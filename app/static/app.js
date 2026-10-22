@@ -80,10 +80,11 @@ async function route() {
   if (k !== "search" && $("#gs")) $("#gs").value = "";
   $("#main").className = k === "map" ? "wide" : "";
   window.scrollTo(0, 0);
+  const tok = window._rt = (window._rt || 0) + 1;      // nur die zuletzt geöffnete Seite darf Fehler anzeigen
   try {
     if (!TOURS.length) await loadTours();
     await (VIEWS[k] || VIEWS.dash)(name, new URLSearchParams(qs || ""));
-  } catch (e) { $("#main").innerHTML = `<div class="card bad">${esc(e.message)}</div>`; }
+  } catch (e) { if (tok === window._rt) $("#main").innerHTML = `<div class="card bad">${esc(e.message)}</div>`; }
 }
 addEventListener("hashchange", route);
 
