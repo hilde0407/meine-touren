@@ -213,6 +213,17 @@ def thumb(photo_id, size):
     return out
 
 
+def respond(request, path):
+    """Bilddatei mit ETag ausliefern; der Browser fragt jedes Mal nach (304, wenn unverändert)."""
+    from fastapi.responses import FileResponse, Response
+    st = os.stat(path)
+    etag = f'"{st.st_mtime_ns:x}-{st.st_size:x}"'
+    h = {"Cache-Control": "private, no-cache", "ETag": etag}
+    if etag in (request.headers.get("if-none-match") or ""):
+        return Response(status_code=304, headers=h)
+    return FileResponse(path, media_type="image/jpeg", headers=h)
+
+
 def compress(src, dst, max_side=None, quality=None):
     """Verkleinert ein Foto für die Bildschirmdarstellung (EXIF-Zeit/GPS bleiben erhalten)."""
     max_side = max_side or db.get_int("photo_max_side", 2200)

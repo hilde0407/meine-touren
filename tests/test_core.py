@@ -508,6 +508,8 @@ def test_users_isolation_and_sharing():
         assert (config.DATA_DIR / "users" / "max" / "komoot_hub.sqlite").exists() and not (config.DATA_DIR / "komoot_hub.sqlite").exists()
         assert [t["name"] for t in c.get("/api/tours").json()] == ["Hohe Wurzel"]
         assert c.get("/photo/1?size=200").status_code == 200           # Pfad wurde mit umgezogen
+        r = c.get("/pic/1?size=200"); assert r.status_code == 200 and r.headers["cache-control"] == "private, no-cache"
+        assert c.get("/pic/1?size=200", headers={"If-None-Match": r.headers["etag"]}).status_code == 304   # Browser fragt nach, statt blind zu vertrauen
         anon = TestClient(main.app)
         assert anon.get("/api/tours").status_code == 401 and anon.get("/photo/1").status_code == 401
         assert anon.get("/").status_code == 200                          # Programmdateien bleiben erreichbar (Anmeldeseite)

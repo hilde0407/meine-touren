@@ -221,6 +221,7 @@ def api_shared_photos(request: Request):
     return out
 
 
+@router.get("/spic/{owner}/{pid}")
 @router.get("/sphoto/{owner}/{pid}")
 def api_shared_photo(owner: str, pid: int, request: Request, size: int = 600):
     u = _user(request)
@@ -231,7 +232,7 @@ def api_shared_photo(owner: str, pid: int, request: Request, size: int = 600):
         p = photos.thumb(pid, max(120, min(size, 2400)))
     if not p:
         raise HTTPException(404)
-    return FileResponse(p, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=3600"})
+    return photos.respond(request, p)
 
 
 def _imported_keys():

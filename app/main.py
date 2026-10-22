@@ -33,13 +33,13 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 async def no_stale_static(request: Request, call_next):
     r = await call_next(request)
     p = request.url.path
-    if not p.startswith(("/photo/", "/api/")) and "cache-control" not in r.headers:
+    if not p.startswith(("/photo/", "/pic/", "/api/")) and "cache-control" not in r.headers:
         r.headers["Cache-Control"] = "no-cache"      # Browser prüft bei jedem Aufruf auf neue Programmdateien
     return r
 
 
 OPEN_API = ("/api/version", "/api/me", "/api/login", "/api/logout", "/api/setup", "/api/zepp-token")
-PROTECTED = ("/api/", "/photo/", "/sphoto/")
+PROTECTED = ("/api/", "/photo/", "/sphoto/", "/pic/", "/spic/")
 
 
 @app.middleware("http")
@@ -450,13 +450,15 @@ def photo_info():
             "folder_exists": config.PHOTOS_DIR.exists(), "lib_dir": str(config.LIB_DIR), "source_dir": str(config.PHOTOS_DIR), "slideshow_seconds": db.get_int("slideshow_seconds", 6)}
 
 
+@app.get("/pic/{photo_id}")
 @app.get("/photo/{photo_id}")
-def photo(photo_id: int, size: int = 1600):
+def photo(photo_id: int, request: Request, size: int = 1600):
     size = max(120, min(size, 3000))
     p = photos.thumb(photo_id, size)
     if not p:
         raise HTTPException(404)
-    return FileResponse(p, media_type="image/jpeg", headers={"Cache-Control": "public, max-age=86400"})
+    # Immer beim Server nachfragen (ETag → 304): verhindert, dass der Browser Bilder eines früheren Servers unter derselben Adresse anzeigt
+    return photos.respond(request, p)
 
 
 app.include_router(extras.router)

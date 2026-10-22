@@ -184,7 +184,7 @@ VIEWS.dash = async (_, q) => {
   $("#main").innerHTML = `
   <section class="hero"><div id="hm"></div><div class="in"><div class="t">
     <div class="k">Letzte Tour, ${sName(last.sport)}</div><h1>${esc(last.name)}</h1><div class="w">${dateL(last.date)}, ${timeS(last.date)} Uhr</div>
-    ${ph.length ? `<div class="thumbrow">${ph.map((p, i) => `<img loading="lazy" src="/photo/${p.id}?size=300" data-i="${i}">`).join("")}</div>` : ""}
+    ${ph.length ? `<div class="thumbrow">${ph.map((p, i) => `<img loading="lazy" src="/pic/${p.id}?size=300" data-i="${i}">`).join("")}</div>` : ""}
     <div class="btns"><a class="btn" href="#/tour/${last.id}">Tour ansehen</a>${last.photos ? `<a class="btn alt" style="color:#fff" target="_blank" href="slideshow.html?tour=${last.id}">Diashow</a>` : ""}</div></div>
     <div class="signs"><div class="sign">${nf(last.km, 1)}<small>Kilometer</small></div><div class="sign l">${nf(last.up_m, 0)}<small>Meter aufwärts</small></div><div class="sign">${nf(last.h, 1)}<small>Stunden</small></div></div></div></section>
   <div class="inner">
@@ -220,7 +220,7 @@ VIEWS.dash = async (_, q) => {
   api(`/api/tours/${last.id}/coords`).then(c => { const l = L.polyline(cleanPts(c).map(p => [p[0], p[1]]), {color: "#f2c230", weight: 5}).addTo(map); map.fitBounds(l.getBounds(), {paddingTopLeft: [window.innerWidth > 900 ? 640 : 40, 40], paddingBottomRight: [40, 40]}); }).catch(() => {});
   try {
     const r = await api("/api/photos?random=true&limit=8");
-    if (r.length) { $("#mem").innerHTML = r.map((p, i) => `<img loading="lazy" src="/photo/${p.id}?size=400" data-i="${i}" title="${esc(p.tour_name || "")}">`).join(""); $("#memsub").innerHTML = `<a target="_blank" href="slideshow.html?random=1">Zufalls-Diashow starten</a>`; bindThumbs($("#mem"), r); }
+    if (r.length) { $("#mem").innerHTML = r.map((p, i) => `<img loading="lazy" src="/pic/${p.id}?size=400" data-i="${i}" title="${esc(p.tour_name || "")}">`).join(""); $("#memsub").innerHTML = `<a target="_blank" href="slideshow.html?random=1">Zufalls-Diashow starten</a>`; bindThumbs($("#mem"), r); }
     else { $("#memh").remove(); $("#mem").remove(); }
   } catch (e) {}
 };
@@ -378,11 +378,11 @@ VIEWS.tour = async id => {
   const ph = await api(`/api/photos?tour_id=${t.id}&limit=400`);
   $("#pc").textContent = ph.length ? `${ph.length} Fotos` : "Zu dieser Tour gibt es noch keine Fotos.";
   if (ph.length) { $("#ss").style.display = ""; $("#ss").href = `slideshow.html?tour=${t.id}`; }
-  $("#th").innerHTML = ph.map((p, k) => `<div class="th"><img loading="lazy" src="/photo/${p.id}?size=500" data-i="${k}"><span class="cap">${new Date(p.taken_ts * 1000).toLocaleString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"})}${p.manual === 1 ? " 📌" : ""}</span></div>`).join(""); bindThumbs($("#th"), ph);
+  $("#th").innerHTML = ph.map((p, k) => `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=500" data-i="${k}"><span class="cap">${new Date(p.taken_ts * 1000).toLocaleString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"})}${p.manual === 1 ? " 📌" : ""}</span></div>`).join(""); bindThumbs($("#th"), ph);
   if (ph.length) photoSelect(ph, 0, {box: "#th", anchor: "#pc", tour: true});
   mk.then(c => { if (!c || !ph.length || (!c[0][3] && c[0][3] !== 0)) return;
     ph.forEach(p => { const rel = (p.taken_ts - t.start_ts) * 1000; let b = c[0], bd = 1e18; c.forEach(q => { const d = Math.abs((q[3] || 0) - rel); if (d < bd) { bd = d; b = q; } });
-      const ic = L.divIcon({className: "", html: `<div class="pm" style="background-image:url(/photo/${p.id}?size=120)"></div>`, iconSize: [36, 36]});
+      const ic = L.divIcon({className: "", html: `<div class="pm" style="background-image:url(/pic/${p.id}?size=120)"></div>`, iconSize: [36, 36]});
       L.marker([b[0], b[1]], {icon: ic}).addTo(map).on("click", () => openLb(ph, ph.indexOf(p))); }); });
   $("#eup").onclick = () => uploadDialog(t); uploadChips(t);
   if ($("#edel")) $("#edel").onclick = async () => { if (!confirm(`Lokale Tour „${t.name}“ samt gespeicherter Strecke löschen? Bereits hochgeladene Kopien bei Komoot/Strava bleiben bestehen.`)) return; try { await api(`/api/tours/${encodeURIComponent(t.id)}`, {method: "DELETE"}); ROUTES = null; await loadTours(); location.hash = "#/tours"; } catch (e) { alert(e.message); } };
@@ -467,7 +467,7 @@ function profile(c, t) {
 /* ---------- Fotos ---------- */
 let PH_LIST = [], LB_I = 0;
 function openLb(list, i) { PH_LIST = list; LB_I = i; showLb(); $("#lb").classList.add("on"); }
-function showLb() { const p = PH_LIST[LB_I]; if (!p) return; $("#lbi").src = p.src || `/photo/${p.id}?size=2000`; $("#lbc").textContent = `${p.tour_name ? p.tour_name + " · " : ""}${new Date(p.taken_ts * 1000).toLocaleString("de-DE", {dateStyle: "long", timeStyle: "short"})} · ${LB_I + 1}/${PH_LIST.length}`; }
+function showLb() { const p = PH_LIST[LB_I]; if (!p) return; $("#lbi").src = p.src || `/pic/${p.id}?size=2000`; $("#lbc").textContent = `${p.tour_name ? p.tour_name + " · " : ""}${new Date(p.taken_ts * 1000).toLocaleString("de-DE", {dateStyle: "long", timeStyle: "short"})} · ${LB_I + 1}/${PH_LIST.length}`; }
 function bindThumbs(box, list) { box.querySelectorAll("img[data-i]").forEach(im => im.onclick = () => openLb(list, +im.dataset.i)); }
 $("#lb").onclick = e => { const a = e.target.dataset.a; if (a === "next") { LB_I = (LB_I + 1) % PH_LIST.length; showLb(); } else if (a === "prev") { LB_I = (LB_I - 1 + PH_LIST.length) % PH_LIST.length; showLb(); } else if (a === "close" || e.target.id === "lb") $("#lb").classList.remove("on"); };
 addEventListener("keydown", e => { if (!$("#lb").classList.contains("on")) return; if (e.key === "Escape") $("#lb").classList.remove("on"); if (e.key === "ArrowRight") { LB_I = (LB_I + 1) % PH_LIST.length; showLb(); } if (e.key === "ArrowLeft") { LB_I = (LB_I - 1 + PH_LIST.length) % PH_LIST.length; showLb(); } });
@@ -482,7 +482,7 @@ VIEWS.photos = async (_, q) => {
   const ph = await api(`/api/photos?year=${Y}&limit=4000`); PH_LIST = ph;
   const groups = new Map(); ph.forEach(p => { const k = p.tour_id || "-"; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(p); });
   $("#pg").innerHTML = [...groups.entries()].map(([k, a]) => { const t = BY[k]; return `<div class="pgroup"><div class="ph"><h3>${t ? `<a href="#/tour/${k}">${esc(t.name)}</a>` : "Ohne Tour"}</h3><span>${t ? dateL(t.date) : new Date(a[0].taken_ts * 1000).toLocaleDateString("de-DE")}, ${a.length} Fotos</span><span class="sp"></span>${t ? `<a class="btn ghost sm" target="_blank" href="slideshow.html?tour=${k}">Diashow</a>` : ""}</div>
-    <div class="thumbs">${a.map(p => `<div class="th"><img loading="lazy" src="/photo/${p.id}?size=400" data-i="${ph.indexOf(p)}"><span class="cap">${new Date(p.taken_ts * 1000).toLocaleString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"})}${p.manual === 1 ? " 📌" : ""}</span></div>`).join("")}</div></div>`; }).join("");
+    <div class="thumbs">${a.map(p => `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=400" data-i="${ph.indexOf(p)}"><span class="cap">${new Date(p.taken_ts * 1000).toLocaleString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"})}${p.manual === 1 ? " 📌" : ""}</span></div>`).join("")}</div></div>`; }).join("");
   bindThumbs($("#pg"), ph); photoSelect(ph, Y);
 };
 
@@ -749,7 +749,7 @@ VIEWS.recap = async name => {
    <div class="grid g2" style="margin-top:34px"><div class="panel"><h2>Kilometer pro Monat</h2>${barChart(mm, MON, {ghost: pm, ghostLabel: Y - 1})}<div class="mut" style="font-size:14px">Stärkster Monat: ${MONL[bm]} mit ${nf(mm[bm], 0)} km</div></div>
     <div class="panel"><h2>Sportarten</h2><div class="stack">${sp.map(([s, v]) => `<div style="width:${v / km * 100}%;background:${sCol(s)}"></div>`).join("")}</div><div class="rows" style="margin-top:10px">${sp.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${nf(v, 0)} km, ${nf(v / km * 100, 0)} %</span></div>`).join("")}</div></div></div>
    <div class="panel" style="margin-top:34px"><h2>Die fünf längsten Touren</h2><div class="tl">${top.map(tourRow).join("")}</div><div class="mut" style="margin-top:10px">Meiste Höhenmeter: <a href="#/tour/${steep.id}">${esc(steep.name)}</a> (${nf(steep.up_m, 0)} m)</div></div>
-   ${ph.length ? `<div class="panel" style="margin-top:34px"><div class="row"><h2>Fotos des Jahres</h2><span class="sp"></span><a class="btn sm noprint" target="_blank" href="slideshow.html?year=${Y}">Diashow</a></div><div class="thumbs" id="rph">${ph.map((p, i) => `<div class="th"><img loading="lazy" src="/photo/${p.id}?size=400" data-i="${i}"></div>`).join("")}</div></div>` : ""}</div>`;
+   ${ph.length ? `<div class="panel" style="margin-top:34px"><div class="row"><h2>Fotos des Jahres</h2><span class="sp"></span><a class="btn sm noprint" target="_blank" href="slideshow.html?year=${Y}">Diashow</a></div><div class="thumbs" id="rph">${ph.map((p, i) => `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=400" data-i="${i}"></div>`).join("")}</div></div>` : ""}</div>`;
   if (ph.length) bindThumbs($("#rph"), ph);
 };
 
@@ -784,7 +784,7 @@ VIEWS.map = async () => {
   const drawHeat = () => { hl.clearLayers(); if (!heat) return; const o = off(), y = yearSel(); TOURS.forEach(t => { if ((y && t.y !== y) || o.has(t.sport)) return; const r = cleanPts(routes[t.id]); if (r.length > 1) L.polyline(r, {color: "#ff4d12", weight: 4, opacity: .17, interactive: false}).addTo(hl); }); };
   const drawPh = () => { pl.clearLayers(); if (!phOn || !phs) return; const y = yearSel();
     phs.forEach(p => { if (y && new Date(p.taken_ts * 1000).getFullYear() !== y) return; if (!okPt([p.lat, p.lng])) return;
-      L.circleMarker([p.lat, p.lng], {radius: 5, color: "#fff", weight: 1.5, fillColor: "#e11d74", fillOpacity: .95}).addTo(pl).bindPopup(`<img src="/photo/${p.id}?size=300" style="width:220px;border-radius:3px;display:block"><div style="margin-top:4px">${new Date(p.taken_ts * 1000).toLocaleString("de-DE")}${p.tour_id && BY[p.tour_id] ? `<br><a href="#/tour/${p.tour_id}">${esc(BY[p.tour_id].name)}</a>` : "<br>ohne Tour"}</div>`); }); };
+      L.circleMarker([p.lat, p.lng], {radius: 5, color: "#fff", weight: 1.5, fillColor: "#e11d74", fillOpacity: .95}).addTo(pl).bindPopup(`<img src="/pic/${p.id}?size=300" style="width:220px;border-radius:3px;display:block"><div style="margin-top:4px">${new Date(p.taken_ts * 1000).toLocaleString("de-DE")}${p.tour_id && BY[p.tour_id] ? `<br><a href="#/tour/${p.tour_id}">${esc(BY[p.tour_id].name)}</a>` : "<br>ohne Tour"}</div>`); }); };
   const mainGrp = []; m.eachLayer(l => { if (l instanceof L.LayerGroup && !(l === hl || l === pl)) mainGrp.push(l); });
   $("#mht").onclick = e => { heat = !heat; e.target.classList.toggle("on", heat); mainGrp.forEach(g => heat ? m.removeLayer(g) : m.addLayer(g)); drawHeat(); };
   $("#mph").onclick = async e => { phOn = !phOn; e.target.classList.toggle("on", phOn); if (phOn && !phs) { try { phs = await api("/api/photos?gps=true&limit=20000"); } catch (x) { phs = []; } if (!phs.length) e.target.title = "Keine Fotos mit GPS-Position"; } drawPh(); };
@@ -883,7 +883,7 @@ VIEWS.flight = async id => {
     return Math.min(1, Math.max(0, (p.taken_ts - t.start_ts) / (((t.end_ts || t.start_ts + 1) - t.start_ts) || 1))); };
   phs.forEach(p => { p.u = phU(p); const k = P[Math.max(0, Math.min(N - 1, Math.round(p.u * (N - 1)) || 0))], el = document.createElement("div"); el.className = "fcam"; el.title = "Foto"; new maplibregl.Marker({element: el}).setLngLat([k.lng, k.lat]).addTo(m); });
   let phUntil = 0, prevU = 0; const phi = $("#fphi");
-  const showPh = p => { phi.src = `/photo/${p.id}?size=500`; $("#fphc").textContent = new Date(p.taken_ts * 1000).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"}) + " Uhr"; $("#fph").classList.add("on"); phUntil = performance.now() + 4500; };
+  const showPh = p => { phi.src = `/pic/${p.id}?size=500`; $("#fphc").textContent = new Date(p.taken_ts * 1000).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"}) + " Uhr"; $("#fph").classList.add("on"); phUntil = performance.now() + 4500; };
   // Video-Aufnahme: Karte + Kopfzeile + Fotos auf eine Zeichenfläche, per MediaRecorder gespeichert
   let rec = null;
   const compose = () => { if (!rec) return; const c = m.getCanvas(), W = rec.c.width, H = rec.c.height, x = rec.x; x.drawImage(c, 0, 0, W, H);
@@ -1044,7 +1044,7 @@ VIEWS.dash = async (...a) => {
     const old = hero.querySelector(".thumbrow"); if (old) old.remove();
     const [ph, c] = await Promise.all([t.photos ? api(`/api/photos?tour_id=${t.id}&limit=4`).catch(() => []) : [], api(`/api/tours/${t.id}/coords`).catch(() => null)]);
     if (my !== tok || !hero.isConnected) return;
-    if (ph.length) { w.insertAdjacentHTML("afterend", `<div class="thumbrow">${ph.map((p, x) => `<img loading="lazy" src="/photo/${p.id}?size=300" data-i="${x}">`).join("")}</div>`); bindThumbs(hero.querySelector(".thumbrow"), ph); }
+    if (ph.length) { w.insertAdjacentHTML("afterend", `<div class="thumbrow">${ph.map((p, x) => `<img loading="lazy" src="/pic/${p.id}?size=300" data-i="${x}">`).join("")}</div>`); bindThumbs(hero.querySelector(".thumbrow"), ph); }
     if (map) { map.eachLayer(l => { if (l instanceof L.Polyline) map.removeLayer(l); });
       const pts = cleanPts(c || []).map(p => [p[0], p[1]]);
       if (pts.length > 1) { const l = L.polyline(pts, {color: "#f2c230", weight: 5}).addTo(map); map.fitBounds(l.getBounds(), {paddingTopLeft: [window.innerWidth > 900 ? 640 : 40, 40], paddingBottomRight: [40, 40]}); }
@@ -1130,7 +1130,7 @@ VIEWS.dash = async (...a) => {
   const h = [...document.querySelectorAll("#main .sec h2")].find(x => x.textContent === "An diesem Tag"); if (!h) return;
   const now = new Date(), md = `${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`, ot = TOURS.filter(t => t.date.slice(5, 10) === md && t.y !== now.getFullYear()).slice(0, 3);
   const cards = await Promise.all(ot.map(async t => { const ph = t.photos ? await api(`/api/photos?tour_id=${t.id}&limit=1`).catch(() => []) : [];
-    return `<a class="otd" href="#/tour/${t.id}" style="${ph[0] ? `background-image:linear-gradient(transparent 40%,#000b),url(/photo/${ph[0].id}?size=600)` : ""}"><b>Vor ${now.getFullYear() - t.y} ${now.getFullYear() - t.y === 1 ? "Jahr" : "Jahren"}</b><span>${esc(t.name)}</span><small>${nf(t.km, 1)} km · ${nf(t.up_m, 0)} m</small></a>`; }));
+    return `<a class="otd" href="#/tour/${t.id}" style="${ph[0] ? `background-image:linear-gradient(transparent 40%,#000b),url(/pic/${ph[0].id}?size=600)` : ""}"><b>Vor ${now.getFullYear() - t.y} ${now.getFullYear() - t.y === 1 ? "Jahr" : "Jahren"}</b><span>${esc(t.name)}</span><small>${nf(t.km, 1)} km · ${nf(t.up_m, 0)} m</small></a>`; }));
   const sec = h.closest(".sec"); if (sec && cards.length && !sec.nextElementSibling?.classList.contains("otdg")) sec.insertAdjacentHTML("afterend", `<div class="otdg">${cards.join("")}</div>`);
 };
 
@@ -1184,7 +1184,7 @@ async function collView(title, sub, ids, back) {
   ts.forEach((t, i) => { const p = cleanPts(co[i]).map(x => [x[0], x[1]]); if (p.length > 1) L.polyline(p, {color: DAYC[days.indexOf(t.date.slice(0, 10)) % DAYC.length], weight: 4}).bindTooltip(`${dateS(t.date)} · ${esc(t.name)}`).addTo(fg); });
   if (fg.getLayers().length) map.fitBounds(fg.getBounds(), {padding: [30, 30]}); else map.setView([50, 9], 6);
   Promise.all(ts.slice(0, 14).map(t => t.photos ? api(`/api/photos?tour_id=${t.id}&limit=6`).catch(() => []) : [])).then(a => { const ph = a.flat(); if (!$("#cph")) return;
-    $("#cph").innerHTML = ph.map((p, i) => `<img loading="lazy" src="/photo/${p.id}?size=300" data-i="${i}">`).join("") || '<span class="mut">Keine Fotos.</span>'; bindThumbs($("#cph"), ph); });
+    $("#cph").innerHTML = ph.map((p, i) => `<img loading="lazy" src="/pic/${p.id}?size=300" data-i="${i}">`).join("") || '<span class="mut">Keine Fotos.</span>'; bindThumbs($("#cph"), ph); });
   const plan = await api(`/api/tiles/plan?ids=${ts.map(t => t.id).join(",")}`).catch(() => null);
   if (plan) $("#cofm").textContent = plan.missing ? `${plan.missing} von ${plan.total} Kacheln fehlen noch (ca. ${Math.ceil(plan.missing / 60)} Min.)` : "✓ Karte ist offline verfügbar";
   $("#coff").onclick = async e => { e.target.disabled = true; try { await api("/api/tiles/prefetch", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({ids: ts.map(t => t.id)})}); $("#cofm").textContent = "Läuft im Hintergrund (1 Kachel/Sekunde, höchstens 1500). Danach Seite neu öffnen."; } catch (x) { $("#cofm").textContent = x.message; e.target.disabled = false; } };
@@ -1192,8 +1192,8 @@ async function collView(title, sub, ids, back) {
 VIEWS.trips = async () => {
   $("#main").innerHTML = `<div class="sec" style="margin-top:0"><h2>Reisen</h2><span class="sub">automatisch erkannt: Touren weit weg von zu Hause an aufeinanderfolgenden Tagen</span></div><div id="tr" class="mut">Wird geladen …</div>`;
   const [tr, tg] = await Promise.all([api("/api/trips"), api("/api/tags")]); $("#tr").className = "";
-  $("#tr").innerHTML = (tr.length ? `<div class="otdg">${tr.map(x => `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/photo/${x.photo}?size=600)` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${dateS(x.start)}${x.end !== x.start ? " – " + dateS(x.end) : ""}</span><small>${x.tours.length} Touren · ${nf(x.km, 0)} km · ${nf(x.up_m, 0)} m</small></a>`).join("")}</div>` : '<p class="mut">Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Gruppen legst du mit Tags an.</p>')
-   + `<div class="sec"><h2>Alben &amp; Tags</h2><span class="sub">in der Tour über „🏷 Tags“ vergeben</span></div>` + (tg.length ? `<div class="otdg">${tg.map(x => `<a class="otd" href="#/album/${encodeURIComponent(x.tag)}"${x.photo ? ` style="background-image:linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/photo/${x.photo}?size=600)"` : ""}><b>🏷 ${esc(x.tag)}</b><small>${x.n} Touren · ${nf(x.km, 0)} km</small></a>`).join("")}</div>` : '<p class="mut">Noch keine Tags vergeben.</p>');
+  $("#tr").innerHTML = (tr.length ? `<div class="otdg">${tr.map(x => `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${dateS(x.start)}${x.end !== x.start ? " – " + dateS(x.end) : ""}</span><small>${x.tours.length} Touren · ${nf(x.km, 0)} km · ${nf(x.up_m, 0)} m</small></a>`).join("")}</div>` : '<p class="mut">Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Gruppen legst du mit Tags an.</p>')
+   + `<div class="sec"><h2>Alben &amp; Tags</h2><span class="sub">in der Tour über „🏷 Tags“ vergeben</span></div>` + (tg.length ? `<div class="otdg">${tg.map(x => `<a class="otd" href="#/album/${encodeURIComponent(x.tag)}"${x.photo ? ` style="background-image:linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)"` : ""}><b>🏷 ${esc(x.tag)}</b><small>${x.n} Touren · ${nf(x.km, 0)} km</small></a>`).join("")}</div>` : '<p class="mut">Noch keine Tags vergeben.</p>');
 };
 VIEWS.trip = async id => { const tr = (await api("/api/trips")).find(x => x.id === id); if (!tr) throw new Error("Reise nicht gefunden");
   await collView(`${tr.region}${tr.country && tr.country !== tr.region ? ", " + tr.country : ""}`, `${dateL(tr.start)}${tr.end !== tr.start ? " – " + dateL(tr.end) : ""}`, tr.tours, "#/trips"); };
@@ -1353,9 +1353,9 @@ VIEWS.shared = async () => {
   if (!data.length) { $("#shb").innerHTML = '<div class="empty"><h2>Noch nichts geteilt</h2><p>Sobald jemand Fotos für dich freigibt, erscheinen sie hier.</p></div>'; return; }
   $("#shb").innerHTML = data.map((o, oi) => { const by = {}; o.photos.forEach(p => (by[p.tour_id || ""] ||= []).push(p));
     return `<div class="sec"><h2>${esc(o.name)}</h2><span class="sub">${o.photos.length} Fotos</span><span class="sp"></span><button class="btn sm" data-all="${oi}">Alle übernehmen</button></div>` + Object.entries(by).map(([tid, ps]) => `<div class="pgroup"><div class="ph"><h3>${esc(tid ? o.tours[tid] || "Tour" : "Ohne Tour")}</h3><span>${ps.length} Fotos</span><button class="btn alt sm" data-grp="${oi}|${esc(tid)}">Übernehmen</button></div>
-      <div class="thumbs" data-g="${oi}|${esc(tid)}">${ps.map((p, i) => `<img loading="lazy" src="/sphoto/${esc(o.owner)}/${p.id}?size=300" data-i="${i}" title="${new Date(p.taken_ts * 1000).toLocaleString("de-DE")}">`).join("")}</div></div>`).join(""); }).join("");
+      <div class="thumbs" data-g="${oi}|${esc(tid)}">${ps.map((p, i) => `<img loading="lazy" src="/spic/${esc(o.owner)}/${p.id}?size=300" data-i="${i}" title="${new Date(p.taken_ts * 1000).toLocaleString("de-DE")}">`).join("")}</div></div>`).join(""); }).join("");
   data.forEach((o, oi) => { const by = {}; o.photos.forEach(p => (by[p.tour_id || ""] ||= []).push(p));
-    document.querySelectorAll(`[data-g^="${oi}|"]`).forEach(box => { const tid = box.dataset.g.split("|")[1], list = by[tid].map(p => ({...p, src: `/sphoto/${o.owner}/${p.id}?size=2000`})); bindThumbs(box, list); }); });
+    document.querySelectorAll(`[data-g^="${oi}|"]`).forEach(box => { const tid = box.dataset.g.split("|")[1], list = by[tid].map(p => ({...p, src: `/spic/${o.owner}/${p.id}?size=2000`})); bindThumbs(box, list); }); });
   const imp = async (oi, ids, btn) => { btn.disabled = true; try { const r = await api("/api/shared/import", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({owner: data[oi].owner, ids})}); btn.textContent = `✓ ${r.total} übernommen`; } catch (e) { btn.disabled = false; alert(e.message); } };
   document.querySelectorAll("[data-all]").forEach(b => b.onclick = () => imp(+b.dataset.all, data[+b.dataset.all].photos.map(p => p.id), b));
   document.querySelectorAll("[data-grp]").forEach(b => b.onclick = () => { const [oi, tid] = b.dataset.grp.split("|"); imp(+oi, data[+oi].photos.filter(p => (p.tour_id || "") === tid).map(p => p.id), b); });
