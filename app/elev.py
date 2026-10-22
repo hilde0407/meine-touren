@@ -62,6 +62,74 @@ def smooth(v, med=5, avg=5):
     return [sum(m[max(0, i - avg // 2): i + avg // 2 + 1]) / len(m[max(0, i - avg // 2): i + avg // 2 + 1]) for i in range(n)]
 
 
+def clean(v, lo=-500.0, hi=9000.0):
+    """Unmögliche Höhenwerte (z. B. Platzhalter „keine Höhe“ wie −20 000 m) durch den nächsten gültigen Nachbarn ersetzen."""
+    ok = [x is not None and lo <= x <= hi for x in v]
+    if not any(ok):
+        return [None] * len(v) if all(x is None for x in v) else [0.0] * len(v)
+    out, last = list(v), None
+    for i, x in enumerate(v):
+        if ok[i]:
+            last = x
+        elif last is not None:
+            out[i] = last
+    nxt = None
+    for i in range(len(v) - 1, -1, -1):
+        if ok[i]:
+            nxt = v[i]
+        elif out[i] is None or not (lo <= out[i] <= hi):
+            out[i] = nxt
+    return out
+
+
+def clean_gpx(text):
+    """Alle <ele>-Werte einer GPX-Datei bereinigen. Gibt (Text, Anzahl ersetzter Werte) zurück."""
+    import re
+    vals = re.findall(r"<ele>([^<]*)</ele>", text)
+    if not vals:
+        return text, 0
+    nums = []
+    for x in vals:
+        try:
+            nums.append(float(x))
+        except ValueError:
+            nums.append(None)
+    fixed = clean(nums)
+    n = sum(1 for a, b in zip(nums, fixed) if a != b)
+    if not n:
+        return text, 0
+    it = iter(fixed)
+    return re.sub(r"<ele>[^<]*</ele>", lambda m: "<ele>%s</ele>" % (round(next(it), 2)), text), n
+
+
+def recompute_local():
+    """Auf-/Abstieg lokaler Touren (GPX/Zepp) mit bereinigten Höhen neu berechnen. Durch das Geländemodell korrigierte Touren bleiben unberührt."""
+    from . import jobs, tracks
+    fixed = {r["id"] for r in db.query("SELECT id FROM elev_fix")}
+    n = ch = 0
+    for t in db.query("SELECT id,up_m,down_m FROM tours WHERE source='local'"):
+        if t["id"] in fixed:
+            continue
+        f = tracks.gpx_file(t["id"])
+        if not f.exists():
+            continue
+        text, bad = clean_gpx(f.read_text(encoding="utf-8"))
+        items = tracks.points_from_gpx(text)
+        alts = [p[2] for p in items if p[2] is not None]
+        if len(alts) < 6:
+            continue
+        up, down = ascent(smooth(clean(alts), 3, 3))
+        n += 1
+        if bad or abs(up - (t["up_m"] or 0)) >= 1 or abs(down - (t["down_m"] or 0)) >= 1:
+            if bad:
+                f.write_text(text, encoding="utf-8"); routes.store(t["id"], items)
+            db.execute("UPDATE tours SET up_m=?,down_m=? WHERE id=?", (up, down, t["id"])); ch += 1
+            if ch <= 5:
+                jobs.log(f"  {t['id']}: Aufstieg {round(t['up_m'] or 0)} m → {round(up)} m")
+    jobs.log(f"Höhenmeter: {n} lokale Touren geprüft, {ch} korrigiert")
+    return ch
+
+
 def ascent(v, hyst=4.0):
     """Auf-/Abstieg mit Schwelle (kleine Schwankungen zählen nicht)."""
     up = down = 0.0

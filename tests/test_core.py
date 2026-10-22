@@ -605,3 +605,21 @@ def test_local_tours_and_portals(monkeypatch):
         assert any(n.startswith("tracks/") for n in zipfile.ZipFile(io.BytesIO(data)).namelist())
         assert c.delete(f"/api/tours/{tid}").status_code == 200 and not tracks.gpx_file(tid).exists()
         assert c.delete("/api/tours/888").status_code == 400
+
+
+def test_hoehen_platzhalter(fresh):
+    """Platzhalterwerte wie −20 000 m dürfen nicht als Aufstieg gezählt werden (Zepp-Import)."""
+    from app import elev, tracks, zepp
+    spike = [300.0, 301.0] + [-20000.0] * 4 + [303.0, 304.0, 305.0] + [-200000.0] * 4 + [307.0, 308.0, 309.0, 310.0]
+    assert max(elev.clean(spike)) < 400 and min(elev.clean(spike)) > 0
+    assert elev.ascent(elev.smooth(spike, 3, 3))[0] > 5000                     # ohne Bereinigung: absurder Aufstieg
+    assert elev.ascent(elev.smooth(elev.clean(spike), 3, 3))[0] < 30
+    txt = gpx("Workout--2026-05-01--10-00-00.gpx")
+    import re as _re
+    ele = iter(range(10 ** 6))
+    bad = _re.sub(r"<ele>[^<]*</ele>", lambda m: "<ele>-20000.0</ele>" if 100 <= next(ele) < 106 else m.group(0), txt)
+    t, c = tracks.adopt(bad, "Workout--2026-05-01--10-00-00.gpx")
+    assert t["up_m"] < 200 and "-20000" not in tracks.gpx_file(t["id"]).read_text()
+    db.execute("UPDATE tours SET up_m=24000 WHERE id=?", (t["id"],))                  # bereits falsch importierte Tour
+    tracks.gpx_file(t["id"]).write_text(bad)
+    assert elev.recompute_local() >= 1 and db.one("SELECT up_m FROM tours WHERE id=?", (t["id"],))["up_m"] < 200

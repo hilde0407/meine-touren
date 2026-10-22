@@ -203,7 +203,9 @@ def decode_points(summary, detail):
     la = _interp_col(accumulate(lat), track_times, all_t)
     lo = _interp_col(accumulate(lon), track_times, all_t)
     al = _interp_col(alt, track_times, all_t)
-    return [(start + t, a / 1e8, o / 1e8, h / 100) for t, a, o, h in zip(all_t, la, lo, al)]
+    from .elev import clean
+    hs = clean([h / 100 for h in al])                       # Platzhalterwerte („keine Höhe“) nicht als echte Höhe übernehmen
+    return [(start + t, a / 1e8, o / 1e8, h) for t, a, o, h in zip(all_t, la, lo, hs)]
 
 
 def points_to_gpx(summary, pts, sport):

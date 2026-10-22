@@ -59,6 +59,7 @@ def gpx_for(tid):
 def adopt(text, filename="", prefix="g", ident=None, name=None, sport=None, tours=None):
     """GPX/TCX als lokale Tour anlegen. Gibt die Tour (dict) zurück."""
     c = gpxtools.convert(text, filename, db.get("default_sport") or "hike")
+    c["gpx"] = elev.clean_gpx(c["gpx"])[0]
     tid = str(ident or f"{prefix}{c['start_ts']}")
     items = points_from_gpx(c["gpx"])
     alts = [p[2] for p in items if p[2] is not None]

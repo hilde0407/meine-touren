@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, config, ctx, db, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, users_api, zepp
+from . import auth, config, ctx, db, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, users_api, zepp
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -334,6 +334,7 @@ JOBS = {
     "weather": ("Wetter laden", lambda dry: more2.weather_fill()),
     "photos": ("Fotos indizieren", lambda dry: photos.scan()),
     "photo-import": ("Fotos übernehmen", lambda dry: (photos.import_from(), photos.scan())),
+    "elev-local": ("Höhenmeter lokaler Touren neu berechnen", lambda dry: elev.recompute_local()),
     "export": ("Zepp-Import (ohne Upload)", lambda dry: sync.export_zepp()),
 }
 
