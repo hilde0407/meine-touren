@@ -52,27 +52,54 @@ def api_check():
 
 
 # ---------- Gipfel ----------
-def peaks_fill(limit=None, fetch=None):
+def _peak_candidates():
+    """Touren, für die ein Gipfel infrage kommt (Wandersportart, mind. 150 m Aufstieg) und die noch nicht bestimmt sind."""
+    return db.query(f"SELECT id,sport,up_m FROM tours WHERE id NOT IN (SELECT id FROM tour_peak) ORDER BY start_ts DESC")
+
+
+def peaks_pending():
+    """Anzahl wirklich bearbeitbarer Touren: Strecke liegt lokal vor und die Tour kommt infrage."""
+    n = 0
+    for t in _peak_candidates():
+        if t["sport"] in HIKE and (t["up_m"] or 0) >= 150 and routes.path_full(t["id"]).exists():
+            n += 1
+    return n
+
+
+def peaks_fill(limit=None, fetch=None, retry_wait=8):
     fetch = fetch or extras.peak_name
-    todo = [t for t in db.query("SELECT id,sport,up_m FROM tours WHERE id NOT IN (SELECT id FROM tour_peak) ORDER BY start_ts DESC")]
-    ok = n = 0
-    for t in todo:
+    ok = n = fails = skipped = 0
+    for t in _peak_candidates():
         if limit and n >= limit:
             break
+        if t["sport"] not in HIKE or (t["up_m"] or 0) < 150:      # kommt nie infrage: ohne Netzwerk als erledigt vermerken
+            db.execute("INSERT OR REPLACE INTO tour_peak(id,name,alt,lat,lng) VALUES(?,?,?,?,?)", (t["id"], "", None, None, None)); continue
         pts = routes.load(t["id"])
         alts = [p for p in (pts or []) if len(p) > 2 and p[2] is not None]
-        if t["sport"] not in HIKE or (t["up_m"] or 0) < 150 or len(alts) < 5:
-            db.execute("INSERT OR REPLACE INTO tour_peak(id,name,alt,lat,lng) VALUES(?,?,?,?,?)", (t["id"], "", None, None, None)); continue
+        if len(alts) < 5:                                          # Strecke fehlt noch: später (nach „Strecken lokal sichern“) erneut
+            skipped += 1; continue
         hi = max(alts, key=lambda p: p[2]); n += 1
         jobs.progress(f"Gipfel {n}")
-        try:
-            name = fetch(hi[0], hi[1])
-        except Exception as e:  # noqa
-            jobs.log(f"  Gipfel: {e} – Abbruch, nächster Versuch später"); break
+        name, err = None, None
+        for attempt in range(3):                                   # Overpass begrenzt Anfragen: kurz warten und erneut versuchen
+            try:
+                name = fetch(hi[0], hi[1]); err = None; break
+            except Exception as e:  # noqa
+                err = e
+                if attempt < 2:
+                    time.sleep(retry_wait * (attempt + 1))
+        if err is not None:
+            fails += 1
+            if fails == 1 or fails % 5 == 0:
+                jobs.log(f"  Gipfel: {err}")
+            if fails >= 8:
+                jobs.log("  Gipfel: zu viele Fehler in Folge – Abbruch, später erneut versuchen"); break
+            continue
+        fails = 0
         db.execute("INSERT OR REPLACE INTO tour_peak(id,name,alt,lat,lng) VALUES(?,?,?,?,?)", (t["id"], name or "", hi[2], hi[0], hi[1]))
         ok += 1
         time.sleep(1.0)
-    jobs.log(f"Gipfel: {ok} bestimmt")
+    jobs.log(f"Gipfel: {ok} bestimmt" + (f", {skipped} Touren ohne lokale Strecke übersprungen" if skipped else "") + f", noch offen: {peaks_pending()}")
     return ok
 
 
@@ -85,7 +112,7 @@ def api_places():
     for r in rows:
         d = peaks.setdefault(r["name"], {"name": r["name"], "alt": r["alt"], "n": 0, "tours": []})
         d["n"] += 1; d["tours"].append(r["id"]); d["alt"] = max(d["alt"] or 0, r["alt"] or 0)
-    pending = db.one("SELECT COUNT(*) n FROM tours WHERE id NOT IN (SELECT id FROM tour_peak)")["n"]
+    pending = peaks_pending()
     return {"starts": starts, "peaks": sorted(peaks.values(), key=lambda p: (-p["n"], -(p["alt"] or 0)))[:40], "pending_peaks": pending}
 
 

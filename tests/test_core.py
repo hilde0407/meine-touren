@@ -432,7 +432,11 @@ def test_check_places_health(monkeypatch):
         r = c.get("/api/check").json()
         assert {"a": "c0", "b": "c1"} in r["duplicates"]
         assert len(r["default_names"]) >= 2 and any(s["id"] == "c0" for s in r["suspicious"])
+        def boom(la, ln): raise RuntimeError("Overpass: down")
+        assert more.peaks_pending() == 3 and more.peaks_fill(fetch=boom, retry_wait=0) == 0
+        assert more.peaks_pending() == 3                      # Fehler: nichts verloren, nichts als erledigt markiert
         assert more.peaks_fill(fetch=lambda la, ln: "Hohe Wurzel") >= 1
+        assert more.peaks_pending() == 0 and c.get("/api/places").json()["pending_peaks"] == 0
         p = c.get("/api/places").json()
         assert p["peaks"][0]["name"] == "Hohe Wurzel" and p["peaks"][0]["n"] >= 1
         assert isinstance(c.get("/api/health").json(), list) and c.get("/api/guides/progress").status_code == 200
