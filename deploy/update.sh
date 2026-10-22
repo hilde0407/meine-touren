@@ -25,7 +25,7 @@ else
   else
     [ -f "$A" ] || { echo "Datei $A nicht gefunden."; exit 1; }
     echo "Verwende: $A ($(du -h "$A" | cut -f1), $(date -r "$A" '+%d.%m.%Y %H:%M'))"
-    unzip -l "$A" | grep -q "app/main.py" || { echo "Das ist keine Meine-Touren-ZIP (app/main.py fehlt)."; exit 1; }
+    unzip -l "$A" | grep "app/main.py" >/dev/null || { echo "Das ist keine Meine-Touren-ZIP (app/main.py fehlt)."; exit 1; }
     unzip -q "$A" -d "$T"
   fi
   SRC=$(dirname "$(dirname "$(find "$T" -path '*/deploy/install.sh' | head -1)")")
