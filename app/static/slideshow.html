@@ -1,0 +1,27 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Diashow</title>
+<style>@font-face{font-family:Barlow;font-weight:500;src:url(vendor/fonts/barlow-latin-500-normal.woff2)}@font-face{font-family:"Barlow Semi Condensed";font-weight:700;src:url(vendor/fonts/barlow-semi-condensed-latin-700-normal.woff2)}html,body{margin:0;height:100%;background:#000;color:#fff;font:14px system-ui;overflow:hidden}
+.s{position:absolute;inset:0;background:center/contain no-repeat;opacity:0;transition:opacity 1.4s}.s.on{opacity:1;animation:kb 14s ease-out forwards}@keyframes kb{from{transform:scale(1)}to{transform:scale(1.045)}}
+#cap{position:fixed;left:18px;bottom:14px;text-shadow:0 1px 4px #000;font:500 17px Barlow,system-ui}#cap b{display:block;font:700 28px 'Barlow Semi Condensed',Barlow,sans-serif;letter-spacing:.2px}#hint{position:fixed;right:12px;bottom:10px;opacity:.5}
+#msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center}</style></head><body>
+<div class="s" id="a"></div><div class="s" id="b"></div><div id="cap"></div><div id="hint">Leertaste: Pause · ←/→ · F: Vollbild</div><div id="msg">Keine Fotos gefunden.</div>
+<script>
+const q = new URLSearchParams(location.search);
+(async () => {
+  const info = await (await fetch("/api/photo-info")).json();
+  const sec = (+q.get("sec") || info.slideshow_seconds || 6) * 1000;
+  const u = new URLSearchParams({limit: 1500}); ["tour","year"].forEach(k => q.get(k) && u.set(k === "tour" ? "tour_id" : k, q.get(k))); if (q.get("random")) u.set("random", "true");
+  let list = await (await fetch("/api/photos?" + u)).json();
+  if (!list.length) { document.getElementById("msg").style.display = "flex"; return; }
+  if (q.get("shuffle")) list.sort(() => Math.random() - .5);
+  let i = -1, cur = "a", paused = false, timer;
+  const show = n => { i = (n + list.length) % list.length; const p = list[i], el = document.getElementById(cur === "a" ? "b" : "a"), old = document.getElementById(cur);
+    const img = new Image(); img.onload = () => { el.style.backgroundImage = `url(${img.src})`; el.classList.add("on"); old.classList.remove("on"); cur = cur === "a" ? "b" : "a"; };
+    img.src = `/photo/${p.id}?size=2000`;
+    document.getElementById("cap").innerHTML = (p.tour_name ? `<b>${p.tour_name.replace(/</g, "&lt;")}</b>` : "") + new Date(p.taken_ts * 1000).toLocaleString("de-DE", {dateStyle: "long", timeStyle: "short"}) + `  (${i + 1}/${list.length})`;
+    const nx = new Image(); nx.src = `/photo/${list[(i + 1) % list.length].id}?size=2000`; };
+  const loop = () => { clearTimeout(timer); if (!paused) timer = setTimeout(() => { show(i + 1); loop(); }, sec); };
+  addEventListener("keydown", e => { if (e.key === " ") { paused = !paused; loop(); } else if (e.key === "ArrowRight") { show(i + 1); loop(); } else if (e.key === "ArrowLeft") { show(i - 1); loop(); } else if (e.key.toLowerCase() === "f") document.documentElement.requestFullscreen?.(); });
+  addEventListener("click", e => { show(e.clientX < innerWidth / 3 ? i - 1 : i + 1); loop(); });
+  show(0); loop();
+})();
+</script></body></html>

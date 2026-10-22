@@ -1,0 +1,12 @@
+name: Tests
+on: [push, pull_request]
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r requirements.txt pytest httpx
+      - run: python -m pytest -q tests
+      - run: bash -n deploy/install.sh && bash -n deploy/update.sh && bash -n deploy/restore.sh && bash -n ct/meine-touren.sh && bash -n install/meine-touren-install.sh

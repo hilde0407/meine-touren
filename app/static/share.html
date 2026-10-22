@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Geteilte Tour</title><link rel="stylesheet" href="/vendor/leaflet.css">
+<style>
+:root{--bg:#eef2ee;--ink:#10282a;--mut:#5d716f;--acc:#f2c230;--forest:#0e2a2b}
+@media(prefers-color-scheme:dark){:root{--bg:#0d1b1c;--ink:#e6efec;--mut:#9db3ae}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:var(--forest);color:#fff;padding:22px 16px 18px}header .in,main{max-width:980px;margin:0 auto;padding:0 16px}header .in{padding:0}
+h1{margin:4px 0 4px;font-size:clamp(26px,5vw,42px);line-height:1.1}.k{color:#b6c9c4;font-size:15px}
+.figs{display:flex;gap:26px;flex-wrap:wrap;margin:16px 0}.fig b{display:block;font-size:30px;line-height:1.1}.fig span{color:var(--mut);font-size:14px}
+#m{height:420px;border-radius:8px;margin:6px 0 22px}.ph{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}.ph img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px;cursor:zoom-in}
+#lb{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;z-index:9999}#lb img{max-width:96vw;max-height:94vh}
+footer{color:var(--mut);font-size:13px;padding:30px 16px;text-align:center}.err{padding:40px 16px;text-align:center}
+</style></head><body>
+<header><div class="in"><div class="k" id="k"></div><h1 id="h"></h1></div></header>
+<main><div class="figs" id="f"></div><div id="m"></div><div class="ph" id="p"></div></main>
+<footer>Geteilt aus „Meine Touren“</footer><div id="lb"><img alt=""></div>
+<script src="/vendor/leaflet.js"></script>
+<script>
+const tok = location.pathname.split("/").pop(), nf = (n, d = 1) => Number(n).toLocaleString("de-DE", {minimumFractionDigits: d, maximumFractionDigits: d});
+fetch("/api/public/" + tok).then(r => { if (!r.ok) throw 0; return r.json(); }).then(t => {
+  document.title = t.name; document.getElementById("h").textContent = t.name;
+  document.getElementById("k").textContent = new Date(t.date).toLocaleDateString("de-DE", {weekday: "long", day: "numeric", month: "long", year: "numeric"});
+  document.getElementById("f").innerHTML = [[nf(t.km) + " km", "Strecke"], [nf(t.up_m, 0) + " m", "Aufstieg"], [nf(t.down_m, 0) + " m", "Abstieg"], [nf(t.h) + " h", "Dauer"]].map(x => `<div class="fig"><b>${x[0]}</b><span>${x[1]}</span></div>`).join("");
+  const m = L.map("m"); L.tileLayer("/tiles/osm/{z}/{x}/{y}", {maxZoom: 18, attribution: "© OpenStreetMap"}).addTo(m);
+  const ll = t.coords.map(p => [p[0], p[1]]);
+  if (ll.length > 1) { const l = L.polyline(ll, {color: "#e11d74", weight: 5}).addTo(m); m.fitBounds(l.getBounds(), {padding: [20, 20]}); } else m.setView([50, 9], 5);
+  const P = document.getElementById("p"), lb = document.getElementById("lb");
+  P.innerHTML = t.photos.map(id => `<img loading="lazy" src="/pub/${tok}/photo/${id}?size=400" data-id="${id}">`).join("");
+  P.onclick = e => { const i = e.target.closest("img"); if (i) { lb.firstChild.src = `/pub/${tok}/photo/${i.dataset.id}?size=1600`; lb.style.display = "flex"; } };
+  lb.onclick = () => lb.style.display = "none";
+}).catch(() => { document.querySelector("main").innerHTML = '<div class="err">Dieser Link ist nicht (mehr) gültig.</div>'; });
+</script></body></html>

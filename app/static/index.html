@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meine Touren</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230e2a2b'/%3E%3Cpath d='M4 25l9-14 5 8 3-4 7 10z' fill='%23f2c230'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0e2a2b"><link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="style.css"></head>
+<body>
+<header class="top"><a class="brand" href="#/dash"><svg viewBox="0 0 34 26" width="34" height="26"><path d="M2 3h22l7 6-7 6H2z" fill="#f2c230"/><path d="M32 14H10l-7 6 7 6h22z" fill="#f2c230" opacity=".55" transform="translate(-1 -3)"/></svg><span>Meine Touren</span></a>
+<nav id="nav"></nav><span id="busy"></span></header>
+<main id="main"></main>
+<div id="lb"><button class="x" data-a="close" aria-label="Schließen">×</button><button class="nv l" data-a="prev" aria-label="Zurück">‹</button><img id="lbi" alt=""><button class="nv r" data-a="next" aria-label="Weiter">›</button><div id="lbc"></div></div>
+<script src="vendor/leaflet.js"></script>
+<script src="app.js"></script>
+<script>if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js").catch(() => {});</script>
+</body></html>
