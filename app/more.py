@@ -30,7 +30,7 @@ def duplicates(tours):
                 continue
             near = a["lat"] is not None and b["lat"] is not None and _hav((a["lat"], a["lng"]), (b["lat"], b["lng"])) < 400
             if near or abs(b["start_ts"] - a["start_ts"]) < 900:
-                out.append({"a": a["id"], "b": b["id"]})
+                out.append({"a": a["id"], "b": b["id"], "a_local": a.get("source") == "local", "b_local": b.get("source") == "local"})
     return out
 
 

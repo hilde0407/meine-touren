@@ -430,7 +430,7 @@ def test_check_places_health(monkeypatch):
             db.execute("INSERT OR REPLACE INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,up_m,down_m,lat,lng,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)", (f"c{i}", nm, "hike", ts, ts + 3600, km, 3600, up, up, 50.1, 8.0, "x"))
             routes.store(f"c{i}", [(50.1 + j * 0.001, 8.0, 300 + j * 4, j) for j in range(80)])
         r = c.get("/api/check").json()
-        assert {"a": "c0", "b": "c1"} in r["duplicates"]
+        assert any(d["a"] == "c0" and d["b"] == "c1" for d in r["duplicates"])
         assert len(r["default_names"]) >= 2 and any(s["id"] == "c0" for s in r["suspicious"])
         def boom(la, ln): raise RuntimeError("Overpass: down")
         assert more.peaks_pending() == 3 and more.peaks_fill(fetch=boom, retry_wait=0) == 0
@@ -623,3 +623,13 @@ def test_hoehen_platzhalter(fresh):
     db.execute("UPDATE tours SET up_m=24000 WHERE id=?", (t["id"],))                  # bereits falsch importierte Tour
     tracks.gpx_file(t["id"]).write_text(bad)
     assert elev.recompute_local() >= 1 and db.one("SELECT up_m FROM tours WHERE id=?", (t["id"],))["up_m"] < 200
+
+
+def test_zeitzonen_dublette():
+    """Dieselbe Aktivität mit um ganze Stunden verschobener Startzeit gilt als Doppelte."""
+    from app import sync
+    tours = [{"id": "z1", "start_ts": 1729678104, "dist_m": 11100, "dur_s": 5000, "source": "local"}]
+    assert sync.is_duplicate(1729681704, 11110, 5010, tours, 300)["id"] == "z1"          # +1 h
+    assert sync.is_duplicate(1729681704 + 3600, 11110, 5010, tours, 300)["id"] == "z1"    # +2 h
+    assert sync.is_duplicate(1729678104 + 4 * 3600, 11110, 5010, tours, 300) is None      # +4 h: andere Tour
+    assert sync.is_duplicate(1729681704, 15000, 5010, tours, 300) is None                 # andere Länge

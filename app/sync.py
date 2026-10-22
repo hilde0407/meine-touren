@@ -139,6 +139,9 @@ def is_duplicate(start_ts, dist_m, dur_s, tours, tol=300):
                 and dur_s and t["dur_s"] and abs(t["dur_s"] - dur_s) <= 60
                 and t["start_ts"] and abs(t["start_ts"] - start_ts) <= 3 * 3600):
             return t
+        if (dist_m and t["dist_m"] and abs(t["dist_m"] - dist_m) <= 0.01 * dist_m and dur_s and t["dur_s"] and abs(t["dur_s"] - dur_s) <= 60
+                and t["start_ts"] and any(abs(abs(t["start_ts"] - start_ts) - h * 3600) <= tol for h in (1, 2))):
+            return t                                     # gleiche Aktivität, Startzeit um ganze Stunden verschoben (Zeitzone/Sommerzeit)
     return None
 
 
@@ -219,6 +222,15 @@ def adopt_workout(trackid):
     p = Path(r["gpx_path"])
     tid = f"z{int(trackid)}"
     if not db.one("SELECT 1 x FROM tours WHERE id=?", (tid,)):
+        try:                                             # dieselbe Aktivität schon vorhanden (z. B. doppelt von der Uhr gemeldet)?
+            c = gpxtools.convert(p.read_text(encoding="utf-8"), p.name, db.get("default_sport") or "hike")
+            dup = is_duplicate(c["start_ts"], c["dist_m"], c["end_ts"] - c["start_ts"], db.query("SELECT id,start_ts,dist_m,dur_s FROM tours"), db.get_int("dup_tolerance_s", 300))
+        except Exception:  # noqa
+            dup = None
+        if dup:
+            db.execute("UPDATE workouts SET status=?, komoot_id=?, updated=? WHERE trackid=? AND status IN ('new','local')", ("dup", dup["id"], int(time.time()), int(trackid)))
+            log(f"  Training {trackid}: schon vorhanden als Tour {dup['id']} – nicht doppelt übernommen")
+            return dup["id"]
         tracks.adopt(p.read_text(encoding="utf-8"), p.name, ident=tid)
         photos.assign_all()
     db.execute("UPDATE workouts SET status=?, komoot_id=?, updated=? WHERE trackid=? AND status IN ('new','local')",
