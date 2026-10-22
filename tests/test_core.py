@@ -462,7 +462,9 @@ def test_more2(monkeypatch):
             db.execute("INSERT OR REPLACE INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,up_m,down_m,lat,lng,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)", (tid, tid, "hike", ts, ts + 3600, 8000, 3600, 300, 300, la, lo, "x"))
             routes.store(tid, [(la + j * 0.0005, lo, 300 + j, j) for j in range(80)])
         tr = c.get("/api/trips").json()
-        assert tr and set(tr[0]["tours"]) == {"r1", "r2"}
+        assert tr and set(tr[0]["tours"]) == {"r1", "r2"} and tr[0]["photo"] is None
+        db.execute("INSERT INTO photos(path,mtime,size,taken_ts,lat,lng,tour_id) VALUES('/x/a.jpg',1,1,?,?,?,?)", (base + 100 * 86400 + 5, -21.1, 55.4, "r1"))
+        assert c.get("/api/trips").json()[0]["photo"] is not None
         assert c.post("/api/tours/r1/tags", json={"tags": ["Urlaub", " Réunion "]}).json()["tags"] == ["Urlaub", "Réunion"]
         assert any(t["tag"] == "Urlaub" for t in c.get("/api/tags").json())
         assert [t for t in c.get("/api/tours").json() if t["id"] == "r1"][0]["tags"]

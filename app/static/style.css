@@ -175,6 +175,7 @@ table.cmp{width:100%;border-collapse:collapse}table.cmp td,table.cmp th{padding:
 .otdg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin:12px 0 18px}
 .otd{display:flex;flex-direction:column;justify-content:flex-end;min-height:180px;padding:14px;border-radius:8px;background:var(--forest) center/cover;color:#fff;text-decoration:none}
 .otd b{font:600 22px var(--d)}.otd span{font-weight:600}.otd small{opacity:.85}
+.otd{text-shadow:0 1px 3px #000a}
 .warnbar{background:#fff3cd;color:#5c4500;border-left:5px solid #f2c230;border-radius:6px;padding:10px 14px;margin:0 0 18px;font-size:15px}.warnbar a{font-weight:600;color:inherit}
 .tleg{position:absolute;left:10px;bottom:10px;z-index:900;background:#fffe;border-radius:6px;padding:6px 10px;display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:#123}
 .tleg i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:4px;vertical-align:-1px}

@@ -24,9 +24,20 @@ def _ids(s):
 
 
 # ---------- Tags / Alben ----------
+def cover_photo(tour_ids):
+    """Titelfoto für eine Sammlung: das mittlere Foto (nach Aufnahmezeit) aus den zugehörigen Touren."""
+    if not tour_ids:
+        return None
+    ph = db.query("SELECT id FROM photos WHERE tour_id IN (%s) ORDER BY taken_ts, id" % ",".join("?" * len(tour_ids)), tuple(tour_ids))
+    return ph[len(ph) // 2]["id"] if ph else None
+
+
 @router.get("/api/tags")
 def api_tags():
-    return db.query("SELECT x.tag AS tag, COUNT(*) AS n, ROUND(SUM(t.dist_m)/1000.0,0) AS km FROM tour_tags x JOIN tours t ON t.id=x.id GROUP BY x.tag ORDER BY n DESC, tag")
+    rows = db.query("SELECT x.tag AS tag, COUNT(*) AS n, ROUND(SUM(t.dist_m)/1000.0,0) AS km FROM tour_tags x JOIN tours t ON t.id=x.id GROUP BY x.tag ORDER BY n DESC, tag")
+    for r in rows:
+        r["photo"] = cover_photo([x["id"] for x in db.query("SELECT id FROM tour_tags WHERE tag=?", (r["tag"],))])
+    return rows
 
 
 @router.post("/api/tours/{tour_id}/tags")
@@ -74,7 +85,10 @@ def build_trips():
 
 @router.get("/api/trips")
 def api_trips():
-    return build_trips()
+    out = build_trips()
+    for t in out:
+        t["photo"] = cover_photo(t["tours"])
+    return out
 
 
 @router.get("/api/collection/coords")
