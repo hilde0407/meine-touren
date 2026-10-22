@@ -7,7 +7,7 @@ from pathlib import Path
 
 from fastapi import APIRouter
 
-from . import config, db, elev, extras, jobs, routes
+from . import config, db, elev, extras, jobs, memo, routes
 
 router = APIRouter()
 DEFAULT_NAME = re.compile(r"\d{2}\.\d{2}\.\d{4}")
@@ -104,6 +104,7 @@ def peaks_fill(limit=None, fetch=None, retry_wait=8):
 
 
 @router.get("/api/places")
+@memo.cached
 def api_places():
     starts = db.query("SELECT g.place AS place, g.state AS state, COUNT(*) AS n, ROUND(SUM(t.dist_m)/1000.0,0) AS km FROM tour_geo g JOIN tours t ON t.id=g.id "
                       "WHERE g.place IS NOT NULL AND g.place!='' GROUP BY g.place, g.state ORDER BY n DESC, km DESC LIMIT 25")
@@ -118,6 +119,7 @@ def api_places():
 
 # ---------- Wanderführer-Fortschritt ----------
 @router.get("/api/guides/progress")
+@memo.cached
 def api_guides_progress():
     gs = db.query("SELECT id,book,title,pts FROM guide_tours ORDER BY book,title")
     if not gs:

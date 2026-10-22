@@ -13,7 +13,7 @@ import requests
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse
 
-from . import auth, config, ctx, db, extras, jobs, more, photos, routes
+from . import auth, config, ctx, db, extras, jobs, memo, more, photos, routes
 from .gpxtools import TZ
 
 router = APIRouter()
@@ -227,6 +227,7 @@ def newground():
 
 
 @router.get("/api/newground")
+@memo.cached
 def api_newground():
     return newground()
 
