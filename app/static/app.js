@@ -1118,7 +1118,7 @@ VIEWS.places = async () => {
      <div class="rows">${b.tours.map(x => `<div class="r"><span>${x.tour ? "✓" : "○"} ${esc(x.title)}</span>${x.tour ? `<a href="#/tour/${x.tour}">${BY[x.tour] ? dateS(BY[x.tour].date) : "Tour"}</a>` : '<span class="mut">offen</span>'}</div>`).join("")}</div></div>`).join("") : '<p class="mut">Noch keine Wanderführer hinterlegt: Verwaltung → „Wanderführer“ (GPX-Dateien hochladen).</p>'}`;
   $("#pkb").onclick = async e => { e.target.disabled = true; try { await api("/api/jobs/peaks", {method: "POST"}); } catch (x) { $("#pkm").textContent = x.message; e.target.disabled = false; return; }
     const tick = async () => { if (!$("#pkm")) return; const j = await api("/api/jobs").catch(() => null);
-      if (j && j.running) { $("#pkm").textContent = `⏳ ${j.progress || "läuft"} (ca. 1 Sekunde pro Tour; du kannst die Seite verlassen)`; return setTimeout(tick, 2500); }
+      if (j && j.running) { $("#pkm").textContent = `⏳ ${j.progress || "läuft"} (wird nach jedem Gipfel gespeichert; du kannst die Seite verlassen und später fortsetzen)`; return setTimeout(tick, 2500); }
       $("#pkm").textContent = (j && j.log.filter(l => /Gipfel/.test(l)).slice(-2).join(" · ")) || "Fertig"; e.target.disabled = false; setTimeout(() => { if (location.hash.startsWith("#/places")) route(); }, 2500); };
     setTimeout(tick, 1500); };
 };

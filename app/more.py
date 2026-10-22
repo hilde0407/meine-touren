@@ -67,38 +67,53 @@ def peaks_pending():
 
 
 def peaks_fill(limit=None, fetch=None, retry_wait=8):
+    """Gipfel bestimmen. Jedes Ergebnis wird sofort gespeichert; ein erneuter Start macht dort weiter, wo der letzte aufgehört hat."""
     fetch = fetch or extras.peak_name
     ok = n = fails = skipped = 0
+    now = int(time.time())
+    todo = []
     for t in _peak_candidates():
-        if limit and n >= limit:
-            break
         if t["sport"] not in HIKE or (t["up_m"] or 0) < 150:      # kommt nie infrage: ohne Netzwerk als erledigt vermerken
             db.execute("INSERT OR REPLACE INTO tour_peak(id,name,alt,lat,lng) VALUES(?,?,?,?,?)", (t["id"], "", None, None, None)); continue
+        if not routes.path_full(t["id"]).exists():                 # Strecke fehlt noch: später (nach „Strecken lokal sichern“) erneut
+            skipped += 1; continue
+        todo.append(t)
+    failed = {r["k"][9:]: r["ts"] for r in db.query("SELECT k,ts FROM geocache WHERE k LIKE 'peakfail:%'")}
+    fresh = lambda t: now - failed.get(t["id"], 0) < 6 * 3600     # vor Kurzem gescheitert: erst die übrigen Touren, dann diese
+    todo = [t for t in todo if not fresh(t)] + [t for t in todo if fresh(t)]
+    total = len(todo) if not limit else min(limit, len(todo))
+    jobs.log(f"Gipfel: {total} Touren zu bearbeiten (jedes Ergebnis wird sofort gespeichert)")
+    for t in todo:
+        if limit and n >= limit:
+            break
         pts = routes.load(t["id"])
         alts = [p for p in (pts or []) if len(p) > 2 and p[2] is not None]
-        if len(alts) < 5:                                          # Strecke fehlt noch: später (nach „Strecken lokal sichern“) erneut
-            skipped += 1; continue
+        if len(alts) < 5:
+            db.execute("INSERT OR REPLACE INTO tour_peak(id,name,alt,lat,lng) VALUES(?,?,?,?,?)", (t["id"], "", None, None, None)); continue
         hi = max(alts, key=lambda p: p[2]); n += 1
-        jobs.progress(f"Gipfel {n}")
-        name, err = None, None
-        for attempt in range(3):                                   # Overpass begrenzt Anfragen: kurz warten und erneut versuchen
+        jobs.progress(f"Gipfel {n} von {total} · {ok} bestimmt")
+        name, err, t0 = None, None, time.monotonic()
+        for attempt in range(2):                                   # Overpass begrenzt Anfragen: kurz warten und erneut versuchen
             try:
                 name = fetch(hi[0], hi[1]); err = None; break
             except Exception as e:  # noqa
                 err = e
-                if attempt < 2:
-                    time.sleep(retry_wait * (attempt + 1))
+                if attempt < 1:
+                    time.sleep(retry_wait)
         if err is not None:
             fails += 1
+            db.execute("INSERT OR REPLACE INTO geocache(k,name,ts) VALUES(?,?,?)", (f"peakfail:{t['id']}", "", int(time.time())))
             if fails == 1 or fails % 5 == 0:
                 jobs.log(f"  Gipfel: {err}")
-            if fails >= 8:
-                jobs.log("  Gipfel: zu viele Fehler in Folge – Abbruch, später erneut versuchen"); break
+            if fails >= 5:
+                jobs.log("  Gipfel: Overpass antwortet nicht – Abbruch, bereits Bestimmtes bleibt gespeichert. Später einfach erneut starten."); break
             continue
         fails = 0
+        db.execute("DELETE FROM geocache WHERE k=?", (f"peakfail:{t['id']}",))
         db.execute("INSERT OR REPLACE INTO tour_peak(id,name,alt,lat,lng) VALUES(?,?,?,?,?)", (t["id"], name or "", hi[2], hi[0], hi[1]))
         ok += 1
-        time.sleep(1.0)
+        if time.monotonic() - t0 > 0.05:                           # nur nach echten Abfragen pausieren (Zwischenspeicher-Treffer sofort)
+            time.sleep(1.0)
     jobs.log(f"Gipfel: {ok} bestimmt" + (f", {skipped} Touren ohne lokale Strecke übersprungen" if skipped else "") + f", noch offen: {peaks_pending()}")
     return ok
 
