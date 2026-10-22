@@ -89,14 +89,16 @@ def scan(root=None):
             if known.get(p) == (st.st_mtime, st.st_size):
                 continue
             ts, la, lo = read_meta(p)
-            if ts is None:  # Rückfall: Änderungsdatum
+            dated = 1 if ts is not None else 0
+            if ts is None:  # Rückfall: Änderungsdatum (unsicher – wird nicht automatisch einer Tour zugeordnet)
                 ts = int(st.st_mtime)
-            batch.append((p, st.st_mtime, st.st_size, ts, la, lo))
+            batch.append((p, st.st_mtime, st.st_size, ts, la, lo, dated))
             n_new += 1
             if len(batch) >= 200:
                 _store(batch); batch = []
                 jobs.progress(f"{len(seen)} Fotos gesichtet")
     _store(batch)
+    _check_dated()
     gone = [p for p in known if p not in seen]
     for i in range(0, len(gone), 500):
         db.executemany("DELETE FROM photos WHERE path=?", [(p,) for p in gone[i:i + 500]])
@@ -105,11 +107,28 @@ def scan(root=None):
     return n_new
 
 
+def _check_dated():
+    """Einmalig für bereits eingelesene Fotos feststellen, ob die Aufnahmezeit aus den Bilddaten stammt."""
+    rows = db.query("SELECT id,path FROM photos WHERE dated IS NULL")
+    if not rows:
+        return
+    log(f"Fotos: prüfe bei {len(rows)} Fotos, ob eine Aufnahmezeit im Bild steht")
+    upd = []
+    for i, r in enumerate(rows, 1):
+        ts = read_meta(r["path"])[0] if os.path.exists(r["path"]) else 1
+        upd.append((1 if ts is not None else 0, r["id"]))
+        if i % 500 == 0:
+            jobs.progress(f"Aufnahmezeit prüfen {i}/{len(rows)}")
+            db.executemany("UPDATE photos SET dated=? WHERE id=?", upd); upd = []
+    db.executemany("UPDATE photos SET dated=? WHERE id=?", upd)
+
+
 def _store(batch):
+    batch = [b if len(b) > 6 else (*b, 1) for b in batch]
     if batch:
         db.executemany(
-            "INSERT INTO photos(path,mtime,size,taken_ts,lat,lng) VALUES(?,?,?,?,?,?) "
-            "ON CONFLICT(path) DO UPDATE SET mtime=excluded.mtime,size=excluded.size,"
+            "INSERT INTO photos(path,mtime,size,taken_ts,lat,lng,dated) VALUES(?,?,?,?,?,?,?) "
+            "ON CONFLICT(path) DO UPDATE SET mtime=excluded.mtime,size=excluded.size,dated=excluded.dated,"
             "taken_ts=excluded.taken_ts+COALESCE(offset_s,0),lat=excluded.lat,lng=excluded.lng,tour_id=CASE WHEN manual=1 THEN tour_id ELSE NULL END", batch)
 
 
@@ -122,7 +141,7 @@ def assign_all():
         end = t["end_ts"] or t["start_ts"]
         rows.append((t["id"], t["start_ts"] - margin, end + margin))
     with db.cur() as c:
-        c.executemany("UPDATE photos SET tour_id=? WHERE taken_ts BETWEEN ? AND ? AND tour_id IS NULL AND COALESCE(manual,0)=0", rows)
+        c.executemany("UPDATE photos SET tour_id=? WHERE taken_ts BETWEEN ? AND ? AND tour_id IS NULL AND COALESCE(manual,0)=0 AND COALESCE(dated,1)=1", rows)
     r = db.one("SELECT COUNT(*) n FROM photos WHERE tour_id IS NOT NULL")
     log(f"Fotos: {r['n']} einer Tour zugeordnet")
 

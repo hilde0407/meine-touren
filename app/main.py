@@ -445,7 +445,8 @@ async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken
 def photo_info():
     r = db.one("SELECT COUNT(*) n, SUM(tour_id IS NOT NULL) a, MIN(taken_ts) mi, MAX(taken_ts) ma FROM photos")
     years = db.query("SELECT DISTINCT CAST(strftime('%Y', taken_ts, 'unixepoch') AS INT) y FROM photos ORDER BY y DESC")
-    return {"count": r["n"], "assigned": r["a"] or 0, "years": [y["y"] for y in years],
+    undated = db.one("SELECT COUNT(*) n FROM photos WHERE dated=0")["n"]
+    return {"count": r["n"], "assigned": r["a"] or 0, "undated": undated, "years": [y["y"] for y in years],
             "folder_exists": config.PHOTOS_DIR.exists(), "lib_dir": str(config.LIB_DIR), "source_dir": str(config.PHOTOS_DIR), "slideshow_seconds": db.get_int("slideshow_seconds", 6)}
 
 

@@ -633,3 +633,14 @@ def test_zeitzonen_dublette():
     assert sync.is_duplicate(1729681704 + 3600, 11110, 5010, tours, 300)["id"] == "z1"    # +2 h
     assert sync.is_duplicate(1729678104 + 4 * 3600, 11110, 5010, tours, 300) is None      # +4 h: andere Tour
     assert sync.is_duplicate(1729681704, 15000, 5010, tours, 300) is None                 # andere Länge
+
+
+def test_fotos_ohne_aufnahmezeit_nicht_zugeordnet(fresh, tmp_path):
+    """Fotos nur mit Dateidatum (Exportzeit) dürfen nicht automatisch einer Tour zugeordnet werden."""
+    from app import photos
+    base = 1780000000
+    db.execute("INSERT OR REPLACE INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,up_m,down_m,lat,lng,status,source) VALUES('u1','T','hike',?,?,1000,3600,10,10,50,8,'x','local')", (base, base + 3600))
+    photos._store([("/a.jpg", 1.0, 1, base + 600, None, None, 1), ("/b.jpg", 1.0, 1, base + 700, None, None, 0)])
+    photos.assign_all()
+    r = {p["path"]: p["tour_id"] for p in db.query("SELECT path,tour_id FROM photos")}
+    assert r["/a.jpg"] == "u1" and r["/b.jpg"] is None
