@@ -103,7 +103,7 @@ def tiff_info(f, base=0):
             return None
         return (v[0] if v else None) if first and isinstance(v, list) else v
 
-    info = {"model": g(i0, 0x0110), "exp": g(ex, 0x829A), "f": g(ex, 0x829D), "iso": g(ex, 0x8827), "fl": g(ex, 0x920A),
+    info = {"make": g(i0, 0x010F), "model": g(i0, 0x0110), "exp": g(ex, 0x829A), "f": g(ex, 0x829D), "iso": g(ex, 0x8827), "fl": g(ex, 0x920A),
             "uid": g(ex, 0xA420) or None, "dt": g(ex, 0x9003), "patch": {}}
     for name, tag in (("dto", 0x9003), ("cd", 0x9004)):          # Positionen der 19-Byte-Zeitstempel für die Korrektur
         if tag in ex and ex[tag][0] == 2 and ex[tag][1] >= 20:
@@ -115,6 +115,10 @@ def tiff_info(f, base=0):
     return info
 
 
+class NoExif(ValueError):
+    pass
+
+
 def jpeg_info(path):
     with open(path, "rb") as f:
         if f.read(2) != b"\xff\xd8":
@@ -122,14 +126,19 @@ def jpeg_info(path):
         while True:
             b = f.read(4)
             if len(b) < 4 or b[0] != 0xFF:
-                raise ValueError("kein EXIF")
+                raise NoExif()
             mk, ln = b[1], struct.unpack(">H", b[2:4])[0]
             if mk == 0xDA:
-                raise ValueError("kein EXIF")
+                raise NoExif()
             if mk == 0xE1:
                 start = f.tell()
                 if f.read(6) == b"Exif\0\0":
-                    return tiff_info(f, start + 6)
+                    try:
+                        info = tiff_info(f, start + 6)
+                    except Exception:  # noqa
+                        info = {"make": None, "model": None, "exp": None, "f": None, "iso": None, "fl": None, "uid": None, "dt": None, "patch": {}}
+                    info["seg"] = (start - 4, ln + 2)                 # Position des 0xFF-Markers und Länge inkl. Marker
+                    return info
                 f.seek(start)
             f.seek(ln - 2, 1)
 
@@ -137,6 +146,116 @@ def jpeg_info(path):
 def raw_info(path):
     with open(path, "rb") as f:
         return tiff_info(f, 0)
+
+
+# ---------------------------------------------------------------- EXIF-Block neu schreiben (wenn Felder fehlen)
+def _entries(t, ifd):
+    """Einträge als {tag: (typ, anzahl, bytes im Little-Endian-Format)}"""
+    out = {}
+    for tag, (typ, cnt, pos) in ifd.items():
+        sz = SIZES.get(typ, 1) * cnt
+        t.f.seek(pos); raw = t.f.read(sz)
+        if len(raw) != sz:
+            continue
+        w = {3: "H", 8: "h", 4: "I", 9: "i", 11: "f", 5: "I", 10: "i", 12: "d"}.get(typ)
+        if w and t.e == ">":
+            n = sz // struct.calcsize(w)
+            raw = struct.pack("<%d%s" % (n, w), *struct.unpack(">%d%s" % (n, w), raw))
+        out[tag] = (typ, cnt, raw)
+    return out
+
+
+def _serialize(entries, off):
+    items = sorted(entries.items())
+    head = struct.pack("<H", len(items)); data = b""; base = off + 2 + 12 * len(items) + 4
+    for tag, (typ, cnt, raw) in items:
+        if len(raw) <= 4:
+            head += struct.pack("<HHI", tag, typ, cnt) + raw.ljust(4, b"\0")
+        else:
+            head += struct.pack("<HHII", tag, typ, cnt, base + len(data)); data += raw + (b"\0" if len(raw) % 2 else b"")
+    return head + struct.pack("<I", 0) + data
+
+
+def _ascii(s):
+    b = s.encode("latin-1", "replace") + b"\0"
+    return (2, len(b), b)
+
+
+def _rational(v):
+    from fractions import Fraction
+    fr = Fraction(v).limit_denominator(100000)
+    return (5, 1, struct.pack("<II", fr.numerator, fr.denominator))
+
+
+def build_exif(path, jinfo, add):
+    """Neuer EXIF-Block (TIFF, Little-Endian) mit den vorhandenen Feldern plus den fehlenden aus `add`."""
+    i0, ex = {}, {}
+    if jinfo.get("seg"):
+        with open(path, "rb") as f:
+            t = Tiff(f, jinfo["seg"][0] + 10)
+            d0 = t.ifd(t.first)
+            if 0x8825 in d0:
+                raise RuntimeError("GPS-Block vorhanden – wird nicht umgeschrieben")
+            i0 = _entries(t, {k: v for k, v in d0.items() if k not in (0x8769, 0x0201, 0x0202)})
+            if 0x8769 in d0:
+                e0 = t.ifd(t.val(d0[0x8769])[0])
+                if 0xA005 in e0:
+                    raise RuntimeError("Interoperabilitäts-Block vorhanden – wird nicht umgeschrieben")
+                ex = _entries(t, e0)
+    ex.setdefault(0x9000, (7, 4, b"0231"))
+    for tag, v in add.get("ifd0", {}).items():
+        i0.setdefault(tag, v)
+    for tag, v in add.get("exif", {}).items():
+        ex.setdefault(tag, v)
+    i0[0x8769] = (4, 1, struct.pack("<I", 0))
+    ex_off = 8 + len(_serialize(i0, 8))
+    i0[0x8769] = (4, 1, struct.pack("<I", ex_off))
+    return b"II*\0" + struct.pack("<I", 8) + _serialize(i0, 8) + _serialize(ex, ex_off)
+
+
+def new_fields(orig, jinfo):
+    """Was dem JPEG fehlt und aus dem Original übernommen wird."""
+    dt = orig["dt"]
+    add = {"ifd0": {}, "exif": {0x9003: _ascii(dt), 0x9004: _ascii(dt)}}
+    if orig.get("make") and not jinfo.get("make"):
+        add["ifd0"][0x010F] = _ascii(orig["make"])
+    if orig.get("model") and not jinfo.get("model"):
+        add["ifd0"][0x0110] = _ascii(orig["model"])
+    for key, tag in (("exp", 0x829A), ("f", 0x829D), ("fl", 0x920A)):
+        if orig.get(key) and not jinfo.get(key):
+            add["exif"][tag] = _rational(orig[key])
+    if orig.get("iso") and not jinfo.get("iso"):
+        add["exif"][0x8827] = (3, 1, struct.pack("<H", min(int(orig["iso"]), 65535)))
+    return add
+
+
+def rewrite_exif(path, jinfo, orig, backup_dir):
+    """Schreibt einen neuen EXIF-Block ins JPEG. Der alte Block wird für „undo“ gesichert."""
+    exif = build_exif(path, jinfo, new_fields(orig, jinfo))
+    seg = b"Exif\0\0" + exif
+    if len(seg) + 2 > 65535:
+        raise RuntimeError("EXIF-Block zu groß")
+    block = b"\xff\xe1" + struct.pack(">H", len(seg) + 2) + seg
+    data = Path(path).read_bytes()
+    if jinfo.get("seg"):
+        a, n = jinfo["seg"]; old = data[a:a + n]
+        if old[:2] != b"\xff\xe1":
+            raise RuntimeError("Datei hat sich geändert")
+    else:
+        a, n, old = 2, 0, b""
+        if data[2:4] == b"\xff\xe0":                                  # nach JFIF-Segment einfügen
+            a = 4 + struct.unpack(">H", data[4:6])[0]
+    bk = None
+    if old:
+        backup_dir.mkdir(parents=True, exist_ok=True)
+        bk = backup_dir / (re.sub(r"[^A-Za-z0-9._-]", "_", str(path))[-150:] + f".{abs(hash(str(path))) % 10**8}.bak")
+        bk.write_bytes(old)
+    tmp = Path(str(path) + ".fza_tmp")
+    tmp.write_bytes(data[:a] + block + data[a + n:])
+    st = os.stat(path)
+    os.replace(tmp, path)
+    os.chmod(path, st.st_mode & 0o7777)
+    return {"mode": "rewrite", "backup": str(bk) if bk else None, "newlen": len(block), "oldlen": n, "at": a}
 
 
 # ---------------------------------------------------------------- Index der RAW-Dateien
@@ -167,9 +286,11 @@ def cmd_index(a):
             print(f"Ordner nicht gefunden: {root}"); continue
         label = disk_label(root, a.name if len(a.pfade) == 1 else None)
         d = ix["disks"].setdefault(label, {"files": {}})
-        old = d["files"]; new = {}; n = reused = bad = 0
+        old = d["files"]; new = {}; n = reused = bad = 0; t0 = time.time(); cut = False
         print(f"Lese {root} (Platte „{label}“) …")
         for dp, dns, fns in os.walk(root):
+            if a.zeitlimit and time.time() - t0 > a.zeitlimit:
+                cut = True; break
             dns[:] = [x for x in dns if not x.startswith(".")]
             for fn in fns:
                 if fn.startswith(".") or not fn.lower().endswith(exts):
@@ -180,7 +301,7 @@ def cmd_index(a):
                 except OSError:
                     continue
                 o = old.get(rel)
-                if o and o["size"] == st.st_size and o["mtime"] == int(st.st_mtime):
+                if o and o["size"] == st.st_size and o["mtime"] == int(st.st_mtime) and "make" in o:
                     new[rel] = o; reused += 1; continue
                 try:
                     i = raw_info(p)
@@ -188,12 +309,14 @@ def cmd_index(a):
                     bad += 1; continue
                 if not i["dt"]:
                     bad += 1; continue
-                new[rel] = {"stem": p.stem.upper(), "size": st.st_size, "mtime": int(st.st_mtime), "dt": i["dt"], "model": i["model"],
+                new[rel] = {"stem": p.stem.upper(), "size": st.st_size, "mtime": int(st.st_mtime), "dt": i["dt"], "make": i["make"], "model": i["model"],
                             "exp": i["exp"], "f": i["f"], "iso": i["iso"], "fl": i["fl"], "uid": i["uid"]}
                 n += 1
                 if n % 200 == 0:
                     print(f"  {n} neu gelesen …")
-        d["files"] = new; d["root"] = str(root); d["scanned"] = int(time.time())
+        d["files"] = {**old, **new} if cut else new; d["root"] = str(root); d["scanned"] = int(time.time())
+        if cut:
+            print("  Zeitlimit erreicht – denselben Befehl noch einmal ausführen, er macht dort weiter.")
         print(f"  {len(new)} Originale auf „{label}“ ({n} neu, {reused} unverändert, {bad} ohne lesbares Datum)")
     save_index(ix)
     print(f"Index gespeichert: {INDEX} – insgesamt {sum(len(d['files']) for d in ix['disks'].values())} Originale auf {len(ix['disks'])} Platte(n).")
@@ -237,17 +360,87 @@ def compatible(j, r):
     return close(j["exp"], r["exp"]) and close(j["f"], r["f"]) and (j["iso"] is None or r["iso"] is None or j["iso"] == r["iso"]) and close(j["fl"], r["fl"])
 
 
-def find_original(j, stem, stems):
-    cands = []
+def folder_hint(path):
+    """Datum aus dem Ordnerpfad: ('tag', 'JJJJ:MM:TT') bei „TT.MM.JJJJ“, sonst ('monat', 'JJJJ:MM') bzw. ('jahr', 'JJJJ')."""
+    parts = Path(path).parts[:-1]
+    for p in reversed(parts):
+        m = re.search(r"(\d{1,2})\.(\d{1,2})\.(20\d\d|19\d\d)", p)
+        if m:
+            return "tag", "%s:%02d:%02d" % (m.group(3), int(m.group(2)), int(m.group(1)))
+    yr = next((p for p in parts if re.fullmatch(r"(19|20)\d\d", p)), None)
+    if yr:
+        i = parts.index(yr)
+        m = re.match(r"(\d{2})\b", parts[i + 1]) if i + 1 < len(parts) else None
+        if m and 1 <= int(m.group(1)) <= 12:
+            return "monat", f"{yr}:{m.group(1)}"
+        return "jahr", yr
+    return None
+
+
+def context_pick(cands, path, mtime):
+    """Mehrere Originale gleichen Namens: anhand Ordnerdatum und Exportzeitpunkt (Original muss älter sein) auswählen."""
+    dts = sorted({c["dt"] for c in cands})
+    if mtime:
+        lim = datetime.fromtimestamp(mtime + 86400).strftime("%Y:%m:%d %H:%M:%S")
+        dts = [d for d in dts if d <= lim]
+    h = folder_hint(path)
+    if h and dts:
+        kind, v = h
+        sel = [d for d in dts if d.startswith(v)]
+        if not sel and kind == "tag":
+            from datetime import timedelta
+            day = datetime.strptime(v, "%Y:%m:%d")
+            near = {(day + timedelta(days=x)).strftime("%Y:%m:%d") for x in (-1, 1)}
+            sel = [d for d in dts if d[:10] in near]
+        if not sel and kind != "jahr":
+            sel = [d for d in dts if d.startswith(v[:4])]
+        dts = sel
+    return dts[0] if len(dts) == 1 else None
+
+
+def plausible(dt, path, mtime):
+    """Passt die Originalzeit zum Ordner (Jahr/Monat/Tag im Pfad) und liegt sie vor dem Export (Dateizeit)?"""
+    from datetime import timedelta
+    t = parse(dt)
+    if mtime and t > datetime.fromtimestamp(mtime) + timedelta(days=1):
+        return False
+    h = folder_hint(path)
+    if not h:
+        return True
+    kind, v = h
+    if kind == "tag":
+        lo = datetime.strptime(v, "%Y:%m:%d") - timedelta(days=2); hi = lo + timedelta(days=5)
+    elif kind == "monat":
+        lo = datetime.strptime(v + ":01", "%Y:%m:%d") - timedelta(days=35); hi = lo + timedelta(days=100)
+    else:
+        lo = datetime.strptime(v + ":01:01", "%Y:%m:%d") - timedelta(days=35); hi = lo + timedelta(days=436)
+    return lo <= t <= hi
+
+
+def find_original(j, stem, stems, path=None, mtime=None):
+    cands = []; relaxed = False
     for s in stem_candidates(stem, stems):
         cands = [r for r in stems[s] if compatible(j, r)]
         if cands:
             break
+    if not cands and re.search(r"pano|hdr|stack|fokus|focus|merge", stem, re.I):          # zusammengesetzte Bilder: Belichtungswerte weichen ab
+        for s in stem_candidates(stem, stems):
+            cands = [r for r in stems[s] if not (j["model"] and r["model"] and j["model"].strip().lower() != r["model"].strip().lower())]
+            if cands:
+                relaxed = True; break
     if not cands:
         return None, "nicht gefunden"
+    strong = not relaxed and all(j.get(k) is not None for k in ("exp", "f", "iso"))           # Aufnahmedaten im JPEG vorhanden und passend
+    if not strong and path:                                                     # sonst: nur plausible Treffer (Ordnerdatum, vor dem Export)
+        cands = [c for c in cands if plausible(c["dt"], path, mtime)]
+        if not cands:
+            return None, "nicht gefunden (Originaldatum passt nicht zum Ordner)"
     if len({c["dt"] for c in cands}) > 1:
-        return None, "mehrdeutig (%d Originale mit gleichem Namen und gleichen Einstellungen)" % len(cands)
-    return cands[0], ""
+        dt = context_pick(cands, path, mtime) if path else None
+        if not dt:
+            return None, "mehrdeutig (%d Originale mit gleichem Namen und gleichen Einstellungen)" % len(cands)
+        return next(c for c in cands if c["dt"] == dt), "über Ordnerdatum gewählt"
+    return cands[0], ("" if strong else "nur über Dateiname und Ordnerdatum zugeordnet")
 
 
 def parse(dt):
@@ -284,13 +477,19 @@ def run_check(a, apply):
     files = sorted(p for p in root.rglob("*") if p.is_file() and not p.name.startswith(".") and p.suffix.lower() in (".jpg", ".jpeg"))
     run = datetime.now().strftime("%Y%m%d-%H%M%S-%f"); rows = []; cnt = {}
     logf = open(LOG, "a") if apply else None
+    bdir = Path(os.environ.get("FOTO_ZEIT_BACKUP") or Path.home() / ".foto_zeit_backup") / run
     for k, p in enumerate(files, 1):
         try:
             j = jpeg_info(p)
+        except NoExif:
+            j = {"make": None, "model": None, "exp": None, "f": None, "iso": None, "fl": None, "uid": None, "dt": None, "patch": {}, "seg": None}
         except Exception as e:  # noqa
-            st, rel, note, delta, newdt, disk = "kein EXIF", "", str(e), "", "", ""
-            rows.append((str(p), st, "", "", "", "", note)); cnt[st] = cnt.get(st, 0) + 1; continue
-        r, why = find_original(j, p.stem, stems)
+            rows.append((str(p), "defekt", "", "", "", "", str(e))); cnt["defekt"] = cnt.get("defekt", 0) + 1; continue
+        try:
+            mt = p.stat().st_mtime
+        except OSError:
+            mt = None
+        r, why = find_original(j, p.stem, stems, p, mt)
         if not r:
             st = "mehrdeutig" if why.startswith("mehrdeutig") else "nicht gefunden"
             rows.append((str(p), st, j["dt"] or "", "", "", "", why)); cnt[st] = cnt.get(st, 0) + 1; continue
@@ -299,19 +498,23 @@ def run_check(a, apply):
             diff = (parse(j["dt"]) - parse(orig)).total_seconds() if j["dt"] else None
         except ValueError:
             diff = None
+        note = why
         if diff is not None and abs(diff) <= a.toleranz:
             st = "ok"
-        elif not j["patch"]:
-            st = "nicht änderbar"
         else:
-            st = "korrigiert" if apply else "zu korrigieren"
+            st = ("korrigiert" if apply else "zu korrigieren") if "dto" in j["patch"] else ("ergänzt" if apply else "zu ergänzen")
             if apply:
                 try:
-                    done = patch_file(p, j["patch"], orig)
-                    logf.write(json.dumps({"run": run, "file": str(p), "new": orig, "fields": done}) + "\n"); logf.flush()
+                    if "dto" in j["patch"]:
+                        done = patch_file(p, j["patch"], orig)
+                        logf.write(json.dumps({"run": run, "file": str(p), "new": orig, "mode": "patch", "fields": done}) + "\n")
+                    else:
+                        res = rewrite_exif(p, j, dict(r, dt=orig), bdir)
+                        logf.write(json.dumps(dict(res, run=run, file=str(p), new=orig)) + "\n")
+                    logf.flush()
                 except Exception as e:  # noqa
                     st = "Fehler"; rows.append((str(p), st, j["dt"] or "", orig, "", f'{r["disk"]}:{r["rel"]}', str(e))); cnt[st] = cnt.get(st, 0) + 1; continue
-        rows.append((str(p), st, j["dt"] or "", orig, fmt_delta(diff) if diff is not None else "", f'{r["disk"]}:{r["rel"]}', ""))
+        rows.append((str(p), st, j["dt"] or "", orig, fmt_delta(diff) if diff is not None else "", f'{r["disk"]}:{r["rel"]}', note))
         cnt[st] = cnt.get(st, 0) + 1
         if k % 500 == 0:
             print(f"  {k}/{len(files)} geprüft …")
@@ -323,13 +526,13 @@ def run_check(a, apply):
     print(f"\n{len(files)} JPEG-Dateien in {root}:")
     for k2, v in sorted(cnt.items(), key=lambda x: -x[1]):
         print(f"  {k2:16s} {v}")
-    shown = [r for r in rows if r[1] in ("zu korrigieren", "korrigiert")][:8]
+    shown = [r for r in rows if r[1] in ("zu korrigieren", "korrigiert", "zu ergänzen", "ergänzt")][:8]
     for r in shown:
-        print(f"    {Path(r[0]).name}: {r[2]} → {r[3]}  ({r[4]})")
+        print(f"    {Path(r[0]).name}: {r[2] or 'keine Zeit'} → {r[3]}  {('(' + r[4] + ')') if r[4] else ''}")
     print(f"Bericht: {rep}")
-    if apply and cnt.get("korrigiert"):
-        print(f"{cnt['korrigiert']} Dateien korrigiert (Lauf {run}). Rückgängig: python3 {Path(sys.argv[0]).name} undo")
-    elif not apply and cnt.get("zu korrigieren"):
+    if apply and (cnt.get("korrigiert") or cnt.get("ergänzt")):
+        print(f"{cnt.get('korrigiert', 0) + cnt.get('ergänzt', 0)} Dateien geändert (Lauf {run}). Rückgängig: python3 {Path(sys.argv[0]).name} undo")
+    elif not apply and (cnt.get("zu korrigieren") or cnt.get("zu ergänzen")):
         print("Zum Anwenden denselben Befehl mit „fix“ statt „check“ ausführen.")
     return 0
 
@@ -344,6 +547,13 @@ def cmd_undo(a):
     n = skipped = 0
     for r in sel:
         try:
+            if r.get("mode") == "rewrite":
+                data = Path(r["file"]).read_bytes(); at, nl = r["at"], r["newlen"]
+                if data[at:at + 2] != b"\xff\xe1" or struct.unpack(">H", data[at + 2:at + 4])[0] + 2 != nl:
+                    skipped += 1; continue
+                old = Path(r["backup"]).read_bytes() if r.get("backup") else b""
+                tmp = Path(r["file"] + ".fza_tmp"); tmp.write_bytes(data[:at] + old + data[at + nl:]); os.replace(tmp, r["file"]); n += 1
+                continue
             with open(r["file"], "r+b") as f:
                 for name, pos, old in r["fields"]:
                     f.seek(pos)
@@ -364,7 +574,7 @@ def main():
     ap = argparse.ArgumentParser(description="Aufnahmezeit exportierter JPEGs anhand der RAW-Originale korrigieren")
     sub = ap.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("index", help="RAW-Dateien einer angeschlossenen Festplatte/eines Ordners einlesen"); s.add_argument("pfade", nargs="+")
-    s.add_argument("--name", help="Bezeichnung der Platte (Standard: Volume-Name)"); s.add_argument("--ext", default="arw", help="Dateiendungen, Standard: arw (z. B. arw,dng)")
+    s.add_argument("--name", help="Bezeichnung der Platte (Standard: Volume-Name)"); s.add_argument("--zeitlimit", type=int, default=0, help=argparse.SUPPRESS); s.add_argument("--ext", default="arw", help="Dateiendungen, Standard: arw (z. B. arw,dng)")
     sub.add_parser("status", help="eingelesene Festplatten anzeigen")
     for nm, h in (("check", "nur prüfen und Bericht erstellen"), ("fix", "Zeiten korrigieren")):
         s = sub.add_parser(nm, help=h); s.add_argument("ordner"); s.add_argument("--toleranz", type=int, default=1, help="Abweichung in Sekunden, die noch als gleich gilt (Standard 1)")
