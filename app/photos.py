@@ -470,7 +470,12 @@ def plan(items):
                                        "km": round((t["dist_m"] or 0) / 1000, 1), "shift_h": 0, "matched": sum(g == 0 for g in gaps),
                                        "gap_min": round(min(gaps) / 60), "dist_km": round(dk) if dk is not None else None,
                                        "score": 4 - min(gaps) / 3600 - (dk / 50 if dk is not None else 0)}
-        row["options"] = sorted(cands.values(), key=lambda x: -x["score"])[:4]
+        opts = sorted(cands.values(), key=lambda x: -x["score"])
+        row["options"] = opts[:4]
+        if not any(o["shift_h"] == 0 for o in row["options"]):          # ohne Zeitverschiebung immer mindestens eine Möglichkeit anbieten
+            z = next((o for o in opts if o["shift_h"] == 0), None)
+            if z:
+                row["options"].append(z)
         out.append(row)
     return out
 
