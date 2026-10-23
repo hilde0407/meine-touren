@@ -646,3 +646,21 @@ def test_fotos_ohne_aufnahmezeit_nicht_zugeordnet(fresh, tmp_path):
     photos.assign_all()
     r = {p["path"]: p["tour_id"] for p in db.query("SELECT path,tour_id FROM photos")}
     assert r["/a.jpg"] == "u1" and r["/b.jpg"] is None
+
+
+def test_reisen_mit_ruhetagen(fresh):
+    """Eine Reise darf Tage ohne Tour enthalten (nicht jeden Tag wird gewandert); zu Hause oder weit weg trennt sie."""
+    from app import more2
+    base = 1780000000 - 1780000000 % 86400 + 43200
+    D = 86400
+    spec = [(f"h{i}", 50.1, 8.6, base + i * 2 * D) for i in range(-30, 0)]                 # Heimat
+    spec += [("r1", -21.1, 55.4, base), ("r2", -21.2, 55.5, base + D), ("r3", -21.0, 55.6, base + 4 * D), ("r4", -21.1, 55.5, base + 5 * D)]   # Reunion mit Ruhetagen
+    spec += [("x1", 50.1, 8.6, base + 7 * D)]                                             # zu Hause
+    spec += [("a1", 47.0, 12.0, base + 20 * D), ("a2", 47.1, 12.1, base + 21 * D), ("a3", 47.1, 12.1, base + 30 * D), ("a4", 47.1, 12.1, base + 31 * D)]   # 9 Tage Pause
+    spec += [("b1", 47.0, 12.0, base + 40 * D), ("b2", 47.1, 12.1, base + 42 * D)]           # 2 Tage Pause -> eine Reise
+    for tid, la, lo, ts in spec:
+        db.execute("INSERT OR REPLACE INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,up_m,down_m,lat,lng,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)", (tid, tid, "hike", ts, ts + 3600, 8000, 3600, 300, 300, la, lo, "x"))
+    got = sorted(sorted(t["tours"]) for t in more2.build_trips())
+    assert ["r1", "r2", "r3", "r4"] in got                       # Réunion mit Ruhetagen = eine Reise
+    assert ["a1", "a2"] in got and ["a3", "a4"] in got           # mehr als 7 Tage Pause trennt
+    assert ["b1", "b2"] in got

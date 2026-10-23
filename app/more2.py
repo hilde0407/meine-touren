@@ -60,12 +60,20 @@ def build_trips():
     if len(tours) < 3:
         return []
     hl, hn = statistics.median(t["lat"] for t in tours), statistics.median(t["lng"] for t in tours)
-    away = [t for t in tours if extras._hav((hl, hn), (t["lat"], t["lng"])) > 60000]
+    far = lambda t: extras._hav((hl, hn), (t["lat"], t["lng"])) > 60000
     groups, cur = [], []
     day = lambda t: datetime.fromtimestamp(t["start_ts"], tz=TZ).date()
-    for t in away:
-        if cur and (day(t) - day(cur[-1])).days > 1:
-            groups.append(cur); cur = []
+    MAXGAP, NEAR = 7, 150000          # Pausentage ohne Tour innerhalb einer Reise; „gleiches Reiseziel“ = höchstens 150 km entfernt
+    for t in tours:
+        if not far(t):                # eine Tour zu Hause beendet die laufende Reise
+            if cur:
+                groups.append(cur); cur = []
+            continue
+        if cur:
+            gap = (day(t) - day(cur[-1])).days
+            close = min(extras._hav((c["lat"], c["lng"]), (t["lat"], t["lng"])) for c in cur) <= NEAR
+            if gap > 1 and not (gap <= MAXGAP and close):
+                groups.append(cur); cur = []
         cur.append(t)
     if cur:
         groups.append(cur)
