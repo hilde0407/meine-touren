@@ -445,10 +445,12 @@ def plan(items):
         base, overlap = match(0)
         far = bool(base) and g is not None and all((dist(by_id[i]) or 0) > 150 for i in base)
         row = {"day": day, "n": len(lst), "keys": [i["k"] for i, _ in lst], "matched": sum(base.values()), "status": "ok", "options": []}
-        if base and not overlap and not far:
+        row["single"] = len(base) == 1
+        if base and not overlap and not far and row["matched"] >= len(lst):
             out.append(row); continue
         row["status"] = "ask"
-        row["reason"] = ("überlappende Touren" if overlap else "Aufnahmeort passt nicht zur Tour" if far else "keine Tour zur Aufnahmezeit")
+        row["reason"] = ("überlappende Touren" if overlap else "Aufnahmeort passt nicht zur Tour" if far else
+                         f"{len(lst) - row['matched']} von {len(lst)} Fotos liegen außerhalb der Aufzeichnung" if base else "keine Tour zur Aufnahmezeit")
         cands = {}
         for h in range(-12, 13):
             cnt, _ = match(h * 3600)

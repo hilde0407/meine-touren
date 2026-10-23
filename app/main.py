@@ -433,7 +433,7 @@ def photo_library():
 
 @app.post("/api/photo-upload")
 async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken: str = Form(""), mtime: int = Form(0),
-                       tour: str = Form(""), shift_s: int = Form(0), lat: str = Form(""), lng: str = Form("")):
+                       tour: str = Form(""), shift_s: int = Form(0), lat: str = Form(""), lng: str = Form(""), force: str = Form("")):
     """Nimmt ein im Browser verkleinertes Foto an und schreibt die Aufnahmezeit als EXIF hinein."""
     parts = [p for p in rel.replace("\\", "/").split("/") if p not in ("", ".", "..")]
     if not parts:
@@ -443,7 +443,7 @@ async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken
         raise HTTPException(400, "Ungültiger Pfad")
     if shift_s and photos._raw_ts(taken) is not None:      # Zeitverschiebung (Kamera nicht auf Ortszeit): Aufnahmezeit korrigieren
         taken = datetime.fromtimestamp(photos._raw_ts(taken) + shift_s, photos.TZ).strftime("%Y:%m:%d %H:%M:%S")
-    if not tour and photos.only_tracked() and not photos.in_track(photos._raw_ts(taken), photos.track_windows()):
+    if not tour and not force and photos.only_tracked() and not photos.in_track(photos._raw_ts(taken), photos.track_windows()):
         return {"ok": True, "skipped": True}     # keine GPS-Strecke zu diesem Foto
     raw = await file.read()
     ts = photos._raw_ts(taken)
