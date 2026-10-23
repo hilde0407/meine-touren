@@ -117,6 +117,22 @@ def komoot_upload(gpx, sport, name):
     return sync._komoot().upload(gpx, sport, name)
 
 
+def komoot_check(tid):
+    """Fragt bei Komoot nach, ob die hochgeladene Tour wirklich dort liegt. Fehlt sie, wird der Upload-Vermerk gelöscht."""
+    from . import sync
+    old = status_of(tid).get("komoot")
+    if not old or not old["remote_id"] or old["status"] not in ("uploaded", "pending"):
+        return {"checked": False}
+    try:
+        t = sync._komoot().tour(old["remote_id"])
+    except Exception as e:  # noqa
+        if "nicht gefunden" in str(e):
+            db.execute("DELETE FROM tour_uploads WHERE tour_id=? AND portal='komoot'", (str(tid),))
+            return {"checked": True, "exists": False}
+        return {"checked": False, "msg": str(e)}
+    return {"checked": True, "exists": True, "type": t.get("status"), "name": t.get("name")}
+
+
 # ---------- gemeinsam ----------
 def status_of(tid):
     return {r["portal"]: {"status": r["status"], "remote_id": r["remote_id"], "msg": r["msg"], "ts": r["ts"]}
@@ -168,6 +184,12 @@ def upload_tour(tid, portal, gpx=None, force=False, dry_run=False):
         log(f"  {name}: {PORTALS[portal]} kennt die Tour schon")
         return "duplicate", rid, "Das Portal kennt die Tour bereits"
     record(tid, portal, "uploaded" if st == "created" else "pending", rid, "")
+    if portal == "komoot":
+        chk = komoot_check(tid)
+        if chk.get("checked") and not chk.get("exists"):
+            raise PortalError("Komoot hat den Upload angenommen, die Tour ist dort aber nicht auffindbar. Bitte erneut versuchen.")
+        if chk.get("exists"):
+            log(f"  {name}: bei Komoot geprüft ({chk.get('type')})")
     log(f"  {name}: zu {PORTALS[portal]} hochgeladen {rid}")
     return "uploaded", rid, ""
 
@@ -240,6 +262,11 @@ def api_tour_uploads(tour_id: str):
     for k, v in out.items():
         v["url"] = remote_url(k, v["remote_id"])
     return out
+
+
+@router.post("/api/tours/{tour_id}/komoot-check")
+def api_komoot_check(tour_id: str):
+    return komoot_check(tour_id)
 
 
 @router.post("/api/tours/{tour_id}/upload")

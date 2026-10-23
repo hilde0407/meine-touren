@@ -311,8 +311,12 @@ VIEWS.tours = async () => {
 const UPST = {uploaded: "hochgeladen", linked: "bei Komoot vorhanden", duplicate: "dort schon vorhanden", pending: "wird verarbeitet", error: "Fehler"};
 async function uploadChips(t) {
   const box = $("#upst"); if (!box) return;
-  const st = await api(`/api/tours/${encodeURIComponent(t.id)}/uploads`).catch(() => ({}));
+  let st = await api(`/api/tours/${encodeURIComponent(t.id)}/uploads`).catch(() => ({}));
   const nm = {komoot: "Komoot", strava: "Strava"};
+  if (st.komoot && ["uploaded", "pending"].includes(st.komoot.status)) {
+    const c = await api(`/api/tours/${encodeURIComponent(t.id)}/komoot-check`, {method: "POST"}).catch(() => ({}));
+    if (c.checked && !c.exists) { st = await api(`/api/tours/${encodeURIComponent(t.id)}/uploads`).catch(() => ({})); box.dataset.warn = "1"; box.insertAdjacentHTML("beforebegin", '<p class="bad" style="margin:6px 0">Die Tour wurde bei Komoot nicht gefunden – sie kann jetzt erneut hochgeladen werden.</p>'); }
+  }
   box.innerHTML = Object.entries(st).filter(([, v]) => v.status !== "error").map(([k, v]) => `<span class="chip">${v.url ? `<a target="_blank" href="${esc(v.url)}">${nm[k] || k} ↗</a>` : (nm[k] || k)} · ${UPST[v.status] || v.status}</span>`).join(" ");
 }
 async function uploadDialog(t) {
