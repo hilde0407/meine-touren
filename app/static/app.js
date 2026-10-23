@@ -594,7 +594,8 @@ function tourChoice(days) {  // Rückfrage: welche Tour gehört zu den Fotos die
 async function folderUpload() {
   const inp = $("#pdir"); if (!inp) return; let stop = false;
   $("#pdirb").onclick = () => inp.click(); $("#pstop").onclick = () => stop = true;
-  inp.onchange = async () => {
+  inp.onchange = async () => { try { await uploadFolder(inp); } catch (e) { console.error(e); $("#ptxt") && ($("#ptxt").textContent = "Fehler: " + e); alert("Der Foto-Upload ist abgebrochen: " + (e && e.message || e)); } };
+  const uploadFolder = async inp => {
     const files = [...inp.files].filter(f => /\.(jpe?g|png|webp)$/i.test(f.name) && !f.name.startsWith("."));
     inp.value = ""; if (!files.length) return alert("Im gewählten Ordner wurden keine JPG/PNG-Bilder gefunden.");
     const have = new Set(await api("/api/photo-library"));
@@ -602,11 +603,13 @@ async function folderUpload() {
     const pw = await api("/api/photo-windows").catch(() => ({only: false, windows: []}));
     const fresh = files.filter(f => !have.has(rel(f))); let todo = fresh, notrack = 0;
     if (pw.only && fresh.length) {
-      $("#ptxt") && ($("#ptxt").textContent = "Aufnahmezeiten werden geprüft …");
+      $("#pup2").style.display = ""; $("#ptxt").textContent = `Aufnahmezeiten von ${fresh.length} Fotos werden geprüft …`;
       const items = [];
-      for (let i = 0; i < fresh.length; i++) { const f = fresh[i], hd = f.type === "image/jpeg" ? await f.slice(0, 262144).arrayBuffer() : null, ed = hd ? exifDate(hd) : null, gp = hd ? exifGps(hd) : null, d = new Date(f.lastModified);
+      for (let i = 0; i < fresh.length; i++) { if (i % 50 === 0) { $("#ptxt").textContent = `Aufnahmezeiten werden geprüft … ${i} / ${fresh.length}`; await new Promise(r => setTimeout(r)); } const f = fresh[i], hd = f.type === "image/jpeg" ? await f.slice(0, 262144).arrayBuffer() : null, d = new Date(f.lastModified); let ed = null, gp = null;
+        try { ed = hd ? exifDate(hd) : null; } catch (e) {} try { gp = hd ? exifGps(hd) : null; } catch (e) {}
         f._t = ed || `${d.getFullYear()}:${pad2(d.getMonth() + 1)}:${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`; f._gps = gp;
         items.push({k: i, t: f._t, lat: gp ? gp[0] : null, lng: gp ? gp[1] : null}); }
+      $("#ptxt").textContent = "Passende Touren werden gesucht …";
       const plan = await api("/api/photo-plan", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({items})});
       const ask = plan.days.filter(d => d.status === "ask"), ok = new Set(plan.days.filter(d => d.status === "ok").flatMap(d => d.keys));
       const picks = ask.length ? await tourChoice(ask) : [];
@@ -616,12 +619,13 @@ async function folderUpload() {
       ask.forEach((d, i) => { const p = picks[i]; if (p && p.bytime) d.keys.forEach(k => { const f = fresh[k], t = Math.floor(new Date(+f._t.slice(0, 4), +f._t.slice(5, 7) - 1, +f._t.slice(8, 10), +f._t.slice(11, 13), +f._t.slice(14, 16), +f._t.slice(17, 19)) / 1000); if (pw.windows.some(([x, y]) => t >= x - 3600 && t <= y + 3600)) keep.add(k); }); else if (p) d.keys.forEach(k => { fresh[k]._tour = p.tour; fresh[k]._shift = p.shift_h * 3600; fresh[k]._force = !!p.force; keep.add(k); }); });
       todo = fresh.filter((f, k) => keep.has(k)); notrack = fresh.length - todo.length;
     }
-    if (!todo.length) { alert(`${files.length} Bilder gefunden – es gibt nichts zu übernehmen:\n\n• ${files.length - fresh.length} sind schon in der Bibliothek (oder wurden früher gelöscht)\n• ${notrack} haben keine passende GPS-Strecke und wurden nicht übernommen${notrack ? "\n\nTipp: Beim nächsten Mal bei der Rückfrage „Trotzdem importieren, ohne Tour“ wählen, oder in den Bildeinstellungen photo_only_tracked auf 0 setzen." : ""}`); return; }
+    $("#ptxt").textContent = "";
+    if (!todo.length) { $("#pup2").style.display = "none"; alert(`${files.length} Bilder gefunden – es gibt nichts zu übernehmen:\n\n• ${files.length - fresh.length} sind schon in der Bibliothek (oder wurden früher gelöscht)\n• ${notrack} haben keine passende GPS-Strecke und wurden nicht übernommen${notrack ? "\n\nTipp: Beim nächsten Mal bei der Rückfrage „Trotzdem importieren, ohne Tour“ wählen, oder in den Bildeinstellungen photo_only_tracked auf 0 setzen." : ""}`); return; }
     if (!confirm(`${files.length} Bilder gefunden, davon ${fresh.length} neu${notrack ? `, ${notrack} ohne passende GPS-Strecke werden übersprungen` : ""}. ${todo.length} jetzt verkleinern und hochladen?`)) return;
     $("#pup2").style.display = ""; let done = 0, fail = 0; const mx = +s_max() || 2200, q = (+s_q() || 82) / 100, t0 = Date.now(); stop = false;
     const one = async f => {
       try {
-        const head = f.type === "image/jpeg" ? exifDate(await f.slice(0, 262144).arrayBuffer()) : null;
+        let head = null; try { head = f.type === "image/jpeg" ? exifDate(await f.slice(0, 262144).arrayBuffer()) : null; } catch (e) {}
         const d = new Date(f.lastModified), taken = head || `${d.getFullYear()}:${pad2(d.getMonth() + 1)}:${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
         const bmp = await createImageBitmap(f, {imageOrientation: "from-image"}), k = Math.min(1, mx / Math.max(bmp.width, bmp.height));
         const c = document.createElement("canvas"); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k); c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height); bmp.close();
