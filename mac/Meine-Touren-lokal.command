@@ -25,7 +25,7 @@ if [ ! -x "$VENV/bin/uvicorn" ] || [ "$APP/requirements.txt" -nt "$VENV/.fertig"
   touch "$VENV/.fertig"
 fi
 mkdir -p "$DATA"
-export DATA_DIR="$DATA" TZ="${TZ:-Europe/Berlin}" APP_NAME="meine-touren-lokal" TILE_FETCH=1
+export DATA_DIR="$DATA" BACKUP_DIR="$DATA/backups-system" TZ="${TZ:-Europe/Berlin}" APP_NAME="meine-touren-lokal" TILE_FETCH=1
 echo "Meine Touren läuft auf http://127.0.0.1:$PORT   (Daten: $DATA)"
 ( sleep 3; open "http://127.0.0.1:$PORT" ) &
 cd "$APP"

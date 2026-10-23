@@ -42,7 +42,16 @@ VERSION = "1.0.16 · Meine Touren (2026-10-22)"
 
 SYSTEM_DB = DATA_DIR / "system.sqlite"          # Benutzer, Sitzungen, Freigaben
 TILE_CACHE = DATA_DIR / "tilecache"             # Kartenkacheln und Geländedaten: für alle Benutzer gemeinsam
-BACKUP_ROOT = Path(os.environ.get("BACKUP_DIR") or ("/var/backups/komoot-hub" if Path("/var/backups/komoot-hub").exists() else "/var/backups/meine-touren"))
+def _backup_root():
+    if os.environ.get("BACKUP_DIR"):
+        return Path(os.environ["BACKUP_DIR"])
+    try:
+        return Path("/var/backups/komoot-hub" if Path("/var/backups/komoot-hub").exists() else "/var/backups/meine-touren")
+    except OSError:                      # z. B. macOS ohne Zugriff
+        return DATA_DIR / "backups-system"
+
+
+BACKUP_ROOT = _backup_root()
 
 
 def user_dir(uid):
