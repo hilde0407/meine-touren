@@ -4,8 +4,14 @@ from contextlib import contextmanager
 
 from . import config
 
-_lock = threading.RLock()
+_lock = threading.RLock()          # nur zum Öffnen/Schließen von Verbindungen
 _conns = {}
+_plocks = {}                       # je Datenbank (= je Benutzer) eigene Sperre: Benutzer bremsen sich nicht gegenseitig aus
+
+
+def _plock(path):
+    with _lock:
+        return _plocks.setdefault(path, threading.RLock())
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS settings (k TEXT PRIMARY KEY, v TEXT);
@@ -43,6 +49,10 @@ def _open(path):
             return _conns[path]
         conn = sqlite3.connect(str(path), check_same_thread=False)
         conn.row_factory = sqlite3.Row
+        try:   # WAL + NORMAL: viele kleine Schreibvorgänge warten nicht mehr jeweils auf die Festplatte (deutlich schneller, auch auf Proxmox/Netzspeicher)
+            conn.execute("PRAGMA journal_mode=WAL"); conn.execute("PRAGMA synchronous=NORMAL"); conn.execute("PRAGMA busy_timeout=15000")
+        except sqlite3.Error:
+            pass
         conn.executescript(SCHEMA)
         cols = {r["name"] for r in conn.execute("PRAGMA table_info(photos)")}
         if "offset_s" not in cols:
@@ -80,8 +90,9 @@ def close_all():
 
 @contextmanager
 def cur():
-    with _lock:
-        conn = _open(config.DB_PATH)
+    path = config.DB_PATH
+    with _plock(path):
+        conn = _open(path)
         c = conn.cursor()
         try:
             yield c
