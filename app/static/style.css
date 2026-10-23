@@ -52,7 +52,7 @@ clip-path:polygon(0 0,calc(100% - 22px) 0,100% 50%,calc(100% - 22px) 100%,0 100%
 .years button{background:none;border:0;padding:6px 0 8px;margin-bottom:-1px;font:600 30px var(--d);color:var(--mut);cursor:pointer;border-bottom:4px solid transparent;letter-spacing:.2px}
 .years button:hover{color:var(--ink)}.years button.on{color:var(--ink);border-bottom-color:var(--yellow)}
 .chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1.5px solid var(--rule);background:transparent;color:var(--ink);padding:3px 13px;border-radius:99px;cursor:pointer;font:500 15px var(--b)}
-.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}.chip i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px}
+.chip.on{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}.chip i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px}
 /* Kennzahlen */
 .figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:22px 0 0}
 .fig{padding:4px 22px 4px 0;margin-right:22px;border-right:1px solid var(--rule)}.fig:last-child{border:0}
@@ -92,7 +92,7 @@ input:focus,select:focus{border-color:var(--ink);outline:0}
 .mapbox{position:relative;height:calc(100vh - 58px)}#bigmap{position:absolute;inset:0}
 .mapui{position:absolute;z-index:500;left:60px;top:12px;right:12px;display:flex;gap:8px;flex-wrap:wrap;pointer-events:none}
 .mapui>*{pointer-events:auto}.mapui .box{background:var(--forest);color:#fff;border-radius:var(--r);padding:8px 12px;display:flex;gap:10px;align-items:center;box-shadow:0 2px 10px #0004}
-.mapui select{background:#fff1;color:#fff;border-color:#fff4}.mapui select option{color:#000}.mapui .chip{color:#fff;border-color:#fff4}.mapui .chip.on{background:#fff;color:var(--forest);border-color:#fff}
+.mapui select{background:#fff1;color:#fff;border-color:#fff4}.mapui select option{color:#000}.mapui .chip{color:#fff;border-color:#fff4}.mapui .chip.on{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}
 .mapui .cnt{font:600 17px var(--d)}
 /* Fotos */
 #lb{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;z-index:1000}#lb.on{display:flex}#lbi{max-width:96vw;max-height:92vh;object-fit:contain}
