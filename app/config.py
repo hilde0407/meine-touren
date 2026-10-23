@@ -37,7 +37,7 @@ DEFAULTS = {
 }
 SECRET_KEYS = {"zepp_password", "zepp_token", "komoot_password", "strava_client_secret", "strava_tokens"}
 
-VERSION = "1.0.17 · Meine Touren (2026-10-22)"
+VERSION = "1.0.18 · Meine Touren (2026-10-22)"
 
 
 SYSTEM_DB = DATA_DIR / "system.sqlite"          # Benutzer, Sitzungen, Freigaben

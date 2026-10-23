@@ -235,6 +235,8 @@ def assign_all():
         rows.append((t["id"], t["start_ts"] - margin, end + margin))
     with db.cur() as c:
         c.executemany("UPDATE photos SET tour_id=? WHERE taken_ts BETWEEN ? AND ? AND tour_id IS NULL AND COALESCE(manual,0)=0 AND COALESCE(dated,1)=1", rows)
+    db.execute("UPDATE photos SET tour_id=(SELECT tour_id FROM photo_pref WHERE photo_pref.path=photos.path) "
+               "WHERE COALESCE(manual,0)=0 AND path IN (SELECT path FROM photo_pref) AND (SELECT tour_id FROM photo_pref WHERE photo_pref.path=photos.path) IN (SELECT id FROM tours)")
     r = db.one("SELECT COUNT(*) n FROM photos WHERE tour_id IS NOT NULL")
     log(f"Fotos: {r['n']} einer Tour zugeordnet")
 
@@ -375,7 +377,66 @@ def import_from(root=None, dst_root=None):
     return done
 
 
-def with_exif_time(jpeg, taken):
+def _hav(a, b, c, d):
+    from math import asin, cos, radians, sin, sqrt
+    p = radians(c - a); q = radians(d - b)
+    h = sin(p / 2) ** 2 + cos(radians(a)) * cos(radians(c)) * sin(q / 2) ** 2
+    return 12742 * asin(sqrt(h))
+
+
+def plan(items):
+    """Prüft vor dem Import je Aufnahmetag, welche Tour zu den Fotos passt.
+    items: [{k, t:'JJJJ:MM:TT hh:mm:ss', lat?, lng?}] -> Tage mit Status 'ok' (eindeutig) oder 'ask' (Rückfrage nötig) mit Vorschlägen.
+    Vorschläge berücksichtigen Zeitverschiebungen in ganzen Stunden (Kamera nicht auf Ortszeit) und den Aufnahmeort."""
+    from datetime import datetime
+    m = db.get_int("photo_margin_min", 30) * 60
+    tours = db.query("SELECT id,name,start_ts,end_ts,lat,lng,dist_m FROM tours WHERE start_ts IS NOT NULL")
+    days = {}
+    for it in items:
+        ts = _raw_ts(it.get("t"))
+        if ts is not None:
+            days.setdefault(it["t"][:10].replace(":", "-"), []).append((it, ts))
+    out = []
+    for day, lst in sorted(days.items()):
+        gl = [(i["lat"], i["lng"]) for i, _ in lst if i.get("lat") is not None and i.get("lng") is not None]
+        g = (sorted(x[0] for x in gl)[len(gl) // 2], sorted(x[1] for x in gl)[len(gl) // 2]) if gl else None
+
+        def dist(t):
+            return _hav(g[0], g[1], t["lat"], t["lng"]) if g and t["lat"] is not None and t["lng"] is not None else None
+
+        def match(shift):
+            cnt, overlap = {}, 0
+            for _, ts in lst:
+                hit = [t for t in tours if t["start_ts"] - m <= ts + shift <= (t["end_ts"] or t["start_ts"]) + m]
+                overlap += len(hit) > 1
+                for t in hit:
+                    cnt[t["id"]] = cnt.get(t["id"], 0) + 1
+            return cnt, overlap
+        by_id = {t["id"]: t for t in tours}
+        base, overlap = match(0)
+        far = bool(base) and g is not None and all((dist(by_id[i]) or 0) > 150 for i in base)
+        row = {"day": day, "n": len(lst), "keys": [i["k"] for i, _ in lst], "matched": sum(base.values()), "status": "ok", "options": []}
+        if base and not overlap and not far:
+            out.append(row); continue
+        row["status"] = "ask"
+        row["reason"] = ("überlappende Touren" if overlap else "Aufnahmeort passt nicht zur Tour" if far else "keine Tour zur Aufnahmezeit")
+        cands = {}
+        for h in range(-12, 13):
+            cnt, _ = match(h * 3600)
+            for tid, n in cnt.items():
+                t = by_id[tid]; dk = dist(t)
+                score = n / len(lst) * 10 - (dk / 50 if dk is not None else 0) - abs(h) * 0.05
+                if dk is not None and dk > 300:
+                    score -= 5
+                k = (tid, h)
+                cands[k] = {"tour": tid, "name": t["name"], "start": datetime.fromtimestamp(t["start_ts"], TZ).strftime("%d.%m.%Y %H:%M"),
+                            "km": round((t["dist_m"] or 0) / 1000, 1), "shift_h": h, "matched": n, "dist_km": round(dk) if dk is not None else None, "score": score}
+        row["options"] = sorted(cands.values(), key=lambda x: -x["score"])[:4]
+        out.append(row)
+    return out
+
+
+def with_exif_time(jpeg, taken, lat=None, lng=None):
     """Fügt einem (vom Browser erzeugten) JPEG die Aufnahmezeit 'JJJJ:MM:TT hh:mm:ss' als EXIF hinzu."""
     import io
     import re
@@ -385,6 +446,12 @@ def with_exif_time(jpeg, taken):
     ex = Image.Exif()
     ex[0x0132] = taken                     # DateTime
     ex.get_ifd(0x8769)[0x9003] = taken     # DateTimeOriginal
+    if lat is not None and lng is not None:
+        def dms(v):
+            v = abs(v); d = int(v); mi = int((v - d) * 60)
+            return (float(d), float(mi), round(((v - d) * 60 - mi) * 60, 3))
+        g = ex.get_ifd(0x8825)
+        g[1] = "N" if lat >= 0 else "S"; g[2] = dms(lat); g[3] = "E" if lng >= 0 else "W"; g[4] = dms(lng)
     payload = ex.tobytes()
     if not payload.startswith(b"Exif\x00\x00"):
         payload = b"Exif\x00\x00" + payload

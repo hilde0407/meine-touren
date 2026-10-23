@@ -423,7 +423,8 @@ def photo_library():
 
 
 @app.post("/api/photo-upload")
-async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken: str = Form(""), mtime: int = Form(0)):
+async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken: str = Form(""), mtime: int = Form(0),
+                       tour: str = Form(""), shift_s: int = Form(0), lat: str = Form(""), lng: str = Form("")):
     """Nimmt ein im Browser verkleinertes Foto an und schreibt die Aufnahmezeit als EXIF hinein."""
     parts = [p for p in rel.replace("\\", "/").split("/") if p not in ("", ".", "..")]
     if not parts:
@@ -431,14 +432,22 @@ async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken
     dst = (config.LIB_DIR.joinpath(*parts)).with_suffix(".jpg")
     if config.LIB_DIR.resolve() not in dst.resolve().parents:
         raise HTTPException(400, "Ungültiger Pfad")
-    if photos.only_tracked() and not photos.in_track(photos._raw_ts(taken), photos.track_windows()):
+    if shift_s and photos._raw_ts(taken) is not None:      # Zeitverschiebung (Kamera nicht auf Ortszeit): Aufnahmezeit korrigieren
+        taken = datetime.fromtimestamp(photos._raw_ts(taken) + shift_s, photos.TZ).strftime("%Y:%m:%d %H:%M:%S")
+    if not tour and photos.only_tracked() and not photos.in_track(photos._raw_ts(taken), photos.track_windows()):
         return {"ok": True, "skipped": True}     # keine GPS-Strecke zu diesem Foto
     raw = await file.read()
     ts = photos._raw_ts(taken)
     dup = photos.find_duplicate(ts, photos.fingerprint(raw), str(dst))
     if dup:
         return {"ok": True, "skipped": True, "duplicate": True}      # dasselbe Bild ist schon in der Bibliothek
-    data = photos.with_exif_time(raw, taken)
+    try:
+        la, lo = (float(lat), float(lng)) if lat != "" and lng != "" else (None, None)
+    except ValueError:
+        la = lo = None
+    data = photos.with_exif_time(raw, taken, la, lo)
+    if tour:
+        db.execute("INSERT INTO photo_pref(path,tour_id) VALUES(?,?) ON CONFLICT(path) DO UPDATE SET tour_id=excluded.tour_id", (str(dst), tour))
     dst.parent.mkdir(parents=True, exist_ok=True)
     tmp = dst.with_suffix(".tmp")
     tmp.write_bytes(data)
@@ -446,6 +455,12 @@ async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken
         os.utime(tmp, (mtime, mtime))
     tmp.replace(dst)
     return {"ok": True}
+
+
+@app.post("/api/photo-plan")
+def photo_plan(body: dict):
+    """Vor dem Import: je Aufnahmetag passende Tour(en) und Vorschläge bei Unklarheit (Zeitverschiebung, Aufnahmeort)."""
+    return {"only": photos.only_tracked(), "days": photos.plan(body.get("items") or [])}
 
 
 @app.get("/api/photo-windows")

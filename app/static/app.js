@@ -561,6 +561,30 @@ function exifDate(buf) {  // liest DateTimeOriginal aus dem JPEG-Kopf
     if ((m & 0xFF00) !== 0xFF00) break; o += 2 + len; }
   return null;
 }
+function exifGps(buf) {  // Aufnahmeort (Breite, Länge) aus dem JPEG-Kopf
+  const v = new DataView(buf); if (v.getUint16(0) !== 0xFFD8) return null; let o = 2;
+  while (o + 4 < v.byteLength) { const m = v.getUint16(o), len = v.getUint16(o + 2);
+    if (m === 0xFFE1 && v.getUint32(o + 4) === 0x45786966) { const t = o + 10, le = v.getUint16(t) === 0x4949, g16 = x => v.getUint16(x, le), g32 = x => v.getUint32(x, le);
+      const find = (off, tag) => { const n = g16(t + off); for (let i = 0; i < n; i++) { const e = t + off + 2 + i * 12; if (g16(e) === tag) return e; } return null; };
+      const eg = find(g32(t + 4), 0x8825); if (eg === null) return null; const go = g32(eg + 8);
+      const ref = tag => { const e = find(go, tag); return e === null ? null : String.fromCharCode(v.getUint8(e + 8)); };
+      const rat = tag => { const e = find(go, tag); if (e === null) return null; const p = t + g32(e + 8), r = i => g32(p + i * 8) / (g32(p + i * 8 + 4) || 1); return r(0) + r(1) / 60 + r(2) / 3600; };
+      const la = rat(2), lo = rat(4); if (la === null || lo === null || isNaN(la + lo)) return null;
+      return [ref(1) === "S" ? -la : la, ref(3) === "W" ? -lo : lo]; }
+    if ((m & 0xFF00) !== 0xFF00) break; o += 2 + len; }
+  return null;
+}
+function tourChoice(days) {  // Rückfrage: welche Tour gehört zu den Fotos dieses Tages?
+  return new Promise(res => {
+    const m = modal(`<h2>Welche Tour gehört zu diesen Fotos?</h2><p class="mut">Bei diesen Aufnahmetagen ist die Zuordnung nicht eindeutig. Vorschläge berücksichtigen Zeitverschiebungen (z. B. Kamera noch auf deutscher Zeit im Ausland) und den Aufnahmeort.</p>
+      ${days.map((d, i) => `<div class="panel" style="margin:12px 0"><h3 style="margin:0 0 6px">${d.day.split("-").reverse().join(".")} · ${d.n} Foto${d.n > 1 ? "s" : ""}</h3><div class="mut" style="margin-bottom:6px">${esc(d.reason)}</div>
+        ${d.options.map((o, j) => `<label style="display:block;margin:4px 0"><input type="radio" name="d${i}" value="${j}" ${j === 0 ? "checked" : ""}> <b>${esc(o.name)}</b> · ${o.start} Uhr · ${nf(o.km, 1)} km${o.shift_h ? ` · Zeitverschiebung ${o.shift_h > 0 ? "+" : ""}${o.shift_h} h` : ""} · ${o.matched} von ${d.n} Fotos passen${o.dist_km != null ? ` · ${o.dist_km} km vom Aufnahmeort` : ""}</label>`).join("")}
+        <label style="display:block;margin:4px 0"><input type="radio" name="d${i}" value="-1" ${d.options.length ? "" : "checked"}> Nicht importieren (keine passende Tour)</label></div>`).join("")}
+      <div class="row" style="margin-top:12px"><button class="btn" id="tcok">Übernehmen</button><button class="btn ghost" id="tccx">Abbrechen</button></div>`);
+    m.querySelector("#tccx").onclick = () => { m.remove(); res(null); };
+    m.querySelector("#tcok").onclick = () => { const out = days.map((d, i) => { const v = +m.querySelector(`input[name=d${i}]:checked`).value; return v < 0 ? null : d.options[v]; }); m.remove(); res(out); };
+  });
+}
 async function folderUpload() {
   const inp = $("#pdir"); if (!inp) return; let stop = false;
   $("#pdirb").onclick = () => inp.click(); $("#pstop").onclick = () => stop = true;
@@ -570,11 +594,21 @@ async function folderUpload() {
     const have = new Set(await api("/api/photo-library"));
     const rel = f => { const p = (f.webkitRelativePath || f.name).split("/").slice(1).join("/") || f.name, m = p.match(/^(.*)\.([^.]+)$/); const base = m ? m[1] : p, ext = m ? m[2].toLowerCase() : ""; return /^jpe?g$/.test(ext) || !ext ? base : `${base}~${ext}`; };   // andere Endungen bekommen einen eigenen Namen (keine Kollision mit gleichnamigem JPG)
     const pw = await api("/api/photo-windows").catch(() => ({only: false, windows: []}));
-    const tsOf = f => { const h = f._head ? exifDate(f._head) : null; const m = (h || "").match(/^(\d{4}):(\d\d):(\d\d) (\d\d):(\d\d):(\d\d)$/); const d = m ? new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5], +m[6]) : new Date(f.lastModified); return Math.floor(d / 1000); };
     const fresh = files.filter(f => !have.has(rel(f))); let todo = fresh, notrack = 0;
-    if (pw.only) {
-      for (const f of fresh) f._head = f.type === "image/jpeg" ? await f.slice(0, 262144).arrayBuffer() : null;
-      todo = fresh.filter(f => { const t = tsOf(f); return pw.windows.some(([a, b]) => t >= a - 3600 && t <= b + 3600); }); notrack = fresh.length - todo.length;
+    if (pw.only && fresh.length) {
+      $("#ptxt") && ($("#ptxt").textContent = "Aufnahmezeiten werden geprüft …");
+      const items = [];
+      for (let i = 0; i < fresh.length; i++) { const f = fresh[i], hd = f.type === "image/jpeg" ? await f.slice(0, 262144).arrayBuffer() : null, ed = hd ? exifDate(hd) : null, gp = hd ? exifGps(hd) : null, d = new Date(f.lastModified);
+        f._t = ed || `${d.getFullYear()}:${pad2(d.getMonth() + 1)}:${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`; f._gps = gp;
+        items.push({k: i, t: f._t, lat: gp ? gp[0] : null, lng: gp ? gp[1] : null}); }
+      const plan = await api("/api/photo-plan", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({items})});
+      const ask = plan.days.filter(d => d.status === "ask"), ok = new Set(plan.days.filter(d => d.status === "ok").flatMap(d => d.keys));
+      const picks = ask.length ? await tourChoice(ask) : [];
+      if (ask.length && picks === null) return;
+      const keep = new Set();
+      plan.days.filter(d => d.status === "ok").forEach(d => d.keys.forEach(k => { const f = fresh[k], t = Math.floor(new Date(+f._t.slice(0, 4), +f._t.slice(5, 7) - 1, +f._t.slice(8, 10), +f._t.slice(11, 13), +f._t.slice(14, 16), +f._t.slice(17, 19)) / 1000); if (pw.windows.some(([x, y]) => t >= x - 3600 && t <= y + 3600)) keep.add(k); }));
+      ask.forEach((d, i) => { const p = picks[i]; if (p) d.keys.forEach(k => { fresh[k]._tour = p.tour; fresh[k]._shift = p.shift_h * 3600; keep.add(k); }); });
+      todo = fresh.filter((f, k) => keep.has(k)); notrack = fresh.length - todo.length;
     }
     if (!confirm(`${files.length} Bilder gefunden, davon ${fresh.length} neu${notrack ? `, ${notrack} ohne passende GPS-Strecke werden übersprungen` : ""}. ${todo.length} jetzt verkleinern und hochladen?`)) return;
     $("#pup2").style.display = ""; let done = 0, fail = 0; const mx = +s_max() || 2200, q = (+s_q() || 82) / 100, t0 = Date.now(); stop = false;
@@ -585,7 +619,7 @@ async function folderUpload() {
         const bmp = await createImageBitmap(f, {imageOrientation: "from-image"}), k = Math.min(1, mx / Math.max(bmp.width, bmp.height));
         const c = document.createElement("canvas"); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k); c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height); bmp.close();
         const blob = await new Promise(r => c.toBlob(r, "image/jpeg", q)); const fd = new FormData();
-        fd.append("file", blob, "x.jpg"); fd.append("rel", rel(f)); fd.append("taken", taken); fd.append("mtime", Math.floor(f.lastModified / 1000));
+        fd.append("file", blob, "x.jpg"); fd.append("rel", rel(f)); fd.append("taken", taken); if (f._tour) { fd.append("tour", f._tour); fd.append("shift_s", f._shift || 0); } if (f._gps) { fd.append("lat", f._gps[0]); fd.append("lng", f._gps[1]); } fd.append("mtime", Math.floor(f.lastModified / 1000));
         await api("/api/photo-upload", {method: "POST", body: fd}); done++;
       } catch (e) { fail++; }
       const n = done + fail, eta = n ? Math.round((Date.now() - t0) / n * (todo.length - n) / 1000) : 0;

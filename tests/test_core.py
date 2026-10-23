@@ -728,3 +728,35 @@ def test_photo_duplicates_not_stored_twice(monkeypatch):
         photos.scan()
         names = sorted(p.name for p in (config.LIB_DIR / "dup").glob("*.jpg"))
         assert names == ["a.jpg", "c.jpg"], names
+
+
+def test_photo_plan_asks_on_time_shift(monkeypatch):
+    from app import main
+    from fastapi.testclient import TestClient
+    monkeypatch.setattr(main, "scheduler", lambda: None)
+    with TestClient(main.app) as c:
+        db.put("photo_only_tracked", "1")
+        base = photos._raw_ts("2019:07:10 09:00:00")
+        # Tour auf Réunion: lokale Startzeit 09:00 = 05:00 UTC; Kamera zeigt Ortszeit (09:00), App liest als Berlin (=07:00 UTC) -> 2 h daneben
+        db.execute("INSERT OR REPLACE INTO tours(id,name,sport,start_ts,end_ts,lat,lng) VALUES('t_re','Piton','hike',?,?,-21.2,55.5)", (base - 7200, base - 7200 + 5400))
+        db.execute("INSERT OR REPLACE INTO tours(id,name,sport,start_ts,end_ts,lat,lng) VALUES('t_de','Hunsrück','hike',?,?,49.9,7.3)", (base - 3600 * 30, base - 3600 * 28))
+        items = [{"k": i, "t": f"2019:07:10 {9 + i}:15:00", "lat": -21.1, "lng": 55.4} for i in range(3)]
+        days = c.post("/api/photo-plan", json={"items": items}).json()["days"]
+        assert len(days) == 1 and days[0]["status"] == "ask"
+        top = days[0]["options"][0]
+        assert top["tour"] == "t_re" and top["shift_h"] == -2, top
+        # eindeutiger Fall: Zeit passt direkt
+        items = [{"k": 0, "t": "2019:07:09 02:30:00"}]
+        d2 = c.post("/api/photo-plan", json={"items": items}).json()["days"]
+        assert d2[0]["status"] == "ok" or d2[0]["options"]
+        # Upload mit gewählter Tour und Verschiebung korrigiert die Aufnahmezeit
+        import io
+        from PIL import Image
+        buf = io.BytesIO(); Image.effect_noise((100, 80), 50).convert("RGB").save(buf, "JPEG")
+        r = c.post("/api/photo-upload", files={"file": ("x.jpg", buf.getvalue(), "image/jpeg")},
+                   data={"rel": "re/p1", "taken": "2019:07:10 09:15:00", "mtime": "0", "tour": "t_re", "shift_s": "-7200", "lat": "-21.1", "lng": "55.4"}).json()
+        assert r["ok"] and not r.get("skipped")
+        ts, la, lo = photos.read_meta(str(config.LIB_DIR / "re/p1.jpg"))
+        assert ts == base - 7200 + 900 and abs(la + 21.1) < 0.01 and abs(lo - 55.4) < 0.01
+        photos.scan()
+        assert db.one("SELECT tour_id FROM photos WHERE path LIKE '%re/p1.jpg'")["tour_id"] == "t_re"
