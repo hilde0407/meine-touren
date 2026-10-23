@@ -638,7 +638,22 @@ async function folderUpload() {
     };
     const queue = todo.slice(); await Promise.all([0, 1, 2].map(async () => { while (queue.length && !stop) await one(queue.shift()); }));
     $("#ptxt").textContent = `${stop ? "Abgebrochen" : "Fertig"}: ${done} hochgeladen${fail ? `, ${fail} Fehler` : ""}. Bibliothek wird eingelesen …`;
-    await api("/api/jobs/photos", {method: "POST"}).catch(() => {});
+    const sum = `${stop ? "Abgebrochen" : "Fertig"}: ${done} hochgeladen${fail ? `, ${fail} Fehler` : ""}.`;
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    let started = false;
+    for (let i = 0; i < 30 && !started; i++) {
+      try { await api("/api/jobs/photos", {method: "POST"}); started = true; } catch (e) { await sleep(2000); }
+    }
+    if (!started) { $("#ptxt").textContent = sum + " Einlesen konnte nicht gestartet werden – bitte in der Verwaltung „Fotos indizieren“ ausführen."; return; }
+    for (let i = 0; i < 900; i++) {
+      await sleep(1500);
+      if (!$("#ptxt")) return;
+      const j = await api("/api/jobs").catch(() => null);
+      if (j && j.running) { $("#ptxt").textContent = `${sum} Bibliothek wird eingelesen … ${j.progress || ""}`; continue; }
+      break;
+    }
+    $("#ptxt").textContent = `✓ ${sum} Bibliothek ist eingelesen und den Touren zugeordnet – du kannst den Dialog schließen.`;
+    if (location.hash.startsWith("#/photos") || location.hash.startsWith("#/tour")) setTimeout(() => { try { route(); } catch (e) {} }, 500);
   };
 }
 const s_max = () => document.querySelector('[data-k="photo_max_side"]')?.value, s_q = () => document.querySelector('[data-k="photo_quality"]')?.value;
