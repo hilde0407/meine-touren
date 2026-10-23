@@ -52,6 +52,8 @@ def _open(path):
             conn.execute("ALTER TABLE tours ADD COLUMN source TEXT DEFAULT 'komoot'")
         if "manual" not in cols:
             conn.execute("ALTER TABLE photos ADD COLUMN manual INTEGER DEFAULT 0")
+        if "fp" not in cols:
+            conn.execute("ALTER TABLE photos ADD COLUMN fp TEXT")            # Bild-Fingerabdruck (dHash) gegen Doppelte
         if "dated" not in cols:
             conn.execute("ALTER TABLE photos ADD COLUMN dated INTEGER")      # 1 = Aufnahmezeit aus EXIF, 0 = nur Dateidatum, NULL = noch nicht geprüft
         conn.commit()

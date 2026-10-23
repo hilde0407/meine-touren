@@ -433,7 +433,12 @@ async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken
         raise HTTPException(400, "Ungültiger Pfad")
     if photos.only_tracked() and not photos.in_track(photos._raw_ts(taken), photos.track_windows()):
         return {"ok": True, "skipped": True}     # keine GPS-Strecke zu diesem Foto
-    data = photos.with_exif_time(await file.read(), taken)
+    raw = await file.read()
+    ts = photos._raw_ts(taken)
+    dup = photos.find_duplicate(ts, photos.fingerprint(raw), str(dst))
+    if dup:
+        return {"ok": True, "skipped": True, "duplicate": True}      # dasselbe Bild ist schon in der Bibliothek
+    data = photos.with_exif_time(raw, taken)
     dst.parent.mkdir(parents=True, exist_ok=True)
     tmp = dst.with_suffix(".tmp")
     tmp.write_bytes(data)

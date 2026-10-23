@@ -700,3 +700,31 @@ def test_photo_import_only_with_track(monkeypatch):
         assert w["only"] and w["windows"]
         r = c.get("/api/photo-library").json()
         assert "mit/a" in r and "ohne/b" not in r
+
+
+def test_photo_duplicates_not_stored_twice(monkeypatch):
+    import io
+    from PIL import Image
+    from fastapi.testclient import TestClient
+    from app import main
+    monkeypatch.setattr(main, "scheduler", lambda: None)
+    im = Image.effect_noise((400, 300), 60).convert("RGB")
+    buf = io.BytesIO(); im.save(buf, "JPEG")
+    small = io.BytesIO(); im.resize((200, 150)).save(small, "JPEG")
+    other = io.BytesIO(); Image.effect_noise((400, 300), 90).convert("RGB").transpose(Image.FLIP_LEFT_RIGHT).save(other, "JPEG")
+    with TestClient(main.app) as c:
+        db.put("photo_only_tracked", "0")
+        post = lambda rel, b, taken: c.post("/api/photo-upload", files={"file": ("x.jpg", b.getvalue(), "image/jpeg")},
+                                            data={"rel": rel, "taken": taken, "mtime": "0"}).json()
+        t = "2020:05:05 12:00:00"
+        assert not post("dup/a", buf, t).get("skipped")
+        photos.scan()
+        r = post("anderer/ordner/b", small, t)               # gleiches Bild, anderer Ordner/Name/Größe
+        assert r.get("duplicate")
+        assert not post("dup/c", other, t).get("skipped")     # anderes Bild zur selben Zeit bleibt erhalten
+        # zwei identische Dateien nachträglich in der Bibliothek -> Einlesen entfernt eine
+        import shutil
+        shutil.copy(config.LIB_DIR / "dup/a.jpg", config.LIB_DIR / "dup/kopie.jpg")
+        photos.scan()
+        names = sorted(p.name for p in (config.LIB_DIR / "dup").glob("*.jpg"))
+        assert names == ["a.jpg", "c.jpg"], names

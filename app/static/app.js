@@ -568,7 +568,7 @@ async function folderUpload() {
     const files = [...inp.files].filter(f => /\.(jpe?g|png|webp)$/i.test(f.name) && !f.name.startsWith("."));
     inp.value = ""; if (!files.length) return alert("Im gewählten Ordner wurden keine JPG/PNG-Bilder gefunden.");
     const have = new Set(await api("/api/photo-library"));
-    const rel = f => (f.webkitRelativePath || f.name).split("/").slice(1).join("/").replace(/\.[^.]+$/, "") || f.name.replace(/\.[^.]+$/, "");
+    const rel = f => { const p = (f.webkitRelativePath || f.name).split("/").slice(1).join("/") || f.name, m = p.match(/^(.*)\.([^.]+)$/); const base = m ? m[1] : p, ext = m ? m[2].toLowerCase() : ""; return /^jpe?g$/.test(ext) || !ext ? base : `${base}~${ext}`; };   // andere Endungen bekommen einen eigenen Namen (keine Kollision mit gleichnamigem JPG)
     const pw = await api("/api/photo-windows").catch(() => ({only: false, windows: []}));
     const tsOf = f => { const h = f._head ? exifDate(f._head) : null; const m = (h || "").match(/^(\d{4}):(\d\d):(\d\d) (\d\d):(\d\d):(\d\d)$/); const d = m ? new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5], +m[6]) : new Date(f.lastModified); return Math.floor(d / 1000); };
     const fresh = files.filter(f => !have.has(rel(f))); let todo = fresh, notrack = 0;

@@ -71,6 +71,78 @@ def _raw_ts(raw, offs=None):
     return ts
 
 
+def fingerprint(src):
+    """64-Bit-dHash des Bildinhalts (Pfad oder Bytes) als Hex – gleiche Bilder in anderer Größe/Datei ergeben (fast) denselben Wert."""
+    import io
+    try:
+        with Image.open(io.BytesIO(src) if isinstance(src, (bytes, bytearray)) else src) as im:
+            try:
+                im.draft("L", (128, 128))
+            except Exception:  # noqa
+                pass
+            im = ImageOps.exif_transpose(im).convert("L").resize((9, 8), Image.BILINEAR)
+        px = im.tobytes()
+        bits = 0
+        for y in range(8):
+            for x in range(8):
+                bits = (bits << 1) | (px[y * 9 + x] > px[y * 9 + x + 1])
+        return "%016x" % bits
+    except Exception:  # noqa
+        return None
+
+
+def similar(a, b, tol=6):
+    return bool(a and b) and bin(int(a, 16) ^ int(b, 16)).count("1") <= tol
+
+
+def find_duplicate(ts, fp, own_path=None):
+    """Gibt den Pfad eines bereits vorhandenen Fotos mit gleicher Aufnahmezeit und gleichem Bildinhalt zurück."""
+    if ts is None or not fp:
+        return None
+    for r in db.query("SELECT path,fp FROM photos WHERE taken_ts BETWEEN ? AND ? AND fp IS NOT NULL AND COALESCE(dated,1)=1", (ts - 2, ts + 2)):
+        if r["path"] != own_path and similar(fp, r["fp"]):
+            return r["path"]
+    return None
+
+
+def _fill_fp():
+    rows = db.query("SELECT id,path FROM photos WHERE fp IS NULL")
+    upd = []
+    for i, r in enumerate(rows, 1):
+        upd.append((fingerprint(r["path"]) or "", r["id"]))      # "" = nicht lesbar, nicht erneut versuchen
+        if i % 300 == 0:
+            jobs.progress(f"Bildvergleich {i}/{len(rows)}")
+            db.executemany("UPDATE photos SET fp=? WHERE id=?", upd); upd = []
+    db.executemany("UPDATE photos SET fp=? WHERE id=?", upd)
+
+
+def dedupe():
+    """Entfernt doppelte Fotos (gleiche Aufnahmezeit + gleicher Bildinhalt); das ältere/zugeordnete bleibt."""
+    rows = db.query("SELECT id,path,taken_ts,fp,COALESCE(manual,0) m,tour_id FROM photos WHERE COALESCE(dated,1)=1 AND fp IS NOT NULL AND fp!='' ORDER BY taken_ts,id")
+    drop, keep = set(), []
+    for r in rows:
+        keep = [k for k in keep if r["taken_ts"] - k["taken_ts"] <= 2]
+        twin = next((k for k in keep if similar(r["fp"], k["fp"])), None)
+        if twin is None:
+            keep.append(r); continue
+        a, b = (twin, r) if (twin["m"], twin["id"] * -1) >= (r["m"], r["id"] * -1) else (r, twin)
+        drop.add(b["id"]); paths = b["path"]
+        if b is twin:
+            keep = [k for k in keep if k["id"] != twin["id"]] + [r]
+        try:
+            lib = config.LIB_DIR.resolve()
+            p = os.path.realpath(paths)
+            if lib in __import__("pathlib").Path(p).parents and os.path.exists(p):
+                os.remove(p)
+        except Exception:  # noqa
+            pass
+    for i in range(0, len(drop), 500):
+        db.executemany("DELETE FROM photos WHERE id=?", [(x,) for x in list(drop)[i:i + 500]])
+    if drop:
+        log(f"Fotos: {len(drop)} doppelte (gleiche Zeit und gleicher Bildinhalt) entfernt")
+    return len(drop)
+
+
 def only_tracked():
     return db.get("photo_only_tracked") not in ("0", "false", "nein")
 
@@ -118,10 +190,12 @@ def scan(root=None):
                 jobs.progress(f"{len(seen)} Fotos gesichtet")
     _store(batch)
     _check_dated()
+    _fill_fp()
     gone = [p for p in known if p not in seen]
     for i in range(0, len(gone), 500):
         db.executemany("DELETE FROM photos WHERE path=?", [(p,) for p in gone[i:i + 500]])
     log(f"Fotos: {len(seen)} im Ordner, {n_new} neu/geändert, {len(gone)} entfernt")
+    dedupe()
     assign_all()
     return n_new
 
@@ -148,7 +222,7 @@ def _store(batch):
         db.executemany(
             "INSERT INTO photos(path,mtime,size,taken_ts,lat,lng,dated) VALUES(?,?,?,?,?,?,?) "
             "ON CONFLICT(path) DO UPDATE SET mtime=excluded.mtime,size=excluded.size,dated=excluded.dated,"
-            "taken_ts=excluded.taken_ts+COALESCE(offset_s,0),lat=excluded.lat,lng=excluded.lng,tour_id=CASE WHEN manual=1 THEN tour_id ELSE NULL END", batch)
+            "fp=NULL,taken_ts=excluded.taken_ts+COALESCE(offset_s,0),lat=excluded.lat,lng=excluded.lng,tour_id=CASE WHEN manual=1 THEN tour_id ELSE NULL END", batch)
 
 
 def assign_all():
