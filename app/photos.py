@@ -375,7 +375,7 @@ def import_from(root=None, dst_root=None):
     root = root or config.PHOTOS_DIR
     dst_root = dst_root or config.LIB_DIR
     if not root.exists():
-        raise RuntimeError(f"Quellordner {root} nicht gefunden (SMB-Freigabe eingebunden?)")
+        raise RuntimeError(f"Quellordner {root} nicht gefunden. Server: SMB-Freigabe eingebunden? Mac-Version: Ordner mit der Umgebungsvariable MT_FOTOS angeben, oder in der Verwaltung „Ordner auswählen und hochladen …“ benutzen.")
     done = skipped = failed = notrack = 0
     wins = track_windows() if only_tracked() else None
     gone = {r["rel"] for r in db.query("SELECT rel FROM photo_deleted")}

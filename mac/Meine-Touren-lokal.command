@@ -25,7 +25,11 @@ if [ ! -x "$VENV/bin/uvicorn" ] || [ "$APP/requirements.txt" -nt "$VENV/.fertig"
   touch "$VENV/.fertig"
 fi
 mkdir -p "$DATA"
+# Quelle für "Fotos aus Ordner übernehmen" (Verwaltung): Standard ~/Pictures/fertige Fotos, sonst ~/Pictures; anderer Ordner: MT_FOTOS
+FOTOS="${MT_FOTOS:-$HOME/Pictures/fertige Fotos}"; [ -d "$FOTOS" ] || FOTOS="$HOME/Pictures"
+export PHOTOS_DIR="$FOTOS"
 export DATA_DIR="$DATA" BACKUP_DIR="$DATA/backups-system" TZ="${TZ:-Europe/Berlin}" APP_NAME="meine-touren-lokal" TILE_FETCH=1
+echo "Foto-Quelle: $FOTOS"
 echo "Meine Touren läuft auf http://127.0.0.1:$PORT   (Daten: $DATA)"
 ( sleep 3; open "http://127.0.0.1:$PORT" ) &
 cd "$APP"
