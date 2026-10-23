@@ -80,6 +80,9 @@ async function route() {
   if (k !== "search" && $("#gs")) $("#gs").value = "";
   $("#main").className = k === "map" ? "wide" : "";
   window.scrollTo(0, 0);
+  if (k === "tour" && /^#\/(trip|album)\//.test(window._cur || "")) window._from = window._cur;     // Rücksprung zur Reise bzw. zum Album merken
+  else if (k !== "tour" && k !== "flight") window._from = null;
+  window._cur = location.hash;
   const tok = window._rt = (window._rt || 0) + 1;      // nur die zuletzt geöffnete Seite darf Fehler anzeigen
   try {
     if (!TOURS.length) await loadTours();
@@ -340,7 +343,7 @@ async function uploadDialog(t) {
 VIEWS.tour = async id => {
   const t = BY[id]; if (!t) throw new Error("Tour nicht gefunden");
   const i = TOURS.indexOf(t), nx = TOURS[i - 1], pv = TOURS[i + 1];
-  $("#main").innerHTML = `<div class="row"><a class="back" href="#/tours">‹ Alle Touren</a><span class="sp"></span>${pv ? `<a class="btn ghost sm" href="#/tour/${pv.id}">Vorherige</a>` : ""}${nx ? `<a class="btn ghost sm" href="#/tour/${nx.id}">Nächste</a>` : ""}</div>
+  $("#main").innerHTML = `<div class="row"><a class="back" href="${window._from || "#/tours"}">${window._from ? (window._from.startsWith("#/trip/") ? "‹ Zurück zur Reise" : "‹ Zurück zum Album") : "‹ Alle Touren"}</a><span class="sp"></span>${pv ? `<a class="btn ghost sm" href="#/tour/${pv.id}">Vorherige</a>` : ""}${nx ? `<a class="btn ghost sm" href="#/tour/${nx.id}">Nächste</a>` : ""}</div>
    <div style="margin-top:18px"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span class="mut" style="margin-left:8px">${dateL(t.date)}, ${timeS(t.date)} Uhr</span>${t.g_country ? `<span class="mut" style="margin-left:8px">· ${esc([t.g_place, t.g_state, t.g_country].filter(Boolean).join(", "))}</span>` : ""}</div>
    <h1 style="font-size:clamp(34px,5vw,56px);margin:10px 0 18px"><span id="tname">${esc(t.name)}</span> <button class="btn ghost sm" id="ren" title="Tour umbenennen" style="vertical-align:middle;font-size:15px">✎ Umbenennen</button></h1>
    <div class="row" style="margin:-6px 0 14px">${t.source === "local" ? `<span class="tag" style="background:var(--yellow);color:#000" title="Diese Tour liegt nur lokal vor (Strecke als GPX im Datenordner)">lokal gespeichert</span>` : `<button class="btn ghost sm" id="ksync" title="Daten und GPS-Track neu von Komoot laden">⟳ Mit Komoot abgleichen</button>`}<button class="btn ghost sm" id="eup" title="Zu Komoot, Strava … hochladen">⬆ Hochladen</button><a class="btn ghost sm" id="egpx" href="/api/tours/${encodeURIComponent(t.id)}/gpx" title="Strecke als GPX-Datei herunterladen">⬇ GPX</a>${t.source === "local" ? `<button class="btn ghost sm" id="edel" title="Lokale Tour löschen">🗑 Löschen</button>` : ""}<button class="btn ghost sm" id="etag" title="Schlagworte / Alben">🏷 Tags</button><button class="btn ghost sm" id="eshr" title="Öffentlichen Link erzeugen">🔗 Teilen</button><button class="btn ghost sm" id="etc" title="Farbe und Breite der Strecke">🎨 Streckenfarbe</button><button class="btn ghost sm" id="efix" title="Höhen mit Geländemodell neu berechnen"></button><span id="ksm" class="mut" style="font-size:14px"></span></div><div id="upst" class="chips" style="margin:-4px 0 10px"></div><div id="tagl" class="chips" style="margin:-4px 0 12px"></div><div id="ewarn"></div>
@@ -1181,7 +1184,8 @@ async function collView(title, sub, ids, back) {
    <div class="tmap" id="cm" style="height:460px"></div><div class="sec"><h2>Fotos</h2></div><div class="thumbs" id="cph"></div><div class="sec"><h2>Touren</h2></div><div class="tl">${ts.map(tourRow).join("")}</div>`;
   map = mkMap("cm", {layers: true}); const fg = L.featureGroup().addTo(map);
   const co = await Promise.all(ts.map(t => api(`/api/tours/${t.id}/coords`).catch(() => [])));
-  ts.forEach((t, i) => { const p = cleanPts(co[i]).map(x => [x[0], x[1]]); if (p.length > 1) L.polyline(p, {color: DAYC[days.indexOf(t.date.slice(0, 10)) % DAYC.length], weight: 4}).bindTooltip(`${dateS(t.date)} · ${esc(t.name)}`).addTo(fg); });
+  ts.forEach((t, i) => { const p = cleanPts(co[i]).map(x => [x[0], x[1]]); if (p.length > 1) { const ln = L.polyline(p, {color: DAYC[days.indexOf(t.date.slice(0, 10)) % DAYC.length], weight: 5, className: "clk"}).bindTooltip(`${dateS(t.date)} · ${esc(t.name)} – anklicken für Einzelheiten`, {sticky: true}).addTo(fg);
+    ln.on("click", () => { location.hash = `#/tour/${t.id}`; }); ln.on("mouseover", () => ln.setStyle({weight: 8})); ln.on("mouseout", () => ln.setStyle({weight: 5})); } });
   if (fg.getLayers().length) map.fitBounds(fg.getBounds(), {padding: [30, 30]}); else map.setView([50, 9], 6);
   Promise.all(ts.slice(0, 14).map(t => t.photos ? api(`/api/photos?tour_id=${t.id}&limit=6`).catch(() => []) : [])).then(a => { const ph = a.flat(); if (!$("#cph")) return;
     $("#cph").innerHTML = ph.map((p, i) => `<img loading="lazy" src="/pic/${p.id}?size=300" data-i="${i}">`).join("") || '<span class="mut">Keine Fotos.</span>'; bindThumbs($("#cph"), ph); });

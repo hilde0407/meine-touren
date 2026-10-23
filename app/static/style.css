@@ -233,3 +233,5 @@ details.agrp .gt{font:600 26px var(--d)}details.agrp .gs{color:var(--mut,#667);f
 details.agrp>.gbody{margin-top:6px}
 details.agrp .panel{margin-top:6px}
 html.mob details.agrp .gs{display:none}
+
+path.clk{cursor:pointer}
