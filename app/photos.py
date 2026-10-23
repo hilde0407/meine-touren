@@ -48,6 +48,10 @@ def read_meta(path):
             offs = ex.get_ifd(0x8769).get(36880) if raw else None
     except Exception:  # noqa
         return None, None, None
+    return _raw_ts(raw, offs), lat, lng
+
+
+def _raw_ts(raw, offs=None):
     ts = None
     if raw:
         try:
@@ -64,7 +68,22 @@ def read_meta(path):
             ts = int(d.timestamp())
         except ValueError:
             pass
-    return ts, lat, lng
+    return ts
+
+
+def only_tracked():
+    return db.get("photo_only_tracked") not in ("0", "false", "nein")
+
+
+def track_windows():
+    """Zeitfenster aller Touren (mit Toleranz) – nur Fotos darin lassen sich einer Strecke zuordnen."""
+    margin = db.get_int("photo_margin_min", 30) * 60
+    return [(t["start_ts"] - margin, (t["end_ts"] or t["start_ts"]) + margin)
+            for t in db.query("SELECT start_ts,end_ts FROM tours WHERE start_ts IS NOT NULL ORDER BY start_ts")]
+
+
+def in_track(ts, wins):
+    return ts is not None and any(a <= ts <= b for a, b in wins)
 
 
 def scan(root=None):
@@ -255,7 +274,8 @@ def import_from(root=None, dst_root=None):
     dst_root = dst_root or config.LIB_DIR
     if not root.exists():
         raise RuntimeError(f"Quellordner {root} nicht gefunden (SMB-Freigabe eingebunden?)")
-    done = skipped = failed = 0
+    done = skipped = failed = notrack = 0
+    wins = track_windows() if only_tracked() else None
     for dp, dn, fn in os.walk(root):
         dn[:] = [d for d in dn if not d.startswith(".")]
         for f in sorted(fn):
@@ -267,6 +287,8 @@ def import_from(root=None, dst_root=None):
             try:
                 if dst.exists() and dst.stat().st_mtime >= os.stat(src).st_mtime - 2:
                     skipped += 1; continue
+                if wins is not None and not in_track(read_meta(src)[0], wins):
+                    notrack += 1; continue      # keine GPS-Strecke zu diesem Foto -> nicht übernehmen
                 compress(src, dst)
                 done += 1
             except Exception as e:  # noqa
@@ -275,7 +297,7 @@ def import_from(root=None, dst_root=None):
                     log(f"  {rel}: {e}")
             if (done + skipped + failed) % 50 == 0:
                 jobs.progress(f"{done} übernommen, {skipped} vorhanden, {failed} Fehler")
-    log(f"Fotos übernommen: {done} neu, {skipped} schon vorhanden, {failed} Fehler")
+    log(f"Fotos übernommen: {done} neu, {skipped} schon vorhanden, {notrack} ohne passende Strecke übersprungen, {failed} Fehler")
     return done
 
 

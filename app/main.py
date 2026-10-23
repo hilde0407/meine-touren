@@ -431,6 +431,8 @@ async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken
     dst = (config.LIB_DIR.joinpath(*parts)).with_suffix(".jpg")
     if config.LIB_DIR.resolve() not in dst.resolve().parents:
         raise HTTPException(400, "Ungültiger Pfad")
+    if photos.only_tracked() and not photos.in_track(photos._raw_ts(taken), photos.track_windows()):
+        return {"ok": True, "skipped": True}     # keine GPS-Strecke zu diesem Foto
     data = photos.with_exif_time(await file.read(), taken)
     dst.parent.mkdir(parents=True, exist_ok=True)
     tmp = dst.with_suffix(".tmp")
@@ -439,6 +441,12 @@ async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken
         os.utime(tmp, (mtime, mtime))
     tmp.replace(dst)
     return {"ok": True}
+
+
+@app.get("/api/photo-windows")
+def photo_windows():
+    """Zeitfenster der Touren (Sekunden, UTC) – der Browser lädt nur Fotos hoch, die hineinfallen."""
+    return {"only": photos.only_tracked(), "windows": photos.track_windows()}
 
 
 @app.get("/api/photo-info")

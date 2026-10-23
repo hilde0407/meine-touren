@@ -569,8 +569,14 @@ async function folderUpload() {
     inp.value = ""; if (!files.length) return alert("Im gewählten Ordner wurden keine JPG/PNG-Bilder gefunden.");
     const have = new Set(await api("/api/photo-library"));
     const rel = f => (f.webkitRelativePath || f.name).split("/").slice(1).join("/").replace(/\.[^.]+$/, "") || f.name.replace(/\.[^.]+$/, "");
-    const todo = files.filter(f => !have.has(rel(f)));
-    if (!confirm(`${files.length} Bilder gefunden, davon ${todo.length} neu. Jetzt verkleinern und hochladen?`)) return;
+    const pw = await api("/api/photo-windows").catch(() => ({only: false, windows: []}));
+    const tsOf = f => { const h = f._head ? exifDate(f._head) : null; const m = (h || "").match(/^(\d{4}):(\d\d):(\d\d) (\d\d):(\d\d):(\d\d)$/); const d = m ? new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5], +m[6]) : new Date(f.lastModified); return Math.floor(d / 1000); };
+    const fresh = files.filter(f => !have.has(rel(f))); let todo = fresh, notrack = 0;
+    if (pw.only) {
+      for (const f of fresh) f._head = f.type === "image/jpeg" ? await f.slice(0, 262144).arrayBuffer() : null;
+      todo = fresh.filter(f => { const t = tsOf(f); return pw.windows.some(([a, b]) => t >= a - 3600 && t <= b + 3600); }); notrack = fresh.length - todo.length;
+    }
+    if (!confirm(`${files.length} Bilder gefunden, davon ${fresh.length} neu${notrack ? `, ${notrack} ohne passende GPS-Strecke werden übersprungen` : ""}. ${todo.length} jetzt verkleinern und hochladen?`)) return;
     $("#pup2").style.display = ""; let done = 0, fail = 0; const mx = +s_max() || 2200, q = (+s_q() || 82) / 100, t0 = Date.now(); stop = false;
     const one = async f => {
       try {
@@ -611,7 +617,7 @@ VIEWS.admin = async (_, q) => {
     <input type="file" id="pdir" webkitdirectory multiple hidden><div id="pup2" style="display:none;margin-top:10px"><div class="stack" style="height:10px"><div id="pbar" style="width:0;background:var(--acc)"></div></div><div class="row" style="margin-top:6px"><span id="ptxt" class="mut"></span><span class="sp"></span><button class="btn alt sm" id="pstop">Abbrechen</button></div></div>
     <details><summary>Weitere Wege (SMB-Ordner, Mac-Skript)</summary><div class="row" style="margin:8px 0"><button class="btn alt sm" data-job="photo-import">Fotos aus Serverordner übernehmen</button></div>
     <p class="mut" style="font-size:13px">„Übernehmen“ verkleinert die Originale aus <code>${esc(pi.source_dir)}</code> ${pi.folder_exists ? "" : "<b class='bad'>(Ordner nicht gefunden)</b>"} für die Bildschirmdarstellung und legt sie in der Bibliothek ab. Alternativ vom Mac aus mit dem Skript <code>mac/fotos_senden.sh</code>.</p></details><p class="mut" style="font-size:13px">Beim Hochladen werden die Bilder <b>im Browser</b> für die Bildschirmdarstellung verkleinert; nur die kleinen Dateien gehen übers Netz. Originale werden nie verändert.</p>
-    <details><summary>Bildeinstellungen</summary>${f("photo_max_side", "Längste Bildseite (Pixel)", "number")}${f("photo_quality", "JPEG-Qualität (1–95)", "number")}${f("photo_margin_min", "Zuordnung: Toleranz vor/nach der Tour (Min.)", "number")}${f("camera_utc_offset_h", "Kamerazeit-Versatz zu UTC in Stunden (leer = lokale Zeit)")}${f("slideshow_seconds", "Diashow: Sekunden pro Bild", "number")}</details></div></div>
+    <details><summary>Bildeinstellungen</summary>${f("photo_max_side", "Längste Bildseite (Pixel)", "number")}${f("photo_quality", "JPEG-Qualität (1–95)", "number")}${f("photo_margin_min", "Zuordnung: Toleranz vor/nach der Tour (Min.)", "number")}${f("photo_only_tracked", "Beim Foto-Import nur Fotos mit passender GPS-Strecke übernehmen (1 = ja, 0 = alle)")}${f("camera_utc_offset_h", "Kamerazeit-Versatz zu UTC in Stunden (leer = lokale Zeit)")}${f("slideshow_seconds", "Diashow: Sekunden pro Bild", "number")}</details></div></div>
   <div class="panel" style="margin-top:40px"><h2>Portale <span class="mut" style="font:400 16px var(--b)">(Upload)</span></h2>
    <p class="mut">Touren liegen lokal vor und können einzeln (Tourdetail → „⬆ Hochladen“) oder gesammelt (Zepp/Dateien unten) zu Komoot und Strava gesendet werden – immer nur auf deinen ausdrücklichen Wunsch.</p>
    ${sres ? `<p class="${sres === "ok" ? "ok" : "bad"}"><b>${sres === "ok" ? "Strava ist verbunden ✓" : "Strava: " + esc(sres)}</b></p>` : ""}

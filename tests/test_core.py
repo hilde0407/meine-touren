@@ -138,6 +138,7 @@ def test_photos_import_compress_scan_assign():
     for i, hh in enumerate((10, 11, 12)):                       # drei synthetische Fotos mit EXIF-Aufnahmezeit
         ex = Image.Exif(); ex[0x0132] = f"2023:05:01 {hh}:00:00"; ex.get_ifd(0x8769)[0x9003] = f"2023:05:01 {hh}:00:00"
         Image.effect_noise((3000, 2000), 40).convert("RGB").save(SAMPLE / "Tour" / f"p{i}.jpg", exif=ex.tobytes(), quality=90)
+    db.put("photo_only_tracked", "0")
     assert photos.import_from() == 3
     files = list(config.LIB_DIR.rglob("*.jpg"))
     assert len(files) == 3 and all(f.stat().st_size < 3_000_000 for f in files)
@@ -256,6 +257,7 @@ def test_browser_upload_keeps_exif_time(monkeypatch):
     monkeypatch.setattr(main, "scheduler", lambda: None)
     buf = io.BytesIO(); Image.new("RGB", (200, 100), "green").save(buf, "JPEG")
     with TestClient(main.app) as c:
+        db.put("photo_only_tracked", "0")
         r = c.post("/api/photo-upload", files={"file": ("x.jpg", buf.getvalue(), "image/jpeg")},
                    data={"rel": "2021/03 - Tour/IMG_1.jpg".rsplit(".", 1)[0], "taken": "2021:03:23 16:06:33", "mtime": "1616515593"})
         assert r.json()["ok"]
@@ -677,3 +679,24 @@ def test_gipfel_ausweichweg_ohne_overpass(fresh, monkeypatch):
     monkeypatch.setattr(extras, "_ov_down", [0.0])
     assert extras.peak_name(47.1, 10.1) == "Nahe Spitze"
     assert extras.peak_name(47.2, 10.2) == "Nahe Spitze" and calls["ov"] == 1          # Overpass wird nicht jedes Mal erneut versucht
+
+
+def test_photo_import_only_with_track(monkeypatch):
+    import io
+    from PIL import Image
+    from fastapi.testclient import TestClient
+    from app import main
+    monkeypatch.setattr(main, "scheduler", lambda: None)
+    buf = io.BytesIO(); Image.new("RGB", (200, 100), "green").save(buf, "JPEG")
+    with TestClient(main.app) as c:
+        db.put("photo_only_tracked", "1")
+        ts = photos._raw_ts("2021:03:23 16:06:33")
+        db.execute("INSERT OR REPLACE INTO tours(id,name,sport,start_ts,end_ts) VALUES('t_trk','Tour','hike',?,?)", (ts - 600, ts + 600))
+        post = lambda rel, taken: c.post("/api/photo-upload", files={"file": ("x.jpg", buf.getvalue(), "image/jpeg")},
+                                         data={"rel": rel, "taken": taken, "mtime": "0"}).json()
+        assert not post("mit/a", "2021:03:23 16:06:33").get("skipped")
+        assert post("ohne/b", "2022:01:01 10:00:00").get("skipped")
+        w = c.get("/api/photo-windows").json()
+        assert w["only"] and w["windows"]
+        r = c.get("/api/photo-library").json()
+        assert "mit/a" in r and "ohne/b" not in r

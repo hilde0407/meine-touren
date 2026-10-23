@@ -8,6 +8,8 @@ Stufen (jede ist fortsetzbar, mit --zeit N werden sie nach N Sekunden sauber bee
   scan     Katalog lesen -> <ziel>/_Arbeit/<platte>/katalog.json
   score    Bewertung (Schärfe, Belichtung, Bildaufbau) der Vorschaubilder -> scores2.jsonl
   select   je Tag beste ~10 %, 5-Sterne immer, Doppelte (gleiches Motiv) raus -> auswahl.json + Kontaktbögen
+  katalog  Kopie des Lightroom-Katalogs nur mit der Auswahl (inkl. Entwicklungseinstellungen) -> <ziel>/Lightroom
+  preset   Lightroom-Exportvorgaben (.lrtemplate) -> <ziel>/Lightroom
   export   entwickeln (Kamera-WB, milde Tonwerte, Schärfen) und als JPEG nach <ziel>/Jahr/Monat/Tag
   status   Fortschritt anzeigen
 Aufruf:  python3 foto_auswahl.py <stufe> --platte "/Volumes/Daten 2022" --ziel ~/Desktop/Aktivitäten
@@ -468,6 +470,118 @@ def cmd_export(a):
     print("exportiert: %d, schon vorhanden: %d, Fehler: %d (von %d, %.0f s)" % (ok, vor, fehl, len(jobs), time.time() - t0))
 
 
+PRESET = """s = {
+	id = "%(id)s",
+	internalName = "%(title)s",
+	title = "%(title)s",
+	type = "Export",
+	version = 0,
+	value = {
+		LR_collisionHandling = "ask",
+		LR_embeddedMetadataOption = "all",
+		LR_enableHDRDisplay = false,
+		LR_exportServiceProvider = "com.adobe.ag.export.file",
+		LR_exportServiceProviderTitle = "Festplatte",
+		LR_export_bitDepth = 8,
+		LR_export_colorSpace = "sRGB",
+		LR_export_destinationPathPrefix = "",
+		LR_export_destinationType = "ask",
+		LR_export_useParentFolder = false,
+		LR_export_useSubfolder = false,
+		LR_extensionCase = "lowercase",
+		LR_format = "JPEG",
+		LR_includeFaceTaggingInIptc = false,
+		LR_includeFaceTaggingInXmp = false,
+		LR_includeFineGrainedMetadata = true,
+		LR_jpeg_limitSize = 100,
+		LR_jpeg_quality = %(q)s,
+		LR_jpeg_useLimitSize = false,
+		LR_metadata_keywordOptions = "flat",
+		LR_minimizeEmbeddedMetadata = false,
+		LR_outputSharpeningLevel = 2,
+		LR_outputSharpeningMedia = "%(media)s",
+		LR_outputSharpeningOn = true,
+		LR_reimportExportedPhoto = false,
+		LR_removeFaceMetadata = true,
+		LR_removeLocationMetadata = false,
+		LR_renamingTokensOn = false,
+		LR_selectedTextFontFamily = "Myriad Web Pro",
+		LR_selectedTextFontSize = 12,
+		LR_size_doConstrain = %(constrain)s,
+		LR_size_doNotEnlarge = true,
+		LR_size_maxHeight = %(px)s,
+		LR_size_maxWidth = %(px)s,
+		LR_size_resizeType = "longEdge",
+		LR_size_resolution = %(dpi)s,
+		LR_size_resolutionUnits = "inch",
+		LR_size_units = "pixels",
+		LR_size_userWantsConstrain = %(constrain)s,
+		LR_tokenCustomString = "",
+		LR_tokens = "{{image_name}}",
+		LR_useWatermark = false,
+	},
+}
+"""
+
+
+def cmd_preset(a):
+    """Schreibt Lightroom-Exportvorgaben (.lrtemplate) nach <ziel>/Lightroom/."""
+    import uuid
+    d = os.path.join(a.ziel, "Lightroom")
+    os.makedirs(d, exist_ok=True)
+    defs = [
+        ("Auswahl - Druck (volle Aufloesung)", dict(q="0.92", media="matte", constrain="false", px="6000", dpi="300")),
+        ("Auswahl - Bildschirm (2560 px)", dict(q="0.85", media="screen", constrain="true", px="2560", dpi="72")),
+    ]
+    for title, p in defs:
+        p = dict(p, id=str(uuid.uuid4()).upper(), title=title)
+        with open(os.path.join(d, title + ".lrtemplate"), "w", encoding="utf-8") as f:
+            f.write(PRESET % p)
+        print("geschrieben:", title)
+    print("In Lightroom: Datei > Exportieren > links in der Vorgabenliste Rechtsklick auf 'Benutzervorgaben' > Importieren ...")
+
+
+def cmd_katalog(a):
+    """Kopiert den Original-Katalog (nur lesend!) und entfernt alles außer der Auswahl -> <ziel>/Lightroom/Auswahl <platte>.lrcat"""
+    import shutil, tempfile
+    w = arbeit(a)
+    kat = jload(os.path.join(w, "katalog.json"))
+    sel = jload(os.path.join(w, "auswahl.json"))
+    if not kat or not sel:
+        sys.exit("Erst scan, score und select ausführen.")
+    drop = set(jload(os.path.join(w, "sichtung.json"), {"raus": []}).get("raus", []))
+    ids = sorted({x["id"] for x in sel["auswahl"]} - drop)
+    name = os.path.basename(a.platte.rstrip("/"))
+    out_dir = os.path.join(a.ziel, "Lightroom")
+    os.makedirs(out_dir, exist_ok=True)
+    tmp = os.path.join(tempfile.mkdtemp(), "auswahl.lrcat")
+    src = sqlite3.connect("file:%s?mode=ro&immutable=1" % os.path.abspath(kat["katalog"]), uri=True)
+    dst = sqlite3.connect(tmp)
+    src.backup(dst)
+    src.close()
+    dst.execute("create temp table keep(id integer primary key)")
+    dst.executemany("insert into keep values(?)", [(i,) for i in ids])
+    tabs = [r[0] for r in dst.execute("select name from sqlite_master where type='table' and name not like 'sqlite_%'")]
+    n0 = dst.execute("select count(*) from Adobe_images").fetchone()[0]
+    # abhängige Tabellen zuerst, dann Bilder, dann Dateien ohne Bild
+    for t in tabs:
+        cols = [r[1] for r in dst.execute("pragma table_info('%s')" % t)]
+        if t != "Adobe_images" and "image" in cols:
+            dst.execute("delete from '%s' where image not in (select id from keep)" % t)
+    dst.execute("delete from Adobe_images where id_local not in (select id from keep)")
+    dst.execute("delete from AgLibraryFile where id_local not in (select rootFile from Adobe_images)")
+    dst.execute("delete from AgLibraryFolderStackImage where image not in (select id from keep)")
+    dst.commit()
+    ok = dst.execute("pragma integrity_check").fetchone()[0]
+    n1 = dst.execute("select count(*) from Adobe_images").fetchone()[0]
+    dst.execute("vacuum")
+    dst.close()
+    ziel = os.path.join(out_dir, "Auswahl %s.lrcat" % name)
+    shutil.copyfile(tmp, ziel)
+    print("Katalog: %d -> %d Fotos (integrity_check: %s) -> %s (%.0f MB)" % (n0, n1, ok, ziel, os.path.getsize(ziel) / 1e6))
+    print("Die Fotos bleiben auf der Festplatte (Pfade unverändert) – die Platte muss zum Öffnen angeschlossen sein.")
+
+
 def cmd_status(a):
     w = arbeit(a)
     kat = jload(os.path.join(w, "katalog.json"))
@@ -480,7 +594,7 @@ def cmd_status(a):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("stufe", choices=["scan", "score", "select", "export", "status"])
+    ap.add_argument("stufe", choices=["scan", "score", "select", "export", "preset", "katalog", "status"])
     ap.add_argument("--platte", required=True, help='Mountpunkt der Festplatte, z. B. "/Volumes/Daten 2022"')
     ap.add_argument("--ziel", default=os.path.expanduser("~/Desktop/Aktivitäten"))
     ap.add_argument("--zeit", type=int, default=150, help="max. Laufzeit in Sekunden")
@@ -494,7 +608,7 @@ def main():
     ap.add_argument("--qualitaet", type=int, default=92)
     ap.add_argument("--nur", help="export: nur diese Katalog-IDs (kommagetrennt)")
     a = ap.parse_args()
-    {"scan": cmd_scan, "score": cmd_score, "select": cmd_select, "export": cmd_export, "status": cmd_status}[a.stufe](a)
+    {"scan": cmd_scan, "score": cmd_score, "select": cmd_select, "export": cmd_export, "preset": cmd_preset, "katalog": cmd_katalog, "status": cmd_status}[a.stufe](a)
 
 
 if __name__ == "__main__":

@@ -27,6 +27,7 @@ DEFAULTS = {
     "auto_sync": "1",            # 1 = täglich Komoot-Touren, Routen, Fotos aktualisieren (lädt NIE zu Komoot hoch)
     "auto_sync_hour": "3",
     "photo_margin_min": "30",
+    "photo_only_tracked": "1",
     "camera_utc_offset_h": "",   # leer = Kamera-Zeit ist lokale Zeit (Europa/Berlin)
     "slideshow_seconds": "6",
     "photo_max_side": "2200",
@@ -36,7 +37,7 @@ DEFAULTS = {
 }
 SECRET_KEYS = {"zepp_password", "zepp_token", "komoot_password", "strava_client_secret", "strava_tokens"}
 
-VERSION = "1.0.15 · Meine Touren (2026-10-22)"
+VERSION = "1.0.16 · Meine Touren (2026-10-22)"
 
 
 SYSTEM_DB = DATA_DIR / "system.sqlite"          # Benutzer, Sitzungen, Freigaben
