@@ -30,6 +30,9 @@ try:
 except ImportError:
     rawpy = None
 
+from PIL import ImageFile
+ImageFile.MAXBLOCK = 1 << 28
+Image.MAX_IMAGE_PIXELS = None
 RAWEXT = {"ARW", "DNG", "NEF", "CR2", "CR3", "RAF", "ORF", "RW2"}
 JPGEXT = {"JPG", "JPEG", "TIF", "TIFF", "PNG"}
 
