@@ -782,3 +782,12 @@ def test_photo_delete_group_and_not_reimported(monkeypatch):
         lib = c.get("/api/photo-library").json()
         assert all(f"del/f{i}" in lib for i in range(3))          # gelöschte gelten als "vorhanden" -> kein erneuter Import
         assert c.post("/api/photo-delete", json={"ids": []}).status_code == 400
+
+
+def test_photo_plan_offers_same_day_tour_outside_window():
+    base = photos._raw_ts("2023:10:02 12:04:00")
+    db.execute("INSERT OR REPLACE INTO tours(id,name,sport,start_ts,end_ts,lat,lng) VALUES('t_dil','Diller','hike',?,?,49.9,7.4)", (base, base + 3 * 3600))
+    days = photos.plan([{"k": 0, "t": "2023:10:02 11:12:00"}, {"k": 1, "t": "2023:10:02 11:32:00"}])
+    assert days[0]["status"] == "ask"
+    o = [x for x in days[0]["options"] if x["tour"] == "t_dil" and x["shift_h"] == 0]
+    assert o and o[0]["gap_min"] == 32

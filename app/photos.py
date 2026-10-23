@@ -460,6 +460,16 @@ def plan(items):
                 k = (tid, h)
                 cands[k] = {"tour": tid, "name": t["name"], "start": datetime.fromtimestamp(t["start_ts"], TZ).strftime("%d.%m.%Y %H:%M"),
                             "km": round((t["dist_m"] or 0) / 1000, 1), "shift_h": h, "matched": n, "dist_km": round(dk) if dk is not None else None, "score": score}
+        # Tour am selben Tag, aber Fotos vor Start/nach Ende der Aufzeichnung (Uhr zu spät gestartet o. ä.)
+        d0 = datetime.strptime(day, "%Y-%m-%d").replace(tzinfo=TZ).timestamp()
+        for t in tours:
+            if d0 - 3 * 3600 <= t["start_ts"] < d0 + 27 * 3600 and (t["id"], 0) not in cands:
+                gaps = [max(t["start_ts"] - ts, ts - (t["end_ts"] or t["start_ts"]), 0) for _, ts in lst]
+                dk = dist(t)
+                cands[(t["id"], 0)] = {"tour": t["id"], "name": t["name"], "start": datetime.fromtimestamp(t["start_ts"], TZ).strftime("%d.%m.%Y %H:%M"),
+                                       "km": round((t["dist_m"] or 0) / 1000, 1), "shift_h": 0, "matched": sum(g == 0 for g in gaps),
+                                       "gap_min": round(min(gaps) / 60), "dist_km": round(dk) if dk is not None else None,
+                                       "score": 4 - min(gaps) / 3600 - (dk / 50 if dk is not None else 0)}
         row["options"] = sorted(cands.values(), key=lambda x: -x["score"])[:4]
         out.append(row)
     return out
