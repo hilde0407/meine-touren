@@ -325,7 +325,7 @@ async function uploadDialog(t) {
   const m = document.createElement("div"); m.className = "modal";
   const rows = pf.portals.map(p => {
     const fromHere = p.id === "komoot" && t.source !== "local", s = st[p.id], done = s && ["uploaded", "linked", "duplicate", "pending"].includes(s.status);
-    const why = fromHere ? "Die Tour stammt von Komoot" : !p.connected ? (p.id === "strava" ? "nicht verbunden (Verwaltung → Portale)" : "Zugang fehlt (Verwaltung)") : done ? (UPST[s.status] + (s.url ? ` – <a target="_blank" href="${esc(s.url)}">öffnen</a>` : "")) : (s && s.status === "error" ? `<span class="bad">letzter Versuch: ${esc(s.msg)}</span>` : "");
+    const why = fromHere ? "Die Tour stammt von Komoot" : !p.connected ? (p.id === "strava" ? "nicht verbunden (Verwaltung → Portale)" : "Zugang fehlt (Verwaltung)") : done ? (UPST[s.status] + (s.url ? ` – <a target="_blank" href="${esc(s.url)}">öffnen</a>` : "") + (s.msg ? `<br><span style="font-size:12px">${esc(s.msg)}</span>` : "") + `<br><span style="font-size:12px">„hochgeladen“ = vom Portal angenommen und geprüft; bei Komoot erscheint die Tour in der Tourenliste bzw. unter „Geplant“.</span>`) : (s && s.status === "error" ? `<span class="bad">letzter Versuch: ${esc(s.msg)}</span>` : "");
     return `<label class="chk" style="display:block;margin:8px 0"><input type="checkbox" class="pp" value="${p.id}" ${fromHere || !p.connected || done ? "disabled" : ""}> <b>${p.name}</b> <span class="mut">${why}</span></label>`;
   }).join("");
   m.innerHTML = `<div class="mbox"><h3>Tour hochladen</h3><p class="mut">„${esc(t.name)}“ wird mit der lokal gespeicherten Strecke zu den gewählten Portalen gesendet. Es passiert nichts ohne dein Häkchen.</p>${rows}<div id="upr" style="margin-top:10px"></div>

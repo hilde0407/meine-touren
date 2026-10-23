@@ -189,6 +189,8 @@ def upload_tour(tid, portal, gpx=None, force=False, dry_run=False):
         if chk.get("checked") and not chk.get("exists"):
             raise PortalError("Komoot hat den Upload angenommen, die Tour ist dort aber nicht auffindbar. Bitte erneut versuchen.")
         if chk.get("exists"):
+            typ = {"tour_recorded": "als aufgezeichnete Tour", "tour_planned": "als geplante Route (unter „Geplant“ in Komoot)"}.get(chk.get("type"), chk.get("type") or "")
+            record(tid, portal, "uploaded", rid, f"bei Komoot geprüft: {typ}")
             log(f"  {name}: bei Komoot geprüft ({chk.get('type')})")
     log(f"  {name}: zu {PORTALS[portal]} hochgeladen {rid}")
     return "uploaded", rid, ""

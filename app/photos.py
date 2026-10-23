@@ -225,19 +225,30 @@ def _store(batch):
             "fp=NULL,taken_ts=excluded.taken_ts+COALESCE(offset_s,0),lat=excluded.lat,lng=excluded.lng,tour_id=CASE WHEN manual=1 THEN tour_id ELSE NULL END", batch)
 
 
-def assign_all():
+def _assign_sig(margin, tours):
+    import hashlib
+    h = hashlib.md5(repr((margin, [(t["id"], t["start_ts"], t["end_ts"]) for t in tours])).encode()).hexdigest()
+    r = db.one("SELECT COUNT(*) n, COALESCE(SUM(taken_ts),0) s, COALESCE(SUM(COALESCE(manual,0)),0) m, COALESCE(SUM(COALESCE(dated,1)),0) d, "
+               "COALESCE(SUM(tour_id IS NOT NULL),0) a FROM photos")
+    pr = db.one("SELECT COUNT(*) n FROM photo_pref")["n"]
+    return f"{h}|{r['n']}|{r['s']}|{r['m']}|{r['d']}|{r['a']}|{pr}"
+
+
+def assign_all(force=False):
+    """Fotos den Touren zuordnen. Ändert sich nichts (gleiche Touren, Fotos, Einstellungen), wird die teure Neuberechnung übersprungen."""
     margin = db.get_int("photo_margin_min", 30) * 60
     tours = db.query("SELECT id,start_ts,end_ts FROM tours WHERE start_ts IS NOT NULL ORDER BY start_ts")
-    db.execute("UPDATE photos SET tour_id=NULL WHERE COALESCE(manual,0)=0")
-    rows = []
-    for t in tours:
-        end = t["end_ts"] or t["start_ts"]
-        rows.append((t["id"], t["start_ts"] - margin, end + margin))
-    with db.cur() as c:
+    sig = _assign_sig(margin, tours)
+    if not force and db.get("assign_sig") == sig:
+        return
+    rows = [(t["id"], t["start_ts"] - margin, (t["end_ts"] or t["start_ts"]) + margin) for t in tours]
+    with db.cur() as c:       # alles in einer Transaktion: andere Anfragen sehen nie den Zwischenstand „nichts zugeordnet“
+        c.execute("UPDATE photos SET tour_id=NULL WHERE COALESCE(manual,0)=0")
         c.executemany("UPDATE photos SET tour_id=? WHERE taken_ts BETWEEN ? AND ? AND tour_id IS NULL AND COALESCE(manual,0)=0 AND COALESCE(dated,1)=1", rows)
-    db.execute("UPDATE photos SET tour_id=(SELECT tour_id FROM photo_pref WHERE photo_pref.path=photos.path) "
-               "WHERE COALESCE(manual,0)=0 AND path IN (SELECT path FROM photo_pref) AND (SELECT tour_id FROM photo_pref WHERE photo_pref.path=photos.path) IN (SELECT id FROM tours)")
+        c.execute("UPDATE photos SET tour_id=(SELECT tour_id FROM photo_pref WHERE photo_pref.path=photos.path) "
+                  "WHERE COALESCE(manual,0)=0 AND path IN (SELECT path FROM photo_pref) AND (SELECT tour_id FROM photo_pref WHERE photo_pref.path=photos.path) IN (SELECT id FROM tours)")
     r = db.one("SELECT COUNT(*) n FROM photos WHERE tour_id IS NOT NULL")
+    db.put("assign_sig", _assign_sig(margin, tours))
     log(f"Fotos: {r['n']} einer Tour zugeordnet")
 
 

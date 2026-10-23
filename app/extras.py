@@ -683,6 +683,18 @@ def newest_backup():
     return max(fs, key=lambda p: p.stat().st_mtime) if fs else None
 
 
+def backup_on_update():
+    """Beim ersten Start einer neuen Programmversion sofort eine Sicherung anlegen (Rückweg bei Problemen)."""
+    if db.get("last_version") == config.VERSION:
+        return None
+    nb = newest_backup()
+    p = None
+    if db.one("SELECT 1 x FROM tours LIMIT 1") and not (nb and time.time() - nb.stat().st_mtime < 600):
+        p = auto_backup(max_age_s=0)
+    db.put("last_version", config.VERSION)
+    return p
+
+
 def auto_backup(max_age_s=23 * 3600):
     """Sicherung selbst erstellen, falls die letzte älter ist (unabhängig vom Cron-Eintrag)."""
     nb = newest_backup()

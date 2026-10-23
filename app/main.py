@@ -87,6 +87,8 @@ def _user_tick(tick, now, last_day):
         if newest and str(newest) != (db.get("inbox_seen") or "") and time.time() - newest > 90:
             if jobs.start("Fotos aus Eingang", sync.import_inbox):
                 db.put("inbox_seen", str(newest))
+    if tick == 1:                          # neue Programmversion: gleich eine Sicherung anlegen
+        extras.backup_on_update()
     if tick % 10 == 1:                     # fehlt eine Sicherung der letzten 23 Stunden, selbst eine anlegen
         extras.auto_backup()
     if tick % 60 == 20:                    # stündlich: Warnungen per Webhook melden (nur wenn eingerichtet)
