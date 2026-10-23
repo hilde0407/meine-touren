@@ -372,13 +372,42 @@ def place_name(lat, lng):
         return name
 
 
+_ov_down = [0.0]          # Zeitpunkt, bis zu dem Overpass als nicht erreichbar gilt (spart minutenlange Wartezeiten)
+
+
+def nominatim_peaks(lat, lng, r=350):
+    """Ausweichweg ohne Overpass: Gipfel in der Nähe über die Nominatim-Suche (höchstens 1 Anfrage pro Sekunde)."""
+    dl, dn = 0.0065, 0.0095
+    with _geo_lock:
+        wait = 1.1 - (time.time() - _last_geo[0])
+        if wait > 0:
+            time.sleep(wait)
+        _last_geo[0] = time.time()
+        resp = requests.get("https://nominatim.openstreetmap.org/search", headers=UA, timeout=10, params={
+            "q": "peak", "viewbox": f"{lng - dn},{lat + dl},{lng + dn},{lat - dl}", "bounded": 1, "format": "jsonv2", "limit": 10, "accept-language": "de"})
+    if resp.status_code != 200:
+        raise RuntimeError(f"Nominatim: HTTP {resp.status_code}")
+    out = []
+    for e in resp.json():
+        if e.get("category") == "natural" and e.get("type") == "peak" and e.get("name"):
+            out.append({"lat": float(e["lat"]), "lon": float(e["lon"]), "tags": {"name": e["name"]}})
+    return out
+
+
 def peak_name(lat, lng):
     key = f"peak:{lat:.3f},{lng:.3f}"
     c = db.one("SELECT name FROM geocache WHERE k=?", (key,))
     if c:
         return c["name"] or None
     q = f'[out:json][timeout:10];(node(around:350,{lat},{lng})["natural"~"peak|saddle"]["name"];node(around:350,{lat},{lng})["tourism"="alpine_hut"]["name"];);out;'
-    els = overpass(q, 10)
+    els = None
+    if time.time() > _ov_down[0]:
+        try:
+            els = overpass(q, 10)
+        except RuntimeError:
+            _ov_down[0] = time.time() + 600          # 10 Minuten lang nicht erneut versuchen
+    if els is None:
+        els = [e for e in nominatim_peaks(lat, lng) if _hav((lat, lng), (e["lat"], e["lon"])) <= 350]
     els.sort(key=lambda x: _hav((lat, lng), (x["lat"], x["lon"])))
     name = (els[0].get("tags") or {}).get("name") if els else None
     db.execute("INSERT OR REPLACE INTO geocache(k,name,ts) VALUES(?,?,?)", (key, name or "", int(time.time())))

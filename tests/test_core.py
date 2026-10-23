@@ -664,3 +664,16 @@ def test_reisen_mit_ruhetagen(fresh):
     assert ["r1", "r2", "r3", "r4"] in got                       # Réunion mit Ruhetagen = eine Reise
     assert ["a1", "a2"] in got and ["a3", "a4"] in got           # mehr als 7 Tage Pause trennt
     assert ["b1", "b2"] in got
+
+
+def test_gipfel_ausweichweg_ohne_overpass(fresh, monkeypatch):
+    """Ist Overpass überlastet, werden Gipfel über Nominatim bestimmt; der Ausfall wird kurz gemerkt."""
+    from app import extras
+    calls = {"ov": 0}
+    def ov(q, t=12):
+        calls["ov"] += 1; raise RuntimeError("Overpass: ReadTimeout")
+    monkeypatch.setattr(extras, "overpass", ov)
+    monkeypatch.setattr(extras, "nominatim_peaks", lambda la, ln, r=350: [{"lat": la + 0.001, "lon": ln, "tags": {"name": "Nahe Spitze"}}, {"lat": la + 0.003, "lon": ln, "tags": {"name": "Ferne Spitze"}}])
+    monkeypatch.setattr(extras, "_ov_down", [0.0])
+    assert extras.peak_name(47.1, 10.1) == "Nahe Spitze"
+    assert extras.peak_name(47.2, 10.2) == "Nahe Spitze" and calls["ov"] == 1          # Overpass wird nicht jedes Mal erneut versucht

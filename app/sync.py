@@ -366,7 +366,7 @@ def refresh_all(with_routes=True, with_photos=True):
         from . import extras
         extras.geo_fill()
         from . import more
-        more.peaks_fill(limit=25)
+        more.peaks_fill(limit=100)
     except Exception as e:  # noqa
         log(f"Regionen: {e}")
     check_zepp()
