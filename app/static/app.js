@@ -499,7 +499,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
   const paint = () => {
     document.querySelectorAll(BOX + " img[data-i]").forEach(im => im.classList.toggle("sel", sel.has(ph[+im.dataset.i].id)));
     tb.style.display = on ? "" : "none";
-    tb.innerHTML = `<b>${sel.size}</b> ausgewählt <button class="btn sm" data-a="assign" ${sel.size ? "" : "disabled"}>${o.tour ? "Andere Tour …" : "Einer Tour zuordnen …"}</button>${o.tour ? `<button class="btn alt sm" data-a="rm" ${sel.size ? "" : "disabled"}>Aus dieser Tour entfernen</button>` : `<button class="btn alt sm" data-a="un" ${sel.size ? "" : "disabled"}>Zuordnung lösen</button>`}<button class="btn alt sm" data-a="off">Fertig</button>`;
+    tb.innerHTML = `<b>${sel.size}</b> ausgewählt <button class="btn sm" data-a="assign" ${sel.size ? "" : "disabled"}>${o.tour ? "Andere Tour …" : "Einer Tour zuordnen …"}</button>${o.tour ? `<button class="btn alt sm" data-a="rm" ${sel.size ? "" : "disabled"}>Aus dieser Tour entfernen</button>` : `<button class="btn alt sm" data-a="un" ${sel.size ? "" : "disabled"}>Zuordnung lösen</button>`}<button class="btn alt sm" data-a="del" ${sel.size ? "" : "disabled"} style="color:#c0392b;border-color:#c0392b">Löschen …</button><button class="btn alt sm" data-a="off">Fertig</button>`;
     btn.classList.toggle("on", on);
   };
   btn.onclick = () => { on = !on; if (!on) sel.clear(); document.body.classList.toggle("selmode", on); paint(); };
@@ -518,6 +518,11 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
     const a = e.target.dataset.a; if (!a) return;
     if (a === "off") return btn.click();
     const ids = [...sel];
+    if (a === "del") {
+      if (!confirm(`${ids.length} Foto(s) endgültig löschen?\n\nGelöscht wird die Kopie in Meine Touren (nicht dein Original auf dem Rechner). Die Fotos werden beim nächsten Import nicht erneut übernommen.`)) return;
+      await api("/api/photo-delete", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({ids})});
+      PHINFO = await api("/api/photo-info").catch(() => PHINFO); return route();
+    }
     if (a === "rm") {
       if (!confirm(`${ids.length} Foto(s) aus dieser Tour entfernen?\n\nSie werden keiner Tour mehr zugeordnet (auch nicht automatisch) und erscheinen unter „Fotos“ bei „Ohne Tour“.`)) return;
       await api("/api/photo-unassign", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({ids, exclude: true})}); return route();

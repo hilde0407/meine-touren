@@ -415,11 +415,20 @@ def api_photo_unassign(body: dict):
     return {"ok": True}
 
 
+@app.post("/api/photo-delete")
+def api_photo_delete(body: dict):
+    ids = body.get("ids") or []
+    if not ids:
+        raise HTTPException(400, "Keine Fotos gewählt")
+    return {"ok": True, "deleted": photos.delete_photos(ids)}
+
+
 @app.get("/api/photo-library")
 def photo_library():
-    """Relative Pfade (ohne Endung) aller Bilder der Bibliothek – damit der Browser Vorhandenes überspringt."""
+    """Relative Pfade (ohne Endung) aller Bilder der Bibliothek – damit der Browser Vorhandenes überspringt (auch gelöschte)."""
     root = config.LIB_DIR
-    return [str(p.relative_to(root).with_suffix("")) for p in root.rglob("*.jpg")] if root.exists() else []
+    have = [str(p.relative_to(root).with_suffix("")) for p in root.rglob("*.jpg")] if root.exists() else []
+    return have + [r["rel"] for r in db.query("SELECT rel FROM photo_deleted")]
 
 
 @app.post("/api/photo-upload")

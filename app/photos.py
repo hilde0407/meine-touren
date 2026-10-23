@@ -241,6 +241,32 @@ def assign_all():
     log(f"Fotos: {r['n']} einer Tour zugeordnet")
 
 
+def delete_photos(ids):
+    """Löscht Fotos aus der Bibliothek (nur die App-Kopie im Fotoordner – nie Originale) und merkt sie, damit sie beim nächsten
+    Import nicht wieder auftauchen."""
+    ids = [int(i) for i in ids]
+    lib = config.LIB_DIR.resolve()
+    n = files = 0
+    for i in range(0, len(ids), 400):
+        chunk = ids[i:i + 400]
+        rows = db.query("SELECT id,path FROM photos WHERE id IN (%s)" % ",".join("?" * len(chunk)), tuple(chunk))
+        for r in rows:
+            try:
+                f = os.path.realpath(r["path"])
+                if lib in __import__("pathlib").Path(f).parents:
+                    rel = os.path.splitext(os.path.relpath(f, lib))[0].replace(os.sep, "/")
+                    db.execute("INSERT OR REPLACE INTO photo_deleted(rel,ts) VALUES(?,?)", (rel, int(time.time())))
+                    if os.path.exists(f):
+                        os.remove(f); files += 1
+            except OSError:
+                pass
+            db.execute("DELETE FROM photo_pref WHERE path=?", (r["path"],))
+            db.execute("DELETE FROM photos WHERE id=?", (r["id"],))
+            n += 1
+    log(f"Fotos: {n} gelöscht")
+    return n
+
+
 def assign_manual(ids, tour_id, shift=False, minutes_after_start=0, scope="selected"):
     """Fotos fest einer Tour zuordnen. Optional: Zeitversatz aus dem ersten (frühesten) gewählten Foto bestimmen
     (Foto = Tourstart + Minuten) und auf selected / day (gleicher Aufnahmetag) / unassigned anwenden."""
@@ -352,6 +378,7 @@ def import_from(root=None, dst_root=None):
         raise RuntimeError(f"Quellordner {root} nicht gefunden (SMB-Freigabe eingebunden?)")
     done = skipped = failed = notrack = 0
     wins = track_windows() if only_tracked() else None
+    gone = {r["rel"] for r in db.query("SELECT rel FROM photo_deleted")}
     for dp, dn, fn in os.walk(root):
         dn[:] = [d for d in dn if not d.startswith(".")]
         for f in sorted(fn):
@@ -360,6 +387,8 @@ def import_from(root=None, dst_root=None):
             src = os.path.join(dp, f)
             rel = os.path.relpath(src, root)
             dst = dst_root / (os.path.splitext(rel)[0] + ".jpg")
+            if os.path.splitext(rel)[0].replace(os.sep, "/") in gone:
+                skipped += 1; continue
             try:
                 if dst.exists() and dst.stat().st_mtime >= os.stat(src).st_mtime - 2:
                     skipped += 1; continue
