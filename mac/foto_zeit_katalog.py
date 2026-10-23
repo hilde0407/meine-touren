@@ -21,6 +21,7 @@ except ImportError:
     sys.exit("Pillow fehlt:  pip3 install pillow")
 
 LOG = os.path.expanduser("~/.foto_zeit_katalog_log.jsonl")
+T_ENDE = None
 
 
 def katalog_zeiten(platte):
@@ -116,8 +117,14 @@ def main():
     ap.add_argument("--katalog", help="Festplatte (Mountpunkt) mit dem Lightroom-Katalog, z. B. /Volumes/Daten 2022")
     ap.add_argument("--fotos", default=os.path.expanduser("~/Pictures/fertige Fotos"))
     ap.add_argument("--anwenden", action="store_true", help="wirklich schreiben (sonst nur Bericht)")
+    ap.add_argument("--log", help="Protokolldatei (Standard: ~/.foto_zeit_katalog_log.jsonl)")
+    ap.add_argument("--zeit", type=int, default=0, help="nach N Sekunden sauber beenden (erneut starten setzt fort)")
     ap.add_argument("--undo", action="store_true", help="letzten Lauf zurücknehmen")
     a = ap.parse_args()
+    global LOG
+    if a.log:
+        LOG = a.log
+    t_start = time.time()
     if a.undo:
         if not os.path.exists(LOG):
             sys.exit("Kein Protokoll vorhanden.")
@@ -140,7 +147,7 @@ def main():
     if not a.katalog:
         sys.exit("--katalog angeben")
     zeiten = katalog_zeiten(a.katalog)
-    lauf = time.strftime("%Y%m%d-%H%M%S")
+    lauf = os.environ.get("FZK_LAUF") or time.strftime("%Y%m%d-%H%M%S")
     stat = collections.Counter(); offen = []
     log = open(LOG, "a", encoding="utf-8") if a.anwenden else None
     for dp, dn, fn in os.walk(a.fotos):
@@ -149,6 +156,9 @@ def main():
             if f.startswith(".") or not f.lower().endswith((".jpg", ".jpeg")):
                 continue
             p = os.path.join(dp, f)
+            if a.zeit and time.time() - t_start > a.zeit:
+                stat["zeitlimit erreicht – bitte erneut starten"] += 1
+                break
             try:
                 b = open(p, "rb").read(262144)
                 segs = segmente(b)
