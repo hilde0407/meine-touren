@@ -26,6 +26,9 @@ for i, d in enumerate(['2024-06-01--07-00-00', '2024-07-14--09-30-00', '2025-05-
     t, _ = tracks.adopt(gpx(d), f'w{{i}}.gpx', name=f'Runde {{i}}')
 db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,up_m,down_m,lat,lng,status,source) VALUES('k1','Komoot-Tour','touringbicycle',1720000000,1720007200,40000,7200,300,300,48,8,'tour_recorded','komoot')")
 db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,up_m,down_m,lat,lng,status,source) VALUES('k2','Wanderung 01.03.2020 13:18','hike',1583000000,1583000060,51,60,0,0,48,8,'tour_recorded','komoot')")
+lt = db.query("SELECT id,start_ts FROM tours WHERE source='local' ORDER BY start_ts LIMIT 1")[0]
+for j in range(6):   # 6 Fotos am selben Tag (Dateien fehlen absichtlich – es geht nur um die Auswahl)
+    db.execute("INSERT INTO photos(path,taken_ts,dated,tour_id) VALUES(?,?,1,?)", (f"/x/p{{j}}.jpg", lt["start_ts"] + 300 * j, lt["id"]))
 print(db.query("SELECT id FROM tours"))
 """
     out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=ROOT, env=dict(os.environ, DATA_DIR=str(data)))
@@ -114,4 +117,24 @@ def test_interactions(page):
     page.click("#impl [data-idel]"); page.wait_for_selector("#dok"); page.click("#dx")
     page.evaluate("location.hash = '#/admin'"); page.wait_for_timeout(1500)
     assert "Zustand" in page.inner_text("#hlt")
+    assert not page.errors, page.errors
+
+
+def test_photo_selection_from_clicked(page):
+    page.errors.clear()
+    page.evaluate("location.hash = '#/tour/' + TOURS.filter(t => t.source === 'local').sort((a, b) => a.start_ts - b.start_ts)[0].id")
+    page.wait_for_timeout(1500)
+    page.click("button:has-text('Fotos bearbeiten')")
+    imgs = page.locator(".thumbs img[data-i]")
+    assert imgs.count() == 6
+    cap = lambda sel: page.evaluate(f"[...document.querySelectorAll('.thumbs {sel}')].map(i => i.parentElement.querySelector('.cap').textContent.slice(-5)).sort()")
+    clicked = page.evaluate("document.querySelectorAll('.thumbs img[data-i]')[2].parentElement.querySelector('.cap').textContent.slice(-5)")
+    alle = cap("img[data-i]")
+    imgs.nth(2).click(force=True)
+    assert cap("img.sel") == [x for x in alle if x >= clicked]
+    page.click("[data-a=off]"); page.click("button:has-text('Fotos bearbeiten')")
+    imgs.nth(2).click(force=True, modifiers=["Shift"])
+    assert cap("img.sel") == [x for x in alle if x <= clicked]
+    imgs.nth(0).click(force=True)                      # danach: einzelnes Foto umschalten
+    assert len(cap("img.sel")) in (len([x for x in alle if x <= clicked]) - 1, len([x for x in alle if x <= clicked]) + 1)
     assert not page.errors, page.errors

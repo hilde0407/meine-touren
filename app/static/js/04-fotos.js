@@ -85,7 +85,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
   const btn = document.createElement("button");
   btn.className = "btn ghost";
   btn.textContent = "Fotos zuordnen";
-  btn.title = "Fotos auswählen und einer Tour zuordnen";
+  btn.title = "Fotos auswählen: Klick auf ein Foto wählt dieses und alle späteren des Tages, mit Umschalttaste dieses und alle früheren; danach einzelne Fotos per Klick an- oder abwählen";
   $(o.anchor).after(btn);
   if (o.tour) {
     btn.textContent = "Fotos bearbeiten";
@@ -94,7 +94,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
   const paint = () => {
     document.querySelectorAll(BOX + " img[data-i]").forEach(im => im.classList.toggle("sel", sel.has(ph[+im.dataset.i].id)));
     tb.style.display = on ? "" : "none";
-    tb.innerHTML = `<b>${sel.size}</b> ausgewählt <button class="btn sm" data-a="assign" ${sel.size ? "" : "disabled"}>${o.tour ? "Andere Tour …" : "Einer Tour zuordnen …"}</button>${o.tour ? `<button class="btn alt sm" data-a="rm" ${sel.size ? "" : "disabled"}>Aus dieser Tour entfernen</button>` : `<button class="btn alt sm" data-a="un" ${sel.size ? "" : "disabled"}>Zuordnung lösen</button>`}<button class="btn alt sm" data-a="del" ${sel.size ? "" : "disabled"} style="color:#c0392b;border-color:#c0392b">Löschen …</button><button class="btn alt sm" data-a="off">Fertig</button>`;
+    tb.innerHTML = `<b>${sel.size}</b> ausgewählt ${sel.size ? "" : `<span class="mut" style="font-size:13px">Foto anklicken: dieses und alle späteren des Tages · mit ⇧ Umschalttaste: dieses und alle früheren</span> `}<button class="btn sm" data-a="assign" ${sel.size ? "" : "disabled"}>${o.tour ? "Andere Tour …" : "Einer Tour zuordnen …"}</button>${o.tour ? `<button class="btn alt sm" data-a="rm" ${sel.size ? "" : "disabled"}>Aus dieser Tour entfernen</button>` : `<button class="btn alt sm" data-a="un" ${sel.size ? "" : "disabled"}>Zuordnung lösen</button>`}<button class="btn alt sm" data-a="del" ${sel.size ? "" : "disabled"} style="color:#c0392b;border-color:#c0392b">Löschen …</button><button class="btn alt sm" data-a="off">Fertig</button>`;
     btn.classList.toggle("on", on);
   };
   btn.onclick = () => {
@@ -114,13 +114,16 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
         const p0 = ph[+im.dataset.i],
           id = p0.id;
         if (!sel.size) {
+          // erstes Foto: alle Fotos desselben Tages ab diesem (einschließlich) vorauswählen – mit Umschalttaste alle bis zu diesem
           const dk = x => new Date(x.taken_ts * 1000).toLocaleDateString("de-DE"),
-            k = dk(p0);
-          ph.forEach(x => {
-            if (dk(x) === k) sel.add(x.id);
+            k = dk(p0),
+            i0 = +im.dataset.i,
+            after = (x, i) => x.taken_ts > p0.taken_ts || (x.taken_ts === p0.taken_ts && i >= i0),
+            before = (x, i) => x.taken_ts < p0.taken_ts || (x.taken_ts === p0.taken_ts && i <= i0);
+          ph.forEach((x, i) => {
+            if (dk(x) === k && (e.shiftKey ? before(x, i) : after(x, i))) sel.add(x.id);
           });
-        } // erstes Foto: alle vom selben Tag vorauswählen
-        else sel.has(id) ? sel.delete(id) : sel.add(id);
+        } else sel.has(id) ? sel.delete(id) : sel.add(id);
         paint();
         return;
       }
