@@ -110,6 +110,18 @@ class Komoot:
         if r.status_code not in (200, 204):
             raise KomootError(f"Umbenennen bei Komoot fehlgeschlagen (HTTP {r.status_code}): {r.text[:160]}")
 
+    def delete(self, tour_id):
+        """Tour bei Komoot endgültig löschen."""
+        r = requests.delete(f"{BASE}/v007/tours/{tour_id}", auth=self._auth(), timeout=30)
+        if r.status_code == 401:
+            self.token = None
+            r = requests.delete(f"{BASE}/v007/tours/{tour_id}", auth=self._auth(), timeout=30)
+        if r.status_code == 404:
+            return False                      # dort schon nicht (mehr) vorhanden
+        if r.status_code not in (200, 202, 204):
+            raise KomootError(f"Löschen bei Komoot fehlgeschlagen (HTTP {r.status_code}): {r.text[:160]}")
+        return True
+
     def upload(self, gpx_text, sport, name):
         r = requests.post(f"{BASE}/v007/tours/", auth=self._auth(), timeout=120,
                           params={"data_type": "gpx", "sport": sport, "name": name},

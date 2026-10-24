@@ -153,3 +153,27 @@ def test_implausible_hide_and_sport_override():
     assert not db.one("SELECT 1 x FROM tours WHERE id='z'") and db.one("SELECT sport FROM tours WHERE id='k2'")["sport"] == "skitour"
     assert c.post("/api/tours/z/hide", json={"hide": False}).status_code == 200
     assert db.one("SELECT dist_m FROM tours WHERE id='z'")["dist_m"] == 50
+
+
+def test_delete_tour_local_and_komoot(monkeypatch):
+    from fastapi.testclient import TestClient
+    from app import main, portals
+    deleted = []
+    class K:
+        def delete(self, i): deleted.append(i); return True
+        def tours(self):
+            return [{"id": "k1", "name": "x", "sport": "hike", "start_ts": 1583000000, "end_ts": 1583000060, "dist_m": 50, "dur_s": 60, "up_m": 0, "down_m": 0, "lat": 47, "lng": 11, "status": "tour_recorded"}]
+    monkeypatch.setattr(sync, "_komoot", lambda *a, **k: K())
+    c = TestClient(main.app)
+    sync.refresh_tours(K())
+    assert db.one("SELECT 1 x FROM tours WHERE id='k1'")
+    # nur hier löschen: kommt beim Abgleich nicht wieder
+    assert c.post("/api/tours/k1/delete", json={"komoot": False}).json()["ok"] and not deleted
+    sync.refresh_tours(K())
+    assert not db.one("SELECT 1 x FROM tours WHERE id='k1'")
+    assert c.get("/api/check").json()["hidden"] == []
+    # lokale, zu Komoot hochgeladene Tour: auch dort löschen
+    _tour("g1", "Lokal", 1600000000)
+    portals.record("g1", "komoot", "uploaded", "999")
+    r = c.post("/api/tours/g1/delete", json={"komoot": True}).json()
+    assert deleted == ["999"] and "gelöscht" in r["komoot"] and not db.one("SELECT 1 x FROM tours WHERE id='g1'")

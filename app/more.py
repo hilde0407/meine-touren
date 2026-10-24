@@ -57,7 +57,8 @@ def implausible(tours):
         if why:
             why = re.sub(r"(\d)\.(\d)", r"\1,\2", why)
             out.append({"id": t["id"], "name": t["name"], "sport": t["sport"], "start_ts": t["start_ts"], "km": round(d / 1000, 2),
-                        "kmh": round(v, 1), "why": why, "suggest": sug, "local": t.get("source") == "local"})
+                        "kmh": round(v, 1), "why": why, "suggest": sug, "local": t.get("source") == "local",
+                        "on_komoot": t.get("source") != "local" or bool(db.one("SELECT 1 x FROM tour_uploads WHERE tour_id=? AND portal='komoot' AND remote_id!=''", (t["id"],)))})
     return out
 
 
@@ -96,6 +97,45 @@ def api_hide(tour_id: str, body: dict):
     return {"ok": True}
 
 
+def delete_tour(tid, on_komoot=False):
+    """Tour löschen. on_komoot: auch die zugehörige Komoot-Tour endgültig löschen (die Tour selbst bzw. die hochgeladene Kopie).
+    Eine Komoot-Tour, die nur hier gelöscht wird, wird gemerkt, damit sie beim nächsten Abgleich nicht wiederkommt."""
+    from . import photos, portals, sync, tracks
+    t = db.one("SELECT * FROM tours WHERE id=?", (tid,))
+    if not t:
+        raise HTTPException(404, "Tour nicht gefunden")
+    local = t.get("source") == "local"
+    up = portals.status_of(tid).get("komoot") or {}
+    kid = (up.get("remote_id") if local else tid) or ""
+    msg = ""
+    if on_komoot and kid:
+        gone = sync._komoot().delete(kid)
+        msg = "bei Komoot gelöscht" if gone else "bei Komoot nicht (mehr) vorhanden"
+    if local:
+        tracks.delete_local(tid)
+    else:
+        if not (on_komoot and kid):           # nur hier gelöscht: beim nächsten Abgleich nicht wieder anlegen
+            db.execute("INSERT OR REPLACE INTO tour_hidden(id,js,ts) VALUES(?,?,?)", (tid, json.dumps({**t, "deleted": 1}), int(time.time())))
+        for tb in ("tours", "tour_tags", "tour_notes", "tour_geo", "tour_peak", "tour_names", "elev_fix", "weather", "tour_sport"):
+            db.execute(f"DELETE FROM {tb} WHERE id=?", (tid,))
+        db.execute("DELETE FROM tour_uploads WHERE tour_id=?", (tid,))
+        db.execute("UPDATE photos SET tour_id=NULL WHERE tour_id=? AND COALESCE(manual,0)=0", (tid,))
+        for p in (routes.path_full(tid), routes.path_small(tid)):
+            p.unlink(missing_ok=True)
+    photos.assign_all()
+    return {"ok": True, "komoot": msg}
+
+
+@router.post("/api/tours/{tour_id}/delete")
+def api_delete_tour(tour_id: str, body: dict):
+    try:
+        return delete_tour(tour_id, bool(body.get("komoot")))
+    except HTTPException:
+        raise
+    except Exception as e:  # noqa
+        raise HTTPException(502, str(e))
+
+
 @router.get("/api/check")
 def api_check():
     tours = db.query("SELECT t.*, (SELECT COUNT(*) FROM photos p WHERE p.tour_id=t.id) AS photos, "
@@ -107,7 +147,7 @@ def api_check():
         "default_names": [brief(t) for t in tours if DEFAULT_NAME.search(t["name"] or "")],
         "suspicious": [brief(t) for t in tours if not t["fixed"] and elev.suspicious(t)],
         "implausible": implausible(tours),
-        "hidden": [{"id": r["id"], **{k: v for k, v in json.loads(r["js"]).items() if k in ("name", "sport", "start_ts", "dist_m")}} for r in db.query("SELECT id,js FROM tour_hidden ORDER BY ts DESC")],
+        "hidden": [{"id": r["id"], **{k: v for k, v in json.loads(r["js"]).items() if k in ("name", "sport", "start_ts", "dist_m")}} for r in db.query("SELECT id,js FROM tour_hidden ORDER BY ts DESC") if not json.loads(r["js"]).get("deleted")],
         "gaps": {"no_route": sum(1 for t in tours if not routes.path_full(t["id"]).exists()),
                  "no_region": sum(1 for t in tours if not t["has_geo"] and t["lat"] is not None),
                  "no_photos": sum(1 for t in tours if not t["photos"]),
