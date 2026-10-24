@@ -102,4 +102,4 @@ Die exportierten Fotos aus `Aktivitäten/` lassen sich über den Eingangsordner 
 
 ### Verwaltung → Zustand
 
-Die Verwaltung zeigt oben eine Zustandsprüfung (Komoot-Zugang, Backup, Datenbankgröße, freier Speicher, Touren ohne Strecke, Fotos ohne Tour, doppelte Tournamen) und weist auf eine neuere Version auf GitHub hin.
+Die Verwaltung zeigt oben eine Zustandsprüfung (Komoot-Zugang, Backup, Datenbankgröße, freier Speicher, Touren ohne Strecke, Fotos ohne Tour) und weist auf eine neuere Version auf GitHub hin.

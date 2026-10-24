@@ -65,12 +65,10 @@ def health():
     r = db.one("SELECT COUNT(*) n, SUM(tour_id IS NULL) o FROM photos")
     o = r["o"] or 0
     add("Fotos ohne Tour", True, f"{o} von {r['n'] or 0}", "")
-    d = duplicate_names()
-    add("Doppelte Tournamen", not d, f"{len(d)} Namen" if d else "keine", "" if not d else "Touren umbenennen (Tour öffnen → Umbenennen)")
     err = db.get("backup_err")
     if err:
         add("Backup-Fehler", False, err[:120], "Sicherungsordner prüfen")
-    return {"checks": checks, "ok": all(c["ok"] for c in checks), "duplicates": d, "version": config.VERSION}
+    return {"checks": checks, "ok": all(c["ok"] for c in checks), "duplicates": [], "version": config.VERSION}
 
 
 def update_check():
