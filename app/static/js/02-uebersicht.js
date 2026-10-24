@@ -264,10 +264,12 @@ VIEWS.map = async () => {
           }
           done++;
           busy.delete(x.t.id);
+          if (!$("#mn")) return; // Seite inzwischen verlassen
           $("#mn").textContent = `Strecken werden geladen (${done}/${need.length}) …`;
         }
       })
     );
+    if (!$("#mn")) return;
     if (fail) {
       $("#mn").textContent = `${fail} Strecken nicht lokal vorhanden – in der Verwaltung „Routen laden“ (Komoot-Zugang nötig)`;
       need.forEach(x => busy.add(x.t.id));

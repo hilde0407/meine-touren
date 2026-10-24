@@ -81,12 +81,15 @@ def test_view_loads_without_errors(page, view):
     assert not page.errors, f"{view}: {page.errors}"
 
 
-def test_fast_navigation_no_errors(page):
+@pytest.mark.parametrize("pause", [15, 40, 90, 200])
+def test_fast_navigation_no_errors(page, pause):
+    cdp = page.context.new_cdp_session(page); cdp.send("Emulation.setCPUThrottlingRate", {"rate": 4})   # langsamer Rechner (wie GitHub Actions)
     page.errors.clear()
     tid = _tour_id(page)
-    for v in ["map", "tour/" + tid, "dash", "map", "records", "tour/" + tid, "map", "tours"] * 2:
-        page.evaluate(f"location.hash = '#/{v}'"); page.wait_for_timeout(60)
-    page.wait_for_timeout(2500)
+    for v in ["map", "tour/" + tid, "dash", "map", "records", "tour/" + tid, "check", "map", "admin", "photos", "tours"] * 2:
+        page.evaluate(f"location.hash = '#/{v}'"); page.wait_for_timeout(pause)
+    page.wait_for_timeout(3000)
+    cdp.send("Emulation.setCPUThrottlingRate", {"rate": 1})
     assert not page.errors, page.errors
 
 
