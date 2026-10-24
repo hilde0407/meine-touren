@@ -88,3 +88,27 @@ def test_fast_navigation_no_errors(page):
         page.evaluate(f"location.hash = '#/{v}'"); page.wait_for_timeout(60)
     page.wait_for_timeout(2500)
     assert not page.errors, page.errors
+
+
+def test_fresh_load_without_errors(page, app_url):
+    pg = page.context.browser.new_page(); errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(app_url) else r.continue_())
+    for v in ["dash", "tours", "check", "admin"]:
+        pg.goto(app_url + "/#/" + v); pg.wait_for_timeout(900)
+    pg.close()
+    assert not errs, errs
+
+
+def test_interactions(page):
+    page.errors.clear()
+    page.evaluate("location.hash = '#/tour/' + TOURS.find(t => t.source === 'local').id"); page.wait_for_timeout(1200)
+    page.click("#eup"); page.wait_for_selector(".modal .pp"); page.click("#ucx")
+    page.evaluate("location.hash = '#/records'"); page.wait_for_timeout(800)
+    page.click("a.chip:has-text('Radtour')"); page.wait_for_timeout(800)
+    assert "Radtour" in page.inner_text("#main .sec")
+    page.evaluate("location.hash = '#/check'"); page.wait_for_selector("#impl")
+    page.click("#impl [data-idel]"); page.wait_for_selector("#dok"); page.click("#dx")
+    page.evaluate("location.hash = '#/admin'"); page.wait_for_timeout(1500)
+    assert "Zustand" in page.inner_text("#hlt")
+    assert not page.errors, page.errors
