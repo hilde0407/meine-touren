@@ -111,3 +111,18 @@ def test_browser_admin_and_folder_upload(server, tmp_path):
         assert len(n) == 3
         assert not errs
         b.close()
+
+
+def test_name_suggestions_run_in_parallel(monkeypatch):
+    import time as _t
+    from app import extras as ex
+    def slow(*a, **k):
+        _t.sleep(0.4); return None
+    monkeypatch.setattr(ex, "guide_matches", lambda pts: slow() or [])
+    monkeypatch.setattr(ex, "trail_names", lambda t, pts: slow() or [])
+    monkeypatch.setattr(ex, "place_name", lambda la, lo: slow() or "Ort")
+    monkeypatch.setattr(ex, "peak_name", lambda la, lo: slow() or "Gipfel")
+    pts = [[47.0, 11.0, 1000.0], [47.01, 11.01, 1400.0], [47.02, 11.0, 1100.0]]
+    t = {"sport": "hike", "name": "x", "lat": 47.0, "lng": 11.0, "dist_m": 20000}
+    t0 = _t.time(); res = ex.name_suggestions(t, pts, "all"); dt = _t.time() - t0
+    assert res and dt < 1.3          # nacheinander wären es > 2 s

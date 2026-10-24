@@ -480,17 +480,37 @@ def name_suggestions(t, pts, part="all"):
             return fn(*a)
         except Exception as e:  # noqa
             errs.append(str(e)); return None
-    guides = safe(guide_matches, pts) if part in ("all", "guides") else []
-    if part == "guides":
-        return [x for b, ti in (guides or []) for x in ((f"{ti} ({b})", ti) if b else (ti,)) if x != t["name"]]
-    trails = (safe(trail_names, t, pts) or []) if part in ("all", "trails") else []   # zuerst: Overpass läuft, während Nominatim wartet
-    a = safe(place_name, start[0], start[1])
     loop = _hav(start, end) < max(500, 0.15 * (t["dist_m"] or 0))
-    b = None if loop or part != "all" and part != "places" else safe(place_name, end[0], end[1])
-    f = safe(place_name, far[0], far[1]) if (part in ("all", "places") and loop and _hav(start, far) > 2500) else None
-    pk = None
-    if part in ("all", "peak") and hi is not None and start[2] is not None and hi[2] - start[2] >= 150 and t["sport"] in ("hike", "mountaineering", "skitour", "snowshoe", "nordicwalking", "skialpin"):
-        pk = safe(peak_name, hi[0], hi[1])
+    want_peak = part in ("all", "peak") and hi is not None and start[2] is not None and hi[2] - start[2] >= 150 and t["sport"] in ("hike", "mountaineering", "skitour", "snowshoe", "nordicwalking", "skialpin")
+
+    def do_guides():
+        return safe(guide_matches, pts) if part in ("all", "guides") else []
+
+    def do_trails():
+        return (safe(trail_names, t, pts) or []) if part in ("all", "trails") else []
+
+    def do_places():
+        a_ = safe(place_name, start[0], start[1])
+        b_ = None if loop or part != "all" and part != "places" else safe(place_name, end[0], end[1])
+        f_ = safe(place_name, far[0], far[1]) if (part in ("all", "places") and loop and _hav(start, far) > 2500) else None
+        return a_, b_, f_
+
+    def do_peak():
+        return safe(peak_name, hi[0], hi[1]) if want_peak else None
+
+    if part == "all":      # wie in den Tourdetails: Overpass (Wege, Gipfel, Wanderführer) und Nominatim (Orte) laufen gleichzeitig statt nacheinander
+        import contextvars
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(4) as ex:
+            fs = [ex.submit(contextvars.copy_context().run, fn) for fn in (do_guides, do_trails, do_places, do_peak)]
+            guides, trails, (a, b, f), pk = [x.result() for x in fs]
+    else:
+        guides = do_guides()
+        if part == "guides":
+            return [x for bk, ti in (guides or []) for x in ((f"{ti} ({bk})", ti) if bk else (ti,)) if x != t["name"]]
+        trails = do_trails()
+        a, b, f = do_places()
+        pk = do_peak()
     for tn in trails:
         out.append(tn)
         if a and a.lower() not in tn.lower():

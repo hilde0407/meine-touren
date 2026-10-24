@@ -1180,7 +1180,9 @@ VIEWS.check = async () => {
       row.innerHTML = `<span class="ok">✓ ${esc(nn)}</span>${$("#rkomall").checked && !x.komoot ? ` <span class="bad">(bei Komoot nicht geklappt: ${esc(x.warning || "")})</span>` : ""}`; if (BY[b.dataset.save]) BY[b.dataset.save].name = nn;
     } catch (e) { b.disabled = false; alert("Umbenennen fehlgeschlagen: " + e.message); } });
   if ($("#sugall")) $("#sugall").onclick = async e => { e.target.disabled = true; const rows = [...body.querySelectorAll(".nm")].filter(x => !x.querySelector(".sugs").children.length).slice(0, 10); let n = 0;
-    for (const row of rows) { $("#sugm").textContent = `Lade ${++n}/${rows.length} …`; await sug(row); } $("#sugm").textContent = rows.length ? "Fertig – bitte prüfen und speichern." : "Alle schon geladen."; e.target.disabled = false; };
+    const q = rows.slice(), done = () => { $("#sugm").textContent = `Lade ${n}/${rows.length} …`; }; done();
+    await Promise.all([0, 1, 2].map(async () => { while (q.length) { await sug(q.shift()); n++; done(); } }));   // 3 Touren gleichzeitig: Wartezeiten der Dienste überlappen
+    $("#sugm").textContent = rows.length ? "Fertig – bitte prüfen und speichern." : "Alle schon geladen."; e.target.disabled = false; };
 };
 
 /* =====================  Orte & Gipfel, Wanderführer  ===================== */
