@@ -5,7 +5,7 @@ import shutil
 import time
 from pathlib import Path
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from . import config, db, elev, extras, jobs, memo, routes
 
@@ -34,6 +34,68 @@ def duplicates(tours):
     return out
 
 
+WALK = ("hike", "nordicwalking", "snowshoe", "mountaineering")
+SPORT_OK = {"hike", "touringbicycle", "e_touringbicycle", "racebike", "mtb", "e_mtb", "jogging", "skialpin", "snowshoe", "mountaineering",
+            "nordic", "nordicwalking", "skitour", "other"}
+
+
+def implausible(tours):
+    """Fehlaufzeichnungen (fast keine Strecke/Dauer) und Tempo, das nicht zur Sportart passt (z. B. „Wandern“ mit 20 km/h)."""
+    out = []
+    for t in tours:
+        d, s = t["dist_m"] or 0, t["dur_s"] or 0
+        v = d / s * 3.6 if s else 0
+        why, sug = None, None
+        if d < 300 or (s and s < 180):
+            why = f"Fehlaufzeichnung? nur {d:.0f} m" + (f" in {s // 60:.0f} min" if s else "")
+        elif t["sport"] in WALK and v > 8:
+            why, sug = f"{v:.1f} km/h – zu schnell für {t['sport'] == 'hike' and 'Wandern' or 'diese Sportart'}", "touringbicycle"
+        elif t["sport"] == "jogging" and v > 22:
+            why, sug = f"{v:.1f} km/h – zu schnell zum Laufen", "touringbicycle"
+        elif t["sport"] in ("touringbicycle", "racebike", "mtb") and 0 < v < 4 and d > 2000:
+            why, sug = f"{v:.1f} km/h – sehr langsam für Rad", "hike"
+        if why:
+            why = re.sub(r"(\d)\.(\d)", r"\1,\2", why)
+            out.append({"id": t["id"], "name": t["name"], "sport": t["sport"], "start_ts": t["start_ts"], "km": round(d / 1000, 2),
+                        "kmh": round(v, 1), "why": why, "suggest": sug, "local": t.get("source") == "local"})
+    return out
+
+
+@router.post("/api/tours/{tour_id}/sport")
+def api_set_sport(tour_id: str, body: dict):
+    sp = str(body.get("sport") or "")
+    if sp not in SPORT_OK:
+        raise HTTPException(400, "Unbekannte Sportart")
+    if not db.one("SELECT 1 x FROM tours WHERE id=?", (tour_id,)):
+        raise HTTPException(404, "Tour nicht gefunden")
+    db.execute("INSERT OR REPLACE INTO tour_sport(id,sport) VALUES(?,?)", (tour_id, sp))
+    db.execute("UPDATE tours SET sport=? WHERE id=?", (sp, tour_id))
+    return {"ok": True}
+
+
+@router.post("/api/tours/{tour_id}/hide")
+def api_hide(tour_id: str, body: dict):
+    """Tour aus allen Ansichten und Statistiken ausblenden (Daten bleiben erhalten) bzw. wieder einblenden."""
+    if body.get("hide", True):
+        t = db.one("SELECT * FROM tours WHERE id=?", (tour_id,))
+        if not t:
+            raise HTTPException(404, "Tour nicht gefunden")
+        db.execute("INSERT OR REPLACE INTO tour_hidden(id,js,ts) VALUES(?,?,?)", (tour_id, json.dumps(t), int(time.time())))
+        db.execute("DELETE FROM tours WHERE id=?", (tour_id,))
+        db.execute("UPDATE photos SET tour_id=NULL WHERE tour_id=? AND COALESCE(manual,0)=0", (tour_id,))
+    else:
+        r = db.one("SELECT js FROM tour_hidden WHERE id=?", (tour_id,))
+        if not r:
+            raise HTTPException(404, "Nicht ausgeblendet")
+        t = json.loads(r["js"])
+        cols = [c for c in t if c in {x["name"] for x in db.query("PRAGMA table_info(tours)")}]
+        db.execute(f"INSERT OR REPLACE INTO tours({','.join(cols)}) VALUES({','.join('?' * len(cols))})", tuple(t[c] for c in cols))
+        db.execute("DELETE FROM tour_hidden WHERE id=?", (tour_id,))
+    from . import photos
+    photos.assign_all()
+    return {"ok": True}
+
+
 @router.get("/api/check")
 def api_check():
     tours = db.query("SELECT t.*, (SELECT COUNT(*) FROM photos p WHERE p.tour_id=t.id) AS photos, "
@@ -44,6 +106,8 @@ def api_check():
         "duplicates": duplicates(tours),
         "default_names": [brief(t) for t in tours if DEFAULT_NAME.search(t["name"] or "")],
         "suspicious": [brief(t) for t in tours if not t["fixed"] and elev.suspicious(t)],
+        "implausible": implausible(tours),
+        "hidden": [{"id": r["id"], **{k: v for k, v in json.loads(r["js"]).items() if k in ("name", "sport", "start_ts", "dist_m")}} for r in db.query("SELECT id,js FROM tour_hidden ORDER BY ts DESC")],
         "gaps": {"no_route": sum(1 for t in tours if not routes.path_full(t["id"]).exists()),
                  "no_region": sum(1 for t in tours if not t["has_geo"] and t["lat"] is not None),
                  "no_photos": sum(1 for t in tours if not t["photos"]),

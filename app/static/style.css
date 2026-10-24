@@ -235,3 +235,4 @@ details.agrp .panel{margin-top:6px}
 html.mob details.agrp .gs{display:none}
 
 path.clk{cursor:pointer}
+a.chip{text-decoration:none;color:inherit;cursor:pointer}a.chip .sw{margin-right:5px}

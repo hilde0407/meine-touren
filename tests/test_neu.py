@@ -5,7 +5,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from tests.test_core import fresh  # noqa: F401  (setzt die Testumgebung und liefert die Fixture)
-from app import db, health, photos, extras, config  # noqa
+from app import db, health, photos, extras, config, sync  # noqa
 
 
 def _tour(i, name, ts):
@@ -126,3 +126,30 @@ def test_name_suggestions_run_in_parallel(monkeypatch):
     t = {"sport": "hike", "name": "x", "lat": 47.0, "lng": 11.0, "dist_m": 20000}
     t0 = _t.time(); res = ex.name_suggestions(t, pts, "all"); dt = _t.time() - t0
     assert res and dt < 1.3          # nacheinander wären es > 2 s
+
+
+def test_implausible_hide_and_sport_override():
+    from fastapi.testclient import TestClient
+    from app import main, more
+    _tour("z", "Wanderung 01.03.2020", 1583000000); db.execute("UPDATE tours SET dist_m=50,dur_s=60,source='komoot' WHERE id='z'")
+    _tour("f", "Schnell", 1590000000); db.execute("UPDATE tours SET dist_m=40000,dur_s=7200 WHERE id='f'")
+    _tour("ok", "Normal", 1600000000)
+    c = TestClient(main.app)
+    r = c.get("/api/check").json()
+    ids = {x["id"]: x for x in r["implausible"]}
+    assert set(ids) == {"z", "f"} and ids["f"]["suggest"] == "touringbicycle"
+    assert c.post("/api/tours/f/sport", json={"sport": "touringbicycle"}).status_code == 200
+    assert c.post("/api/tours/z/hide", json={"hide": True}).status_code == 200
+    r = c.get("/api/check").json()
+    assert not r["implausible"] and [h["id"] for h in r["hidden"]] == ["z"]
+    assert "z" not in {t["id"] for t in c.get("/api/tours").json()}
+    # Komoot-Abgleich: ausgeblendete Tour bleibt weg, eigene Sportart bleibt erhalten
+    class K:
+        def tours(self):
+            return [{"id": "z", "name": "x", "sport": "hike", "start_ts": 1583000000, "end_ts": 1583000060, "dist_m": 50, "dur_s": 60, "up_m": 0, "down_m": 0, "lat": 47, "lng": 11, "status": "tour_recorded"},
+                    {"id": "k2", "name": "y", "sport": "hike", "start_ts": 1610000000, "end_ts": 1610003600, "dist_m": 5000, "dur_s": 3600, "up_m": 0, "down_m": 0, "lat": 47, "lng": 11, "status": "tour_recorded"}]
+    db.execute("INSERT INTO tour_sport(id,sport) VALUES('k2','skitour')")
+    sync.refresh_tours(K())
+    assert not db.one("SELECT 1 x FROM tours WHERE id='z'") and db.one("SELECT sport FROM tours WHERE id='k2'")["sport"] == "skitour"
+    assert c.post("/api/tours/z/hide", json={"hide": False}).status_code == 200
+    assert db.one("SELECT dist_m FROM tours WHERE id='z'")["dist_m"] == 50

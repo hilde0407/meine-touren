@@ -783,28 +783,33 @@ VIEWS.dash = async (n, q) => {
 };
 
 /* ---- Rekorde ---- */
-VIEWS.records = async () => {
+VIEWS.records = async (_, q) => {
   if (!TOURS.length) { $("#main").innerHTML = `<div class="empty"><h2>Noch keine Touren</h2></div>`; return; }
-  const sum = (a, f) => a.reduce((c, t) => c + f(t), 0), km = sum(TOURS, t => t.km), up = sum(TOURS, t => t.up_m || 0), h = sum(TOURS, t => t.h);
+  let fs = (q && q.get("s")) || ""; try { if (!q || !q.has("s")) fs = sessionStorage.getItem("rec_s") || ""; sessionStorage.setItem("rec_s", fs); } catch (e) {}
+  const allSp = [...new Set(TOURS.map(t => t.sport))].sort((a, b) => TOURS.filter(t => t.sport === b).length - TOURS.filter(t => t.sport === a).length);
+  if (fs && !allSp.includes(fs)) fs = "";
+  const T = fs ? TOURS.filter(t => t.sport === fs) : TOURS;
+  const chips = `<div class="row" style="gap:6px;margin:-4px 0 18px;flex-wrap:wrap"><a class="chip${fs ? "" : " on"}" href="#/records?s=">Alle Aktivitäten</a>${allSp.map(x => `<a class="chip${fs === x ? " on" : ""}" href="#/records?s=${x}"><i class="sw" style="background:${sCol(x)}"></i>${sName(x)}</a>`).join("")}</div>`;
+  const sum = (a, f) => a.reduce((c, t) => c + f(t), 0), km = sum(T, t => t.km), up = sum(T, t => t.up_m || 0), h = sum(T, t => t.h);
   const best = (a, f) => a.reduce((b, t) => (b == null || f(t) > f(b)) ? t : b, null);
-  const sports = [...new Set(TOURS.map(t => t.sport))].sort((a, b) => TOURS.filter(t => t.sport === b).length - TOURS.filter(t => t.sport === a).length);
+  const sports = [...new Set(T.map(t => t.sport))].sort((a, b) => T.filter(t => t.sport === b).length - T.filter(t => t.sport === a).length);
   const lnk = (t, v) => t ? `<div class="r"><span>${v[0]}<small><a href="#/tour/${t.id}">${esc(t.name)}</a>, ${dateS(t.date)}</small></span><b>${v[1]}</b></div>` : "";
-  const wkIdx = t => Math.floor((Date.UTC(t.y, t.m - 1, +t.date.slice(8, 10)) / 864e5 + 3) / 7), wks = [...new Set(TOURS.map(wkIdx))].sort((a, b) => a - b);
+  const wkIdx = t => Math.floor((Date.UTC(t.y, t.m - 1, +t.date.slice(8, 10)) / 864e5 + 3) / 7), wks = [...new Set(T.map(wkIdx))].sort((a, b) => a - b);
   let longest = 0, run = 0, prevW = null; wks.forEach(w => { run = prevW !== null && w === prevW + 1 ? run + 1 : 1; longest = Math.max(longest, run); prevW = w; });
   const curW = Math.floor((Date.now() / 864e5 + 3) / 7); let cur = 0; { let w = wks.includes(curW) ? curW : wks.includes(curW - 1) ? curW - 1 : null; while (w !== null && wks.includes(w)) { cur++; w--; } }
-  const dayN = new Set(TOURS.map(t => t.date.slice(0, 10))).size, wd = Array(7).fill(0); TOURS.forEach(t => wd[(new Date(t.date.slice(0, 10) + "T12:00:00").getDay() + 6) % 7]++);
-  const alts = await api("/api/records/altitude?limit=8").catch(() => []);
-  $("#main").innerHTML = `<div class="sec" style="margin-top:0"><h2>Rekorde</h2><span class="sub">${nf(TOURS.length, 0)} Touren seit ${TOURS[TOURS.length - 1].y}</span></div>
+  const dayN = new Set(T.map(t => t.date.slice(0, 10))).size, wd = Array(7).fill(0); T.forEach(t => wd[(new Date(t.date.slice(0, 10) + "T12:00:00").getDay() + 6) % 7]++);
+  const alts = (await api(`/api/records/altitude?limit=${fs ? 60 : 8}`).catch(() => [])).filter(a => !fs || (BY[a.id] && BY[a.id].sport === fs)).slice(0, 8);
+  $("#main").innerHTML = `<div class="sec" style="margin-top:0"><h2>Rekorde</h2><span class="sub">${nf(T.length, 0)} Touren seit ${T[T.length - 1].y}${fs ? " · " + sName(fs) : ""}</span></div>${chips}
    <div class="figs"><div class="fig"><div class="v">${nf(km / 40075, 2)}<span class="u">×</span></div><div class="l">um die Erde (${nf(km, 0)} km)</div></div>
     <div class="fig"><div class="v">${nf(up / 8849, 1)}<span class="u">×</span></div><div class="l">Mount Everest bergauf (${nf(up, 0)} m)</div></div>
     <div class="fig"><div class="v">${nf(h / 24, 1)}<span class="u">Tage</span></div><div class="l">unterwegs (${nf(h, 0)} Std.)</div></div>
     <div class="fig"><div class="v">${nf(dayN, 0)}</div><div class="l">Tage mit Touren</div></div>
     <div class="fig"><div class="v">${longest}<span class="u">Wochen</span></div><div class="l">längste Serie · aktuell ${cur}</div></div></div>
    <div class="grid g2" style="margin-top:36px">
-    <div class="panel"><h2>Bestwerte gesamt</h2><div class="rows">${lnk(best(TOURS, t => t.km), ["Längste Strecke", nf(best(TOURS, t => t.km).km, 1) + " km"])}${lnk(best(TOURS, t => t.up_m || 0), ["Meiste Höhenmeter", nf(best(TOURS, t => t.up_m || 0).up_m, 0) + " m"])}${lnk(best(TOURS, t => t.h), ["Längste Dauer", nf(best(TOURS, t => t.h).h, 1) + " h"])}</div></div>
+    <div class="panel"><h2>Bestwerte gesamt</h2><div class="rows">${lnk(best(T, t => t.km), ["Längste Strecke", nf(best(T, t => t.km).km, 1) + " km"])}${lnk(best(T, t => t.up_m || 0), ["Meiste Höhenmeter", nf(best(T, t => t.up_m || 0).up_m, 0) + " m"])}${lnk(best(T, t => t.h), ["Längste Dauer", nf(best(T, t => t.h).h, 1) + " h"])}</div></div>
     <div class="panel"><h2>Höchste Punkte</h2><div class="rows">${alts.length ? alts.map(a => BY[a.id] ? `<div class="r"><span><a href="#/tour/${a.id}">${esc(BY[a.id].name)}</a><small>${dateS(BY[a.id].date)}</small></span><b>${nf(a.alt, 0)} m</b></div>` : "").join("") : `<div class="mut">Sobald die Strecken geladen sind („Routen laden“ in der Verwaltung), erscheinen hier die höchsten Punkte.</div>`}</div></div>
     <div class="panel"><h2>Nach Wochentag</h2>${barChart(wd, ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"])}</div>
-    <div class="panel"><h2>Je Sportart</h2><div class="rows">${sports.map(s => { const a = TOURS.filter(t => t.sport === s), l = best(a, t => t.km), u = best(a, t => t.up_m || 0), f = best(a.filter(t => t.km >= 3 && t.h > 0), t => t.km / t.h);
+    <div class="panel"><h2>Je Sportart</h2><div class="rows">${sports.map(s => { const a = T.filter(t => t.sport === s), l = best(a, t => t.km), u = best(a, t => t.up_m || 0), f = best(a.filter(t => t.km >= 3 && t.h > 0), t => t.km / t.h);
       return `<div class="r" style="display:block"><div><i class="sw" style="background:${sCol(s)}"></i><b style="font:600 20px var(--d)">${sName(s)}</b> <span class="mut">· ${a.length} Touren, ${nf(sum(a, t => t.km), 0)} km, ${nf(sum(a, t => t.up_m || 0), 0)} m</span></div>
        <small>Längste: <a href="#/tour/${l.id}">${nf(l.km, 1)} km</a> · Meiste Höhenmeter: <a href="#/tour/${u.id}">${nf(u.up_m, 0)} m</a>${f ? ` · Schnellste: <a href="#/tour/${f.id}">${nf(f.km / f.h, 1)} km/h</a>` : ""}</small></div>`; }).join("")}</div></div></div>`;
 };
@@ -1160,6 +1165,22 @@ VIEWS.check = async () => {
     <div class="row"><button class="btn" id="sugall">Vorschläge für die nächsten 10 laden</button><label class="chk" style="margin:0"><input type="checkbox" id="rkomall"> auch bei Komoot umbenennen</label><span id="sugm" class="mut"></span></div>
     <div class="rows" id="nml">${r.default_names.map(t => `<div class="r nm" data-id="${t.id}" style="display:block"><div class="mut" style="font-size:13px">${dateS(BY[t.id]?.date || "0000-00-00")} · ${esc(sName(t.sport))} · ${t.km} km · <a href="#/tour/${t.id}">öffnen</a></div>
       <div class="row" style="margin:4px 0"><input class="nin" value="${esc(t.name)}" style="flex:1;min-width:220px"><button class="btn alt sm" data-sug="${t.id}">💡</button><button class="btn sm" data-save="${t.id}">Speichern</button></div><div class="chips sugs"></div></div>`).join("")}</div>` : '<p class="ok">✓ Alle Touren haben einen eigenen Namen.</p>'}</div>`;
+  { const SP = ["hike", "touringbicycle", "e_touringbicycle", "racebike", "mtb", "jogging", "skialpin", "snowshoe", "mountaineering", "nordic", "nordicwalking", "skitour"];
+    const im = r.implausible || [], hd = r.hidden || [];
+    const first = body.querySelector(".panel");
+    first.querySelector(".rows").insertAdjacentHTML("beforeend", `<div class="r"><span>Unplausible Touren</span><b class="${im.length ? "bad" : ""}">${im.length}</b></div>`);
+    first.insertAdjacentHTML("afterend", `<div class="panel" style="margin-top:22px" id="impl"><h2>Unplausible Touren</h2>
+      <p class="mut">Fehlaufzeichnungen (fast keine Strecke) und Touren, deren Tempo nicht zur Sportart passt. Sie zählen in Rekorden und Statistiken mit. Du kannst die Sportart ändern (bleibt auch nach dem Komoot-Abgleich) oder die Tour ausblenden (Daten bleiben erhalten, jederzeit wieder einblendbar).</p>
+      ${im.length ? `<div class="rows">${im.map(t => `<div class="r" style="display:block" data-id="${esc(t.id)}"><div><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a> <span class="mut">${dateS(BY[t.id]?.date || "0000-00-00")} · ${esc(sName(t.sport))} · ${nf(t.km, 2)} km</span></div>
+        <div class="row" style="margin:4px 0;gap:6px"><span class="bad" style="font-size:14px">${esc(t.why)}</span><span class="sp"></span>
+        <select class="isp">${SP.map(x => `<option value="${x}" ${x === (t.suggest || t.sport) ? "selected" : ""}>${esc(sName(x))}</option>`).join("")}</select><button class="btn alt sm" data-isp>Sportart ändern</button><button class="btn alt sm" data-ihide>Ausblenden</button></div></div>`).join("")}</div>` : '<p class="ok">✓ Keine auffälligen Touren.</p>'}
+      ${hd.length ? `<h3 style="margin-top:18px">Ausgeblendet (${hd.length})</h3><div class="rows">${hd.map(t => `<div class="r" data-id="${esc(t.id)}"><span>${esc(t.name || t.id)} <span class="mut">${t.start_ts ? new Date(t.start_ts * 1000).toLocaleDateString("de-DE") : ""} · ${nf((t.dist_m || 0) / 1000, 2)} km</span></span><button class="btn alt sm" data-ishow>Wieder einblenden</button></div>`).join("")}</div>` : ""}</div>`);
+    const after = async () => { await loadTours(); route(); };
+    $("#impl").querySelectorAll("[data-isp]").forEach(b => b.onclick = async () => { const row = b.closest("[data-id]"); b.disabled = true;
+      try { await api(`/api/tours/${encodeURIComponent(row.dataset.id)}/sport`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({sport: row.querySelector(".isp").value})}); await after(); } catch (e) { alert(e.message); b.disabled = false; } });
+    $("#impl").querySelectorAll("[data-ihide],[data-ishow]").forEach(b => b.onclick = async () => { const row = b.closest("[data-id]"); b.disabled = true;
+      try { await api(`/api/tours/${encodeURIComponent(row.dataset.id)}/hide`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({hide: b.hasAttribute("data-ihide")})}); await after(); } catch (e) { alert(e.message); b.disabled = false; } });
+  }
   const fix1 = async id => { const b = body.querySelector(`[data-fix="${id}"]`); if (b) { b.disabled = true; b.textContent = "…"; }
     try { const x = await api(`/api/tours/${encodeURIComponent(id)}/elev-fix`, {method: "POST"}); if (b) b.closest(".r").innerHTML = `<span>${nm(id)}<small class="ok">korrigiert: ${nf(x.up_m, 0)} m Aufstieg (vorher ${nf(x.orig_up, 0)} m)</small></span>`; return true; }
     catch (e) { if (b) { b.disabled = false; b.textContent = "Fehler – nochmal"; b.title = e.message; } return false; } };

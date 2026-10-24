@@ -25,6 +25,13 @@ def refresh_tours(k=None):
     k = k or _komoot()
     tours = k.tours()
     tours = _link_local(tours)
+    hidden = {r["id"] for r in db.query("SELECT id FROM tour_hidden")}
+    if hidden:
+        tours = [t for t in tours if str(t["id"]) not in hidden]      # ausgeblendete Touren bleiben ausgeblendet
+    for r in db.query("SELECT id,sport FROM tour_sport"):               # eigene Sportart hat Vorrang vor Komoot
+        for t in tours:
+            if str(t["id"]) == r["id"]:
+                t["sport"] = r["sport"]
     old = {r["id"]: (r["dist_m"], r["dur_s"], r["up_m"]) for r in db.query("SELECT id,dist_m,dur_s,up_m FROM tours")}
     changed = [t["id"] for t in tours if t["id"] in old and (
         abs((old[t["id"]][0] or 0) - (t["dist_m"] or 0)) > 5 or abs((old[t["id"]][1] or 0) - (t["dur_s"] or 0)) > 5)]
