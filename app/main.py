@@ -78,7 +78,8 @@ def startup():
             config.EXPORT_DIR.mkdir(parents=True, exist_ok=True)
             config.CACHE_DIR.mkdir(parents=True, exist_ok=True)
             config.INBOX_DIR.mkdir(parents=True, exist_ok=True)
-    threading.Thread(target=scheduler, daemon=True).start()
+    if os.environ.get("MT_NO_SCHEDULER") != "1":      # Tests: kein Hintergrundplaner (würde nach 60 s Sicherungen anlegen)
+        threading.Thread(target=scheduler, daemon=True).start()
 
 
 def _user_tick(tick, now, last_day):

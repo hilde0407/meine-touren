@@ -301,6 +301,7 @@ VIEWS.admin = async (...a) => {
     const g = await api("/api/guides").catch(() => []),
       by = {};
     g.forEach(x => (by[x.book] ||= []).push(x));
+    if (!$("#glist")) return; // Seite inzwischen verlassen
     $("#glist").innerHTML =
       Object.keys(by)
         .map(

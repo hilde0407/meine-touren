@@ -29,6 +29,15 @@ if (window.L) {
         return f.apply(this, a);
       };
   }
+  // Canvas-Ebene: verspätetes Neuzeichnen nach dem Entfernen der Karte überspringen
+  for (const m of ["_redraw", "_updatePaths", "_draw"]) {
+    const f = L.Canvas && L.Canvas.prototype[m];
+    if (f)
+      L.Canvas.prototype[m] = function (...a) {
+        if (!this._ctx || !this._map) return;
+        return f.apply(this, a);
+      };
+  }
 }
 const pad2 = n => String(n).padStart(2, "0");
 const nf = (n, d = 1) => Number(n ?? 0).toLocaleString("de-DE", {minimumFractionDigits: d, maximumFractionDigits: d});

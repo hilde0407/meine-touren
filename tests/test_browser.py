@@ -83,7 +83,7 @@ def test_view_loads_without_errors(page, view):
 
 @pytest.mark.parametrize("pause", [15, 40, 90, 200])
 def test_fast_navigation_no_errors(page, pause):
-    cdp = page.context.new_cdp_session(page); cdp.send("Emulation.setCPUThrottlingRate", {"rate": 4})   # langsamer Rechner (wie GitHub Actions)
+    cdp = page.context.new_cdp_session(page); cdp.send("Emulation.setCPUThrottlingRate", {"rate": int(os.environ.get("MT_CPU_RATE", "4"))})   # langsamer Rechner (wie GitHub Actions)
     page.errors.clear()
     tid = _tour_id(page)
     for v in ["map", "tour/" + tid, "dash", "map", "records", "tour/" + tid, "check", "map", "admin", "photos", "tours"] * 2:

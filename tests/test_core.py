@@ -6,6 +6,7 @@ SAMPLE = Path("/tmp/meine_touren_test_photos")
 os.environ["DATA_DIR"] = str(Path("/tmp/komoot_hub_test"))
 os.environ["PHOTOS_DIR"] = str(SAMPLE)
 os.environ["FAKE"] = "1"
+os.environ["MT_NO_SCHEDULER"] = "1"
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app import config, db, gpxtools, sync, photos, stats, zepp, komoot, routes  # noqa
