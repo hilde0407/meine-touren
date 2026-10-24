@@ -190,3 +190,23 @@ def test_set_sport_also_on_komoot(monkeypatch):
     r = TestClient(main.app).post("/api/tours/k5/sport", json={"sport": "touringbicycle", "komoot": True}).json()
     assert calls == [("k5", "touringbicycle")] and r["komoot"] == "auch bei Komoot geändert"
     assert db.one("SELECT sport FROM tours WHERE id='k5'")["sport"] == "touringbicycle"
+
+
+def test_secrets_are_encrypted(monkeypatch):
+    from app import secret
+    monkeypatch.delenv("MT_SECRET_KEY", raising=False); secret.reset_cache()
+    db.put("komoot_password", "geheim123")
+    raw = db.one("SELECT v FROM settings WHERE k='komoot_password'")["v"]
+    assert raw.startswith("enc1:") and "geheim" not in raw
+    assert db.get("komoot_password") == "geheim123"
+    assert (config.DATA_DIR / "secret.key").exists() and oct((config.DATA_DIR / "secret.key").stat().st_mode)[-3:] == "600"
+    # Altbestand im Klartext wird beim Lesen verschlüsselt
+    db.execute("INSERT OR REPLACE INTO settings(k,v) VALUES('strava_tokens','{\"a\":1}')")
+    assert db.get("strava_tokens") == '{"a":1}'
+    assert db.one("SELECT v FROM settings WHERE k='strava_tokens'")["v"].startswith("enc1:")
+    # anderer Schlüssel (z. B. Sicherung von einem anderen Rechner): leer statt Fehler
+    monkeypatch.setenv("MT_SECRET_KEY", "anderer"); secret.reset_cache()
+    assert db.get("komoot_password") == ""
+    monkeypatch.delenv("MT_SECRET_KEY"); secret.reset_cache()
+    assert db.get("komoot_password") == "geheim123"
+    assert db.get("tile_style") == db.get("tile_style")        # normale Einstellungen unverändert

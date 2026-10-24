@@ -36,6 +36,7 @@ DEFAULTS = {
     "ui_prefs": "",              # JSON: Streckenfarbe, Kartenstil (geräteübergreifend)
 }
 SECRET_KEYS = {"zepp_password", "zepp_token", "komoot_password", "strava_client_secret", "strava_tokens"}
+ENCRYPTED_KEYS = SECRET_KEYS | {"zepp_key"}     # werden verschlüsselt in der Datenbank abgelegt (app/secret.py)
 
 VERSION = "1.0.34 · Meine Touren (2026-10-24)"
 

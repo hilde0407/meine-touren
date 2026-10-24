@@ -131,11 +131,20 @@ def executemany(sql, rows):
 def get(key):
     r = one("SELECT v FROM settings WHERE k=?", (key,))
     if r is not None:
-        return r["v"]
+        v = r["v"]
+        if key in config.ENCRYPTED_KEYS and v:
+            from . import secret
+            v, ok = secret.decrypt(v)
+            if ok is None:                      # noch Klartext aus einer älteren Version: jetzt verschlüsselt ablegen
+                put(key, v)
+        return v
     return config.DEFAULTS.get(key, "")
 
 
 def put(key, value):
+    if key in config.ENCRYPTED_KEYS and value:
+        from . import secret
+        value = secret.encrypt(value)
     execute("INSERT INTO settings(k,v) VALUES(?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v", (key, str(value)))
 
 
