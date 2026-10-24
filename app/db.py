@@ -80,12 +80,15 @@ def init(path=None):
 
 def close_all():
     with _lock:
-        for c in _conns.values():
+        items = list(_conns.items())
+    for path, c in items:
+        with _plock(path):            # nicht schließen, solange ein anderer Thread die Verbindung benutzt (sonst Absturz in SQLite)
             try:
                 c.close()
             except Exception:  # noqa
                 pass
-        _conns.clear()
+            with _lock:
+                _conns.pop(path, None)
 
 
 @contextmanager

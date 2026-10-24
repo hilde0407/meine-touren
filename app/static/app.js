@@ -326,17 +326,19 @@ async function uploadDialog(t) {
   const rows = pf.portals.map(p => {
     const fromHere = p.id === "komoot" && t.source !== "local", s = st[p.id], done = s && ["uploaded", "linked", "duplicate", "pending"].includes(s.status);
     const why = fromHere ? "Die Tour stammt von Komoot" : !p.connected ? (p.id === "strava" ? "nicht verbunden (Verwaltung → Portale)" : "Zugang fehlt (Verwaltung)") : done ? (UPST[s.status] + (s.url ? ` – <a target="_blank" href="${esc(s.url)}">öffnen</a>` : "") + (s.msg ? `<br><span style="font-size:12px">${esc(s.msg)}</span>` : "") + `<br><span style="font-size:12px">„hochgeladen“ = vom Portal angenommen und geprüft; bei Komoot erscheint die Tour in der Tourenliste bzw. unter „Geplant“.</span>`) : (s && s.status === "error" ? `<span class="bad">letzter Versuch: ${esc(s.msg)}</span>` : "");
-    return `<label class="chk" style="display:block;margin:8px 0"><input type="checkbox" class="pp" value="${p.id}" ${fromHere || !p.connected || done ? "disabled" : ""}> <b>${p.name}</b> <span class="mut">${why}</span></label>`;
+    return `<label class="chk" style="display:block;margin:8px 0"><input type="checkbox" class="pp" value="${p.id}" ${fromHere || !p.connected || done ? "disabled" : ""}> <b>${p.name}</b> <span class="mut">${why}</span>${done && p.connected && !fromHere ? `<br><label style="font-size:12px;margin-left:22px"><input type="checkbox" class="ff" data-p="${p.id}"> trotzdem erneut hochladen (z. B. wenn die Tour bei ${p.name} fehlt)</label>` : ""}</label>`;
   }).join("");
   m.innerHTML = `<div class="mbox"><h3>Tour hochladen</h3><p class="mut">„${esc(t.name)}“ wird mit der lokal gespeicherten Strecke zu den gewählten Portalen gesendet. Es passiert nichts ohne dein Häkchen.</p>${rows}<div id="upr" style="margin-top:10px"></div>
     <div style="margin-top:18px;display:flex;gap:8px;justify-content:flex-end"><button class="btn alt" id="ucx">Schließen</button><button class="btn" id="uok">Hochladen</button></div></div>`;
   document.body.appendChild(m);
   const close = () => m.remove(); m.querySelector("#ucx").onclick = close; m.onclick = e => { if (e.target === m) close(); };
+  m.querySelectorAll(".ff").forEach(f => f.onchange = () => { const c = m.querySelector(`.pp[value="${f.dataset.p}"]`); c.disabled = !f.checked; c.checked = f.checked; });
   m.querySelector("#uok").onclick = async e => {
     const ps = [...m.querySelectorAll(".pp:checked")].map(c => c.value); if (!ps.length) return;
+    const force = !!m.querySelector(".ff:checked");
     e.target.disabled = true; m.querySelector("#upr").innerHTML = '<span class="mut">Wird hochgeladen … (Strava kann bis zu 50 s brauchen)</span>';
     try {
-      const r = await api(`/api/tours/${encodeURIComponent(t.id)}/upload`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({portals: ps})});
+      const r = await api(`/api/tours/${encodeURIComponent(t.id)}/upload`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({portals: ps, force})});
       m.querySelector("#upr").innerHTML = Object.entries(r).map(([k, v]) => `<div class="${v.status === "error" ? "bad" : "ok"}"><b>${k === "komoot" ? "Komoot" : "Strava"}:</b> ${v.status === "uploaded" ? "hochgeladen ✓" : v.status === "duplicate" ? "dort schon vorhanden" : v.status === "already" ? "schon erledigt" : esc(v.msg || v.status)}${v.url ? ` – <a target="_blank" href="${esc(v.url)}">öffnen</a>` : ""}</div>`).join("");
     } catch (er) { m.querySelector("#upr").innerHTML = `<span class="bad">${esc(er.message)}</span>`; }
     e.target.disabled = false; uploadChips(t);
@@ -392,6 +394,8 @@ VIEWS.tour = async id => {
       const ic = L.divIcon({className: "", html: `<div class="pm" style="background-image:url(/pic/${p.id}?size=120)"></div>`, iconSize: [36, 36]});
       L.marker([b[0], b[1]], {icon: ic}).addTo(map).on("click", () => openLb(ph, ph.indexOf(p))); }); });
   $("#eup").onclick = () => uploadDialog(t); uploadChips(t);
+  { const ds = TOURS.filter(o => o.id !== t.id && o.name === t.name && Math.abs(o.start_ts - t.start_ts) < 7 * 86400); const bx = $("#upst");
+    if (ds.length && bx) bx.insertAdjacentHTML("beforebegin", `<p class="mut" style="margin:6px 0">⚠ Gleicher Name wie ${ds.map(o => `<a href="#/tour/${o.id}">${dateS(o.date)}</a>`).join(", ")} – vielleicht umbenennen (z. B. andere Tagesnummer).</p>`); }
   if ($("#edel")) $("#edel").onclick = async () => { if (!confirm(`Lokale Tour „${t.name}“ samt gespeicherter Strecke löschen? Bereits hochgeladene Kopien bei Komoot/Strava bleiben bestehen.`)) return; try { await api(`/api/tours/${encodeURIComponent(t.id)}`, {method: "DELETE"}); ROUTES = null; await loadTours(); location.hash = "#/tours"; } catch (e) { alert(e.message); } };
   if ($("#ksync")) $("#ksync").onclick = async () => {
     const o = t.km; $("#ksync").disabled = true; $("#ksm").textContent = "Lade von Komoot …";
@@ -671,6 +675,7 @@ VIEWS.admin = async (_, q) => {
   const f = (k, l, t = "text", ph = "") => `<div class="field"><label>${l}</label><input data-k="${k}" type="${t}" value="${esc(s[k])}" placeholder="${ph}"></div>`;
   $("#main").innerHTML = `
   <div class="sec admin" style="margin-top:0"><h2>Verwaltung</h2><span class="sub" id="st"></span><span class="sp"></span><span class="mut" style="font-size:13px" id="ver"></span></div>
+  <div id="upd"></div><div class="panel" id="hlt" style="margin-bottom:16px"><h2>Zustand</h2><p class="mut">wird geprüft …</p></div>
   <div class="grid g2">
    <div class="panel"><h2>Komoot <span class="mut" style="font:400 16px var(--b)">(optional)</span></h2><p class="mut">${nf(st.tours, 0)} Touren (davon ${nf(st.local_tours, 0)} nur lokal) · ${nf(st.routes, 0)} Strecken lokal gespeichert. Karten und Tourdetails nutzen immer die lokal gespeicherten Strecken; Komoot wird nur zum Laden und Hochladen gebraucht.</p>
     <div class="row"><button class="btn" data-job="refresh">Komoot aktualisieren</button><button class="btn alt" data-job="tours">Nur Touren</button><button class="btn alt" data-job="routes" title="Fehlende Strecken von Komoot lokal speichern">Strecken lokal sichern</button><button class="btn alt" data-job="geo" title="Land, Bundesland und Ort jeder Tour per OpenStreetMap bestimmen (für Suche und Filter)">Regionen bestimmen</button><button class="btn alt" id="diag">Komoot-Test</button></div>
@@ -841,6 +846,10 @@ const _adm = VIEWS.admin;
 VIEWS.admin = async (...a) => {
   await _adm(...a); const st = await api("/api/status").catch(() => ({})), sv = $("#save"); if (!sv) return;
   if ($("#ver")) $("#ver").textContent = "Version: " + (st.version || "alt");
+  api("/api/zustand").then(h => { const b = $("#hlt"); if (!b) return;
+    b.innerHTML = `<h2>Zustand <span class="mut" style="font:400 16px var(--b)">${h.ok ? "– alles in Ordnung" : "– bitte prüfen"}</span></h2><div class="rows">${h.checks.map(c => `<div class="r"><span>${c.ok ? "✓" : "⚠"} ${esc(c.name)}</span><span class="${c.ok ? "mut" : "bad"}">${esc(c.detail)}${c.hint ? ` – ${esc(c.hint)}` : ""}</span></div>`).join("")}</div>`
+      + (h.duplicates.length ? `<p class="mut" style="margin-top:8px">Doppelte Namen: ${h.duplicates.map(d => esc(d.name) + " (" + d.tours.map(t => `<a href="#/tour/${t.id}">${t.date}</a>`).join(", ") + ")").join(" · ")}</p>` : ""); }).catch(() => { const b = $("#hlt"); if (b) b.remove(); });
+  api("/api/update-check").then(u => { const b = $("#upd"); if (b && u.newer) b.innerHTML = `<div class="panel" style="margin-bottom:16px;border-color:var(--yellow)">Neue Version <b>${esc(u.latest)}</b> verfügbar (installiert: ${esc(u.current)}) – <a target="_blank" rel="noopener" href="${esc(u.url)}">Download auf GitHub</a></div>`; }).catch(() => {});
   sv.closest(".row").insertAdjacentHTML("beforebegin", `<div class="grid g2" style="margin-top:40px"><div class="panel"><h2>Sicherung</h2>
    <p class="mut">Täglich um 03:40 Uhr wird die Datenbank (Touren, Notizen, Ziele, Zuordnungen) automatisch nach <code>${esc(st.backup_dir || "/var/backups/meine-touren")}</code> gesichert, die letzten 14 bleiben erhalten. Wiederherstellen: <code>${esc(st.app_name || "meine-touren")}-restore &lt;Datei&gt;</code> im Container.</p>
    <div class="row"><a class="btn alt" href="/api/backup" download>Backup jetzt herunterladen</a></div><p class="mut" style="font-size:13px">Passwörter und Tokens sind im Download nicht enthalten. Fotos und Routen sind nicht enthalten, sie lassen sich neu laden.</p></div>

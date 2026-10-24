@@ -113,6 +113,36 @@ def lies(pfad):
     return t, bool(gps.get(2) and gps.get(4))
 
 
+def gps_von(pfad):
+    b = open(pfad, "rb").read(262144)
+    segs = segmente(b)
+    ex_seg = next(((s, e) for m, s, e in segs if m == 0xE1 and b[s + 4:s + 10] == b"Exif\x00\x00"), None)
+    if not ex_seg:
+        return None
+    ex = Image.Exif(); ex.load(b[ex_seg[0] + 4:ex_seg[1]])
+    g = ex.get_ifd(0x8825)
+    try:
+        la = sum(float(x) / 60 ** i for i, x in enumerate(g[2])) * (1 if g[1] == "N" else -1)
+        lo = sum(float(x) / 60 ** i for i, x in enumerate(g[4])) * (1 if g[3] == "E" else -1)
+        return la, lo
+    except Exception:
+        return None
+
+
+def orte_lesen(datei):
+    """Zeilen 'JJJJ-MM-TT;Breite;Länge' (oder 'JJJJ-MM;…' für einen ganzen Monat bzw. 'JJJJ;…')."""
+    out = {}
+    if datei and os.path.exists(datei):
+        for z in open(datei, encoding="utf-8"):
+            t = [x.strip().replace(",", ".") for x in z.replace("\t", ";").split(";")]
+            if len(t) >= 3 and t[0][:1].isdigit():
+                try:
+                    out[t[0]] = (float(t[1]), float(t[2]))
+                except ValueError:
+                    pass
+    return out
+
+
 def schreibe(pfad, lat, lng):
     b = open(pfad, "rb").read()
     segs = segmente(b)
@@ -147,6 +177,8 @@ def main():
     ap.add_argument("--benutzer", default="volker")
     ap.add_argument("--toleranz", type=int, default=600)
     ap.add_argument("--zeitzone", default="Europe/Berlin")
+    ap.add_argument("--orte", help="Datei mit Zeilen JJJJ-MM-TT;Breite;Länge für Tage ohne Tour (auch JJJJ-MM oder JJJJ)")
+    ap.add_argument("--tagesort", action="store_true", help="Fotos ohne Tour bekommen die mittlere Position der Fotos desselben Tagesordners, die GPS haben")
     ap.add_argument("--anwenden", action="store_true")
     ap.add_argument("--zeit", type=int, default=0, help="nach N Sekunden sauber beenden (erneut starten setzt fort)")
     ap.add_argument("--log")
@@ -174,6 +206,8 @@ def main():
     st = collections.Counter(); keine = []
     log = open(LOG, "a", encoding="utf-8") if a.anwenden else None
     t0 = time.time()
+    orte = orte_lesen(a.orte)
+    offen = []                                   # (Pfad, Ordner, Tag) ohne Tour
     for dp, dn, fn in os.walk(a.fotos):
         dn[:] = [d for d in dn if not d.startswith(".") and d not in ("_Arbeit", "Lightroom")]
         for f in sorted(fn):
@@ -196,7 +230,7 @@ def main():
                 st["Zeit nicht lesbar"] += 1; continue
             b = tour_fuer(tours, starts, ts, a.toleranz)
             if not b:
-                st["keine Tour zur Aufnahmezeit"] += 1; keine.append(p); continue
+                offen.append((p, dp, datetime.fromtimestamp(ts, tz).strftime("%Y-%m-%d"))); continue
             pts = strecke(coords, b[3])
             if not pts or len(pts) < 2:
                 st["Tour ohne gespeicherte Strecke"] += 1; keine.append(p + "  (Tour %s ohne Strecke)" % b[3]); continue
@@ -206,6 +240,35 @@ def main():
                 try:
                     mt = os.path.getmtime(p)
                     info = schreibe(p, lat, lng)
+                    os.utime(p, (mt, mt))
+                    log.write(json.dumps({"lauf": lauf, "pfad": p, "mtime": mt, **info}) + "\n"); log.flush()
+                except Exception as e:
+                    st["Fehler beim Schreiben"] += 1; print("Fehler", p, e)
+    if offen:      # Ersatzposition: Tagesliste (--orte) bzw. Mittel der GPS-Fotos des Tagesordners (--tagesort)
+        mitte = {}
+        if a.tagesort:
+            for ordner in {o[1] for o in offen}:
+                pts = []
+                for f in os.listdir(ordner):
+                    if f.lower().endswith((".jpg", ".jpeg")) and not f.startswith("."):
+                        try:
+                            g = gps_von(os.path.join(ordner, f))
+                        except Exception:
+                            g = None
+                        if g:
+                            pts.append(g)
+                if pts:
+                    pts.sort()
+                    mitte[ordner] = (sorted(x[0] for x in pts)[len(pts) // 2], sorted(x[1] for x in pts)[len(pts) // 2])
+        for p, ordner, tag in offen:
+            pos = orte.get(tag) or orte.get(tag[:7]) or orte.get(tag[:4]) or mitte.get(ordner)
+            if not pos:
+                st["keine Tour zur Aufnahmezeit"] += 1; keine.append(p); continue
+            st["GPS aus Tagesort/Liste ergänzbar"] += 1
+            if a.anwenden:
+                try:
+                    mt = os.path.getmtime(p)
+                    info = schreibe(p, pos[0], pos[1])
                     os.utime(p, (mt, mt))
                     log.write(json.dumps({"lauf": lauf, "pfad": p, "mtime": mt, **info}) + "\n"); log.flush()
                 except Exception as e:
