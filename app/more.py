@@ -69,9 +69,21 @@ def api_set_sport(tour_id: str, body: dict):
         raise HTTPException(400, "Unbekannte Sportart")
     if not db.one("SELECT 1 x FROM tours WHERE id=?", (tour_id,)):
         raise HTTPException(404, "Tour nicht gefunden")
+    msg = ""
+    if body.get("komoot"):                # auch bei Komoot ändern (Komoot-Tour selbst bzw. hochgeladene Kopie einer lokalen Tour)
+        from . import portals, sync
+        t = db.one("SELECT source FROM tours WHERE id=?", (tour_id,))
+        kid = tour_id if t["source"] != "local" else (portals.status_of(tour_id).get("komoot") or {}).get("remote_id")
+        if kid:
+            try:
+                sync._komoot().set_sport(kid, sp); msg = "auch bei Komoot geändert"
+            except Exception as e:  # noqa
+                raise HTTPException(502, str(e))
+        else:
+            msg = "bei Komoot nicht vorhanden – nur hier geändert"
     db.execute("INSERT OR REPLACE INTO tour_sport(id,sport) VALUES(?,?)", (tour_id, sp))
     db.execute("UPDATE tours SET sport=? WHERE id=?", (sp, tour_id))
-    return {"ok": True}
+    return {"ok": True, "komoot": msg}
 
 
 @router.post("/api/tours/{tour_id}/hide")

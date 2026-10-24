@@ -110,6 +110,15 @@ class Komoot:
         if r.status_code not in (200, 204):
             raise KomootError(f"Umbenennen bei Komoot fehlgeschlagen (HTTP {r.status_code}): {r.text[:160]}")
 
+    def set_sport(self, tour_id, sport):
+        r = requests.patch(f"{BASE}/v007/tours/{tour_id}", auth=self._auth(), timeout=30,
+                           json={"sport": sport}, headers={"Content-Type": "application/json"})
+        if r.status_code == 401:
+            self.token = None
+            r = requests.patch(f"{BASE}/v007/tours/{tour_id}", auth=self._auth(), timeout=30, json={"sport": sport})
+        if r.status_code not in (200, 204):
+            raise KomootError(f"Sportart bei Komoot ändern fehlgeschlagen (HTTP {r.status_code}): {r.text[:160]}")
+
     def delete(self, tour_id):
         """Tour bei Komoot endgültig löschen."""
         r = requests.delete(f"{BASE}/v007/tours/{tour_id}", auth=self._auth(), timeout=30)

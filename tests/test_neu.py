@@ -177,3 +177,16 @@ def test_delete_tour_local_and_komoot(monkeypatch):
     portals.record("g1", "komoot", "uploaded", "999")
     r = c.post("/api/tours/g1/delete", json={"komoot": True}).json()
     assert deleted == ["999"] and "gelöscht" in r["komoot"] and not db.one("SELECT 1 x FROM tours WHERE id='g1'")
+
+
+def test_set_sport_also_on_komoot(monkeypatch):
+    from fastapi.testclient import TestClient
+    from app import main
+    calls = []
+    class K:
+        def set_sport(self, i, s): calls.append((i, s))
+    monkeypatch.setattr(sync, "_komoot", lambda *a, **k: K())
+    _tour("k5", "Komoot", 1600000000); db.execute("UPDATE tours SET source='komoot' WHERE id='k5'")
+    r = TestClient(main.app).post("/api/tours/k5/sport", json={"sport": "touringbicycle", "komoot": True}).json()
+    assert calls == [("k5", "touringbicycle")] and r["komoot"] == "auch bei Komoot geändert"
+    assert db.one("SELECT sport FROM tours WHERE id='k5'")["sport"] == "touringbicycle"
