@@ -1,7 +1,11 @@
 /* Meine Touren – Einzelseiten-App ohne Build-Schritt */
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
-const api = async (u, o) => { const r = await fetch(u, o); if (r.status === 401 && ME.users_enabled && !(u + "").startsWith("/api/login")) { showAuth("login", "Bitte anmelden."); throw new Error("Bitte anmelden"); } if (!r.ok) { let m = await r.text(); try { m = JSON.parse(m).detail || m; } catch (e) {} throw new Error(m || r.status); } return r.json(); };
+const STALE = () => new Promise(() => {});   // Antwort für eine inzwischen verlassene Seite: nie auflösen, damit die alte Ansicht nichts mehr zeichnet
+const api = async (u, o) => { const tok = window._rt, r = await fetch(u, o); if (tok && tok !== window._rt && (!o || !o.method || o.method === "GET")) return STALE(); if (r.status === 401 && ME.users_enabled && !(u + "").startsWith("/api/login")) { showAuth("login", "Bitte anmelden."); throw new Error("Bitte anmelden"); } if (!r.ok) { let m = await r.text(); try { m = JSON.parse(m).detail || m; } catch (e) {} throw new Error(m || r.status); } return r.json(); };
+if (window.L) {   // Leaflet: Zoom-Übergang, der erst nach dem Verlassen der Seite endet, nicht mehr auf die entfernte Karte anwenden
+  for (const m of ["_onZoomTransitionEnd", "_onPanTransitionEnd"]) { const f = L.Map.prototype[m]; if (f) L.Map.prototype[m] = function (...a) { if (!this._mapPane) return; return f.apply(this, a); }; }
+}
 const pad2 = n => String(n).padStart(2, "0");
 const nf = (n, d = 1) => Number(n ?? 0).toLocaleString("de-DE", {minimumFractionDigits: d, maximumFractionDigits: d});
 const MON = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
@@ -76,7 +80,7 @@ async function route() {
   const [k = "dash", name] = path.split("/");
   document.querySelectorAll("nav a").forEach(a => a.classList.toggle("on", a.dataset.k === (k === "tour" || k === "flight" ? "tours" : k)));
   document.querySelectorAll(".modal").forEach(m => m.remove());
-  clearInterval(pollTimer); if (map) { map.remove(); map = null; }
+  clearInterval(pollTimer); if (map) { try { map.stop(); map.off(); map.remove(); } catch (e) {} map = null; }
   if (k !== "search" && $("#gs")) $("#gs").value = "";
   $("#main").className = k === "map" ? "wide" : "";
   window.scrollTo(0, 0);
@@ -258,7 +262,8 @@ VIEWS.map = async () => {
   };
   // Beim Hineinzoomen: fehlende bzw. grob vereinfachte Strecken der sichtbaren Touren in voller Genauigkeit nachladen
   const detail = async () => {
-    if (!map || !$("#mn") || map.getZoom() < 11) { $("#mn").style.display = "none"; return; }
+    if (!$("#mn")) return;
+    if (!map || map.getZoom() < 11) { $("#mn").style.display = "none"; return; }
     const bd = map.getBounds().pad(.1), c = map.getCenter();
     const need = shown.filter(x => bd.contains(x.st) && !FULL[x.t.id] && !busy.has(x.t.id)).sort((a, z) => map.distance(c, a.st) - map.distance(c, z.st)).slice(0, 30);
     if (!need.length) { $("#mn").style.display = "none"; return; }
