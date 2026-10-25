@@ -50,7 +50,11 @@ def app_url(tmp_path_factory):
         except Exception:
             time.sleep(0.2)
     yield f"http://127.0.0.1:{port}"
-    pr.terminate(); pr.wait(5)
+    pr.terminate()
+    try:
+        pr.wait(10)
+    except subprocess.TimeoutExpired:      # Beenden dauert auf langsamen Runnern manchmal länger
+        pr.kill(); pr.wait(5)
 
 
 @pytest.fixture(scope="module")
