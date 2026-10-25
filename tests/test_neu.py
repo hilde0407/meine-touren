@@ -199,7 +199,9 @@ def test_secrets_are_encrypted(monkeypatch):
     raw = db.one("SELECT v FROM settings WHERE k='komoot_password'")["v"]
     assert raw.startswith("enc1:") and "geheim" not in raw
     assert db.get("komoot_password") == "geheim123"
-    assert (config.DATA_DIR / "secret.key").exists() and oct((config.DATA_DIR / "secret.key").stat().st_mode)[-3:] == "600"
+    assert (config.DATA_DIR / "secret.key").exists()
+    if os.name != "nt":
+        assert oct((config.DATA_DIR / "secret.key").stat().st_mode)[-3:] == "600"
     # Altbestand im Klartext wird beim Lesen verschlüsselt
     db.execute("INSERT OR REPLACE INTO settings(k,v) VALUES('strava_tokens','{\"a\":1}')")
     assert db.get("strava_tokens") == '{"a":1}'

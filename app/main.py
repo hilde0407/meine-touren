@@ -442,7 +442,7 @@ def api_photo_delete(body: dict):
 def photo_library():
     """Relative Pfade (ohne Endung) aller Bilder der Bibliothek – damit der Browser Vorhandenes überspringt (auch gelöschte)."""
     root = config.LIB_DIR
-    have = [str(p.relative_to(root).with_suffix("")) for p in root.rglob("*.jpg")] if root.exists() else []
+    have = [p.relative_to(root).with_suffix("").as_posix() for p in root.rglob("*.jpg")] if root.exists() else []
     return have + [r["rel"] for r in db.query("SELECT rel FROM photo_deleted")]
 
 

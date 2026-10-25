@@ -760,7 +760,7 @@ def test_photo_plan_asks_on_time_shift(monkeypatch):
         ts, la, lo = photos.read_meta(str(config.LIB_DIR / "re/p1.jpg"))
         assert ts == base - 7200 + 900 and abs(la + 21.1) < 0.01 and abs(lo - 55.4) < 0.01
         photos.scan()
-        assert db.one("SELECT tour_id FROM photos WHERE path LIKE '%re/p1.jpg'")["tour_id"] == "t_re"
+        assert db.one("SELECT tour_id FROM photos WHERE path LIKE '%re_p1.jpg'")["tour_id"] == "t_re"
 
 
 def test_photo_delete_group_and_not_reimported(monkeypatch):
@@ -775,10 +775,10 @@ def test_photo_delete_group_and_not_reimported(monkeypatch):
             b = io.BytesIO(); Image.effect_noise((120, 90), 30 + i * 40).convert("RGB").transpose(Image.ROTATE_90 if i == 1 else Image.FLIP_TOP_BOTTOM if i == 2 else Image.ROTATE_180).save(b, "JPEG")
             c.post("/api/photo-upload", files={"file": ("x.jpg", b.getvalue(), "image/jpeg")}, data={"rel": f"del/f{i}", "taken": f"2018:02:0{i + 1} 10:00:00", "mtime": "0"})
         photos.scan()
-        ids = [r["id"] for r in db.query("SELECT id FROM photos WHERE path LIKE '%/del/%'")]
+        ids = [r["id"] for r in db.query("SELECT id FROM photos WHERE path LIKE '%del_f%'")]
         assert len(ids) == 3
         assert c.post("/api/photo-delete", json={"ids": ids[:2]}).json()["deleted"] == 2
-        assert db.one("SELECT COUNT(*) n FROM photos WHERE path LIKE '%/del/%'")["n"] == 1
+        assert db.one("SELECT COUNT(*) n FROM photos WHERE path LIKE '%del_f%'")["n"] == 1
         assert len(list((config.LIB_DIR / "del").glob("*.jpg"))) == 1
         lib = c.get("/api/photo-library").json()
         assert all(f"del/f{i}" in lib for i in range(3))          # gelöschte gelten als "vorhanden" -> kein erneuter Import
