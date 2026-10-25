@@ -1,0 +1,3 @@
+# Optional: Anbindung an Garmin-Konten (braucht Python 3.12 oder neuer). Ohne dieses Paket funktioniert der Datei-Import trotzdem.
+garminconnect>=0.3.20
+curl_cffi>=0.15

@@ -210,3 +210,37 @@ def test_secrets_are_encrypted(monkeypatch):
     monkeypatch.delenv("MT_SECRET_KEY"); secret.reset_cache()
     assert db.get("komoot_password") == "geheim123"
     assert db.get("tile_style") == db.get("tile_style")        # normale Einstellungen unverändert
+
+
+def test_shift_photos_tour_day_and_reset():
+    _tour("a", "T", 1600000000); _tour("b", "U", 1600020000)
+    for i, (ts, tour) in enumerate([(1600000100, "a"), (1600000200, "a"), (1600012000, None), (1600020100, "b"), (1600200000, None)]):
+        db.execute("INSERT INTO photos(path,taken_ts,dated,tour_id) VALUES(?,?,1,?)", (f"p{i}", ts, tour))
+    photos.assign_all()
+    q = lambda: [r["taken_ts"] for r in db.query("SELECT taken_ts FROM photos ORDER BY id")]
+    r = photos.shift_photos("a", 600)
+    assert r["shifted"] == 2 and q() == [1600000700, 1600000800, 1600012000, 1600020100, 1600200000]
+    row = db.one("SELECT manual, offset_s FROM photos WHERE path='p0'")
+    assert row["manual"] == 1 and row["offset_s"] == 600
+    photos.shift_photos("a", 60, scope="day")                      # auch p2 (gleicher Tag, ohne Tour); b/andere Tage nicht
+    assert q() == [1600000760, 1600000860, 1600012060, 1600020100, 1600200000]
+    r = photos.shift_photos("a", 0, reset=True, scope="day")
+    assert q() == [1600000100, 1600000200, 1600012000, 1600020100, 1600200000]
+    with pytest.raises(ValueError):
+        photos.shift_photos("a", 10 ** 9)
+    with pytest.raises(KeyError):
+        photos.shift_photos("nix", 1)
+    _tour("c", "leer", 1700000000)
+    with pytest.raises(ValueError):
+        photos.shift_photos("c", 5)
+
+
+def test_photo_shift_api():
+    from fastapi.testclient import TestClient
+    from app import main
+    _tour("a", "T", 1600000000)
+    db.execute("INSERT INTO photos(path,taken_ts,dated,tour_id) VALUES('p',1600000100,1,'a')")
+    with TestClient(main.app) as c:
+        assert c.post("/api/photo-shift", json={"tour_id": "a", "delta_s": 30}).json()["shifted"] == 1
+        assert c.post("/api/photo-shift", json={"tour_id": "zz", "delta_s": 1}).status_code == 404
+        assert c.post("/api/photo-shift", json={"tour_id": "a", "delta_s": "abc"}).status_code == 400

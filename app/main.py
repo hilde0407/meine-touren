@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, health, config, ctx, db, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, users_api, zepp
+from . import auth, health, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, zepp
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -88,6 +88,8 @@ def _user_tick(tick, now, last_day):
         if newest and str(newest) != (db.get("inbox_seen") or "") and time.time() - newest > 90:
             if jobs.start("Fotos aus Eingang", sync.import_inbox):
                 db.put("inbox_seen", str(newest))
+    if (tick == 2 or tick % 360 == 5) and db.get("update_check") != "0":      # alle 6 Stunden: neue Version auf GitHub?
+        health.update_check()
     if tick == 1:                          # neue Programmversion: gleich eine Sicherung anlegen
         extras.backup_on_update()
     if tick % 10 == 1:                     # fehlt eine Sicherung der letzten 23 Stunden, selbst eine anlegen
@@ -410,6 +412,16 @@ def api_photo_assign(body: dict):
         raise HTTPException(400, str(e))
 
 
+@app.post("/api/photo-shift")
+def api_photo_shift(body: dict):
+    try:
+        return photos.shift_photos(body.get("tour_id"), body.get("delta_s", 0), body.get("scope", "tour"), bool(body.get("reset")))
+    except KeyError:
+        raise HTTPException(404, "Tour nicht gefunden")
+    except (ValueError, TypeError) as e:
+        raise HTTPException(400, str(e))
+
+
 @app.post("/api/photo-unassign")
 def api_photo_unassign(body: dict):
     if not body.get("ids"):
@@ -507,4 +519,6 @@ app.include_router(more2.router)
 app.include_router(users_api.router)
 app.include_router(portals.router)
 app.include_router(health.router)
+app.include_router(devices.router)
+app.include_router(updater.router)
 app.mount("/", StaticFiles(directory=str(STATIC), html=True), name="static")

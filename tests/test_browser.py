@@ -138,3 +138,35 @@ def test_photo_selection_from_clicked(page):
     imgs.nth(0).click(force=True)                      # danach: einzelnes Foto umschalten
     assert len(cap("img.sel")) in (len([x for x in alle if x <= clicked]) - 1, len([x for x in alle if x <= clicked]) + 1)
     assert not page.errors, page.errors
+
+
+def test_photo_chain_drag_moves_all_and_saves(page):
+    page.errors.clear()
+    tid = page.evaluate("TOURS.filter(t => t.source === 'local').sort((a, b) => a.start_ts - b.start_ts)[0].id")
+    page.evaluate(f"location.hash = '#/tour/{tid}'")
+    page.wait_for_selector("#chb", timeout=15000)
+    page.wait_for_timeout(500)
+    ts = lambda: page.evaluate(f"fetch('/api/photos?tour_id={tid}').then(r => r.json()).then(a => a.map(p => p.taken_ts))")
+    before = ts()
+    assert len(before) == 6
+    page.click("#chb")
+    pos = page.evaluate("""() => {
+      const c = window._chain, m = c.items[0].m, tgt = c.atTime(1200 * 1000);
+      const f = map.latLngToContainerPoint(m.getLatLng()), to = map.latLngToContainerPoint(L.latLng(tgt[0], tgt[1])), r = document.getElementById('tm').getBoundingClientRect();
+      return {fx: r.left + f.x, fy: r.top + f.y, tx: r.left + to.x, ty: r.top + to.y};
+    }""")
+    page.mouse.move(pos["fx"], pos["fy"]); page.mouse.down()
+    page.mouse.move((pos["fx"] + pos["tx"]) / 2, (pos["fy"] + pos["ty"]) / 2, steps=6)
+    page.mouse.move(pos["tx"], pos["ty"], steps=6); page.mouse.up()
+    assert "Min." in page.inner_text("#chi") and not page.is_disabled("#chok")
+    # die anderen Fotos sind mitgewandert: Foto 5 (25 min nach Start) liegt jetzt am Streckenende (Zeit begrenzt)
+    moved = page.evaluate("window._chain.items.map(i => [i.m.getLatLng().lat, i.m.getLatLng().lng])")
+    assert len({tuple(round(x, 5) for x in m) for m in moved}) >= 5
+    page.click("#chok"); page.wait_for_timeout(1500)
+    after = ts()
+    diffs = {a - b for a, b in zip(after, before)}
+    assert len(diffs) == 1 and abs(diffs.pop() - 1200) < 60              # alle Fotos um denselben Betrag verschoben
+    page.once("dialog", lambda d: d.accept())
+    page.click("#chb"); page.click("#chre"); page.wait_for_timeout(1500)
+    assert ts() == before                                                # Original-Zeiten wiederhergestellt
+    assert not page.errors, page.errors

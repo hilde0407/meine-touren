@@ -1,0 +1,9 @@
+[Unit]
+Description=Meine Touren: angefordertes Update installieren
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/@NAME@-update auto
+TimeoutStartSec=1200

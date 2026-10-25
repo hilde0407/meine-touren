@@ -57,8 +57,17 @@ cat > "/etc/cron.d/$NAME-backup" <<EOT
 40 3 * * * $SVCUSER cd $APP && set -a && . $ENVF && set +a && $APP/venv/bin/python -m app.backup $BACKUPS 14 >/dev/null 2>&1
 EOT
 chmod 644 "/etc/cron.d/$NAME-backup"
-cp "$SRC/deploy/restore.sh" "/usr/local/bin/$NAME-restore" && chmod 755 "/usr/local/bin/$NAME-restore"
-cp "$SRC/deploy/update.sh" "/usr/local/bin/$NAME-update" && chmod 755 "/usr/local/bin/$NAME-update"
+# atomar ersetzen (läuft gerade ein Skript aus dieser Datei, bleibt dessen alte Fassung unverändert)
+for pair in restore update; do cp "$SRC/deploy/$pair.sh" "/usr/local/bin/$NAME-$pair.new" && chmod 755 "/usr/local/bin/$NAME-$pair.new" && mv -f "/usr/local/bin/$NAME-$pair.new" "/usr/local/bin/$NAME-$pair"; done
+
+echo "== Update aus der Oberfläche (Hilfsdienst mit Root-Rechten, nimmt nur eine Versionsnummer entgegen) =="
+sed -e "s|@NAME@|$NAME|g" -e "s|@DATA@|$DATA|g" "$SRC/deploy/meine-touren-update.path" > "/etc/systemd/system/$NAME-update.path"
+sed -e "s|@NAME@|$NAME|g" -e "s|@DATA@|$DATA|g" "$SRC/deploy/meine-touren-update.service" > "/etc/systemd/system/$NAME-update.service"
+systemctl daemon-reload
+systemctl enable --now "$NAME-update.path" >/dev/null 2>&1 || echo "(Update-Hilfsdienst konnte nicht gestartet werden – Updates weiterhin per $NAME-update github)"
+
+echo "== Optional: Garmin-Konto-Anbindung =="
+"$APP/venv/bin/pip" install -q -r "$SRC/requirements-optional.txt" >/dev/null 2>&1 && echo "garminconnect installiert." || echo "(garminconnect nicht installierbar, z. B. Python < 3.12 – Garmin-Import per Datei funktioniert trotzdem)"
 
 echo "== Webserver (nginx, Port 80) =="
 cp "$SRC/deploy/nginx-meine-touren.conf" "/etc/nginx/sites-available/$NAME"

@@ -17,13 +17,18 @@ for c in python3.13 python3.12 python3.11 python3.10 /opt/homebrew/bin/python3 /
 done
 [ -n "$PY" ] || { echo "Python 3.10 oder neuer fehlt. Installation: brew install python   (oder https://www.python.org/downloads/)"; read -p "Enter zum Beenden"; exit 1; }
 
-if [ ! -x "$VENV/bin/uvicorn" ] || [ "$APP/requirements.txt" -nt "$VENV/.fertig" ]; then
-  echo "Einrichtung (einmalig, 1–2 Minuten) …"
-  "$PY" -m venv "$VENV"
-  "$VENV/bin/pip" install -q --upgrade pip
-  "$VENV/bin/pip" install -q -r "$APP/requirements.txt"
-  touch "$VENV/.fertig"
-fi
+einrichten() {
+  if [ ! -x "$VENV/bin/uvicorn" ] || [ "$APP/requirements.txt" -nt "$VENV/.fertig" ]; then
+    echo "Einrichtung (einmalig, 1–2 Minuten) …"
+    "$PY" -m venv "$VENV"
+    "$VENV/bin/pip" install -q --upgrade pip
+    "$VENV/bin/pip" install -q -r "$APP/requirements.txt"
+    touch "$VENV/.fertig"
+  fi
+  # Garmin-Konto-Anbindung (optional, braucht Python 3.12+; ohne sie geht der Datei-Import trotzdem)
+  [ -f "$VENV/.garmin" ] || { "$VENV/bin/pip" install -q -r "$APP/requirements-optional.txt" >/dev/null 2>&1; touch "$VENV/.garmin"; }
+}
+einrichten
 mkdir -p "$DATA"
 # Quelle für "Fotos aus Ordner übernehmen" (Verwaltung): Standard ~/Pictures/fertige Fotos, sonst ~/Pictures; anderer Ordner: MT_FOTOS
 FOTOS="${MT_FOTOS:-$HOME/Pictures/fertige Fotos}"; [ -d "$FOTOS" ] || FOTOS="$HOME/Pictures"
@@ -33,4 +38,12 @@ echo "Foto-Quelle: $FOTOS"
 echo "Meine Touren läuft auf http://127.0.0.1:$PORT   (Daten: $DATA)"
 ( sleep 3; open "http://127.0.0.1:$PORT" ) &
 cd "$APP"
-exec "$VENV/bin/uvicorn" app.main:app --host 127.0.0.1 --port "$PORT"
+export MT_SELF_UPDATE=1                    # erlaubt "Jetzt installieren" in der Oberfläche; Neustart übernimmt diese Schleife
+while true; do
+  rm -f "$DATA/.neustart"
+  "$VENV/bin/uvicorn" app.main:app --host 127.0.0.1 --port "$PORT" || true
+  if [ -f "$DATA/.neustart" ]; then
+    echo "Neustart nach Update …"; rm -f "$DATA/.neustart"; rm -f "$VENV/.garmin"; einrichten; continue
+  fi
+  break
+done

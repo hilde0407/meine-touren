@@ -293,6 +293,83 @@ VIEWS.tour = async id => {
 };
 
 /* ---- Verwaltung: Sicherung und Schutz ---- */
+/* ---- Updates: Prüfung auf GitHub, Installation aus der Oberfläche ---- */
+const isAdmin = () => !ME.users_enabled || (ME.user && ME.user.role === "admin");
+async function installUpdate(u, say) {
+  if (
+    !confirm(
+      `Version ${u.latest} jetzt installieren?\n\nVorher wird eine Sicherung aller Daten angelegt. Die Seite ist während der Installation kurz nicht erreichbar.`
+    )
+  )
+    return;
+  const before = u.current;
+  say("Sicherung wird angelegt …");
+  try {
+    await api("/api/update/install", {
+      method: "POST",
+      headers: {"content-type": "application/json"},
+      body: JSON.stringify({version: u.latest}),
+    });
+  } catch (e) {
+    return say(`<span class="bad">${esc(e.message)}</span>`);
+  }
+  say("Version wird installiert … (dauert etwa ein bis zwei Minuten)");
+  const t0 = Date.now();
+  const tick = async () => {
+    let v = null,
+      s = null;
+    try {
+      v = (await (await fetch("/api/version", {cache: "no-store"})).json()).version;
+      s = (await api("/api/update/status")).status;
+    } catch (e) {}
+    if (v && v.split(" ")[0] !== before) {
+      say(`<span class="ok">Version ${esc(v.split(" ")[0])} ist installiert ✓ – Seite wird neu geladen …</span>`);
+      return setTimeout(() => location.reload(), 1500);
+    }
+    if (s && s.state === "error") return say(`<span class="bad">Update fehlgeschlagen: ${esc(s.message || "unbekannter Fehler")}</span>`);
+    if (Date.now() - t0 > 6 * 60000)
+      return say(
+        `<span class="bad">Das dauert ungewöhnlich lange. Bitte im Container <code>journalctl -u ${esc(u.command.split("-update")[0])}-update</code> ansehen.</span>`
+      );
+    setTimeout(tick, 3000);
+  };
+  setTimeout(tick, 4000);
+}
+async function updatePanel() {
+  const b = $("#upd");
+  if (!b) return;
+  let u;
+  try {
+    u = await api("/api/update-check");
+  } catch (e) {
+    return;
+  }
+  const admin = isAdmin();
+  const notes = (u.notes || "").trim();
+  b.innerHTML = `<div class="panel" style="margin-bottom:16px${u.newer ? ";border-color:var(--yellow)" : ""}"><h2>Updates</h2>
+   <p>Installiert: <b>${esc(u.current)}</b>${u.latest ? ` · neueste Version auf GitHub: <b>${esc(u.latest)}</b>${u.published ? ` (${esc(u.published)})` : ""}` : ` · <span class="mut">GitHub war nicht erreichbar</span>`}
+   ${u.newer ? `<span class="bad"> – es gibt eine neuere Version</span>` : u.ok ? `<span class="ok"> ✓ aktuell</span>` : ""}</p>
+   ${notes && u.newer ? `<details><summary>Was ist neu?</summary><pre class="pre" style="white-space:pre-wrap;max-height:240px;overflow:auto">${esc(notes)}</pre></details>` : ""}
+   <div class="row"><button class="btn alt" id="ucheck">Jetzt prüfen</button>
+   ${u.newer && admin && u.can_install ? `<button class="btn" id="uinst">Version ${esc(u.latest)} installieren</button>` : ""}
+   ${u.newer ? `<a class="btn alt" target="_blank" rel="noopener" href="${esc(u.url)}">Auf GitHub ansehen</a>` : ""}<span id="umsg"></span></div>
+   ${
+     u.newer && !u.can_install
+       ? `<p class="mut" style="font-size:13px">Die Installation aus der Oberfläche ist hier noch nicht eingerichtet. Im Container <b>einmal</b> ausführen: <code>${esc(u.command)}</code> – danach klappt es per Knopfdruck.</p>`
+       : ""
+   }
+   <div class="field" style="margin-top:8px"><label>Regelmäßig (alle 6 Stunden) auf neue Versionen prüfen</label><select data-k="update_check"><option value="1">ja</option><option value="0">nein</option></select></div>
+   ${u.status && u.status.state === "error" ? `<p class="bad" style="font-size:13px">Letztes Update fehlgeschlagen: ${esc(u.status.message || "")}</p>` : ""}</div>`;
+  const sel = b.querySelector('[data-k="update_check"]');
+  if (sel) sel.value = u.enabled ? "1" : "0";
+  $("#ucheck").onclick = async () => {
+    $("#umsg").textContent = "…";
+    await api("/api/update-check?force=1").catch(() => {});
+    updatePanel();
+  };
+  if ($("#uinst")) $("#uinst").onclick = () => installUpdate(u, h => ($("#umsg").innerHTML = h));
+}
+
 const _adm = VIEWS.admin;
 VIEWS.admin = async (...a) => {
   await _adm(...a);
@@ -314,13 +391,7 @@ VIEWS.admin = async (...a) => {
       const b = $("#hlt");
       if (b) b.remove();
     });
-  api("/api/update-check")
-    .then(u => {
-      const b = $("#upd");
-      if (b && u.newer)
-        b.innerHTML = `<div class="panel" style="margin-bottom:16px;border-color:var(--yellow)">Neue Version <b>${esc(u.latest)}</b> verfügbar (installiert: ${esc(u.current)}) – <a target="_blank" rel="noopener" href="${esc(u.url)}">Download auf GitHub</a></div>`;
-    })
-    .catch(() => {});
+  updatePanel();
   sv.closest(".row").insertAdjacentHTML(
     "beforebegin",
     `<div class="grid g2" style="margin-top:40px"><div class="panel"><h2>Sicherung</h2>

@@ -332,6 +332,11 @@ def notify_check():
     if not (db.get("notify_url") or "").strip():
         return False
     w = [x["text"] for x in more.api_health()]
+    if db.get("update_check") != "0":
+        from . import health
+        u = health.update_check()
+        if u.get("newer"):
+            w.append(f"Neue Version {u['latest']} von Meine Touren verfügbar (installiert: {u['current']}) – Verwaltung → Update.")
     h = hashlib.md5("|".join(w).encode()).hexdigest() if w else ""
     if h == (db.get("notify_last") or ""):
         return False

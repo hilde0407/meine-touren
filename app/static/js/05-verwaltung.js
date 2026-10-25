@@ -8,13 +8,17 @@ const STATUS_DE = {
   no_gps: "ohne GPS",
 };
 VIEWS.admin = async (_, q) => {
-  const [st, w, s, pi, pf] = await Promise.all([
+  const [st, w, s, pi, pf, dv] = await Promise.all([
     api("/api/status"),
     api("/api/workouts"),
     api("/api/settings"),
     api("/api/photo-info"),
     api("/api/portals"),
+    api("/api/devices").catch(() => ({garmin: {}, suunto: {}})),
   ]);
+  const gm = dv.garmin || {},
+    su = dv.suunto || {},
+    sunres = q && q.get("suunto");
   const sv = pf.portals.find(x => x.id === "strava") || {},
     sres = q && q.get("strava");
   const pend = w.filter(x => x.status === "new");
@@ -58,12 +62,50 @@ VIEWS.admin = async (_, q) => {
        : ""
    }
    </div>
-  <div class="panel" style="margin-top:40px"><h2>GPX/TCX-Dateien <span class="mut" style="font:400 16px var(--b)">(Import)</span></h2><div class="field"><label>GPX/TCX-Dateien importieren (lokal speichern, Doppelten-Prüfung; Upload nur mit Häkchen)</label><div class="row"><input type="file" id="files" multiple accept=".gpx,.tcx"><span class="mut">zusätzlich zu:</span>${pf.portals.map(p => `<label class="chk" style="margin:0"><input type="checkbox" class="fp" value="${p.id}" ${p.connected ? "" : "disabled"}> ${p.name}${p.connected ? "" : `<span class="mut" style="font-size:12px"> (${p.id === "komoot" ? "Zugang fehlt: im Panel „Komoot“ (Komoot-E-Mail und -Passwort) speichern" : "nicht verbunden: bei „Portale“ verbinden"})</span>`}</label>`).join("")}<button class="btn alt sm" id="upl">Importieren</button><label style="margin:0"><input type="checkbox" id="dry"> Probelauf</label></div></div></div>
+  <div class="panel" style="margin-top:40px"><h2>Garmin, Suunto &amp; andere Uhren <span class="mut" style="font:400 16px var(--b)">(Import)</span></h2>
+   <p class="mut">Aktivitäten werden <b>lokal</b> als Touren gespeichert (Karte, Statistik, Fotozuordnung), mit Doppelten-Prüfung. Hochgeladen wird nur, wenn du es unten ausdrücklich ankreuzt.<br>
+   <b>Tipp:</b> Ist deine Uhr in Garmin Connect bzw. der Suunto-App mit <b>Komoot</b> verbunden, kommen die Touren ohnehin über „Komoot aktualisieren“.</p>
+   <h3>Dateien importieren <span class="ok" style="font-size:14px">funktioniert immer</span></h3>
+   <div class="field"><label>FIT-, GPX-, TCX- oder ZIP-Dateien (mehrere möglich; ZIP darf viele Aktivitäten enthalten, auch der komplette Garmin-Export)</label><div class="row"><input type="file" id="files" multiple accept=".fit,.gpx,.tcx,.zip,.gz"><span class="mut">zusätzlich zu:</span>${pf.portals.map(p => `<label class="chk" style="margin:0"><input type="checkbox" class="fp" value="${p.id}" ${p.connected ? "" : "disabled"}> ${p.name}${p.connected ? "" : `<span class="mut" style="font-size:12px"> (${p.id === "komoot" ? "Zugang fehlt: im Panel „Komoot“ (Komoot-E-Mail und -Passwort) speichern" : "nicht verbunden: bei „Portale“ verbinden"})</span>`}</label>`).join("")}<button class="btn alt sm" id="upl">Importieren</button><label style="margin:0"><input type="checkbox" id="dry"> Probelauf</label></div></div>
+   <details><summary>So kommst du an die Dateien</summary><ul class="mut" style="padding-left:18px">
+    <li><b>Garmin, alles auf einmal:</b> auf <a target="_blank" rel="noopener" href="https://www.garmin.com/account/datamanagement/">garmin.com/account/datamanagement</a> „Daten exportieren“ anfordern (Garmin schickt nach ein bis zwei Tagen eine ZIP-Datei per E-Mail) und die ZIP-Datei hier importieren.</li>
+    <li><b>Garmin, einzelne Aktivität:</b> connect.garmin.com → Aktivität öffnen → Zahnrad ⚙ → „Original exportieren“ (FIT in einer ZIP) oder „Als GPX exportieren“.</li>
+    <li><b>Suunto:</b> Suunto-App → Training öffnen → ⋮ (oben rechts) → Exportieren → FIT (alle Daten) oder GPX. Trainings ohne GPS lassen sich nur als FIT exportieren und werden hier ohnehin übersprungen.</li>
+    <li><b>Große ZIP-Dateien</b> (über 1 GB): statt Hochladen in den Eingangsordner legen: <code>${esc(st.inbox || "")}/touren</code> – sie werden automatisch übernommen und danach nach „erledigt“ verschoben.</li>
+    <li>Andere Hersteller (Polar, Coros, Wahoo, Amazfit …) exportieren ebenfalls FIT oder GPX – das geht genauso.</li></ul></details>
+   <div class="grid g2" style="margin-top:14px">
+    <div><h3 style="margin-top:0">Garmin-Konto ${gm.connected ? `<span class="ok" style="font-size:15px">✓ verbunden${gm.email ? " als " + esc(gm.email) : ""}</span>` : ""} <span class="mut" style="font-size:12px">experimentell</span></h3>
+     ${
+       gm.available === false
+         ? `<p class="mut">Nicht verfügbar: ${esc(gm.why)}</p>`
+         : gm.connected
+           ? `<p class="mut">${nf(gm.imported || 0, 0)} Aktivitäten übernommen${gm.checked ? ", zuletzt geprüft " + new Date(+gm.checked * 1000).toLocaleString("de-DE") : ""}.</p>
+     <div class="field"><label>Nur Aktivitäten ab Datum (JJJJ-MM-TT, leer = alle)</label><input data-k="garmin_since" value="${esc(s.garmin_since)}" placeholder="2024-01-01"></div>
+     <div class="field"><label>Neue Aktivitäten täglich automatisch übernehmen</label><select data-k="garmin_auto"><option value="0">aus</option><option value="1">an</option></select></div>
+     <div class="row"><button class="btn" id="gsync">Jetzt importieren</button><button class="btn alt" id="gdis">Trennen</button><span id="gres"></span></div>`
+           : `<p class="mut">Anmeldung wie im Browser (E-Mail und Passwort von Garmin Connect). Das Passwort wird <b>nicht gespeichert</b>, nur der Anmelde-Schlüssel (verschlüsselt). Konten mit Google-/Apple-Login haben kein Garmin-Passwort – dann bitte den Dateiweg nehmen.</p>
+     <div class="field"><label>Garmin-E-Mail</label><input id="gem" autocomplete="off"></div><div class="field"><label>Garmin-Passwort</label><input id="gpw" type="password" autocomplete="off"></div>
+     <div class="field" id="gmfa" style="display:none"><label>Bestätigungscode (Zwei-Faktor, per E-Mail/App)</label><input id="gcode" inputmode="numeric" autocomplete="off"></div>
+     <div class="row"><button class="btn" id="glogin">Verbinden</button><span id="gres"></span></div>
+     <p class="mut" style="font-size:12px">Garmin bietet Privatpersonen keine offizielle Schnittstelle; die Anmeldung kann von Garmin jederzeit geändert oder zeitweise gebremst werden. Der Dateiweg bleibt davon unberührt.</p>`
+     }</div>
+    <div><h3 style="margin-top:0">Suunto-Konto ${su.connected ? `<span class="ok" style="font-size:15px">✓ verbunden</span>` : ""} <span class="mut" style="font-size:12px">nur mit API-Zugang</span></h3>
+     ${sunres ? `<p class="${sunres === "ok" ? "ok" : "bad"}"><b>${sunres === "ok" ? "Suunto ist verbunden ✓" : "Suunto: " + esc(sunres)}</b></p>` : ""}
+     <p class="mut">Suunto gibt seine Cloud-Schnittstelle nur an Firmen und Organisationen, nicht an Privatpersonen. Wer einen Zugang über das <a target="_blank" rel="noopener" href="https://apizone.suunto.com/how-to-start">Suunto-Partnerprogramm</a> hat, trägt ihn hier ein. Alle anderen nutzen den Dateiweg oben.</p>
+     <details${su.configured || su.connected ? " open" : ""}><summary>Zugangsdaten der Suunto API Zone</summary>
+      ${f("suunto_client_id", "Client-ID")}${f("suunto_client_secret", "Client-Secret", "password")}${f("suunto_key", "Subscription-Key (Primary Key)", "password")}
+      <p class="mut" style="font-size:13px">Weiterleitungsadresse (in der API Zone eintragen): <code>${esc(su.redirect || "")}</code></p>
+      <div class="field"><label>Nur Workouts ab Datum (JJJJ-MM-TT, leer = alle)</label><input data-k="suunto_since" value="${esc(s.suunto_since)}"></div>
+      <div class="field"><label>Neue Workouts täglich automatisch übernehmen</label><select data-k="suunto_auto"><option value="0">aus</option><option value="1">an</option></select></div>
+      <div class="row"><button class="btn" id="sunconn">${su.connected ? "Neu verbinden" : "Mit Suunto verbinden"}</button>${su.connected ? `<button class="btn" id="sunsync">Jetzt importieren</button><button class="btn alt" id="sundis">Trennen</button>` : ""}<span id="sunres"></span></div></details></div></div></div>
   <div class="grid g2" style="margin-top:40px">
    <div class="panel"><h2>Automatik</h2><div class="field"><label>Täglich aktualisieren (Komoot, Routen, Fotos)</label><select data-k="auto_sync"><option value="0">aus</option><option value="1">an</option></select></div>${f("auto_sync_hour", "Uhrzeit (Stunde)", "number")}</div>
    <div class="panel"><h2>Protokoll</h2><div class="pre" id="log">–</div></div></div>
   <div class="row" style="margin-top:34px"><button class="btn" id="save">Einstellungen speichern</button><span id="ok" class="ok"></span></div>`;
   document.querySelector('[data-k="auto_sync"]').value = s.auto_sync;
+  ["garmin_auto", "suunto_auto"].forEach(
+    k => document.querySelector(`[data-k="${k}"]`) && (document.querySelector(`[data-k="${k}"]`).value = s[k])
+  );
   if (document.querySelector('[data-k="zepp_auto_adopt"]')) document.querySelector('[data-k="zepp_auto_adopt"]').value = s.zepp_auto_adopt;
   const run = async (u, o) => {
     try {
@@ -132,8 +174,67 @@ VIEWS.admin = async (_, q) => {
     if (!$("#files").files.length) return;
     const ps = [...document.querySelectorAll(".fp:checked")].map(c => c.value);
     if (!$("#dry").checked && ps.length && !confirm(`Dateien lokal speichern und zu ${ps.join(" + ")} hochladen?`)) return;
-    run(`/api/import-files?dry_run=${$("#dry").checked}&portals=${ps.join(",")}`, {method: "POST", body: fd});
+    run(`/api/import-activity-files?dry_run=${$("#dry").checked}&portals=${ps.join(",")}`, {method: "POST", body: fd});
   };
+  const dres = (id, html) => $(id) && ($(id).innerHTML = html);
+  if ($("#glogin"))
+    $("#glogin").onclick = async () => {
+      dres("#gres", "…");
+      try {
+        let r;
+        if ($("#gmfa").style.display !== "none" && $("#gcode").value.trim())
+          r = await api("/api/garmin/mfa", {
+            method: "POST",
+            headers: {"content-type": "application/json"},
+            body: JSON.stringify({code: $("#gcode").value}),
+          });
+        else
+          r = await api("/api/garmin/login", {
+            method: "POST",
+            headers: {"content-type": "application/json"},
+            body: JSON.stringify({email: $("#gem").value, password: $("#gpw").value}),
+          });
+        if (r.mfa) {
+          $("#gmfa").style.display = "";
+          $("#glogin").textContent = "Code bestätigen";
+          return dres("#gres", `<span class="mut">Garmin hat einen Code geschickt – bitte oben eintragen.</span>`);
+        }
+        route();
+      } catch (e) {
+        dres("#gres", `<span class="bad">${esc(e.message)}</span>`);
+      }
+    };
+  if ($("#gsync"))
+    $("#gsync").onclick = async () => {
+      await save();
+      run("/api/garmin/sync", {method: "POST"});
+    };
+  if ($("#gdis"))
+    $("#gdis").onclick = async () => {
+      if (!confirm("Garmin-Verbindung trennen? Bereits übernommene Touren bleiben erhalten.")) return;
+      await api("/api/garmin/disconnect", {method: "POST"});
+      route();
+    };
+  $("#sunconn").onclick = async () => {
+    try {
+      await save();
+      const r = await api("/api/suunto/connect");
+      location.href = r.url;
+    } catch (e) {
+      dres("#sunres", `<span class="bad">${esc(e.message)}</span>`);
+    }
+  };
+  if ($("#sunsync"))
+    $("#sunsync").onclick = async () => {
+      await save();
+      run("/api/suunto/sync", {method: "POST"});
+    };
+  if ($("#sundis"))
+    $("#sundis").onclick = async () => {
+      if (!confirm("Suunto-Verbindung trennen? Bereits übernommene Touren bleiben erhalten.")) return;
+      await api("/api/suunto/disconnect", {method: "POST"});
+      route();
+    };
   $("#sconn").onclick = async () => {
     try {
       await save();

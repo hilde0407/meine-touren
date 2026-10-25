@@ -236,3 +236,4 @@ html.mob details.agrp .gs{display:none}
 
 path.clk{cursor:pointer}
 a.chip{text-decoration:none;color:inherit;cursor:pointer}a.chip .sw{margin-right:5px}
+.chtip{background:#000b;color:#fff;border:0;box-shadow:none;font-size:11px;padding:1px 5px}.chtip:before{display:none}

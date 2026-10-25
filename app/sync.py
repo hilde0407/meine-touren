@@ -340,6 +340,11 @@ def import_inbox():
         except Exception as e:  # noqa
             log(f"Fotoeingang {root}: {e}")
     photos.scan()
+    try:
+        from . import devices
+        devices.import_inbox_activities()          # Tourendateien (FIT/GPX/TCX/ZIP) im Unterordner „touren“
+    except Exception as e:  # noqa
+        log(f"Tourendateien im Eingang: {e}")
     return n
 
 
@@ -377,3 +382,5 @@ def refresh_all(with_routes=True, with_photos=True):
     except Exception as e:  # noqa
         log(f"Regionen: {e}")
     check_zepp()
+    from . import devices
+    devices.auto_sync()                              # Garmin/Suunto, nur wenn „automatisch“ eingeschaltet ist

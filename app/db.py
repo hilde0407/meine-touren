@@ -70,6 +70,7 @@ def _open(path):
         conn.execute("CREATE TABLE IF NOT EXISTS tour_sport (id TEXT PRIMARY KEY, sport TEXT)")        # eigene Sportart (bleibt beim Komoot-Abgleich)
         conn.execute("CREATE TABLE IF NOT EXISTS tour_hidden (id TEXT PRIMARY KEY, js TEXT, ts INTEGER)")  # ausgeblendete Touren (z. B. Fehlaufzeichnungen)
         conn.execute("CREATE TABLE IF NOT EXISTS photo_deleted (rel TEXT PRIMARY KEY, ts INTEGER)")   # gelöschte Fotos: nicht erneut importieren
+        conn.execute("CREATE TABLE IF NOT EXISTS ext_imports (src TEXT, ext_id TEXT, tour_id TEXT, status TEXT, ts INTEGER, PRIMARY KEY(src, ext_id))")  # Garmin/Suunto: schon geprüfte Aktivitäten
         conn.commit()
         _conns[path] = conn
         return conn

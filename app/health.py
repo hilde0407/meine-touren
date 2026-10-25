@@ -72,27 +72,29 @@ def health():
 
 
 def update_check():
-    if _upd["data"] is not None and time.time() - _upd["ts"] < 6 * 3600:
+    """Neueste Version laut GitHub (Zwischenspeicher: 6 Stunden, bei Fehlern 30 Minuten)."""
+    if _upd["data"] is not None and time.time() - _upd["ts"] < _upd.get("ttl", 6 * 3600):
         return _upd["data"]
-    res = {"current": config.VERSION.split(" ")[0], "latest": None, "url": f"https://github.com/{REPO}/releases/latest", "newer": False}
+    res = {"current": config.VERSION.split(" ")[0], "latest": None, "url": f"https://github.com/{REPO}/releases/latest", "newer": False,
+           "notes": "", "published": "", "checked": int(time.time()), "ok": False}
+    ttl = 30 * 60
     try:
         r = requests.get(f"https://api.github.com/repos/{REPO}/releases/latest", timeout=8, headers={"Accept": "application/vnd.github+json"})
         if r.status_code == 200:
             j = r.json()
             res["latest"] = j.get("tag_name", "").lstrip("v")
             res["url"] = j.get("html_url") or res["url"]
+            res["notes"] = (j.get("body") or "")[:1500]
+            res["published"] = (j.get("published_at") or "")[:10]
             res["newer"] = _ver(res["latest"]) > _ver(res["current"])
+            res["ok"] = True
+            ttl = 6 * 3600
     except Exception:  # noqa
         pass
-    _upd.update(ts=time.time(), data=res)
+    _upd.update(ts=time.time(), data=res, ttl=ttl)
     return res
 
 
 @router.get("/api/zustand")
 def api_health():
     return health()
-
-
-@router.get("/api/update-check")
-def api_update():
-    return update_check()

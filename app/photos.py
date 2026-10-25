@@ -315,6 +315,42 @@ def assign_manual(ids, tour_id, shift=False, minutes_after_start=0, scope="selec
     return {"offset_s": offset, "shifted": n_shift, "assigned": len(ids)}
 
 
+def shift_photos(tour_id, delta_s, scope="tour", reset=False):
+    """Zeitverschiebung für die Fotos einer Tour („Perlenkette“): alle Fotos der Tour wandern um denselben Betrag,
+    ihre Abstände zueinander bleiben. scope='day': zusätzlich alle anderen Fotos desselben Aufnahmetags
+    (Kamerauhr ging für den ganzen Tag falsch). reset=True nimmt jede frühere Verschiebung dieser Fotos zurück."""
+    t = db.one("SELECT id FROM tours WHERE id=?", (str(tour_id),))
+    if not t:
+        raise KeyError(tour_id)
+    delta_s = int(delta_s)
+    if abs(delta_s) > 400 * 86400:
+        raise ValueError("Zeitversatz unplausibel groß")
+    own = [r["id"] for r in db.query("SELECT id FROM photos WHERE tour_id=?", (str(tour_id),))]
+    if not own:
+        raise ValueError("Diese Tour hat keine Fotos")
+    ids = set(own)
+    if scope == "day":
+        from datetime import datetime
+        from .gpxtools import TZ
+        q = ",".join("?" * len(own))
+        for r in db.query(f"SELECT DISTINCT taken_ts FROM photos WHERE id IN ({q})", own):
+            d = datetime.fromtimestamp(r["taken_ts"], tz=TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+            a = int(d.timestamp())
+            ids |= {x["id"] for x in db.query("SELECT id FROM photos WHERE taken_ts>=? AND taken_ts<? AND (tour_id IS NULL OR tour_id=?)", (a, a + 86400, str(tour_id)))}
+    ids = sorted(ids)
+    for i in range(0, len(ids), 500):
+        part = ids[i:i + 500]
+        q = ",".join("?" * len(part))
+        if reset:
+            db.execute(f"UPDATE photos SET taken_ts=taken_ts-COALESCE(offset_s,0), offset_s=0 WHERE id IN ({q})", part)
+        else:
+            db.execute(f"UPDATE photos SET taken_ts=taken_ts+?, offset_s=COALESCE(offset_s,0)+? WHERE id IN ({q})", (delta_s, delta_s, *part))
+    q = ",".join("?" * len(own))
+    db.execute(f"UPDATE photos SET tour_id=?, manual=1 WHERE id IN ({q})", (str(tour_id), *own))
+    assign_all()
+    return {"shifted": len(ids), "delta_s": 0 if reset else delta_s}
+
+
 def unassign_manual(ids, reset_time=False, exclude=False):
     ids = [int(i) for i in ids]
     q = ",".join("?" * len(ids))

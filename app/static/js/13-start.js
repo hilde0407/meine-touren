@@ -74,16 +74,24 @@ VIEWS.admin = async (...a) => {
   anchor.parentNode.insertBefore(frag, anchor);
 };
 
-/* ---- Warnbanner (Gesundheitscheck) ---- */
-let _hl = {t: 0, v: []};
+/* ---- Warnbanner (Gesundheitscheck) und Hinweis auf neue Version (nur Administratoren) ---- */
+let _hl = {t: 0, v: []},
+  _up = {t: 0, v: null};
 async function healthBanner() {
   try {
     if (Date.now() - _hl.t > 60000) _hl = {t: Date.now(), v: await api("/api/health")};
+    if (isAdmin() && Date.now() - _up.t > 6 * 3600 * 1000) _up = {t: Date.now(), v: await api("/api/update-check").catch(() => null)};
     const m = $("#main");
-    if (!m || !_hl.v.length || m.querySelector(".warnbar")) return;
+    if (!m || m.querySelector(".warnbar")) return;
+    const u = isAdmin() && _up.v && _up.v.newer && _up.v.enabled !== false && !location.hash.startsWith("#/admin") ? _up.v : null;
+    if (!_hl.v.length && !u) return;
     m.insertAdjacentHTML(
       "afterbegin",
-      `<div class="warnbar">${_hl.v.map(w => `<div>⚠ ${esc(w.text)}</div>`).join("")}<a href="#/admin">Verwaltung öffnen</a></div>`
+      `<div class="warnbar">${_hl.v.map(w => `<div>⚠ ${esc(w.text)}</div>`).join("")}${
+        u
+          ? `<div>⬆ Neue Version <b>${esc(u.latest)}</b> verfügbar (installiert: ${esc(u.current)}). <a href="#/admin">${u.can_install ? "Jetzt installieren" : "Details"}</a></div>`
+          : ""
+      }${_hl.v.length ? '<a href="#/admin">Verwaltung öffnen</a>' : ""}</div>`
     );
   } catch (e) {}
 }

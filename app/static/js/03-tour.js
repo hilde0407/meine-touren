@@ -216,27 +216,7 @@ VIEWS.tour = async id => {
   bindThumbs($("#th"), ph);
   if (ph.length) photoSelect(ph, 0, {box: "#th", anchor: "#pc", tour: true});
   mk.then(c => {
-    if (!c || !ph.length || (!c[0][3] && c[0][3] !== 0)) return;
-    ph.forEach(p => {
-      const rel = (p.taken_ts - t.start_ts) * 1000;
-      let b = c[0],
-        bd = 1e18;
-      c.forEach(q => {
-        const d = Math.abs((q[3] || 0) - rel);
-        if (d < bd) {
-          bd = d;
-          b = q;
-        }
-      });
-      const ic = L.divIcon({
-        className: "",
-        html: `<div class="pm" style="background-image:url(/pic/${p.id}?size=120)"></div>`,
-        iconSize: [36, 36],
-      });
-      L.marker([b[0], b[1]], {icon: ic})
-        .addTo(map)
-        .on("click", () => openLb(ph, ph.indexOf(p)));
-    });
+    if (c && ph.length) photoChain(map, t, c, ph); // Fotos auf der Strecke; verschiebbar (12-fotokette.js)
   });
   $("#eup").onclick = () => uploadDialog(t);
   uploadChips(t);
@@ -371,7 +351,7 @@ VIEWS.tour = async id => {
           inp.value = x;
           inp.focus();
         };
-        if (front) box.querySelector(".mut")?.remove(), box.prepend(b);
+        if (front) (box.querySelector(".mut")?.remove(), box.prepend(b));
         else {
           box.querySelector(".mut")?.remove();
           box.appendChild(b);

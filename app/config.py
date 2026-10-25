@@ -33,12 +33,21 @@ DEFAULTS = {
     "photo_max_side": "2200",
     "photo_quality": "82",
     "notify_url": "",            # optionaler Webhook (ntfy, Gotify, eigener Dienst …) für Warnungen; leer = aus
+    "garmin_email": "",          # nur zur Anzeige; gespeichert werden nur die Anmelde-Token (verschlüsselt), nie das Passwort
+    "garmin_since": "",          # leer = alle Aktivitäten, sonst ab diesem Datum (JJJJ-MM-TT)
+    "garmin_auto": "0",          # 1 = neue Garmin-Aktivitäten täglich automatisch als lokale Tour übernehmen
+    "suunto_client_id": "",
+    "suunto_client_secret": "",
+    "suunto_key": "",            # Ocp-Apim-Subscription-Key (Suunto API Zone)
+    "suunto_since": "",
+    "suunto_auto": "0",
+    "update_check": "1",         # 1 = regelmäßig auf GitHub nach einer neuen Version sehen
     "ui_prefs": "",              # JSON: Streckenfarbe, Kartenstil (geräteübergreifend)
 }
-SECRET_KEYS = {"zepp_password", "zepp_token", "komoot_password", "strava_client_secret", "strava_tokens"}
+SECRET_KEYS = {"zepp_password", "zepp_token", "komoot_password", "strava_client_secret", "strava_tokens", "suunto_client_secret", "suunto_key", "suunto_tokens", "garmin_tokens"}
 ENCRYPTED_KEYS = SECRET_KEYS | {"zepp_key"}     # werden verschlüsselt in der Datenbank abgelegt (app/secret.py)
 
-VERSION = "1.0.36 · Meine Touren (2026-10-24)"
+VERSION = "1.1.0 · Meine Touren (2026-10-25)"
 
 
 SYSTEM_DB = DATA_DIR / "system.sqlite"          # Benutzer, Sitzungen, Freigaben
