@@ -55,6 +55,8 @@ TILE_CACHE = DATA_DIR / "tilecache"             # Kartenkacheln und Geländedate
 def _backup_root():
     if os.environ.get("BACKUP_DIR"):
         return Path(os.environ["BACKUP_DIR"])
+    if os.name == "nt":                  # Windows: kein /var/backups
+        return DATA_DIR / "backups-system"
     try:
         return Path("/var/backups/komoot-hub" if Path("/var/backups/komoot-hub").exists() else "/var/backups/meine-touren")
     except OSError:                      # z. B. macOS ohne Zugriff

@@ -28,7 +28,7 @@ from . import auth, config, ctx, extras, health
 router = APIRouter()
 APP_ROOT = Path(__file__).resolve().parent.parent
 VERSION_RE = re.compile(r"^\d+\.\d+\.\d+$")
-KEEP = ("app", "mac", "deploy", "install", "ct", "requirements.txt", "README.md", "LICENSE")
+KEEP = ("app", "mac", "windows", "deploy", "install", "ct", "requirements.txt", "README.md", "LICENSE")
 MAX_DOWNLOAD = 150 * 1024 ** 2
 
 

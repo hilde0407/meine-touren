@@ -11,3 +11,12 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - run: python -m pytest -q tests
       - run: bash -n deploy/install.sh && bash -n deploy/update.sh && bash -n deploy/restore.sh && bash -n ct/meine-touren.sh && bash -n install/meine-touren-install.sh
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: {python-version: "3.12"}
+      - run: pip install -r requirements.txt pytest httpx playwright
+      - run: python -m playwright install chromium
+      - run: python -m pytest -q tests
