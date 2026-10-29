@@ -278,6 +278,45 @@ function exifDate(buf) {
   }
   return null;
 }
+function exifOffset(buf) {
+  // Zeitzonen-Versatz der Aufnahme (OffsetTimeOriginal/OffsetTime, z. B. "+00:00") – ohne ihn wäre die Kamerazeit mehrdeutig
+  const v = new DataView(buf);
+  if (v.getUint16(0) !== 0xffd8) return null;
+  let o = 2;
+  while (o + 4 < v.byteLength) {
+    const m = v.getUint16(o),
+      len = v.getUint16(o + 2);
+    if (m === 0xffe1 && v.getUint32(o + 4) === 0x45786966) {
+      const t = o + 10,
+        le = v.getUint16(t) === 0x4949,
+        g16 = x => v.getUint16(x, le),
+        g32 = x => v.getUint32(x, le);
+      const ifd = (off, tag) => {
+        const n = g16(t + off);
+        for (let i = 0; i < n; i++) {
+          const e = t + off + 2 + i * 12;
+          if (g16(e) === tag) return e;
+        }
+        return null;
+      };
+      const e1 = ifd(g32(t + 4), 0x8769);
+      if (e1 === null) return null;
+      for (const tag of [0x9011, 0x9010]) {
+        const e = ifd(g32(e1 + 8), tag);
+        if (e === null) continue;
+        const cnt = g32(e + 4),
+          so = cnt > 4 ? t + g32(e + 8) : e + 8;
+        let r = "";
+        for (let i = 0; i < Math.min(6, cnt); i++) r += String.fromCharCode(v.getUint8(so + i));
+        if (/^[+-]\d\d:\d\d$/.test(r)) return r;
+      }
+      return null;
+    }
+    if ((m & 0xff00) !== 0xff00) break;
+    o += 2 + len;
+  }
+  return null;
+}
 function exifGps(buf) {
   // Aufnahmeort (Breite, Länge) aus dem JPEG-Kopf
   const v = new DataView(buf);
@@ -410,7 +449,7 @@ function photoImportModal(o = {}) {
       if (fs.length) analyse(fs);
     });
   };
-  const analyse = async all => {
+  const analyse = async (all, withGone = false) => {
     busy = true;
     try {
       const files = all.filter(f => PHOTO_EXT.test(f.name) && !f.name.startsWith(".")),
@@ -423,8 +462,11 @@ function photoImportModal(o = {}) {
         return;
       }
       body(`<p id="ptxt0">Fotos werden geprüft …</p>`);
-      const have = new Set(await api("/api/photo-library")),
-        fresh = files.filter(f => !have.has(relOf(f))),
+      const lib = await api("/api/photo-library?split=1"),
+        have = new Set(lib.have),
+        gone = new Set(lib.deleted),
+        fresh = files.filter(f => !have.has(relOf(f)) && (withGone || !gone.has(relOf(f)))),
+        deleted = withGone ? 0 : files.filter(f => !have.has(relOf(f)) && gone.has(relOf(f))).length,
         items = [];
       let nodate = 0;
       for (let i = 0; i < fresh.length; i++) {
@@ -437,8 +479,10 @@ function photoImportModal(o = {}) {
           d = new Date(f.lastModified);
         let ed = null,
           gp = null;
+        f._o = "";
         try {
           ed = hd ? exifDate(hd) : null;
+          f._o = (ed && hd && exifOffset(hd)) || "";
         } catch (e) {}
         try {
           gp = hd ? exifGps(hd) : null;
@@ -446,12 +490,14 @@ function photoImportModal(o = {}) {
         if (!ed) nodate++;
         f._t = ed || `${d.getFullYear()}:${pad2(d.getMonth() + 1)}:${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
         f._gps = gp;
-        items.push({k: i, t: f._t, lat: gp ? gp[0] : null, lng: gp ? gp[1] : null});
+        items.push({k: i, t: f._t, o: f._o, lat: gp ? gp[0] : null, lng: gp ? gp[1] : null});
       }
-      const info = {total: files.length, dup: files.length - fresh.length, other, heic, nodate};
+      const info = {total: files.length, dup: files.length - fresh.length - deleted, deleted, other, heic, nodate, all};
       if (!fresh.length) {
         busy = false;
-        body(`<p><b>Nichts zu importieren:</b> alle ${files.length} Bilder sind schon in der Bibliothek (oder wurden früher gelöscht).</p><div class="row"><button class="btn" id="pback">Anderen Ordner wählen</button><button class="btn ghost" id="pcx">Schließen</button></div>`);
+        body(`<p><b>Nichts zu importieren:</b> ${info.dup ? `${info.dup} Bilder sind schon in der Bibliothek` : ""}${info.dup && deleted ? " und " : ""}${deleted ? `${deleted} Bilder hast du früher gelöscht – sie werden deshalb nicht erneut übernommen` : ""}.</p>
+          <div class="row">${deleted ? `<button class="btn" id="pre">Die ${deleted} gelöschten Fotos erneut importieren</button>` : ""}<button class="btn alt" id="pback">Anderen Ordner wählen</button><button class="btn ghost" id="pcx">Schließen</button></div>`);
+        if (deleted) q("#pre").onclick = () => analyse(all, true);
         q("#pback").onclick = start;
         q("#pcx").onclick = close;
         return;
@@ -490,7 +536,7 @@ function photoImportModal(o = {}) {
         return {d, ch, def};
       });
     q("#pih").textContent = o.tour ? `Fotos zu „${o.tour.name}“ hinzufügen` : "Fotos importieren";
-    body(`<p>${info.total} Bilder gefunden, davon <b>${info.total - info.dup}</b> neu${info.dup ? ` (${info.dup} schon vorhanden)` : ""}.${info.nodate ? ` <span class="mut">${info.nodate} ohne Aufnahmezeit im Bild – dort gilt das Dateidatum.</span>` : ""}${info.heic ? ` <span class="mut">${info.heic} HEIC-Bilder werden übersprungen (bitte als JPG exportieren).</span>` : ""}</p>
+    body(`<p>${info.total} Bilder gefunden, davon <b>${fresh.length}</b> zu importieren${info.dup ? ` (${info.dup} schon vorhanden)` : ""}${info.deleted ? ` · <a href="#" id="pre">${info.deleted} früher gelöschte ebenfalls importieren</a>` : ""}.${info.nodate ? ` <span class="mut">${info.nodate} ohne Aufnahmezeit im Bild – dort gilt das Dateidatum.</span>` : ""}${info.heic ? ` <span class="mut">${info.heic} HEIC-Bilder werden übersprungen (bitte als JPG exportieren).</span>` : ""}</p>
       <p class="mut" style="font-size:14px">So werden die Fotos nach Aufnahmetag zugeordnet. Pro Tag kannst du die Auswahl ändern.</p>
       ${rows
         .map(
@@ -499,6 +545,11 @@ function photoImportModal(o = {}) {
         )
         .join("")}
       <div class="row" style="margin-top:14px"><button class="btn" id="pigo">Importieren</button><button class="btn ghost" id="pcx">Abbrechen</button><span class="sp"></span><span class="mut" id="pisum"></span></div>`);
+    if (q("#pre"))
+      q("#pre").onclick = e => {
+        e.preventDefault();
+        analyse(info.all, true);
+      };
     const val = i => q(`select[data-r="${i}"]`).value;
     const count = () => {
       const n = rows.reduce((a, r, i) => a + (val(i) === "skip" ? 0 : r.d.n), 0);
@@ -561,6 +612,7 @@ function photoImportModal(o = {}) {
         fd.append("file", blob, "x.jpg");
         fd.append("rel", relOf(f));
         fd.append("taken", f._t);
+        if (f._o) fd.append("offset", f._o);
         if (f._tour) {
           fd.append("tour", f._tour);
           fd.append("shift_s", f._shift || 0);

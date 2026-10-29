@@ -179,3 +179,74 @@ def test_browser_add_photos_to_tour_with_wrong_camera_clock(tour_server):
         assert r["ok"] and r["aligned"]
         assert not errs
         br.close()
+
+
+# ---------- Zeitzonen-Versatz der Kamera und erneuter Import gelöschter Fotos ----------
+def _jpeg(seed):
+    from PIL import Image
+    import random
+    random.seed(seed)
+    im = Image.new("RGB", (64, 48)); im.putdata([(random.randint(0, 255),) * 3 for _ in range(64 * 48)])
+    b = io.BytesIO(); im.save(b, "JPEG")
+    return b.getvalue()
+
+
+def test_offset_time_original_is_kept_and_used(tmp_path):
+    from PIL import Image
+    data = photos.with_exif_time(_jpeg(1), "2026:10:29 12:17:17", None, None, "+00:00")
+    p = tmp_path / "a.jpg"; p.write_bytes(data)
+    ts, _, _ = photos.read_meta(p)
+    assert ts == int(__import__("datetime").datetime(2026, 10, 29, 12, 17, 17, tzinfo=__import__("datetime").timezone.utc).timestamp())
+    with Image.open(p) as im:
+        assert im.getexif().get_ifd(0x8769).get(0x9011) == "+00:00"
+    # nur OffsetTimeOriginal (ohne OffsetTime) wird ebenfalls erkannt
+    ex = Image.Exif(); ex.get_ifd(0x8769)[0x9003] = "2026:10:29 12:00:00"; ex.get_ifd(0x8769)[0x9011] = "+01:00"
+    q = tmp_path / "b.jpg"; Image.new("RGB", (8, 8)).save(q, "JPEG", exif=ex.tobytes())
+    assert photos.read_meta(q)[0] == int(__import__("datetime").datetime(2026, 10, 29, 11, 0, 0, tzinfo=__import__("datetime").timezone.utc).timestamp())
+
+
+def test_plan_uses_camera_offset():
+    t = int(__import__("datetime").datetime(2026, 10, 29, 12, 10, 0, tzinfo=__import__("datetime").timezone.utc).timestamp())
+    _tour("G", t, 2 * 3600 + 600, 28.1, -17.1)                 # 12:10-14:20 UTC (La Gomera)
+    items = [{"k": i, "t": "2026:10:29 %02d:%02d:00" % divmod(740 + i * 20, 60), "o": "+00:00"} for i in range(5)]
+    d = photos.plan(items)
+    assert len(d) == 1 and d[0]["status"] == "ok" and d[0]["matched"] == 5       # ohne Offset (Berlin) lägen alle 1 h zu früh
+    no_off = photos.plan([{k: v for k, v in it.items() if k != "o"} for it in items])
+    assert no_off[0]["matched"] < 5
+
+
+def test_upload_with_offset_and_reimport_of_deleted(monkeypatch):
+    from fastapi.testclient import TestClient
+    from app import main
+    monkeypatch.setattr(main, "scheduler", lambda: None)
+    with TestClient(main.app) as c:
+        db.put("photo_only_tracked", "0")
+        for i in range(2):
+            r = c.post("/api/photo-upload", files={"file": ("x.jpg", _jpeg(10 + i), "image/jpeg")},
+                       data={"rel": f"gom/f{i}", "taken": "2026:10:29 12:17:17", "offset": "+00:00", "mtime": "0"})
+            assert r.status_code == 200
+        photos.scan()
+        rows = db.query("SELECT id,taken_ts FROM photos WHERE path LIKE '%gom_f%' ORDER BY id")
+        utc = int(__import__("datetime").datetime(2026, 10, 29, 12, 17, 17, tzinfo=__import__("datetime").timezone.utc).timestamp())
+        assert len(rows) == 2 and all(r["taken_ts"] == utc for r in rows)
+        c.post("/api/photo-delete", json={"ids": [rows[0]["id"]]})
+        lib = c.get("/api/photo-library?split=1").json()
+        assert "gom/f0" in lib["deleted"] and "gom/f0" not in lib["have"]
+        r = c.post("/api/photo-upload", files={"file": ("x.jpg", _jpeg(10), "image/jpeg")}, data={"rel": "gom/f0", "taken": "2026:10:29 12:17:17", "offset": "+00:00", "mtime": "0"})
+        assert r.status_code == 200 and not r.json().get("skipped")
+        lib = c.get("/api/photo-library?split=1").json()
+        assert "gom/f0" in lib["have"] and "gom/f0" not in lib["deleted"]
+
+
+def test_upload_shift_keeps_offset_zone(monkeypatch):
+    from fastapi.testclient import TestClient
+    from app import main
+    monkeypatch.setattr(main, "scheduler", lambda: None)
+    with TestClient(main.app) as c:
+        db.put("photo_only_tracked", "0")
+        c.post("/api/photo-upload", files={"file": ("x.jpg", _jpeg(20), "image/jpeg")},
+               data={"rel": "gom/s0", "taken": "2026:10:29 12:00:00", "offset": "+00:00", "shift_s": "3600", "mtime": "0"})
+        photos.scan()
+        r = db.one("SELECT taken_ts FROM photos WHERE path LIKE '%gom_s0%'")
+        utc = int(__import__("datetime").datetime(2026, 10, 29, 13, 0, 0, tzinfo=__import__("datetime").timezone.utc).timestamp())
+        assert r["taken_ts"] == utc

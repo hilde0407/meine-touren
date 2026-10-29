@@ -439,16 +439,19 @@ def api_photo_delete(body: dict):
 
 
 @app.get("/api/photo-library")
-def photo_library():
+def photo_library(split: int = 0):
     """Relative Pfade (ohne Endung) aller Bilder der Bibliothek – damit der Browser Vorhandenes überspringt (auch gelöschte)."""
     root = config.LIB_DIR
     have = [p.relative_to(root).with_suffix("").as_posix() for p in root.rglob("*.jpg")] if root.exists() else []
-    return have + [r["rel"] for r in db.query("SELECT rel FROM photo_deleted")]
+    gone = [r["rel"] for r in db.query("SELECT rel FROM photo_deleted")]
+    if split:
+        return {"have": have, "deleted": gone}
+    return have + gone
 
 
 @app.post("/api/photo-upload")
 async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken: str = Form(""), mtime: int = Form(0),
-                       tour: str = Form(""), shift_s: int = Form(0), lat: str = Form(""), lng: str = Form(""), force: str = Form("")):
+                       tour: str = Form(""), shift_s: int = Form(0), lat: str = Form(""), lng: str = Form(""), force: str = Form(""), offset: str = Form("")):
     """Nimmt ein im Browser verkleinertes Foto an und schreibt die Aufnahmezeit als EXIF hinein."""
     parts = [p for p in rel.replace("\\", "/").split("/") if p not in ("", ".", "..")]
     if not parts:
@@ -456,12 +459,16 @@ async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken
     dst = (config.LIB_DIR.joinpath(*parts)).with_suffix(".jpg")
     if config.LIB_DIR.resolve() not in dst.resolve().parents:
         raise HTTPException(400, "Ungültiger Pfad")
-    if shift_s and photos._raw_ts(taken) is not None:      # Zeitverschiebung (Kamera nicht auf Ortszeit): Aufnahmezeit korrigieren
-        taken = datetime.fromtimestamp(photos._raw_ts(taken) + shift_s, photos.TZ).strftime("%Y:%m:%d %H:%M:%S")
-    if not tour and not force and photos.only_tracked() and not photos.in_track(photos._raw_ts(taken), photos.track_windows()):
+    import re as _re
+    offset = offset if _re.match(r"^[+-]\d\d:\d\d$", offset or "") else ""
+    ts = photos._raw_ts(taken, offset or None)
+    if shift_s and ts is not None:      # Zeitverschiebung (Kamera nicht auf Ortszeit): Aufnahmezeit korrigieren
+        ts += shift_s
+        zone = photos.timezone(photos.timedelta(seconds=(1 if offset[0] == "+" else -1) * (int(offset[1:3]) * 3600 + int(offset[4:6]) * 60))) if offset else photos.TZ
+        taken = datetime.fromtimestamp(ts, zone).strftime("%Y:%m:%d %H:%M:%S")
+    if not tour and not force and photos.only_tracked() and not photos.in_track(ts, photos.track_windows()):
         return {"ok": True, "skipped": True}     # keine GPS-Strecke zu diesem Foto
     raw = await file.read()
-    ts = photos._raw_ts(taken)
     dup = photos.find_duplicate(ts, photos.fingerprint(raw), str(dst))
     if dup:
         return {"ok": True, "skipped": True, "duplicate": True}      # dasselbe Bild ist schon in der Bibliothek
@@ -469,7 +476,9 @@ async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken
         la, lo = (float(lat), float(lng)) if lat != "" and lng != "" else (None, None)
     except ValueError:
         la = lo = None
-    data = photos.with_exif_time(raw, taken, la, lo)
+    data = photos.with_exif_time(raw, taken, la, lo, offset or None)
+    rel_key = "/".join(parts); rel_key = rel_key.rsplit(".", 1)[0] if "." in parts[-1] and parts[-1].lower().endswith(".jpg") else rel_key
+    db.execute("DELETE FROM photo_deleted WHERE rel=?", (rel_key,))      # bewusst erneut hochgeladen: nicht mehr als gelöscht merken
     if tour:
         db.execute("INSERT INTO photo_pref(path,tour_id) VALUES(?,?) ON CONFLICT(path) DO UPDATE SET tour_id=excluded.tour_id", (str(dst), tour))
     dst.parent.mkdir(parents=True, exist_ok=True)

@@ -45,7 +45,7 @@ def read_meta(path):
                 pass
             raw = raw or ex.get(306)
             lat, lng = _gps(ex)
-            offs = ex.get_ifd(0x8769).get(36880) if raw else None
+            offs = (ex.get_ifd(0x8769).get(36881) or ex.get_ifd(0x8769).get(36880)) if raw else None
     except Exception:  # noqa
         return None, None, None
     return _raw_ts(raw, offs), lat, lng
@@ -629,7 +629,7 @@ def plan(items, only_tour=None):
         tours = [t for t in tours if t["id"] == str(only_tour)]
     days = {}
     for it in items:
-        ts = _raw_ts(it.get("t"))
+        ts = _raw_ts(it.get("t"), it.get("o") or None)
         if ts is not None:
             days.setdefault(it["t"][:10].replace(":", "-"), []).append((it, ts))
     by_id = {t["id"]: t for t in tours}
@@ -708,7 +708,7 @@ def plan(items, only_tour=None):
     return out
 
 
-def with_exif_time(jpeg, taken, lat=None, lng=None):
+def with_exif_time(jpeg, taken, lat=None, lng=None, offset=None):
     """Fügt einem (vom Browser erzeugten) JPEG die Aufnahmezeit 'JJJJ:MM:TT hh:mm:ss' als EXIF hinzu."""
     import io
     import re
@@ -718,6 +718,9 @@ def with_exif_time(jpeg, taken, lat=None, lng=None):
     ex = Image.Exif()
     ex[0x0132] = taken                     # DateTime
     ex.get_ifd(0x8769)[0x9003] = taken     # DateTimeOriginal
+    if offset and re.match(r"^[+-]\d\d:\d\d$", offset):
+        ex.get_ifd(0x8769)[0x9011] = offset      # OffsetTimeOriginal: ohne ihn wäre die Kamerazeit nur als Ortszeit der App lesbar
+        ex.get_ifd(0x8769)[0x9010] = offset
     if lat is not None and lng is not None:
         def dms(v):
             v = abs(v); d = int(v); mi = int((v - d) * 60)

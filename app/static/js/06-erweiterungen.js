@@ -362,12 +362,15 @@ async function updatePanel() {
    ${u.status && u.status.state === "error" ? `<p class="bad" style="font-size:13px">Letztes Update fehlgeschlagen: ${esc(u.status.message || "")}</p>` : ""}</div>`;
   const sel = b.querySelector('[data-k="update_check"]');
   if (sel) sel.value = u.enabled ? "1" : "0";
-  $("#ucheck").onclick = async () => {
-    $("#umsg").textContent = "…";
+  const uc = b.querySelector("#ucheck");
+  if (!uc || !b.isConnected) return;       // Seite wurde inzwischen gewechselt
+  uc.onclick = async () => {
+    b.querySelector("#umsg").textContent = "…";
     await api("/api/update-check?force=1").catch(() => {});
     updatePanel();
   };
-  if ($("#uinst")) $("#uinst").onclick = () => installUpdate(u, h => ($("#umsg").innerHTML = h));
+  const ui = b.querySelector("#uinst");
+  if (ui) ui.onclick = () => installUpdate(u, h => (b.querySelector("#umsg").innerHTML = h));
 }
 
 const _adm = VIEWS.admin;
