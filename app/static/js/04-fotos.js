@@ -44,13 +44,15 @@ VIEWS.photos = async (_, q) => {
   PHINFO = await api("/api/photo-info");
   if (!PHINFO.count) {
     $("#main").innerHTML =
-      `<div class="empty"><h2>Noch keine Fotos</h2><p>Lade unter <a href="#/admin"><b>Verwaltung, Fotos</b></a> einen Ordner mit Bildern hoch.</p></div>`;
+      `<div class="empty"><h2>Noch keine Fotos</h2><p>Importiere einen Ordner mit Bildern – sie werden nach Aufnahmezeit und Aufnahmeort deinen Touren zugeordnet.</p><p><button class="btn" id="pimp">Fotos importieren …</button></p></div>`;
+    $("#pimp").onclick = () => photoImportModal();
     return;
   }
   const Y = +(q.get("y") || PHINFO.years[0]);
   $("#main").innerHTML =
-    `<div class="sec" style="margin-top:0"><h2>Fotos</h2><span class="sub">${nf(PHINFO.count, 0)} Bilder, ${nf(PHINFO.assigned, 0)} einer Tour zugeordnet</span>${PHINFO.undated ? `<span class="chip" style="cursor:default;background:#f6e3b4;color:#5a4300" title="Diese Fotos enthalten keine Aufnahmezeit im Bild. Es wird das Dateidatum benutzt (meist der Exportzeitpunkt); sie werden deshalb nicht automatisch einer Tour zugeordnet. Mit dem Foto-Zeit-Abgleich (mac/foto_zeit_abgleich.py) lässt sich die echte Zeit aus den RAW-Originalen nachtragen.">⚠ ${nf(PHINFO.undated, 0)} ohne Aufnahmezeit</span>` : ""}<span class="sp"></span><a class="btn" target="_blank" href="slideshow.html?year=${Y}">Diashow ${Y}</a><a class="btn ghost" target="_blank" href="slideshow.html?random=1">Zufall</a></div>
+    `<div class="sec" style="margin-top:0"><h2>Fotos</h2><span class="sub">${nf(PHINFO.count, 0)} Bilder, ${nf(PHINFO.assigned, 0)} einer Tour zugeordnet</span>${PHINFO.undated ? `<span class="chip" style="cursor:default;background:#f6e3b4;color:#5a4300" title="Diese Fotos enthalten keine Aufnahmezeit im Bild. Es wird das Dateidatum benutzt (meist der Exportzeitpunkt); sie werden deshalb nicht automatisch einer Tour zugeordnet. Mit dem Foto-Zeit-Abgleich (mac/foto_zeit_abgleich.py) lässt sich die echte Zeit aus den RAW-Originalen nachtragen.">⚠ ${nf(PHINFO.undated, 0)} ohne Aufnahmezeit</span>` : ""}<span class="sp"></span><button class="btn" id="pimp">Fotos importieren …</button><a class="btn" target="_blank" href="slideshow.html?year=${Y}">Diashow ${Y}</a><a class="btn ghost" target="_blank" href="slideshow.html?random=1">Zufall</a></div>
    <div class="years">${PHINFO.years.map(y => `<button data-y="${y}" class="${y === Y ? "on" : ""}">${y}</button>`).join("")}</div><div id="pg" style="margin-top:26px"></div>`;
+  $("#pimp").onclick = () => photoImportModal();
   $(".years").onclick = e => e.target.dataset.y && (location.hash = `#/photos?y=${e.target.dataset.y}`);
   const ph = await api(`/api/photos?year=${Y}&limit=4000`);
   PH_LIST = ph;
@@ -321,75 +323,113 @@ function exifGps(buf) {
   }
   return null;
 }
-function tourChoice(days) {
-  // Rückfrage: welche Tour gehört zu den Fotos dieses Tages?
-  return new Promise(res => {
-    const m =
-      modal(`<h2>Welche Tour gehört zu diesen Fotos?</h2><p class="mut">Bei diesen Aufnahmetagen ist die Zuordnung nicht eindeutig. Vorschläge berücksichtigen Zeitverschiebungen (z. B. Kamera noch auf deutscher Zeit im Ausland) und den Aufnahmeort.</p>
-      ${days
-        .map(
-          (
-            d,
-            i
-          ) => `<div class="panel" style="margin:12px 0"><h3 style="margin:0 0 6px">${d.day.split("-").reverse().join(".")} · ${d.n} Foto${d.n > 1 ? "s" : ""}</h3><div class="mut" style="margin-bottom:6px">${esc(d.reason)}</div>
-        ${d.matched ? `<label style="display:block;margin:4px 0"><input type="radio" name="d${i}" value="-3" ${d.single && d.options.length ? "" : "checked"}> Nach Uhrzeit zuordnen (nur die ${d.matched} passenden Fotos importieren)</label>` : ""}${d.options.map((o, j) => `<label style="display:block;margin:4px 0"><input type="radio" name="d${i}" value="${j}" ${j === 0 && (d.single || !d.matched) ? "checked" : ""}> <b>${esc(o.name)}</b> · ${o.start} Uhr · ${nf(o.km, 1)} km${o.shift_h ? ` · Zeitverschiebung ${o.shift_h > 0 ? "+" : ""}${o.shift_h} h` : ""} · ${o.matched} von ${d.n} Fotos passen${o.gap_min ? ` · nächstes Foto ${o.gap_min} min außerhalb der Aufzeichnung` : ""}${o.dist_km != null ? ` · ${o.dist_km} km vom Aufnahmeort` : ""}</label>`).join("")}
-        <label style="display:block;margin:4px 0"><input type="radio" name="d${i}" value="-2"> Trotzdem importieren, ohne Tour (erscheint unter „Ohne Tour“)</label>
-        <label style="display:block;margin:4px 0"><input type="radio" name="d${i}" value="-1" ${d.options.length || d.matched ? "" : "checked"}> Nicht importieren</label></div>`
-        )
-        .join("")}
-      <div class="row" style="margin-top:12px"><button class="btn" id="tcok">Übernehmen</button><button class="btn ghost" id="tccx">Abbrechen</button></div>`);
-    m.querySelector("#tccx").onclick = () => {
-      m.remove();
-      res(null);
-    };
-    m.querySelector("#tcok").onclick = () => {
-      const out = days.map((d, i) => {
-        const v = +m.querySelector(`input[name=d${i}]:checked`).value;
-        return v === -2 ? {tour: "", shift_h: 0, force: true} : v === -3 ? {bytime: true} : v < 0 ? null : d.options[v];
-      });
-      m.remove();
-      res(out);
-    };
-  });
-}
-async function folderUpload() {
-  const inp = $("#pdir");
-  if (!inp) return;
-  let stop = false;
-  $("#pdirb").onclick = () => inp.click();
-  $("#pstop").onclick = () => (stop = true);
-  inp.onchange = async () => {
-    try {
-      await uploadFolder(inp);
-    } catch (e) {
-      console.error(e);
-      $("#ptxt") && ($("#ptxt").textContent = "Fehler: " + e);
-      alert("Der Foto-Upload ist abgebrochen: " + ((e && e.message) || e));
+/* ---------- Foto-Import: ein Dialog (auswählen oder ablegen → Vorschau je Aufnahmetag → importieren) ---------- */
+const PHOTO_EXT = /\.(jpe?g|png|webp)$/i;
+async function filesFromDrop(dt) {
+  const ents = [...(dt.items || [])].map(i => (i.webkitGetAsEntry ? i.webkitGetAsEntry() : null)).filter(Boolean); // sofort, danach ist dt leer
+  const out = [];
+  const walk = async (en, path) => {
+    if (en.isFile) await new Promise(r => en.file(f => ((f._rp = path + f.name), out.push(f), r()), r));
+    else if (en.isDirectory) {
+      const rd = en.createReader();
+      let all = [];
+      for (;;) {
+        const b = await new Promise(r => rd.readEntries(r, () => r([])));
+        if (!b.length) break;
+        all = all.concat(b);
+      }
+      for (const c of all) await walk(c, path + en.name + "/");
     }
   };
-  const uploadFolder = async inp => {
-    const files = [...inp.files].filter(f => /\.(jpe?g|png|webp)$/i.test(f.name) && !f.name.startsWith("."));
-    inp.value = "";
-    if (!files.length) return alert("Im gewählten Ordner wurden keine JPG/PNG-Bilder gefunden.");
-    const have = new Set(await api("/api/photo-library"));
-    const rel = f => {
-      const p = (f.webkitRelativePath || f.name).split("/").slice(1).join("/") || f.name,
-        m = p.match(/^(.*)\.([^.]+)$/);
-      const base = m ? m[1] : p,
-        ext = m ? m[2].toLowerCase() : "";
-      return /^jpe?g$/.test(ext) || !ext ? base : `${base}~${ext}`;
-    }; // andere Endungen bekommen einen eigenen Namen (keine Kollision mit gleichnamigem JPG)
-    const pw = await api("/api/photo-windows").catch(() => ({only: false, windows: []}));
-    const fresh = files.filter(f => !have.has(rel(f)));
-    let todo = fresh,
-      notrack = 0;
-    if (pw.only && fresh.length) {
-      $("#pup2").style.display = "";
-      $("#ptxt").textContent = `Aufnahmezeiten von ${fresh.length} Fotos werden geprüft …`;
-      const items = [];
+  if (ents.length) for (const e of ents) await walk(e, "");
+  else out.push(...dt.files);
+  return out;
+}
+const shiftTxt = s => {
+  if (!s) return "";
+  const a = Math.abs(Math.round(s / 60)),
+    h = Math.floor(a / 60),
+    mi = a % 60;
+  return `${s < 0 ? "−" : "+"}${h ? h + " Std. " : ""}${mi ? mi + " Min." : h ? "" : "0 Min."}`.trim();
+};
+function photoImportModal(o = {}) {
+  const m = modal(`<h2 id="pih"></h2><div id="pib"></div>`);
+  const q = s => m.querySelector(s);
+  let busy = false,
+    stop = false;
+  m.style.zIndex = 120;
+  m.onclick = e => {
+    if (e.target === m && !busy) m.remove();
+  };
+  q(".mbox").style.maxWidth = "720px";
+  const close = () => {
+    if (busy && !confirm("Der Import läuft noch. Wirklich abbrechen?")) return;
+    stop = true;
+    m.remove();
+    if (/^#\/(photos|tour|admin)/.test(location.hash))
+      try {
+        route();
+      } catch (e) {}
+  };
+  const body = html => (q("#pib").innerHTML = html);
+  const relOf = f => {
+    const full = f._rp || f.webkitRelativePath || "",
+      p = full.includes("/") ? full.split("/").slice(1).join("/") : `einzeln/${Math.floor(f.lastModified / 1000)}_${f.name}`,
+      mm = p.match(/^(.*)\.([^.]+)$/),
+      base = mm ? mm[1] : p,
+      ext = mm ? mm[2].toLowerCase() : "";
+    return /^jpe?g$/.test(ext) || !ext ? base : `${base}~${ext}`; // andere Endungen bekommen einen eigenen Namen (keine Kollision mit gleichnamigem JPG)
+  };
+  const start = () => {
+    q("#pih").textContent = o.tour ? `Fotos zu „${o.tour.name}“ hinzufügen` : "Fotos importieren";
+    body(`<div id="pdz" style="border:2px dashed var(--ink);border-radius:8px;padding:30px 16px;text-align:center;margin:12px 0"><b>Ordner oder Fotos hierher ziehen</b>
+      <div class="mut" style="margin:8px 0 16px;font-size:14px">JPG, PNG oder WebP – du musst nichts vorsortieren. Die Fotos werden nach Aufnahmezeit und Aufnahmeort den Touren zugeordnet; du siehst vor dem Import, was wohin kommt. Deine Originale bleiben unverändert, importiert wird eine verkleinerte Kopie.</div>
+      <div class="row" style="justify-content:center"><button class="btn" id="pdirb">Ordner wählen …</button><button class="btn alt" id="pfilb">Einzelne Fotos wählen …</button></div></div>
+      <input type="file" id="pdir" webkitdirectory multiple hidden><input type="file" id="pfil" accept="image/jpeg,image/png,image/webp" multiple hidden>
+      <div class="row"><span class="sp"></span><button class="btn ghost" id="pcx">Schließen</button></div>`);
+    const dz = q("#pdz");
+    q("#pdirb").onclick = () => q("#pdir").click();
+    q("#pfilb").onclick = () => q("#pfil").click();
+    q("#pcx").onclick = close;
+    q("#pdir").onchange = q("#pfil").onchange = e => {
+      const fs = [...e.target.files];
+      e.target.value = "";
+      if (fs.length) analyse(fs);
+    };
+    ["dragenter", "dragover"].forEach(ev =>
+      dz.addEventListener(ev, e => {
+        e.preventDefault();
+        dz.style.background = "#f6e3b455";
+      })
+    );
+    dz.addEventListener("dragleave", () => (dz.style.background = ""));
+    dz.addEventListener("drop", async e => {
+      e.preventDefault();
+      dz.style.background = "";
+      const fs = await filesFromDrop(e.dataTransfer);
+      if (fs.length) analyse(fs);
+    });
+  };
+  const analyse = async all => {
+    busy = true;
+    try {
+      const files = all.filter(f => PHOTO_EXT.test(f.name) && !f.name.startsWith(".")),
+        other = all.length - files.length,
+        heic = all.filter(f => /\.hei[cf]$/i.test(f.name)).length;
+      if (!files.length) {
+        busy = false;
+        body(`<p>Es wurden keine JPG-, PNG- oder WebP-Bilder gefunden${heic ? ` (${heic} HEIC-Bilder: der Browser kann sie nicht verkleinern – bitte vorher als JPG exportieren)` : ""}.</p><div class="row"><button class="btn" id="pback">Zurück</button></div>`);
+        q("#pback").onclick = start;
+        return;
+      }
+      body(`<p id="ptxt0">Fotos werden geprüft …</p>`);
+      const have = new Set(await api("/api/photo-library")),
+        fresh = files.filter(f => !have.has(relOf(f))),
+        items = [];
+      let nodate = 0;
       for (let i = 0; i < fresh.length; i++) {
-        if (i % 50 === 0) {
-          $("#ptxt").textContent = `Aufnahmezeiten werden geprüft … ${i} / ${fresh.length}`;
+        if (i % 40 === 0) {
+          q("#ptxt0").textContent = `Aufnahmezeiten werden gelesen … ${i} / ${fresh.length}`;
           await new Promise(r => setTimeout(r));
         }
         const f = fresh[i],
@@ -403,100 +443,112 @@ async function folderUpload() {
         try {
           gp = hd ? exifGps(hd) : null;
         } catch (e) {}
-        f._t =
-          ed ||
-          `${d.getFullYear()}:${pad2(d.getMonth() + 1)}:${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+        if (!ed) nodate++;
+        f._t = ed || `${d.getFullYear()}:${pad2(d.getMonth() + 1)}:${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
         f._gps = gp;
         items.push({k: i, t: f._t, lat: gp ? gp[0] : null, lng: gp ? gp[1] : null});
       }
-      $("#ptxt").textContent = "Passende Touren werden gesucht …";
+      const info = {total: files.length, dup: files.length - fresh.length, other, heic, nodate};
+      if (!fresh.length) {
+        busy = false;
+        body(`<p><b>Nichts zu importieren:</b> alle ${files.length} Bilder sind schon in der Bibliothek (oder wurden früher gelöscht).</p><div class="row"><button class="btn" id="pback">Anderen Ordner wählen</button><button class="btn ghost" id="pcx">Schließen</button></div>`);
+        q("#pback").onclick = start;
+        q("#pcx").onclick = close;
+        return;
+      }
+      q("#ptxt0").textContent = "Passende Touren werden gesucht …";
       const plan = await api("/api/photo-plan", {
         method: "POST",
         headers: {"content-type": "application/json"},
-        body: JSON.stringify({items}),
+        body: JSON.stringify({items, tour: o.tour ? o.tour.id : null}),
       });
-      const ask = plan.days.filter(d => d.status === "ask"),
-        ok = new Set(plan.days.filter(d => d.status === "ok").flatMap(d => d.keys));
-      const picks = ask.length ? await tourChoice(ask) : [];
-      if (ask.length && picks === null) return;
-      const keep = new Set();
-      plan.days
-        .filter(d => d.status === "ok")
-        .forEach(d =>
-          d.keys.forEach(k => {
-            const f = fresh[k],
-              t = Math.floor(
-                new Date(
-                  +f._t.slice(0, 4),
-                  +f._t.slice(5, 7) - 1,
-                  +f._t.slice(8, 10),
-                  +f._t.slice(11, 13),
-                  +f._t.slice(14, 16),
-                  +f._t.slice(17, 19)
-                ) / 1000
-              );
-            if (pw.windows.some(([x, y]) => t >= x - 3600 && t <= y + 3600)) keep.add(k);
+      busy = false;
+      preview(fresh, plan, info);
+    } catch (e) {
+      busy = false;
+      console.error(e);
+      body(`<p class="bad">Fehler beim Prüfen: ${esc((e && e.message) || String(e))}</p><div class="row"><button class="btn" id="pback">Zurück</button></div>`);
+      q("#pback").onclick = start;
+    }
+  };
+  const preview = (fresh, plan, info) => {
+    const days = plan.days,
+      rows = days.map((d, i) => {
+        const ch = [];
+        if (d.status === "ok" && !o.tour) ch.push({v: "time", t: `Nach Uhrzeit zuordnen${d.names && d.names.length ? " → " + d.names.join(", ") : ""}${d.matched < d.n ? ` (${d.matched} von ${d.n} passen zeitlich)` : ""}`});
+        d.options.forEach((p, j) =>
+          ch.push({
+            v: "o" + j,
+            t: `${p.name} · ${p.start} · ${p.matched} von ${d.n} passen${p.shift_s ? ` · Zeit ${shiftTxt(p.shift_s)}${p.by_gps ? " (per GPS)" : ""}` : ""}${p.gap_min ? ` · nächstes Foto ${p.gap_min} min außerhalb` : ""}${p.dist_km != null ? ` · ${p.dist_km} km vom Aufnahmeort` : ""}`,
           })
         );
-      ask.forEach((d, i) => {
-        const p = picks[i];
-        if (p && p.bytime)
-          d.keys.forEach(k => {
-            const f = fresh[k],
-              t = Math.floor(
-                new Date(
-                  +f._t.slice(0, 4),
-                  +f._t.slice(5, 7) - 1,
-                  +f._t.slice(8, 10),
-                  +f._t.slice(11, 13),
-                  +f._t.slice(14, 16),
-                  +f._t.slice(17, 19)
-                ) / 1000
-              );
-            if (pw.windows.some(([x, y]) => t >= x - 3600 && t <= y + 3600)) keep.add(k);
-          });
-        else if (p)
-          d.keys.forEach(k => {
-            fresh[k]._tour = p.tour;
-            fresh[k]._shift = p.shift_h * 3600;
-            fresh[k]._force = !!p.force;
-            keep.add(k);
-          });
+        ch.push({v: "none", t: "Ohne Tour importieren (erscheint unter „Ohne Tour“)"});
+        ch.push({v: "skip", t: "Nicht importieren"});
+        let def = ch.some(c => c.v === "time") ? "time" : null;
+        if (!def && d.options.length && (o.tour || d.options[0].matched >= d.n * 0.5)) def = "o0";
+        if (!def) def = plan.only ? "skip" : "none";
+        return {d, ch, def};
       });
-      todo = fresh.filter((f, k) => keep.has(k));
-      notrack = fresh.length - todo.length;
-    }
-    $("#ptxt").textContent = "";
-    if (!todo.length) {
-      $("#pup2").style.display = "none";
-      alert(
-        `${files.length} Bilder gefunden – es gibt nichts zu übernehmen:\n\n• ${files.length - fresh.length} sind schon in der Bibliothek (oder wurden früher gelöscht)\n• ${notrack} haben keine passende GPS-Strecke und wurden nicht übernommen${notrack ? "\n\nTipp: Beim nächsten Mal bei der Rückfrage „Trotzdem importieren, ohne Tour“ wählen, oder in den Bildeinstellungen photo_only_tracked auf 0 setzen." : ""}`
-      );
-      return;
-    }
-    if (
-      !confirm(
-        `${files.length} Bilder gefunden, davon ${fresh.length} neu${notrack ? `, ${notrack} ohne passende GPS-Strecke werden übersprungen` : ""}. ${todo.length} jetzt verkleinern und hochladen?`
-      )
-    )
-      return;
-    $("#pup2").style.display = "";
-    let done = 0,
-      fail = 0;
-    const mx = +s_max() || 2200,
-      q = (+s_q() || 82) / 100,
-      t0 = Date.now();
+    q("#pih").textContent = o.tour ? `Fotos zu „${o.tour.name}“ hinzufügen` : "Fotos importieren";
+    body(`<p>${info.total} Bilder gefunden, davon <b>${info.total - info.dup}</b> neu${info.dup ? ` (${info.dup} schon vorhanden)` : ""}.${info.nodate ? ` <span class="mut">${info.nodate} ohne Aufnahmezeit im Bild – dort gilt das Dateidatum.</span>` : ""}${info.heic ? ` <span class="mut">${info.heic} HEIC-Bilder werden übersprungen (bitte als JPG exportieren).</span>` : ""}</p>
+      <p class="mut" style="font-size:14px">So werden die Fotos nach Aufnahmetag zugeordnet. Pro Tag kannst du die Auswahl ändern.</p>
+      ${rows
+        .map(
+          (r, i) => `<div class="panel" style="margin:10px 0"><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:baseline"><b>${r.d.day.split("-").reverse().join(".")}</b><span>${r.d.n} Foto${r.d.n > 1 ? "s" : ""}</span>${r.d.gps ? `<span class="mut" style="font-size:13px">${r.d.gps} mit Aufnahmeort</span>` : ""}${r.d.status === "ask" && r.d.reason ? `<span class="mut" style="font-size:13px">· ${esc(r.d.reason)}</span>` : ""}</div>
+          <select data-r="${i}" style="width:100%;margin-top:6px">${r.ch.map(c => `<option value="${c.v}" ${c.v === r.def ? "selected" : ""}>${esc(c.t)}</option>`).join("")}</select></div>`
+        )
+        .join("")}
+      <div class="row" style="margin-top:14px"><button class="btn" id="pigo">Importieren</button><button class="btn ghost" id="pcx">Abbrechen</button><span class="sp"></span><span class="mut" id="pisum"></span></div>`);
+    const val = i => q(`select[data-r="${i}"]`).value;
+    const count = () => {
+      const n = rows.reduce((a, r, i) => a + (val(i) === "skip" ? 0 : r.d.n), 0);
+      q("#pisum").textContent = `${n} von ${fresh.length} Fotos werden importiert`;
+      q("#pigo").disabled = !n;
+      q("#pigo").textContent = n ? `${n} Foto${n > 1 ? "s" : ""} importieren` : "Nichts ausgewählt";
+    };
+    m.querySelectorAll("select[data-r]").forEach(se => (se.onchange = count));
+    count();
+    q("#pcx").onclick = close;
+    q("#pigo").onclick = () => {
+      const todo = [];
+      rows.forEach((r, i) => {
+        const v = val(i);
+        r.d.keys.forEach(k => {
+          const f = fresh[k];
+          f._tour = "";
+          f._shift = 0;
+          f._force = false;
+          if (v === "skip") return;
+          if (v === "none") f._force = true;
+          else if (v[0] === "o") {
+            const p = r.d.options[+v.slice(1)];
+            f._tour = p.tour;
+            f._shift = p.shift_s || 0;
+          }
+          todo.push(f);
+        });
+      });
+      upload(todo);
+    };
+  };
+  const upload = async todo => {
+    busy = true;
     stop = false;
+    q("#pih").textContent = "Fotos werden importiert …";
+    body(`<div class="stack" style="height:10px"><div id="pbar" style="width:0;background:var(--acc)"></div></div>
+      <div class="row" style="margin-top:8px"><span id="ptxt" class="mut"></span><span class="sp"></span><button class="btn alt sm" id="pstop">Abbrechen</button></div>`);
+    q("#pstop").onclick = () => (stop = true);
+    const before = PHINFO ? PHINFO.assigned : 0;
+    let done = 0,
+      dup = 0,
+      skipped = 0,
+      fail = 0;
+    const failed = [],
+      mx = +s_max() || 2200,
+      qu = (+s_q() || 82) / 100,
+      t0 = Date.now();
     const one = async f => {
       try {
-        let head = null;
-        try {
-          head = f.type === "image/jpeg" ? exifDate(await f.slice(0, 262144).arrayBuffer()) : null;
-        } catch (e) {}
-        const d = new Date(f.lastModified),
-          taken =
-            head ||
-            `${d.getFullYear()}:${pad2(d.getMonth() + 1)}:${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
         const bmp = await createImageBitmap(f, {imageOrientation: "from-image"}),
           k = Math.min(1, mx / Math.max(bmp.width, bmp.height));
         const c = document.createElement("canvas");
@@ -504,11 +556,11 @@ async function folderUpload() {
         c.height = Math.round(bmp.height * k);
         c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
         bmp.close();
-        const blob = await new Promise(r => c.toBlob(r, "image/jpeg", q));
+        const blob = await new Promise(r => c.toBlob(r, "image/jpeg", qu));
         const fd = new FormData();
         fd.append("file", blob, "x.jpg");
-        fd.append("rel", rel(f));
-        fd.append("taken", taken);
+        fd.append("rel", relOf(f));
+        fd.append("taken", f._t);
         if (f._tour) {
           fd.append("tour", f._tour);
           fd.append("shift_s", f._shift || 0);
@@ -519,15 +571,19 @@ async function folderUpload() {
           fd.append("lng", f._gps[1]);
         }
         fd.append("mtime", Math.floor(f.lastModified / 1000));
-        await api("/api/photo-upload", {method: "POST", body: fd});
-        done++;
+        const r = await api("/api/photo-upload", {method: "POST", body: fd});
+        if (r && r.duplicate) dup++;
+        else if (r && r.skipped) skipped++;
+        else done++;
       } catch (e) {
         fail++;
+        if (failed.length < 3) failed.push(f.name);
       }
-      const n = done + fail,
+      const n = done + dup + skipped + fail,
         eta = n ? Math.round((((Date.now() - t0) / n) * (todo.length - n)) / 1000) : 0;
-      $("#pbar").style.width = (n / todo.length) * 100 + "%";
-      $("#ptxt").textContent = `${n} / ${todo.length}${fail ? ` · ${fail} Fehler` : ""} · noch ca. ${Math.floor(eta / 60)} min`;
+      if (!q("#pbar")) return;
+      q("#pbar").style.width = (n / todo.length) * 100 + "%";
+      q("#ptxt").textContent = `${n} / ${todo.length}${fail ? ` · ${fail} Fehler` : ""} · noch ca. ${Math.floor(eta / 60)} min`;
     };
     const queue = todo.slice();
     await Promise.all(
@@ -535,9 +591,9 @@ async function folderUpload() {
         while (queue.length && !stop) await one(queue.shift());
       })
     );
-    $("#ptxt").textContent =
-      `${stop ? "Abgebrochen" : "Fertig"}: ${done} hochgeladen${fail ? `, ${fail} Fehler` : ""}. Bibliothek wird eingelesen …`;
-    const sum = `${stop ? "Abgebrochen" : "Fertig"}: ${done} hochgeladen${fail ? `, ${fail} Fehler` : ""}.`;
+    const sum = `${done} importiert${dup ? `, ${dup} doppelt (schon vorhanden)` : ""}${skipped ? `, ${skipped} ohne passende Strecke übersprungen` : ""}${fail ? `, ${fail} Fehler${failed.length ? " (z. B. " + failed.join(", ") + ")" : ""}` : ""}${stop ? " – abgebrochen" : ""}`;
+    if (!q("#ptxt")) return;
+    q("#ptxt").textContent = `${sum}. Bibliothek wird eingelesen …`;
     const sleep = ms => new Promise(r => setTimeout(r, ms));
     let started = false;
     for (let i = 0; i < 30 && !started; i++) {
@@ -548,28 +604,51 @@ async function folderUpload() {
         await sleep(2000);
       }
     }
-    if (!started) {
-      $("#ptxt").textContent = sum + " Einlesen konnte nicht gestartet werden – bitte in der Verwaltung „Fotos indizieren“ ausführen.";
-      return;
-    }
-    for (let i = 0; i < 900; i++) {
-      await sleep(1500);
-      if (!$("#ptxt")) return;
-      const j = await api("/api/jobs").catch(() => null);
-      if (j && j.running) {
-        $("#ptxt").textContent = `${sum} Bibliothek wird eingelesen … ${j.progress || ""}`;
-        continue;
+    let ok = started;
+    if (started)
+      for (let i = 0; i < 900; i++) {
+        await sleep(1500);
+        if (!q("#ptxt")) return;
+        const j = await api("/api/jobs").catch(() => null);
+        if (j && j.running) {
+          q("#ptxt").textContent = `${sum}. Bibliothek wird eingelesen … ${j.progress || ""}`;
+          continue;
+        }
+        break;
       }
-      break;
-    }
-    $("#ptxt").textContent = `✓ ${sum} Bibliothek ist eingelesen und den Touren zugeordnet – du kannst den Dialog schließen.`;
-    if (location.hash.startsWith("#/photos") || location.hash.startsWith("#/tour"))
-      setTimeout(() => {
-        try {
-          route();
-        } catch (e) {}
-      }, 500);
+    busy = false;
+    PHINFO = await api("/api/photo-info").catch(() => PHINFO);
+    const gain = PHINFO ? PHINFO.assigned - before : 0;
+    q("#pih").textContent = ok ? "Import abgeschlossen" : "Import fast abgeschlossen";
+    body(`<p>${ok ? "✓" : "⚠"} <b>${sum}.</b></p>${ok ? `<p>${gain > 0 ? `<b>${gain}</b> Fotos wurden Touren zugeordnet.` : "Es wurden keine Fotos automatisch einer Tour zugeordnet."}${PHINFO && PHINFO.count - PHINFO.assigned > 0 ? ` ${nf(PHINFO.count - PHINFO.assigned, 0)} Fotos sind „ohne Tour“ – unter Fotos → „Fotos zuordnen“ lassen sie sich Touren zuweisen, in der Tour per „Zeit per GPS prüfen“ korrigieren.` : ""}</p>` : `<p>Das Einlesen konnte nicht gestartet werden – bitte in der Verwaltung „Bibliothek neu einlesen“ ausführen.</p>`}
+      <div class="row"><a class="btn" href="#/photos" id="pgo">Fotos ansehen</a><button class="btn ghost" id="pcx">Schließen</button></div>`);
+    q("#pcx").onclick = close;
+    q("#pgo").onclick = () => {
+      stop = true;
+      m.remove();
+    };
   };
+  start();
+  return m;
+}
+async function folderUpload() {
+  const b = $("#photoimp");
+  if (b) b.onclick = () => photoImportModal();
 }
 const s_max = () => document.querySelector('[data-k="photo_max_side"]')?.value,
   s_q = () => document.querySelector('[data-k="photo_quality"]')?.value;
+
+/* Zeit der Fotos per Aufnahmeort mit der Strecke abgleichen (Kamerauhr falsch gestellt) */
+async function gpsAlign(t) {
+  const r = await api(`/api/photo-offset?tour_id=${encodeURIComponent(t.id)}`);
+  if (!r.ok) return alert("Zeitabgleich nicht möglich:\n\n" + r.reason);
+  if (r.aligned) return alert(`Die Zeiten der Fotos passen zur Strecke (${r.n} von ${r.of} Fotos mit Aufnahmeort geprüft).`);
+  if (
+    !confirm(
+      `Die Kamerauhr scheint ${shiftTxt(Math.abs(r.delta_s)).replace("+", "")} ${r.delta_s > 0 ? "nachzugehen" : "vorzugehen"}.\n\nAus dem Aufnahmeort von ${r.n} von ${r.of} Fotos ergibt sich eine Korrektur von ${shiftTxt(r.delta_s)}. Die Fotos aus diesem Zeitraum werden korrigiert und dieser Tour zugeordnet.\n\nÜbernehmen?`
+    )
+  )
+    return;
+  await api("/api/photo-offset", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({tour_id: t.id, delta_s: r.delta_s, ids: r.ids})});
+  route();
+}

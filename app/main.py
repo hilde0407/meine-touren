@@ -484,7 +484,26 @@ async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken
 @app.post("/api/photo-plan")
 def photo_plan(body: dict):
     """Vor dem Import: je Aufnahmetag passende Tour(en) und Vorschläge bei Unklarheit (Zeitverschiebung, Aufnahmeort)."""
-    return {"only": photos.only_tracked(), "days": photos.plan(body.get("items") or [])}
+    return {"only": photos.only_tracked(), "days": photos.plan(body.get("items") or [], body.get("tour") or None)}
+
+
+@app.get("/api/photo-offset")
+def photo_offset(tour_id: str):
+    """Passen die Foto-Zeiten zur Strecke? Aus dem Aufnahmeort der Fotos wird ein Zeitversatz der Kamerauhr vorgeschlagen."""
+    try:
+        return photos.suggest_offset(tour_id)
+    except KeyError:
+        raise HTTPException(404, "Tour nicht gefunden")
+
+
+@app.post("/api/photo-offset")
+def photo_offset_apply(body: dict):
+    try:
+        return photos.apply_offset(body.get("tour_id"), body.get("delta_s", 0), body.get("ids"))
+    except KeyError:
+        raise HTTPException(404, "Tour nicht gefunden")
+    except (ValueError, TypeError) as e:
+        raise HTTPException(400, str(e))
 
 
 @app.get("/api/photo-windows")

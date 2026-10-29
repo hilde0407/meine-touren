@@ -120,7 +120,7 @@ VIEWS.tour = async id => {
    <div class="fig"><div class="v">${t.h ? nf(t.km / t.h, 1) : "–"}<span class="u">km/h</span></div><div class="l">Tempo im Schnitt</div></div><div id="kmax" class="fig" style="display:none"><div class="v" id="kmaxv"></div><div class="l">Höchster Punkt</div></div></div>
    <div class="tmap" id="tm"></div>
    <div class="panel prof" style="margin-top:34px" id="profcard"><h2>Höhenprofil</h2><div id="prof" class="mut">Wird geladen …</div></div>
-   <div class="sec"><h2>Fotos</h2><span class="sub" id="pc"></span><span class="sp"></span><a class="btn sm" id="ss" style="display:none" target="_blank">Diashow</a></div><div class="thumbs" id="th"></div>
+   <div class="sec"><h2>Fotos</h2><span class="sub" id="pc"></span><span class="sp"></span><button class="btn sm alt" id="padd">Fotos hinzufügen …</button><button class="btn sm alt" id="pgps" title="Vergleicht den Aufnahmeort der Fotos mit der Strecke und korrigiert eine falsch gestellte Kamerauhr">Zeit per GPS prüfen</button><a class="btn sm" id="ss" style="display:none" target="_blank">Diashow</a></div><div class="thumbs" id="th"></div>
    ${t.source === "local" ? "" : `<p style="margin-top:30px"><a class="back" target="_blank" href="https://www.komoot.com/tour/${t.id}">In Komoot öffnen</a></p>`}`;
   map = mkMap("tm", {layers: true});
   map.setView([t.lat || 50, t.lng || 8], 12);
@@ -214,6 +214,14 @@ VIEWS.tour = async id => {
     )
     .join("");
   bindThumbs($("#th"), ph);
+  $("#padd").onclick = () => photoImportModal({tour: t});
+  $("#pgps").onclick = async () => {
+    try {
+      await gpsAlign(t);
+    } catch (e) {
+      alert(e.message || e);
+    }
+  };
   if (ph.length) photoSelect(ph, 0, {box: "#th", anchor: "#pc", tour: true});
   mk.then(c => {
     if (c && ph.length) photoChain(map, t, c, ph); // Fotos auf der Strecke; verschiebbar (12-fotokette.js)
