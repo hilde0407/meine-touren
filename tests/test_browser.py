@@ -369,3 +369,13 @@ def test_clean_unused_dialog(page):
     page.click("#cuy input"); assert "endgültig löschen" in page.inner_text("#cudo")
     page.click("#cuno")
     assert not page.errors, page.errors
+
+
+def test_update_panel_inside_tab_and_check_button(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/admin?tab=uebersicht"); page.wait_for_timeout(2500)
+    assert page.evaluate("document.querySelectorAll('#ucheck').length") == 1
+    assert page.evaluate("!!document.querySelector('#upd #ucheck')"), "Update-Bereich liegt nicht mehr in seinem Container"
+    page.click("#ucheck"); page.wait_for_timeout(2500)
+    assert "Installiert" in page.inner_text("#upd")
+    assert not page.errors, page.errors

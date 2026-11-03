@@ -89,8 +89,10 @@ def update_check():
             res["newer"] = _ver(res["latest"]) > _ver(res["current"])
             res["ok"] = True
             ttl = 6 * 3600
-    except Exception:  # noqa
-        pass
+        else:
+            res["error"] = f"GitHub antwortet mit Status {r.status_code}" + (" (Anfragelimit erreicht)" if r.status_code in (403, 429) else "")
+    except Exception as e:  # noqa
+        res["error"] = f"{type(e).__name__}: {str(e)[:90]}"          # z. B. keine Verbindung / DNS / Zeitüberschreitung
     _upd.update(ts=time.time(), data=res, ttl=ttl)
     return res
 

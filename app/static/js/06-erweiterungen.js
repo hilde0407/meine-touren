@@ -368,7 +368,7 @@ async function updatePanel() {
   const admin = isAdmin();
   const notes = (u.notes || "").trim();
   b.innerHTML = `<div class="panel" style="margin-bottom:16px${u.newer ? ";border-color:var(--yellow)" : ""}"><h2>Updates</h2>
-   <p>Installiert: <b>${esc(u.current)}</b>${u.latest ? ` · neueste Version auf GitHub: <b>${esc(u.latest)}</b>${u.published ? ` (${esc(u.published)})` : ""}` : ` · <span class="mut">GitHub war nicht erreichbar</span>`}
+   <p>Installiert: <b>${esc(u.current)}</b>${u.latest ? ` · neueste Version auf GitHub: <b>${esc(u.latest)}</b>${u.published ? ` (${esc(u.published)})` : ""}` : ` · <span class="mut">GitHub war nicht erreichbar${u.error ? " (" + esc(u.error) + ")" : ""}</span>`}
    ${u.newer ? `<span class="bad"> – es gibt eine neuere Version</span>` : u.ok ? `<span class="ok"> ✓ aktuell</span>` : ""}</p>
    ${notes && u.newer ? `<details><summary>Was ist neu?</summary><pre class="pre" style="white-space:pre-wrap;max-height:240px;overflow:auto">${esc(notes)}</pre></details>` : ""}
    <div class="row"><button class="btn alt" id="ucheck">Jetzt prüfen</button>

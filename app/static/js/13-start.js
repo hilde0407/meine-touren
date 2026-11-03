@@ -41,6 +41,7 @@ VIEWS.admin = async (...a) => {
       const el = k[0] === "#" ? $(k) : panels.find(p => !used.has(p) && title(p).startsWith(k));
       if (!el) return;
       used.add(el);
+      panels.forEach(p => el.contains(p) && used.add(p));       // Bereiche in verschobenen Containern (z. B. #upd) nicht noch einmal verschieben
       if (k[0] !== "#" && el.querySelector(":scope > h2")) el.style.marginTop = "0";
       if (k === "#upd" || k === "#hlt") el.style.gridColumn = "1 / -1";
       if (k === "Protokoll") el.style.gridColumn = "1 / -1";
