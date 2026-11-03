@@ -73,3 +73,46 @@ def test_gps_jitter_is_reported_and_removed():
     trackfix.apply(t["id"], True, [], True)
     assert db.one("SELECT dist_m FROM tours WHERE id=?", (t["id"],))["dist_m"] < d0 * 0.5
     assert len(a["fast"]) == 0 or all(f["m"] > 400 for f in a["fast"])
+
+
+def test_uniform_timestamps_detected_and_duration_set():
+    """Gleichmäßig verteilte (nicht aufgezeichnete) Zeitstempel: kein falscher „schneller Abschnitt“, Dauer lässt sich korrigieren."""
+    t0 = datetime(2026, 7, 6, 5, 0, tzinfo=timezone.utc)
+    pts = []
+    for i in range(1000):                                   # 10 km/h exakt, 20 m Auf- und Abstieg je Kilometer
+        t = (t0 + timedelta(seconds=3.6 * 0.1 * 36 * i / 36 * 10)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        pts.append(f'<trkpt lat="{46.5:.6f}" lon="{10.0 + 0.0000144 * i * 10:.6f}"><ele>{1500 + 400 * math.sin(i / 80):.1f}</ele><time>{t}</time></trkpt>')
+    g = '<?xml version="1.0"?><gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1"><trk><type>hiking</type><trkseg>' + "".join(pts) + "</trkseg></trk></gpx>"
+    t, _ = tracks.adopt(g, "plan.gpx", name="Geplant")
+    tid = t["id"]
+    a = trackfix.analyse(tid)
+    assert a["timing"]["uniform"] and a["timing"]["est_s"] > a["dur_s"]
+    assert a["fast"] == []
+    r = trackfix.apply(tid, True, [], False, 6 * 3600)
+    row = db.one("SELECT dur_s,end_ts,start_ts FROM tours WHERE id=?", (tid,))
+    assert row["dur_s"] == 6 * 3600 and row["end_ts"] - row["start_ts"] == 6 * 3600
+    pts2 = routes.load(tid)
+    assert abs(pts2[-1][3] - 6 * 3600 * 1000) < 2000
+    assert trackfix.restore(tid)
+    row = db.one("SELECT dur_s,end_ts,start_ts FROM tours WHERE id=?", (tid,))
+    assert row["dur_s"] != 6 * 3600 and row["end_ts"] - row["start_ts"] != 6 * 3600
+
+
+def test_photos_offer_duration_and_start():
+    t0 = datetime(2026, 7, 6, 5, 0, tzinfo=timezone.utc)
+    pts = []
+    for i in range(300):
+        tt = (t0 + timedelta(seconds=12 * i)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        pts.append(f'<trkpt lat="46.5" lon="{10.0 + 0.00014 * i:.6f}"><ele>1500</ele><time>{tt}</time></trkpt>')
+    g = '<?xml version="1.0"?><gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1"><trk><type>hiking</type><trkseg>' + "".join(pts) + "</trkseg></trk></gpx>"
+    t, _ = tracks.adopt(g, "ph.gpx", name="Mit Fotos")
+    st = db.one("SELECT start_ts FROM tours WHERE id=?", (t["id"],))["start_ts"]
+    for j, off in enumerate((600, 7200, 30000)):
+        db.execute("INSERT INTO photos(path,taken_ts,dated) VALUES(?,?,1)", (f"/x/e{j}.jpg", st + off))
+    a = trackfix.analyse(t["id"])
+    assert a["photos"] and a["photos"]["last"] - a["photos"]["first"] == 29400
+    trackfix.apply(t["id"], True, [], False, 29400, a["photos"]["first"])
+    row = db.one("SELECT start_ts,end_ts,dur_s FROM tours WHERE id=?", (t["id"],))
+    assert row["start_ts"] == st + 600 and row["end_ts"] == st + 600 + 29400
+    assert trackfix.restore(t["id"])
+    assert db.one("SELECT start_ts FROM tours WHERE id=?", (t["id"],))["start_ts"] == st

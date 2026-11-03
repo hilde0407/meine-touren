@@ -145,6 +145,32 @@ def jitter_m(pts):
     return max(0.0, raw - smooth_len(pts)), raw
 
 
+def timing(pts, sport):
+    """Prüft die Zeitstempel: Sind sie nur gleichmäßig über die Strecke verteilt (konstantes Tempo in jedem 10-Minuten-Block),
+    wurden sie nicht aufgezeichnet (z. B. geplante Route). Liefert auch eine Wanderzeit-Schätzung (SAC: 4,2 km/h, 400 m/h hoch, 800 m/h runter)."""
+    from . import elev
+    if pts[0][3] is None or pts[-1][3] is None:
+        return {"uniform": False, "est_s": None}
+    blk = {}
+    for i in range(len(pts) - 1):
+        b = pts[i][3] // 600000
+        x = blk.setdefault(b, [0.0, 0.0])
+        x[0] += hav(pts[i], pts[i + 1]); x[1] += max(0, (pts[i + 1][3] - pts[i][3]) / 1000)
+    v = [d / s * 3.6 for d, s in blk.values() if s > 60 and d > 100]
+    uniform = False
+    if len(v) >= 5:
+        m = sum(v) / len(v)
+        uniform = m > 0 and (sum((x - m) ** 2 for x in v) / len(v)) ** 0.5 / m < 0.03
+    est = None
+    alts = [p[2] for p in pts if p[2] is not None]
+    if kind(sport) == "walk" and len(alts) > 5:
+        up, down = elev.ascent(elev.smooth(alts, 3, 3))
+        dist = sum(hav(pts[i], pts[i + 1]) for i in range(len(pts) - 1))
+        h, vv = dist / 4200, up / 400 + down / 800
+        est = int(3600 * (max(h, vv) + min(h, vv) / 2))
+    return {"uniform": uniform, "est_s": est}
+
+
 def _line(pts, i0, i1, n=60):
     seg = pts[i0:i1 + 1]
     step = max(1, len(seg) // n)
@@ -165,7 +191,8 @@ def analyse(tid):
     bad = find_spikes(pts, peak)
     badset = set(bad)
     keep = [p for i, p in enumerate(pts) if i not in badset]
-    fast = find_fast(keep, sustain) if has_t else []
+    tm = timing(pts, t["sport"])
+    fast = find_fast(keep, sustain) if has_t and not tm["uniform"] else []      # bei erfundenen Zeitstempeln lässt sich Tempo nicht beurteilen
     for k, f in enumerate(fast):
         f["id"] = k
         f["line"] = _line(keep, f["i0"], f["i1"])
@@ -179,7 +206,14 @@ def analyse(tid):
     step = max(1, len(pts) // 800)
     jit, raw = jitter_m(keep)
     dur_now = (t["dur_s"] or 0)
-    return {"jitter_m": round(jit), "raw_m": round(raw), "spike_m": round(sum(hav(pts[i], pts[i + 1]) for i in range(len(pts) - 1)) - raw),
+    from .gpxtools import TZ
+    from datetime import datetime
+    st = datetime.fromtimestamp(t["start_ts"] or 0, TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+    d0 = int(st.timestamp())
+    ph = db.one("SELECT COUNT(*) n, MIN(taken_ts) a, MAX(taken_ts) b FROM photos WHERE COALESCE(dated,1)=1 AND taken_ts IS NOT NULL AND "
+                "(tour_id=? OR (taken_ts>=? AND taken_ts<?))", (tid, d0, d0 + 86400))
+    photos_info = {"n": ph["n"], "first": ph["a"], "last": ph["b"]} if ph and ph["n"] >= 2 and ph["b"] - ph["a"] >= 600 else None
+    return {"photos": photos_info, "start_ts": t["start_ts"], "timing": tm, "jitter_m": round(jit), "raw_m": round(raw), "spike_m": round(sum(hav(pts[i], pts[i + 1]) for i in range(len(pts) - 1)) - raw),
             "dur_s": round(fx["orig_dur"] if fx else dur_now),"id": tid, "sport": t["sport"], "kind": kind(t["sport"]), "has_time": has_t, "n": len(pts),
             "limit_peak": peak, "limit_sustain": sustain, "spikes": runs, "n_spikes": len(bad), "fast": fast,
             "line": [[round(p[0], 5), round(p[1], 5)] for p in pts[::step]],
@@ -188,7 +222,7 @@ def analyse(tid):
             "applied": {"spikes": fx["removed"], "excluded": fx["excluded"]} if fx else None}
 
 
-def apply(tid, remove_spikes=True, exclude=(), smooth=False):
+def apply(tid, remove_spikes=True, exclude=(), smooth=False, set_dur_s=None, set_start_ts=None):
     tid = str(tid)
     t = db.one("SELECT * FROM tours WHERE id=?", (tid,))
     if not t:
@@ -199,6 +233,15 @@ def apply(tid, remove_spikes=True, exclude=(), smooth=False):
     if not pts or len(pts) < 5:
         raise RuntimeError("Für diese Tour liegt keine Strecke vor")
     peak, sustain = LIMITS[kind(t["sport"])]
+    new_dur = None
+    if set_dur_s:                                         # Zeitstempel auf die angegebene Dauer strecken (bei nicht aufgezeichneten Zeiten)
+        new_dur = int(set_dur_s)
+        if not 60 <= new_dur <= 14 * 86400:
+            raise ValueError("Unplausible Dauer")
+        if pts[-1][3] is None or pts[-1][3] <= 0:
+            raise RuntimeError("Der Track hat keine Zeitstempel")
+        f = new_dur * 1000 / pts[-1][3]
+        pts = [[p[0], p[1], p[2], None if p[3] is None else int(p[3] * f)] for p in pts]
     bad = set(find_spikes(pts, peak)) if remove_spikes else set()
     keep = [p for i, p in enumerate(pts) if i not in bad]
     fast = find_fast(keep, sustain) if keep[0][3] is not None else []
@@ -213,20 +256,35 @@ def apply(tid, remove_spikes=True, exclude=(), smooth=False):
     # Länge: Original-Wert um die entfernten Sprünge und Fahrten verringern (die gespeicherte Länge kann von der Punktesumme abweichen)
     jit = jitter_m(keep)[0] if smooth else 0.0
     dist = max(0.0, (o_dist or 0) - (before - after) - ex_m - jit)
-    dur = max(0.0, (o_dur or 0) - ex_s)
+    dur = max(0.0, ((new_dur if new_dur else (o_dur or 0)) - ex_s))
     if not fx:                                            # Original sichern
         if local:
             orig_gpx(tid).write_text(tracks.gpx_file(tid).read_text(encoding="utf-8"), encoding="utf-8")
         else:
             routes.D.mkdir(parents=True, exist_ok=True)
             orig_path(tid).write_text(json.dumps(pts))
+    if set_start_ts:
+        t = dict(t); t["start_ts"] = int(set_start_ts)
     if local:
         tracks.gpx_file(tid).write_text(build_gpx(t, keep), encoding="utf-8")
     routes.store(tid, [tuple(p) for p in keep])
+    cur_t = db.one("SELECT start_ts, end_ts FROM tours WHERE id=?", (tid,))
+    o_end = fx["orig_end"] if fx and fx["orig_end"] else cur_t["end_ts"]
+    o_start = fx["orig_start"] if fx and fx["orig_start"] else cur_t["start_ts"]
     with db.cur() as c:
-        c.execute("INSERT OR REPLACE INTO track_fix(id,orig_dist,orig_dur,dist,dur,removed,excluded,ts) VALUES(?,?,?,?,?,?,?,?)",
-                  (tid, o_dist, o_dur, dist, dur, len(bad), len(ex), int(time.time())))
+        c.execute("INSERT OR REPLACE INTO track_fix(id,orig_dist,orig_dur,dist,dur,removed,excluded,ts,orig_end,orig_start) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                  (tid, o_dist, o_dur, dist, dur, len(bad), len(ex), int(time.time()), o_end, o_start))
         c.execute("UPDATE tours SET dist_m=?,dur_s=? WHERE id=?", (dist, dur, tid))
+        if set_start_ts:
+            c.execute("UPDATE tours SET start_ts=? WHERE id=?", (int(set_start_ts), tid))
+        if new_dur:
+            c.execute("UPDATE tours SET end_ts=? WHERE id=?", ((t["start_ts"] or 0) + new_dur, tid))
+    if new_dur or set_start_ts:
+        try:
+            from . import photos
+            photos.assign_all()
+        except Exception:  # noqa
+            pass
     return {"dist_m": dist, "orig_dist": o_dist, "dur_s": dur, "orig_dur": o_dur, "removed": len(bad), "excluded": len(ex), "jitter_m": jit}
 
 
@@ -264,6 +322,10 @@ def restore(tid):
         routes.store(tid, pts)
     with db.cur() as c:
         c.execute("UPDATE tours SET dist_m=?,dur_s=? WHERE id=?", (fx["orig_dist"], fx["orig_dur"], tid))
+        if fx["orig_end"]:
+            c.execute("UPDATE tours SET end_ts=? WHERE id=?", (fx["orig_end"], tid))
+        if fx["orig_start"]:
+            c.execute("UPDATE tours SET start_ts=? WHERE id=?", (fx["orig_start"], tid))
         c.execute("DELETE FROM track_fix WHERE id=?", (tid,))
     return True
 

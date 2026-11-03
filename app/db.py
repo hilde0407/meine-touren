@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS photos (
   id INTEGER PRIMARY KEY AUTOINCREMENT, path TEXT UNIQUE, mtime REAL, size INTEGER,
   taken_ts INTEGER, lat REAL, lng REAL, tour_id TEXT);
 CREATE TABLE IF NOT EXISTS elev_fix (id TEXT PRIMARY KEY, orig_up REAL, orig_down REAL, up_m REAL, down_m REAL, ts INTEGER);
-CREATE TABLE IF NOT EXISTS track_fix (id TEXT PRIMARY KEY, orig_dist REAL, orig_dur REAL, dist REAL, dur REAL, removed INTEGER, excluded INTEGER, ts INTEGER);
+CREATE TABLE IF NOT EXISTS track_fix (id TEXT PRIMARY KEY, orig_dist REAL, orig_dur REAL, dist REAL, dur REAL, removed INTEGER, excluded INTEGER, ts INTEGER, orig_end INTEGER, orig_start INTEGER);
 CREATE TABLE IF NOT EXISTS tour_geo (id TEXT PRIMARY KEY, country TEXT, state TEXT, county TEXT, place TEXT, ts INTEGER);
 CREATE TABLE IF NOT EXISTS guide_tours (id INTEGER PRIMARY KEY AUTOINCREMENT, book TEXT, title TEXT, pts TEXT);
 CREATE TABLE IF NOT EXISTS tour_peak (id TEXT PRIMARY KEY, name TEXT, alt REAL, lat REAL, lng REAL);
@@ -67,6 +67,10 @@ def _open(path):
             conn.execute("ALTER TABLE photos ADD COLUMN fp TEXT")            # Bild-Fingerabdruck (dHash) gegen Doppelte
         if "dated" not in cols:
             conn.execute("ALTER TABLE photos ADD COLUMN dated INTEGER")      # 1 = Aufnahmezeit aus EXIF, 0 = nur Dateidatum, NULL = noch nicht geprüft
+        if "orig_end" not in {r["name"] for r in conn.execute("PRAGMA table_info(track_fix)")}:
+            conn.execute("ALTER TABLE track_fix ADD COLUMN orig_end INTEGER")        # ursprüngliches Tourende (Dauerkorrektur)
+        if "orig_start" not in {r["name"] for r in conn.execute("PRAGMA table_info(track_fix)")}:
+            conn.execute("ALTER TABLE track_fix ADD COLUMN orig_start INTEGER")
         conn.execute("CREATE TABLE IF NOT EXISTS photo_pref (path TEXT PRIMARY KEY, tour_id TEXT)")   # beim Import gewählte Tour
         conn.execute("CREATE TABLE IF NOT EXISTS tour_sport (id TEXT PRIMARY KEY, sport TEXT)")        # eigene Sportart (bleibt beim Komoot-Abgleich)
         conn.execute("CREATE TABLE IF NOT EXISTS tour_hidden (id TEXT PRIMARY KEY, js TEXT, ts INTEGER)")  # ausgeblendete Touren (z. B. Fehlaufzeichnungen)
