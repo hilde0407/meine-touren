@@ -21,19 +21,36 @@ function trackFixDialog(id, done) {
     const none = !a.n_spikes && !a.fast.length;
     b.className = "";
     b.innerHTML = `
-     <p class="mut" style="font-size:14px;margin-top:0">Gesucht wird nach <b>Ausreißern</b> (Punkte, die mit unmöglichem Tempo vom Weg wegspringen) und nach <b>schnellen Abschnitten</b> (dauerhaft über ${lim} km/h, z. B. Seilbahn, Bus oder Auto). Das Original bleibt erhalten und lässt sich zurückholen.</p>
+     <p class="mut" style="font-size:14px;margin-top:0">Gesucht wird nach <b>Ausreißern</b> (Punkte, die mit unmöglichem Tempo vom Weg wegspringen) und nach <b>schnellen Abschnitten</b> (dauerhaft über ${lim} km/h, z. B. Seilbahn, Bus oder Auto) sowie nach <b>GPS-Zittern</b>, das die Strecke künstlich verlängert. Das Original bleibt erhalten und lässt sich zurückholen.</p>
      <div id="tfm" style="height:280px;border-radius:6px;margin:8px 0"></div>
      ${a.fixed ? `<p class="ok">✓ Bereits korrigiert: ${a.applied.spikes} Ausreißer entfernt, ${a.applied.excluded} Abschnitt(e) herausgerechnet (Strecke vorher ${nf(a.dist_km, 1)} km, jetzt ${nf(a.now_km, 1)} km). Die Liste unten zeigt, was vom Original aus gefunden wird.</p>` : ""}
      ${none ? `<p class="ok">✓ Im Track wurde nichts Auffälliges gefunden.</p>` : ""}
      ${a.n_spikes ? `<label class="chk"><input type="checkbox" id="tfs" checked> <b>${a.n_spikes} Ausreißer-Punkt${a.n_spikes > 1 ? "e" : ""}</b> in ${a.spikes.length} Stelle${a.spikes.length > 1 ? "n" : ""} entfernen</label>` : ""}
-     ${a.fast.length ? `<h3 style="margin:16px 0 4px">Schnelle Abschnitte</h3><p class="mut" style="font-size:13px;margin:0 0 6px">Angehakt = als Fahrt aus Strecke und Dauer der Tour herausrechnen (der Weg bleibt auf der Karte sichtbar). Nicht angehakt = zählt als echte Bewegung.</p>
+     ${a.fast.length ? `<h3 style="margin:16px 0 4px">Schnelle Abschnitte</h3><p class="mut" style="font-size:13px;margin:0 0 6px">Nichts ist vorgewählt. Anhaken = als Fahrt aus Strecke und Dauer herausrechnen (der Weg bleibt auf der Karte sichtbar). Bitte Karte und Uhrzeit prüfen: Nur echte Fahrten (Seilbahn, Bus, Auto) anhaken, keine Wegstücke, die du gelaufen bist.</p>
       <div class="rows">${a.fast
         .map(
-          f => `<label class="r" style="cursor:pointer;display:flex;gap:8px;align-items:center"><input type="checkbox" data-f="${f.id}" checked><span>${a.has_time ? clock(f.t0) + " Uhr · " : ""}${nf(f.m / 1000, 2)} km in ${fmtMin(f.s)}<small class="mut"> · Ø ${nf(f.avg, 1)} km/h, bis ${nf(f.max, 0)} km/h</small></span></label>`
+          f => `<label class="r" style="cursor:pointer;display:flex;gap:8px;align-items:center"><input type="checkbox" data-f="${f.id}"><span>${a.has_time ? clock(f.t0) + " Uhr · " : ""}${nf(f.m / 1000, 2)} km in ${fmtMin(f.s)}<small class="mut"> · Ø ${nf(f.avg, 1)} km/h, bis ${nf(f.max, 0)} km/h</small></span></label>`
         )
         .join("")}</div>` : ""}
+     ${a.jitter_m >= 200 && a.jitter_m >= a.raw_m * 0.03 ? `<label class="chk"><input type="checkbox" id="tfj"> <b>GPS-Zittern glätten:</b> der Track ist durch Messrauschen etwa ${nf(a.jitter_m / 1000, 1)} km (${Math.round((a.jitter_m / a.raw_m) * 100)} %) zu lang. Die Länge wird entsprechend verringert, der Weg bleibt unverändert.</label>` : ""}
+     <p id="tfp" class="panel" style="padding:10px 14px;margin:14px 0 0;font-size:14px"></p>
      ${!a.has_time ? `<p class="mut" style="font-size:13px">Dieser Track hat keine Zeitstempel – schnelle Abschnitte lassen sich daher nicht erkennen.</p>` : ""}
      <div class="row" style="margin-top:16px">${none && !a.fixed ? "" : `<button class="btn" id="tfok">${a.fixed ? "Erneut anwenden" : "Korrigieren"}</button>`}${a.fixed ? `<button class="btn alt" id="tfre">Original wiederherstellen</button>` : ""}<button class="btn ghost" id="tfno">Schließen</button><span id="tfer" class="bad"></span></div>`;
+    const preview = () => {
+      let d = a.dist_km * 1000,
+        s = a.dur_s;
+      if (b.querySelector("#tfs")?.checked) d -= a.spike_m;
+      b.querySelectorAll("[data-f]:checked").forEach(x => {
+        const f = a.fast[+x.dataset.f];
+        d -= f.m;
+        s -= f.s;
+      });
+      if (b.querySelector("#tfj")?.checked) d -= a.jitter_m;
+      const v = (km, sec) => (sec > 0 ? nf(km / (sec / 3600), 1) : "–");
+      b.querySelector("#tfp").innerHTML = `Original: <b>${nf(a.dist_km, 1)} km</b> in ${fmtMin(a.dur_s)} (Ø ${v(a.dist_km, a.dur_s)} km/h)<br>Nach der Korrektur: <b>${nf(Math.max(0, d) / 1000, 1)} km</b> in ${fmtMin(Math.max(0, s))} (Ø ${v(Math.max(0, d) / 1000, s)} km/h)`;
+    };
+    b.querySelectorAll("input[type=checkbox]").forEach(x => (x.onchange = preview));
+    preview();
     // Karte
     try {
       const mp = L.map(b.querySelector("#tfm"), {zoomControl: true});
@@ -65,7 +82,7 @@ function trackFixDialog(id, done) {
           api(`/api/tours/${encodeURIComponent(id)}/trackfix`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({spikes: b.querySelector("#tfs") ? b.querySelector("#tfs").checked : false, exclude: [...b.querySelectorAll("[data-f]:checked")].map(x => +x.dataset.f)}),
+            body: JSON.stringify({spikes: b.querySelector("#tfs") ? b.querySelector("#tfs").checked : false, exclude: [...b.querySelectorAll("[data-f]:checked")].map(x => +x.dataset.f), smooth: !!b.querySelector("#tfj")?.checked}),
           })
         );
     const re = b.querySelector("#tfre");

@@ -55,3 +55,21 @@ def test_api_hidden_tour_message():
         assert False
     except Exception as e:
         assert getattr(e, "status_code", 0) == 409
+
+
+def test_gps_jitter_is_reported_and_removed():
+    import random
+    random.seed(3)
+    t0 = datetime(2026, 7, 6, 6, 0, tzinfo=timezone.utc)
+    pts = []
+    for i in range(500):
+        t = (t0 + timedelta(seconds=5 * i)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        pts.append(f'<trkpt lat="{46.5 + random.uniform(-0.00015, 0.00015):.6f}" lon="{10.0 + 0.00003 * i + random.uniform(-0.00015, 0.00015):.6f}"><ele>1500</ele><time>{t}</time></trkpt>')
+    g = '<?xml version="1.0"?><gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1"><trk><type>hiking</type><trkseg>' + "".join(pts) + "</trkseg></trk></gpx>"
+    t, _ = tracks.adopt(g, "zit.gpx", name="Zittern")
+    a = trackfix.analyse(t["id"])
+    assert a["jitter_m"] > 0.5 * a["raw_m"]                     # fast die ganze „Strecke“ ist Rauschen
+    d0 = db.one("SELECT dist_m FROM tours WHERE id=?", (t["id"],))["dist_m"]
+    trackfix.apply(t["id"], True, [], True)
+    assert db.one("SELECT dist_m FROM tours WHERE id=?", (t["id"],))["dist_m"] < d0 * 0.5
+    assert len(a["fast"]) == 0 or all(f["m"] > 400 for f in a["fast"])

@@ -109,7 +109,7 @@ def api_trackfix(tour_id: str):
 def api_trackfix_apply(tour_id: str, body: dict):
     from . import trackfix
     try:
-        return trackfix.apply(tour_id, bool(body.get("spikes", True)), body.get("exclude") or [])
+        return trackfix.apply(tour_id, bool(body.get("spikes", True)), body.get("exclude") or [], bool(body.get("smooth", False)))
     except Exception as e:  # noqa
         _fixerr(tour_id, e)
 

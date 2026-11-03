@@ -12,7 +12,7 @@ from . import config, db, routes, tracks
 
 WALK = ("hike", "nordicwalking", "snowshoe", "mountaineering")
 # (Spitzentempo in km/h für Sprung-Erkennung, Dauertempo in km/h für „schneller Abschnitt“)
-LIMITS = {"walk": (22, 9), "run": (35, 20), "bike": (90, 45), "other": (150, 60)}
+LIMITS = {"walk": (22, 12), "run": (35, 22), "bike": (90, 50), "other": (150, 60)}
 
 
 def kind(sport):
@@ -77,7 +77,7 @@ def find_spikes(pts, vmax_kmh, look=12):
     return bad
 
 
-def find_fast(pts, vmax_kmh, window_s=90, min_m=300):
+def find_fast(pts, vmax_kmh, window_s=120, min_m=400):
     """Zusammenhängende Abschnitte (Indexbereiche), in denen das Tempo über ein Zeitfenster dauerhaft über der Grenze liegt."""
     n = len(pts)
     if n < 3 or pts[0][3] is None or pts[-1][3] is None:
@@ -122,6 +122,29 @@ def find_fast(pts, vmax_kmh, window_s=90, min_m=300):
     return out
 
 
+def smooth_len(pts, half_s=25):
+    """Länge des Tracks, nachdem die Positionen über ±half_s Sekunden (ohne Zeit: ±3 Punkte) gemittelt wurden."""
+    n = len(pts)
+    timed = all(p[3] is not None for p in pts)
+    out, lo, hi = [], 0, 0
+    for i in range(n):
+        if timed:
+            while pts[lo][3] < pts[i][3] - half_s * 1000:
+                lo += 1
+            while hi + 1 < n and pts[hi + 1][3] <= pts[i][3] + half_s * 1000:
+                hi += 1
+        else:
+            lo, hi = max(0, i - 3), min(n - 1, i + 3)
+        seg = pts[lo:hi + 1]
+        out.append((sum(p[0] for p in seg) / len(seg), sum(p[1] for p in seg) / len(seg)))
+    return sum(hav(out[i], out[i + 1]) for i in range(n - 1))
+
+
+def jitter_m(pts):
+    raw = sum(hav(pts[i], pts[i + 1]) for i in range(len(pts) - 1))
+    return max(0.0, raw - smooth_len(pts)), raw
+
+
 def _line(pts, i0, i1, n=60):
     seg = pts[i0:i1 + 1]
     step = max(1, len(seg) // n)
@@ -154,7 +177,10 @@ def analyse(tid):
         runs.append({"i0": bad[i], "i1": bad[k], "n": k - i + 1, "at": [round(pts[bad[i]][0], 5), round(pts[bad[i]][1], 5)]})
         i = k + 1
     step = max(1, len(pts) // 800)
-    return {"id": tid, "sport": t["sport"], "kind": kind(t["sport"]), "has_time": has_t, "n": len(pts),
+    jit, raw = jitter_m(keep)
+    dur_now = (t["dur_s"] or 0)
+    return {"jitter_m": round(jit), "raw_m": round(raw), "spike_m": round(sum(hav(pts[i], pts[i + 1]) for i in range(len(pts) - 1)) - raw),
+            "dur_s": round(fx["orig_dur"] if fx else dur_now),"id": tid, "sport": t["sport"], "kind": kind(t["sport"]), "has_time": has_t, "n": len(pts),
             "limit_peak": peak, "limit_sustain": sustain, "spikes": runs, "n_spikes": len(bad), "fast": fast,
             "line": [[round(p[0], 5), round(p[1], 5)] for p in pts[::step]],
             "dist_km": round((fx["orig_dist"] if fx else t["dist_m"] or 0) / 1000, 2),
@@ -162,7 +188,7 @@ def analyse(tid):
             "applied": {"spikes": fx["removed"], "excluded": fx["excluded"]} if fx else None}
 
 
-def apply(tid, remove_spikes=True, exclude=()):
+def apply(tid, remove_spikes=True, exclude=(), smooth=False):
     tid = str(tid)
     t = db.one("SELECT * FROM tours WHERE id=?", (tid,))
     if not t:
@@ -185,7 +211,8 @@ def apply(tid, remove_spikes=True, exclude=()):
     o_dist = fx["orig_dist"] if fx else t["dist_m"]
     o_dur = fx["orig_dur"] if fx else t["dur_s"]
     # Länge: Original-Wert um die entfernten Sprünge und Fahrten verringern (die gespeicherte Länge kann von der Punktesumme abweichen)
-    dist = max(0.0, (o_dist or 0) - (before - after) - ex_m)
+    jit = jitter_m(keep)[0] if smooth else 0.0
+    dist = max(0.0, (o_dist or 0) - (before - after) - ex_m - jit)
     dur = max(0.0, (o_dur or 0) - ex_s)
     if not fx:                                            # Original sichern
         if local:
@@ -200,7 +227,7 @@ def apply(tid, remove_spikes=True, exclude=()):
         c.execute("INSERT OR REPLACE INTO track_fix(id,orig_dist,orig_dur,dist,dur,removed,excluded,ts) VALUES(?,?,?,?,?,?,?,?)",
                   (tid, o_dist, o_dur, dist, dur, len(bad), len(ex), int(time.time())))
         c.execute("UPDATE tours SET dist_m=?,dur_s=? WHERE id=?", (dist, dur, tid))
-    return {"dist_m": dist, "orig_dist": o_dist, "dur_s": dur, "orig_dur": o_dur, "removed": len(bad), "excluded": len(ex)}
+    return {"dist_m": dist, "orig_dist": o_dist, "dur_s": dur, "orig_dur": o_dur, "removed": len(bad), "excluded": len(ex), "jitter_m": jit}
 
 
 def build_gpx(t, pts):
