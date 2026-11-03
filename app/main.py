@@ -576,7 +576,7 @@ def photo_info():
     years = db.query("SELECT DISTINCT CAST(strftime('%Y', taken_ts, 'unixepoch') AS INT) y FROM photos ORDER BY y DESC")
     undated = db.one("SELECT COUNT(*) n FROM photos WHERE dated=0")["n"]
     return {"count": r["n"], "assigned": r["a"] or 0, "undated": undated, "years": [y["y"] for y in years],
-            "folder_exists": config.PHOTOS_DIR.exists(), "heic": photos.heic_supported(), "lib_dir": str(config.LIB_DIR), "source_dir": str(config.PHOTOS_DIR), "slideshow_seconds": db.get_int("slideshow_seconds", 6)}
+            "folder_exists": config.PHOTOS_DIR.exists(), "heic": photos.heic_supported(), "lib_dir": str(config.LIB_DIR), "source_dir": str(config.PHOTOS_DIR), "slideshow_seconds": db.get_int("slideshow_seconds", 6), "tz": config.TZ_NAME}
 
 
 @app.get("/pic/{photo_id}")

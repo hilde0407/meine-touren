@@ -153,8 +153,9 @@ def test_photo_gps_anchors_set_track_time():
     assert abs(row["start_ts"] + pts2[k][3] / 1000 - (st + 9 * 3600)) < 300      # Foto-Position ↔ Fotozeit
 
 
-def test_selftest_has_new_local_checks():
-    from app import extras
+def test_selftest_has_new_local_checks(tmp_path, monkeypatch):
+    from app import extras, config
+    monkeypatch.setattr(config, "BACKUP_ROOT", tmp_path / "backups")       # /var/backups ist auf Testrechnern oft nicht beschreibbar
     res = {r["name"]: r for r in extras.api_selftest()}
     for n in ("Datenbank-Integrität", "Schreibrechte der Ordner", "Foto-Dateien erreichbar", "HEIC-Unterstützung", "Auffällige Touren", "Update-Weg"):
         assert n in res, n

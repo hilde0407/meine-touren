@@ -611,9 +611,20 @@ function photoImportModal(o = {}) {
         const sg = f._o[0] === "-" ? -1 : 1;
         return Date.UTC(...n) / 1000 - sg * (+f._o.slice(1, 3) * 3600 + +f._o.slice(4, 6) * 60);
       }
+      // Aufnahmezeit ohne Zeitzonenangabe: in der Zeitzone des Servers lesen (nicht in der des Browsers, z. B. auf Reisen)
+      const z = window._srvTz;
+      if (z) {
+        const off = ms => {
+          const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", {timeZone: z, hourCycle: "h23", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric"}).formatToParts(new Date(ms)).map(x => [x.type, +x.value]));
+          return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - ms;
+        };
+        const g = Date.UTC(...n);
+        return (g - off(g - off(g))) / 1000;
+      }
       return new Date(...n).getTime() / 1000;
     };
     const drawMap = async i => {
+      if (!window._srvTz) window._srvTz = (await api("/api/photo-info").catch(() => ({}))).tz || "";
       const box = q(`[data-map="${i}"]`),
         v = val(i),
         d = rows[i].d;

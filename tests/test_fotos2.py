@@ -232,7 +232,8 @@ def test_upload_with_offset_and_reimport_of_deleted(monkeypatch):
         rows = db.query("SELECT id,taken_ts FROM photos WHERE path LIKE '%gom_f%' ORDER BY id")
         utc = int(__import__("datetime").datetime(2026, 10, 29, 12, 17, 17, tzinfo=__import__("datetime").timezone.utc).timestamp())
         assert len(rows) == 2 and all(r["taken_ts"] == utc for r in rows)
-        c.post("/api/photo-delete", json={"ids": [rows[0]["id"]]})
+        f0 = db.one("SELECT id FROM photos WHERE path LIKE '%gom_f0%'")["id"]      # Reihenfolge beim Einlesen hängt vom Dateisystem ab
+        c.post("/api/photo-delete", json={"ids": [f0]})
         lib = c.get("/api/photo-library?split=1").json()
         assert "gom/f0" in lib["deleted"] and "gom/f0" not in lib["have"]
         r = c.post("/api/photo-upload", files={"file": ("x.jpg", _jpeg(10), "image/jpeg")}, data={"rel": "gom/f0", "taken": "2026:10:29 12:17:17", "offset": "+00:00", "mtime": "0"})

@@ -286,6 +286,7 @@ def test_profile_photo_markers(page):
     page.evaluate("document.querySelector('#psvg .pph').dispatchEvent(new MouseEvent('click', {bubbles: true}))")
     page.wait_for_timeout(300)
     assert page.evaluate("document.querySelector('#lb').classList.contains('on')")
+    page.evaluate("document.querySelector('#lb').classList.remove('on')")        # Foto-Ansicht schließen, damit Folgetests nicht verdeckt werden
     assert not page.errors, page.errors
 
 
