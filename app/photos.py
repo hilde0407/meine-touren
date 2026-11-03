@@ -1,6 +1,7 @@
 """Fotoindex (EXIF), Zuordnung zu Touren, Vorschaubilder."""
 import hashlib
 import os
+import re
 import time
 from datetime import datetime, timedelta, timezone
 
@@ -800,3 +801,110 @@ def with_exif_time(jpeg, taken, lat=None, lng=None, offset=None):
     if not payload.startswith(b"Exif\x00\x00"):
         payload = b"Exif\x00\x00" + payload
     return jpeg[:2] + b"\xff\xe1" + struct.pack(">H", len(payload) + 2) + payload + jpeg[2:]
+
+
+# ---------- Automatische Fotoauswahl (beste Fotos einer Tour) ----------
+_RATING_RES = (re.compile(rb'xmp:Rating\s*=\s*"(-?\d)"'), re.compile(rb"<xmp:Rating>\s*(-?\d)\s*</xmp:Rating>"))
+
+
+def _rating_in(data):
+    for rx in _RATING_RES:
+        m = rx.search(data)
+        if m:
+            return max(-1, min(5, int(m.group(1))))
+    return None
+
+
+def read_rating(path):
+    """Sternebewertung 0–5 (-1 = abgelehnt): Begleitdatei .xmp (Lightroom) oder eingebettetes XMP/EXIF; None = keine Angabe."""
+    base = os.path.splitext(path)[0]
+    for side in (base + ".xmp", base + ".XMP", path + ".xmp"):
+        try:
+            with open(side, "rb") as f:
+                r = _rating_in(f.read(200000))
+            if r is not None:
+                return r
+        except OSError:
+            pass
+    try:
+        with open(path, "rb") as f:
+            r = _rating_in(f.read(262144))      # XMP steht bei JPEG im Kopfbereich
+        if r is not None:
+            return r
+        with Image.open(path) as im:
+            v = im.getexif().get(0x4746)          # EXIF „Rating“
+            if isinstance(v, int) and 0 <= v <= 5:
+                return v
+    except Exception:  # noqa
+        pass
+    return None
+
+
+def sharpness(path):
+    """Schärfemaß: Varianz des Kantenbilds eines verkleinerten Graubilds (größer = schärfer)."""
+    from PIL import ImageFilter, ImageStat
+    with Image.open(path) as im:
+        try:
+            im.draft("L", (1000, 1000))
+        except Exception:  # noqa
+            pass
+        im = ImageOps.exif_transpose(im).convert("L")
+        im.thumbnail((640, 640), Image.BILINEAR)
+        return float(ImageStat.Stat(im.filter(ImageFilter.FIND_EDGES)).var[0])
+
+
+def ensure_metrics(rows, budget_s=40):
+    """Fehlende Bewertung/Schärfe berechnen und speichern (zeitlich begrenzt)."""
+    t0 = time.time()
+    for r in rows:
+        if r.get("rating") is not None and r.get("sharp") is not None:
+            continue
+        if time.time() - t0 > budget_s:
+            break
+        try:
+            if not os.path.exists(r["path"]):
+                continue
+            rt = r["rating"] if r.get("rating") is not None else (read_rating(r["path"]) or 0)
+            sh = r["sharp"] if r.get("sharp") is not None else sharpness(r["path"])
+            db.execute("UPDATE photos SET rating=?, sharp=? WHERE id=?", (rt, sh, r["id"]))
+            r["rating"], r["sharp"] = rt, sh
+        except Exception:  # noqa
+            continue
+
+
+def pick_best(rows, n=10):
+    """Aus Fotos (dicts mit taken_ts, rating, sharp) die besten n wählen: abgelehnte und unscharfe aussortieren,
+    Sterne zuerst, dann Schärfe, möglichst gleichmäßig über die Tour verteilt. Ergebnis zeitlich sortiert."""
+    rows = [r for r in rows if (r.get("rating") if r.get("rating") is not None else 0) >= 0]
+    if len(rows) <= n:
+        return sorted(rows, key=lambda r: r["taken_ts"])
+    sh = sorted(r["sharp"] for r in rows if r.get("sharp") is not None)
+    if len(sh) >= 5:
+        med, hi = sh[len(sh) // 2], sh[int(len(sh) * 0.95) - 1]
+        keep = [r for r in rows if r.get("sharp") is None or r["sharp"] >= 0.35 * med]
+        rows = keep if len(keep) >= n else rows
+    else:
+        hi = max(sh) if sh else 1.0
+    hi = max(hi, 1e-6)
+    score = lambda r: (r.get("rating") or 0) * 1000 + min(r.get("sharp") or 0, hi) / hi * 500
+    ts = [r["taken_ts"] for r in rows]
+    gap = max(60, (max(ts) - min(ts)) / (2.5 * n))
+    chosen = []
+    for r in sorted(rows, key=score, reverse=True):
+        if len(chosen) >= n:
+            break
+        if all(abs(r["taken_ts"] - c["taken_ts"]) >= gap for c in chosen):
+            chosen.append(r)
+    for r in sorted(rows, key=score, reverse=True):      # Rest auffüllen, falls der Mindestabstand zu streng war
+        if len(chosen) >= n:
+            break
+        if r not in chosen:
+            chosen.append(r)
+    return sorted(chosen, key=lambda r: r["taken_ts"])
+
+
+def best_of_tour(tour_id, n=10):
+    rows = db.query("SELECT id,taken_ts,tour_id,lat,lng,path,rating,sharp FROM photos WHERE tour_id=? AND COALESCE(manual,0)!=2 ORDER BY taken_ts", (tour_id,))
+    ensure_metrics(rows)
+    out = pick_best(rows, n)
+    return [{k: r[k] for k in ("id", "taken_ts", "tour_id", "lat", "lng", "rating", "sharp")} for r in out], len(rows)

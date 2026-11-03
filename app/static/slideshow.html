@@ -11,6 +11,7 @@ const q = new URLSearchParams(location.search);
   const sec = (+q.get("sec") || info.slideshow_seconds || 6) * 1000;
   const u = new URLSearchParams({limit: 1500}); ["tour","year"].forEach(k => q.get(k) && u.set(k === "tour" ? "tour_id" : k, q.get(k))); if (q.get("random")) u.set("random", "true");
   let list = await (await fetch("/api/photos?" + u)).json();
+  if (q.get("best") && q.get("tour")) { const b = await (await fetch(`/api/tours/${encodeURIComponent(q.get("tour"))}/best-photos?n=${+q.get("best") || 10}`)).json(); const nm = (list[0] || {}).tour_name; list = b.photos.map(p => ({...p, tour_name: nm})); }
   if (!list.length) { document.getElementById("msg").style.display = "flex"; return; }
   if (q.get("shuffle")) list.sort(() => Math.random() - .5);
   let i = -1, cur = "a", paused = false, timer;

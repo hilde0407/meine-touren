@@ -331,6 +331,14 @@ def api_guides_progress():
     return [{"book": b, "total": len(v), "done": sum(1 for x in v if x["tour"]), "tours": v} for b, v in books.items()]
 
 
+# ---------- Beste Fotos ----------
+@router.get("/api/tours/{tour_id}/best-photos")
+def api_best_photos(tour_id: str, n: int = 10):
+    from . import photos
+    best, total = photos.best_of_tour(tour_id, max(1, min(n, 60)))
+    return {"photos": best, "total": total, "rated": sum(1 for p in best if (p.get("rating") or 0) > 0)}
+
+
 # ---------- Wunschliste ----------
 @router.get("/api/wishlist")
 def api_wishlist():

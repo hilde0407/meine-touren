@@ -477,7 +477,12 @@ Kamerauhr|Horloge de l’appareil photo
 Wird geprüft …|Vérification …
 Ignorieren|Ignorer
 ✓ Die Kamerauhr passt zu den Strecken der letzten Touren.|✓ L’horloge de l’appareil correspond aux tracés des derniers parcours.
-Bei diesen Touren passen die Foto-Zeiten nicht zum Aufnahmeort (Kamerauhr falsch gestellt, z. B. Zeitzone der Reise). Mit „Korrigieren“ werden die Fotos um den Unterschied verschoben und der Tour zugeordnet.|Pour ces parcours, l’heure des photos ne correspond pas au lieu de prise de vue (horloge mal réglée, p. ex. fuseau horaire du voyage). « Corriger » décale les photos de l’écart et les rattache au parcours.`,
+Bei diesen Touren passen die Foto-Zeiten nicht zum Aufnahmeort (Kamerauhr falsch gestellt, z. B. Zeitzone der Reise). Mit „Korrigieren“ werden die Fotos um den Unterschied verschoben und der Tour zugeordnet.|Pour ces parcours, l’heure des photos ne correspond pas au lieu de prise de vue (horloge mal réglée, p. ex. fuseau horaire du voyage). « Corriger » décale les photos de l’écart et les rattache au parcours.
+⭐ Beste Fotos|⭐ Meilleures photos
+Alle Fotos zeigen|Afficher toutes les photos
+Diashow der besten|Diaporama des meilleures
+Wird ausgewählt …|Sélection …
+Wählt aus den Fotos der Tour die besten aus: Sterne aus Lightroom (XMP), unscharfe und abgelehnte Fotos fallen heraus, verteilt über die ganze Tour|Choisit les meilleures photos du parcours : étoiles Lightroom (XMP), photos floues ou rejetées exclues, réparties sur tout le parcours`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
 Aktivität im Jahr 2026|Actividad en 2026
 Neuere Tour (←)|Ruta más reciente (←)
@@ -955,5 +960,10 @@ Kamerauhr|Reloj de la cámara
 Wird geprüft …|Comprobando …
 Ignorieren|Ignorar
 ✓ Die Kamerauhr passt zu den Strecken der letzten Touren.|✓ El reloj de la cámara coincide con los trazados de las últimas rutas.
-Bei diesen Touren passen die Foto-Zeiten nicht zum Aufnahmeort (Kamerauhr falsch gestellt, z. B. Zeitzone der Reise). Mit „Korrigieren“ werden die Fotos um den Unterschied verschoben und der Tour zugeordnet.|En estas rutas la hora de las fotos no coincide con el lugar donde se tomaron (reloj mal ajustado, p. ej. zona horaria del viaje). «Corregir» desplaza las fotos esa diferencia y las asigna a la ruta.`,
+Bei diesen Touren passen die Foto-Zeiten nicht zum Aufnahmeort (Kamerauhr falsch gestellt, z. B. Zeitzone der Reise). Mit „Korrigieren“ werden die Fotos um den Unterschied verschoben und der Tour zugeordnet.|En estas rutas la hora de las fotos no coincide con el lugar donde se tomaron (reloj mal ajustado, p. ej. zona horaria del viaje). «Corregir» desplaza las fotos esa diferencia y las asigna a la ruta.
+⭐ Beste Fotos|⭐ Mejores fotos
+Alle Fotos zeigen|Mostrar todas las fotos
+Diashow der besten|Presentación de las mejores
+Wird ausgewählt …|Seleccionando …
+Wählt aus den Fotos der Tour die besten aus: Sterne aus Lightroom (XMP), unscharfe und abgelehnte Fotos fallen heraus, verteilt über die ganze Tour|Elige las mejores fotos de la ruta: estrellas de Lightroom (XMP), se descartan las borrosas y rechazadas, repartidas por toda la ruta`,
 };

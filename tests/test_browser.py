@@ -311,3 +311,16 @@ def test_goal_forecast_text(page):
     assert "verfehlt" in txt or "voraussichtlich" in txt or "Ziel erreicht" in txt, txt
     page.evaluate("""async () => { for (const g of await api('/api/goals')) await api('/api/goals/' + g.id, {method: 'DELETE'}); }""")
     assert not page.errors, page.errors
+
+
+def test_best_photos_button(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.wait_for_timeout(300)
+    tid = page.evaluate("""async () => { const ph = await api('/api/photos?limit=500'); const p = ph.find(x => x.tour_id); return p && p.tour_id; }""")
+    assert tid
+    page.goto(base + "#/tour/" + tid); page.wait_for_timeout(2000)
+    assert page.locator("#pbest").count() == 1
+    page.click("#pbest"); page.wait_for_timeout(1200)
+    assert "beste von" in page.inner_text("#pc"), page.inner_text("#pc")
+    assert page.locator("#ss").get_attribute("href").endswith("best=10")
+    assert not page.errors, page.errors

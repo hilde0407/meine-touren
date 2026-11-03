@@ -501,7 +501,12 @@ Kamerauhr|Camera clock
 Wird geprüft …|Checking …
 Ignorieren|Ignore
 ✓ Die Kamerauhr passt zu den Strecken der letzten Touren.|✓ The camera clock matches the tracks of the latest tours.
-Bei diesen Touren passen die Foto-Zeiten nicht zum Aufnahmeort (Kamerauhr falsch gestellt, z. B. Zeitzone der Reise). Mit „Korrigieren“ werden die Fotos um den Unterschied verschoben und der Tour zugeordnet.|For these tours the photo times do not match where they were taken (camera clock wrong, e.g. the trip’s time zone). “Fix” shifts the photos by the difference and assigns them to the tour.`;
+Bei diesen Touren passen die Foto-Zeiten nicht zum Aufnahmeort (Kamerauhr falsch gestellt, z. B. Zeitzone der Reise). Mit „Korrigieren“ werden die Fotos um den Unterschied verschoben und der Tour zugeordnet.|For these tours the photo times do not match where they were taken (camera clock wrong, e.g. the trip’s time zone). “Fix” shifts the photos by the difference and assigns them to the tour.
+⭐ Beste Fotos|⭐ Best photos
+Alle Fotos zeigen|Show all photos
+Diashow der besten|Slideshow of the best
+Wird ausgewählt …|Selecting …
+Wählt aus den Fotos der Tour die besten aus: Sterne aus Lightroom (XMP), unscharfe und abgelehnte Fotos fallen heraus, verteilt über die ganze Tour|Picks the best photos of the tour: Lightroom stars (XMP), blurry and rejected photos are dropped, spread over the whole tour`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");

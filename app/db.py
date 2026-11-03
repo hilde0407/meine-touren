@@ -67,6 +67,10 @@ def _open(path):
             conn.execute("ALTER TABLE photos ADD COLUMN fp TEXT")            # Bild-Fingerabdruck (dHash) gegen Doppelte
         if "dated" not in cols:
             conn.execute("ALTER TABLE photos ADD COLUMN dated INTEGER")      # 1 = Aufnahmezeit aus EXIF, 0 = nur Dateidatum, NULL = noch nicht geprüft
+        if "rating" not in cols:
+            conn.execute("ALTER TABLE photos ADD COLUMN rating INTEGER")     # Sternebewertung (Lightroom/XMP) 0–5, -1 = abgelehnt, NULL = noch nicht gelesen
+        if "sharp" not in cols:
+            conn.execute("ALTER TABLE photos ADD COLUMN sharp REAL")         # Schärfemaß (Kantenvarianz), NULL = noch nicht berechnet
         if "orig_end" not in {r["name"] for r in conn.execute("PRAGMA table_info(track_fix)")}:
             conn.execute("ALTER TABLE track_fix ADD COLUMN orig_end INTEGER")        # ursprüngliches Tourende (Dauerkorrektur)
         if "orig_start" not in {r["name"] for r in conn.execute("PRAGMA table_info(track_fix)")}:

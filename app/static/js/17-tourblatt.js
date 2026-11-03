@@ -26,9 +26,14 @@ VIEWS.sheet = async id => {
   } catch (e) {
     $("#profcard").style.display = "none";
   }
-  const ph = await api(`/api/photos?tour_id=${t.id}&limit=400`).catch(() => []);
-  const n = Math.min(6, ph.length),
+  let pick = [];
+  try {
+    pick = (await api(`/api/tours/${t.id}/best-photos?n=6`)).photos; // beste Fotos: Sterne, Schärfe, verteilt
+  } catch (e) {
+    const ph = await api(`/api/photos?tour_id=${t.id}&limit=400`).catch(() => []),
+      n = Math.min(6, ph.length);
     pick = n ? Array.from({length: n}, (_, i) => ph[Math.round((i * (ph.length - 1)) / Math.max(1, n - 1))]) : [];
+  }
   $("#th").innerHTML = [...new Set(pick)].map(p => `<div class="th"><img src="/pic/${p.id}?size=500"></div>`).join("");
   $("#shp").onclick = () => {
     map.invalidateSize();
