@@ -1,27 +1,36 @@
 /* Sprache / Language – Übersetzungsschicht (Beta).
    Die Oberfläche ist deutsch geschrieben. Für Englisch werden Texte zur Laufzeit über ein Wörterbuch ersetzt
    (Textknoten, Platzhalter, Tooltips) und Datums-/Zahlenformate umgestellt. Was nicht im Wörterbuch steht, bleibt deutsch.
-   Umschalten: Knopf „DE / EN“ oben rechts; Standard nach Browsersprache. Ergänzen: Zeile „deutsch|english“ in D unten. */
+   Sprachen: Deutsch (Original), English, Français, Español – Auswahl oben rechts; Standard nach Browsersprache. Ergänzen: Zeile „deutsch|übersetzung“ (Englisch unten in EN, Französisch/Spanisch in 00-i18n-data.js). */
 (function () {
+  const SUP = ["de", "en", "fr", "es"];
   let lang = "de";
-  try { lang = localStorage.getItem("lang") || ((navigator.language || "de").toLowerCase().startsWith("de") ? "de" : "en"); } catch (e) {}
+  try {
+    lang = localStorage.getItem("lang");
+    if (!SUP.includes(lang)) { const n = (navigator.language || "de").toLowerCase().slice(0, 2); lang = SUP.includes(n) ? n : "en"; }
+  } catch (e) {}
   window.LANG = lang;
   document.documentElement.lang = lang;
   window.setLang = l => { try { localStorage.setItem("lang", l); } catch (e) {} location.reload(); };
   const mkBtn = () => {
-    const b = document.createElement("button");
-    b.id = "langsw"; b.className = "btn ghost sm"; b.title = "Sprache / Language";
-    b.textContent = lang === "de" ? "DE → EN" : "EN → DE";
-    b.style.cssText = "margin-left:8px;color:#fff;border:1px solid rgba(255,255,255,.5);background:transparent;white-space:nowrap;font-size:12px;padding:4px 8px;border-radius:6px;cursor:pointer";
-    b.onclick = () => window.setLang(lang === "de" ? "en" : "de");
+    const b = document.createElement("select");
+    b.id = "langsw"; b.title = "Sprache / Language / Langue / Idioma";
+    b.innerHTML = SUP.map(x => `<option value="${x}"${x === lang ? " selected" : ""}>${x.toUpperCase()}</option>`).join("");
+    b.style.cssText = "margin-left:8px;width:auto;color:#fff;border:1px solid rgba(255,255,255,.5);background:transparent;font-size:12px;padding:4px 6px;border-radius:6px;cursor:pointer";
+    b.querySelectorAll("option").forEach(o => (o.style.color = "#000"));
+    b.onchange = () => window.setLang(b.value);
     const top = document.querySelector("header.top");
     if (top) top.appendChild(b);
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mkBtn); else mkBtn();
-  if (lang !== "en") return;
+  if (lang === "de") return;
 
   const D = {};
-  `Übersicht|Overview
+  const EN = `Meine Touren|Meine Touren
+Name suchen|Search name
+m auf|m up
+m ab|m down
+Übersicht|Overview
 Karte|Map
 Touren|Tours
 Reisen|Trips
@@ -375,44 +384,53 @@ Korrigieren|Fix
 Original wiederherstellen|Restore original
 Erneut anwenden|Apply again
 Schnelle Abschnitte|Fast sections
-✓ Im Track wurde nichts Auffälliges gefunden.|✓ Nothing unusual found in the track.`.split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
+✓ Im Track wurde nichts Auffälliges gefunden.|✓ Nothing unusual found in the track.`;
+  ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");
-  const P = [   // dynamische Texte
-    [/^(\d+) Fotos?$/, (m, n) => `${n} photo${n === "1" ? "" : "s"}`],
-    [/^(\d+) Touren?$/, (m, n) => `${n} tour${n === "1" ? "" : "s"}`],
-    [/^(\d+) Tage?$/, (m, n) => `${n} day${n === "1" ? "" : "s"}`],
-    [/^(\d+)\. (Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember) (\d{4})$/, (m, d, mo, y) => `${D[mo] || mo} ${d}, ${y}`],
-    [/^(.*), (\d+) Fotos$/, (m, a, n) => `${a}, ${n} photos`],
-    [/^(\d+) von (\d+)$/, (m, a, b) => `${a} of ${b}`],
+  const MO = "Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember";
+  const dt = (d, mo, y) => (lang === "en" ? `${D[mo] || mo} ${d}, ${y}` : lang === "fr" ? `${d === "1" ? "1er" : d} ${D[mo] || mo} ${y}` : `${d} de ${D[mo] || mo} de ${y}`);
+  const pl = (n, one, many) => (n === "1" ? one : many);
+  const U = {   // Einheiten und Satzteile je Sprache
+    en: {photo: ["photo", "photos"], tour: ["tour", "tours"], day: ["day", "days"], of: "of", img: "images", asg: "assigned to a tour", lib: "in the library", libc: "Library:", free: "free", adm: "Admin → ", open: "Open admin", asgp: "Assign photos", show: "Slideshow", act: "activities", Tours: "Tours", Photos: "Photos", miss: "missing – ", none: "none yet – ", latest: "latest version on GitHub", ltour: "Latest tour", lh: "Latest tour, hiking", lc: "Latest tour, cycling", yr: "Year in review", nobk: "There is no backup yet – the first one is created automatically (at night), or right now:"},
+    fr: {photo: ["photo", "photos"], tour: ["parcours", "parcours"], day: ["jour", "jours"], of: "sur", img: "images", asg: "associées à un parcours", lib: "dans la bibliothèque", libc: "Bibliothèque :", free: "libres", adm: "Administration → ", open: "Ouvrir l’administration", asgp: "Associer les photos", show: "Diaporama", act: "activités", Tours: "Parcours", Photos: "Photos", miss: "manquant – ", none: "aucune pour l’instant – ", latest: "dernière version sur GitHub", ltour: "Dernier parcours", lh: "Dernier parcours, randonnée", lc: "Dernier parcours, vélo", yr: "Bilan de l’année", nobk: "Il n’y a pas encore de sauvegarde – la première est créée automatiquement (la nuit), ou tout de suite :"},
+    es: {photo: ["foto", "fotos"], tour: ["ruta", "rutas"], day: ["día", "días"], of: "de", img: "imágenes", asg: "asignadas a una ruta", lib: "en la biblioteca", libc: "Biblioteca:", free: "libres", adm: "Administración → ", open: "Abrir administración", asgp: "Asignar fotos", show: "Presentación", act: "actividades", Tours: "Rutas", Photos: "Fotos", miss: "falta – ", none: "ninguna aún – ", latest: "última versión en GitHub", ltour: "Última ruta", lh: "Última ruta, senderismo", lc: "Última ruta, ciclismo", yr: "Resumen del año", nobk: "Aún no hay copia de seguridad – la primera se crea automáticamente (por la noche), o ahora mismo:"},
+  }[lang];
+  const P = [   // dynamische Texte (ganzer Textknoten)
+    [/^(\d+) Fotos?$/, (m, n) => `${n} ${pl(n, U.photo[0], U.photo[1])}`],
+    [/^(\d+) Touren?$/, (m, n) => `${n} ${pl(n, U.tour[0], U.tour[1])}`],
+    [/^(\d+) Tage?$/, (m, n) => `${n} ${pl(n, U.day[0], U.day[1])}`],
+    [new RegExp(`^(\\d+)\\. (${MO}) (\\d{4})$`), (m, d, mo, y) => dt(d, mo, y)],
+    [/^(.*), (\d+) Fotos$/, (m, a2, n) => `${a2}, ${n} ${pl(n, U.photo[0], U.photo[1])}`],
+    [/^(\d+) von (\d+)$/, (m, a2, b2) => `${a2} ${U.of} ${b2}`],
     [/^(\d+(?:[.,]\d+)?) Uhr$/, (m, t) => t],
   ];
   const S = [   // Ersetzungen innerhalb längerer Texte
-    [/(\d+)\. (Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember) (\d{4})/g, (m, d, mo, y) => `${D[mo] || mo} ${d}, ${y}`],
-    [/(\d+) Bilder, (\d+) einer Tour zugeordnet/g, "$1 images, $2 assigned to a tour"],
-    [/Es gibt noch kein Backup – das erste wird automatisch angelegt \(nachts\), oder jetzt sofort:/g, "There is no backup yet – the first one is created automatically (at night), or right now:"],
-    [/Letzte Tour, Wandern/g, "Latest tour, hiking"],
-    [/Letzte Tour, Radtour/g, "Latest tour, cycling"],
-    [/Letzte Tour/g, "Latest tour"],
-    [/Jahresrückblick (\d{4})/g, "Year in review $1"],
+    [new RegExp(`(\\d+)\\. (${MO}) (\\d{4})`, "g"), (m, d, mo, y) => dt(d, mo, y)],
+    [/(\d+) Bilder, (\d+) einer Tour zugeordnet/g, (m, a2, b2) => `${a2} ${U.img}, ${b2} ${U.asg}`],
+    [/Es gibt noch kein Backup – das erste wird automatisch angelegt \(nachts\), oder jetzt sofort:/g, () => U.nobk],
+    [/Letzte Tour, Wandern/g, () => U.lh],
+    [/Letzte Tour, Radtour/g, () => U.lc],
+    [/Letzte Tour/g, () => U.ltour],
+    [/Jahresrückblick (\d{4})/g, (m, y) => `${U.yr} ${y}`],
     [/ Uhr\b/g, ""],
-    [/(\d+) Fotos in der Bibliothek, (\d+) einer Tour zugeordnet/g, "$1 photos in the library, $2 assigned to a tour"],
-    [/(\d+) von (\d+)/g, "$1 of $2"],
-    [/ in der Bibliothek/g, " in the library"],
-    [/neueste Version auf GitHub/g, "latest version on GitHub"],
-    [/Bibliothek:/g, "Library:"],
-    [/(\d+(?:[.,]\d+)?) GB frei/g, "$1 GB free"],
-    [/Verwaltung → /g, "Admin → "],
-    [/fehlt – /g, "missing – "],
-    [/noch keines – /g, "none yet – "],
-    [/Verwaltung öffnen/g, "Open admin"],
-    [/Fotos zuordnen/g, "Assign photos"],
-    [/Diashow (\d{4})/g, "Slideshow $1"],
-    [/(\d+) Fotos/g, "$1 photos"],
-    [/(\d+) Touren/g, "$1 tours"],
-    [/(\d+) Aktivitäten/g, "$1 activities"],
-    [/\bTouren\b/g, "Tours"],
-    [/\bFotos\b/g, "Photos"],
+    [/(\d+) Fotos in der Bibliothek, (\d+) einer Tour zugeordnet/g, (m, a2, b2) => `${a2} ${U.photo[1]} ${U.lib}, ${b2} ${U.asg}`],
+    [/(\d+) von (\d+)/g, (m, a2, b2) => `${a2} ${U.of} ${b2}`],
+    [/ in der Bibliothek/g, () => " " + U.lib],
+    [/neueste Version auf GitHub/g, () => U.latest],
+    [/Bibliothek:/g, () => U.libc],
+    [/(\d+(?:[.,]\d+)?) GB frei/g, (m, g) => `${g} GB ${U.free}`],
+    [/Verwaltung → /g, () => U.adm],
+    [/fehlt – /g, () => U.miss],
+    [/noch keines – /g, () => U.none],
+    [/Verwaltung öffnen/g, () => U.open],
+    [/Fotos zuordnen/g, () => U.asgp],
+    [/Diashow (\d{4})/g, (m, y) => `${U.show} ${y}`],
+    [/(\d+) Fotos/g, (m, n) => `${n} ${pl(n, U.photo[0], U.photo[1])}`],
+    [/(\d+) Touren/g, (m, n) => `${n} ${pl(n, U.tour[0], U.tour[1])}`],
+    [/(\d+) Aktivitäten/g, (m, n) => `${n} ${U.act}`],
+    [/\bTouren\b/g, () => U.Tours],
+    [/\bFotos\b/g, () => U.Photos],
   ];
   const long = Object.keys(D).filter(k => k.length >= 16).sort((a, b) => b.length - a.length);
   const tr = s => {
@@ -447,13 +465,14 @@ Schnelle Abschnitte|Fast sections
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
 
   // Datum und Zahlen
-  const loc = a => (a === "de-DE" || a === "de" || a === undefined ? "en-GB" : a);
+  const LOC = {en: ["en-GB", "en-US"], fr: ["fr-FR", "fr-FR"], es: ["es-ES", "es-ES"]}[lang];
+  const loc = a => (a === "de-DE" || a === "de" || a === undefined ? LOC[0] : a);
   ["toLocaleString", "toLocaleDateString", "toLocaleTimeString"].forEach(k => {
     const o = Date.prototype[k];
     Date.prototype[k] = function (a, b) { return o.call(this, loc(a), b); };
   });
   const on = Number.prototype.toLocaleString;
-  Number.prototype.toLocaleString = function (a, b) { return on.call(this, a === "de-DE" ? "en-US" : a, b); };
+  Number.prototype.toLocaleString = function (a, b) { return on.call(this, a === "de-DE" ? LOC[1] : a, b); };
 
   // Meldungsfenster
   const al = window.alert, cf = window.confirm, pr = window.prompt;

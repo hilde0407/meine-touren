@@ -217,7 +217,7 @@ def test_english_ui(page, app_url):
         for v in ("tours", "photos", "admin", "check", "records"):
             pg.goto(app_url + f"/#/{v}"); pg.wait_for_timeout(600)
         assert pg.evaluate("document.documentElement.lang") == "en"
-        pg.click("#langsw"); pg.wait_for_timeout(1200)
+        pg.select_option("#langsw", "de"); pg.wait_for_timeout(1200)
         assert "Übersicht" in pg.inner_text("#nav")
         assert not errs, errs
         ctx.close()
@@ -231,3 +231,21 @@ def test_trackfix_dialog_opens(page):
     assert "Track" in page.inner_text(".mbox")
     page.click("#tfno")
     assert not page.errors, page.errors
+
+
+def test_french_and_spanish_ui(page, app_url):
+    """Französische und spanische Oberfläche: Navigation übersetzt, Datumsformat, keine JavaScript-Fehler."""
+    for loc, word, nope in (("fr-FR", "Aperçu", "Übersicht"), ("es-ES", "Resumen", "Übersicht")):
+        ctx = page.context.browser.new_context(locale=loc)
+        pg = ctx.new_page()
+        pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(app_url) else r.continue_())
+        errs = []
+        pg.on("pageerror", lambda e: errs.append(str(e)))
+        pg.goto(app_url + "/#/dash"); pg.wait_for_timeout(1500)
+        nav = pg.inner_text("#nav")
+        assert word in nav and nope not in nav, nav
+        for v in ("tours", "photos", "admin", "check"):
+            pg.goto(app_url + f"/#/{v}"); pg.wait_for_timeout(500)
+        assert pg.evaluate("document.documentElement.lang") == loc[:2]
+        assert not errs, errs
+        ctx.close()
