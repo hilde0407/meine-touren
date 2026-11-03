@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS photos (
   id INTEGER PRIMARY KEY AUTOINCREMENT, path TEXT UNIQUE, mtime REAL, size INTEGER,
   taken_ts INTEGER, lat REAL, lng REAL, tour_id TEXT);
 CREATE TABLE IF NOT EXISTS elev_fix (id TEXT PRIMARY KEY, orig_up REAL, orig_down REAL, up_m REAL, down_m REAL, ts INTEGER);
+CREATE TABLE IF NOT EXISTS track_fix (id TEXT PRIMARY KEY, orig_dist REAL, orig_dur REAL, dist REAL, dur REAL, removed INTEGER, excluded INTEGER, ts INTEGER);
 CREATE TABLE IF NOT EXISTS tour_geo (id TEXT PRIMARY KEY, country TEXT, state TEXT, county TEXT, place TEXT, ts INTEGER);
 CREATE TABLE IF NOT EXISTS guide_tours (id INTEGER PRIMARY KEY AUTOINCREMENT, book TEXT, title TEXT, pts TEXT);
 CREATE TABLE IF NOT EXISTS tour_peak (id TEXT PRIMARY KEY, name TEXT, alt REAL, lat REAL, lng REAL);

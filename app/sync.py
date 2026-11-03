@@ -3,7 +3,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import elev, config, db, gpxtools, jobs, komoot as komoot_mod, photos, portals, routes, tracks, zepp
+from . import elev, config, db, gpxtools, jobs, komoot as komoot_mod, photos, portals, routes, trackfix, tracks, zepp
 from .jobs import log
 
 
@@ -54,6 +54,7 @@ def refresh_tours(k=None):
             else:
                 c.execute("UPDATE tours SET name=? WHERE id=?", (o["name"], o["id"]))
     elev.reapply(tours)
+    trackfix.reapply(tours)
     log(f"Komoot: {len(tours)} abgeschlossene Touren geladen")
     return tours
 
@@ -92,6 +93,7 @@ def sync_tour(tour_id):
     if not items:
         raise RuntimeError("Komoot lieferte keine Streckenpunkte")
     elev.drop(tid)                       # Komoot-Abgleich ersetzt eine lokale Höhenkorrektur
+    trackfix.drop(tid)
     with db.cur() as c:
         o = c.execute("SELECT name,orig FROM tour_names WHERE id=?", (tid,)).fetchone()
         if o and t["name"] == o["orig"]:

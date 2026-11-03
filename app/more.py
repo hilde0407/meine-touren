@@ -87,6 +87,39 @@ def api_set_sport(tour_id: str, body: dict):
     return {"ok": True, "komoot": msg}
 
 
+def _fixerr(tour_id, e):
+    if isinstance(e, KeyError):
+        if db.one("SELECT 1 x FROM tour_hidden WHERE id=?", (tour_id,)):
+            raise HTTPException(409, "Die Tour ist ausgeblendet – bitte zuerst unter Prüfen wieder einblenden.")
+        raise HTTPException(404, "Tour nicht gefunden")
+    raise HTTPException(422, str(e))
+
+
+@router.get("/api/tours/{tour_id}/trackfix")
+def api_trackfix(tour_id: str):
+    """Auffälligkeiten im GPS-Track: Ausreißer und zu schnelle Abschnitte."""
+    from . import trackfix
+    try:
+        return trackfix.analyse(tour_id)
+    except Exception as e:  # noqa
+        _fixerr(tour_id, e)
+
+
+@router.post("/api/tours/{tour_id}/trackfix")
+def api_trackfix_apply(tour_id: str, body: dict):
+    from . import trackfix
+    try:
+        return trackfix.apply(tour_id, bool(body.get("spikes", True)), body.get("exclude") or [])
+    except Exception as e:  # noqa
+        _fixerr(tour_id, e)
+
+
+@router.post("/api/tours/{tour_id}/trackfix-restore")
+def api_trackfix_restore(tour_id: str):
+    from . import trackfix
+    return {"ok": trackfix.restore(tour_id)}
+
+
 @router.post("/api/tours/{tour_id}/hide")
 def api_hide(tour_id: str, body: dict):
     """Tour aus allen Ansichten und Statistiken ausblenden (Daten bleiben erhalten) bzw. wieder einblenden."""

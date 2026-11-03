@@ -64,12 +64,12 @@ VIEWS.check = async () => {
               .map(
                 t => `<div class="r" style="display:block" data-id="${esc(t.id)}" data-name="${esc(t.name)}" data-km="${t.km}" data-onk="${t.on_komoot ? 1 : ""}" data-local="${t.local ? 1 : ""}"><div class="iop" style="cursor:pointer" title="Tour öffnen"><a href="#/tour/${encodeURIComponent(t.id)}" style="text-decoration:underline;font-weight:600">${esc(t.name)}</a> <span class="mut">${dateS(BY[t.id]?.date || "0000-00-00")} · ${esc(sName(t.sport))} · ${nf(t.km, 2)} km</span></div>
         <div class="row" style="margin:4px 0;gap:6px"><span class="bad" style="font-size:14px">${esc(t.why)}</span><span class="sp"></span>
-        <select class="isp">${SP.map(x => `<option value="${x}" ${x === (t.suggest || t.sport) ? "selected" : ""}>${esc(sName(x))}</option>`).join("")}</select><button class="btn alt sm" data-isp>Sportart ändern</button>${t.on_komoot ? `<label style="font-size:12px;margin:0"><input type="checkbox" class="iko" checked> auch bei Komoot</label>` : ""}<button class="btn alt sm" data-ihide>Ausblenden</button><button class="btn alt sm" data-idel style="color:var(--bad,#b3261e)">Löschen …</button></div></div>`
+        <select class="isp">${SP.map(x => `<option value="${x}" ${x === (t.suggest || t.sport) ? "selected" : ""}>${esc(sName(x))}</option>`).join("")}</select><button class="btn alt sm" data-isp>Sportart ändern</button>${t.on_komoot ? `<label style="font-size:12px;margin:0"><input type="checkbox" class="iko" checked> auch bei Komoot</label>` : ""}<button class="btn alt sm" data-itf title="Ausreißer im Track entfernen, Seilbahn-/Autofahrten herausrechnen">🧹 Track korrigieren</button><button class="btn alt sm" data-ihide>Ausblenden</button><button class="btn alt sm" data-idel style="color:var(--bad,#b3261e)">Löschen …</button></div></div>`
               )
               .join("")}</div>`
           : '<p class="ok">✓ Keine auffälligen Touren.</p>'
       }
-      ${hd.length ? `<h3 style="margin-top:18px">Ausgeblendet (${hd.length})</h3><div class="rows">${hd.map(t => `<div class="r" data-id="${esc(t.id)}"><span>${esc(t.name || t.id)} <span class="mut">${t.start_ts ? new Date(t.start_ts * 1000).toLocaleDateString("de-DE") : ""} · ${nf((t.dist_m || 0) / 1000, 2)} km</span></span><button class="btn alt sm" data-ishow>Wieder einblenden</button></div>`).join("")}</div>` : ""}</div>`
+      ${hd.length ? `<h3 style="margin-top:18px">Ausgeblendet (${hd.length})</h3><div class="rows">${hd.map(t => `<div class="r" data-id="${esc(t.id)}"><span>${esc(t.name || t.id)} <span class="mut">${t.start_ts ? new Date(t.start_ts * 1000).toLocaleDateString("de-DE") : ""} · ${nf((t.dist_m || 0) / 1000, 2)} km</span></span><button class="btn alt sm" data-ishow>Wieder einblenden</button><button class="btn alt sm" data-ishowfix title="Tour einblenden und gleich den GPS-Track korrigieren">Einblenden &amp; Track korrigieren</button></div>`).join("")}</div>` : ""}</div>`
     );
     const after = async () => {
       await loadTours();
@@ -137,6 +137,26 @@ VIEWS.check = async () => {
               });
               if (r.komoot && !/geändert$/.test(r.komoot)) alert(r.komoot);
               await after();
+            } catch (e) {
+              alert(e.message);
+              b.disabled = false;
+            }
+          })
+      );
+    $("#impl")
+      .querySelectorAll("[data-itf]")
+      .forEach(b => (b.onclick = () => trackFixDialog(b.closest("[data-id]").dataset.id, after)));
+    $("#impl")
+      .querySelectorAll("[data-ishowfix]")
+      .forEach(
+        b =>
+          (b.onclick = async () => {
+            const id = b.closest("[data-id]").dataset.id;
+            b.disabled = true;
+            try {
+              await api(`/api/tours/${encodeURIComponent(id)}/hide`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({hide: false})});
+              await loadTours();
+              trackFixDialog(id, after);
             } catch (e) {
               alert(e.message);
               b.disabled = false;

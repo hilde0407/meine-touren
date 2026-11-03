@@ -221,3 +221,13 @@ def test_english_ui(page, app_url):
         assert "Übersicht" in pg.inner_text("#nav")
         assert not errs, errs
         ctx.close()
+
+
+def test_trackfix_dialog_opens(page):
+    page.goto(page.url.split("#")[0] + "#/dash"); page.wait_for_timeout(300)
+    tid = _tour_id(page)
+    page.goto(page.url.split("#")[0] + f"#/tour/{tid}"); page.wait_for_timeout(1200)
+    page.click("#etfix"); page.wait_for_selector("#tfb #tfno", timeout=8000)
+    assert "Track" in page.inner_text(".mbox")
+    page.click("#tfno")
+    assert not page.errors, page.errors

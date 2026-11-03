@@ -366,7 +366,16 @@ Regelmäßig (alle 6 Stunden) auf neue Versionen prüfen|Check for new versions 
 neueste Version auf GitHub:|latest version on GitHub:
 frei|free
 noch keines|none yet
-fehlt|missing`.split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
+fehlt|missing
+🧹 Track korrigieren|🧹 Fix track
+GPS-Track korrigieren|Fix GPS track
+Track wird untersucht …|Analysing track …
+Einblenden & Track korrigieren|Show & fix track
+Korrigieren|Fix
+Original wiederherstellen|Restore original
+Erneut anwenden|Apply again
+Schnelle Abschnitte|Fast sections
+✓ Im Track wurde nichts Auffälliges gefunden.|✓ Nothing unusual found in the track.`.split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");
   const P = [   // dynamische Texte
