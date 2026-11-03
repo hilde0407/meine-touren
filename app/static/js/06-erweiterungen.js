@@ -53,6 +53,27 @@ const goalVal = (g, T) =>
     (c, t) => c + (g.metric === "km" ? t.km : g.metric === "up" ? t.up_m || 0 : g.metric === "hours" ? t.h : 1),
     0
   );
+// Prognose: voraussichtlicher Zieltermin und Warnung bei Rückstand
+function goalNote(g, v, u, frac, proj, yr, cy) {
+  if (v >= g.target) return ` · <span class="ok">Ziel erreicht ✓</span>`;
+  if (frac >= 1) return ` · <span class="bad">Ziel verfehlt (${nf(g.target - v, 0)} ${u} gefehlt)</span>`;
+  if (proj == null) return "";
+  const y0 = new Date(cy, 0, 1),
+    days = (new Date(cy + 1, 0, 1) - y0) / 864e5,
+    rate = v / (frac * days); // pro Tag bisher
+  let s = ` · Prognose zum Jahresende: ${nf(proj, 0)} ${u} (${nf((proj / g.target) * 100, 0)} %)`;
+  if (rate > 0) {
+    const d = (g.target - v) / rate,
+      when = new Date(Date.now() + d * 864e5);
+    if (proj >= g.target) s += ` · Ziel voraussichtlich am ${when.toLocaleDateString("de-DE", {day: "numeric", month: "long"})}`;
+    else {
+      const left = (new Date(cy + 1, 0, 1) - Date.now()) / 864e5 / 7;
+      s += ` · <span class="bad">Ziel wird bei diesem Tempo verfehlt – nötig wären ${nf((g.target - v) / Math.max(0.5, left), g.target < 50 ? 1 : 0)} ${u} pro Woche (bisher ${nf(rate * 7, g.target < 50 ? 1 : 0)})</span>`;
+    }
+  }
+  else s += ` · <span class="bad">noch kein Fortschritt – Ziel wird so verfehlt</span>`;
+  return s + (v < g.target * frac ? ` · <span class="bad">${nf(g.target * frac - v, 0)} ${u} hinter dem Plan</span>` : ` · <span class="ok">im Plan</span>`);
+}
 const _dash = VIEWS.dash;
 VIEWS.dash = async (n, q) => {
   await _dash(n, q);
@@ -73,7 +94,7 @@ VIEWS.dash = async (n, q) => {
       proj = frac > 0.02 && frac < 1 ? v / frac : null;
     return `<div class="goal"><div class="gh"><b>${GM[g.metric][1]}${g.sport ? " " + sName(g.sport) : ""}</b><span>${nf(v, g.metric === "count" ? 0 : 0)} / ${nf(g.target, 0)} ${u} <button class="gx" data-g="${g.id}" title="Ziel löschen">×</button></span></div>
      <div class="gb"><i style="width:${p}%"></i>${frac < 1 ? `<u style="left:${frac * 100}%" title="Soll heute"></u>` : ""}</div>
-     <div class="gs">${nf(p, 0)} %${proj != null ? ` · Prognose zum Jahresende: ${nf(proj, 0)} ${u} (${nf((proj / g.target) * 100, 0)} %)` : ""}${frac < 1 && v < g.target * frac ? ` · <span class="bad">${nf(g.target * frac - v, 0)} ${u} hinter dem Plan</span>` : frac < 1 && v >= g.target * frac ? ` · <span class="ok">im Plan</span>` : ""}</div></div>`;
+     <div class="gs">${nf(p, 0)} %${goalNote(g, v, u, frac, proj, yr, cy)}</div></div>`;
   };
   const box = document.createElement("div");
   box.className = "panel";

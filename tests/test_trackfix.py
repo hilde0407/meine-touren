@@ -1,5 +1,5 @@
 """GPS-Track korrigieren: Ausreißer entfernen, schnelle Abschnitte herausrechnen, Original wiederherstellen."""
-import math, sys
+import json, math, sys
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
@@ -159,3 +159,29 @@ def test_selftest_has_new_local_checks():
     for n in ("Datenbank-Integrität", "Schreibrechte der Ordner", "Foto-Dateien erreichbar", "HEIC-Unterstützung", "Auffällige Touren", "Update-Weg"):
         assert n in res, n
     assert res["Datenbank-Integrität"]["ok"] and res["Schreibrechte der Ordner"]["ok"], res
+
+
+def test_series_rename_api():
+    from app import more
+    ids = []
+    for i, d in enumerate(("2026-07-01--08-00-00", "2026-07-02--08-00-00")):
+        t, _ = tracks.adopt(_gpx(False, False), f"s{i}.gpx", name=f"Alt {i}", ident=f"s{i}")
+        ids.append(t["id"])
+    r = more.api_series_rename({"name": "Hohe Tour", "word": "Tag", "items": [{"id": ids[0], "n": 1}, {"id": ids[1], "n": 2}]})
+    assert r["renamed"] == 2
+    assert db.one("SELECT name FROM tours WHERE id=?", (ids[1],))["name"] == "Hohe Tour – Tag 2"
+
+
+def test_wishlist_api():
+    from app import extras, more
+    gpx = '<gpx><trk><trkseg>' + "".join(f'<trkpt lat="{47+i*0.002}" lon="11"><ele>{1000+i*5}</ele></trkpt>' for i in range(60)) + '</trkseg></trk></gpx>'
+    r = extras._guide_parse(gpx, "t.gpx")
+    km, up = extras.guide_stats(gpx, r[1])
+    assert 12 < km < 14 and up and up > 250
+    db.execute("INSERT INTO guide_tours(book,title,pts,km,up) VALUES('B','Gipfelrunde',?,?,?)", (json.dumps([list(p) for p in r[1]]), km, up))
+    gid = db.one("SELECT id FROM guide_tours WHERE title='Gipfelrunde'")["id"]
+    more.api_wishlist_set({"id": gid, "on": True})
+    w = [x for x in more.api_wishlist() if x["id"] == gid][0]
+    assert w["wish"] == 1 and w["km"] == km and w["tour"] is None
+    more.api_wishlist_set({"id": gid, "on": False})
+    assert [x for x in more.api_wishlist() if x["id"] == gid][0]["wish"] == 0

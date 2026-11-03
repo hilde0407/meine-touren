@@ -121,6 +121,27 @@ def api_trackfix_restore(tour_id: str):
     return {"ok": trackfix.restore(tour_id)}
 
 
+@router.post("/api/series/rename")
+def api_series_rename(body: dict):
+    """Mehrtagestour benennen: items = [{id, n}], name = Reihenname, word = „Tag“/„Etappe“ … → „Name – Tag N“ für jede Tour."""
+    name = re.sub(r"\s+", " ", str(body.get("name") or "")).strip()
+    word = re.sub(r"\s+", " ", str(body.get("word") or "Tag")).strip()[:20] or "Tag"
+    items = body.get("items") or []
+    if not name or len(name) > 120 or not items or len(items) > 60:
+        raise HTTPException(400, "Name und mindestens eine Tour nötig")
+    done = 0
+    for it in items:
+        tid, n = str(it.get("id")), int(it.get("n") or 0)
+        if n < 1 or not db.one("SELECT 1 x FROM tours WHERE id=?", (tid,)):
+            continue
+        new = f"{name} – {word} {n}"
+        old = db.one("SELECT name FROM tours WHERE id=?", (tid,))["name"]
+        db.execute("UPDATE tours SET name=? WHERE id=?", (new, tid))
+        db.execute("INSERT OR REPLACE INTO tour_names(id,name,orig) VALUES(?,?,COALESCE((SELECT orig FROM tour_names WHERE id=?),?))", (tid, new, tid, old))
+        done += 1
+    return {"ok": True, "renamed": done}
+
+
 @router.post("/api/tours/{tour_id}/hide")
 def api_hide(tour_id: str, body: dict):
     """Tour aus allen Ansichten und Statistiken ausblenden (Daten bleiben erhalten) bzw. wieder einblenden."""
@@ -308,6 +329,38 @@ def api_guides_progress():
                 done = (tid, ts); break
         books.setdefault(g["book"] or "(ohne Buch)", []).append({"id": g["id"], "title": g["title"], "tour": done[0] if done else None, "ts": done[1] if done else None})
     return [{"book": b, "total": len(v), "done": sum(1 for x in v if x["tour"]), "tours": v} for b, v in books.items()]
+
+
+# ---------- Wunschliste ----------
+@router.get("/api/wishlist")
+def api_wishlist():
+    done = {}
+    for b in api_guides_progress():
+        for x in b["tours"]:
+            done[x["id"]] = x
+    rows = db.query("SELECT g.id,g.book,g.title,g.km,g.up,g.pts,w.ts AS wish FROM guide_tours g LEFT JOIN wishlist w ON w.gid=g.id ORDER BY g.book,g.title")
+    out = []
+    for r in rows:
+        km = r["km"]
+        if km is None:
+            pts = json.loads(r["pts"])
+            km = extras.guide_stats("<x/>", pts)[0]
+            db.execute("UPDATE guide_tours SET km=? WHERE id=?", (km, r["id"]))
+        d = done.get(r["id"]) or {}
+        out.append({"id": r["id"], "book": r["book"] or "", "title": r["title"], "km": km, "up": r["up"], "wish": 1 if r["wish"] else 0, "tour": d.get("tour"), "ts": d.get("ts")})
+    return out
+
+
+@router.post("/api/wishlist")
+def api_wishlist_set(body: dict):
+    gid = int(body.get("id"))
+    if not db.one("SELECT 1 FROM guide_tours WHERE id=?", (gid,)):
+        raise HTTPException(404, "Tour nicht gefunden")
+    if body.get("on", True):
+        db.execute("INSERT OR REPLACE INTO wishlist(gid,ts) VALUES(?,?)", (gid, int(time.time())))
+    else:
+        db.execute("DELETE FROM wishlist WHERE gid=?", (gid,))
+    return {"ok": True}
 
 
 # ---------- Gesundheitscheck (ohne Netzwerk) ----------

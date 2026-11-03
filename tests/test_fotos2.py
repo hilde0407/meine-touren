@@ -333,3 +333,17 @@ def test_demo_seed():
     assert db.one("SELECT COUNT(*) c FROM tours")["c"] == n
     assert db.one("SELECT COUNT(*) c FROM photos WHERE tour_id IS NOT NULL")["c"] >= 10
     assert demo.seed() == 0            # zweiter Aufruf legt nichts doppelt an
+
+
+def test_clock_check_finds_shifted_tour_and_ignore():
+    import time as _t
+    now = int(_t.time()) - 3 * 86400
+    _tour("A", now, 7200, 48.0, 8.0)
+    for i in range(6):                                   # Fotos entlang der Strecke, Kamerauhr 2 Stunden nachgehend
+        frac = (i + 1) / 7
+        _photo(i, now + int(7200 * frac) - 7200, 48.0, 8.0 + 0.0009 * 120 * frac)
+    r = photos.clock_check()
+    assert r and r[0]["tour_id"] == "A" and abs(r[0]["delta_s"] - 7200) < 400
+    from app.main import clock_check_ignore
+    clock_check_ignore({"tour_id": "A"})
+    assert photos.clock_check() == []

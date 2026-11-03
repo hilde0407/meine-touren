@@ -264,8 +264,50 @@ def test_multiday_series_view(page):
     assert r["n"] == 1 and r["e"] == 3
     page.goto(base + "#/trips"); page.wait_for_timeout(1200)
     assert "Mehrtagestouren" in page.inner_text("main") and "Alpenüberquerung E5" in page.inner_text("main")
+    has = page.evaluate("async () => { const ids = new Set(window.__loc.map(t => t.id)); return (await api('/api/photos?limit=5000')).some(p => ids.has(p.tour_id)); }")
+    bg = page.evaluate("document.querySelector('.otdg .otd').style.backgroundImage")
+    assert (not has) or "/pic/" in bg, bg
     page.goto(base + "#/series/" + r["id"]); page.wait_for_timeout(1500)
     assert "3 Etappen" in page.inner_text("main")
     page.evaluate("() => window.__loc.forEach((t, i) => (t.name = window.__old[i]))")
     page.goto(base + "#/dash"); page.wait_for_timeout(300)
+    assert not page.errors, page.errors
+
+
+def test_profile_photo_markers(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.wait_for_timeout(300)
+    tid = page.evaluate("""async () => { const ph = await api('/api/photos?limit=500'); const p = ph.find(x => x.tour_id); return p && p.tour_id; }""")
+    if not tid:
+        return
+    page.goto(base + "#/tour/" + tid); page.wait_for_timeout(2500)
+    n = page.evaluate("document.querySelectorAll('#psvg .pph').length")
+    if n:
+        page.evaluate("document.querySelector('#psvg .pph').dispatchEvent(new MouseEvent('click', {bubbles: true}))")
+        page.wait_for_timeout(300)
+        assert page.evaluate("document.querySelector('#lb').classList.contains('on')")
+    assert not page.errors, page.errors
+
+
+def test_tourblatt(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.wait_for_timeout(300)
+    tid = page.evaluate("TOURS[0].id")
+    page.goto(base + "#/tour/" + tid); page.wait_for_timeout(1500)
+    assert page.locator("#esheet").count() == 1
+    page.goto(base + "#/sheet/" + tid); page.wait_for_timeout(2000)
+    assert page.locator(".sheet h1").count() == 1 and page.locator("#shp").count() == 1
+    assert page.locator(".sheet .leaflet-container").count() == 1
+    assert not page.errors, page.errors
+
+
+def test_goal_forecast_text(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.wait_for_timeout(300)
+    page.evaluate("""async () => { const y = new Date().getFullYear(); window.__g = []; for (const t of [1, 99999]) { await api('/api/goals', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({year: y, metric: 'km', sport: '', target: t})}); } }""")
+    page.goto(base + "#/dash?y=" + str(__import__("datetime").date.today().year)); page.wait_for_timeout(1500)
+    txt = page.inner_text("#goals")
+    assert "Ziel erreicht" in txt or "Prognose" in txt, txt
+    assert "verfehlt" in txt or "voraussichtlich" in txt or "Ziel erreicht" in txt, txt
+    page.evaluate("""async () => { for (const g of await api('/api/goals')) await api('/api/goals/' + g.id, {method: 'DELETE'}); }""")
     assert not page.errors, page.errors

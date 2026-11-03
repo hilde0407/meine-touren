@@ -471,7 +471,37 @@ Korrigieren|Fix
 Original wiederherstellen|Restore original
 Erneut anwenden|Apply again
 Schnelle Abschnitte|Fast sections
-✓ Im Track wurde nichts Auffälliges gefunden.|✓ Nothing unusual found in the track.`;
+✓ Im Track wurde nichts Auffälliges gefunden.|✓ Nothing unusual found in the track.
+📄 Tourblatt|📄 Tour sheet
+Druckbares Tourblatt mit Karte, Höhenprofil und Fotos|Printable tour sheet with map, elevation profile and photos
+‹ Zurück zur Tour|‹ Back to the tour
+🖨 Drucken / als PDF speichern|🖨 Print / save as PDF
+Gelbe Punkte = Fotos – anklicken zum Ansehen.|Yellow dots = photos – click to view.
+＋ Mehrtagestour bilden …|＋ Create multi-day tour …
+Mehrtagestour bilden|Create multi-day tour
+✎ Reihe umbenennen|✎ Rename series
+Mehrtagestour umbenennen|Rename multi-day tour
+Benennen|Name
+Bitte einen Namen eingeben und mindestens zwei Touren wählen.|Please enter a name and choose at least two tours.
+Keine Touren in diesem Zeitraum.|No tours in this period.
+Wunschliste|Wish list
+Zur Wunschliste|Add to wish list
+Noch keine Touren vorgemerkt.|No tours saved yet.
+Von der Wunschliste entfernen|Remove from wish list
+Offline-Nutzung|Offline use
+Für Offline vorbereiten|Prepare for offline use
+Offline – es werden die zuletzt geladenen Daten gezeigt (Änderungen sind nicht möglich).|Offline – showing the most recently loaded data (changes are not possible).
+Ausgewählte Touren übernehmen|Import selected tours
+Bitte Touren ankreuzen.|Please tick tours.
+✓ übernommen|✓ imported
+Wird übernommen …|Importing …
+Ziel erreicht ✓|Goal reached ✓
+noch kein Fortschritt – Ziel wird so verfehlt|no progress yet – goal will be missed
+Kamerauhr|Camera clock
+Wird geprüft …|Checking …
+Ignorieren|Ignore
+✓ Die Kamerauhr passt zu den Strecken der letzten Touren.|✓ The camera clock matches the tracks of the latest tours.
+Bei diesen Touren passen die Foto-Zeiten nicht zum Aufnahmeort (Kamerauhr falsch gestellt, z. B. Zeitzone der Reise). Mit „Korrigieren“ werden die Fotos um den Unterschied verschoben und der Tour zugeordnet.|For these tours the photo times do not match where they were taken (camera clock wrong, e.g. the trip’s time zone). “Fix” shifts the photos by the difference and assigns them to the tour.`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");

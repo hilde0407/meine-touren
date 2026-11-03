@@ -31,6 +31,18 @@ VIEWS.trips = async () => {
       s => `<a class="otd" href="#/series/${s.id}" style="background-image:linear-gradient(#0e2a2b99,#0e2a2bee)"><b>${esc(s.name)}</b><span>${ds(s.start)}${s.end - s.start > 86400 ? " – " + ds(s.end) : ""}</span><small>${s.n} Etappen · ${nf(s.km, 0)} km · ${nf(s.up, 0)} m</small></a>`
     ).join("")}</div>`
   );
+  // Titelfoto je Mehrtagestour: ein Foto aus der Mitte der Reihe
+  try {
+    const ph = await api("/api/photos?limit=5000");
+    L.forEach((s, i) => {
+      const set = new Set(s.ids),
+        mine = ph.filter(p => set.has(p.tour_id)).sort((a, b) => a.taken_ts - b.taken_ts);
+      if (!mine.length) return;
+      const pick = mine[Math.floor(mine.length / 2)],
+        el = tr.querySelectorAll(".otdg .otd")[i];
+      if (el) el.style.backgroundImage = `linear-gradient(#0e2a2b33,#0e2a2bdd),url(/pic/${pick.id}?size=500)`;
+    });
+  } catch (e) {}
 };
 VIEWS.series = async id => {
   const s = seriesList().find(x => x.id === id || decodeURIComponent(x.id) === decodeURIComponent(id));
@@ -48,4 +60,84 @@ VIEWS.tour = async (id, q) => {
   if (!m || !m[1].trim()) return;
   const s = seriesList().find(x => x.name.toLowerCase() === m[1].trim().toLowerCase());
   if (s) w.insertAdjacentHTML("beforebegin", `<div id="sernote" class="mut" style="margin:-4px 0 10px">Etappe der Mehrtagestour <a href="#/series/${s.id}"><b>${esc(s.name)}</b></a> (${s.n} Etappen, ${nf(s.km, 0)} km, ${nf(s.up, 0)} m Aufstieg) – <a href="#/series/${s.id}">Gesamtansicht</a></div>`);
+};
+
+/* ---- Reihe bilden / umbenennen ---- */
+async function seriesRename(items, name, word) {
+  await api("/api/series/rename", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({items, name, word})});
+  await loadTours();
+}
+function seriesBuildDialog() {
+  const iso = ts => new Date(ts * 1000).toISOString().slice(0, 10);
+  const newest = TOURS.reduce((a, t) => Math.max(a, t.start_ts), 0);
+  const m = modal(`<h2>Mehrtagestour bilden</h2>
+   <p class="mut" style="font-size:14px">Wähle den Zeitraum der Etappen. Die Touren dieser Tage werden „Name – Tag N“ genannt (N = Tag seit Beginn), danach erscheinen sie als Mehrtagestour unter Reisen.</p>
+   <div class="row" style="gap:8px;align-items:center"><label>Von <input id="sbf" type="date" value="${iso(newest - 6 * 86400)}"></label><label>bis <input id="sbt" type="date" value="${iso(newest)}"></label></div>
+   <div class="row" style="gap:8px;align-items:center;margin-top:8px"><input id="sbn" placeholder="Name, z. B. Alpenüberquerung E5" style="flex:1;min-width:200px"><select id="sbw" style="width:auto"><option>Tag</option><option>Etappe</option></select></div>
+   <div id="sbl" class="rows" style="margin:10px 0;max-height:260px;overflow:auto"></div>
+   <div class="row"><button class="btn" id="sbok">Benennen</button><button class="btn ghost" id="sbno">Abbrechen</button><span id="sber" class="bad"></span></div>`);
+  const list = () => {
+    const f = m.querySelector("#sbf").value,
+      t = m.querySelector("#sbt").value;
+    const ts = TOURS.filter(x => iso(x.start_ts) >= f && iso(x.start_ts) <= t).sort((a, b) => a.start_ts - b.start_ts);
+    m.querySelector("#sbl").innerHTML = ts.length
+      ? ts.map(x => `<label class="r" style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-i="${esc(x.id)}" data-s="${x.start_ts}" checked><span>${dateS(x.date)} · ${esc(x.name)} <span class="mut">${nf(x.km, 1)} km</span></span></label>`).join("")
+      : '<p class="mut">Keine Touren in diesem Zeitraum.</p>';
+  };
+  m.querySelectorAll("input[type=date]").forEach(i => (i.onchange = list));
+  list();
+  m.querySelector("#sbno").onclick = () => m.remove();
+  m.querySelector("#sbok").onclick = async () => {
+    const name = m.querySelector("#sbn").value.trim(),
+      chosen = [...m.querySelectorAll("[data-i]:checked")];
+    if (!name || chosen.length < 2) {
+      m.querySelector("#sber").textContent = "Bitte einen Namen eingeben und mindestens zwei Touren wählen.";
+      return;
+    }
+    const day0 = Math.floor(Math.min(...chosen.map(c => +c.dataset.s)) / 86400);
+    const items = chosen.map(c => ({id: c.dataset.i, n: Math.floor(+c.dataset.s / 86400) - day0 + 1}));
+    try {
+      await seriesRename(items, name, m.querySelector("#sbw").value);
+      m.remove();
+      location.hash = "#/series/" + encodeURIComponent(name.toLowerCase());
+    } catch (e) {
+      m.querySelector("#sber").textContent = e.message;
+    }
+  };
+}
+const _tripsB = VIEWS.trips;
+VIEWS.trips = async () => {
+  await _tripsB();
+  const sec = $("#tr");
+  if (!sec || $("#sbbtn")) return;
+  sec.insertAdjacentHTML("afterbegin", `<div class="row" style="margin-bottom:10px"><button class="btn alt sm" id="sbbtn">＋ Mehrtagestour bilden …</button></div>`);
+  $("#sbbtn").onclick = seriesBuildDialog;
+};
+const _serV = VIEWS.series;
+VIEWS.series = async id => {
+  await _serV(id);
+  const s = seriesList().find(x => x.id === id || decodeURIComponent(x.id) === decodeURIComponent(id));
+  const row = document.querySelector("#main .row .btn");
+  if (!s || !row || $("#serren")) return;
+  row.parentElement.insertAdjacentHTML("beforeend", `<button class="btn alt" id="serren">✎ Reihe umbenennen</button>`);
+  $("#serren").onclick = () => {
+    const m = modal(`<h2>Mehrtagestour umbenennen</h2><p class="mut" style="font-size:14px">Alle ${s.n} Etappen heißen danach „Neuer Name – Tag N“ (die Nummern bleiben).</p><input id="srn" value="${esc(s.name)}" style="width:100%"><div class="row" style="margin-top:12px"><button class="btn" id="srok">Umbenennen</button><button class="btn ghost" id="srno">Abbrechen</button><span id="srer" class="bad"></span></div>`);
+    m.querySelector("#srno").onclick = () => m.remove();
+    m.querySelector("#srok").onclick = async () => {
+      const name = m.querySelector("#srn").value.trim();
+      if (!name) return;
+      const items = s.ids.map(i => {
+        const mm = SER_RE.exec((BY[i].name || "").trim());
+        return {id: i, n: mm ? +mm[2] : 1};
+      });
+      const word = /(Tag|Etappe|Day|Stage|Jour|Étape|Día|Etapa)/i.exec(BY[s.ids[0]].name)?.[1] || "Tag";
+      try {
+        await seriesRename(items, name, word);
+        m.remove();
+        location.hash = "#/series/" + encodeURIComponent(name.toLowerCase());
+      } catch (e) {
+        m.querySelector("#srer").textContent = e.message;
+      }
+    };
+  };
 };

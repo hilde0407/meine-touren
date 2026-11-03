@@ -447,7 +447,37 @@ Einblenden & Track korrigieren|Afficher et corriger le tracé
 Original wiederherstellen|Restaurer l’original
 Erneut anwenden|Appliquer à nouveau
 Schnelle Abschnitte|Sections rapides
-✓ Im Track wurde nichts Auffälliges gefunden.|✓ Rien de suspect trouvé dans le tracé.`,
+✓ Im Track wurde nichts Auffälliges gefunden.|✓ Rien de suspect trouvé dans le tracé.
+📄 Tourblatt|📄 Fiche du parcours
+Druckbares Tourblatt mit Karte, Höhenprofil und Fotos|Fiche imprimable avec carte, profil altimétrique et photos
+‹ Zurück zur Tour|‹ Retour au parcours
+🖨 Drucken / als PDF speichern|🖨 Imprimer / enregistrer en PDF
+Gelbe Punkte = Fotos – anklicken zum Ansehen.|Points jaunes = photos – cliquez pour les voir.
+＋ Mehrtagestour bilden …|＋ Créer un parcours de plusieurs jours …
+Mehrtagestour bilden|Créer un parcours de plusieurs jours
+✎ Reihe umbenennen|✎ Renommer la série
+Mehrtagestour umbenennen|Renommer le parcours de plusieurs jours
+Benennen|Nommer
+Bitte einen Namen eingeben und mindestens zwei Touren wählen.|Saisissez un nom et choisissez au moins deux parcours.
+Keine Touren in diesem Zeitraum.|Aucun parcours sur cette période.
+Wunschliste|Liste de souhaits
+Zur Wunschliste|Ajouter à la liste
+Noch keine Touren vorgemerkt.|Aucun parcours enregistré pour l’instant.
+Von der Wunschliste entfernen|Retirer de la liste de souhaits
+Offline-Nutzung|Utilisation hors ligne
+Für Offline vorbereiten|Préparer pour le mode hors ligne
+Offline – es werden die zuletzt geladenen Daten gezeigt (Änderungen sind nicht möglich).|Hors ligne – dernières données chargées affichées (modifications impossibles).
+Ausgewählte Touren übernehmen|Reprendre les parcours sélectionnés
+Bitte Touren ankreuzen.|Cochez des parcours.
+✓ übernommen|✓ repris
+Wird übernommen …|Reprise en cours …
+Ziel erreicht ✓|Objectif atteint ✓
+noch kein Fortschritt – Ziel wird so verfehlt|aucun progrès – objectif manqué
+Kamerauhr|Horloge de l’appareil photo
+Wird geprüft …|Vérification …
+Ignorieren|Ignorer
+✓ Die Kamerauhr passt zu den Strecken der letzten Touren.|✓ L’horloge de l’appareil correspond aux tracés des derniers parcours.
+Bei diesen Touren passen die Foto-Zeiten nicht zum Aufnahmeort (Kamerauhr falsch gestellt, z. B. Zeitzone der Reise). Mit „Korrigieren“ werden die Fotos um den Unterschied verschoben und der Tour zugeordnet.|Pour ces parcours, l’heure des photos ne correspond pas au lieu de prise de vue (horloge mal réglée, p. ex. fuseau horaire du voyage). « Corriger » décale les photos de l’écart et les rattache au parcours.`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
 Aktivität im Jahr 2026|Actividad en 2026
 Neuere Tour (←)|Ruta más reciente (←)
@@ -895,5 +925,35 @@ Einblenden & Track korrigieren|Mostrar y corregir el trazado
 Original wiederherstellen|Restaurar el original
 Erneut anwenden|Aplicar de nuevo
 Schnelle Abschnitte|Tramos rápidos
-✓ Im Track wurde nichts Auffälliges gefunden.|✓ No se encontró nada sospechoso en el trazado.`,
+✓ Im Track wurde nichts Auffälliges gefunden.|✓ No se encontró nada sospechoso en el trazado.
+📄 Tourblatt|📄 Hoja de ruta
+Druckbares Tourblatt mit Karte, Höhenprofil und Fotos|Hoja imprimible con mapa, perfil de altitud y fotos
+‹ Zurück zur Tour|‹ Volver a la ruta
+🖨 Drucken / als PDF speichern|🖨 Imprimir / guardar como PDF
+Gelbe Punkte = Fotos – anklicken zum Ansehen.|Puntos amarillos = fotos: haz clic para verlas.
+＋ Mehrtagestour bilden …|＋ Crear ruta de varios días …
+Mehrtagestour bilden|Crear ruta de varios días
+✎ Reihe umbenennen|✎ Renombrar la serie
+Mehrtagestour umbenennen|Renombrar la ruta de varios días
+Benennen|Nombrar
+Bitte einen Namen eingeben und mindestens zwei Touren wählen.|Introduce un nombre y elige al menos dos rutas.
+Keine Touren in diesem Zeitraum.|No hay rutas en este período.
+Wunschliste|Lista de deseos
+Zur Wunschliste|Añadir a la lista
+Noch keine Touren vorgemerkt.|Aún no hay rutas guardadas.
+Von der Wunschliste entfernen|Quitar de la lista de deseos
+Offline-Nutzung|Uso sin conexión
+Für Offline vorbereiten|Preparar para uso sin conexión
+Offline – es werden die zuletzt geladenen Daten gezeigt (Änderungen sind nicht möglich).|Sin conexión: se muestran los últimos datos cargados (no se pueden hacer cambios).
+Ausgewählte Touren übernehmen|Importar las rutas seleccionadas
+Bitte Touren ankreuzen.|Marca algunas rutas.
+✓ übernommen|✓ importada
+Wird übernommen …|Importando …
+Ziel erreicht ✓|Objetivo alcanzado ✓
+noch kein Fortschritt – Ziel wird so verfehlt|sin progreso: no se alcanzará el objetivo
+Kamerauhr|Reloj de la cámara
+Wird geprüft …|Comprobando …
+Ignorieren|Ignorar
+✓ Die Kamerauhr passt zu den Strecken der letzten Touren.|✓ El reloj de la cámara coincide con los trazados de las últimas rutas.
+Bei diesen Touren passen die Foto-Zeiten nicht zum Aufnahmeort (Kamerauhr falsch gestellt, z. B. Zeitzone der Reise). Mit „Korrigieren“ werden die Fotos um den Unterschied verschoben und der Tour zugeordnet.|En estas rutas la hora de las fotos no coincide con el lugar donde se tomaron (reloj mal ajustado, p. ej. zona horaria del viaje). «Corregir» desplaza las fotos esa diferencia y las asigna a la ruta.`,
 };

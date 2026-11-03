@@ -71,6 +71,12 @@ def _open(path):
             conn.execute("ALTER TABLE track_fix ADD COLUMN orig_end INTEGER")        # ursprüngliches Tourende (Dauerkorrektur)
         if "orig_start" not in {r["name"] for r in conn.execute("PRAGMA table_info(track_fix)")}:
             conn.execute("ALTER TABLE track_fix ADD COLUMN orig_start INTEGER")
+        gcols = {r["name"] for r in conn.execute("PRAGMA table_info(guide_tours)")}
+        if "km" not in gcols:
+            conn.execute("ALTER TABLE guide_tours ADD COLUMN km REAL")
+        if "up" not in gcols:
+            conn.execute("ALTER TABLE guide_tours ADD COLUMN up REAL")
+        conn.execute("CREATE TABLE IF NOT EXISTS wishlist (gid INTEGER PRIMARY KEY, ts INTEGER)")   # Wunschliste: Wanderführer-Touren, die ich noch gehen möchte
         conn.execute("CREATE TABLE IF NOT EXISTS photo_pref (path TEXT PRIMARY KEY, tour_id TEXT)")   # beim Import gewählte Tour
         conn.execute("CREATE TABLE IF NOT EXISTS tour_sport (id TEXT PRIMARY KEY, sport TEXT)")        # eigene Sportart (bleibt beim Komoot-Abgleich)
         conn.execute("CREATE TABLE IF NOT EXISTS tour_hidden (id TEXT PRIMARY KEY, js TEXT, ts INTEGER)")  # ausgeblendete Touren (z. B. Fehlaufzeichnungen)

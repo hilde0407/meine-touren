@@ -688,6 +688,35 @@ def _guide_parse(text, fallback):
     return title, pts[::step] + ([pts[-1]] if step > 1 else [])
 
 
+def guide_stats(text, pts):
+    """Länge (km) aus den Punkten, Aufstieg (m) aus den Höhenangaben der GPX-Datei (None, falls keine vorhanden)."""
+    import math
+    km = 0.0
+    for a, b in zip(pts, pts[1:]):
+        dy = (b[0] - a[0]) * 111.2
+        dx = (b[1] - a[1]) * 111.2 * math.cos(math.radians((a[0] + b[0]) / 2))
+        km += (dx * dx + dy * dy) ** 0.5
+    up = None
+    try:
+        els = []
+        for el in ET.fromstring(text).iter():
+            if el.tag.split("}")[-1] in ("trkpt", "rtept"):
+                for ch in el:
+                    if ch.tag.split("}")[-1] == "ele" and ch.text:
+                        els.append(float(ch.text))
+        if len(els) >= 3:
+            sm = [sum(els[max(0, i - 2):i + 3]) / len(els[max(0, i - 2):i + 3]) for i in range(len(els))]
+            up, ref = 0.0, sm[0]
+            for v in sm[1:]:                       # Schwelle 3 m gegen Rauschen
+                if v - ref >= 3:
+                    up += v - ref; ref = v
+                elif ref - v >= 3:
+                    ref = v
+    except Exception:  # noqa
+        up = None
+    return round(km, 2), (round(up) if up is not None else None)
+
+
 def _seg_dist(p, a, b):
     k = 111000.0
     cx = 0.65  # cos(~50°)
@@ -746,7 +775,8 @@ async def api_guides_add(request: Request):
     for it in data.get("items") or []:
         try:
             title, pts = _guide_parse(it.get("gpx", ""), it.get("name", "Tour"))
-            db.execute("INSERT INTO guide_tours(book,title,pts) VALUES(?,?,?)", (book, title[:200], json.dumps([[round(a, 5), round(b, 5)] for a, b in pts])))
+            km, up = guide_stats(it.get("gpx", ""), pts)
+            db.execute("INSERT INTO guide_tours(book,title,pts,km,up) VALUES(?,?,?,?,?)", (book, title[:200], json.dumps([[round(a, 5), round(b, 5)] for a, b in pts]), km, up))
             ok += 1
         except Exception as ex:  # noqa
             bad.append(f"{it.get('name', '?')}: {ex}")

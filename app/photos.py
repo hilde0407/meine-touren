@@ -430,6 +430,29 @@ def suggest_offset(tour_id):
     return {"ok": True, "delta_s": delta, "aligned": abs(delta) <= 120, "n": n, "of": len(rows), "ids": [r["id"] for r in rows]}
 
 
+def clock_check(days=90, limit=30, min_s=600):
+    """Touren der letzten Zeit, deren Foto-Zeiten nach dem Aufnahmeort um mehr als min_s von der Strecke abweichen (Kamerauhr falsch)."""
+    import json
+    try:
+        ignore = set(json.loads(db.get("clock_ignore") or "[]"))
+    except ValueError:
+        ignore = set()
+    since = int(time.time()) - days * 86400
+    out = []
+    tours = db.query("SELECT t.id,t.name,t.start_ts FROM tours t WHERE t.start_ts>=? AND (SELECT COUNT(*) FROM photos p WHERE p.lat IS NOT NULL AND p.taken_ts BETWEEN t.start_ts-50400 AND COALESCE(t.end_ts,t.start_ts)+50400)>=3 "
+                     "ORDER BY t.start_ts DESC LIMIT ?", (since, limit))
+    for t in tours:
+        if t["id"] in ignore:
+            continue
+        try:
+            r = suggest_offset(t["id"])
+        except Exception:  # noqa
+            continue
+        if r.get("ok") and abs(r["delta_s"]) >= min_s:
+            out.append({"tour_id": t["id"], "name": t["name"], "start_ts": t["start_ts"], "delta_s": r["delta_s"], "n": r["n"], "of": r["of"], "ids": r["ids"]})
+    return out
+
+
 def apply_offset(tour_id, delta_s, ids):
     """Zeitversatz auf die Fotos anwenden, die für den Abgleich genutzt wurden, plus Fotos dazwischen/daneben (Zeitraum ±30 Min.),
     und diese fest der Tour zuordnen."""

@@ -7,7 +7,7 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import FileResponse
 
-from . import auth, config, ctx, db, more2, photos
+from . import auth, config, ctx, db, more2, photos, tracks
 
 router = APIRouter()
 
@@ -284,3 +284,70 @@ async def api_shared_import(request: Request):
     photos._store(rows)
     photos.assign_all()
     return {"imported": n, "total": len(rows)}
+
+
+# ---------- Geteilte Touren übernehmen ----------
+def _visible_tours(u):
+    """Touren anderer Benutzer, die für `u` freigegeben sind: [(owner, tour-Zeile)]"""
+    by = {}
+    for g in auth.grants_to(u["uid"]):
+        by.setdefault(g["owner"], []).append(g)
+    out = []
+    for owner, sc in by.items():
+        with ctx.as_user(owner):
+            if any(x["scope"] == "all" for x in sc):
+                rows = db.query("SELECT id,name,sport,start_ts,dist_m,up_m FROM tours ORDER BY start_ts DESC LIMIT 500")
+            else:
+                ids = [x["ref"] for x in sc if x["scope"] == "tour"]
+                rows = db.query(f"SELECT id,name,sport,start_ts,dist_m,up_m FROM tours WHERE id IN ({','.join('?' * len(ids))})", tuple(ids)) if ids else []
+        out += [(owner, r) for r in rows]
+    return out
+
+
+@router.get("/api/shared/tours")
+def api_shared_tours(request: Request):
+    u = _user(request)
+    names = {x["uid"]: x["name"] for x in auth.list_users()}
+    have = {r["id"] for r in db.query("SELECT id FROM tours WHERE id LIKE 'von-%'")}
+    return [{"owner": o, "owner_name": names.get(o, o), "id": r["id"], "name": r["name"], "sport": r["sport"], "start_ts": r["start_ts"], "dist_m": r["dist_m"], "up_m": r["up_m"],
+             "imported": f"von-{o}-{r['id']}" in have} for o, r in _visible_tours(u)]
+
+
+@router.post("/api/shared/tours-import")
+async def api_shared_tours_import(request: Request):
+    """Freigegebene Touren (Strecke + passende Fotos) in die eigene Sammlung kopieren."""
+    u = _user(request); d = await request.json()
+    owner = str(d.get("owner", "")); ids = {str(i) for i in d.get("ids") or []}
+    ok = {r["id"] for o, r in _visible_tours(u) if o == owner}
+    done, failed, photo_ids = 0, [], []
+    for tid in sorted(ids & ok):
+        try:
+            with ctx.as_user(owner):
+                t = db.one("SELECT name,sport FROM tours WHERE id=?", (tid,))
+                gpx = tracks.gpx_for(tid)
+                photo_ids += [r["id"] for r in db.query("SELECT id FROM photos WHERE tour_id=? AND COALESCE(manual,0)!=2", (tid,))]
+            tracks.adopt(gpx, f"{tid}.gpx", ident=f"von-{owner}-{tid}", name=t["name"], sport=t["sport"])
+            done += 1
+        except Exception as ex:  # noqa
+            failed.append(f"{tid}: {ex}")
+    n = 0
+    if photo_ids:
+        src = []
+        with ctx.as_user(owner):
+            for i in photo_ids[:3000]:
+                r = db.one("SELECT path,taken_ts,lat,lng FROM photos WHERE id=?", (i,))
+                if r and os.path.exists(r["path"]):
+                    src.append(r)
+        dst_dir = config.LIB_DIR / f"von-{owner}"
+        dst_dir.mkdir(parents=True, exist_ok=True)
+        rows = []
+        for r in src:
+            dst = dst_dir / Path(r["path"]).name
+            if not dst.exists():
+                shutil.copy2(r["path"], dst); n += 1
+            st = dst.stat()
+            rows.append((str(dst), st.st_mtime, st.st_size, r["taken_ts"], r["lat"], r["lng"]))
+        photos._store(rows)
+    if done:
+        photos.assign_all()
+    return {"imported": done, "photos": n, "failed": failed}

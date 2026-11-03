@@ -546,6 +546,24 @@ def photo_offset_apply(body: dict):
         raise HTTPException(400, str(e))
 
 
+@app.get("/api/clock-check")
+def clock_check():
+    """Touren, bei denen die Kamerauhr nach dem Aufnahmeort der Fotos falsch gegangen sein muss (Vorschlag zum Korrigieren)."""
+    return photos.clock_check()
+
+
+@app.post("/api/clock-check/ignore")
+def clock_check_ignore(body: dict):
+    import json as _j
+    try:
+        cur = set(_j.loads(db.get("clock_ignore") or "[]"))
+    except ValueError:
+        cur = set()
+    cur.add(str(body.get("tour_id")))
+    db.put("clock_ignore", _j.dumps(sorted(cur)))
+    return {"ok": True}
+
+
 @app.get("/api/photo-windows")
 def photo_windows():
     """Zeitfenster der Touren (Sekunden, UTC) – der Browser lädt nur Fotos hoch, die hineinfallen."""

@@ -224,7 +224,10 @@ VIEWS.tour = async id => {
   };
   if (ph.length) photoSelect(ph, 0, {box: "#th", anchor: "#pc", tour: true});
   mk.then(c => {
-    if (c && ph.length) photoChain(map, t, c, ph); // Fotos auf der Strecke; verschiebbar (12-fotokette.js)
+    if (c && ph.length) {
+      photoChain(map, t, c, ph); // Fotos auf der Strecke; verschiebbar (12-fotokette.js)
+      profilePhotos(ph);
+    }
   });
   $("#eup").onclick = () => uploadDialog(t);
   uploadChips(t);
@@ -473,6 +476,7 @@ function profile(c, t) {
       else mkr.setLatLng([c[k][0], c[k][1]]);
     }
   };
+  profile.ctx = {c, dist, pts, svg, W, H, B, T};
   svg.onmouseleave = () => {
     $("#ptip").style.display = "none";
     $("#pl").setAttribute("opacity", 0);
@@ -481,4 +485,63 @@ function profile(c, t) {
       mkr = null;
     }
   };
+}
+
+/* Fotos im Höhenprofil: Marker an der Stelle der Aufnahme; Klick zeigt das Foto, Zeiger darüber setzt den Punkt auf der Karte */
+function profilePhotos(ph) {
+  const X = profile.ctx;
+  if (!X || !ph || !ph.length || $("#pphotos")) return;
+  const {c, pts, svg, H, B} = X,
+    hasT = c.some(p => p[3] != null);
+  const idxOf = p => {
+    if (p.lat != null && p.lng != null) {
+      let bi = 0,
+        bd = 1e18;
+      c.forEach((q, i) => {
+        const d = (q[0] - p.lat) ** 2 + ((q[1] - p.lng) * Math.cos((p.lat * Math.PI) / 180)) ** 2;
+        if (d < bd) (bd = d), (bi = i);
+      });
+      return bi;
+    }
+    if (!hasT) return -1;
+    const ms = p.taken_ts * 1000;
+    let bi = -1,
+      bd = 1e18;
+    c.forEach((q, i) => {
+      if (q[3] == null) return;
+      const d = Math.abs(q[3] - ms);
+      if (d < bd) (bd = d), (bi = i);
+    });
+    return bd < 6 * 3600e3 ? bi : -1;
+  };
+  let h = '<g id="pphotos">',
+    n = 0;
+  ph.forEach((p, k) => {
+    const i = idxOf(p);
+    if (i < 0) return;
+    n++;
+    const x = pts[i][0].toFixed(1);
+    h += `<g class="pph" data-k="${k}" data-i="${i}" style="cursor:pointer"><line x1="${x}" x2="${x}" y1="${pts[i][1].toFixed(1)}" y2="${H - B}" stroke="var(--ink)" opacity=".25"/><circle cx="${x}" cy="${pts[i][1].toFixed(1)}" r="5" fill="#e2b13c" stroke="#fff" stroke-width="1.5"><title>Foto ${k + 1} anzeigen</title></circle></g>`;
+  });
+  if (!n) return;
+  svg.insertAdjacentHTML("beforeend", h + "</g>");
+  svg.querySelectorAll(".pph").forEach(g => {
+    g.onclick = e => {
+      e.stopPropagation();
+      openLb(ph, +g.dataset.k);
+    };
+    g.onmousemove = e => {
+      e.stopPropagation();
+      const q = c[+g.dataset.i];
+      if (map && q) {
+        if (!profilePhotos.m) profilePhotos.m = L.circleMarker([q[0], q[1]], {radius: 9, color: "#fff", fillColor: "#e2b13c", fillOpacity: 1, weight: 3}).addTo(map);
+        else profilePhotos.m.setLatLng([q[0], q[1]]);
+      }
+    };
+    g.onmouseleave = () => {
+      if (profilePhotos.m && map) map.removeLayer(profilePhotos.m);
+      profilePhotos.m = null;
+    };
+  });
+  $("#profcard").insertAdjacentHTML("beforeend", `<p class="mut" style="font-size:13px;margin:4px 0 0">Gelbe Punkte = Fotos – anklicken zum Ansehen.</p>`);
 }
