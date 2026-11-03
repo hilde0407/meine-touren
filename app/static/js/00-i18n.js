@@ -26,7 +26,94 @@
   if (lang === "de") return;
 
   const D = {};
-  const EN = `Meine Touren|Meine Touren
+  const EN = `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|No goal for 2026 yet. Set one, for example 1000 km of hiking.
+Aktivität im Jahr 2026|Activity in 2026
+Neuere Tour (←)|Newer tour (←)
+Ältere Tour (→)|Older tour (→)
+Ältere Tour|Older tour
+Farbe und Breite der Strecken ändern|Change colour and width of the tracks
+Alle Strecken übereinander: häufig begangene Wege leuchten stärker|All tracks on top of each other: frequently walked paths glow brighter
+Fotos mit GPS-Position anzeigen|Show photos with GPS position
+Alle Touren auflisten, die den sichtbaren Kartenausschnitt berühren|List all tours touching the visible map area
+um die Erde|around the Earth
+Mount Everest bergauf|up Mount Everest
+unterwegs|on the road
+längste Serie|longest streak
+Längste:|Longest:
+· Meiste Höhenmeter:|· Most elevation:
+Meiste Höhenmeter:|Most elevation:
+gegenüber|compared with
+Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Gruppen legst du mit Tags an.|No trips detected (at least two tours in a row, more than 60 km from your usual starting point, are needed). Create your own groups with tags.
+in der Tour über „🏷 Tags“ vergeben|assign in the tour via “🏷 Tags”
+Noch keine Regionen bestimmt: Verwaltung → „Regionen bestimmen“.|No regions determined yet: Admin → “Determine regions”.
+Noch keine Wanderführer hinterlegt: Verwaltung → „Wanderführer“ (GPX-Dateien hochladen).|No hiking guides stored yet: Admin → “Hiking guides” (upload GPX files).
+nur Jahre mit mindestens 2 Touren der Sportart|only years with at least 2 tours of the sport
+Bei welcher Temperatur bist du unterwegs?|At what temperature do you go out?
+unter 0 °|below 0 °
+über 30 °|above 30 °
+Anteil der Strecke, der auf keiner früheren Tour lag|Share of the route not covered by any earlier tour
+Gruppe wählen|Choose group
+ausgewählt|selected
+Einer Tour zuordnen …|Assign to a tour …
+Aufnahmezeit der gewählten Fotos verschieben, z. B. Zeitzone einer Reise korrigieren|Shift the capture time of the selected photos, e.g. to correct the time zone of a trip
+Fehlende Strecken: Verwaltung → „Routen laden“. Fehlende Regionen: „Regionen bestimmen“.|Missing tracks: Admin → “Load routes”. Missing regions: “Determine regions”.
+Mögliche Ursache:|Possible cause:
+– „🧹 Track korrigieren“ hilft dabei.|– “🧹 Fix track” can help.
+Der Track selbst ist unauffällig – wahrscheinlich ist nur die Sportart falsch.|The track itself looks fine – probably only the sport is wrong.
+Zeitangaben nicht aufgezeichnet (überall gleiches Tempo) – Dauer korrigieren|Times not recorded (same pace everywhere) – correct the duration
+Tour öffnen|Open tour
+Name enthält …|Name contains …
+Text ersetzen (Suchen → Ersetzen)|Replace text (search → replace)
+Datum und Uhrzeit am Ende entfernen|Remove date and time at the end
+Wähle Touren aus, lege eine Regel fest, prüfe die Vorschau und wende sie an.|Select tours, define a rule, check the preview and apply it.
+Version:|Version:
+Garmin, Suunto & andere Uhren|Garmin, Suunto & other watches
+Touren und Fotos in die App holen|Bring tours and photos into the app
+Weitere Wege (SMB-Ordner, Mac-Skript)|More ways (SMB folder, Mac script)
+(Ordner nicht gefunden)|(folder not found)
+Längste Bildseite (Pixel)|Longest image side (pixels)
+JPEG-Qualität (1–95)|JPEG quality (1–95)
+Zuordnung: Toleranz vor/nach der Tour (Min.)|Assignment: tolerance before/after the tour (min)
+Automatik & Benachrichtigung|Automation & notification
+Uhrzeit (Stunde)|Time of day (hour)
+Benachrichtigung (optional)|Notification (optional)
+Testnachricht senden (nach „Speichern“)|Send test message (after “Save”)
+Wartung & Sicherheit|Maintenance & security
+Sicherung, Zugriffsschutz, Selbsttest, Wanderführer|Backup, access protection, self-test, hiking guides
+Die Oberfläche ist nicht passwortgeschützt.|The interface is not password-protected.
+Wanderführer (z. B. Rother)|Hiking guides (e.g. Rother)
+GPX-Dateien auswählen …|Choose GPX files …
+Noch keine Wanderführer hinterlegt.|No hiking guides stored yet.
+Einrichten …|Set up …
+Touren zum Vergleichen nicht gefunden|Tours to compare not found
+‹ Alle Touren|‹ All tours
+⬇ GPX|⬇ GPX
+⛰ Höhen korrigieren|⛰ Fix elevation
+Steigung (Anteil der Strecke)|Gradient (share of the route)
+📍 Fotos ausrichten|📍 Align photos
+Andere Tour …|Other tour …
+Diese Tour liegt nur lokal vor (Strecke als GPX im Datenordner)|This tour exists only locally (track as GPX in the data folder)
+Zu Komoot, Strava … hochladen|Upload to Komoot, Strava …
+Lokale Tour löschen|Delete local tour
+Öffentlichen Link erzeugen|Create public link
+Farbe und Breite der Strecke|Colour and width of the track
+Höhen mit Geländemodell neu berechnen|Recalculate elevation with a terrain model
+Ausreißer im GPS-Track entfernen, Seilbahn-/Autofahrten aus der Wertung nehmen|Remove outliers in the GPS track, exclude cable-car/car rides from the totals
+Vergleicht den Aufnahmeort der Fotos mit der Strecke und korrigiert eine falsch gestellte Kamerauhr|Compares where the photos were taken with the track and corrects a wrongly set camera clock
+Ein Foto auf die richtige Stelle der Strecke ziehen – die anderen wandern zeitlich mit|Drag a photo to the right spot on the track – the others move along in time
+Aus den Fotos übernehmen|Take from the photos
+Zeit aus den Foto-Positionen ableiten|Derive time from the photo positions
+Nach der Korrektur:|After the correction:
+Mit Schlagworten wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).|Tags such as “Holiday Réunion 2026” or “Rother Taunus” create an album with its own page (map, totals, photos, 3D flight).
+Anfang und Ende (300 m) ausblenden – schützt deinen Wohnort|Hide start and end (300 m) – protects your home location
+weiße Umrandung (besser sichtbar auf Satellit/Topo)|white outline (more visible on satellite/topo)
+Zugang fehlt (Verwaltung)|Access missing (Admin)
+nicht verbunden (Verwaltung → Portale)|not connected (Admin → Portals)
+Mehrtagestouren|Multi-day tours
+erkannt an Namen wie „… Tag 3“ oder „… Etappe 2“|detected from names like “… Day 3” or “… Stage 2”
+Gesamtansicht|Overall view
+Etappen|Stages
+Meine Touren|Meine Touren
 Name suchen|Search name
 m auf|m up
 m ab|m down
@@ -392,9 +479,9 @@ Schnelle Abschnitte|Fast sections
   const dt = (d, mo, y) => (lang === "en" ? `${D[mo] || mo} ${d}, ${y}` : lang === "fr" ? `${d === "1" ? "1er" : d} ${D[mo] || mo} ${y}` : `${d} de ${D[mo] || mo} de ${y}`);
   const pl = (n, one, many) => (n === "1" ? one : many);
   const U = {   // Einheiten und Satzteile je Sprache
-    en: {photo: ["photo", "photos"], tour: ["tour", "tours"], day: ["day", "days"], of: "of", img: "images", asg: "assigned to a tour", lib: "in the library", libc: "Library:", free: "free", adm: "Admin → ", open: "Open admin", asgp: "Assign photos", show: "Slideshow", act: "activities", Tours: "Tours", Photos: "Photos", miss: "missing – ", none: "none yet – ", latest: "latest version on GitHub", ltour: "Latest tour", lh: "Latest tour, hiking", lc: "Latest tour, cycling", yr: "Year in review", nobk: "There is no backup yet – the first one is created automatically (at night), or right now:"},
-    fr: {photo: ["photo", "photos"], tour: ["parcours", "parcours"], day: ["jour", "jours"], of: "sur", img: "images", asg: "associées à un parcours", lib: "dans la bibliothèque", libc: "Bibliothèque :", free: "libres", adm: "Administration → ", open: "Ouvrir l’administration", asgp: "Associer les photos", show: "Diaporama", act: "activités", Tours: "Parcours", Photos: "Photos", miss: "manquant – ", none: "aucune pour l’instant – ", latest: "dernière version sur GitHub", ltour: "Dernier parcours", lh: "Dernier parcours, randonnée", lc: "Dernier parcours, vélo", yr: "Bilan de l’année", nobk: "Il n’y a pas encore de sauvegarde – la première est créée automatiquement (la nuit), ou tout de suite :"},
-    es: {photo: ["foto", "fotos"], tour: ["ruta", "rutas"], day: ["día", "días"], of: "de", img: "imágenes", asg: "asignadas a una ruta", lib: "en la biblioteca", libc: "Biblioteca:", free: "libres", adm: "Administración → ", open: "Abrir administración", asgp: "Asignar fotos", show: "Presentación", act: "actividades", Tours: "Rutas", Photos: "Fotos", miss: "falta – ", none: "ninguna aún – ", latest: "última versión en GitHub", ltour: "Última ruta", lh: "Última ruta, senderismo", lc: "Última ruta, ciclismo", yr: "Resumen del año", nobk: "Aún no hay copia de seguridad – la primera se crea automáticamente (por la noche), o ahora mismo:"},
+    en: {photo: ["photo", "photos"], tour: ["tour", "tours"], day: ["day", "days"], of: "of", img: "images", asg: "assigned to a tour", lib: "in the library", libc: "Library:", free: "free", adm: "Admin → ", open: "Open admin", asgp: "Assign photos", show: "Slideshow", act: "activities", Tours: "Tours", Photos: "Photos", miss: "missing – ", none: "none yet – ", latest: "latest version on GitHub", ltour: "Latest tour", lh: "Latest tour, hiking", lc: "Latest tour, cycling", yr: "Year in review", stg: ["stage", "stages"], fast: ["section with vehicle pace (cable car, bus, car?)", "sections with vehicle pace (cable car, bus, car?)"], tfast: "too fast for hiking", nobk: "There is no backup yet – the first one is created automatically (at night), or right now:"},
+    fr: {photo: ["photo", "photos"], tour: ["parcours", "parcours"], day: ["jour", "jours"], of: "sur", img: "images", asg: "associées à un parcours", lib: "dans la bibliothèque", libc: "Bibliothèque :", free: "libres", adm: "Administration → ", open: "Ouvrir l’administration", asgp: "Associer les photos", show: "Diaporama", act: "activités", Tours: "Parcours", Photos: "Photos", miss: "manquant – ", none: "aucune pour l’instant – ", latest: "dernière version sur GitHub", ltour: "Dernier parcours", lh: "Dernier parcours, randonnée", lc: "Dernier parcours, vélo", yr: "Bilan de l’année", stg: ["étape", "étapes"], fast: ["section à allure de véhicule (téléphérique, bus, voiture ?)", "sections à allure de véhicule (téléphérique, bus, voiture ?)"], tfast: "trop rapide pour la randonnée", nobk: "Il n’y a pas encore de sauvegarde – la première est créée automatiquement (la nuit), ou tout de suite :"},
+    es: {photo: ["foto", "fotos"], tour: ["ruta", "rutas"], day: ["día", "días"], of: "de", img: "imágenes", asg: "asignadas a una ruta", lib: "en la biblioteca", libc: "Biblioteca:", free: "libres", adm: "Administración → ", open: "Abrir administración", asgp: "Asignar fotos", show: "Presentación", act: "actividades", Tours: "Rutas", Photos: "Fotos", miss: "falta – ", none: "ninguna aún – ", latest: "última versión en GitHub", ltour: "Última ruta", lh: "Última ruta, senderismo", lc: "Última ruta, ciclismo", yr: "Resumen del año", stg: ["etapa", "etapas"], fast: ["tramo a ritmo de vehículo (¿teleférico, autobús, coche?)", "tramos a ritmo de vehículo (¿teleférico, autobús, coche?)"], tfast: "demasiado rápido para senderismo", nobk: "Aún no hay copia de seguridad – la primera se crea automáticamente (por la noche), o ahora mismo:"},
   }[lang];
   const P = [   // dynamische Texte (ganzer Textknoten)
     [/^(\d+) Fotos?$/, (m, n) => `${n} ${pl(n, U.photo[0], U.photo[1])}`],
@@ -429,6 +516,9 @@ Schnelle Abschnitte|Fast sections
     [/(\d+) Fotos/g, (m, n) => `${n} ${pl(n, U.photo[0], U.photo[1])}`],
     [/(\d+) Touren/g, (m, n) => `${n} ${pl(n, U.tour[0], U.tour[1])}`],
     [/(\d+) Aktivitäten/g, (m, n) => `${n} ${U.act}`],
+    [/(\d+) Etappen/g, (m, n) => `${n} ${pl(n, U.stg[0], U.stg[1])}`],
+    [/(\d+) Abschnitte?  ?mit Fahrt-Tempo \(Seilbahn, Bus, Auto\?\)/g, (m, n) => `${n} ${pl(n, U.fast[0], U.fast[1])}`],
+    [/zu schnell für Wandern/g, () => U.tfast],
     [/\bTouren\b/g, () => U.Tours],
     [/\bFotos\b/g, () => U.Photos],
   ];

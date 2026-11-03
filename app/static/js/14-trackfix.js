@@ -33,6 +33,8 @@ function trackFixDialog(id, done) {
        <label class="chk" style="margin-top:8px"><input type="checkbox" id="tfd" ${a.timing.uniform ? "checked" : ""}> <b>Dauer korrigieren auf</b> <input id="tfdh" type="number" min="0" max="99" style="width:64px" value="${Math.floor(initS / 3600)}"> Std. <input id="tfdm" type="number" min="0" max="59" style="width:64px" value="${Math.round((initS % 3600) / 60) % 60}"> Min.</label>
        ${a.photos ? `<div class="row" style="margin:4px 0;gap:6px;align-items:center"><button class="btn alt sm" type="button" id="tfph">Aus den Fotos übernehmen</button><span class="mut" style="font-size:13px">${a.photos.n} Fotos von ${hm(a.photos.first)} bis ${hm(a.photos.last)} Uhr = ${fmtMin(a.photos.last - a.photos.first)}</span></div><label class="chk" style="margin:2px 0"><input type="checkbox" id="tfst"> Start der Tour auf die Zeit des ersten Fotos (${hm(a.photos.first)} Uhr) setzen</label>` : ""}
        <span class="mut" style="font-size:13px">${a.timing.est_s ? "Vorschlag nach Strecke und Höhenmetern (Wanderzeit nach SAC-Formel, ohne Pausen); du kannst den Wert ändern. " : ""}Die Zeitpunkte im Track werden entsprechend gestreckt, schnelle Abschnitte werden bei solchen Zeiten nicht gesucht.</span></div>` : ""}
+     ${a.anchors ? `<div class="panel" style="padding:10px 14px;margin:10px 0;border-left:4px solid var(--green,#2a7f62)"><label class="chk" style="margin:0"><input type="checkbox" id="tfa" ${a.timing.uniform || avg > a.limit_sustain * 0.6 ? "checked" : ""}> <b>Zeit aus den Foto-Positionen ableiten</b></label>
+       <span class="mut" style="font-size:13px">${a.anchors.n} Fotos mit Aufnahmeort liegen auf dem Track. Ihre Aufnahmezeiten legen fest, wann du wo warst (Pausen eingeschlossen): Start ${hm(a.anchors.start)} Uhr, Ende ${hm(a.anchors.end)} Uhr, Dauer ${fmtMin(a.anchors.dur_s)}. Das ist genauer als eine Schätzung und ersetzt „Dauer korrigieren“.</span></div>` : ""}
      ${a.n_spikes ? `<label class="chk"><input type="checkbox" id="tfs" checked> <b>${a.n_spikes} Ausreißer-Punkt${a.n_spikes > 1 ? "e" : ""}</b> in ${a.spikes.length} Stelle${a.spikes.length > 1 ? "n" : ""} entfernen</label>` : ""}
      ${a.fast.length ? `<h3 style="margin:16px 0 4px">Schnelle Abschnitte</h3><p class="mut" style="font-size:13px;margin:0 0 6px">Nichts ist vorgewählt. Anhaken = als Fahrt aus Strecke und Dauer herausrechnen (der Weg bleibt auf der Karte sichtbar). Bitte Karte und Uhrzeit prüfen: Nur echte Fahrten (Seilbahn, Bus, Auto) anhaken, keine Wegstücke, die du gelaufen bist.</p>
       <div class="rows">${a.fast
@@ -47,7 +49,8 @@ function trackFixDialog(id, done) {
     const preview = () => {
       let d = a.dist_km * 1000,
         s = a.dur_s;
-      if (b.querySelector("#tfd")?.checked) s = (+b.querySelector("#tfdh").value || 0) * 3600 + (+b.querySelector("#tfdm").value || 0) * 60;
+      if (b.querySelector("#tfa")?.checked) s = a.anchors.dur_s;
+      else if (b.querySelector("#tfd")?.checked) s = (+b.querySelector("#tfdh").value || 0) * 3600 + (+b.querySelector("#tfdm").value || 0) * 60;
       if (b.querySelector("#tfs")?.checked) d -= a.spike_m;
       b.querySelectorAll("[data-f]:checked").forEach(x => {
         const f = a.fast[+x.dataset.f];
@@ -101,7 +104,7 @@ function trackFixDialog(id, done) {
           api(`/api/tours/${encodeURIComponent(id)}/trackfix`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({spikes: b.querySelector("#tfs") ? b.querySelector("#tfs").checked : false, exclude: [...b.querySelectorAll("[data-f]:checked")].map(x => +x.dataset.f), smooth: !!b.querySelector("#tfj")?.checked, start_ts: b.querySelector("#tfst")?.checked ? a.photos.first : null, dur_s: b.querySelector("#tfd")?.checked ? (+b.querySelector("#tfdh").value || 0) * 3600 + (+b.querySelector("#tfdm").value || 0) * 60 : null}),
+            body: JSON.stringify({spikes: b.querySelector("#tfs") ? b.querySelector("#tfs").checked : false, exclude: [...b.querySelectorAll("[data-f]:checked")].map(x => +x.dataset.f), smooth: !!b.querySelector("#tfj")?.checked, start_ts: b.querySelector("#tfst")?.checked && !b.querySelector("#tfa")?.checked ? a.photos.first : null, anchors: !!b.querySelector("#tfa")?.checked, dur_s: b.querySelector("#tfd")?.checked && !b.querySelector("#tfa")?.checked ? (+b.querySelector("#tfdh").value || 0) * 3600 + (+b.querySelector("#tfdm").value || 0) * 60 : null}),
           })
         );
     const re = b.querySelector("#tfre");

@@ -213,7 +213,9 @@ def analyse(tid):
     ph = db.one("SELECT COUNT(*) n, MIN(taken_ts) a, MAX(taken_ts) b FROM photos WHERE COALESCE(dated,1)=1 AND taken_ts IS NOT NULL AND "
                 "(tour_id=? OR (taken_ts>=? AND taken_ts<?))", (tid, d0, d0 + 86400))
     photos_info = {"n": ph["n"], "first": ph["a"], "last": ph["b"]} if ph and ph["n"] >= 2 and ph["b"] - ph["a"] >= 600 else None
-    return {"photos": photos_info, "start_ts": t["start_ts"], "timing": tm, "jitter_m": round(jit), "raw_m": round(raw), "spike_m": round(sum(hav(pts[i], pts[i + 1]) for i in range(len(pts) - 1)) - raw),
+    at, an = anchor_times(pts, _photo_rows(t))
+    anchors = {"n": an, "start": int(at[0]), "end": int(at[-1]), "dur_s": int(at[-1] - at[0])} if at else None
+    return {"anchors": anchors, "photos": photos_info, "start_ts": t["start_ts"], "timing": tm, "jitter_m": round(jit), "raw_m": round(raw), "spike_m": round(sum(hav(pts[i], pts[i + 1]) for i in range(len(pts) - 1)) - raw),
             "dur_s": round(fx["orig_dur"] if fx else dur_now),"id": tid, "sport": t["sport"], "kind": kind(t["sport"]), "has_time": has_t, "n": len(pts),
             "limit_peak": peak, "limit_sustain": sustain, "spikes": runs, "n_spikes": len(bad), "fast": fast,
             "line": [[round(p[0], 5), round(p[1], 5)] for p in pts[::step]],
@@ -222,7 +224,87 @@ def analyse(tid):
             "applied": {"spikes": fx["removed"], "excluded": fx["excluded"]} if fx else None}
 
 
-def apply(tid, remove_spikes=True, exclude=(), smooth=False, set_dur_s=None, set_start_ts=None):
+def _photo_rows(t):
+    from .gpxtools import TZ
+    from datetime import datetime
+    d0 = int(datetime.fromtimestamp(t["start_ts"] or 0, TZ).replace(hour=0, minute=0, second=0, microsecond=0).timestamp())
+    return db.query("SELECT taken_ts, lat, lng FROM photos WHERE lat IS NOT NULL AND lng IS NOT NULL AND taken_ts IS NOT NULL AND COALESCE(dated,1)=1 "
+                    "AND (tour_id=? OR (taken_ts>=? AND taken_ts<?))", (t["id"], d0, d0 + 86400))
+
+
+def anchor_times(pts, rows, max_m=150):
+    """Zeit jedes Trackpunkts aus Fotos mit Aufnahmeort: Ein Foto, das auf dem Track liegt, verrät, wann man dort war.
+    Zwischen den Fotos wird entlang der Strecke linear interpoliert, davor und danach mit dem Tempo des nächsten Abschnitts.
+    Gibt (Zeiten absolut in s, Anzahl Anker) oder (None, 0) zurück."""
+    n = len(pts)
+    cum = [0.0]
+    for i in range(n - 1):
+        cum.append(cum[-1] + hav(pts[i], pts[i + 1]))
+    cand = {}
+    for r in rows:
+        best, bi = None, None
+        for i in range(0, n, max(1, n // 4000)):
+            d = hav((r["lat"], r["lng"]), pts[i])
+            if best is None or d < best:
+                best, bi = d, i
+        if best is not None and best <= max_m:
+            cand.setdefault(bi, []).append(r["taken_ts"])
+    items = sorted((cum[i], min(v)) for i, v in cand.items())
+    # nur zeitlich zur Strecke passende Anker behalten (längste wachsende Folge)
+    best_seq = []
+    seqs = []
+    for k, it in enumerate(items):
+        seqs.append(max((seqs[j] for j in range(k) if items[j][1] < it[1] and items[j][0] < it[0]), key=len, default=[]) + [it])
+        if len(seqs[-1]) > len(best_seq):
+            best_seq = seqs[-1]
+    if len(best_seq) < 3 or best_seq[-1][1] - best_seq[0][1] < 600:
+        return None, len(best_seq)
+    A = best_seq
+    pace = lambda a, b: min(3.0, max(0.3, (b[1] - a[1]) / max(1.0, b[0] - a[0])))
+    p0, p1 = pace(A[0], A[1]), pace(A[-2], A[-1])
+    out, k = [], 0
+    for c in cum:
+        if c <= A[0][0]:
+            out.append(A[0][1] - (A[0][0] - c) * p0)
+        elif c >= A[-1][0]:
+            out.append(A[-1][1] + (c - A[-1][0]) * p1)
+        else:
+            while A[k + 1][0] < c:
+                k += 1
+            f = (c - A[k][0]) / max(1e-6, A[k + 1][0] - A[k][0])
+            out.append(A[k][1] + f * (A[k + 1][1] - A[k][1]))
+    return out, len(A)
+
+
+def diagnose(tid):
+    """Kurze Ursachenliste für eine auffällige Tour (leer = Track unauffällig, dann liegt es wohl an der Sportart)."""
+    try:
+        t = db.one("SELECT * FROM tours WHERE id=?", (str(tid),))
+        pts = _load(tid, fixed=bool(db.one("SELECT 1 x FROM track_fix WHERE id=?", (str(tid),)))) if t else None
+        if not t or not pts or len(pts) < 5:
+            return None
+        peak, sustain = LIMITS[kind(t["sport"])]
+        out = []
+        tm = timing(pts, t["sport"])
+        if tm["uniform"]:
+            out.append("Zeitangaben nicht aufgezeichnet (überall gleiches Tempo) – Dauer korrigieren")
+        bad = find_spikes(pts, peak)
+        if bad:
+            out.append(f"{len(bad)} GPS-Ausreißer")
+        if pts[0][3] is not None and not tm["uniform"]:
+            keep = [p for i, p in enumerate(pts) if i not in set(bad)]
+            fast = find_fast(keep, sustain)
+            if fast:
+                out.append(f"{len(fast)} Abschnitt{'e' if len(fast) > 1 else ''} mit Fahrt-Tempo (Seilbahn, Bus, Auto?)")
+        jit, raw = jitter_m(pts)
+        if jit >= 300 and jit >= raw * 0.05:
+            out.append(f"GPS-Zittern (Strecke ca. {jit / 1000:.1f} km zu lang)".replace(".", ","))
+        return out
+    except Exception:  # noqa
+        return None
+
+
+def apply(tid, remove_spikes=True, exclude=(), smooth=False, set_dur_s=None, set_start_ts=None, use_anchors=False):
     tid = str(tid)
     t = db.one("SELECT * FROM tours WHERE id=?", (tid,))
     if not t:
@@ -234,6 +316,13 @@ def apply(tid, remove_spikes=True, exclude=(), smooth=False, set_dur_s=None, set
         raise RuntimeError("Für diese Tour liegt keine Strecke vor")
     peak, sustain = LIMITS[kind(t["sport"])]
     new_dur = None
+    if use_anchors:                                       # Zeit der Trackpunkte aus Fotos mit Aufnahmeort
+        at, an = anchor_times(pts, _photo_rows(t))
+        if not at:
+            raise RuntimeError("Zu wenige Fotos auf dem Track, um die Zeit daraus abzuleiten")
+        t0 = at[0]
+        pts = [[p[0], p[1], p[2], int((a - t0) * 1000)] for p, a in zip(pts, at)]
+        set_start_ts, set_dur_s = int(t0), int(at[-1] - t0)
     if set_dur_s:                                         # Zeitstempel auf die angegebene Dauer strecken (bei nicht aufgezeichneten Zeiten)
         new_dur = int(set_dur_s)
         if not 60 <= new_dur <= 14 * 86400:

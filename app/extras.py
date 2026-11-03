@@ -327,6 +327,61 @@ def api_selftest():
         age = (time.time() - fs[-1].stat().st_mtime) / 3600
         return f"{len(fs)} Backups, letztes vor {age:.0f} Std."
     chk("Automatisches Backup", bk)
+    def integ():
+        r = db.one("PRAGMA integrity_check")
+        v = list(r.values())[0] if r else "?"
+        if v != "ok":
+            raise RuntimeError(f"Datenbank meldet: {v}")
+        return "Datenbank in Ordnung"
+    chk("Datenbank-Integrität", integ)
+
+    def dirs():
+        bad = []
+        for n, d in (("Fotobibliothek", config.LIB_DIR), ("Eingang", config.INBOX_DIR), ("Backup", config.backup_dirs(ctx.uid())[0]), ("Strecken", config.TRACK_DIR)):
+            try:
+                d.mkdir(parents=True, exist_ok=True)
+                probe = d / ".schreibtest"
+                probe.write_text("ok"); probe.unlink()
+            except Exception as e:  # noqa
+                bad.append(f"{n}: {str(e)[:60]}")
+        if bad:
+            raise RuntimeError("; ".join(bad))
+        return "Foto-, Eingangs-, Backup- und Streckenordner beschreibbar"
+    chk("Schreibrechte der Ordner", dirs)
+
+    def phfiles():
+        rows = db.query("SELECT path FROM photos ORDER BY RANDOM() LIMIT 40")
+        if not rows:
+            return "noch keine Fotos"
+        miss = sum(1 for r in rows if not Path(r["path"]).exists())
+        if miss > len(rows) * 0.2:
+            raise RuntimeError(f"{miss} von {len(rows)} geprüften Foto-Dateien fehlen (Quellordner nicht verbunden?)")
+        return f"{len(rows) - miss} von {len(rows)} Stichproben vorhanden"
+    chk("Foto-Dateien erreichbar", phfiles)
+
+    def heic():
+        from . import photos
+        return "HEIC/HEIF wird unterstützt" if photos.heic_supported() else "HEIC/HEIF nicht installiert (optional: pip install pillow-heif)"
+    chk("HEIC-Unterstützung", heic)
+
+    def imp():
+        from . import more
+        n = len(more.implausible([dict(t) for t in db.query("SELECT * FROM tours")]))
+        return f"{n} Touren unter „Prüfen“ auffällig" if n else "keine auffälligen Touren"
+    chk("Auffällige Touren", imp)
+
+    def upd():
+        r = requests.get("https://api.github.com/repos/hilde0407/meine-touren/releases/latest", headers=UA, timeout=8)
+        r.raise_for_status()
+        return f"GitHub erreichbar, neueste Version {r.json().get('tag_name', '?')}"
+    chk("Update-Prüfung (GitHub)", upd)
+
+    def upsvc():
+        mode = (os.environ.get("MT_SELF_UPDATE") == "1" and "lokal") or ("Dienst" if Path("/etc/systemd/system").exists() else "manuell")
+        if mode == "Dienst" and not os.access(config.DATA_DIR, os.W_OK):
+            raise RuntimeError("Datenordner nicht beschreibbar – Update-Anforderung nicht möglich")
+        return f"Update-Weg: {mode}"
+    chk("Update-Weg", upsvc)
     chk("Fotobibliothek", lambda: f"{db.one('SELECT COUNT(*) n FROM photos')['n']} Fotos, Eingang: {config.INBOX_DIR}")
     return res
 

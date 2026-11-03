@@ -57,7 +57,8 @@ def implausible(tours):
             why, sug = f"{v:.1f} km/h – sehr langsam für Rad", "hike"
         if why:
             why = re.sub(r"(\d)\.(\d)", r"\1,\2", why)
-            out.append({"id": t["id"], "name": t["name"], "sport": t["sport"], "start_ts": t["start_ts"], "km": round(d / 1000, 2),
+            from . import trackfix
+            out.append({"diag": trackfix.diagnose(t["id"]), "id": t["id"], "name": t["name"], "sport": t["sport"], "start_ts": t["start_ts"], "km": round(d / 1000, 2),
                         "kmh": round(v, 1), "why": why, "suggest": sug, "local": t.get("source") == "local",
                         "on_komoot": t.get("source") != "local" or bool(db.one("SELECT 1 x FROM tour_uploads WHERE tour_id=? AND portal='komoot' AND remote_id!=''", (t["id"],)))})
     return out
@@ -109,7 +110,7 @@ def api_trackfix(tour_id: str):
 def api_trackfix_apply(tour_id: str, body: dict):
     from . import trackfix
     try:
-        return trackfix.apply(tour_id, bool(body.get("spikes", True)), body.get("exclude") or [], bool(body.get("smooth", False)), body.get("dur_s"), body.get("start_ts"))
+        return trackfix.apply(tour_id, bool(body.get("spikes", True)), body.get("exclude") or [], bool(body.get("smooth", False)), body.get("dur_s"), body.get("start_ts"), bool(body.get("anchors")))
     except Exception as e:  # noqa
         _fixerr(tour_id, e)
 

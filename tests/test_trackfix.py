@@ -116,3 +116,46 @@ def test_photos_offer_duration_and_start():
     assert row["start_ts"] == st + 600 and row["end_ts"] == st + 600 + 29400
     assert trackfix.restore(t["id"])
     assert db.one("SELECT start_ts FROM tours WHERE id=?", (t["id"],))["start_ts"] == st
+
+
+def test_diagnose_in_implausible_list():
+    from app import more
+    t, _ = tracks.adopt(_gpx(), "d.gpx", name="Diag")
+    d = trackfix.diagnose(t["id"])
+    assert any("Ausreißer" in x for x in d) and any("Fahrt" in x for x in d)
+    t2, _ = tracks.adopt(_gpx(False, False), "d2.gpx", name="Ruhig2")
+    assert not any("Ausreißer" in x or "Fahrt" in x for x in trackfix.diagnose(t2["id"]))
+    rows = more.implausible([dict(db.one("SELECT * FROM tours WHERE id=?", (t["id"],)))])
+    assert rows == [] or "diag" in rows[0]
+
+
+def test_photo_gps_anchors_set_track_time():
+    t0 = datetime(2026, 7, 6, 5, 0, tzinfo=timezone.utc)
+    pts = []
+    for i in range(500):
+        tt = (t0 + timedelta(seconds=4 * i)).strftime("%Y-%m-%dT%H:%M:%SZ")      # Track: nur 2000 s (erfundene Zeit)
+        pts.append(f'<trkpt lat="46.5" lon="{10.0 + 0.0001 * i:.6f}"><ele>1500</ele><time>{tt}</time></trkpt>')
+    g = '<?xml version="1.0"?><gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1"><trk><type>hiking</type><trkseg>' + "".join(pts) + "</trkseg></trk></gpx>"
+    t, _ = tracks.adopt(g, "anker.gpx", name="Anker")
+    tid = t["id"]
+    st = db.one("SELECT start_ts FROM tours WHERE id=?", (tid,))["start_ts"]
+    # echte Zeiten: 1 h Pause in der Mitte -> Fotos bei 10 %, 40 %, 60 % (nach der Pause), 90 % der Strecke
+    real = {50: 3600, 200: 5 * 3600, 300: 9 * 3600, 450: 11 * 3600}
+    for i, (idx, off) in enumerate(real.items()):
+        db.execute("INSERT INTO photos(path,taken_ts,lat,lng,dated,tour_id) VALUES(?,?,?,?,1,?)", (f"/x/a{i}.jpg", st + off, 46.5, 10.0 + 0.0001 * idx, tid))
+    a = trackfix.analyse(tid)
+    assert a["anchors"] and a["anchors"]["n"] == 4 and a["anchors"]["dur_s"] > 9 * 3600
+    trackfix.apply(tid, True, [], False, None, None, True)
+    row = db.one("SELECT start_ts,end_ts,dur_s FROM tours WHERE id=?", (tid,))
+    assert row["dur_s"] > 9 * 3600 and row["start_ts"] < st + 3600
+    pts2 = routes.load(tid)
+    k = min(range(len(pts2)), key=lambda i: abs(pts2[i][1] - (10.0 + 0.0001 * 300)))
+    assert abs(row["start_ts"] + pts2[k][3] / 1000 - (st + 9 * 3600)) < 300      # Foto-Position ↔ Fotozeit
+
+
+def test_selftest_has_new_local_checks():
+    from app import extras
+    res = {r["name"]: r for r in extras.api_selftest()}
+    for n in ("Datenbank-Integrität", "Schreibrechte der Ordner", "Foto-Dateien erreichbar", "HEIC-Unterstützung", "Auffällige Touren", "Update-Weg"):
+        assert n in res, n
+    assert res["Datenbank-Integrität"]["ok"] and res["Schreibrechte der Ordner"]["ok"], res

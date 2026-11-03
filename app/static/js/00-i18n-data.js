@@ -1,6 +1,93 @@
 /* Übersetzungen Französisch und Spanisch: Zeilen „deutsch|übersetzung“ (siehe 00-i18n.js) */
 window.I18N = {
-fr: `Meine Touren|Meine Touren
+fr: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Pas encore d’objectif pour 2026. Fixez-en un, par exemple 1000 km de randonnée.
+Aktivität im Jahr 2026|Activité en 2026
+Neuere Tour (←)|Parcours plus récent (←)
+Ältere Tour (→)|Parcours plus ancien (→)
+Ältere Tour|Parcours plus ancien
+Farbe und Breite der Strecken ändern|Modifier la couleur et la largeur des tracés
+Alle Strecken übereinander: häufig begangene Wege leuchten stärker|Tous les tracés superposés : les chemins très fréquentés ressortent davantage
+Fotos mit GPS-Position anzeigen|Afficher les photos géolocalisées
+Alle Touren auflisten, die den sichtbaren Kartenausschnitt berühren|Lister tous les parcours touchant la zone visible de la carte
+um die Erde|autour de la Terre
+Mount Everest bergauf|en montée du mont Everest
+unterwegs|en route
+längste Serie|plus longue série
+Längste:|Plus long :
+· Meiste Höhenmeter:|· Plus fort dénivelé :
+Meiste Höhenmeter:|Plus fort dénivelé :
+gegenüber|par rapport à
+Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Gruppen legst du mit Tags an.|Aucun voyage détecté (il faut au moins deux parcours consécutifs à plus de 60 km de votre point de départ habituel). Créez vos propres groupes avec des tags.
+in der Tour über „🏷 Tags“ vergeben|à attribuer dans le parcours via « 🏷 Tags »
+Noch keine Regionen bestimmt: Verwaltung → „Regionen bestimmen“.|Aucune région déterminée : Administration → « Déterminer les régions ».
+Noch keine Wanderführer hinterlegt: Verwaltung → „Wanderführer“ (GPX-Dateien hochladen).|Aucun guide de randonnée enregistré : Administration → « Guides de randonnée » (téléverser des fichiers GPX).
+nur Jahre mit mindestens 2 Touren der Sportart|uniquement les années avec au moins 2 parcours du sport
+Bei welcher Temperatur bist du unterwegs?|À quelle température partez-vous ?
+unter 0 °|sous 0 °
+über 30 °|au-dessus de 30 °
+Anteil der Strecke, der auf keiner früheren Tour lag|Part du tracé ne figurant sur aucun parcours antérieur
+Gruppe wählen|Choisir un groupe
+ausgewählt|sélectionné(s)
+Einer Tour zuordnen …|Associer à un parcours …
+Aufnahmezeit der gewählten Fotos verschieben, z. B. Zeitzone einer Reise korrigieren|Décaler l’heure de prise de vue des photos sélectionnées, p. ex. pour corriger le fuseau horaire d’un voyage
+Fehlende Strecken: Verwaltung → „Routen laden“. Fehlende Regionen: „Regionen bestimmen“.|Tracés manquants : Administration → « Charger les tracés ». Régions manquantes : « Déterminer les régions ».
+Mögliche Ursache:|Cause possible :
+– „🧹 Track korrigieren“ hilft dabei.|– « 🧹 Corriger le tracé » peut aider.
+Der Track selbst ist unauffällig – wahrscheinlich ist nur die Sportart falsch.|Le tracé lui-même est normal – c’est probablement seulement le sport qui est faux.
+Zeitangaben nicht aufgezeichnet (überall gleiches Tempo) – Dauer korrigieren|Heures non enregistrées (même allure partout) – corriger la durée
+Tour öffnen|Ouvrir le parcours
+Name enthält …|Le nom contient …
+Text ersetzen (Suchen → Ersetzen)|Remplacer du texte (rechercher → remplacer)
+Datum und Uhrzeit am Ende entfernen|Supprimer la date et l’heure à la fin
+Wähle Touren aus, lege eine Regel fest, prüfe die Vorschau und wende sie an.|Sélectionnez des parcours, définissez une règle, vérifiez l’aperçu et appliquez-la.
+Version:|Version :
+Garmin, Suunto & andere Uhren|Garmin, Suunto et autres montres
+Touren und Fotos in die App holen|Importer parcours et photos dans l’application
+Weitere Wege (SMB-Ordner, Mac-Skript)|Autres méthodes (dossier SMB, script Mac)
+(Ordner nicht gefunden)|(dossier introuvable)
+Längste Bildseite (Pixel)|Plus grand côté de l’image (pixels)
+JPEG-Qualität (1–95)|Qualité JPEG (1–95)
+Zuordnung: Toleranz vor/nach der Tour (Min.)|Association : tolérance avant/après le parcours (min)
+Automatik & Benachrichtigung|Automatisation et notification
+Uhrzeit (Stunde)|Heure (heures)
+Benachrichtigung (optional)|Notification (facultatif)
+Testnachricht senden (nach „Speichern“)|Envoyer un message de test (après « Enregistrer »)
+Wartung & Sicherheit|Maintenance et sécurité
+Sicherung, Zugriffsschutz, Selbsttest, Wanderführer|Sauvegarde, protection d’accès, autotest, guides de randonnée
+Die Oberfläche ist nicht passwortgeschützt.|L’interface n’est pas protégée par mot de passe.
+Wanderführer (z. B. Rother)|Guides de randonnée (p. ex. Rother)
+GPX-Dateien auswählen …|Choisir des fichiers GPX …
+Noch keine Wanderführer hinterlegt.|Aucun guide de randonnée enregistré.
+Einrichten …|Configurer …
+Touren zum Vergleichen nicht gefunden|Parcours à comparer introuvables
+‹ Alle Touren|‹ Tous les parcours
+⬇ GPX|⬇ GPX
+⛰ Höhen korrigieren|⛰ Corriger l’altitude
+Steigung (Anteil der Strecke)|Pente (part du tracé)
+📍 Fotos ausrichten|📍 Aligner les photos
+Andere Tour …|Autre parcours …
+Diese Tour liegt nur lokal vor (Strecke als GPX im Datenordner)|Ce parcours n’existe qu’en local (tracé en GPX dans le dossier de données)
+Zu Komoot, Strava … hochladen|Téléverser vers Komoot, Strava …
+Lokale Tour löschen|Supprimer le parcours local
+Öffentlichen Link erzeugen|Créer un lien public
+Farbe und Breite der Strecke|Couleur et largeur du tracé
+Höhen mit Geländemodell neu berechnen|Recalculer l’altitude avec un modèle de terrain
+Ausreißer im GPS-Track entfernen, Seilbahn-/Autofahrten aus der Wertung nehmen|Supprimer les points aberrants du tracé GPS, exclure les trajets en téléphérique/voiture du total
+Vergleicht den Aufnahmeort der Fotos mit der Strecke und korrigiert eine falsch gestellte Kamerauhr|Compare le lieu de prise de vue des photos avec le tracé et corrige une horloge d’appareil mal réglée
+Ein Foto auf die richtige Stelle der Strecke ziehen – die anderen wandern zeitlich mit|Faites glisser une photo au bon endroit du tracé – les autres suivent dans le temps
+Aus den Fotos übernehmen|Reprendre depuis les photos
+Zeit aus den Foto-Positionen ableiten|Déduire l’heure des positions des photos
+Nach der Korrektur:|Après la correction :
+Mit Schlagworten wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).|Avec des mots-clés comme « Vacances Réunion 2026 » ou « Rother Taunus », un album avec sa propre page est créé (carte, totaux, photos, vol 3D).
+Anfang und Ende (300 m) ausblenden – schützt deinen Wohnort|Masquer le début et la fin (300 m) – protège votre domicile
+weiße Umrandung (besser sichtbar auf Satellit/Topo)|contour blanc (plus visible sur satellite/topo)
+Zugang fehlt (Verwaltung)|Accès manquant (Administration)
+nicht verbunden (Verwaltung → Portale)|non connecté (Administration → Portails)
+Mehrtagestouren|Parcours de plusieurs jours
+erkannt an Namen wie „… Tag 3“ oder „… Etappe 2“|détectés d’après des noms comme « … Jour 3 » ou « … Étape 2 »
+Gesamtansicht|Vue d’ensemble
+Etappen|Étapes
+Meine Touren|Meine Touren
 Name suchen|Rechercher un nom
 m auf|m D+
 m ab|m D−
@@ -361,7 +448,94 @@ Original wiederherstellen|Restaurer l’original
 Erneut anwenden|Appliquer à nouveau
 Schnelle Abschnitte|Sections rapides
 ✓ Im Track wurde nichts Auffälliges gefunden.|✓ Rien de suspect trouvé dans le tracé.`,
-es: `Meine Touren|Meine Touren
+es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
+Aktivität im Jahr 2026|Actividad en 2026
+Neuere Tour (←)|Ruta más reciente (←)
+Ältere Tour (→)|Ruta más antigua (→)
+Ältere Tour|Ruta más antigua
+Farbe und Breite der Strecken ändern|Cambiar el color y el grosor de los trazados
+Alle Strecken übereinander: häufig begangene Wege leuchten stärker|Todos los trazados superpuestos: los caminos más frecuentes brillan más
+Fotos mit GPS-Position anzeigen|Mostrar fotos con posición GPS
+Alle Touren auflisten, die den sichtbaren Kartenausschnitt berühren|Listar todas las rutas que tocan la zona visible del mapa
+um die Erde|alrededor de la Tierra
+Mount Everest bergauf|subiendo el Everest
+unterwegs|de ruta
+längste Serie|racha más larga
+Längste:|Más larga:
+· Meiste Höhenmeter:|· Mayor desnivel:
+Meiste Höhenmeter:|Mayor desnivel:
+gegenüber|respecto a
+Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Gruppen legst du mit Tags an.|No se detectó ningún viaje (hacen falta al menos dos rutas seguidas a más de 60 km de tu punto de salida habitual). Crea tus propios grupos con etiquetas.
+in der Tour über „🏷 Tags“ vergeben|se asignan en la ruta con «🏷 Etiquetas»
+Noch keine Regionen bestimmt: Verwaltung → „Regionen bestimmen“.|Aún no se han determinado regiones: Administración → «Determinar regiones».
+Noch keine Wanderführer hinterlegt: Verwaltung → „Wanderführer“ (GPX-Dateien hochladen).|Aún no hay guías de senderismo: Administración → «Guías de senderismo» (sube archivos GPX).
+nur Jahre mit mindestens 2 Touren der Sportart|solo años con al menos 2 rutas del deporte
+Bei welcher Temperatur bist du unterwegs?|¿A qué temperatura sales?
+unter 0 °|por debajo de 0 °
+über 30 °|por encima de 30 °
+Anteil der Strecke, der auf keiner früheren Tour lag|Parte del trazado que no estaba en ninguna ruta anterior
+Gruppe wählen|Elegir grupo
+ausgewählt|seleccionado(s)
+Einer Tour zuordnen …|Asignar a una ruta …
+Aufnahmezeit der gewählten Fotos verschieben, z. B. Zeitzone einer Reise korrigieren|Desplazar la hora de captura de las fotos seleccionadas, p. ej. para corregir la zona horaria de un viaje
+Fehlende Strecken: Verwaltung → „Routen laden“. Fehlende Regionen: „Regionen bestimmen“.|Trazados que faltan: Administración → «Cargar trazados». Regiones que faltan: «Determinar regiones».
+Mögliche Ursache:|Posible causa:
+– „🧹 Track korrigieren“ hilft dabei.|– «🧹 Corregir el trazado» puede ayudar.
+Der Track selbst ist unauffällig – wahrscheinlich ist nur die Sportart falsch.|El trazado en sí es normal; probablemente solo el deporte es incorrecto.
+Zeitangaben nicht aufgezeichnet (überall gleiches Tempo) – Dauer korrigieren|Horas no registradas (mismo ritmo en todas partes): corrige la duración
+Tour öffnen|Abrir ruta
+Name enthält …|El nombre contiene …
+Text ersetzen (Suchen → Ersetzen)|Reemplazar texto (buscar → reemplazar)
+Datum und Uhrzeit am Ende entfernen|Quitar la fecha y la hora al final
+Wähle Touren aus, lege eine Regel fest, prüfe die Vorschau und wende sie an.|Selecciona rutas, define una regla, revisa la vista previa y aplícala.
+Version:|Versión:
+Garmin, Suunto & andere Uhren|Garmin, Suunto y otros relojes
+Touren und Fotos in die App holen|Traer rutas y fotos a la aplicación
+Weitere Wege (SMB-Ordner, Mac-Skript)|Otras vías (carpeta SMB, script de Mac)
+(Ordner nicht gefunden)|(carpeta no encontrada)
+Längste Bildseite (Pixel)|Lado más largo de la imagen (píxeles)
+JPEG-Qualität (1–95)|Calidad JPEG (1–95)
+Zuordnung: Toleranz vor/nach der Tour (Min.)|Asignación: tolerancia antes/después de la ruta (min)
+Automatik & Benachrichtigung|Automatización y avisos
+Uhrzeit (Stunde)|Hora del día (hora)
+Benachrichtigung (optional)|Aviso (opcional)
+Testnachricht senden (nach „Speichern“)|Enviar mensaje de prueba (tras «Guardar»)
+Wartung & Sicherheit|Mantenimiento y seguridad
+Sicherung, Zugriffsschutz, Selbsttest, Wanderführer|Copia de seguridad, protección de acceso, autodiagnóstico, guías de senderismo
+Die Oberfläche ist nicht passwortgeschützt.|La interfaz no está protegida con contraseña.
+Wanderführer (z. B. Rother)|Guías de senderismo (p. ej. Rother)
+GPX-Dateien auswählen …|Elegir archivos GPX …
+Noch keine Wanderführer hinterlegt.|Aún no hay guías de senderismo.
+Einrichten …|Configurar …
+Touren zum Vergleichen nicht gefunden|No se encontraron rutas para comparar
+‹ Alle Touren|‹ Todas las rutas
+⬇ GPX|⬇ GPX
+⛰ Höhen korrigieren|⛰ Corregir altitudes
+Steigung (Anteil der Strecke)|Pendiente (parte del trazado)
+📍 Fotos ausrichten|📍 Alinear fotos
+Andere Tour …|Otra ruta …
+Diese Tour liegt nur lokal vor (Strecke als GPX im Datenordner)|Esta ruta solo existe localmente (trazado en GPX en la carpeta de datos)
+Zu Komoot, Strava … hochladen|Subir a Komoot, Strava …
+Lokale Tour löschen|Eliminar ruta local
+Öffentlichen Link erzeugen|Crear enlace público
+Farbe und Breite der Strecke|Color y grosor del trazado
+Höhen mit Geländemodell neu berechnen|Recalcular altitudes con un modelo del terreno
+Ausreißer im GPS-Track entfernen, Seilbahn-/Autofahrten aus der Wertung nehmen|Quitar valores atípicos del trazado GPS y excluir trayectos en teleférico/coche del total
+Vergleicht den Aufnahmeort der Fotos mit der Strecke und korrigiert eine falsch gestellte Kamerauhr|Compara el lugar de captura de las fotos con el trazado y corrige un reloj de cámara mal ajustado
+Ein Foto auf die richtige Stelle der Strecke ziehen – die anderen wandern zeitlich mit|Arrastra una foto al punto correcto del trazado: las demás se desplazan en el tiempo
+Aus den Fotos übernehmen|Tomar de las fotos
+Zeit aus den Foto-Positionen ableiten|Deducir la hora de las posiciones de las fotos
+Nach der Korrektur:|Tras la corrección:
+Mit Schlagworten wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).|Con etiquetas como «Vacaciones Reunión 2026» o «Rother Taunus» se crea un álbum con página propia (mapa, totales, fotos, vuelo 3D).
+Anfang und Ende (300 m) ausblenden – schützt deinen Wohnort|Ocultar inicio y final (300 m): protege tu domicilio
+weiße Umrandung (besser sichtbar auf Satellit/Topo)|borde blanco (más visible en satélite/topo)
+Zugang fehlt (Verwaltung)|Falta el acceso (Administración)
+nicht verbunden (Verwaltung → Portale)|no conectado (Administración → Portales)
+Mehrtagestouren|Rutas de varios días
+erkannt an Namen wie „… Tag 3“ oder „… Etappe 2“|detectadas por nombres como «… Día 3» o «… Etapa 2»
+Gesamtansicht|Vista general
+Etappen|Etapas
+Meine Touren|Meine Touren
 Name suchen|Buscar nombre
 m auf|m ↑
 m ab|m ↓

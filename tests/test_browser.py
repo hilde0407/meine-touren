@@ -249,3 +249,23 @@ def test_french_and_spanish_ui(page, app_url):
         assert pg.evaluate("document.documentElement.lang") == loc[:2]
         assert not errs, errs
         ctx.close()
+
+
+def test_multiday_series_view(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.wait_for_timeout(300)
+    r = page.evaluate("""() => {
+      const loc = TOURS.filter(t => t.source === 'local').slice(0, 3), old = loc.map(t => t.name);
+      loc.forEach((t, i) => (t.name = 'Alpenüberquerung E5 - Tag ' + (i + 4)));
+      const L = seriesList();
+      window.__old = old; window.__loc = loc;
+      return {n: L.length, e: L[0] && L[0].n, id: L[0] && L[0].id};
+    }""")
+    assert r["n"] == 1 and r["e"] == 3
+    page.goto(base + "#/trips"); page.wait_for_timeout(1200)
+    assert "Mehrtagestouren" in page.inner_text("main") and "Alpenüberquerung E5" in page.inner_text("main")
+    page.goto(base + "#/series/" + r["id"]); page.wait_for_timeout(1500)
+    assert "3 Etappen" in page.inner_text("main")
+    page.evaluate("() => window.__loc.forEach((t, i) => (t.name = window.__old[i]))")
+    page.goto(base + "#/dash"); page.wait_for_timeout(300)
+    assert not page.errors, page.errors
