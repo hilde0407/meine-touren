@@ -264,7 +264,7 @@ def test_multiday_series_view(page):
     assert r["n"] == 1 and r["e"] == 3
     page.goto(base + "#/trips"); page.wait_for_timeout(1200)
     assert "Mehrtagestouren" in page.inner_text("main") and "Alpenüberquerung E5" in page.inner_text("main")
-    has = page.evaluate("async () => { const ids = new Set(window.__loc.map(t => t.id)); return (await api('/api/photos?limit=5000')).some(p => ids.has(p.tour_id)); }")
+    has = page.evaluate("async () => { const ids = new Set(window.__loc.map(t => t.id)); const cv = await api('/api/tour-covers'); return [...ids].some(i => cv[i]); }")
     bg = page.evaluate("document.querySelector('.otdg .otd').style.backgroundImage")
     assert (not has) or "/pic/" in bg, bg
     page.goto(base + "#/series/" + r["id"]); page.wait_for_timeout(1500)

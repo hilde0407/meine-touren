@@ -33,14 +33,12 @@ VIEWS.trips = async () => {
   );
   // Titelfoto je Mehrtagestour: ein Foto aus der Mitte der Reihe
   try {
-    const ph = await api("/api/photos?limit=5000");
+    const cv = await api("/api/tour-covers");
     L.forEach((s, i) => {
-      const set = new Set(s.ids),
-        mine = ph.filter(p => set.has(p.tour_id)).sort((a, b) => a.taken_ts - b.taken_ts);
-      if (!mine.length) return;
-      const pick = mine[Math.floor(mine.length / 2)],
+      // Tour der Reihe mit den meisten Fotos; davon das Foto aus der Mitte
+      const best = s.ids.filter(id => cv[id]).sort((x, y) => cv[y].n - cv[x].n)[0],
         el = tr.querySelectorAll(".otdg .otd")[i];
-      if (el) el.style.backgroundImage = `linear-gradient(#0e2a2b33,#0e2a2bdd),url(/pic/${pick.id}?size=500)`;
+      if (best && el) el.style.backgroundImage = `linear-gradient(#0e2a2b33,#0e2a2bdd),url(/pic/${cv[best].id}?size=500)`;
     });
   } catch (e) {}
 };

@@ -331,6 +331,16 @@ def api_guides_progress():
     return [{"book": b, "total": len(v), "done": sum(1 for x in v if x["tour"]), "tours": v} for b, v in books.items()]
 
 
+# ---------- Titelfoto je Tour ----------
+@router.get("/api/tour-covers")
+def api_tour_covers():
+    """Pro Tour ein Foto aus der Mitte der Aufnahmen: {tour_id: {"id": Foto-ID, "n": Anzahl Fotos}}"""
+    by = {}
+    for r in db.query("SELECT id,tour_id FROM photos WHERE tour_id IS NOT NULL AND COALESCE(manual,0)!=2 ORDER BY tour_id,taken_ts"):
+        by.setdefault(r["tour_id"], []).append(r["id"])
+    return {t: {"id": ids[len(ids) // 2], "n": len(ids)} for t, ids in by.items()}
+
+
 # ---------- Beste Fotos ----------
 @router.get("/api/tours/{tour_id}/best-photos")
 def api_best_photos(tour_id: str, n: int = 10):
