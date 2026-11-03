@@ -482,7 +482,16 @@ Bei diesen Touren passen die Foto-Zeiten nicht zum Aufnahmeort (Kamerauhr falsch
 Alle Fotos zeigen|Afficher toutes les photos
 Diashow der besten|Diaporama des meilleures
 Wird ausgewählt …|Sélection …
-Wählt aus den Fotos der Tour die besten aus: Sterne aus Lightroom (XMP), unscharfe und abgelehnte Fotos fallen heraus, verteilt über die ganze Tour|Choisit les meilleures photos du parcours : étoiles Lightroom (XMP), photos floues ou rejetées exclues, réparties sur tout le parcours`,
+Wählt aus den Fotos der Tour die besten aus: Sterne aus Lightroom (XMP), unscharfe und abgelehnte Fotos fallen heraus, verteilt über die ganze Tour|Choisit les meilleures photos du parcours : étoiles Lightroom (XMP), photos floues ou rejetées exclues, réparties sur tout le parcours
+Übersicht|Aperçu
+Touren & Quellen|Parcours et sources
+Automatik|Automatisation
+Sicherung & Zugang|Sauvegarde et accès
+Zustand der App, Updates, Protokoll und Selbsttest.|État de l’application, mises à jour, journal et autotest.
+Woher deine Touren kommen: Komoot, Zepp, Garmin, Suunto, Dateien – und wohin sie hochgeladen werden dürfen (Strava). Dazu Wanderführer.|D’où viennent vos parcours : Komoot, Zepp, Garmin, Suunto, fichiers – et où ils peuvent être téléversés (Strava). Plus les guides de randonnée.
+Fotobibliothek, Import und Eingangsordner.|Photothèque, import et dossier d’entrée.
+Tägliche Aktualisierung und Benachrichtigungen.|Mise à jour quotidienne et notifications.
+Backups, Zugriffsschutz und Offline-Nutzung.|Sauvegardes, protection d’accès et utilisation hors ligne.`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
 Aktivität im Jahr 2026|Actividad en 2026
 Neuere Tour (←)|Ruta más reciente (←)
@@ -965,5 +974,14 @@ Bei diesen Touren passen die Foto-Zeiten nicht zum Aufnahmeort (Kamerauhr falsch
 Alle Fotos zeigen|Mostrar todas las fotos
 Diashow der besten|Presentación de las mejores
 Wird ausgewählt …|Seleccionando …
-Wählt aus den Fotos der Tour die besten aus: Sterne aus Lightroom (XMP), unscharfe und abgelehnte Fotos fallen heraus, verteilt über die ganze Tour|Elige las mejores fotos de la ruta: estrellas de Lightroom (XMP), se descartan las borrosas y rechazadas, repartidas por toda la ruta`,
+Wählt aus den Fotos der Tour die besten aus: Sterne aus Lightroom (XMP), unscharfe und abgelehnte Fotos fallen heraus, verteilt über die ganze Tour|Elige las mejores fotos de la ruta: estrellas de Lightroom (XMP), se descartan las borrosas y rechazadas, repartidas por toda la ruta
+Übersicht|Resumen
+Touren & Quellen|Rutas y fuentes
+Automatik|Automatización
+Sicherung & Zugang|Copia de seguridad y acceso
+Zustand der App, Updates, Protokoll und Selbsttest.|Estado de la aplicación, actualizaciones, registro y autodiagnóstico.
+Woher deine Touren kommen: Komoot, Zepp, Garmin, Suunto, Dateien – und wohin sie hochgeladen werden dürfen (Strava). Dazu Wanderführer.|De dónde vienen tus rutas: Komoot, Zepp, Garmin, Suunto, archivos – y adónde pueden subirse (Strava). Además, guías de senderismo.
+Fotobibliothek, Import und Eingangsordner.|Biblioteca de fotos, importación y carpeta de entrada.
+Tägliche Aktualisierung und Benachrichtigungen.|Actualización diaria y notificaciones.
+Backups, Zugriffsschutz und Offline-Nutzung.|Copias de seguridad, protección de acceso y uso sin conexión.`,
 };

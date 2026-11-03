@@ -506,7 +506,16 @@ Bei diesen Touren passen die Foto-Zeiten nicht zum Aufnahmeort (Kamerauhr falsch
 Alle Fotos zeigen|Show all photos
 Diashow der besten|Slideshow of the best
 Wird ausgewählt …|Selecting …
-Wählt aus den Fotos der Tour die besten aus: Sterne aus Lightroom (XMP), unscharfe und abgelehnte Fotos fallen heraus, verteilt über die ganze Tour|Picks the best photos of the tour: Lightroom stars (XMP), blurry and rejected photos are dropped, spread over the whole tour`;
+Wählt aus den Fotos der Tour die besten aus: Sterne aus Lightroom (XMP), unscharfe und abgelehnte Fotos fallen heraus, verteilt über die ganze Tour|Picks the best photos of the tour: Lightroom stars (XMP), blurry and rejected photos are dropped, spread over the whole tour
+Übersicht|Overview
+Touren & Quellen|Tours & sources
+Automatik|Automation
+Sicherung & Zugang|Backup & access
+Zustand der App, Updates, Protokoll und Selbsttest.|App status, updates, log and self-test.
+Woher deine Touren kommen: Komoot, Zepp, Garmin, Suunto, Dateien – und wohin sie hochgeladen werden dürfen (Strava). Dazu Wanderführer.|Where your tours come from: Komoot, Zepp, Garmin, Suunto, files – and where they may be uploaded (Strava). Plus hiking guides.
+Fotobibliothek, Import und Eingangsordner.|Photo library, import and inbox folder.
+Tägliche Aktualisierung und Benachrichtigungen.|Daily update and notifications.
+Backups, Zugriffsschutz und Offline-Nutzung.|Backups, access protection and offline use.`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");

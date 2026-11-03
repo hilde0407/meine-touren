@@ -13,65 +13,76 @@ async function boot() {
   route();
 }
 
-/* ---- Verwaltung: Bereiche gruppieren und einklappbar machen ---- */
+/* ---- Verwaltung: nach Aufgaben geordnet in Reitern (statt einer langen Seite) ---- */
+const ADM_TABS = [
+  ["uebersicht", "Übersicht", "Zustand der App, Updates, Protokoll und Selbsttest.", ["#upd", "#hlt", "Protokoll", "Selbsttest"]],
+  ["quellen", "Touren & Quellen", "Woher deine Touren kommen: Komoot, Zepp, Garmin, Suunto, Dateien – und wohin sie hochgeladen werden dürfen (Strava). Dazu Wanderführer.", ["Komoot", "Zepp-Import", "Garmin", "Portale", "Wanderführer"]],
+  ["fotos", "Fotos", "Fotobibliothek, Import und Eingangsordner.", ["Fotos", "Foto-Eingang"]],
+  ["auto", "Automatik", "Tägliche Aktualisierung und Benachrichtigungen.", ["Automatik", "Benachrichtigung"]],
+  ["sicher", "Sicherung & Zugang", "Backups, Zugriffsschutz und Offline-Nutzung.", ["Sicherung", "Zugriffsschutz", "Offline-Nutzung"]],
+];
 const _admG = VIEWS.admin;
 VIEWS.admin = async (...a) => {
   await _admG(...a);
   const main = $("#main"),
-    save = $("#save");
-  if (!save) return;
-  const GROUPS = [
-    ["import", "Import", "Touren und Fotos in die App holen", ["Komoot", "Zepp-Import", "GPX/TCX-Dateien", "Fotos", "Foto-Eingang"], true],
-    ["portale", "Upload-Portale", "Strava, Komoot", ["Portale"], false],
-    ["auto", "Automatik & Benachrichtigung", "", ["Automatik", "Benachrichtigung"], false],
-    ["log", "Protokoll", "", ["Protokoll"], true],
-    [
-      "wartung",
-      "Wartung & Sicherheit",
-      "Sicherung, Zugriffsschutz, Selbsttest, Wanderführer",
-      ["Sicherung", "Zugriffsschutz", "Selbsttest", "Wanderführer"],
-      false,
-    ],
-  ];
-  let mem = {};
-  try {
-    mem = JSON.parse(localStorage.getItem("admgrp") || "{}");
-  } catch (e) {}
-  const panels = [...main.querySelectorAll(".panel")].filter(p => p.parentElement && p.querySelector(":scope > h2"));
-  const title = p => p.querySelector(":scope > h2").firstChild.textContent.trim();
-  const anchor = save.closest(".row"),
-    frag = document.createDocumentFragment();
-  const open = new URLSearchParams(location.hash.split("?")[1] || "").get("strava");
-  GROUPS.forEach(([id, name, sub, titles, dflt]) => {
-    const mine = titles.map(t => panels.find(p => title(p).startsWith(t))).filter(Boolean);
-    if (!mine.length) return;
-    const d = document.createElement("details");
-    d.className = "agrp";
-    d.open = id in mem ? !!mem[id] : dflt || (id === "portale" && !!open);
-    d.innerHTML = `<summary><span class="gt">${name}</span><span class="gs">${sub}</span></summary><div class="grid g2 gbody"></div>`;
-    mine.forEach(p => {
-      p.style.marginTop = "6px";
-      if (mine.length === 1 && title(p) === name) {
-        p.style.borderTop = "0";
-        p.querySelector(":scope > h2").style.display = "none";
-      }
-      d.querySelector(".gbody").appendChild(p);
+    save = $("#save"),
+    q = a[1];
+  if (!save || $("#atabs")) return;
+  const title = p => ((p.querySelector(":scope > h2") || {}).textContent || "").trim();
+  const panels = [...main.querySelectorAll(".panel")].filter(p => p.querySelector(":scope > h2"));
+  const used = new Set();
+  const secs = ADM_TABS.map(([id, name, intro, keys]) => {
+    const sec = document.createElement("section");
+    sec.className = "atab";
+    sec.dataset.t = id;
+    sec.innerHTML = `<p class="mut atintro">${intro}</p><div class="grid g2 gbody"></div>`;
+    const body = sec.querySelector(".gbody");
+    keys.forEach(k => {
+      const el = k[0] === "#" ? $(k) : panels.find(p => !used.has(p) && title(p).startsWith(k));
+      if (!el) return;
+      used.add(el);
+      if (k[0] !== "#" && el.querySelector(":scope > h2")) el.style.marginTop = "0";
+      if (k === "#upd" || k === "#hlt") el.style.gridColumn = "1 / -1";
+      if (k === "Protokoll") el.style.gridColumn = "1 / -1";
+      if (k === "Garmin") el.style.gridColumn = "1 / -1";
+      body.appendChild(el);
     });
-    d.addEventListener("toggle", () => {
-      mem[id] = d.open;
-      try {
-        localStorage.setItem("admgrp", JSON.stringify(mem));
-      } catch (e) {}
-    });
-    frag.appendChild(d);
+    return sec;
   });
+  const rest = panels.filter(p => !used.has(p));       // unbekannte Bereiche gehen nicht verloren
+  if (rest.length) rest.forEach(p => secs[0].querySelector(".gbody").appendChild(p));
+  const nav = document.createElement("div");
+  nav.id = "atabs";
+  nav.className = "atabs";
+  nav.setAttribute("role", "tablist");
+  nav.innerHTML = ADM_TABS.map(([id, name]) => `<button role="tab" data-t="${id}">${name}</button>`).join("");
+  const anchor = save.closest(".row");
+  anchor.classList.add("savebar");
+  anchor.parentNode.insertBefore(nav, anchor);
+  secs.forEach(sec => anchor.parentNode.insertBefore(sec, anchor));
   main.querySelectorAll(":scope > .grid, :scope > .panel").forEach(g => {
-    if (!g.querySelector(".panel") && !g.matches(".panel") && !g.textContent.trim()) g.remove();
+    if (!g.children.length || (!g.querySelector(".panel") && !g.matches(".panel") && !g.textContent.trim())) g.remove();
   });
-  main.querySelectorAll(":scope > .grid").forEach(g => {
-    if (!g.children.length) g.remove();
-  });
-  anchor.parentNode.insertBefore(frag, anchor);
+  let tab = (q && q.get && q.get("tab")) || "";
+  if (!tab && q && q.get && (q.get("strava") || q.get("suunto"))) tab = "quellen";
+  try {
+    if (!tab) tab = localStorage.getItem("admtab") || "";
+  } catch (e) {}
+  const show = id => {
+    if (!ADM_TABS.some(t => t[0] === id)) id = "uebersicht";
+    nav.querySelectorAll("button").forEach(b => {
+      b.classList.toggle("on", b.dataset.t === id);
+      b.setAttribute("aria-selected", b.dataset.t === id ? "true" : "false");
+    });
+    secs.forEach(sec => (sec.style.display = sec.dataset.t === id ? "" : "none"));
+    try {
+      localStorage.setItem("admtab", id);
+    } catch (e) {}
+    const hq = location.hash.split("?")[1];
+    if (!hq || /^tab=/.test(hq)) history.replaceState(null, "", "#/admin?tab=" + id);   // ohne Neuaufbau der Seite
+  };
+  nav.onclick = e => e.target.dataset.t && show(e.target.dataset.t);
+  show(tab);
 };
 
 /* ---- Warnbanner (Gesundheitscheck) und Hinweis auf neue Version (nur Administratoren) ---- */

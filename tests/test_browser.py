@@ -325,3 +325,34 @@ def test_best_photos_button(page):
     assert "beste von" in page.inner_text("#pc"), page.inner_text("#pc")
     assert page.locator("#ss").get_attribute("href").endswith("best=10")
     assert not page.errors, page.errors
+
+
+def test_admin_tabs(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.wait_for_timeout(300)
+    page.evaluate("localStorage.removeItem('admtab')")
+    page.goto(base + "#/admin"); page.wait_for_timeout(2500)
+    tabs = page.evaluate("[...document.querySelectorAll('#atabs button')].map(b => b.textContent)")
+    assert tabs == ["Übersicht", "Touren & Quellen", "Fotos", "Automatik", "Sicherung & Zugang"], tabs
+    vis = lambda: page.evaluate("[...document.querySelectorAll('.atab')].filter(s => s.style.display !== 'none').map(s => s.dataset.t)")
+    assert vis() == ["uebersicht"]
+    for t, word in (("quellen", "Komoot"), ("fotos", "Fotos importieren"), ("auto", "Automatik"), ("sicher", "Sicherung")):
+        page.click(f"#atabs [data-t={t}]")
+        assert vis() == [t] and word in page.inner_text(f".atab[data-t={t}]"), (t, word)
+    assert "tab=sicher" in page.url
+    assert page.locator("#save").is_visible()                      # Speichern-Leiste bleibt auf jedem Reiter erreichbar
+    page.goto(base + "#/admin?strava=ok"); page.wait_for_timeout(1500)
+    assert vis() == ["quellen"]
+    assert not page.errors, page.errors
+
+
+def test_repeat_badge(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.wait_for_timeout(800)
+    page.evaluate("REP = Object.fromEntries(TOURS.slice(0, 2).map((t, i) => [t.id, {n: 3, start_ts: t.start_ts, with: [{id: TOURS[2].id, start_ts: TOURS[2].start_ts}, {id: TOURS[3].id, start_ts: TOURS[3].start_ts}]}]))")
+    page.goto(base + "#/tours"); page.wait_for_timeout(1200)
+    assert page.locator(".tr .rep").count() >= 1
+    tid = page.evaluate("TOURS[0].id")
+    page.goto(base + "#/tour/" + tid); page.wait_for_timeout(1500)
+    assert "3-mal" in page.inner_text("#repnote")
+    assert not page.errors, page.errors

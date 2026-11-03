@@ -239,3 +239,12 @@ a.chip{text-decoration:none;color:inherit;cursor:pointer}a.chip .sw{margin-right
 .chtip{background:#000b;color:#fff;border:0;box-shadow:none;font-size:11px;padding:1px 5px}.chtip:before{display:none}
 .sheetph{grid-template-columns:repeat(3,1fr);margin-top:16px}
 @media print{.sheet .tmap{height:340px!important}.sheetph{grid-template-columns:repeat(3,1fr)}.sheet .figs{break-inside:avoid}.sheet{max-width:none}}
+
+.atabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:2px solid var(--ink);margin:14px 0 18px}
+.atabs button{background:none;border:0;border-bottom:4px solid transparent;margin-bottom:-2px;padding:10px 16px;font:600 17px var(--b);color:inherit;cursor:pointer}
+.atabs button:hover{background:var(--soft)}
+.atabs button.on{border-bottom-color:var(--acc,#2f8f5f)}
+.atab .atintro{margin:0 0 14px;font-size:15px}
+.savebar{position:sticky;bottom:0;background:var(--bg,#fff);padding:10px 0;margin-top:24px!important;border-top:1px solid var(--rule);z-index:5}
+@media(max-width:700px){.atabs button{padding:8px 10px;font-size:15px}}
+.rep{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:10px;background:var(--soft);font:600 13px var(--b);white-space:nowrap}

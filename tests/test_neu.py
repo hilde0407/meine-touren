@@ -102,6 +102,7 @@ def test_browser_admin_and_folder_upload(server, tmp_path):
         pg.goto(base + "/#/admin"); pg.wait_for_selector("#hlt", timeout=10000)
         assert "Zustand" in pg.inner_text("#hlt") or pg.locator("#hlt").count() == 0
         assert not errs
+        pg.click("#atabs [data-t=fotos]")             # Fotoimport liegt auf dem Reiter „Fotos“
         pg.click("#photoimp")
         pg.set_input_files("#pdir", str(d))
         pg.wait_for_selector("#pigo:not([disabled])", timeout=30000)
