@@ -282,10 +282,10 @@ def test_profile_photo_markers(page):
         return
     page.goto(base + "#/tour/" + tid); page.wait_for_timeout(2500)
     n = page.evaluate("document.querySelectorAll('#psvg .pph').length")
-    if n:
-        page.evaluate("document.querySelector('#psvg .pph').dispatchEvent(new MouseEvent('click', {bubbles: true}))")
-        page.wait_for_timeout(300)
-        assert page.evaluate("document.querySelector('#lb').classList.contains('on')")
+    assert n >= 1, "keine Foto-Marker im Höhenprofil"      # Testfotos haben keine GPS-Position: Zuordnung über die Zeit
+    page.evaluate("document.querySelector('#psvg .pph').dispatchEvent(new MouseEvent('click', {bubbles: true}))")
+    page.wait_for_timeout(300)
+    assert page.evaluate("document.querySelector('#lb').classList.contains('on')")
     assert not page.errors, page.errors
 
 

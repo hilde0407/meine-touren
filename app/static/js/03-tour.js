@@ -226,7 +226,7 @@ VIEWS.tour = async id => {
   mk.then(c => {
     if (c && ph.length) {
       photoChain(map, t, c, ph); // Fotos auf der Strecke; verschiebbar (12-fotokette.js)
-      profilePhotos(ph);
+      profilePhotos(ph, t);
     }
   });
   $("#eup").onclick = () => uploadDialog(t);
@@ -488,7 +488,7 @@ function profile(c, t) {
 }
 
 /* Fotos im Höhenprofil: Marker an der Stelle der Aufnahme; Klick zeigt das Foto, Zeiger darüber setzt den Punkt auf der Karte */
-function profilePhotos(ph) {
+function profilePhotos(ph, t) {
   const X = profile.ctx;
   if (!X || !ph || !ph.length || $("#pphotos")) return;
   const {c, pts, svg, H, B} = X,
@@ -504,7 +504,7 @@ function profilePhotos(ph) {
       return bi;
     }
     if (!hasT) return -1;
-    const ms = p.taken_ts * 1000;
+    const ms = (p.taken_ts - t.start_ts) * 1000; // Streckenzeiten sind Millisekunden seit Tourstart
     let bi = -1,
       bd = 1e18;
     c.forEach((q, i) => {
