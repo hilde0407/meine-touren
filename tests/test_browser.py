@@ -356,3 +356,16 @@ def test_repeat_badge(page):
     page.goto(base + "#/tour/" + tid); page.wait_for_timeout(1500)
     assert "3-mal" in page.inner_text("#repnote")
     assert not page.errors, page.errors
+
+
+def test_clean_unused_dialog(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.wait_for_timeout(300)
+    ids = page.evaluate("""async () => { const ph = await api('/api/photos?limit=500'); const id = ph[0].id; await api('/api/photo-unassign', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({ids: [id], exclude: true})}); return id; }""")
+    page.goto(base + "#/photos"); page.wait_for_timeout(1800)
+    assert page.locator("#pclean").count() == 1
+    page.click("#pclean"); page.wait_for_timeout(800)
+    assert page.locator("#cudo").is_disabled()                    # erst nach Auswahl eines Jahres möglich
+    page.click("#cuy input"); assert "endgültig löschen" in page.inner_text("#cudo")
+    page.click("#cuno")
+    assert not page.errors, page.errors

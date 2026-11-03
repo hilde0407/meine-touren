@@ -405,6 +405,36 @@ def api_repeats():
     return res
 
 
+# ---------- Unbenutzte Fotos (keiner Tour zugeordnet) aufräumen ----------
+def _unused_where(years):
+    w, a = "tour_id IS NULL", []
+    ys = [int(y) for y in (years or [])]
+    if ys:
+        w += " AND CAST(strftime('%Y', taken_ts, 'unixepoch') AS INT) IN (" + ",".join("?" * len(ys)) + ")"
+        a += ys
+    return w, tuple(a)
+
+
+@router.get("/api/photos-unused")
+def api_photos_unused():
+    rows = db.query("SELECT CAST(strftime('%Y', taken_ts, 'unixepoch') AS INT) y, COUNT(*) n, COALESCE(SUM(size),0) b FROM photos WHERE tour_id IS NULL GROUP BY y ORDER BY y DESC")
+    sample = [r["id"] for r in db.query("SELECT id FROM photos WHERE tour_id IS NULL ORDER BY RANDOM() LIMIT 12")]
+    return {"count": sum(r["n"] for r in rows), "bytes": sum(r["b"] for r in rows), "years": rows, "sample": sample}
+
+
+@router.post("/api/photos-unused/delete")
+def api_photos_unused_delete(body: dict):
+    """Löscht Fotos ohne Tour (nur die Kopien der Bibliothek, nie Originale). `years` leer = alle Jahre.
+    Die Auswahl wird erst jetzt neu bestimmt: inzwischen zugeordnete Fotos bleiben erhalten."""
+    from . import photos
+    years = body.get("years") or []
+    if not years and not body.get("all"):
+        raise HTTPException(400, "Bitte Jahre wählen oder „alle“ bestätigen")
+    w, a = _unused_where(years)
+    ids = [r["id"] for r in db.query(f"SELECT id FROM photos WHERE {w}", a)]
+    return {"ok": True, "deleted": photos.delete_photos(ids) if ids else 0}
+
+
 # ---------- Titelfoto je Tour ----------
 @router.get("/api/tour-covers")
 def api_tour_covers():

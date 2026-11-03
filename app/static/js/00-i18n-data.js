@@ -491,7 +491,14 @@ Zustand der App, Updates, Protokoll und Selbsttest.|État de l’application, mi
 Woher deine Touren kommen: Komoot, Zepp, Garmin, Suunto, Dateien – und wohin sie hochgeladen werden dürfen (Strava). Dazu Wanderführer.|D’où viennent vos parcours : Komoot, Zepp, Garmin, Suunto, fichiers – et où ils peuvent être téléversés (Strava). Plus les guides de randonnée.
 Fotobibliothek, Import und Eingangsordner.|Photothèque, import et dossier d’entrée.
 Tägliche Aktualisierung und Benachrichtigungen.|Mise à jour quotidienne et notifications.
-Backups, Zugriffsschutz und Offline-Nutzung.|Sauvegardes, protection d’accès et utilisation hors ligne.`,
+Backups, Zugriffsschutz und Offline-Nutzung.|Sauvegardes, protection d’accès et utilisation hors ligne.
+🧹 Unbenutzte Fotos aufräumen …|🧹 Nettoyer les photos inutilisées …
+Fotos löschen, die keiner Tour zugeordnet sind|Supprimer les photos non rattachées à un parcours
+Unbenutzte Fotos aufräumen|Nettoyer les photos inutilisées
+Welche Jahre löschen?|Quelles années supprimer ?
+Löschen|Supprimer
+Alle Fotos sind einer Tour zugeordnet – es gibt nichts aufzuräumen.|Toutes les photos sont rattachées à un parcours – rien à nettoyer.
+Gelöscht werden nur die Kopien in der Fotobibliothek dieser App – <b>niemals deine Originale</b>. Die Fotos tauchen beim nächsten Import nicht wieder auf. Das Löschen lässt sich nicht rückgängig machen.|Seules les copies de la photothèque de cette application sont supprimées – <b>jamais vos originaux</b>. Les photos ne réapparaîtront pas à l’import suivant. Action irréversible.`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
 Aktivität im Jahr 2026|Actividad en 2026
 Neuere Tour (←)|Ruta más reciente (←)
@@ -983,5 +990,12 @@ Zustand der App, Updates, Protokoll und Selbsttest.|Estado de la aplicación, ac
 Woher deine Touren kommen: Komoot, Zepp, Garmin, Suunto, Dateien – und wohin sie hochgeladen werden dürfen (Strava). Dazu Wanderführer.|De dónde vienen tus rutas: Komoot, Zepp, Garmin, Suunto, archivos – y adónde pueden subirse (Strava). Además, guías de senderismo.
 Fotobibliothek, Import und Eingangsordner.|Biblioteca de fotos, importación y carpeta de entrada.
 Tägliche Aktualisierung und Benachrichtigungen.|Actualización diaria y notificaciones.
-Backups, Zugriffsschutz und Offline-Nutzung.|Copias de seguridad, protección de acceso y uso sin conexión.`,
+Backups, Zugriffsschutz und Offline-Nutzung.|Copias de seguridad, protección de acceso y uso sin conexión.
+🧹 Unbenutzte Fotos aufräumen …|🧹 Limpiar fotos sin usar …
+Fotos löschen, die keiner Tour zugeordnet sind|Eliminar fotos no asignadas a ninguna ruta
+Unbenutzte Fotos aufräumen|Limpiar fotos sin usar
+Welche Jahre löschen?|¿Qué años eliminar?
+Löschen|Eliminar
+Alle Fotos sind einer Tour zugeordnet – es gibt nichts aufzuräumen.|Todas las fotos están asignadas a una ruta: no hay nada que limpiar.
+Gelöscht werden nur die Kopien in der Fotobibliothek dieser App – <b>niemals deine Originale</b>. Die Fotos tauchen beim nächsten Import nicht wieder auf. Das Löschen lässt sich nicht rückgängig machen.|Solo se eliminan las copias de la biblioteca de fotos de esta aplicación, <b>nunca tus originales</b>. Las fotos no volverán a aparecer en la próxima importación. No se puede deshacer.`,
 };

@@ -515,7 +515,14 @@ Zustand der App, Updates, Protokoll und Selbsttest.|App status, updates, log and
 Woher deine Touren kommen: Komoot, Zepp, Garmin, Suunto, Dateien – und wohin sie hochgeladen werden dürfen (Strava). Dazu Wanderführer.|Where your tours come from: Komoot, Zepp, Garmin, Suunto, files – and where they may be uploaded (Strava). Plus hiking guides.
 Fotobibliothek, Import und Eingangsordner.|Photo library, import and inbox folder.
 Tägliche Aktualisierung und Benachrichtigungen.|Daily update and notifications.
-Backups, Zugriffsschutz und Offline-Nutzung.|Backups, access protection and offline use.`;
+Backups, Zugriffsschutz und Offline-Nutzung.|Backups, access protection and offline use.
+🧹 Unbenutzte Fotos aufräumen …|🧹 Clean up unused photos …
+Fotos löschen, die keiner Tour zugeordnet sind|Delete photos that are not assigned to any tour
+Unbenutzte Fotos aufräumen|Clean up unused photos
+Welche Jahre löschen?|Which years to delete?
+Löschen|Delete
+Alle Fotos sind einer Tour zugeordnet – es gibt nichts aufzuräumen.|All photos are assigned to a tour – nothing to clean up.
+Gelöscht werden nur die Kopien in der Fotobibliothek dieser App – <b>niemals deine Originale</b>. Die Fotos tauchen beim nächsten Import nicht wieder auf. Das Löschen lässt sich nicht rückgängig machen.|Only the copies in this app’s photo library are deleted – <b>never your originals</b>. The photos will not reappear on the next import. This cannot be undone.`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");
