@@ -2,6 +2,7 @@
 import json
 import re
 import shutil
+import os
 import time
 from pathlib import Path
 
@@ -279,6 +280,8 @@ def api_guides_progress():
 @router.get("/api/health")
 def api_health():
     w = []
+    if os.environ.get("MT_DEMO") == "1":
+        w.append({"level": "info", "text": "Demo-Modus: Alle Touren und Fotos hier sind Beispieldaten."})
     if not (db.get("komoot_email") and db.get("komoot_password")) and not db.one("SELECT 1 x FROM tours LIMIT 1"):
         w.append({"level": "warn", "text": "Noch keine Touren: Komoot-Zugang eintragen oder GPX-Dateien bzw. Zepp-Trainings importieren (Verwaltung)."})
     z = db.get("zepp_state") or ""
@@ -292,9 +295,9 @@ def api_health():
     if err:
         w.append({"level": "warn", "text": f"Backup kann nicht geschrieben werden: {err}"})
     elif nb is None:
-        w.append({"level": "warn", "text": "Es gibt noch kein Backup – das erste wird in den nächsten Minuten automatisch angelegt."})
+        w.append({"level": "warn", "text": "Es gibt noch kein Backup – das erste wird automatisch angelegt (nachts), oder jetzt sofort:", "action": "backup"})
     elif time.time() - nb.stat().st_mtime > 2 * 86400:
-        w.append({"level": "warn", "text": "Das letzte Backup ist älter als 2 Tage."})
+        w.append({"level": "warn", "text": "Das letzte Backup ist älter als 2 Tage.", "action": "backup"})
     try:
         free = shutil.disk_usage(config.DATA_DIR).free
         if free < 1_000_000_000:

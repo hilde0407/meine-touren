@@ -80,6 +80,6 @@ copy /y "%APP%\requirements.txt" "%VENV%\req.txt" >nul
 :optional
 rem Garmin-Konto-Anbindung (optional, braucht Python 3.12+; ohne sie geht der Datei-Import trotzdem)
 if exist "%VENV%\garmin.ok" exit /b 0
-"%VENV%\Scripts\python.exe" -m pip install -q -r "%APP%\requirements-optional.txt" >nul 2>&1
+for /f "usebackq eol=# tokens=*" %%P in ("%APP%\requirements-optional.txt") do "%VENV%\Scripts\python.exe" -m pip install -q "%%P" >nul 2>&1
 echo ok> "%VENV%\garmin.ok"
 exit /b 0

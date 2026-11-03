@@ -114,8 +114,8 @@ details{border-top:1px solid var(--rule);padding:10px 0;margin-top:10px}summary{
 .field .row input[type=file]{width:auto;flex:1;min-width:220px}
 .panel .row:first-of-type .btn{white-space:nowrap}
 
-.seltb{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--forest);color:#fff;padding:10px 18px;border-radius:99px;display:flex;gap:12px;align-items:center;z-index:50;box-shadow:0 6px 24px #0006}
-.seltb .btn.alt{color:#fff;border-color:#fff8}
+.seltb{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 24px);flex-wrap:wrap;justify-content:center;background:var(--forest);color:#fff;padding:10px 18px;border-radius:99px;display:flex;gap:12px;align-items:center;z-index:50;box-shadow:0 6px 24px #0006}
+.seltb .btn.alt{color:#fff;border-color:#fff8}.seltb .btn{white-space:nowrap}
 .selmode .thumbs img{cursor:crosshair}.thumbs img.sel{outline:4px solid var(--yellow);outline-offset:-4px;filter:brightness(.8)}
 .btn.on{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}
 .gsel{display:none}.selmode .gsel{display:inline-block}

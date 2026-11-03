@@ -96,7 +96,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
   const paint = () => {
     document.querySelectorAll(BOX + " img[data-i]").forEach(im => im.classList.toggle("sel", sel.has(ph[+im.dataset.i].id)));
     tb.style.display = on ? "" : "none";
-    tb.innerHTML = `<b>${sel.size}</b> ausgewählt ${sel.size ? "" : `<span class="mut" style="font-size:13px">Foto anklicken: dieses und alle späteren des Tages · mit ⇧ Umschalttaste: dieses und alle früheren</span> `}<button class="btn sm" data-a="assign" ${sel.size ? "" : "disabled"}>${o.tour ? "Andere Tour …" : "Einer Tour zuordnen …"}</button>${o.tour ? `<button class="btn alt sm" data-a="rm" ${sel.size ? "" : "disabled"}>Aus dieser Tour entfernen</button>` : `<button class="btn alt sm" data-a="un" ${sel.size ? "" : "disabled"}>Zuordnung lösen</button>`}<button class="btn alt sm" data-a="del" ${sel.size ? "" : "disabled"} style="color:#c0392b;border-color:#c0392b">Löschen …</button><button class="btn alt sm" data-a="off">Fertig</button>`;
+    tb.innerHTML = `<b>${sel.size}</b> ausgewählt ${sel.size ? "" : `<span class="mut" style="font-size:13px">Foto anklicken: dieses und alle späteren des Tages · mit ⇧ Umschalttaste: dieses und alle früheren</span> `}<button class="btn sm" data-a="assign" ${sel.size ? "" : "disabled"}>${o.tour ? "Andere Tour …" : "Einer Tour zuordnen …"}</button>${o.tour ? `<button class="btn alt sm" data-a="rm" ${sel.size ? "" : "disabled"}>Aus dieser Tour entfernen</button>` : `<button class="btn alt sm" data-a="un" ${sel.size ? "" : "disabled"}>Zuordnung lösen</button>`}<button class="btn alt sm" data-a="shift" ${sel.size ? "" : "disabled"} title="Aufnahmezeit der gewählten Fotos verschieben, z. B. Zeitzone einer Reise korrigieren">Zeit verschieben …</button><button class="btn alt sm" data-a="del" ${sel.size ? "" : "disabled"} style="color:#c0392b;border-color:#c0392b">Löschen …</button><button class="btn alt sm" data-a="off">Fertig</button>`;
     btn.classList.toggle("on", on);
   };
   btn.onclick = () => {
@@ -153,6 +153,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
     if (!a) return;
     if (a === "off") return btn.click();
     const ids = [...sel];
+    if (a === "shift") return shiftDialog(ids.map(i => ph.find(p => p.id === i)).filter(Boolean), () => route());
     if (a === "del") {
       if (
         !confirm(
@@ -195,6 +196,41 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
     );
   };
   paint();
+}
+function shiftDialog(sp, done) {
+  const first = sp.slice().sort((a, b) => a.taken_ts - b.taken_ts)[0];
+  const m = modal(`<h2>Zeit von ${sp.length} Foto${sp.length > 1 ? "s" : ""} verschieben</h2>
+   <p class="mut" style="font-size:14px">Alle gewählten Fotos wandern um denselben Betrag, ihre Abstände bleiben gleich. Typischer Fall: Kamera stand auf deutscher Zeit, die Reise lag in einer anderen Zeitzone (z. B. Kanaren: 1 Stunde früher).<br>Das erste gewählte Foto hat jetzt: <b>${new Date(first.taken_ts * 1000).toLocaleString("de-DE")}</b></p>
+   <div class="row" style="margin:8px 0"><button class="btn alt sm" data-p="-3600">−1 Std.</button><button class="btn alt sm" data-p="3600">+1 Std.</button><button class="btn alt sm" data-p="-7200">−2 Std.</button><button class="btn alt sm" data-p="7200">+2 Std.</button></div>
+   <div class="row" style="align-items:center;gap:8px"><select id="shs"><option value="1">später (+)</option><option value="-1">früher (−)</option></select><input id="shh" type="number" min="0" value="0" style="width:70px"> Std. <input id="shm" type="number" min="0" max="59" value="0" style="width:70px"> Min.</div>
+   <p class="mut" id="shp" style="font-size:14px;margin-top:8px"></p>
+   <div class="row" style="margin-top:14px"><button class="btn" id="shok">Verschieben</button><button class="btn ghost" id="shno">Abbrechen</button><span id="sher" class="bad"></span></div>`);
+  const delta = () => (+m.querySelector("#shs").value || 1) * ((+m.querySelector("#shh").value || 0) * 3600 + (+m.querySelector("#shm").value || 0) * 60);
+  const upd = () => {
+    const d = delta();
+    m.querySelector("#shp").textContent = d ? `Neue Zeit des ersten Fotos: ${new Date((first.taken_ts + d) * 1000).toLocaleString("de-DE")}` : "";
+  };
+  m.querySelectorAll("[data-p]").forEach(b => (b.onclick = () => {
+    const v = +b.dataset.p;
+    m.querySelector("#shs").value = v < 0 ? "-1" : "1";
+    m.querySelector("#shh").value = Math.floor(Math.abs(v) / 3600);
+    m.querySelector("#shm").value = Math.floor((Math.abs(v) % 3600) / 60);
+    upd();
+  }));
+  ["shs", "shh", "shm"].forEach(i => (m.querySelector("#" + i).oninput = upd));
+  m.querySelector("#shno").onclick = () => m.remove();
+  m.querySelector("#shok").onclick = async () => {
+    const d = delta();
+    if (!d) return (m.querySelector("#sher").textContent = "Bitte einen Zeitversatz eingeben.");
+    try {
+      await api("/api/photo-shift-ids", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({ids: sp.map(p => p.id), delta_s: d})});
+      m.remove();
+      await done();
+    } catch (e) {
+      m.querySelector("#sher").textContent = e.message;
+    }
+  };
+  upd();
 }
 let assignDialog = function (sp, done) {
   const first = sp.slice().sort((a, b) => a.taken_ts - b.taken_ts)[0];
@@ -363,7 +399,7 @@ function exifGps(buf) {
   return null;
 }
 /* ---------- Foto-Import: ein Dialog (auswählen oder ablegen → Vorschau je Aufnahmetag → importieren) ---------- */
-const PHOTO_EXT = /\.(jpe?g|png|webp)$/i;
+const photoExt = heic => (heic ? /\.(jpe?g|png|webp|hei[cf])$/i : /\.(jpe?g|png|webp)$/i);
 async function filesFromDrop(dt) {
   const ents = [...(dt.items || [])].map(i => (i.webkitGetAsEntry ? i.webkitGetAsEntry() : null)).filter(Boolean); // sofort, danach ist dt leer
   const out = [];
@@ -452,12 +488,13 @@ function photoImportModal(o = {}) {
   const analyse = async (all, withGone = false) => {
     busy = true;
     try {
-      const files = all.filter(f => PHOTO_EXT.test(f.name) && !f.name.startsWith(".")),
+      const pi = await api("/api/photo-info").catch(() => ({})),
+        files = all.filter(f => photoExt(pi.heic).test(f.name) && !f.name.startsWith(".")),
         other = all.length - files.length,
-        heic = all.filter(f => /\.hei[cf]$/i.test(f.name)).length;
+        heic = pi.heic ? 0 : all.filter(f => /\.hei[cf]$/i.test(f.name)).length;
       if (!files.length) {
         busy = false;
-        body(`<p>Es wurden keine JPG-, PNG- oder WebP-Bilder gefunden${heic ? ` (${heic} HEIC-Bilder: der Browser kann sie nicht verkleinern – bitte vorher als JPG exportieren)` : ""}.</p><div class="row"><button class="btn" id="pback">Zurück</button></div>`);
+        body(`<p>Es wurden keine JPG-, PNG- oder WebP-Bilder gefunden${heic ? ` (${heic} HEIC-Bilder: dieser Server kann sie nicht umwandeln – bitte als JPG exportieren oder auf dem Server <code>pip install pillow-heif</code> ausführen)` : ""}.</p><div class="row"><button class="btn" id="pback">Zurück</button></div>`);
         q("#pback").onclick = start;
         return;
       }
@@ -480,6 +517,7 @@ function photoImportModal(o = {}) {
         let ed = null,
           gp = null;
         f._o = "";
+        f._heic = /\.hei[cf]$/i.test(f.name);
         try {
           ed = hd ? exifDate(hd) : null;
           f._o = (ed && hd && exifOffset(hd)) || "";
@@ -487,6 +525,18 @@ function photoImportModal(o = {}) {
         try {
           gp = hd ? exifGps(hd) : null;
         } catch (e) {}
+        if (f._heic) {
+          try {
+            const fd = new FormData();
+            fd.append("file", f, f.name);
+            const mt = await api("/api/photo-meta", {method: "POST", body: fd});
+            if (mt.ok) {
+              ed = mt.t || null;
+              f._o = mt.o || "";
+              gp = mt.lat != null ? [mt.lat, mt.lng] : null;
+            }
+          } catch (e) {}
+        }
         if (!ed) nodate++;
         f._t = ed || `${d.getFullYear()}:${pad2(d.getMonth() + 1)}:${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
         f._gps = gp;
@@ -536,12 +586,13 @@ function photoImportModal(o = {}) {
         return {d, ch, def};
       });
     q("#pih").textContent = o.tour ? `Fotos zu „${o.tour.name}“ hinzufügen` : "Fotos importieren";
-    body(`<p>${info.total} Bilder gefunden, davon <b>${fresh.length}</b> zu importieren${info.dup ? ` (${info.dup} schon vorhanden)` : ""}${info.deleted ? ` · <a href="#" id="pre">${info.deleted} früher gelöschte ebenfalls importieren</a>` : ""}.${info.nodate ? ` <span class="mut">${info.nodate} ohne Aufnahmezeit im Bild – dort gilt das Dateidatum.</span>` : ""}${info.heic ? ` <span class="mut">${info.heic} HEIC-Bilder werden übersprungen (bitte als JPG exportieren).</span>` : ""}</p>
+    body(`<p>${info.total} Bilder gefunden, davon <b>${fresh.length}</b> zu importieren${info.dup ? ` (${info.dup} schon vorhanden)` : ""}${info.deleted ? ` · <a href="#" id="pre">${info.deleted} früher gelöschte ebenfalls importieren</a>` : ""}.${info.nodate ? ` <span class="mut">${info.nodate} ohne Aufnahmezeit im Bild – dort gilt das Dateidatum.</span>` : ""}${info.heic ? ` <span class="mut">${info.heic} HEIC-Bilder werden übersprungen (Server ohne pillow-heif; bitte als JPG exportieren).</span>` : ""}</p>
       <p class="mut" style="font-size:14px">So werden die Fotos nach Aufnahmetag zugeordnet. Pro Tag kannst du die Auswahl ändern.</p>
       ${rows
         .map(
           (r, i) => `<div class="panel" style="margin:10px 0"><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:baseline"><b>${r.d.day.split("-").reverse().join(".")}</b><span>${r.d.n} Foto${r.d.n > 1 ? "s" : ""}</span>${r.d.gps ? `<span class="mut" style="font-size:13px">${r.d.gps} mit Aufnahmeort</span>` : ""}${r.d.status === "ask" && r.d.reason ? `<span class="mut" style="font-size:13px">· ${esc(r.d.reason)}</span>` : ""}</div>
-          <select data-r="${i}" style="width:100%;margin-top:6px">${r.ch.map(c => `<option value="${c.v}" ${c.v === r.def ? "selected" : ""}>${esc(c.t)}</option>`).join("")}</select></div>`
+          <select data-r="${i}" style="width:100%;margin-top:6px">${r.ch.map(c => `<option value="${c.v}" ${c.v === r.def ? "selected" : ""}>${esc(c.t)}</option>`).join("")}</select>
+          <div style="margin-top:6px"><button class="btn ghost sm" data-mp="${i}">Auf der Karte ansehen</button></div><div data-map="${i}" style="display:none;height:230px;margin-top:8px;border-radius:6px;overflow:hidden"></div></div>`
         )
         .join("")}
       <div class="row" style="margin-top:14px"><button class="btn" id="pigo">Importieren</button><button class="btn ghost" id="pcx">Abbrechen</button><span class="sp"></span><span class="mut" id="pisum"></span></div>`);
@@ -551,13 +602,100 @@ function photoImportModal(o = {}) {
         analyse(info.all, true);
       };
     const val = i => q(`select[data-r="${i}"]`).value;
+    // Kartenvorschau: Strecke der gewählten Tour und die Stellen, an denen die Fotos nach ihrer Zeit lägen
+    const maps = {};
+    const photoTs = f => {
+      const t = f._t,
+        n = [+t.slice(0, 4), +t.slice(5, 7) - 1, +t.slice(8, 10), +t.slice(11, 13), +t.slice(14, 16), +t.slice(17, 19)];
+      if (f._o) {
+        const sg = f._o[0] === "-" ? -1 : 1;
+        return Date.UTC(...n) / 1000 - sg * (+f._o.slice(1, 3) * 3600 + +f._o.slice(4, 6) * 60);
+      }
+      return new Date(...n).getTime() / 1000;
+    };
+    const drawMap = async i => {
+      const box = q(`[data-map="${i}"]`),
+        v = val(i),
+        d = rows[i].d;
+      if (box.style.display === "none") return;
+      let tid = null,
+        shift = 0;
+      if (v === "time") tid = (d.tour_ids || [])[0];
+      else if (v[0] === "o") {
+        const p = d.options[+v.slice(1)];
+        tid = p.tour;
+        shift = p.shift_s || 0;
+      }
+      if (maps[i]) {
+        maps[i].remove();
+        maps[i] = null;
+      }
+      box.innerHTML = "";
+      if (!tid) {
+        box.innerHTML = `<div class="mut" style="padding:14px">Ohne Tour gibt es nichts auf der Karte anzuzeigen.</div>`;
+        return;
+      }
+      const t = BY[tid];
+      let c = null;
+      try {
+        c = cleanPts(await api(`/api/tours/${tid}/coords`));
+      } catch (e) {}
+      if (!c || !c.length) {
+        box.innerHTML = `<div class="mut" style="padding:14px">Zu dieser Tour gibt es keine Strecke.</div>`;
+        return;
+      }
+      const mp = (maps[i] = mkMap(box, {attr: false}));
+      const ln = L.polyline(c.map(p => [p[0], p[1]]), {color: "#2f8f5b", weight: 4}).addTo(mp);
+      mp.fitBounds(ln.getBounds(), {padding: [20, 20]});
+      const tp = c.filter(p => p[3] != null).sort((a, b) => a[3] - b[3]),
+        T = tp.map(p => p[3]);
+      const at = ms => {
+        if (ms < T[0] - 1800000 || ms > T[T.length - 1] + 1800000) return null;
+        if (ms <= T[0]) return tp[0];
+        if (ms >= T[T.length - 1]) return tp[tp.length - 1];
+        let lo = 0,
+          hi = T.length - 1;
+        while (hi - lo > 1) {
+          const mm = (lo + hi) >> 1;
+          T[mm] <= ms ? (lo = mm) : (hi = mm);
+        }
+        const u = (ms - T[lo]) / (T[hi] - T[lo] || 1);
+        return [tp[lo][0] + (tp[hi][0] - tp[lo][0]) * u, tp[lo][1] + (tp[hi][1] - tp[lo][1]) * u];
+      };
+      let on = 0;
+      if (tp.length > 1)
+        d.keys.forEach(k => {
+          const f = fresh[k],
+            ms = (photoTs(f) + shift - t.start_ts) * 1000,
+            pt = at(ms);
+          if (!pt) return;
+          on++;
+          L.circleMarker([pt[0], pt[1]], {radius: 5, color: "#fff", weight: 1.5, fillColor: "#f0a020", fillOpacity: 1}).addTo(mp);
+          if (f._gps) L.circleMarker(f._gps, {radius: 7, color: "#1d6fb8", weight: 2, fill: false}).addTo(mp);
+        });
+      const note = L.control({position: "topright"});
+      note.onAdd = () => {
+        const dv = L.DomUtil.create("div");
+        dv.style.cssText = "background:#000b;color:#fff;font-size:12px;padding:3px 8px;border-radius:4px;max-width:260px";
+        dv.innerHTML = tp.length > 1 ? `${on} von ${d.n} Fotos liegen nach ihrer Zeit auf der Strecke (orange${d.gps ? ", blau = Aufnahmeort" : ""})` : "Die Strecke hat keine Zeitangaben";
+        return dv;
+      };
+      note.addTo(mp);
+      setTimeout(() => mp.invalidateSize(), 50);
+    };
+    m.querySelectorAll("[data-mp]").forEach(b => (b.onclick = () => {
+      const box = q(`[data-map="${b.dataset.mp}"]`);
+      box.style.display = box.style.display === "none" ? "" : "none";
+      b.textContent = box.style.display === "none" ? "Auf der Karte ansehen" : "Karte ausblenden";
+      drawMap(+b.dataset.mp);
+    }));
     const count = () => {
       const n = rows.reduce((a, r, i) => a + (val(i) === "skip" ? 0 : r.d.n), 0);
       q("#pisum").textContent = `${n} von ${fresh.length} Fotos werden importiert`;
       q("#pigo").disabled = !n;
       q("#pigo").textContent = n ? `${n} Foto${n > 1 ? "s" : ""} importieren` : "Nichts ausgewählt";
     };
-    m.querySelectorAll("select[data-r]").forEach(se => (se.onchange = count));
+    m.querySelectorAll("select[data-r]").forEach(se => (se.onchange = () => (count(), drawMap(+se.dataset.r))));
     count();
     q("#pcx").onclick = close;
     q("#pigo").onclick = () => {
@@ -595,20 +733,37 @@ function photoImportModal(o = {}) {
       skipped = 0,
       fail = 0;
     const failed = [],
+      why = e => {
+        const t = (e && e.message) || String(e);
+        return /Failed to fetch|NetworkError/.test(t) ? "Verbindung zum Server unterbrochen" : t;
+      },
       mx = +s_max() || 2200,
       qu = (+s_q() || 82) / 100,
       t0 = Date.now();
     const one = async f => {
       try {
-        const bmp = await createImageBitmap(f, {imageOrientation: "from-image"}),
-          k = Math.min(1, mx / Math.max(bmp.width, bmp.height));
-        const c = document.createElement("canvas");
-        c.width = Math.round(bmp.width * k);
-        c.height = Math.round(bmp.height * k);
-        c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-        bmp.close();
-        const blob = await new Promise(r => c.toBlob(r, "image/jpeg", qu));
+        let blob = null,
+          rawMode = false;
+        if (!f._heic) {
+          try {
+            const bmp = await createImageBitmap(f, {imageOrientation: "from-image"}),
+              k = Math.min(1, mx / Math.max(bmp.width, bmp.height));
+            const c = document.createElement("canvas");
+            c.width = Math.round(bmp.width * k);
+            c.height = Math.round(bmp.height * k);
+            c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+            bmp.close();
+            blob = await new Promise(r => c.toBlob(r, "image/jpeg", qu));
+          } catch (e) {
+            blob = null; // Browser kann das Bild nicht lesen: der Server versucht es mit dem Original
+          }
+        }
+        if (!blob) {
+          blob = f;
+          rawMode = true;
+        }
         const fd = new FormData();
+        if (rawMode) fd.append("raw_mode", "1");
         fd.append("file", blob, "x.jpg");
         fd.append("rel", relOf(f));
         fd.append("taken", f._t);
@@ -629,7 +784,7 @@ function photoImportModal(o = {}) {
         else done++;
       } catch (e) {
         fail++;
-        if (failed.length < 3) failed.push(f.name);
+        failed.push({name: f.name, reason: why(e)});
       }
       const n = done + dup + skipped + fail,
         eta = n ? Math.round((((Date.now() - t0) / n) * (todo.length - n)) / 1000) : 0;
@@ -643,7 +798,7 @@ function photoImportModal(o = {}) {
         while (queue.length && !stop) await one(queue.shift());
       })
     );
-    const sum = `${done} importiert${dup ? `, ${dup} doppelt (schon vorhanden)` : ""}${skipped ? `, ${skipped} ohne passende Strecke übersprungen` : ""}${fail ? `, ${fail} Fehler${failed.length ? " (z. B. " + failed.join(", ") + ")" : ""}` : ""}${stop ? " – abgebrochen" : ""}`;
+    const sum = `${done} importiert${dup ? `, ${dup} doppelt (schon vorhanden)` : ""}${skipped ? `, ${skipped} ohne passende Strecke übersprungen` : ""}${fail ? `, ${fail} Fehler` : ""}${stop ? " – abgebrochen" : ""}`;
     if (!q("#ptxt")) return;
     q("#ptxt").textContent = `${sum}. Bibliothek wird eingelesen …`;
     const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -672,7 +827,7 @@ function photoImportModal(o = {}) {
     PHINFO = await api("/api/photo-info").catch(() => PHINFO);
     const gain = PHINFO ? PHINFO.assigned - before : 0;
     q("#pih").textContent = ok ? "Import abgeschlossen" : "Import fast abgeschlossen";
-    body(`<p>${ok ? "✓" : "⚠"} <b>${sum}.</b></p>${ok ? `<p>${gain > 0 ? `<b>${gain}</b> Fotos wurden Touren zugeordnet.` : "Es wurden keine Fotos automatisch einer Tour zugeordnet."}${PHINFO && PHINFO.count - PHINFO.assigned > 0 ? ` ${nf(PHINFO.count - PHINFO.assigned, 0)} Fotos sind „ohne Tour“ – unter Fotos → „Fotos zuordnen“ lassen sie sich Touren zuweisen, in der Tour per „Zeit per GPS prüfen“ korrigieren.` : ""}</p>` : `<p>Das Einlesen konnte nicht gestartet werden – bitte in der Verwaltung „Bibliothek neu einlesen“ ausführen.</p>`}
+    body(`<p>${ok ? "✓" : "⚠"} <b>${sum}.</b></p>${failed.length ? `<details open><summary>${failed.length} Foto${failed.length > 1 ? "s" : ""} konnte${failed.length > 1 ? "n" : ""} nicht importiert werden</summary><ul style="font-size:14px;max-height:200px;overflow:auto;margin:6px 0">${failed.slice(0, 200).map(x => `<li><b>${esc(x.name)}</b> – ${esc(x.reason)}</li>`).join("")}${failed.length > 200 ? `<li>… und ${failed.length - 200} weitere</li>` : ""}</ul></details>` : ""}${ok ? `<p>${gain > 0 ? `<b>${gain}</b> Fotos wurden Touren zugeordnet.` : "Es wurden keine Fotos automatisch einer Tour zugeordnet."}${PHINFO && PHINFO.count - PHINFO.assigned > 0 ? ` ${nf(PHINFO.count - PHINFO.assigned, 0)} Fotos sind „ohne Tour“ – unter Fotos → „Fotos zuordnen“ lassen sie sich Touren zuweisen, in der Tour per „Zeit per GPS prüfen“ korrigieren.` : ""}</p>` : `<p>Das Einlesen konnte nicht gestartet werden – bitte in der Verwaltung „Bibliothek neu einlesen“ ausführen.</p>`}
       <div class="row"><a class="btn" href="#/photos" id="pgo">Fotos ansehen</a><button class="btn ghost" id="pcx">Schließen</button></div>`);
     q("#pcx").onclick = close;
     q("#pgo").onclick = () => {

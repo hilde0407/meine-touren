@@ -62,7 +62,7 @@ def page(app_url):
     from playwright.sync_api import sync_playwright
     with sync_playwright() as pw:
         b = pw.chromium.launch()
-        pg = b.new_page(viewport={"width": 1280, "height": 900})
+        pg = b.new_page(locale="de-DE", viewport={"width": 1280, "height": 900})
         pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(app_url) else r.continue_())   # keine Kartenkacheln/Internet
         pg.errors = []
         pg.on("pageerror", lambda e: pg.errors.append(str(e) + " @ " + (e.stack or "")[:1500]))
@@ -101,7 +101,7 @@ def test_fast_navigation_no_errors(page, pause):
 
 
 def test_fresh_load_without_errors(page, app_url):
-    pg = page.context.browser.new_page(); errs = []
+    pg = page.context.browser.new_page(locale="de-DE"); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(app_url) else r.continue_())
     for v in ["dash", "tours", "check", "admin"]:
@@ -134,6 +134,7 @@ def test_photo_selection_from_clicked(page):
     cap = lambda sel: page.evaluate(f"[...document.querySelectorAll('.thumbs {sel}')].map(i => i.parentElement.querySelector('.cap').textContent.slice(-5)).sort()")
     clicked = page.evaluate("document.querySelectorAll('.thumbs img[data-i]')[2].parentElement.querySelector('.cap').textContent.slice(-5)")
     alle = cap("img[data-i]")
+    page.evaluate("document.querySelectorAll('.thumbs img[data-i]')[2].scrollIntoView({block: 'start'})")     # nicht unter der Auswahlleiste klicken
     imgs.nth(2).click(force=True)
     assert cap("img.sel") == [x for x in alle if x >= clicked]
     page.click("[data-a=off]"); page.click("button:has-text('Fotos bearbeiten')")
@@ -141,6 +142,31 @@ def test_photo_selection_from_clicked(page):
     assert cap("img.sel") == [x for x in alle if x <= clicked]
     imgs.nth(0).click(force=True)                      # danach: einzelnes Foto umschalten
     assert len(cap("img.sel")) in (len([x for x in alle if x <= clicked]) - 1, len([x for x in alle if x <= clicked]) + 1)
+    assert not page.errors, page.errors
+
+
+def test_photo_shift_dialog_moves_selected(page):
+    page.errors.clear()
+    tid = page.evaluate("TOURS.filter(t => t.source === 'local').sort((a, b) => a.start_ts - b.start_ts)[0].id")
+    page.evaluate("location.hash = '#/dash'"); page.wait_for_timeout(600)          # frisch aufbauen (Auswahlmodus des vorigen Tests zurücksetzen)
+    page.evaluate(f"location.hash = '#/tour/{tid}'"); page.wait_for_timeout(1500)
+    before = page.evaluate(f"fetch('/api/photos?tour_id={tid}&limit=50').then(r => r.json()).then(j => j.map(p => p.taken_ts).sort())")
+    assert len(before) == 6
+    page.click("button:has-text('Fotos bearbeiten')")
+    page.evaluate("document.querySelectorAll('.thumbs img[data-i]')[5].scrollIntoView({block: 'start'})")
+    page.locator(".thumbs img[data-i]").nth(5).click(force=True)           # letztes Foto (und alle späteren: nur dieses)
+    page.click("[data-a=shift]"); page.wait_for_selector("#shok")
+    page.click("[data-p='-3600']")
+    assert "Neue Zeit" in page.inner_text("#shp")
+    page.click("#shok"); page.wait_for_timeout(1500)
+    after = page.evaluate("fetch('/api/photos?limit=500').then(r => r.json()).then(j => j.map(p => p.taken_ts))")
+    assert any(b - 3600 in after for b in before[-1:]), (before, after)
+    # zurückschieben, damit die übrigen Tests unverändert laufen
+    page.evaluate("fetch('/api/photo-shift-ids', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({ids: [...document.querySelectorAll('.nothing')].map(x => 0), delta_s: 0})})")
+    ids = page.evaluate("fetch('/api/photos?limit=500').then(r => r.json()).then(j => j.filter(p => p.offset_s === -3600).map(p => p.id))")
+    assert ids
+    page.evaluate(f"fetch('/api/photo-shift-ids', {{method: 'POST', headers: {{'content-type': 'application/json'}}, body: JSON.stringify({{ids: {ids}, delta_s: 3600}})}})")
+    page.wait_for_timeout(800)
     assert not page.errors, page.errors
 
 
@@ -174,3 +200,24 @@ def test_photo_chain_drag_moves_all_and_saves(page):
     page.click("#chb"); page.click("#chre"); page.wait_for_timeout(1500)
     assert ts() == before                                                # Original-Zeiten wiederhergestellt
     assert not page.errors, page.errors
+
+
+def test_english_ui(page, app_url):
+    """Englische Oberfläche: Navigation und Datumsformat übersetzt, keine JavaScript-Fehler, Umschalten zurück funktioniert."""
+    if True:
+        b = page.context.browser
+        ctx = b.new_context(locale="en-US")
+        pg = ctx.new_page()
+        pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(app_url) else r.continue_())
+        errs = []
+        pg.on("pageerror", lambda e: errs.append(str(e)))
+        pg.goto(app_url + "/#/dash"); pg.wait_for_timeout(1500)
+        nav = pg.inner_text("#nav")
+        assert "Overview" in nav and "Tours" in nav and "Photos" in nav and "Übersicht" not in nav
+        for v in ("tours", "photos", "admin", "check", "records"):
+            pg.goto(app_url + f"/#/{v}"); pg.wait_for_timeout(600)
+        assert pg.evaluate("document.documentElement.lang") == "en"
+        pg.click("#langsw"); pg.wait_for_timeout(1200)
+        assert "Übersicht" in pg.inner_text("#nav")
+        assert not errs, errs
+        ctx.close()

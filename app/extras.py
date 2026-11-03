@@ -59,6 +59,15 @@ def make_backup(dest_dir=None, strip_secrets=False, keep=14):
     return p
 
 
+@router.post("/api/backup/now")
+def api_backup_now():
+    """Sofort eine Sicherung in den Sicherungsordner schreiben (für den Hinweis „noch kein Backup“)."""
+    p = auto_backup(max_age_s=0)
+    if not p:
+        raise HTTPException(500, "Die Sicherung konnte nicht geschrieben werden: " + (db.get("backup_err") or "unbekannter Fehler"))
+    return {"ok": True, "name": Path(str(p)).name}
+
+
 @router.get("/api/backup")
 def api_backup():
     name, data = make_backup(strip_secrets=True)

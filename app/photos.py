@@ -33,22 +33,68 @@ def _gps(exif):
         return None, None
 
 
-def read_meta(path):
-    """(taken_ts_utc oder None, lat, lng)"""
+def exif_fields(src):
+    """(DateTimeOriginal-Text, Zeitzonen-Zusatz, lat, lng) aus Datei oder Datei-Objekt; alles None, wenn nicht lesbar."""
     try:
-        with Image.open(path) as im:
+        with Image.open(src) as im:
             ex = im.getexif()
-            raw = None
+            sub = {}
             try:
-                raw = ex.get_ifd(0x8769).get(36867) or ex.get_ifd(0x8769).get(36868)
+                sub = ex.get_ifd(0x8769)
             except Exception:  # noqa
                 pass
-            raw = raw or ex.get(306)
+            raw = sub.get(36867) or sub.get(36868) or ex.get(306)
             lat, lng = _gps(ex)
-            offs = (ex.get_ifd(0x8769).get(36881) or ex.get_ifd(0x8769).get(36880)) if raw else None
+            offs = (sub.get(36881) or sub.get(36880)) if raw else None
     except Exception:  # noqa
+        return None, None, None, None
+    return raw, offs, lat, lng
+
+
+def read_meta(path):
+    """(taken_ts_utc oder None, lat, lng)"""
+    raw, offs, lat, lng = exif_fields(path)
+    if raw is None and lat is None:
         return None, None, None
     return _raw_ts(raw, offs), lat, lng
+
+
+def heic_supported():
+    return ".heic" in EXTS
+
+
+def to_jpeg_bytes(data, max_side=None, quality=None):
+    """Beliebiges Bild (auch HEIC, falls pillow-heif installiert ist) -> verkleinertes JPEG (ohne EXIF). Wirft ValueError, wenn unlesbar."""
+    import io
+    max_side = max_side or db.get_int("photo_max_side", 2200)
+    quality = quality or db.get_int("photo_quality", 82)
+    try:
+        with Image.open(io.BytesIO(data)) as im:
+            fmt = im.format
+            im = ImageOps.exif_transpose(im).convert("RGB")
+            im.thumbnail((max_side, max_side), Image.LANCZOS)
+            out = io.BytesIO()
+            im.save(out, "JPEG", quality=quality, optimize=True)
+    except Exception as e:  # noqa
+        if data[4:12] in (b"ftypheic", b"ftypheix", b"ftypmif1", b"ftypheim", b"ftyphevc") and not heic_supported():
+            raise ValueError("HEIC-Bilder werden auf diesem Server nicht unterstützt (pip install pillow-heif)")
+        raise ValueError("Kein gültiges Bild")
+    return out.getvalue()
+
+
+def shift_ids(ids, delta_s):
+    """Aufnahmezeit ausgewählter Fotos um delta_s Sekunden verschieben (z. B. Zeitzone der Reise nachträglich korrigieren)."""
+    ids = sorted({int(i) for i in ids or []})
+    if not ids:
+        raise ValueError("Keine Fotos gewählt")
+    delta_s = int(delta_s)
+    if abs(delta_s) > 400 * 86400:
+        raise ValueError("Zeitversatz unplausibel groß")
+    for i in range(0, len(ids), 500):
+        part = ids[i:i + 500]
+        db.execute(f"UPDATE photos SET taken_ts=taken_ts+?, offset_s=COALESCE(offset_s,0)+? WHERE id IN ({','.join('?' * len(part))})", (delta_s, delta_s, *part))
+    assign_all()
+    return {"shifted": len(ids), "delta_s": delta_s}
 
 
 def _raw_ts(raw, offs=None):
@@ -663,7 +709,7 @@ def plan(items, only_tour=None):
         base, overlap = match(0)
         far = bool(base) and bool(sample) and all((dist(by_id[i]) or 0) > FAR_KM for i in base)
         row = {"day": day, "n": len(lst), "keys": [i["k"] for i, _ in lst], "matched": sum(base.values()), "status": "ok", "options": [], "gps": len(gps),
-               "names": [by_id[i]["name"] for i in base]}
+               "names": [by_id[i]["name"] for i in base], "tour_ids": sorted(base, key=lambda i: -base[i])}
         row["single"] = len(base) == 1
         if not only_tour and base and not overlap and not far and row["matched"] >= max(1, 0.6 * len(lst)):
             out.append(row); continue

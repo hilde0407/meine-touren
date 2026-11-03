@@ -26,7 +26,8 @@ einrichten() {
     touch "$VENV/.fertig"
   fi
   # Garmin-Konto-Anbindung (optional, braucht Python 3.12+; ohne sie geht der Datei-Import trotzdem)
-  [ -f "$VENV/.garmin" ] || { "$VENV/bin/pip" install -q -r "$APP/requirements-optional.txt" >/dev/null 2>&1; touch "$VENV/.garmin"; }
+  # Optionale Pakete einzeln installieren (Garmin-Anbindung, HEIC-Fotos): ein nicht installierbares Paket darf die anderen nicht verhindern
+  [ -f "$VENV/.garmin" ] || { grep -v '^#' "$APP/requirements-optional.txt" | grep -v '^$' | while read -r pkg; do "$VENV/bin/pip" install -q "$pkg" >/dev/null 2>&1 || true; done; touch "$VENV/.garmin"; }
 }
 einrichten
 mkdir -p "$DATA"

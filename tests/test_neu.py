@@ -96,7 +96,7 @@ def test_browser_admin_and_folder_upload(server, tmp_path):
         im = Image.new("RGB", (64, 48)); im.putdata([(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for _ in range(64 * 48)]); im.save(d / f"f{i}.jpg")
     with sync_api.sync_playwright() as pw:
         b = pw.chromium.launch(executable_path=os.environ.get("CHROMIUM", "/opt/pw-browsers/chromium") if os.path.exists("/opt/pw-browsers/chromium") else None)
-        pg = b.new_page()
+        pg = b.new_page(locale="de-DE")
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.goto(base + "/#/admin"); pg.wait_for_selector("#hlt", timeout=10000)

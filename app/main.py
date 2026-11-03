@@ -78,6 +78,11 @@ def startup():
             config.EXPORT_DIR.mkdir(parents=True, exist_ok=True)
             config.CACHE_DIR.mkdir(parents=True, exist_ok=True)
             config.INBOX_DIR.mkdir(parents=True, exist_ok=True)
+    if os.environ.get("MT_DEMO") == "1":              # Demo-Modus: Beispieldaten anlegen, falls noch leer
+        from . import demo
+        for u in auth.active_uids():
+            with ctx.as_user(u):
+                demo.seed()
     if os.environ.get("MT_NO_SCHEDULER") != "1":      # Tests: kein Hintergrundplaner (würde nach 60 s Sicherungen anlegen)
         threading.Thread(target=scheduler, daemon=True).start()
 
@@ -422,6 +427,14 @@ def api_photo_shift(body: dict):
         raise HTTPException(400, str(e))
 
 
+@app.post("/api/photo-shift-ids")
+def api_photo_shift_ids(body: dict):
+    try:
+        return photos.shift_ids(body.get("ids"), body.get("delta_s", 0))
+    except (ValueError, TypeError) as e:
+        raise HTTPException(400, str(e))
+
+
 @app.post("/api/photo-unassign")
 def api_photo_unassign(body: dict):
     if not body.get("ids"):
@@ -451,7 +464,7 @@ def photo_library(split: int = 0):
 
 @app.post("/api/photo-upload")
 async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken: str = Form(""), mtime: int = Form(0),
-                       tour: str = Form(""), shift_s: int = Form(0), lat: str = Form(""), lng: str = Form(""), force: str = Form(""), offset: str = Form("")):
+                       tour: str = Form(""), shift_s: int = Form(0), lat: str = Form(""), lng: str = Form(""), force: str = Form(""), offset: str = Form(""), raw_mode: str = Form("")):
     """Nimmt ein im Browser verkleinertes Foto an und schreibt die Aufnahmezeit als EXIF hinein."""
     parts = [p for p in rel.replace("\\", "/").split("/") if p not in ("", ".", "..")]
     if not parts:
@@ -469,6 +482,13 @@ async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken
     if not tour and not force and photos.only_tracked() and not photos.in_track(ts, photos.track_windows()):
         return {"ok": True, "skipped": True}     # keine GPS-Strecke zu diesem Foto
     raw = await file.read()
+    if raw_mode:                      # Original (HEIC, großes JPEG …): der Server verkleinert
+        try:
+            raw = photos.to_jpeg_bytes(raw)
+        except ValueError as e:
+            raise HTTPException(415, str(e))
+    elif raw[:2] != b"\xff\xd8":
+        raise HTTPException(415, "Kein gültiges JPEG")
     dup = photos.find_duplicate(ts, photos.fingerprint(raw), str(dst))
     if dup:
         return {"ok": True, "skipped": True, "duplicate": True}      # dasselbe Bild ist schon in der Bibliothek
@@ -488,6 +508,17 @@ async def photo_upload(file: UploadFile = File(...), rel: str = Form(...), taken
         os.utime(tmp, (mtime, mtime))
     tmp.replace(dst)
     return {"ok": True}
+
+
+@app.post("/api/photo-meta")
+async def photo_meta(file: UploadFile = File(...)):
+    """Aufnahmezeit, Zeitzonen-Zusatz und Aufnahmeort aus einem Bild lesen (für HEIC, die der Browser nicht selbst lesen kann)."""
+    import io
+    raw, offs, la, lo = photos.exif_fields(io.BytesIO(await file.read()))
+    if raw is None and la is None:
+        return {"ok": False}
+    t = str(raw).strip()[:19] if raw else ""
+    return {"ok": True, "t": t, "o": str(offs) if offs else "", "lat": la, "lng": lo}
 
 
 @app.post("/api/photo-plan")
@@ -527,7 +558,7 @@ def photo_info():
     years = db.query("SELECT DISTINCT CAST(strftime('%Y', taken_ts, 'unixepoch') AS INT) y FROM photos ORDER BY y DESC")
     undated = db.one("SELECT COUNT(*) n FROM photos WHERE dated=0")["n"]
     return {"count": r["n"], "assigned": r["a"] or 0, "undated": undated, "years": [y["y"] for y in years],
-            "folder_exists": config.PHOTOS_DIR.exists(), "lib_dir": str(config.LIB_DIR), "source_dir": str(config.PHOTOS_DIR), "slideshow_seconds": db.get_int("slideshow_seconds", 6)}
+            "folder_exists": config.PHOTOS_DIR.exists(), "heic": photos.heic_supported(), "lib_dir": str(config.LIB_DIR), "source_dir": str(config.PHOTOS_DIR), "slideshow_seconds": db.get_int("slideshow_seconds", 6)}
 
 
 @app.get("/pic/{photo_id}")

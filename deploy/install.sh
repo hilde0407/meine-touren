@@ -67,7 +67,10 @@ systemctl daemon-reload
 systemctl enable --now "$NAME-update.path" >/dev/null 2>&1 || echo "(Update-Hilfsdienst konnte nicht gestartet werden – Updates weiterhin per $NAME-update github)"
 
 echo "== Optional: Garmin-Konto-Anbindung =="
-"$APP/venv/bin/pip" install -q -r "$SRC/requirements-optional.txt" >/dev/null 2>&1 && echo "garminconnect installiert." || echo "(garminconnect nicht installierbar, z. B. Python < 3.12 – Garmin-Import per Datei funktioniert trotzdem)"
+# Optionale Pakete einzeln: Garmin-Anbindung (Python 3.12+), Garmin-Hilfspaket, HEIC-Fotos – ein Fehler soll die anderen nicht verhindern
+grep -v '^#' "$SRC/requirements-optional.txt" | grep -v '^$' | while read -r pkg; do
+  "$APP/venv/bin/pip" install -q "$pkg" >/dev/null 2>&1 && echo "$pkg installiert." || echo "($pkg nicht installierbar – die zugehörige Funktion fehlt dann, alles andere läuft)"
+done
 
 echo "== Webserver (nginx, Port 80) =="
 cp "$SRC/deploy/nginx-meine-touren.conf" "/etc/nginx/sites-available/$NAME"

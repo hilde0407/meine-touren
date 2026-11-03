@@ -87,12 +87,28 @@ async function healthBanner() {
     if (!_hl.v.length && !u) return;
     m.insertAdjacentHTML(
       "afterbegin",
-      `<div class="warnbar">${_hl.v.map(w => `<div>⚠ ${esc(w.text)}</div>`).join("")}${
+      `<div class="warnbar">${_hl.v.map(w => `<div>⚠ ${esc(w.text)}${w.action === "backup" ? ` <button class="btn sm" data-act="backup">Jetzt sichern</button>` : ""}</div>`).join("")}${
         u
           ? `<div>⬆ Neue Version <b>${esc(u.latest)}</b> verfügbar (installiert: ${esc(u.current)}). <a href="#/admin">${u.can_install ? "Jetzt installieren" : "Details"}</a></div>`
           : ""
       }${_hl.v.length ? '<a href="#/admin">Verwaltung öffnen</a>' : ""}</div>`
     );
+    const bb = m.querySelector('[data-act="backup"]');
+    if (bb)
+      bb.onclick = async () => {
+        bb.disabled = true;
+        bb.textContent = "Sichere …";
+        try {
+          await api("/api/backup/now", {method: "POST"});
+          _hl.t = 0;
+          m.querySelector(".warnbar")?.remove();
+          healthBanner();
+        } catch (e) {
+          bb.disabled = false;
+          bb.textContent = "Jetzt sichern";
+          alert(e.message || e);
+        }
+      };
   } catch (e) {}
 }
 Object.keys(VIEWS).forEach(k => {

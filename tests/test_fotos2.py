@@ -157,7 +157,7 @@ def test_browser_add_photos_to_tour_with_wrong_camera_clock(tour_server):
         (src / f"k{i}.jpg").write_bytes(data)
         truth.append(t_true)
     with sync_playwright() as pw:
-        br = pw.chromium.launch(); pg = br.new_page(viewport={"width": 1200, "height": 900})
+        br = pw.chromium.launch(); pg = br.new_page(locale="de-DE", viewport={"width": 1200, "height": 900})
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.goto(f"{base}/#/tour/{tid}"); pg.wait_for_selector("#padd", timeout=15000)
@@ -166,6 +166,9 @@ def test_browser_add_photos_to_tour_with_wrong_camera_clock(tour_server):
         pg.wait_for_selector("#pigo:not([disabled])", timeout=20000)
         txt = pg.inner_text("#pib")
         assert "(per GPS)" in txt and "−3 Std. 7 Min." in txt
+        pg.click("[data-mp='0']")
+        pg.wait_for_selector("[data-map='0'].leaflet-container", timeout=10000)
+        pg.wait_for_function("document.querySelector(\"[data-map='0']\").textContent.includes('6 von 6 Fotos liegen nach ihrer Zeit auf der Strecke')", timeout=10000)
         if os.environ.get("MT_SHOT"):
             pg.screenshot(path=os.environ["MT_SHOT"])
         pg.click("#pigo")
@@ -250,3 +253,83 @@ def test_upload_shift_keeps_offset_zone(monkeypatch):
         r = db.one("SELECT taken_ts FROM photos WHERE path LIKE '%gom_s0%'")
         utc = int(__import__("datetime").datetime(2026, 10, 29, 13, 0, 0, tzinfo=__import__("datetime").timezone.utc).timestamp())
         assert r["taken_ts"] == utc
+
+
+# ---------- Zeit verschieben, HEIC, Fehlergründe ----------
+def test_shift_ids_moves_selected_and_reassigns():
+    _tour("A", T0, 3600, 48.0, 8.0)
+    _photo(1, T0 + 600)
+    _photo(2, T0 + 700)
+    _photo(3, T0 + 800)
+    photos.assign_all(force=True)
+    ids = [r["id"] for r in db.query("SELECT id FROM photos ORDER BY id")]
+    assert _tid(1) == "A"
+    out = photos.shift_ids(ids[:2], 5 * 3600)               # zwei Fotos weit hinter die Tour schieben
+    assert out["shifted"] == 2
+    assert _tid(1) is None and _tid(2) is None and _tid(3) == "A"
+    photos.shift_ids(ids[:2], -5 * 3600)
+    assert _tid(1) == "A"
+    import pytest as _pt
+    with _pt.raises(ValueError):
+        photos.shift_ids([], 60)
+    with _pt.raises(ValueError):
+        photos.shift_ids(ids, 10 ** 9)
+
+
+def test_invalid_upload_gives_reason(monkeypatch):
+    from fastapi.testclient import TestClient
+    from app import main
+    monkeypatch.setattr(main, "scheduler", lambda: None)
+    with TestClient(main.app) as c:
+        db.put("photo_only_tracked", "0")
+        r = c.post("/api/photo-upload", files={"file": ("x.jpg", b"das ist kein bild", "image/jpeg")}, data={"rel": "bad/x", "taken": "2026:10:29 12:00:00"})
+        assert r.status_code == 415 and "gültig" in r.json()["detail"]
+        r = c.post("/api/photo-upload", files={"file": ("x.jpg", b"ebenfalls nicht", "image/jpeg")}, data={"rel": "bad/y", "taken": "2026:10:29 12:00:00", "raw_mode": "1"})
+        assert r.status_code == 415
+        assert c.post("/api/photo-shift-ids", json={"ids": [], "delta_s": 60}).status_code == 400
+
+
+def test_heic_meta_and_raw_upload(monkeypatch):
+    pytest.importorskip("pillow_heif")
+    import pillow_heif
+    from PIL import Image
+    from fastapi.testclient import TestClient
+    from app import main
+    pillow_heif.register_heif_opener()
+    ex = Image.Exif(); ex.get_ifd(0x8769)[0x9003] = "2026:10:29 12:17:17"; ex.get_ifd(0x8769)[0x9011] = "+00:00"
+    b = io.BytesIO(); Image.effect_noise((200, 150), 60).convert("RGB").save(b, "HEIF", exif=ex.tobytes()); heic = b.getvalue()
+    monkeypatch.setattr(main, "scheduler", lambda: None)
+    with TestClient(main.app) as c:
+        db.put("photo_only_tracked", "0")
+        assert c.get("/api/photo-info").json()["heic"] is True
+        m = c.post("/api/photo-meta", files={"file": ("a.heic", heic, "image/heic")}).json()
+        assert m["ok"] and m["t"] == "2026:10:29 12:17:17" and m["o"] == "+00:00"
+        r = c.post("/api/photo-upload", files={"file": ("a.heic", heic, "image/heic")},
+                   data={"rel": "iph/a~heic", "taken": m["t"], "offset": m["o"], "raw_mode": "1", "mtime": "0"})
+        assert r.status_code == 200 and not r.json().get("skipped")
+        photos.scan()
+        row = db.one("SELECT taken_ts FROM photos WHERE path LIKE '%a~heic%'")
+        utc = int(__import__("datetime").datetime(2026, 10, 29, 12, 17, 17, tzinfo=__import__("datetime").timezone.utc).timestamp())
+        assert row and row["taken_ts"] == utc
+
+
+def test_backup_now_endpoint_and_health_action(monkeypatch, tmp_path):
+    from fastapi.testclient import TestClient
+    from app import main, extras
+    monkeypatch.setattr(main, "scheduler", lambda: None)
+    monkeypatch.setattr(extras, "newest_backup", lambda: None)
+    with TestClient(main.app) as c:
+        w = c.get("/api/health").json()
+        assert any(x.get("action") == "backup" for x in w)
+        _tour("A", T0, 3600, 48.0, 8.0)
+        r = c.post("/api/backup/now")
+        assert r.status_code == 200 and r.json()["ok"] and r.json()["name"].endswith(".zip")
+
+
+def test_demo_seed():
+    from app import demo
+    n = demo.seed()
+    assert n == len(demo.TOURS)
+    assert db.one("SELECT COUNT(*) c FROM tours")["c"] == n
+    assert db.one("SELECT COUNT(*) c FROM photos WHERE tour_id IS NOT NULL")["c"] >= 10
+    assert demo.seed() == 0            # zweiter Aufruf legt nichts doppelt an
