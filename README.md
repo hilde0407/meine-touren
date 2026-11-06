@@ -178,6 +178,8 @@ Im Ordner `android/` liegt eine kleine native Android-App („Hülle“) um die 
 - **PDF-Downloads** landen im Download-Ordner des Handys.
 - Die Serveradresse (auch `http://192.168.178.230`) wird beim ersten Start eingegeben und lässt sich in der Verwaltung ändern.
 
+**Reisen (ab 2.2.1):** Als Reise zählen nur Gruppen über mindestens zwei Kalendertage. Tagesausflüge sind keine Reise, auch mit mehreren Aufzeichnungen am selben Tag. Eine fälschlich erkannte Reise lässt sich auf ihrer Seite mit „Keine Reise“ aus der Liste entfernen. Unten in der Reisenliste steht „Entfernte Reisen“ zum Wiederherstellen. Die Touren selbst bleiben immer erhalten.
+
 **Teilen und Smartphone-Ansicht (ab 2.2):** Auf Tourseite, Reise und Jahresrückblick gibt es „Senden“. In der App öffnet es das Android-Auswahlmenü (WhatsApp, Signal, E-Mail …). Bei einer Tour wird dafür ein Link ohne Anmeldung erzeugt (Anfang und Ende ausgeblendet). Der Link funktioniert für Empfänger nur, wenn der Server von außen erreichbar ist (z. B. Tailscale Funnel). Die Übersicht und die Filterleiste der Tourenliste sind auf dem Handy deutlich kompakter.
 
 **Push-Meldungen (ab 2.1):** Trage in der Verwaltung unter „Benachrichtigung“ eine ntfy-Adresse ein (z. B. `https://ntfy.sh/mein-geheimes-thema`). Dann kommen Warnungen und neue Touren (Aufzeichnung, Teilen-Menü, Import) als Meldung. In der Android-App: Verwaltung → Android-App → „ntfy-App holen“, danach „In ntfy abonnieren“. Das Abschalten der Tour-Meldungen geht im selben Panel.

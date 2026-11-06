@@ -80,7 +80,7 @@ def build_trips():
     out = []
     for g in groups:
         days = {day(t) for t in g}
-        if len(g) < 2 and len(days) < 2:
+        if len(days) < 2:             # Tagesausflüge (auch mit mehreren Aufzeichnungen) sind keine Reise
             continue
         regs = [t["g_state"] or t["g_country"] or t["g_place"] for t in g if t["g_state"] or t["g_country"] or t["g_place"]]
         reg = max(set(regs), key=regs.count) if regs else "Reise"
@@ -148,9 +148,22 @@ def api_trip_edit(trip_id: str, body: dict):
     return {"ok": True}
 
 
+@router.post("/api/trips/{trip_id}/hide")
+def api_trip_hide(trip_id: str, body: dict):
+    """Eine erkannte Reise aus der Liste entfernen (hide=true) oder wiederherstellen (hide=false). Touren bleiben unverändert."""
+    if not any(t["id"] == trip_id for t in build_trips()):
+        raise HTTPException(404, "Reise nicht gefunden")
+    if body.get("hide", True):
+        db.execute("INSERT OR IGNORE INTO trip_hidden(id) VALUES(?)", (trip_id,))
+    else:
+        db.execute("DELETE FROM trip_hidden WHERE id=?", (trip_id,))
+    return {"ok": True}
+
+
 @router.get("/api/trips")
-def api_trips():
-    out = _apply_trip_edits(build_trips())
+def api_trips(hidden: int = 0):
+    hid = {r["id"] for r in db.query("SELECT id FROM trip_hidden")}
+    out = [t for t in _apply_trip_edits(build_trips()) if (t["id"] in hid) == bool(hidden)]
     for t in out:
         t["photo"] = cover_photo(t["tours"])
     return out

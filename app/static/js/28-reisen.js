@@ -89,4 +89,30 @@ VIEWS.trip = async id => {
   await _trip28b(id);
   const b = $("#tredit");
   if (b && !$("#trpdf")) b.insertAdjacentHTML("beforebegin", `<a class="btn alt sm" id="trpdf" href="#/tripsheet/${encodeURIComponent(id)}" title="Reisebericht mit Karte, Statistik und Fotos – als PDF herunterladbar">Reisebericht (PDF)</a> `);
+  if (b && !$("#trhide")) {
+    b.insertAdjacentHTML("afterend", ` <button class="btn alt sm" id="trhide" title="Diese Gruppe ist keine Reise (z. B. ein Tagesausflug) – aus der Liste entfernen. Die Touren bleiben erhalten.">Keine Reise</button>`);
+    $("#trhide").onclick = async () => {
+      if (!confirm("Diese Gruppe aus den Reisen entfernen? Die Touren selbst bleiben unverändert, die Reise lässt sich später unter „Reisen“ wiederherstellen.")) return;
+      await api(`/api/trips/${encodeURIComponent(id)}/hide`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({hide: true})});
+      location.hash = "#/trips";
+    };
+  }
+};
+
+/* Reisenliste: ausgeblendete Reisen wiederherstellen */
+const _trips28 = VIEWS.trips;
+VIEWS.trips = async (...a) => {
+  await _trips28(...a);
+  const hid = await api("/api/trips?hidden=1").catch(() => []);
+  if (!hid.length || $("#trhidbox")) return;
+  $("#main").insertAdjacentHTML("beforeend", `<details id="trhidbox" style="margin-top:28px"><summary class="mut" style="cursor:pointer">Entfernte Reisen (${hid.length})</summary>${hid
+    .map(t => `<div class="r" style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule)"><span style="flex:1">${esc(t.region)} <small class="mut">${esc(t.start)}${t.end !== t.start ? " – " + esc(t.end) : ""}, ${t.tours.length} Touren</small></span><button class="btn alt sm" data-rt="${esc(t.id)}">Wiederherstellen</button></div>`)
+    .join("")}</details>`);
+  document.querySelectorAll("[data-rt]").forEach(
+    b =>
+      (b.onclick = async () => {
+        await api(`/api/trips/${encodeURIComponent(b.dataset.rt)}/hide`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({hide: false})});
+        route();
+      })
+  );
 };
