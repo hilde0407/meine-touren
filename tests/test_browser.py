@@ -645,3 +645,31 @@ def test_offline_banner(page):
     page.context.set_offline(False)
     page.evaluate("window.dispatchEvent(new Event('online'))"); page.wait_for_timeout(300)
     assert page.locator("#offbar").count() == 0
+
+
+def test_record_view_app(page):
+    """Aufzeichnungsseite mit nachgebildeter Android-Brücke (window.MTApp)."""
+    base = page.url.split("#")[0]
+    page.add_init_script("""
+      window._st = {state:'idle', sport:'hike', name:'', count:0, dist_m:0, up_m:0, down_m:0, active_s:0, gps:true};
+      window._g = '<?xml version="1.0"?><gpx version="1.1"><trk><type>hike</type><trkseg>' + Array.from({length:30},(_, i)=>`<trkpt lat="${47+i*0.0006}" lon="11"><ele>${900+i*4}</ele><time>2026-08-01T07:${String(i).padStart(2,'0')}:00Z</time></trkpt>`).join('') + '</trkseg></trk></gpx>';
+      window.MTApp = {version:()=>'2.0.0', serverUrl:()=>location.origin, hasPermission:()=>true, requestPermission(){}, openBatterySettings(){}, changeServer(){},
+        status:()=>JSON.stringify(window._st), points:()=>'[[47,11],[47.001,11.001]]',
+        startRecording(s,n){window._st={...window._st,state:'recording',sport:s,name:n,dist_m:1234,up_m:56,active_s:75}},
+        pauseRecording(){window._st.state='paused'}, resumeRecording(){window._st.state='recording'},
+        stopRecording(){window._st.state='finished'}, takeFinished:()=>window._g, markUploaded(){window._st.state='idle'}, discardRecording(){window._st.state='idle'},
+        diagnose:()=>JSON.stringify({version:'2.0.0',android:'14',device:'Test',server:location.origin,loc_perm:true,gps_on:true,notif_perm:true,battery_free:false,status:window._st}), logText:()=>'Start', clearLog(){}, appLog(){}, shareText(){}};
+    """)
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(800)
+    assert page.locator('nav a[data-k="record"]').count() == 1
+    page.goto(base + "#/record"); page.wait_for_timeout(500)
+    page.fill("#rname", "Testrunde"); page.click("#rstart"); page.wait_for_timeout(700)
+    assert "1,23" in page.inner_text("#rd") and page.locator("#rmap").count() == 1
+    page.once("dialog", lambda d: d.accept())
+    page.click("#rstop"); page.wait_for_timeout(700)
+    assert page.locator("#rsend").count() == 1
+    page.click("#rsend"); page.wait_for_function("location.hash.startsWith('#/tour/')", timeout=8000)
+
+    page.goto(base + "#/apptest"); page.wait_for_timeout(800)
+    t = page.inner_text("#main")
+    assert "Server erreichbar" in t and "Akku-Optimierung ist aktiv" in t and "GPS ist eingeschaltet" in t

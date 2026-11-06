@@ -257,11 +257,13 @@ VIEWS.recap = async name => {
   const bySport = {};
   sel.forEach(t => (bySport[t.sport] = (bySport[t.sport] || 0) + t.km));
   const sp = Object.entries(bySport).sort((a, b) => b[1] - a[1]);
-  const top = sel
+  const eff = sel.filter(t => t.sport !== "skialpin") /* Liftabfahrten sagen nichts über die Leistung */,
+    pool = eff.length ? eff : sel,
+    top = pool
       .slice()
-      .sort((a, b) => b.km - a.km)
+      .sort((a, b) => b.km + (b.up_m || 0) / 100 - (a.km + (a.up_m || 0) / 100))
       .slice(0, 5),
-    steep = sel.slice().sort((a, b) => (b.up_m || 0) - (a.up_m || 0))[0],
+    steep = pool.slice().sort((a, b) => (b.up_m || 0) - (a.up_m || 0))[0],
     bm = mm.indexOf(Math.max(...mm));
   await pdfPhotoLoad();
   const days = new Set(sel.map(t => t.date.slice(0, 10))).size,
@@ -280,7 +282,7 @@ VIEWS.recap = async name => {
      .join("")}</div></div>
    <div class="grid g2" style="margin-top:34px"><div class="panel"><h2>Kilometer pro Monat</h2>${barChart(mm, MON, {ghost: pm, ghostLabel: Y - 1})}<div class="mut" style="font-size:14px">Stärkster Monat: ${MONL[bm]} mit ${nf(mm[bm], 0)} km</div></div>
     <div class="panel"><h2>Sportarten</h2><div class="stack">${sp.map(([s, v]) => `<div style="width:${(v / km) * 100}%;background:${sCol(s)}"></div>`).join("")}</div><div class="rows" style="margin-top:10px">${sp.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${nf(v, 0)} km, ${nf((v / km) * 100, 0)} %</span></div>`).join("")}</div></div></div>
-   <div class="panel" style="margin-top:34px"><h2>Die fünf längsten Touren</h2><div class="tl">${top.map(tourRow).join("")}</div><div class="mut" style="margin-top:10px">Meiste Höhenmeter: <a href="#/tour/${steep.id}">${esc(steep.name)}</a> (${nf(steep.up_m, 0)} m)</div></div>
+   <div class="panel" style="margin-top:34px"><h2>Die fünf stärksten Touren</h2><div class="tl">${top.map(tourRow).join("")}</div><div class="mut" style="margin-top:10px">Meiste Höhenmeter: <a href="#/tour/${steep.id}">${esc(steep.name)}</a> (${nf(steep.up_m, 0)} m)</div></div>
    ${ph.length ? `<div class="panel" style="margin-top:34px"><div class="row"><h2>Fotos des Jahres</h2><span class="sp"></span><a class="btn sm noprint" target="_blank" href="slideshow.html?year=${Y}">Diashow</a></div><div class="thumbs" id="rph">${ph.map((p, i) => `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=400" data-i="${i}"></div>`).join("")}</div></div>` : ""}</div>`;
   if (ph.length) bindThumbs($("#rph"), ph);
   const mark = () => {                  // Fotos nur im Druck/PDF: aus oder nur die ersten n

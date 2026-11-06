@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, health, pdfgen, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, zepp
+from . import auth, gear, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, zepp
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -476,6 +476,35 @@ async def api_share_target(files: list[UploadFile] = File(default=[])):
         jobs.start("Geteilte Fotos", sync.import_inbox)
     q = f"?t={imported}&d={dup}&a={n_act}&p={n_img}&x={n_bad}"
     return RedirectResponse("/#/shared" + q, status_code=303)
+
+
+@app.post("/api/record/upload")
+async def api_record_upload(request: Request):
+    """Aufzeichnung aus der Android-App: JSON {gpx, name, sport}. Legt eine lokale Tour an (doppelte werden erkannt)."""
+    try:
+        d = await request.json()
+    except Exception:  # noqa
+        raise HTTPException(400, "Ungültige Daten")
+    gpx = str(d.get("gpx") or "")
+    if "<trkpt" not in gpx or len(gpx) > 60 * 1024 * 1024:
+        raise HTTPException(400, "Keine GPS-Punkte")
+    name = (str(d.get("name") or "").strip() or None)
+    sport = str(d.get("sport") or "").strip() or None
+    try:
+        c = gpxtools.convert(gpx, "rec.gpx", db.get("default_sport") or "hike")
+    except gpxtools.NoGps:
+        raise HTTPException(400, "Keine GPS-Punkte")
+    tid = f"g{c['start_ts']}"
+    if db.one("SELECT 1 FROM tours WHERE id=?", (tid,)):
+        return {"id": tid, "dup": True}
+    if sport not in gpxtools.LABEL:
+        sport = None
+    t, _ = await asyncio.get_running_loop().run_in_executor(None, lambda: tracks.adopt(gpx, "rec.gpx", name=name, sport=sport))
+    try:
+        photos.assign_all()
+    except Exception:  # noqa
+        pass
+    return {"id": t["id"], "dup": False}
 
 
 def _share_import(paths):

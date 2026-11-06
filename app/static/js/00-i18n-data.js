@@ -448,10 +448,10 @@ Original wiederherstellen|Restaurer l’original
 Erneut anwenden|Appliquer à nouveau
 Schnelle Abschnitte|Sections rapides
 ✓ Im Track wurde nichts Auffälliges gefunden.|✓ Rien de suspect trouvé dans le tracé.
-📄 Tourblatt|📄 Fiche du parcours
+Tourblatt|Fiche du parcours
 Druckbares Tourblatt mit Karte, Höhenprofil und Fotos|Fiche imprimable avec carte, profil altimétrique et photos
 ‹ Zurück zur Tour|‹ Retour au parcours
-🖨 Drucken / als PDF speichern|🖨 Imprimer / enregistrer en PDF
+Drucken / als PDF speichern|Imprimer / enregistrer en PDF
 Gelbe Punkte = Fotos – anklicken zum Ansehen.|Points jaunes = photos – cliquez pour les voir.
 ＋ Mehrtagestour bilden …|＋ Créer un parcours de plusieurs jours …
 Mehrtagestour bilden|Créer un parcours de plusieurs jours
@@ -632,13 +632,13 @@ Abstieg|Descente
 Reise bearbeiten|Modifier le voyage
 Name und Zeitraum der automatisch erkannten Reise. Ein anderer Zeitraum nimmt alle Touren dieser Tage auf (auch solche, die nicht weit von zu Hause waren) bzw. lässt Touren außerhalb weg.|Nom et période du voyage détecté automatiquement. Une autre période inclut toutes les sorties de ces jours (même proches de chez vous) et exclut les autres.
 Zurücksetzen|Réinitialiser
-📄 Reisebericht (PDF)|📄 Rapport de voyage (PDF)
+Reisebericht (PDF)|Rapport de voyage (PDF)
 ‹ Zurück zur Reise|‹ Retour au voyage
 Tag für Tag|Jour après jour
 Zeit|Heure
 Fotos im PDF|Photos dans le PDF
-⬇ PDF herunterladen|⬇ Télécharger le PDF
-🖨 Drucken|🖨 Imprimer
+PDF herunterladen|Télécharger le PDF
+Drucken|Imprimer
 Drucken|Imprimer
 Mit Meine Touren geteilt|Partagé avec Meine Touren
 Zu den Touren|Vers les sorties
@@ -1093,10 +1093,10 @@ Original wiederherstellen|Restaurar el original
 Erneut anwenden|Aplicar de nuevo
 Schnelle Abschnitte|Tramos rápidos
 ✓ Im Track wurde nichts Auffälliges gefunden.|✓ No se encontró nada sospechoso en el trazado.
-📄 Tourblatt|📄 Hoja de ruta
+Tourblatt|Hoja de ruta
 Druckbares Tourblatt mit Karte, Höhenprofil und Fotos|Hoja imprimible con mapa, perfil de altitud y fotos
 ‹ Zurück zur Tour|‹ Volver a la ruta
-🖨 Drucken / als PDF speichern|🖨 Imprimir / guardar como PDF
+Drucken / als PDF speichern|Imprimir / guardar como PDF
 Gelbe Punkte = Fotos – anklicken zum Ansehen.|Puntos amarillos = fotos: haz clic para verlas.
 ＋ Mehrtagestour bilden …|＋ Crear ruta de varios días …
 Mehrtagestour bilden|Crear ruta de varios días

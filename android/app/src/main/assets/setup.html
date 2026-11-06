@@ -1,0 +1,11 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meine Touren</title>
+<style>body{font-family:sans-serif;margin:0;padding:28px 20px;background:#f4f6f3;color:#1d2b22}
+h1{font-size:24px;margin:0 0 6px}p{color:#4d5d52;line-height:1.45}input{width:100%;box-sizing:border-box;font-size:18px;padding:12px;border:1px solid #9fb0a4;border-radius:10px;margin:8px 0}
+button{width:100%;font-size:18px;padding:14px;border:0;border-radius:10px;background:#2f6b45;color:#fff;margin-top:6px}small{color:#6b7a70}</style></head>
+<body><h1>⛰ Meine Touren</h1>
+<p>Gib die Adresse deines Meine-Touren-Servers ein, z.&thinsp;B. <b>http://192.168.178.230</b> oder deine HTTPS-/Tailscale-Adresse.</p>
+<input id="u" type="url" inputmode="url" placeholder="http://192.168.178.230" autocapitalize="off" autocomplete="off">
+<button onclick="go()">Verbinden</button>
+<p><small>Die Adresse lässt sich später in der Verwaltung unter „Auf dem Handy“ ändern.</small></p>
+<script>function go(){var v=document.getElementById('u').value.trim();if(v&&window.MTApp)MTApp.setServer(v)}</script></body></html>

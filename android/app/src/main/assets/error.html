@@ -1,0 +1,11 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nicht erreichbar</title>
+<style>body{font-family:sans-serif;margin:0;padding:28px 20px;background:#f4f6f3;color:#1d2b22}
+p{color:#4d5d52;line-height:1.45}button{width:100%;font-size:18px;padding:14px;border:0;border-radius:10px;background:#2f6b45;color:#fff;margin-top:8px}
+.s{background:#e6ebe7;color:#1d2b22}</style></head>
+<body><h1>Server nicht erreichbar</h1>
+<p id="m">Meine Touren konnte den Server nicht erreichen. Ist das Handy im Heimnetz oder per VPN (Tailscale) verbunden?</p>
+<p>Deine laufende Aufzeichnung ist davon <b>nicht</b> betroffen – sie läuft weiter und wird später hochgeladen.</p>
+<button onclick="location.href=u()">Erneut versuchen</button>
+<button class="s" onclick="MTApp.changeServer()">Serveradresse ändern</button>
+<script>function u(){return decodeURIComponent((location.search.match(/u=([^&]*)/)||[])[1]||'')+'/'}</script></body></html>

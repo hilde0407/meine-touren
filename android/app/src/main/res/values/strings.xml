@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Meine Touren</string>
+    <string name="rec_channel">Aufzeichnung</string>
+    <string name="rec_title">Aufzeichnung läuft</string>
+    <string name="rec_paused">Aufzeichnung pausiert</string>
+</resources>

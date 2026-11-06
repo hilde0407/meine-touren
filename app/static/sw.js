@@ -1,6 +1,6 @@
 // Service Worker: App-Dateien offline verfügbar; Daten (/api), Kartenkacheln und kleine Fotos werden bei Verbindung
 // frisch geladen und zuletzt Gesehenes dient als Rückfall, wenn keine Verbindung besteht.
-const V = "mt-v35", API = "mt-api-v1", TILES = "mt-tiles-v1", PICS = "mt-pics-v1";
+const V = "mt-v36", API = "mt-api-v1", TILES = "mt-tiles-v1", PICS = "mt-pics-v1";
 const KEEP = [V, API, TILES, PICS];
 const NOCACHE = /^\/api\/(jobs|update|selftest|health|login|logout|setup|me\/password|clock-check\/ignore)/;
 self.addEventListener("install", e => { self.skipWaiting(); });
