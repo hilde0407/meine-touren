@@ -21,6 +21,8 @@ const recStatus = () => {
 const recDur = s => `${Math.floor(s / 3600)}:${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
 if (recApp()) {
+  /* Smartphone-Ansicht: Menü „Mehr“ (Tab-Leiste) */
+  if (typeof MORE !== "undefined" && !MORE.some(x => x[0] === "record")) MORE.unshift(["record", "● Aufzeichnen"], ["apptest", "App-Test"]);
   const nav = document.querySelector("#nav");
   if (nav && !nav.querySelector('[data-k="record"]')) {
     nav.querySelector('[data-k="admin"]').insertAdjacentHTML("beforebegin", '<a href="#/record" data-k="record">● Aufzeichnen</a>');

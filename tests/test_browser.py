@@ -662,7 +662,12 @@ def test_record_view_app(page):
     """)
     page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(800)
     assert page.locator('nav a[data-k="record"]').count() == 1
-    page.goto(base + "#/record"); page.wait_for_timeout(500)
+    page.set_viewport_size({"width": 390, "height": 800}); page.wait_for_timeout(500)
+    page.click("#tmore"); page.wait_for_timeout(300)
+    assert page.locator('.moregrid a[href="#/record"]').count() == 1
+    assert page.locator('.moregrid a[href="#/record"]').is_visible(), 'Menüpunkt nicht sichtbar'
+    page.locator('.moregrid a[href="#/record"]').dispatch_event('click'); page.wait_for_timeout(500)
+    page.set_viewport_size({"width": 1280, "height": 800})
     page.fill("#rname", "Testrunde"); page.click("#rstart"); page.wait_for_timeout(700)
     assert "1,23" in page.inner_text("#rd") and page.locator("#rmap").count() == 1
     page.once("dialog", lambda d: d.accept())
