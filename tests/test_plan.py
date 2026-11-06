@@ -96,3 +96,16 @@ def test_plan_switch_and_test(monkeypatch):
         plan.api_plan_route({"a": [48.0, 8.0], "b": [48.01, 8.02]})
     assert e.value.status_code == 403
     db.put("plan_enabled", "1")
+
+
+def test_plan_api_gate():
+    from app import main, db
+    from fastapi.testclient import TestClient
+    c = TestClient(main.app)
+    db.put("plan_enabled", "0")
+    try:
+        assert c.get("/api/plans").status_code == 403
+        assert c.get("/api/plan/guide/x").status_code == 403
+    finally:
+        db.put("plan_enabled", "1")
+    assert c.get("/api/plans").status_code == 200

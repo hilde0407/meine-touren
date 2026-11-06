@@ -6,11 +6,17 @@ import time
 
 import requests
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from . import db, elev, config
 
-router = APIRouter()
+def _gate(request: Request):
+    """Ist die Tourplanung ausgeschaltet, antwortet die ganze Planungs-Schnittstelle mit 403 (außer dem Verbindungstest der Einstellungen)."""
+    if request.url.path != "/api/plan/test" and not enabled():
+        raise HTTPException(403, "Die Tourplanung ist in den Einstellungen ausgeschaltet")
+
+
+router = APIRouter(dependencies=[Depends(_gate)])
 MAXPTS = 3000
 
 
