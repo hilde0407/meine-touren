@@ -91,9 +91,66 @@ def build_trips():
     return sorted(out, key=lambda x: x["start"], reverse=True)
 
 
+def _apply_trip_edits(trips):
+    """Eigene Namen und Zeiträume über die automatisch erkannten Reisen legen (Schlüssel = ID der ersten Tour der erkannten Reise)."""
+    ed = {r["id"]: r for r in db.query("SELECT * FROM trip_edit")}
+    if not ed:
+        return trips
+    day = lambda t: datetime.fromtimestamp(t["start_ts"], tz=TZ).date().isoformat()
+    allt = None
+    for t in trips:
+        e = ed.get(t["id"])
+        t["auto_region"], t["auto_start"], t["auto_end"] = t["region"], t["start"], t["end"]
+        if not e:
+            continue
+        t["edited"] = True
+        if e["name"]:
+            t["region"], t["country"] = e["name"], None
+        if (e["start"] and e["start"] != t["start"]) or (e["end"] and e["end"] != t["end"]):
+            d0, d1 = e["start"] or t["start"], e["end"] or t["end"]
+            if allt is None:
+                allt = db.query("SELECT id, start_ts, dist_m, up_m, dur_s FROM tours WHERE start_ts IS NOT NULL ORDER BY start_ts")
+            g = [x for x in allt if d0 <= day(x) <= d1]
+            if g:
+                days = {day(x) for x in g}
+                t.update(start=min(days), end=max(days), days=(datetime.fromisoformat(max(days)) - datetime.fromisoformat(min(days))).days + 1,
+                         tours=[x["id"] for x in g], km=round(sum(x["dist_m"] or 0 for x in g) / 1000, 1),
+                         up_m=round(sum(x["up_m"] or 0 for x in g)), h=round(sum(x["dur_s"] or 0 for x in g) / 3600, 1))
+    return sorted(trips, key=lambda x: x["start"], reverse=True)
+
+
+@router.post("/api/trips/{trip_id}/edit")
+def api_trip_edit(trip_id: str, body: dict):
+    """Name und/oder Zeitraum einer Reise ändern. Leer lassen = automatische Werte; alles leer = zurücksetzen."""
+    if not any(t["id"] == trip_id for t in build_trips()):
+        raise HTTPException(404, "Reise nicht gefunden")
+    name = (body.get("name") or "").strip()[:120]
+    d0, d1 = (body.get("start") or "").strip(), (body.get("end") or "").strip()
+    for d in (d0, d1):
+        if d:
+            try:
+                datetime.fromisoformat(d)
+            except ValueError:
+                raise HTTPException(400, "Datum bitte als JJJJ-MM-TT angeben")
+    if d0 and d1 and d0 > d1:
+        raise HTTPException(400, "Das Ende liegt vor dem Beginn")
+    auto = next(t for t in build_trips() if t["id"] == trip_id)
+    if name == auto["region"]:
+        name = ""
+    if d0 == auto["start"]:
+        d0 = ""
+    if d1 == auto["end"]:
+        d1 = ""
+    if name or d0 or d1:
+        db.execute("INSERT OR REPLACE INTO trip_edit(id,name,start,end) VALUES(?,?,?,?)", (trip_id, name, d0, d1))
+    else:
+        db.execute("DELETE FROM trip_edit WHERE id=?", (trip_id,))
+    return {"ok": True}
+
+
 @router.get("/api/trips")
 def api_trips():
-    out = build_trips()
+    out = _apply_trip_edits(build_trips())
     for t in out:
         t["photo"] = cover_photo(t["tours"])
     return out

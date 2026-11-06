@@ -581,3 +581,43 @@ def test_plan_switch_ui_and_album_stats(page):
     page.goto(base + "#/album/statstest"); page.wait_for_timeout(1500)
     txt = page.inner_text("main")
     assert "Statistik nach Aktivität" in txt and "Abstieg" in txt and "Wandern" in txt, txt[:400]
+
+
+def test_trip_edit_and_pdf_sheet(page):
+    import json as _j
+    base = page.url.split("#")[0]
+    page.goto(base + "#/tours"); page.wait_for_timeout(1000)
+    ids = page.evaluate("TOURS.slice(0, 3).map(t => t.id)")
+    day = lambda i: page.evaluate("TOURS.find(t => t.id === '%s').date.slice(0, 10)" % ids[i])
+    fake = [{"id": ids[0], "region": "Kanaren", "country": "Spanien", "start": day(0), "end": day(0), "days": 1, "tours": ids, "km": 10, "up_m": 100, "h": 2, "photo": None}]
+    page.route("**/api/trips", lambda r: r.fulfill(status=200, content_type="application/json", body=_j.dumps(fake)))
+    page.goto(base + "#/trip/" + ids[0]); page.wait_for_timeout(1500)
+    assert page.locator("#tredit").count() == 1 and page.locator("#trpdf").count() == 1
+    assert "Statistik nach Aktivität" in page.inner_text("main")
+    page.click("#tredit")
+    assert page.input_value("#tn") == "Kanaren" and page.locator("#tf").count() == 1
+    page.click("#tno")
+    page.click("#trpdf"); page.wait_for_timeout(1800)
+    txt = page.inner_text("main")
+    assert "Kanaren" in txt and "Tag für Tag" in txt and "Statistik nach Aktivität" in txt and "Drucken" in txt
+    assert page.locator("#tm").count() == 1
+
+
+def test_pdf_photo_choice(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/tours"); page.wait_for_timeout(1000)
+    tid = page.evaluate("(TOURS.find(t => t.photos) || TOURS[0]).id")
+    page.goto(base + "#/sheet/" + tid); page.wait_for_timeout(1500)
+    assert page.locator("#pdfon").is_checked() and page.input_value("#pdfn") == "6"
+    n_on = page.locator("#th .th").count()
+    page.select_option("#pdfn", "3"); page.wait_for_timeout(800)
+    assert page.locator("#th .th").count() <= 3
+    s = page.evaluate("api('/api/settings').then(s => [s.pdf_photos, s.pdf_photo_n])")
+    assert s == ["1", "3"]
+    page.uncheck("#pdfon"); page.wait_for_timeout(800)
+    assert page.locator("#th .th").count() == 0 and page.is_disabled("#pdfn")
+    assert page.evaluate("api('/api/settings').then(s => s.pdf_photos)") == "0"
+    # gilt appweit: auch im Jahresrückblick
+    page.goto(base + "#/recap/2024"); page.wait_for_timeout(1500)
+    assert page.locator("#pdfon").count() == 1 and not page.locator("#pdfon").is_checked()
+    page.evaluate("api('/api/settings', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({pdf_photos: '1', pdf_photo_n: '6'})})")

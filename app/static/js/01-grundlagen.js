@@ -243,7 +243,7 @@ const years = () => [...new Set(TOURS.map(t => t.y))].sort((a, b) => b - a);
 async function route() {
   const [path, qs] = (location.hash || "#/dash").replace(/^#\/?/, "").split("?");
   const [k = "dash", name] = path.split("/");
-  document.querySelectorAll("nav a").forEach(a => a.classList.toggle("on", a.dataset.k === (k === "tour" || k === "flight" || k === "plan" ? "tours" : k)));
+  document.querySelectorAll("nav a").forEach(a => a.classList.toggle("on", a.dataset.k === (k === "tour" || k === "flight" || k === "plan" ? "tours" : k === "tripsheet" || k === "trip" ? "trips" : k)));
   document.querySelectorAll(".modal").forEach(m => m.remove());
   clearInterval(pollTimer);
   if (map) {

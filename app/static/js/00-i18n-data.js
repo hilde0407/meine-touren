@@ -627,7 +627,16 @@ Stunden|Heures
 Ø km/h|Ø km/h
 Längste km|Plus longue km
 Gesamt|Total
-Abstieg|Descente`,
+Abstieg|Descente
+✎ Reise bearbeiten|✎ Modifier le voyage
+Reise bearbeiten|Modifier le voyage
+Name und Zeitraum der automatisch erkannten Reise. Ein anderer Zeitraum nimmt alle Touren dieser Tage auf (auch solche, die nicht weit von zu Hause waren) bzw. lässt Touren außerhalb weg.|Nom et période du voyage détecté automatiquement. Une autre période inclut toutes les sorties de ces jours (même proches de chez vous) et exclut les autres.
+Zurücksetzen|Réinitialiser
+📄 Reisebericht (PDF)|📄 Rapport de voyage (PDF)
+‹ Zurück zur Reise|‹ Retour au voyage
+Tag für Tag|Jour après jour
+Zeit|Heure
+Fotos im PDF|Photos dans le PDF`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
 Aktivität im Jahr 2026|Actividad en 2026
 Neuere Tour (←)|Ruta más reciente (←)
@@ -1255,5 +1264,11 @@ Stunden|Horas
 Ø km/h|Ø km/h
 Längste km|Más larga km
 Gesamt|Total
-Abstieg|Descenso`,
+Abstieg|Descenso
+✎ Reise bearbeiten|✎ Editar viaje
+Reise bearbeiten|Editar viaje
+Name und Zeitraum der automatisch erkannten Reise. Ein anderer Zeitraum nimmt alle Touren dieser Tage auf (auch solche, die nicht weit von zu Hause waren) bzw. lässt Touren außerhalb weg.|Nombre y período del viaje detectado automáticamente. Otro período incluye todas las rutas de esos días (también las cercanas a casa) y excluye las demás.
+Zurücksetzen|Restablecer
+
+Fotos im PDF|Fotos en el PDF`,
 };

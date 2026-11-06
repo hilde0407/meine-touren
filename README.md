@@ -159,6 +159,12 @@ Die Zuordnung nutzt Zeit **und** Ort: Überlappen sich Touren, entscheidet der A
 
 Im Tourdetail öffnet **„📍 Fotos ausrichten“** die Karte im Ausrichtungsmodus: Ein Foto wird auf die Stelle der Strecke gezogen, an der man sicher ist, dass es dort entstand; alle anderen Fotos wandern wie auf einer Perlenkette im gleichen zeitlichen Abstand mit (mit Uhrzeit-Beschriftung). „Speichern“ verschiebt die Aufnahmezeiten dauerhaft um diesen Betrag (wahlweise auch die anderen Fotos desselben Tages); „Original-Zeiten“ nimmt jede Verschiebung zurück. Voraussetzung: die Strecke enthält Zeitstempel.
 
+### Neu in Version 1.13
+
+* **Reisen bearbeiten:** In der Reise gibt es „✎ Reise bearbeiten“: Name und Zeitraum lassen sich ändern. Ein größerer Zeitraum nimmt alle Touren dieser Tage auf, ein kleinerer lässt Touren weg; Kilometer, Aufstieg und Statistik passen sich an. „Zurücksetzen“ stellt die automatische Erkennung wieder her.
+* **Reisebericht als PDF:** „📄 Reisebericht (PDF)“ in der Reise öffnet eine druckbare Seite mit Karte (Tage in Farben), Statistik nach Aktivität, Tag-für-Tag-Liste und den besten Fotos. Über „Drucken / als PDF speichern“ (auch am Handy) entsteht die PDF-Datei.
+* **Fotos im PDF wählbar:** In Tourblatt, Reisebericht und Jahresrückblick lässt sich über „Fotos im PDF“ einstellen, ob Fotos dabei sind und wie viele (3 bis 24). Die Wahl gilt appweit und wird gespeichert.
+
 ### Neu in Version 1.12.2
 
 * **Tourplanung komplett abschaltbar:** Ist „Tourplanung“ unter Verwaltung → „Touren & Quellen“ aus, sind neben den Schaltflächen und der Seite auch alle Planungs-Schnittstellen der App gesperrt.

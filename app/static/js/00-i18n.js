@@ -648,7 +648,16 @@ Aktivität|Activity
 Aufstieg m|Ascent m
 Abstieg m|Descent m
 Ø km/h|Ø km/h
-Längste km|Longest km`;
+Längste km|Longest km
+✎ Reise bearbeiten|✎ Edit trip
+Reise bearbeiten|Edit trip
+Name und Zeitraum der automatisch erkannten Reise. Ein anderer Zeitraum nimmt alle Touren dieser Tage auf (auch solche, die nicht weit von zu Hause waren) bzw. lässt Touren außerhalb weg.|Name and period of the automatically detected trip. A different period includes all tours of those days (even ones close to home) and drops tours outside it.
+Zurücksetzen|Reset
+📄 Reisebericht (PDF)|📄 Trip report (PDF)
+‹ Zurück zur Reise|‹ Back to trip
+Tag für Tag|Day by day
+Zeit|Time
+Fotos im PDF|Photos in PDF`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");

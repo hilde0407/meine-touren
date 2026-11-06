@@ -263,11 +263,12 @@ VIEWS.recap = async name => {
       .slice(0, 5),
     steep = sel.slice().sort((a, b) => (b.up_m || 0) - (a.up_m || 0))[0],
     bm = mm.indexOf(Math.max(...mm));
+  await pdfPhotoLoad();
   const days = new Set(sel.map(t => t.date.slice(0, 10))).size,
-    ph = await api(`/api/photos?year=${Y}&random=true&limit=12`).catch(() => []);
+    ph = await api(`/api/photos?year=${Y}&random=true&limit=${Math.max(12, PDFP.n)}`).catch(() => []);
   const dl = (a, b) => (b ? `${a >= b ? "+" : "−"}${nf((Math.abs(a - b) / b) * 100, 0)} % gegenüber ${Y - 1}` : "");
   $("#main").innerHTML =
-    `<div class="recap"><div class="noprint row" style="margin-bottom:10px"><a class="back" href="#/dash?y=${Y}">‹ Übersicht</a><span class="sp"></span><button class="btn ghost sm" onclick="print()">Drucken / als PDF speichern</button></div>
+    `<div class="recap"><div class="noprint row" style="margin-bottom:10px"><a class="back" href="#/dash?y=${Y}">‹ Übersicht</a><span class="sp"></span>${pdfPhotoBar()}<button class="btn ghost sm" onclick="print()">Drucken / als PDF speichern</button></div>
    <div class="rhero"><div class="k">Mein Tourenjahr</div><h1>${Y}</h1><div class="rs"><span><b>${nf(sel.length, 0)}</b> Touren</span><span><b>${nf(km, 0)}</b> km</span><span><b>${nf(up, 0)}</b> Höhenmeter</span><span><b>${nf(h, 0)}</b> Stunden</span><span><b>${days}</b> Tage unterwegs</span></div>
    <div class="rd">${[
      dl(
@@ -282,6 +283,14 @@ VIEWS.recap = async name => {
    <div class="panel" style="margin-top:34px"><h2>Die fünf längsten Touren</h2><div class="tl">${top.map(tourRow).join("")}</div><div class="mut" style="margin-top:10px">Meiste Höhenmeter: <a href="#/tour/${steep.id}">${esc(steep.name)}</a> (${nf(steep.up_m, 0)} m)</div></div>
    ${ph.length ? `<div class="panel" style="margin-top:34px"><div class="row"><h2>Fotos des Jahres</h2><span class="sp"></span><a class="btn sm noprint" target="_blank" href="slideshow.html?year=${Y}">Diashow</a></div><div class="thumbs" id="rph">${ph.map((p, i) => `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=400" data-i="${i}"></div>`).join("")}</div></div>` : ""}</div>`;
   if (ph.length) bindThumbs($("#rph"), ph);
+  const mark = () => {                  // Fotos nur im Druck/PDF: aus oder nur die ersten n
+    const pn = $("#rph") && $("#rph").closest(".panel");
+    if (!pn) return;
+    pn.classList.toggle("noprint", !PDFP.on);
+    [...$("#rph").children].forEach((c, i) => c.classList.toggle("noprint", i >= PDFP.n));
+  };
+  pdfPhotoBind(mark);
+  mark();
 };
 
 /* ---- Tourdetail: Notiz, GPX, Teilen ---- */
