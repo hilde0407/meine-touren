@@ -93,6 +93,10 @@ const ALT_COL = ["#e8590c", "#1c7ed6", "#9c36b5", "#2b8a3e"];
 VIEWS.plan = async (pid, q) => {
   const P = {id: null, wp: [], rt: true, alt: {}, segs: {}, pend: {}, sel: null, stored: null, ele: null, dense: null, up: null, down: null, max: null, warned: false};
   $("#main").className = "";
+  if (!(await planOn())) {
+    $("#main").innerHTML = `<div class="row"><a class="back" href="#/tours">‹ Alle Touren</a></div><div class="sec"><h2>Tour planen</h2></div><p class="mut">Die Tourplanung ist ausgeschaltet. Du kannst sie unter Verwaltung → „Tourplanung“ wieder einschalten.</p>`;
+    return;
+  }
   const [plans, guides] = await Promise.all([api("/api/plans").catch(() => []), api("/api/guides").catch(() => [])]);
   const sports = Object.keys(SPORT);
   const planRow = p => `<div class="r" data-p="${p.id}" style="cursor:pointer"><span>${esc(p.name)}<small>${sName(p.sport)} · ${nf(p.km || 0, 1)} km · ↑ ${nf(p.up || 0, 0)} m${p.est_h ? " · ca. " + hmm(p.est_h) + " h" : ""}</small></span><span><button class="btn ghost sm" data-d="${p.id}" title="Plan löschen">✕</button></span></div>`;
@@ -421,13 +425,13 @@ const _tours27 = VIEWS.tours;
 VIEWS.tours = async (...a) => {
   await _tours27(...a);
   const h = document.querySelector("#main .sec");
-  if (h && !$("#plink")) h.insertAdjacentHTML("beforeend", `<span class="sp"></span><a class="btn alt sm" id="plink" href="#/plan">🗺 Tour planen</a>`);
+  if (h && !$("#plink") && (await planOn())) h.insertAdjacentHTML("beforeend", `<span class="sp"></span><a class="btn alt sm" id="plink" href="#/plan">🗺 Tour planen</a>`);
 };
 const _places27 = VIEWS.places;
 VIEWS.places = async (...a) => {
   await _places27(...a);
   const w = $("#wlist");
-  if (!w || w.dataset.plan) return;
+  if (!w || w.dataset.plan || !(await planOn())) return;
   w.dataset.plan = "1";
   const mark = () => {
     const h = w.querySelector(".sec");
@@ -441,16 +445,59 @@ VIEWS.places = async (...a) => {
   new MutationObserver(mark).observe(w, {childList: true, subtree: true});
 };
 
-/* Verwaltung: eigene BRouter-Adresse (optional) */
+/* Verwaltung: Tourplanung ein/aus, Routing-Dienst wählen */
+const planOn = () => api("/api/settings").then(s => (s.plan_enabled || "1") !== "0").catch(() => true);
 const _admin27 = VIEWS.admin;
 VIEWS.admin = async (...a) => {
   await _admin27(...a);
   const sv = $("#save");
   if (!sv || $("#brpanel")) return;
   const s = await api("/api/settings").catch(() => ({}));
+  const on = (s.plan_enabled || "1") !== "0",
+    url = s.brouter_url || "";
+  let mode = s.plan_mode || (url ? "custom" : "public");
+  const host = location.hostname || "SERVER-IP",
+    localUrl = `http://${host}:17777/brouter`,
+    cmd = "sudo bash deploy/brouter/install-brouter.sh";
   sv.closest(".row").insertAdjacentHTML(
     "beforebegin",
-    `<div class="panel" id="brpanel" style="margin-top:30px"><h2>Routenplanung (optional)</h2><p class="mut">Die Tourplanung verbindet Punkte über Wege des öffentlichen Dienstes <b>brouter.de</b> (OpenStreetMap). Dabei werden die Koordinaten der geplanten Punkte dorthin gesendet. Wer das nicht möchte, trägt hier die Adresse eines <b>eigenen BRouter-Servers</b> ein (z. B. <code>http://192.168.178.50:17777/brouter</code>) oder schaltet in der Planung „Wegen folgen“ aus.</p>
-     <div class="field"><label>BRouter-Adresse (leer = brouter.de)</label><input data-k="brouter_url" value="${esc(s.brouter_url || "")}" placeholder="https://brouter.de/brouter"></div></div>`
+    `<div class="panel" id="brpanel"><h2>Tourplanung</h2>
+     <div class="field"><label>Funktion „Tour planen“</label><select data-k="plan_enabled" id="pon"><option value="1">an</option><option value="0">aus</option></select></div>
+     <div id="pbox">
+      <p class="mut">Die Planung verbindet deine Punkte über Wege aus OpenStreetMap. Dafür braucht es einen Routing-Dienst (BRouter). Wähle, wo er läuft:</p>
+      <label class="pmode"><input type="radio" name="pm" value="public"> <b>Öffentlicher Dienst brouter.de</b><small>Nichts zu installieren. Die Koordinaten der geplanten Punkte werden an brouter.de gesendet.</small></label>
+      <label class="pmode"><input type="radio" name="pm" value="local"> <b>Eigener BRouter auf diesem Server</b><small>Kostenlos, privat und schnell. Einmalig installieren (siehe unten), die Adresse ist dann <code>${esc(localUrl)}</code>.</small></label>
+      <label class="pmode"><input type="radio" name="pm" value="custom"> <b>Anderer BRouter-Server im Netz</b><small>Du trägst die Adresse eines vorhandenen BRouter ein (z. B. auf einem NAS oder Raspberry Pi).</small></label>
+      <div class="field" id="purlf" style="margin-top:10px"><label>BRouter-Adresse</label><input data-k="brouter_url" id="purl" value="${esc(url)}" placeholder="http://192.168.178.50:17777/brouter"></div>
+      <div class="row" style="gap:8px;margin:6px 0"><button class="btn alt sm" id="ptest" type="button">Verbindung testen</button><span id="ptm" class="mut"></span></div>
+      <div id="pinst" style="display:none"><p class="mut" style="margin:10px 0 4px"><b>Installation auf dem Server</b> (Debian/Ubuntu, einmalig; lädt BRouter und die Karten-Kacheln für Deutschland/Alpenraum, je 100–400&nbsp;MB):</p>
+        <pre style="white-space:pre-wrap;user-select:all;margin:0 0 6px;padding:8px 10px;background:var(--surface);border:1px solid var(--rule);border-radius:8px">cd ~/meine-touren   # bzw. dein Installationsordner
+${esc(cmd)}
+# andere Regionen, z. B. Kanaren: ${esc(cmd)} E5_N45 W20_N25</pre>
+        <p class="mut" style="font-size:13px;margin:0">Die App installiert nichts selbst (dafür sind Administratorrechte nötig). Danach „Verbindung testen“ und speichern. Ausführliche Anleitung: README → „Eigener BRouter-Server“.</p></div>
+      <input type="hidden" data-k="plan_mode" id="pmode"></div></div>`
   );
+  const upd = () => {
+    mode = (document.querySelector('input[name="pm"]:checked') || {}).value || "public";
+    $("#pmode").value = mode;
+    $("#pbox").style.display = $("#pon").value === "0" ? "none" : "";
+    $("#purlf").style.display = mode === "public" ? "none" : "";
+    $("#pinst").style.display = mode === "local" ? "" : "none";
+    if (mode === "local" && !$("#purl").value.trim()) $("#purl").value = localUrl;
+    $("#ptest").style.display = mode === "public" ? "none" : "";
+  };
+  $("#pon").value = on ? "1" : "0";
+  document.querySelector(`input[name="pm"][value="${mode}"]`).checked = true;
+  $("#pon").onchange = upd;
+  document.querySelectorAll('input[name="pm"]').forEach(r => (r.onchange = upd));
+  upd();
+  $("#ptest").onclick = async () => {
+    $("#ptm").textContent = "prüfe …";
+    try {
+      const r = await api("/api/plan/test", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({url: $("#purl").value})});
+      $("#ptm").innerHTML = `<span class="${r.ok ? (r.warn ? "" : "ok") : "bad"}">${esc(r.msg)}</span>`;
+    } catch (e) {
+      $("#ptm").innerHTML = `<span class="bad">${esc(e.message)}</span>`;
+    }
+  };
 };

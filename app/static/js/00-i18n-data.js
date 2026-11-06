@@ -611,7 +611,23 @@ Klick auf die Karte setzt einen Punkt, Rechtsklick auf einen Punkt entfernt ihn.
 Alternativen anzeigen|Afficher les alternatives
 Keine Alternativen gefunden.|Aucune alternative trouvée.
 Routenplanung (optional)|Planification d’itinéraire (facultatif)
-BRouter-Adresse (leer = brouter.de)|Adresse BRouter (vide = brouter.de)`,
+BRouter-Adresse (leer = brouter.de)|Adresse BRouter (vide = brouter.de)
+Tourplanung|Planification de sorties
+Funktion „Tour planen“|Fonction « Planifier une sortie »
+Öffentlicher Dienst brouter.de|Service public brouter.de
+Eigener BRouter auf diesem Server|BRouter personnel sur ce serveur
+Anderer BRouter-Server im Netz|Autre serveur BRouter du réseau
+BRouter-Adresse|Adresse BRouter
+Verbindung testen|Tester la connexion
+Statistik nach Aktivität|Statistiques par activité
+Aktivität|Activité
+Aufstieg m|Montée m
+Abstieg m|Descente m
+Stunden|Heures
+Ø km/h|Ø km/h
+Längste km|Plus longue km
+Gesamt|Total
+Abstieg|Descente`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
 Aktivität im Jahr 2026|Actividad en 2026
 Neuere Tour (←)|Ruta más reciente (←)
@@ -1223,5 +1239,21 @@ Klick auf die Karte setzt einen Punkt, Rechtsklick auf einen Punkt entfernt ihn.
 Alternativen anzeigen|Mostrar alternativas
 Keine Alternativen gefunden.|No se encontraron alternativas.
 Routenplanung (optional)|Planificación de rutas (opcional)
-BRouter-Adresse (leer = brouter.de)|Dirección de BRouter (vacío = brouter.de)`,
+BRouter-Adresse (leer = brouter.de)|Dirección de BRouter (vacío = brouter.de)
+Tourplanung|Planificación de rutas
+Funktion „Tour planen“|Función «Planificar una ruta»
+Öffentlicher Dienst brouter.de|Servicio público brouter.de
+Eigener BRouter auf diesem Server|BRouter propio en este servidor
+Anderer BRouter-Server im Netz|Otro servidor BRouter en la red
+BRouter-Adresse|Dirección de BRouter
+Verbindung testen|Probar conexión
+Statistik nach Aktivität|Estadísticas por actividad
+Aktivität|Actividad
+Aufstieg m|Ascenso m
+Abstieg m|Descenso m
+Stunden|Horas
+Ø km/h|Ø km/h
+Längste km|Más larga km
+Gesamt|Total
+Abstieg|Descenso`,
 };

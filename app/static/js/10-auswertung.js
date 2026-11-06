@@ -224,6 +224,20 @@ VIEWS.tour = async (id, q) => {
 
 /* =====================  Sammlungen: Reisen & Alben  ===================== */
 const DAYC = ["#e11d74", "#f2c230", "#00a6d6", "#7cc43a", "#ff6a1a", "#8e5bd6", "#16a085", "#c0392b"];
+/* Statistik je Aktivität (Sportart) für Reisen, Alben und Etappen */
+function collStats(ts) {
+  const g = {};
+  ts.forEach(t => (g[t.sport || "other"] = g[t.sport || "other"] || []).push(t));
+  const keys = Object.keys(g).sort((a, b) => g[b].reduce((c, t) => c + t.km, 0) - g[a].reduce((c, t) => c + t.km, 0));
+  if (!ts.length) return "";
+  const row = (name, col, a) => {
+    const sm = f => a.reduce((c, t) => c + (f(t) || 0), 0),
+      km = sm(t => t.km),
+      h = sm(t => t.h);
+    return `<tr><td>${col ? `<i class="dot" style="background:${col}"></i>` : ""}${esc(name)}</td><td>${a.length}</td><td>${nf(km, 1)}</td><td>${nf(sm(t => t.up_m), 0)}</td><td>${nf(sm(t => t.down_m), 0)}</td><td>${nf(h, 1)}</td><td>${h > 0 ? nf(km / h, 1) : "–"}</td><td>${nf(Math.max(...a.map(t => t.km || 0)), 1)}</td></tr>`;
+  };
+  return `<div class="sec"><h2>Statistik nach Aktivität</h2></div><div class="tblw"><table class="cstat"><thead><tr><th>Aktivität</th><th>Touren</th><th>km</th><th>Aufstieg m</th><th>Abstieg m</th><th>Stunden</th><th>Ø km/h</th><th>Längste km</th></tr></thead><tbody>${keys.map(k => row(sName(k), typeof sCol === "function" ? sCol(k) : "", g[k])).join("")}</tbody>${keys.length > 1 ? `<tfoot>${row("Gesamt", "", ts).replace(/<td>/g, "<td><b>").replace(/<\/td>/g, "</b></td>")}</tfoot>` : ""}</table></div>`;
+}
 async function collView(title, sub, ids, back) {
   const ts = ids
       .map(i => BY[i])
@@ -241,9 +255,13 @@ async function collView(title, sub, ids, back) {
       sum(t => t.up_m || 0),
       0
     )}<span class="u">m</span></div><div class="l">Aufstieg</div></div><div class="fig"><div class="v">${nf(
+      sum(t => t.down_m || 0),
+      0
+    )}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${nf(
       sum(t => t.h),
       0
     )}<span class="u">h</span></div><div class="l">Unterwegs</div></div><div class="fig"><div class="v">${days.length}</div><div class="l">Tage</div></div></div>
+   ${collStats(ts)}
    <div class="row" style="margin:6px 0 12px"><a class="btn" href="#/flight/${encodeURIComponent("set:" + ts.map(t => t.id).join(","))}">3D-Flug über alles</a><button class="btn alt" id="coff" title="Kartenkacheln dieser Strecken zwischenspeichern">Karte offline speichern</button><span id="cofm" class="mut"></span></div>
    <div class="tmap" id="cm" style="height:460px"></div><div class="sec"><h2>Fotos</h2></div><div class="thumbs" id="cph"></div><div class="sec"><h2>Touren</h2></div><div class="tl">${ts.map(tourRow).join("")}</div>`;
   map = mkMap("cm", {layers: true});

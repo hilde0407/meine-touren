@@ -259,3 +259,13 @@ a.chip{text-decoration:none;color:inherit;cursor:pointer}a.chip .sw{margin-right
 .cmpbar{height:14px;border-radius:3px;background:var(--soft)}.cmpbar i{display:block;height:100%;border-radius:3px;background:var(--green,#2f8f5f)}.cmprow{display:grid;grid-template-columns:96px 1fr 120px;gap:10px;align-items:center;margin:6px 0}.cmprow.me{font-weight:700}
 @media(max-width:700px){.cmprow{grid-template-columns:80px 1fr 90px}}
 #note,#snote{resize:both;min-width:200px}
+
+.pmode{display:block;margin:8px 0;padding:8px 10px;border:1px solid var(--rule);border-radius:var(--r);cursor:pointer}
+.pmode small{display:block;color:var(--mut);margin:2px 0 0 22px}
+.tblw{overflow-x:auto}
+.cstat{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+.cstat th,.cstat td{padding:7px 10px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
+.cstat th:first-child,.cstat td:first-child{text-align:left}
+.cstat th{font-size:12px;color:var(--mut);font-weight:600}
+.cstat tfoot td{border-top:2px solid var(--rule)}
+.cstat .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px}

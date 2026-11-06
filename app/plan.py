@@ -1,5 +1,6 @@
 """Touren planen: Strecke zeichnen oder laden, Höhenmeter aus dem Geländemodell, gespeicherte Pläne."""
 import json
+import re
 import threading
 import time
 
@@ -47,13 +48,43 @@ UA = {"User-Agent": "MeineTouren/1.0 (privates Selbsthosting; https://github.com
 _RC, _RL = {}, threading.Lock()
 
 
+def enabled():
+    return (db.get("plan_enabled") or "1") != "0"
+
+
 def _brouter_url():
-    return (db.get("brouter_url") or "").strip().rstrip("/") or BROUTER
+    own = (db.get("brouter_url") or "").strip().rstrip("/")
+    mode = db.get("plan_mode") or ""
+    if mode == "public" or not own:
+        return BROUTER
+    return own
+
+
+@router.post("/api/plan/test")
+def api_plan_test(body: dict):
+    """Prüft, ob unter der Adresse ein BRouter antwortet (leer = aktuell eingestellte Adresse)."""
+    url = (body.get("url") or "").strip().rstrip("/")
+    if url and not url.lower().startswith(("http://", "https://")):
+        raise HTTPException(400, "Die Adresse muss mit http:// oder https:// beginnen")
+    url = url or _brouter_url()
+    try:
+        r = requests.get(url, params={"lonlats": "8.4037,49.0069|8.4137,49.0119", "profile": "trekking", "alternativeidx": 0, "format": "geojson"}, headers=UA, timeout=12)
+    except Exception as e:
+        return {"ok": False, "msg": f"Keine Verbindung zu {url}: {str(e)[:120]}"}
+    txt = (r.text or "")[:300]
+    if r.status_code == 200 and '"features"' in txt + r.text[:2000]:
+        return {"ok": True, "msg": "BRouter antwortet, Routen werden berechnet ✓"}
+    if "datafile" in txt and "not found" in txt:
+        m = re.search(r"datafile (\S+)", txt)
+        return {"ok": True, "warn": True, "msg": f"BRouter läuft, aber die Karten-Kachel {m.group(1) if m else ''} fehlt noch (bei Test-Punkten in Karlsruhe). Für andere Regionen ist das normal; nötige Kacheln mit install-brouter.sh nachladen."}
+    return {"ok": False, "msg": f"Unerwartete Antwort ({r.status_code}): {txt[:150]}"}
 
 
 @router.post("/api/plan/route")
 def api_plan_route(body: dict):
     """Verbindet zwei Punkte über bekannte Wege (OpenStreetMap, BRouter). alt = 0 … 3: Alternativrouten."""
+    if not enabled():
+        raise HTTPException(403, "Die Tourplanung ist in den Einstellungen ausgeschaltet")
     a, b = _pts([body.get("a")]), _pts([body.get("b")])
     if not a or not b:
         raise HTTPException(400, "Start und Ziel angeben")

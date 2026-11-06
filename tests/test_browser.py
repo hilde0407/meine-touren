@@ -552,3 +552,32 @@ def test_plan_page(page):
     page.wait_for_timeout(1500)
     assert 2.5 < km() < 2.9
     assert not page.errors, page.errors
+
+
+def test_plan_switch_ui_and_album_stats(page):
+    base = page.url.split("#")[0]
+    page.evaluate("api('/api/settings', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({plan_enabled: '1', plan_mode: '', brouter_url: ''})})")
+    page.goto(base + "#/tours"); page.wait_for_timeout(1200)
+    assert page.locator("#plink").count() == 1
+    page.goto(base + "#/admin?tab=quellen"); page.wait_for_timeout(1500)
+    assert page.locator("#brpanel").count() == 1 and page.is_visible("#brpanel")
+    page.check('input[name="pm"][value="local"]')
+    assert page.is_visible("#pinst") and "install-brouter.sh" in page.inner_text("#pinst")
+    assert ":17777/brouter" in page.input_value("#purl")
+    page.route("**/api/plan/test", lambda r: r.fulfill(status=200, content_type="application/json", body='{"ok": true, "msg": "BRouter antwortet, Routen werden berechnet ✓"}'))
+    page.click("#ptest"); page.wait_for_timeout(500)
+    assert "antwortet" in page.inner_text("#ptm")
+    page.select_option("#pon", "0"); assert not page.is_visible("#pbox")
+    page.click("#save"); page.wait_for_timeout(600)
+    page.goto(base + "#/tours"); page.wait_for_timeout(1200)
+    assert page.locator("#plink").count() == 0
+    page.goto(base + "#/plan"); page.wait_for_timeout(800)
+    assert "ausgeschaltet" in page.inner_text("main")
+    page.evaluate("api('/api/settings', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({plan_enabled: '1', plan_mode: '', brouter_url: ''})})")
+    # Statistik je Aktivität in Alben/Reisen
+    tid = page.evaluate("TOURS.filter(t => t.sport === 'hike')[0].id")
+    page.evaluate("api('/api/tours/%s/tags', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({tags: ['statstest']})})" % tid)
+    page.goto(base + "#/tours"); page.reload(); page.wait_for_timeout(800)
+    page.goto(base + "#/album/statstest"); page.wait_for_timeout(1500)
+    txt = page.inner_text("main")
+    assert "Statistik nach Aktivität" in txt and "Abstieg" in txt and "Wandern" in txt, txt[:400]

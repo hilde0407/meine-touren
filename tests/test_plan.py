@@ -62,3 +62,37 @@ def test_route_proxy(monkeypatch):
         plan.api_plan_route({"a": [48.0, 8.0], "b": [48.5, 8.5]})
     pid = plan.api_plan_save({"name": "R", "pts": [[48, 8], [48.1, 8.1]], "wps": {"wp": [[48, 8], [48.1, 8.1]], "alt": {"x": 1}, "rt": True}})["id"]
     assert plan.api_plan_get(pid)["wps"]["alt"] == {"x": 1}
+
+
+def test_plan_switch_and_test(monkeypatch):
+    from app import plan, db
+    import pytest
+    from fastapi import HTTPException
+    assert plan.enabled() and plan._brouter_url() == plan.BROUTER
+    db.put("brouter_url", "http://10.0.0.5:17777/brouter/")
+    assert plan._brouter_url() == "http://10.0.0.5:17777/brouter"          # Adresse gesetzt → eigener Server (alte Einstellung)
+    db.put("plan_mode", "public")
+    assert plan._brouter_url() == plan.BROUTER                              # ausdrücklich öffentlicher Dienst
+    db.put("plan_mode", "local")
+    assert plan._brouter_url() == "http://10.0.0.5:17777/brouter"
+
+    class R:
+        status_code, text = 200, '{"features": []}'
+    monkeypatch.setattr(plan.requests, "get", lambda *a, **k: R())
+    assert plan.api_plan_test({"url": "http://x:17777/brouter"})["ok"]
+    R.status_code, R.text = 200, "datafile E5_N45.rd5 not found"
+    r = plan.api_plan_test({})
+    assert r["ok"] and r["warn"] and "E5_N45" in r["msg"]
+    with pytest.raises(HTTPException):
+        plan.api_plan_test({"url": "ftp://x"})
+
+    def boom(*a, **k):
+        raise OSError("refused")
+    monkeypatch.setattr(plan.requests, "get", boom)
+    assert not plan.api_plan_test({})["ok"]
+    db.put("plan_enabled", "0")
+    assert not plan.enabled()
+    with pytest.raises(HTTPException) as e:
+        plan.api_plan_route({"a": [48.0, 8.0], "b": [48.01, 8.02]})
+    assert e.value.status_code == 403
+    db.put("plan_enabled", "1")

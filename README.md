@@ -159,6 +159,11 @@ Die Zuordnung nutzt Zeit **und** Ort: Überlappen sich Touren, entscheidet der A
 
 Im Tourdetail öffnet **„📍 Fotos ausrichten“** die Karte im Ausrichtungsmodus: Ein Foto wird auf die Stelle der Strecke gezogen, an der man sicher ist, dass es dort entstand; alle anderen Fotos wandern wie auf einer Perlenkette im gleichen zeitlichen Abstand mit (mit Uhrzeit-Beschriftung). „Speichern“ verschiebt die Aufnahmezeiten dauerhaft um diesen Betrag (wahlweise auch die anderen Fotos desselben Tages); „Original-Zeiten“ nimmt jede Verschiebung zurück. Voraussetzung: die Strecke enthält Zeitstempel.
 
+### Neu in Version 1.12
+
+* **Tourplanung ein- und ausschaltbar:** Unter Verwaltung → „Touren & Quellen“ → „Tourplanung“. Ist sie aus, verschwinden alle „Tour planen“-Schaltflächen. Ist sie an, wählst du den Routing-Dienst: **brouter.de** (öffentlich), **eigener BRouter auf diesem Server** (mit Installationsbefehl direkt in der Oberfläche) oder **anderer BRouter-Server im Netz**. „Verbindung testen“ prüft die Adresse und meldet fehlende Karten-Kacheln.
+* **Statistik nach Aktivität** bei Reisen, Alben und Etappen: je Sportart Touren, Kilometer, Aufstieg, Abstieg, Stunden, Ø km/h und längste Tour, dazu eine Gesamtzeile; die Kennzahlen oben zeigen jetzt auch den Gesamtabstieg.
+
 ### Neu in Version 1.11.1
 
 * **Notizfeld:** Die Box wuchs beim Tippen mit jedem Zeichen weiter. Jetzt richtet sich die Höhe nach dem Text und nie darunter nach der gemerkten/gezogenen Größe.

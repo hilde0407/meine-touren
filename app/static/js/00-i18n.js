@@ -635,7 +635,20 @@ Klick auf die Karte setzt einen Punkt, Rechtsklick auf einen Punkt entfernt ihn.
 Alternativen anzeigen|Show alternatives
 Keine Alternativen gefunden.|No alternatives found.
 Routenplanung (optional)|Route planning (optional)
-BRouter-Adresse (leer = brouter.de)|BRouter address (empty = brouter.de)`;
+BRouter-Adresse (leer = brouter.de)|BRouter address (empty = brouter.de)
+Tourplanung|Tour planning
+Funktion „Tour planen“|“Plan a tour” feature
+Öffentlicher Dienst brouter.de|Public service brouter.de
+Eigener BRouter auf diesem Server|Own BRouter on this server
+Anderer BRouter-Server im Netz|Other BRouter server on the network
+BRouter-Adresse|BRouter address
+Verbindung testen|Test connection
+Statistik nach Aktivität|Statistics by activity
+Aktivität|Activity
+Aufstieg m|Ascent m
+Abstieg m|Descent m
+Ø km/h|Ø km/h
+Längste km|Longest km`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");

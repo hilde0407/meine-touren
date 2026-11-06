@@ -11,6 +11,8 @@ UI_USER = os.environ.get("UI_USER", "admin")
 TZ_NAME = os.environ.get("TZ", "Europe/Berlin")
 
 DEFAULTS = {
+    "plan_enabled": "1",         # 1 = Tourplanung ist eingeschaltet
+    "plan_mode": "",             # public = brouter.de · local = BRouter auf diesem Server · custom = anderer Server; leer = automatisch (Adresse gesetzt → eigener Server)
     "brouter_url": "",           # leer = öffentlicher BRouter-Dienst (brouter.de); eigene Adresse z. B. http://192.168.1.5:17777/brouter
     "zepp_email": "",
     "zepp_password": "",
@@ -48,7 +50,7 @@ DEFAULTS = {
 SECRET_KEYS = {"zepp_password", "zepp_token", "komoot_password", "strava_client_secret", "strava_tokens", "suunto_client_secret", "suunto_key", "suunto_tokens", "garmin_tokens"}
 ENCRYPTED_KEYS = SECRET_KEYS | {"zepp_key"}     # werden verschlüsselt in der Datenbank abgelegt (app/secret.py)
 
-VERSION = "1.11.1 · Meine Touren (2026-11-06)"
+VERSION = "1.12.0 · Meine Touren (2026-11-06)"
 
 
 SYSTEM_DB = DATA_DIR / "system.sqlite"          # Benutzer, Sitzungen, Freigaben
