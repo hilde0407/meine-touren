@@ -159,6 +159,10 @@ Die Zuordnung nutzt Zeit **und** Ort: Überlappen sich Touren, entscheidet der A
 
 Im Tourdetail öffnet **„📍 Fotos ausrichten“** die Karte im Ausrichtungsmodus: Ein Foto wird auf die Stelle der Strecke gezogen, an der man sicher ist, dass es dort entstand; alle anderen Fotos wandern wie auf einer Perlenkette im gleichen zeitlichen Abstand mit (mit Uhrzeit-Beschriftung). „Speichern“ verschiebt die Aufnahmezeiten dauerhaft um diesen Betrag (wahlweise auch die anderen Fotos desselben Tages); „Original-Zeiten“ nimmt jede Verschiebung zurück. Voraussetzung: die Strecke enthält Zeitstempel.
 
+### Neu in Version 1.11.1
+
+* **Notizfeld:** Die Box wuchs beim Tippen mit jedem Zeichen weiter. Jetzt richtet sich die Höhe nach dem Text und nie darunter nach der gemerkten/gezogenen Größe.
+
 ### Neu in Version 1.11
 
 * **Planung über bekannte Wege:** Die Punkte der Tourplanung werden jetzt über Wege und Straßen aus OpenStreetMap verbunden (Dienst [BRouter](https://brouter.de), Profil je nach Sportart: Wandern/Ski/Schneeschuh „hiking-mountain“, Rennrad „fastbike“, MTB „mtb“, sonst „trekking“). Gestrichelt gezeichnet wird eine gerade Linie, wo kein Weg gefunden wurde. Ein Klick auf einen Abschnitt wählt ihn aus; **„Alternativen anzeigen“** zeigt bis zu drei weitere Routen mit Länge und Aufstieg, ein Klick auf eine Alternative übernimmt sie. „Wegen folgen“ lässt sich ausschalten (gerade Linien; geladene GPX-Strecken und Wanderführer-Touren werden nie umgeroutet). Gespeicherte Pläne merken sich Punkte und gewählte Alternativen.

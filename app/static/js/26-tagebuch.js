@@ -15,9 +15,16 @@ function rememberSize(el, key) {
     if (v && v.w >= 120) el.style.width = Math.min(v.w, el.parentElement ? el.parentElement.clientWidth || v.w : v.w) + "px";
   } catch (e) {}
   // Box so hoch machen, dass der ganze Text zu lesen ist (nie kleiner als die gemerkte Größe)
+  // Mindesthöhe = gemerkte/vom Nutzer gezogene Höhe; wächst nur, wenn der Text mehr Platz braucht
+  let floor = el.offsetHeight || 80,
+    lastFit = 0;
   const fit = () => {
-    const need = el.scrollHeight + 4;
-    if (el.offsetHeight && need > el.offsetHeight) el.style.height = need + "px";
+    if (!el.offsetHeight && !el.offsetParent) return;
+    el.style.height = "1px";
+    const need = el.scrollHeight + (el.offsetHeight - el.clientHeight) + 2;
+    const nh = Math.max(need, floor);
+    el.style.height = nh + "px";
+    lastFit = nh;
   };
   fit();
   el.addEventListener("input", fit);
@@ -30,6 +37,7 @@ function rememberSize(el, key) {
       const cur = el.offsetHeight + "x" + el.offsetWidth;
       if (cur === last || !el.offsetHeight) return;
       last = cur;
+      if (el.offsetHeight !== lastFit) floor = el.offsetHeight;
       try {
         localStorage.setItem(K, JSON.stringify({h: el.offsetHeight, w: el.offsetWidth}));
       } catch (e) {}

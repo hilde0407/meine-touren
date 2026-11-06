@@ -474,6 +474,12 @@ def test_stars_safety_compare_and_note_size(page):
     # lange Notiz: Box wächst mit, damit der ganze Text lesbar ist
     page.fill("#note", "\n".join(f"Zeile {i}" for i in range(30)))
     assert page.evaluate("document.querySelector('#note').offsetHeight >= document.querySelector('#note').scrollHeight")
+    # Regression: Tippen darf die Box nicht Zeichen für Zeichen aufblähen
+    page.fill("#note", "")
+    page.evaluate("document.querySelector('#note').style.height = '120px'"); page.wait_for_timeout(500)
+    page.click("#note"); page.keyboard.type("x" * 40)
+    h = page.evaluate("document.querySelector('#note').offsetHeight")
+    assert h <= 140, h
     # Liste: Bewertungsfilter
     page.evaluate("sessionStorage.clear()")
     page.goto(base + "#/tours"); page.wait_for_timeout(1200)
