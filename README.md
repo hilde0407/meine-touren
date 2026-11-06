@@ -159,6 +159,11 @@ Die Zuordnung nutzt Zeit **und** Ort: Überlappen sich Touren, entscheidet der A
 
 Im Tourdetail öffnet **„📍 Fotos ausrichten“** die Karte im Ausrichtungsmodus: Ein Foto wird auf die Stelle der Strecke gezogen, an der man sicher ist, dass es dort entstand; alle anderen Fotos wandern wie auf einer Perlenkette im gleichen zeitlichen Abstand mit (mit Uhrzeit-Beschriftung). „Speichern“ verschiebt die Aufnahmezeiten dauerhaft um diesen Betrag (wahlweise auch die anderen Fotos desselben Tages); „Original-Zeiten“ nimmt jede Verschiebung zurück. Voraussetzung: die Strecke enthält Zeitstempel.
 
+### Neu in Version 1.15
+
+* **PDF-Berichte neu gestaltet:** Tourblatt, Reisebericht und Jahresrückblick haben jetzt einen farbigen Kopf mit Titel (auf Wunsch mit Titelfoto), Kennzahlen-Karten, Kartenbild mit Rahmen, Höhenprofil mit höchstem Punkt, Tabellen mit Zebra-Streifen und Tageszeilen, abgerundete Fotos mit Aufnahmezeit, Notiz und Bewertung (Tourblatt), Monatsdiagramm und Sportarten-Anteile (Jahresrückblick) sowie „Seite x von y“ in der Fußzeile.
+* **Offline-Hinweis:** Ohne Verbindung zeigt die App oben einen gelben Hinweis; zuletzt gesehene Touren und Karten bleiben sichtbar (installierte App über HTTPS).
+
 ### Neu in Version 1.14
 
 * **Teilen mit Meine Touren (Android):** Ist die App auf dem Handy installiert, erscheint sie im Teilen-Menü. GPX-, FIT-, TCX- und ZIP-Dateien (z. B. aus Garmin Connect oder Komoot) werden sofort als Tour übernommen, Fotos aus der Galerie landen im Eingang und werden im Hintergrund den Touren zugeordnet. Danach zeigt eine Ergebnisseite, was importiert wurde.

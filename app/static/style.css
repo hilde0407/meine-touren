@@ -271,3 +271,4 @@ a.chip{text-decoration:none;color:inherit;cursor:pointer}a.chip .sw{margin-right
 .cstat .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px}
 
 .pdfctl{display:inline-flex;gap:6px;align-items:center;font-size:14px;margin-right:10px}.pdfctl select{padding:4px 6px;font-size:14px;min-height:0}
+.offbar{position:sticky;top:0;z-index:50;background:#f2c230;color:#241d00;text-align:center;padding:7px 12px;font-size:14px;font-weight:600}

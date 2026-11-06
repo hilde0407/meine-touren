@@ -643,7 +643,8 @@ Drucken|Imprimer
 Mit Meine Touren geteilt|Partagé avec Meine Touren
 Zu den Touren|Vers les sorties
 Auf dem Handy|Sur le téléphone
-App installieren|Installer l’application`,
+App installieren|Installer l’application
+Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen sind erst mit Verbindung möglich.|Hors ligne – les dernières données consultées sont affichées. Enregistrer et téléverser nécessitent une connexion.`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
 Aktivität im Jahr 2026|Actividad en 2026
 Neuere Tour (←)|Ruta más reciente (←)
@@ -1279,5 +1280,6 @@ Zurücksetzen|Restablecer
 
 Fotos im PDF|Fotos en el PDF
 
-`,
+
+Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen sind erst mit Verbindung möglich.|Sin conexión: se muestran los últimos datos vistos. Guardar y subir requiere conexión.`,
 };

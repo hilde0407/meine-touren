@@ -633,3 +633,15 @@ def test_share_result_and_handy_panel(page):
     page.goto(base + "#/admin?tab=uebersicht"); page.wait_for_timeout(1500)
     assert page.locator("#handy").count() == 1 and page.is_visible("#handy")
     assert "Teilen-Menü" in page.inner_text("#handy")
+
+
+def test_offline_banner(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/tours"); page.wait_for_timeout(800)
+    assert page.locator("#offbar").count() == 0
+    page.context.set_offline(True)
+    page.evaluate("window.dispatchEvent(new Event('offline'))"); page.wait_for_timeout(300)
+    assert page.locator("#offbar").count() == 1 and "Offline" in page.inner_text("#offbar")
+    page.context.set_offline(False)
+    page.evaluate("window.dispatchEvent(new Event('online'))"); page.wait_for_timeout(300)
+    assert page.locator("#offbar").count() == 0

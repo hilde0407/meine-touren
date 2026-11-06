@@ -664,7 +664,8 @@ Drucken|Print
 Mit Meine Touren geteilt|Shared with Meine Touren
 Zu den Touren|To the tours
 Auf dem Handy|On your phone
-App installieren|Install app`;
+App installieren|Install app
+Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen sind erst mit Verbindung möglich.|Offline – last seen data is shown. Saving and uploading need a connection.`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");

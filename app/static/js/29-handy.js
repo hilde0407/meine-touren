@@ -54,3 +54,22 @@ VIEWS.admin = async (...a) => {
       b.style.display = "none";
     };
 };
+
+/* Offline-Hinweis: ohne Verbindung zeigt die App zuletzt gesehene Daten (Service Worker) */
+(() => {
+  const upd = () => {
+    let b = document.querySelector("#offbar");
+    if (navigator.onLine === false) {
+      if (!b) {
+        b = document.createElement("div");
+        b.id = "offbar";
+        b.className = "offbar noprint";
+        b.textContent = "Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen sind erst mit Verbindung möglich.";
+        document.body.prepend(b);
+      }
+    } else if (b) b.remove();
+  };
+  window.addEventListener("offline", upd);
+  window.addEventListener("online", upd);
+  upd();
+})();
