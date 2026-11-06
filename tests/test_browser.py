@@ -29,6 +29,9 @@ db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,up_m,do
 lt = db.query("SELECT id,start_ts FROM tours WHERE source='local' ORDER BY start_ts LIMIT 1")[0]
 for j in range(6):   # 6 Fotos am selben Tag (Dateien fehlen absichtlich – es geht nur um die Auswahl)
     db.execute("INSERT INTO photos(path,taken_ts,dated,tour_id) VALUES(?,?,1,?)", (f"/x/p{{j}}.jpg", lt["start_ts"] + 300 * j, lt["id"]))
+import json as _json
+_g = db.execute("INSERT INTO guide_tours(book,title,pts,km,up) VALUES('Testbuch','Winterrunde',?,6,200)", (_json.dumps([[48.0, 8.0], [48.01, 8.01], [48.0, 8.02]]),))
+db.execute("INSERT INTO wishlist(gid,ts) VALUES(?,1)", (_g,))
 print(db.query("SELECT id FROM tours"))
 """
     out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=ROOT, env=dict(os.environ, DATA_DIR=str(data)))
@@ -378,4 +381,66 @@ def test_update_panel_inside_tab_and_check_button(page):
     assert page.evaluate("!!document.querySelector('#upd #ucheck')"), "Update-Bereich liegt nicht mehr in seinem Container"
     page.click("#ucheck"); page.wait_for_timeout(2500)
     assert "Installiert" in page.inner_text("#upd")
+    assert not page.errors, page.errors
+
+
+def test_sport_figs_and_steep_button(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.wait_for_timeout(600)
+    tid = page.evaluate("TOURS.find(t => t.sport === 'hike' && t.source === 'local').id")
+    page.goto(base + "#/tour/" + tid); page.wait_for_timeout(2500)
+    txt = page.inner_text("#sfigs")
+    assert "Gehzeit" in txt and "steilster Abschnitt" in txt
+    assert page.locator("#tm .smap").count() == 1
+    page.click("#tm .smap"); page.wait_for_timeout(300)
+    assert page.locator("#tm .sleg").count() == 1
+    assert not page.errors, page.errors
+
+
+def test_sport_metrics_ski_and_bike(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.wait_for_timeout(600)
+    r = page.evaluate("""() => {
+      // 2 km bergauf (10 %), dann 2 km bergab (-12 %) mit Pause dazwischen; alle 20 m ein Punkt, 4 km/h hoch, 30 km/h runter
+      const pts = []; let t = 0, z = 1000, lat = 47;
+      for (let i = 0; i < 100; i++) { pts.push([lat, 10, z, t]); lat += 20 / 111320; z += 2; t += 18000; }
+      pts.push([lat, 10, z, t + 600000]); t += 600000;
+      for (let i = 0; i < 100; i++) { lat += 20 / 111320; z -= 2.4; t += 2400; pts.push([lat, 10, z, t]); }
+      const m = sportMetrics(pts);
+      return {m: {tUp: m.tUp, tDown: m.tDown, tPause: m.tPause, down: m.down, maxV: m.maxV, maxG: m.maxG},
+              ski: sportFigs({sport: 'skitour'}, m).map(x => x[2]), bike: sportFigs({sport: 'mtb'}, m).map(x => x[2]), run: sportFigs({sport: 'jogging'}, m).map(x => x[1])};
+    }""")
+    m = r["m"]
+    assert 1700 < m["tUp"] < 1900 and 150 < m["tDown"] < 260
+    assert 500 < m["tPause"] < 700 and 220 < m["down"] < 260
+    assert 25 < m["maxV"] < 33 and -14 < m["maxG"] < -10
+    assert "Aufstieg" in r["ski"] and "Abfahrtshöhenmeter" in r["ski"] and "Höchstes Tempo" in r["bike"] and "min/km" in r["run"]
+    assert not page.errors, page.errors
+
+
+def test_gear_row_and_season_filter(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.wait_for_timeout(600)
+    tid = page.evaluate("""async () => { await api('/api/gear', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({name: 'Testschuhe', kind: 'Schuhe', sports: ['hike'], limit_km: 5})}); return TOURS.find(t => t.sport === 'hike' && t.source === 'local').id; }""")
+    page.goto(base + "#/tour/" + tid); page.wait_for_timeout(2000)
+    assert "Testschuhe" in page.inner_text("#gearrow")
+    page.goto(base + "#/places"); page.wait_for_timeout(2500)
+    assert "Testschuhe" in page.inner_text("#gearsec") and "Wechsel fällig" in page.inner_text("#gearsec")
+    page.goto(base + "#/tours"); page.wait_for_timeout(1200)
+    n_all = page.evaluate("TOURS.length")
+    page.select_option("#fz", "winter"); page.wait_for_timeout(300)
+    cnt = page.evaluate("TOURS.filter(t => seasonOf(t.date) === 'winter').length")
+    assert page.locator(".tr").count() == cnt < n_all
+    assert not page.errors, page.errors
+
+
+def test_wishlist_season_select(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/places"); page.wait_for_timeout(2500)
+    sel = page.locator("#wlist .wseason")
+    assert sel.count() == 1
+    now = page.evaluate("seasonOfMonth(new Date().getMonth() + 1)")
+    sel.select_option(now); page.wait_for_timeout(500)
+    assert "passt jetzt" in page.inner_text("#wlist")
+    assert page.evaluate("api('/api/wishlist').then(l => l.find(x => x.title === 'Winterrunde').season)") == now
     assert not page.errors, page.errors

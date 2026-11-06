@@ -222,6 +222,13 @@ Das Original bleibt erhalten (**„Original wiederherstellen“**). Bei Komoot-T
 
 * **Unbenutzte Fotos aufräumen:** Auf der Seite „Fotos“ gibt es „🧹 Unbenutzte Fotos aufräumen …“, solange Fotos keiner Tour zugeordnet sind. Der Dialog zeigt Anzahl, Speicherplatz und eine Stichprobe und lässt dich **Jahre auswählen**; erst danach ist „Löschen“ möglich. Gelöscht werden nur die Kopien in der Fotobibliothek der App, nie Originale; die Fotos tauchen beim nächsten Import nicht wieder auf. Zum Zeitpunkt des Löschens wird neu geprüft, welche Fotos noch ohne Tour sind.
 
+### Neu in Version 1.8
+
+* **Kennzahlen passend zur Sportart:** Unter den Grunddaten einer Tour steht eine zweite Zeile mit Werten, die zur Sportart passen – Wandern/Bergtour/Schneeschuh: Gehzeit, Pausen, Steigrate (m/h), steilster Abschnitt; Rad: Ø in Bewegung, Höchsttempo, Pausen, Anteil bergauf/bergab; Skitour/Skifahren: Aufstiegs- und Abfahrtszeit, Abfahrtshöhenmeter, Höchsttempo, steilster Abschnitt und Anteil der Strecke über 30°; Laufen: Pace. Die Werte werden aus den Streckenpunkten berechnet (GPS-Rauschen wird geglättet).
+* **Steigung auf der Karte:** Der Knopf „⛰ Steigung“ direkt auf der Tourkarte färbt die Strecke nach Steilheit ein (mit Legende). Bei Skitouren und Schneeschuh-Touren sind Abschnitte über 30° Hangneigung violett markiert.
+* **Jahreszeit:** In der Tourliste filtert „Sommerhalbjahr (Mai–Okt) / Winterhalbjahr (Nov–Apr)“. Touren auf der Wunschliste haben eine beste Jahreszeit (ganzjährig / Sommer / Winter); passt sie zur aktuellen Jahreszeit, steht „passt jetzt“ dabei.
+* **Ausrüstung:** Unter „Auswertung“ legst du Rad, Schuhe, Ski … an (Name, Art, Sportarten, Zeitraum, optional „Wechsel-Hinweis ab … km“). Die App zählt Kilometer, Höhenmeter und Touren automatisch mit und warnt mit „bald wechseln“ (ab 90 %) und „Wechsel fällig“. Im Tourdetail steht die zugeordnete Ausrüstung; mit ✎ lässt sie sich für diese eine Tour ändern („automatisch nach Sportart und Datum“ oder eigene Auswahl).
+
 ### Neu in Version 1.7
 
 * **Verwaltung neu geordnet:** Statt einer langen Seite mit Klappbereichen gibt es fünf Reiter nach Aufgaben – *Übersicht* (Zustand, Updates, Protokoll, Selbsttest), *Touren & Quellen* (Komoot, Zepp, Garmin/Suunto/Dateien, Strava, Wanderführer), *Fotos*, *Automatik* und *Sicherung & Zugang* (Backup, Zugriffsschutz, Offline). „Einstellungen speichern“ bleibt auf jedem Reiter unten sichtbar. Der zuletzt gewählte Reiter wird gemerkt; Adressen wie `#/admin?tab=fotos` führen direkt hin.

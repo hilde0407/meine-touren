@@ -125,7 +125,7 @@ VIEWS.tour = async id => {
         A.segs.map(sg =>
           L.polyline(
             c.slice(sg.a, sg.b + 1).map(p => [p[0], p[1]]),
-            {color: grCol(sg.g), weight: 7, opacity: 0.95}
+            {color: (typeof sportGrp === "function" && (sportGrp(t.sport) === "ski" || t.sport === "snowshoe")) && Math.abs(sg.g) >= STEEP30 ? "#7e22ce" : grCol(sg.g), weight: 7, opacity: 0.95}
           ).bindTooltip(`${nf(sg.g, 0)} % Steigung`)
         )
       ).addTo(map);

@@ -154,6 +154,9 @@ VIEWS.dash = async (_, q) => {
     }
   } catch (e) {}
 };
+/* Jahreszeit: Sommerhalbjahr Mai–Oktober, Winterhalbjahr November–April */
+const seasonOfMonth = m => (m >= 5 && m <= 10 ? "sommer" : "winter");
+const seasonOf = d => seasonOfMonth(+String(d).slice(5, 7));
 function tourRow(t) {
   return `<a class="tr" href="#/tour/${t.id}">${miniRoute(t.id, t.sport)}<span><div class="nm">${esc(t.name)}</div><div class="s"><span>${dateS(t.date)}, ${timeS(t.date)}</span><span><i style="background:${sCol(t.sport)}"></i>${sName(t.sport)}</span>${t.photos ? `<span>${t.photos} Fotos</span>` : ""}</div></span>
   <span class="n"><span>${nf(t.km, 1)}<small>km</small></span><span>${nf(t.up_m, 0)}<small>m auf</small></span><span>${nf(t.h, 1)}<small>Std.</small></span></span></a>`;
@@ -327,6 +330,7 @@ VIEWS.tours = async () => {
   $("#main").innerHTML = `<div class="sec" style="margin-top:0"><h2>Alle Touren</h2><span class="sub" id="cnt"></span></div>
    <div class="filters"><input id="q" placeholder="Name suchen" style="min-width:230px"><select id="fy"><option value="0">Alle Jahre</option>${ys.map(y => `<option>${y}</option>`).join("")}</select>
    <select id="fs"><option value="">Alle Sportarten</option>${sp.map(s => `<option value="${s}">${sName(s)}</option>`).join("")}</select>
+   <select id="fz" title="Jahreszeit"><option value="">Ganzjährig</option><option value="sommer">Sommerhalbjahr (Mai–Okt)</option><option value="winter">Winterhalbjahr (Nov–Apr)</option></select>
    <select id="fr" title="Region"><option value="">Alle Regionen</option>${regionOpts()}</select>
    <select id="ft" title="Tag / Album"><option value="">Alle Tags</option>${allTags()
      .map(x => `<option value="${esc(x)}">${esc(x)}</option>`)
@@ -351,6 +355,7 @@ VIEWS.tours = async () => {
           fy: $("#fy").value,
           fs: $("#fs").value,
           fr: $("#fr").value,
+          fz: $("#fz").value,
           ft: $("#ft").value,
           so: $("#so").value,
           lim,
@@ -359,7 +364,7 @@ VIEWS.tours = async () => {
     } catch (e) {}
   };
   const f0 = ld();
-  ["q", "fy", "fs", "fr", "ft", "so"].forEach(i => {
+  ["q", "fy", "fs", "fr", "fz", "ft", "so"].forEach(i => {
     if (f0[i] !== undefined) $("#" + i).value = f0[i];
   });
   if (f0.lim) lim = f0.lim;
@@ -370,10 +375,12 @@ VIEWS.tours = async () => {
       s = $("#fs").value,
       so = $("#so").value,
       rg = $("#fr").value,
-      tg = $("#ft").value;
+      tg = $("#ft").value,
+      sz = $("#fz").value;
     let a = TOURS.filter(
       t =>
         (!y || t.y === y) &&
+        (!sz || seasonOf(t.date) === sz) &&
         (!s || t.sport === s) &&
         inRegion(t, rg) &&
         (!tg || (t.tags || "").split("|").includes(tg)) &&
@@ -388,7 +395,7 @@ VIEWS.tours = async () => {
     $("#tl").innerHTML = a.slice(0, lim).map(tourRow).join("") || `<div class="empty">Keine Treffer</div>`;
     $("#more").style.display = a.length > lim ? "" : "none";
   };
-  ["q", "fy", "fs", "fr", "ft", "so"].forEach(
+  ["q", "fy", "fs", "fr", "fz", "ft", "so"].forEach(
     i =>
       ($("#" + i).oninput = () => {
         lim = 80;

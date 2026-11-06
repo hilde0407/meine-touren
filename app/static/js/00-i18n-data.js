@@ -498,7 +498,58 @@ Unbenutzte Fotos aufräumen|Nettoyer les photos inutilisées
 Welche Jahre löschen?|Quelles années supprimer ?
 Löschen|Supprimer
 Alle Fotos sind einer Tour zugeordnet – es gibt nichts aufzuräumen.|Toutes les photos sont rattachées à un parcours – rien à nettoyer.
-Gelöscht werden nur die Kopien in der Fotobibliothek dieser App – <b>niemals deine Originale</b>. Die Fotos tauchen beim nächsten Import nicht wieder auf. Das Löschen lässt sich nicht rückgängig machen.|Seules les copies de la photothèque de cette application sont supprimées – <b>jamais vos originaux</b>. Les photos ne réapparaîtront pas à l’import suivant. Action irréversible.`,
+Gelöscht werden nur die Kopien in der Fotobibliothek dieser App – <b>niemals deine Originale</b>. Die Fotos tauchen beim nächsten Import nicht wieder auf. Das Löschen lässt sich nicht rückgängig machen.|Seules les copies de la photothèque de cette application sont supprimées – <b>jamais vos originaux</b>. Les photos ne réapparaîtront pas à l’import suivant. Action irréversible.
+Ø in Bewegung|Ø en mouvement
+Höchstes Tempo|Vitesse maximale
+Pausen|Pauses
+bergauf / bergab|montée / descente
+Abfahrt|Descente
+Abfahrtshöhenmeter|Dénivelé négatif
+steilster Abschnitt|passage le plus raide
+der Strecke über 30°|du parcours à plus de 30°
+Gehzeit|Temps de marche
+Steigrate|Vitesse ascensionnelle
+Pace in Bewegung|Allure en mouvement
+Zeit in Bewegung|Temps en mouvement
+⛰ Steigung|⛰ Pente
+Strecke nach Steigung einfärben|Colorer le tracé selon la pente
+über 30°|plus de 30°
+Ganzjährig|Toute l’année
+Sommerhalbjahr (Mai–Okt)|Semestre d’été (mai–oct.)
+Winterhalbjahr (Nov–Apr)|Semestre d’hiver (nov.–avr.)
+Jahreszeit|Saison
+Beste Jahreszeit für diese Tour|Meilleure saison pour cette sortie
+ganzjährig|toute l’année
+☀ Sommer|☀ Été
+❄ Winter|❄ Hiver
+passt jetzt|convient maintenant
+Ausrüstung|Équipement
+Ausrüstung:|Équipement :
+keine|aucun
++ Neue Ausrüstung|+ Nouvel équipement
+Neue Ausrüstung|Nouvel équipement
+Ausrüstung bearbeiten|Modifier l’équipement
+Ausrüstung dieser Tour|Équipement de cette sortie
+Ausrüstung dieser Tour ändern|Modifier l’équipement de cette sortie
+Kilometerstand je Rad, Schuh und Ski|Kilométrage par vélo, chaussure et ski
+Rad, Schuhe, Ski … – mit Kilometerstand und Wechsel-Hinweis|Vélos, chaussures, skis … – avec kilométrage et rappel de remplacement
+Wechsel fällig|Remplacement dû
+bald wechseln|bientôt à remplacer
+Name|Nom
+Art|Type
+Im Gebrauch ab|Utilisé depuis
+bis (leer = noch aktiv)|jusqu’au (vide = actif)
+Wechsel-Hinweis ab Kilometern|Rappel de remplacement à partir de (km)
+Notiz|Note
+Rad|Vélo
+Schuhe|Chaussures
+Ski|Skis
+Schneeschuhe|Raquettes
+Sonstiges|Autre
+automatisch nach Sportart und Datum|automatiquement selon sport et date
+Wird automatisch zugeordnet bei Touren der Sportart|Attribué automatiquement aux sorties du sport
+(sonst wählst du es in der Tour selbst)|(sinon choisissez-le dans la sortie)
+Beste Jahreszeit|Meilleure saison`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
 Aktivität im Jahr 2026|Actividad en 2026
 Neuere Tour (←)|Ruta más reciente (←)
@@ -997,5 +1048,56 @@ Unbenutzte Fotos aufräumen|Limpiar fotos sin usar
 Welche Jahre löschen?|¿Qué años eliminar?
 Löschen|Eliminar
 Alle Fotos sind einer Tour zugeordnet – es gibt nichts aufzuräumen.|Todas las fotos están asignadas a una ruta: no hay nada que limpiar.
-Gelöscht werden nur die Kopien in der Fotobibliothek dieser App – <b>niemals deine Originale</b>. Die Fotos tauchen beim nächsten Import nicht wieder auf. Das Löschen lässt sich nicht rückgängig machen.|Solo se eliminan las copias de la biblioteca de fotos de esta aplicación, <b>nunca tus originales</b>. Las fotos no volverán a aparecer en la próxima importación. No se puede deshacer.`,
+Gelöscht werden nur die Kopien in der Fotobibliothek dieser App – <b>niemals deine Originale</b>. Die Fotos tauchen beim nächsten Import nicht wieder auf. Das Löschen lässt sich nicht rückgängig machen.|Solo se eliminan las copias de la biblioteca de fotos de esta aplicación, <b>nunca tus originales</b>. Las fotos no volverán a aparecer en la próxima importación. No se puede deshacer.
+Ø in Bewegung|Ø en movimiento
+Höchstes Tempo|Velocidad máxima
+Pausen|Pausas
+bergauf / bergab|subida / bajada
+Abfahrt|Bajada
+Abfahrtshöhenmeter|Desnivel de bajada
+steilster Abschnitt|tramo más empinado
+der Strecke über 30°|del recorrido a más de 30°
+Gehzeit|Tiempo de marcha
+Steigrate|Ritmo de ascenso
+Pace in Bewegung|Ritmo en movimiento
+Zeit in Bewegung|Tiempo en movimiento
+⛰ Steigung|⛰ Pendiente
+Strecke nach Steigung einfärben|Colorear el recorrido según la pendiente
+über 30°|más de 30°
+Ganzjährig|Todo el año
+Sommerhalbjahr (Mai–Okt)|Semestre de verano (mayo–oct.)
+Winterhalbjahr (Nov–Apr)|Semestre de invierno (nov.–abr.)
+Jahreszeit|Estación
+Beste Jahreszeit für diese Tour|Mejor estación para esta ruta
+ganzjährig|todo el año
+☀ Sommer|☀ Verano
+❄ Winter|❄ Invierno
+passt jetzt|encaja ahora
+Ausrüstung|Equipo
+Ausrüstung:|Equipo:
+keine|ninguno
++ Neue Ausrüstung|+ Nuevo equipo
+Neue Ausrüstung|Nuevo equipo
+Ausrüstung bearbeiten|Editar equipo
+Ausrüstung dieser Tour|Equipo de esta ruta
+Ausrüstung dieser Tour ändern|Cambiar el equipo de esta ruta
+Kilometerstand je Rad, Schuh und Ski|Kilometraje por bici, calzado y esquí
+Rad, Schuhe, Ski … – mit Kilometerstand und Wechsel-Hinweis|Bicis, calzado, esquís … – con kilometraje y aviso de cambio
+Wechsel fällig|Cambio necesario
+bald wechseln|cambiar pronto
+Name|Nombre
+Art|Tipo
+Im Gebrauch ab|En uso desde
+bis (leer = noch aktiv)|hasta (vacío = activo)
+Wechsel-Hinweis ab Kilometern|Aviso de cambio a partir de (km)
+Notiz|Nota
+Rad|Bici
+Schuhe|Calzado
+Ski|Esquís
+Schneeschuhe|Raquetas
+Sonstiges|Otro
+automatisch nach Sportart und Datum|automáticamente según deporte y fecha
+Wird automatisch zugeordnet bei Touren der Sportart|Se asigna automáticamente a rutas del deporte
+(sonst wählst du es in der Tour selbst)|(si no, elígelo en la propia ruta)
+Beste Jahreszeit|Mejor estación`,
 };

@@ -522,7 +522,58 @@ Unbenutzte Fotos aufräumen|Clean up unused photos
 Welche Jahre löschen?|Which years to delete?
 Löschen|Delete
 Alle Fotos sind einer Tour zugeordnet – es gibt nichts aufzuräumen.|All photos are assigned to a tour – nothing to clean up.
-Gelöscht werden nur die Kopien in der Fotobibliothek dieser App – <b>niemals deine Originale</b>. Die Fotos tauchen beim nächsten Import nicht wieder auf. Das Löschen lässt sich nicht rückgängig machen.|Only the copies in this app’s photo library are deleted – <b>never your originals</b>. The photos will not reappear on the next import. This cannot be undone.`;
+Gelöscht werden nur die Kopien in der Fotobibliothek dieser App – <b>niemals deine Originale</b>. Die Fotos tauchen beim nächsten Import nicht wieder auf. Das Löschen lässt sich nicht rückgängig machen.|Only the copies in this app’s photo library are deleted – <b>never your originals</b>. The photos will not reappear on the next import. This cannot be undone.
+Ø in Bewegung|Ø while moving
+Höchstes Tempo|Top speed
+Pausen|Breaks
+bergauf / bergab|uphill / downhill
+Abfahrt|Descent
+Abfahrtshöhenmeter|Descent (metres)
+steilster Abschnitt|steepest section
+der Strecke über 30°|of the route over 30°
+Gehzeit|Walking time
+Steigrate|Climb rate
+Pace in Bewegung|Pace while moving
+Zeit in Bewegung|Time moving
+⛰ Steigung|⛰ Slope
+Strecke nach Steigung einfärben|Colour the route by slope
+über 30°|over 30°
+Ganzjährig|All year
+Sommerhalbjahr (Mai–Okt)|Summer half-year (May–Oct)
+Winterhalbjahr (Nov–Apr)|Winter half-year (Nov–Apr)
+Jahreszeit|Season
+Beste Jahreszeit für diese Tour|Best season for this tour
+ganzjährig|all year
+☀ Sommer|☀ Summer
+❄ Winter|❄ Winter
+passt jetzt|fits now
+Ausrüstung|Gear
+Ausrüstung:|Gear:
+keine|none
++ Neue Ausrüstung|+ New gear
+Neue Ausrüstung|New gear
+Ausrüstung bearbeiten|Edit gear
+Ausrüstung dieser Tour|Gear of this tour
+Ausrüstung dieser Tour ändern|Change the gear of this tour
+Kilometerstand je Rad, Schuh und Ski|Mileage per bike, shoe and ski
+Rad, Schuhe, Ski … – mit Kilometerstand und Wechsel-Hinweis|Bikes, shoes, skis … – with mileage and replacement reminder
+Wechsel fällig|Replace now
+bald wechseln|replace soon
+Name|Name
+Art|Type
+Im Gebrauch ab|In use since
+bis (leer = noch aktiv)|until (empty = still active)
+Wechsel-Hinweis ab Kilometern|Replacement reminder from kilometres
+Notiz|Note
+Rad|Bike
+Schuhe|Shoes
+Ski|Skis
+Schneeschuhe|Snowshoes
+Sonstiges|Other
+automatisch nach Sportart und Datum|automatically by sport and date
+Wird automatisch zugeordnet bei Touren der Sportart|Assigned automatically to tours of the sport
+(sonst wählst du es in der Tour selbst)|(otherwise choose it in the tour itself)
+Beste Jahreszeit|Best season`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");

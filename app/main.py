@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, health, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, zepp
+from . import auth, gear, health, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, zepp
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -593,6 +593,7 @@ def photo(photo_id: int, request: Request, size: int = 1600):
 app.include_router(extras.router)
 app.include_router(more.router)
 app.include_router(more2.router)
+app.include_router(gear.router)
 app.include_router(users_api.router)
 app.include_router(portals.router)
 app.include_router(health.router)

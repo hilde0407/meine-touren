@@ -186,6 +186,7 @@ def delete_tour(tid, on_komoot=False):
             db.execute("INSERT OR REPLACE INTO tour_hidden(id,js,ts) VALUES(?,?,?)", (tid, json.dumps({**t, "deleted": 1}), int(time.time())))
         for tb in ("tours", "tour_tags", "tour_notes", "tour_geo", "tour_peak", "tour_names", "elev_fix", "weather", "tour_sport"):
             db.execute(f"DELETE FROM {tb} WHERE id=?", (tid,))
+        db.execute("DELETE FROM tour_gear WHERE tour_id=?", (tid,))
         db.execute("DELETE FROM tour_uploads WHERE tour_id=?", (tid,))
         db.execute("UPDATE photos SET tour_id=NULL WHERE tour_id=? AND COALESCE(manual,0)=0", (tid,))
         for p in (routes.path_full(tid), routes.path_small(tid)):
@@ -460,7 +461,7 @@ def api_wishlist():
     for b in api_guides_progress():
         for x in b["tours"]:
             done[x["id"]] = x
-    rows = db.query("SELECT g.id,g.book,g.title,g.km,g.up,g.pts,w.ts AS wish FROM guide_tours g LEFT JOIN wishlist w ON w.gid=g.id ORDER BY g.book,g.title")
+    rows = db.query("SELECT g.id,g.book,g.title,g.km,g.up,g.pts,w.ts AS wish, w.season FROM guide_tours g LEFT JOIN wishlist w ON w.gid=g.id ORDER BY g.book,g.title")
     out = []
     for r in rows:
         km = r["km"]
@@ -469,7 +470,7 @@ def api_wishlist():
             km = extras.guide_stats("<x/>", pts)[0]
             db.execute("UPDATE guide_tours SET km=? WHERE id=?", (km, r["id"]))
         d = done.get(r["id"]) or {}
-        out.append({"id": r["id"], "book": r["book"] or "", "title": r["title"], "km": km, "up": r["up"], "wish": 1 if r["wish"] else 0, "tour": d.get("tour"), "ts": d.get("ts")})
+        out.append({"id": r["id"], "book": r["book"] or "", "title": r["title"], "km": km, "up": r["up"], "wish": 1 if r["wish"] else 0, "season": r["season"] or "", "tour": d.get("tour"), "ts": d.get("ts")})
     return out
 
 
@@ -478,8 +479,12 @@ def api_wishlist_set(body: dict):
     gid = int(body.get("id"))
     if not db.one("SELECT 1 FROM guide_tours WHERE id=?", (gid,)):
         raise HTTPException(404, "Tour nicht gefunden")
-    if body.get("on", True):
-        db.execute("INSERT OR REPLACE INTO wishlist(gid,ts) VALUES(?,?)", (gid, int(time.time())))
+    if "season" in body and db.one("SELECT 1 FROM wishlist WHERE gid=?", (gid,)):      # nur die Jahreszeit ändern
+        sea = body.get("season") if body.get("season") in ("sommer", "winter") else ""
+        db.execute("UPDATE wishlist SET season=? WHERE gid=?", (sea, gid))
+    elif body.get("on", True):
+        sea = body.get("season") if body.get("season") in ("sommer", "winter") else ""
+        db.execute("INSERT OR REPLACE INTO wishlist(gid,ts,season) VALUES(?,?,?)", (gid, int(time.time()), sea))
     else:
         db.execute("DELETE FROM wishlist WHERE gid=?", (gid,))
     return {"ok": True}

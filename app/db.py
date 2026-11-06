@@ -86,6 +86,10 @@ def _open(path):
         conn.execute("CREATE TABLE IF NOT EXISTS tour_hidden (id TEXT PRIMARY KEY, js TEXT, ts INTEGER)")  # ausgeblendete Touren (z. B. Fehlaufzeichnungen)
         conn.execute("CREATE TABLE IF NOT EXISTS photo_deleted (rel TEXT PRIMARY KEY, ts INTEGER)")   # gelöschte Fotos: nicht erneut importieren
         conn.execute("CREATE TABLE IF NOT EXISTS ext_imports (src TEXT, ext_id TEXT, tour_id TEXT, status TEXT, ts INTEGER, PRIMARY KEY(src, ext_id))")  # Garmin/Suunto: schon geprüfte Aktivitäten
+        conn.execute("CREATE TABLE IF NOT EXISTS gear (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, kind TEXT, sports TEXT, since TEXT, until TEXT, limit_km REAL, note TEXT)")   # Ausrüstung
+        conn.execute("CREATE TABLE IF NOT EXISTS tour_gear (tour_id TEXT, gear_id INTEGER, PRIMARY KEY(tour_id, gear_id))")   # gear_id 0 = ausdrücklich keine
+        if "season" not in {r["name"] for r in conn.execute("PRAGMA table_info(wishlist)")}:
+            conn.execute("ALTER TABLE wishlist ADD COLUMN season TEXT")                                      # '', 'sommer', 'winter'
         conn.commit()
         _conns[path] = conn
         return conn
