@@ -6,6 +6,19 @@
 
 **Bebilderte Kurzanleitung: [docs/ANLEITUNG.md](docs/ANLEITUNG.md)**
 
+## Screenshots
+
+Alle Bilder stammen aus dem **Demo-Modus** (`MT_DEMO=1 python3 -m app.demo`) und zeigen ausschließlich erfundene Beispieldaten. (Die Kartenkacheln fehlen in den Bildern – in der echten App ist die Karte sichtbar.)
+
+| | |
+|---|---|
+| ![Übersicht](docs/bilder/uebersicht.png) **Übersicht** – letzte Tour, Fotos, Kennzahlen | ![Touren](docs/bilder/touren.png) **Touren** – Liste mit Filtern und Streckenform |
+| ![Tourdetail](docs/bilder/tour-ganz.png) **Tourdetail** – Höhenprofil mit Foto-Punkten | ![Karte](docs/bilder/karte.png) **Karte** – alle Touren auf einen Blick |
+| ![Rekorde](docs/bilder/rekorde.png) **Rekorde** | ![Jahresrückblick](docs/bilder/jahresrueckblick.png) **Jahresrückblick** |
+| ![Tourblatt](docs/bilder/tourblatt.png) **Tourblatt** – druckbares Blatt einer Tour | ![Verwaltung](docs/bilder/verwaltung.png) **Verwaltung** – übersichtlich in Reitern |
+
+<p align="center"><img src="docs/bilder/handy.png" width="280" alt="Handy-Ansicht"><br><b>Handy-Ansicht</b></p>
+
 ## Installation auf Proxmox VE (empfohlen)
 
 Auf dem **Proxmox-Host** (Shell) ausführen – der Assistent legt einen Debian-13-Container an und installiert alles darin:
