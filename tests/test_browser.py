@@ -442,6 +442,7 @@ def test_wishlist_season_select(page):
     now = page.evaluate("seasonOfMonth(new Date().getMonth() + 1)")
     sel.select_option(now); page.wait_for_timeout(500)
     assert "passt jetzt" in page.inner_text("#wlist")
+    assert page.locator("#wlist .plan-g").count() == 1 and page.locator("#wlist .plan-l").count() == 1
     assert page.evaluate("api('/api/wishlist').then(l => l.find(x => x.title === 'Winterrunde').season)") == now
     assert not page.errors, page.errors
 
@@ -499,4 +500,26 @@ def test_ui_password_panel(page):
     assert "stimmen nicht überein" in page.inner_text("#uipwm")
     page.fill("#uipw1", "abc"); page.fill("#uipw2", "abc"); page.click("#uipws")
     assert "mindestens 6" in page.inner_text("#uipwm")
+    assert not page.errors, page.errors
+
+
+def test_plan_page(page):
+    base = page.url.split("#")[0]
+    page.route("**/api/plan/elevation", lambda r: r.fulfill(status=200, content_type="application/json", body='{"ele":[500,520,560,540,600,640],"up":140,"down":20,"max":640,"min":500}'))
+    page.goto(base + "#/tours"); page.wait_for_timeout(1200)
+    assert page.locator("#plink").count() == 1
+    page.click("#plink"); page.wait_for_timeout(1200)
+    page.evaluate("""() => { const m = map; [[48.0, 8.0], [48.01, 8.01], [48.02, 8.0]].forEach(p => m.fire('click', {latlng: L.latLng(p[0], p[1])})); }""")
+    page.wait_for_timeout(1500)
+    txt = page.inner_text("#pf")
+    assert "Strecke" in txt and "140" in txt and "Geschätzte Zeit" in txt
+    assert page.locator("#pprof svg").count() == 1
+    r = page.evaluate("""() => { const d = densify([[48, 8], [48.01, 8]], 50); return [d.length, paceModel('hike').n >= 0, parseGpxPts('<gpx><trk><trkseg><trkpt lat="1" lon="2"/><trkpt lat="3" lon="4"/></trkseg></trk></gpx>').length]; }""")
+    assert 20 <= r[0] <= 25 and r[2] == 2
+    page.fill("#pn", "Meine Testplanung"); page.click("#psave"); page.wait_for_timeout(800)
+    assert "gespeichert" in page.inner_text("#pmsg") and "Meine Testplanung" in page.inner_text("#plist")
+    page.click("#pclr"); page.wait_for_timeout(300)
+    assert page.evaluate("document.querySelector('#pf').innerText").startswith("Setze")
+    page.click("#plist [data-p]"); page.wait_for_timeout(1500)
+    assert page.input_value("#pn") == "Meine Testplanung" and "Strecke" in page.inner_text("#pf")
     assert not page.errors, page.errors

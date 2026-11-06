@@ -222,6 +222,10 @@ Das Original bleibt erhalten (**„Original wiederherstellen“**). Bei Komoot-T
 
 * **Unbenutzte Fotos aufräumen:** Auf der Seite „Fotos“ gibt es „🧹 Unbenutzte Fotos aufräumen …“, solange Fotos keiner Tour zugeordnet sind. Der Dialog zeigt Anzahl, Speicherplatz und eine Stichprobe und lässt dich **Jahre auswählen**; erst danach ist „Löschen“ möglich. Gelöscht werden nur die Kopien in der Fotobibliothek der App, nie Originale; die Fotos tauchen beim nächsten Import nicht wieder auf. Zum Zeitpunkt des Löschens wird neu geprüft, welche Fotos noch ohne Tour sind.
 
+### Neu in Version 1.10
+
+* **Touren planen:** Unter „Touren“ (und in der Wunschliste) führt „🗺 Tour planen“ zur Planung. Punkte in die Karte klicken (ziehen, Rechtsklick entfernt) oder eine **GPX-Datei laden** oder eine Tour aus dem **Wanderführer** übernehmen. Die App zeigt Länge, Auf- und Abstieg, höchsten Punkt und das Höhenprofil (Höhen aus dem Geländemodell) und schätzt die **Zeit nach deinem eigenen Tempo**: Aus deinen bisherigen Touren der Sportart wird gelernt, wie lange du je Kilometer und Höhenmeter brauchst (Gesamtzeit inklusive Pausen, mit Spanne). Bei zu wenig Archiv gelten Standardwerte. Pläne lassen sich mit Notiz speichern, wieder laden, löschen und als GPX herunterladen. Die Punkte werden geradlinig verbunden (kein Wege-Routing) – für Wege entlang von Pfaden also dicht klicken oder eine fertige GPX-Strecke laden.
+
 ### Neu in Version 1.9
 
 * **Schneller Start der Übersicht:** Die Seite wartet nicht mehr auf die Streckenlinien und die „Wie oft gelaufen?“-Auswertung – beides wird nachgereicht (Mini-Strecken erscheinen kurz danach, 🔁 ebenso). Der Server hält die Streckenlinien fertig im Speicher (mit ETag, bei unveränderten Daten antwortet er nur noch „304“), rechnet die Wiederholungs-Auswertung nur neu, wenn sich Touren oder Strecken ändern (nicht mehr bei jeder Datenbankänderung), und erzeugt die Vorschaubilder der Übersicht nach dem Start im Hintergrund vor (gedrosselt, alle 3 Stunden nachgeholt).

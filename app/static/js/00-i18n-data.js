@@ -585,7 +585,26 @@ Passwort ändern|Changer le mot de passe
 Schutz aufheben|Supprimer la protection
 Der Browser fragt danach nach dem Passwort (Benutzername beliebig). Das Passwort wird nur als Hash im Datenordner gespeichert.|Le navigateur demandera ensuite le mot de passe (nom d’utilisateur au choix). Il n’est enregistré que sous forme de hachage dans le dossier de données.
 Die beiden Eingaben stimmen nicht überein.|Les deux saisies ne correspondent pas.
-Das Passwort braucht mindestens 6 Zeichen.|Le mot de passe doit comporter au moins 6 caractères.`,
+Das Passwort braucht mindestens 6 Zeichen.|Le mot de passe doit comporter au moins 6 caractères.
+Tour planen|Planifier une sortie
+🗺 Tour planen|🗺 Planifier une sortie
+🗺 Planen|🗺 Planifier
+Punkte in die Karte klicken oder eine GPX-Datei laden – Länge, Höhenmeter und Zeit nach deinem Tempo|Cliquez des points sur la carte ou chargez un fichier GPX – longueur, dénivelé et durée selon votre rythme
+Name der Planung|Nom de la planification
+GPX laden …|Charger un GPX …
+Aus Wanderführer laden …|Charger depuis un guide …
+↶ Letzten Punkt entfernen|↶ Supprimer le dernier point
+Leeren|Effacer
+Klick auf die Karte setzt einen Punkt (Punkte lassen sich ziehen, Rechtsklick entfernt einen). Die Punkte werden geradlinig verbunden – setze sie dicht entlang des Weges oder lade eine fertige GPX-Strecke.|Un clic sur la carte ajoute un point (clic droit pour le supprimer). Les points sont reliés en ligne droite – placez-les près les uns des autres le long du chemin ou chargez un GPX.
+Setze mindestens zwei Punkte oder lade eine GPX-Datei.|Placez au moins deux points ou chargez un fichier GPX.
+Notiz zur Planung|Note sur la planification
+Plan speichern|Enregistrer le plan
+⬇ Als GPX herunterladen|⬇ Télécharger en GPX
+Gespeicherte Pläne|Plans enregistrés
+Gespeicherte Planungen erscheinen hier.|Les plans enregistrés apparaissent ici.
+Geschätzte Zeit|Durée estimée
+Höchster Punkt|Point culminant
+Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.|Durée selon des valeurs par défaut – avec plus de sorties de ce sport dans vos archives, l’estimation devient personnelle.`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
 Aktivität im Jahr 2026|Actividad en 2026
 Neuere Tour (←)|Ruta más reciente (←)
@@ -1171,5 +1190,24 @@ Passwort ändern|Cambiar contraseña
 Schutz aufheben|Quitar protección
 Der Browser fragt danach nach dem Passwort (Benutzername beliebig). Das Passwort wird nur als Hash im Datenordner gespeichert.|El navegador pedirá entonces la contraseña (cualquier nombre de usuario). Solo se guarda como hash en la carpeta de datos.
 Die beiden Eingaben stimmen nicht überein.|Las dos entradas no coinciden.
-Das Passwort braucht mindestens 6 Zeichen.|La contraseña necesita al menos 6 caracteres.`,
+Das Passwort braucht mindestens 6 Zeichen.|La contraseña necesita al menos 6 caracteres.
+Tour planen|Planificar una ruta
+🗺 Tour planen|🗺 Planificar una ruta
+🗺 Planen|🗺 Planificar
+Punkte in die Karte klicken oder eine GPX-Datei laden – Länge, Höhenmeter und Zeit nach deinem Tempo|Haz clic en el mapa o carga un GPX: longitud, desnivel y tiempo según tu ritmo
+Name der Planung|Nombre de la planificación
+GPX laden …|Cargar GPX …
+Aus Wanderführer laden …|Cargar desde una guía …
+↶ Letzten Punkt entfernen|↶ Quitar el último punto
+Leeren|Vaciar
+Klick auf die Karte setzt einen Punkt (Punkte lassen sich ziehen, Rechtsklick entfernt einen). Die Punkte werden geradlinig verbunden – setze sie dicht entlang des Weges oder lade eine fertige GPX-Strecke.|Un clic en el mapa añade un punto (clic derecho lo quita). Los puntos se unen en línea recta: colócalos cerca a lo largo del camino o carga un GPX.
+Setze mindestens zwei Punkte oder lade eine GPX-Datei.|Coloca al menos dos puntos o carga un archivo GPX.
+Notiz zur Planung|Nota sobre la planificación
+Plan speichern|Guardar plan
+⬇ Als GPX herunterladen|⬇ Descargar como GPX
+Gespeicherte Pläne|Planes guardados
+Gespeicherte Planungen erscheinen hier.|Los planes guardados aparecen aquí.
+Geschätzte Zeit|Tiempo estimado
+Höchster Punkt|Punto más alto
+Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.|Tiempo según valores estándar: con más rutas de este deporte en tu archivo, la estimación será personal.`,
 };

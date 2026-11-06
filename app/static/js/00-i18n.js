@@ -609,7 +609,26 @@ Passwort ändern|Change password
 Schutz aufheben|Remove protection
 Der Browser fragt danach nach dem Passwort (Benutzername beliebig). Das Passwort wird nur als Hash im Datenordner gespeichert.|The browser will then ask for the password (any user name). The password is stored only as a hash in the data folder.
 Die beiden Eingaben stimmen nicht überein.|The two entries do not match.
-Das Passwort braucht mindestens 6 Zeichen.|The password needs at least 6 characters.`;
+Das Passwort braucht mindestens 6 Zeichen.|The password needs at least 6 characters.
+Tour planen|Plan a tour
+🗺 Tour planen|🗺 Plan a tour
+🗺 Planen|🗺 Plan
+Punkte in die Karte klicken oder eine GPX-Datei laden – Länge, Höhenmeter und Zeit nach deinem Tempo|Click points on the map or load a GPX file – length, ascent and time based on your own pace
+Name der Planung|Name of the plan
+GPX laden …|Load GPX …
+Aus Wanderführer laden …|Load from hiking guide …
+↶ Letzten Punkt entfernen|↶ Remove last point
+Leeren|Clear
+Klick auf die Karte setzt einen Punkt (Punkte lassen sich ziehen, Rechtsklick entfernt einen). Die Punkte werden geradlinig verbunden – setze sie dicht entlang des Weges oder lade eine fertige GPX-Strecke.|A click on the map adds a point (right-click removes one). Points are joined by straight lines – place them close together along the path or load a ready-made GPX route.
+Setze mindestens zwei Punkte oder lade eine GPX-Datei.|Set at least two points or load a GPX file.
+Notiz zur Planung|Note on the plan
+Plan speichern|Save plan
+⬇ Als GPX herunterladen|⬇ Download as GPX
+Gespeicherte Pläne|Saved plans
+Gespeicherte Planungen erscheinen hier.|Saved plans will appear here.
+Geschätzte Zeit|Estimated time
+Höchster Punkt|Highest point
+Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.|Time based on default values – with more tours of this sport in your archive the estimate becomes personal.`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");
