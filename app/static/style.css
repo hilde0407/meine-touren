@@ -272,3 +272,7 @@ a.chip{text-decoration:none;color:inherit;cursor:pointer}a.chip .sw{margin-right
 
 .pdfctl{display:inline-flex;gap:6px;align-items:center;font-size:14px;margin-right:10px}.pdfctl select{padding:4px 6px;font-size:14px;min-height:0}
 .offbar{position:sticky;top:0;z-index:50;background:#f2c230;color:#241d00;text-align:center;padding:7px 12px;font-size:14px;font-weight:600}
+/* Smartphone: Fenster über der Tab-Leiste, scrollbar, nichts abgeschnitten */
+html.mob .modal{z-index:1000}
+html.mob .modal .mbox{overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:88vh;max-height:88dvh}
+html.mob .moregrid .btn{min-height:46px;display:flex;align-items:center;justify-content:center;text-align:center}

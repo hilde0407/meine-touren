@@ -678,3 +678,15 @@ def test_record_view_app(page):
     page.goto(base + "#/apptest"); page.wait_for_timeout(800)
     t = page.inner_text("#main")
     assert "Server erreichbar" in t and "Akku-Optimierung ist aktiv" in t and "GPS ist eingeschaltet" in t
+
+
+def test_mobile_more_sheet_not_covered(page):
+    """„Mehr“-Fenster liegt über der Tab-Leiste und ist bis ganz unten erreichbar."""
+    base = page.url.split("#")[0]
+    page.set_viewport_size({"width": 360, "height": 640})
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(800)
+    page.click("#tmore"); page.wait_for_timeout(400)
+    z = page.evaluate("(()=>{const m=document.querySelector('.modal'),t=document.querySelector('#tabbar');return [+getComputedStyle(m).zIndex,+getComputedStyle(t).zIndex,getComputedStyle(m.querySelector('.mbox')).overflowY]})()")
+    assert z[0] > z[1] and z[2] in ("auto", "scroll")
+    box = page.evaluate("(()=>{const b=document.querySelector('.modal .mbox');b.scrollTop=1e5;const r=document.querySelector('.modal .mbox').getBoundingClientRect();return [r.bottom,innerHeight]})()")
+    assert box[0] <= box[1] + 1
