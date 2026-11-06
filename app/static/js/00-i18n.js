@@ -657,7 +657,10 @@ Zurücksetzen|Reset
 ‹ Zurück zur Reise|‹ Back to trip
 Tag für Tag|Day by day
 Zeit|Time
-Fotos im PDF|Photos in PDF`;
+Fotos im PDF|Photos in PDF
+⬇ PDF herunterladen|⬇ Download PDF
+🖨 Drucken|🖨 Print
+Drucken|Print`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");

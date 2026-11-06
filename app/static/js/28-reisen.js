@@ -43,7 +43,7 @@ VIEWS.tripsheet = async id => {
       a.map(t => `<tr><td>${timeS(t.date)}</td><td style="text-align:left">${esc(t.name)}</td><td>${sName(t.sport)}</td><td>${nf(t.km, 1)}</td><td>${nf(t.up_m || 0, 0)}</td><td>${nf(t.down_m || 0, 0)}</td></tr>`).join("");
   }).join("");
   $("#main").innerHTML = `<div class="sheet">
-   <div class="row noprint"><a class="back" href="#/trip/${esc(id)}">‹ Zurück zur Reise</a><span class="sp"></span>${pdfPhotoBar()}<button class="btn" id="shp">🖨 Drucken / als PDF speichern</button></div>
+   <div class="row noprint"><a class="back" href="#/trip/${esc(id)}">‹ Zurück zur Reise</a><span class="sp"></span>${pdfPhotoBar()}${pdfBtn()}<button class="btn ghost" id="shp">🖨 Drucken</button></div>
    <div class="mut" style="margin-top:14px">${dateL(tr.start)}${tr.end !== tr.start ? " – " + dateL(tr.end) : ""}</div>
    <h1 style="font-size:34px;margin:8px 0 14px">${esc(tr.region)}${tr.country && tr.country !== tr.region ? ", " + esc(tr.country) : ""}</h1>
    <div class="figs">${fig(ts.length, "", "Touren")}${fig(nf(sum(t => t.km), 1), "km", "Strecke")}${fig(nf(sum(t => t.up_m), 0), "m", "Aufstieg")}${fig(nf(sum(t => t.down_m), 0), "m", "Abstieg")}${fig(nf(sum(t => t.h), 1), "h", "Unterwegs")}${fig(days.length, "", "Tage")}</div>
@@ -81,11 +81,12 @@ VIEWS.tripsheet = async id => {
     $("#th").innerHTML = [...new Set(spread(all, PDFP.n))].map(p => `<div class="th"><img src="/pic/${p.id}?size=500"></div>`).join("");
   };
   pdfPhotoBind(photos);
+  pdfBindDl(`/api/trips/${encodeURIComponent(id)}/pdf`);
   await photos();
 };
 const _trip28b = VIEWS.trip;
 VIEWS.trip = async id => {
   await _trip28b(id);
   const b = $("#tredit");
-  if (b && !$("#trpdf")) b.insertAdjacentHTML("beforebegin", `<a class="btn alt sm" id="trpdf" href="#/tripsheet/${encodeURIComponent(id)}" title="Druckbarer Reisebericht mit Karte, Statistik und Fotos – als PDF speicherbar">📄 Reisebericht (PDF)</a> `);
+  if (b && !$("#trpdf")) b.insertAdjacentHTML("beforebegin", `<a class="btn alt sm" id="trpdf" href="#/tripsheet/${encodeURIComponent(id)}" title="Reisebericht mit Karte, Statistik und Fotos – als PDF herunterladbar">📄 Reisebericht (PDF)</a> `);
 };

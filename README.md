@@ -159,10 +159,14 @@ Die Zuordnung nutzt Zeit **und** Ort: Überlappen sich Touren, entscheidet der A
 
 Im Tourdetail öffnet **„📍 Fotos ausrichten“** die Karte im Ausrichtungsmodus: Ein Foto wird auf die Stelle der Strecke gezogen, an der man sicher ist, dass es dort entstand; alle anderen Fotos wandern wie auf einer Perlenkette im gleichen zeitlichen Abstand mit (mit Uhrzeit-Beschriftung). „Speichern“ verschiebt die Aufnahmezeiten dauerhaft um diesen Betrag (wahlweise auch die anderen Fotos desselben Tages); „Original-Zeiten“ nimmt jede Verschiebung zurück. Voraussetzung: die Strecke enthält Zeitstempel.
 
+### Neu in Version 1.13.1
+
+* **Echte PDF-Berichte:** Tourblatt, Reisebericht und Jahresrückblick haben „⬇ PDF herunterladen“: Der Server erstellt eine fertige, saubere PDF-Datei (Text als Text, Karte mit Strecke, Höhenprofil als Grafik, Fotos, Statistik-Tabellen, Seitenzahlen) statt eines Bildschirmfotos. „Drucken“ bleibt als zusätzliche Möglichkeit. Fotos an/aus und Anzahl gelten auch hier. Neues Python-Paket: `reportlab` (wird beim Update automatisch installiert). Die Karte entsteht aus dem Kachel-Zwischenspeicher bzw. lädt fehlende Kacheln von OpenTopoMap; ohne Internet erscheint die Strecke auf heller Fläche.
+
 ### Neu in Version 1.13
 
 * **Reisen bearbeiten:** In der Reise gibt es „✎ Reise bearbeiten“: Name und Zeitraum lassen sich ändern. Ein größerer Zeitraum nimmt alle Touren dieser Tage auf, ein kleinerer lässt Touren weg; Kilometer, Aufstieg und Statistik passen sich an. „Zurücksetzen“ stellt die automatische Erkennung wieder her.
-* **Reisebericht als PDF:** „📄 Reisebericht (PDF)“ in der Reise öffnet eine druckbare Seite mit Karte (Tage in Farben), Statistik nach Aktivität, Tag-für-Tag-Liste und den besten Fotos. Über „Drucken / als PDF speichern“ (auch am Handy) entsteht die PDF-Datei.
+* **Reisebericht als PDF:** „📄 Reisebericht (PDF)“ in der Reise öffnet eine druckbare Seite mit Karte (Tage in Farben), Statistik nach Aktivität, Tag-für-Tag-Liste und den besten Fotos. Als Datei über „⬇ PDF herunterladen“ (auch am Handy).
 * **Fotos im PDF wählbar:** In Tourblatt, Reisebericht und Jahresrückblick lässt sich über „Fotos im PDF“ einstellen, ob Fotos dabei sind und wie viele (3 bis 24). Die Wahl gilt appweit und wird gespeichert.
 
 ### Neu in Version 1.12.2

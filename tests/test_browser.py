@@ -600,7 +600,7 @@ def test_trip_edit_and_pdf_sheet(page):
     page.click("#trpdf"); page.wait_for_timeout(1800)
     txt = page.inner_text("main")
     assert "Kanaren" in txt and "Tag für Tag" in txt and "Statistik nach Aktivität" in txt and "Drucken" in txt
-    assert page.locator("#tm").count() == 1
+    assert page.locator("#tm").count() == 1 and page.locator("#pdfdl").count() == 1
 
 
 def test_pdf_photo_choice(page):

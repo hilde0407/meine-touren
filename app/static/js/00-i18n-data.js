@@ -636,7 +636,10 @@ Zurücksetzen|Réinitialiser
 ‹ Zurück zur Reise|‹ Retour au voyage
 Tag für Tag|Jour après jour
 Zeit|Heure
-Fotos im PDF|Photos dans le PDF`,
+Fotos im PDF|Photos dans le PDF
+⬇ PDF herunterladen|⬇ Télécharger le PDF
+🖨 Drucken|🖨 Imprimer
+Drucken|Imprimer`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
 Aktivität im Jahr 2026|Actividad en 2026
 Neuere Tour (←)|Ruta más reciente (←)
@@ -1270,5 +1273,6 @@ Reise bearbeiten|Editar viaje
 Name und Zeitraum der automatisch erkannten Reise. Ein anderer Zeitraum nimmt alle Touren dieser Tage auf (auch solche, die nicht weit von zu Hause waren) bzw. lässt Touren außerhalb weg.|Nombre y período del viaje detectado automáticamente. Otro período incluye todas las rutas de esos días (también las cercanas a casa) y excluye las demás.
 Zurücksetzen|Restablecer
 
-Fotos im PDF|Fotos en el PDF`,
+Fotos im PDF|Fotos en el PDF
+`,
 };

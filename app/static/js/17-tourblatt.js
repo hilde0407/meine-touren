@@ -19,6 +19,12 @@ function pdfPhotoBind(onChange) {
   $("#pdfon").onchange = save;
   $("#pdfn").onchange = save;
 }
+/* echte PDF-Datei vom Server (Vektor-Text, Karte, Höhenprofil, Fotos) */
+const pdfBtn = () => `<button class="btn" id="pdfdl" title="Fertige PDF-Datei herunterladen">⬇ PDF herunterladen</button>`;
+const pdfBindDl = path => {
+  const b = $("#pdfdl");
+  if (b) b.onclick = () => (location.href = `${path}?photos_on=${PDFP.on ? 1 : 0}&n=${PDFP.n}`);
+};
 /* gleichmäßig verteilte Auswahl von höchstens n Einträgen */
 const spread = (a, n) => (a.length <= n ? a : Array.from({length: n}, (_, i) => a[Math.round((i * (a.length - 1)) / Math.max(1, n - 1))]));
 
@@ -27,7 +33,7 @@ VIEWS.sheet = async id => {
   if (!t) throw new Error("Tour nicht gefunden");
   await pdfPhotoLoad();
   $("#main").innerHTML = `<div class="sheet">
-   <div class="row noprint"><a class="back" href="#/tour/${esc(t.id)}">‹ Zurück zur Tour</a><span class="sp"></span>${pdfPhotoBar()}<button class="btn" id="shp">🖨 Drucken / als PDF speichern</button></div>
+   <div class="row noprint"><a class="back" href="#/tour/${esc(t.id)}">‹ Zurück zur Tour</a><span class="sp"></span>${pdfPhotoBar()}${pdfBtn()}<button class="btn ghost" id="shp">🖨 Drucken</button></div>
    <div style="margin-top:14px"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span class="mut" style="margin-left:8px">${dateL(t.date)}, ${timeS(t.date)} Uhr${t.g_country ? " · " + esc([t.g_place, t.g_state, t.g_country].filter(Boolean).join(", ")) : ""}</span></div>
    <h1 style="font-size:34px;margin:8px 0 14px">${esc(t.name)}</h1>
    <div class="figs"><div class="fig"><div class="v">${nf(t.km, 2)}<span class="u">km</span></div><div class="l">Strecke</div></div><div class="fig"><div class="v">${nf(t.up_m, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div></div>
@@ -64,6 +70,7 @@ VIEWS.sheet = async id => {
     $("#th").innerHTML = [...new Set(pick)].slice(0, PDFP.n).map(p => `<div class="th"><img src="/pic/${p.id}?size=500"></div>`).join("");
   };
   pdfPhotoBind(photos);
+  pdfBindDl(`/api/tours/${encodeURIComponent(t.id)}/pdf`);
   await photos();
   $("#shp").onclick = () => {
     map.invalidateSize();
