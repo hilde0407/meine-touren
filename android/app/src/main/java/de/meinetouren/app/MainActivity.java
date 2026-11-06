@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
         s.setDomStorageEnabled(true);
         s.setGeolocationEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
-        s.setUserAgentString(s.getUserAgentString() + " MeineTourenApp/2.0");
+        s.setUserAgentString(s.getUserAgentString() + " MeineTourenApp/2.1");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(web, false);
         web.addJavascriptInterface(new Bridge(), "MTApp");
@@ -67,6 +67,13 @@ public class MainActivity extends Activity {
                 String base = server();
                 if (base.length() > 0 && u.startsWith(base)) return false;
                 if (u.startsWith("file:///android_asset/")) return false;
+                if (sameHost(u, base)) {                       // z. B. Weiterleitung http -> https: in der App bleiben
+                    if (r.isForMainFrame() && u.startsWith("https://") && base.startsWith("http://")) {
+                        prefs.edit().putString("server", u.replaceAll("^(https://[^/]+).*$", "$1")).apply();
+                        AppLog.log("Server auf HTTPS umgestellt: " + server());
+                    }
+                    return false;
+                }
                 try { startActivity(new Intent(Intent.ACTION_VIEW, r.getUrl())); } catch (Exception e) { /* keine App */ }
                 return true;
             }
@@ -119,6 +126,26 @@ public class MainActivity extends Activity {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_PERM + 1);
         if (b != null) web.restoreState(b);
         else start(getIntent());
+    }
+
+    private static String hostOf(String u) {
+        try { return u == null ? "" : Uri.parse(u).getHost() == null ? "" : Uri.parse(u).getHost().toLowerCase(); }
+        catch (Exception e) { return ""; }
+    }
+
+    private static boolean sameHost(String a, String b) {
+        String x = hostOf(a);
+        return x.length() > 0 && x.equals(hostOf(b));
+    }
+
+    /** Ohne Schema: Adressen im Heimnetz (IP, .local, localhost) mit http, alles andere (z. B. Tailscale/Funnel) mit https. */
+    static String normalizeServer(String u) {
+        u = u == null ? "" : u.trim();
+        while (u.endsWith("/")) u = u.substring(0, u.length() - 1);
+        if (u.length() == 0 || u.startsWith("http://") || u.startsWith("https://")) return u;
+        String h = u.split("[/:]")[0];
+        boolean local = h.matches("\\d{1,3}(\\.\\d{1,3}){3}") || h.endsWith(".local") || h.equals("localhost") || !h.contains(".");
+        return (local ? "http://" : "https://") + u;
     }
 
     private String server() {
@@ -272,15 +299,12 @@ public class MainActivity extends Activity {
 
     /* ---------- Brücke zur Weboberfläche ---------- */
     public class Bridge {
-        @JavascriptInterface public String version() { return "2.0.0"; }
+        @JavascriptInterface public String version() { return "2.1.2"; }
         @JavascriptInterface public String serverUrl() { return server(); }
 
         @JavascriptInterface
         public void setServer(String u) {
-            u = u == null ? "" : u.trim();
-            while (u.endsWith("/")) u = u.substring(0, u.length() - 1);
-            if (u.length() > 0 && !u.startsWith("http")) u = "http://" + u;
-            final String v = u;
+            final String v = normalizeServer(u);
             prefs.edit().putString("server", v).apply();
             runOnUiThread(() -> web.loadUrl(v.length() == 0 ? "file:///android_asset/setup.html" : v + "/"));
         }
@@ -306,7 +330,7 @@ public class MainActivity extends Activity {
             try {
                 android.os.PowerManager pm = (android.os.PowerManager) getSystemService(POWER_SERVICE);
                 android.location.LocationManager lm = (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
-                o.put("version", "2.0.0");
+                o.put("version", "2.1.2");
                 o.put("android", Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
                 o.put("device", Build.MANUFACTURER + " " + Build.MODEL);
                 o.put("server", server());
