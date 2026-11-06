@@ -153,6 +153,17 @@ VIEWS.admin = async (...a) => {
   const body = document.querySelector('.atab[data-t="uebersicht"] .gbody');
   if (body) body.insertAdjacentHTML("beforeend", box);
   else if ($("#save")) $("#save").closest(".row").insertAdjacentHTML("beforebegin", box);
+  const cfg = await api("/api/settings").catch(() => ({})),
+    nu = (cfg.notify_url || "").trim(),
+    m = nu.match(/^(https?):\/\/([^/]+)\/(.+)$/);
+  $("#appbox").insertAdjacentHTML(
+    "beforeend",
+    `<h3 style="margin:14px 0 4px">Push-Meldungen</h3><p class="mut" style="font-size:13px">${
+      m ? "Neue Touren und Warnungen kommen als echte Handy-Meldung, wenn die kostenlose <b>ntfy</b>-App das Thema abonniert hat." : "Trage unter Verwaltung → „Benachrichtigung“ eine ntfy-Adresse ein (z. B. https://ntfy.sh/mein-thema), dann lässt sich das hier mit einem Tipp abonnieren."
+    }</p><div class="row" style="gap:8px"><button class="btn alt" id="apush"${m ? "" : " disabled"}>In ntfy abonnieren</button><button class="btn alt" id="apushget">ntfy-App holen</button></div>`
+  );
+  if ($("#apush") && m) $("#apush").onclick = () => A.openUrl(`ntfy://${m[2]}/${m[3]}${m[1] === "http" ? "?secure=false" : ""}`);
+  $("#apushget").onclick = () => A.openUrl("https://ntfy.sh/app");
   if ($("#appsrv")) $("#appsrv").onclick = () => confirm("Serveradresse wirklich ändern?") && A.changeServer();
   if ($("#appbat")) $("#appbat").onclick = () => A.openBatterySettings();
 };

@@ -385,6 +385,22 @@ def notify_send(text, title="Meine Touren"):
         raise RuntimeError(f"Webhook: HTTP {r.status_code}")
 
 
+def notify_event(text, title="Meine Touren"):
+    """Ereignis-Meldung (neue Tour o. ä.): still, im Hintergrund, nur wenn Webhook eingerichtet und nicht abgeschaltet."""
+    import threading
+    try:
+        if not (db.get("notify_url") or "").strip() or db.get("notify_events") == "0":
+            return
+    except Exception:  # noqa
+        return
+    def run():
+        try:
+            notify_send(text, title)
+        except Exception:  # noqa
+            pass
+    threading.Thread(target=run, daemon=True).start()
+
+
 def notify_check():
     if not (db.get("notify_url") or "").strip():
         return False

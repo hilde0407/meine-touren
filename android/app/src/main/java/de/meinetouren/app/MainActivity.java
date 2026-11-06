@@ -321,6 +321,14 @@ public class MainActivity extends Activity {
             return o.toString();
         }
 
+        @JavascriptInterface
+        public void openUrl(String u) {
+            runOnUiThread(() -> {
+                try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(u)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
+                catch (Exception e) { Toast.makeText(MainActivity.this, "Keine App dafür gefunden", Toast.LENGTH_LONG).show(); }
+            });
+        }
+
         @JavascriptInterface public String logText() { return AppLog.tail(30000); }
         @JavascriptInterface public void clearLog() { AppLog.clear(); }
         @JavascriptInterface public void appLog(String m) { AppLog.log("[Web] " + m); }

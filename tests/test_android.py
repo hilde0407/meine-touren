@@ -34,3 +34,23 @@ def test_record_upload():
     assert t["name"] == "Morgenrunde" and t["sport"] == "skitour"
     assert c.post("/api/record/upload", json={"gpx": _gpx(), "name": "nochmal"}).json()["dup"] is True
     assert c.post("/api/record/upload", json={"gpx": "<gpx/>"}).status_code == 400
+
+
+def test_record_upload_notifies(monkeypatch):
+    from fastapi.testclient import TestClient
+    from app import main, db, more2
+    sent = []
+    monkeypatch.setattr(more2, "notify_send", lambda t, title="x": sent.append((t, title)))
+    c = TestClient(main.app)
+    db.put("notify_url", "")
+    c.post("/api/record/upload", json={"gpx": _gpx().replace("2026-07-01", "2026-07-02"), "name": "A"})
+    import time; time.sleep(0.2)
+    assert sent == []                                                  # ohne Webhook keine Meldung
+    db.put("notify_url", "https://ntfy.sh/test")
+    c.post("/api/record/upload", json={"gpx": _gpx().replace("2026-07-01", "2026-07-03"), "name": "Abendrunde"})
+    time.sleep(0.3)
+    assert len(sent) == 1 and "Abendrunde" in sent[0][0]
+    db.put("notify_events", "0")
+    c.post("/api/record/upload", json={"gpx": _gpx().replace("2026-07-01", "2026-07-04"), "name": "B"})
+    time.sleep(0.3)
+    assert len(sent) == 1                                              # abgeschaltet

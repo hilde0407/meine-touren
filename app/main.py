@@ -504,6 +504,7 @@ async def api_record_upload(request: Request):
         photos.assign_all()
     except Exception:  # noqa
         pass
+    more2.notify_event(f"Neue Tour gespeichert: {t['name']} ({(t['dist_m'] or 0) / 1000:.1f} km, {round(t['up_m'] or 0)} m aufwärts)", "Neue Tour")
     return {"id": t["id"], "dup": False}
 
 
@@ -521,6 +522,8 @@ def _share_import(paths):
         photos.assign_all()
     except Exception:  # noqa
         pass
+    if tot["imported"]:
+        more2.notify_event(f"{tot['imported']} Tour{'en' if tot['imported'] != 1 else ''} per Teilen-Menü übernommen.", "Neue Tour")
     return tot["imported"], tot["dup"]
 
 

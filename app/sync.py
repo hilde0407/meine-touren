@@ -284,6 +284,13 @@ def import_items(items, portals_=(), dry_run=False, k=None):
                 state = "error"
         results.append((label, state, tid))
     photos.assign_all()
+    new = [r for r in results if r[1] in ("imported", "uploaded") and not dry_run]
+    if new:
+        try:
+            from . import more2
+            more2.notify_event(f"{len(new)} neue Tour{'en' if len(new) != 1 else ''} importiert." if len(new) > 1 else "Eine neue Tour importiert.", "Neue Tour")
+        except Exception:  # noqa
+            pass
     return results
 
 
