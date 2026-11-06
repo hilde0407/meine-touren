@@ -628,7 +628,14 @@ Gespeicherte Pläne|Saved plans
 Gespeicherte Planungen erscheinen hier.|Saved plans will appear here.
 Geschätzte Zeit|Estimated time
 Höchster Punkt|Highest point
-Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.|Time based on default values – with more tours of this sport in your archive the estimate becomes personal.`;
+Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.|Time based on default values – with more tours of this sport in your archive the estimate becomes personal.
+Punkte in die Karte klicken – sie werden über bekannte Wege verbunden – oder eine GPX-Datei laden|Click points on the map – they are joined along known paths – or load a GPX file
+Wegen folgen|Follow paths
+Klick auf die Karte setzt einen Punkt, Rechtsklick auf einen Punkt entfernt ihn. Ein Klick auf einen Abschnitt wählt ihn aus – dort lassen sich <b>Alternativen</b> anzeigen. Gestrichelt = gerade Linie (kein Weg gefunden oder „Wegen folgen“ aus).|A click on the map adds a point, a right-click on a point removes it. Click a section to select it – there you can show <b>alternatives</b>. Dashed = straight line (no path found or “Follow paths” off).
+Alternativen anzeigen|Show alternatives
+Keine Alternativen gefunden.|No alternatives found.
+Routenplanung (optional)|Route planning (optional)
+BRouter-Adresse (leer = brouter.de)|BRouter address (empty = brouter.de)`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");

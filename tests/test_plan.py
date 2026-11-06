@@ -32,3 +32,33 @@ def test_plan_guide_points():
     gid = db.execute("INSERT INTO guide_tours(book,title,pts,km,up) VALUES('B','Gipfel',?,5,100)", (json.dumps([[48, 8], [48.01, 8.01, 900]]),))
     g = plan.api_plan_guide(gid)
     assert g["title"] == "Gipfel" and g["pts"] == [[48.0, 8.0], [48.01, 8.01]]
+
+
+def test_route_proxy(monkeypatch):
+    from app import plan
+    import pytest
+    from fastapi import HTTPException
+    calls = []
+
+    class R:
+        status_code = 200
+        text = ""
+        def json(self):
+            return {"features": [{"geometry": {"coordinates": [[8.0, 48.0, 500.0], [8.01, 48.005, 520.0], [8.02, 48.01, 540.0]]},
+                                  "properties": {"track-length": "2500", "filtered ascend": "45", "total-time": "1800"}}]}
+
+    def fake_get(url, params=None, **k):
+        calls.append((url, params))
+        return R()
+    monkeypatch.setattr(plan.requests, "get", fake_get)
+    r = plan.api_plan_route({"a": [48.0, 8.0], "b": [48.01, 8.02], "profile": "mtb", "alt": 2})
+    assert r["km"] == 2.5 and r["up"] == 45 and r["pts"][0] == [48.0, 8.0, 500.0] and len(r["pts"]) == 3
+    url, prm = calls[0]
+    assert url.startswith("https://brouter.de") and prm["lonlats"] == "8.0,48.0|8.02,48.01" and prm["profile"] == "mtb" and prm["alternativeidx"] == 2 and prm["format"] == "geojson"
+    plan.api_plan_route({"a": [48.0, 8.0], "b": [48.01, 8.02], "profile": "mtb", "alt": 2})
+    assert len(calls) == 1                                                            # zweite Anfrage aus dem Zwischenspeicher
+    R.status_code, R.text = 400, "no track found"
+    with pytest.raises(HTTPException):
+        plan.api_plan_route({"a": [48.0, 8.0], "b": [48.5, 8.5]})
+    pid = plan.api_plan_save({"name": "R", "pts": [[48, 8], [48.1, 8.1]], "wps": {"wp": [[48, 8], [48.1, 8.1]], "alt": {"x": 1}, "rt": True}})["id"]
+    assert plan.api_plan_get(pid)["wps"]["alt"] == {"x": 1}

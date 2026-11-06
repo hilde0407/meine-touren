@@ -604,7 +604,14 @@ Gespeicherte Pläne|Plans enregistrés
 Gespeicherte Planungen erscheinen hier.|Les plans enregistrés apparaissent ici.
 Geschätzte Zeit|Durée estimée
 Höchster Punkt|Point culminant
-Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.|Durée selon des valeurs par défaut – avec plus de sorties de ce sport dans vos archives, l’estimation devient personnelle.`,
+Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.|Durée selon des valeurs par défaut – avec plus de sorties de ce sport dans vos archives, l’estimation devient personnelle.
+Punkte in die Karte klicken – sie werden über bekannte Wege verbunden – oder eine GPX-Datei laden|Cliquez des points sur la carte – ils sont reliés par des chemins connus – ou chargez un GPX
+Wegen folgen|Suivre les chemins
+Klick auf die Karte setzt einen Punkt, Rechtsklick auf einen Punkt entfernt ihn. Ein Klick auf einen Abschnitt wählt ihn aus – dort lassen sich <b>Alternativen</b> anzeigen. Gestrichelt = gerade Linie (kein Weg gefunden oder „Wegen folgen“ aus).|Un clic sur la carte ajoute un point, un clic droit le supprime. Cliquez sur un tronçon pour le sélectionner – vous pouvez y afficher des <b>alternatives</b>. Pointillé = ligne droite (aucun chemin trouvé ou « Suivre les chemins » désactivé).
+Alternativen anzeigen|Afficher les alternatives
+Keine Alternativen gefunden.|Aucune alternative trouvée.
+Routenplanung (optional)|Planification d’itinéraire (facultatif)
+BRouter-Adresse (leer = brouter.de)|Adresse BRouter (vide = brouter.de)`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
 Aktivität im Jahr 2026|Actividad en 2026
 Neuere Tour (←)|Ruta más reciente (←)
@@ -1209,5 +1216,12 @@ Gespeicherte Pläne|Planes guardados
 Gespeicherte Planungen erscheinen hier.|Los planes guardados aparecen aquí.
 Geschätzte Zeit|Tiempo estimado
 Höchster Punkt|Punto más alto
-Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.|Tiempo según valores estándar: con más rutas de este deporte en tu archivo, la estimación será personal.`,
+Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.|Tiempo según valores estándar: con más rutas de este deporte en tu archivo, la estimación será personal.
+Punkte in die Karte klicken – sie werden über bekannte Wege verbunden – oder eine GPX-Datei laden|Haz clic en el mapa: se unen por caminos conocidos, o carga un GPX
+Wegen folgen|Seguir caminos
+Klick auf die Karte setzt einen Punkt, Rechtsklick auf einen Punkt entfernt ihn. Ein Klick auf einen Abschnitt wählt ihn aus – dort lassen sich <b>Alternativen</b> anzeigen. Gestrichelt = gerade Linie (kein Weg gefunden oder „Wegen folgen“ aus).|Un clic en el mapa añade un punto, clic derecho lo quita. Haz clic en un tramo para seleccionarlo: allí puedes mostrar <b>alternativas</b>. Discontinua = línea recta (sin camino o «Seguir caminos» desactivado).
+Alternativen anzeigen|Mostrar alternativas
+Keine Alternativen gefunden.|No se encontraron alternativas.
+Routenplanung (optional)|Planificación de rutas (opcional)
+BRouter-Adresse (leer = brouter.de)|Dirección de BRouter (vacío = brouter.de)`,
 };

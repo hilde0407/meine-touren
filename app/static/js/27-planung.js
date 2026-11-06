@@ -86,39 +86,86 @@ function planProfile(dense, ele) {
   return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${ticks}${kms}<path d="${line}L${x(D)},${H - B}L${L},${H - B}Z" fill="var(--green,#2f8f5f)" opacity=".22"/><path d="${line}" fill="none" stroke="var(--green,#2f8f5f)" stroke-width="2.2"/></svg>`;
 }
 
+const PLAN_PROFILE = s => ({racebike: "fastbike", mtb: "mtb"}[s] || (sportGrp(s) === "bike" ? "trekking" : "hiking-mountain"));
+const PLAN_MAXROUTED = 40; // so viele Punkte werden höchstens über Wege verbunden (jeder Abschnitt ist eine Anfrage)
+const ALT_COL = ["#e8590c", "#1c7ed6", "#9c36b5", "#2b8a3e"];
+
 VIEWS.plan = async (pid, q) => {
-  const P = {id: null, name: "", sport: "hike", wp: [], note: "", ele: null, dense: null, up: null, down: null, max: null};
+  const P = {id: null, wp: [], rt: true, alt: {}, segs: {}, pend: {}, sel: null, stored: null, ele: null, dense: null, up: null, down: null, max: null, warned: false};
   $("#main").className = "";
   const [plans, guides] = await Promise.all([api("/api/plans").catch(() => []), api("/api/guides").catch(() => [])]);
   const sports = Object.keys(SPORT);
+  const planRow = p => `<div class="r" data-p="${p.id}" style="cursor:pointer"><span>${esc(p.name)}<small>${sName(p.sport)} · ${nf(p.km || 0, 1)} km · ↑ ${nf(p.up || 0, 0)} m${p.est_h ? " · ca. " + hmm(p.est_h) + " h" : ""}</small></span><span><button class="btn ghost sm" data-d="${p.id}" title="Plan löschen">✕</button></span></div>`;
   $("#main").innerHTML = `<div class="row"><a class="back" href="#/tours">‹ Alle Touren</a></div>
-   <div class="sec"><h2>Tour planen</h2><span class="sub">Punkte in die Karte klicken oder eine GPX-Datei laden – Länge, Höhenmeter und Zeit nach deinem Tempo</span></div>
+   <div class="sec"><h2>Tour planen</h2><span class="sub">Punkte in die Karte klicken – sie werden über bekannte Wege verbunden – oder eine GPX-Datei laden</span></div>
    <div class="row" style="gap:8px;flex-wrap:wrap"><input id="pn" placeholder="Name der Planung" maxlength="120" style="min-width:230px"><select id="ps">${sports.map(s => `<option value="${s}" ${s === "hike" ? "selected" : ""}>${sName(s)}</option>`).join("")}</select>
+    <label class="chip on" style="cursor:pointer" title="Verbindet die Punkte über Wege und Straßen aus OpenStreetMap (BRouter). Aus: gerade Linien."><input type="checkbox" id="prt" checked style="display:none">Wegen folgen</label>
     <label class="btn alt sm" style="cursor:pointer">GPX laden …<input type="file" id="pg" accept=".gpx,application/gpx+xml,text/xml" style="display:none"></label>
     ${guides.length ? `<select id="pgd" style="max-width:260px"><option value="">Aus Wanderführer laden …</option>${guides.map(g => `<option value="${g.id}">${esc(g.book ? g.book + " – " : "")}${esc(g.title)}</option>`).join("")}</select>` : ""}
     <button class="btn ghost sm" id="pundo">↶ Letzten Punkt entfernen</button><button class="btn ghost sm" id="pclr">Leeren</button></div>
    <div class="tmap" id="pm" style="margin-top:12px;height:min(60vh,520px)"></div>
-   <p class="mut" style="font-size:13px;margin:6px 0 0">Klick auf die Karte setzt einen Punkt (Punkte lassen sich ziehen, Rechtsklick entfernt einen). Die Punkte werden geradlinig verbunden – setze sie dicht entlang des Weges oder lade eine fertige GPX-Strecke.</p>
+   <div id="pseg" class="wx" style="display:none;margin:8px 0 0"></div>
+   <p class="mut" style="font-size:13px;margin:6px 0 0">Klick auf die Karte setzt einen Punkt, Rechtsklick auf einen Punkt entfernt ihn. Ein Klick auf einen Abschnitt wählt ihn aus – dort lassen sich <b>Alternativen</b> anzeigen. Gestrichelt = gerade Linie (kein Weg gefunden oder „Wegen folgen“ aus).</p>
    <div class="figs" id="pf" style="margin-top:18px"></div><div class="mut" id="pb" style="margin:8px 0 0"></div>
    <div class="panel prof" style="margin-top:18px;display:none" id="pprof"><h2>Höhenprofil</h2><div id="pprofc"></div></div>
    <div class="field" style="max-width:760px;margin:16px 0 0"><label for="pnote">Notiz zur Planung</label><textarea id="pnote" rows="2" placeholder="Anfahrt, Einkehr, beste Jahreszeit …"></textarea></div>
    <div class="row" style="margin-top:12px"><button class="btn" id="psave">Plan speichern</button><button class="btn alt" id="pdl">⬇ Als GPX herunterladen</button><span id="pmsg" class="mut"></span></div>
    <div class="sec"><h2>Gespeicherte Pläne</h2><span class="sub">${plans.length ? plans.length + " Pläne" : "noch keine"}</span></div>
-   <div class="panel"><div class="rows" id="plist">${plans.length ? plans.map(p => `<div class="r" data-p="${p.id}" style="cursor:pointer"><span>${esc(p.name)}<small>${sName(p.sport)} · ${nf(p.km || 0, 1)} km · ↑ ${nf(p.up || 0, 0)} m${p.est_h ? " · ca. " + hmm(p.est_h) + " h" : ""}</small></span><span><button class="btn ghost sm" data-d="${p.id}" title="Plan löschen">✕</button></span></div>`).join("") : `<p class="mut">Gespeicherte Planungen erscheinen hier.</p>`}</div></div>`;
+   <div class="panel"><div class="rows" id="plist">${plans.length ? plans.map(planRow).join("") : `<p class="mut">Gespeicherte Planungen erscheinen hier.</p>`}</div></div>`;
   map = mkMap("pm", {layers: true});
   map.setView([47.5, 9], 6);
-  const line = L.polyline([], {color: "#e8590c", weight: 4, opacity: 0.9}).addTo(map);
+  const segLayer = L.layerGroup().addTo(map),
+    altLayer = L.layerGroup().addTo(map);
   let markers = [],
     seq = 0,
     tm = null;
-  const sw = () => $("#ps").value;
+  const sw = () => $("#ps").value,
+    prof = () => PLAN_PROFILE(sw()),
+    r5 = p => p[0].toFixed(5) + "," + p[1].toFixed(5),
+    base = i => `${r5(P.wp[i])}>${r5(P.wp[i + 1])}|${prof()}`,
+    ckey = (i, a) => base(i) + "#" + (a == null ? P.alt[base(i)] || 0 : a),
+    routedOK = () => P.rt && P.wp.length >= 2 && P.wp.length <= PLAN_MAXROUTED,
+    segRes = i => (routedOK() ? P.segs[ckey(i)] : null),
+    segPts = i => {
+      const r = segRes(i);
+      return r && r.pts ? r.pts : [P.wp[i], P.wp[i + 1]];
+    };
+  const path = () => {
+    if (P.stored) return P.stored;
+    const out = [];
+    for (let i = 0; i < P.wp.length - 1; i++) (i ? segPts(i).slice(1) : segPts(i)).forEach(p => out.push([p[0], p[1]]));
+    return out.length ? out : P.wp.map(p => [p[0], p[1]]);
+  };
+  const msg = (t, bad) => ($("#pmsg").innerHTML = t ? `<span class="${bad ? "bad" : "ok"}">${esc(t)}</span>` : "");
+  const segInfo = () => {
+    const el = $("#pseg");
+    if (P.stored || P.sel == null || P.sel >= P.wp.length - 1 || !routedOK()) return (el.style.display = "none");
+    const r = segRes(P.sel);
+    el.style.display = "";
+    el.innerHTML = `<b>Abschnitt ${P.sel + 1} von ${P.wp.length - 1}</b> ${r && r.pts ? `· ${nf(r.km, 2)} km · ↑ ${nf(r.up, 0)} m` : r && r.fail ? `· <span class="bad">kein Weg gefunden – gerade Linie</span>` : "· wird berechnet …"} <button class="btn alt sm" id="palts" style="margin-left:8px">Alternativen anzeigen</button><span id="paltl"></span>`;
+    $("#palts").onclick = () => showAlts(P.sel);
+  };
   const redraw = () => {
     markers.forEach(m => map.removeLayer(m));
     markers = [];
-    line.setLatLngs(P.wp);
+    segLayer.clearLayers();
+    altLayer.clearLayers();
+    if (P.stored) L.polyline(P.stored, {color: "#e8590c", weight: 4, opacity: 0.9, bubblingMouseEvents: false}).addTo(segLayer);
+    else
+      for (let i = 0; i < P.wp.length - 1; i++) {
+        const r = segRes(i),
+          straight = !(r && r.pts),
+          sel = i === P.sel && routedOK();
+        const pl = L.polyline(segPts(i).map(p => [p[0], p[1]]), {color: sel ? "#1c7ed6" : "#e8590c", weight: sel ? 7 : 4, opacity: 0.9, dashArray: straight ? "7 8" : null, bubblingMouseEvents: false}).addTo(segLayer);
+        pl.on("click", () => {
+          P.sel = i;
+          redraw();
+          segInfo();
+        });
+      }
     if (P.wp.length <= 80)
       P.wp.forEach((p, i) => {
-        const m = L.circleMarker(p, {radius: 6, color: "#fff", weight: 2, fillColor: i === 0 ? "#2f8f5f" : i === P.wp.length - 1 ? "#c0504d" : "#e8590c", fillOpacity: 1}).addTo(map);
+        const m = L.circleMarker(p, {radius: 6, color: "#fff", weight: 2, fillColor: i === 0 ? "#2f8f5f" : i === P.wp.length - 1 ? "#c0504d" : "#e8590c", fillOpacity: 1, bubblingMouseEvents: false}).addTo(map);
         m.on("contextmenu", ev => {
           L.DomEvent.stop(ev);
           P.wp.splice(i, 1);
@@ -126,19 +173,21 @@ VIEWS.plan = async (pid, q) => {
         });
         markers.push(m);
       });
+    segInfo();
   };
   const figs = () => {
-    const km = P.wp.length > 1 ? pathKm(P.wp) : 0,
+    const pth = path(),
+      km = pth.length > 1 ? pathKm(pth) : 0,
       m = paceModel(sw()),
       up = P.up,
       est = km > 0 ? planTime(m, km, up || 0) : null;
     P.km = km;
     P.est = est ? est.h : null;
     const F = (v, u, l) => `<div class="fig"><div class="v">${v}<span class="u">${u}</span></div><div class="l">${l}</div></div>`;
-    $("#pf").innerHTML = P.wp.length > 1
+    $("#pf").innerHTML = pth.length > 1
       ? F(nf(km, 2), "km", "Strecke") + F(up != null ? nf(up, 0) : "…", "m", "Aufstieg") + F(P.down != null ? nf(P.down, 0) : "…", "m", "Abstieg") + F(P.max != null ? nf(P.max, 0) : "…", "m", "Höchster Punkt") + F(`${hmm(est.h)}`, "Std.", `Geschätzte Zeit (${hmm(est.lo)}–${hmm(est.hi)})`)
       : `<div class="mut">Setze mindestens zwei Punkte oder lade eine GPX-Datei.</div>`;
-    $("#pb").textContent = P.wp.length > 1
+    $("#pb").textContent = pth.length > 1
       ? m.n
         ? `Zeit nach deinem Tempo aus ${m.n} ähnlichen Touren (im Schnitt ${nf(m.kmh, 1)} km/h, Gesamtzeit inklusive Pausen).`
         : `Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.`
@@ -149,12 +198,13 @@ VIEWS.plan = async (pid, q) => {
     } else $("#pprof").style.display = "none";
   };
   const calc = async () => {
-    const my = ++seq;
-    if (P.wp.length < 2) {
+    const my = ++seq,
+      pth = path();
+    if (pth.length < 2) {
       P.ele = P.dense = P.up = P.down = P.max = null;
       return figs();
     }
-    const dense = densify(P.wp);
+    const dense = densify(pth);
     try {
       const r = await api("/api/plan/elevation", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({points: dense})});
       if (my !== seq) return;
@@ -162,28 +212,106 @@ VIEWS.plan = async (pid, q) => {
     } catch (e) {
       if (my !== seq) return;
       Object.assign(P, {dense: null, ele: null, up: null, down: null, max: null});
-      $("#pmsg").innerHTML = `<span class="bad">Höhen konnten nicht geladen werden (${esc(e.message)}) – Strecke und Zeit ohne Höhenmeter.</span>`;
+      msg(`Höhen konnten nicht geladen werden (${e.message}) – Strecke und Zeit ohne Höhenmeter.`, true);
     }
     figs();
   };
-  const changed = () => {
-    redraw();
-    figs();
+  const later = () => {
     clearTimeout(tm);
     tm = setTimeout(calc, 500);
   };
+  /* Abschnitte über Wege berechnen (jeder Abschnitt einzeln, Ergebnisse werden gemerkt) */
+  const ensure = () => {
+    if (!routedOK()) return;
+    for (let i = 0; i < P.wp.length - 1; i++) {
+      const k = ckey(i);
+      if (P.segs[k] || P.pend[k]) continue;
+      P.pend[k] = 1;
+      const a = P.wp[i],
+        b = P.wp[i + 1];
+      api("/api/plan/route", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({a, b, profile: prof(), alt: P.alt[base(i)] || 0})})
+        .then(r => (P.segs[k] = r))
+        .catch(e => {
+          P.segs[k] = {fail: e.message};
+          if (!P.warned) {
+            P.warned = true;
+            msg(`Kein Weg über das Routing gefunden (${e.message}) – dort wird eine gerade Linie gezeichnet.`, true);
+          }
+        })
+        .finally(() => {
+          delete P.pend[k];
+          if (!$("#pm")) return;
+          redraw();
+          figs();
+          later();
+        });
+    }
+  };
+  const showAlts = async i => {
+    altLayer.clearLayers();
+    $("#paltl").innerHTML = ` <span class="mut">suche Alternativen …</span>`;
+    const b = base(i),
+      res = await Promise.all([0, 1, 2, 3].map(a => api("/api/plan/route", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({a: P.wp[i], b: P.wp[i + 1], profile: prof(), alt: a})}).then(r => ({a, r})).catch(() => null)));
+    if (!$("#pm") || P.wp.length < i + 2 || base(i) !== b) return;
+    const seen = [],
+      list = res.filter(x => {
+        if (!x) return false;
+        const sig = `${Math.round(x.r.km * 20)}|${x.r.up}`;
+        if (seen.includes(sig)) return false;
+        seen.push(sig);
+        return true;
+      });
+    if (list.length < 2) return ($("#paltl").innerHTML = ` <span class="mut">Keine Alternativen gefunden.</span>`);
+    const cur = P.alt[b] || 0;
+    $("#paltl").innerHTML = " " + list.map(x => `<button class="btn ${x.a === cur ? "" : "ghost"} sm alt-c" data-a="${x.a}" style="border-left:6px solid ${ALT_COL[x.a]}">${nf(x.r.km, 2)} km · ↑ ${nf(x.r.up, 0)} m</button>`).join(" ");
+    list.forEach(x => {
+      if (x.a !== cur) L.polyline(x.r.pts.map(p => [p[0], p[1]]), {color: ALT_COL[x.a], weight: 5, opacity: 0.85, dashArray: "2 8", bubblingMouseEvents: false}).bindTooltip(`${nf(x.r.km, 2)} km · ↑ ${nf(x.r.up, 0)} m`).addTo(altLayer);
+      P.segs[b + "#" + x.a] = x.r;
+    });
+    $("#paltl").querySelectorAll(".alt-c").forEach(btn => (btn.onclick = () => {
+      P.alt[b] = +btn.dataset.a;
+      changed();
+    }));
+  };
+  const changed = () => {
+    P.stored = null;
+    if (P.sel != null && P.sel > P.wp.length - 2) P.sel = P.wp.length > 1 ? P.wp.length - 2 : null;
+    redraw();
+    figs();
+    ensure();
+    later();
+  };
   map.on("click", e => {
     P.wp.push([e.latlng.lat, e.latlng.lng]);
+    if (P.wp.length > 1) P.sel = P.wp.length - 2;
     changed();
   });
-  const fit = () => P.wp.length > 1 && map.fitBounds(L.latLngBounds(P.wp), {padding: [30, 30]});
-  const setPts = (pts, name) => {
+  const fit = () => P.wp.length > 1 && map.fitBounds(L.latLngBounds(path()), {padding: [30, 30]});
+  const setRt = on => {
+    P.rt = on;
+    $("#prt").checked = on;
+    $("#prt").parentElement.classList.toggle("on", on);
+  };
+  const setPts = (pts, name, routed) => {
     P.wp = pts;
+    setRt(!!routed && pts.length <= PLAN_MAXROUTED);
     if (name && !$("#pn").value) $("#pn").value = name;
+    P.sel = null;
     changed();
     fit();
   };
-  $("#ps").onchange = () => figs();
+  $("#ps").onchange = () => {
+    changed();
+  };
+  $("#prt").onchange = e => {
+    if (e.target.checked && P.wp.length > PLAN_MAXROUTED) {
+      e.target.checked = false;
+      return msg(`Zu viele Punkte (${P.wp.length}) zum Verbinden über Wege – höchstens ${PLAN_MAXROUTED}. Leere die Planung oder setze weniger Punkte.`, true);
+    }
+    setRt(e.target.checked);
+    P.stored = null;
+    changed();
+  };
   $("#pundo").onclick = () => {
     P.wp.pop();
     changed();
@@ -191,27 +319,29 @@ VIEWS.plan = async (pid, q) => {
   $("#pclr").onclick = () => {
     P.wp = [];
     P.id = null;
-    $("#pmsg").textContent = "";
+    P.sel = null;
+    msg("");
+    setRt(true);
     changed();
   };
   $("#pg").onchange = async e => {
     const f = e.target.files[0];
     if (!f) return;
     const pts = parseGpxPts(await f.text());
-    if (pts.length < 2) return ($("#pmsg").innerHTML = `<span class="bad">In der Datei wurde keine Strecke gefunden.</span>`);
+    if (pts.length < 2) return msg("In der Datei wurde keine Strecke gefunden.", true);
     P.id = null;
-    setPts(pts.length > 3000 ? pts.filter((_, i) => i % Math.ceil(pts.length / 3000) === 0) : pts, f.name.replace(/\.gpx$/i, ""));
+    setPts(pts.length > 3000 ? pts.filter((_, i) => i % Math.ceil(pts.length / 3000) === 0) : pts, f.name.replace(/\.gpx$/i, ""), false);
   };
   if ($("#pgd"))
     $("#pgd").onchange = async e => {
       if (!e.target.value) return;
       const g = await api(`/api/plan/guide/${e.target.value}`);
       P.id = null;
-      setPts(g.pts, g.title);
+      setPts(g.pts, g.title, false);
     };
   $("#pdl").onclick = () => {
-    if (P.wp.length < 2) return;
-    const dense = P.dense || P.wp,
+    if (path().length < 2) return;
+    const dense = P.dense || path(),
       blob = new Blob([planGpx($("#pn").value || "Planung", dense, P.ele)], {type: "application/gpx+xml"}),
       a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -220,17 +350,21 @@ VIEWS.plan = async (pid, q) => {
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   };
   $("#psave").onclick = async () => {
-    if (P.wp.length < 2) return ($("#pmsg").innerHTML = `<span class="bad">Bitte zuerst eine Strecke planen.</span>`);
+    const pth = path();
+    if (pth.length < 2) return msg("Bitte zuerst eine Strecke planen.", true);
     figs();
     try {
-      const r = await api("/api/plans", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({id: P.id, name: $("#pn").value, sport: sw(), pts: P.wp, km: P.km, up: P.up, down: P.down, max_alt: P.max, est_h: P.est, note: $("#pnote").value})});
+      const r = await api("/api/plans", {
+        method: "POST",
+        headers: {"content-type": "application/json"},
+        body: JSON.stringify({id: P.id, name: $("#pn").value, sport: sw(), pts: pth, wps: {wp: P.wp, alt: P.alt, rt: P.rt}, km: P.km, up: P.up, down: P.down, max_alt: P.max, est_h: P.est, note: $("#pnote").value}),
+      });
       P.id = r.id;
       history.replaceState(null, "", `#/plan/${r.id}`);
-      $("#pmsg").textContent = "gespeichert ✓";
-      const l = await api("/api/plans");
-      $("#plist").innerHTML = l.map(p => `<div class="r" data-p="${p.id}" style="cursor:pointer"><span>${esc(p.name)}<small>${sName(p.sport)} · ${nf(p.km || 0, 1)} km · ↑ ${nf(p.up || 0, 0)} m${p.est_h ? " · ca. " + hmm(p.est_h) + " h" : ""}</small></span><span><button class="btn ghost sm" data-d="${p.id}" title="Plan löschen">✕</button></span></div>`).join("");
+      msg("gespeichert ✓");
+      $("#plist").innerHTML = (await api("/api/plans")).map(planRow).join("");
     } catch (e) {
-      $("#pmsg").innerHTML = `<span class="bad">${esc(e.message)}</span>`;
+      msg(e.message, true);
     }
   };
   $("#plist").onclick = async e => {
@@ -255,16 +389,29 @@ VIEWS.plan = async (pid, q) => {
       $("#pn").value = p.name;
       $("#ps").value = p.sport;
       $("#pnote").value = p.note || "";
-      setPts(p.pts);
+      const w = p.wps;
+      if (w && w.wp && w.wp.length > 1) {
+        P.wp = w.wp;
+        P.alt = w.alt || {};
+        setRt(!!w.rt && w.wp.length <= PLAN_MAXROUTED);
+      } else {
+        P.wp = p.pts;
+        setRt(false);
+      }
+      P.stored = p.pts; // bis zur ersten Änderung die gespeicherte Strecke zeigen
+      redraw();
+      figs();
+      later();
+      fit();
     } catch (e) {
-      $("#pmsg").innerHTML = `<span class="bad">${esc(e.message)}</span>`;
+      msg(e.message, true);
     }
   } else if (q && q.get("g")) {
     try {
       const g = await api(`/api/plan/guide/${+q.get("g")}`);
-      setPts(g.pts, g.title);
+      setPts(g.pts, g.title, false);
     } catch (e) {
-      $("#pmsg").innerHTML = `<span class="bad">${esc(e.message)}</span>`;
+      msg(e.message, true);
     }
   } else figs();
 };
@@ -292,4 +439,18 @@ VIEWS.places = async (...a) => {
   };
   mark();
   new MutationObserver(mark).observe(w, {childList: true, subtree: true});
+};
+
+/* Verwaltung: eigene BRouter-Adresse (optional) */
+const _admin27 = VIEWS.admin;
+VIEWS.admin = async (...a) => {
+  await _admin27(...a);
+  const sv = $("#save");
+  if (!sv || $("#brpanel")) return;
+  const s = await api("/api/settings").catch(() => ({}));
+  sv.closest(".row").insertAdjacentHTML(
+    "beforebegin",
+    `<div class="panel" id="brpanel" style="margin-top:30px"><h2>Routenplanung (optional)</h2><p class="mut">Die Tourplanung verbindet Punkte über Wege des öffentlichen Dienstes <b>brouter.de</b> (OpenStreetMap). Dabei werden die Koordinaten der geplanten Punkte dorthin gesendet. Wer das nicht möchte, trägt hier die Adresse eines <b>eigenen BRouter-Servers</b> ein (z. B. <code>http://192.168.178.50:17777/brouter</code>) oder schaltet in der Planung „Wegen folgen“ aus.</p>
+     <div class="field"><label>BRouter-Adresse (leer = brouter.de)</label><input data-k="brouter_url" value="${esc(s.brouter_url || "")}" placeholder="https://brouter.de/brouter"></div></div>`
+  );
 };

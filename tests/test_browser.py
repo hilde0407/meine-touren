@@ -504,22 +504,45 @@ def test_ui_password_panel(page):
 
 
 def test_plan_page(page):
+    import json as _j
     base = page.url.split("#")[0]
     page.route("**/api/plan/elevation", lambda r: r.fulfill(status=200, content_type="application/json", body='{"ele":[500,520,560,540,600,640],"up":140,"down":20,"max":640,"min":500}'))
+
+    def route(r):
+        b = _j.loads(r.request.post_data)
+        (la1, lo1), (la2, lo2), alt = b["a"], b["b"], b.get("alt", 0)
+        mid = [(la1 + la2) / 2 + 0.02 * (alt + 1), (lo1 + lo2) / 2]                     # Umweg: je Alternative weiter weg
+        pts = [[la1, lo1, 500], mid + [520], [la2, lo2, 540]]
+        r.fulfill(status=200, content_type="application/json", body=_j.dumps({"pts": pts, "km": 2.0 + alt, "up": 40 + 10 * alt, "time_s": 1800, "alt": alt}))
+    page.route("**/api/plan/route", route)
     page.goto(base + "#/tours"); page.wait_for_timeout(1200)
     assert page.locator("#plink").count() == 1
     page.click("#plink"); page.wait_for_timeout(1200)
     page.evaluate("""() => { const m = map; [[48.0, 8.0], [48.01, 8.01], [48.02, 8.0]].forEach(p => m.fire('click', {latlng: L.latLng(p[0], p[1])})); }""")
-    page.wait_for_timeout(1500)
+    page.wait_for_timeout(1800)
     txt = page.inner_text("#pf")
     assert "Strecke" in txt and "140" in txt and "Geschätzte Zeit" in txt
+    km = lambda: float(page.inner_text("#pf").split("km")[0].replace(",", "."))
+    k0 = km()
+    assert k0 > 6                                                                      # geroutete Umwege statt Luftlinie (≈ 2,7 km)
     assert page.locator("#pprof svg").count() == 1
+    # Alternativen für den ausgewählten (letzten) Abschnitt
+    assert "Abschnitt 2 von 2" in page.inner_text("#pseg")
+    page.click("#palts"); page.wait_for_timeout(1200)
+    assert page.locator("#paltl .alt-c").count() == 4
+    page.click("#paltl .alt-c[data-a='2']"); page.wait_for_timeout(1800)
+    k1 = km()
+    assert k1 > k0 + 1                                                                 # gewählte Alternative ist länger
     r = page.evaluate("""() => { const d = densify([[48, 8], [48.01, 8]], 50); return [d.length, paceModel('hike').n >= 0, parseGpxPts('<gpx><trk><trkseg><trkpt lat="1" lon="2"/><trkpt lat="3" lon="4"/></trkseg></trk></gpx>').length]; }""")
     assert 20 <= r[0] <= 25 and r[2] == 2
     page.fill("#pn", "Meine Testplanung"); page.click("#psave"); page.wait_for_timeout(800)
     assert "gespeichert" in page.inner_text("#pmsg") and "Meine Testplanung" in page.inner_text("#plist")
     page.click("#pclr"); page.wait_for_timeout(300)
     assert page.evaluate("document.querySelector('#pf').innerText").startswith("Setze")
-    page.click("#plist [data-p]"); page.wait_for_timeout(1500)
-    assert page.input_value("#pn") == "Meine Testplanung" and "Strecke" in page.inner_text("#pf")
+    page.click("#plist [data-p]"); page.wait_for_timeout(1800)
+    assert page.input_value("#pn") == "Meine Testplanung" and abs(km() - k1) < 0.05      # gewählte Alternative bleibt erhalten
+    # „Wegen folgen“ aus: gerade Linien (Luftlinie ≈ 2,5 km statt 5 km)
+    page.click("#prt + *") if False else page.evaluate("document.querySelector('#prt').click()")
+    page.wait_for_timeout(1500)
+    assert 2.5 < km() < 2.9
     assert not page.errors, page.errors
