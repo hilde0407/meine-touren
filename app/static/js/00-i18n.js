@@ -573,7 +573,43 @@ Sonstiges|Other
 automatisch nach Sportart und Datum|automatically by sport and date
 Wird automatisch zugeordnet bei Touren der Sportart|Assigned automatically to tours of the sport
 (sonst wählst du es in der Tour selbst)|(otherwise choose it in the tour itself)
-Beste Jahreszeit|Best season`;
+Beste Jahreszeit|Best season
+Meine Bewertung:|My rating:
+Meine Bewertung|My rating
+Alle Bewertungen|All ratings
+Sicherheit|Safety
+– Lawinenlage, Gruppe, Notfallausrüstung (nur Notiz)|– avalanche conditions, group, emergency gear (note only)
+Lawinenwarnstufe (laut Lagebericht des Tages)|Avalanche danger level (per the day’s bulletin)
+gering|low
+mäßig|moderate
+erheblich|considerable
+groß|high
+sehr groß|very high
+Gruppe|Group
+Schneedecke, Gefahrenstellen, Umkehrpunkt …|Snowpack, hazards, turning point …
+Reine Dokumentation – ersetzt keinen Lawinenlagebericht.|Documentation only – does not replace an avalanche bulletin.
+Vergleich dieser Strecke|Comparison of this route
+Erste Hilfe|First aid
+Biwaksack|Bivvy bag
+Stirnlampe|Headlamp
+Schaufel|Shovel
+Sonde|Probe
+Helm|Helmet
+Alle Rad-Sportarten|All cycling sports
+Alle Ski-Sportarten|All ski sports
+Zu Fuß (Wandern, Bergtour, Schneeschuh)|On foot (hiking, mountaineering, snowshoeing)
+Laufen und Langlauf|Running and cross-country skiing
+Mit Benutzerverwaltung melden sich alle mit ihrem eigenen Benutzernamen und Passwort an (siehe „Benutzer“).|With user management everyone signs in with their own user name and password (see “Users”).
+Jeder im Netzwerk kann Touren, Fotos und Einstellungen sehen.|Anyone on the network can see tours, photos and settings.
+Passwort festlegen (mind. 6 Zeichen)|Set a password (min. 6 characters)
+Neues Passwort (mind. 6 Zeichen)|New password (min. 6 characters)
+Wiederholen|Repeat
+Passwort setzen|Set password
+Passwort ändern|Change password
+Schutz aufheben|Remove protection
+Der Browser fragt danach nach dem Passwort (Benutzername beliebig). Das Passwort wird nur als Hash im Datenordner gespeichert.|The browser will then ask for the password (any user name). The password is stored only as a hash in the data folder.
+Die beiden Eingaben stimmen nicht überein.|The two entries do not match.
+Das Passwort braucht mindestens 6 Zeichen.|The password needs at least 6 characters.`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");

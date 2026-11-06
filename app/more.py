@@ -1,5 +1,6 @@
 """Prüfen/Aufräumen, Orte & Gipfel, Wanderführer-Fortschritt, Gesundheitscheck."""
 import json
+import threading
 import re
 import shutil
 import os
@@ -184,7 +185,7 @@ def delete_tour(tid, on_komoot=False):
     else:
         if not (on_komoot and kid):           # nur hier gelöscht: beim nächsten Abgleich nicht wieder anlegen
             db.execute("INSERT OR REPLACE INTO tour_hidden(id,js,ts) VALUES(?,?,?)", (tid, json.dumps({**t, "deleted": 1}), int(time.time())))
-        for tb in ("tours", "tour_tags", "tour_notes", "tour_geo", "tour_peak", "tour_names", "elev_fix", "weather", "tour_sport"):
+        for tb in ("tours", "tour_tags", "tour_notes", "tour_geo", "tour_peak", "tour_names", "elev_fix", "weather", "tour_sport", "tour_rating", "tour_safety"):
             db.execute(f"DELETE FROM {tb} WHERE id=?", (tid,))
         db.execute("DELETE FROM tour_gear WHERE tour_id=?", (tid,))
         db.execute("DELETE FROM tour_uploads WHERE tour_id=?", (tid,))
@@ -365,8 +366,32 @@ def _cover(samp, line, r_m, cos):
     return hit / max(1, len(samp))
 
 
+def _repeats_sig():
+    r = db.one("SELECT COUNT(*) n, COALESCE(SUM(dist_m),0) d, COALESCE(MAX(start_ts),0) m FROM tours") or {}
+    h = db.one("SELECT COUNT(*) n FROM tour_hidden") or {}
+    try:
+        cd = (config.CACHE_DIR / "coords").stat().st_mtime_ns
+    except OSError:
+        cd = None
+    return (r.get("n"), r.get("d"), r.get("m"), h.get("n"), cd)
+
+
+def warm_repeats():
+    """Wiederholungs-Auswertung im Hintergrund vorberechnen, damit die Übersicht nicht darauf warten muss."""
+    from . import ctx
+    uid = ctx.uid()
+
+    def run():
+        try:
+            with ctx.as_user(uid):
+                api_repeats()
+        except Exception:  # noqa
+            pass
+    threading.Thread(target=run, daemon=True).start()
+
+
 @router.get("/api/repeats")
-@memo.cached
+@memo.cached(sig=_repeats_sig)
 def api_repeats():
     """Touren, die dieselbe Strecke mehrfach gegangen wurden: {tour_id: {"n": Anzahl, "with": [{"id","start_ts"}, …]}} (nur n >= 2)."""
     import math
@@ -519,3 +544,49 @@ def api_health():
     except OSError:
         pass
     return w
+
+
+# ---------- Tagebuch: Bewertung · Sicherheitsnotiz ----------
+@router.post("/api/tours/{tour_id}/rating")
+def api_rating(tour_id: str, body: dict):
+    if not db.one("SELECT 1 x FROM tours WHERE id=?", (tour_id,)):
+        raise HTTPException(404, "Tour nicht gefunden")
+    try:
+        n = int(body.get("stars") or 0)
+    except (TypeError, ValueError):
+        raise HTTPException(400, "Ungültige Bewertung")
+    if not 0 <= n <= 5:
+        raise HTTPException(400, "Bewertung von 1 bis 5 Sternen")
+    if n:
+        db.execute("INSERT OR REPLACE INTO tour_rating(id,stars) VALUES(?,?)", (tour_id, n))
+    else:
+        db.execute("DELETE FROM tour_rating WHERE id=?", (tour_id,))
+    return {"ok": True}
+
+
+SAFETY_GEAR = ("lvs", "sonde", "schaufel", "helm", "airbag", "erste-hilfe", "biwaksack", "stirnlampe")
+
+
+@router.get("/api/tours/{tour_id}/safety")
+def api_safety_get(tour_id: str):
+    r = db.one("SELECT level,grp,gear,note FROM tour_safety WHERE id=?", (tour_id,))
+    if not r:
+        return {"level": None, "grp": "", "gear": [], "note": "", "set": False}
+    return {"level": r["level"], "grp": r["grp"] or "", "gear": [g for g in (r["gear"] or "").split(",") if g], "note": r["note"] or "", "set": True}
+
+
+@router.post("/api/tours/{tour_id}/safety")
+def api_safety_set(tour_id: str, body: dict):
+    if not db.one("SELECT 1 x FROM tours WHERE id=?", (tour_id,)):
+        raise HTTPException(404, "Tour nicht gefunden")
+    lv = body.get("level")
+    lv = int(lv) if lv not in (None, "", 0, "0") else None
+    if lv is not None and not 1 <= lv <= 5:
+        raise HTTPException(400, "Lawinenwarnstufe von 1 bis 5")
+    gear = ",".join(g for g in (body.get("gear") or []) if g in SAFETY_GEAR)
+    grp, note = str(body.get("grp") or "").strip()[:200], str(body.get("note") or "").strip()[:1000]
+    if lv is None and not (gear or grp or note):
+        db.execute("DELETE FROM tour_safety WHERE id=?", (tour_id,))
+    else:
+        db.execute("INSERT OR REPLACE INTO tour_safety(id,level,grp,gear,note) VALUES(?,?,?,?,?)", (tour_id, lv, grp, gear, note))
+    return {"ok": True}

@@ -222,6 +222,16 @@ Das Original bleibt erhalten (**„Original wiederherstellen“**). Bei Komoot-T
 
 * **Unbenutzte Fotos aufräumen:** Auf der Seite „Fotos“ gibt es „🧹 Unbenutzte Fotos aufräumen …“, solange Fotos keiner Tour zugeordnet sind. Der Dialog zeigt Anzahl, Speicherplatz und eine Stichprobe und lässt dich **Jahre auswählen**; erst danach ist „Löschen“ möglich. Gelöscht werden nur die Kopien in der Fotobibliothek der App, nie Originale; die Fotos tauchen beim nächsten Import nicht wieder auf. Zum Zeitpunkt des Löschens wird neu geprüft, welche Fotos noch ohne Tour sind.
 
+### Neu in Version 1.9
+
+* **Schneller Start der Übersicht:** Die Seite wartet nicht mehr auf die Streckenlinien und die „Wie oft gelaufen?“-Auswertung – beides wird nachgereicht (Mini-Strecken erscheinen kurz danach, 🔁 ebenso). Der Server hält die Streckenlinien fertig im Speicher (mit ETag, bei unveränderten Daten antwortet er nur noch „304“), rechnet die Wiederholungs-Auswertung nur neu, wenn sich Touren oder Strecken ändern (nicht mehr bei jeder Datenbankänderung), und erzeugt die Vorschaubilder der Übersicht nach dem Start im Hintergrund vor (gedrosselt, alle 3 Stunden nachgeholt).
+* **Wetter und Schneelage:** Zur Tour zeigt die Wetterzeile bei Schnee zusätzlich Schneehöhe, Neuschnee der 3 Tage davor und Schneefall während der Tour (Open-Meteo, grobe Modelldaten). Ältere Wetterdaten werden dafür einmal nachgeladen.
+* **Vergleich dieser Strecke:** Bei wiederholten Strecken zeigt ein Balkenvergleich alle Begehungen mit Dauer und Tempo, Bestzeit mit 🏆 und „x. schnellste von n“.
+* **Tagebuch:** Eigene Bewertung mit 1–5 Sternen je Tour (★ in der Tourliste, Filter „Alle Bewertungen / ab ★★★ …“). Die Notiz zur Tour gibt es jetzt auch bei lokalen Touren; die Notizbox **merkt sich ihre Größe** und wächst mit dem Text, sodass er ganz lesbar ist.
+* **Sicherheitsnotiz** bei Skitouren, Skifahren, Schneeschuh und Bergtouren: Lawinenwarnstufe 1–5, Gruppe, mitgeführte Notfallausrüstung (LVS, Sonde, Schaufel, Helm, Airbag …) und Notiz. Reine Dokumentation, kein Lawinenlagebericht.
+* **Ziele je Sportart-Gruppe:** Ziele können jetzt auch für „Alle Rad-Sportarten“, „Alle Ski-Sportarten“, „Zu Fuß“ oder „Laufen und Langlauf“ gelten. Ohne Ziele im neuen Jahr bietet die Übersicht „Ziele aus dem Vorjahr übernehmen“ an.
+* **Oberflächenpasswort in der Oberfläche:** Unter Verwaltung → „Sicherung & Zugang“ lässt sich das gemeinsame Passwort jetzt setzen, ändern und aufheben (nur Betrieb ohne Benutzerverwaltung; gespeichert wird nur ein Hash). Ein per `UI_PASSWORD` festgelegtes Passwort bleibt weiter möglich, ist dann aber nur dort änderbar.
+
 ### Neu in Version 1.8
 
 * **Kennzahlen passend zur Sportart:** Unter den Grunddaten einer Tour steht eine zweite Zeile mit Werten, die zur Sportart passen – Wandern/Bergtour/Schneeschuh: Gehzeit, Pausen, Steigrate (m/h), steilster Abschnitt; Rad: Ø in Bewegung, Höchsttempo, Pausen, Anteil bergauf/bergab; Skitour/Skifahren: Aufstiegs- und Abfahrtszeit, Abfahrtshöhenmeter, Höchsttempo, steilster Abschnitt und Anteil der Strecke über 30°; Laufen: Pace. Die Werte werden aus den Streckenpunkten berechnet (GPS-Rauschen wird geglättet).

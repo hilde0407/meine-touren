@@ -407,3 +407,16 @@ function mkMap(el, opt = {}) {
 const okPt = p => Array.isArray(p) && p[0] != null && p[1] != null && isFinite(p[0]) && isFinite(p[1]);
 const cleanPts = a => (Array.isArray(a) ? a.filter(okPt) : []);
 const loadRoutes = async () => ROUTES || (ROUTES = await api("/api/routes"));
+/* Mini-Strecken in den Listen nachreichen, ohne die Seite darauf warten zu lassen */
+function patchMinis() {
+  document.querySelectorAll('a.tr[href^="#/tour/"]').forEach(a => {
+    const id = decodeURIComponent(a.getAttribute("href").slice(7)),
+      t = BY[id],
+      s = a.querySelector("svg.mini");
+    if (t && s) s.outerHTML = miniRoute(id, t.sport);
+  });
+}
+function loadRoutesLater() {
+  if (ROUTES) return;
+  loadRoutes().then(patchMinis).catch(() => {});
+}

@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, health, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, zepp
+from . import auth, gear, health, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, zepp
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -49,13 +49,13 @@ async def auth_mw(request: Request, call_next):
     public = path.startswith(more2.PUBLIC_PREFIXES) or path == "/share.html"
     if not auth.users_exist():
         # Altbetrieb ohne Benutzer: wie bisher, optional mit einem gemeinsamen Passwort (UI_PASSWORD)
-        if config.UI_PASSWORD and not public:
+        if uipw.is_set() and not public:
             ok = False
             h = request.headers.get("authorization", "")
             if h.lower().startswith("basic "):
                 try:
                     _, _, p = base64.b64decode(h[6:]).decode().partition(":")
-                    ok = hmac.compare_digest(p, config.UI_PASSWORD)
+                    ok = uipw.check(p)
                 except Exception:  # noqa
                     ok = False
             if not ok:
@@ -85,6 +85,7 @@ def startup():
                 demo.seed()
     if os.environ.get("MT_NO_SCHEDULER") != "1":      # Tests: kein Hintergrundplaner (würde nach 60 s Sicherungen anlegen)
         threading.Thread(target=scheduler, daemon=True).start()
+        threading.Thread(target=_warm_all, daemon=True).start()
 
 
 def _user_tick(tick, now, last_day):
@@ -105,6 +106,20 @@ def _user_tick(tick, now, last_day):
         if jobs.start("Tägliche Aktualisierung", sync.refresh_all):
             return now.date()
     return last_day
+
+
+def _warm_all():
+    """Nach dem Start (und dann alle 3 Stunden) Vorschaubilder und Wiederholungs-Auswertung vorbereiten."""
+    time.sleep(20)
+    while True:
+        for u in auth.active_uids():
+            try:
+                with ctx.as_user(u):
+                    more.api_repeats()
+                    photos.warm_thumbs()
+            except Exception:  # noqa
+                pass
+        time.sleep(3 * 3600)
 
 
 def scheduler():
@@ -217,7 +232,7 @@ def api_stats():
 @app.get("/api/tours")
 def api_tours(year: int = 0, q: str = "", limit: int = 20000):
     rows = db.query(
-        "SELECT t.*, (SELECT COUNT(*) FROM photos p WHERE p.tour_id=t.id) AS photos, (SELECT note FROM tour_notes n WHERE n.id=t.id) AS note, (SELECT orig_up FROM elev_fix e WHERE e.id=t.id) AS fix_up, (SELECT group_concat(tag, '|') FROM tour_tags x WHERE x.id=t.id) AS tags, g.country AS g_country, g.state AS g_state, g.county AS g_county, g.place AS g_place FROM tours t LEFT JOIN tour_geo g ON g.id=t.id "
+        "SELECT t.*, (SELECT COUNT(*) FROM photos p WHERE p.tour_id=t.id) AS photos, (SELECT note FROM tour_notes n WHERE n.id=t.id) AS note, (SELECT stars FROM tour_rating r WHERE r.id=t.id) AS stars, (SELECT orig_up FROM elev_fix e WHERE e.id=t.id) AS fix_up, (SELECT group_concat(tag, '|') FROM tour_tags x WHERE x.id=t.id) AS tags, g.country AS g_country, g.state AS g_state, g.county AS g_county, g.place AS g_place FROM tours t LEFT JOIN tour_geo g ON g.id=t.id "
         "WHERE t.start_ts IS NOT NULL ORDER BY t.start_ts DESC LIMIT ?", (limit,))
     out = []
     for t in rows:
@@ -229,6 +244,8 @@ def api_tours(year: int = 0, q: str = "", limit: int = 20000):
         t["date"] = d.isoformat()
         t["sport_de"] = stats.SPORT_DE.get(t["sport"], t["sport"])
         out.append(t)
+    if out:
+        more.warm_repeats()               # Wiederholungs-Auswertung schon vorrechnen, während die Seite lädt
     return out
 
 
@@ -282,6 +299,21 @@ def api_coords(tour_id: str):
     return data
 
 
+@app.post("/api/ui-password")
+def api_ui_password(body: dict, request: Request):
+    """Gemeinsames Oberflächenpasswort setzen, ändern oder (leer) aufheben. Nur im Betrieb ohne Benutzerverwaltung."""
+    if auth.users_exist():
+        raise HTTPException(409, "Mit Benutzerverwaltung melden sich Benutzer mit ihrem eigenen Passwort an.")
+    pw = str(body.get("password") or "")
+    if pw and len(pw) < 6:
+        raise HTTPException(400, "Das Passwort braucht mindestens 6 Zeichen")
+    try:
+        uipw.set_password(pw)
+    except PermissionError as e:
+        raise HTTPException(409, str(e))
+    return {"ok": True, "protected": uipw.is_set()}
+
+
 @app.get("/api/version")
 def api_version():
     return {"version": config.VERSION}
@@ -290,15 +322,19 @@ def api_version():
 @app.get("/api/status")
 def api_status():
     n = len(list(routes.D.glob("*.s.json"))) if routes.D.exists() else 0
-    return {"tours": db.one("SELECT COUNT(*) n FROM tours")["n"], "local_tours": db.one("SELECT COUNT(*) n FROM tours WHERE source='local'")["n"], "routes": n, "protected": bool(config.UI_PASSWORD), "version": config.VERSION,
+    return {"tours": db.one("SELECT COUNT(*) n FROM tours")["n"], "local_tours": db.one("SELECT COUNT(*) n FROM tours WHERE source='local'")["n"], "routes": n, "protected": uipw.is_set(), "ui_pw_env": uipw.env_set(), "users": auth.users_exist(), "version": config.VERSION,
             "zepp": {"state": db.get("zepp_state") or "", "checked": db.get("zepp_checked") or "", "token_ts": db.get("zepp_token_ts") or ""},
             "inbox": str(config.INBOX_DIR), "app_name": config.APP_NAME, "backup_dir": str(config.BACKUP_ROOT)}
 
 
 @app.get("/api/routes")
-def api_routes():
-    """Vereinfachte Linien aller zwischengespeicherten Touren für die Gesamtkarte."""
-    return routes.overview()
+def api_routes(request: Request):
+    """Vereinfachte Linien aller zwischengespeicherten Touren für die Gesamtkarte (mit ETag: bei unveränderten Daten 304)."""
+    body, etag = routes.overview_bytes()
+    h = {"ETag": etag, "Cache-Control": "private, no-cache"}
+    if etag in (request.headers.get("if-none-match") or ""):
+        return Response(status_code=304, headers=h)
+    return Response(body, media_type="application/json", headers=h)
 
 
 @app.get("/api/diag/coords")

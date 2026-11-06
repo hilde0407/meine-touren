@@ -233,7 +233,7 @@ def test_api(monkeypatch):
         assert db.get("komoot_password") == "geheim"
         assert c.get("/").status_code == 200 and c.get("/slideshow.html").status_code == 200
         assert c.get("/api/photo-info").json()["count"] == 0
-        assert c.get("/api/status").json() == {"tours": 0, "local_tours": 0, "routes": 0, "protected": False, "version": config.VERSION, "zepp": {"state": "", "checked": "", "token_ts": ""}, "inbox": str(config.INBOX_DIR), "app_name": config.APP_NAME, "backup_dir": str(config.BACKUP_ROOT)}
+        assert c.get("/api/status").json() == {"tours": 0, "local_tours": 0, "routes": 0, "protected": False, "ui_pw_env": False, "users": False, "version": config.VERSION, "zepp": {"state": "", "checked": "", "token_ts": ""}, "inbox": str(config.INBOX_DIR), "app_name": config.APP_NAME, "backup_dir": str(config.BACKUP_ROOT)}
         assert c.get("/api/routes").json() == {}
         assert c.post("/api/jobs/nope").status_code == 404
 

@@ -549,7 +549,43 @@ Sonstiges|Autre
 automatisch nach Sportart und Datum|automatiquement selon sport et date
 Wird automatisch zugeordnet bei Touren der Sportart|Attribué automatiquement aux sorties du sport
 (sonst wählst du es in der Tour selbst)|(sinon choisissez-le dans la sortie)
-Beste Jahreszeit|Meilleure saison`,
+Beste Jahreszeit|Meilleure saison
+Meine Bewertung:|Ma note :
+Meine Bewertung|Ma note
+Alle Bewertungen|Toutes les notes
+Sicherheit|Sécurité
+– Lawinenlage, Gruppe, Notfallausrüstung (nur Notiz)|– risque d’avalanche, groupe, matériel de secours (note seulement)
+Lawinenwarnstufe (laut Lagebericht des Tages)|Niveau de danger d’avalanche (selon le bulletin du jour)
+gering|faible
+mäßig|limité
+erheblich|marqué
+groß|fort
+sehr groß|très fort
+Gruppe|Groupe
+Schneedecke, Gefahrenstellen, Umkehrpunkt …|Manteau neigeux, dangers, point de demi-tour …
+Reine Dokumentation – ersetzt keinen Lawinenlagebericht.|Simple documentation – ne remplace pas un bulletin d’avalanche.
+Vergleich dieser Strecke|Comparaison de ce parcours
+Erste Hilfe|Premiers secours
+Biwaksack|Sac de bivouac
+Stirnlampe|Lampe frontale
+Schaufel|Pelle
+Sonde|Sonde
+Helm|Casque
+Alle Rad-Sportarten|Tous les sports de vélo
+Alle Ski-Sportarten|Tous les sports de ski
+Zu Fuß (Wandern, Bergtour, Schneeschuh)|À pied (randonnée, alpinisme, raquettes)
+Laufen und Langlauf|Course et ski de fond
+Mit Benutzerverwaltung melden sich alle mit ihrem eigenen Benutzernamen und Passwort an (siehe „Benutzer“).|Avec la gestion des utilisateurs, chacun se connecte avec son propre nom et mot de passe (voir « Utilisateurs »).
+Jeder im Netzwerk kann Touren, Fotos und Einstellungen sehen.|Toute personne du réseau peut voir les sorties, photos et réglages.
+Passwort festlegen (mind. 6 Zeichen)|Définir un mot de passe (6 caractères min.)
+Neues Passwort (mind. 6 Zeichen)|Nouveau mot de passe (6 caractères min.)
+Wiederholen|Répéter
+Passwort setzen|Définir le mot de passe
+Passwort ändern|Changer le mot de passe
+Schutz aufheben|Supprimer la protection
+Der Browser fragt danach nach dem Passwort (Benutzername beliebig). Das Passwort wird nur als Hash im Datenordner gespeichert.|Le navigateur demandera ensuite le mot de passe (nom d’utilisateur au choix). Il n’est enregistré que sous forme de hachage dans le dossier de données.
+Die beiden Eingaben stimmen nicht überein.|Les deux saisies ne correspondent pas.
+Das Passwort braucht mindestens 6 Zeichen.|Le mot de passe doit comporter au moins 6 caractères.`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
 Aktivität im Jahr 2026|Actividad en 2026
 Neuere Tour (←)|Ruta más reciente (←)
@@ -1099,5 +1135,41 @@ Sonstiges|Otro
 automatisch nach Sportart und Datum|automáticamente según deporte y fecha
 Wird automatisch zugeordnet bei Touren der Sportart|Se asigna automáticamente a rutas del deporte
 (sonst wählst du es in der Tour selbst)|(si no, elígelo en la propia ruta)
-Beste Jahreszeit|Mejor estación`,
+Beste Jahreszeit|Mejor estación
+Meine Bewertung:|Mi valoración:
+Meine Bewertung|Mi valoración
+Alle Bewertungen|Todas las valoraciones
+Sicherheit|Seguridad
+– Lawinenlage, Gruppe, Notfallausrüstung (nur Notiz)|– peligro de aludes, grupo, equipo de emergencia (solo nota)
+Lawinenwarnstufe (laut Lagebericht des Tages)|Nivel de peligro de aludes (según el boletín del día)
+gering|débil
+mäßig|moderado
+erheblich|notable
+groß|fuerte
+sehr groß|muy fuerte
+Gruppe|Grupo
+Schneedecke, Gefahrenstellen, Umkehrpunkt …|Manto nival, peligros, punto de retorno …
+Reine Dokumentation – ersetzt keinen Lawinenlagebericht.|Solo documentación: no sustituye un boletín de aludes.
+Vergleich dieser Strecke|Comparación de esta ruta
+Erste Hilfe|Primeros auxilios
+Biwaksack|Saco vivac
+Stirnlampe|Linterna frontal
+Schaufel|Pala
+Sonde|Sonda
+Helm|Casco
+Alle Rad-Sportarten|Todos los deportes de bici
+Alle Ski-Sportarten|Todos los deportes de esquí
+Zu Fuß (Wandern, Bergtour, Schneeschuh)|A pie (senderismo, montaña, raquetas)
+Laufen und Langlauf|Correr y esquí de fondo
+Mit Benutzerverwaltung melden sich alle mit ihrem eigenen Benutzernamen und Passwort an (siehe „Benutzer“).|Con la gestión de usuarios, cada uno inicia sesión con su propio nombre y contraseña (véase «Usuarios»).
+Jeder im Netzwerk kann Touren, Fotos und Einstellungen sehen.|Cualquiera en la red puede ver rutas, fotos y ajustes.
+Passwort festlegen (mind. 6 Zeichen)|Definir contraseña (mín. 6 caracteres)
+Neues Passwort (mind. 6 Zeichen)|Nueva contraseña (mín. 6 caracteres)
+Wiederholen|Repetir
+Passwort setzen|Definir contraseña
+Passwort ändern|Cambiar contraseña
+Schutz aufheben|Quitar protección
+Der Browser fragt danach nach dem Passwort (Benutzername beliebig). Das Passwort wird nur als Hash im Datenordner gespeichert.|El navegador pedirá entonces la contraseña (cualquier nombre de usuario). Solo se guarda como hash en la carpeta de datos.
+Die beiden Eingaben stimmen nicht überein.|Las dos entradas no coinciden.
+Das Passwort braucht mindestens 6 Zeichen.|La contraseña necesita al menos 6 caracteres.`,
 };

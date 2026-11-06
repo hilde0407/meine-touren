@@ -26,17 +26,30 @@ def _sig():
     return tuple(parts)
 
 
-def cached(fn):
+_K = {}
+
+
+def cached(fn=None, sig=None):
+    """@cached oder @cached(sig=funktion): sig liefert eine kleinere Signatur als „irgendeine Änderung an der Datenbank“."""
+    if fn is None:
+        return lambda f: cached(f, sig)
+
     @functools.wraps(fn)
     def wrap(*a, **k):
         key = (str(config.DB_PATH), fn.__name__, repr((a, sorted(k.items()))))
-        sig = _sig()
+        sg = (sig or _sig)()
         with _L:
             hit = _C.get(key)
-        if hit and hit[0] == sig:
+            lock = _K.setdefault(key, threading.Lock())
+        if hit and hit[0] == sg:
             return hit[1]
-        val = fn(*a, **k)
-        with _L:
-            _C[key] = (sig, val)
-        return val
+        with lock:                         # läuft dieselbe Berechnung schon (z. B. im Hintergrund), wird auf sie gewartet
+            with _L:
+                hit = _C.get(key)
+            if hit and hit[0] == sg:
+                return hit[1]
+            val = fn(*a, **k)
+            with _L:
+                _C[key] = (sg, val)
+            return val
     return wrap

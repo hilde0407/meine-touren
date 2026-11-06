@@ -608,6 +608,27 @@ def thumb(photo_id, size):
     return out
 
 
+def warm_thumbs(sizes=(300, 400, 500), stop=None):
+    """Fehlende Vorschaubilder der Übersicht im Hintergrund erzeugen (gedrosselt), damit der erste Seitenaufruf nicht darauf wartet."""
+    import time as _t
+    try:
+        os.nice(10)                       # nur dieser Thread (Linux); Fehler anderswo ignorieren
+    except Exception:  # noqa
+        pass
+    n = 0
+    for r in db.query("SELECT id FROM photos WHERE tour_id IS NOT NULL ORDER BY taken_ts DESC"):
+        for sz in sizes:
+            try:
+                thumb(r["id"], sz)
+            except Exception:  # noqa
+                pass
+        n += 1
+        _t.sleep(0.03)
+        if stop and stop():
+            break
+    return n
+
+
 def respond(request, path):
     """Bilddatei mit ETag ausliefern; der Browser fragt jedes Mal nach (304, wenn unverändert)."""
     from fastapi.responses import FileResponse, Response

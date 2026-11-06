@@ -90,6 +90,8 @@ def _open(path):
         conn.execute("CREATE TABLE IF NOT EXISTS tour_gear (tour_id TEXT, gear_id INTEGER, PRIMARY KEY(tour_id, gear_id))")   # gear_id 0 = ausdrücklich keine
         if "season" not in {r["name"] for r in conn.execute("PRAGMA table_info(wishlist)")}:
             conn.execute("ALTER TABLE wishlist ADD COLUMN season TEXT")                                      # '', 'sommer', 'winter'
+        conn.execute("CREATE TABLE IF NOT EXISTS tour_rating (id TEXT PRIMARY KEY, stars INTEGER)")   # eigene Bewertung 1–5
+        conn.execute("CREATE TABLE IF NOT EXISTS tour_safety (id TEXT PRIMARY KEY, level INTEGER, grp TEXT, gear TEXT, note TEXT)")   # Lawinenlage, Gruppe, Notfallausrüstung
         conn.commit()
         _conns[path] = conn
         return conn

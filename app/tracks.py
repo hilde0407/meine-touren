@@ -81,7 +81,7 @@ def delete_local(tid):
     t = db.one("SELECT source FROM tours WHERE id=?", (str(tid),))
     if not t or t["source"] != "local":
         raise ValueError("Nur lokale Touren können hier gelöscht werden")
-    for tb in ("tours", "tour_tags", "tour_notes", "tour_geo", "tour_peak", "tour_names", "elev_fix", "tour_uploads", "weather"):
+    for tb in ("tours", "tour_tags", "tour_notes", "tour_geo", "tour_peak", "tour_names", "elev_fix", "tour_uploads", "weather", "tour_rating", "tour_safety"):
         col = "tour_id" if tb == "tour_uploads" else "id"
         db.execute(f"DELETE FROM {tb} WHERE {col}=?", (str(tid),))
     db.execute("UPDATE photos SET tour_id=NULL WHERE tour_id=? AND COALESCE(manual,0)=0", (str(tid),))

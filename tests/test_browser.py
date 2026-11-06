@@ -444,3 +444,59 @@ def test_wishlist_season_select(page):
     assert "passt jetzt" in page.inner_text("#wlist")
     assert page.evaluate("api('/api/wishlist').then(l => l.find(x => x.title === 'Winterrunde').season)") == now
     assert not page.errors, page.errors
+
+
+def test_stars_safety_compare_and_note_size(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.wait_for_timeout(700)
+    tid = page.evaluate("TOURS.find(t => t.sport === 'hike' && t.source === 'local').id")
+    other = page.evaluate("TOURS.filter(t => t.source === 'local')[1].id")
+    page.evaluate("""async id => { await api('/api/tours/' + id + '/sport', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({sport: 'skitour'})}); await loadTours(); }""", tid)
+    page.evaluate("window.REPP")      # echte Wiederholungs-Auswertung abwarten (4 gleiche Runden)
+    page.goto(base + "#/tour/" + tid); page.wait_for_selector("#starrow", timeout=20000); page.wait_for_selector("#cmpseg", timeout=10000)
+    # Sterne
+    page.click("#starrow .st[data-n='4']"); page.wait_for_timeout(400)
+    assert page.evaluate("BY[%r].stars" % tid) == 4 and page.locator("#starrow .st.on").count() == 4
+    # Sicherheit (Skitour)
+    assert page.locator("#safety").count() == 1
+    page.click("#safety summary"); page.click("#slvl [data-l='3']")
+    page.click("#sgear label:has-text('LVS')"); page.fill("#snote", "Triebschnee am Grat"); page.click("#ssave"); page.wait_for_timeout(500)
+    assert "gespeichert" in page.inner_text("#smsg")
+    assert page.evaluate("api('/api/tours/%s/safety').then(s => [s.level, s.gear, s.note])" % tid) == [3, ["lvs"], "Triebschnee am Grat"]
+    # Vergleich derselben Strecke
+    assert page.locator("#cmpseg").count() == 1 and "schnellste von" in page.inner_text("#cmpseg")
+    # Größe der Notizbox wird gemerkt
+    page.evaluate("document.querySelector('#note').style.height = '210px'"); page.wait_for_timeout(900)
+    assert "210" in page.evaluate("localStorage.getItem('size:note')")
+    page.goto(base + "#/tour/" + other); page.wait_for_selector("#starrow", timeout=20000)
+    assert 200 <= page.evaluate("document.querySelector('#note').offsetHeight") <= 220
+    # lange Notiz: Box wächst mit, damit der ganze Text lesbar ist
+    page.fill("#note", "\n".join(f"Zeile {i}" for i in range(30)))
+    assert page.evaluate("document.querySelector('#note').offsetHeight >= document.querySelector('#note').scrollHeight")
+    # Liste: Bewertungsfilter
+    page.evaluate("sessionStorage.clear()")
+    page.goto(base + "#/tours"); page.wait_for_timeout(1200)
+    page.select_option("#fb", "4"); page.wait_for_timeout(300)
+    assert page.locator(".tr").count() == 1 and "★" in page.inner_text(".tr")
+    assert not page.errors, page.errors
+
+
+def test_goal_sport_groups(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.wait_for_timeout(700)
+    r = page.evaluate("""() => { const y = TOURS[0].y; return ['grp:foot', 'grp:bike', 'grp:ski', 'hike', ''].map(s => goalVal({year: y, sport: s, metric: 'count'}, TOURS)); }""")
+    assert r[0] + r[1] + r[2] >= 1 and r[4] >= r[3]
+    page.goto(base + "#/dash"); page.wait_for_timeout(1500)
+    assert page.evaluate("[...document.querySelectorAll('#gsp option')].map(o => o.textContent).join('|')").count("Alle Rad-Sportarten") == 1
+    assert not page.errors, page.errors
+
+
+def test_ui_password_panel(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/admin?tab=sicher"); page.wait_for_timeout(1500)
+    assert page.locator("#uipws").count() == 1 and "nicht passwortgeschützt" in page.inner_text("#uipw")
+    page.fill("#uipw1", "abcdef"); page.fill("#uipw2", "abcdeX"); page.click("#uipws")
+    assert "stimmen nicht überein" in page.inner_text("#uipwm")
+    page.fill("#uipw1", "abc"); page.fill("#uipw2", "abc"); page.click("#uipws")
+    assert "mindestens 6" in page.inner_text("#uipwm")
+    assert not page.errors, page.errors

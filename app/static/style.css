@@ -252,3 +252,10 @@ a.chip{text-decoration:none;color:inherit;cursor:pointer}a.chip .sw{margin-right
 .figs.sm{margin:14px 0 8px}.figs.sm .fig .v{font-size:clamp(24px,3vw,34px)}.figs.sm .fig .u{font-size:15px}
 .smap{background:#fff;border:2px solid #0003;border-radius:4px;padding:5px 10px;font:600 14px var(--b,inherit);cursor:pointer;color:#123}.smap.on{background:var(--yellow);border-color:#000}
 .wseason{font-size:13px;padding:2px 4px;max-width:120px}
+
+.stars{color:#d98a1f;letter-spacing:1px}
+.starrow{display:flex;align-items:center;gap:6px;margin:-4px 0 12px}.starrow button.st{background:none;border:0;font-size:26px;line-height:1;color:#c8c8c0;cursor:pointer;padding:0 1px}.starrow button.st.on{color:#d98a1f}
+.lvl{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.lvl button{min-width:44px;padding:6px 10px;border:2px solid #0003;border-radius:6px;background:#fff;font:600 16px var(--d);cursor:pointer}.lvl button.on{border-color:#000;box-shadow:0 0 0 2px #0005}
+.cmpbar{height:14px;border-radius:3px;background:var(--soft)}.cmpbar i{display:block;height:100%;border-radius:3px;background:var(--green,#2f8f5f)}.cmprow{display:grid;grid-template-columns:96px 1fr 120px;gap:10px;align-items:center;margin:6px 0}.cmprow.me{font-weight:700}
+@media(max-width:700px){.cmprow{grid-template-columns:80px 1fr 90px}}
+#note,#snote{resize:both;min-width:200px}

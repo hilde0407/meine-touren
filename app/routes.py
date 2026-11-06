@@ -71,6 +71,31 @@ def fetch_missing(k, pause=0.3, limit=None):
     return ok
 
 
+_OV = {}
+
+
+def overview_bytes():
+    """Die Übersichtslinien als fertiges JSON samt ETag. Wird nur neu gelesen, wenn sich Dateien geändert haben."""
+    import hashlib
+    import os
+    d = _D()
+    n, mx = 0, 0
+    if d.exists():
+        with os.scandir(d) as it:
+            for e in it:
+                if e.name.endswith(".s.json"):
+                    n += 1
+                    mx = max(mx, e.stat().st_mtime_ns)
+    sig = (n, mx)
+    hit = _OV.get(str(d))
+    if hit and hit[0] == sig:
+        return hit[1], hit[2]
+    body = json.dumps(overview(), separators=(",", ":")).encode()
+    etag = '"' + hashlib.sha1(body).hexdigest()[:16] + '"'
+    _OV[str(d)] = (sig, body, etag)
+    return body, etag
+
+
 def overview():
     """{id: [[lat,lng],...]} aller zwischengespeicherten Touren."""
     out = {}

@@ -48,8 +48,11 @@ VIEWS.search = async (_, q) => {
 
 /* ---- Ziele (Übersicht) ---- */
 const GM = {km: ["km", "Kilometer"], up: ["m", "Höhenmeter"], count: ["", "Touren"], hours: ["h", "Stunden"]};
+const GOAL_GRP = {"grp:bike": ["Alle Rad-Sportarten", "bike"], "grp:ski": ["Alle Ski-Sportarten", "ski"], "grp:foot": ["Zu Fuß (Wandern, Bergtour, Schneeschuh)", "foot"], "grp:run": ["Laufen und Langlauf", "run"]};
+const goalSport = (g, t) => !g.sport || (GOAL_GRP[g.sport] ? SPORT_GRP[GOAL_GRP[g.sport][1]].includes(t.sport) : t.sport === g.sport);
+const goalSportName = s => (GOAL_GRP[s] ? GOAL_GRP[s][0] : sName(s));
 const goalVal = (g, T) =>
-  T.filter(t => t.y === g.year && (!g.sport || t.sport === g.sport)).reduce(
+  T.filter(t => t.y === g.year && goalSport(g, t)).reduce(
     (c, t) => c + (g.metric === "km" ? t.km : g.metric === "up" ? t.up_m || 0 : g.metric === "hours" ? t.h : 1),
     0
   );
@@ -83,7 +86,9 @@ VIEWS.dash = async (n, q) => {
     Y = +(q.get("y") || 0) || 0,
     cy = new Date().getFullYear(),
     yr = Y || cy;
-  const goals = (await api("/api/goals").catch(() => [])).filter(g => g.year === yr),
+  const allGoals = await api("/api/goals").catch(() => []),
+    goals = allGoals.filter(g => g.year === yr),
+    prevGoals = allGoals.filter(g => g.year === yr - 1),
     sp = [...new Set(TOURS.map(t => t.sport))];
   const now = new Date(),
     frac = yr === cy ? Math.max(0, (now - new Date(cy, 0, 1)) / (new Date(cy + 1, 0, 1) - new Date(cy, 0, 1))) : 1;
@@ -92,7 +97,7 @@ VIEWS.dash = async (n, q) => {
       p = Math.min(100, (v / g.target) * 100),
       u = GM[g.metric][0],
       proj = frac > 0.02 && frac < 1 ? v / frac : null;
-    return `<div class="goal"><div class="gh"><b>${GM[g.metric][1]}${g.sport ? " " + sName(g.sport) : ""}</b><span>${nf(v, g.metric === "count" ? 0 : 0)} / ${nf(g.target, 0)} ${u} <button class="gx" data-g="${g.id}" title="Ziel löschen">×</button></span></div>
+    return `<div class="goal"><div class="gh"><b>${GM[g.metric][1]}${g.sport ? " " + goalSportName(g.sport) : ""}</b><span>${nf(v, g.metric === "count" ? 0 : 0)} / ${nf(g.target, 0)} ${u} <button class="gx" data-g="${g.id}" title="Ziel löschen">×</button></span></div>
      <div class="gb"><i style="width:${p}%"></i>${frac < 1 ? `<u style="left:${frac * 100}%" title="Soll heute"></u>` : ""}</div>
      <div class="gs">${nf(p, 0)} %${goalNote(g, v, u, frac, proj, yr, cy)}</div></div>`;
   };
@@ -100,11 +105,11 @@ VIEWS.dash = async (n, q) => {
   box.className = "panel";
   box.id = "goals";
   box.style.marginTop = "34px";
-  box.innerHTML = `<h2>Ziele ${yr}</h2>${goals.map(row).join("") || `<p class="mut">Noch kein Ziel für ${yr}. Setze dir eines, zum Beispiel 1000 km Wandern.</p>`}
+  box.innerHTML = `<h2>Ziele ${yr}</h2>${goals.map(row).join("") || `<p class="mut">Noch kein Ziel für ${yr}. Setze dir eines, zum Beispiel 1000 km Wandern.</p>${prevGoals.length ? `<button class="btn sm alt" id="gcopy">Ziele aus ${yr - 1} übernehmen (${prevGoals.length})</button>` : ""}`}
    <details><summary>Ziel hinzufügen</summary><div class="row" style="margin-top:8px"><select id="gm">${Object.entries(GM)
      .map(([k, v]) => `<option value="${k}">${v[1]}</option>`)
      .join("")}</select>
-   <select id="gsp"><option value="">alle Sportarten</option>${sp.map(s => `<option value="${s}">${sName(s)}</option>`).join("")}</select><input id="gt" type="number" min="1" placeholder="Zielwert" style="width:130px"><button class="btn sm" id="gadd">Speichern</button></div></details>`;
+   <select id="gsp"><option value="">alle Sportarten</option>${Object.entries(GOAL_GRP).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join("")}${sp.map(s => `<option value="${s}">${sName(s)}</option>`).join("")}</select><input id="gt" type="number" min="1" placeholder="Zielwert" style="width:130px"><button class="btn sm" id="gadd">Speichern</button></div></details>`;
   fg.after(box);
   box.onclick = async e => {
     const g = e.target.dataset.g;
@@ -113,6 +118,12 @@ VIEWS.dash = async (n, q) => {
       route();
     }
   };
+  if ($("#gcopy"))
+    $("#gcopy").onclick = async () => {
+      for (const g of prevGoals)
+        await api("/api/goals", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({year: yr, metric: g.metric, sport: g.sport, target: g.target})});
+      route();
+    };
   $("#gadd").onclick = async () => {
     const t = +$("#gt").value;
     if (!t) return;
@@ -278,8 +289,9 @@ const _tourV = VIEWS.tour;
 VIEWS.tour = async id => {
   await _tourV(id);
   const t = BY[id],
-    r = $("#ksync") && $("#ksync").closest(".row");
+    r = ($("#ksync") || $("#eup")) && ($("#ksync") || $("#eup")).closest(".row");
   if (!t || !r) return;
+  if ($("#ksync"))           // Komoot-Touren: zusätzliche Knöpfe (lokale Touren haben GPX/Teilen schon in der Leiste)
   r.insertAdjacentHTML(
     "beforeend",
     `<a class="btn ghost sm" href="/api/tours/${encodeURIComponent(id)}/gpx" download title="Strecke als GPX-Datei">⬇ GPX</a><a class="btn ghost sm" href="#/flight/${encodeURIComponent(id)}" title="Die Strecke im 3D-Gelände abfliegen">🛰 3D-Flug</a>${t.photos ? `<button class="btn ghost sm" id="shr" title="Link zur Foto-Diashow dieser Tour kopieren">🔗 Diashow-Link</button>` : ""}`
@@ -306,9 +318,9 @@ VIEWS.tour = async id => {
         body: JSON.stringify({note: $("#note").value}),
       });
       t.note = $("#note").value.trim();
-      $("#notes").textContent = "gespeichert ✓";
+      if ($("#notes")) $("#notes").textContent = "gespeichert ✓";
     } catch (e) {
-      $("#notes").innerHTML = `<span class="bad">${esc(e.message)}</span>`;
+      if ($("#notes")) $("#notes").innerHTML = `<span class="bad">${esc(e.message)}</span>`;
     }
   };
 };
@@ -433,8 +445,33 @@ VIEWS.admin = async (...a) => {
     `<div class="grid g2" style="margin-top:40px"><div class="panel"><h2>Sicherung</h2>
    <p class="mut">Täglich um 03:40 Uhr wird die Datenbank (Touren, Notizen, Ziele, Zuordnungen) automatisch nach <code>${esc(st.backup_dir || "/var/backups/meine-touren")}</code> gesichert, die letzten 14 bleiben erhalten. Wiederherstellen: <code>${esc(st.app_name || "meine-touren")}-restore &lt;Datei&gt;</code> im Container.</p>
    <div class="row"><a class="btn alt" href="/api/backup" download>Backup jetzt herunterladen</a></div><p class="mut" style="font-size:13px">Passwörter und Tokens sind im Download nicht enthalten. Fotos und Routen sind nicht enthalten, sie lassen sich neu laden.</p></div>
-   <div class="panel"><h2>Zugriffsschutz</h2>${st.protected ? `<p class="ok"><b>✓ Passwortschutz ist aktiv.</b></p>` : `<p class="bad"><b>Die Oberfläche ist nicht passwortgeschützt.</b></p><p class="mut">Jeder im Netzwerk kann Touren, Fotos und Einstellungen sehen. Zum Schutz im Container <code>UI_PASSWORD=…</code> in <code>/etc/${esc(st.app_name || "meine-touren")}.env</code> setzen und <code>systemctl restart ${esc(st.app_name || "meine-touren")}</code> ausführen.</p>`}</div></div>`
+   <div class="panel" id="uipw"><h2>Zugriffsschutz</h2>${
+     st.users
+       ? `<p class="mut">Mit Benutzerverwaltung melden sich alle mit ihrem eigenen Benutzernamen und Passwort an (siehe „Benutzer“).</p>`
+       : st.ui_pw_env
+         ? `<p class="ok"><b>✓ Passwortschutz ist aktiv.</b></p><p class="mut">Das Passwort ist über <code>UI_PASSWORD</code> in <code>/etc/${esc(st.app_name || "meine-touren")}.env</code> festgelegt und lässt sich hier nicht ändern.</p>`
+         : `${st.protected ? `<p class="ok"><b>✓ Passwortschutz ist aktiv.</b></p>` : `<p class="bad"><b>Die Oberfläche ist nicht passwortgeschützt.</b></p><p class="mut">Jeder im Netzwerk kann Touren, Fotos und Einstellungen sehen.</p>`}
+            <div class="row" style="gap:8px"><input type="password" id="uipw1" autocomplete="new-password" placeholder="${st.protected ? "Neues Passwort" : "Passwort festlegen"} (mind. 6 Zeichen)" style="max-width:260px"><input type="password" id="uipw2" autocomplete="new-password" placeholder="Wiederholen" style="max-width:200px"><button class="btn sm" id="uipws">${st.protected ? "Passwort ändern" : "Passwort setzen"}</button>${st.protected ? `<button class="btn ghost sm" id="uipwx">Schutz aufheben</button>` : ""}</div>
+            <p class="mut" style="font-size:13px">Der Browser fragt danach nach dem Passwort (Benutzername beliebig). Das Passwort wird nur als Hash im Datenordner gespeichert.</p><div id="uipwm"></div>`
+   }</div></div>`
   );
+  const setPw = async pw => {
+    try {
+      await api("/api/ui-password", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({password: pw})});
+      $("#uipwm").innerHTML = `<span class="ok">${pw ? "Passwort gespeichert – beim nächsten Aufruf fragt der Browser danach." : "Schutz aufgehoben."}</span>`;
+      setTimeout(() => route(), 1200);
+    } catch (e) {
+      $("#uipwm").innerHTML = `<span class="bad">${esc(e.message)}</span>`;
+    }
+  };
+  if ($("#uipws"))
+    $("#uipws").onclick = () => {
+      const a = $("#uipw1").value;
+      if (a !== $("#uipw2").value) return ($("#uipwm").innerHTML = `<span class="bad">Die beiden Eingaben stimmen nicht überein.</span>`);
+      if (a.length < 6) return ($("#uipwm").innerHTML = `<span class="bad">Das Passwort braucht mindestens 6 Zeichen.</span>`);
+      setPw(a);
+    };
+  if ($("#uipwx")) $("#uipwx").onclick = () => confirm("Passwortschutz wirklich aufheben? Danach kann jeder im Netzwerk die App öffnen.") && setPw("");
 };
 
 /* ---- Karte: Heatmap und Fotos ---- */

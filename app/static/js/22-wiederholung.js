@@ -3,9 +3,13 @@ let REP = {};
 const _loadToursR = loadTours;
 loadTours = async (...a) => {
   await _loadToursR(...a);
-  // Auswertung kann bei großen Bibliotheken ein paar Sekunden dauern: höchstens 3 s warten, sonst später nachreichen
-  const p = api("/api/repeats").then(r => (REP = r)).catch(() => (REP = {}));
-  await Promise.race([p, new Promise(r => setTimeout(r, 3000))]);
+  // Die Auswertung kann bei großen Bibliotheken ein paar Sekunden dauern: nicht darauf warten, sondern nachreichen
+  window.REPP = api("/api/repeats")
+    .then(r => {
+      REP = r;
+      if (location.hash.startsWith("#/tours") && $("#q") && window.scrollY < 40) $("#q").dispatchEvent(new Event("input")); // Liste mit 🔁 neu zeichnen
+    })
+    .catch(() => (REP = {}));
 };
 const _tourRowR = tourRow;
 tourRow = t => {
@@ -16,9 +20,17 @@ tourRow = t => {
 const _tourRep = VIEWS.tour;
 VIEWS.tour = async (id, q) => {
   await _tourRep(id, q);
-  const r = REP[id],
+  const go = () => {
+    if (location.hash.includes(id)) showRepNote(id);
+  };
+  if (window.REPP) window.REPP.then(go);   // nicht warten: die Auswertung kann bei großen Bibliotheken dauern
+  else go();
+};
+function showRepNote(id) {
+  const t = BY[id],
+    r = REP[id],
     w = $("#ewarn");
-  if (!r || !w || $("#repnote")) return;
+  if (!t || !r || !w || $("#repnote")) return;
   const rank = 1 + r.with.filter(x => x.start_ts < r.start_ts).length,
     ds = ts => new Date(ts * 1000).toLocaleDateString("de-DE");
   w.insertAdjacentHTML(
@@ -27,4 +39,4 @@ VIEWS.tour = async (id, q) => {
       .map(x => `<a href="#/tour/${esc(x.id)}">${ds(x.start_ts)}</a>`)
       .join(", ")}</span></div>`
   );
-};
+}

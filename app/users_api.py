@@ -7,7 +7,7 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import FileResponse
 
-from . import auth, config, ctx, db, more2, photos, tracks
+from . import auth, config, ctx, db, more2, photos, tracks, uipw
 
 router = APIRouter()
 
@@ -42,7 +42,7 @@ def _cookie(resp: Response, tok, request: Request, clear=False):
 def api_me(request: Request):
     u = getattr(request.state, "user", None)
     exist = auth.users_exist()
-    return {"users_enabled": exist, "needs_setup": not exist, "user": u, "legacy_protected": bool(config.UI_PASSWORD) and not exist}
+    return {"users_enabled": exist, "needs_setup": not exist, "user": u, "legacy_protected": uipw.is_set() and not exist}
 
 
 @router.post("/api/setup")

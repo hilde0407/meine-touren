@@ -6,7 +6,7 @@ import shutil
 import sqlite3
 import tempfile
 import zipfile
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Response
@@ -234,24 +234,32 @@ def fetch_weather(t):
     old = (datetime.now(TZ).date() - day).days > 6
     url = "https://archive-api.open-meteo.com/v1/archive" if old else "https://api.open-meteo.com/v1/forecast"
     prm = {"latitude": t["lat"], "longitude": t["lng"], "start_date": day.isoformat(), "end_date": end_day.isoformat(), "timezone": "Europe/Berlin",
-           "hourly": "temperature_2m,precipitation,weather_code,wind_speed_10m"}
+           "hourly": "temperature_2m,precipitation,weather_code,wind_speed_10m,snowfall,snow_depth"}
+    prm["start_date"] = (day - timedelta(days=3)).isoformat()      # drei Tage davor: Neuschnee vor der Tour
     if not old:
         prm.pop("start_date"); prm.pop("end_date"); prm["past_days"] = 7; prm["forecast_days"] = 1
     r = requests.get(url, params=prm, headers=UA, timeout=20)
     if r.status_code != 200:
         raise RuntimeError(f"Wetterdienst: HTTP {r.status_code}")
     h = r.json().get("hourly") or {}
-    rows = []
+    rows, snow72, depth = [], 0.0, []
+    sf, sd = h.get("snowfall") or [], h.get("snow_depth") or []
     for i, tm in enumerate(h.get("time", [])):
         ts = int(datetime.fromisoformat(tm).replace(tzinfo=TZ).timestamp())
+        if t["start_ts"] - 72 * 3600 < ts <= t["start_ts"]:
+            snow72 += (sf[i] if i < len(sf) else None) or 0
         if t["start_ts"] - 3600 < ts < (t["end_ts"] or t["start_ts"]) + 1800:
-            rows.append({"ts": ts, "t": h["temperature_2m"][i], "p": h["precipitation"][i], "c": h["weather_code"][i], "w": h["wind_speed_10m"][i]})
+            rows.append({"ts": ts, "t": h["temperature_2m"][i], "p": h["precipitation"][i], "c": h["weather_code"][i], "w": h["wind_speed_10m"][i],
+                         "s": (sf[i] if i < len(sf) else None) or 0})
+            if i < len(sd) and sd[i] is not None:
+                depth.append(sd[i] * 100)                   # Meter -> cm
     if not rows:
         raise RuntimeError("Keine Wetterdaten für diesen Zeitraum")
     temps = [r["t"] for r in rows if r["t"] is not None]
     code = max((r["c"] for r in rows if r["c"] is not None), default=0)
     return {"tmin": min(temps), "tmax": max(temps), "precip": round(sum(r["p"] or 0 for r in rows), 1), "wind": max((r["w"] or 0) for r in rows),
-            "code": code, "text": WMO.get(code, "–"), "hours": len(rows)}
+            "code": code, "text": WMO.get(code, "–"), "hours": len(rows),
+            "snowfall": round(sum(r["s"] for r in rows), 1), "snow72": round(snow72, 1), "snow_depth": round(max(depth)) if depth else None}
 
 
 @router.get("/api/tours/{tour_id}/weather")
@@ -260,11 +268,14 @@ def api_weather(tour_id: str):
     if not t or t["lat"] is None:
         raise HTTPException(404, "Tour oder Startpunkt unbekannt")
     c = db.one("SELECT js,ts FROM weather WHERE id=?", (tour_id,))
-    if c and (time.time() - c["ts"] < 86400 * 30 or (time.time() - t["start_ts"]) > 10 * 86400):
-        return json.loads(c["js"])
+    old = json.loads(c["js"]) if c else None
+    if old and "snow72" in old and (time.time() - c["ts"] < 86400 * 30 or (time.time() - t["start_ts"]) > 10 * 86400):
+        return old
     try:
         w = fetch_weather(t)
     except Exception as e:  # noqa
+        if old:                                   # ältere Daten ohne Schneeangaben sind besser als nichts
+            return old
         raise HTTPException(502, str(e))
     db.execute("INSERT OR REPLACE INTO weather(id,js,ts) VALUES(?,?,?)", (tour_id, json.dumps(w), int(time.time())))
     return w
