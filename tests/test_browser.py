@@ -690,3 +690,16 @@ def test_mobile_more_sheet_not_covered(page):
     assert z[0] > z[1] and z[2] in ("auto", "scroll")
     box = page.evaluate("(()=>{const b=document.querySelector('.modal .mbox');b.scrollTop=1e5;const r=document.querySelector('.modal .mbox').getBoundingClientRect();return [r.bottom,innerHeight]})()")
     assert box[0] <= box[1] + 1
+
+
+def test_share_send_button(page):
+    """„Senden“ erzeugt einen Link und reicht ihn an das Android-Auswahlmenü (MTApp.shareText) weiter."""
+    base = page.url.split("#")[0]
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.2.0', serverUrl: () => ''}")
+    page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(1200)
+    page.click("#esnd"); page.wait_for_function("window._sent", timeout=8000)
+    sent = page.evaluate("window._sent")
+    assert "/s/" in sent and "km" in sent
+    page.set_viewport_size({"width": 1280, "height": 900})

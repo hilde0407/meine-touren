@@ -178,6 +178,8 @@ Im Ordner `android/` liegt eine kleine native Android-App („Hülle“) um die 
 - **PDF-Downloads** landen im Download-Ordner des Handys.
 - Die Serveradresse (auch `http://192.168.178.230`) wird beim ersten Start eingegeben und lässt sich in der Verwaltung ändern.
 
+**Teilen und Smartphone-Ansicht (ab 2.2):** Auf Tourseite, Reise und Jahresrückblick gibt es „Senden“. In der App öffnet es das Android-Auswahlmenü (WhatsApp, Signal, E-Mail …). Bei einer Tour wird dafür ein Link ohne Anmeldung erzeugt (Anfang und Ende ausgeblendet). Der Link funktioniert für Empfänger nur, wenn der Server von außen erreichbar ist (z. B. Tailscale Funnel). Die Übersicht und die Filterleiste der Tourenliste sind auf dem Handy deutlich kompakter.
+
 **Push-Meldungen (ab 2.1):** Trage in der Verwaltung unter „Benachrichtigung“ eine ntfy-Adresse ein (z. B. `https://ntfy.sh/mein-geheimes-thema`). Dann kommen Warnungen und neue Touren (Aufzeichnung, Teilen-Menü, Import) als Meldung. In der Android-App: Verwaltung → Android-App → „ntfy-App holen“, danach „In ntfy abonnieren“. Das Abschalten der Tour-Meldungen geht im selben Panel.
 
 **APK bauen:** Die APK entsteht auf GitHub (Actions → „Android-App“ → *Run workflow*, oder automatisch bei jeder Veröffentlichung; sie wird dann an das Release angehängt). Ohne Signierschlüssel wird eine Debug-APK gebaut – die lässt sich ebenfalls installieren („Aus unbekannten Quellen“ erlauben). Für eine signierte Release-APK unter *Settings → Secrets → Actions* hinterlegen: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`.

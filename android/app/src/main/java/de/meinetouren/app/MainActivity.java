@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
         s.setDomStorageEnabled(true);
         s.setGeolocationEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
-        s.setUserAgentString(s.getUserAgentString() + " MeineTourenApp/2.1");
+        s.setUserAgentString(s.getUserAgentString() + " MeineTourenApp/2.2");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(web, false);
         web.addJavascriptInterface(new Bridge(), "MTApp");
@@ -299,7 +299,7 @@ public class MainActivity extends Activity {
 
     /* ---------- Brücke zur Weboberfläche ---------- */
     public class Bridge {
-        @JavascriptInterface public String version() { return "2.1.2"; }
+        @JavascriptInterface public String version() { return "2.2.0"; }
         @JavascriptInterface public String serverUrl() { return server(); }
 
         @JavascriptInterface
@@ -330,7 +330,7 @@ public class MainActivity extends Activity {
             try {
                 android.os.PowerManager pm = (android.os.PowerManager) getSystemService(POWER_SERVICE);
                 android.location.LocationManager lm = (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
-                o.put("version", "2.1.2");
+                o.put("version", "2.2.0");
                 o.put("android", Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
                 o.put("device", Build.MANUFACTURER + " " + Build.MODEL);
                 o.put("server", server());
@@ -360,8 +360,8 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void shareText(String text) {
             runOnUiThread(() -> {
-                Intent i = new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text).putExtra(Intent.EXTRA_SUBJECT, "Meine Touren Diagnose");
-                startActivity(Intent.createChooser(i, "Diagnose senden"));
+                Intent i = new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text).putExtra(Intent.EXTRA_SUBJECT, text.split("\n")[0].length() > 80 ? "Meine Touren" : text.split("\n")[0]);
+                startActivity(Intent.createChooser(i, "Senden mit …"));
             });
         }
 

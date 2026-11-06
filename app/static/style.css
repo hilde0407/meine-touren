@@ -276,3 +276,21 @@ a.chip{text-decoration:none;color:inherit;cursor:pointer}a.chip .sw{margin-right
 html.mob .modal{z-index:1000}
 html.mob .modal .mbox{overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:88vh;max-height:88dvh}
 html.mob .moregrid .btn{min-height:46px;display:flex;align-items:center;justify-content:center;text-align:center}
+/* Smartphone: mehr Inhalt auf kleinem Bildschirm (Übersicht, Filter, Kennzahlen) */
+html.mob .hero{min-height:0}
+html.mob .hero .in{padding:64px 14px 14px;gap:10px;flex-direction:column;align-items:stretch}
+html.mob .hero .k{font-size:13px;margin-bottom:2px}html.mob .hero h1{font-size:26px;margin-bottom:4px}html.mob .hero .w{font-size:14px}
+html.mob .hero .thumbrow{display:none}
+html.mob .hero .btns{margin-top:10px;gap:8px}html.mob .hero .btns .btn{min-height:38px;padding:6px 14px;font-size:15px}
+html.mob .signs{flex-direction:row;gap:6px;min-width:0}
+html.mob .sign,html.mob .sign.l{flex:1;flex-direction:column;align-items:flex-start;gap:0;padding:6px 8px;margin:0;font-size:21px;line-height:1.05;clip-path:none;border-radius:4px;animation:none;justify-content:flex-start}
+html.mob .sign small{font-size:11px}
+html.mob .hero::after{background:linear-gradient(0deg,#071314f5 0%,#071314b0 60%,#07131455 100%)}
+html.mob .years{flex-wrap:nowrap;overflow-x:auto;gap:4px 18px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+html.mob .years button{font-size:22px;white-space:nowrap}
+html.mob .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}html.mob .chip{white-space:nowrap;flex:none}
+html.mob .figs{grid-template-columns:repeat(3,1fr);gap:4px 0}html.mob .fig .v{font-size:25px}html.mob .fig .l{font-size:12px}html.mob .fig{margin:0 0 8px;padding-right:6px}
+html.mob .inner .sec{margin-top:20px}html.mob .inner .grid{margin-top:22px!important}html.mob .inner .panel[style*="margin-top:44px"]{margin-top:22px!important}
+html.mob .filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}html.mob .filters>*{min-width:0!important}html.mob .filters #q{grid-column:1/-1}
+html.mob .filters select{min-height:40px;padding:6px 8px;font-size:15px}
+html.mob .tr{padding:9px 0}
