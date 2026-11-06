@@ -621,3 +621,15 @@ def test_pdf_photo_choice(page):
     page.goto(base + "#/recap/2024"); page.wait_for_timeout(1500)
     assert page.locator("#pdfon").count() == 1 and not page.locator("#pdfon").is_checked()
     page.evaluate("api('/api/settings', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({pdf_photos: '1', pdf_photo_n: '6'})})")
+
+
+def test_share_result_and_handy_panel(page):
+    base = page.url.split("#")[0]
+    page.goto(base + "#/shared?t=1&d=0&a=1&p=2&x=1"); page.wait_for_timeout(1200)
+    txt = page.inner_text("main")
+    assert "1 Tour importiert" in txt and "2 Fotos empfangen" in txt and "nicht unterstützt" in txt
+    page.goto(base + "#/shared?t=0&d=1&a=1"); page.wait_for_timeout(800)
+    assert "schon vorhanden" in page.inner_text("main")
+    page.goto(base + "#/admin?tab=uebersicht"); page.wait_for_timeout(1500)
+    assert page.locator("#handy").count() == 1 and page.is_visible("#handy")
+    assert "Teilen-Menü" in page.inner_text("#handy")

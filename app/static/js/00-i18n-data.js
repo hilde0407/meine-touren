@@ -639,7 +639,11 @@ Zeit|Heure
 Fotos im PDF|Photos dans le PDF
 ⬇ PDF herunterladen|⬇ Télécharger le PDF
 🖨 Drucken|🖨 Imprimer
-Drucken|Imprimer`,
+Drucken|Imprimer
+Mit Meine Touren geteilt|Partagé avec Meine Touren
+Zu den Touren|Vers les sorties
+Auf dem Handy|Sur le téléphone
+App installieren|Installer l’application`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
 Aktivität im Jahr 2026|Actividad en 2026
 Neuere Tour (←)|Ruta más reciente (←)
@@ -1274,5 +1278,6 @@ Name und Zeitraum der automatisch erkannten Reise. Ein anderer Zeitraum nimmt al
 Zurücksetzen|Restablecer
 
 Fotos im PDF|Fotos en el PDF
+
 `,
 };

@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import os
 import hmac
@@ -8,7 +9,7 @@ from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, Query, Request, Response, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -422,6 +423,76 @@ async def api_import_files(files: list[UploadFile] = File(...), dry_run: bool = 
     if not jobs.start("Datei-Import", lambda: sync.import_items(items, ps, dry_run)):
         raise HTTPException(409, "Es läuft bereits ein Job")
     return {"started": len(items)}
+
+
+# ---------- Teilen-Ziel (Android: „Teilen mit Meine Touren“) ----------
+SHARE_ACT = (".gpx", ".fit", ".tcx", ".zip", ".gz")
+SHARE_IMG = (".jpg", ".jpeg", ".png", ".heic", ".heif", ".webp")
+SHARE_MAX = 300 * 1024 * 1024
+
+
+@app.post("/api/share-target")
+async def api_share_target(files: list[UploadFile] = File(default=[])):
+    """Nimmt Dateien an, die per Android-Teilen-Menü gesendet wurden: Tourendateien werden sofort übernommen, Fotos
+    kommen in den Eingangsordner und werden im Hintergrund zugeordnet. Danach Weiterleitung zur Ergebnisseite."""
+    import re as _re
+    act_dir, img_dir = config.INBOX_DIR / "touren", config.INBOX_DIR / "teilen"
+    n_act = n_img = n_bad = total = 0
+    for f in files:
+        name = _re.sub(r"[^\w.\- ]+", "_", (f.filename or "datei").replace("\\", "/").split("/")[-1])[:120] or "datei"
+        ext = Path(name).suffix.lower()
+        dest = act_dir if ext in SHARE_ACT else img_dir if ext in SHARE_IMG else None
+        if dest is None:
+            n_bad += 1
+            continue
+        dest.mkdir(parents=True, exist_ok=True)
+        target = dest / name
+        if target.exists():
+            target = dest / f"{int(time.time())}_{name}"
+        size = 0
+        with open(target, "wb") as out:
+            while True:
+                chunk = await f.read(1 << 20)
+                if not chunk:
+                    break
+                size += len(chunk)
+                total += len(chunk)
+                if total > SHARE_MAX:
+                    out.close()
+                    target.unlink(missing_ok=True)
+                    raise HTTPException(413, "Zu viele Daten auf einmal")
+                out.write(chunk)
+        if ext in SHARE_ACT:
+            n_act += 1
+        else:
+            n_img += 1
+    imported = dup = 0
+    if n_act:
+        root = act_dir
+        paths = [p for p in root.iterdir() if p.is_file() and p.suffix.lower() in SHARE_ACT]
+        res = await asyncio.get_running_loop().run_in_executor(None, lambda: _share_import(paths))
+        imported, dup = res
+    if n_img:
+        jobs.start("Geteilte Fotos", sync.import_inbox)
+    q = f"?t={imported}&d={dup}&a={n_act}&p={n_img}&x={n_bad}"
+    return RedirectResponse("/#/shared" + q, status_code=303)
+
+
+def _share_import(paths):
+    from . import devices
+    tot = devices.import_paths(paths)
+    done = config.INBOX_DIR / "touren" / "erledigt"
+    done.mkdir(parents=True, exist_ok=True)
+    for p in paths:
+        try:
+            p.replace(done / p.name)
+        except OSError:
+            pass
+    try:
+        photos.assign_all()
+    except Exception:  # noqa
+        pass
+    return tot["imported"], tot["dup"]
 
 
 # ---------- Fotos ----------

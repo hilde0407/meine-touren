@@ -660,7 +660,11 @@ Zeit|Time
 Fotos im PDF|Photos in PDF
 ⬇ PDF herunterladen|⬇ Download PDF
 🖨 Drucken|🖨 Print
-Drucken|Print`;
+Drucken|Print
+Mit Meine Touren geteilt|Shared with Meine Touren
+Zu den Touren|To the tours
+Auf dem Handy|On your phone
+App installieren|Install app`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
   const decode = s => s.replace(/&amp;/g, "&");

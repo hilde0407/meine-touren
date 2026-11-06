@@ -1,22 +1,38 @@
 {
+ "id": "./",
  "name": "Meine Touren",
  "short_name": "Touren",
+ "description": "Meine Touren: Wandern, Rad, Ski und mehr – Auswertung, Karte, Fotos und Planung auf dem eigenen Server",
  "start_url": "./",
+ "scope": "./",
  "display": "standalone",
+ "orientation": "any",
  "background_color": "#0e2a2b",
  "theme_color": "#0e2a2b",
  "lang": "de",
+ "categories": ["sports", "health", "navigation"],
  "icons": [
-  {
-   "src": "icon-192.png",
-   "sizes": "192x192",
-   "type": "image/png"
-  },
-  {
-   "src": "icon-512.png",
-   "sizes": "512x512",
-   "type": "image/png",
-   "purpose": "any maskable"
+  {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+  {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+  {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+ ],
+ "shortcuts": [
+  {"name": "Touren", "short_name": "Touren", "url": "./#/tours"},
+  {"name": "Karte", "short_name": "Karte", "url": "./#/map"},
+  {"name": "Tour planen", "short_name": "Planen", "url": "./#/plan"},
+  {"name": "Reisen", "short_name": "Reisen", "url": "./#/trips"}
+ ],
+ "share_target": {
+  "action": "./api/share-target",
+  "method": "POST",
+  "enctype": "multipart/form-data",
+  "params": {
+   "files": [
+    {
+     "name": "files",
+     "accept": [".gpx", ".fit", ".tcx", ".zip", "application/gpx+xml", "application/vnd.ant.fit", "application/octet-stream", "text/xml", "application/xml", "application/zip", "image/jpeg", "image/png", "image/heic", "image/heif", "image/webp"]
+    }
+   ]
   }
- ]
+ }
 }
