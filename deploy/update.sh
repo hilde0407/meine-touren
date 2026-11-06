@@ -29,7 +29,10 @@ elif [ "$A" = release ]; then
   WANT="${2:-}"; [[ "$WANT" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Aufruf: $0 release 1.2.3"; exit 1; }
   A="release:$WANT"
 fi
-trap 'rc=$?; rm -rf "$T"; if [ $rc -ne 0 ] && [ -n "$WANT" ]; then status error "$WANT" "Update fehlgeschlagen – Einzelheiten: journalctl -u $NAME-update"; fi' EXIT
+LOG="$DATA/update.log"
+if [ -n "$WANT" ]; then exec > >(tee "$LOG") 2>&1; chown "$SVCUSER" "$LOG" 2>/dev/null || true; fi
+STATUS_SET=0
+trap 'rc=$?; rm -rf "$T"; if [ $rc -ne 0 ] && [ -n "$WANT" ] && [ "$STATUS_SET" = 0 ]; then sleep 0.5; status error "$WANT" "Fehlgeschlagen: $(grep -v "^[[:space:]]*$" "$LOG" 2>/dev/null | tail -n 2 | tr "\n" " ") (Protokoll: $LOG)"; fi' EXIT
 [ -n "$WANT" ] && status running "$WANT" "Lade und installiere Version $WANT …"
 SRC=""
 if [ -d "$A" ]; then
@@ -67,8 +70,12 @@ if [ -x "$APP/venv/bin/python" ]; then
   (cd "$APP" && set -a && . "$ENVF" && set +a && sudo -u "$SVCUSER" env DATA_DIR="$DATA_DIR" "$APP/venv/bin/python" -m app.backup "$BACKUPS" 14) >/dev/null 2>&1 && echo "Sicherung vor dem Update erstellt." || echo "(Sicherung vor dem Update übersprungen)"
 fi
 bash "$SRC/deploy/install.sh"
-sleep 2
-NOW=$(curl -s localhost:8080/api/version | python3 -c 'import sys,json; print(json.load(sys.stdin).get("version"))' 2>/dev/null || echo "")
+NOW=""
+for _ in $(seq 1 45); do        # der Dienst braucht nach dem Neustart manchmal länger als 2 Sekunden (Datenbanken, Zwischenspeicher)
+  sleep 2
+  NOW=$(curl -s localhost:8080/api/version | python3 -c 'import sys,json; print(json.load(sys.stdin).get("version"))' 2>/dev/null || echo "")
+  [ -n "$NOW" ] && [ "$NOW" != "None" ] && { [ -z "$WANT" ] || [ "${NOW%% *}" = "$WANT" ]; } && break
+done
 echo "Läuft jetzt: $NOW"
-[ -z "$WANT" ] || { [ "${NOW%% *}" = "$WANT" ] && status ok "$WANT" "Version $WANT ist installiert" || { status error "$WANT" "Dienst meldet nach dem Update: ${NOW:-keine Antwort}"; exit 1; }; }
+[ -z "$WANT" ] || { [ "${NOW%% *}" = "$WANT" ] && status ok "$WANT" "Version $WANT ist installiert" || { STATUS_SET=1; status error "$WANT" "Dienst meldet nach dem Update: ${NOW:-keine Antwort} (journalctl -u $NAME -n 50)"; exit 1; }; }
 echo "Im Browser: Strg+Shift+R (Mac: Cmd+Shift+R)."
