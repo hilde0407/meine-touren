@@ -59,7 +59,12 @@ final class RecPhotos {
     static void finish(Context c, File f, double lat, double lon, long ts) {
         try {
             ExifInterface ex = new ExifInterface(f.getAbsolutePath());
-            if (!Double.isNaN(lat) && !Double.isNaN(lon)) ex.setLatLong(lat, lon);
+            if (!Double.isNaN(lat) && !Double.isNaN(lon)) {
+                ex.setAttribute(ExifInterface.TAG_GPS_LATITUDE, dms(lat));
+                ex.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, lat >= 0 ? "N" : "S");
+                ex.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, dms(lon));
+                ex.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, lon >= 0 ? "E" : "W");
+            }
             String dt = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.US).format(new Date(ts));
             if (ex.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL) == null) ex.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, dt);
             if (ex.getAttribute(ExifInterface.TAG_DATETIME) == null) ex.setAttribute(ExifInterface.TAG_DATETIME, dt);
@@ -70,6 +75,18 @@ final class RecPhotos {
         toGallery(c, f);
         AppLog.log("Foto aufgenommen: " + f.getName());
         if ("now".equals(mode(c))) flushAsync(c);
+    }
+
+    /** Dezimalgrad als EXIF-Wert „Grad/1,Minuten/1,Sekunden*1000/1000“. */
+    static String dms(double v) {
+        v = Math.abs(v);
+        int d = (int) v;
+        double m = (v - d) * 60;
+        int mi = (int) m;
+        long s = Math.round((m - mi) * 60 * 1000);
+        if (s >= 60000) { s -= 60000; mi++; }
+        if (mi >= 60) { mi -= 60; d++; }
+        return d + "/1," + mi + "/1," + s + "/1000";
     }
 
     private static void toGallery(Context c, File f) {
