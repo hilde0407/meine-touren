@@ -37,6 +37,7 @@ DEFAULTS = {
     "slideshow_seconds": "6",
     "photo_max_side": "2200",
     "photo_quality": "82",
+    "live_mode": "off",           # Standort für andere Benutzer/Betrachter: off | rec (nur während der Aufzeichnung) | on
     "notify_events": "1",        # neue Touren (Aufzeichnung, Teilen, Import) per Webhook melden, wenn notify_url gesetzt ist
     "notify_url": "",            # optionaler Webhook (ntfy, Gotify, eigener Dienst …) für Warnungen; leer = aus
     "garmin_email": "",          # nur zur Anzeige; gespeichert werden nur die Anmelde-Token (verschlüsselt), nie das Passwort
@@ -53,7 +54,7 @@ DEFAULTS = {
 SECRET_KEYS = {"zepp_password", "zepp_token", "komoot_password", "strava_client_secret", "strava_tokens", "suunto_client_secret", "suunto_key", "suunto_tokens", "garmin_tokens"}
 ENCRYPTED_KEYS = SECRET_KEYS | {"zepp_key"}     # werden verschlüsselt in der Datenbank abgelegt (app/secret.py)
 
-VERSION = "2.2.1 · Meine Touren (2026-11-06)"
+VERSION = "2.3.0 · Meine Touren (2026-11-07)"
 
 
 SYSTEM_DB = DATA_DIR / "system.sqlite"          # Benutzer, Sitzungen, Freigaben

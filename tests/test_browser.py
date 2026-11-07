@@ -697,9 +697,38 @@ def test_share_send_button(page):
     base = page.url.split("#")[0]
     page.set_viewport_size({"width": 390, "height": 844})
     page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
-    page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.2.0', serverUrl: () => ''}")
+    page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.3.0', serverUrl: () => ''}")
     page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(1200)
     page.click("#esnd"); page.wait_for_function("window._sent", timeout=8000)
     sent = page.evaluate("window._sent")
     assert "/s/" in sent and "km" in sent
     page.set_viewport_size({"width": 1280, "height": 900})
+
+
+def test_mobile_map_and_more_menu(page):
+    """Mobile Karte füllt den Bereich zwischen Kopfzeile und Tab-Leiste (kein Scrollen); „Mehr“ trennt Hauptpunkte von Einstellungen; Ortungsknopf vorhanden."""
+    base = page.url.split("#")[0]
+    page.set_viewport_size({"width": 360, "height": 640})
+    page.goto(base + "#/map"); page.reload(); page.wait_for_timeout(1500)
+    r = page.evaluate("(()=>{const m=document.querySelector('.mapbox').getBoundingClientRect(),t=document.querySelector('#tabbar').getBoundingClientRect();return [m.bottom,t.top,t.bottom,innerHeight,document.documentElement.scrollHeight]})()")
+    assert abs(r[0] - r[1]) <= 1 and r[2] <= r[3] + 1 and r[4] <= r[3] + 1
+    assert page.query_selector("#mloc")
+    page.click("#tmore"); page.wait_for_timeout(300)
+    heads = page.evaluate("[...document.querySelectorAll('.modal h4')].map(h=>h.textContent)")
+    assert heads[0].startswith("Einstellungen")
+    main = page.evaluate("[...document.querySelectorAll('.modal .moregrid:not(.sm) a')].map(a=>a.getAttribute('href'))")
+    assert "#/trips" in main and "#/admin" not in main
+    page.set_viewport_size({"width": 1280, "height": 900})
+
+
+def test_viewer_ui(page):
+    """Betrachter: kein Verwaltungs-Menü, keine Bearbeiten-Knöpfe; Karte lädt ohne Fehler."""
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    page.evaluate("ME.user = {name:'Oma', role:'viewer'}; applyView()")
+    assert page.evaluate("document.documentElement.classList.contains('viewer')")
+    assert not page.is_visible("nav a[data-k=admin]")
+    page.goto(base + "#/admin"); page.wait_for_timeout(500)
+    assert page.evaluate("location.hash") == "#/dash"
+    page.goto(base + "#/map"); page.wait_for_timeout(1200)
+    assert page.query_selector("#mloc")

@@ -438,3 +438,48 @@ def api_notify_test():
         return {"ok": True}
     except Exception as e:  # noqa
         raise HTTPException(502, str(e))
+
+
+# ---------- Live-Standort (für Betrachter und die Karte) ----------
+LIVE_MAX_AGE = 24 * 3600
+
+
+@router.post("/api/live")
+async def api_live_set(request: Request):
+    """Aktuelle Position des Besitzers ablegen. source=rec (Aufzeichnung der App) oder manual (Knopf auf der Karte)."""
+    d = await request.json()
+    mode = db.get("live_mode") or "off"
+    src = "rec" if d.get("source") == "rec" else "manual"
+    if mode == "off":
+        raise HTTPException(403, "Die Standort-Freigabe ist ausgeschaltet (Verwaltung → Standort teilen)")
+    try:
+        lat, lon = float(d["lat"]), float(d["lon"])
+    except (KeyError, TypeError, ValueError):
+        raise HTTPException(400, "Position fehlt")
+    if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+        raise HTTPException(400, "Ungültige Position")
+    acc = d.get("acc")
+    u = getattr(request.state, "user", None)
+    db.put("live_pos", json.dumps({"lat": lat, "lon": lon, "acc": round(float(acc)) if isinstance(acc, (int, float)) else None, "ts": int(time.time()),
+                                   "src": src, "name": (u or {}).get("name") or ""}))
+    return {"ok": True}
+
+
+@router.get("/api/live")
+def api_live_get():
+    if (db.get("live_mode") or "off") == "off":
+        return {}
+    try:
+        p = json.loads(db.get("live_pos") or "{}")
+    except ValueError:
+        return {}
+    if not p or time.time() - p.get("ts", 0) > LIVE_MAX_AGE:
+        return {}
+    p["age_s"] = int(time.time() - p["ts"])
+    return p
+
+
+@router.delete("/api/live")
+def api_live_clear():
+    db.put("live_pos", "")
+    return {"ok": True}

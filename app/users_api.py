@@ -105,10 +105,18 @@ def api_users(request: Request):
 @router.post("/api/users")
 async def api_user_add(request: Request):
     _admin(request); d = await request.json()
+    role = d.get("role", "user")
+    owner = None
+    if role == "viewer":
+        owner = d.get("owner") or ctx.first_uid
+        if not auth.q1("SELECT 1 x FROM users WHERE uid=? AND role!='viewer' AND active=1", (owner,)):
+            raise HTTPException(400, "Bitte einen Benutzer wählen, dessen Touren angezeigt werden sollen")
     try:
-        uid = auth.create_user(d.get("name"), d.get("password"), d.get("role", "user"))
+        uid = auth.create_user(d.get("name"), d.get("password"), role)
     except ValueError as e:
         raise HTTPException(400, str(e))
+    if owner:
+        auth.set_viewer_owner(uid, owner)
     return {"uid": uid}
 
 
@@ -124,10 +132,20 @@ async def api_user_edit(uid: str, request: Request):
             raise HTTPException(400, str(e))
     admins = auth.q1("SELECT COUNT(*) n FROM users WHERE role='admin' AND active=1")["n"]
     target = auth.q1("SELECT role,active FROM users WHERE uid=?", (uid,))
-    if "role" in d and d["role"] in ("admin", "user"):
+    if "role" in d and d["role"] in ("admin", "user", "viewer"):
         if target["role"] == "admin" and d["role"] != "admin" and admins <= 1:
             raise HTTPException(400, "Es muss mindestens einen Administrator geben")
+        if d["role"] == "viewer":
+            owner = d.get("owner") or auth.viewer_owner(uid) or ctx.first_uid
+            if owner == uid or not auth.q1("SELECT 1 x FROM users WHERE uid=? AND role!='viewer' AND active=1", (owner,)):
+                raise HTTPException(400, "Bitte einen anderen Benutzer wählen, dessen Touren angezeigt werden sollen")
+            auth.set_viewer_owner(uid, owner)
         auth.q("UPDATE users SET role=? WHERE uid=?", (d["role"], uid))
+        auth.q("DELETE FROM sessions WHERE uid=?", (uid,))
+    elif "owner" in d and target["role"] == "viewer":
+        if d["owner"] == uid or not auth.q1("SELECT 1 x FROM users WHERE uid=? AND role!='viewer' AND active=1", (d["owner"],)):
+            raise HTTPException(400, "Ungültiger Benutzer")
+        auth.set_viewer_owner(uid, d["owner"])
     if "active" in d:
         if not d["active"] and uid == me["uid"]:
             raise HTTPException(400, "Du kannst dich nicht selbst sperren")

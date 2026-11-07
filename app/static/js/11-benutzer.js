@@ -65,7 +65,11 @@ const MORE = [
   ["account", "Konto & Freigaben"],
   ["admin", "Verwaltung"],
 ];
+// Einträge, die unter „Einstellungen & Prüfung“ stehen (alles andere ist ein Hauptpunkt oben im Menü)
+const MORE_SET = ["account", "check", "admin", "apptest"];
+const isViewer = () => !!(ME.user && ME.user.role === "viewer");
 function applyView() {
+  document.documentElement.classList.toggle("viewer", isViewer());
   const m = viewPref(),
     mob = m === "mobile" || (m === "auto" && matchMedia("(max-width: 760px)").matches);
   document.documentElement.classList.toggle("mob", mob);
@@ -85,7 +89,12 @@ function applyView() {
     T.map(([k, l, i]) => `<a href="#/${k}" data-k="${k}"><span class="ti">${i}</span><span>${l}</span></a>`).join("") +
     `<button id="tmore"><span class="ti">☰</span><span>Mehr</span></button>`;
   $("#tmore").onclick = () => {
-    const m2 = modal(`<h3>Mehr</h3><div class="moregrid">${MORE.map(([k, l]) => `<a class="btn alt" href="#/${k}">${l}</a>`).join("")}</div>
+    const items = isViewer() ? MORE.filter(x => ["trips", "places"].includes(x[0])) : MORE,
+      lnk = ([k, l]) => `<a class="btn alt" href="#/${k}">${l}</a>`,
+      main = items.filter(x => !MORE_SET.includes(x[0])),
+      sett = items.filter(x => MORE_SET.includes(x[0]));
+    const m2 = modal(`<h3>Mehr</h3><div class="moregrid">${main.map(lnk).join("")}</div>
+      ${sett.length ? `<h4 style="margin:16px 0 6px">Einstellungen & Prüfung</h4><div class="moregrid sm">${sett.map(lnk).join("")}</div>` : ""}
       <h4 style="margin:16px 0 6px">Ansicht</h4><div class="row">${[
         ["auto", "Automatisch"],
         ["mobile", "Smartphone"],
@@ -204,11 +213,11 @@ VIEWS.account = async () => {
      adm
        ? `<div class="sec"><h2>Benutzer verwalten</h2></div><div class="panel"><div class="rows">${us
            .map(
-             u => `<div class="r" style="display:block"><b>${esc(u.name)}</b> <span class="mut">${u.role === "admin" ? "Administrator" : "Benutzer"}${u.active ? "" : " · gesperrt"}${u.me ? " · du" : ""}</span>
-      <div class="row" style="margin:6px 0 0"><button class="btn alt sm" data-ur="${u.uid}">${u.role === "admin" ? "Zum Benutzer machen" : "Zum Admin machen"}</button><button class="btn alt sm" data-up="${u.uid}">Passwort setzen</button>${u.me ? "" : `<button class="btn alt sm" data-ua="${u.uid}">${u.active ? "Sperren" : "Entsperren"}</button><button class="btn alt sm" data-ud="${u.uid}">Löschen</button>`}</div></div>`
+             u => `<div class="r" style="display:block"><b>${esc(u.name)}</b> <span class="mut">${u.role === "admin" ? "Administrator" : u.role === "viewer" ? "Betrachter (sieht die Daten von " + esc((us.find(x => x.uid === u.owner) || {}).name || "?") + ")" : "Benutzer"}${u.active ? "" : " · gesperrt"}${u.me ? " · du" : ""}</span>
+      <div class="row" style="margin:6px 0 0">${u.role === "viewer" ? "" : `<button class="btn alt sm" data-ur="${u.uid}">${u.role === "admin" ? "Zum Benutzer machen" : "Zum Admin machen"}</button>`}<button class="btn alt sm" data-up="${u.uid}">Passwort setzen</button>${u.me ? "" : `<button class="btn alt sm" data-ua="${u.uid}">${u.active ? "Sperren" : "Entsperren"}</button><button class="btn alt sm" data-ud="${u.uid}">Löschen</button>`}</div></div>`
            )
            .join("")}</div>
-     <h3 style="margin-top:20px">Neuer Benutzer</h3><div class="filters"><input id="nu_n" placeholder="Name"><input id="nu_p" type="password" placeholder="Passwort (mind. 8 Zeichen)" autocomplete="new-password"><select id="nu_r"><option value="user">Benutzer</option><option value="admin">Administrator</option></select><button class="btn" id="nu_b">Anlegen</button><span id="nu_m" class="mut"></span></div>
+     <h3 style="margin-top:20px">Neuer Benutzer</h3><div class="filters"><input id="nu_n" placeholder="Name"><input id="nu_p" type="password" placeholder="Passwort (mind. 8 Zeichen)" autocomplete="new-password"><select id="nu_r"><option value="user">Benutzer</option><option value="admin">Administrator</option><option value="viewer">Betrachter (nur ansehen)</option></select><select id="nu_o" style="display:none" title="Dessen Touren, Fotos und Standort sieht der Betrachter">${us.filter(u => u.role !== "viewer" && u.active).map(u => `<option value="${u.uid}">sieht: ${esc(u.name)}</option>`).join("")}</select><button class="btn" id="nu_b">Anlegen</button><span id="nu_m" class="mut"></span></div>
      <p class="mut" style="font-size:13px">Jeder Benutzer hat eigene Touren, Fotos, Notizen, Ziele und sein eigenes Komoot-Konto (Verwaltung). Fotos aus einem Ordner <code>/mnt/fotos/&lt;Benutzername&gt;</code> werden dem jeweiligen Benutzer zugeordnet.</p></div>`
        : ""
    }`;
@@ -297,13 +306,14 @@ VIEWS.account = async () => {
         }
       })
   );
+  if ($("#nu_r")) $("#nu_r").onchange = () => ($("#nu_o").style.display = $("#nu_r").value === "viewer" ? "" : "none");
   if ($("#nu_b"))
     $("#nu_b").onclick = async () => {
       try {
         await api("/api/users", {
           method: "POST",
           headers: J,
-          body: JSON.stringify({name: $("#nu_n").value, password: $("#nu_p").value, role: $("#nu_r").value}),
+          body: JSON.stringify({name: $("#nu_n").value, password: $("#nu_p").value, role: $("#nu_r").value, owner: $("#nu_r").value === "viewer" ? $("#nu_o").value : undefined}),
         });
         VIEWS.account();
       } catch (e) {

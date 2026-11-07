@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import os
+import re
 import hmac
 import json
 import threading
@@ -39,6 +40,9 @@ async def no_stale_static(request: Request, call_next):
     return r
 
 
+VIEWER_GET = re.compile(
+    r"^/(api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings"
+    r"|tours|tours/[^/]+/(coords|best-photos|weather|gpx|pdf)|trips/[^/]+/pdf|recap/\d+/pdf|records/altitude|weather/stats)|photo/|pic/|tiles/)")
 OPEN_API = ("/api/version", "/api/me", "/api/login", "/api/logout", "/api/setup", "/api/zepp-token")
 PROTECTED = ("/api/", "/photo/", "/sphoto/", "/pic/", "/spic/")
 
@@ -63,7 +67,18 @@ async def auth_mw(request: Request, call_next):
                 return Response(status_code=401, headers={"WWW-Authenticate": 'Basic realm="Meine Touren"'})
         return await call_next(request)
     u = auth.session_user(request.cookies.get(auth.COOKIE))
-    if u:
+    if u and u["role"] == "viewer":
+        # Betrachter: sieht die Daten eines Benutzers, darf aber nichts ändern und nur Touren, Fotos und Standort abrufen
+        owner = auth.viewer_owner(u["uid"])
+        if not owner or not auth.q1("SELECT 1 x FROM users WHERE uid=? AND active=1", (owner,)):
+            return JSONResponse({"detail": "Dieser Zugang ist keinem Benutzer zugeordnet"}, status_code=403)
+        request.state.user = u
+        if path.startswith(("/api/", "/photo/", "/pic/", "/tiles/")) and path != "/api/login":
+            ok = (request.method in ("GET", "HEAD") and bool(VIEWER_GET.match(path))) or path in ("/api/logout", "/api/me")
+            if not ok:
+                return JSONResponse({"detail": "Dieser Zugang darf nur ansehen"}, status_code=403)
+        ctx._uid.set(owner)
+    elif u:
         request.state.user = u
         ctx._uid.set(u["uid"])
     elif path.startswith(PROTECTED) and not path.startswith(OPEN_API) and not public:
@@ -147,7 +162,10 @@ def scheduler():
 
 # ---------- Einstellungen ----------
 @app.get("/api/settings")
-def get_settings():
+def get_settings(request: Request):
+    u = getattr(request.state, "user", None)
+    if u and u["role"] == "viewer":
+        return {"pdf_photos": db.get("pdf_photos"), "pdf_photo_n": db.get("pdf_photo_n"), "plan_enabled": "0"}
     out = {}
     for k in config.DEFAULTS:
         v = db.get(k)

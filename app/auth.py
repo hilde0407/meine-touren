@@ -20,6 +20,7 @@ COOKIE = "kh_session"
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (uid TEXT PRIMARY KEY, name TEXT, pw TEXT, role TEXT, active INTEGER DEFAULT 1, created INTEGER);
 CREATE TABLE IF NOT EXISTS sessions (th TEXT PRIMARY KEY, uid TEXT, created INTEGER, exp INTEGER);
+CREATE TABLE IF NOT EXISTS viewer_of (uid TEXT PRIMARY KEY, owner TEXT);
 CREATE TABLE IF NOT EXISTS grants (id INTEGER PRIMARY KEY AUTOINCREMENT, owner TEXT, grantee TEXT, scope TEXT, ref TEXT, ts INTEGER);
 CREATE TABLE IF NOT EXISTS share_index (token TEXT PRIMARY KEY, uid TEXT);
 """
@@ -90,7 +91,7 @@ def load_first():
 
 
 def list_users():
-    return q("SELECT uid,name,role,active,created FROM users ORDER BY created, uid")
+    return q("SELECT u.uid,u.name,u.role,u.active,u.created,v.owner FROM users u LEFT JOIN viewer_of v ON v.uid=u.uid ORDER BY u.created, u.uid")
 
 
 def active_uids():
@@ -109,7 +110,7 @@ def create_user(name, pw, role="user"):
         n += 1; uid = f"{base}-{n}"
     if q1("SELECT 1 x FROM users WHERE lower(name)=lower(?)", (name,)):
         raise ValueError("Diesen Namen gibt es schon")
-    q("INSERT INTO users(uid,name,pw,role,active,created) VALUES(?,?,?,?,1,?)", (uid, name, hash_pw(pw), "admin" if role == "admin" else "user", int(time.time())))
+    q("INSERT INTO users(uid,name,pw,role,active,created) VALUES(?,?,?,?,1,?)", (uid, name, hash_pw(pw), role if role in ("admin", "viewer") else "user", int(time.time())))
     load_first()
     d = config.user_dir(uid)
     for sub in ("cache", "export", "inbox", "photos"):
@@ -117,6 +118,16 @@ def create_user(name, pw, role="user"):
     with ctx.as_user(uid):
         db.init()
     return uid
+
+
+def viewer_owner(uid):
+    """Benutzer, dessen Daten ein Betrachter (nur Ansicht) sieht."""
+    r = q1("SELECT owner FROM viewer_of WHERE uid=?", (uid,))
+    return r["owner"] if r else None
+
+
+def set_viewer_owner(uid, owner):
+    q("INSERT OR REPLACE INTO viewer_of(uid,owner) VALUES(?,?)", (uid, owner))
 
 
 def set_password(uid, pw):
@@ -128,6 +139,7 @@ def set_password(uid, pw):
 
 def delete_user(uid, with_data=False):
     q("DELETE FROM users WHERE uid=?", (uid,)); q("DELETE FROM sessions WHERE uid=?", (uid,))
+    q("DELETE FROM viewer_of WHERE uid=? OR owner=?", (uid, uid))
     q("DELETE FROM grants WHERE owner=? OR grantee=?", (uid, uid)); q("DELETE FROM share_index WHERE uid=?", (uid,))
     load_first()
     if with_data:

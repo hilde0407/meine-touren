@@ -294,3 +294,23 @@ html.mob .inner .sec{margin-top:20px}html.mob .inner .grid{margin-top:22px!impor
 html.mob .filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}html.mob .filters>*{min-width:0!important}html.mob .filters #q{grid-column:1/-1}
 html.mob .filters select{min-height:40px;padding:6px 8px;font-size:15px}
 html.mob .tr{padding:9px 0}
+
+/* ---- 2.3: Karte mobil, Live-Standort, Betrachter ---- */
+.livepin i{display:block;width:22px;height:22px;border-radius:50%;background:#d93025;border:3px solid #fff;box-shadow:0 0 0 0 #d93025aa;animation:livep 2s infinite}
+@keyframes livep{70%{box-shadow:0 0 0 14px #d9302500}100%{box-shadow:0 0 0 0 #d9302500}}
+.livetip{background:#d93025;color:#fff;border:0;font-weight:600;box-shadow:none}.livetip::before{display:none}
+.mapui .chip.on#mloc{background:#1a73e8;border-color:#1a73e8;color:#fff}
+.moregrid.sm .btn{font-size:14px;min-height:38px}
+html.viewer nav a[data-k=check],html.viewer nav a[data-k=admin],html.viewer #eup,html.viewer #ksync,html.viewer #edel,html.viewer #etag,html.viewer #eshr,html.viewer #etc,html.viewer #efix,html.viewer #esnd,html.viewer #esheet{display:none!important}
+html.viewer .umpop a{display:none}
+html.mob main.wide .warnbar,html.mob .warnbar.mapw{display:none}
+html.mob .mapbox{position:fixed;left:0;right:0;top:50px;bottom:calc(53px + env(safe-area-inset-bottom));height:auto}
+html.mob .mapui{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;left:6px;right:6px;top:6px;padding-bottom:2px}
+html.mob .mapui::-webkit-scrollbar{display:none}
+html.mob .mapui .box{flex:0 0 auto;padding:4px 8px}
+html.mob .mapui .chip{min-height:32px;padding:2px 10px;font-size:13px}
+html.mob .mapui select{min-height:34px;padding:2px 8px;font-size:14px}
+html.mob #mn{position:fixed;left:8px;bottom:calc(66px + env(safe-area-inset-bottom));font-size:12px;padding:4px 8px}
+html.mob #tabbar{justify-content:center}
+html.mob #tabbar a,html.mob #tabbar button{flex:0 1 84px;min-height:52px}
+html.mob #tabbar .ti{font-size:20px}

@@ -133,6 +133,7 @@ public class RecorderService extends Service implements LocationListener {
     public void onLocationChanged(Location l) {
         Recorder r = Recorder.get(this);
         r.onLocation(l);
+        LivePost.send(this, l);
         long now = System.currentTimeMillis();
         if (now - lastNotify > 15000) {
             lastNotify = now;
