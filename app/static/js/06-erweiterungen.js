@@ -495,7 +495,7 @@ VIEWS.map = async () => {
   if (!box || !map) return;
   box.insertAdjacentHTML(
     "beforeend",
-    `<div class="box"><button class="chip" id="mht" title="Alle Strecken übereinander: häufig begangene Wege leuchten stärker">Heatmap</button><button class="chip" id="mph" title="Fotos mit GPS-Position anzeigen">Fotos</button></div>`
+    `<div class="box"><button class="chip" id="mht" title="Alle Strecken übereinander: häufig begangene Wege leuchten stärker">Heatmap</button><button class="chip" id="mph" title="Zeigt als rosa Punkte alle Fotos, die einen Aufnahmeort (GPS) haben. Antippen öffnet das Foto mit Zeit und Tour. Gilt für das gewählte Jahr.">Fotos</button></div>`
   );
   const m = map,
     hl = L.layerGroup().addTo(m),
@@ -518,17 +518,20 @@ VIEWS.map = async () => {
   };
   const drawPh = () => {
     pl.clearLayers();
-    if (!phOn || !phs) return;
+    if (!phOn || !phs) return ($("#mph").textContent = "Fotos");
     const y = yearSel();
+    let n = 0;
     phs.forEach(p => {
       if (y && new Date(p.taken_ts * 1000).getFullYear() !== y) return;
       if (!okPt([p.lat, p.lng])) return;
+      n++;
       L.circleMarker([p.lat, p.lng], {radius: 5, color: "#fff", weight: 1.5, fillColor: "#e11d74", fillOpacity: 0.95})
         .addTo(pl)
         .bindPopup(
           `<img src="/pic/${p.id}?size=300" style="width:220px;border-radius:3px;display:block"><div style="margin-top:4px">${new Date(p.taken_ts * 1000).toLocaleString("de-DE")}${p.tour_id && BY[p.tour_id] ? `<br><a href="#/tour/${p.tour_id}">${esc(BY[p.tour_id].name)}</a>` : "<br>ohne Tour"}</div>`
         );
     });
+    $("#mph").textContent = `Fotos (${n})`;       // so sieht man, wie viele Fotos mit Standort gezeigt werden
   };
   const mainGrp = [];
   m.eachLayer(l => {

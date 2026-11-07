@@ -54,13 +54,32 @@ async def api_set_tags(tour_id: str, request: Request):
 
 
 # ---------- Reisen ----------
+def home_places(tours):
+    """Orte, an denen man sich allgemein aufhält (Zuhause, Zweitwohnsitz, Stammgebiet): Gebiete von etwa 30 km, in denen sehr viele Touren
+    über viele verschiedene Monate gestartet wurden. Touren dort zählen nie als Reise. Ein Urlaubsort, den man nur jährlich besucht, fällt nicht darunter."""
+    pts = [(t["lat"], t["lng"], datetime.fromtimestamp(t["start_ts"], tz=TZ).strftime("%Y-%m")) for t in tours]
+    cl = []                                              # [lat, lng, n, Monate]
+    for la, lo, mo in pts:
+        for c in cl:
+            if extras._hav((c[0], c[1]), (la, lo)) <= 30000:
+                c[0] += (la - c[0]) / (c[2] + 1); c[1] += (lo - c[1]) / (c[2] + 1); c[2] += 1; c[3].add(mo)
+                break
+        else:
+            cl.append([la, lo, 1, {mo}])
+    need = max(8, len(pts) // 10)
+    homes = [(c[0], c[1]) for c in cl if c[2] >= need and len(c[3]) >= 8]
+    if not homes:                                        # wenige Daten: wie bisher der mittlere Startort
+        homes = [(statistics.median(p[0] for p in pts), statistics.median(p[1] for p in pts))]
+    return homes
+
+
 def build_trips():
     tours = db.query("SELECT t.*, g.state AS g_state, g.country AS g_country, g.place AS g_place, g.county AS g_county FROM tours t LEFT JOIN tour_geo g ON g.id=t.id "
                      "WHERE t.start_ts IS NOT NULL AND t.lat IS NOT NULL ORDER BY t.start_ts")
     if len(tours) < 3:
         return []
-    hl, hn = statistics.median(t["lat"] for t in tours), statistics.median(t["lng"] for t in tours)
-    far = lambda t: extras._hav((hl, hn), (t["lat"], t["lng"])) > 60000
+    homes = home_places(tours)
+    far = lambda t: min(extras._hav(h, (t["lat"], t["lng"])) for h in homes) > 60000
     groups, cur = [], []
     day = lambda t: datetime.fromtimestamp(t["start_ts"], tz=TZ).date()
     MAXGAP, NEAR = 7, 150000          # Pausentage ohne Tour innerhalb einer Reise; „gleiches Reiseziel“ = höchstens 150 km entfernt

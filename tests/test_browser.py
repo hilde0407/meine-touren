@@ -750,6 +750,19 @@ def test_mobile_tour_menus(page):
     page.set_viewport_size({"width": 1280, "height": 900})
 
 
+def test_info_box(page):
+    """„Info“ im Mehr-Menü: zeigt App- und Server-Version sowie die Ersteller."""
+    base = page.url.split("#")[0]
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(800)
+    page.evaluate("window.MTApp = {version: () => '2.5.0', hasPermission: () => true, status: () => '{}', serverUrl: () => ''}")
+    page.click("#tmore"); page.click("#mab"); page.wait_for_selector("#abx")
+    txt = page.inner_text(".modal")
+    assert "2.5.0" in txt and "Claude" in txt and "Volker" in txt and "Meine Touren" in txt
+    page.click("#abx")
+    page.set_viewport_size({"width": 1280, "height": 900})
+
+
 def test_mobile_map_and_more_menu(page):
     """Mobile Karte füllt den Bereich zwischen Kopfzeile und Tab-Leiste (kein Scrollen); „Mehr“ trennt Hauptpunkte von Einstellungen; Ortungsknopf vorhanden."""
     base = page.url.split("#")[0]

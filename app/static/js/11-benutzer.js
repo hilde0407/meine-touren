@@ -7,6 +7,27 @@ const initials = n =>
     .join("")
     .slice(0, 2)
     .toUpperCase();
+/* „Info“: laufende Versionen und Ersteller */
+async function aboutBox() {
+  let sv = "";
+  try {
+    sv = (await (await fetch("/api/version")).json()).version || "";
+  } catch (e) {}
+  let app = "";
+  try {
+    if (window.MTApp && MTApp.version) app = MTApp.version();
+  } catch (e) {}
+  const m = modal(`<h3>Meine Touren</h3>
+    <div class="rows"><div class="r"><span>Android-App<small>${app ? "läuft auf diesem Gerät" : "du nutzt gerade den Browser"}</small></span><b>${app ? esc(app) : "–"}</b></div>
+    <div class="r"><span>Server<small>dein Meine-Touren-Server</small></span><b>${esc((sv.split(" ·")[0] || "?").trim())}</b></div></div>
+    <p class="mut" style="font-size:13px;margin:6px 0 0">${esc(sv)}</p>
+    <h4 style="margin:18px 0 6px">Ersteller</h4>
+    <p style="margin:0">Entwickelt von <b>Volker</b> gemeinsam mit <b>Claude</b> (KI-Assistent von Anthropic).</p>
+    <p class="mut" style="font-size:13px;margin:10px 0 0">Karten © OpenStreetMap-Mitwirkende. Freie Software, Quellcode auf GitHub (hilde0407/meine-touren).</p>
+    <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" id="abx">Schließen</button></div>`);
+  m.classList.add("sheet");
+  m.querySelector("#abx").onclick = () => m.remove();
+}
 /* Anmeldehelfer: JSON senden, Fehlermeldung des Servers lesbar machen */
 async function postJson(url, body) {
   const r = await fetch(url, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(body)});
@@ -141,6 +162,7 @@ function applyView() {
       ]
         .map(([k, l]) => `<button class="btn ${viewPref() === k ? "" : "alt"} sm" data-vm="${k}">${l}</button>`)
         .join("")}</div>
+      <div class="row" style="margin-top:16px"><button class="btn alt sm" id="mab">ℹ️ Info: Version &amp; Ersteller</button></div>
       ${ME.user ? `<div class="row" style="margin-top:16px"><button class="btn alt" id="mlo">Abmelden (${esc(ME.user.name)})</button></div>` : ""}`);
     m2.classList.add("sheet");
     m2.querySelectorAll("a").forEach(a => (a.onclick = () => m2.remove()));
@@ -155,6 +177,7 @@ function applyView() {
         })
     );
     if ($("#mlo")) $("#mlo").onclick = doLogout;
+    m2.querySelector("#mab").onclick = () => (m2.remove(), aboutBox());
   };
   markTabs();
 }
@@ -192,8 +215,8 @@ function userMenu() {
     const p = document.createElement("div");
     p.className = "umpop";
     p.innerHTML = ME.user
-      ? `<div class="mut" style="padding:6px 12px">${esc(ME.user.name)} · ${ME.user.role === "admin" ? "Administrator" : "Benutzer"}</div><a href="#/account">Konto &amp; Freigaben</a><a href="#/shared">Geteilte Fotos</a><button id="umo">Abmelden</button>`
-      : `<div class="mut" style="padding:6px 12px">Noch keine Benutzerverwaltung</div><button id="ums">Benutzer einrichten …</button>`;
+      ? `<div class="mut" style="padding:6px 12px">${esc(ME.user.name)} · ${ME.user.role === "admin" ? "Administrator" : "Benutzer"}</div><a href="#/account">Konto &amp; Freigaben</a><a href="#/shared">Geteilte Fotos</a><button id="uma">Info</button><button id="umo">Abmelden</button>`
+      : `<div class="mut" style="padding:6px 12px">Noch keine Benutzerverwaltung</div><button id="ums">Benutzer einrichten …</button><button id="uma">Info</button>`;
     document.body.appendChild(p);
     setTimeout(
       () =>
@@ -207,6 +230,7 @@ function userMenu() {
     );
     p.querySelectorAll("a").forEach(a => (a.onclick = () => p.remove()));
     if ($("#umo")) $("#umo").onclick = doLogout;
+    if ($("#uma")) $("#uma").onclick = () => (p.remove(), aboutBox());
     if ($("#ums"))
       $("#ums").onclick = () => {
         p.remove();

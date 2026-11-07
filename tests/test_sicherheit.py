@@ -138,3 +138,18 @@ def test_trip_names_are_unique(fresh, monkeypatch):       # noqa: F811
     names = [t["region"] for t in trips]
     assert len(set(names)) == 4 and names[3] == "Bayern" and "Taunus" in names[2] and "Mai 2024" in names[0] and "Juli 2024" in names[1]
     assert [t["short"] for t in trips] == [True, False, True, False]
+
+
+def test_home_places_exclude_regular_areas(fresh):        # noqa: F811
+    """Zuhause und Stammgebiete (viele Touren über viele Monate) zählen nie als Reise; ein Urlaubsort schon."""
+    from app import more2
+    from app.gpxtools import TZ
+    from datetime import datetime
+    ts = lambda y, m, d: int(datetime(y, m, d, 9, tzinfo=TZ).timestamp())
+    tours = [{"lat": 50.1 + i * 0.001, "lng": 8.6, "start_ts": ts(2023 + i // 12, i % 12 + 1, 5)} for i in range(24)]              # Zuhause: 24 Monate
+    tours += [{"lat": 28.1, "lng": -15.4, "start_ts": ts(2024, i % 9 + 1, 12)} for i in range(14)]                                    # zweiter Wohnort
+    tours += [{"lat": 46.5, "lng": 10.0, "start_ts": ts(2024, 7, 1 + d)} for d in range(7)]                                           # Urlaub
+    homes = more2.home_places(tours)
+    near = lambda p, q: more2.extras._hav(p, q) < 20000
+    assert len(homes) == 2 and any(near(h, (50.1, 8.6)) for h in homes) and any(near(h, (28.1, -15.4)) for h in homes)
+    assert not any(near(h, (46.5, 10.0)) for h in homes)
