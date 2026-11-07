@@ -373,5 +373,5 @@ Das Skript installiert Java, lädt BRouter 1.7.7 und die Kartenkacheln (je ca. 1
 4. Während der Aufnahme eine andere App öffnen und zurückkehren: Aufzeichnung läuft weiter, kein Punkteverlust.
 5. „Beenden“ nur kurz antippen: nichts passiert; lange halten: Aufzeichnung stoppt.
 6. In der Galerie prüfen, ob die Kopie der Fotos vorhanden ist.
-Bei Fehlern: Android-Diagnose in der App (Menü „Mehr“) kopieren und schicken.
+Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → Android-App) und mir schicken.
 
