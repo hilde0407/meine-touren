@@ -10,11 +10,19 @@ android {
         applicationId 'de.meinetouren.app'
         minSdk 26
         targetSdk 34
-        versionCode 240
-        versionName '2.4.0'
+        versionCode 250
+        versionName '2.5.0'
     }
 
     signingConfigs {
+        debug {
+            // Fester, im Repository liegender Schlüssel: jede gebaute APK hat dieselbe Signatur,
+            // damit sich neue Versionen ohne Deinstallation über die alte installieren lassen.
+            storeFile file('mt-debug.jks')
+            storePassword 'android'
+            keyAlias 'meinetouren'
+            keyPassword 'android'
+        }
         release {
             // Nur wenn die Werte gesetzt sind (GitHub-Secrets, siehe README); sonst wird die Debug-Fassung gebaut.
             def ks = System.getenv('ANDROID_KEYSTORE_FILE')

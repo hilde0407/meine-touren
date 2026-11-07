@@ -490,6 +490,15 @@ def test_more2(monkeypatch):
         assert pg.status_code == 200 and 'property="og:title"' in pg.text and "show.html" not in pg.text and "Diashow ansehen" in pg.text
         assert c.get("/api/public/" + sh["token"]).json()["show"] is True and len(c.get("/api/public/" + sh["token"]).json()["photos"]) >= 1
         assert "og:image" in pg.text and "/pub/" + sh["token"] + "/photo/" in pg.text
+        assert c.get("/api/public/" + sh["token"]).json()["photo_t"]                      # Uhrzeit je Foto
+        lst = [x for x in c.get("/api/tours/r1/shares").json() if x["token"] == sh["token"]][0]
+        assert lst["views"] >= 2 and lst["exp"] is None and lst["best"] == 0              # Aufrufe gezählt, unbegrenzt
+        ex = c.post("/api/tours/r1/share", json={"show": True, "days": 7, "best": 5}).json()
+        e1 = [x for x in c.get("/api/tours/r1/shares").json() if x["token"] == ex["token"]][0]
+        assert abs(e1["exp"] - time.time() - 7 * 86400) < 120 and e1["best"] == 5
+        db.execute("UPDATE shares SET exp=? WHERE token=?", (int(time.time()) - 5, ex["token"]))   # abgelaufen
+        assert c.get("/s/" + ex["token"]).status_code == 404 and c.get("/api/public/" + ex["token"]).status_code == 404
+        assert c.get("/pub/" + ex["token"] + "/photo/1").status_code == 404
         assert c.delete("/api/share/" + sh["token"]).status_code == 200 and c.get("/s/" + sh["token"]).status_code == 404
         sent = []
         monkeypatch.setattr(more2.requests, "post", lambda u, **k: sent.append((u, k)) or type("R", (), {"status_code": 200})())

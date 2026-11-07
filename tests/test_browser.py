@@ -718,7 +718,7 @@ def test_share_slideshow_button(page):
     page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.5.0', serverUrl: () => ''}")
     page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(1200)
     page.once("dialog", lambda d: d.accept())             # falls die Tour keine Fotos hat
-    page.click("#eshow"); page.wait_for_function("window._sent", timeout=8000)
+    page.click("#eshow"); page.wait_for_selector("#sh_go"); page.select_option("#sh_d", "7"); page.click("#sh_go"); page.wait_for_function("window._sent", timeout=8000)
     sent = page.evaluate("window._sent")
     assert "Diashow" in sent and "/s/" in sent
     link = sent.split()[-1]

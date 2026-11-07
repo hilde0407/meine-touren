@@ -325,14 +325,19 @@ async def api_share(tour_id: str, request: Request):
         raise HTTPException(404)
     d = await request.json()
     token = secrets.token_urlsafe(12)
-    db.execute("INSERT INTO shares(token,tour_id,photos,trim,ts) VALUES(?,?,?,?,?)", (token, tour_id, 2 if d.get("show") else (1 if d.get("photos") else 0), 0 if d.get("trim") is False else 1, int(time.time())))
+    days = int(d.get("days") or 0)
+    best = max(0, min(int(d.get("best") or 0), 100))
+    now = int(time.time())
+    db.execute("INSERT INTO shares(token,tour_id,photos,trim,ts,exp,views,best) VALUES(?,?,?,?,?,?,0,?)",
+               (token, tour_id, 2 if d.get("show") else (1 if d.get("photos") else 0), 0 if d.get("trim") is False else 1, now,
+                now + days * 86400 if 0 < days <= 3650 else None, best))
     auth.q("INSERT OR REPLACE INTO share_index(token,uid) VALUES(?,?)", (token, ctx.uid() or ""))
     return {"token": token, "url": f"/s/{token}"}   # photos=2: Diashow-Link (Fotos + Karte, ohne Konto)
 
 
 @router.get("/api/tours/{tour_id}/shares")
 def api_shares(tour_id: str):
-    return db.query("SELECT token,photos,trim,ts FROM shares WHERE tour_id=? ORDER BY ts DESC", (tour_id,))
+    return db.query("SELECT token,photos,trim,ts,exp,views,best FROM shares WHERE tour_id=? ORDER BY ts DESC", (tour_id,))
 
 
 @router.delete("/api/share/{token}")
@@ -352,6 +357,8 @@ def _share(token):
     s = db.one("SELECT * FROM shares WHERE token=?", (token,))
     if not s:
         raise HTTPException(404, "Link nicht (mehr) gültig")
+    if s["exp"] and s["exp"] < time.time():
+        raise HTTPException(404, "Link abgelaufen")
     return s
 
 
@@ -383,9 +390,14 @@ def api_public(token: str):
     if s["trim"]:
         pts = _trim(pts)
     ph = db.query("SELECT id,taken_ts FROM photos WHERE tour_id=? AND manual!=2 ORDER BY taken_ts LIMIT 300", (t["id"],)) if s["photos"] else []
+    if s["photos"] == 2 and s["best"] and len(ph) > s["best"]:
+        keep = {p["id"] for p in photos.best_of_tour(t["id"], s["best"])[0]}
+        ph = [p for p in ph if p["id"] in keep]
+    if s["photos"] == 2:
+        db.execute("UPDATE shares SET views=COALESCE(views,0)+1 WHERE token=?", (token,))
     return {"name": t["name"], "sport": t["sport"], "date": datetime.fromtimestamp(t["start_ts"], tz=TZ).isoformat(), "km": round((t["dist_m"] or 0) / 1000, 1),
             "up_m": round(t["up_m"] or 0), "down_m": round(t["down_m"] or 0), "h": round((t["dur_s"] or 0) / 3600, 1),
-            "coords": [[round(p[0], 5), round(p[1], 5), p[2]] for p in pts[::max(1, len(pts) // 800)]], "photos": [p["id"] for p in ph], "show": s["photos"] == 2}
+            "coords": [[round(p[0], 5), round(p[1], 5), p[2]] for p in pts[::max(1, len(pts) // 800)]], "photos": [p["id"] for p in ph], "photo_t": [datetime.fromtimestamp(p["taken_ts"], tz=TZ).strftime("%H:%M") if p["taken_ts"] else "" for p in ph], "show": s["photos"] == 2}
 
 
 @router.get("/pub/{token}/photo/{pid}")

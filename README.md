@@ -361,3 +361,17 @@ Das Skript installiert Java, lädt BRouter 1.7.7 und die Kartenkacheln (je ca. 1
 **Verwaltung neu geordnet (ab 2.4.1):** Sieben Reiter, jeder Bereich ist eine gleich gestaltete Karte: Übersicht (Zustand, Updates, Selbsttest, Protokoll), Touren holen (Komoot, Zepp, Uhren und Dateien, Wanderführer), Hochladen & Planen (Strava/Komoot-Upload, Tourplanung), Fotos, Automatik & Meldungen, Handy & App (Android-App, Standort teilen, verlorene Aufzeichnungen, App auf dem Startbildschirm) und Sicherung & Zugang. Das Protokoll ist eingeklappt; „Einstellungen speichern“ bleibt unten auf jedem Reiter erreichbar.
 
 **Diashow per WhatsApp teilen (ab 2.5.0):** In der Tour gibt es neben „Senden“ den Knopf „Diashow senden“. Er erzeugt einen Link, der ohne Benutzerkonto funktioniert, und öffnet das Teilen-Menü (WhatsApp, Signal, E-Mail …). Wer den Link öffnet, sieht die Fotos der Tour als Vollbild-Diashow (automatischer Wechsel alle 5 s, Wischen, Pause, Vollbild, Karte mit dem Track). WhatsApp zeigt in der Vorschau Titel und erstes Foto. Es werden nur die Fotos dieser einen Tour freigegeben (keine Konten, keine anderen Touren); ausgeblendete Fotos fehlen. Der Link lässt sich unter „Teilen“ der Tour (Eintrag „Diashow“) widerrufen. Betrachter können keine Links erzeugen.
+
+**Diashow-Links genauer (ab 2.5.1):** „Diashow senden“ fragt vorher nach den Fotos (alle oder nur die besten 20/50) und der Gültigkeit (7 Tage, 30 Tage, unbegrenzt). Abgelaufene Links zeigen „nicht mehr gültig“, auch die Fotos sind dann gesperrt. In „Tour teilen“ steht je Link, bis wann er gilt und wie oft die Diashow angesehen wurde. Die Diashow zeigt die Uhrzeit des Fotos und hat einen Tempo-Knopf (3/5/8 s).
+
+**Fester App-Schlüssel (ab App 2.5.0):** Die APK wird jetzt immer mit demselben, im Repository liegenden Schlüssel (`android/app/mt-debug.jks`) signiert. Neue Versionen lassen sich dadurch **über die alte installieren, ohne zu deinstallieren** – die Aufzeichnungs-Backups auf dem Handy bleiben erhalten. *Einmalig* muss die bisherige App noch deinstalliert werden, weil sie mit einem anderen Schlüssel signiert war. Wer sicherer signieren will, hinterlegt wie bisher die vier GitHub-Secrets (siehe „APK bauen“); diese haben Vorrang. Hinweis: Der Schlüssel liegt öffentlich im Repository – das ist für eine privat genutzte App in Ordnung, ersetzt aber keine geheime Signatur.
+
+**Testliste Fotos und Aufzeichnung (vor einer langen Tour, ca. 10 Minuten):**
+1. Aufzeichnung starten, 2 Fotos aufnehmen (Modus „sofort“): Foto erscheint nach kurzer Zeit in der Tour, ohne Fehlermeldung.
+2. Flugmodus an, ein Foto aufnehmen: Foto bleibt in „Wartende Fotos“; Flugmodus aus → wird hochgeladen.
+3. Modus „am Ende“, Foto aufnehmen, Aufzeichnung beenden: Track und Foto kommen zusammen an.
+4. Während der Aufnahme eine andere App öffnen und zurückkehren: Aufzeichnung läuft weiter, kein Punkteverlust.
+5. „Beenden“ nur kurz antippen: nichts passiert; lange halten: Aufzeichnung stoppt.
+6. In der Galerie prüfen, ob die Kopie der Fotos vorhanden ist.
+Bei Fehlern: Android-Diagnose in der App (Menü „Mehr“) kopieren und schicken.
+

@@ -317,7 +317,7 @@ public class MainActivity extends Activity {
 
     /* ---------- Brücke zur Weboberfläche ---------- */
     public class Bridge {
-        @JavascriptInterface public String version() { return "2.4.0"; }
+        @JavascriptInterface public String version() { return "2.5.0"; }
         @JavascriptInterface public String serverUrl() { return server(); }
 
         @JavascriptInterface
@@ -387,7 +387,7 @@ public class MainActivity extends Activity {
             try {
                 android.os.PowerManager pm = (android.os.PowerManager) getSystemService(POWER_SERVICE);
                 android.location.LocationManager lm = (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
-                o.put("version", "2.4.0");
+                o.put("version", "2.5.0");
                 o.put("android", Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
                 o.put("device", Build.MANUFACTURER + " " + Build.MODEL);
                 o.put("server", server());
