@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, zepp
+from . import auth, gear, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, zepp
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -45,7 +45,7 @@ VIEWER_GET = re.compile(
     r"^(/api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings"
     r"|tours|tours/[^/]+|tours/[^/]+/(coords|best-photos|weather|gpx)|trips/[^/]+|records/altitude|weather/stats)"
     r"|/photo/[^/]+|/pic/[^/]+|/tiles/.+)$")
-OPEN_API = ("/api/version", "/api/me", "/api/login", "/api/logout", "/api/setup", "/api/zepp-token")
+OPEN_API = ("/api/version", "/api/me", "/api/login", "/api/logout", "/api/setup", "/api/zepp-token", "/api/forgot", "/api/reset")
 PROTECTED = ("/api/", "/photo/", "/sphoto/", "/pic/", "/spic/")
 
 
@@ -819,6 +819,7 @@ app.include_router(gear.router)
 app.include_router(plan.router)
 app.include_router(pdfgen.router)
 app.include_router(users_api.router)
+app.include_router(security.router)
 app.include_router(portals.router)
 app.include_router(health.router)
 app.include_router(devices.router)

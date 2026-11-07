@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<title>Neues Passwort</title>
+<style>
+:root{--bg:#eef2ee;--ink:#10282a;--mut:#5d716f;--acc:#f2c230;--forest:#0e2a2b;--card:#fff}
+@media(prefers-color-scheme:dark){:root{--bg:#0d1b1c;--ink:#e6efec;--mut:#9db3ae;--card:#142a2b}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.box{background:var(--card);border-radius:12px;padding:26px 22px;width:100%;max-width:420px;box-shadow:0 4px 24px #0002}
+.brand{font-weight:700;color:var(--mut);letter-spacing:.04em;font-size:14px}h1{margin:4px 0 14px;font-size:24px}
+label{display:block;margin:12px 0 4px;font-size:14px;color:var(--mut)}input{width:100%;font:inherit;padding:11px 12px;border:1px solid #8aa;border-radius:8px;background:transparent;color:inherit}
+button,a.b{display:inline-block;margin-top:18px;background:var(--acc);color:#000;border:0;border-radius:8px;padding:12px 20px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none}
+.bad{color:#c0392b;min-height:1.4em;margin-top:10px;font-size:14px}.ok{color:#1a7f4b}.mut{color:var(--mut);font-size:14px}
+</style></head><body><div class="box">
+<div class="brand">Meine Touren</div><h1>Neues Passwort festlegen</h1>
+<div id="c"></div></div>
+<script>
+const tok = location.pathname.split("/").pop(), c = document.getElementById("c");
+fetch("/api/reset/" + encodeURIComponent(tok)).then(r => { if (!r.ok) throw 0; return r.json(); }).then(u => {
+  c.innerHTML = `<p class="mut">Konto: <b></b></p><form><label for="p1">Neues Passwort (mindestens 8 Zeichen)</label><input id="p1" type="password" autocomplete="new-password" minlength="8" required>
+    <label for="p2">Passwort wiederholen</label><input id="p2" type="password" autocomplete="new-password" minlength="8" required><div class="bad" id="e"></div><button type="submit">Passwort speichern</button></form>`;
+  c.querySelector("b").textContent = u.name;
+  c.querySelector("form").onsubmit = async ev => {
+    ev.preventDefault();
+    const e = document.getElementById("e"); e.textContent = "";
+    if (p1.value !== p2.value) { e.textContent = "Die Passwörter sind nicht gleich."; return; }
+    const r = await fetch("/api/reset", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({token: tok, password: p1.value})});
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { e.textContent = j.detail || "Das hat nicht geklappt."; return; }
+    c.innerHTML = `<p class="ok"><b>Dein Passwort wurde geändert.</b></p><p class="mut">Du kannst dich jetzt mit dem neuen Passwort anmelden.${j.totp ? " Danach wird noch der Code aus deiner Authenticator-App abgefragt." : ""}</p><a class="b" href="/">Zur Anmeldung</a>`;
+  };
+}).catch(() => { c.innerHTML = '<p class="bad">Dieser Link ist abgelaufen oder wurde schon benutzt.</p><p class="mut">Du kannst auf der Anmeldeseite einen neuen anfordern („Passwort vergessen?“).</p><a class="b" href="/">Zur Anmeldung</a>'; });
+</script></body></html>

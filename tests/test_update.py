@@ -60,9 +60,9 @@ def test_only_admin_may_install(monkeypatch):
     monkeypatch.setattr(updater, "mode", lambda: "service")
     monkeypatch.setattr(updater, "backup_all", lambda: 0)
     with _client() as c:
-        c.post("/api/setup", json={"name": "chef", "password": "geheim123"})
+        c.post("/api/setup", json={"name": "chef", "email": "chef@example.com", "password": "geheim123"})
         c.post("/api/login", json={"name": "chef", "password": "geheim123"})
-        c.post("/api/users", json={"name": "gast", "password": "geheim456", "role": "user"})
+        c.post("/api/users", json={"name": "gast", "email": "gast@example.com", "password": "geheim456", "role": "user"})
         c.post("/api/logout")
         c.post("/api/login", json={"name": "gast", "password": "geheim456"})
         assert c.post("/api/update/install", json={"version": "9.9.9"}).status_code == 403

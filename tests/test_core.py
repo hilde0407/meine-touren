@@ -520,8 +520,8 @@ def test_users_isolation_and_sharing():
     db.put("komoot_email", "max@example.org")
     with TestClient(main.app) as c:
         assert c.get("/api/me").json()["needs_setup"] is True
-        assert c.post("/api/setup", json={"name": "Max", "password": "kurz"}).status_code == 400
-        r = c.post("/api/setup", json={"name": "Max", "password": "geheim1234"}).json()
+        assert c.post("/api/setup", json={"name": "Max", "email": "max@example.com", "password": "kurz"}).status_code == 400
+        r = c.post("/api/setup", json={"name": "Max", "email": "max@example.com", "password": "geheim1234"}).json()
         assert r["adopted"] and r["uid"] == "max"
         assert (config.DATA_DIR / "users" / "max" / "komoot_hub.sqlite").exists() and not (config.DATA_DIR / "komoot_hub.sqlite").exists()
         assert [t["name"] for t in c.get("/api/tours").json()] == ["Hohe Wurzel"]
@@ -531,12 +531,12 @@ def test_users_isolation_and_sharing():
         anon = TestClient(main.app)
         assert anon.get("/api/tours").status_code == 401 and anon.get("/photo/1").status_code == 401
         assert anon.get("/").status_code == 200                          # Programmdateien bleiben erreichbar (Anmeldeseite)
-        assert c.post("/api/users", json={"name": "Anna", "password": "annas-pass1", "role": "user"}).json()["uid"] == "anna"
+        assert c.post("/api/users", json={"name": "Anna", "email": "anna@example.com", "password": "annas-pass1", "role": "user"}).json()["uid"] == "anna"
         a = TestClient(main.app)
         assert a.post("/api/login", json={"name": "Anna", "password": "falsch"}).status_code == 401
         assert a.post("/api/login", json={"name": "anna", "password": "annas-pass1"}).status_code == 200
         assert a.get("/api/tours").json() == [] and a.get("/photo/1").status_code == 404      # getrennte Daten
-        assert a.get("/api/users").status_code == 200 and a.post("/api/users", json={"name": "X", "password": "12345678"}).status_code == 403
+        assert a.get("/api/users").status_code == 200 and a.post("/api/users", json={"name": "X", "email": "x@example.com", "password": "12345678"}).status_code == 403
         assert a.get("/api/shared/photos").json() == []
         assert a.get("/sphoto/max/1").status_code == 404            # ohne Freigabe kein Zugriff
         assert c.post("/api/grants", json={"grantee": "anna", "scope": "tour", "ref": "t1"}).status_code == 200

@@ -11,8 +11,8 @@ def test_viewer_and_live():
     from app import main, tracks
     tracks.adopt(_gpx(), "g.gpx", name="Gipfeltour", ident="g1")
     with TestClient(main.app) as c:
-        c.post("/api/setup", json={"name": "Max", "password": "geheim1234"})
-        r = c.post("/api/users", json={"name": "Oma", "password": "omas-pass12", "role": "viewer"})
+        c.post("/api/setup", json={"name": "Max", "email": "max@example.com", "password": "geheim1234"})
+        r = c.post("/api/users", json={"name": "Oma", "email": "oma@example.com", "password": "omas-pass12", "role": "viewer"})
         assert r.status_code == 200, r.text
         users = {u["name"].lower(): u for u in c.get("/api/users").json()}
         assert users["oma"]["role"] == "viewer" and users["oma"]["owner"] == users["max"]["uid"]
@@ -55,7 +55,7 @@ def test_record_upload_lands_in_users_account():
     from fastapi.testclient import TestClient
     from app import main, config
     with TestClient(main.app) as c:
-        c.post("/api/setup", json={"name": "Max", "password": "geheim1234"})
+        c.post("/api/setup", json={"name": "Max", "email": "max@example.com", "password": "geheim1234"})
         r = c.post("/api/record/upload", json={"gpx": _gpx(), "name": "", "sport": "hike"})
         assert r.status_code == 200, r.text
         tid = r.json()["id"]
@@ -75,8 +75,8 @@ def test_rec_photos_upload():
     from app import main, config
     jpg = b"\xff\xd8\xff\xe0" + b"0" * 100
     with TestClient(main.app) as c:
-        c.post("/api/setup", json={"name": "Max", "password": "geheim1234"})
-        c.post("/api/users", json={"name": "Oma", "password": "omas-pass12", "role": "viewer"})
+        c.post("/api/setup", json={"name": "Max", "email": "max@example.com", "password": "geheim1234"})
+        c.post("/api/users", json={"name": "Oma", "email": "oma@example.com", "password": "omas-pass12", "role": "viewer"})
         r = c.post("/api/rec-photos", files=[("files", ("MT_1.jpg", jpg, "image/jpeg")), ("files", ("x.exe", b"zzz", "application/octet-stream"))])
         assert r.status_code == 200 and r.json()["saved"] == 1, r.text
         v = TestClient(main.app)

@@ -19,7 +19,7 @@ const ADM_TABS = [
   ["quellen", "Touren holen", "Woher deine Touren kommen: Komoot, Zepp, Uhren und Dateien, dazu Wanderführer.", ["Komoot", "Zepp-Import", "Garmin", "Wanderführer"]],
   ["weitergabe", "Hochladen & Planen", "Wohin Touren hochgeladen werden dürfen (nur auf deinen Wunsch) und wie Touren geplant werden.", ["Portale", "Tourplanung"]],
   ["fotos", "Fotos", "Fotobibliothek, Import und Eingangsordner.", ["Fotos", "Foto-Eingang"]],
-  ["auto", "Automatik & Meldungen", "Tägliche Aktualisierung und Benachrichtigungen.", ["Automatik", "Benachrichtigung"]],
+  ["auto", "Automatik & Meldungen", "Tägliche Aktualisierung und Benachrichtigungen.", ["Automatik", "Benachrichtigung", "E-Mail-Versand"]],
   ["handy", "Handy & App", "Android-App, Standort teilen und die App auf dem Startbildschirm.", ["Android-App", "Standort teilen", "Verlorene", "Auf dem Handy"]],
   ["sicher", "Sicherung & Zugang", "Backups, Zugriffsschutz und Offline-Nutzung.", ["Sicherung", "Zugriffsschutz", "Offline-Nutzung"]],
 ];

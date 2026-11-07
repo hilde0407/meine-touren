@@ -317,7 +317,13 @@ VIEWS.trips = async () => {
   $("#tr").className = "";
   $("#tr").innerHTML =
     (tr.length
-      ? `<div class="otdg">${tr.map(x => `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${dateS(x.start)}${x.end !== x.start ? " – " + dateS(x.end) : ""}</span><small>${x.tours.length} Touren · ${nf(x.km, 0)} km · ${nf(x.up_m, 0)} m</small></a>`).join("")}</div>`
+      ? `${(() => {
+          const card = x => `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${dateS(x.start)}${x.end !== x.start ? " – " + dateS(x.end) : ""}</span><small>${x.tours.length} Touren · ${nf(x.km, 0)} km · ${nf(x.up_m, 0)} m</small></a>`,
+            big = tr.filter(x => x.days > 3),
+            small = tr.filter(x => x.days <= 3),
+            grp = (l, h) => (l.length ? `${h}<div class="otdg">${l.map(card).join("")}</div>` : "");
+          return big.length && small.length ? grp(big, "") + `<div class="sec"><h2>Kurzreisen</h2><span class="sub">bis 3 Tage</span></div>` + grp(small, "") : grp(tr, "");
+        })()}`
       : '<p class="mut">Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Gruppen legst du mit Tags an.</p>') +
     `<div class="sec"><h2>Alben &amp; Tags</h2><span class="sub">in der Tour über „🏷 Tags“ vergeben</span></div>` +
     (tg.length

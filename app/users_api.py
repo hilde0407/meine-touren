@@ -51,7 +51,7 @@ async def api_setup(request: Request, response: Response):
         raise HTTPException(403, "Es gibt schon Benutzer")
     d = await request.json()
     try:
-        uid = auth.create_user(d.get("name"), d.get("password"), "admin")
+        uid = auth.create_user(d.get("name"), d.get("password"), "admin", auth.clean_email(d.get("email"), required=True))
     except ValueError as e:
         raise HTTPException(400, str(e))
     adopted = auth.adopt_legacy(uid)
@@ -64,10 +64,13 @@ async def api_setup(request: Request, response: Response):
 async def api_login(request: Request, response: Response):
     d = await request.json()
     try:
-        tok, u = auth.login(str(d.get("name", "")), str(d.get("password", "")), _ip(request))
+        u = auth.check_login(str(d.get("name", "")), str(d.get("password", "")), _ip(request))
     except PermissionError as e:
         raise HTTPException(429 if "Zu viele" in str(e) else 401, str(e))
-    _cookie(response, tok, request)
+    if u.get("totp_on"):                                   # zweiter Schritt: Code aus der Authenticator-App
+        from . import security
+        return {"need_2fa": True, "ticket": security.make_ticket(u["uid"])}
+    _cookie(response, auth.start_session(u["uid"]), request)
     return {"ok": True, "user": {"uid": u["uid"], "name": u["name"], "role": u["role"]}}
 
 
@@ -112,7 +115,7 @@ async def api_user_add(request: Request):
         if not auth.q1("SELECT 1 x FROM users WHERE uid=? AND role!='viewer' AND active=1", (owner,)):
             raise HTTPException(400, "Bitte einen Benutzer wählen, dessen Touren angezeigt werden sollen")
     try:
-        uid = auth.create_user(d.get("name"), d.get("password"), role)
+        uid = auth.create_user(d.get("name"), d.get("password"), role, auth.clean_email(d.get("email"), required=True))
     except ValueError as e:
         raise HTTPException(400, str(e))
     if owner:
@@ -130,6 +133,15 @@ async def api_user_edit(uid: str, request: Request):
             auth.set_password(uid, d["password"])
         except ValueError as e:
             raise HTTPException(400, str(e))
+    if "email" in d:
+        try:
+            auth.q("UPDATE users SET email=? WHERE uid=?", (auth.clean_email(d["email"]), uid))
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+    if d.get("reset_2fa"):                                 # z. B. Handy verloren und keine Wiederherstellungscodes mehr
+        auth.q("UPDATE users SET totp_on=0, totp_secret=NULL, totp_pending=NULL, totp_last=0 WHERE uid=?", (uid,))
+        auth.q("DELETE FROM recovery WHERE uid=?", (uid,))
+        auth.q("DELETE FROM sessions WHERE uid=? AND ?", (uid, 1 if uid != me["uid"] else 0))
     admins = auth.q1("SELECT COUNT(*) n FROM users WHERE role='admin' AND active=1")["n"]
     target = auth.q1("SELECT role,active FROM users WHERE uid=?", (uid,))
     if "role" in d and d["role"] in ("admin", "user", "viewer"):

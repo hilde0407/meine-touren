@@ -7,6 +7,54 @@ const initials = n =>
     .join("")
     .slice(0, 2)
     .toUpperCase();
+/* Anmeldehelfer: JSON senden, Fehlermeldung des Servers lesbar machen */
+async function postJson(url, body) {
+  const r = await fetch(url, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(body)});
+  let t = await r.text(),
+    j = {};
+  try {
+    j = JSON.parse(t);
+  } catch (x) {}
+  if (!r.ok) throw new Error(j.detail || t || "Fehler " + r.status);
+  return j;
+}
+/* Zweiter Schritt der Anmeldung: Code aus der Authenticator-App (oder Wiederherstellungscode) */
+function codeBox(w, ticket) {
+  w.querySelector("form").innerHTML = `<div class="brandl">Meine Touren</div><h2>Bestätigungscode</h2>
+    <p class="mut">Gib den 6-stelligen Code aus deiner Authenticator-App ein. Hast du dein Handy nicht zur Hand, kannst du einen Wiederherstellungscode (z. B. a1b2c3-d4e5f6) verwenden.</p>
+    <label>Code<input id="au_c" inputmode="numeric" autocomplete="one-time-code" autocapitalize="off" required></label>
+    <div class="bad" id="au_e"></div><div class="row"><button class="btn" type="submit">Anmelden</button></div>`;
+  $("#au_c").focus();
+  w.querySelector("form").onsubmit = async e => {
+    e.preventDefault();
+    try {
+      const j = await postJson("/api/login/2fa", {ticket, code: $("#au_c").value});
+      location.hash = "#/dash";
+      location.reload();
+    } catch (x) {
+      $("#au_e").textContent = x.message;
+    }
+  };
+}
+/* „Passwort vergessen?“ */
+function forgotBox(w, who) {
+  w.querySelector("form").innerHTML = `<div class="brandl">Meine Touren</div><h2>Passwort vergessen</h2>
+    <p class="mut">Gib deine E-Mail-Adresse oder deinen Namen ein. Du bekommst einen Link zum Festlegen eines neuen Passworts.</p>
+    <label>E-Mail-Adresse oder Name<input id="au_w" autocomplete="username" value="${esc(who || "")}" required></label>
+    <div class="bad" id="au_e"></div><div class="row"><button class="btn" type="submit">Link senden</button><button class="btn alt" type="button" id="au_b">Zurück</button></div>`;
+  $("#au_w").focus();
+  $("#au_b").onclick = () => showAuth("login");
+  w.querySelector("form").onsubmit = async e => {
+    e.preventDefault();
+    try {
+      await postJson("/api/forgot", {who: $("#au_w").value});
+      w.querySelector("form").innerHTML = `<div class="brandl">Meine Touren</div><h2>E-Mail ist unterwegs</h2><p>Wenn zu deinen Angaben ein Konto mit E-Mail-Adresse gehört, haben wir einen Link zum Zurücksetzen geschickt. Er gilt eine Stunde. Schau bitte auch im Spam-Ordner nach.</p><div class="row"><button class="btn" type="button" id="au_b">Zur Anmeldung</button></div>`;
+      $("#au_b").onclick = () => showAuth("login");
+    } catch (x) {
+      $("#au_e").textContent = x.message;
+    }
+  };
+}
 function showAuth(kind, msg = "") {
   document.querySelector(".authwrap")?.remove();
   const setup = kind === "setup",
@@ -15,12 +63,14 @@ function showAuth(kind, msg = "") {
   w.innerHTML = `<form class="authbox" autocomplete="on"><div class="brandl">Meine Touren</div><h2>${setup ? "Benutzerverwaltung einrichten" : "Anmelden"}</h2>
     ${setup ? `<p class="mut">Du legst jetzt den ersten Benutzer an, er wird Administrator. Alle bisherigen Touren, Fotos und Einstellungen gehören danach ihm. Weitere Benutzer legst du anschließend selbst an.</p>` : ""}
     <label>Name<input id="au_n" name="username" autocomplete="username" required></label>
+    ${setup ? `<label>E-Mail-Adresse<input id="au_m" type="email" autocomplete="email" required><small class="mut">Wird zum Zurücksetzen des Passworts verwendet.</small></label>` : ""}
     <label>Passwort<input id="au_p" name="password" type="password" autocomplete="${setup ? "new-password" : "current-password"}" required minlength="${setup ? 8 : 1}"></label>
     ${setup ? `<label>Passwort wiederholen<input id="au_p2" type="password" autocomplete="new-password" required></label><p class="mut" style="font-size:13px">Mindestens 8 Zeichen.</p>` : ""}
-    <div class="bad" id="au_e">${esc(msg)}</div><div class="row"><button class="btn" type="submit">${setup ? "Einrichten" : "Anmelden"}</button>${setup ? '<button class="btn alt" type="button" id="au_x">Später</button>' : ""}</div></form>`;
+    <div class="bad" id="au_e">${esc(msg)}</div><div class="row"><button class="btn" type="submit">${setup ? "Einrichten" : "Anmelden"}</button>${setup ? '<button class="btn alt" type="button" id="au_x">Später</button>' : ""}</div>${setup ? "" : '<p style="margin:14px 0 0"><a href="#" id="au_f">Passwort vergessen?</a></p>'}</form>`;
   document.body.appendChild(w);
   $("#au_n").focus();
   if (setup) $("#au_x").onclick = () => w.remove();
+  if ($("#au_f")) $("#au_f").onclick = e => (e.preventDefault(), forgotBox(w, $("#au_n").value));
   w.querySelector("form").onsubmit = async e => {
     e.preventDefault();
     $("#au_e").textContent = "";
@@ -29,19 +79,8 @@ function showAuth(kind, msg = "") {
       return;
     }
     try {
-      await fetch(setup ? "/api/setup" : "/api/login", {
-        method: "POST",
-        headers: {"content-type": "application/json"},
-        body: JSON.stringify({name: $("#au_n").value, password: $("#au_p").value}),
-      }).then(async r => {
-        if (!r.ok) {
-          let m = await r.text();
-          try {
-            m = JSON.parse(m).detail || m;
-          } catch (x) {}
-          throw new Error(m);
-        }
-      });
+      const j = await postJson(setup ? "/api/setup" : "/api/login", {name: $("#au_n").value, password: $("#au_p").value, email: setup ? $("#au_m").value : undefined});
+      if (j && j.need_2fa) return codeBox(w, j.ticket);
       location.hash = "#/dash";
       location.reload();
     } catch (x) {
@@ -213,11 +252,11 @@ VIEWS.account = async () => {
      adm
        ? `<div class="sec"><h2>Benutzer verwalten</h2></div><div class="panel"><div class="rows">${us
            .map(
-             u => `<div class="r" style="display:block"><b>${esc(u.name)}</b> <span class="mut">${u.role === "admin" ? "Administrator" : u.role === "viewer" ? "Betrachter (sieht die Daten von " + esc((us.find(x => x.uid === u.owner) || {}).name || "?") + ")" : "Benutzer"}${u.active ? "" : " · gesperrt"}${u.me ? " · du" : ""}</span>
-      <div class="row" style="margin:6px 0 0">${u.role === "viewer" ? "" : `<button class="btn alt sm" data-ur="${u.uid}">${u.role === "admin" ? "Zum Benutzer machen" : "Zum Admin machen"}</button>`}<button class="btn alt sm" data-up="${u.uid}">Passwort setzen</button>${u.me ? "" : `<button class="btn alt sm" data-ua="${u.uid}">${u.active ? "Sperren" : "Entsperren"}</button><button class="btn alt sm" data-ud="${u.uid}">Löschen</button>`}</div></div>`
+             u => `<div class="r" style="display:block"><b>${esc(u.name)}</b> <span class="mut">${u.role === "admin" ? "Administrator" : u.role === "viewer" ? "Betrachter (sieht die Daten von " + esc((us.find(x => x.uid === u.owner) || {}).name || "?") + ")" : "Benutzer"}${u.active ? "" : " · gesperrt"}${u.me ? " · du" : ""}</span><br><small class="mut">${u.email ? esc(u.email) : "keine E-Mail-Adresse"}${u.totp_on ? " · Zwei-Faktor an" : ""}</small>
+      <div class="row" style="margin:6px 0 0">${u.role === "viewer" ? "" : `<button class="btn alt sm" data-ur="${u.uid}">${u.role === "admin" ? "Zum Benutzer machen" : "Zum Admin machen"}</button>`}<button class="btn alt sm" data-up="${u.uid}">Passwort setzen</button><button class="btn alt sm" data-um="${u.uid}">E-Mail ändern</button>${u.totp_on && !u.me ? `<button class="btn alt sm" data-u2="${u.uid}">Zwei-Faktor zurücksetzen</button>` : ""}${u.me ? "" : `<button class="btn alt sm" data-ua="${u.uid}">${u.active ? "Sperren" : "Entsperren"}</button><button class="btn alt sm" data-ud="${u.uid}">Löschen</button>`}</div></div>`
            )
            .join("")}</div>
-     <h3 style="margin-top:20px">Neuer Benutzer</h3><div class="filters"><input id="nu_n" placeholder="Name"><input id="nu_p" type="password" placeholder="Passwort (mind. 8 Zeichen)" autocomplete="new-password"><select id="nu_r"><option value="user">Benutzer</option><option value="admin">Administrator</option><option value="viewer">Betrachter (nur ansehen)</option></select><select id="nu_o" style="display:none" title="Dessen Touren, Fotos und Standort sieht der Betrachter">${us.filter(u => u.role !== "viewer" && u.active).map(u => `<option value="${u.uid}">sieht: ${esc(u.name)}</option>`).join("")}</select><button class="btn" id="nu_b">Anlegen</button><span id="nu_m" class="mut"></span></div>
+     <h3 style="margin-top:20px">Neuer Benutzer</h3><div class="filters"><input id="nu_n" placeholder="Name"><input id="nu_m" type="email" placeholder="E-Mail-Adresse" autocomplete="off"><input id="nu_p" type="password" placeholder="Passwort (mind. 8 Zeichen)" autocomplete="new-password"><select id="nu_r"><option value="user">Benutzer</option><option value="admin">Administrator</option><option value="viewer">Betrachter (nur ansehen)</option></select><select id="nu_o" style="display:none" title="Dessen Touren, Fotos und Standort sieht der Betrachter">${us.filter(u => u.role !== "viewer" && u.active).map(u => `<option value="${u.uid}">sieht: ${esc(u.name)}</option>`).join("")}</select><button class="btn" id="nu_b">Anlegen</button><span id="nu_m" class="mut"></span></div>
      <p class="mut" style="font-size:13px">Jeder Benutzer hat eigene Touren, Fotos, Notizen, Ziele und sein eigenes Komoot-Konto (Verwaltung). Fotos aus einem Ordner <code>/mnt/fotos/&lt;Benutzername&gt;</code> werden dem jeweiligen Benutzer zugeordnet.</p></div>`
        : ""
    }`;
@@ -287,6 +326,21 @@ VIEWS.account = async () => {
         if (p) patch(b.dataset.up, {password: p});
       })
   );
+  document.querySelectorAll("[data-um]").forEach(
+    b =>
+      (b.onclick = () => {
+        const u = us.find(x => x.uid === b.dataset.um),
+          e = prompt(`E-Mail-Adresse für ${u.name}:`, u.email || "");
+        if (e !== null) patch(b.dataset.um, {email: e});
+      })
+  );
+  document.querySelectorAll("[data-u2]").forEach(
+    b =>
+      (b.onclick = () => {
+        const u = us.find(x => x.uid === b.dataset.u2);
+        if (confirm(`Zwei-Faktor-Anmeldung von „${u.name}“ ausschalten? Der Benutzer kann sie danach neu einrichten.`)) patch(b.dataset.u2, {reset_2fa: true});
+      })
+  );
   document
     .querySelectorAll("[data-ua]")
     .forEach(b => (b.onclick = () => patch(b.dataset.ua, {active: !us.find(u => u.uid === b.dataset.ua).active})));
@@ -313,7 +367,7 @@ VIEWS.account = async () => {
         await api("/api/users", {
           method: "POST",
           headers: J,
-          body: JSON.stringify({name: $("#nu_n").value, password: $("#nu_p").value, role: $("#nu_r").value, owner: $("#nu_r").value === "viewer" ? $("#nu_o").value : undefined}),
+          body: JSON.stringify({name: $("#nu_n").value, email: $("#nu_m").value, password: $("#nu_p").value, role: $("#nu_r").value, owner: $("#nu_r").value === "viewer" ? $("#nu_o").value : undefined}),
         });
         VIEWS.account();
       } catch (e) {

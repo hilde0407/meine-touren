@@ -55,7 +55,7 @@ async def api_set_tags(tour_id: str, request: Request):
 
 # ---------- Reisen ----------
 def build_trips():
-    tours = db.query("SELECT t.*, g.state AS g_state, g.country AS g_country, g.place AS g_place FROM tours t LEFT JOIN tour_geo g ON g.id=t.id "
+    tours = db.query("SELECT t.*, g.state AS g_state, g.country AS g_country, g.place AS g_place, g.county AS g_county FROM tours t LEFT JOIN tour_geo g ON g.id=t.id "
                      "WHERE t.start_ts IS NOT NULL AND t.lat IS NOT NULL ORDER BY t.start_ts")
     if len(tours) < 3:
         return []
@@ -88,7 +88,35 @@ def build_trips():
         out.append({"id": g[0]["id"], "region": reg, "country": next((t["g_country"] for t in g if t["g_country"]), None), "start": d0.isoformat(), "end": d1.isoformat(),
                     "days": (d1 - d0).days + 1, "tours": [t["id"] for t in g], "km": round(sum(t["dist_m"] or 0 for t in g) / 1000, 1),
                     "up_m": round(sum(t["up_m"] or 0 for t in g)), "h": round(sum(t["dur_s"] or 0 for t in g) / 3600, 1)})
+    _unique_names(out, {t["id"]: t for t in tours})
     return sorted(out, key=lambda x: x["start"], reverse=True)
+
+
+MONTHS = ["Jan.", "Feb.", "März", "Apr.", "Mai", "Juni", "Juli", "Aug.", "Sep.", "Okt.", "Nov.", "Dez."]
+
+
+def _unique_names(trips, by_id):
+    """Mehrere Reisen im selben Bundesland hießen alle gleich (z. B. „Hessen“): erst mit dem häufigsten Ort/Landkreis, dann mit dem Monat unterscheiden.
+    Reisen bis 3 Tage gelten als Kurzreisen (Feld „short“)."""
+    from collections import Counter
+    for t in trips:
+        t["short"] = t["days"] <= 3
+        t["base_region"] = t["region"]
+    for name, n in Counter(t["region"] for t in trips).items():
+        if n < 2:
+            continue
+        same = [t for t in trips if t["region"] == name]
+        for t in same:
+            places = [by_id[i].get("g_place") or by_id[i].get("g_county") for i in t["tours"] if by_id.get(i)]
+            places = [p for p in places if p]
+            if places:
+                t["region"] = f"{name} – {Counter(places).most_common(1)[0][0]}"
+        for nm, m in Counter(t["region"] for t in trips).items():
+            if m < 2:
+                continue
+            for t in [x for x in trips if x["region"] == nm]:
+                d = datetime.fromisoformat(t["start"])
+                t["region"] = f"{nm} ({MONTHS[d.month - 1]} {d.year})"
 
 
 def _apply_trip_edits(trips):
@@ -411,7 +439,7 @@ def public_photo(token: str, pid: int, size: int = 1400):
     return FileResponse(p, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=3600"})
 
 
-PUBLIC_PREFIXES = ("/s/", "/api/public/", "/pub/", "/vendor/", "/tiles/")
+PUBLIC_PREFIXES = ("/s/", "/api/public/", "/pub/", "/vendor/", "/tiles/", "/reset/")
 
 
 # ---------- Benachrichtigung (freier Webhook, standardmäßig aus) ----------

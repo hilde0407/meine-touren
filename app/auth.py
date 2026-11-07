@@ -23,7 +23,12 @@ CREATE TABLE IF NOT EXISTS sessions (th TEXT PRIMARY KEY, uid TEXT, created INTE
 CREATE TABLE IF NOT EXISTS viewer_of (uid TEXT PRIMARY KEY, owner TEXT);
 CREATE TABLE IF NOT EXISTS grants (id INTEGER PRIMARY KEY AUTOINCREMENT, owner TEXT, grantee TEXT, scope TEXT, ref TEXT, ts INTEGER);
 CREATE TABLE IF NOT EXISTS share_index (token TEXT PRIMARY KEY, uid TEXT);
+CREATE TABLE IF NOT EXISTS sysconf (k TEXT PRIMARY KEY, v TEXT);
+CREATE TABLE IF NOT EXISTS resets (th TEXT PRIMARY KEY, uid TEXT, exp INTEGER);
+CREATE TABLE IF NOT EXISTS tickets (th TEXT PRIMARY KEY, uid TEXT, exp INTEGER, tries INTEGER DEFAULT 0);
+CREATE TABLE IF NOT EXISTS recovery (uid TEXT, h TEXT);
 """
+USER_COLS = (("email", "TEXT"), ("totp_secret", "TEXT"), ("totp_on", "INTEGER DEFAULT 0"), ("totp_last", "INTEGER DEFAULT 0"), ("totp_pending", "TEXT"))
 
 
 def _c():
@@ -35,6 +40,10 @@ def _c():
             _conn_path = str(config.SYSTEM_DB)
             _conn.row_factory = sqlite3.Row
             _conn.executescript(SCHEMA)
+            have = {r["name"] for r in _conn.execute("PRAGMA table_info(users)")}
+            for c, d in USER_COLS:
+                if c not in have:
+                    _conn.execute(f"ALTER TABLE users ADD COLUMN {c} {d}")      # E-Mail-Adresse und Zwei-Faktor-Angaben
             _conn.commit()
         return _conn
 
@@ -91,15 +100,30 @@ def load_first():
 
 
 def list_users():
-    return q("SELECT u.uid,u.name,u.role,u.active,u.created,v.owner FROM users u LEFT JOIN viewer_of v ON v.uid=u.uid ORDER BY u.created, u.uid")
+    return q("SELECT u.uid,u.name,u.role,u.active,u.created,u.email,u.totp_on,v.owner FROM users u LEFT JOIN viewer_of v ON v.uid=u.uid ORDER BY u.created, u.uid")
 
 
 def active_uids():
     return [u["uid"] for u in q("SELECT uid FROM users WHERE active=1 ORDER BY created, uid")] if users_exist() else [None]
 
 
-def create_user(name, pw, role="user"):
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]{2,}$")
+
+
+def clean_email(e, required=False):
+    e = (e or "").strip()
+    if not e:
+        if required:
+            raise ValueError("Bitte eine E-Mail-Adresse angeben")
+        return None
+    if len(e) > 120 or not EMAIL_RE.match(e):
+        raise ValueError("Die E-Mail-Adresse sieht nicht richtig aus")
+    return e
+
+
+def create_user(name, pw, role="user", email=None):
     name = (name or "").strip()
+    email = clean_email(email)
     if len(name) < 2 or len(name) > 40:
         raise ValueError("Der Name muss 2 bis 40 Zeichen lang sein")
     if len(pw or "") < 8:
@@ -110,7 +134,7 @@ def create_user(name, pw, role="user"):
         n += 1; uid = f"{base}-{n}"
     if q1("SELECT 1 x FROM users WHERE lower(name)=lower(?)", (name,)):
         raise ValueError("Diesen Namen gibt es schon")
-    q("INSERT INTO users(uid,name,pw,role,active,created) VALUES(?,?,?,?,1,?)", (uid, name, hash_pw(pw), role if role in ("admin", "viewer") else "user", int(time.time())))
+    q("INSERT INTO users(uid,name,pw,role,active,created,email) VALUES(?,?,?,?,1,?,?)", (uid, name, hash_pw(pw), role if role in ("admin", "viewer") else "user", int(time.time()), email))
     load_first()
     d = config.user_dir(uid)
     for sub in ("cache", "export", "inbox", "photos"):
@@ -151,7 +175,8 @@ def delete_user(uid, with_data=False):
 _fail = {}
 
 
-def login(name, pw, ip=""):
+def check_login(name, pw, ip=""):
+    """Name und Passwort prüfen (mit Sperre nach zu vielen Fehlversuchen). Gibt die Benutzerzeile zurück."""
     key = (name or "").strip().lower() + "|" + ip
     now = time.time(); f = [t for t in _fail.get(key, []) if now - t < 300]
     if len(f) >= 6:
@@ -164,16 +189,26 @@ def login(name, pw, ip=""):
         _fail[key] = f + [now]
         raise PermissionError("Name oder Passwort stimmt nicht")
     _fail.pop(key, None)
+    return u
+
+
+def start_session(uid):
+    now = time.time()
     tok = secrets.token_urlsafe(32)
-    q("INSERT INTO sessions(th,uid,created,exp) VALUES(?,?,?,?)", (hashlib.sha256(tok.encode()).hexdigest(), u["uid"], int(now), int(now + SESSION_DAYS * 86400)))
+    q("INSERT INTO sessions(th,uid,created,exp) VALUES(?,?,?,?)", (hashlib.sha256(tok.encode()).hexdigest(), uid, int(now), int(now + SESSION_DAYS * 86400)))
     q("DELETE FROM sessions WHERE exp<?", (int(now),))
-    return tok, u
+    return tok
+
+
+def login(name, pw, ip=""):
+    u = check_login(name, pw, ip)
+    return start_session(u["uid"]), u
 
 
 def session_user(tok):
     if not tok:
         return None
-    return q1("SELECT u.uid,u.name,u.role FROM sessions s JOIN users u ON u.uid=s.uid WHERE s.th=? AND s.exp>? AND u.active=1", (hashlib.sha256(tok.encode()).hexdigest(), int(time.time())))
+    return q1("SELECT u.uid,u.name,u.role,u.email,u.totp_on FROM sessions s JOIN users u ON u.uid=s.uid WHERE s.th=? AND s.exp>? AND u.active=1", (hashlib.sha256(tok.encode()).hexdigest(), int(time.time())))
 
 
 def logout(tok):

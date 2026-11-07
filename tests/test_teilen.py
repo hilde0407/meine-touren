@@ -19,8 +19,8 @@ def test_share_tour_copy():
     p1 = config.LIB_DIR / "b.jpg"; Image.new("RGB", (40, 30), "blue").save(p1)
     photos._store([(str(p1), p1.stat().st_mtime, p1.stat().st_size, t["start_ts"] + 20, None, None)]); photos.assign_all()
     with TestClient(main.app) as c:
-        c.post("/api/setup", json={"name": "Max", "password": "geheim1234"})
-        c.post("/api/users", json={"name": "Anna", "password": "annas-pass1", "role": "user"})
+        c.post("/api/setup", json={"name": "Max", "email": "max@example.com", "password": "geheim1234"})
+        c.post("/api/users", json={"name": "Anna", "email": "anna@example.com", "password": "annas-pass1", "role": "user"})
         a = TestClient(main.app); a.post("/api/login", json={"name": "anna", "password": "annas-pass1"})
         assert a.get("/api/shared/tours").json() == []
         assert c.post("/api/grants", json={"grantee": "anna", "scope": "tour", "ref": "g1"}).status_code == 200
