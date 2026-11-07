@@ -48,3 +48,22 @@ def test_viewer_and_live():
         assert v.post("/api/live", json={"lat": 1, "lon": 1}).status_code == 403          # Betrachter sendet nicht
         c.post("/api/settings", json={"live_mode": "off"})
         assert v.get("/api/live").json() == {}
+
+
+def test_record_upload_lands_in_users_account():
+    """App-Aufzeichnung muss im Konto des angemeldeten Benutzers landen (nicht im Altbestand) – und die Rettung holt Altlasten."""
+    from fastapi.testclient import TestClient
+    from app import main, config
+    with TestClient(main.app) as c:
+        c.post("/api/setup", json={"name": "Max", "password": "geheim1234"})
+        r = c.post("/api/record/upload", json={"gpx": _gpx(), "name": "", "sport": "hike"})
+        assert r.status_code == 200, r.text
+        tid = r.json()["id"]
+        assert any(t["id"] == tid for t in c.get("/api/tours").json())
+        # Altlast im Altbestand nachstellen und retten
+        legacy = config.user_dir(None) / "tracks"
+        legacy.mkdir(parents=True, exist_ok=True)
+        (legacy / "g1700000001.gpx").write_text(_gpx().replace("2023", "2026"), encoding="utf-8")
+        rr = c.post("/api/record/rescue").json()
+        assert rr["found"] == 1 and rr["imported"][0]["id"] == "g1700000001", rr
+        assert any(t["id"] == "g1700000001" for t in c.get("/api/tours").json())

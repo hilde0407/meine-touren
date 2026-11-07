@@ -125,6 +125,19 @@ VIEWS.admin = async (...a) => {
   if (body) body.insertAdjacentHTML("beforeend", box);
   else if ($("#save")) $("#save").closest(".row").insertAdjacentHTML("beforebegin", box);
   if (!$("#livem")) return;
+  if (!$("#rescue") && $("#livebox"))
+    $("#livebox").insertAdjacentHTML("afterend", `<div class="panel" id="rescue"><h2>Verlorene App-Aufzeichnungen suchen</h2><p class="mut" style="font-size:13px">Vor Version 2.3.2 konnten Aufzeichnungen aus der Android-App im Altbestand statt in deinem Konto landen. Hier werden sie (aus den letzten 30 Tagen) in dein Konto übernommen.</p><button class="btn alt" id="rescueb">Suchen und übernehmen</button> <span id="rescuem" class="mut"></span></div>`);
+  if ($("#rescueb"))
+    $("#rescueb").onclick = async () => {
+      $("#rescuem").textContent = "Suche …";
+      try {
+        const r = await api("/api/record/rescue", {method: "POST"});
+        $("#rescuem").textContent = r.imported.length ? `${r.imported.length} Tour(en) übernommen: ${r.imported.map(x => x.name + " (" + x.km + " km)").join(", ")}` : "Nichts Verlorenes gefunden.";
+        if (r.imported.length) loadTours().catch(() => {});
+      } catch (e) {
+        $("#rescuem").textContent = e.message;
+      }
+    };
   $("#livem").value = cur;
   $("#livem").onchange = async () => {
     try {

@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import contextvars
 import os
 import re
 import hmac
@@ -489,7 +490,7 @@ async def api_share_target(files: list[UploadFile] = File(default=[])):
     if n_act:
         root = act_dir
         paths = [p for p in root.iterdir() if p.is_file() and p.suffix.lower() in SHARE_ACT]
-        res = await asyncio.get_running_loop().run_in_executor(None, lambda: _share_import(paths))
+        res = await asyncio.get_running_loop().run_in_executor(None, contextvars.copy_context().run, lambda: _share_import(paths))
         imported, dup = res
     if n_img:
         jobs.start("Geteilte Fotos", sync.import_inbox)
@@ -518,13 +519,42 @@ async def api_record_upload(request: Request):
         return {"id": tid, "dup": True}
     if sport not in gpxtools.LABEL:
         sport = None
-    t, _ = await asyncio.get_running_loop().run_in_executor(None, lambda: tracks.adopt(gpx, "rec.gpx", name=name, sport=sport))
+    t, _ = await asyncio.get_running_loop().run_in_executor(None, contextvars.copy_context().run, lambda: tracks.adopt(gpx, "rec.gpx", name=name, sport=sport))
     try:
         photos.assign_all()
     except Exception:  # noqa
         pass
     more2.notify_event(f"Neue Tour gespeichert: {t['name']} ({(t['dist_m'] or 0) / 1000:.1f} km, {round(t['up_m'] or 0)} m aufwärts)", "Neue Tour")
     return {"id": t["id"], "dup": False}
+
+
+@app.post("/api/record/rescue")
+async def api_record_rescue(request: Request):
+    """Admin: App-Aufzeichnungen, die vor 2.3.2 versehentlich im Altbestand (ohne Benutzer) gelandet sind, in den eigenen Bestand übernehmen."""
+    u = getattr(request.state, "user", None)
+    if u and u["role"] != "admin":
+        raise HTTPException(403, "Nur für Administratoren")
+    legacy = config.user_dir(None) / "tracks"
+    found, done = 0, []
+    uid = ctx.uid()
+    if uid and legacy.is_dir():
+        for f in sorted(legacy.glob("g*.gpx")):
+            if time.time() - f.stat().st_mtime > 30 * 86400:
+                continue
+            tid = f.stem
+            if db.one("SELECT 1 FROM tours WHERE id=?", (tid,)):
+                continue
+            found += 1
+            try:
+                t, _ = tracks.adopt(f.read_text(encoding="utf-8"), "rec.gpx", ident=tid)
+                done.append({"id": t["id"], "name": t["name"], "km": round((t["dist_m"] or 0) / 1000, 1), "date": t["start_ts"]})
+            except Exception:  # noqa
+                pass
+        try:
+            photos.assign_all()
+        except Exception:  # noqa
+            pass
+    return {"found": found, "imported": done}
 
 
 def _share_import(paths):

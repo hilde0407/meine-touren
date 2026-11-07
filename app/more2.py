@@ -406,12 +406,13 @@ def notify_event(text, title="Meine Touren"):
             return
     except Exception:  # noqa
         return
+    import contextvars
     def run():
         try:
             notify_send(text, title)
         except Exception:  # noqa
             pass
-    threading.Thread(target=run, daemon=True).start()
+    threading.Thread(target=contextvars.copy_context().run, args=(run,), daemon=True).start()
 
 
 def notify_check():
