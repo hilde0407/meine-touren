@@ -704,7 +704,7 @@ def test_share_send_button(page):
     page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
     page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.3.0', serverUrl: () => ''}")
     page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(1200)
-    page.click("#esnd"); page.wait_for_function("window._sent", timeout=8000)
+    page.evaluate("document.querySelector('#esnd').click()"); page.wait_for_function("window._sent", timeout=8000)
     sent = page.evaluate("window._sent")
     assert "/s/" in sent and "km" in sent
     page.set_viewport_size({"width": 1280, "height": 900})
@@ -718,7 +718,7 @@ def test_share_slideshow_button(page):
     page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.5.0', serverUrl: () => ''}")
     page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(1200)
     page.once("dialog", lambda d: d.accept())             # falls die Tour keine Fotos hat
-    page.click("#eshow"); page.wait_for_selector("#sh_go"); page.select_option("#sh_d", "7"); page.click("#sh_go"); page.wait_for_function("window._sent", timeout=8000)
+    page.evaluate("document.querySelector('#eshow').click()"); page.wait_for_selector("#sh_go"); page.select_option("#sh_d", "7"); page.click("#sh_go"); page.wait_for_function("window._sent", timeout=8000)
     sent = page.evaluate("window._sent")
     assert "Diashow" in sent and "/s/" in sent
     link = sent.split()[-1]
@@ -728,6 +728,25 @@ def test_share_slideshow_button(page):
     p2.goto(link); p2.wait_for_selector("#h:not(:empty)", timeout=8000)
     assert p2.is_visible("#pl") and p2.is_visible("#nx") and not errs
     ctx2.close()
+    page.set_viewport_size({"width": 1280, "height": 900})
+
+
+def test_mobile_tour_menus(page):
+    """Mobile Tour-Ansicht: zwei Menüknöpfe statt elf Einzelknöpfe; Menüpunkte lösen die ursprünglichen Funktionen aus."""
+    base = page.url.split("#")[0]
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    page.goto(base + "#/tour/" + page.evaluate("TOURS.find(t => t.source === 'local').id")); page.wait_for_selector(".tact .tk", timeout=8000)
+    vis = page.evaluate("[...document.querySelectorAll('#main .tact > *')].filter(e => e.offsetParent && e.textContent.trim()).map(e => e.className)")
+    assert len(vis) <= 2 and page.is_visible("#main .tact-bar")                  # nur Menüleiste (und ggf. „lokal gespeichert“)
+    page.click(".tk[data-g=share]"); page.wait_for_selector(".tactl")
+    assert {"esnd", "eshow", "eshr", "egpx"} <= set(page.evaluate("[...document.querySelectorAll('.tactl [data-e]')].map(b => b.dataset.e)"))
+    page.click(".tactl [data-e=eshr]"); page.wait_for_selector("#shn")            # „Links verwalten“ öffnet den Link-Dialog
+    page.click("#shx"); page.wait_for_timeout(200)
+    page.click(".tk[data-g=edit]"); page.wait_for_selector(".tactl")
+    assert {"ren", "etag", "etc", "edel"} <= set(page.evaluate("[...document.querySelectorAll('.tactl [data-e]')].map(b => b.dataset.e)"))
+    page.click(".tactl [data-e=ren]")
+    page.wait_for_selector("#rnn"); page.click("#rcx")
     page.set_viewport_size({"width": 1280, "height": 900})
 
 

@@ -375,3 +375,5 @@ Das Skript installiert Java, lädt BRouter 1.7.7 und die Kartenkacheln (je ca. 1
 6. In der Galerie prüfen, ob die Kopie der Fotos vorhanden ist.
 Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → Android-App) und mir schicken.
 
+
+**Aufgeräumte Tour-Ansicht am Handy (ab 2.5.2):** Statt elf Einzelknöpfen gibt es zwei große Knöpfe. „Teilen & Senden“ enthält Link senden, Diashow senden, Links verwalten, GPX-Datei und Tourblatt; „Bearbeiten“ enthält Umbenennen, Tags, Streckenfarbe, Höhen und Track korrigieren, Hochladen, Komoot-Abgleich und (abgesetzt, rot) Löschen – jeweils mit kurzer Erklärung. Am Computer bleibt alles unverändert.
