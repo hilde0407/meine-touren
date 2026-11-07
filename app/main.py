@@ -41,8 +41,9 @@ async def no_stale_static(request: Request, call_next):
 
 
 VIEWER_GET = re.compile(
-    r"^/(api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings"
-    r"|tours|tours/[^/]+/(coords|best-photos|weather|gpx|pdf)|trips/[^/]+/pdf|recap/\d+/pdf|records/altitude|weather/stats)|photo/|pic/|tiles/)")
+    r"^(/api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings"
+    r"|tours|tours/[^/]+|tours/[^/]+/(coords|best-photos|weather|gpx)|trips/[^/]+|records/altitude|weather/stats)"
+    r"|/photo/[^/]+|/pic/[^/]+|/tiles/.+)$")
 OPEN_API = ("/api/version", "/api/me", "/api/login", "/api/logout", "/api/setup", "/api/zepp-token")
 PROTECTED = ("/api/", "/photo/", "/sphoto/", "/pic/", "/spic/")
 

@@ -29,6 +29,12 @@ def test_viewer_and_live():
         assert v.delete(f"/api/tours/{tours[0]['id']}").status_code == 403
         assert v.get("/api/users").status_code in (401, 403)
         assert v.get("/api/jobs").status_code == 403
+        tid = tours[0]["id"]
+        for bad in (f"/api/tours/{tid}/pdf", f"/api/tours/{tid}/trackfix", f"/api/tours/{tid}/shares", "/api/trips/x/pdf", "/api/recap/2026/pdf", "/api/photo-library"):
+            assert v.get(bad).status_code == 403, bad
+        for bad in ("/api/photo-delete", "/api/photo-upload", f"/api/tours/{tid}/rename", f"/api/tours/{tid}/note", f"/api/tours/{tid}/share"):
+            assert v.post(bad, json={}).status_code == 403, bad
+        assert v.get(f"/api/tours/{tid}/gpx").status_code == 200
         s = v.get("/api/settings").json()
         assert "notify_url" not in s and "live_mode" not in s
         # Live-Standort

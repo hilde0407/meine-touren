@@ -732,3 +732,17 @@ def test_viewer_ui(page):
     assert page.evaluate("location.hash") == "#/dash"
     page.goto(base + "#/map"); page.wait_for_timeout(1200)
     assert page.query_selector("#mloc")
+
+
+def test_viewer_tour_page_readonly(page):
+    """Betrachter: Tourseite ohne Umbenennen, Höhenkorrektur, Foto-Bearbeitung, PDF und Teilen; GPX bleibt."""
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    page.evaluate("ME.user = {name:'Oma', role:'viewer'}; applyView()")
+    page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(2000)
+    for sel in ("#ren", "#efix", "#etag", "#eshr", "#esheet", "#eup", "#padd", "#pgps", "#esnd"):
+        assert not page.is_visible(sel), sel
+    assert page.is_visible("#egpx")
+    assert not page.evaluate("[...document.querySelectorAll('#main button, #main a.btn')].some(b=>!b.hidden && b.offsetParent && /Fotos (zuordnen|bearbeiten)|PDF|Tourblatt/.test(b.textContent))")
+    err = page.evaluate("api('/api/tours/x/rename', {method:'POST'}).then(()=>'ok', e=>e.message)")
+    assert "nur ansehen" in err

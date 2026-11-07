@@ -3,6 +3,8 @@ const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"})[c]);
 const STALE = () => new Promise(() => {}); // Antwort für eine inzwischen verlassene Seite: nie auflösen, damit die alte Ansicht nichts mehr zeichnet
 const api = async (u, o) => {
+  if (o && o.method && !/^(GET|HEAD)$/i.test(o.method) && typeof isViewer === "function" && isViewer() && !/^\/api\/(login|logout)/.test(u + ""))
+    throw new Error("Dieser Zugang darf nur ansehen");
   const tok = window._rt,
     r = await fetch(u, o);
   if (tok && tok !== window._rt && (!o || !o.method || o.method === "GET")) return STALE();

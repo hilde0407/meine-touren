@@ -314,3 +314,4 @@ html.mob #mn{position:fixed;left:8px;bottom:calc(66px + env(safe-area-inset-bott
 html.mob #tabbar{justify-content:center}
 html.mob #tabbar a,html.mob #tabbar button{flex:0 1 84px;min-height:52px}
 html.mob #tabbar .ti{font-size:20px}
+html.viewer [hidden]{display:none!important}

@@ -6,6 +6,23 @@
   if (o) VIEWS[k] = (...a) => (isViewer() ? void (location.hash = "#/dash") : o(...a));
 });
 
+/* Betrachter: Bedienelemente zum Ändern, Hochladen, Teilen und für PDFs entfernen (api() in 01-grundlagen.js sendet für Betrachter nur Abfragen) */
+const VHIDE =
+  "#ren,#ksync,#eup,#edel,#etag,#eshr,#etc,#efix,#padd,#pgps,#pimp,#pbest,#shr,#esnd,#esheet,#shp,#pdfdl,#trpdf,#tredit,#trhide,#sbbtn,#serren,#chb,#offb,#stclr,#ssave,#snote,#sgrp,#gedit,#gnew,#starrow,.pdfctl,a[href*='pdf'],a[href^='#/sheet'],a[href^='#/tripsheet'],a[href^='#/compare'],a[href^='#/plan'],a[href^='#/record']";
+const VTXT = /^(Fotos (zuordnen|bearbeiten|importieren|hinzufügen)|Tourblatt|PDF|Senden|Teilen|Löschen|Keine Reise|Entfernte Reisen)/;
+function viewerLock() {
+  if (!isViewer()) return;
+  document.querySelectorAll(VHIDE).forEach(e => (e.hidden = true));
+  document.querySelectorAll("#main button, #main a.btn").forEach(b => {
+    if (VTXT.test(b.textContent.trim()) || /Ändern|bearbeiten|umbenennen/i.test(b.title || "")) b.hidden = true;
+  });
+  document.querySelectorAll("#main textarea, #main input:not([type=checkbox])").forEach(i => {
+    if (!i.closest(".mapui") && i.id !== "gs") i.readOnly = true;
+  });
+  document.querySelectorAll("#main .st").forEach(b => (b.disabled = true));
+}
+new MutationObserver(() => viewerLock()).observe(document.body, {childList: true, subtree: true});
+
 const fmtAge = s => {
   if (s < 90) return "gerade eben";
   if (s < 3600) return `vor ${Math.round(s / 60)} Min.`;
