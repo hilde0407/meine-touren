@@ -336,16 +336,16 @@ def test_admin_tabs(page):
     page.evaluate("localStorage.removeItem('admtab')")
     page.goto(base + "#/admin"); page.wait_for_timeout(2500)
     tabs = page.evaluate("[...document.querySelectorAll('#atabs button')].map(b => b.textContent)")
-    assert tabs == ["Übersicht", "Touren & Quellen", "Fotos", "Automatik", "Sicherung & Zugang"], tabs
+    assert tabs == ["Übersicht", "Touren holen", "Hochladen & Planen", "Fotos", "Automatik & Meldungen", "Handy & App", "Sicherung & Zugang"], tabs
     vis = lambda: page.evaluate("[...document.querySelectorAll('.atab')].filter(s => s.style.display !== 'none').map(s => s.dataset.t)")
     assert vis() == ["uebersicht"]
-    for t, word in (("quellen", "Komoot"), ("fotos", "Fotos importieren"), ("auto", "Automatik"), ("sicher", "Sicherung")):
+    for t, word in (("quellen", "Komoot"), ("weitergabe", "Portale"), ("fotos", "Fotos importieren"), ("auto", "Automatik"), ("handy", "Auf dem Handy"), ("sicher", "Sicherung")):
         page.click(f"#atabs [data-t={t}]")
         assert vis() == [t] and word in page.inner_text(f".atab[data-t={t}]"), (t, word)
     assert "tab=sicher" in page.url
     assert page.locator("#save").is_visible()                      # Speichern-Leiste bleibt auf jedem Reiter erreichbar
     page.goto(base + "#/admin?strava=ok"); page.wait_for_timeout(1500)
-    assert vis() == ["quellen"]
+    assert vis() == ["weitergabe"]
     assert not page.errors, page.errors
 
 
@@ -559,7 +559,7 @@ def test_plan_switch_ui_and_album_stats(page):
     page.evaluate("api('/api/settings', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({plan_enabled: '1', plan_mode: '', brouter_url: ''})})")
     page.goto(base + "#/tours"); page.wait_for_timeout(1200)
     assert page.locator("#plink").count() == 1
-    page.goto(base + "#/admin?tab=quellen"); page.wait_for_timeout(1500)
+    page.goto(base + "#/admin?tab=weitergabe"); page.wait_for_timeout(1500)
     assert page.locator("#brpanel").count() == 1 and page.is_visible("#brpanel")
     page.check('input[name="pm"][value="local"]')
     assert page.is_visible("#pinst") and "install-brouter.sh" in page.inner_text("#pinst")
@@ -630,7 +630,7 @@ def test_share_result_and_handy_panel(page):
     assert "1 Tour importiert" in txt and "2 Fotos empfangen" in txt and "nicht unterstützt" in txt
     page.goto(base + "#/shared?t=0&d=1&a=1"); page.wait_for_timeout(800)
     assert "schon vorhanden" in page.inner_text("main")
-    page.goto(base + "#/admin?tab=uebersicht"); page.wait_for_timeout(1500)
+    page.goto(base + "#/admin?tab=handy"); page.wait_for_timeout(1500)
     assert page.locator("#handy").count() == 1 and page.is_visible("#handy")
     assert "Teilen-Menü" in page.inner_text("#handy")
 
@@ -795,3 +795,19 @@ def test_record_live_values_and_photos(page):
     assert "2 Foto" in page.inner_text("#main")
     page.click("#rsend"); page.wait_for_function("location.hash.startsWith('#/tour/')", timeout=15000)
     assert "upload" in page.evaluate("window._calls")
+
+
+def test_admin_tabs_uniform(page):
+    """Verwaltung: sieben Reiter, jeder Bereich liegt in genau einem Reiter und ist eine gleich gestaltete Karte."""
+    base = page.url.split("#")[0]
+    page.goto(base + "#/admin?tab=uebersicht"); page.reload(); page.wait_for_timeout(1800)
+    tabs = page.evaluate("[...document.querySelectorAll('#atabs button')].map(b=>b.textContent)")
+    assert tabs == ["Übersicht", "Touren holen", "Hochladen & Planen", "Fotos", "Automatik & Meldungen", "Handy & App", "Sicherung & Zugang"]
+    where = page.evaluate("Object.fromEntries([...document.querySelectorAll('.atab')].map(s=>[s.dataset.t,[...s.querySelectorAll(':scope > .gbody > *')].map(c=>(c.querySelector('h2')||{}).textContent||'').map(t=>t.trim().split(' ')[0])]))")
+    assert "Zustand" in where["uebersicht"] and "Updates" in where["uebersicht"] and "Komoot" in where["quellen"]
+    assert "Portale" in where["weitergabe"] and "Tourplanung" in where["weitergabe"] and "Standort" in where["handy"]
+    assert "Zugriffsschutz" in where["sicher"] and "Sicherung" in where["sicher"]
+    # gleiche Gestaltung: gleiche Schriftgröße der Kartentitel und gleicher Kartenrand
+    sizes = page.evaluate("[...document.querySelectorAll('.atab .gbody > * > h2, .atab .gbody > * > .panel > h2')].map(h=>getComputedStyle(h).fontSize)")
+    assert len(set(sizes)) == 1, sizes
+    assert page.evaluate("[...document.querySelectorAll('.atab .gbody > *')].every(c=>getComputedStyle(c).borderTopWidth==='1px')")

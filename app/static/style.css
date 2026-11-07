@@ -327,3 +327,29 @@ html.viewer [hidden]{display:none!important}
 .holdstop.holding .fill{width:100%;transition:width 1.5s linear}
 .holdstop .lbl{position:relative}
 .livetip.me{background:#1a73e8}
+
+/* ---- 2.4.1: Verwaltung – einheitliche Karten ---- */
+.atabs{gap:2px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+.atabs::-webkit-scrollbar{display:none}
+.atabs button{white-space:nowrap}
+.atab .atintro{font-size:15px;margin:0 0 16px;max-width:760px}
+.atab .gbody{display:flex;flex-direction:column;gap:18px;max-width:900px}
+.atab .gbody>*{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px 20px;margin:0!important;grid-column:auto!important}
+.atab .gbody>*>h2{font-size:20px;margin:0 0 10px;padding:0;border:0}
+.atab .gbody>*>h2 small,.atab .gbody>*>h2 .mut{font:500 14px var(--b);color:var(--mut)}
+.atab .gbody>* h3{font-size:16px;margin:16px 0 6px}
+.atab .gbody>* p,.atab .gbody>* .mut{font-size:14.5px}
+.atab .gbody>*>p.mut:first-of-type{margin:0 0 12px}
+.atab .gbody>* .row{gap:8px;flex-wrap:wrap}
+.atab .gbody>* .grid{gap:14px 24px}
+.atab .gbody>* details{margin-top:10px}
+.atab .gbody>* summary{cursor:pointer;font-weight:600}
+.atab .gbody>* label.mut,.atab .gbody>* label{display:block;margin:10px 0 4px;font-size:13.5px}
+.atab .gbody>* input[type=text],.atab .gbody>* input[type=password],.atab .gbody>* input[type=email],.atab .gbody>* input:not([type]),.atab .gbody>* select{max-width:520px}
+.savebar{max-width:900px}
+@media (max-width:700px){.atab .gbody>*{padding:14px}.atab .gbody>*>h2{font-size:18px}}
+.atab .gbody>* .panel{border:0;padding:0;margin:0!important;background:none}
+.atab .gbody>* .panel>h2{font-size:20px;margin:0 0 10px}
+@media (max-width:700px){.atabs{flex-wrap:wrap;overflow:visible}.atabs button{padding:8px 9px}}
+.atab .gbody>* [style*="font-size:13px"]{font-size:14px!important}
+.atab .gbody>* h3{font-family:var(--d)}

@@ -41,7 +41,7 @@ VIEWS.admin = async (...a) => {
     <div class="row" style="gap:8px"><button class="btn" id="pwainst" style="${_installEv ? "" : "display:none"}">App installieren</button></div>
     ${secure ? "" : `<p class="mut" style="font-size:13px;margin-top:8px"><b>So bekommst du HTTPS:</b> am einfachsten mit <b>Tailscale</b> (kostenlos): auf Server und Handy installieren, auf dem Server <code>tailscale serve --bg 80</code> ausführen und die angezeigte Adresse <code>https://…ts.net</code> öffnen. Alternativ ein Reverse-Proxy mit eigener Domain (Caddy, Nginx Proxy Manager). Einzelheiten: README → „Handy und HTTPS“.</p>`}
     <p class="mut" style="font-size:13px;margin-top:8px">Ohne Installation: In Chrome ⋮ → „Zum Startbildschirm hinzufügen“.</p></div>`;
-  const body = document.querySelector('.atab[data-t="uebersicht"] .gbody');
+  const body = document.querySelector('.atab[data-t="handy"] .gbody');
   if (body) body.insertAdjacentHTML("beforeend", html);
   else $("#save").closest(".row").insertAdjacentHTML("beforebegin", html);
   const b = $("#pwainst");

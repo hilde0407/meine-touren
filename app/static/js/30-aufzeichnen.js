@@ -265,7 +265,7 @@ VIEWS.admin = async (...a) => {
   const box = `<div class="panel" id="appbox"><h2>Android-App</h2>
     <p class="mut">Version ${esc(A.version())} · Server: ${esc(A.serverUrl())}</p>
     <div class="row" style="gap:8px"><button class="btn alt" id="appsrv">Serveradresse ändern</button><button class="btn alt" id="appbat">Akku-Einstellungen</button><a class="btn" href="#/apptest">App-Test und Protokoll</a></div></div>`;
-  const body = document.querySelector('.atab[data-t="uebersicht"] .gbody');
+  const body = document.querySelector('.atab[data-t="handy"] .gbody');
   if (body) body.insertAdjacentHTML("beforeend", box);
   else if ($("#save")) $("#save").closest(".row").insertAdjacentHTML("beforebegin", box);
   const cfg = await api("/api/settings").catch(() => ({})),

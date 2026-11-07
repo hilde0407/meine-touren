@@ -15,10 +15,12 @@ async function boot() {
 
 /* ---- Verwaltung: nach Aufgaben geordnet in Reitern (statt einer langen Seite) ---- */
 const ADM_TABS = [
-  ["uebersicht", "Übersicht", "Zustand der App, Updates, Protokoll und Selbsttest.", ["#upd", "#hlt", "Protokoll", "Selbsttest"]],
-  ["quellen", "Touren & Quellen", "Woher deine Touren kommen: Komoot, Zepp, Garmin, Suunto, Dateien – und wohin sie hochgeladen werden dürfen (Strava). Dazu Wanderführer.", ["Komoot", "Zepp-Import", "Garmin", "Portale", "Wanderführer", "Tourplanung"]],
+  ["uebersicht", "Übersicht", "Zustand der App, Updates, Selbsttest und Protokoll.", ["#hlt", "#upd", "Selbsttest", "Protokoll"]],
+  ["quellen", "Touren holen", "Woher deine Touren kommen: Komoot, Zepp, Uhren und Dateien, dazu Wanderführer.", ["Komoot", "Zepp-Import", "Garmin", "Wanderführer"]],
+  ["weitergabe", "Hochladen & Planen", "Wohin Touren hochgeladen werden dürfen (nur auf deinen Wunsch) und wie Touren geplant werden.", ["Portale", "Tourplanung"]],
   ["fotos", "Fotos", "Fotobibliothek, Import und Eingangsordner.", ["Fotos", "Foto-Eingang"]],
-  ["auto", "Automatik", "Tägliche Aktualisierung und Benachrichtigungen.", ["Automatik", "Benachrichtigung"]],
+  ["auto", "Automatik & Meldungen", "Tägliche Aktualisierung und Benachrichtigungen.", ["Automatik", "Benachrichtigung"]],
+  ["handy", "Handy & App", "Android-App, Standort teilen und die App auf dem Startbildschirm.", ["Android-App", "Standort teilen", "Verlorene", "Auf dem Handy"]],
   ["sicher", "Sicherung & Zugang", "Backups, Zugriffsschutz und Offline-Nutzung.", ["Sicherung", "Zugriffsschutz", "Offline-Nutzung"]],
 ];
 const _admG = VIEWS.admin;
@@ -35,7 +37,7 @@ VIEWS.admin = async (...a) => {
     const sec = document.createElement("section");
     sec.className = "atab";
     sec.dataset.t = id;
-    sec.innerHTML = `<p class="mut atintro">${intro}</p><div class="grid g2 gbody"></div>`;
+    sec.innerHTML = `<p class="mut atintro">${intro}</p><div class="gbody"></div>`;
     const body = sec.querySelector(".gbody");
     keys.forEach(k => {
       const el = k[0] === "#" ? $(k) : panels.find(p => !used.has(p) && title(p).startsWith(k));
@@ -43,9 +45,6 @@ VIEWS.admin = async (...a) => {
       used.add(el);
       panels.forEach(p => el.contains(p) && used.add(p));       // Bereiche in verschobenen Containern (z. B. #upd) nicht noch einmal verschieben
       if (k[0] !== "#" && el.querySelector(":scope > h2")) el.style.marginTop = "0";
-      if (k === "#upd" || k === "#hlt") el.style.gridColumn = "1 / -1";
-      if (k === "Protokoll") el.style.gridColumn = "1 / -1";
-      if (k === "Garmin" || k === "Tourplanung") el.style.gridColumn = "1 / -1";
       body.appendChild(el);
     });
     return sec;
@@ -65,7 +64,7 @@ VIEWS.admin = async (...a) => {
     if (!g.children.length || (!g.querySelector(".panel") && !g.matches(".panel") && !g.textContent.trim())) g.remove();
   });
   let tab = (q && q.get && q.get("tab")) || "";
-  if (!tab && q && q.get && (q.get("strava") || q.get("suunto"))) tab = "quellen";
+  if (!tab && q && q.get) tab = q.get("strava") ? "weitergabe" : q.get("suunto") ? "quellen" : "";
   try {
     if (!tab) tab = localStorage.getItem("admtab") || "";
   } catch (e) {}

@@ -270,6 +270,15 @@ Dateien importieren|Import files
 Verbinden|Connect
 ✓ verbunden|✓ connected
 Automatik|Automation
+Touren holen|Get tours
+Hochladen & Planen|Upload & planning
+Automatik & Meldungen|Automation & alerts
+Handy & App|Phone & app
+Zustand der App, Updates, Selbsttest und Protokoll.|App status, updates, self-test and log.
+Woher deine Touren kommen: Komoot, Zepp, Uhren und Dateien, dazu Wanderführer.|Where your tours come from: Komoot, Zepp, watches and files, plus hiking guides.
+Wohin Touren hochgeladen werden dürfen (nur auf deinen Wunsch) und wie Touren geplant werden.|Where tours may be uploaded (only on your request) and how tours are planned.
+Android-App, Standort teilen und die App auf dem Startbildschirm.|Android app, location sharing and the app on your home screen.
+Protokoll anzeigen|Show log
 Täglich aktualisieren (Komoot, Routen, Fotos)|Update daily (Komoot, routes, photos)
 Protokoll|Log
 Einstellungen speichern|Save settings
