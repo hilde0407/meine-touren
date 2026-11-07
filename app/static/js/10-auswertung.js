@@ -312,19 +312,13 @@ async function collView(title, sub, ids, back) {
 }
 VIEWS.trips = async () => {
   $("#main").innerHTML =
-    `<div class="sec" style="margin-top:0"><h2>Reisen</h2><span class="sub">automatisch erkannt: Touren weit weg von zu Hause an aufeinanderfolgenden Tagen</span></div><div id="tr" class="mut">Wird geladen …</div>`;
+    `<div class="sec" style="margin-top:0"><h2>Reisen</h2><span class="sub">automatisch erkannt: Touren weit weg von zu Hause an mindestens 4 Tagen</span></div><div id="tr" class="mut">Wird geladen …</div>`;
   const [tr, tg] = await Promise.all([api("/api/trips"), api("/api/tags")]);
   $("#tr").className = "";
   $("#tr").innerHTML =
     (tr.length
-      ? `${(() => {
-          const card = x => `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${dateS(x.start)}${x.end !== x.start ? " – " + dateS(x.end) : ""}</span><small>${x.tours.length} Touren · ${nf(x.km, 0)} km · ${nf(x.up_m, 0)} m</small></a>`,
-            big = tr.filter(x => x.days > 3),
-            small = tr.filter(x => x.days <= 3),
-            grp = (l, h) => (l.length ? `${h}<div class="otdg">${l.map(card).join("")}</div>` : "");
-          return big.length && small.length ? grp(big, "") + `<div class="sec"><h2>Kurzreisen</h2><span class="sub">bis 3 Tage</span></div>` + grp(small, "") : grp(tr, "");
-        })()}`
-      : '<p class="mut">Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Gruppen legst du mit Tags an.</p>') +
+      ? `<div class="otdg">${tr.map(x => `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${dateS(x.start)}${x.end !== x.start ? " – " + dateS(x.end) : ""}</span><small>${x.tours.length} Touren · ${nf(x.km, 0)} km · ${nf(x.up_m, 0)} m</small></a>`).join("")}</div>`
+      : '<p class="mut">Keine Reisen erkannt (es braucht Touren an mindestens 4 Tagen am Stück, über 60 km von deinem üblichen Startort entfernt – Wochenendausflüge zählen nicht). Eigene Gruppen legst du mit Tags an.</p>') +
     `<div class="sec"><h2>Alben &amp; Tags</h2><span class="sub">in der Tour über „🏷 Tags“ vergeben</span></div>` +
     (tg.length
       ? `<div class="otdg">${tg.map(x => `<a class="otd" href="#/album/${encodeURIComponent(x.tag)}"${x.photo ? ` style="background-image:linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)"` : ""}><b>🏷 ${esc(x.tag)}</b><small>${x.n} Touren · ${nf(x.km, 0)} km</small></a>`).join("")}</div>`

@@ -92,6 +92,7 @@ def build_trips():
     return sorted(out, key=lambda x: x["start"], reverse=True)
 
 
+TRIP_MIN_DAYS = 4      # ab so vielen Kalendertagen zählt eine Auswärtsserie als Reise (Einstellung „trip_min_days“)
 MONTHS = ["Jan.", "Feb.", "März", "Apr.", "Mai", "Juni", "Juli", "Aug.", "Sep.", "Okt.", "Nov.", "Dez."]
 
 
@@ -191,7 +192,9 @@ def api_trip_hide(trip_id: str, body: dict):
 @router.get("/api/trips")
 def api_trips(hidden: int = 0):
     hid = {r["id"] for r in db.query("SELECT id FROM trip_hidden")}
-    out = [t for t in _apply_trip_edits(build_trips()) if (t["id"] in hid) == bool(hidden)]
+    mind = max(2, db.get_int("trip_min_days", TRIP_MIN_DAYS))
+    # Nur echte Reisen: kürzere Ausflüge (z. B. Wochenende) bleiben draußen, außer man hat die Reise selbst bearbeitet
+    out = [t for t in _apply_trip_edits(build_trips()) if (t["id"] in hid) == bool(hidden) and (t["days"] >= mind or t.get("edited"))]
     for t in out:
         t["photo"] = cover_photo(t["tours"])
     return out

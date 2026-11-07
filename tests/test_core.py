@@ -466,12 +466,14 @@ def test_more2(monkeypatch):
     with TestClient(main.app) as c:
         base = 1700000000
         # 6 Heimat-Touren + 2 Reise-Touren an aufeinanderfolgenden Tagen weit weg
-        specs = [(f"h{i}", 50.1, 8.6, base + i * 86400 * 9) for i in range(6)] + [("r1", -21.1, 55.4, base + 100 * 86400), ("r2", -21.2, 55.5, base + 101 * 86400)]
+        specs = [(f"h{i}", 50.1, 8.6, base + i * 86400 * 9) for i in range(6)] + [("r1", -21.1, 55.4, base + 100 * 86400), ("r2", -21.2, 55.5, base + 101 * 86400),
+                                                                ("r3", -21.2, 55.5, base + 102 * 86400), ("r4", -21.1, 55.4, base + 103 * 86400),
+                                                                ("w1", 45.0, 6.0, base + 150 * 86400), ("w2", 45.0, 6.0, base + 151 * 86400)]      # w1/w2: nur ein Wochenende weit weg
         for tid, la, lo, ts in specs:
             db.execute("INSERT OR REPLACE INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,up_m,down_m,lat,lng,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)", (tid, tid, "hike", ts, ts + 3600, 8000, 3600, 300, 300, la, lo, "x"))
             routes.store(tid, [(la + j * 0.0005, lo, 300 + j, j) for j in range(80)])
         tr = c.get("/api/trips").json()
-        assert tr and set(tr[0]["tours"]) == {"r1", "r2"} and tr[0]["photo"] is None
+        assert len(tr) == 1 and set(tr[0]["tours"]) == {"r1", "r2", "r3", "r4"} and tr[0]["photo"] is None      # 2-Tage-Ausflug (w1/w2) zählt nicht als Reise
         db.execute("INSERT INTO photos(path,mtime,size,taken_ts,lat,lng,tour_id) VALUES('/x/a.jpg',1,1,?,?,?,?)", (base + 100 * 86400 + 5, -21.1, 55.4, "r1"))
         assert c.get("/api/trips").json()[0]["photo"] is not None
         assert c.post("/api/tours/r1/tags", json={"tags": ["Urlaub", " Réunion "]}).json()["tags"] == ["Urlaub", "Réunion"]
