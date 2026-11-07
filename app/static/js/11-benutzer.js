@@ -22,7 +22,7 @@ async function aboutBox() {
     <div class="r"><span>Server<small>dein Meine-Touren-Server</small></span><b>${esc((sv.split(" ·")[0] || "?").trim())}</b></div></div>
     <p class="mut" style="font-size:13px;margin:6px 0 0">${esc(sv)}</p>
     <h4 style="margin:18px 0 6px">Ersteller</h4>
-    <p style="margin:0">Entwickelt von <b>Volker</b> gemeinsam mit <b>Claude</b> (KI-Assistent von Anthropic).</p>
+    <p style="margin:0">Entwickelt von <b>Volker Hildebrand</b> gemeinsam mit <b>Claude</b> (KI-Assistent von Anthropic).</p>
     <p class="mut" style="font-size:13px;margin:10px 0 0">Karten © OpenStreetMap-Mitwirkende. Freie Software, Quellcode auf GitHub (hilde0407/meine-touren).</p>
     <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" id="abx">Schließen</button></div>`);
   m.classList.add("sheet");

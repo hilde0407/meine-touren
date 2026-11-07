@@ -758,7 +758,7 @@ def test_info_box(page):
     page.evaluate("window.MTApp = {version: () => '2.5.0', hasPermission: () => true, status: () => '{}', serverUrl: () => ''}")
     page.click("#tmore"); page.click("#mab"); page.wait_for_selector("#abx")
     txt = page.inner_text(".modal")
-    assert "2.5.0" in txt and "Claude" in txt and "Volker" in txt and "Meine Touren" in txt
+    assert "2.5.0" in txt and "Claude" in txt and "Volker Hildebrand" in txt and "Meine Touren" in txt
     page.click("#abx")
     page.set_viewport_size({"width": 1280, "height": 900})
 
