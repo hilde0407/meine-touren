@@ -222,6 +222,10 @@ public final class Recorder {
             long last = store.lastTime();
             if (RECORDING.equals(s) && last > 0 && System.currentTimeMillis() - last < 60000) act += System.currentTimeMillis() - last;
             o.put("active_s", act / 1000);
+            double al = store.lastAlt(), ma = store.maxAlt();
+            if (!Double.isNaN(al)) o.put("alt_m", Math.round(al));
+            if (!Double.isNaN(ma)) o.put("max_alt_m", Math.round(ma));
+            o.put("speed_ms", Math.round(store.recentSpeedMs() * 100) / 100.0);
             if (store.count() > 0) {
                 o.put("lat", store.lastLat());
                 o.put("lon", store.lastLon());

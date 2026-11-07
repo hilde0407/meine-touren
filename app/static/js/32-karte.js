@@ -35,7 +35,8 @@ VIEWS.map = async () => {
   await _mapK();
   const box = $(".mapui");
   if (!box || !map) return;
-  const m = map,
+  const myName = (ME.user && ME.user.name) || "Standort",
+    m = map,
     viewer = typeof isViewer === "function" && isViewer();
   const meL = L.layerGroup().addTo(m),
     liveL = L.layerGroup().addTo(m);
@@ -48,7 +49,7 @@ VIEWS.map = async () => {
   if (!viewer) api("/api/settings").then(c => (liveMode = c.live_mode || "off")).catch(() => {});
   box.insertAdjacentHTML(
     "afterbegin",
-    `<div class="box"><button class="chip" id="mloc" title="Meinen Standort auf der Karte zeigen">⌖ Ich</button><button class="chip" id="mlive" style="display:none" title="Zuletzt gemeldeten Standort zeigen">📍 Live</button></div>`
+    `<div class="box"><button class="chip" id="mloc" title="Meinen Standort auf der Karte zeigen">⌖ ${esc(myName)}</button><button class="chip" id="mlive" style="display:none" title="Zuletzt gemeldeten Standort zeigen">📍 Live</button></div>`
   );
   const stop = () => {
     if (watch != null) navigator.geolocation.clearWatch(watch);
@@ -66,7 +67,7 @@ VIEWS.map = async () => {
         const ll = [p.coords.latitude, p.coords.longitude];
         meL.clearLayers();
         L.circle(ll, {radius: Math.max(p.coords.accuracy || 10, 5), color: "#1a73e8", weight: 1, fillOpacity: 0.12, interactive: false}).addTo(meL);
-        L.circleMarker(ll, {radius: 8, color: "#fff", weight: 3, fillColor: "#1a73e8", fillOpacity: 1}).addTo(meL).bindPopup("Du bist hier");
+        L.circleMarker(ll, {radius: 8, color: "#fff", weight: 3, fillColor: "#1a73e8", fillOpacity: 1}).addTo(meL).bindPopup(`<b>${esc(myName)}</b><br>Du bist hier`).bindTooltip(esc(myName), {permanent: true, direction: "bottom", offset: [0, 8], className: "livetip me"});
         if (!viewer && liveMode === "on" && Date.now() - lastSent > 30000) {
           lastSent = Date.now();
           api("/api/live", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({lat: ll[0], lon: ll[1], acc: p.coords.accuracy, source: "manual"})}).catch(() => {});
@@ -102,6 +103,7 @@ VIEWS.map = async () => {
       lastLive = null;
     }
     $("#mlive").style.display = lastLive ? "" : "none";
+    if (lastLive && lastLive.name) $("#mlive").textContent = "📍 " + lastLive.name;
     showLive(lastLive);
   };
   $("#mlive").onclick = () => lastLive && m.setView([lastLive.lat, lastLive.lon], Math.max(m.getZoom(), 14));

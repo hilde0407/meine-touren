@@ -498,6 +498,37 @@ async def api_share_target(files: list[UploadFile] = File(default=[])):
     return RedirectResponse("/#/shared" + q, status_code=303)
 
 
+@app.post("/api/rec-photos")
+async def api_rec_photos(files: list[UploadFile] = File(default=[])):
+    """Fotos, die in der Android-App während einer Aufzeichnung aufgenommen wurden (mit Aufnahmezeit und GPS im EXIF)."""
+    import re as _re
+    img_dir = config.INBOX_DIR / "teilen"
+    img_dir.mkdir(parents=True, exist_ok=True)
+    saved, total = 0, 0
+    for f in files:
+        name = _re.sub(r"[^\w.\- ]+", "_", (f.filename or "foto.jpg").replace("\\", "/").split("/")[-1])[:120] or "foto.jpg"
+        if Path(name).suffix.lower() not in SHARE_IMG:
+            continue
+        target = img_dir / name
+        if target.exists():
+            target = img_dir / f"{int(time.time())}_{name}"
+        with open(target, "wb") as out:
+            while True:
+                chunk = await f.read(1 << 20)
+                if not chunk:
+                    break
+                total += len(chunk)
+                if total > SHARE_MAX:
+                    out.close()
+                    target.unlink(missing_ok=True)
+                    raise HTTPException(413, "Zu viele Daten auf einmal")
+                out.write(chunk)
+        saved += 1
+    if saved:
+        jobs.start("Fotos der Aufzeichnung", sync.import_inbox)
+    return {"saved": saved}
+
+
 @app.post("/api/record/upload")
 async def api_record_upload(request: Request):
     """Aufzeichnung aus der Android-App: JSON {gpx, name, sport}. Legt eine lokale Tour an (doppelte werden erkannt)."""
@@ -522,6 +553,9 @@ async def api_record_upload(request: Request):
     t, _ = await asyncio.get_running_loop().run_in_executor(None, contextvars.copy_context().run, lambda: tracks.adopt(gpx, "rec.gpx", name=name, sport=sport))
     try:
         photos.assign_all()
+        wait = config.INBOX_DIR / "teilen"
+        if wait.is_dir() and any(wait.iterdir()):
+            jobs.start("Fotos der Aufzeichnung", sync.import_inbox)        # Fotos aus der App, die noch im Eingang liegen
     except Exception:  # noqa
         pass
     more2.notify_event(f"Neue Tour gespeichert: {t['name']} ({(t['dist_m'] or 0) / 1000:.1f} km, {round(t['up_m'] or 0)} m aufwärts)", "Neue Tour")

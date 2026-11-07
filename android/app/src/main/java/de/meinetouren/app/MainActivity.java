@@ -36,7 +36,7 @@ import java.util.UUID;
 
 /** Hülle um die Meine-Touren-Weboberfläche: WebView, GPS-Aufzeichnung, Teilen-Ziel, PDF-Downloads. */
 public class MainActivity extends Activity {
-    private static final int REQ_PERM = 11, REQ_FILE = 12;
+    private static final int REQ_PERM = 11, REQ_FILE = 12, REQ_PHOTO = 13;
     private WebView web;
     private SharedPreferences prefs;
     private ValueCallback<Uri[]> fileCb;
@@ -198,6 +198,24 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int req, int res, Intent data) {
+        if (req == REQ_PHOTO) {
+            final String pf = prefs.getString("pend_file", "");
+            final double la = Double.longBitsToDouble(prefs.getLong("pend_lat", Double.doubleToLongBits(Double.NaN)));
+            final double lo = Double.longBitsToDouble(prefs.getLong("pend_lon", Double.doubleToLongBits(Double.NaN)));
+            final long ts = prefs.getLong("pend_ts", System.currentTimeMillis());
+            prefs.edit().remove("pend_file").apply();
+            final java.io.File f = new java.io.File(RecPhotos.dir(this), pf);
+            if (res == RESULT_OK && !pf.isEmpty() && f.length() > 0) {
+                prefs.edit().putInt("photos_taken", prefs.getInt("photos_taken", 0) + 1).apply();
+                new Thread(() -> {
+                    RecPhotos.finish(getApplicationContext(), f, la, lo, ts);
+                    runOnUiThread(() -> web.evaluateJavascript("window.dispatchEvent(new Event('mtphoto'))", null));
+                }).start();
+            } else if (!pf.isEmpty()) {
+                f.delete();
+            }
+            return;
+        }
         if (req == REQ_FILE && fileCb != null) {
             Uri[] r = null;
             if (res == RESULT_OK && data != null) {
@@ -299,7 +317,7 @@ public class MainActivity extends Activity {
 
     /* ---------- Brücke zur Weboberfläche ---------- */
     public class Bridge {
-        @JavascriptInterface public String version() { return "2.3.1"; }
+        @JavascriptInterface public String version() { return "2.4.0"; }
         @JavascriptInterface public String serverUrl() { return server(); }
 
         @JavascriptInterface
@@ -315,13 +333,50 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> web.loadUrl("file:///android_asset/setup.html"));
         }
 
-        @JavascriptInterface public void startRecording(String sport, String name) { Recorder.get(MainActivity.this).start(sport, name); }
+        @JavascriptInterface public void startRecording(String sport, String name) { prefs.edit().putInt("photos_taken", 0).apply(); Recorder.get(MainActivity.this).start(sport, name); }
         @JavascriptInterface public void pauseRecording() { Recorder.get(MainActivity.this).pause(); }
         @JavascriptInterface public void resumeRecording() { Recorder.get(MainActivity.this).resume(); }
         @JavascriptInterface public void stopRecording(String name) { Recorder.get(MainActivity.this).stop(name); }
         @JavascriptInterface public String status() { return Recorder.get(MainActivity.this).statusJson(); }
         @JavascriptInterface public String points(int max) { return Recorder.get(MainActivity.this).store().pointsJson(max); }
         @JavascriptInterface public String takeFinished() { return Recorder.get(MainActivity.this).finishedGpx(); }
+        @JavascriptInterface
+        public boolean takePhoto() {
+            Recorder r = Recorder.get(MainActivity.this);
+            String st = r.state();
+            if (!"recording".equals(st) && !"paused".equals(st)) return false;
+            final java.io.File f = RecPhotos.newFile(MainActivity.this);
+            try { f.createNewFile(); } catch (Exception e) { return false; }
+            prefs.edit().putString("pend_file", f.getName())
+                    .putLong("pend_lat", Double.doubleToLongBits(r.store().lastLat()))
+                    .putLong("pend_lon", Double.doubleToLongBits(r.store().lastLon()))
+                    .putLong("pend_ts", System.currentTimeMillis()).apply();
+            runOnUiThread(() -> {
+                try {
+                    Uri u = PhotoProvider.uriFor(f);
+                    Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, u);
+                    i.setClipData(android.content.ClipData.newRawUri("", u));
+                    i.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivityForResult(i, REQ_PHOTO);
+                } catch (Exception e) {
+                    prefs.edit().remove("pend_file").apply();
+                    f.delete();
+                    Toast.makeText(MainActivity.this, "Keine Kamera-App gefunden", Toast.LENGTH_LONG).show();
+                }
+            });
+            return true;
+        }
+        @JavascriptInterface public String photoMode() { return RecPhotos.mode(MainActivity.this); }
+        @JavascriptInterface public void setPhotoMode(String m) { prefs.edit().putString("photo_mode", "end".equals(m) ? "end" : "now").apply(); }
+        @JavascriptInterface public void uploadPhotos() { RecPhotos.flushAsync(MainActivity.this); }
+        @JavascriptInterface
+        public String photoInfo() {
+            try {
+                return new org.json.JSONObject().put("taken", prefs.getInt("photos_taken", 0)).put("pending", RecPhotos.pending(MainActivity.this).length)
+                        .put("busy", RecPhotos.busy()).put("error", RecPhotos.error()).toString();
+            } catch (Exception e) { return "{}"; }
+        }
         @JavascriptInterface public String backups() { return Recorder.get(MainActivity.this).backupsJson(); }
         @JavascriptInterface public String backupGpx(String f) { return Recorder.get(MainActivity.this).backupGpx(f); }
         @JavascriptInterface public void markUploaded() { Recorder.get(MainActivity.this).discard(); }
@@ -332,7 +387,7 @@ public class MainActivity extends Activity {
             try {
                 android.os.PowerManager pm = (android.os.PowerManager) getSystemService(POWER_SERVICE);
                 android.location.LocationManager lm = (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
-                o.put("version", "2.3.1");
+                o.put("version", "2.4.0");
                 o.put("android", Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
                 o.put("device", Build.MANUFACTURER + " " + Build.MODEL);
                 o.put("server", server());

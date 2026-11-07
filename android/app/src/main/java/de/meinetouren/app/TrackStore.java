@@ -94,6 +94,30 @@ public class TrackStore {
     public synchronized long activeMs() { return activeMs; }
     public synchronized long firstTime() { return pts.isEmpty() ? 0 : pts.get(0).t; }
     public synchronized long lastTime() { return pts.isEmpty() ? 0 : pts.get(pts.size() - 1).t; }
+    public synchronized double lastAlt() {
+        for (int i = pts.size() - 1; i >= 0; i--) if (!Double.isNaN(pts.get(i).alt)) return pts.get(i).alt;
+        return Double.NaN;
+    }
+    public synchronized double maxAlt() {
+        double m = Double.NaN;
+        for (Pt p : pts) if (!Double.isNaN(p.alt) && (Double.isNaN(m) || p.alt > m)) m = p.alt;
+        return m;
+    }
+    /** Geschwindigkeit der letzten ca. 30 Sekunden in m/s (0 bei Stillstand oder zu wenig Punkten). */
+    public synchronized double recentSpeedMs() {
+        int n = pts.size();
+        if (n < 2) return 0;
+        long tEnd = pts.get(n - 1).t, tStart = tEnd;
+        double d = 0;
+        for (int i = n - 1; i > 0; i--) {
+            Pt p = pts.get(i), q = pts.get(i - 1);
+            if (p.newSeg) break;
+            d += haversine(q.lat, q.lon, p.lat, p.lon);
+            tStart = q.t;
+            if (tEnd - tStart >= 30000) break;
+        }
+        return tEnd - tStart >= 8000 ? d / ((tEnd - tStart) / 1000.0) : 0;
+    }
     public synchronized double lastLat() { return pts.isEmpty() ? Double.NaN : pts.get(pts.size() - 1).lat; }
     public synchronized double lastLon() { return pts.isEmpty() ? Double.NaN : pts.get(pts.size() - 1).lon; }
 

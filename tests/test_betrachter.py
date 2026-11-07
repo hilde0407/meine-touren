@@ -67,3 +67,18 @@ def test_record_upload_lands_in_users_account():
         rr = c.post("/api/record/rescue").json()
         assert rr["found"] == 1 and rr["imported"][0]["id"] == "g1700000001", rr
         assert any(t["id"] == "g1700000001" for t in c.get("/api/tours").json())
+
+
+def test_rec_photos_upload():
+    """Fotos aus der App landen im Eingang des Benutzers; Betrachter darf nichts hochladen."""
+    from fastapi.testclient import TestClient
+    from app import main, config
+    jpg = b"\xff\xd8\xff\xe0" + b"0" * 100
+    with TestClient(main.app) as c:
+        c.post("/api/setup", json={"name": "Max", "password": "geheim1234"})
+        c.post("/api/users", json={"name": "Oma", "password": "omas-pass12", "role": "viewer"})
+        r = c.post("/api/rec-photos", files=[("files", ("MT_1.jpg", jpg, "image/jpeg")), ("files", ("x.exe", b"zzz", "application/octet-stream"))])
+        assert r.status_code == 200 and r.json()["saved"] == 1, r.text
+        v = TestClient(main.app)
+        v.post("/api/login", json={"name": "oma", "password": "omas-pass12"})
+        assert v.post("/api/rec-photos", files=[("files", ("MT_2.jpg", jpg, "image/jpeg"))]).status_code == 403

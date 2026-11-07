@@ -29,6 +29,42 @@ if (recApp()) {
   }
 }
 
+const recKmh = ms => (ms || 0) * 3.6;
+const recCells = n => {
+  const avg = n.active_s > 20 ? recKmh((n.dist_m || 0) / n.active_s) : 0,
+    cell = (id, label, val) => `<div class="rc"><b id="${id}">${val}</b><span>${label}</span></div>`;
+  return (
+    cell("rd", "Strecke km", nf((n.dist_m || 0) / 1000, 2)) +
+    cell("ru", "Aufstieg m", nf(n.up_m || 0, 0)) +
+    cell("rdn", "Abstieg m", nf(n.down_m || 0, 0)) +
+    cell("ralt", "Höhe m", n.alt_m != null ? nf(n.alt_m, 0) : "–") +
+    cell("rmax", "Höchster Punkt m", n.max_alt_m != null ? nf(n.max_alt_m, 0) : "–") +
+    cell("rspd", "Tempo km/h", nf(recKmh(n.speed_ms), 1)) +
+    cell("ravg", "Ø km/h", nf(avg, 1)) +
+    cell("racc", "GPS ± m", n.fix_acc_m > 0 ? nf(n.fix_acc_m, 0) : "–")
+  );
+};
+const recFill = n => {
+  const put = (id, v) => $("#" + id) && ($("#" + id).textContent = v),
+    avg = n.active_s > 20 ? recKmh((n.dist_m || 0) / n.active_s) : 0;
+  put("rt", recDur(n.active_s || 0));
+  put("rd", nf((n.dist_m || 0) / 1000, 2));
+  put("ru", nf(n.up_m || 0, 0));
+  put("rdn", nf(n.down_m || 0, 0));
+  put("ralt", n.alt_m != null ? nf(n.alt_m, 0) : "–");
+  put("rmax", n.max_alt_m != null ? nf(n.max_alt_m, 0) : "–");
+  put("rspd", nf(recKmh(n.speed_ms), 1));
+  put("ravg", nf(avg, 1));
+  put("racc", n.fix_acc_m > 0 ? nf(n.fix_acc_m, 0) : "–");
+};
+const recPhotoInfo = () => {
+  try {
+    return JSON.parse(recApp().photoInfo());
+  } catch (e) {
+    return {};
+  }
+};
+
 VIEWS.record = async () => {
   const A = recApp();
   if (!A) {
@@ -45,6 +81,7 @@ VIEWS.record = async () => {
       h += '<div class="panel"><p><b>Standort-Berechtigung fehlt.</b> Für die Aufzeichnung braucht die App Zugriff auf den genauen Standort.</p><button class="btn" id="rperm">Berechtigung erteilen</button></div>';
     if (s === "idle") {
       h += `<div class="panel"><label class="mut">Sportart</label><select id="rsport" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px">${REC_SPORTS.map(([k, l]) => `<option value="${k}">${l}</option>`).join("")}</select>
+        ${typeof A.takePhoto === "function" ? `<label class="mut">Fotos während der Aufzeichnung</label><select id="rphm" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px"><option value="now">Sofort auf den Server laden</option><option value="end">Gesammelt am Ende laden</option></select>` : ""}
         <label class="mut">Name (optional)</label><input id="rname" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px" placeholder="wird sonst automatisch vergeben">
         <button class="btn" id="rstart" style="width:100%;font-size:20px;padding:16px">● Aufzeichnung starten</button>
         <p class="mut" style="font-size:13px;margin-top:10px">Die Aufzeichnung läuft auch bei ausgeschaltetem Bildschirm weiter. Tipp: Akku-Optimierung für diese App ausschalten.</p>
@@ -52,16 +89,21 @@ VIEWS.record = async () => {
     } else if (s === "finished") {
       h += `<div class="panel"><h2>Aufzeichnung beendet</h2><p>${nf((st.dist_m || 0) / 1000, 2)} km · ${recDur(st.active_s || 0)} h · ↑ ${nf(st.up_m || 0, 0)} m · ↓ ${nf(st.down_m || 0, 0)} m</p>
         <input id="rname" value="${esc(st.name)}" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px" placeholder="Name der Tour (leer lassen = automatisch)">
+        ${(() => {
+          const pi = typeof A.photoInfo === "function" ? recPhotoInfo() : {};
+          return pi.pending ? `<p class="mut" style="font-size:13px">📷 ${pi.pending} Foto(s) werden mit hochgeladen.</p>` : "";
+        })()}
         <button class="btn" id="rsend" style="width:100%;font-size:19px;padding:14px">Auf den Server speichern</button>
         <p id="rmsg" class="mut"></p>
         <button class="btn alt" id="rdrop" style="margin-top:6px">Verwerfen</button></div>`;
     } else {
       h += `<div class="panel" style="text-align:center"><div class="mut">${s === "paused" ? "⏸ pausiert" : st.gps ? "● nimmt auf" : "⚠ GPS ist ausgeschaltet"}</div>
         <div id="rt" style="font-size:44px;font-weight:700;margin:6px 0">${recDur(st.active_s || 0)}</div>
-        <div style="font-size:22px"><b id="rd">${nf((st.dist_m || 0) / 1000, 2)}</b> km &nbsp; ↑ <b id="ru">${nf(st.up_m || 0, 0)}</b> m</div>
+        <div class="recgrid">${recCells(st)}</div>
+        ${typeof A.takePhoto === "function" ? '<button class="btn" id="rphoto" style="width:100%;font-size:20px;padding:16px;margin-top:12px">📷 Foto aufnehmen</button><div id="rphinfo" class="mut" style="font-size:13px;margin-top:4px"></div>' : ""}
         <div class="row" style="gap:8px;margin-top:14px;justify-content:center">
           ${s === "paused" ? '<button class="btn" id="rres">▶ Weiter</button>' : '<button class="btn alt" id="rpause">⏸ Pause</button>'}
-          <button class="btn" id="rstop" style="background:#b3402d">■ Beenden</button></div></div>
+          <button class="btn holdstop" id="rstop"><span class="fill"></span><span class="lbl">■ Beenden – gedrückt halten</span></button></div></div>
         <div id="rmap" style="height:300px;border-radius:12px;margin-top:12px"></div>`;
     }
     let bk = [];
@@ -72,7 +114,14 @@ VIEWS.record = async () => {
       h += `<div class="panel"><h2>Gesicherte Aufzeichnungen</h2><p class="mut" style="font-size:13px">Jede beendete Aufzeichnung wird zusätzlich auf dem Handy gesichert (die letzten 10). Falls eine Tour nicht auf dem Server angekommen ist, kannst du sie hier erneut speichern.</p>${bk
         .map(b => `<div class="row" style="gap:8px;margin:6px 0"><span>${new Date(b.ts).toLocaleString("de-DE", {dateStyle: "short", timeStyle: "short"})} · ${Math.round(b.size / 1024)} kB</span><span class="sp"></span><button class="btn alt sm" data-bk="${esc(b.file)}">Auf den Server speichern</button></div>`)
         .join("")}<p id="bkmsg" class="mut"></p></div>`;
+    if (s === "idle" && typeof A.photoInfo === "function" && recPhotoInfo().pending)
+      h += `<div class="panel"><h2>Fotos warten auf den Upload</h2><p class="mut" style="font-size:13px">${recPhotoInfo().pending} Foto(s) aus früheren Aufzeichnungen liegen noch auf dem Handy (sie sind auch in der Galerie).</p><button class="btn alt" id="rphup">Jetzt hochladen</button> <span id="rphupm" class="mut"></span></div>`;
     $("#main").innerHTML = h;
+    if ($("#rphup"))
+      $("#rphup").onclick = () => {
+        A.uploadPhotos();
+        $("#rphupm").textContent = "Wird hochgeladen …";
+      };
     document.querySelectorAll("[data-bk]").forEach(b => {
       b.onclick = async () => {
         b.disabled = true;
@@ -91,6 +140,35 @@ VIEWS.record = async () => {
     const on = (id, f) => $(id) && ($(id).onclick = f);
     on("#rperm", () => A.requestPermission());
     on("#rbat", () => A.openBatterySettings());
+    if ($("#rphm")) {
+      $("#rphm").value = A.photoMode();
+      $("#rphm").onchange = () => A.setPhotoMode($("#rphm").value);
+    }
+    on("#rphoto", () => {
+      if (!A.takePhoto()) alert("Fotos sind nur während einer laufenden Aufzeichnung möglich.");
+    });
+    const rs = $("#rstop");
+    if (rs) {
+      let tm = null;
+      const cancel = () => {
+        clearTimeout(tm);
+        tm = null;
+        rs.classList.remove("holding");
+      };
+      rs.onpointerdown = e => {
+        e.preventDefault();
+        rs.classList.add("holding");
+        clearTimeout(tm);
+        tm = setTimeout(() => {
+          cancel();
+          if (navigator.vibrate) navigator.vibrate(60);
+          A.stopRecording("");
+          setTimeout(draw, 300);
+        }, 1500);
+      };
+      ["pointerup", "pointercancel", "pointerleave"].forEach(ev => (rs["on" + ev] = cancel));
+      rs.oncontextmenu = e => e.preventDefault();
+    }
     on("#rstart", () => {
       if (!A.hasPermission()) return A.requestPermission();
       A.startRecording($("#rsport").value, $("#rname").value.trim());
@@ -98,11 +176,6 @@ VIEWS.record = async () => {
     });
     on("#rpause", () => (A.pauseRecording(), setTimeout(draw, 200)));
     on("#rres", () => (A.resumeRecording(), setTimeout(draw, 200)));
-    on("#rstop", () => {
-      if (!confirm("Aufzeichnung beenden?")) return;
-      A.stopRecording("");
-      setTimeout(draw, 300);
-    });
     on("#rdrop", () => {
       if (!confirm("Aufzeichnung wirklich verwerfen?")) return;
       A.discardRecording();
@@ -112,6 +185,22 @@ VIEWS.record = async () => {
       const gpx = A.takeFinished();
       $("#rsend").disabled = true;
       $("#rmsg").textContent = "Wird gespeichert …";
+      let phNote = "";
+      if (typeof A.photoInfo === "function" && recPhotoInfo().pending) {
+        A.uploadPhotos();
+        for (let i = 0; i < 180; i++) {
+          await new Promise(r => setTimeout(r, 1000));
+          const pi = recPhotoInfo();
+          $("#rmsg").textContent = `Fotos werden hochgeladen … (${pi.pending} übrig)`;
+          if (!pi.pending) break;
+          if (!pi.busy) {
+            if (pi.error) break;
+            A.uploadPhotos();
+          }
+        }
+        const left = recPhotoInfo().pending;
+        if (left) phNote = `${left} Foto(s) konnten nicht hochgeladen werden und bleiben auf dem Handy (Aufzeichnen → „Fotos hochladen“).`;
+      }
       try {
         const r = await api("/api/record/upload", {
           method: "POST",
@@ -120,6 +209,7 @@ VIEWS.record = async () => {
         });
         A.markUploaded();
         await loadTours().catch(() => {});
+        if (phNote) alert(phNote);
         location.hash = "#/tour/" + r.id;
       } catch (e) {
         $("#rsend").disabled = false;
@@ -152,15 +242,16 @@ VIEWS.record = async () => {
       pollTimer = setInterval(() => {
         const n = recStatus();
         if (n.state !== lastUpState) return draw();
-        if ($("#rt")) {
-          $("#rt").textContent = recDur(n.active_s || 0);
-          $("#rd").textContent = nf((n.dist_m || 0) / 1000, 2);
-          $("#ru").textContent = nf(n.up_m || 0, 0);
+        recFill(n);
+        if ($("#rphinfo")) {
+          const pi = recPhotoInfo();
+          $("#rphinfo").textContent = `${pi.taken || 0} Foto(s) aufgenommen` + (pi.pending ? ` · ${pi.pending} warten auf den Upload${pi.error ? " (" + pi.error + ")" : ""}` : "");
         }
         upd();
       }, 2000);
     }
   };
+  window.addEventListener("mtphoto", () => location.hash === "#/record" && recFill(recStatus()));
   window.addEventListener("mtperm", () => location.hash === "#/record" && draw(), {once: true});
   draw();
 };

@@ -670,8 +670,13 @@ def test_record_view_app(page):
     page.set_viewport_size({"width": 1280, "height": 800})
     page.fill("#rname", "Testrunde"); page.click("#rstart"); page.wait_for_timeout(700)
     assert "1,23" in page.inner_text("#rd") and page.locator("#rmap").count() == 1
-    page.once("dialog", lambda d: d.accept())
-    page.click("#rstop"); page.wait_for_timeout(700)
+    # versehentliches Antippen beendet NICHT, erst langes Halten
+    page.click("#rstop"); page.wait_for_timeout(500)
+    assert page.locator("#rsend").count() == 0 and page.locator("#rstop").count() == 1
+    box = page.locator("#rstop").bounding_box()
+    page.mouse.move(box["x"] + 20, box["y"] + 10); page.mouse.down(); page.wait_for_timeout(600); page.mouse.up(); page.wait_for_timeout(2500)
+    assert page.locator("#rsend").count() == 0, "zu kurz gehalten darf nicht beenden"
+    page.mouse.move(box["x"] + 20, box["y"] + 10); page.mouse.down(); page.wait_for_timeout(1900); page.mouse.up(); page.wait_for_timeout(900)
     assert page.locator("#rsend").count() == 1
     page.click("#rsend"); page.wait_for_function("location.hash.startsWith('#/tour/')", timeout=8000)
 
@@ -756,3 +761,37 @@ def test_record_backups_listed(page):
     page.goto(base + "#/record"); page.wait_for_timeout(800)
     assert "Gesicherte Aufzeichnungen" in page.inner_text("#main")
     assert page.query_selector("[data-bk='rec_1.gpx']")
+
+
+def test_record_live_values_and_photos(page):
+    """Während der Aufzeichnung: Kennzahlen, Foto-Knopf, Foto-Modus; Foto-Upload vor dem Speichern der Tour."""
+    base = page.url.split("#")[0]
+    page.add_init_script("""
+      window._calls = [];
+      window._st = {state:'idle', sport:'hike', name:'', count:0, dist_m:0, up_m:0, down_m:0, active_s:0, gps:true};
+      window._pi = {taken:0, pending:0, busy:false, error:''};
+      window._mode = 'now';
+      window._g = '<?xml version="1.0"?><gpx version="1.1"><trk><type>hike</type><trkseg>' + Array.from({length:30},(_, i)=>`<trkpt lat="${47+i*0.0006}" lon="11"><ele>${900+i*4}</ele><time>2026-08-02T07:${String(i).padStart(2,'0')}:00Z</time></trkpt>`).join('') + '</trkseg></trk></gpx>';
+      window.MTApp = {version:()=>'2.4.0', serverUrl:()=>location.origin, hasPermission:()=>true, requestPermission(){}, openBatterySettings(){}, changeServer(){},
+        status:()=>JSON.stringify(window._st), points:()=>'[[47,11],[47.001,11.001]]',
+        startRecording(s,n){window._st={...window._st,state:'recording',dist_m:5200,up_m:410,down_m:120,active_s:3600,alt_m:1530,max_alt_m:1602,speed_ms:1.4,fix_acc_m:4}},
+        pauseRecording(){}, resumeRecording(){}, stopRecording(){window._st.state='finished'}, takeFinished:()=>window._g,
+        markUploaded(){window._st.state='idle'}, discardRecording(){window._st.state='idle'},
+        takePhoto(){window._calls.push('photo'); window._pi={...window._pi,taken:window._pi.taken+1,pending:window._pi.pending+1}; return true},
+        photoMode:()=>window._mode, setPhotoMode(m){window._mode=m; window._calls.push('mode:'+m)}, photoInfo:()=>JSON.stringify(window._pi),
+        uploadPhotos(){window._calls.push('upload'); window._pi={...window._pi,pending:0}},
+        diagnose:()=>'{}', logText:()=>'', clearLog(){}, appLog(){}, shareText(){}};
+    """)
+    page.goto(base + "#/record"); page.reload(); page.wait_for_timeout(1000)
+    page.select_option("#rphm", "end")
+    assert "mode:end" in page.evaluate("window._calls")
+    page.fill("#rname", "Fototour"); page.click("#rstart"); page.wait_for_timeout(800)
+    for k, v in (("#rd", "5,20"), ("#ru", "410"), ("#rdn", "120"), ("#ralt", "1.530"), ("#rmax", "1.602"), ("#rspd", "5,0"), ("#ravg", "5,2")):
+        assert v in page.inner_text(k), (k, page.inner_text(k))
+    page.click("#rphoto"); page.click("#rphoto"); page.wait_for_timeout(2300)
+    assert "2 Foto" in page.inner_text("#rphinfo") and "warten" in page.inner_text("#rphinfo")
+    box = page.locator("#rstop").bounding_box()
+    page.mouse.move(box["x"] + 20, box["y"] + 10); page.mouse.down(); page.wait_for_timeout(1900); page.mouse.up(); page.wait_for_timeout(900)
+    assert "2 Foto" in page.inner_text("#main")
+    page.click("#rsend"); page.wait_for_function("location.hash.startsWith('#/tour/')", timeout=15000)
+    assert "upload" in page.evaluate("window._calls")

@@ -23,6 +23,7 @@ final class LivePost {
         final String server = ctx.getSharedPreferences("app", Context.MODE_PRIVATE).getString("server", "");
         if (server.isEmpty() || !server.startsWith("https://")) return;
         last = now;
+        if ("now".equals(RecPhotos.mode(ctx))) RecPhotos.flushAsync(ctx);   // wartende Fotos erneut versuchen
         busy = true;
         final String body = String.format(Locale.US, "{\"lat\":%.6f,\"lon\":%.6f,\"acc\":%d,\"source\":\"rec\"}",
                 l.getLatitude(), l.getLongitude(), Math.round(l.getAccuracy()));
