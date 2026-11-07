@@ -485,6 +485,12 @@ def test_more2(monkeypatch):
         pub = c.get("/api/public/" + s["token"]).json()
         assert pub["name"] == "r1" and len(pub["coords"]) < 80 and c.get("/s/" + s["token"]).status_code == 200
         assert c.delete("/api/share/" + s["token"]).status_code == 200 and c.get("/api/public/" + s["token"]).status_code == 404
+        sh = c.post("/api/tours/r1/share", json={"show": True}).json()                 # Diashow-Link (ohne Konto)
+        pg = c.get("/s/" + sh["token"])
+        assert pg.status_code == 200 and 'property="og:title"' in pg.text and "show.html" not in pg.text and "Diashow ansehen" in pg.text
+        assert c.get("/api/public/" + sh["token"]).json()["show"] is True and len(c.get("/api/public/" + sh["token"]).json()["photos"]) >= 1
+        assert "og:image" in pg.text and "/pub/" + sh["token"] + "/photo/" in pg.text
+        assert c.delete("/api/share/" + sh["token"]).status_code == 200 and c.get("/s/" + sh["token"]).status_code == 404
         sent = []
         monkeypatch.setattr(more2.requests, "post", lambda u, **k: sent.append((u, k)) or type("R", (), {"status_code": 200})())
         db.put("notify_url", "http://example.test/hook"); db.put("notify_last", "")

@@ -177,7 +177,7 @@ VIEWS.tour = async (id, q) => {
         s
           .map(x => {
             const u = location.origin + "/s/" + x.token;
-            return `<div class="r" style="display:block;border-top:1px solid var(--rule);padding:8px 0"><input readonly value="${esc(u)}" style="width:100%" onclick="this.select()"><small class="mut">${x.photos ? "mit Fotos" : "ohne Fotos"}${x.trim ? ", Anfang/Ende ausgeblendet" : ""}</small> <button class="btn alt sm" data-cp="${esc(u)}">Kopieren</button> <button class="btn alt sm" data-rv="${x.token}">Widerrufen</button></div>`;
+            return `<div class="r" style="display:block;border-top:1px solid var(--rule);padding:8px 0"><input readonly value="${esc(u)}" style="width:100%" onclick="this.select()"><small class="mut">${x.photos == 2 ? "Diashow" : x.photos ? "mit Fotos" : "ohne Fotos"}${x.trim ? ", Anfang/Ende ausgeblendet" : ""}</small> <button class="btn alt sm" data-cp="${esc(u)}">Kopieren</button> <button class="btn alt sm" data-rv="${x.token}">Widerrufen</button></div>`;
           })
           .join("") || '<span class="mut">Noch kein Link.</span>';
       m.querySelectorAll("[data-cp]").forEach(

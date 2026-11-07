@@ -325,9 +325,9 @@ async def api_share(tour_id: str, request: Request):
         raise HTTPException(404)
     d = await request.json()
     token = secrets.token_urlsafe(12)
-    db.execute("INSERT INTO shares(token,tour_id,photos,trim,ts) VALUES(?,?,?,?,?)", (token, tour_id, 1 if d.get("photos") else 0, 0 if d.get("trim") is False else 1, int(time.time())))
+    db.execute("INSERT INTO shares(token,tour_id,photos,trim,ts) VALUES(?,?,?,?,?)", (token, tour_id, 2 if d.get("show") else (1 if d.get("photos") else 0), 0 if d.get("trim") is False else 1, int(time.time())))
     auth.q("INSERT OR REPLACE INTO share_index(token,uid) VALUES(?,?)", (token, ctx.uid() or ""))
-    return {"token": token, "url": f"/s/{token}"}
+    return {"token": token, "url": f"/s/{token}"}   # photos=2: Diashow-Link (Fotos + Karte, ohne Konto)
 
 
 @router.get("/api/tours/{tour_id}/shares")
@@ -356,9 +356,23 @@ def _share(token):
 
 
 @router.get("/s/{token}")
-def share_page(token: str):
-    _share(token)
-    return FileResponse(Path(__file__).parent / "static" / "share.html", media_type="text/html", headers={"Cache-Control": "no-store", "Referrer-Policy": "no-referrer"})
+def share_page(token: str, request: Request):
+    s = _share(token)
+    hdr = {"Cache-Control": "no-store", "Referrer-Policy": "no-referrer"}
+    if s["photos"] == 2:                           # Diashow: Seite mit Vorschau-Angaben (WhatsApp zeigt Titel + erstes Foto)
+        import html as _h
+        t = db.one("SELECT name,start_ts,dist_m FROM tours WHERE id=?", (s["tour_id"],)) or {}
+        ph = db.one("SELECT id FROM photos WHERE tour_id=? AND manual!=2 ORDER BY taken_ts LIMIT 1", (s["tour_id"],))
+        title = _h.escape(t["name"] if t else "Diashow")
+        meta = (f'<meta property="og:type" content="website"><meta property="og:title" content="{title}">'
+                f'<meta property="og:description" content="Diashow ansehen – ohne Anmeldung">')
+        if ph:
+            host = request.headers.get("x-forwarded-host") or request.headers.get("host") or ""
+            proto = request.headers.get("x-forwarded-proto") or ("https" if host.endswith(".ts.net") else request.url.scheme)
+            meta += f'<meta property="og:image" content="{proto}://{host}/pub/{token}/photo/{ph["id"]}?size=600">'
+        page = (Path(__file__).parent / "static" / "show.html").read_text(encoding="utf-8").replace("<!--META-->", meta).replace("<title>Diashow</title>", f"<title>{title}</title>")
+        return HTMLResponse(page, headers=hdr)
+    return FileResponse(Path(__file__).parent / "static" / "share.html", media_type="text/html", headers=hdr)
 
 
 @router.get("/api/public/{token}")
@@ -368,10 +382,10 @@ def api_public(token: str):
     pts = [p for p in (routes.load(t["id"]) or []) if p and p[0] is not None]
     if s["trim"]:
         pts = _trim(pts)
-    ph = db.query("SELECT id,taken_ts FROM photos WHERE tour_id=? AND manual!=2 ORDER BY taken_ts LIMIT 60", (t["id"],)) if s["photos"] else []
+    ph = db.query("SELECT id,taken_ts FROM photos WHERE tour_id=? AND manual!=2 ORDER BY taken_ts LIMIT 300", (t["id"],)) if s["photos"] else []
     return {"name": t["name"], "sport": t["sport"], "date": datetime.fromtimestamp(t["start_ts"], tz=TZ).isoformat(), "km": round((t["dist_m"] or 0) / 1000, 1),
             "up_m": round(t["up_m"] or 0), "down_m": round(t["down_m"] or 0), "h": round((t["dur_s"] or 0) / 3600, 1),
-            "coords": [[round(p[0], 5), round(p[1], 5), p[2]] for p in pts[::max(1, len(pts) // 800)]], "photos": [p["id"] for p in ph]}
+            "coords": [[round(p[0], 5), round(p[1], 5), p[2]] for p in pts[::max(1, len(pts) // 800)]], "photos": [p["id"] for p in ph], "show": s["photos"] == 2}
 
 
 @router.get("/pub/{token}/photo/{pid}")

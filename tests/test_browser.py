@@ -710,6 +710,27 @@ def test_share_send_button(page):
     page.set_viewport_size({"width": 1280, "height": 900})
 
 
+def test_share_slideshow_button(page):
+    """„Diashow senden“ erzeugt einen Diashow-Link; die öffentliche Seite zeigt Titel, Bedienelemente und lädt ohne Konto."""
+    base = page.url.split("#")[0]
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.5.0', serverUrl: () => ''}")
+    page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(1200)
+    page.once("dialog", lambda d: d.accept())             # falls die Tour keine Fotos hat
+    page.click("#eshow"); page.wait_for_function("window._sent", timeout=8000)
+    sent = page.evaluate("window._sent")
+    assert "Diashow" in sent and "/s/" in sent
+    link = sent.split()[-1]
+    ctx2 = page.context.browser.new_context()             # frischer Browser = kein Konto, keine Cookies
+    p2 = ctx2.new_page(); errs = []
+    p2.on("pageerror", lambda e: errs.append(str(e)))
+    p2.goto(link); p2.wait_for_selector("#h:not(:empty)", timeout=8000)
+    assert p2.is_visible("#pl") and p2.is_visible("#nx") and not errs
+    ctx2.close()
+    page.set_viewport_size({"width": 1280, "height": 900})
+
+
 def test_mobile_map_and_more_menu(page):
     """Mobile Karte füllt den Bereich zwischen Kopfzeile und Tab-Leiste (kein Scrollen); „Mehr“ trennt Hauptpunkte von Einstellungen; Ortungsknopf vorhanden."""
     base = page.url.split("#")[0]
@@ -811,3 +832,4 @@ def test_admin_tabs_uniform(page):
     sizes = page.evaluate("[...document.querySelectorAll('.atab .gbody > * > h2, .atab .gbody > * > .panel > h2')].map(h=>getComputedStyle(h).fontSize)")
     assert len(set(sizes)) == 1, sizes
     assert page.evaluate("[...document.querySelectorAll('.atab .gbody > *')].every(c=>getComputedStyle(c).borderTopWidth==='1px')")
+

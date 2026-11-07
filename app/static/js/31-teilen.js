@@ -25,6 +25,26 @@ VIEWS.tour = async id => {
     old = $("#eshr");
   if (!t || !old || $("#esnd")) return;
   old.insertAdjacentHTML("beforebegin", `<button class="btn sm" id="esnd" title="Link zur Tour an WhatsApp, Signal, E-Mail … senden">Senden</button> `);
+  {
+    $("#esnd").insertAdjacentHTML("afterend", ` <button class="btn sm" id="eshow" title="Diashow der Fotos als Link senden – ohne Benutzerkonto ansehbar">Diashow senden</button>`);
+    $("#eshow").onclick = async () => {
+      const b = $("#eshow");
+      b.disabled = true;
+      try {
+        const n = (await api(`/api/photos?tour_id=${encodeURIComponent(t.id)}`).catch(() => null)) || [];
+        if (Array.isArray(n) && !n.filter(x => x.manual !== 2).length && !confirm("Zu dieser Tour wurden keine Fotos gefunden. Trotzdem Link erstellen?")) { b.disabled = false; return; }
+        const s = await api(`/api/tours/${encodeURIComponent(t.id)}/share`, {
+          method: "POST",
+          headers: {"content-type": "application/json"},
+          body: JSON.stringify({show: true, trim: true}),
+        });
+        await shareOut(t.name, `Diashow: ${t.name} (${dateL(t.date)})`, location.origin + s.url);
+      } catch (e) {
+        alert("Link konnte nicht erstellt werden: " + e.message);
+      }
+      b.disabled = false;
+    };
+  }
   $("#esnd").onclick = async () => {
     const b = $("#esnd");
     b.disabled = true;
