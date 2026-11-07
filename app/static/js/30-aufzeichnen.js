@@ -51,7 +51,7 @@ VIEWS.record = async () => {
         <button class="btn alt" id="rbat" style="margin-top:6px">Akku-Einstellungen öffnen</button> <a class="btn alt" href="#/apptest" style="margin-top:6px">App-Test</a></div>`;
     } else if (s === "finished") {
       h += `<div class="panel"><h2>Aufzeichnung beendet</h2><p>${nf((st.dist_m || 0) / 1000, 2)} km · ${recDur(st.active_s || 0)} h · ↑ ${nf(st.up_m || 0, 0)} m · ↓ ${nf(st.down_m || 0, 0)} m</p>
-        <input id="rname" value="${esc(st.name)}" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px" placeholder="Name der Tour">
+        <input id="rname" value="${esc(st.name)}" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px" placeholder="Name der Tour (leer lassen = automatisch)">
         <button class="btn" id="rsend" style="width:100%;font-size:19px;padding:14px">Auf den Server speichern</button>
         <p id="rmsg" class="mut"></p>
         <button class="btn alt" id="rdrop" style="margin-top:6px">Verwerfen</button></div>`;
@@ -64,7 +64,29 @@ VIEWS.record = async () => {
           <button class="btn" id="rstop" style="background:#b3402d">■ Beenden</button></div></div>
         <div id="rmap" style="height:300px;border-radius:12px;margin-top:12px"></div>`;
     }
+    let bk = [];
+    try {
+      if (s === "idle" && typeof A.backups === "function") bk = JSON.parse(A.backups());
+    } catch (e) {}
+    if (bk.length)
+      h += `<div class="panel"><h2>Gesicherte Aufzeichnungen</h2><p class="mut" style="font-size:13px">Jede beendete Aufzeichnung wird zusätzlich auf dem Handy gesichert (die letzten 10). Falls eine Tour nicht auf dem Server angekommen ist, kannst du sie hier erneut speichern.</p>${bk
+        .map(b => `<div class="row" style="gap:8px;margin:6px 0"><span>${new Date(b.ts).toLocaleString("de-DE", {dateStyle: "short", timeStyle: "short"})} · ${Math.round(b.size / 1024)} kB</span><span class="sp"></span><button class="btn alt sm" data-bk="${esc(b.file)}">Auf den Server speichern</button></div>`)
+        .join("")}<p id="bkmsg" class="mut"></p></div>`;
     $("#main").innerHTML = h;
+    document.querySelectorAll("[data-bk]").forEach(b => {
+      b.onclick = async () => {
+        b.disabled = true;
+        $("#bkmsg").textContent = "Wird gespeichert …";
+        try {
+          const r = await api("/api/record/upload", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({gpx: A.backupGpx(b.dataset.bk), name: "", sport: "hike"})});
+          await loadTours().catch(() => {});
+          location.hash = "#/tour/" + r.id;
+        } catch (e) {
+          b.disabled = false;
+          $("#bkmsg").innerHTML = `<span class="bad">Speichern fehlgeschlagen: ${esc(e.message)}</span>`;
+        }
+      };
+    });
     lastUpState = s;
     const on = (id, f) => $(id) && ($(id).onclick = f);
     on("#rperm", () => A.requestPermission());

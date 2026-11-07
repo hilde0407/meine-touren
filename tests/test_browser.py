@@ -746,3 +746,13 @@ def test_viewer_tour_page_readonly(page):
     assert not page.evaluate("[...document.querySelectorAll('#main button, #main a.btn')].some(b=>!b.hidden && b.offsetParent && /Fotos (zuordnen|bearbeiten)|PDF|Tourblatt/.test(b.textContent))")
     err = page.evaluate("api('/api/tours/x/rename', {method:'POST'}).then(()=>'ok', e=>e.message)")
     assert "nur ansehen" in err
+
+
+def test_record_backups_listed(page):
+    """Unter Aufzeichnen erscheinen die gesicherten Aufzeichnungen mit Speichern-Knopf."""
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(800)
+    page.evaluate("window.MTApp = {hasPermission: () => true, status: () => '{\"state\":\"idle\"}', version: () => '2.3.1', serverUrl: () => '', backups: () => JSON.stringify([{file:'rec_1.gpx', size: 51200, ts: Date.now()}]), backupGpx: f => ''}")
+    page.goto(base + "#/record"); page.wait_for_timeout(800)
+    assert "Gesicherte Aufzeichnungen" in page.inner_text("#main")
+    assert page.query_selector("[data-bk='rec_1.gpx']")

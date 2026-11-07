@@ -123,10 +123,64 @@ public final class Recorder {
     /** Aufzeichnung verwerfen bzw. nach erfolgreichem Hochladen aufräumen. */
     public synchronized void discard() {
         AppLog.log("Aufzeichnung verworfen/abgeschlossen");
+        backupFinished();
         if (RECORDING.equals(state()) || PAUSED.equals(state())) service(RecorderService.ACT_STOP);
         store.clear();
         finalFile.delete();
         setState(IDLE);
+    }
+
+    /** Fertige Aufzeichnung vor dem Löschen als Sicherung ablegen (die letzten 10 bleiben), damit nichts verloren geht. */
+    private void backupFinished() {
+        try {
+            if (!finalFile.exists() || finalFile.length() < 200) return;
+            File dir = new File(ctx.getFilesDir(), "backup");
+            dir.mkdirs();
+            String stamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US).format(new java.util.Date());
+            File to = new File(dir, "rec_" + stamp + ".gpx");
+            java.io.InputStream in = new FileInputStream(finalFile);
+            java.io.OutputStream out = new FileOutputStream(to);
+            try {
+                byte[] b = new byte[8192];
+                int n;
+                while ((n = in.read(b)) > 0) out.write(b, 0, n);
+            } finally { in.close(); out.close(); }
+            File[] all = dir.listFiles();
+            if (all != null && all.length > 10) {
+                java.util.Arrays.sort(all);
+                for (int i = 0; i < all.length - 10; i++) all[i].delete();
+            }
+            AppLog.log("Sicherung angelegt: " + to.getName());
+        } catch (Exception e) {
+            AppLog.log("Sicherung fehlgeschlagen: " + e.getClass().getSimpleName());
+        }
+    }
+
+    /** Liste der Sicherungen als JSON: [{"file","size","ts"}], neueste zuerst. */
+    public String backupsJson() {
+        org.json.JSONArray a = new org.json.JSONArray();
+        File[] all = new File(ctx.getFilesDir(), "backup").listFiles();
+        if (all != null) {
+            java.util.Arrays.sort(all, java.util.Collections.reverseOrder());
+            for (File f : all) {
+                try { a.put(new JSONObject().put("file", f.getName()).put("size", f.length()).put("ts", f.lastModified())); } catch (JSONException e) { }
+            }
+        }
+        return a.toString();
+    }
+
+    public String backupGpx(String name) {
+        if (name == null || name.contains("/") || name.contains("..")) return "";
+        try {
+            BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(new File(new File(ctx.getFilesDir(), "backup"), name)), "UTF-8"));
+            StringBuilder b = new StringBuilder();
+            char[] buf = new char[8192];
+            int n;
+            try { while ((n = r.read(buf)) > 0) b.append(buf, 0, n); } finally { r.close(); }
+            return b.toString();
+        } catch (IOException e) {
+            return "";
+        }
     }
 
     public synchronized String finishedGpx() {

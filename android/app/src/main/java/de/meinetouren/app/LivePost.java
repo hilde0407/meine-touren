@@ -13,6 +13,7 @@ import java.util.Locale;
 final class LivePost {
     private static long last = 0;
     private static boolean busy = false;
+    private static long lastLog = 0;
 
     private LivePost() { }
 
@@ -40,7 +41,7 @@ final class LivePost {
                 int code = c.getResponseCode();
                 if (code != 200 && code != 403) AppLog.log("Live-Standort: HTTP " + code);
             } catch (Exception e) {
-                AppLog.log("Live-Standort nicht gesendet: " + e.getClass().getSimpleName());
+                if (System.currentTimeMillis() - lastLog > 60000) { lastLog = System.currentTimeMillis(); AppLog.log("Live-Standort nicht gesendet: " + e.getClass().getSimpleName()); }
             } finally {
                 if (c != null) c.disconnect();
                 busy = false;

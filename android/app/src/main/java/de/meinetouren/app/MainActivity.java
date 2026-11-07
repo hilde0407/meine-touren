@@ -299,7 +299,7 @@ public class MainActivity extends Activity {
 
     /* ---------- Brücke zur Weboberfläche ---------- */
     public class Bridge {
-        @JavascriptInterface public String version() { return "2.3.0"; }
+        @JavascriptInterface public String version() { return "2.3.1"; }
         @JavascriptInterface public String serverUrl() { return server(); }
 
         @JavascriptInterface
@@ -322,6 +322,8 @@ public class MainActivity extends Activity {
         @JavascriptInterface public String status() { return Recorder.get(MainActivity.this).statusJson(); }
         @JavascriptInterface public String points(int max) { return Recorder.get(MainActivity.this).store().pointsJson(max); }
         @JavascriptInterface public String takeFinished() { return Recorder.get(MainActivity.this).finishedGpx(); }
+        @JavascriptInterface public String backups() { return Recorder.get(MainActivity.this).backupsJson(); }
+        @JavascriptInterface public String backupGpx(String f) { return Recorder.get(MainActivity.this).backupGpx(f); }
         @JavascriptInterface public void markUploaded() { Recorder.get(MainActivity.this).discard(); }
         @JavascriptInterface public void discardRecording() { Recorder.get(MainActivity.this).discard(); }
         @JavascriptInterface
@@ -330,7 +332,7 @@ public class MainActivity extends Activity {
             try {
                 android.os.PowerManager pm = (android.os.PowerManager) getSystemService(POWER_SERVICE);
                 android.location.LocationManager lm = (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
-                o.put("version", "2.3.0");
+                o.put("version", "2.3.1");
                 o.put("android", Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
                 o.put("device", Build.MANUFACTURER + " " + Build.MODEL);
                 o.put("server", server());
