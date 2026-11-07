@@ -153,3 +153,17 @@ def test_home_places_exclude_regular_areas(fresh):        # noqa: F811
     near = lambda p, q: more2.extras._hav(p, q) < 20000
     assert len(homes) == 2 and any(near(h, (50.1, 8.6)) for h in homes) and any(near(h, (28.1, -15.4)) for h in homes)
     assert not any(near(h, (46.5, 10.0)) for h in homes)
+
+
+def test_photo_positions_from_track_time(fresh):          # noqa: F811
+    """Fotos ohne GPS bekommen ihre Position aus der Uhrzeit auf dem Track der Tour (est=1); Fotos mit GPS bleiben unverändert."""
+    from app import db, routes, main
+    base = 1700000000
+    with TestClient(main.app) as c:
+        db.execute("INSERT OR REPLACE INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,up_m,down_m,lat,lng,status) VALUES('e1','Estour','hike',?,?,1000,100,1,1,48,8,'x')", (base, base + 100))
+        routes.store("e1", [(48 + j * 0.001, 8.0, 300, j * 1000) for j in range(101)])          # Minute für Minute: 1 s = 0,001°
+        db.execute("INSERT INTO photos(path,mtime,size,taken_ts,tour_id) VALUES('/x/e1.jpg',1,1,?,?)", (base + 50, "e1"))
+        db.execute("INSERT INTO photos(path,mtime,size,taken_ts,lat,lng,tour_id) VALUES('/x/e2.jpg',1,1,?,?,?,?)", (base + 60, 10.5, 20.5, "e1"))
+        assert len(c.get("/api/photos?gps=true").json()) == 1                                    # ohne est: nur das Foto mit GPS
+        r = {p["taken_ts"]: p for p in c.get("/api/photos?gps=true&est=true").json()}
+        assert r[base + 50]["est"] == 1 and abs(r[base + 50]["lat"] - 48.05) < 0.002 and r[base + 60]["est"] == 0 and r[base + 60]["lat"] == 10.5

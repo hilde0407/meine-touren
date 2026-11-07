@@ -611,9 +611,44 @@ def _share_import(paths):
 
 
 # ---------- Fotos ----------
+def _photos_located(limit, year=0):
+    rows = db.query("SELECT p.id,p.taken_ts,p.tour_id,p.lat,p.lng,p.manual,p.offset_s,t.name AS tour_name,t.start_ts AS t0 FROM photos p LEFT JOIN tours t ON t.id=p.tour_id "
+                    "WHERE COALESCE(p.manual,0)!=2 ORDER BY p.taken_ts DESC LIMIT ?", (max(1, min(limit, 60000)),))
+    out, cache = [], {}
+    for r in rows:
+        if year and datetime.fromtimestamp(r["taken_ts"] or 0, tz=TZ).year != year:
+            continue
+        if r["lat"] is not None and r["lng"] is not None:
+            out.append({**{k: r[k] for k in ("id", "taken_ts", "tour_id", "lat", "lng", "tour_name")}, "est": 0})
+            continue
+        if not r["tour_id"] or r["t0"] is None or r["taken_ts"] is None:
+            continue
+        pts = cache.get(r["tour_id"])
+        if pts is None:
+            pts = cache[r["tour_id"]] = [p for p in (photos.track_pts(r["tour_id"]) or []) if p[2] is not None]
+        if len(pts) < 2:
+            continue
+        sec = r["taken_ts"] - r["t0"]
+        if sec <= pts[0][2]:
+            a = pts[0]
+        elif sec >= pts[-1][2]:
+            a = pts[-1]
+        else:
+            lo, hi = 0, len(pts) - 1
+            while hi - lo > 1:
+                m = (lo + hi) // 2
+                lo, hi = (m, hi) if pts[m][2] <= sec else (lo, m)
+            u = (sec - pts[lo][2]) / ((pts[hi][2] - pts[lo][2]) or 1)
+            a = (pts[lo][0] + (pts[hi][0] - pts[lo][0]) * u, pts[lo][1] + (pts[hi][1] - pts[lo][1]) * u)
+        out.append({**{k: r[k] for k in ("id", "taken_ts", "tour_id", "tour_name")}, "lat": round(a[0], 5), "lng": round(a[1], 5), "est": 1})
+    return out
+
+
 @app.get("/api/photos")
-def api_photos(tour_id: str = "", year: int = 0, random: bool = False, limit: int = 500, unassigned: bool = False, gps: bool = False):
+def api_photos(tour_id: str = "", year: int = 0, random: bool = False, limit: int = 500, unassigned: bool = False, gps: bool = False, est: bool = False):
     where, args = ["1=1"], []
+    if gps and est:        # Fotos ohne eigenen Aufnahmeort: Position über die Uhrzeit auf der Strecke der Tour berechnen (est=1)
+        return _photos_located(limit, year)
     if gps:
         where.append("p.lat IS NOT NULL AND p.lng IS NOT NULL")
     if tour_id:

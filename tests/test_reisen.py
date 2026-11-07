@@ -16,6 +16,8 @@ def test_trip_edit(monkeypatch):
         db.execute("INSERT INTO tours(id,name,sport,start_ts,dist_m,up_m,dur_s,lat,lng) VALUES(?,?,?,?,?,?,?,?,?)", (f"t{i}", f"T{i}", "hike", ts(d), 10000, 500, 3600, 28.0, -16.5))
     auto = {"id": "t0", "region": "Teneriffa", "country": "Spanien", "start": "2026-05-01", "end": "2026-05-02", "days": 2, "tours": ["t0", "t1"], "km": 20.0, "up_m": 1000, "h": 2.0}
     monkeypatch.setattr(more2, "build_trips", lambda: [dict(auto)])
+    assert more2.api_trips() == []                                # Standard: 2 Tage sind noch keine Reise (mindestens 4)
+    db.put("trip_min_days", "2")
     monkeypatch.setattr(more2, "cover_photo", lambda ids: None)
     assert more2.api_trips()[0]["region"] == "Teneriffa"
     more2.api_trip_edit("t0", {"name": "Kanaren 2026", "start": "2026-05-01", "end": "2026-05-04"})
@@ -47,6 +49,8 @@ def test_day_trips_excluded_and_hide(monkeypatch):
     add("a1", "2026-06-10", 9, 28.0, -16.5); add("a2", "2026-06-10", 15, 28.0, -16.5)   # Tagesausflug mit zwei Aufzeichnungen
     add("b1", "2026-07-01", 9, 28.0, -16.5); add("b2", "2026-07-02", 9, 28.0, -16.5)    # echte Reise (2 Tage)
     monkeypatch.setattr(more2, "cover_photo", lambda ids: None)
+    assert more2.api_trips() == []                                # Standard: 2 Tage sind noch keine Reise (mindestens 4)
+    db.put("trip_min_days", "2")
     ids = [t["id"] for t in more2.build_trips()]
     assert "b1" in ids and "a1" not in ids
     more2.api_trip_hide("b1", {"hide": True})

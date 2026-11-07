@@ -495,7 +495,7 @@ VIEWS.map = async () => {
   if (!box || !map) return;
   box.insertAdjacentHTML(
     "beforeend",
-    `<div class="box"><button class="chip" id="mht" title="Alle Strecken übereinander: häufig begangene Wege leuchten stärker">Heatmap</button><button class="chip" id="mph" title="Zeigt als rosa Punkte alle Fotos, die einen Aufnahmeort (GPS) haben. Antippen öffnet das Foto mit Zeit und Tour. Gilt für das gewählte Jahr.">Fotos</button></div>`
+    `<div class="box"><button class="chip" id="mht" title="Alle Strecken übereinander: häufig begangene Wege leuchten stärker">Heatmap</button><button class="chip" id="mph" title="Zeigt als rosa Punkte alle Fotos. Haben sie keinen eigenen Aufnahmeort, wird er aus der Uhrzeit auf dem Track der Tour berechnet (blassere Punkte). Antippen öffnet das Foto mit Zeit und Tour. Gilt für das gewählte Jahr.">Fotos</button></div>`
   );
   const m = map,
     hl = L.layerGroup().addTo(m),
@@ -525,10 +525,10 @@ VIEWS.map = async () => {
       if (y && new Date(p.taken_ts * 1000).getFullYear() !== y) return;
       if (!okPt([p.lat, p.lng])) return;
       n++;
-      L.circleMarker([p.lat, p.lng], {radius: 5, color: "#fff", weight: 1.5, fillColor: "#e11d74", fillOpacity: 0.95})
+      L.circleMarker([p.lat, p.lng], {radius: p.est ? 4 : 5, color: "#fff", weight: 1.5, fillColor: "#e11d74", fillOpacity: p.est ? 0.6 : 0.95})
         .addTo(pl)
         .bindPopup(
-          `<img src="/pic/${p.id}?size=300" style="width:220px;border-radius:3px;display:block"><div style="margin-top:4px">${new Date(p.taken_ts * 1000).toLocaleString("de-DE")}${p.tour_id && BY[p.tour_id] ? `<br><a href="#/tour/${p.tour_id}">${esc(BY[p.tour_id].name)}</a>` : "<br>ohne Tour"}</div>`
+          `<img src="/pic/${p.id}?size=300" style="width:220px;border-radius:3px;display:block"><div style="margin-top:4px">${new Date(p.taken_ts * 1000).toLocaleString("de-DE")}${p.tour_id && BY[p.tour_id] ? `<br><a href="#/tour/${p.tour_id}">${esc(BY[p.tour_id].name)}</a>` : "<br>ohne Tour"}${p.est ? '<br><small style="opacity:.7">Position aus der Uhrzeit auf dem Track berechnet</small>' : ""}</div>`
         );
     });
     $("#mph").textContent = `Fotos (${n})`;       // so sieht man, wie viele Fotos mit Standort gezeigt werden
@@ -548,7 +548,7 @@ VIEWS.map = async () => {
     e.target.classList.toggle("on", phOn);
     if (phOn && !phs) {
       try {
-        phs = await api("/api/photos?gps=true&limit=20000");
+        phs = await api("/api/photos?gps=true&est=true&limit=60000");
       } catch (x) {
         phs = [];
       }
