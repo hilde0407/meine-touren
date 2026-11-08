@@ -31,6 +31,8 @@ services:
     depends_on: [tailscale]
     environment:
       TZ: Europe/Berlin
+      # PUID: 1000             # Benutzer/Gruppe, unter denen die App läuft und in /data schreibt (TrueNAS: 568)
+      # PGID: 1000
     volumes:
       - ./daten:/data
       # - /pfad/zu/deinen/fotos:/fotos:ro

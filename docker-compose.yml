@@ -10,6 +10,8 @@ services:
       - "8080:8080"            # bei Tailscale/Reverse-Proxy besser "127.0.0.1:8080:8080"
     environment:
       TZ: Europe/Berlin
+      # PUID: 1000             # Benutzer/Gruppe, unter denen die App läuft und in /data schreibt (TrueNAS: 568)
+      # PGID: 1000
       # Ordner mit Originalfotos (nur lesen) – optional, siehe volumes
       # PHOTOS_DIR: /fotos
     volumes:
