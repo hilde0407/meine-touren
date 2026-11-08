@@ -66,6 +66,58 @@ def send_mail(to, subject, body):
         raise RuntimeError("Mailversand fehlgeschlagen: " + (str(e) or e.__class__.__name__)[:160])
 
 
+_MAILS = {
+    "mail_changed": {
+        "de": ("Meine Touren: E-Mail-Adresse geändert", "Hallo {name},\n\ndie E-Mail-Adresse deines Kontos wurde auf {email} geändert.\nWar das nicht deine Absicht, melde dich bitte beim Administrator.\n"),
+        "en": ("Meine Touren: Email address changed", "Hello {name},\n\nthe email address of your account was changed to {email}.\nIf this was not intended, please contact the administrator.\n"),
+        "fr": ("Meine Touren : adresse e-mail modifiée", "Bonjour {name},\n\nl’adresse e-mail de votre compte a été modifiée en {email}.\nSi ce n’était pas voulu, contactez l’administrateur.\n"),
+        "es": ("Meine Touren: dirección de correo cambiada", "Hola {name}:\n\nla dirección de correo de tu cuenta se ha cambiado a {email}.\nSi no fue intencionado, ponte en contacto con el administrador.\n")},
+    "2fa_on": {
+        "de": ("Meine Touren: Zwei-Faktor-Anmeldung eingeschaltet", "Hallo {name},\n\ndie Zwei-Faktor-Anmeldung für dein Konto wurde eingeschaltet.\nWar das nicht deine Absicht, melde dich bitte beim Administrator.\n"),
+        "en": ("Meine Touren: Two-factor sign-in turned on", "Hello {name},\n\ntwo-factor sign-in was turned on for your account.\nIf this was not intended, please contact the administrator.\n"),
+        "fr": ("Meine Touren : authentification à deux facteurs activée", "Bonjour {name},\n\nl’authentification à deux facteurs a été activée pour votre compte.\nSi ce n’était pas voulu, contactez l’administrateur.\n"),
+        "es": ("Meine Touren: inicio de sesión en dos pasos activado", "Hola {name}:\n\nse ha activado el inicio de sesión en dos pasos en tu cuenta.\nSi no fue intencionado, ponte en contacto con el administrador.\n")},
+    "2fa_off": {
+        "de": ("Meine Touren: Zwei-Faktor-Anmeldung ausgeschaltet", "Hallo {name},\n\ndie Zwei-Faktor-Anmeldung für dein Konto wurde ausgeschaltet.\nWar das nicht deine Absicht, ändere bitte sofort dein Passwort.\n"),
+        "en": ("Meine Touren: Two-factor sign-in turned off", "Hello {name},\n\ntwo-factor sign-in was turned off for your account.\nIf this was not intended, please change your password immediately.\n"),
+        "fr": ("Meine Touren : authentification à deux facteurs désactivée", "Bonjour {name},\n\nl’authentification à deux facteurs a été désactivée pour votre compte.\nSi ce n’était pas voulu, changez immédiatement votre mot de passe.\n"),
+        "es": ("Meine Touren: inicio de sesión en dos pasos desactivado", "Hola {name}:\n\nse ha desactivado el inicio de sesión en dos pasos en tu cuenta.\nSi no fue intencionado, cambia tu contraseña de inmediato.\n")},
+    "pw_changed": {
+        "de": ("Meine Touren: Passwort geändert", "Hallo {name},\n\ndein Passwort wurde soeben über den Link „Passwort vergessen“ geändert. Alle bisherigen Anmeldungen wurden beendet.\nWar das nicht deine Absicht, wende dich bitte an den Administrator.\n"),
+        "en": ("Meine Touren: Password changed", "Hello {name},\n\nyour password was just changed via the “Forgot password” link. All previous sign-ins have been ended.\nIf this was not intended, please contact the administrator.\n"),
+        "fr": ("Meine Touren : mot de passe modifié", "Bonjour {name},\n\nvotre mot de passe vient d’être modifié via le lien « Mot de passe oublié ». Toutes les connexions précédentes ont été fermées.\nSi ce n’était pas voulu, contactez l’administrateur.\n"),
+        "es": ("Meine Touren: contraseña cambiada", "Hola {name}:\n\ntu contraseña se acaba de cambiar mediante el enlace «¿Olvidaste tu contraseña?». Se han cerrado todas las sesiones anteriores.\nSi no fue intencionado, ponte en contacto con el administrador.\n")},
+    "reset": {
+        "de": ("Meine Touren: Passwort zurücksetzen", "Für dein Konto bei „Meine Touren“ wurde ein neues Passwort angefordert.\n\n", "Konto „{n}“:\n{u}", "\n\nDer Link gilt {m} Minuten und kann nur einmal benutzt werden.\nHast du das nicht angefordert, kannst du diese Nachricht ignorieren – dein Passwort bleibt unverändert.\n"),
+        "en": ("Meine Touren: Reset password", "A new password was requested for your “Meine Touren” account.\n\n", "Account “{n}”:\n{u}", "\n\nThe link is valid for {m} minutes and can only be used once.\nIf you did not request this, you can ignore this message – your password stays unchanged.\n"),
+        "fr": ("Meine Touren : réinitialiser le mot de passe", "Un nouveau mot de passe a été demandé pour votre compte « Meine Touren ».\n\n", "Compte « {n} » :\n{u}", "\n\nLe lien est valable {m} minutes et ne peut être utilisé qu’une seule fois.\nSi vous n’en êtes pas à l’origine, ignorez ce message – votre mot de passe reste inchangé.\n"),
+        "es": ("Meine Touren: restablecer contraseña", "Se ha solicitado una nueva contraseña para tu cuenta de «Meine Touren».\n\n", "Cuenta «{n}»:\n{u}", "\n\nEl enlace es válido durante {m} minutos y solo se puede usar una vez.\nSi no lo solicitaste, ignora este mensaje: tu contraseña no cambia.\n")},
+    "test": {
+        "de": ("Meine Touren: Testnachricht", "Der E-Mail-Versand funktioniert. 🎉\n"),
+        "en": ("Meine Touren: Test message", "Email delivery works. 🎉\n"),
+        "fr": ("Meine Touren : message de test", "L’envoi d’e-mails fonctionne. 🎉\n"),
+        "es": ("Meine Touren: mensaje de prueba", "El envío de correos funciona. 🎉\n")},
+}
+
+
+def _mlang(request=None):
+    """Mailsprache aus Accept-Language der auslösenden Anfrage (de/en/fr/es; sonst Englisch, ohne Header Deutsch)."""
+    try:
+        al = (request.headers.get("accept-language") or "de").lower()
+    except Exception:
+        return "de"
+    for part in al.split(","):
+        c = part.strip()[:2]
+        if c in ("de", "en", "fr", "es"):
+            return c
+    return "en"
+
+
+def _mail_t(key, request, **kw):
+    t = _MAILS[key][_mlang(request)]
+    return t[0], t[1].format(**kw)
+
+
 def send_async(to, subject, body):
     """Hinweismails (z. B. „Passwort geändert“) im Hintergrund, Fehler werden nur geschluckt."""
     if not to or not mail_ready():
@@ -201,7 +253,7 @@ async def api_my_email(request: Request):
     old = row["email"]
     auth.q("UPDATE users SET email=? WHERE uid=?", (e, row["uid"]))
     if old and old.lower() != e.lower():
-        send_async(old, "Meine Touren: E-Mail-Adresse geändert", f"Hallo {row['name']},\n\ndie E-Mail-Adresse deines Kontos wurde auf {e} geändert.\nWar das nicht deine Absicht, melde dich bitte beim Administrator.\n")
+        send_async(old, *_mail_t("mail_changed", request, name=row['name'], email=e))
     return {"ok": True, "email": e}
 
 
@@ -231,7 +283,7 @@ async def api_2fa_enable(request: Request):
     if not st:
         raise HTTPException(400, "Der Code stimmt nicht – prüfe die Uhrzeit des Handys und versuche es noch einmal")
     auth.q("UPDATE users SET totp_secret=?, totp_on=1, totp_pending=NULL, totp_last=? WHERE uid=?", (s, st, row["uid"]))
-    send_async(row["email"], "Meine Touren: Zwei-Faktor-Anmeldung eingeschaltet", f"Hallo {row['name']},\n\ndie Zwei-Faktor-Anmeldung für dein Konto wurde eingeschaltet.\nWar das nicht deine Absicht, melde dich bitte beim Administrator.\n")
+    send_async(row["email"], *_mail_t("2fa_on", request, name=row['name']))
     return {"ok": True, "codes": make_recovery(row["uid"])}
 
 
@@ -243,7 +295,7 @@ async def api_2fa_disable(request: Request):
         raise HTTPException(400, "Der Code stimmt nicht")
     auth.q("UPDATE users SET totp_on=0, totp_secret=NULL, totp_pending=NULL, totp_last=0 WHERE uid=?", (row["uid"],))
     auth.q("DELETE FROM recovery WHERE uid=?", (row["uid"],))
-    send_async(row["email"], "Meine Touren: Zwei-Faktor-Anmeldung ausgeschaltet", f"Hallo {row['name']},\n\ndie Zwei-Faktor-Anmeldung für dein Konto wurde ausgeschaltet.\nWar das nicht deine Absicht, ändere bitte sofort dein Passwort.\n")
+    send_async(row["email"], *_mail_t("2fa_off", request, name=row['name']))
     return {"ok": True}
 
 
@@ -282,9 +334,9 @@ async def api_forgot(request: Request):
         by_mail.setdefault(r["email"], []).append((r["name"], f"{_base_url()}/reset/{tok}"))
     auth.q("DELETE FROM resets WHERE exp<?", (int(time.time()),))
     for to, items in by_mail.items():
-        body = "Für dein Konto bei „Meine Touren“ wurde ein neues Passwort angefordert.\n\n" + "\n\n".join(f"Konto „{n}“:\n{u}" for n, u in items) + \
-               f"\n\nDer Link gilt {RESET_MIN} Minuten und kann nur einmal benutzt werden.\nHast du das nicht angefordert, kannst du diese Nachricht ignorieren – dein Passwort bleibt unverändert.\n"
-        send_async(to, "Meine Touren: Passwort zurücksetzen", body)
+        subj, intro, item, outro = _MAILS["reset"][_mlang(request)]
+        body = intro + "\n\n".join(item.format(n=n, u=u) for n, u in items) + outro.format(m=RESET_MIN)
+        send_async(to, subj, body)
     return {"ok": True}                              # immer dieselbe Antwort – man erfährt nicht, ob eine Adresse bekannt ist
 
 
@@ -320,7 +372,7 @@ async def api_reset(request: Request):
     auth.q("DELETE FROM resets WHERE uid=?", (r["uid"],))
     u = auth.q1("SELECT name,email,totp_on FROM users WHERE uid=?", (r["uid"],))
     if u:
-        send_async(u["email"], "Meine Touren: Passwort geändert", f"Hallo {u['name']},\n\ndein Passwort wurde soeben über den Link „Passwort vergessen“ geändert. Alle bisherigen Anmeldungen wurden beendet.\nWar das nicht deine Absicht, wende dich bitte an den Administrator.\n")
+        send_async(u["email"], *_mail_t("pw_changed", request, name=u['name']))
     return {"ok": True, "totp": bool(u and u["totp_on"])}
 
 
@@ -361,7 +413,7 @@ def api_mail_test(request: Request):
     if not row or not row["email"]:
         raise HTTPException(400, "Für dein Konto ist keine E-Mail-Adresse hinterlegt (Konto & Freigaben)")
     try:
-        send_mail(row["email"], "Meine Touren: Testnachricht", "Der E-Mail-Versand funktioniert. 🎉\n")
+        send_mail(row["email"], *_mail_t("test", request))
     except RuntimeError as e:
         raise HTTPException(400, str(e))
     return {"ok": True, "to": row["email"]}

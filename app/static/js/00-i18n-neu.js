@@ -506,4 +506,89 @@ Tempo || Speed || Vitesse || Velocidad
 Karte || Map || Carte || Mapa
 {} Uhr || {} || {} || {}
 {} m aufwärts || {} m ascent || {} m de dénivelé positif || {} m de subida
+Anmeldung nicht möglich || Sign-in not possible || Connexion impossible || No se puede iniciar sesión
+Ausrüstung nicht gefunden || Equipment not found || Équipement introuvable || Equipo no encontrado
+Bewertung von 1 bis 5 Sternen || Rating from 1 to 5 stars || Note de 1 à 5 étoiles || Valoración de 1 a 5 estrellas
+Bitte Jahre wählen oder „alle“ bestätigen || Please choose years or confirm “all” || Veuillez choisir des années ou confirmer « toutes » || Elige años o confirma «todos»
+Bitte anmelden || Please sign in || Veuillez vous connecter || Inicia sesión
+Bitte einen Benutzer wählen, dessen Touren angezeigt werden sollen || Please choose a user whose tours should be shown || Veuillez choisir un utilisateur dont les parcours doivent être affichés || Elige un usuario cuyas rutas se deban mostrar
+Bitte einen anderen Benutzer wählen, dessen Touren angezeigt werden sollen || Please choose another user whose tours should be shown || Veuillez choisir un autre utilisateur dont les parcours doivent être affichés || Elige otro usuario cuyas rutas se deban mostrar
+Bitte einen Namen eingeben || Please enter a name || Veuillez saisir un nom || Introduce un nombre
+Bitte zuerst „Einrichten“ wählen || Please choose “Set up” first || Veuillez d’abord choisir « Configurer » || Elige primero «Configurar»
+Das Ende liegt vor dem Beginn || The end is before the start || La fin précède le début || El final es anterior al inicio
+Das Passwort braucht mindestens 6 Zeichen || The password needs at least 6 characters || Le mot de passe doit comporter au moins 6 caractères || La contraseña necesita al menos 6 caracteres
+Das Passwort stimmt nicht || The password is incorrect || Le mot de passe est incorrect || La contraseña es incorrecta
+Das Zurücksetzen per E-Mail ist noch nicht eingerichtet. Bitte den Administrator bitten, dein Passwort zu setzen. || Resetting by email has not been set up yet. Please ask the administrator to set your password. || La réinitialisation par e-mail n’est pas encore configurée. Demandez à l’administrateur de définir votre mot de passe. || El restablecimiento por correo aún no está configurado. Pide al administrador que establezca tu contraseña.
+Das alte Passwort stimmt nicht || The old password is incorrect || L’ancien mot de passe est incorrect || La contraseña anterior es incorrecta
+Datum bitte als JJJJ-MM-TT angeben || Please enter the date as YYYY-MM-DD || Veuillez saisir la date au format AAAA-MM-JJ || Indica la fecha como AAAA-MM-DD
+Der Code stimmt nicht – prüfe die Uhrzeit des Handys und versuche es noch einmal || The code is incorrect – check the time on your phone and try again || Le code est incorrect – vérifiez l’heure de votre téléphone et réessayez || El código es incorrecto: comprueba la hora del móvil e inténtalo de nuevo
+Der Code stimmt nicht || The code is incorrect || Le code est incorrect || El código es incorrecto
+Der Plan braucht mindestens zwei Punkte || The plan needs at least two points || Le plan nécessite au moins deux points || El plan necesita al menos dos puntos
+Der Port muss eine Zahl sein || The port must be a number || Le port doit être un nombre || El puerto debe ser un número
+Die Adresse muss mit http:// oder https:// beginnen || The address must start with http:// or https:// || L’adresse doit commencer par http:// ou https:// || La dirección debe empezar por http:// o https://
+Die Anmeldung ist abgelaufen – bitte noch einmal mit Name und Passwort beginnen || The sign-in has expired – please start again with name and password || La connexion a expiré – veuillez recommencer avec le nom et le mot de passe || El inicio de sesión ha caducado: empieza de nuevo con el nombre y la contraseña
+Die Sicherung konnte nicht geschrieben werden: {} || The backup could not be written: {} || La sauvegarde n’a pas pu être écrite : {} || No se pudo escribir la copia de seguridad: {}
+Die Standort-Freigabe ist ausgeschaltet (Verwaltung → Standort teilen) || Location sharing is turned off (Administration → Share location) || Le partage de position est désactivé (Administration → Partager la position) || El uso compartido de la ubicación está desactivado (Administración → Compartir ubicación)
+Die Tour ist ausgeblendet – bitte zuerst unter Prüfen wieder einblenden. || The tour is hidden – please unhide it under Review first. || Le parcours est masqué – veuillez d’abord le réafficher sous Vérifier. || La ruta está oculta: vuelve a mostrarla primero en Revisar.
+Die Tourplanung ist in den Einstellungen ausgeschaltet || Tour planning is turned off in the settings || La planification de parcours est désactivée dans les réglages || La planificación de rutas está desactivada en los ajustes
+Die Zwei-Faktor-Anmeldung ist schon eingeschaltet || Two-factor sign-in is already turned on || L’authentification à deux facteurs est déjà activée || El inicio de sesión en dos pasos ya está activado
+Die öffentliche Adresse muss mit https:// beginnen || The public address must start with https:// || L’adresse publique doit commencer par https:// || La dirección pública debe empezar por https://
+Diese Version ist nicht die neueste auf GitHub – bitte die Seite neu laden. || This version is not the latest on GitHub – please reload the page. || Cette version n’est pas la plus récente sur GitHub – veuillez recharger la page. || Esta versión no es la más reciente en GitHub: recarga la página.
+Dieser Link ist abgelaufen oder wurde schon benutzt || This link has expired or has already been used || Ce lien a expiré ou a déjà été utilisé || Este enlace ha caducado o ya se ha usado
+Dieser Zugang darf nur ansehen || This access is view-only || Cet accès est en lecture seule || Este acceso es de solo lectura
+Du kannst dich nicht selbst löschen || You cannot delete yourself || Vous ne pouvez pas vous supprimer vous-même || No puedes eliminarte a ti mismo
+Du kannst dich nicht selbst sperren || You cannot lock yourself out || Vous ne pouvez pas vous bloquer vous-même || No puedes bloquearte a ti mismo
+E-Mail und Passwort eingeben || Enter email and password || Saisissez l’e-mail et le mot de passe || Introduce el correo y la contraseña
+Es gibt schon Benutzer || Users already exist || Des utilisateurs existent déjà || Ya existen usuarios
+Es läuft bereits ein Job || A job is already running || Une tâche est déjà en cours || Ya hay un trabajo en curso
+Es muss mindestens einen Administrator geben || There must be at least one administrator || Il doit y avoir au moins un administrateur || Debe haber al menos un administrador
+Für dein Konto ist keine E-Mail-Adresse hinterlegt (Konto & Freigaben) || No email address is stored for your account (Account & sharing) || Aucune adresse e-mail n’est enregistrée pour votre compte (Compte et partages) || No hay ningún correo guardado para tu cuenta (Cuenta y accesos compartidos)
+Garmin ist nicht verbunden || Garmin is not connected || Garmin n’est pas connecté || Garmin no está conectado
+Jahr und Zielwert angeben || Specify year and target value || Indiquez l’année et la valeur cible || Indica el año y el valor objetivo
+Kein Token gespeichert || No token saved || Aucun jeton enregistré || No hay ningún token guardado
+Kein gültiges JPEG || Not a valid JPEG || JPEG non valide || No es un JPEG válido
+Keine Fotos gewählt || No photos selected || Aucune photo sélectionnée || No se han elegido fotos
+Keine GPS-Punkte || No GPS points || Aucun point GPS || Sin puntos GPS
+Keine Route gefunden || No route found || Aucun itinéraire trouvé || No se ha encontrado ninguna ruta
+Keine Streckenpunkte || No track points || Aucun point de tracé || Sin puntos de recorrido
+Keine Touren in diesem Jahr || No tours this year || Aucun parcours cette année || No hay rutas este año
+Kilometer-Grenze ist keine Zahl || Kilometre limit is not a number || La limite en kilomètres n’est pas un nombre || El límite de kilómetros no es un número
+Lawinenwarnstufe von 1 bis 5 || Avalanche danger level from 1 to 5 || Niveau de danger d’avalanche de 1 à 5 || Nivel de peligro de aludes de 1 a 5
+Mindestens zwei Punkte nötig || At least two points required || Au moins deux points requis || Se necesitan al menos dos puntos
+Mit Benutzerverwaltung melden sich Benutzer mit ihrem eigenen Passwort an. || With user management, users sign in with their own password. || Avec la gestion des utilisateurs, chaque utilisateur se connecte avec son propre mot de passe. || Con la gestión de usuarios, cada usuario inicia sesión con su propia contraseña.
+Name und mindestens eine Tour nötig || A name and at least one tour are required || Un nom et au moins un parcours sont requis || Se necesitan un nombre y al menos una ruta
+Nicht ausgeblendet || Not hidden || Non masqué || No oculta
+Noch keine Touren geladen || No tours loaded yet || Aucun parcours chargé pour l’instant || Aún no se han cargado rutas
+Nur für Administratoren || Administrators only || Réservé aux administrateurs || Solo para administradores
+Plan nicht gefunden || Plan not found || Plan introuvable || Plan no encontrado
+Position fehlt || Position missing || Position manquante || Falta la posición
+Start und Ziel angeben || Specify start and destination || Indiquez le départ et l’arrivée || Indica el inicio y el destino
+Strecke nicht lokal vorhanden und kein Komoot-Zugang eingetragen || Track not available locally and no Komoot access entered || Tracé non disponible localement et aucun accès Komoot renseigné || Recorrido no disponible en local y sin acceso a Komoot configurado
+Strecke noch nicht geladen (Tour mit Komoot abgleichen) || Track not loaded yet (sync the tour with Komoot) || Tracé pas encore chargé (synchronisez le parcours avec Komoot) || Recorrido aún no cargado (sincroniza la ruta con Komoot)
+Suunto ist nicht verbunden || Suunto is not connected || Suunto n’est pas connecté || Suunto no está conectado
+Tour oder Foto nicht gefunden || Tour or photo not found || Parcours ou photo introuvable || Ruta o foto no encontrada
+Tour oder Startpunkt unbekannt || Tour or starting point unknown || Parcours ou point de départ inconnu || Ruta o punto de inicio desconocido
+Unbekannte Sportart || Unknown sport type || Sport inconnu || Deporte desconocido
+Unbekannter Benutzer || Unknown user || Utilisateur inconnu || Usuario desconocido
+Unbekannter Besitzer || Unknown owner || Propriétaire inconnu || Propietario desconocido
+Unerwartete Antwort des Routing-Dienstes || Unexpected response from the routing service || Réponse inattendue du service d’itinéraires || Respuesta inesperada del servicio de rutas
+Ungültige Bewertung || Invalid rating || Note non valide || Valoración no válida
+Ungültige Daten || Invalid data || Données non valides || Datos no válidos
+Ungültige Freigabe || Invalid share || Partage non valide || Acceso compartido no válido
+Ungültige Position || Invalid position || Position non valide || Posición no válida
+Ungültige Verschlüsselung || Invalid encryption || Chiffrement non valide || Cifrado no válido
+Ungültige Versionsnummer || Invalid version number || Numéro de version non valide || Número de versión no válido
+Ungültiger Benutzer || Invalid user || Utilisateur non valide || Usuario no válido
+Ungültiger Pfad || Invalid path || Chemin non valide || Ruta de archivo no válida
+Ungültiges Ziel || Invalid destination || Destination non valide || Destino no válido
+Wanderführer-Tour nicht gefunden || Guidebook tour not found || Parcours du guide de randonnée introuvable || Ruta de la guía de senderismo no encontrada
+Zu viele Anfragen – bitte in einer Viertelstunde erneut versuchen || Too many requests – please try again in a quarter of an hour || Trop de requêtes – veuillez réessayer dans un quart d’heure || Demasiadas solicitudes: inténtalo de nuevo en un cuarto de hora
+Zu viele Daten auf einmal || Too much data at once || Trop de données à la fois || Demasiados datos a la vez
+Zu viele Punkte || Too many points || Trop de points || Demasiados puntos
+Zu viele Versuche – bitte in ein paar Minuten erneut versuchen || Too many attempts – please try again in a few minutes || Trop de tentatives – veuillez réessayer dans quelques minutes || Demasiados intentos: inténtalo de nuevo en unos minutos
+Zu viele Versuche || Too many attempts || Trop de tentatives || Demasiados intentos
+Automatische Installation ist hier nicht eingerichtet. Im Container ausführen: {} || Automatic installation is not set up here. Run in the container: {} || L’installation automatique n’est pas configurée ici. À exécuter dans le conteneur : {} || La instalación automática no está configurada aquí. Ejecuta en el contenedor: {}
+Geländemodell nicht erreichbar: {} || Terrain model not reachable: {} || Modèle de terrain inaccessible : {} || Modelo de terreno no accesible: {}
+Routing-Dienst nicht erreichbar: {} || Routing service not reachable: {} || Service d’itinéraires inaccessible : {} || Servicio de rutas no accesible: {}
+Update fehlgeschlagen: {} || Update failed: {} || Échec de la mise à jour : {} || Error en la actualización: {}
 `;
