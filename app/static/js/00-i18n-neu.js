@@ -50,7 +50,7 @@ lokal übernommen || imported locally || importé en local || importado en local
 noch nicht übernommen || not yet imported || pas encore importé || aún no importado
 bereits in Komoot || already on Komoot || déjà sur Komoot || ya está en Komoot
 ohne GPS || no GPS || sans GPS || sin GPS
-wird geprüft … || checking … || vérification … || comprobando …
+wird geprüft … || being checked … || vérification en cours … || comprobando …
 zu Komoot hochgeladen. || uploaded to Komoot. || envoyé vers Komoot. || subido a Komoot.
 „Übernehmen“ verkleinert die Originale aus || “Import” shrinks the originals from || « Importer » réduit les originaux depuis || «Importar» reduce los originales de
 Beim Hochladen werden die Bilder || When uploading, the images are || Lors de l’envoi, les images sont || Al subir, las imágenes se
@@ -591,4 +591,28 @@ Automatische Installation ist hier nicht eingerichtet. Im Container ausführen: 
 Geländemodell nicht erreichbar: {} || Terrain model not reachable: {} || Modèle de terrain inaccessible : {} || Modelo de terreno no accesible: {}
 Routing-Dienst nicht erreichbar: {} || Routing service not reachable: {} || Service d’itinéraires inaccessible : {} || Servicio de rutas no accesible: {}
 Update fehlgeschlagen: {} || Update failed: {} || Échec de la mise à jour : {} || Error en la actualización: {}
+Komoot-Zugang || Komoot access || Accès Komoot || Acceso a Komoot
+gespeichert || saved || enregistré || guardado
+fehlt || missing || manquant || falta
+Verwaltung → Komoot: E-Mail und Passwort eintragen || Administration → Komoot: enter email and password || Administration → Komoot : saisir l’e-mail et le mot de passe || Administración → Komoot: introduce el correo y la contraseña
+Letztes Backup || Latest backup || Dernière sauvegarde || Última copia de seguridad
+vor {} h || {} h ago || il y a {} h || hace {} h
+noch keines || none yet || aucune pour l’instant || todavía ninguna
+Verwaltung → Sicherung: jetzt sichern || Administration → Backup: back up now || Administration → Sauvegarde : sauvegarder maintenant || Administración → Copia de seguridad: hacer copia ahora
+Datenbank || Database || Base de données || Base de datos
+{} MB || {} MB || {} Mo || {} MB
+Freier Speicher || Free storage || Espace libre || Espacio libre
+{} GB frei || {} GB free || {} Go libres || {} GB libres
+Weniger als 2 GB frei – Platz schaffen || Less than 2 GB free – free up some space || Moins de 2 Go libres – libérez de l’espace || Menos de 2 GB libres: libera espacio
+Touren ohne Strecke || Tours without a track || Parcours sans tracé || Rutas sin recorrido
+{} von {} || {} of {} || {} sur {} || {} de {}
+Verwaltung → „Routen laden“ || Administration → “Load routes” || Administration → « Charger les itinéraires » || Administración → «Cargar rutas»
+Fotos ohne Tour || Photos without a tour || Photos sans parcours || Fotos sin ruta
+Backup-Fehler || Backup error || Erreur de sauvegarde || Error de copia de seguridad
+Sicherungsordner prüfen || Check the backup folder || Vérifiez le dossier de sauvegarde || Comprueba la carpeta de copias
+– alles in Ordnung || – all good || – tout est en ordre || – todo en orden
+Jetzt sichern || Back up now || Sauvegarder maintenant || Hacer copia ahora
+Doppelte Namen: {} || Duplicate names: {} || Noms en double : {} || Nombres duplicados: {}
+Ziele {} || Goals {} || Objectifs {} || Objetivos {}
+Buch (z. B. „Rother Taunus“) || Book (e.g. “Rother Taunus”) || Livre (par ex. « Rother Taunus ») || Libro (p. ej. «Rother Taunus»)
 `;
