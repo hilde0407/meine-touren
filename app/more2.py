@@ -131,12 +131,12 @@ def _unique_names(trips, by_id):
             places = [p for p in places if p]
             if places:
                 t["region"] = f"{name} – {Counter(places).most_common(1)[0][0]}"
-        for nm, m in Counter(t["region"] for t in trips).items():
-            if m < 2:
-                continue
-            for t in [x for x in trips if x["region"] == nm]:
-                d = datetime.fromisoformat(t["start"])
-                t["region"] = f"{nm} ({MONTHS[d.month - 1]} {d.year})"
+    for nm, m in Counter(t["region"] for t in trips).items():     # nur einmal, nachdem alle Orte ergänzt sind (sonst hängt der Monat mehrfach an)
+        if m < 2:
+            continue
+        for t in [x for x in trips if x["region"] == nm]:
+            d = datetime.fromisoformat(t["start"])
+            t["region"] = f"{nm} ({MONTHS[d.month - 1]} {d.year})"
 
 
 def _apply_trip_edits(trips):

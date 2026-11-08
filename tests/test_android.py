@@ -157,3 +157,14 @@ def test_public_slideshow_comments():
         last = c.post(f"/api/public/{tok}/comments", json={"photo_id": pid, "text": "spam"})
     assert last.status_code == 429
     assert c.get("/api/tours/gt1/shares").json()[0]["comments"] in (0, 1)
+
+
+def test_trip_names_month_added_once():
+    """Mehrere Reisen mit gleichem Namen und Monat: der Monat wird nur einmal angehängt (nicht pro doppeltem Namen erneut)."""
+    from app import more2
+    trips, by = [], {}
+    for i, reg in enumerate(["Andalusien", "Andalusien", "Hessen", "Hessen", "Bayern", "Bayern"]):
+        trips.append({"id": f"r{i}", "region": reg, "days": 5, "start": "2019-06-0%d" % (i + 1), "tours": [f"r{i}"]})
+        by[f"r{i}"] = {"g_place": None, "g_county": None}
+    more2._unique_names(trips, by)
+    assert [t["region"] for t in trips] == ["Andalusien (Juni 2019)"] * 2 + ["Hessen (Juni 2019)"] * 2 + ["Bayern (Juni 2019)"] * 2
