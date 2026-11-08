@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, zepp
+from . import auth, gear, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, begleiter, zepp
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -863,6 +863,7 @@ app.include_router(security.router)
 app.include_router(portals.router)
 app.include_router(health.router)
 app.include_router(wps.router)
+app.include_router(begleiter.router)
 app.include_router(devices.router)
 app.include_router(updater.router)
 app.mount("/", StaticFiles(directory=str(STATIC), html=True), name="static")

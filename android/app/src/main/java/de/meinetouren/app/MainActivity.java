@@ -327,7 +327,7 @@ public class MainActivity extends Activity {
 
     /* ---------- Brücke zur Weboberfläche ---------- */
     public class Bridge {
-        @JavascriptInterface public String version() { return "2.8.0"; }
+        @JavascriptInterface public String version() { return "2.9.0"; }
         @JavascriptInterface public String serverUrl() { return server(); }
 
         @JavascriptInterface
@@ -388,6 +388,9 @@ public class MainActivity extends Activity {
         @JavascriptInterface public boolean offlineServed() { return OfflineCache.offline(); }
         @JavascriptInterface public String offlineStats() { return OfflineCache.stats(MainActivity.this); }
         @JavascriptInterface public void clearOffline() { OfflineCache.clear(MainActivity.this); }
+        @JavascriptInterface public boolean weatherOn() { return WeatherWatch.enabled(MainActivity.this); }
+        @JavascriptInterface public void setWeather(boolean on) { WeatherWatch.setEnabled(MainActivity.this, on); }
+        @JavascriptInterface public String weatherInfo() { return WeatherWatch.info(); }
         @JavascriptInterface public String lang() { return GuideText.lang; }
         @JavascriptInterface public void setLang(String l) { Navi.setLang(MainActivity.this, l); }
         @JavascriptInterface public void setGuide(boolean on) { Navi.setEnabled(MainActivity.this, on); }

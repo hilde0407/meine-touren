@@ -94,6 +94,32 @@ public final class GuideText {
                 "Mi-parcours. Encore " + dist(rest) + " jusqu’à l’arrivée.", "Mitad del recorrido. Quedan " + dist(rest) + " hasta el destino.");
     }
     public static String km5() { return t("Noch fünf Kilometer bis zum Ziel.", "Five kilometres to go.", "Encore cinq kilomètres jusqu’à l’arrivée.", "Quedan cinco kilómetros hasta el destino."); }
+    private static String when(int h) {
+        return h <= 1 ? t("in der nächsten Stunde", "within the next hour", "dans l’heure qui vient", "en la próxima hora")
+                : t("in etwa " + h + " Stunden", "in about " + h + " hours", "dans environ " + h + " heures", "en unas " + h + " horas");
+    }
+
+    public static String weatherTitle() { return t("Wetterwarnung", "Weather warning", "Alerte météo", "Aviso meteorológico"); }
+
+    /** Warntext für kind = thunder | rain | wind | snow | cold. */
+    public static String weather(String kind, int inH, int val) {
+        String w = when(inH);
+        switch (kind) {
+            case "thunder": return t("Achtung, Gewittergefahr " + w + ". Such rechtzeitig Schutz und meide Gipfel und Grate.",
+                    "Warning: thunderstorm risk " + w + ". Seek shelter in time and avoid summits and ridges.",
+                    "Attention, risque d’orage " + w + ". Cherchez un abri à temps et évitez sommets et crêtes.",
+                    "Atención: riesgo de tormenta " + w + ". Busca refugio a tiempo y evita cumbres y crestas.");
+            case "rain": return t("Starkregen " + w + ". Regenschutz bereithalten.", "Heavy rain " + w + ". Have rain gear ready.",
+                    "Fortes pluies " + w + ". Préparez votre protection contre la pluie.", "Lluvia intensa " + w + ". Ten el impermeable a mano.");
+            case "wind": return t("Sturmböen bis " + val + " Kilometer pro Stunde " + w + ".", "Gusts up to " + val + " kilometres per hour " + w + ".",
+                    "Rafales jusqu’à " + val + " kilomètres par heure " + w + ".", "Rachas de hasta " + val + " kilómetros por hora " + w + ".");
+            case "snow": return t("Schnee oder Frost mit Niederschlag " + w + ". Auf glatte Wege achten.", "Snow or freezing precipitation " + w + ". Watch for slippery paths.",
+                    "Neige ou précipitations gelées " + w + ". Attention aux chemins glissants.", "Nieve o precipitación helada " + w + ". Cuidado con los caminos resbaladizos.");
+            default: return t("Temperatursturz um " + val + " Grad " + w + ". Warme Kleidung bereithalten.", "Temperature drop of " + val + " degrees " + w + ". Have warm clothing ready.",
+                    "Chute de température de " + val + " degrés " + w + ". Prévoyez des vêtements chauds.", "Descenso de temperatura de " + val + " grados " + w + ". Ten ropa de abrigo a mano.");
+        }
+    }
+
     public static String arrived() { return t("Du hast das Ziel erreicht.", "You have reached your destination.", "Vous êtes arrivé à destination.", "Has llegado a tu destino."); }
     public static String test() {
         return t("Die Sprachansagen sind eingeschaltet. In 100 Metern links abbiegen.", "Voice guidance is on. In 100 metres, turn left.",

@@ -130,6 +130,23 @@ const recProfile = name => {
 };
 
 /* Live-Ansicht: nächste Abbiegung, Rest, Ankunft, Höhenprofil mit Standort */
+const recWhen = h => (h <= 1 ? "in der nächsten Stunde" : `in etwa ${h} Stunden`);
+function recWeather() {
+  const box = $("#rwx");
+  if (!box) return;
+  let o = {};
+  try { o = typeof recApp().weatherInfo === "function" ? JSON.parse(recApp().weatherInfo() || "{}") : {}; } catch (e) {}
+  const ev = (o.events || []).slice(0, 3);
+  if (!ev.length) { box.style.display = "none"; return; }
+  const txt = e => {
+    const w = recWhen(e.in_h || 0);
+    return ({thunder: `⚠ Gewittergefahr ${w}`, rain: `⚠ Starkregen ${w}`, wind: `⚠ Sturmböen bis ${e.val} km/h ${w}`, snow: `⚠ Schnee oder Frost ${w}`, cold: `⚠ Temperatursturz um ${e.val} Grad ${w}`})[e.kind] || "";
+  };
+  box.style.display = "";
+  box.style.borderLeftColor = o.level === "danger" ? "#dc2626" : "#d97706";
+  box.innerHTML = `<b>Wetter</b>${ev.map(e => `<div>${esc(txt(e))}</div>`).join("")}`;
+}
+
 function recLive(st) {
   const box = $("#rlive");
   if (!box) return;
@@ -180,6 +197,9 @@ VIEWS.record = async () => {
         ${typeof A.setRoute === "function" ? `<label class="mut">Route mit Sprachansagen (optional)</label><select id="rroute" style="width:100%;font-size:17px;padding:10px;margin:6px 0 4px"><option value="">Keine – frei aufzeichnen</option></select>
         <div id="rrinfo" class="mut" style="font-size:13px;margin-bottom:12px">Lädt eine geplante oder frühere Strecke; unterwegs sagt die App an, wo du abbiegen musst.</div>` : ""}
         ${typeof A.takePhoto === "function" ? `<label class="mut">Fotos während der Aufzeichnung</label><select id="rphm" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px"><option value="now">Sofort auf den Server laden</option><option value="end">Gesammelt am Ende laden</option></select>` : ""}
+        ${typeof A.setWeather === "function" ? `<label style="display:block;margin:0 0 10px"><input type="checkbox" id="rwxon" ${A.weatherOn() ? "checked" : ""}> Wetterwarnung unterwegs (Gewitter, Starkregen, Sturm, Kälteeinbruch)</label>` : ""}
+        <div class="row" style="gap:8px;margin:0 0 12px;align-items:center"><select id="rlh" style="padding:10px"><option value="3">3 Stunden</option><option value="12" selected>12 Stunden</option><option value="24">24 Stunden</option><option value="72">3 Tage</option></select><button class="btn alt" id="rlink">📡 Live-Standort für Kontakt teilen</button></div>
+        <div id="rlmsg" class="mut" style="font-size:13px;margin:-6px 0 12px"></div>
         <label class="mut">Name (optional)</label><input id="rname" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px" placeholder="wird sonst automatisch vergeben">
         <button class="btn" id="rstart" style="width:100%;font-size:20px;padding:16px">● Aufzeichnung starten</button>
         <p class="mut" style="font-size:13px;margin-top:10px">Die Aufzeichnung läuft auch bei ausgeschaltetem Bildschirm weiter. Tipp: Akku-Optimierung für diese App ausschalten.</p>
@@ -199,6 +219,7 @@ VIEWS.record = async () => {
         <div id="rt" style="font-size:44px;font-weight:700;margin:6px 0">${recDur(st.active_s || 0)}</div>
         <div class="recgrid">${recCells(st)}</div>
         <div id="rlive" class="panel" style="display:none;margin:12px 0 0;text-align:center"></div>
+        <div id="rwx" class="panel" style="display:none;margin:12px 0 0;border-left:5px solid #d97706"></div>
         ${typeof A.routeInfo === "function" && recRouteInfo().has ? `<div class="mut" id="rgi" style="font-size:13px;margin-top:8px">🧭 ${esc(recRouteInfo().name)} · ${nf(recRouteInfo().km, 1)} km <label style="margin-left:8px"><input type="checkbox" id="rgon" ${recRouteInfo().on ? "checked" : ""}> Ansagen</label></div>` : ""}
         ${typeof A.takePhoto === "function" ? '<button class="btn" id="rphoto" style="width:100%;font-size:20px;padding:16px;margin-top:12px">📷 Foto aufnehmen</button><div id="rphinfo" class="mut" style="font-size:13px;margin-top:4px"></div>' : ""}
         ${typeof A.addWaypoint === "function" ? `<button class="btn alt" id="rwpb" style="width:100%;font-size:18px;padding:12px;margin-top:10px">📍 Wegpunkt setzen</button>
@@ -244,6 +265,22 @@ VIEWS.record = async () => {
     const on = (id, f) => $(id) && ($(id).onclick = f);
     on("#rperm", () => A.requestPermission());
     on("#rbat", () => A.openBatterySettings());
+    if ($("#rwxon")) $("#rwxon").onchange = e => A.setWeather(e.target.checked);
+    if ($("#rlink"))
+      $("#rlink").onclick = async () => {
+        const m = $("#rlmsg");
+        m.textContent = "Wird erstellt …";
+        try {
+          const r = await api("/api/live/link", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({hours: +$("#rlh").value})});
+          const until = new Date(r.exp * 1000).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"});
+          m.innerHTML = `Link bis ${until} Uhr erstellt.${r.https ? "" : ' <span class="bad">Die App meldet den Standort nur über HTTPS – bitte eine https-Serveradresse verwenden.</span>'}`;
+          const text = `Hier kannst du meinen Live-Standort verfolgen (gültig bis ${until} Uhr): ${r.url}`;
+          if (typeof A.shareText === "function") A.shareText(text);
+          else if (navigator.share) navigator.share({text}).catch(() => {});
+        } catch (e) {
+          m.innerHTML = `<span class="bad">${esc(e.message || e)}</span>`;
+        }
+      };
     if ($("#rwpb")) {
       const save = note => {
         const ok = A.addWaypoint(note);
@@ -393,11 +430,13 @@ VIEWS.record = async () => {
       };
       upd();
       recLive(st);
+      recWeather();
       pollTimer = setInterval(() => {
         const n = recStatus();
         if (n.state !== lastUpState) return draw();
         recFill(n);
         recLive(n);
+        recWeather();
         if ($("#rphinfo")) {
           const pi = recPhotoInfo();
           $("#rphinfo").textContent = `${pi.taken || 0} Foto(s) aufgenommen` + (pi.pending ? ` · ${pi.pending} warten auf den Upload${pi.error ? " (" + pi.error + ")" : ""}` : "");

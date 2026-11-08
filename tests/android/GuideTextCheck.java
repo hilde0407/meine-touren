@@ -30,6 +30,17 @@ public class GuideTextCheck {
         check(all.contains("Halbzeit") && all.indexOf("Halbzeit") == all.lastIndexOf("Halbzeit"), "Halbzeit: " + all);
         check(all.contains("fünf Kilometer") && all.contains("ein Kilometer") && all.contains("Ziel erreicht"), "Restansagen: " + all);
         check(g.nextTurn() == null, "keine Abbiegung auf der Geraden");
+        for (String l : new String[]{"de", "en", "fr", "es"}) {
+            GuideText.lang = l;
+            for (String k : new String[]{"thunder", "rain", "wind", "snow", "cold"}) {
+                String w = GuideText.weather(k, 2, 70);
+                check(w.length() > 20, l + " " + k);
+                check(k.equals("wind") || k.equals("cold") ? w.contains("70") : true, l + " Wert " + k + ": " + w);
+                check(w.contains("2"), l + " Stunden " + k + ": " + w);
+            }
+            check(GuideText.weather("thunder", 0, 0).length() > 20 && !GuideText.weatherTitle().isEmpty(), l + " jetzt");
+        }
+        GuideText.lang = "de";
         System.out.println("OK GuideText");
     }
 }

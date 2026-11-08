@@ -652,4 +652,23 @@ Start || Start || Départ || Inicio
 Ziel || Finish || Arrivée || Meta
 {} Foto || {} photo || {} photo || {} foto
 {} Fotos || {} photos || {} photos || {} fotos
+Wetterwarnung unterwegs (Gewitter, Starkregen, Sturm, Kälteeinbruch) || Weather warning on the way (thunderstorm, heavy rain, storm, cold snap) || Alerte météo en chemin (orage, fortes pluies, tempête, coup de froid) || Aviso meteorológico en ruta (tormenta, lluvia intensa, temporal, bajada de temperatura)
+3 Stunden || 3 hours || 3 heures || 3 horas
+12 Stunden || 12 hours || 12 heures || 12 horas
+24 Stunden || 24 hours || 24 heures || 24 horas
+3 Tage || 3 days || 3 jours || 3 días
+📡 Live-Standort für Kontakt teilen || 📡 Share live location with a contact || 📡 Partager la position en direct avec un contact || 📡 Compartir ubicación en directo con un contacto
+Wird erstellt … || Being created … || Création en cours … || Creando …
+Link bis {} Uhr erstellt. || Link created, valid until {}. || Lien créé, valable jusqu’à {}. || Enlace creado, válido hasta las {}.
+Die App meldet den Standort nur über HTTPS – bitte eine https-Serveradresse verwenden. || The app only reports the location over HTTPS – please use an https server address. || L’application ne transmet la position qu’en HTTPS – utilisez une adresse de serveur en https. || La aplicación solo envía la ubicación por HTTPS: usa una dirección de servidor https.
+Hier kannst du meinen Live-Standort verfolgen (gültig bis {} Uhr): {} || You can follow my live location here (valid until {}): {} || Vous pouvez suivre ma position en direct ici (valable jusqu’à {}) : {} || Aquí puedes seguir mi ubicación en directo (válido hasta las {}): {}
+Wetter || Weather || Météo || Tiempo
+in der nächsten Stunde || within the next hour || dans l’heure qui vient || en la próxima hora
+in etwa {} Stunden || in about {} hours || dans environ {} heures || en unas {} horas
+⚠ Gewittergefahr {} || ⚠ Thunderstorm risk {} || ⚠ Risque d’orage {} || ⚠ Riesgo de tormenta {}
+⚠ Starkregen {} || ⚠ Heavy rain {} || ⚠ Fortes pluies {} || ⚠ Lluvia intensa {}
+⚠ Sturmböen bis {} km/h {} || ⚠ Gusts up to {} km/h {} || ⚠ Rafales jusqu’à {} km/h {} || ⚠ Rachas de hasta {} km/h {}
+⚠ Schnee oder Frost {} || ⚠ Snow or frost {} || ⚠ Neige ou gel {} || ⚠ Nieve o helada {}
+⚠ Temperatursturz um {} Grad {} || ⚠ Temperature drop of {} degrees {} || ⚠ Chute de température de {} degrés {} || ⚠ Descenso de temperatura de {} grados {}
+Wetterdienst nicht erreichbar: {} || Weather service not reachable: {} || Service météo inaccessible : {} || Servicio meteorológico no accesible: {}
 `;

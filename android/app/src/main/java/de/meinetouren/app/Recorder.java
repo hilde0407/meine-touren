@@ -214,6 +214,7 @@ public final class Recorder {
         if (++fixes % 25 == 1) AppLog.log("Fix #" + fixes + " Genauigkeit " + Math.round(lastAcc) + " m, Punkte " + store.count());
         store.add(l.getTime() > 0 ? l.getTime() : System.currentTimeMillis(), l.getLatitude(), l.getLongitude(),
                 l.hasAltitude() ? l.getAltitude() : Double.NaN, l.hasAccuracy() ? l.getAccuracy() : 0f);
+        WeatherWatch.check(ctx, l);
     }
 
     public String statusJson() {

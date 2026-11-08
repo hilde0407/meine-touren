@@ -907,7 +907,7 @@ def test_record_live_view(page, app_url):
       localStorage.setItem('mt_route_prof', JSON.stringify({name:'Testroute', d:[0,1000,2000,3000,4000], e:[800,850,900,860,950], up:190}));
       window._st = {state:'recording', sport:'hike', name:'', count:5, dist_m:1500, up_m:30, down_m:5, active_s:1200, gps:true};
       window._ri = {on:true, has:true, name:'Testroute', km:4, turns:2, prog_m:1000, total_m:4000, next_m:230, next_angle:-90, off:false};
-      window.MTApp = {version:()=>'2.8.0', serverUrl:()=>location.origin, hasPermission:()=>true, requestPermission(){}, openBatterySettings(){}, changeServer(){},
+      window.MTApp = {version:()=>'2.9.0', serverUrl:()=>location.origin, hasPermission:()=>true, requestPermission(){}, openBatterySettings(){}, changeServer(){},
         status:()=>JSON.stringify(window._st), points:()=>'[[47,11],[47.001,11.001]]', routeInfo:()=>JSON.stringify(window._ri), routePoints:()=>'[]',
         setRoute(){}, clearRoute(){}, setGuide(){}, guideTest(){}, backups:()=>'[]', photoInfo:()=>'{}'};
     """)
@@ -942,3 +942,34 @@ def test_waypoints_and_story(page, app_url):
     assert "Rast am Bach" in t and "Start" in t and "Ziel" in t, t
     assert page.locator("#sm .leaflet-marker-icon").count() >= 3
     assert len(page.errors) == n0, page.errors[n0:]
+
+
+def test_record_weather_and_live_link(page, app_url):
+    """Aufzeichnen: Wetterwarnung im Aufnahme-Panel, Live-Standort-Link wird erstellt und geteilt."""
+    import json as _j
+    urllib.request.urlopen(urllib.request.Request(app_url + "/api/settings", data=_j.dumps({"live_mode": "on"}).encode(), headers={"Content-Type": "application/json"}))
+    ctx = page.context.browser.new_context(locale="de-DE", viewport={"width": 420, "height": 900})
+    pg = ctx.new_page()
+    pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(app_url) else r.continue_())
+    errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.add_init_script("""
+      window._st = {state:'idle', sport:'hike', name:'', count:0, dist_m:0, up_m:0, down_m:0, active_s:0, gps:true};
+      window._wx = '{}'; window._wxon = true; window._shared = null;
+      window.MTApp = {version:()=>'2.9.0', serverUrl:()=>location.origin, hasPermission:()=>true, requestPermission(){}, openBatterySettings(){}, changeServer(){},
+        status:()=>JSON.stringify(window._st), points:()=>'[]', routeInfo:()=>'{"has":false}', routePoints:()=>'[]', setRoute(){}, clearRoute(){}, setGuide(){}, guideTest(){},
+        backups:()=>'[]', photoInfo:()=>'{}', weatherOn:()=>window._wxon, setWeather(b){window._wxon=b}, weatherInfo:()=>window._wx, shareText(t){window._shared=t},
+        startRecording(){window._st.state='recording'}};
+    """)
+    pg.goto(app_url + "/#/record"); pg.wait_for_timeout(1200)
+    assert pg.locator("#rwxon").is_checked()
+    pg.uncheck("#rwxon"); assert pg.evaluate("window._wxon") is False
+    pg.click("#rlink"); pg.wait_for_timeout(1200)
+    assert "erstellt" in pg.inner_text("#rlmsg"), pg.inner_text("#rlmsg")
+    assert "/pub/live/" in pg.evaluate("window._shared")
+    pg.evaluate("window._wx = JSON.stringify({level:'danger', events:[{kind:'thunder', in_h:2, val:null},{kind:'wind', in_h:1, val:70}]})")
+    pg.click("#rstart"); pg.wait_for_timeout(2600)
+    t = pg.inner_text("#rwx")
+    assert "Gewittergefahr in etwa 2 Stunden" in t and "Sturmböen bis 70 km/h in der nächsten Stunde" in t, t
+    assert not errs, errs
+    ctx.close()
