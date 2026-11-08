@@ -628,4 +628,28 @@ Nächste Abbiegung || Next turn || Prochain virage || Próximo giro
 Ziel in {} km || Destination in {} km || Arrivée dans {} km || Destino en {} km
 Ankunft ca. {} Uhr || Arrival about {} || Arrivée vers {} || Llegada hacia las {}
 {} m · noch ↑ {} m · höchster Punkt {} m || {} m · ↑ {} m to go · highest point {} m || {} m · encore ↑ {} m · point culminant {} m || {} m · aún ↑ {} m · punto más alto {} m
+📍 Wegpunkt setzen || 📍 Set waypoint || 📍 Poser un point de passage || 📍 Marcar punto de ruta
+Rast || Rest stop || Pause || Descanso
+Aussicht || View || Point de vue || Mirador
+Quelle || Spring || Source || Fuente
+Gabelung || Junction || Bifurcation || Bifurcación
+Gefahr || Danger || Danger || Peligro
+Gipfel || Summit || Sommet || Cima
+Hütte || Hut || Refuge || Refugio
+Eigene Notiz || Your own note || Note personnelle || Nota propia
+Noch keine Position – kurz warten, bis das GPS einen Standort hat. || No position yet – wait a moment until the GPS has a fix. || Pas encore de position – patientez jusqu’à ce que le GPS ait un signal. || Aún no hay posición: espera un momento hasta que el GPS tenga señal.
+✓ „{}“ gespeichert · {} Wegpunkt(e) || ✓ “{}” saved · {} waypoint(s) || ✓ « {} » enregistré · {} point(s) de passage || ✓ «{}» guardado · {} punto(s) de ruta
+📍 {} Wegpunkt(e) gesetzt || 📍 {} waypoint(s) set || 📍 {} point(s) de passage posé(s) || 📍 {} punto(s) de ruta marcado(s)
+📖 Erzählung || 📖 Story || 📖 Récit || 📖 Historia
+Wegpunkte, Fotos und Eckdaten als Zeitleiste || Waypoints, photos and key figures as a timeline || Points de passage, photos et chiffres clés sur une frise || Puntos de ruta, fotos y datos clave en una línea de tiempo
+Wegpunkte || Waypoints || Points de passage || Puntos de ruta
+Wegpunkt || Waypoint || Point de passage || Punto de ruta
+Notiz ändern || Edit note || Modifier la note || Cambiar nota
+Wegpunkt löschen || Delete waypoint || Supprimer le point de passage || Eliminar punto de ruta
+Wegpunkt löschen? || Delete waypoint? || Supprimer le point de passage ? || ¿Eliminar el punto de ruta?
+‹ Zur Tour || ‹ Back to the tour || ‹ Vers le parcours || ‹ A la ruta
+Start || Start || Départ || Inicio
+Ziel || Finish || Arrivée || Meta
+{} Foto || {} photo || {} photo || {} foto
+{} Fotos || {} photos || {} photos || {} fotos
 `;

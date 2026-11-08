@@ -907,7 +907,7 @@ def test_record_live_view(page, app_url):
       localStorage.setItem('mt_route_prof', JSON.stringify({name:'Testroute', d:[0,1000,2000,3000,4000], e:[800,850,900,860,950], up:190}));
       window._st = {state:'recording', sport:'hike', name:'', count:5, dist_m:1500, up_m:30, down_m:5, active_s:1200, gps:true};
       window._ri = {on:true, has:true, name:'Testroute', km:4, turns:2, prog_m:1000, total_m:4000, next_m:230, next_angle:-90, off:false};
-      window.MTApp = {version:()=>'2.7.1', serverUrl:()=>location.origin, hasPermission:()=>true, requestPermission(){}, openBatterySettings(){}, changeServer(){},
+      window.MTApp = {version:()=>'2.8.0', serverUrl:()=>location.origin, hasPermission:()=>true, requestPermission(){}, openBatterySettings(){}, changeServer(){},
         status:()=>JSON.stringify(window._st), points:()=>'[[47,11],[47.001,11.001]]', routeInfo:()=>JSON.stringify(window._ri), routePoints:()=>'[]',
         setRoute(){}, clearRoute(){}, setGuide(){}, guideTest(){}, backups:()=>'[]', photoInfo:()=>'{}'};
     """)
@@ -921,3 +921,24 @@ def test_record_live_view(page, app_url):
     assert not pg.locator("#rlive").is_visible()
     assert not errs, errs
     ctx.close()
+
+
+def test_waypoints_and_story(page, app_url):
+    """Tour mit Wegpunkten: Liste und Erzählungs-Link auf der Tourseite, Zeitleiste auf der Erzählungsseite."""
+    import json as _j
+    pts = "".join(f'<trkpt lat="{47.5+i*0.0006}" lon="11.5"><ele>{1000+i*4}</ele><time>2026-09-03T08:{i//60:02d}:{i%60:02d}Z</time></trkpt>' for i in range(50))
+    wpt = '<wpt lat="47.510" lon="11.5"><time>2026-09-03T08:00:20Z</time><name>Rast am Bach</name></wpt>'
+    gpx = f'<?xml version="1.0"?><gpx version="1.1">{wpt}<trk><name>w</name><type>hike</type><trkseg>{pts}</trkseg></trk></gpx>'
+    req = urllib.request.Request(app_url + "/api/record/upload", data=_j.dumps({"gpx": gpx, "name": "Wegpunkt-Tour"}).encode(), headers={"Content-Type": "application/json"})
+    tid = _j.load(urllib.request.urlopen(req))["id"]
+    n0 = len(page.errors)
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(1000)
+    page.goto(base + f"#/tour/{tid}"); page.wait_for_timeout(1800)
+    assert page.locator("#storybtn").count() == 1
+    assert "Rast am Bach" in page.inner_text("#wpcard")
+    page.goto(base + f"#/story/{tid}"); page.wait_for_timeout(1800)
+    t = page.inner_text("#stl")
+    assert "Rast am Bach" in t and "Start" in t and "Ziel" in t, t
+    assert page.locator("#sm .leaflet-marker-icon").count() >= 3
+    assert len(page.errors) == n0, page.errors[n0:]

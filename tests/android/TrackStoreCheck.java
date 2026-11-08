@@ -42,6 +42,21 @@ public class TrackStoreCheck {
         check(r.gpx("x", "hike").split("<trkseg>", -1).length - 1 == 2, "Segmente nach Laden");
         String js = s.pointsJson(50);
         check(js.startsWith("[[") && js.endsWith("]]"), "pointsJson");
+        // Wegpunkte: gesichert, nach Laden wieder da, im GPX als <wpt>, beim Leeren weg
+        TrackStore ws = new TrackStore(new File(f.getPath() + "_w"));
+        ws.add(1000000L, 48.0, 8.0, 500, 5f);
+        ws.addWaypoint(1005000L, 48.0, 8.0, "Rast <am> \"Bach\"\nzwei");
+        ws.addWaypoint(1006000L, 48.001, 8.001, "");
+        check(ws.waypointCount() == 2, "Wegpunkte zählen");
+        String wg = ws.gpx("w", "hike");
+        check(wg.contains("<wpt lat=\"48.000000\" lon=\"8.000000\">") && wg.contains("<name>Rast &lt;am&gt; &quot;Bach&quot; zwei</name>") && wg.contains("<name>Wegpunkt</name>"), "wpt im GPX: " + wg);
+        check(wg.indexOf("<wpt") < wg.indexOf("<trk>"), "wpt vor trk");
+        check(ws.waypointsJson().contains("\"note\":\"Rast <am> \\\"Bach\\\" zwei\""), "Wegpunkte JSON: " + ws.waypointsJson());
+        TrackStore wr = new TrackStore(new File(f.getPath() + "_w"));
+        wr.load();
+        check(wr.waypointCount() == 2, "Wegpunkte nach Laden");
+        wr.clear();
+        check(wr.waypointCount() == 0 && !new File(f.getPath() + "_w.wpt").exists(), "Wegpunkte nach clear");
         if (a.length > 0) {
             FileWriter w = new FileWriter(a[0]);
             w.write(gpx);

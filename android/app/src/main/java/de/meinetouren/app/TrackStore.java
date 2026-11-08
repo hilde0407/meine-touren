@@ -28,6 +28,8 @@ public class TrackStore {
 
     private final File file;
     private final List<Pt> pts = new ArrayList<Pt>();
+    /** Wegpunkte mit Notiz: {Zeit, lat, lon, Text}. */
+    private final List<Object[]> wps = new ArrayList<Object[]>();
     private boolean nextNewSeg = true;
     private double dist = 0, up = 0, down = 0;
     private double refAlt = Double.NaN;
@@ -121,7 +123,56 @@ public class TrackStore {
     public synchronized double lastLat() { return pts.isEmpty() ? Double.NaN : pts.get(pts.size() - 1).lat; }
     public synchronized double lastLon() { return pts.isEmpty() ? Double.NaN : pts.get(pts.size() - 1).lon; }
 
+    private File wptFile() { return file == null ? null : new File(file.getPath() + ".wpt"); }
+
+    /** Wegpunkt mit Notiz an einer Position festhalten (wird sofort gesichert). */
+    public synchronized void addWaypoint(long t, double lat, double lon, String note) {
+        String n = note == null ? "" : note.replace("\t", " ").replace("\r", " ").replace("\n", " ").trim();
+        if (n.length() > 200) n = n.substring(0, 200);
+        wps.add(new Object[]{t, lat, lon, n});
+        File f = wptFile();
+        if (f == null) return;
+        try {
+            FileWriter w = new FileWriter(f, true);
+            try { w.write(String.format(Locale.US, "%d\t%.6f\t%.6f\t%s\n", t, lat, lon, n)); } finally { w.close(); }
+        } catch (IOException e) { /* Zusatz */ }
+    }
+
+    public synchronized int waypointCount() { return wps.size(); }
+
+    public synchronized String waypointsJson() {
+        StringBuilder b = new StringBuilder("[");
+        for (int i = 0; i < wps.size(); i++) {
+            Object[] w = wps.get(i);
+            if (i > 0) b.append(',');
+            b.append(String.format(Locale.US, "{\"t\":%d,\"lat\":%.6f,\"lon\":%.6f,\"note\":\"%s\"}", (Long) w[0], (Double) w[1], (Double) w[2],
+                    ((String) w[3]).replace("\\", "\\\\").replace("\"", "\\\"")));
+        }
+        return b.append(']').toString();
+    }
+
+    private void loadWaypoints() {
+        wps.clear();
+        File f = wptFile();
+        if (f == null || !f.exists()) return;
+        try {
+            BufferedReader r = new BufferedReader(new FileReader(f));
+            try {
+                String line;
+                while ((line = r.readLine()) != null) {
+                    String[] c = line.split("\t", 4);
+                    if (c.length < 3) continue;
+                    try { wps.add(new Object[]{Long.parseLong(c[0]), Double.parseDouble(c[1]), Double.parseDouble(c[2]), c.length > 3 ? c[3] : ""}); }
+                    catch (NumberFormatException e) { /* Zeile überspringen */ }
+                }
+            } finally { r.close(); }
+        } catch (IOException e) { /* ohne Wegpunkte weiter */ }
+    }
+
     public synchronized void clear() {
+        wps.clear();
+        File wf = wptFile();
+        if (wf != null && wf.exists()) wf.delete();
         pts.clear();
         nextNewSeg = true;
         dist = up = down = 0;
@@ -151,6 +202,7 @@ public class TrackStore {
         dist = up = down = 0;
         activeMs = 0;
         refAlt = Double.NaN; a1 = Double.NaN; a2 = Double.NaN;
+        loadWaypoints();
         if (file == null || !file.exists()) return;
         File keep = file;
         List<String[]> rows = new ArrayList<String[]>();
@@ -199,6 +251,11 @@ public class TrackStore {
         b.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         b.append("<gpx version=\"1.1\" creator=\"Meine Touren (Android)\" xmlns=\"http://www.topografix.com/GPX/1/1\">\n");
         b.append("<metadata><name>").append(esc(name)).append("</name><time>").append(iso(start)).append("</time></metadata>\n");
+        for (Object[] w : wps) {
+            String n = (String) w[3];
+            b.append(String.format(Locale.US, "<wpt lat=\"%.6f\" lon=\"%.6f\"><time>", (Double) w[1], (Double) w[2])).append(iso((Long) w[0])).append("</time>")
+                    .append("<name>").append(esc(n.length() > 0 ? n : "Wegpunkt")).append("</name></wpt>\n");
+        }
         b.append("<trk><name>").append(esc(name)).append("</name><type>").append(esc(sport)).append("</type>");
         boolean open = false;
         for (Pt p : pts) {

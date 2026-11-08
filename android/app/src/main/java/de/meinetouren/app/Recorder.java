@@ -197,6 +197,16 @@ public final class Recorder {
         }
     }
 
+    /** Wegpunkt mit Notiz an der letzten bekannten Position; false, wenn noch keine Position vorliegt. */
+    public synchronized boolean addWaypoint(String note) {
+        if (!RECORDING.equals(state()) && !PAUSED.equals(state())) return false;
+        double la = store.lastLat(), lo = store.lastLon();
+        if (Double.isNaN(la) || Double.isNaN(lo)) return false;
+        store.addWaypoint(System.currentTimeMillis(), la, lo, note);
+        AppLog.log("Wegpunkt: " + (note == null ? "" : note));
+        return true;
+    }
+
     public void onLocation(Location l) {
         if (!RECORDING.equals(state())) return;
         lastFixMs = System.currentTimeMillis();
@@ -215,6 +225,7 @@ public final class Recorder {
             o.put("name", name());
             o.put("start", prefs.getLong("start", 0));
             o.put("count", store.count());
+            o.put("wps", store.waypointCount());
             o.put("dist_m", Math.round(store.distanceM()));
             o.put("up_m", Math.round(store.ascentM()));
             o.put("down_m", Math.round(store.descentM()));

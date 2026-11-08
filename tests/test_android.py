@@ -76,3 +76,25 @@ def test_offline_cache_wired():
     for pfad in ("login", "logout", "live", "backup", "photo/"):
         assert pfad in oc.split("SKIP", 1)[1].split(";", 1)[0], pfad
     assert "offlineServed" in ma and "clearOffline" in ma
+
+
+def test_record_upload_waypoints():
+    """Wegpunkte aus der App-GPX werden mit der Tour gespeichert, lassen sich ändern und löschen."""
+    from fastapi.testclient import TestClient
+    from app import main, db
+    c = TestClient(main.app)
+    wpt = ('<wpt lat="47.0100" lon="11.0"><time>2026-07-01T08:10:00Z</time><name>Rast am Bach</name></wpt>'
+           '<wpt lat="47.0200" lon="11.0"><time>2026-07-01T08:20:00Z</time><name>Wegpunkt</name></wpt>')
+    g = _gpx().replace("<trk>", wpt + "<trk>", 1).replace("2026-07-01", "2026-07-02")
+    r = c.post("/api/record/upload", json={"gpx": g, "name": "Mit Wegpunkten"})
+    assert r.status_code == 200
+    tid = r.json()["id"]
+    w = c.get(f"/api/tours/{tid}/wps").json()
+    assert [x["note"] for x in w] == ["Rast am Bach", "Wegpunkt"] and w[0]["ts"] < w[1]["ts"] and abs(w[0]["lat"] - 47.01) < 1e-6
+    assert c.put(f"/api/tours/{tid}/wps/{w[0]['id']}", json={"note": "  Pause   am Wasser "}).json()["ok"]
+    assert c.get(f"/api/tours/{tid}/wps").json()[0]["note"] == "Pause am Wasser"
+    assert c.put(f"/api/tours/{tid}/wps/99999", json={"note": "x"}).status_code == 404
+    c.delete(f"/api/tours/{tid}/wps/{w[1]['id']}")
+    assert len(c.get(f"/api/tours/{tid}/wps").json()) == 1
+    # Tour ohne Wegpunkte: leere Liste
+    assert c.get("/api/tours/gibtsnicht/wps").json() == []

@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, zepp
+from . import auth, gear, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, zepp
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -553,6 +553,10 @@ async def api_record_upload(request: Request):
         sport = None
     t, _ = await asyncio.get_running_loop().run_in_executor(None, contextvars.copy_context().run, lambda: tracks.adopt(gpx, "rec.gpx", name=name, sport=sport))
     try:
+        wps.save(t["id"], wps.from_gpx(gpx))
+    except Exception:  # noqa
+        pass
+    try:
         photos.assign_all()
         wait = config.INBOX_DIR / "teilen"
         if wait.is_dir() and any(wait.iterdir()):
@@ -858,6 +862,7 @@ app.include_router(users_api.router)
 app.include_router(security.router)
 app.include_router(portals.router)
 app.include_router(health.router)
+app.include_router(wps.router)
 app.include_router(devices.router)
 app.include_router(updater.router)
 app.mount("/", StaticFiles(directory=str(STATIC), html=True), name="static")

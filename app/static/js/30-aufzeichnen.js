@@ -103,6 +103,7 @@ async function recLoadRoute(key) {
 }
 
 /* Höhenprofil der Route einmal berechnen (Server, Geländemodell) und auf dem Handy merken – für die Live-Ansicht, auch ohne Netz */
+const REC_WP = ["Rast", "Aussicht", "Quelle", "Gabelung", "Gefahr", "Gipfel", "Hütte"];
 const recProfKey = "mt_route_prof";
 const recHav = (a, b) => {
   const R = 6371000, r = Math.PI / 180, dl = (b[0] - a[0]) * r, dn = (b[1] - a[1]) * r;
@@ -200,6 +201,10 @@ VIEWS.record = async () => {
         <div id="rlive" class="panel" style="display:none;margin:12px 0 0;text-align:center"></div>
         ${typeof A.routeInfo === "function" && recRouteInfo().has ? `<div class="mut" id="rgi" style="font-size:13px;margin-top:8px">🧭 ${esc(recRouteInfo().name)} · ${nf(recRouteInfo().km, 1)} km <label style="margin-left:8px"><input type="checkbox" id="rgon" ${recRouteInfo().on ? "checked" : ""}> Ansagen</label></div>` : ""}
         ${typeof A.takePhoto === "function" ? '<button class="btn" id="rphoto" style="width:100%;font-size:20px;padding:16px;margin-top:12px">📷 Foto aufnehmen</button><div id="rphinfo" class="mut" style="font-size:13px;margin-top:4px"></div>' : ""}
+        ${typeof A.addWaypoint === "function" ? `<button class="btn alt" id="rwpb" style="width:100%;font-size:18px;padding:12px;margin-top:10px">📍 Wegpunkt setzen</button>
+          <div id="rwp" style="display:none;margin-top:8px"><div class="row" style="gap:6px;flex-wrap:wrap;justify-content:center">${REC_WP.map(w => `<button class="btn alt sm" data-wp="${esc(w)}">${esc(w)}</button>`).join("")}</div>
+          <div class="row" style="gap:6px;margin-top:8px"><input id="rwpt" maxlength="200" placeholder="Eigene Notiz" style="flex:1;font-size:16px;padding:10px"><button class="btn" id="rwps">Speichern</button></div></div>
+          <div id="rwpm" class="mut" style="font-size:13px;margin-top:4px">${st.wps ? `📍 ${st.wps} Wegpunkt(e) gesetzt` : ""}</div>` : ""}
         <div class="row" style="gap:8px;margin-top:14px;justify-content:center">
           ${s === "paused" ? '<button class="btn" id="rres">▶ Weiter</button>' : '<button class="btn alt" id="rpause">⏸ Pause</button>'}
           <button class="btn holdstop" id="rstop"><span class="fill"></span><span class="lbl">■ Beenden – gedrückt halten</span></button></div></div>
@@ -239,6 +244,16 @@ VIEWS.record = async () => {
     const on = (id, f) => $(id) && ($(id).onclick = f);
     on("#rperm", () => A.requestPermission());
     on("#rbat", () => A.openBatterySettings());
+    if ($("#rwpb")) {
+      const save = note => {
+        const ok = A.addWaypoint(note);
+        $("#rwpm").innerHTML = ok ? `✓ „${esc(note || "Wegpunkt")}“ gespeichert · ${recStatus().wps || 1} Wegpunkt(e)` : '<span class="bad">Noch keine Position – kurz warten, bis das GPS einen Standort hat.</span>';
+        if (ok) { $("#rwp").style.display = "none"; $("#rwpt").value = ""; }
+      };
+      $("#rwpb").onclick = () => { const w = $("#rwp"); w.style.display = w.style.display === "none" ? "" : "none"; };
+      document.querySelectorAll("[data-wp]").forEach(b => (b.onclick = () => save(b.dataset.wp)));
+      $("#rwps").onclick = () => save($("#rwpt").value.trim());
+    }
     if ($("#rphm")) {
       $("#rphm").value = A.photoMode();
       $("#rphm").onchange = () => A.setPhotoMode($("#rphm").value);

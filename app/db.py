@@ -84,6 +84,8 @@ def _open(path):
             conn.execute("ALTER TABLE guide_tours ADD COLUMN km REAL")
         if "up" not in gcols:
             conn.execute("ALTER TABLE guide_tours ADD COLUMN up REAL")
+        conn.execute("CREATE TABLE IF NOT EXISTS tour_wps (id INTEGER PRIMARY KEY AUTOINCREMENT, tour_id TEXT, ts INTEGER, lat REAL, lng REAL, note TEXT)")   # Wegpunkte mit Notiz
+        conn.execute("CREATE INDEX IF NOT EXISTS tour_wps_t ON tour_wps(tour_id)")
         conn.execute("CREATE TABLE IF NOT EXISTS wishlist (gid INTEGER PRIMARY KEY, ts INTEGER)")   # Wunschliste: Wanderführer-Touren, die ich noch gehen möchte
         conn.execute("CREATE TABLE IF NOT EXISTS photo_pref (path TEXT PRIMARY KEY, tour_id TEXT)")   # beim Import gewählte Tour
         conn.execute("CREATE TABLE IF NOT EXISTS tour_sport (id TEXT PRIMARY KEY, sport TEXT)")        # eigene Sportart (bleibt beim Komoot-Abgleich)

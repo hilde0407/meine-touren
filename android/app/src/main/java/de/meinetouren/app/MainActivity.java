@@ -327,7 +327,7 @@ public class MainActivity extends Activity {
 
     /* ---------- Brücke zur Weboberfläche ---------- */
     public class Bridge {
-        @JavascriptInterface public String version() { return "2.7.1"; }
+        @JavascriptInterface public String version() { return "2.8.0"; }
         @JavascriptInterface public String serverUrl() { return server(); }
 
         @JavascriptInterface
@@ -344,6 +344,8 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface public void startRecording(String sport, String name) { prefs.edit().putInt("photos_taken", 0).apply(); Recorder.get(MainActivity.this).start(sport, name); }
+        @JavascriptInterface public boolean addWaypoint(String note) { return Recorder.get(MainActivity.this).addWaypoint(note); }
+        @JavascriptInterface public String waypoints() { return Recorder.get(MainActivity.this).store().waypointsJson(); }
         @JavascriptInterface public void pauseRecording() { Recorder.get(MainActivity.this).pause(); }
         @JavascriptInterface public void resumeRecording() { Recorder.get(MainActivity.this).resume(); }
         @JavascriptInterface public void stopRecording(String name) { Recorder.get(MainActivity.this).stop(name); }
