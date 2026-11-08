@@ -755,7 +755,7 @@ Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen 
     if (!t) return s;
     let r = D[t];
     if (r === undefined) for (const [re, f] of P) { const m = re.exec(t); if (m) { r = f(...m); break; } }
-    if (r === undefined) for (const q of PAT) { if (t.startsWith(q.pre)) { const m = q.re.exec(t); if (m) { let i = 0; r = q.v.replace(/\{\}/g, () => tr(m[++i])); break; } } }
+    if (r === undefined) for (const q of PAT) { if (t.startsWith(q.pre)) { const m = q.re.exec(t); if (m) { let i = 0; r = q.v.replace(/\{\}/g, () => tr(String(m[++i]).trim())); break; } } }
     if (r === undefined && t.length > 16) { let u = t; for (const k of long) if (u.includes(k)) u = u.split(k).join(D[k]); if (u !== t) r = u; }
     if (r === undefined) r = piecewise(t);
     if (r === undefined) { let u = t.replace(/Meine Touren/g, "\u0001"); for (const [re, f] of S) u = u.replace(re, f); u = u.replace(/\u0001/g, "Meine Touren"); if (u !== t) r = u; }
