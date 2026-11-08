@@ -894,3 +894,30 @@ def test_admin_tabs_uniform(page):
     assert len(set(sizes)) == 1, sizes
     assert page.evaluate("[...document.querySelectorAll('.atab .gbody > *')].every(c=>getComputedStyle(c).borderTopWidth==='1px')")
 
+
+
+def test_record_live_view(page, app_url):
+    """Live-Ansicht mit Route: nächste Abbiegung, Rest, Ankunft und Höhenprofil mit Standort."""
+    ctx = page.context.browser.new_context(locale="de-DE", viewport={"width": 420, "height": 900})
+    pg = ctx.new_page()
+    pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(app_url) else r.continue_())
+    errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.add_init_script("""
+      localStorage.setItem('mt_route_prof', JSON.stringify({name:'Testroute', d:[0,1000,2000,3000,4000], e:[800,850,900,860,950], up:190}));
+      window._st = {state:'recording', sport:'hike', name:'', count:5, dist_m:1500, up_m:30, down_m:5, active_s:1200, gps:true};
+      window._ri = {on:true, has:true, name:'Testroute', km:4, turns:2, prog_m:1000, total_m:4000, next_m:230, next_angle:-90, off:false};
+      window.MTApp = {version:()=>'2.7.1', serverUrl:()=>location.origin, hasPermission:()=>true, requestPermission(){}, openBatterySettings(){}, changeServer(){},
+        status:()=>JSON.stringify(window._st), points:()=>'[[47,11],[47.001,11.001]]', routeInfo:()=>JSON.stringify(window._ri), routePoints:()=>'[]',
+        setRoute(){}, clearRoute(){}, setGuide(){}, guideTest(){}, backups:()=>'[]', photoInfo:()=>'{}'};
+    """)
+    pg.goto(app_url + "/#/record"); pg.wait_for_timeout(1500)
+    t = pg.inner_text("#rlive")
+    assert "230 m" in t and "Nächste Abbiegung" in t and "Ziel in 3,0 km" in t and "Ankunft ca." in t, t
+    assert pg.locator("#rlive svg polyline").count() == 1 and "noch ↑" in t and "höchster Punkt 950 m" in t, t
+    pg.evaluate("window._ri.off = true"); pg.wait_for_timeout(2500)
+    assert "Abseits der Route" in pg.inner_text("#rlive")
+    pg.evaluate("window._ri = {has:false}"); pg.wait_for_timeout(2500)
+    assert not pg.locator("#rlive").is_visible()
+    assert not errs, errs
+    ctx.close()

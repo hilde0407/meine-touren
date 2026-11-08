@@ -89,6 +89,11 @@ public final class GuideText {
         return t("In " + dist(d) + " ", "In " + dist(d) + ", ", "Dans " + dist(d) + ", ", "En " + dist(d) + " ") + instruction(angle) + then + ".";
     }
     public static String oneKm() { return t("Noch ein Kilometer bis zum Ziel.", "One kilometre to go.", "Encore un kilomètre jusqu’à l’arrivée.", "Queda un kilómetro hasta el destino."); }
+    public static String half(double rest) {
+        return t("Halbzeit. Noch " + distNom(rest) + " bis zum Ziel.", "Halfway there. " + dist(rest) + " to go.",
+                "Mi-parcours. Encore " + dist(rest) + " jusqu’à l’arrivée.", "Mitad del recorrido. Quedan " + dist(rest) + " hasta el destino.");
+    }
+    public static String km5() { return t("Noch fünf Kilometer bis zum Ziel.", "Five kilometres to go.", "Encore cinq kilomètres jusqu’à l’arrivée.", "Quedan cinco kilómetros hasta el destino."); }
     public static String arrived() { return t("Du hast das Ziel erreicht.", "You have reached your destination.", "Vous êtes arrivé à destination.", "Has llegado a tu destino."); }
     public static String test() {
         return t("Die Sprachansagen sind eingeschaltet. In 100 Metern links abbiegen.", "Voice guidance is on. In 100 metres, turn left.",

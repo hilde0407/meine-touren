@@ -622,4 +622,10 @@ Kartenkacheln {} von {} || Map tiles {} of {} || Tuiles de carte {} sur {} || Te
 Fertig: {} Touren und {} Kartenkacheln stehen offline bereit. || Done: {} tours and {} map tiles are ready offline. || Terminé : {} parcours et {} tuiles de carte sont disponibles hors ligne. || Listo: {} rutas y {} teselas de mapa están disponibles sin conexión.
 Fehler: {} || Error: {} || Erreur : {} || Error: {}
 Offline – es werden die zuletzt geladenen Daten gezeigt (Änderungen sind nicht möglich). || Offline – the most recently loaded data is shown (changes are not possible). || Hors ligne – les dernières données chargées sont affichées (modifications impossibles). || Sin conexión: se muestran los últimos datos cargados (no se pueden hacer cambios).
+⚠ Abseits der Route || ⚠ Off the route || ⚠ Hors de l’itinéraire || ⚠ Fuera de la ruta
+Keine Abbiegung mehr || No more turns || Plus de virages || No hay más giros
+Nächste Abbiegung || Next turn || Prochain virage || Próximo giro
+Ziel in {} km || Destination in {} km || Arrivée dans {} km || Destino en {} km
+Ankunft ca. {} Uhr || Arrival about {} || Arrivée vers {} || Llegada hacia las {}
+{} m · noch ↑ {} m · höchster Punkt {} m || {} m · ↑ {} m to go · highest point {} m || {} m · encore ↑ {} m · point culminant {} m || {} m · aún ↑ {} m · punto más alto {} m
 `;

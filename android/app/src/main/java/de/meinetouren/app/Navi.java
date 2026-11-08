@@ -110,6 +110,9 @@ final class Navi {
                 o.put("turns", g.turnCount());
                 o.put("off", g.offRoute());
                 o.put("prog_m", Math.round(g.progressM()));
+                o.put("total_m", Math.round(g.totalM()));
+                Guide.Turn t = g.nextTurn();
+                if (t != null) { o.put("next_m", Math.round(t.at - g.progressM())); o.put("next_angle", Math.round(t.angle)); }
             }
             return o.toString();
         } catch (Exception e) {

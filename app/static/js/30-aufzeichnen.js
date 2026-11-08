@@ -98,7 +98,66 @@ async function recLoadRoute(key) {
   pts = recRoutePts(pts || []);
   if (pts.length < 2) throw new Error("Die Strecke hat zu wenige Punkte");
   A.setRoute(pts.map(p => p[0].toFixed(6) + "," + p[1].toFixed(6)).join(";"), name);
+  await recStoreProfile(pts, name);
   return pts;
+}
+
+/* Höhenprofil der Route einmal berechnen (Server, Geländemodell) und auf dem Handy merken – für die Live-Ansicht, auch ohne Netz */
+const recProfKey = "mt_route_prof";
+const recHav = (a, b) => {
+  const R = 6371000, r = Math.PI / 180, dl = (b[0] - a[0]) * r, dn = (b[1] - a[1]) * r;
+  const x = Math.sin(dl / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dn / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+};
+async function recStoreProfile(pts, name) {
+  try { localStorage.removeItem(recProfKey); } catch (e) {}
+  const step = Math.max(1, Math.ceil(pts.length / 600)), q = pts.filter((_, i) => i % step === 0);
+  if (q[q.length - 1] !== pts[pts.length - 1]) q.push(pts[pts.length - 1]);
+  let d = [0];
+  for (let i = 1; i < q.length; i++) d.push(d[i - 1] + recHav(q[i - 1], q[i]));
+  try {
+    const r = await api("/api/plan/elevation", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({points: q})});
+    if (!r || !r.ele || r.ele.length !== q.length) return;
+    localStorage.setItem(recProfKey, JSON.stringify({name, d: d.map(Math.round), e: r.ele.map(Math.round), up: r.up || 0}));
+  } catch (e) { /* ohne Profil geht es auch */ }
+}
+const recProfile = name => {
+  try {
+    const p = JSON.parse(localStorage.getItem(recProfKey) || "null");
+    return p && p.name === name && p.d && p.d.length > 1 ? p : null;
+  } catch (e) { return null; }
+};
+
+/* Live-Ansicht: nächste Abbiegung, Rest, Ankunft, Höhenprofil mit Standort */
+function recLive(st) {
+  const box = $("#rlive");
+  if (!box) return;
+  const ri = typeof recApp().routeInfo === "function" ? recRouteInfo() : {};
+  if (!ri.has || !ri.total_m) { box.style.display = "none"; return; }
+  box.style.display = "";
+  const prog = ri.prog_m || 0, rest = Math.max(0, ri.total_m - prog);
+  const sp = (st.active_s || 0) > 180 && (st.dist_m || 0) > 200 ? st.dist_m / st.active_s : 1.2;   // m/s, anfangs Wanderschritt
+  const eta = new Date(Date.now() + (rest / sp) * 1000), hh = String(eta.getHours()).padStart(2, "0") + ":" + String(eta.getMinutes()).padStart(2, "0");
+  let nxt = "";
+  if (ri.off) nxt = '<div class="bad" style="font-size:20px;font-weight:700">⚠ Abseits der Route</div>';
+  else if (ri.next_m !== undefined) {
+    const a = ri.next_angle, ar = Math.abs(a) >= 150 ? "↩" : a > 0 ? "➡" : "⬅";
+    nxt = `<div style="font-size:34px;line-height:1.1">${ar} <b>${ri.next_m >= 1000 ? nf(ri.next_m / 1000, 1) + " km" : Math.max(10, Math.round(ri.next_m / 10) * 10) + " m"}</b></div><div class="mut" style="font-size:13px">Nächste Abbiegung</div>`;
+  } else nxt = '<div style="font-size:20px">Keine Abbiegung mehr</div>';
+  let prof = "";
+  const pr = recProfile(ri.name);
+  if (pr) {
+    const W = 300, H = 64, tot = pr.d[pr.d.length - 1] || 1, lo = Math.min(...pr.e), hi = Math.max(...pr.e), sp2 = Math.max(20, hi - lo);
+    const X = m => (m / tot) * W, Y = e => H - 6 - ((e - lo) / sp2) * (H - 14);
+    const pts = pr.d.map((m, i) => `${X(m).toFixed(1)},${Y(pr.e[i]).toFixed(1)}`).join(" ");
+    let ie = 0; while (ie < pr.d.length - 1 && pr.d[ie] < prog) ie++;
+    let upLeft = 0; for (let i = Math.max(1, ie); i < pr.e.length; i++) if (pr.e[i] > pr.e[i - 1] + 0.5) upLeft += pr.e[i] - pr.e[i - 1];
+    prof = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:70px;margin-top:8px" role="img"><polyline points="${pts}" fill="none" stroke="#2f6b45" stroke-width="2"/>` +
+      `<line x1="${X(prog).toFixed(1)}" x2="${X(prog).toFixed(1)}" y1="0" y2="${H}" stroke="#2f6bd9" stroke-width="2"/><circle cx="${X(prog).toFixed(1)}" cy="${Y(pr.e[ie]).toFixed(1)}" r="4" fill="#2f6bd9"/></svg>` +
+      `<div class="mut" style="font-size:13px">${pr.e[ie]} m · noch ↑ ${Math.round(upLeft)} m · höchster Punkt ${hi} m</div>`;
+  }
+  box.innerHTML = `${nxt}<div class="row" style="gap:16px;justify-content:center;margin-top:6px"><span>Ziel in <b>${nf(rest / 1000, 1)} km</b></span><span>Ankunft ca. <b>${hh} Uhr</b></span></div>` +
+    `<div style="height:6px;background:var(--line,#ddd);border-radius:3px;margin-top:8px"><div style="height:6px;width:${Math.min(100, (prog / ri.total_m) * 100).toFixed(0)}%;background:#2f6bd9;border-radius:3px"></div></div>${prof}`;
 }
 
 VIEWS.record = async () => {
@@ -138,6 +197,7 @@ VIEWS.record = async () => {
       h += `<div class="panel" style="text-align:center"><div class="mut">${s === "paused" ? "⏸ pausiert" : st.gps ? "● nimmt auf" : "⚠ GPS ist ausgeschaltet"}</div>
         <div id="rt" style="font-size:44px;font-weight:700;margin:6px 0">${recDur(st.active_s || 0)}</div>
         <div class="recgrid">${recCells(st)}</div>
+        <div id="rlive" class="panel" style="display:none;margin:12px 0 0;text-align:center"></div>
         ${typeof A.routeInfo === "function" && recRouteInfo().has ? `<div class="mut" id="rgi" style="font-size:13px;margin-top:8px">🧭 ${esc(recRouteInfo().name)} · ${nf(recRouteInfo().km, 1)} km <label style="margin-left:8px"><input type="checkbox" id="rgon" ${recRouteInfo().on ? "checked" : ""}> Ansagen</label></div>` : ""}
         ${typeof A.takePhoto === "function" ? '<button class="btn" id="rphoto" style="width:100%;font-size:20px;padding:16px;margin-top:12px">📷 Foto aufnehmen</button><div id="rphinfo" class="mut" style="font-size:13px;margin-top:4px"></div>' : ""}
         <div class="row" style="gap:8px;margin-top:14px;justify-content:center">
@@ -199,6 +259,7 @@ VIEWS.record = async () => {
       sel.onchange = async () => {
         if (!sel.value) {
           A.clearRoute();
+          try { localStorage.removeItem(recProfKey); } catch (e) {}
           info.textContent = "Keine Route – freie Aufzeichnung.";
           return;
         }
@@ -316,10 +377,12 @@ VIEWS.record = async () => {
         } else if (!fitted) map.setView([47, 11], 5);
       };
       upd();
+      recLive(st);
       pollTimer = setInterval(() => {
         const n = recStatus();
         if (n.state !== lastUpState) return draw();
         recFill(n);
+        recLive(n);
         if ($("#rphinfo")) {
           const pi = recPhotoInfo();
           $("#rphinfo").textContent = `${pi.taken || 0} Foto(s) aufgenommen` + (pi.pending ? ` · ${pi.pending} warten auf den Upload${pi.error ? " (" + pi.error + ")" : ""}` : "");

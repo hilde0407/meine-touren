@@ -24,7 +24,7 @@ public final class Guide {
     private final int[] level;               // je Abbiegung: 0 nichts gesagt, 1 Vorankündigung, 2 „jetzt“
 
     private double prog = 0;
-    private boolean reached = false, introSaid = false, off = false, finished = false, km1 = false;
+    private boolean reached = false, introSaid = false, off = false, finished = false, km1 = false, km5 = false, half = false;
     private int offCount = 0;
     private long lastOffSay = 0;
 
@@ -136,6 +136,12 @@ public final class Guide {
     public double progressM() { return prog; }
     public boolean offRoute() { return off; }
 
+    /** Nächste noch nicht angesagte Abbiegung (oder null). */
+    public Turn nextTurn() {
+        for (int i = 0; i < turns.size(); i++) if (turns.get(i).at > prog - 8 && level[i] < 2) return turns.get(i);
+        return null;
+    }
+
     /** Abstand zur Strecke und Position darauf (Meter ab Start) für die Segmente [from,to]. */
     private double[] nearest(double px, double py, int from, int to, double penaltyFrom) {
         double best = 1e12, bp = prog, bscore = 1e12;
@@ -227,6 +233,14 @@ public final class Guide {
                 level[ti] = 1;
                 say.add(GuideText.ahead(d, t.angle, then));
             }
+        }
+        if (!half && totalM() > 6000 && prog >= totalM() / 2 && rest > 2500) {
+            half = true;
+            say.add(GuideText.half(rest));
+        }
+        if (!km5 && rest <= 5000 && totalM() > 9000 && rest > 2500) {
+            km5 = true;
+            say.add(GuideText.km5());
         }
         if (!km1 && rest <= 1000 && totalM() > 2500) {
             km1 = true;

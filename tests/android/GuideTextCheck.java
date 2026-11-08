@@ -1,4 +1,7 @@
+import de.meinetouren.app.Guide;
 import de.meinetouren.app.GuideText;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuideTextCheck {
     static void check(boolean ok, String msg) { if (!ok) { System.err.println("FEHLER: " + msg); System.exit(1); } }
@@ -15,6 +18,18 @@ public class GuideTextCheck {
             check(GuideText.dist(1500).startsWith("1,5") || GuideText.dist(1500).startsWith("1.5"), e[0] + " km: " + GuideText.dist(1500));
             check(GuideText.now(90, GuideText.thenPart(45)).endsWith("."), e[0] + " now");
         }
+        // lange gerade Strecke (12 km): Halbzeit und „noch fünf Kilometer“ werden je einmal angesagt
+        GuideText.lang = "de";
+        int n = 121;
+        double[] la = new double[n], lo = new double[n];
+        for (int i = 0; i < n; i++) { la[i] = 48.0 + i * 100 / 110540.0; lo[i] = 8.0; }
+        Guide g = new Guide(la, lo);
+        List<String> said = new ArrayList<>();
+        for (int i = 0; i < n; i++) said.addAll(g.fix(la[i], lo[i], 5f, 1.4, i * 70000L));
+        String all = String.join(" | ", said);
+        check(all.contains("Halbzeit") && all.indexOf("Halbzeit") == all.lastIndexOf("Halbzeit"), "Halbzeit: " + all);
+        check(all.contains("fünf Kilometer") && all.contains("ein Kilometer") && all.contains("Ziel erreicht"), "Restansagen: " + all);
+        check(g.nextTurn() == null, "keine Abbiegung auf der Geraden");
         System.out.println("OK GuideText");
     }
 }
