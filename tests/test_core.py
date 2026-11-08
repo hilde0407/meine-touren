@@ -728,10 +728,16 @@ def test_photo_duplicates_not_stored_twice(monkeypatch):
     from fastapi.testclient import TestClient
     from app import main
     monkeypatch.setattr(main, "scheduler", lambda: None)
-    im = Image.effect_noise((400, 300), 60).convert("RGB")
+    import random
+
+    def noise(seed):                                          # deterministisch (effect_noise ist zufällig und machte den Test flackernd)
+        r = random.Random(seed)
+        g = Image.frombytes("L", (100, 75), bytes(r.randrange(40, 216) for _ in range(7500))).resize((400, 300), Image.BICUBIC)
+        return g.convert("RGB")
+    im = noise(1)
     buf = io.BytesIO(); im.save(buf, "JPEG")
     small = io.BytesIO(); im.resize((200, 150)).save(small, "JPEG")
-    other = io.BytesIO(); Image.effect_noise((400, 300), 90).convert("RGB").transpose(Image.FLIP_LEFT_RIGHT).save(other, "JPEG")
+    other = io.BytesIO(); noise(2).save(other, "JPEG")
     with TestClient(main.app) as c:
         db.put("photo_only_tracked", "0")
         post = lambda rel, b, taken: c.post("/api/photo-upload", files={"file": ("x.jpg", b.getvalue(), "image/jpeg")},
