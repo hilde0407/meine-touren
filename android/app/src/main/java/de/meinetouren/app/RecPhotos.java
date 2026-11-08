@@ -77,6 +77,12 @@ final class RecPhotos {
         if ("now".equals(mode(c))) flushAsync(c);
     }
 
+    /** Zeitzone des Telefons als „+01:00“ – der Server braucht sie, um die Kamerazeit richtig einzuordnen. */
+    static String utcOffset() {
+        int m = java.util.TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 60000;
+        return String.format(Locale.US, "%s%02d:%02d", m < 0 ? "-" : "+", Math.abs(m) / 60, Math.abs(m) % 60);
+    }
+
     /** Dezimalgrad als EXIF-Wert „Grad/1,Minuten/1,Sekunden*1000/1000“. */
     static String dms(double v) {
         v = Math.abs(v);
@@ -137,6 +143,7 @@ final class RecPhotos {
                 h.setDoOutput(true);
                 h.setChunkedStreamingMode(64 * 1024);
                 h.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+                h.setRequestProperty("X-UTC-Offset", utcOffset());
                 String ck = CookieManager.getInstance().getCookie(server);
                 if (ck != null) h.setRequestProperty("Cookie", ck);
                 OutputStream o = h.getOutputStream();

@@ -499,7 +499,7 @@ async def api_share_target(files: list[UploadFile] = File(default=[])):
 
 
 @app.post("/api/rec-photos")
-async def api_rec_photos(files: list[UploadFile] = File(default=[])):
+async def api_rec_photos(request: Request, files: list[UploadFile] = File(default=[])):
     """Fotos, die in der Android-App während einer Aufzeichnung aufgenommen wurden (mit Aufnahmezeit und GPS im EXIF)."""
     import re as _re
     img_dir = config.INBOX_DIR / "teilen"
@@ -523,6 +523,7 @@ async def api_rec_photos(files: list[UploadFile] = File(default=[])):
                     target.unlink(missing_ok=True)
                     raise HTTPException(413, "Zu viele Daten auf einmal")
                 out.write(chunk)
+        photos.add_offset(target, request.headers.get("x-utc-offset"))
         saved += 1
     if saved:
         jobs.start("Fotos der Aufzeichnung", sync.import_inbox)

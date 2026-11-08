@@ -10,8 +10,8 @@ android {
         applicationId 'de.meinetouren.app'
         minSdk 26
         targetSdk 34
-        versionCode 250
-        versionName '2.5.0'
+        versionCode 251
+        versionName '2.5.1'
     }
 
     signingConfigs {

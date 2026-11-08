@@ -824,6 +824,34 @@ def with_exif_time(jpeg, taken, lat=None, lng=None, offset=None):
     return jpeg[:2] + b"\xff\xe1" + struct.pack(">H", len(payload) + 2) + payload + jpeg[2:]
 
 
+def add_offset(path, offset):
+    """Trägt die Zeitzone der Aufnahme („+01:00“) in die EXIF-Daten ein, wenn das Foto keine hat. Die Android-App schickt sie mit:
+    ohne sie würde die Kamerazeit als Ortszeit des Servers gedeutet und ein Foto aus einer anderen Zeitzone fiele aus der Tour."""
+    if not offset or not re.match(r"^[+-]\d\d:\d\d$", offset):
+        return False
+    try:
+        with Image.open(path) as im:
+            if im.format != "JPEG":
+                return False
+            ex = im.getexif()
+            sub = ex.get_ifd(0x8769)
+            if not (sub.get(0x9003) or ex.get(0x0132)) or sub.get(0x9011) or sub.get(0x9010):
+                return False
+            sub[0x9011] = offset
+            sub[0x9010] = offset
+            im.load()
+            im.save(str(path) + ".tmp", "JPEG", exif=ex.tobytes(), quality=95)
+        os.replace(str(path) + ".tmp", path)
+        return True
+    except Exception as e:  # noqa
+        log(f"Zeitzone für {path}: {e}")
+        try:
+            os.remove(str(path) + ".tmp")
+        except OSError:
+            pass
+        return False
+
+
 # ---------- Automatische Fotoauswahl (beste Fotos einer Tour) ----------
 _RATING_RES = (re.compile(rb'xmp:Rating\s*=\s*"(-?\d)"'), re.compile(rb"<xmp:Rating>\s*(-?\d)\s*</xmp:Rating>"))
 
