@@ -65,3 +65,14 @@ def test_record_upload_notifies(monkeypatch):
     c.post("/api/record/upload", json={"gpx": _gpx().replace("2026-07-01", "2026-07-04"), "name": "B"})
     time.sleep(0.3)
     assert len(sent) == 1                                              # abgeschaltet
+
+
+def test_offline_cache_wired():
+    """Offline-Speicher der App: Klasse vorhanden, im WebViewClient eingehängt, Anmelde-/Live-Pfade ausgenommen."""
+    d = ROOT / "android/app/src/main/java/de/meinetouren/app"
+    oc = (d / "OfflineCache.java").read_text(encoding="utf8")
+    ma = (d / "MainActivity.java").read_text(encoding="utf8")
+    assert "shouldInterceptRequest" in ma and "OfflineCache.serve" in ma and "OfflineCache.wanted" in ma
+    for pfad in ("login", "logout", "live", "backup", "photo/"):
+        assert pfad in oc.split("SKIP", 1)[1].split(";", 1)[0], pfad
+    assert "offlineServed" in ma and "clearOffline" in ma

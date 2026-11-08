@@ -21,6 +21,7 @@ import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -62,6 +63,14 @@ public class MainActivity extends Activity {
         CookieManager.getInstance().setAcceptThirdPartyCookies(web, false);
         web.addJavascriptInterface(new Bridge(), "MTApp");
         web.setWebViewClient(new WebViewClient() {
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView v, WebResourceRequest r) {
+                try {
+                    if (OfflineCache.wanted(server(), r)) return OfflineCache.serve(MainActivity.this, r);
+                } catch (Throwable t) { AppLog.log("Offline-Speicher: " + t.getClass().getSimpleName()); }
+                return null;
+            }
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
                 String u = r.getUrl().toString();
@@ -318,7 +327,7 @@ public class MainActivity extends Activity {
 
     /* ---------- Brücke zur Weboberfläche ---------- */
     public class Bridge {
-        @JavascriptInterface public String version() { return "2.6.1"; }
+        @JavascriptInterface public String version() { return "2.7.0"; }
         @JavascriptInterface public String serverUrl() { return server(); }
 
         @JavascriptInterface
@@ -374,6 +383,9 @@ public class MainActivity extends Activity {
         @JavascriptInterface public String routePoints() { return Navi.points(MainActivity.this); }
         @JavascriptInterface public void clearRoute() { Navi.clear(MainActivity.this); }
         @JavascriptInterface public String routeInfo() { return Navi.info(MainActivity.this); }
+        @JavascriptInterface public boolean offlineServed() { return OfflineCache.offline(); }
+        @JavascriptInterface public String offlineStats() { return OfflineCache.stats(MainActivity.this); }
+        @JavascriptInterface public void clearOffline() { OfflineCache.clear(MainActivity.this); }
         @JavascriptInterface public String lang() { return GuideText.lang; }
         @JavascriptInterface public void setLang(String l) { Navi.setLang(MainActivity.this, l); }
         @JavascriptInterface public void setGuide(boolean on) { Navi.setEnabled(MainActivity.this, on); }

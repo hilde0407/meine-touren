@@ -615,4 +615,11 @@ Jetzt sichern || Back up now || Sauvegarder maintenant || Hacer copia ahora
 Doppelte Namen: {} || Duplicate names: {} || Noms en double : {} || Nombres duplicados: {}
 Ziele {} || Goals {} || Objectifs {} || Objetivos {}
 Buch (z. B. „Rother Taunus“) || Book (e.g. “Rother Taunus”) || Livre (par ex. « Rother Taunus ») || Libro (p. ej. «Rother Taunus»)
+Alle Touren offline (Daten und Strecken) || All tours offline (data and tracks) || Tous les parcours hors ligne (données et tracés) || Todas las rutas sin conexión (datos y recorridos)
+Daten von Tour {} von {} || Data of tour {} of {} || Données du parcours {} sur {} || Datos de la ruta {} de {}
+Tour {} von {}: {} || Tour {} of {}: {} || Parcours {} sur {} : {} || Ruta {} de {}: {}
+Kartenkacheln {} von {} || Map tiles {} of {} || Tuiles de carte {} sur {} || Teselas de mapa {} de {}
+Fertig: {} Touren und {} Kartenkacheln stehen offline bereit. || Done: {} tours and {} map tiles are ready offline. || Terminé : {} parcours et {} tuiles de carte sont disponibles hors ligne. || Listo: {} rutas y {} teselas de mapa están disponibles sin conexión.
+Fehler: {} || Error: {} || Erreur : {} || Error: {}
+Offline – es werden die zuletzt geladenen Daten gezeigt (Änderungen sind nicht möglich). || Offline – the most recently loaded data is shown (changes are not possible). || Hors ligne – les dernières données chargées sont affichées (modifications impossibles). || Sin conexión: se muestran los últimos datos cargados (no se pueden hacer cambios).
 `;
