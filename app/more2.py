@@ -397,24 +397,54 @@ def api_share_del(token: str):
     return {"ok": True}
 
 
+class ShareGone(HTTPException):
+    """Link nicht (mehr) gültig; exp = Ablaufzeit, wenn er abgelaufen ist."""
+    def __init__(self, exp=None):
+        super().__init__(410 if exp else 404, "Link abgelaufen" if exp else "Link nicht (mehr) gültig")
+        self.exp = exp
+
+
+def gone_page(exp=None):
+    import html as _h
+    if exp:
+        d = datetime.fromtimestamp(exp, tz=TZ).strftime("%d.%m.%Y")
+        icon, title = "⏳", "Dieser Link ist abgelaufen"
+        text = f"Die Freigabe war bis zum <b>{_h.escape(d)}</b> gültig. Danach sind die Fotos nicht mehr abrufbar."
+        tip = "Bitte die Person, die dir den Link geschickt hat, dir einen neuen Link zu senden."
+    else:
+        icon, title = "🔗", "Dieser Link ist nicht (mehr) gültig"
+        text = "Die Freigabe wurde vom Absender zurückgezogen – oder der Link wurde beim Kopieren abgeschnitten."
+        tip = "Prüfe bitte, ob du den ganzen Link verwendet hast. Sonst bitte um einen neuen Link."
+    page = f"""<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>{title}</title><style>:root{{--bg:#eef2ee;--ink:#10282a;--mut:#5d716f;--card:#fff;--acc:#f2c230}}@media(prefers-color-scheme:dark){{:root{{--bg:#0d1b1c;--ink:#e6efec;--mut:#9db3ae;--card:#142a2b}}}}
+*{{box-sizing:border-box}}body{{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}}
+.box{{background:var(--card);border-radius:14px;padding:32px 26px;max-width:440px;text-align:center;box-shadow:0 4px 24px #0002}}.ic{{font-size:54px;line-height:1}}h1{{font-size:22px;margin:14px 0 10px}}p{{margin:8px 0}}.mut{{color:var(--mut);font-size:15px}}
+.brand{{margin-top:22px;font-size:13px;letter-spacing:.05em;color:var(--mut);border-top:1px solid #8884;padding-top:14px}}</style></head>
+<body><div class="box"><div class="ic">{icon}</div><h1>{title}</h1><p>{text}</p><p class="mut">{tip}</p><div class="brand">MEINE TOUREN</div></div></body></html>"""
+    return HTMLResponse(page, status_code=410 if exp else 404, headers={"Cache-Control": "no-store", "Referrer-Policy": "no-referrer"})
+
+
 def _share(token):
     from . import auth
     idx = auth.q1("SELECT uid FROM share_index WHERE token=?", (token,))
     if idx:
         ctx._uid.set(idx["uid"] or None)          # ab hier arbeitet die Anfrage mit den Daten des Besitzers
     elif auth.users_exist():
-        raise HTTPException(404, "Link nicht (mehr) gültig")
+        raise ShareGone()
     s = db.one("SELECT * FROM shares WHERE token=?", (token,))
     if not s:
-        raise HTTPException(404, "Link nicht (mehr) gültig")
+        raise ShareGone()
     if s["exp"] and s["exp"] < time.time():
-        raise HTTPException(404, "Link abgelaufen")
+        raise ShareGone(s["exp"])
     return s
 
 
 @router.get("/s/{token}")
 def share_page(token: str, request: Request):
-    s = _share(token)
+    try:
+        s = _share(token)
+    except ShareGone as g:
+        return gone_page(g.exp)
     hdr = {"Cache-Control": "no-store", "Referrer-Policy": "no-referrer"}
     if s["photos"] == 2:                           # Diashow: Seite mit Vorschau-Angaben (WhatsApp zeigt Titel + erstes Foto)
         import html as _h

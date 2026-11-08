@@ -390,3 +390,5 @@ Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → An
 **Info (ab 2.7.0):** Im Menü „Mehr“ (Handy) bzw. im Benutzermenü (Computer) zeigt „Info“ die laufende Version der Android-App und des Servers sowie die Ersteller (Volker Hildebrand und Claude).
 
 **Fotos auf der Karte (ab 2.7.1):** Der Knopf „Fotos“ zeigt jetzt auch Fotos ohne eigenen Aufnahmeort (GPS): ihre Position wird aus der Aufnahmezeit auf dem Track der Tour berechnet und als blassere Punkte gezeigt („Position aus der Uhrzeit berechnet“). Fotos mit GPS bleiben unverändert. Der Knopf zeigt die Anzahl, z. B. „Fotos (312)“.
+
+**Abgelaufene Diashow-Links (ab 2.7.3):** Wer einen abgelaufenen oder zurückgezogenen Link öffnet, sieht eine verständliche Seite statt einer Fehlermeldung: bei Ablauf mit dem Datum und dem Hinweis, einen neuen Link anzufordern, sonst mit dem Hinweis auf einen abgeschnittenen oder zurückgezogenen Link.

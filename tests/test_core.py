@@ -499,8 +499,10 @@ def test_more2(monkeypatch):
         e1 = [x for x in c.get("/api/tours/r1/shares").json() if x["token"] == ex["token"]][0]
         assert abs(e1["exp"] - time.time() - 7 * 86400) < 120 and e1["best"] == 5
         db.execute("UPDATE shares SET exp=? WHERE token=?", (int(time.time()) - 5, ex["token"]))   # abgelaufen
-        assert c.get("/s/" + ex["token"]).status_code == 404 and c.get("/api/public/" + ex["token"]).status_code == 404
-        assert c.get("/pub/" + ex["token"] + "/photo/1").status_code == 404
+        gp = c.get("/s/" + ex["token"])
+        assert gp.status_code == 410 and "abgelaufen" in gp.text and "text/html" in gp.headers["content-type"] and "detail" not in gp.text
+        assert c.get("/api/public/" + ex["token"]).status_code == 410 and c.get("/s/gibtsnicht123").status_code == 404 and "nicht (mehr) gültig" in c.get("/s/gibtsnicht123").text
+        assert c.get("/pub/" + ex["token"] + "/photo/1").status_code in (404, 410)
         assert c.delete("/api/share/" + sh["token"]).status_code == 200 and c.get("/s/" + sh["token"]).status_code == 404
         sent = []
         monkeypatch.setattr(more2.requests, "post", lambda u, **k: sent.append((u, k)) or type("R", (), {"status_code": 200})())
