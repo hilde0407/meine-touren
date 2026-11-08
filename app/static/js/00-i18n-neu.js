@@ -671,4 +671,8 @@ in etwa {} Stunden || in about {} hours || dans environ {} heures || en unas {} 
 ⚠ Schnee oder Frost {} || ⚠ Snow or frost {} || ⚠ Neige ou gel {} || ⚠ Nieve o helada {}
 ⚠ Temperatursturz um {} Grad {} || ⚠ Temperature drop of {} degrees {} || ⚠ Chute de température de {} degrés {} || ⚠ Descenso de temperatura de {} grados {}
 Wetterdienst nicht erreichbar: {} || Weather service not reachable: {} || Service météo inaccessible : {} || Servicio meteorológico no accesible: {}
+📷 Foto || 📷 Photo || 📷 Photo || 📷 Foto
+Noch keine Kommentare. || No comments yet. || Pas encore de commentaires. || Aún no hay comentarios.
+Kommentar schreiben … || Write a comment … || Écrire un commentaire … || Escribe un comentario …
+Bitte einen Kommentar eingeben || Please enter a comment || Veuillez saisir un commentaire || Introduce un comentario
 `;

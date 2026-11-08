@@ -98,3 +98,24 @@ def test_record_upload_waypoints():
     assert len(c.get(f"/api/tours/{tid}/wps").json()) == 1
     # Tour ohne Wegpunkte: leere Liste
     assert c.get("/api/tours/gibtsnicht/wps").json() == []
+
+
+def test_photo_comments_api():
+    """Kommentare zu Fotos: anlegen, je Tour auflisten, löschen; leere Texte werden abgelehnt; mit dem Foto verschwinden sie."""
+    from fastapi.testclient import TestClient
+    from app import main, db, photos
+    c = TestClient(main.app)
+    db.execute("INSERT INTO photos(path,taken_ts,tour_id) VALUES('/x/kommentar.jpg',1,'kt1')")
+    pid = db.one("SELECT id FROM photos WHERE path='/x/kommentar.jpg'")["id"]
+    assert c.post(f"/api/photos/{pid}/comments", json={"text": "   "}).status_code == 400
+    assert c.post("/api/photos/987654/comments", json={"text": "x"}).status_code == 404
+    r = c.post(f"/api/photos/{pid}/comments", json={"text": "Schöner Blick!"})
+    assert r.status_code == 200 and r.json()["text"] == "Schöner Blick!"
+    c.post(f"/api/photos/{pid}/comments", json={"text": "Zweiter"})
+    m = c.get("/api/tours/kt1/comments").json()
+    assert [x["text"] for x in m[str(pid)]] == ["Schöner Blick!", "Zweiter"]
+    assert len(c.get(f"/api/photos/{pid}/comments").json()) == 2
+    c.delete(f"/api/comments/{r.json()['id']}")
+    assert [x["text"] for x in c.get("/api/tours/kt1/comments").json()[str(pid)]] == ["Zweiter"]
+    photos.delete_photos([pid])
+    assert c.get("/api/tours/kt1/comments").json() == {}

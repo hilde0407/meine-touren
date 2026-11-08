@@ -40,7 +40,9 @@ VIEWS.story = async id => {
   const t = BY[id];
   if (!t) throw new Error("Tour nicht gefunden");
   $("#main").innerHTML = `<div class="row"><a class="back" href="#/tour/${esc(id)}">‹ Zur Tour</a></div><p class="mut">Wird geladen …</p>`;
-  const [wps, ph, co] = await Promise.all([api(`/api/tours/${id}/wps`).catch(() => []), api(`/api/photos?tour_id=${id}&limit=400`).catch(() => []), api(`/api/tours/${id}/coords`).catch(() => [])]);
+  let CM = {};
+  const [wps, ph, co, cmt] = await Promise.all([api(`/api/tours/${id}/wps`).catch(() => []), api(`/api/photos?tour_id=${id}&limit=400`).catch(() => []), api(`/api/tours/${id}/coords`).catch(() => []), api(`/api/tours/${id}/comments`).catch(() => ({}))]);
+  CM = cmt || {};
   const t0 = t.start_ts || 0, T = Math.max(1, Math.round((t.h || 0) * 3600));
   const ev = [{ts: t0, kind: "start", txt: "Start", pos: co.length ? [co[0][0], co[0][1]] : null}];
   wps.forEach(p => ev.push({ts: p.ts || t0, kind: "wp", txt: p.note || "Wegpunkt", pos: [p.lat, p.lng]}));
@@ -55,7 +57,7 @@ VIEWS.story = async id => {
   const rel = ts => { const m = Math.max(0, Math.round((ts - t0) / 60)); return `+${Math.floor(m / 60)}:${pad2(m % 60)} h`; };
   const icon = k => ({start: "🏁", end: "🎯", wp: "📍", ph: "📷"})[k];
   const item = (e, i) => `<div class="stev" data-e="${i}" style="display:flex;gap:12px;margin:0 0 18px;cursor:${e.pos ? "pointer" : "default"}"><div style="min-width:78px;text-align:right"><b>${wpTime(e.ts)}</b><div class="mut" style="font-size:12px">${rel(e.ts)}</div></div><div style="flex:1;border-left:3px solid var(--line,#ccc);padding-left:14px"><div style="font-size:18px">${icon(e.kind)} ${e.kind === "ph" ? `${e.ph.length} Foto${e.ph.length > 1 ? "s" : ""}` : esc(e.txt)}</div>` +
-    (e.kind === "ph" ? `<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">${e.ph.slice(0, 8).map(p => `<img loading="lazy" src="/pic/${p.id}?size=500" style="height:120px;border-radius:8px">`).join("")}${e.ph.length > 8 ? `<span class="mut">+${e.ph.length - 8}</span>` : ""}</div>` : "") + `</div></div>`;
+    (e.kind === "ph" ? `<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">${e.ph.slice(0, 8).map(p => `<span class="sph" data-p="${p.id}" style="position:relative;cursor:zoom-in"><img loading="lazy" src="/pic/${p.id}?size=500" style="height:120px;border-radius:8px;display:block">${(CM[p.id] || []).length ? `<b class="scn" style="position:absolute;right:4px;bottom:4px;background:#000a;color:#fff;border-radius:10px;padding:1px 7px;font-size:12px">💬 ${CM[p.id].length}</b>` : ""}</span>`).join("")}${e.ph.length > 8 ? `<span class="mut">+${e.ph.length - 8}</span>` : ""}</div>` : "") + `</div></div>`;
   $("#main").innerHTML = `<div class="row"><a class="back" href="#/tour/${esc(id)}">‹ Zur Tour</a></div>
    <h1 style="font-size:clamp(30px,5vw,48px);margin:14px 0 4px">${esc(t.name)}</h1><p class="mut">${dateL(t.date)} · ${nf(t.km, 1)} km · ↑ ${nf(t.up_m, 0)} m · ${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60))} h${t.h ? ` · ${nf(t.km / t.h, 1)} km/h` : ""}</p>
    <div class="tmap" id="sm" style="height:320px"></div><div style="margin-top:22px" id="stl">${ev.map(item).join("")}</div>`;
@@ -65,7 +67,48 @@ VIEWS.story = async id => {
     map.fitBounds(ln.getBounds(), {padding: [20, 20]});
   } else map.setView([t.lat || 50, t.lng || 8], 12);
   ev.forEach((e, i) => { if (e.pos && e.kind !== "ph") L.marker(e.pos, {icon: wpIcon(icon(e.kind))}).addTo(map).bindPopup(esc(e.txt)); });
+  const openPhoto = pid => {
+    const ov = document.createElement("div");
+    ov.id = "pcm";
+    ov.style.cssText = "position:fixed;inset:0;background:#000d;z-index:9999;display:flex;align-items:center;justify-content:center;padding:12px";
+    const draw = () => {
+      const l = CM[pid] || [];
+      ov.innerHTML = `<div style="background:var(--bg,#fff);color:var(--fg,#222);border-radius:14px;max-width:760px;width:100%;max-height:96vh;overflow:auto;padding:14px">
+       <div class="row" style="justify-content:space-between"><b>📷 Foto</b><button class="btn ghost sm" id="pcx">✕</button></div>
+       <img src="/pic/${pid}?size=1200" style="width:100%;max-height:55vh;object-fit:contain;border-radius:8px;margin:8px 0">
+       <div id="pcl">${l.length ? l.map(c => `<div class="pcc" style="margin:6px 0;padding:6px 10px;border-radius:8px;background:rgba(128,128,128,.12)"><div class="mut" style="font-size:12px">${c.author ? esc(c.author) + " · " : ""}${new Date(c.ts * 1000).toLocaleString()} <a href="#" class="pcd" data-c="${c.id}" title="Löschen">🗑</a></div>${esc(c.text)}</div>`).join("") : `<p class="mut">Noch keine Kommentare.</p>`}</div>
+       <div class="row" style="gap:6px;margin-top:8px"><input id="pci" maxlength="1000" placeholder="Kommentar schreiben …" style="flex:1"><button class="btn sm" id="pcs">Senden</button></div></div>`;
+      ov.querySelector("#pcx").onclick = () => ov.remove();
+      const send = async () => {
+        const v = ov.querySelector("#pci").value.trim();
+        if (!v) return;
+        try {
+          const r = await api(`/api/photos/${pid}/comments`, {method: "POST", body: JSON.stringify({text: v})});
+          (CM[pid] = CM[pid] || []).push(r);
+          draw();
+          const sp = document.querySelector(`.sph[data-p="${pid}"]`);
+          if (sp) { let b = sp.querySelector(".scn"); if (!b) { b = document.createElement("b"); b.className = "scn"; b.style.cssText = "position:absolute;right:4px;bottom:4px;background:#000a;color:#fff;border-radius:10px;padding:1px 7px;font-size:12px"; sp.appendChild(b); } b.textContent = "💬 " + CM[pid].length; }
+        } catch (er) { alert(er.message || "Fehler"); }
+      };
+      ov.querySelector("#pcs").onclick = send;
+      ov.querySelector("#pci").onkeydown = e => { if (e.key === "Enter") send(); };
+      ov.querySelectorAll(".pcd").forEach(a => a.onclick = async e => {
+        e.preventDefault();
+        const cid = +a.dataset.c;
+        await api(`/api/comments/${cid}`, {method: "DELETE"}).catch(() => 0);
+        CM[pid] = (CM[pid] || []).filter(c => c.id !== cid);
+        draw();
+        const b = document.querySelector(`.sph[data-p="${pid}"] .scn`);
+        if (b) { if (CM[pid].length) b.textContent = "💬 " + CM[pid].length; else b.remove(); }
+      });
+    };
+    ov.onclick = e => { if (e.target === ov) ov.remove(); };
+    document.body.appendChild(ov);
+    draw();
+  };
   $("#stl").onclick = e => {
+    const sp = e.target.closest(".sph");
+    if (sp) { openPhoto(+sp.dataset.p); return; }
     const el = e.target.closest(".stev");
     if (!el) return;
     const p = ev[+el.dataset.e];

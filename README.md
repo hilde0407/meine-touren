@@ -189,7 +189,36 @@ Im Ordner `android/` liegt eine kleine native Android-App („Hülle“) um die 
 **Wichtig:** Hersteller wie Xiaomi, Samsung oder Huawei beenden Hintergrunddienste teils aggressiv. Für zuverlässige Aufzeichnungen die Akku-Optimierung für die App ausschalten (Verwaltung → Android-App → „Akku-Einstellungen“). Die App wurde ohne echtes Gerät entwickelt; bitte zuerst eine kurze Testrunde machen.
 
 #### Handy und HTTPS
-Android installiert die App nur bei einer **gesicherten Adresse (HTTPS)** wirklich – bei `http://192.168…` entsteht nur eine Verknüpfung ohne Teilen-Menü. Der einfachste Weg ist **Tailscale** (kostenlos): auf Server und Handy installieren, auf dem Server `tailscale serve --bg 80` ausführen und die angezeigte Adresse `https://…ts.net` am Handy öffnen. Alternativ ein Reverse-Proxy mit eigener Domain (Caddy, Nginx Proxy Manager).
+Android installiert die App nur bei einer **gesicherten Adresse (HTTPS)** wirklich – bei `http://192.168…` entsteht nur eine Verknüpfung ohne Teilen-Menü. Der einfachste Weg ist **Tailscale** (kostenlos), siehe unten. Alternativ ein Reverse-Proxy mit eigener Domain (Caddy, Nginx Proxy Manager).
+
+### Tailscale einrichten (privater Zugriff von unterwegs)
+Tailscale verbindet deine eigenen Geräte über ein privates Netz (Tailnet), ohne dass du am Router einen Port öffnest. Nur Geräte, die mit deinem Konto angemeldet sind, kommen an den Server.
+
+1. **Konto anlegen** auf https://login.tailscale.com (Anmeldung über Google, Microsoft, Apple oder GitHub; der Tarif „Personal“ ist kostenlos).
+2. **Auf dem Server installieren** (Proxmox-Container oder Debian/Ubuntu): `curl -fsSL https://tailscale.com/install.sh | sh`, danach `tailscale up` und den angezeigten Link im Browser bestätigen. In einem LXC-Container muss zuvor das TUN-Gerät freigegeben sein (Container → Optionen → Features, oder `/dev/net/tun` in der Container-Konfiguration durchreichen).
+3. **Auf dem Handy und Mac** die Tailscale-App installieren und mit demselben Konto anmelden.
+4. **HTTPS aktivieren:** In der Tailscale-Verwaltung (Admin Console → DNS) „MagicDNS“ und „HTTPS Certificates“ einschalten.
+5. **App nur im Tailnet bereitstellen:** auf dem Server `tailscale serve --bg 80` (Meine Touren lauscht auf Port 80; bei anderem Port die Nummer anpassen). `tailscale serve status` zeigt die Adresse, etwa `https://touren.dein-tailnet.ts.net`.
+6. **Am Handy** diese Adresse öffnen (Tailscale muss dort aktiv sein) und in der Android-App als Serveradresse eintragen. Das Zertifikat ist gültig, die App lässt sich normal installieren.
+
+Das ist die empfohlene Einstellung: Die Adresse ist nur für deine eigenen Geräte erreichbar. Beenden mit `tailscale serve reset`.
+
+### Tailscale Funnel (öffentlich im Internet erreichbar)
+Mit **Funnel** wird dieselbe Adresse für jeden im Internet erreichbar, auch ohne Tailscale. Das braucht man nur, wenn Empfänger ohne Konto etwas öffnen sollen: Teilen-Links einer Tour, die Diashow, der **Live-Standort-Link** oder der Link zur Erzählung.
+
+- **Einschalten:** In der Admin Console → *Access controls* muss Funnel für das Gerät erlaubt sein (Attribut `funnel` in der Richtlinie; beim ersten Aufruf von `tailscale funnel` wird der Link zur Freigabe angezeigt). Dann `tailscale funnel --bg 80`. Funnel erlaubt die Ports 443, 8443 und 10000. `tailscale funnel status` zeigt, was offen ist.
+- **Ausschalten:** `tailscale funnel --bg 80 off` bzw. `tailscale funnel reset`. Danach ist wieder nur das Tailnet verbunden (`tailscale serve --bg 80`).
+
+**Risiken – bitte vorher lesen:**
+- **Die ganze Anmeldeseite ist öffentlich.** Funnel leitet den Port der App weiter, nicht nur die Teilen-Links. Jeder, der die Adresse kennt oder findet, sieht die Login-Seite und kann Passwörter durchprobieren. Adressen mit `ts.net` sind zudem über die öffentlichen Zertifikatslisten (Certificate Transparency) auffindbar, die Adresse ist also nicht geheim.
+- **Starke Passwörter und Konten:** Lege mindestens ein Konto mit langem, einmaligem Passwort an (*Verwaltung → Benutzer*), keine Standardpasswörter. Nutze nach Möglichkeit Funnel nur zeitweise, solange ein Link gebraucht wird.
+- **Teilen-Links sind Links ohne Anmeldung.** Wer den Link hat, sieht den Inhalt (bei Touren sind Anfang und Ende ausgeblendet; beim Live-Standort der letzte gemeldete Punkt). Links lassen sich widerrufen, Live-Links laufen nach der gewählten Zeit ab. Poste sie nicht öffentlich und gib sie nur an Personen weiter, denen du den Standort anvertraust.
+- **Datenschutz:** Fotos, Orte und Gewohnheiten (wann und wo du unterwegs bist) sind sensibel. Ein öffentlicher Server ist ein Ziel für Scanner und Bots.
+- **Software aktuell halten:** Spiele Updates (*Verwaltung → Update*) und Betriebssystem-Updates zeitnah ein; ein öffentlich erreichbarer Dienst ist der erste Angriffspunkt, wenn eine Lücke bekannt wird.
+- **Bandbreite und Zuverlässigkeit:** Funnel ist für gelegentliche Nutzung gedacht und hat Datenlimits; es ist kein Ersatz für einen Webserver. Fällt der Server aus, sind die Links tot.
+- **Keine Sicherung durch Tailscale:** Funnel verschlüsselt die Übertragung (HTTPS), schützt aber nicht vor schwachen Passwörtern oder Fehlern in der App.
+
+Faustregel: im Alltag nur `tailscale serve` (privat). `tailscale funnel` nur einschalten, wenn jemand ohne Tailscale einen Link öffnen soll, und danach wieder ausschalten. In *Verwaltung → Standort teilen* steht „Aus“ für den Normalbetrieb.
 
 ### Neu in Version 1.13.1
 
@@ -394,6 +423,9 @@ Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → An
 **Abgelaufene Diashow-Links (ab 2.7.3):** Wer einen abgelaufenen oder zurückgezogenen Link öffnet, sieht eine verständliche Seite statt einer Fehlermeldung: bei Ablauf mit dem Datum und dem Hinweis, einen neuen Link anzufordern, sonst mit dem Hinweis auf einen abgeschnittenen oder zurückgezogenen Link.
 
 **Fotos aus der App in einer anderen Zeitzone (ab Server 2.7.4 / App 2.5.1):** Die App schickt mit jedem Foto-Upload die Zeitzone des Telefons mit. Hat die Kamera keine Zeitzone ins Foto geschrieben, trägt der Server sie nach. Vorher wurde die Aufnahmezeit als Ortszeit des Servers gedeutet – war das Handy z. B. auf den Kanaren (UTC+0) und der Server in Deutschland, lag das Foto eine Stunde neben der Tour und wurde nicht zugeordnet.
+
+### Neu in 3.1 – Kommentare zu Fotos
+In der **Erzählung** (Tourseite → „📖 Erzählung“) lässt sich jedes Foto anklicken: Es öffnet sich groß, darunter stehen die Kommentare (mit Name und Zeit) und ein Eingabefeld. Kommentare lassen sich löschen; die Zahl der Kommentare erscheint als 💬 am Vorschaubild. Schnittstelle: `GET /api/tours/<id>/comments`, `GET|POST /api/photos/<id>/comments`, `DELETE /api/comments/<id>`. Beim Löschen eines Fotos verschwinden seine Kommentare. Außerdem erscheint bei Komoot-Touren der Knopf „⬇ GPX“ nicht mehr doppelt.
 
 ### Neu in 3.0 – die App begleitet die ganze Tour
 

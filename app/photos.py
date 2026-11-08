@@ -499,6 +499,7 @@ def delete_photos(ids):
             except OSError:
                 pass
             db.execute("DELETE FROM photo_pref WHERE path=?", (r["path"],))
+            db.execute("DELETE FROM photo_comments WHERE photo_id=?", (r["id"],))
             db.execute("DELETE FROM photos WHERE id=?", (r["id"],))
             n += 1
     log(f"Fotos: {n} gelöscht")

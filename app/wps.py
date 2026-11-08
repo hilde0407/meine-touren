@@ -82,3 +82,50 @@ def api_wps_del(tour_id: str, wid: int):
     ensure()
     db.execute("DELETE FROM tour_wps WHERE id=? AND tour_id=?", (wid, tour_id))
     return {"ok": True}
+
+
+# ---------- Kommentare zu Fotos (in der Erzählung) ----------
+def _author(request):
+    u = getattr(request.state, "user", None)
+    return (u or {}).get("name") or ""
+
+
+@router.get("/api/tours/{tour_id}/comments")
+def api_tour_comments(tour_id: str):
+    """Alle Kommentare zu den Fotos einer Tour: {Foto-ID: [{id, ts, author, text}, …]}."""
+    out = {}
+    for r in db.query("SELECT c.id,c.photo_id,c.ts,c.author,c.text FROM photo_comments c JOIN photos p ON p.id=c.photo_id WHERE p.tour_id=? ORDER BY c.ts,c.id", (tour_id,)):
+        out.setdefault(str(r["photo_id"]), []).append({"id": r["id"], "ts": r["ts"], "author": r["author"], "text": r["text"]})
+    return out
+
+
+@router.get("/api/photos/{pid}/comments")
+def api_photo_comments(pid: int):
+    return db.query("SELECT id,ts,author,text FROM photo_comments WHERE photo_id=? ORDER BY ts,id", (pid,))
+
+
+@router.post("/api/photos/{pid}/comments")
+async def api_photo_comment_add(pid: int, request: Request):
+    import time
+    try:
+        d = await request.json()
+    except Exception:  # noqa
+        raise HTTPException(400, "Ungültige Daten")
+    text = str(d.get("text") or "").strip()[:1000]
+    if not text:
+        raise HTTPException(400, "Bitte einen Kommentar eingeben")
+    if not db.one("SELECT 1 FROM photos WHERE id=?", (pid,)):
+        raise HTTPException(404, "Tour oder Foto nicht gefunden")
+    n = db.one("SELECT COUNT(*) n FROM photo_comments WHERE photo_id=?", (pid,))["n"]
+    if n >= 200:
+        raise HTTPException(400, "Zu viele Daten auf einmal")
+    ts = int(time.time())
+    db.execute("INSERT INTO photo_comments(photo_id,ts,author,text) VALUES(?,?,?,?)", (pid, ts, _author(request), text))
+    row = db.one("SELECT id,ts,author,text FROM photo_comments WHERE photo_id=? ORDER BY id DESC LIMIT 1", (pid,))
+    return row
+
+
+@router.delete("/api/comments/{cid}")
+def api_comment_del(cid: int):
+    db.execute("DELETE FROM photo_comments WHERE id=?", (cid,))
+    return {"ok": True}

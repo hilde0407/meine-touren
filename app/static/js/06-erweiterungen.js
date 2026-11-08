@@ -303,10 +303,10 @@ VIEWS.tour = async id => {
   const t = BY[id],
     r = ($("#ksync") || $("#eup")) && ($("#ksync") || $("#eup")).closest(".row");
   if (!t || !r) return;
-  if ($("#ksync"))           // Komoot-Touren: zusätzliche Knöpfe (lokale Touren haben GPX/Teilen schon in der Leiste)
+  if ($("#ksync"))           // Komoot-Touren: zusätzliche Knöpfe (GPX steht schon in der Leiste)
   r.insertAdjacentHTML(
     "beforeend",
-    `<a class="btn ghost sm" href="/api/tours/${encodeURIComponent(id)}/gpx" download title="Strecke als GPX-Datei">⬇ GPX</a><a class="btn ghost sm" href="#/flight/${encodeURIComponent(id)}" title="Die Strecke im 3D-Gelände abfliegen">🛰 3D-Flug</a>${t.photos ? `<button class="btn ghost sm" id="shr" title="Link zur Foto-Diashow dieser Tour kopieren">🔗 Diashow-Link</button>` : ""}`
+    `<a class="btn ghost sm" href="#/flight/${encodeURIComponent(id)}" title="Die Strecke im 3D-Gelände abfliegen">🛰 3D-Flug</a>${t.photos ? `<button class="btn ghost sm" id="shr" title="Link zur Foto-Diashow dieser Tour kopieren">🔗 Diashow-Link</button>` : ""}`
   );
   if ($("#shr"))
     $("#shr").onclick = async () => {
