@@ -907,7 +907,7 @@ def test_record_live_view(page, app_url):
       localStorage.setItem('mt_route_prof', JSON.stringify({name:'Testroute', d:[0,1000,2000,3000,4000], e:[800,850,900,860,950], up:190}));
       window._st = {state:'recording', sport:'hike', name:'', count:5, dist_m:1500, up_m:30, down_m:5, active_s:1200, gps:true};
       window._ri = {on:true, has:true, name:'Testroute', km:4, turns:2, prog_m:1000, total_m:4000, next_m:230, next_angle:-90, off:false};
-      window.MTApp = {version:()=>'2.9.0', serverUrl:()=>location.origin, hasPermission:()=>true, requestPermission(){}, openBatterySettings(){}, changeServer(){},
+      window.MTApp = {version:()=>'3.0.0', serverUrl:()=>location.origin, hasPermission:()=>true, requestPermission(){}, openBatterySettings(){}, changeServer(){},
         status:()=>JSON.stringify(window._st), points:()=>'[[47,11],[47.001,11.001]]', routeInfo:()=>JSON.stringify(window._ri), routePoints:()=>'[]',
         setRoute(){}, clearRoute(){}, setGuide(){}, guideTest(){}, backups:()=>'[]', photoInfo:()=>'{}'};
     """)
@@ -956,7 +956,7 @@ def test_record_weather_and_live_link(page, app_url):
     pg.add_init_script("""
       window._st = {state:'idle', sport:'hike', name:'', count:0, dist_m:0, up_m:0, down_m:0, active_s:0, gps:true};
       window._wx = '{}'; window._wxon = true; window._shared = null;
-      window.MTApp = {version:()=>'2.9.0', serverUrl:()=>location.origin, hasPermission:()=>true, requestPermission(){}, openBatterySettings(){}, changeServer(){},
+      window.MTApp = {version:()=>'3.0.0', serverUrl:()=>location.origin, hasPermission:()=>true, requestPermission(){}, openBatterySettings(){}, changeServer(){},
         status:()=>JSON.stringify(window._st), points:()=>'[]', routeInfo:()=>'{"has":false}', routePoints:()=>'[]', setRoute(){}, clearRoute(){}, setGuide(){}, guideTest(){},
         backups:()=>'[]', photoInfo:()=>'{}', weatherOn:()=>window._wxon, setWeather(b){window._wxon=b}, weatherInfo:()=>window._wx, shareText(t){window._shared=t},
         startRecording(){window._st.state='recording'}};

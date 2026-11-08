@@ -327,7 +327,7 @@ public class MainActivity extends Activity {
 
     /* ---------- Brücke zur Weboberfläche ---------- */
     public class Bridge {
-        @JavascriptInterface public String version() { return "2.9.0"; }
+        @JavascriptInterface public String version() { return "3.0.0"; }
         @JavascriptInterface public String serverUrl() { return server(); }
 
         @JavascriptInterface
