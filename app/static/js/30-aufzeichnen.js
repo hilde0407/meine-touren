@@ -65,6 +65,42 @@ const recPhotoInfo = () => {
   }
 };
 
+/* Route zum Folgen mit Sprachansagen (Planungen und frühere Touren) */
+const recRouteInfo = () => {
+  try {
+    return JSON.parse(recApp().routeInfo());
+  } catch (e) {
+    return {};
+  }
+};
+const recRoutePts = pts => {
+  const out = [];
+  let last = null;
+  for (const p of pts) {
+    const la = +p[0], lo = +p[1];
+    if (!isFinite(la) || !isFinite(lo)) continue;
+    if (last && Math.abs(la - last[0]) < 0.00002 && Math.abs(lo - last[1]) < 0.00003) continue;   // Punkte unter ca. 2 m Abstand weglassen
+    out.push((last = [la, lo]));
+  }
+  return out;
+};
+async function recLoadRoute(key) {
+  const A = recApp();
+  let pts, name;
+  if (key.startsWith("p")) {
+    const p = await api(`/api/plans/${key.slice(1)}`);
+    pts = p.pts;
+    name = p.name;
+  } else {
+    pts = await api(`/api/tours/${key.slice(1)}/coords`);
+    name = (BY[key.slice(1)] || {}).name || "Tour";
+  }
+  pts = recRoutePts(pts || []);
+  if (pts.length < 2) throw new Error("Die Strecke hat zu wenige Punkte");
+  A.setRoute(pts.map(p => p[0].toFixed(6) + "," + p[1].toFixed(6)).join(";"), name);
+  return pts;
+}
+
 VIEWS.record = async () => {
   const A = recApp();
   if (!A) {
@@ -81,6 +117,8 @@ VIEWS.record = async () => {
       h += '<div class="panel"><p><b>Standort-Berechtigung fehlt.</b> Für die Aufzeichnung braucht die App Zugriff auf den genauen Standort.</p><button class="btn" id="rperm">Berechtigung erteilen</button></div>';
     if (s === "idle") {
       h += `<div class="panel"><label class="mut">Sportart</label><select id="rsport" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px">${REC_SPORTS.map(([k, l]) => `<option value="${k}">${l}</option>`).join("")}</select>
+        ${typeof A.setRoute === "function" ? `<label class="mut">Route mit Sprachansagen (optional)</label><select id="rroute" style="width:100%;font-size:17px;padding:10px;margin:6px 0 4px"><option value="">Keine – frei aufzeichnen</option></select>
+        <div id="rrinfo" class="mut" style="font-size:13px;margin-bottom:12px">Lädt eine geplante oder frühere Strecke; unterwegs sagt die App an, wo du abbiegen musst.</div>` : ""}
         ${typeof A.takePhoto === "function" ? `<label class="mut">Fotos während der Aufzeichnung</label><select id="rphm" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px"><option value="now">Sofort auf den Server laden</option><option value="end">Gesammelt am Ende laden</option></select>` : ""}
         <label class="mut">Name (optional)</label><input id="rname" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px" placeholder="wird sonst automatisch vergeben">
         <button class="btn" id="rstart" style="width:100%;font-size:20px;padding:16px">● Aufzeichnung starten</button>
@@ -100,6 +138,7 @@ VIEWS.record = async () => {
       h += `<div class="panel" style="text-align:center"><div class="mut">${s === "paused" ? "⏸ pausiert" : st.gps ? "● nimmt auf" : "⚠ GPS ist ausgeschaltet"}</div>
         <div id="rt" style="font-size:44px;font-weight:700;margin:6px 0">${recDur(st.active_s || 0)}</div>
         <div class="recgrid">${recCells(st)}</div>
+        ${typeof A.routeInfo === "function" && recRouteInfo().has ? `<div class="mut" id="rgi" style="font-size:13px;margin-top:8px">🧭 ${esc(recRouteInfo().name)} · ${nf(recRouteInfo().km, 1)} km <label style="margin-left:8px"><input type="checkbox" id="rgon" ${recRouteInfo().on ? "checked" : ""}> Ansagen</label></div>` : ""}
         ${typeof A.takePhoto === "function" ? '<button class="btn" id="rphoto" style="width:100%;font-size:20px;padding:16px;margin-top:12px">📷 Foto aufnehmen</button><div id="rphinfo" class="mut" style="font-size:13px;margin-top:4px"></div>' : ""}
         <div class="row" style="gap:8px;margin-top:14px;justify-content:center">
           ${s === "paused" ? '<button class="btn" id="rres">▶ Weiter</button>' : '<button class="btn alt" id="rpause">⏸ Pause</button>'}
@@ -144,6 +183,39 @@ VIEWS.record = async () => {
       $("#rphm").value = A.photoMode();
       $("#rphm").onchange = () => A.setPhotoMode($("#rphm").value);
     }
+    if ($("#rroute")) {
+      const sel = $("#rroute"),
+        info = $("#rrinfo");
+      Promise.all([api("/api/plans").catch(() => []), TOURS.length ? Promise.resolve() : loadTours().catch(() => {})]).then(([plans]) => {
+        if (!$("#rroute")) return;
+        let h = '<option value="">Keine – frei aufzeichnen</option>';
+        if (plans.length) h += `<optgroup label="Geplante Touren">${plans.map(p => `<option value="p${p.id}">${esc(p.name)} · ${nf(p.km || 0, 1)} km</option>`).join("")}</optgroup>`;
+        const tl = [...TOURS].sort((a, b) => (b.date || "").localeCompare(a.date || "")).slice(0, 40);
+        if (tl.length) h += `<optgroup label="Frühere Touren (zum Nachgehen)">${tl.map(t => `<option value="t${t.id}">${esc(t.name)} · ${(t.date || "").slice(0, 10)} · ${nf(t.km, 1)} km</option>`).join("")}</optgroup>`;
+        sel.innerHTML = h;
+        const ri = recRouteInfo();
+        if (ri.has) info.innerHTML = `Geladen: <b>${esc(ri.name)}</b> · ${nf(ri.km, 1)} km · ${ri.turns} Abbiegungen. Die Ansagen beginnen, sobald du auf der Route bist.`;
+      });
+      sel.onchange = async () => {
+        if (!sel.value) {
+          A.clearRoute();
+          info.textContent = "Keine Route – freie Aufzeichnung.";
+          return;
+        }
+        info.textContent = "Wird geladen …";
+        try {
+          await recLoadRoute(sel.value);
+          const ri = recRouteInfo();
+          info.innerHTML = `Geladen: <b>${esc(ri.name)}</b> · ${nf(ri.km, 1)} km · ${ri.turns} Abbiegungen.<br>Die Ansagen beginnen, sobald du auf der Route bist. <label><input type="checkbox" id="rgon2" ${ri.on ? "checked" : ""}> Ansagen</label> <button class="btn alt sm" id="rgtest">Testansage</button>`;
+          $("#rgon2").onchange = e => A.setGuide(e.target.checked);
+          $("#rgtest").onclick = () => A.guideTest();
+        } catch (e) {
+          sel.value = "";
+          info.innerHTML = `<span class="bad">Route konnte nicht geladen werden: ${esc(e.message)}</span>`;
+        }
+      };
+    }
+    if ($("#rgon")) $("#rgon").onchange = e => A.setGuide(e.target.checked);
     on("#rphoto", () => {
       if (!A.takePhoto()) alert("Fotos sind nur während einer laufenden Aufzeichnung möglich.");
     });
@@ -219,6 +291,11 @@ VIEWS.record = async () => {
     if (s === "recording" || s === "paused") {
       const m = $("#rmap");
       map = mkMap(m, {layers: true});
+      if (typeof A.routeInfo === "function" && recRouteInfo().has && A.routePoints) {
+        try {
+          L.polyline(JSON.parse(A.routePoints()), {color: "#2f6bd9", weight: 5, opacity: 0.55}).addTo(map);
+        } catch (e) {}
+      }
       let line = L.polyline([], {color: "#d9534f", weight: 4}).addTo(map),
         dot = null,
         fitted = false;

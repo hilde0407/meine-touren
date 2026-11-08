@@ -685,6 +685,34 @@ def test_record_view_app(page):
     assert "Server erreichbar" in t and "Akku-Optimierung ist aktiv" in t and "GPS ist eingeschaltet" in t
 
 
+def test_record_route_guidance(page):
+    """Route mit Sprachansagen: Auswahl einer Planung/früheren Tour reicht die Punkte an die App weiter."""
+    base = page.url.split("#")[0]
+    pts = [[47 + i * 0.0005, 11.0 + (0.0004 * max(0, i - 20))] for i in range(41)]
+    r = page.evaluate("(p) => fetch('/api/plans', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({name:'Gipfelrunde', sport:'hike', pts:p, km:2.2})}).then(r => r.status)", pts)
+    assert r == 200, r
+    page.add_init_script("""
+      window._route = null; window._ri = {on:true, has:false};
+      window.MTApp = {version:()=>'2.6.0', serverUrl:()=>location.origin, hasPermission:()=>true, requestPermission(){}, openBatterySettings(){}, changeServer(){},
+        status:()=>JSON.stringify({state:'idle'}), points:()=>'[]', photoMode:()=>'now', setPhotoMode(){}, backups:()=>'[]',
+        setRoute(p,n){window._route=[p,n]; window._ri={on:true,has:true,name:n,km:2.2,turns:1}}, clearRoute(){window._route=null; window._ri={on:true,has:false}},
+        routeInfo:()=>JSON.stringify(window._ri), setGuide(b){window._ri.on=b}, guideTest(){window._tested=true}, routePoints:()=>'[]'};
+    """)
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(800)
+    page.goto(base + "#/record"); page.wait_for_timeout(800)
+    assert page.locator("#rroute").count() == 1
+    page.wait_for_function("document.querySelectorAll('#rroute option').length > 1", timeout=5000)
+    opts = page.eval_on_selector_all("#rroute option", "o => o.map(x => x.textContent)")
+    assert any("Gipfelrunde" in o for o in opts), opts
+    page.select_option("#rroute", label=[o for o in opts if "Gipfelrunde" in o][0]); page.wait_for_timeout(700)
+    route = page.evaluate("window._route")
+    assert route and route[1] == "Gipfelrunde" and route[0].count(";") == 40 and "," in route[0], route
+    assert "Abbiegungen" in page.inner_text("#rrinfo") and page.locator("#rgtest").count() == 1
+    page.click("#rgtest"); assert page.evaluate("window._tested") is True
+    page.select_option("#rroute", ""); page.wait_for_timeout(300)
+    assert page.evaluate("window._route") is None
+
+
 def test_mobile_more_sheet_not_covered(page):
     """„Mehr“-Fenster liegt über der Tab-Leiste und ist bis ganz unten erreichbar."""
     base = page.url.split("#")[0]
@@ -758,7 +786,7 @@ def test_info_box(page):
     page.evaluate("window.MTApp = {version: () => '2.5.0', hasPermission: () => true, status: () => '{}', serverUrl: () => ''}")
     page.click("#tmore"); page.click("#mab"); page.wait_for_selector("#abx")
     txt = page.inner_text(".modal")
-    assert "2.5.1" in txt and "Claude" in txt and "Volker Hildebrand" in txt and "Meine Touren" in txt
+    assert "2.5.0" in txt and "Claude" in txt and "Volker Hildebrand" in txt and "Meine Touren" in txt
     page.click("#abx")
     page.set_viewport_size({"width": 1280, "height": 900})
 

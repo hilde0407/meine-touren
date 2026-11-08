@@ -18,6 +18,15 @@ def test_trackstore_java(tmp_path):
     assert r.returncode == 0 and "OK" in r.stdout, r.stdout + r.stderr
 
 
+@pytest.mark.skipif(not shutil.which("javac"), reason="kein JDK")
+def test_guide_java(tmp_path):
+    """Wegführung: Abbiegungen erkennen, Ansagen, Abkommen und Rückkehr, Rundweg, Rauschen."""
+    src = ROOT / "android/app/src/main/java/de/meinetouren/app/Guide.java"
+    subprocess.run(["javac", "-d", str(tmp_path), str(src), str(ROOT / "tests/android/GuideCheck.java")], check=True)
+    r = subprocess.run(["java", "-cp", str(tmp_path), "GuideCheck"], capture_output=True, text=True, cwd=tmp_path)
+    assert r.returncode == 0 and "OK" in r.stdout, r.stdout + r.stderr
+
+
 def _gpx():
     pts = "".join(f'<trkpt lat="{47+i*0.0005}" lon="11.0"><ele>{1000+i*3}</ele><time>2026-07-01T08:{i//60:02d}:{i%60:02d}Z</time></trkpt>' for i in range(60))
     return f'<?xml version="1.0"?><gpx version="1.1"><trk><name>x</name><type>skitour</type><trkseg>{pts}</trkseg></trk></gpx>'

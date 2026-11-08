@@ -317,7 +317,7 @@ public class MainActivity extends Activity {
 
     /* ---------- Brücke zur Weboberfläche ---------- */
     public class Bridge {
-        @JavascriptInterface public String version() { return "2.5.1"; }
+        @JavascriptInterface public String version() { return "2.6.0"; }
         @JavascriptInterface public String serverUrl() { return server(); }
 
         @JavascriptInterface
@@ -369,6 +369,12 @@ public class MainActivity extends Activity {
         }
         @JavascriptInterface public String photoMode() { return RecPhotos.mode(MainActivity.this); }
         @JavascriptInterface public void setPhotoMode(String m) { prefs.edit().putString("photo_mode", "end".equals(m) ? "end" : "now").apply(); }
+        @JavascriptInterface public void setRoute(String pts, String name) { Navi.setRoute(MainActivity.this, pts, name); }
+        @JavascriptInterface public String routePoints() { return Navi.points(MainActivity.this); }
+        @JavascriptInterface public void clearRoute() { Navi.clear(MainActivity.this); }
+        @JavascriptInterface public String routeInfo() { return Navi.info(MainActivity.this); }
+        @JavascriptInterface public void setGuide(boolean on) { Navi.setEnabled(MainActivity.this, on); }
+        @JavascriptInterface public void guideTest() { Navi.speak(MainActivity.this, "Die Sprachansagen sind eingeschaltet. In 100 Metern links abbiegen."); }
         @JavascriptInterface public void uploadPhotos() { RecPhotos.flushAsync(MainActivity.this); }
         @JavascriptInterface
         public String photoInfo() {
@@ -387,7 +393,7 @@ public class MainActivity extends Activity {
             try {
                 android.os.PowerManager pm = (android.os.PowerManager) getSystemService(POWER_SERVICE);
                 android.location.LocationManager lm = (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
-                o.put("version", "2.5.1");
+                o.put("version", "2.6.0");
                 o.put("android", Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
                 o.put("device", Build.MANUFACTURER + " " + Build.MODEL);
                 o.put("server", server());

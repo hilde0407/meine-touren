@@ -52,6 +52,8 @@ public class RecorderService extends Service implements LocationListener {
             }
             return START_STICKY;
         }
+        if (ACT_START.equals(a)) Navi.reset(this);            // Fortschritt auf der Strecke von vorn
+        if (ACT_STOP.equals(a)) Navi.clear(this);             // die Strecke gilt nur für diese Aufzeichnung
         if (ACT_START.equals(a) || ACT_RESUME.equals(a)) {
             foreground(r);
             listen(r);
@@ -126,6 +128,7 @@ public class RecorderService extends Service implements LocationListener {
     @Override
     public void onDestroy() {
         unlisten();
+        Navi.shutdown();
         super.onDestroy();
     }
 
@@ -133,6 +136,7 @@ public class RecorderService extends Service implements LocationListener {
     public void onLocationChanged(Location l) {
         Recorder r = Recorder.get(this);
         r.onLocation(l);
+        if (Recorder.RECORDING.equals(r.state())) Navi.onFix(this, l);
         LivePost.send(this, l);
         long now = System.currentTimeMillis();
         if (now - lastNotify > 15000) {
