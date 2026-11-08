@@ -333,17 +333,17 @@ Passwort {} || Password {} || Mot de passe {} || Contraseña {}
 Testmail an mich senden || Send me a test e-mail || M’envoyer un e-mail de test || Enviarme un correo de prueba
 ✓ Testmail an || ✓ Test e-mail to || ✓ E-mail de test envoyé à || ✓ Correo de prueba a
 Konto: || Account: || Compte : || Cuenta:
-Neues Passwort (mindestens 8 Zeichen) || New password (at least 8 characters) || Nouveau mot de passe (8 caractères minimum) || Contraseña nueva (mínimo 8 caracteres)
+Neues Passwort (mindestens 8 Zeichen) || New password (at least 8 characters) || Nouveau mot de passe (8 caractères minimum) || Nueva contraseña (mínimo 8 caracteres)
 Passwort wiederholen || Repeat password || Répéter le mot de passe || Repetir contraseña
 Passwort speichern || Save password || Enregistrer le mot de passe || Guardar contraseña
 Das hat nicht geklappt. || That did not work. || Cela n’a pas fonctionné. || No ha funcionado.
-Dein Passwort wurde geändert. || Your password has been changed. || Votre mot de passe a été modifié. || Tu contraseña se ha cambiado.
+Dein Passwort wurde geändert. || Your password has been changed. || Votre mot de passe a été modifié. || Tu contraseña ha sido cambiada.
 Du kannst dich jetzt mit dem neuen Passwort anmelden.{} || You can now sign in with the new password.{} || Vous pouvez maintenant vous connecter avec le nouveau mot de passe.{} || Ya puedes iniciar sesión con la contraseña nueva.{}
 Dieser Link ist abgelaufen oder wurde schon benutzt. || This link has expired or has already been used. || Ce lien a expiré ou a déjà été utilisé. || Este enlace ha caducado o ya se ha usado.
-Du kannst auf der Anmeldeseite einen neuen anfordern („Passwort vergessen?“). || On the sign-in page you can request a new one (“Forgot password?”). || Sur la page de connexion, vous pouvez en demander un nouveau (« Mot de passe oublié ? »). || En la página de inicio de sesión puedes pedir uno nuevo («¿Olvidaste tu contraseña?»).
-Dieser Link ist nicht (mehr) gültig. || This link is not (or no longer) valid. || Ce lien n’est pas (ou plus) valide. || Este enlace no es válido (o ya no lo es).
+Du kannst auf der Anmeldeseite einen neuen anfordern („Passwort vergessen?“). || You can request a new one on the sign-in page (“Forgot password?”). || Vous pouvez en demander un nouveau sur la page de connexion (« Mot de passe oublié ? »). || Puedes solicitar uno nuevo en la página de inicio de sesión («¿Olvidaste tu contraseña?»).
+Dieser Link ist nicht (mehr) gültig. || This link is no longer valid. || Ce lien n’est plus valable. || Este enlace ya no es válido.
 m aufwärts || m of ascent || m de montée || m de subida
-Dieser Link ist nicht (mehr) gültig oder abgelaufen. || This link is not (or no longer) valid, or has expired. || Ce lien n’est pas (ou plus) valide, ou il a expiré. || Este enlace no es válido (o ya no lo es), o ha caducado.
+Dieser Link ist nicht (mehr) gültig oder abgelaufen. || This link is no longer valid or has expired. || Ce lien n’est plus valable ou a expiré. || Este enlace ya no es válido o ha caducado.
 Dieses Gerät (iPhone) erlaubt keinen Vollbildmodus im Browser. || This device (iPhone) does not allow full-screen mode in the browser. || Cet appareil (iPhone) n’autorise pas le mode plein écran dans le navigateur. || Este dispositivo (iPhone) no permite el modo de pantalla completa en el navegador.
 Tipp: Teilen ▸ „Zum Home-Bildschirm“ – dann öffnet die App ohne Leiste. || Tip: Share ▸ “Add to Home Screen” – then the app opens without the toolbar. || Astuce : Partager ▸ « Sur l’écran d’accueil » – l’application s’ouvre alors sans barre. || Consejo: Compartir ▸ «Añadir a pantalla de inicio»; así la aplicación se abre sin barra.
 Zustand der App, Updates, Selbsttest und Protokoll. || State of the app, updates, self-test and log. || État de l’application, mises à jour, autotest et journal. || Estado de la aplicación, actualizaciones, autodiagnóstico y registro.
@@ -396,7 +396,7 @@ Alle Fotos || All photos || Toutes les photos || Todas las fotos
 Zu dieser Tour wurden keine Fotos gefunden. Trotzdem Link erstellen? || No photos were found for this tour. Create the link anyway? || Aucune photo trouvée pour ce parcours. Créer quand même le lien ? || No se encontraron fotos de esta ruta. ¿Crear el enlace de todos modos?
 Fotos als Diashow – ohne Benutzerkonto ansehbar || Photos as a slideshow – viewable without a user account || Photos en diaporama – consultable sans compte utilisateur || Fotos como presentación: se pueden ver sin cuenta de usuario
 Druckbare Seite mit Karte, Profil und Fotos || Printable page with map, profile and photos || Page imprimable avec carte, profil et photos || Página imprimible con mapa, perfil y fotos
-Zu dieser Tour gibt es keine Fotos. || There are no photos for this tour. || Il n’y a pas de photos pour ce parcours. || No hay fotos de esta ruta.
+Zu dieser Tour gibt es keine Fotos. || There are no photos for this tour. || Il n’y a pas de photos pour ce tour. || No hay fotos de esta ruta.
 Meine Touren || Meine Touren || Meine Touren || Meine Touren
 Touren suchen || Search tours || Rechercher des parcours || Buscar rutas
 Kilometer pro Jahr || Kilometres per year || Kilomètres par an || Kilómetros por año
@@ -485,4 +485,25 @@ Touren holen || Fetch tours || Récupérer des parcours || Obtener rutas
 Woher deine Touren kommen: Komoot, Zepp, Uhren und Dateien, dazu Wanderführer. || Where your tours come from: Komoot, Zepp, watches and files, plus hiking guides. || D’où viennent vos parcours : Komoot, Zepp, montres et fichiers, plus guides de randonnée. || De dónde vienen tus rutas: Komoot, Zepp, relojes y archivos, además de guías de senderismo.
 Wohin Touren hochgeladen werden dürfen (nur auf deinen Wunsch) und wie Touren geplant werden. || Where tours may be uploaded to (only at your request) and how tours are planned. || Où les parcours peuvent être envoyés (uniquement à votre demande) et comment ils sont planifiés. || Adónde se pueden subir las rutas (solo si tú lo pides) y cómo se planifican.
 Zu den Touren || To the tours || Vers les parcours || A las rutas
+Neues Passwort || New password || Nouveau mot de passe || Nueva contraseña
+Neues Passwort festlegen || Set a new password || Définir un nouveau mot de passe || Establecer una nueva contraseña
+Du kannst dich jetzt mit dem neuen Passwort anmelden. || You can now sign in with the new password. || Vous pouvez maintenant vous connecter avec le nouveau mot de passe. || Ya puedes iniciar sesión con la nueva contraseña.
+Danach wird noch der Code aus deiner Authenticator-App abgefragt. || Afterwards you will be asked for the code from your authenticator app. || Ensuite, le code de votre application d’authentification vous sera demandé. || Después se te pedirá el código de tu aplicación de autenticación.
+Zur Anmeldung || To sign in || Vers la connexion || Ir al inicio de sesión
+Geteilte Tour || Shared tour || Tour partagé || Ruta compartida
+Geteilt aus „Meine Touren“ || Shared from “Meine Touren” || Partagé depuis « Meine Touren » || Compartido desde «Meine Touren»
+Leertaste: Pause · ←/→ · F: Vollbild || Space: pause · ←/→ · F: full screen || Espace : pause · ←/→ · F : plein écran || Espacio: pausa · ←/→ · F: pantalla completa
+Keine Fotos gefunden. || No photos found. || Aucune photo trouvée. || No se han encontrado fotos.
+Pause / Weiter || Pause / Resume || Pause / Reprendre || Pausa / Continuar
+Vollbild || Full screen || Plein écran || Pantalla completa
+Vollbild beenden || Exit full screen || Quitter le plein écran || Salir de pantalla completa
+Schließen || Close || Fermer || Cerrar
+Dieses Gerät (iPhone) erlaubt keinen Vollbildmodus im Browser.<br>Tipp: Teilen ▸ „Zum Home-Bildschirm“ – dann öffnet die App ohne Leiste. || This device (iPhone) does not allow full-screen mode in the browser.<br>Tip: Share ▸ “Add to Home Screen” – then the app opens without a toolbar. || Cet appareil (iPhone) n’autorise pas le mode plein écran dans le navigateur.<br>Astuce : Partager ▸ « Sur l’écran d’accueil » – l’app s’ouvre alors sans barre. || Este dispositivo (iPhone) no permite el modo de pantalla completa en el navegador.<br>Consejo: Compartir ▸ «Añadir a pantalla de inicio»: así la app se abre sin barra.
+Zurück || Back || Retour || Atrás
+Start/Pause || Start/Pause || Lecture/Pause || Inicio/Pausa
+Weiter || Next || Suivant || Siguiente
+Tempo || Speed || Vitesse || Velocidad
+Karte || Map || Carte || Mapa
+{} Uhr || {} || {} || {}
+{} m aufwärts || {} m ascent || {} m de dénivelé positif || {} m de subida
 `;

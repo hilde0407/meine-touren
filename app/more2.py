@@ -404,18 +404,51 @@ class ShareGone(HTTPException):
         self.exp = exp
 
 
-def gone_page(exp=None):
+_GONE = {
+    "de": ("Dieser Link ist abgelaufen", "Die Freigabe war bis zum <b>{d}</b> gültig. Danach sind die Fotos nicht mehr abrufbar.",
+           "Bitte die Person, die dir den Link geschickt hat, dir einen neuen Link zu senden.",
+           "Dieser Link ist nicht (mehr) gültig", "Die Freigabe wurde vom Absender zurückgezogen – oder der Link wurde beim Kopieren abgeschnitten.",
+           "Prüfe bitte, ob du den ganzen Link verwendet hast. Sonst bitte um einen neuen Link."),
+    "en": ("This link has expired", "The share was valid until <b>{d}</b>. After that the photos can no longer be viewed.",
+           "Please ask the person who sent you the link to send you a new one.",
+           "This link is no longer valid", "The sender has withdrawn the share – or the link was cut off when it was copied.",
+           "Please check that you used the whole link. Otherwise, ask for a new link."),
+    "fr": ("Ce lien a expiré", "Le partage était valable jusqu’au <b>{d}</b>. Passé cette date, les photos ne sont plus accessibles.",
+           "Demandez à la personne qui vous a envoyé le lien de vous en envoyer un nouveau.",
+           "Ce lien n’est plus valable", "L’expéditeur a retiré le partage – ou le lien a été tronqué lors de la copie.",
+           "Vérifiez que vous avez utilisé le lien en entier. Sinon, demandez un nouveau lien."),
+    "es": ("Este enlace ha caducado", "El enlace era válido hasta el <b>{d}</b>. Después ya no se pueden ver las fotos.",
+           "Pide a la persona que te envió el enlace que te mande uno nuevo.",
+           "Este enlace ya no es válido", "El remitente ha retirado el enlace o este se cortó al copiarlo.",
+           "Comprueba que has usado el enlace completo. Si no, pide uno nuevo."),
+}
+
+
+def _req_lang(request=None):
+    """Sprache aus dem Accept-Language-Header der Anfrage (de/en/fr/es, sonst Englisch)."""
+    try:
+        al = (request.headers.get("accept-language") or "de").lower()
+    except Exception:
+        return "de"
+    for part in al.split(","):
+        c = part.strip()[:2]
+        if c in _GONE:
+            return c
+    return "en"
+
+
+def gone_page(exp=None, request=None):
     import html as _h
+    lang = _req_lang(request)
+    t = _GONE[lang]
     if exp:
         d = datetime.fromtimestamp(exp, tz=TZ).strftime("%d.%m.%Y")
-        icon, title = "⏳", "Dieser Link ist abgelaufen"
-        text = f"Die Freigabe war bis zum <b>{_h.escape(d)}</b> gültig. Danach sind die Fotos nicht mehr abrufbar."
-        tip = "Bitte die Person, die dir den Link geschickt hat, dir einen neuen Link zu senden."
+        icon, title = "⏳", t[0]
+        text, tip = t[1].format(d=_h.escape(d)), t[2]
     else:
-        icon, title = "🔗", "Dieser Link ist nicht (mehr) gültig"
-        text = "Die Freigabe wurde vom Absender zurückgezogen – oder der Link wurde beim Kopieren abgeschnitten."
-        tip = "Prüfe bitte, ob du den ganzen Link verwendet hast. Sonst bitte um einen neuen Link."
-    page = f"""<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+        icon, title = "🔗", t[3]
+        text, tip = t[4], t[5]
+    page = f"""<!doctype html><html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <title>{title}</title><style>:root{{--bg:#eef2ee;--ink:#10282a;--mut:#5d716f;--card:#fff;--acc:#f2c230}}@media(prefers-color-scheme:dark){{:root{{--bg:#0d1b1c;--ink:#e6efec;--mut:#9db3ae;--card:#142a2b}}}}
 *{{box-sizing:border-box}}body{{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}}
 .box{{background:var(--card);border-radius:14px;padding:32px 26px;max-width:440px;text-align:center;box-shadow:0 4px 24px #0002}}.ic{{font-size:54px;line-height:1}}h1{{font-size:22px;margin:14px 0 10px}}p{{margin:8px 0}}.mut{{color:var(--mut);font-size:15px}}
@@ -444,7 +477,7 @@ def share_page(token: str, request: Request):
     try:
         s = _share(token)
     except ShareGone as g:
-        return gone_page(g.exp)
+        return gone_page(g.exp, request)
     hdr = {"Cache-Control": "no-store", "Referrer-Policy": "no-referrer"}
     if s["photos"] == 2:                           # Diashow: Seite mit Vorschau-Angaben (WhatsApp zeigt Titel + erstes Foto)
         import html as _h

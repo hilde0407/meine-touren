@@ -4,7 +4,8 @@
 #cap{position:fixed;left:18px;bottom:14px;text-shadow:0 1px 4px #000;font:500 17px Barlow,system-ui}#cap b{display:block;font:700 28px 'Barlow Semi Condensed',Barlow,sans-serif;letter-spacing:.2px}#hint{position:fixed;right:12px;bottom:10px;opacity:.5}
 #msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center}
 #ctl{position:fixed;top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));display:flex;gap:10px;z-index:5;transition:opacity .4s}#ctl.off{opacity:0;pointer-events:none}#ctl button{min-width:52px;height:52px;border-radius:26px;border:0;background:#000a;color:#fff;font:600 22px system-ui;cursor:pointer;padding:0 16px;-webkit-tap-highlight-color:transparent}#ctl button:active{background:#333c}#fsh{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:#000c;padding:8px 14px;border-radius:10px;max-width:80vw;text-align:center;display:none;z-index:5}
-@media (pointer:coarse){#hint{display:none}}</style></head><body>
+@media (pointer:coarse){#hint{display:none}}</style><script src="/js/00-i18n-data.js"></script><script src="/js/00-i18n-neu.js"></script><script src="/js/00-i18n.js"></script>
+</head><body>
 <div class="s" id="a"></div><div class="s" id="b"></div><div id="cap"></div><div id="hint">Leertaste: Pause · ←/→ · F: Vollbild</div><div id="ctl" class="off"><button id="bpp" title="Pause / Weiter" aria-label="Pause">⏸</button><button id="bfs" title="Vollbild" aria-label="Vollbild">⛶</button><button id="bx" title="Schließen" aria-label="Schließen">✕</button></div><div id="fsh"></div><div id="msg">Keine Fotos gefunden.</div>
 <script>
 const q = new URLSearchParams(location.search);
