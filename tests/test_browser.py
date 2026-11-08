@@ -681,6 +681,7 @@ def test_record_view_app(page):
     page.click("#rsend"); page.wait_for_function("location.hash.startsWith('#/tour/')", timeout=8000)
 
     page.goto(base + "#/apptest"); page.wait_for_timeout(800)
+    page.wait_for_function("document.querySelector('#main') && document.querySelector('#main').innerText.includes('Server erreichbar')", timeout=15000)
     t = page.inner_text("#main")
     assert "Server erreichbar" in t and "Akku-Optimierung ist aktiv" in t and "GPS ist eingeschaltet" in t
 
