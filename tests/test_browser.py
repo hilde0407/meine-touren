@@ -934,10 +934,13 @@ def test_waypoints_and_story(page, app_url):
     n0 = len(page.errors)
     base = page.url.split("#")[0]
     page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(1000)
-    page.goto(base + f"#/tour/{tid}"); page.wait_for_timeout(1800)
+    page.goto(base + f"#/tour/{tid}")
+    page.wait_for_selector("#wpcard", timeout=20000)
     assert page.locator("#storybtn").count() == 1
     assert "Rast am Bach" in page.inner_text("#wpcard")
-    page.goto(base + f"#/story/{tid}"); page.wait_for_timeout(1800)
+    page.goto(base + f"#/story/{tid}")
+    page.wait_for_selector("#stl .stev", timeout=20000)
+    page.wait_for_function("document.querySelectorAll('#sm .leaflet-marker-icon').length >= 3", timeout=10000)
     t = page.inner_text("#stl")
     assert "Rast am Bach" in t and "Start" in t and "Ziel" in t, t
     assert page.locator("#sm .leaflet-marker-icon").count() >= 3
