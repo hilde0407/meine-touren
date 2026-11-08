@@ -378,16 +378,16 @@ async def api_share(tour_id: str, request: Request):
     days = int(d.get("days") or 0)
     best = max(0, min(int(d.get("best") or 0), 100))
     now = int(time.time())
-    db.execute("INSERT INTO shares(token,tour_id,photos,trim,ts,exp,views,best) VALUES(?,?,?,?,?,?,0,?)",
+    db.execute("INSERT INTO shares(token,tour_id,photos,trim,ts,exp,views,best,comments) VALUES(?,?,?,?,?,?,0,?,?)",
                (token, tour_id, 2 if d.get("show") else (1 if d.get("photos") else 0), 0 if d.get("trim") is False else 1, now,
-                now + days * 86400 if 0 < days <= 3650 else None, best))
+                now + days * 86400 if 0 < days <= 3650 else None, best, 1 if d.get("show") and d.get("comments") else 0))
     auth.q("INSERT OR REPLACE INTO share_index(token,uid) VALUES(?,?)", (token, ctx.uid() or ""))
     return {"token": token, "url": f"/s/{token}"}   # photos=2: Diashow-Link (Fotos + Karte, ohne Konto)
 
 
 @router.get("/api/tours/{tour_id}/shares")
 def api_shares(tour_id: str):
-    return db.query("SELECT token,photos,trim,ts,exp,views,best FROM shares WHERE tour_id=? ORDER BY ts DESC", (tour_id,))
+    return db.query("SELECT token,photos,trim,ts,exp,views,best,comments FROM shares WHERE tour_id=? ORDER BY ts DESC", (tour_id,))
 
 
 @router.delete("/api/share/{token}")
@@ -522,6 +522,49 @@ def public_photo(token: str, pid: int, size: int = 1400):
     if not p:
         raise HTTPException(404)
     return FileResponse(p, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=3600"})
+
+
+_CMT_RATE = {}
+
+
+@router.get("/api/public/{token}/comments")
+def api_public_comments(token: str):
+    """Kommentare zu den Fotos einer Diashow (nur wenn der Besitzer sie beim Teilen erlaubt hat)."""
+    s = _share(token)
+    if s["photos"] != 2 or not s["comments"]:
+        return {"enabled": False, "comments": {}}
+    out = {}
+    for r in db.query("SELECT c.photo_id,c.ts,c.author,c.text FROM photo_comments c JOIN photos p ON p.id=c.photo_id WHERE p.tour_id=? ORDER BY c.ts,c.id", (s["tour_id"],)):
+        out.setdefault(str(r["photo_id"]), []).append({"ts": r["ts"], "author": r["author"], "text": r["text"]})
+    return {"enabled": True, "comments": out}
+
+
+@router.post("/api/public/{token}/comments")
+async def api_public_comment_add(token: str, request: Request):
+    """Besucher kommentiert ein Foto der geteilten Diashow (ohne Konto; begrenzt auf wenige Kommentare pro Minute)."""
+    s = _share(token)
+    if s["photos"] != 2 or not s["comments"]:
+        raise HTTPException(403, "Kommentare sind für diesen Link nicht erlaubt")
+    try:
+        d = await request.json()
+        pid = int(d.get("photo_id"))
+    except Exception:  # noqa
+        raise HTTPException(400, "Ungültige Daten")
+    text = " ".join(str(d.get("text") or "").split())[:500]
+    author = " ".join(str(d.get("author") or "").split())[:40] or "Gast"
+    if not text:
+        raise HTTPException(400, "Bitte einen Kommentar eingeben")
+    if not db.one("SELECT 1 FROM photos WHERE id=? AND tour_id=? AND manual!=2", (pid, s["tour_id"])):
+        raise HTTPException(404, "Tour oder Foto nicht gefunden")
+    now = time.time()
+    hits = [x for x in _CMT_RATE.get(token, []) if now - x < 60]
+    if len(hits) >= 5:
+        raise HTTPException(429, "Zu viele Kommentare – bitte kurz warten")
+    _CMT_RATE[token] = hits + [now]
+    if db.one("SELECT COUNT(*) n FROM photo_comments WHERE photo_id=?", (pid,))["n"] >= 200:
+        raise HTTPException(400, "Zu viele Daten auf einmal")
+    db.execute("INSERT INTO photo_comments(photo_id,ts,author,text) VALUES(?,?,?,?)", (pid, int(now), author + " (Gast)", text))
+    return {"ok": True, "ts": int(now), "author": author + " (Gast)", "text": text}
 
 
 PUBLIC_PREFIXES = ("/s/", "/api/public/", "/pub/", "/vendor/", "/tiles/", "/reset/")

@@ -1,0 +1,12 @@
+.git
+.github
+android
+mac
+windows
+tests
+docs
+ct
+install
+__pycache__
+*.pyc
+*.zip

@@ -40,8 +40,7 @@ const TACT = [
   },
 ];
 const _tour34 = VIEWS.tour;
-VIEWS.tour = async id => {
-  await _tour34(id);
+const setup34 = () => {
   if (typeof isViewer === "function" && isViewer()) return;
   const anchor = $("#eup") || $("#egpx"),
     row = anchor && anchor.parentElement;
@@ -81,4 +80,15 @@ VIEWS.tour = async id => {
       );
     };
   });
+};
+/* Die Menüleiste wird gebaut, sobald die Knöpfe im Dokument erscheinen (noch vor dem nächsten Zeichnen) – so blitzen die Einzelknöpfe nicht kurz auf. */
+VIEWS.tour = async id => {
+  const mo = new MutationObserver(() => { if ($("#eup") || $("#egpx")) setup34(); });
+  mo.observe(document.body, {childList: true, subtree: true});
+  try {
+    await _tour34(id);
+  } finally {
+    mo.disconnect();
+  }
+  setup34();
 };

@@ -72,7 +72,7 @@ def _open(path):
         if "sharp" not in cols:
             conn.execute("ALTER TABLE photos ADD COLUMN sharp REAL")         # Schärfemaß (Kantenvarianz), NULL = noch nicht berechnet
         scols = {r["name"] for r in conn.execute("PRAGMA table_info(shares)")}
-        for c, d in (("exp", "INTEGER"), ("views", "INTEGER DEFAULT 0"), ("best", "INTEGER DEFAULT 0")):
+        for c, d in (("exp", "INTEGER"), ("views", "INTEGER DEFAULT 0"), ("best", "INTEGER DEFAULT 0"), ("comments", "INTEGER DEFAULT 0")):
             if c not in scols:
                 conn.execute(f"ALTER TABLE shares ADD COLUMN {c} {d}")      # Ablaufzeit (NULL = unbegrenzt), Aufrufe, nur die besten N Fotos (0 = alle)
         if "orig_end" not in {r["name"] for r in conn.execute("PRAGMA table_info(track_fix)")}:

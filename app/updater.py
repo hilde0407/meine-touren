@@ -68,7 +68,7 @@ def info(force=False):
     u = dict(health.update_check())
     m = mode()
     u.update(mode=m, can_install=bool(u.get("newer")) and m in ("service", "local"),
-             command=f"{config.APP_NAME}-update github", status=status(), enabled=(db_get("update_check") != "0"))
+             command=("docker compose pull && docker compose up -d" if os.environ.get("MT_DOCKER") == "1" else f"{config.APP_NAME}-update github"), status=status(), enabled=(db_get("update_check") != "0"))
     return u
 
 
@@ -176,7 +176,7 @@ def api_update_install(body: dict, request: Request):
         raise HTTPException(409, "Diese Version ist nicht die neueste auf GitHub – bitte die Seite neu laden.")
     m = cur["mode"]
     if m == "manual":
-        raise HTTPException(400, f"Automatische Installation ist hier nicht eingerichtet. Im Container ausführen: {cur['command']}")
+        raise HTTPException(400, f"Automatische Installation ist hier nicht eingerichtet. Zum Aktualisieren ausführen: {cur['command']}")
     n = backup_all()
     if m == "service":
         _set_status("requested", ver, "Update angefordert …")

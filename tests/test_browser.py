@@ -769,6 +769,7 @@ def test_mobile_tour_menus(page):
     vis = page.evaluate("[...document.querySelectorAll('#main .tact > *')].filter(e => e.offsetParent && e.textContent.trim()).map(e => e.className)")
     assert len(vis) <= 2 and page.is_visible("#main .tact-bar")                  # nur Menüleiste (und ggf. „lokal gespeichert“)
     assert page.locator(".tk").count() == 3          # Ansehen, Teilen & Export, Bearbeiten
+    page.wait_for_selector("#esnd", state="attached", timeout=8000)      # „Senden“ wird von der Teilen-Erweiterung nachgereicht
     page.click(".tk[data-g=share]"); page.wait_for_selector(".tactl")
     assert {"esnd", "eshow", "eshr", "egpx"} <= set(page.evaluate("[...document.querySelectorAll('.tactl [data-e]')].map(b => b.dataset.e)"))
     page.click(".tactl [data-e=eshr]"); page.wait_for_selector("#shn")            # „Links verwalten“ öffnet den Link-Dialog
@@ -951,6 +952,20 @@ def test_waypoints_and_story(page, app_url):
     assert "Rast am Bach" in t and "Start" in t and "Ziel" in t, t
     assert page.locator("#sm .leaflet-marker-icon").count() >= 3
     assert len(page.errors) == n0, page.errors[n0:]
+
+
+def test_story_photo_markers(page, app_url):
+    """Erzählung: Fotos ohne GPS erscheinen an der aus der Aufnahmezeit berechneten Stelle der Strecke als 📷 auf der Karte."""
+    import json as _j
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    t = page.evaluate("(()=>{const t=TOURS.find(t => t.source === 'local' && t.h > 0.5);return {id:t.id,ts:t.start_ts}})()")
+    fake = [{"id": 900 + j, "taken_ts": t["ts"] + 300 * j, "lat": None, "lng": None, "manual": 0} for j in range(6)]
+    page.route("**/api/photos?tour_id=*", lambda r: r.fulfill(status=200, content_type="application/json", body=_j.dumps(fake)))
+    page.goto(base + f"#/story/{t['id']}")
+    page.wait_for_selector("#stl .stev", timeout=20000)
+    page.wait_for_function("[...document.querySelectorAll('#sm .leaflet-marker-icon')].filter(e => e.textContent.includes('\\u{1F4F7}')).length >= 6", timeout=15000)
+    page.unroute("**/api/photos?tour_id=*")
 
 
 def test_record_weather_and_live_link(page, app_url):

@@ -370,12 +370,20 @@ VIEWS.flight = async id => {
     const el = $("#fl");
     document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen && el.requestFullscreen();
   };
-  m.on("dragstart", () => {
-    if (follow) {
+  // Multitouch in der freien Kamera: zwei Finger zoomen (Spreizen/Zusammenziehen), drehen (Verdrehen) und kippen (beide nach oben/unten)
+  try {
+    m.touchZoomRotate.enable();
+    m.touchZoomRotate.enableRotation();
+    m.touchPitch.enable();
+    m.dragRotate.enable();
+  } catch (e) {}
+  const goFree = ev => {                    // jede eigene Bewegung (Maus, Finger, Mausrad) beendet das automatische Folgen
+    if (follow && ev && ev.originalEvent) {
       follow = false;
       $("#fc").value = "free";
     }
-  });
+  };
+  ["dragstart", "rotatestart", "pitchstart", "zoomstart"].forEach(n => m.on(n, goFree));
   let terr = 0;
   const DIRECT = {
     osm: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",

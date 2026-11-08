@@ -798,6 +798,16 @@ def api_recap_pdf(year: int, photos_on: int = 1, n: int = 6):
     if reg:
         rr = sorted(reg.items(), key=lambda kv: -kv[1][1])[:8]
         story += [Section("Unterwegs in", W), _table(["Region", "Touren", "km", "Aufstieg m"], [[k, v[0], _nf(v[1], 1), _nf(v[2])] for k, v in rr], [W * x for x in (0.46, 0.14, 0.2, 0.2)])]
+    pl = {}
+    for t in ts:
+        g = geo.get(t["id"])
+        if g and g["place"]:
+            a = pl.setdefault(g["place"], [0, 0.0, g["state"] or g["country"] or ""])
+            a[0] += 1
+            a[1] += (t["dist_m"] or 0) / 1000
+    if pl:
+        pp = sorted(pl.items(), key=lambda kv: (-kv[1][0], -kv[1][1]))[:8]
+        story += [Section("Orte des Jahres", W), _table(["Ort", "Region", "Touren", "km"], [[k, v[2], v[0], _nf(v[1], 1)] for k, v in pp], [W * x for x in (0.38, 0.30, 0.14, 0.18)], align_left=(0, 1))]
     ids = []
     if photos_on:
         phs = db.query("SELECT id FROM photos WHERE CAST(strftime('%Y', taken_ts, 'unixepoch') AS INT)=? ORDER BY taken_ts", (year,))

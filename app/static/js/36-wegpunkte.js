@@ -47,26 +47,52 @@ VIEWS.story = async id => {
   const t0 = t.start_ts || 0, T = Math.max(1, Math.round((t.h || 0) * 3600));
   const ev = [{ts: t0, kind: "start", txt: "Start", pos: co.length ? [co[0][0], co[0][1]] : null}];
   wps.forEach(p => ev.push({ts: p.ts || t0, kind: "wp", txt: p.note || "Wegpunkt", pos: [p.lat, p.lng]}));
+  // Aufnahmeort: GPS des Fotos, sonst aus der Aufnahmezeit auf der Strecke berechnet (Streckenzeiten = ms seit Start)
+  const posOf = p => {
+    if (p.lat != null && p.lng != null) return [p.lat, p.lng];
+    const ms = (p.taken_ts - t0) * 1000, tc = co.filter(c => c[3] != null);
+    if (!tc.length || ms < -600000 || ms > tc[tc.length - 1][3] + 600000) return null;
+    let lo = 0, hi = tc.length - 1;
+    while (lo < hi) { const mid = (lo + hi) >> 1; if (tc[mid][3] < ms) lo = mid + 1; else hi = mid; }
+    const b = tc[lo], a = tc[Math.max(0, lo - 1)], f = b[3] > a[3] ? Math.min(1, Math.max(0, (ms - a[3]) / (b[3] - a[3]))) : 0;
+    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
+  };
+  ph.forEach(p => { p._pos = posOf(p); });
   let grp = null;
   ph.slice().sort((a, b) => a.taken_ts - b.taken_ts).forEach(p => {
     if (grp && p.taken_ts - grp.last < 600) { grp.ph.push(p); grp.last = p.taken_ts; return; }
-    grp = {ts: p.taken_ts, last: p.taken_ts, kind: "ph", ph: [p], pos: p.lat != null ? [p.lat, p.lng] : null};
+    grp = {ts: p.taken_ts, last: p.taken_ts, kind: "ph", ph: [p], pos: p._pos};
     ev.push(grp);
   });
   ev.push({ts: t0 + T, kind: "end", txt: "Ziel", pos: co.length ? [co[co.length - 1][0], co[co.length - 1][1]] : null});
   ev.sort((a, b) => a.ts - b.ts);
   const rel = ts => { const m = Math.max(0, Math.round((ts - t0) / 60)); return `+${Math.floor(m / 60)}:${pad2(m % 60)} h`; };
   const icon = k => ({start: "🏁", end: "🎯", wp: "📍", ph: "📷"})[k];
+  const cmLine = e => (e.ph || []).flatMap(p => (CM[p.id] || [])).map(c => `<div>💬 <b>${esc(c.author || "")}</b>${c.author ? ": " : ""}${esc(c.text)}</div>`).join("");
+  const cmRefresh = () => document.querySelectorAll("#stl .scm").forEach(b => { const e = ev[+b.dataset.i]; if (e) b.innerHTML = cmLine(e); });
   const item = (e, i) => `<div class="stev" data-e="${i}" style="display:flex;gap:12px;margin:0 0 18px;cursor:${e.pos ? "pointer" : "default"}"><div style="min-width:78px;text-align:right"><b>${wpTime(e.ts)}</b><div class="mut" style="font-size:12px">${rel(e.ts)}</div></div><div style="flex:1;border-left:3px solid var(--line,#ccc);padding-left:14px"><div style="font-size:18px">${icon(e.kind)} ${e.kind === "ph" ? `${e.ph.length} Foto${e.ph.length > 1 ? "s" : ""}` : esc(e.txt)}</div><div class="splc mut" style="font-size:14px"></div>` +
-    (e.kind === "ph" ? `<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">${e.ph.slice(0, 8).map(p => `<span class="sph" data-p="${p.id}" style="position:relative;cursor:zoom-in"><img loading="lazy" src="/pic/${p.id}?size=500" style="height:120px;border-radius:8px;display:block">${(CM[p.id] || []).length ? `<b class="scn" style="position:absolute;right:4px;bottom:4px;background:#000a;color:#fff;border-radius:10px;padding:1px 7px;font-size:12px">💬 ${CM[p.id].length}</b>` : ""}</span>`).join("")}${e.ph.length > 8 ? `<span class="mut">+${e.ph.length - 8}</span>` : ""}</div>` : "") + `</div></div>`;
-  $("#main").innerHTML = `<div class="row"><a class="back" href="#/tour/${esc(id)}">‹ Zur Tour</a></div>
+    (e.kind === "ph" ? `<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">${e.ph.slice(0, 8).map(p => `<span class="sph" data-p="${p.id}" style="position:relative;cursor:zoom-in"><img loading="lazy" src="/pic/${p.id}?size=500" style="height:120px;border-radius:8px;display:block">${(CM[p.id] || []).length ? `<b class="scn" style="position:absolute;right:4px;bottom:4px;background:#000a;color:#fff;border-radius:10px;padding:1px 7px;font-size:12px">💬 ${CM[p.id].length}</b>` : ""}</span>`).join("")}${e.ph.length > 8 ? `<span class="mut">+${e.ph.length - 8}</span>` : ""}</div><div class="scm" data-i="${i}" style="font-size:14px;margin-top:6px">${cmLine(e)}</div>` : "") + `</div></div>`;
+  $("#main").innerHTML = `<div class="row noprint"><a class="back" href="#/tour/${esc(id)}">‹ Zur Tour</a><span class="sp"></span><button class="btn ghost sm" id="sshare" title="Link zur Diashow mit Kommentarfunktion erzeugen – ohne Benutzerkonto ansehbar">🔗 Teilen (mit Kommentaren)</button><button class="btn ghost sm" id="sprint" title="Erzählung ausdrucken oder als PDF speichern">🖨 Drucken</button></div>
    <h1 style="font-size:clamp(30px,5vw,48px);margin:14px 0 4px">${esc(t.name)}</h1><p class="mut">${dateL(t.date)} · ${nf(t.km, 1)} km · ↑ ${nf(t.up_m, 0)} m · ${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60))} h${t.h ? ` · ${nf(t.km / t.h, 1)} km/h` : ""}</p>
    <div class="tmap" id="sm" style="height:320px"></div><div style="margin-top:22px" id="stl">${ev.map(item).join("")}</div>`;
+  $("#sprint").onclick = () => { if (map) map.invalidateSize(); setTimeout(() => window.print(), 300); };
+  $("#sshare").onclick = async () => {
+    try {
+      const r = await api(`/api/tours/${encodeURIComponent(id)}/share`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({show: true, trim: true, days: 30, comments: true})});
+      const u = location.origin + r.url;
+      try { await navigator.clipboard.writeText(u); $("#sshare").textContent = "✓ Link kopiert (30 Tage)"; } catch (e) { prompt("Link zur Diashow:", u); }
+    } catch (e) { alert("Link konnte nicht erstellt werden: " + e.message); }
+  };
   map = mkMap("sm", {layers: true});
   if (co.length > 1) {
     const ln = L.polyline(co.map(c => [c[0], c[1]]), {color: "#d9534f", weight: 4}).addTo(map);
     map.fitBounds(ln.getBounds(), {padding: [20, 20]});
   } else map.setView([t.lat || 50, t.lng || 8], 12);
+  ph.forEach(p => {   // Fotostandorte auf der Karte
+    if (!p._pos) return;
+    L.marker(p._pos, {icon: wpIcon("📷")}).addTo(map).bindPopup(`<img src="/pic/${p.id}?size=300" data-p="${p.id}" style="width:200px;border-radius:6px;cursor:zoom-in;display:block">`)
+      .on("popupopen", ev2 => { const im = ev2.popup.getElement().querySelector("img[data-p]"); if (im) im.onclick = () => openPhoto(+im.dataset.p); });
+  });
   ev.forEach((e, i) => { if (e.pos && e.kind !== "ph") L.marker(e.pos, {icon: wpIcon(icon(e.kind))}).addTo(map).bindPopup(esc(e.txt)); });
   (async () => {   // Ortsnamen der Stationen nachladen (zwischengespeichert; ohne Internet bleibt die Zeile leer)
     for (let i = 0; i < ev.length; i++) {
@@ -98,7 +124,7 @@ VIEWS.story = async id => {
         try {
           const r = await api(`/api/photos/${pid}/comments`, {method: "POST", body: JSON.stringify({text: v})});
           (CM[pid] = CM[pid] || []).push(r);
-          draw();
+          draw(); cmRefresh();
           const sp = document.querySelector(`.sph[data-p="${pid}"]`);
           if (sp) { let b = sp.querySelector(".scn"); if (!b) { b = document.createElement("b"); b.className = "scn"; b.style.cssText = "position:absolute;right:4px;bottom:4px;background:#000a;color:#fff;border-radius:10px;padding:1px 7px;font-size:12px"; sp.appendChild(b); } b.textContent = "💬 " + CM[pid].length; }
         } catch (er) { alert(er.message || "Fehler"); }
@@ -110,7 +136,7 @@ VIEWS.story = async id => {
         const cid = +a.dataset.c;
         await api(`/api/comments/${cid}`, {method: "DELETE"}).catch(() => 0);
         CM[pid] = (CM[pid] || []).filter(c => c.id !== cid);
-        draw();
+        draw(); cmRefresh();
         const b = document.querySelector(`.sph[data-p="${pid}"] .scn`);
         if (b) { if (CM[pid].length) b.textContent = "💬 " + CM[pid].length; else b.remove(); }
       });

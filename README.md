@@ -43,6 +43,20 @@ bash deploy/install.sh
 
 Installiert Python-venv, nginx, den Systemdienst `meine-touren` und ein tägliches Backup (03:40 Uhr, 14 Stück in `/var/backups/meine-touren`). Programm: `/opt/meine-touren`, Daten: `/var/lib/meine-touren`, Einstellungen: `/etc/meine-touren.env`. Direkt ohne nginx: `http://<IP>:8080/`. Protokoll: `journalctl -u meine-touren -f`.
 
+## Docker
+Meine Touren läuft auch als Container (Linux-Image für `amd64` und `arm64`, also auch Raspberry Pi und Synology/QNAP mit Docker). Das Image wird bei jeder Release automatisch gebaut und liegt unter `ghcr.io/hilde0407/meine-touren`.
+
+1. Ordner anlegen und die Datei [`docker-compose.yml`](docker-compose.yml) hineinkopieren.
+2. `docker compose up -d` starten, dann `http://<Server>:8080` öffnen. Beim ersten Aufruf legst du den Administrator an.
+3. **Daten** liegen im Ordner `./daten` (Volume `/data`: Datenbanken, Tracks, Fotos der App, Sicherungen, verschlüsselte Zugangsdaten). Diesen Ordner sicherst du regelmäßig; die App legt zusätzlich eigene Sicherungen darin ab.
+4. **Originalfotos** (z. B. von einem NAS) bindest du mit `- /pfad/zu/fotos:/fotos:ro` ein und trägst in den Einstellungen den Ordner `/fotos` ein.
+5. **Aktualisieren:** `docker compose pull && docker compose up -d`. Die Update-Schaltfläche in der Verwaltung zeigt neue Versionen an und nennt diesen Befehl, installiert aber nicht selbst.
+6. **HTTPS und Zugriff von außen:** Setze `ports` auf `127.0.0.1:8080:8080` und veröffentliche den Port mit `tailscale serve --bg 8080` (siehe Abschnitt Tailscale) oder hinter einem Reverse-Proxy (Caddy, Nginx Proxy Manager). Der Container vertraut den `X-Forwarded-*`-Headern des Proxys, öffne ihn deshalb nicht ungeschützt ins Internet.
+7. **Mit eingebautem Tailscale:** [`docker-compose.tailscale.yml`](docker-compose.tailscale.yml) startet neben der App einen Tailscale-Container. Einen Auth-Key in der Tailscale-Verwaltung erzeugen (*Settings → Keys*), dann `TS_AUTHKEY=tskey-auth-… docker compose -f docker-compose.tailscale.yml up -d`. Die App ist danach unter `https://touren.<dein-tailnet>.ts.net` erreichbar, ohne Port am Host. Voraussetzung wie oben: MagicDNS und HTTPS-Zertifikate im Tailnet aktiviert. Funnel ist ausgeschaltet; wer ihn will, setzt in `docker/tailscale-serve.json` `AllowFunnel` auf `true` und liest vorher die Risiken im Abschnitt Tailscale Funnel. Den Auth-Key danach nicht in Dateien im Repository speichern. Der Zustand liegt in `./ts-state`.
+8. Selbst bauen statt ziehen: in der Compose-Datei `build: .` statt `image:` verwenden.
+
+Hinweise: Ein eigener BRouter-Server (Routenplanung) und das Einbinden von SMB-Freigaben per `mount` laufen nicht im Container. Dafür den BRouter als weiteren Container starten und dessen Adresse in den Einstellungen eintragen, die SMB-Freigabe auf dem Docker-Host einhängen und als `/fotos` durchreichen.
+
 ## Funktionen
 
 * **Übersicht, Karte, Touren:** letzte Tour mit Karte und Fotos (zum Durchzappen), Jahresstatistik, Bestwerte, Kalender, „An diesem Tag“; alle Touren auf einer Karte; Tourseite mit Höhenprofil, Fotos an der Strecke, 3D-Flug und Diashow; Streckenfarbe frei wählbar.
@@ -423,6 +437,15 @@ Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → An
 **Abgelaufene Diashow-Links (ab 2.7.3):** Wer einen abgelaufenen oder zurückgezogenen Link öffnet, sieht eine verständliche Seite statt einer Fehlermeldung: bei Ablauf mit dem Datum und dem Hinweis, einen neuen Link anzufordern, sonst mit dem Hinweis auf einen abgeschnittenen oder zurückgezogenen Link.
 
 **Fotos aus der App in einer anderen Zeitzone (ab Server 2.7.4 / App 2.5.1):** Die App schickt mit jedem Foto-Upload die Zeitzone des Telefons mit. Hat die Kamera keine Zeitzone ins Foto geschrieben, trägt der Server sie nach. Vorher wurde die Aufnahmezeit als Ortszeit des Servers gedeutet – war das Handy z. B. auf den Kanaren (UTC+0) und der Server in Deutschland, lag das Foto eine Stunde neben der Tour und wurde nicht zugeordnet.
+
+### Neu in 3.2 – Erzählung teilen, Kommentare für Besucher, Orte im Rückblick
+- **Diashow mit Kommentaren:** Beim „Diashow senden“ gibt es die Option „Besucher dürfen Fotos kommentieren“. Die Diashow-Seite zeigt dann 💬 an jedem Foto; Gäste schreiben ohne Konto (Name optional, am Autor steht „(Gast)“, höchstens 5 Kommentare pro Minute und Link, 500 Zeichen). Der Besitzer sieht und löscht die Kommentare in der Erzählung. Ohne die Option sieht und schreibt niemand Kommentare. Schnittstellen: `GET|POST /api/public/<Token>/comments`. Bedenke: Das ist nur sinnvoll, wenn der Server von außen erreichbar ist (Funnel, siehe oben).
+- **Erzählung teilen und drucken:** Auf der Erzählungsseite erzeugt „🔗 Teilen (mit Kommentaren)“ den Diashow-Link (30 Tage, Kommentare erlaubt) und kopiert ihn; „🖨 Drucken“ druckt die Zeitleiste mit Ortsnamen, Fotos und Kommentaren oder speichert sie als PDF. Kommentare stehen jetzt auch als Text unter den Fotos der Zeitleiste.
+- **Orte im Jahresrückblick:** Seite und PDF zeigen „Orte des Jahres“ (Startorte mit Touren und Kilometern, Zahl der Regionen und Länder).
+- **3D-Flug mit Multitouch:** In der freien Kamera zoomen zwei Finger (spreizen/zusammenziehen), drehen die Ansicht (verdrehen) und kippen sie (beide Finger nach oben/unten). Jede eigene Bewegung schaltet „Kamera folgt“ automatisch auf „Kamera frei“.
+- **Fotostandorte in der Erzählung:** Jedes Foto erscheint als 📷 an seinem Aufnahmeort; ohne GPS im Foto wird die Stelle aus der Aufnahmezeit auf der Strecke berechnet. Klick zeigt das Foto, ein weiterer Klick öffnet es groß mit Kommentaren.
+- **Docker-Image** (siehe Abschnitt Docker), Tourseite ohne Aufblitzen der Einzelknöpfe.
+- **Fotos aus der App:** „Fotos hinzufügen …“ auf der Tourseite funktioniert in der Android-App bereits über die Dateiauswahl des Handys; Fotos während der Aufzeichnung gibt es über die Kamera im Aufnahme-Panel.
 
 ### Neu in 3.1 – Kommentare zu Fotos
 In der **Erzählung** (Tourseite → „📖 Erzählung“) lässt sich jedes Foto anklicken: Es öffnet sich groß, darunter stehen die Kommentare (mit Name und Zeit) und ein Eingabefeld. Kommentare lassen sich löschen; die Zahl der Kommentare erscheint als 💬 am Vorschaubild. Schnittstelle: `GET /api/tours/<id>/comments`, `GET|POST /api/photos/<id>/comments`, `DELETE /api/comments/<id>`. Beim Löschen eines Fotos verschwinden seine Kommentare. Außerdem erscheint bei Komoot-Touren der Knopf „⬇ GPX“ nicht mehr doppelt. Die Knöpfe der Tourseite sind jetzt auch am Rechner nach Themen in drei Menüs sortiert: **Ansehen** (Erzählung, 3D-Flug, Tourblatt), **Teilen & Export** (Link/Diashow senden, Links verwalten, GPX) und **Bearbeiten** (alles, was die Tour verändert, gegliedert in Beschriften, Strecke und Höhen, Abgleich und Upload, Entfernen). In der Erzählung steht unter jeder Station der **Ortsname** (📌, aus OpenStreetMap, zwischengespeichert; ohne Internet bleibt die Zeile leer).

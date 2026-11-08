@@ -131,3 +131,29 @@ def test_story_place_name(monkeypatch):
     monkeypatch.setattr(extras, "place_name", lambda la, ln: (_ for _ in ()).throw(RuntimeError("offline")))
     assert c.get("/api/place?lat=47.5&lng=11.1").json() == {"name": None}
     assert c.get("/api/place?lat=95&lng=11.1").status_code == 400
+
+
+def test_public_slideshow_comments():
+    """Geteilte Diashow: Kommentare nur, wenn beim Teilen erlaubt; Gäste dürfen schreiben (Rate-Limit), Besitzer sieht sie in der Erzählung."""
+    from fastapi.testclient import TestClient
+    from app import main, db
+    c = TestClient(main.app)
+    db.execute("INSERT INTO photos(path,taken_ts,tour_id,manual) VALUES('/x/gast.jpg',1,'gt1',0)")
+    pid = db.one("SELECT id FROM photos WHERE path='/x/gast.jpg'")["id"]
+    db.execute("INSERT OR IGNORE INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,up_m,down_m,lat,lng,status,source) VALUES('gt1','Gast','hike',1,2,1000,60,0,0,48,8,'tour_recorded','komoot')")
+    off = c.post("/api/tours/gt1/share", json={"show": True}).json()["token"]
+    assert c.get(f"/api/public/{off}/comments").json()["enabled"] is False
+    assert c.post(f"/api/public/{off}/comments", json={"photo_id": pid, "text": "x"}).status_code == 403
+    tok = c.post("/api/tours/gt1/share", json={"show": True, "comments": True}).json()["token"]
+    assert c.get(f"/api/public/{tok}/comments").json()["enabled"] is True
+    r = c.post(f"/api/public/{tok}/comments", json={"photo_id": pid, "author": "Anna", "text": "  Toll <b>!</b> "})
+    assert r.status_code == 200 and r.json()["author"] == "Anna (Gast)"
+    assert c.post(f"/api/public/{tok}/comments", json={"photo_id": pid, "text": " "}).status_code == 400
+    assert c.post(f"/api/public/{tok}/comments", json={"photo_id": 424242, "text": "x"}).status_code == 404
+    got = c.get(f"/api/public/{tok}/comments").json()["comments"][str(pid)]
+    assert got[0]["text"] == "Toll <b>!</b>" and got[0]["author"] == "Anna (Gast)"
+    assert [x["text"] for x in c.get("/api/tours/gt1/comments").json()[str(pid)]] == ["Toll <b>!</b>"]
+    for _ in range(6):
+        last = c.post(f"/api/public/{tok}/comments", json={"photo_id": pid, "text": "spam"})
+    assert last.status_code == 429
+    assert c.get("/api/tours/gt1/shares").json()[0]["comments"] in (0, 1)
