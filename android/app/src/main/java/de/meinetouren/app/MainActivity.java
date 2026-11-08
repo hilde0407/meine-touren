@@ -48,6 +48,7 @@ public class MainActivity extends Activity {
         super.onCreate(b);
         prefs = getSharedPreferences("app", MODE_PRIVATE);
         AppLog.init(this);
+        Navi.initLang(this);
         AppLog.log("App gestartet, Server: " + prefs.getString("server", "-"));
         web = new WebView(this);
         setContentView(web, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -117,9 +118,9 @@ public class MainActivity extends Activity {
                 r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                 r.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fn);
                 ((DownloadManager) getSystemService(DOWNLOAD_SERVICE)).enqueue(r);
-                Toast.makeText(this, "Download: " + fn, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.download, fn), Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
-                Toast.makeText(this, "Download fehlgeschlagen", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show();
             }
         });
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
@@ -253,7 +254,7 @@ public class MainActivity extends Activity {
             web.loadUrl(server() + "/");
             return;
         }
-        Toast.makeText(this, "Wird an Meine Touren gesendet …", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.sending, Toast.LENGTH_SHORT).show();
         new Thread(() -> {
             String target = null;
             try {
@@ -264,7 +265,7 @@ public class MainActivity extends Activity {
             final String go = target;
             runOnUiThread(() -> {
                 if (go == null) {
-                    Toast.makeText(this, "Senden fehlgeschlagen – Server erreichbar?", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.send_failed), Toast.LENGTH_LONG).show();
                     web.loadUrl(server() + "/");
                 } else web.loadUrl(go);
             });
@@ -317,7 +318,7 @@ public class MainActivity extends Activity {
 
     /* ---------- Brücke zur Weboberfläche ---------- */
     public class Bridge {
-        @JavascriptInterface public String version() { return "2.6.0"; }
+        @JavascriptInterface public String version() { return "2.6.1"; }
         @JavascriptInterface public String serverUrl() { return server(); }
 
         @JavascriptInterface
@@ -362,7 +363,7 @@ public class MainActivity extends Activity {
                 } catch (Exception e) {
                     prefs.edit().remove("pend_file").apply();
                     f.delete();
-                    Toast.makeText(MainActivity.this, "Keine Kamera-App gefunden", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, getString(R.string.no_camera), Toast.LENGTH_LONG).show();
                 }
             });
             return true;
@@ -373,8 +374,10 @@ public class MainActivity extends Activity {
         @JavascriptInterface public String routePoints() { return Navi.points(MainActivity.this); }
         @JavascriptInterface public void clearRoute() { Navi.clear(MainActivity.this); }
         @JavascriptInterface public String routeInfo() { return Navi.info(MainActivity.this); }
+        @JavascriptInterface public String lang() { return GuideText.lang; }
+        @JavascriptInterface public void setLang(String l) { Navi.setLang(MainActivity.this, l); }
         @JavascriptInterface public void setGuide(boolean on) { Navi.setEnabled(MainActivity.this, on); }
-        @JavascriptInterface public void guideTest() { Navi.speak(MainActivity.this, "Die Sprachansagen sind eingeschaltet. In 100 Metern links abbiegen."); }
+        @JavascriptInterface public void guideTest() { Navi.speak(MainActivity.this, GuideText.test()); }
         @JavascriptInterface public void uploadPhotos() { RecPhotos.flushAsync(MainActivity.this); }
         @JavascriptInterface
         public String photoInfo() {
@@ -412,7 +415,7 @@ public class MainActivity extends Activity {
         public void openUrl(String u) {
             runOnUiThread(() -> {
                 try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(u)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
-                catch (Exception e) { Toast.makeText(MainActivity.this, "Keine App dafür gefunden", Toast.LENGTH_LONG).show(); }
+                catch (Exception e) { Toast.makeText(MainActivity.this, R.string.no_app, Toast.LENGTH_LONG).show(); }
             });
         }
 
@@ -424,7 +427,7 @@ public class MainActivity extends Activity {
         public void shareText(String text) {
             runOnUiThread(() -> {
                 Intent i = new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text).putExtra(Intent.EXTRA_SUBJECT, text.split("\n")[0].length() > 80 ? "Meine Touren" : text.split("\n")[0]);
-                startActivity(Intent.createChooser(i, "Senden mit …"));
+                startActivity(Intent.createChooser(i, getString(R.string.send_with)));
             });
         }
 

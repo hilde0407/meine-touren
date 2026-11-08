@@ -21,10 +21,12 @@ def test_trackstore_java(tmp_path):
 @pytest.mark.skipif(not shutil.which("javac"), reason="kein JDK")
 def test_guide_java(tmp_path):
     """Wegführung: Abbiegungen erkennen, Ansagen, Abkommen und Rückkehr, Rundweg, Rauschen."""
-    src = ROOT / "android/app/src/main/java/de/meinetouren/app/Guide.java"
-    subprocess.run(["javac", "-d", str(tmp_path), str(src), str(ROOT / "tests/android/GuideCheck.java")], check=True)
-    r = subprocess.run(["java", "-cp", str(tmp_path), "GuideCheck"], capture_output=True, text=True, cwd=tmp_path)
-    assert r.returncode == 0 and "OK" in r.stdout, r.stdout + r.stderr
+    d = ROOT / "android/app/src/main/java/de/meinetouren/app"
+    subprocess.run(["javac", "-d", str(tmp_path), str(d / "GuideText.java"), str(d / "Guide.java"), str(ROOT / "tests/android/GuideCheck.java"),
+                    str(ROOT / "tests/android/GuideTextCheck.java")], check=True)
+    for k in ("GuideCheck", "GuideTextCheck"):
+        r = subprocess.run(["java", "-cp", str(tmp_path), k], capture_output=True, text=True, cwd=tmp_path)
+        assert r.returncode == 0 and "OK" in r.stdout, r.stdout + r.stderr
 
 
 def _gpx():

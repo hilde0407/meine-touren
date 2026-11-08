@@ -8,4 +8,8 @@ p{color:#4d5d52;line-height:1.45}button{width:100%;font-size:18px;padding:14px;b
 <p>Deine laufende Aufzeichnung ist davon <b>nicht</b> betroffen – sie läuft weiter und wird später hochgeladen.</p>
 <button onclick="location.href=u()">Erneut versuchen</button>
 <button class="s" onclick="MTApp.changeServer()">Serveradresse ändern</button>
-<script>function u(){return decodeURIComponent((location.search.match(/u=([^&]*)/)||[])[1]||'')+'/'}</script></body></html>
+<script>function u(){return decodeURIComponent((location.search.match(/u=([^&]*)/)||[])[1]||'')+'/'}</script><script>(function(){var T={en:{t:"Not reachable",h:"Server not reachable",m:"Meine Touren could not reach the server. Is the phone on your home network or connected via VPN (Tailscale)?",n:"Your running recording is <b>not</b> affected – it keeps going and will be uploaded later.",r:"Try again",c:"Change server address"},
+fr:{t:"Inaccessible",h:"Serveur inaccessible",m:"Meine Touren n’a pas pu joindre le serveur. Le téléphone est-il sur votre réseau domestique ou connecté par VPN (Tailscale) ?",n:"Votre enregistrement en cours n’est <b>pas</b> affecté – il continue et sera envoyé plus tard.",r:"Réessayer",c:"Modifier l’adresse du serveur"},
+es:{t:"Sin conexión",h:"Servidor no accesible",m:"Meine Touren no pudo conectar con el servidor. ¿Está el móvil en tu red doméstica o conectado por VPN (Tailscale)?",n:"La grabación en curso <b>no</b> se ve afectada: sigue y se subirá más tarde.",r:"Reintentar",c:"Cambiar la dirección del servidor"}};
+var l=((window.MTApp&&MTApp.lang&&MTApp.lang())||navigator.language||"de").slice(0,2),d=T[l];if(!d)return;document.documentElement.lang=l;document.title=d.t;
+var e=document.querySelector("h1");e.textContent=d.h;var p=document.querySelectorAll("p");p[0].textContent=d.m;p[1].innerHTML=d.n;var b=document.querySelectorAll("button");b[0].textContent=d.r;b[1].textContent=d.c;})()</script></body></html>

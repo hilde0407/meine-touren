@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Meine Touren</string>
+    <string name="rec_channel">Grabación</string>
+    <string name="rec_title">Grabación en curso</string>
+    <string name="rec_paused">Grabación en pausa</string>
+    <string name="sending">Enviando a Meine Touren …</string>
+    <string name="no_app">No se encontró ninguna aplicación para esto</string>
+    <string name="send_with">Enviar con …</string>
+    <string name="download" formatted="true">Descarga: %s</string>
+    <string name="download_failed">Error en la descarga</string>
+    <string name="send_failed">Error al enviar: ¿el servidor está accesible?</string>
+    <string name="no_camera">No se encontró ninguna aplicación de cámara</string>
+</resources>

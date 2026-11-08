@@ -8,4 +8,8 @@ button{width:100%;font-size:18px;padding:14px;border:0;border-radius:10px;backgr
 <input id="u" type="url" inputmode="url" placeholder="http://192.168.178.230" autocapitalize="off" autocomplete="off">
 <button onclick="go()">Verbinden</button>
 <p><small>Die Adresse lässt sich später in der Verwaltung unter „Auf dem Handy“ ändern.</small></p>
-<script>function go(){var v=document.getElementById('u').value.trim();if(v&&window.MTApp)MTApp.setServer(v)}</script></body></html>
+<script>function go(){var v=document.getElementById('u').value.trim();if(v&&window.MTApp)MTApp.setServer(v)}</script><script>(function(){var T={en:{p:"Enter the address of your Meine Touren server, e.g. <b>http://192.168.178.230</b> or your HTTPS/Tailscale address.",b:"Connect",s:"You can change the address later in the administration under “On the phone”."},
+fr:{p:"Saisissez l’adresse de votre serveur Meine Touren, par ex. <b>http://192.168.178.230</b> ou votre adresse HTTPS/Tailscale.",b:"Se connecter",s:"Vous pourrez modifier l’adresse plus tard dans l’administration sous « Sur le téléphone »."},
+es:{p:"Introduce la dirección de tu servidor Meine Touren, p. ej. <b>http://192.168.178.230</b> o tu dirección HTTPS/Tailscale.",b:"Conectar",s:"Puedes cambiar la dirección más tarde en la administración, en «En el móvil»."}};
+var l=((window.MTApp&&MTApp.lang&&MTApp.lang())||navigator.language||"de").slice(0,2),d=T[l];if(!d)return;document.documentElement.lang=l;
+document.querySelector("p").innerHTML=d.p;document.querySelector("button").textContent=d.b;document.querySelector("small").textContent=d.s;})()</script></body></html>

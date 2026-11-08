@@ -11,6 +11,7 @@
   } catch (e) {}
   window.LANG = lang;
   document.documentElement.lang = lang;
+  try { if (window.MTApp && MTApp.setLang) MTApp.setLang(lang); } catch (e) {}   // Companion-App: Sprache der Sprachansagen und Benachrichtigungen
   window.setLang = l => { try { localStorage.setItem("lang", l); } catch (e) {} location.reload(); };
   const mkBtn = () => {
     const b = document.createElement("select");

@@ -37,6 +37,9 @@ jobs:
           mkdir -p /tmp/jc
           javac -d /tmp/jc android/app/src/main/java/de/meinetouren/app/TrackStore.java tests/android/TrackStoreCheck.java
           java -cp /tmp/jc TrackStoreCheck
+          javac -d /tmp/jc android/app/src/main/java/de/meinetouren/app/GuideText.java android/app/src/main/java/de/meinetouren/app/Guide.java tests/android/GuideCheck.java tests/android/GuideTextCheck.java
+          java -cp /tmp/jc GuideCheck
+          java -cp /tmp/jc GuideTextCheck
       - name: Signierschlüssel bereitstellen (falls als Secret hinterlegt)
         env:
           KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}

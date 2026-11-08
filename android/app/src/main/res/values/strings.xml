@@ -4,4 +4,11 @@
     <string name="rec_channel">Aufzeichnung</string>
     <string name="rec_title">Aufzeichnung läuft</string>
     <string name="rec_paused">Aufzeichnung pausiert</string>
+    <string name="sending">Wird an Meine Touren gesendet …</string>
+    <string name="no_app">Keine App dafür gefunden</string>
+    <string name="send_with">Senden mit …</string>
+    <string name="download" formatted="true">Download: %s</string>
+    <string name="download_failed">Download fehlgeschlagen</string>
+    <string name="send_failed">Senden fehlgeschlagen – Server erreichbar?</string>
+    <string name="no_camera">Keine Kamera-App gefunden</string>
 </resources>

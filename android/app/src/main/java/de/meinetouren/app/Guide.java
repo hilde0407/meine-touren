@@ -158,29 +158,11 @@ public final class Guide {
         return Math.max(0, lo2 - 1);
     }
 
-    private static String dist(double m) {
-        if (m >= 950) {
-            double km = Math.round(m / 100.0) / 10.0;
-            return String.format(Locale.GERMANY, "%s Kilometer", km == Math.rint(km) ? String.valueOf((long) km) : String.format(Locale.GERMANY, "%.1f", km));
-        }
-        long r = m < 100 ? Math.max(10, Math.round(m / 10.0) * 10) : Math.round(m / 50.0) * 50;
-        return r + " Metern";
-    }
+    private static String dist(double m) { return GuideText.dist(m); }
 
-    private static String distNom(double m) {
-        return dist(m).replace("Metern", "Meter");
-    }
+    private static String distNom(double m) { return GuideText.distNom(m); }
 
-    static String instruction(double angle) {
-        double a = Math.abs(angle);
-        String side = angle > 0 ? "rechts" : "links";
-        if (a >= 150) return "Kehre nach " + side;
-        if (a >= 120) return "scharf " + side + " abbiegen";
-        if (a >= 65) return side + " abbiegen";
-        return "leicht " + side + " halten";
-    }
-
-    private static String cap(String s) { return s.isEmpty() ? s : Character.toUpperCase(s.charAt(0)) + s.substring(1); }
+    static String instruction(double angle) { return GuideText.instruction(angle); }
 
     /**
      * Neue GPS-Position verarbeiten.
@@ -197,11 +179,11 @@ public final class Guide {
             if (n[0] <= Math.max(BACK_M, acc)) {
                 reached = true;
                 prog = n[1];
-                say.add(introSaid ? "Du bist auf der Route." : "Du bist auf der Route. Sie ist " + distNom(totalM()) + " lang.");
+                say.add(introSaid ? GuideText.onRoute() : GuideText.onRouteLen(totalM()));
                 introSaid = true;
             } else if (!introSaid) {
                 introSaid = true;
-                say.add("Die Route ist " + distNom(n[0]) + " entfernt. Geh zur Route, dann beginnt die Führung.");
+                say.add(GuideText.routeAway(n[0]));
             }
             return say;
         }
@@ -212,11 +194,11 @@ public final class Guide {
                 off = true;
                 lastOffSay = now;
                 double[] g = nearest(px, py, 0, x.length - 1, prog);
-                say.add("Du bist vom Weg abgekommen. Bis zur Route sind es " + distNom(g[0]) + ".");
+                say.add(GuideText.offRoute(g[0]));
             } else if (off && now - lastOffSay > 90000) {
                 lastOffSay = now;
                 double[] g = nearest(px, py, 0, x.length - 1, prog);
-                say.add("Noch nicht auf der Route, " + distNom(g[0]) + " entfernt.");
+                say.add(GuideText.stillOff(g[0]));
             }
             return say;
         }
@@ -225,7 +207,7 @@ public final class Guide {
             if (n[0] > BACK_M) return say;
             off = false;
             if (n[1] < prog) for (int i = 0; i < level.length; i++) if (turns.get(i).at > n[1]) level[i] = 0;
-            say.add("Wieder auf dem Weg.");
+            say.add(GuideText.backOn());
         }
         if (n[1] >= prog - 30) prog = Math.max(prog, n[1]);
         double rest = totalM() - prog;
@@ -237,22 +219,22 @@ public final class Guide {
             double d = t.at - prog;
             double far = Math.max(100, Math.min(400, speed * 20)), near = Math.max(18, speed * 3);
             String then = "";
-            if (ti + 1 < turns.size() && turns.get(ti + 1).at - t.at < 80) then = ", danach " + instruction(turns.get(ti + 1).angle);
+            if (ti + 1 < turns.size() && turns.get(ti + 1).at - t.at < 80) then = GuideText.thenPart(turns.get(ti + 1).angle);
             if (d <= near && level[ti] < 2) {
                 level[ti] = 2;
-                say.add(cap("jetzt " + instruction(t.angle)) + then + ".");
+                say.add(GuideText.now(t.angle, then));
             } else if (d <= far && level[ti] < 1 && d > near + 15) {
                 level[ti] = 1;
-                say.add("In " + dist(d) + " " + instruction(t.angle) + then + ".");
+                say.add(GuideText.ahead(d, t.angle, then));
             }
         }
         if (!km1 && rest <= 1000 && totalM() > 2500) {
             km1 = true;
-            say.add("Noch ein Kilometer bis zum Ziel.");
+            say.add(GuideText.oneKm());
         }
         if (!finished && rest <= 25 && prog >= totalM() * 0.8) {
             finished = true;
-            say.add("Du hast das Ziel erreicht.");
+            say.add(GuideText.arrived());
         }
         return say;
     }

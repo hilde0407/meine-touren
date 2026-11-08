@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Meine Touren</string>
+    <string name="rec_channel">Recording</string>
+    <string name="rec_title">Recording in progress</string>
+    <string name="rec_paused">Recording paused</string>
+    <string name="sending">Sending to Meine Touren …</string>
+    <string name="no_app">No app found for this</string>
+    <string name="send_with">Send with …</string>
+    <string name="download" formatted="true">Download: %s</string>
+    <string name="download_failed">Download failed</string>
+    <string name="send_failed">Sending failed – is the server reachable?</string>
+    <string name="no_camera">No camera app found</string>
+</resources>

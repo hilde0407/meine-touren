@@ -39,6 +39,12 @@ public class RecorderService extends Service implements LocationListener {
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        Navi.initLang(this);
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Recorder r = Recorder.get(this);
         String a = intent == null ? null : intent.getAction();
@@ -67,7 +73,7 @@ public class RecorderService extends Service implements LocationListener {
 
     private void foreground(Recorder r) {
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationChannel ch = new NotificationChannel(CHANNEL, getString(R.string.rec_channel), NotificationManager.IMPORTANCE_LOW);
+        NotificationChannel ch = new NotificationChannel(CHANNEL, Navi.lc(this).getString(R.string.rec_channel), NotificationManager.IMPORTANCE_LOW);
         nm.createNotificationChannel(ch);
         Notification n = build(r);
         try {
@@ -84,10 +90,10 @@ public class RecorderService extends Service implements LocationListener {
         PendingIntent pi = PendingIntent.getActivity(this, 0, open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         double km = r.store().distanceM() / 1000.0;
         long s = r.store().activeMs() / 1000;
-        String txt = String.format(Locale.GERMANY, "%.2f km · %d:%02d h", km, s / 3600, (s % 3600) / 60);
+        String txt = String.format(GuideText.locale(), "%.2f km · %d:%02d h", km, s / 3600, (s % 3600) / 60);
         return new Notification.Builder(this, CHANNEL)
                 .setSmallIcon(R.drawable.ic_stat_rec)
-                .setContentTitle(getString(R.string.rec_title))
+                .setContentTitle(Navi.lc(this).getString(R.string.rec_title))
                 .setContentText(txt)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)

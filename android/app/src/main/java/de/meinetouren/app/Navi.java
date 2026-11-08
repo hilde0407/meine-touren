@@ -31,6 +31,25 @@ final class Navi {
     private static SharedPreferences prefs(Context c) { return c.getSharedPreferences("app", Context.MODE_PRIVATE); }
     private static File file(Context c) { return new File(c.getFilesDir(), "route.txt"); }
 
+    /** Sprache der Ansagen (de/en/fr/es) setzen und merken; die Sprachausgabe wird bei Wechsel neu aufgebaut. */
+    static synchronized void setLang(Context c, String l) {
+        String n = GuideText.norm(l);
+        prefs(c).edit().putString("lang", n).apply();
+        if (!n.equals(GuideText.lang)) { GuideText.lang = n; shutdown(); }
+    }
+
+    static void initLang(Context c) {
+        String l = prefs(c).getString("lang", null);
+        GuideText.lang = GuideText.norm(l != null ? l : Locale.getDefault().getLanguage());
+    }
+
+    /** Kontext mit der Ansage-/App-Sprache (für Texte aus den Ressourcen, z. B. die Benachrichtigung). */
+    static Context lc(Context c) {
+        android.content.res.Configuration cf = new android.content.res.Configuration(c.getResources().getConfiguration());
+        cf.setLocale(GuideText.locale());
+        return c.createConfigurationContext(cf);
+    }
+
     static boolean enabled(Context c) { return prefs(c).getBoolean("guide_on", true); }
     static void setEnabled(Context c, boolean on) { prefs(c).edit().putBoolean("guide_on", on).apply(); }
 
@@ -122,8 +141,8 @@ final class Navi {
             tts = new TextToSpeech(app, status -> {
                 synchronized (Navi.class) {
                     if (status != TextToSpeech.SUCCESS) { ttsFailed = true; AppLog.log("Sprachausgabe nicht verfügbar"); return; }
-                    int r = tts.setLanguage(Locale.GERMANY);
-                    if (r == TextToSpeech.LANG_MISSING_DATA || r == TextToSpeech.LANG_NOT_SUPPORTED) AppLog.log("Deutsche Stimme fehlt – Standardstimme wird verwendet");
+                    int r = tts.setLanguage(GuideText.locale());
+                    if (r == TextToSpeech.LANG_MISSING_DATA || r == TextToSpeech.LANG_NOT_SUPPORTED) AppLog.log("Stimme für " + GuideText.lang + " fehlt – Standardstimme wird verwendet");
                     tts.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
                             .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
                     tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
