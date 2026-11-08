@@ -677,6 +677,21 @@ App installieren|Install app
 Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen sind erst mit Verbindung möglich.|Offline – last seen data is shown. Saving and uploading need a connection.`;
   ((lang === "en" ? EN : (window.I18N || {})[lang]) || "").split("\n").forEach(l => { const i = l.indexOf("|"); if (i > 0) D[l.slice(0, i)] = l.slice(i + 1); });
 
+  // Neue Einträge (00-i18n-neu.js): Zeilen „deutsch || englisch || französisch || spanisch“. Ein „{}“ im deutschen Text ist ein Platzhalter
+  // (Zahl, Name, Datum …); er wird beim Übersetzen übernommen – selbst wieder übersetzt – und steht in der Übersetzung an derselben Stelle.
+  const PAT = [];
+  const addEntry = (k, v) => {
+    if (k.indexOf("{}") < 0) { D[k] = v; return; }
+    const parts = k.split("{}");
+    PAT.push({re: new RegExp("^" + parts.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("(.+?)") + "$", "s"), v, pre: parts[0], n: k.length});
+  };
+  const NCOL = {en: 1, fr: 2, es: 3}[lang];
+  String(window.I18N_NEU || "").split("\n").forEach(l => {
+    const c = l.split(" || ");
+    if (c.length > NCOL && c[0].trim() && c[NCOL].trim()) addEntry(c[0].trim(), c[NCOL].trim());
+  });
+  PAT.sort((a, b) => b.n - a.n);
+
   const decode = s => s.replace(/&amp;/g, "&");
   const MO = "Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember";
   const dt = (d, mo, y) => (lang === "en" ? `${D[mo] || mo} ${d}, ${y}` : lang === "fr" ? `${d === "1" ? "1er" : d} ${D[mo] || mo} ${y}` : `${d} de ${D[mo] || mo} de ${y}`);
@@ -722,17 +737,28 @@ Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen 
     [/(\d+) Etappen/g, (m, n) => `${n} ${pl(n, U.stg[0], U.stg[1])}`],
     [/(\d+) Abschnitte?  ?mit Fahrt-Tempo \(Seilbahn, Bus, Auto\?\)/g, (m, n) => `${n} ${pl(n, U.fast[0], U.fast[1])}`],
     [/zu schnell für Wandern/g, () => U.tfast],
-    [/\bTouren\b/g, () => U.Tours],
-    [/\bFotos\b/g, () => U.Photos],
   ];
   const long = Object.keys(D).filter(k => k.length >= 16).sort((a, b) => b.length - a.length);
+  // Zusammengesetzte Textknoten („12 / 40 · noch ca. 5 min“, mehrere Sätze): an „ · “ und Satzgrenzen trennen, Teile einzeln übersetzen
+  let SPLIT = null;
+  try { SPLIT = new RegExp("( · |(?<=[.!?…:])\\s+(?=[A-ZÄÖÜ„“\"(⚠✓✗]))"); } catch (e) {}
+  const piecewise = t => {
+    if (!SPLIT || t.length < 12) return undefined;
+    const parts = t.split(SPLIT);
+    if (parts.length < 3) return undefined;
+    let ch = false;
+    const o = parts.map((p, i) => { if (i % 2) return p; const q = tr(p); if (q !== p) ch = true; return q; });
+    return ch ? o.join("") : undefined;
+  };
   const tr = s => {
-    const t = decode(s).trim();
+    const t = decode(s).replace(/\u00a0/g, " ").trim();
     if (!t) return s;
     let r = D[t];
     if (r === undefined) for (const [re, f] of P) { const m = re.exec(t); if (m) { r = f(...m); break; } }
+    if (r === undefined) for (const q of PAT) { if (t.startsWith(q.pre)) { const m = q.re.exec(t); if (m) { let i = 0; r = q.v.replace(/\{\}/g, () => tr(m[++i])); break; } } }
     if (r === undefined && t.length > 16) { let u = t; for (const k of long) if (u.includes(k)) u = u.split(k).join(D[k]); if (u !== t) r = u; }
-    if (r === undefined) { let u = t; for (const [re, f] of S) u = u.replace(re, f); if (u !== t) r = u; }
+    if (r === undefined) r = piecewise(t);
+    if (r === undefined) { let u = t.replace(/Meine Touren/g, "\u0001"); for (const [re, f] of S) u = u.replace(re, f); u = u.replace(/\u0001/g, "Meine Touren"); if (u !== t) r = u; }
     if (r === undefined) return s;
     return s.replace(s.trim(), () => r);
   };
