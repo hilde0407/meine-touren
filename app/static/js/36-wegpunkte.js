@@ -9,6 +9,7 @@ VIEWS.tour = async id => {
   if (!t || !$("#tm") || !$("#main")) return;
   const ren = $("#ren");
   if (ren && !$("#storybtn")) ren.insertAdjacentHTML("afterend", ` <a class="btn ghost sm" id="storybtn" href="#/story/${esc(id)}" title="Wegpunkte, Fotos und Eckdaten als Zeitleiste" style="vertical-align:middle;font-size:15px">📖 Erzählung</a>`);
+  if ($("#storybtn") && $(".tact-bar")) $("#storybtn").classList.add("tact-off");
   let w = [];
   try { w = await api(`/api/tours/${id}/wps`); } catch (e) { return; }
   if (!w.length || !$("#profcard")) return;
@@ -56,7 +57,7 @@ VIEWS.story = async id => {
   ev.sort((a, b) => a.ts - b.ts);
   const rel = ts => { const m = Math.max(0, Math.round((ts - t0) / 60)); return `+${Math.floor(m / 60)}:${pad2(m % 60)} h`; };
   const icon = k => ({start: "🏁", end: "🎯", wp: "📍", ph: "📷"})[k];
-  const item = (e, i) => `<div class="stev" data-e="${i}" style="display:flex;gap:12px;margin:0 0 18px;cursor:${e.pos ? "pointer" : "default"}"><div style="min-width:78px;text-align:right"><b>${wpTime(e.ts)}</b><div class="mut" style="font-size:12px">${rel(e.ts)}</div></div><div style="flex:1;border-left:3px solid var(--line,#ccc);padding-left:14px"><div style="font-size:18px">${icon(e.kind)} ${e.kind === "ph" ? `${e.ph.length} Foto${e.ph.length > 1 ? "s" : ""}` : esc(e.txt)}</div>` +
+  const item = (e, i) => `<div class="stev" data-e="${i}" style="display:flex;gap:12px;margin:0 0 18px;cursor:${e.pos ? "pointer" : "default"}"><div style="min-width:78px;text-align:right"><b>${wpTime(e.ts)}</b><div class="mut" style="font-size:12px">${rel(e.ts)}</div></div><div style="flex:1;border-left:3px solid var(--line,#ccc);padding-left:14px"><div style="font-size:18px">${icon(e.kind)} ${e.kind === "ph" ? `${e.ph.length} Foto${e.ph.length > 1 ? "s" : ""}` : esc(e.txt)}</div><div class="splc mut" style="font-size:14px"></div>` +
     (e.kind === "ph" ? `<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">${e.ph.slice(0, 8).map(p => `<span class="sph" data-p="${p.id}" style="position:relative;cursor:zoom-in"><img loading="lazy" src="/pic/${p.id}?size=500" style="height:120px;border-radius:8px;display:block">${(CM[p.id] || []).length ? `<b class="scn" style="position:absolute;right:4px;bottom:4px;background:#000a;color:#fff;border-radius:10px;padding:1px 7px;font-size:12px">💬 ${CM[p.id].length}</b>` : ""}</span>`).join("")}${e.ph.length > 8 ? `<span class="mut">+${e.ph.length - 8}</span>` : ""}</div>` : "") + `</div></div>`;
   $("#main").innerHTML = `<div class="row"><a class="back" href="#/tour/${esc(id)}">‹ Zur Tour</a></div>
    <h1 style="font-size:clamp(30px,5vw,48px);margin:14px 0 4px">${esc(t.name)}</h1><p class="mut">${dateL(t.date)} · ${nf(t.km, 1)} km · ↑ ${nf(t.up_m, 0)} m · ${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60))} h${t.h ? ` · ${nf(t.km / t.h, 1)} km/h` : ""}</p>
@@ -67,6 +68,18 @@ VIEWS.story = async id => {
     map.fitBounds(ln.getBounds(), {padding: [20, 20]});
   } else map.setView([t.lat || 50, t.lng || 8], 12);
   ev.forEach((e, i) => { if (e.pos && e.kind !== "ph") L.marker(e.pos, {icon: wpIcon(icon(e.kind))}).addTo(map).bindPopup(esc(e.txt)); });
+  (async () => {   // Ortsnamen der Stationen nachladen (zwischengespeichert; ohne Internet bleibt die Zeile leer)
+    for (let i = 0; i < ev.length; i++) {
+      const e = ev[i];
+      if (!e.pos) continue;
+      try {
+        const r = await api(`/api/place?lat=${e.pos[0]}&lng=${e.pos[1]}`);
+        const box = document.querySelector(`#stl .stev[data-e="${i}"] .splc`);
+        if (!box) return;                                  // Ansicht inzwischen verlassen
+        if (r && r.name) { box.textContent = "📌 " + r.name; e.place = r.name; }
+      } catch (er) { return; }
+    }
+  })();
   const openPhoto = pid => {
     const ov = document.createElement("div");
     ov.id = "pcm";

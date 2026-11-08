@@ -306,7 +306,7 @@ VIEWS.tour = async id => {
   if ($("#ksync"))           // Komoot-Touren: zusätzliche Knöpfe (GPX steht schon in der Leiste)
   r.insertAdjacentHTML(
     "beforeend",
-    `<a class="btn ghost sm" href="#/flight/${encodeURIComponent(id)}" title="Die Strecke im 3D-Gelände abfliegen">🛰 3D-Flug</a>${t.photos ? `<button class="btn ghost sm" id="shr" title="Link zur Foto-Diashow dieser Tour kopieren">🔗 Diashow-Link</button>` : ""}`
+    `<a class="btn ghost sm" id="e3d" href="#/flight/${encodeURIComponent(id)}" title="Die Strecke im 3D-Gelände abfliegen">🛰 3D-Flug</a>${t.photos ? `<button class="btn ghost sm" id="shr" title="Link zur Foto-Diashow dieser Tour kopieren">🔗 Diashow-Link</button>` : ""}`
   );
   if ($("#shr"))
     $("#shr").onclick = async () => {

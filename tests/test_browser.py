@@ -116,7 +116,7 @@ def test_fresh_load_without_errors(page, app_url):
 def test_interactions(page):
     page.errors.clear()
     page.evaluate("location.hash = '#/tour/' + TOURS.find(t => t.source === 'local').id"); page.wait_for_timeout(1200)
-    page.click("#eup"); page.wait_for_selector(".modal .pp"); page.click("#ucx")
+    page.evaluate("document.querySelector(\"#eup\").click()"); page.wait_for_selector(".modal .pp"); page.click("#ucx")
     page.evaluate("location.hash = '#/records'"); page.wait_for_timeout(800)
     page.click("a.chip:has-text('Radtour')"); page.wait_for_timeout(800)
     assert "Radtour" in page.inner_text("#main .sec")
@@ -230,7 +230,7 @@ def test_trackfix_dialog_opens(page):
     page.goto(page.url.split("#")[0] + "#/dash"); page.wait_for_timeout(300)
     tid = _tour_id(page)
     page.goto(page.url.split("#")[0] + f"#/tour/{tid}"); page.wait_for_timeout(1200)
-    page.click("#etfix"); page.wait_for_selector("#tfb #tfno", timeout=8000)
+    page.evaluate("document.querySelector(\"#etfix\").click()"); page.wait_for_selector("#tfb #tfno", timeout=8000)
     assert "Track" in page.inner_text(".mbox")
     page.click("#tfno")
     assert not page.errors, page.errors
@@ -768,6 +768,7 @@ def test_mobile_tour_menus(page):
     page.goto(base + "#/tour/" + page.evaluate("TOURS.find(t => t.source === 'local').id")); page.wait_for_selector(".tact .tk", timeout=8000)
     vis = page.evaluate("[...document.querySelectorAll('#main .tact > *')].filter(e => e.offsetParent && e.textContent.trim()).map(e => e.className)")
     assert len(vis) <= 2 and page.is_visible("#main .tact-bar")                  # nur Menüleiste (und ggf. „lokal gespeichert“)
+    assert page.locator(".tk").count() == 3          # Ansehen, Teilen & Export, Bearbeiten
     page.click(".tk[data-g=share]"); page.wait_for_selector(".tactl")
     assert {"esnd", "eshow", "eshr", "egpx"} <= set(page.evaluate("[...document.querySelectorAll('.tactl [data-e]')].map(b => b.dataset.e)"))
     page.click(".tactl [data-e=eshr]"); page.wait_for_selector("#shn")            # „Links verwalten“ öffnet den Link-Dialog
@@ -938,6 +939,11 @@ def test_waypoints_and_story(page, app_url):
     page.wait_for_selector("#wpcard", timeout=20000)
     assert page.locator("#storybtn").count() == 1
     assert "Rast am Bach" in page.inner_text("#wpcard")
+    page.wait_for_selector(".tk[data-g=view]")                 # Desktop: drei thematische Menüs statt vieler Einzelknöpfe
+    assert page.locator(".tk").count() == 3 and not page.is_visible("#storybtn")
+    page.click(".tk[data-g=view]"); page.wait_for_selector(".tactl [data-e=storybtn]")
+    page.click(".tactl [data-e=storybtn]")
+    page.wait_for_selector("#stl .stev", timeout=20000)
     page.goto(base + f"#/story/{tid}")
     page.wait_for_selector("#stl .stev", timeout=20000)
     page.wait_for_function("document.querySelectorAll('#sm .leaflet-marker-icon').length >= 3", timeout=10000)

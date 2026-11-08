@@ -129,3 +129,15 @@ async def api_photo_comment_add(pid: int, request: Request):
 def api_comment_del(cid: int):
     db.execute("DELETE FROM photo_comments WHERE id=?", (cid,))
     return {"ok": True}
+
+
+@router.get("/api/place")
+def api_place(lat: float, lng: float):
+    """Ortsname zu einer Koordinate (für die Erzählung); bei Fehlern/ohne Internet einfach leer."""
+    from . import extras
+    if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+        raise HTTPException(400, "Ungültige Daten")
+    try:
+        return {"name": extras.place_name(lat, lng)}
+    except Exception:  # noqa
+        return {"name": None}

@@ -355,13 +355,16 @@ html.viewer [hidden]{display:none!important}
 .atab .gbody>* h3{font-family:var(--d)}
 
 /* ---- 2.5.2: Tour-Ansicht mobil – zwei Menüs statt elf Einzelknöpfen ---- */
-html.mob .tact{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:2px 0 14px!important}
-html.mob .tact>:is(button,a):not(.tk){display:none!important}
-html.mob .tact>.tact-bar{display:flex;gap:10px;flex:1 1 100%}
-html.mob .tact-bar .tk{flex:1;min-height:48px;font-size:17px;font-weight:600}
-html.mob .tact>.tag{flex:0 0 auto}
-html.mob .tact-bar .tk{display:flex;align-items:center;justify-content:center;gap:8px}
-html.mob #ren.tact-off{display:none}
+.tact{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:2px 0 14px!important}
+.tact>:is(button,a):not(.tk){display:none!important}
+.tact>.tact-bar{display:flex;gap:10px;flex:1 1 100%}
+.tact-bar .tk{flex:1;min-height:48px;font-size:17px;font-weight:600}
+.tact>.tag{flex:0 0 auto}
+.tact-bar .tk{display:flex;align-items:center;justify-content:center;gap:8px}
+html:not(.mob) .tact>.tact-bar{flex:0 0 auto}
+html:not(.mob) .tact-bar .tk{flex:0 0 auto;min-height:38px;font-size:15px;padding:6px 16px}
+#ren.tact-off,#storybtn.tact-off{display:none}
+.tactg{margin:10px 0 0;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut,#5d716f)}
 .tactl{display:flex;flex-direction:column;gap:8px}
 .tactl .tl{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;padding:12px 16px;min-height:52px}
 .tactl .tl small{font-weight:400;color:var(--mut,#5d716f);font-size:13px}

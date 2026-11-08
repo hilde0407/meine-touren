@@ -119,3 +119,15 @@ def test_photo_comments_api():
     assert [x["text"] for x in c.get("/api/tours/kt1/comments").json()[str(pid)]] == ["Zweiter"]
     photos.delete_photos([pid])
     assert c.get("/api/tours/kt1/comments").json() == {}
+
+
+def test_story_place_name(monkeypatch):
+    """Ortsname zu einer Koordinate für die Erzählung; Fehler ergeben einen leeren Namen statt eines Absturzes."""
+    from fastapi.testclient import TestClient
+    from app import main, extras
+    c = TestClient(main.app)
+    monkeypatch.setattr(extras, "place_name", lambda la, ln: "Garmisch")
+    assert c.get("/api/place?lat=47.5&lng=11.1").json() == {"name": "Garmisch"}
+    monkeypatch.setattr(extras, "place_name", lambda la, ln: (_ for _ in ()).throw(RuntimeError("offline")))
+    assert c.get("/api/place?lat=47.5&lng=11.1").json() == {"name": None}
+    assert c.get("/api/place?lat=95&lng=11.1").status_code == 400
