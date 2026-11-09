@@ -51,3 +51,22 @@ def test_merge_hr_backfill():
     from app import main
     assert TestClient(main.app).get("/api/tours/zt3/hr").json()["n"] >= 30
     assert tracks.merge_hr(txt, [(p[0], 99) for p in pts2])[1] == 0         # vorhandener Puls bleibt
+
+
+def test_backfill_matches_existing_tour_without_gpx(monkeypatch):
+    """Eine Komoot-Tour (ohne lokales GPX) bekommt den Puls über das passende Zepp-Training."""
+    from fastapi.testclient import TestClient
+    from app import main, sync
+    s, pts = _pts()
+    db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,status,source) VALUES(?,?,?,?,?,?,?,?,?)",
+               ("k99", "Komoot-Tour", "hike", 1700000030, 1700000400, 500.0, 370, "tour_recorded", "komoot"))
+    det = {"longitude_latitude": ";".join(["5000000000,800000000"] + ["100,100"] * 39), "time": ";".join(["0"] + ["10"] * 39),
+           "altitude": ";".join(["10000"] * 40), "heart_rate": ";".join(f"{10 if i else 0},{100 + i}" for i in range(40)), "gait": ""}
+
+    class Api:
+        def history(self): return [{"trackid": "1700000000", "dis": "500", "run_time": "390"}]
+        def detail(self, sm): return det
+    sync.backfill_hr(Api())
+    r = TestClient(main.app).get("/api/tours/k99/hr").json()
+    assert r["n"] >= 30 and r["max"] > 120
+    sync.backfill_hr(Api())                                   # zweiter Lauf: nichts mehr zu tun

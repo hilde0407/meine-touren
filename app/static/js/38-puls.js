@@ -3,7 +3,7 @@ function pulsCard(t) {
   const old = $("#pulscard");
   if (old) old.remove();
   const prof = $("#profcard");
-  if (!prof || !t || t.source !== "local") return;
+  if (!prof || !t) return;
   api("/api/tours/" + encodeURIComponent(t.id) + "/hr")
     .then(h => {
       if (!h || !h.n || $("#pulscard")) return;

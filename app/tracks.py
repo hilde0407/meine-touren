@@ -85,7 +85,7 @@ def delete_local(tid):
         col = "tour_id" if tb in ("tour_uploads", "tour_wps") else "id"
         db.execute(f"DELETE FROM {tb} WHERE {col}=?", (str(tid),))
     db.execute("UPDATE photos SET tour_id=NULL WHERE tour_id=? AND COALESCE(manual,0)=0", (str(tid),))
-    for p in (gpx_file(tid), routes.path_full(tid), routes.path_small(tid)):
+    for p in (gpx_file(tid), config.TRACK_DIR / f"{tid}.hr.json", routes.path_full(tid), routes.path_small(tid)):
         p.unlink(missing_ok=True)
 
 

@@ -221,10 +221,17 @@ def export_zepp(limit=None):
         photos.assign_all()
         log(f"Zepp: {n_ad} Training(s) als lokale Tour übernommen")
     log(f"Zepp: {n_gps} GPS-Dateien geschrieben nach {config.EXPORT_DIR} (es wird nichts hochgeladen)")
+    try:
+        backfill_hr(api)                                 # passende vorhandene Touren (auch Komoot/Datei) um den Puls ergänzen
+    except Exception as e:  # noqa
+        log(f"Puls abgleichen fehlgeschlagen: {e}")
 
 
-def backfill_hr():
-    """Puls für bereits übernommene Zepp-Touren nachladen (Touren, Notizen, Fotos bleiben unberührt; nur das GPX wird um den Puls ergänzt)."""
+def hr_sidecar(tid):
+    return config.TRACK_DIR / f"{tid}.hr.json"
+
+
+def _zepp_api():
     token = db.get("zepp_token")
     em, pw = db.get("zepp_email"), db.get("zepp_password")
     if em and pw:
@@ -236,35 +243,51 @@ def backfill_hr():
             log(f"Zepp-Login fehlgeschlagen ({e}); versuche gespeichertes Token")
     if not token:
         raise RuntimeError("Zepp-Zugangsdaten fehlen (Einstellungen)")
-    api = zepp.ZeppApi(token, db.get("zepp_host"))
-    by = {int(s["trackid"]): s for s in api.history()}
-    rows = db.query("SELECT trackid, komoot_id FROM workouts WHERE status='local' AND komoot_id IS NOT NULL")
+    return zepp.ZeppApi(token, db.get("zepp_host"))
+
+
+def backfill_hr(api=None):
+    """Puls zu Touren nachladen, für die es ein passendes Zepp-Training gibt (gleiche ID z<Nr> oder gleicher Start/gleiche Strecke –
+    auch Komoot- oder Datei-Touren). Touren, Notizen und Fotos bleiben unberührt: der Puls kommt in eine Zusatzdatei (und ins lokale GPX)."""
+    import json
+    api = api or _zepp_api()
+    config.TRACK_DIR.mkdir(parents=True, exist_ok=True)
+    tours = db.query("SELECT id,start_ts,dist_m,dur_s FROM tours")
+    byid = {t["id"]: t for t in tours}
+    tol = db.get_int("dup_tolerance_s", 300)
     todo = []
-    for r in rows:
-        f = tracks.gpx_file(r["komoot_id"])
-        if f.exists() and int(r["trackid"]) in by and "gpxtpx:hr" not in f.read_text(encoding="utf-8", errors="ignore"):
-            todo.append((r, f))
-    log(f"Puls nachladen: {len(todo)} von {len(rows)} Zepp-Touren ohne Puls")
+    for s in api.history():
+        tr = int(s["trackid"])
+        t = byid.get(f"z{tr}") or is_duplicate(tr, float(s.get("dis") or 0), int(float(s.get("run_time") or 0)), tours, tol)
+        if not t:
+            continue
+        gf = tracks.gpx_file(t["id"])
+        if hr_sidecar(t["id"]).exists() or (gf.exists() and "gpxtpx:hr" in gf.read_text(encoding="utf-8", errors="ignore")):
+            continue
+        todo.append((s, t, gf))
+    log(f"Puls abgleichen: {len(todo)} Touren mit passendem Zepp-Training, aber ohne Puls")
     done = 0
-    for i, (r, f) in enumerate(todo, 1):
+    for i, (s, t, gf) in enumerate(todo, 1):
         jobs.progress(f"Puls {i}/{len(todo)}")
         try:
-            det = api.detail(by[int(r["trackid"])])
-            pts = zepp.decode_points(by[int(r["trackid"])], det)
+            det = api.detail(s)
+            pts = zepp.decode_points(s, det)
             hr = [(p[0], p[4]) for p in pts if p[4]]
             if not hr:
                 raw = str(det.get("heart_rate") or "")
-                log(f"  {r['trackid']}: kein Puls erkannt – Zepp-Feld heart_rate: " + (f"{len(raw)} Zeichen, Anfang „{raw[:80]}“" if raw else "leer")
-                    + f"; Felder: {', '.join(sorted(det))[:200]}")
+                log(f"  {t['id']}: kein Puls erkannt – Zepp-Feld heart_rate: " + (f"{len(raw)} Zeichen, Anfang „{raw[:80]}“" if raw else "leer"))
+                hr_sidecar(t["id"]).write_text("[]", encoding="utf-8")            # nicht bei jedem Lauf erneut abfragen
                 continue
-            text, n = tracks.merge_hr(f.read_text(encoding="utf-8"), hr)
-            if n:
-                f.write_text(text, encoding="utf-8")
-                done += 1
+            hr_sidecar(t["id"]).write_text(json.dumps([[a - int(s["trackid"]), b] for a, b in hr]), encoding="utf-8")
+            if gf.exists():
+                text, n = tracks.merge_hr(gf.read_text(encoding="utf-8"), hr)
+                if n:
+                    gf.write_text(text, encoding="utf-8")
+            done += 1
         except Exception as e:  # noqa
-            log(f"  {r['trackid']}: {e}")
+            log(f"  {t['id']}: {e}")
         time.sleep(0.2)
-    log(f"Puls nachladen: {done} Touren ergänzt")
+    log(f"Puls abgleichen: {done} Touren ergänzt")
 
 
 def adopt_workout(trackid):

@@ -442,7 +442,7 @@ Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → An
 
 ### Neu in 3.4 – Puls und bessere 3D-Kamera
 - **Herzfrequenz direkt von der Uhr:** Der Zepp-Import (Verwaltung → Import) übernimmt jetzt auch den Puls und speichert ihn im GPX (`gpxtpx:hr`). GPX/TCX-Dateien mit Puls (z. B. aus Gadgetbridge) werden ebenfalls verstanden. Weder Komoot noch Strava werden benötigt.
-- **Pulskarte in der Tourseite:** Verlauf, Ø/Max/Min und Zeit in fünf Pulszonen. Maximalpuls standardmäßig 185 bpm (Einstellung `hr_max`) oder der höchste gemessene Wert. Bereits importierte Touren: Verwaltung → Zepp-Import → „Puls nachladen“ ergänzt den Puls nachträglich (Touren, Notizen und Fotos bleiben unverändert).
+- **Pulskarte in der Tourseite:** Verlauf, Ø/Max/Min und Zeit in fünf Pulszonen. Maximalpuls standardmäßig 185 bpm (Einstellung `hr_max`) oder der höchste gemessene Wert. Bereits importierte Touren: Verwaltung → Zepp-Import → „Puls nachladen“ ergänzt den Puls nachträglich (Touren, Notizen und Fotos bleiben unverändert). Auch „Zepp-Import starten“ gleicht jetzt ab: Für jedes Zepp-Training, zu dem es schon eine Tour gibt (gleicher Start oder gleiche Strecke – auch aus Komoot oder GPX-Dateien), wird der Puls ergänzt.
 - **3D-Flug:** Im Modus „Kamera folgt“ weicht die Neigung Bergen automatisch aus (Auswahl „Neigung: automatisch“; feste Werte bleiben möglich). Der Reiseflug („3D-Flug über alles“) fliegt die Touren nacheinander ab: zwischen zwei Touren steigt die Kamera auf, überfliegt die Lücke mit sanft an- und abschwellendem Tempo und sinkt über der nächsten Tour wieder ab.
 
 ### Neu in 3.3 – Heimatort
