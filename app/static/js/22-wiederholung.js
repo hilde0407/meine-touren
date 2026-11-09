@@ -35,7 +35,7 @@ function showRepNote(id) {
     ds = ts => new Date(ts * 1000).toLocaleDateString("de-DE");
   w.insertAdjacentHTML(
     "beforebegin",
-    `<div id="repnote" style="margin:-4px 0 10px">🔁 Diese Strecke bist du schon <b>${r.n}-mal</b> gegangen – diese Tour war das <b>${rank}. Mal</b>. <span class="mut">Weitere: ${r.with
+    `<div id="repnote" class="mn4-0-10">🔁 Diese Strecke bist du schon <b>${r.n}-mal</b> gegangen – diese Tour war das <b>${rank}. Mal</b>. <span class="mut">Weitere: ${r.with
       .map(x => `<a href="#/tour/${esc(x.id)}">${ds(x.start_ts)}</a>`)
       .join(", ")}</span></div>`
   );

@@ -1,6 +1,6 @@
 /* =====================  Wegpunkte (unterwegs in der App gesetzt) und Erzählung zur Tour  ===================== */
 const wpTime = ts => new Date(ts * 1000).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"});
-const wpIcon = (n, cls = "") => L.divIcon({className: "", html: `<div style="background:#d9534f;color:#fff;border:2px solid #fff;border-radius:50%;width:26px;height:26px;line-height:22px;text-align:center;font:700 13px system-ui;box-shadow:0 1px 4px #0006" class="${cls}">${n}</div>`, iconSize: [26, 26], iconAnchor: [13, 13]});
+const wpIcon = (n, cls = "") => L.divIcon({className: "", html: `<div style="background:#d9534f;border:2px solid #fff;border-radius:50%;width:26px;height:26px;line-height:22px;font:700 13px system-ui;box-shadow:0 1px 4px #0006" class="${cls} c-white tac">${n}</div>`, iconSize: [26, 26], iconAnchor: [13, 13]});
 
 const _tourW = VIEWS.tour;
 VIEWS.tour = async id => {
@@ -8,19 +8,19 @@ VIEWS.tour = async id => {
   const t = BY[id];
   if (!t || !$("#tm") || !$("#main")) return;
   const ren = $("#ren");
-  if (ren && !$("#storybtn")) ren.insertAdjacentHTML("afterend", ` <a class="btn ghost sm" id="storybtn" href="#/story/${esc(id)}" title="Wegpunkte, Fotos und Eckdaten als Zeitleiste" style="vertical-align:middle;font-size:15px">📖 Erzählung</a>`);
+  if (ren && !$("#storybtn")) ren.insertAdjacentHTML("afterend", ` <a class="btn ghost sm vam fs15" id="storybtn" href="#/story/${esc(id)}" title="Wegpunkte, Fotos und Eckdaten als Zeitleiste">📖 Erzählung</a>`);
   if ($("#storybtn") && $(".tact-bar")) $("#storybtn").classList.add("tact-off");
   let w = [];
   try { w = await api(`/api/tours/${id}/wps`); } catch (e) { return; }
   if (!w.length || !$("#profcard")) return;
   w.forEach((p, i) => L.marker([p.lat, p.lng], {icon: wpIcon(i + 1)}).addTo(map).bindPopup(`<b>${esc(p.note || "Wegpunkt")}</b><br>${wpTime(p.ts)} Uhr`));
-  const rows = () => w.map((p, i) => `<div class="row" style="gap:8px;margin:6px 0;align-items:center" data-w="${p.id}"><span class="tag" style="background:#d9534f">${i + 1}</span><span class="mut">${wpTime(p.ts)}</span><span style="flex:1" class="wpn">${esc(p.note || "Wegpunkt")}</span><button class="btn ghost sm" data-wed="${p.id}" title="Notiz ändern">✎</button><button class="btn ghost sm" data-wdel="${p.id}" title="Wegpunkt löschen">✕</button></div>`).join("");
+  const rows = () => w.map((p, i) => `<div class="row g8 m6-0 aic" data-w="${p.id}"><span class="tag" style="background:#d9534f">${i + 1}</span><span class="mut">${wpTime(p.ts)}</span><span class="wpn fx1">${esc(p.note || "Wegpunkt")}</span><button class="btn ghost sm" data-wed="${p.id}" title="Notiz ändern">✎</button><button class="btn ghost sm" data-wdel="${p.id}" title="Wegpunkt löschen">✕</button></div>`).join("");
   $("#profcard").insertAdjacentHTML("afterend", `<div class="panel gap" id="wpcard"><h2>Wegpunkte</h2><div id="wplist">${rows()}</div></div>`);
   $("#wpcard").onclick = async e => {
     const ed = e.target.closest("[data-wed]"), dl = e.target.closest("[data-wdel]");
     if (ed) {
       const p = w.find(x => x.id == ed.dataset.wed), row = ed.closest("[data-w]");
-      row.querySelector(".wpn").innerHTML = `<input value="${esc(p.note)}" maxlength="200" style="width:100%;padding:6px">`;
+      row.querySelector(".wpn").innerHTML = `<input value="${esc(p.note)}" maxlength="200" class="w100 p6">`;
       const inp = row.querySelector("input");
       inp.focus();
       inp.onkeydown = async k => {
@@ -70,11 +70,11 @@ VIEWS.story = async id => {
   const icon = k => ({start: "🏁", end: "🎯", wp: "📍", ph: "📷"})[k];
   const cmLine = e => (e.ph || []).flatMap(p => (CM[p.id] || [])).map(c => `<div>💬 <b>${esc(c.author || "")}</b>${c.author ? ": " : ""}${esc(c.text)}</div>`).join("");
   const cmRefresh = () => document.querySelectorAll("#stl .scm").forEach(b => { const e = ev[+b.dataset.i]; if (e) b.innerHTML = cmLine(e); });
-  const item = (e, i) => `<div class="stev" data-e="${i}" style="display:flex;gap:12px;margin:0 0 18px;cursor:${e.pos ? "pointer" : "default"}"><div style="min-width:78px;text-align:right"><b>${wpTime(e.ts)}</b><div class="mut" style="font-size:12px">${rel(e.ts)}</div></div><div style="flex:1;border-left:3px solid var(--line,#ccc);padding-left:14px"><div style="font-size:18px">${icon(e.kind)} ${e.kind === "ph" ? `${e.ph.length} Foto${e.ph.length > 1 ? "s" : ""}` : esc(e.txt)}</div><div class="splc mut" style="font-size:14px"></div>` +
-    (e.kind === "ph" ? `<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">${e.ph.slice(0, 8).map(p => `<span class="sph" data-p="${p.id}" style="position:relative;cursor:zoom-in"><img loading="lazy" src="/pic/${p.id}?size=500" style="height:120px;border-radius:8px;display:block">${(CM[p.id] || []).length ? `<b class="scn" style="position:absolute;right:4px;bottom:4px;background:#000a;color:#fff;border-radius:10px;padding:1px 7px;font-size:12px">💬 ${CM[p.id].length}</b>` : ""}</span>`).join("")}${e.ph.length > 8 ? `<span class="mut">+${e.ph.length - 8}</span>` : ""}</div><div class="scm" data-i="${i}" style="font-size:14px;margin-top:6px">${cmLine(e)}</div>` : "") + `</div></div>`;
+  const item = (e, i) => `<div class="stev g12 m0-0-18" data-e="${i}" style="display:flex;cursor:${e.pos ? "pointer" : "default"}"><div class="mnw78 tar"><b>${wpTime(e.ts)}</b><div class="mut fs12">${rel(e.ts)}</div></div><div class="fx1 pl14" style="border-left:3px solid var(--line,#ccc)"><div class="fs18">${icon(e.kind)} ${e.kind === "ph" ? `${e.ph.length} Foto${e.ph.length > 1 ? "s" : ""}` : esc(e.txt)}</div><div class="splc mut fs14"></div>` +
+    (e.kind === "ph" ? `<div class="row g6 fxw mt6">${e.ph.slice(0, 8).map(p => `<span class="sph" data-p="${p.id}" style="position:relative;cursor:zoom-in"><img loading="lazy" src="/pic/${p.id}?size=500" class="br8" style="height:120px;display:block">${(CM[p.id] || []).length ? `<b class="scn c-white br10 p1-7 fs12" style="position:absolute;right:4px;bottom:4px;background:#000a">💬 ${CM[p.id].length}</b>` : ""}</span>`).join("")}${e.ph.length > 8 ? `<span class="mut">+${e.ph.length - 8}</span>` : ""}</div><div class="scm fs14 mt6" data-i="${i}">${cmLine(e)}</div>` : "") + `</div></div>`;
   $("#main").innerHTML = `<div class="row noprint"><a class="back" href="#/tour/${esc(id)}">‹ Zur Tour</a><span class="sp"></span><button class="btn ghost sm" id="sshare" title="Link zur Diashow mit Kommentarfunktion erzeugen – ohne Benutzerkonto ansehbar">🔗 Teilen (mit Kommentaren)</button><button class="btn ghost sm" id="sprint" title="Erzählung ausdrucken oder als PDF speichern">🖨 Drucken</button></div>
-   <h1 style="font-size:clamp(30px,5vw,48px);margin:14px 0 4px">${esc(t.name)}</h1><p class="mut">${dateL(t.date)} · ${nf(t.km, 1)} km · ↑ ${nf(t.up_m, 0)} m · ${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60))} h${t.h ? ` · ${nf(t.km / t.h, 1)} km/h` : ""}</p>
-   <div class="tmap" id="sm" style="height:320px"></div><div style="margin-top:22px" id="stl">${ev.map(item).join("")}</div>`;
+   <h1 class="m14-0-4" style="font-size:clamp(30px,5vw,48px)">${esc(t.name)}</h1><p class="mut">${dateL(t.date)} · ${nf(t.km, 1)} km · ↑ ${nf(t.up_m, 0)} m · ${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60))} h${t.h ? ` · ${nf(t.km / t.h, 1)} km/h` : ""}</p>
+   <div class="tmap" id="sm" style="height:320px"></div><div class="mt22" id="stl">${ev.map(item).join("")}</div>`;
   $("#sprint").onclick = () => { if (map) map.invalidateSize(); setTimeout(() => window.print(), 300); };
   $("#sshare").onclick = async () => {
     try {
@@ -90,7 +90,7 @@ VIEWS.story = async id => {
   } else map.setView([t.lat || 50, t.lng || 8], 12);
   ph.forEach(p => {   // Fotostandorte auf der Karte
     if (!p._pos) return;
-    L.marker(p._pos, {icon: wpIcon("📷")}).addTo(map).bindPopup(`<img src="/pic/${p.id}?size=300" data-p="${p.id}" style="width:200px;border-radius:6px;cursor:zoom-in;display:block">`)
+    L.marker(p._pos, {icon: wpIcon("📷")}).addTo(map).bindPopup(`<img src="/pic/${p.id}?size=300" data-p="${p.id}" class="br6" style="width:200px;cursor:zoom-in;display:block">`)
       .on("popupopen", ev2 => { const im = ev2.popup.getElement().querySelector("img[data-p]"); if (im) im.onclick = () => openPhoto(+im.dataset.p); });
   });
   ev.forEach((e, i) => { if (e.pos && e.kind !== "ph") L.marker(e.pos, {icon: wpIcon(icon(e.kind))}).addTo(map).bindPopup(esc(e.txt)); });
@@ -112,11 +112,11 @@ VIEWS.story = async id => {
     ov.style.cssText = "position:fixed;inset:0;background:#000d;z-index:9999;display:flex;align-items:center;justify-content:center;padding:12px";
     const draw = () => {
       const l = CM[pid] || [];
-      ov.innerHTML = `<div style="background:var(--bg,#fff);color:var(--fg,#222);border-radius:14px;max-width:760px;width:100%;max-height:96vh;overflow:auto;padding:14px">
-       <div class="row" style="justify-content:space-between"><b>📷 Foto</b><button class="btn ghost sm" id="pcx">✕</button></div>
-       <img src="/pic/${pid}?size=1200" style="width:100%;max-height:55vh;object-fit:contain;border-radius:8px;margin:8px 0">
-       <div id="pcl">${l.length ? l.map(c => `<div class="pcc" style="margin:6px 0;padding:6px 10px;border-radius:8px;background:rgba(128,128,128,.12)"><div class="mut" style="font-size:12px">${c.author ? esc(c.author) + " · " : ""}${new Date(c.ts * 1000).toLocaleString()} <a href="#" class="pcd" data-c="${c.id}" title="Löschen">🗑</a></div>${esc(c.text)}</div>`).join("") : `<p class="mut">Noch keine Kommentare.</p>`}</div>
-       <div class="row" style="gap:6px;margin-top:8px"><input id="pci" maxlength="1000" placeholder="Kommentar schreiben …" style="flex:1"><button class="btn sm" id="pcs">Senden</button></div></div>`;
+      ov.innerHTML = `<div class="br14 mw760 w100 ova p14" style="background:var(--bg,#fff);color:var(--fg,#222);max-height:96vh">
+       <div class="row jcsb"><b>📷 Foto</b><button class="btn ghost sm" id="pcx">✕</button></div>
+       <img src="/pic/${pid}?size=1200" class="w100 br8 m8-0" style="max-height:55vh;object-fit:contain">
+       <div id="pcl">${l.length ? l.map(c => `<div class="pcc m6-0 p6-10 br8" style="background:rgba(128,128,128,.12)"><div class="mut fs12">${c.author ? esc(c.author) + " · " : ""}${new Date(c.ts * 1000).toLocaleString()} <a href="#" class="pcd" data-c="${c.id}" title="Löschen">🗑</a></div>${esc(c.text)}</div>`).join("") : `<p class="mut">Noch keine Kommentare.</p>`}</div>
+       <div class="row g6 mt8"><input id="pci" maxlength="1000" placeholder="Kommentar schreiben …" class="fx1"><button class="btn sm" id="pcs">Senden</button></div></div>`;
       ov.querySelector("#pcx").onclick = () => ov.remove();
       const send = async () => {
         const v = ov.querySelector("#pci").value.trim();

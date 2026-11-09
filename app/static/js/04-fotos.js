@@ -50,8 +50,8 @@ VIEWS.photos = async (_, q) => {
   }
   const Y = +(q.get("y") || PHINFO.years[0]);
   $("#main").innerHTML =
-    `<div class="sec" style="margin-top:0"><h2>Fotos</h2><span class="sub">${nf(PHINFO.count, 0)} Bilder, ${nf(PHINFO.assigned, 0)} einer Tour zugeordnet</span>${PHINFO.undated ? `<span class="chip" style="cursor:default;background:#f6e3b4;color:#5a4300" title="Diese Fotos enthalten keine Aufnahmezeit im Bild. Es wird das Dateidatum benutzt (meist der Exportzeitpunkt); sie werden deshalb nicht automatisch einer Tour zugeordnet. Mit dem Foto-Zeit-Abgleich (mac/foto_zeit_abgleich.py) lässt sich die echte Zeit aus den RAW-Originalen nachtragen.">⚠ ${nf(PHINFO.undated, 0)} ohne Aufnahmezeit</span>` : ""}<span class="sp"></span><button class="btn" id="pimp">Fotos importieren …</button><a class="btn" target="_blank" href="slideshow.html?year=${Y}">Diashow ${Y}</a><a class="btn ghost" target="_blank" href="slideshow.html?random=1">Zufall</a></div>
-   <div class="years">${PHINFO.years.map(y => `<button data-y="${y}" class="${y === Y ? "on" : ""}">${y}</button>`).join("")}</div><div id="pg" style="margin-top:26px"></div>`;
+    `<div class="sec mt0"><h2>Fotos</h2><span class="sub">${nf(PHINFO.count, 0)} Bilder, ${nf(PHINFO.assigned, 0)} einer Tour zugeordnet</span>${PHINFO.undated ? `<span class="chip" style="cursor:default;background:#f6e3b4;color:#5a4300" title="Diese Fotos enthalten keine Aufnahmezeit im Bild. Es wird das Dateidatum benutzt (meist der Exportzeitpunkt); sie werden deshalb nicht automatisch einer Tour zugeordnet. Mit dem Foto-Zeit-Abgleich (mac/foto_zeit_abgleich.py) lässt sich die echte Zeit aus den RAW-Originalen nachtragen.">⚠ ${nf(PHINFO.undated, 0)} ohne Aufnahmezeit</span>` : ""}<span class="sp"></span><button class="btn" id="pimp">Fotos importieren …</button><a class="btn" target="_blank" href="slideshow.html?year=${Y}">Diashow ${Y}</a><a class="btn ghost" target="_blank" href="slideshow.html?random=1">Zufall</a></div>
+   <div class="years">${PHINFO.years.map(y => `<button data-y="${y}" class="${y === Y ? "on" : ""}">${y}</button>`).join("")}</div><div id="pg" class="mt26"></div>`;
   $("#pimp").onclick = () => photoImportModal();
   $(".years").onclick = e => e.target.dataset.y && (location.hash = `#/photos?y=${e.target.dataset.y}`);
   const ph = await api(`/api/photos?year=${Y}&limit=4000`);
@@ -96,7 +96,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
   const paint = () => {
     document.querySelectorAll(BOX + " img[data-i]").forEach(im => im.classList.toggle("sel", sel.has(ph[+im.dataset.i].id)));
     tb.style.display = on ? "" : "none";
-    tb.innerHTML = `<b>${sel.size}</b> ausgewählt ${sel.size ? "" : `<span class="mut" style="font-size:13px">Foto anklicken: dieses und alle späteren des Tages · mit ⇧ Umschalttaste: dieses und alle früheren</span> `}<button class="btn sm" data-a="assign" ${sel.size ? "" : "disabled"}>${o.tour ? "Andere Tour …" : "Einer Tour zuordnen …"}</button>${o.tour ? `<button class="btn alt sm" data-a="rm" ${sel.size ? "" : "disabled"}>Aus dieser Tour entfernen</button>` : `<button class="btn alt sm" data-a="un" ${sel.size ? "" : "disabled"}>Zuordnung lösen</button>`}<button class="btn alt sm" data-a="shift" ${sel.size ? "" : "disabled"} title="Aufnahmezeit der gewählten Fotos verschieben, z. B. Zeitzone einer Reise korrigieren">Zeit verschieben …</button><button class="btn alt sm" data-a="del" ${sel.size ? "" : "disabled"} style="color:#c0392b;border-color:#c0392b">Löschen …</button><button class="btn alt sm" data-a="off">Fertig</button>`;
+    tb.innerHTML = `<b>${sel.size}</b> ausgewählt ${sel.size ? "" : `<span class="mut fs13">Foto anklicken: dieses und alle späteren des Tages · mit ⇧ Umschalttaste: dieses und alle früheren</span> `}<button class="btn sm" data-a="assign" ${sel.size ? "" : "disabled"}>${o.tour ? "Andere Tour …" : "Einer Tour zuordnen …"}</button>${o.tour ? `<button class="btn alt sm" data-a="rm" ${sel.size ? "" : "disabled"}>Aus dieser Tour entfernen</button>` : `<button class="btn alt sm" data-a="un" ${sel.size ? "" : "disabled"}>Zuordnung lösen</button>`}<button class="btn alt sm" data-a="shift" ${sel.size ? "" : "disabled"} title="Aufnahmezeit der gewählten Fotos verschieben, z. B. Zeitzone einer Reise korrigieren">Zeit verschieben …</button><button class="btn alt sm" data-a="del" ${sel.size ? "" : "disabled"} style="color:#c0392b;border-color:#c0392b">Löschen …</button><button class="btn alt sm" data-a="off">Fertig</button>`;
     btn.classList.toggle("on", on);
   };
   btn.onclick = () => {
@@ -200,11 +200,11 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
 function shiftDialog(sp, done) {
   const first = sp.slice().sort((a, b) => a.taken_ts - b.taken_ts)[0];
   const m = modal(`<h2>Zeit von ${sp.length} Foto${sp.length > 1 ? "s" : ""} verschieben</h2>
-   <p class="mut" style="font-size:14px">Alle gewählten Fotos wandern um denselben Betrag, ihre Abstände bleiben gleich. Typischer Fall: Kamera stand auf deutscher Zeit, die Reise lag in einer anderen Zeitzone (z. B. Kanaren: 1 Stunde früher).<br>Das erste gewählte Foto hat jetzt: <b>${new Date(first.taken_ts * 1000).toLocaleString("de-DE")}</b></p>
-   <div class="row" style="margin:8px 0"><button class="btn alt sm" data-p="-3600">−1 Std.</button><button class="btn alt sm" data-p="3600">+1 Std.</button><button class="btn alt sm" data-p="-7200">−2 Std.</button><button class="btn alt sm" data-p="7200">+2 Std.</button></div>
-   <div class="row" style="align-items:center;gap:8px"><select id="shs"><option value="1">später (+)</option><option value="-1">früher (−)</option></select><input id="shh" type="number" min="0" value="0" style="width:70px"> Std. <input id="shm" type="number" min="0" max="59" value="0" style="width:70px"> Min.</div>
-   <p class="mut" id="shp" style="font-size:14px;margin-top:8px"></p>
-   <div class="row" style="margin-top:14px"><button class="btn" id="shok">Verschieben</button><button class="btn ghost" id="shno">Abbrechen</button><span id="sher" class="bad"></span></div>`);
+   <p class="mut fs14">Alle gewählten Fotos wandern um denselben Betrag, ihre Abstände bleiben gleich. Typischer Fall: Kamera stand auf deutscher Zeit, die Reise lag in einer anderen Zeitzone (z. B. Kanaren: 1 Stunde früher).<br>Das erste gewählte Foto hat jetzt: <b>${new Date(first.taken_ts * 1000).toLocaleString("de-DE")}</b></p>
+   <div class="row m8-0"><button class="btn alt sm" data-p="-3600">−1 Std.</button><button class="btn alt sm" data-p="3600">+1 Std.</button><button class="btn alt sm" data-p="-7200">−2 Std.</button><button class="btn alt sm" data-p="7200">+2 Std.</button></div>
+   <div class="row aic g8"><select id="shs"><option value="1">später (+)</option><option value="-1">früher (−)</option></select><input id="shh" type="number" min="0" value="0" style="width:70px"> Std. <input id="shm" type="number" min="0" max="59" value="0" style="width:70px"> Min.</div>
+   <p class="mut fs14 mt8" id="shp"></p>
+   <div class="row mt14"><button class="btn" id="shok">Verschieben</button><button class="btn ghost" id="shno">Abbrechen</button><span id="sher" class="bad"></span></div>`);
   const delta = () => (+m.querySelector("#shs").value || 1) * ((+m.querySelector("#shh").value || 0) * 3600 + (+m.querySelector("#shm").value || 0) * 60);
   const upd = () => {
     const d = delta();
@@ -240,10 +240,10 @@ let assignDialog = function (sp, done) {
   m.innerHTML = `<div class="mbox"><h2>${sp.length} Foto${sp.length > 1 ? "s" : ""} zuordnen</h2>
    <div class="field"><label>Tour (nächstgelegene zuerst)</label><select id="at">${tours.map(t => `<option value="${t.id}">${dateS(t.date)} · ${esc(t.name)} (${sName(t.sport)})</option>`).join("")}</select></div>
    <label class="chk"><input type="checkbox" id="as"> Zeit der Fotos anpassen: Das erste gewählte Foto (${new Date(first.taken_ts * 1000).toLocaleString("de-DE")}) wurde</label>
-   <div id="aso" style="margin:6px 0 0 24px;display:none"><input id="am" type="number" value="0" step="5" style="width:80px"> Minuten nach dem Start der Tour aufgenommen.
+   <div id="aso" class="m6-0-0-24" style="display:none"><input id="am" type="number" value="0" step="5" style="width:80px"> Minuten nach dem Start der Tour aufgenommen.
      <div class="field"><label>Zeitversatz anwenden auf</label><select id="asc"><option value="selected">nur die gewählten Fotos</option><option value="day">alle Fotos desselben Aufnahmetags</option><option value="unassigned">alle noch nicht zugeordneten Fotos</option></select></div>
-     <div class="mut" id="ap" style="font-size:14px"></div></div>
-   <div class="row" style="margin-top:18px"><button class="btn" id="aok">Zuordnen</button><button class="btn alt" id="ano">Abbrechen</button><span id="aer" class="bad"></span></div></div>`;
+     <div class="mut fs14" id="ap"></div></div>
+   <div class="row mt18"><button class="btn" id="aok">Zuordnen</button><button class="btn alt" id="ano">Abbrechen</button><span id="aer" class="bad"></span></div></div>`;
   document.body.appendChild(m);
   const upd = () => {
     $("#aso").style.display = $("#as").checked ? "" : "none";
@@ -457,9 +457,9 @@ function photoImportModal(o = {}) {
   };
   const start = () => {
     q("#pih").textContent = o.tour ? `Fotos zu „${o.tour.name}“ hinzufügen` : "Fotos importieren";
-    body(`<div id="pdz" style="border:2px dashed var(--ink);border-radius:8px;padding:30px 16px;text-align:center;margin:12px 0"><b>Ordner oder Fotos hierher ziehen</b>
-      <div class="mut" style="margin:8px 0 16px;font-size:14px">JPG, PNG oder WebP – du musst nichts vorsortieren. Die Fotos werden nach Aufnahmezeit und Aufnahmeort den Touren zugeordnet; du siehst vor dem Import, was wohin kommt. Deine Originale bleiben unverändert, importiert wird eine verkleinerte Kopie.</div>
-      <div class="row" style="justify-content:center"><button class="btn" id="pdirb">Ordner wählen …</button><button class="btn alt" id="pfilb">Einzelne Fotos wählen …</button></div></div>
+    body(`<div id="pdz" class="br8 p30-16 tac m12-0" style="border:2px dashed var(--ink)"><b>Ordner oder Fotos hierher ziehen</b>
+      <div class="mut m8-0-16 fs14">JPG, PNG oder WebP – du musst nichts vorsortieren. Die Fotos werden nach Aufnahmezeit und Aufnahmeort den Touren zugeordnet; du siehst vor dem Import, was wohin kommt. Deine Originale bleiben unverändert, importiert wird eine verkleinerte Kopie.</div>
+      <div class="row jcc"><button class="btn" id="pdirb">Ordner wählen …</button><button class="btn alt" id="pfilb">Einzelne Fotos wählen …</button></div></div>
       <input type="file" id="pdir" webkitdirectory multiple hidden><input type="file" id="pfil" accept="image/jpeg,image/png,image/webp" multiple hidden>
       <div class="row"><span class="sp"></span><button class="btn ghost" id="pcx">Schließen</button></div>`);
     const dz = q("#pdz");
@@ -587,15 +587,15 @@ function photoImportModal(o = {}) {
       });
     q("#pih").textContent = o.tour ? `Fotos zu „${o.tour.name}“ hinzufügen` : "Fotos importieren";
     body(`<p>${info.total} Bilder gefunden, davon <b>${fresh.length}</b> zu importieren${info.dup ? ` (${info.dup} schon vorhanden)` : ""}${info.deleted ? ` · <a href="#" id="pre">${info.deleted} früher gelöschte ebenfalls importieren</a>` : ""}.${info.nodate ? ` <span class="mut">${info.nodate} ohne Aufnahmezeit im Bild – dort gilt das Dateidatum.</span>` : ""}${info.heic ? ` <span class="mut">${info.heic} HEIC-Bilder werden übersprungen (Server ohne pillow-heif; bitte als JPG exportieren).</span>` : ""}</p>
-      <p class="mut" style="font-size:14px">So werden die Fotos nach Aufnahmetag zugeordnet. Pro Tag kannst du die Auswahl ändern.</p>
+      <p class="mut fs14">So werden die Fotos nach Aufnahmetag zugeordnet. Pro Tag kannst du die Auswahl ändern.</p>
       ${rows
         .map(
-          (r, i) => `<div class="panel" style="margin:10px 0"><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:baseline"><b>${r.d.day.split("-").reverse().join(".")}</b><span>${r.d.n} Foto${r.d.n > 1 ? "s" : ""}</span>${r.d.gps ? `<span class="mut" style="font-size:13px">${r.d.gps} mit Aufnahmeort</span>` : ""}${r.d.status === "ask" && r.d.reason ? `<span class="mut" style="font-size:13px">· ${esc(r.d.reason)}</span>` : ""}</div>
-          <select data-r="${i}" style="width:100%;margin-top:6px">${r.ch.map(c => `<option value="${c.v}" ${c.v === r.def ? "selected" : ""}>${esc(c.t)}</option>`).join("")}</select>
-          <div style="margin-top:6px"><button class="btn ghost sm" data-mp="${i}">Auf der Karte ansehen</button></div><div data-map="${i}" style="display:none;height:230px;margin-top:8px;border-radius:6px;overflow:hidden"></div></div>`
+          (r, i) => `<div class="panel m10-0"><div class="g12 fxw aib" style="display:flex"><b>${r.d.day.split("-").reverse().join(".")}</b><span>${r.d.n} Foto${r.d.n > 1 ? "s" : ""}</span>${r.d.gps ? `<span class="mut fs13">${r.d.gps} mit Aufnahmeort</span>` : ""}${r.d.status === "ask" && r.d.reason ? `<span class="mut fs13">· ${esc(r.d.reason)}</span>` : ""}</div>
+          <select data-r="${i}" class="w100 mt6">${r.ch.map(c => `<option value="${c.v}" ${c.v === r.def ? "selected" : ""}>${esc(c.t)}</option>`).join("")}</select>
+          <div class="mt6"><button class="btn ghost sm" data-mp="${i}">Auf der Karte ansehen</button></div><div data-map="${i}" class="mt8 br6 ovh" style="display:none;height:230px"></div></div>`
         )
         .join("")}
-      <div class="row" style="margin-top:14px"><button class="btn" id="pigo">Importieren</button><button class="btn ghost" id="pcx">Abbrechen</button><span class="sp"></span><span class="mut" id="pisum"></span></div>`);
+      <div class="row mt14"><button class="btn" id="pigo">Importieren</button><button class="btn ghost" id="pcx">Abbrechen</button><span class="sp"></span><span class="mut" id="pisum"></span></div>`);
     if (q("#pre"))
       q("#pre").onclick = e => {
         e.preventDefault();
@@ -643,7 +643,7 @@ function photoImportModal(o = {}) {
       }
       box.innerHTML = "";
       if (!tid) {
-        box.innerHTML = `<div class="mut" style="padding:14px">Ohne Tour gibt es nichts auf der Karte anzuzeigen.</div>`;
+        box.innerHTML = `<div class="mut p14">Ohne Tour gibt es nichts auf der Karte anzuzeigen.</div>`;
         return;
       }
       const t = BY[tid];
@@ -652,7 +652,7 @@ function photoImportModal(o = {}) {
         c = cleanPts(await api(`/api/tours/${tid}/coords`));
       } catch (e) {}
       if (!c || !c.length) {
-        box.innerHTML = `<div class="mut" style="padding:14px">Zu dieser Tour gibt es keine Strecke.</div>`;
+        box.innerHTML = `<div class="mut p14">Zu dieser Tour gibt es keine Strecke.</div>`;
         return;
       }
       const mp = (maps[i] = mkMap(box, {attr: false}));
@@ -736,7 +736,7 @@ function photoImportModal(o = {}) {
     stop = false;
     q("#pih").textContent = "Fotos werden importiert …";
     body(`<div class="stack" style="height:10px"><div id="pbar" style="width:0;background:var(--acc)"></div></div>
-      <div class="row" style="margin-top:8px"><span id="ptxt" class="mut"></span><span class="sp"></span><button class="btn alt sm" id="pstop">Abbrechen</button></div>`);
+      <div class="row mt8"><span id="ptxt" class="mut"></span><span class="sp"></span><button class="btn alt sm" id="pstop">Abbrechen</button></div>`);
     q("#pstop").onclick = () => (stop = true);
     const before = PHINFO ? PHINFO.assigned : 0;
     let done = 0,
@@ -838,7 +838,7 @@ function photoImportModal(o = {}) {
     PHINFO = await api("/api/photo-info").catch(() => PHINFO);
     const gain = PHINFO ? PHINFO.assigned - before : 0;
     q("#pih").textContent = ok ? "Import abgeschlossen" : "Import fast abgeschlossen";
-    body(`<p>${ok ? "✓" : "⚠"} <b>${sum}.</b></p>${failed.length ? `<details open><summary>${failed.length} Foto${failed.length > 1 ? "s" : ""} konnte${failed.length > 1 ? "n" : ""} nicht importiert werden</summary><ul style="font-size:14px;max-height:200px;overflow:auto;margin:6px 0">${failed.slice(0, 200).map(x => `<li><b>${esc(x.name)}</b> – ${esc(x.reason)}</li>`).join("")}${failed.length > 200 ? `<li>… und ${failed.length - 200} weitere</li>` : ""}</ul></details>` : ""}${ok ? `<p>${gain > 0 ? `<b>${gain}</b> Fotos wurden Touren zugeordnet.` : "Es wurden keine Fotos automatisch einer Tour zugeordnet."}${PHINFO && PHINFO.count - PHINFO.assigned > 0 ? ` ${nf(PHINFO.count - PHINFO.assigned, 0)} Fotos sind „ohne Tour“ – unter Fotos → „Fotos zuordnen“ lassen sie sich Touren zuweisen, in der Tour per „Zeit per GPS prüfen“ korrigieren.` : ""}</p>` : `<p>Das Einlesen konnte nicht gestartet werden – bitte in der Verwaltung „Bibliothek neu einlesen“ ausführen.</p>`}
+    body(`<p>${ok ? "✓" : "⚠"} <b>${sum}.</b></p>${failed.length ? `<details open><summary>${failed.length} Foto${failed.length > 1 ? "s" : ""} konnte${failed.length > 1 ? "n" : ""} nicht importiert werden</summary><ul class="fs14 ova m6-0" style="max-height:200px">${failed.slice(0, 200).map(x => `<li><b>${esc(x.name)}</b> – ${esc(x.reason)}</li>`).join("")}${failed.length > 200 ? `<li>… und ${failed.length - 200} weitere</li>` : ""}</ul></details>` : ""}${ok ? `<p>${gain > 0 ? `<b>${gain}</b> Fotos wurden Touren zugeordnet.` : "Es wurden keine Fotos automatisch einer Tour zugeordnet."}${PHINFO && PHINFO.count - PHINFO.assigned > 0 ? ` ${nf(PHINFO.count - PHINFO.assigned, 0)} Fotos sind „ohne Tour“ – unter Fotos → „Fotos zuordnen“ lassen sie sich Touren zuweisen, in der Tour per „Zeit per GPS prüfen“ korrigieren.` : ""}</p>` : `<p>Das Einlesen konnte nicht gestartet werden – bitte in der Verwaltung „Bibliothek neu einlesen“ ausführen.</p>`}
       <div class="row"><a class="btn" href="#/photos" id="pgo">Fotos ansehen</a><button class="btn ghost" id="pcx">Schließen</button></div>`);
     q("#pcx").onclick = close;
     q("#pgo").onclick = () => {

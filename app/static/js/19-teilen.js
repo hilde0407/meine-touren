@@ -13,11 +13,11 @@ VIEWS.shared = async (...a) => {
   list.forEach(t => (by[t.owner] = by[t.owner] || {name: t.owner_name, t: []}).t.push(t));
   const html = Object.entries(by)
     .map(
-      ([o, v]) => `<div class="sec"><h2>Touren von ${esc(v.name)}</h2><span class="sub">${v.t.length} freigegeben</span></div><div class="panel" style="margin-bottom:16px"><div class="rows">${v.t
+      ([o, v]) => `<div class="sec"><h2>Touren von ${esc(v.name)}</h2><span class="sub">${v.t.length} freigegeben</span></div><div class="panel mb16"><div class="rows">${v.t
         .map(
-          t => `<label class="r" style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-o="${esc(o)}" data-i="${esc(t.id)}" ${t.imported ? "disabled" : ""}><span style="flex:1">${esc(t.name)}<small>${dateS(new Date(t.start_ts * 1000).toISOString())} · ${nf(t.dist_m / 1000, 1)} km${t.up_m ? " · ↑ " + nf(t.up_m, 0) + " m" : ""}</small></span>${t.imported ? '<span class="mut">✓ übernommen</span>' : ""}</label>`
+          t => `<label class="r g8 aic" style="display:flex"><input type="checkbox" data-o="${esc(o)}" data-i="${esc(t.id)}" ${t.imported ? "disabled" : ""}><span class="fx1">${esc(t.name)}<small>${dateS(new Date(t.start_ts * 1000).toISOString())} · ${nf(t.dist_m / 1000, 1)} km${t.up_m ? " · ↑ " + nf(t.up_m, 0) + " m" : ""}</small></span>${t.imported ? '<span class="mut">✓ übernommen</span>' : ""}</label>`
         )
-        .join("")}</div><div class="row" style="margin-top:12px"><button class="btn" data-imp="${esc(o)}">Ausgewählte Touren übernehmen</button><span class="mut" data-m="${esc(o)}"></span></div></div>`
+        .join("")}</div><div class="row mt12"><button class="btn" data-imp="${esc(o)}">Ausgewählte Touren übernehmen</button><span class="mut" data-m="${esc(o)}"></span></div></div>`
     )
     .join("");
   $("#main").insertAdjacentHTML("afterbegin", `<div id="shtours">${html}</div>`);

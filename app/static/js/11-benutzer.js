@@ -20,11 +20,11 @@ async function aboutBox() {
   const m = modal(`<h3>Meine Touren</h3>
     <div class="rows"><div class="r"><span>Android-App<small>${app ? "läuft auf diesem Gerät" : "du nutzt gerade den Browser"}</small></span><b>${app ? esc(app) : "–"}</b></div>
     <div class="r"><span>Server<small>dein Meine-Touren-Server</small></span><b>${esc((sv.split(" ·")[0] || "?").trim())}</b></div></div>
-    <p class="mut" style="font-size:13px;margin:6px 0 0">${esc(sv)}</p>
-    <h4 style="margin:18px 0 6px">Ersteller</h4>
-    <p style="margin:0">Entwickelt von <b>Volker Hildebrand</b> gemeinsam mit <b>Claude</b> (KI-Assistent von Anthropic).</p>
-    <p class="mut" style="font-size:13px;margin:10px 0 0">Karten © OpenStreetMap-Mitwirkende. Freie Software, Quellcode auf GitHub (hilde0407/meine-touren).</p>
-    <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" id="abx">Schließen</button></div>`);
+    <p class="mut fs13 m6-0-0">${esc(sv)}</p>
+    <h4 class="m18-0-6">Ersteller</h4>
+    <p class="m0">Entwickelt von <b>Volker Hildebrand</b> gemeinsam mit <b>Claude</b> (KI-Assistent von Anthropic).</p>
+    <p class="mut fs13 m10-0-0">Karten © OpenStreetMap-Mitwirkende. Freie Software, Quellcode auf GitHub (hilde0407/meine-touren).</p>
+    <div class="row jce mt14"><button class="btn" id="abx">Schließen</button></div>`);
   m.classList.add("sheet");
   m.querySelector("#abx").onclick = () => m.remove();
 }
@@ -86,8 +86,8 @@ function showAuth(kind, msg = "") {
     <label>Name<input id="au_n" name="username" autocomplete="username" required></label>
     ${setup ? `<label>E-Mail-Adresse<input id="au_m" type="email" autocomplete="email" required><small class="mut">Wird zum Zurücksetzen des Passworts verwendet.</small></label>` : ""}
     <label>Passwort<input id="au_p" name="password" type="password" autocomplete="${setup ? "new-password" : "current-password"}" required minlength="${setup ? 8 : 1}"></label>
-    ${setup ? `<label>Passwort wiederholen<input id="au_p2" type="password" autocomplete="new-password" required></label><p class="mut" style="font-size:13px">Mindestens 8 Zeichen.</p>` : ""}
-    <div class="bad" id="au_e">${esc(msg)}</div><div class="row"><button class="btn" type="submit">${setup ? "Einrichten" : "Anmelden"}</button>${setup ? '<button class="btn alt" type="button" id="au_x">Später</button>' : ""}</div>${setup ? "" : '<p style="margin:14px 0 0"><a href="#" id="au_f">Passwort vergessen?</a></p>'}</form>`;
+    ${setup ? `<label>Passwort wiederholen<input id="au_p2" type="password" autocomplete="new-password" required></label><p class="mut fs13">Mindestens 8 Zeichen.</p>` : ""}
+    <div class="bad" id="au_e">${esc(msg)}</div><div class="row"><button class="btn" type="submit">${setup ? "Einrichten" : "Anmelden"}</button>${setup ? '<button class="btn alt" type="button" id="au_x">Später</button>' : ""}</div>${setup ? "" : '<p class="m14-0-0"><a href="#" id="au_f">Passwort vergessen?</a></p>'}</form>`;
   document.body.appendChild(w);
   $("#au_n").focus();
   if (setup) $("#au_x").onclick = () => w.remove();
@@ -154,16 +154,16 @@ function applyView() {
       main = items.filter(x => !MORE_SET.includes(x[0])),
       sett = items.filter(x => MORE_SET.includes(x[0]));
     const m2 = modal(`<h3>Mehr</h3><div class="moregrid">${main.map(lnk).join("")}</div>
-      ${sett.length ? `<h4 style="margin:16px 0 6px">Einstellungen & Prüfung</h4><div class="moregrid sm">${sett.map(lnk).join("")}</div>` : ""}
-      <h4 style="margin:16px 0 6px">Ansicht</h4><div class="row">${[
+      ${sett.length ? `<h4 class="m16-0-6">Einstellungen & Prüfung</h4><div class="moregrid sm">${sett.map(lnk).join("")}</div>` : ""}
+      <h4 class="m16-0-6">Ansicht</h4><div class="row">${[
         ["auto", "Automatisch"],
         ["mobile", "Smartphone"],
         ["desktop", "Computer"],
       ]
         .map(([k, l]) => `<button class="btn ${viewPref() === k ? "" : "alt"} sm" data-vm="${k}">${l}</button>`)
         .join("")}</div>
-      <div class="row" style="margin-top:16px"><button class="btn alt sm" id="mab">ℹ️ Info: Version &amp; Ersteller</button></div>
-      ${ME.user ? `<div class="row" style="margin-top:16px"><button class="btn alt" id="mlo">Abmelden (${esc(ME.user.name)})</button></div>` : ""}`);
+      <div class="row mt16"><button class="btn alt sm" id="mab">ℹ️ Info: Version &amp; Ersteller</button></div>
+      ${ME.user ? `<div class="row mt16"><button class="btn alt" id="mlo">Abmelden (${esc(ME.user.name)})</button></div>` : ""}`);
     m2.classList.add("sheet");
     m2.querySelectorAll("a").forEach(a => (a.onclick = () => m2.remove()));
     m2.querySelectorAll("[data-vm]").forEach(
@@ -215,8 +215,8 @@ function userMenu() {
     const p = document.createElement("div");
     p.className = "umpop";
     p.innerHTML = ME.user
-      ? `<div class="mut" style="padding:6px 12px">${esc(ME.user.name)} · ${ME.user.role === "admin" ? "Administrator" : "Benutzer"}</div><a href="#/account">Konto &amp; Freigaben</a><a href="#/shared">Geteilte Fotos</a><button id="uma">Info</button><button id="umo">Abmelden</button>`
-      : `<div class="mut" style="padding:6px 12px">Noch keine Benutzerverwaltung</div><button id="ums">Benutzer einrichten …</button><button id="uma">Info</button>`;
+      ? `<div class="mut p6-12">${esc(ME.user.name)} · ${ME.user.role === "admin" ? "Administrator" : "Benutzer"}</div><a href="#/account">Konto &amp; Freigaben</a><a href="#/shared">Geteilte Fotos</a><button id="uma">Info</button><button id="umo">Abmelden</button>`
+      : `<div class="mut p6-12">Noch keine Benutzerverwaltung</div><button id="ums">Benutzer einrichten …</button><button id="uma">Info</button>`;
     document.body.appendChild(p);
     setTimeout(
       () =>
@@ -245,13 +245,13 @@ VIEWS.account = async () => {
     adm = me && me.role === "admin";
   if (!me) {
     $("#main").innerHTML =
-      `<div class="sec" style="margin-top:0"><h2>Konto &amp; Freigaben</h2></div><div class="panel"><p>Die Benutzerverwaltung ist noch nicht eingerichtet. Mit „Einrichten“ legst du den ersten Benutzer (Administrator) an; deine bisherigen Daten werden ihm zugeordnet.</p><button class="btn" id="setupb">Einrichten …</button></div>`;
+      `<div class="sec mt0"><h2>Konto &amp; Freigaben</h2></div><div class="panel"><p>Die Benutzerverwaltung ist noch nicht eingerichtet. Mit „Einrichten“ legst du den ersten Benutzer (Administrator) an; deine bisherigen Daten werden ihm zugeordnet.</p><button class="btn" id="setupb">Einrichten …</button></div>`;
     $("#setupb").onclick = () => showAuth("setup");
     return;
   }
   const others = us.filter(u => u.uid !== me.uid && (u.active === undefined || u.active));
   $("#main").innerHTML =
-    `<div class="sec" style="margin-top:0"><h2>Konto &amp; Freigaben</h2><span class="sub">${esc(me.name)} · ${adm ? "Administrator" : "Benutzer"}</span></div>
+    `<div class="sec mt0"><h2>Konto &amp; Freigaben</h2><span class="sub">${esc(me.name)} · ${adm ? "Administrator" : "Benutzer"}</span></div>
    <div class="grid g2"><div class="panel"><h2>Passwort ändern</h2><div class="field"><label>Altes Passwort</label><input id="pw0" type="password" autocomplete="current-password"></div><div class="field"><label>Neues Passwort (mind. 8 Zeichen)</label><input id="pw1" type="password" autocomplete="new-password"></div>
      <div class="row"><button class="btn" id="pwb">Ändern</button><span id="pwm" class="mut"></span></div></div>
     <div class="panel"><h2>Ansicht</h2><p class="mut">Gilt nur auf diesem Gerät.</p><div class="row">${[
@@ -270,18 +270,18 @@ VIEWS.account = async () => {
        .join("")}</select></div>
      <div class="row"><button class="btn" id="gadd">Freigeben</button><span id="gm" class="mut"></span></div></div>
     <div class="panel"><h2>Von mir freigegeben</h2><div class="rows">${gr.mine.map(g => `<div class="r"><span>${esc(g.grantee_name)}<small>${g.scope === "all" ? "ganze Fotobibliothek" : "Tour: " + esc(g.ref_name || g.ref)}</small></span><button class="btn alt sm" data-gd="${g.id}">Entfernen</button></div>`).join("") || '<div class="mut">Noch nichts freigegeben.</div>'}</div>
-     <h2 style="margin-top:18px">Mit mir geteilt</h2><div class="rows">${gr.received.map(g => `<div class="r"><span>${esc(g.owner_name)}<small>${g.scope === "all" ? "ganze Fotobibliothek" : "einzelne Tour"}</small></span></div>`).join("") || '<div class="mut">Noch nichts geteilt.</div>'}</div>
+     <h2 class="mt18">Mit mir geteilt</h2><div class="rows">${gr.received.map(g => `<div class="r"><span>${esc(g.owner_name)}<small>${g.scope === "all" ? "ganze Fotobibliothek" : "einzelne Tour"}</small></span></div>`).join("") || '<div class="mut">Noch nichts geteilt.</div>'}</div>
      <div class="row"><a class="btn alt sm" href="#/shared">Geteilte Fotos ansehen</a></div></div></div>
    ${
      adm
        ? `<div class="sec"><h2>Benutzer verwalten</h2></div><div class="panel"><div class="rows">${us
            .map(
              u => `<div class="r" style="display:block"><b>${esc(u.name)}</b> <span class="mut">${u.role === "admin" ? "Administrator" : u.role === "viewer" ? "Betrachter (sieht die Daten von " + esc((us.find(x => x.uid === u.owner) || {}).name || "?") + ")" : "Benutzer"}${u.active ? "" : " · gesperrt"}${u.me ? " · du" : ""}</span><br><small class="mut">${u.email ? esc(u.email) : "keine E-Mail-Adresse"}${u.totp_on ? " · Zwei-Faktor an" : ""}</small>
-      <div class="row" style="margin:6px 0 0">${u.role === "viewer" ? "" : `<button class="btn alt sm" data-ur="${u.uid}">${u.role === "admin" ? "Zum Benutzer machen" : "Zum Admin machen"}</button>`}<button class="btn alt sm" data-up="${u.uid}">Passwort setzen</button><button class="btn alt sm" data-um="${u.uid}">E-Mail ändern</button>${u.totp_on && !u.me ? `<button class="btn alt sm" data-u2="${u.uid}">Zwei-Faktor zurücksetzen</button>` : ""}${u.me ? "" : `<button class="btn alt sm" data-ua="${u.uid}">${u.active ? "Sperren" : "Entsperren"}</button><button class="btn alt sm" data-ud="${u.uid}">Löschen</button>`}</div></div>`
+      <div class="row m6-0-0">${u.role === "viewer" ? "" : `<button class="btn alt sm" data-ur="${u.uid}">${u.role === "admin" ? "Zum Benutzer machen" : "Zum Admin machen"}</button>`}<button class="btn alt sm" data-up="${u.uid}">Passwort setzen</button><button class="btn alt sm" data-um="${u.uid}">E-Mail ändern</button>${u.totp_on && !u.me ? `<button class="btn alt sm" data-u2="${u.uid}">Zwei-Faktor zurücksetzen</button>` : ""}${u.me ? "" : `<button class="btn alt sm" data-ua="${u.uid}">${u.active ? "Sperren" : "Entsperren"}</button><button class="btn alt sm" data-ud="${u.uid}">Löschen</button>`}</div></div>`
            )
            .join("")}</div>
-     <h3 style="margin-top:20px">Neuer Benutzer</h3><div class="filters"><input id="nu_n" placeholder="Name"><input id="nu_m" type="email" placeholder="E-Mail-Adresse" autocomplete="off"><input id="nu_p" type="password" placeholder="Passwort (mind. 8 Zeichen)" autocomplete="new-password"><select id="nu_r"><option value="user">Benutzer</option><option value="admin">Administrator</option><option value="viewer">Betrachter (nur ansehen)</option></select><select id="nu_o" style="display:none" title="Dessen Touren, Fotos und Standort sieht der Betrachter">${us.filter(u => u.role !== "viewer" && u.active).map(u => `<option value="${u.uid}">sieht: ${esc(u.name)}</option>`).join("")}</select><button class="btn" id="nu_b">Anlegen</button><span id="nu_m" class="mut"></span></div>
-     <p class="mut" style="font-size:13px">Jeder Benutzer hat eigene Touren, Fotos, Notizen, Ziele und sein eigenes Komoot-Konto (Verwaltung). Fotos aus einem Ordner <code>/mnt/fotos/&lt;Benutzername&gt;</code> werden dem jeweiligen Benutzer zugeordnet.</p></div>`
+     <h3 class="mt20">Neuer Benutzer</h3><div class="filters"><input id="nu_n" placeholder="Name"><input id="nu_m" type="email" placeholder="E-Mail-Adresse" autocomplete="off"><input id="nu_p" type="password" placeholder="Passwort (mind. 8 Zeichen)" autocomplete="new-password"><select id="nu_r"><option value="user">Benutzer</option><option value="admin">Administrator</option><option value="viewer">Betrachter (nur ansehen)</option></select><select id="nu_o" style="display:none" title="Dessen Touren, Fotos und Standort sieht der Betrachter">${us.filter(u => u.role !== "viewer" && u.active).map(u => `<option value="${u.uid}">sieht: ${esc(u.name)}</option>`).join("")}</select><button class="btn" id="nu_b">Anlegen</button><span id="nu_m" class="mut"></span></div>
+     <p class="mut fs13">Jeder Benutzer hat eigene Touren, Fotos, Notizen, Ziele und sein eigenes Komoot-Konto (Verwaltung). Fotos aus einem Ordner <code>/mnt/fotos/&lt;Benutzername&gt;</code> werden dem jeweiligen Benutzer zugeordnet.</p></div>`
        : ""
    }`;
   document.querySelectorAll("[data-vm]").forEach(
@@ -402,7 +402,7 @@ VIEWS.account = async () => {
 
 VIEWS.shared = async () => {
   $("#main").innerHTML =
-    `<div class="sec" style="margin-top:0"><h2>Geteilte Fotos</h2><span class="sub">Fotos, die andere Benutzer für dich freigegeben haben</span></div><div id="shb" class="mut">Wird geladen …</div>`;
+    `<div class="sec mt0"><h2>Geteilte Fotos</h2><span class="sub">Fotos, die andere Benutzer für dich freigegeben haben</span></div><div id="shb" class="mut">Wird geladen …</div>`;
   const data = await api("/api/shared/photos");
   $("#shb").className = "";
   if (!data.length) {
@@ -489,8 +489,8 @@ VIEWS.tour = async (id, q) => {
     $("#efsh").onclick = async () => {
       const us = (await api("/api/users").catch(() => [])).filter(u => u.uid !== ME.user.uid && (u.active === undefined || u.active));
       const m =
-        modal(`<h3>Fotos dieser Tour freigeben</h3><p class="mut" style="font-size:14px">Die Freigabe gilt für alle Fotos, die dieser Tour zugeordnet sind.</p><div class="field"><label>Für</label><select id="fg"><option value="*">Alle Benutzer</option>${us.map(u => `<option value="${esc(u.uid)}">${esc(u.name)}</option>`).join("")}</select></div>
-      <div class="row" style="justify-content:flex-end"><button class="btn alt" id="fgx">Abbrechen</button><button class="btn" id="fgo">Freigeben</button></div>`);
+        modal(`<h3>Fotos dieser Tour freigeben</h3><p class="mut fs14">Die Freigabe gilt für alle Fotos, die dieser Tour zugeordnet sind.</p><div class="field"><label>Für</label><select id="fg"><option value="*">Alle Benutzer</option>${us.map(u => `<option value="${esc(u.uid)}">${esc(u.name)}</option>`).join("")}</select></div>
+      <div class="row jce"><button class="btn alt" id="fgx">Abbrechen</button><button class="btn" id="fgo">Freigeben</button></div>`);
       m.querySelector("#fgx").onclick = () => m.remove();
       m.querySelector("#fgo").onclick = async () => {
         try {
@@ -513,7 +513,7 @@ VIEWS.tour = async (id, q) => {
       list.forEach(p => (by[p.owner] ||= {name: p.owner_name, ids: []}).ids.push(p.id));
       $("#th").insertAdjacentHTML(
         "beforebegin",
-        `<div class="panel" id="shn" style="margin-bottom:14px;padding:12px 16px"><b>Fotos von anderen aus diesem Zeitraum:</b> ${Object.entries(
+        `<div class="panel mb14 p12-16" id="shn"><b>Fotos von anderen aus diesem Zeitraum:</b> ${Object.entries(
           by
         )
           .map(([o, v]) => `${esc(v.name)} (${v.ids.length}) <button class="btn sm" data-imp="${esc(o)}">In meine Tour übernehmen</button>`)

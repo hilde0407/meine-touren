@@ -16,12 +16,12 @@ function gearForm(g, done) {
   const m = modal(`<h2>${g.id ? "Ausrüstung bearbeiten" : "Neue Ausrüstung"}</h2>
    <label>Name<input id="gn" maxlength="80" value="${esc(g.name || "")}" placeholder="z. B. Rennrad Canyon, Wanderschuhe Lowa"></label>
    <label>Art<select id="gk">${GEAR_KINDS.map(k => `<option ${k === g.kind ? "selected" : ""}>${k}</option>`).join("")}</select></label>
-   <div style="margin:10px 0 4px">Wird automatisch zugeordnet bei Touren der Sportart <span class="mut">(sonst wählst du es in der Tour selbst)</span></div>
-   <div class="chips" id="gs">${sp.map(s => `<label class="chip ${g.sports.includes(s) ? "on" : ""}" style="cursor:pointer"><input type="checkbox" value="${s}" ${g.sports.includes(s) ? "checked" : ""} style="display:none"><i style="background:${sCol(s)}"></i>${sName(s)}</label>`).join("")}</div>
-   <div class="row" style="margin-top:10px"><label>Im Gebrauch ab<input type="date" id="gsince" value="${esc(g.since || "")}"></label><label>bis (leer = noch aktiv)<input type="date" id="guntil" value="${esc(g.until || "")}"></label></div>
+   <div class="m10-0-4">Wird automatisch zugeordnet bei Touren der Sportart <span class="mut">(sonst wählst du es in der Tour selbst)</span></div>
+   <div class="chips" id="gs">${sp.map(s => `<label class="chip ${g.sports.includes(s) ? "on" : ""} cp"><input type="checkbox" value="${s}" ${g.sports.includes(s) ? "checked" : ""} style="display:none"><i style="background:${sCol(s)}"></i>${sName(s)}</label>`).join("")}</div>
+   <div class="row mt10"><label>Im Gebrauch ab<input type="date" id="gsince" value="${esc(g.since || "")}"></label><label>bis (leer = noch aktiv)<input type="date" id="guntil" value="${esc(g.until || "")}"></label></div>
    <label>Wechsel-Hinweis ab Kilometern<input type="number" id="glim" min="0" step="50" value="${g.limit_km || ""}" placeholder="z. B. 800 für Schuhe, 3000 für eine Kette"></label>
    <label>Notiz<input id="gnote" maxlength="300" value="${esc(g.note || "")}"></label>
-   <div class="row" style="margin-top:14px"><button class="btn" id="gsave">Speichern</button><button class="btn ghost" id="gcancel">Abbrechen</button><span class="sp"></span>${g.id ? `<button class="btn ghost" id="gdel">Löschen</button>` : ""}</div><div id="gerr" class="bad"></div>`);
+   <div class="row mt14"><button class="btn" id="gsave">Speichern</button><button class="btn ghost" id="gcancel">Abbrechen</button><span class="sp"></span>${g.id ? `<button class="btn ghost" id="gdel">Löschen</button>` : ""}</div><div id="gerr" class="bad"></div>`);
   m.querySelectorAll("#gs input").forEach(i => (i.onchange = () => i.parentElement.classList.toggle("on", i.checked)));
   m.querySelector("#gcancel").onclick = () => m.remove();
   m.querySelector("#gsave").onclick = async () => {
@@ -50,7 +50,7 @@ async function gearPanel() {
      list.length
        ? `<div class="rows">${list
            .map(
-             g => `<div class="r gr" data-g="${g.id}" style="${g.until ? "opacity:.6" : ""}"><span>${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)} ${gStatus(g)}<small>${esc(g.kind)}${g.until ? " · seit " + esc(g.until) + " nicht mehr im Gebrauch" : ""}${g.limit_km ? ` · Hinweis ab ${nf(g.limit_km, 0)} km` : ""}${g.note ? " · " + esc(g.note) : ""}</small></span><span style="text-align:right"><b>${nf(g.km, 0)} km</b><small style="display:block">↑ ${nf(g.up, 0)} m · ${g.n} Touren</small></span></div>`
+             g => `<div class="r gr" data-g="${g.id}" style="${g.until ? "opacity:.6" : ""}"><span>${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)} ${gStatus(g)}<small>${esc(g.kind)}${g.until ? " · seit " + esc(g.until) + " nicht mehr im Gebrauch" : ""}${g.limit_km ? ` · Hinweis ab ${nf(g.limit_km, 0)} km` : ""}${g.note ? " · " + esc(g.note) : ""}</small></span><span class="tar"><b>${nf(g.km, 0)} km</b><small style="display:block">↑ ${nf(g.up, 0)} m · ${g.n} Touren</small></span></div>`
            )
            .join("")}</div>`
        : `<p class="mut">Noch nichts angelegt. Lege zum Beispiel dein Rad oder deine Wanderschuhe an und wähle die Sportart – dann zählt die App die Kilometer automatisch mit.</p>`
@@ -79,14 +79,14 @@ VIEWS.tour = async (...a) => {
     if (!r || !r.all.length) return $("#gearrow") && $("#gearrow").remove();
     let row = $("#gearrow");
     if (!row) {
-      anchor.insertAdjacentHTML("beforebegin", `<div id="gearrow" class="row" style="margin:-4px 0 12px;gap:8px"></div>`);
+      anchor.insertAdjacentHTML("beforebegin", `<div id="gearrow" class="row mn4-0-12 g8"></div>`);
       row = $("#gearrow");
     }
     const mine = r.all.filter(g => r.ids.includes(g.id));
     row.innerHTML = `<span class="mut">Ausrüstung:</span>${mine.length ? mine.map(g => `<span class="chip on">${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)}</span>`).join("") : `<span class="mut">keine</span>`}<button class="btn ghost sm" id="gedit" title="Ausrüstung dieser Tour ändern">✎</button>`;
     $("#gedit").onclick = () => {
-      const m = modal(`<h2>Ausrüstung dieser Tour</h2><label class="row" style="gap:8px"><input type="checkbox" id="gauto" ${r.auto ? "checked" : ""}> automatisch nach Sportart und Datum</label>
-        <div id="glist" style="margin:10px 0">${r.all.map(g => `<label class="row" style="gap:8px;margin:4px 0"><input type="checkbox" value="${g.id}" ${r.ids.includes(g.id) ? "checked" : ""}> ${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)}</label>`).join("")}</div>
+      const m = modal(`<h2>Ausrüstung dieser Tour</h2><label class="row g8"><input type="checkbox" id="gauto" ${r.auto ? "checked" : ""}> automatisch nach Sportart und Datum</label>
+        <div id="glist" class="m10-0">${r.all.map(g => `<label class="row g8 m4-0"><input type="checkbox" value="${g.id}" ${r.ids.includes(g.id) ? "checked" : ""}> ${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)}</label>`).join("")}</div>
         <div class="row"><button class="btn" id="gok">Speichern</button><button class="btn ghost" id="gno">Abbrechen</button></div>`);
       const sync = () => m.querySelectorAll("#glist input").forEach(i => (i.disabled = $("#gauto").checked));
       $("#gauto").onchange = sync;

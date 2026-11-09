@@ -79,12 +79,12 @@ VIEWS.dash = async (_, q) => {
   <section class="hero"><div id="hm"></div><div class="in"><div class="t">
     <div class="k">Letzte Tour, ${sName(last.sport)}</div><h1>${esc(last.name)}</h1><div class="w">${dateL(last.date)}, ${timeS(last.date)} Uhr</div>
     ${ph.length ? `<div class="thumbrow">${ph.map((p, i) => `<img loading="lazy" src="/pic/${p.id}?size=300" data-i="${i}">`).join("")}</div>` : ""}
-    <div class="btns"><a class="btn" href="#/tour/${last.id}">Tour ansehen</a>${last.photos ? `<a class="btn alt" style="color:#fff" target="_blank" href="slideshow.html?tour=${last.id}">Diashow</a>` : ""}</div></div>
+    <div class="btns"><a class="btn" href="#/tour/${last.id}">Tour ansehen</a>${last.photos ? `<a class="btn alt c-white" target="_blank" href="slideshow.html?tour=${last.id}">Diashow</a>` : ""}</div></div>
     <div class="signs"><div class="sign">${nf(last.km, 1)}<small>Kilometer</small></div><div class="sign l">${nf(last.up_m, 0)}<small>Meter aufwärts</small></div><div class="sign">${nf(last.h, 1)}<small>Stunden</small></div></div></div></section>
   <div class="inner">
   <div class="sec"><h2>${Y ? "Das Jahr " + Y : "Alle Touren"}${S ? ", " + sName(S) : ""}</h2><span class="sub">${nf(sel.length, 0)} Touren</span></div>
   <div class="years"><button data-y="0" class="${Y ? "" : "on"}">Gesamt</button>${ys.map(y => `<button data-y="${y}" class="${Y === y ? "on" : ""}">${y}</button>`).join("")}</div>
-  <div class="chips" id="sch" style="margin-top:14px"><button class="chip ${S ? "" : "on"}" data-s="">Alle Sportarten</button>${sports.map(([s]) => `<button class="chip ${S === s ? "on" : ""}" data-s="${esc(s)}"><i style="background:${sCol(s)}"></i>${sName(s)}</button>`).join("")}${S && !bySport[S] ? `<button class="chip on" data-s="${esc(S)}"><i style="background:${sCol(S)}"></i>${sName(S)}</button>` : ""}</div>
+  <div class="chips mt14" id="sch"><button class="chip ${S ? "" : "on"}" data-s="">Alle Sportarten</button>${sports.map(([s]) => `<button class="chip ${S === s ? "on" : ""}" data-s="${esc(s)}"><i style="background:${sCol(s)}"></i>${sName(s)}</button>`).join("")}${S && !bySport[S] ? `<button class="chip on" data-s="${esc(S)}"><i style="background:${sCol(S)}"></i>${sName(S)}</button>` : ""}</div>
   <div class="figs">
     <div class="fig"><div class="v">${nf(sel.length, 0)}</div><div class="l">Touren</div>${delta(sel.length, prev.length)}</div>
     <div class="fig"><div class="v">${nf(km, 0)}<span class="u">km</span></div><div class="l">Strecke</div>${delta(km, pk)}</div>
@@ -97,12 +97,12 @@ VIEWS.dash = async (_, q) => {
       sum(prev, t => t.h)
     )}</div>
     <div class="fig"><div class="v">${nf(km / (sel.length || 1), 1)}<span class="u">km</span></div><div class="l">pro Tour im Schnitt</div></div></div>
-  <div class="grid g2" style="margin-top:44px">
+  <div class="grid g2 mt44">
     <div class="panel"><h2>${Y ? "Kilometer pro Monat" : "Kilometer pro Jahr"}</h2>${Y ? barChart(mm, MON, {ghost: pm, ghostLabel: Y - 1}) : barChart(byYear, ys.slice().reverse().map(String), {href: ys.slice().reverse()})}
       <div class="legend">${Y ? `<span><i style="background:var(--yellow);border:1px solid var(--ink)"></i>stärkster Monat</span>${prev.length ? `<span><i style="background:var(--accent2)"></i>${Y - 1}</span>` : ""}` : "<span>Ein Klick auf einen Balken öffnet das Jahr.</span>"}</div></div>
     <div class="panel"><h2>Kilometer im Jahresverlauf</h2>${lineChart(cs)}<div class="legend"><span><i style="background:var(--bars)"></i>${cy}</span>${ys.includes(cy - 1) ? `<span><i style="background:var(--accent2)"></i>${cy - 1}</span>` : ""}</div></div>
     <div class="panel"><h2>Sportarten</h2><div class="stack">${sports.map(([s, v]) => `<div style="width:${(v / tot) * 100}%;background:${sCol(s)}" title="${sName(s)}"></div>`).join("")}</div>
-      <div class="rows" style="margin-top:10px">${sports.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${nf(v, 0)} km, ${nf((v / tot) * 100, 0)} %</span></div>`).join("")}</div></div>
+      <div class="rows mt10">${sports.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${nf(v, 0)} km, ${nf((v / tot) * 100, 0)} %</span></div>`).join("")}</div></div>
     <div class="panel"><h2>Bestwerte ${Y || "gesamt"}</h2><div class="rows">
       ${
         longest
@@ -327,8 +327,8 @@ VIEWS.tours = async () => {
   loadRoutesLater();
   const ys = years(),
     sp = [...new Set(TOURS.map(t => t.sport))];
-  $("#main").innerHTML = `<div class="sec" style="margin-top:0"><h2>Alle Touren</h2><span class="sub" id="cnt"></span></div>
-   <div class="filters"><input id="q" placeholder="Name suchen" style="min-width:230px"><select id="fy"><option value="0">Alle Jahre</option>${ys.map(y => `<option>${y}</option>`).join("")}</select>
+  $("#main").innerHTML = `<div class="sec mt0"><h2>Alle Touren</h2><span class="sub" id="cnt"></span></div>
+   <div class="filters"><input id="q" placeholder="Name suchen" class="mnw230"><select id="fy"><option value="0">Alle Jahre</option>${ys.map(y => `<option>${y}</option>`).join("")}</select>
    <select id="fs"><option value="">Alle Sportarten</option>${sp.map(s => `<option value="${s}">${sName(s)}</option>`).join("")}</select>
    <select id="fz" title="Jahreszeit"><option value="">Ganzjährig</option><option value="sommer">Sommerhalbjahr (Mai–Okt)</option><option value="winter">Winterhalbjahr (Nov–Apr)</option></select>
    <select id="fb" title="Meine Bewertung"><option value="">Alle Bewertungen</option><option value="5">★★★★★</option><option value="4">ab ★★★★</option><option value="3">ab ★★★</option></select>
@@ -337,7 +337,7 @@ VIEWS.tours = async () => {
      .map(x => `<option value="${esc(x)}">${esc(x)}</option>`)
      .join("")}</select>
    <select id="so"><option value="date">Neueste zuerst</option><option value="old">Älteste zuerst</option><option value="km">Längste Strecke</option><option value="up">Meiste Höhenmeter</option><option value="h">Längste Dauer</option></select></div>
-   <div class="tl" id="tl"></div><div class="row" style="justify-content:center;margin-top:20px"><button class="btn ghost" id="more">Mehr anzeigen</button></div>`;
+   <div class="tl" id="tl"></div><div class="row jcc mt20"><button class="btn ghost" id="more">Mehr anzeigen</button></div>`;
   let lim = 80;
   const KEY = "tf",
     ld = () => {

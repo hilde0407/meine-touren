@@ -27,7 +27,7 @@ VIEWS.trips = async () => {
   const ds = ts => new Date(ts * 1000).toLocaleDateString("de-DE");
   tr.insertAdjacentHTML(
     "afterbegin",
-    `<div class="sec" style="margin-top:0"><h2>Mehrtagestouren</h2><span class="sub">erkannt an Namen wie „… Tag 3“ oder „… Etappe 2“</span></div><div class="otdg">${L.map(
+    `<div class="sec mt0"><h2>Mehrtagestouren</h2><span class="sub">erkannt an Namen wie „… Tag 3“ oder „… Etappe 2“</span></div><div class="otdg">${L.map(
       s => `<a class="otd" href="#/series/${s.id}" style="background-image:linear-gradient(#0e2a2b99,#0e2a2bee)"><b>${esc(s.name)}</b><span>${ds(s.start)}${s.end - s.start > 86400 ? " – " + ds(s.end) : ""}</span><small>${s.n} Etappen · ${nf(s.km, 0)} km · ${nf(s.up, 0)} m</small></a>`
     ).join("")}</div>`
   );
@@ -57,7 +57,7 @@ VIEWS.tour = async (id, q) => {
   const m = SER_RE.exec((t.name || "").trim());
   if (!m || !m[1].trim()) return;
   const s = seriesList().find(x => x.name.toLowerCase() === m[1].trim().toLowerCase());
-  if (s) w.insertAdjacentHTML("beforebegin", `<div id="sernote" class="mut" style="margin:-4px 0 10px">Etappe der Mehrtagestour <a href="#/series/${s.id}"><b>${esc(s.name)}</b></a> (${s.n} Etappen, ${nf(s.km, 0)} km, ${nf(s.up, 0)} m Aufstieg) – <a href="#/series/${s.id}">Gesamtansicht</a></div>`);
+  if (s) w.insertAdjacentHTML("beforebegin", `<div id="sernote" class="mut mn4-0-10">Etappe der Mehrtagestour <a href="#/series/${s.id}"><b>${esc(s.name)}</b></a> (${s.n} Etappen, ${nf(s.km, 0)} km, ${nf(s.up, 0)} m Aufstieg) – <a href="#/series/${s.id}">Gesamtansicht</a></div>`);
 };
 
 /* ---- Reihe bilden / umbenennen ---- */
@@ -69,17 +69,17 @@ function seriesBuildDialog() {
   const iso = ts => new Date(ts * 1000).toISOString().slice(0, 10);
   const newest = TOURS.reduce((a, t) => Math.max(a, t.start_ts), 0);
   const m = modal(`<h2>Mehrtagestour bilden</h2>
-   <p class="mut" style="font-size:14px">Wähle den Zeitraum der Etappen. Die Touren dieser Tage werden „Name – Tag N“ genannt (N = Tag seit Beginn), danach erscheinen sie als Mehrtagestour unter Reisen.</p>
-   <div class="row" style="gap:8px;align-items:center"><label>Von <input id="sbf" type="date" value="${iso(newest - 6 * 86400)}"></label><label>bis <input id="sbt" type="date" value="${iso(newest)}"></label></div>
-   <div class="row" style="gap:8px;align-items:center;margin-top:8px"><input id="sbn" placeholder="Name, z. B. Alpenüberquerung E5" style="flex:1;min-width:200px"><select id="sbw" style="width:auto"><option>Tag</option><option>Etappe</option></select></div>
-   <div id="sbl" class="rows" style="margin:10px 0;max-height:260px;overflow:auto"></div>
+   <p class="mut fs14">Wähle den Zeitraum der Etappen. Die Touren dieser Tage werden „Name – Tag N“ genannt (N = Tag seit Beginn), danach erscheinen sie als Mehrtagestour unter Reisen.</p>
+   <div class="row g8 aic"><label>Von <input id="sbf" type="date" value="${iso(newest - 6 * 86400)}"></label><label>bis <input id="sbt" type="date" value="${iso(newest)}"></label></div>
+   <div class="row g8 aic mt8"><input id="sbn" placeholder="Name, z. B. Alpenüberquerung E5" class="fx1 mnw200"><select id="sbw" style="width:auto"><option>Tag</option><option>Etappe</option></select></div>
+   <div id="sbl" class="rows m10-0 ova" style="max-height:260px"></div>
    <div class="row"><button class="btn" id="sbok">Benennen</button><button class="btn ghost" id="sbno">Abbrechen</button><span id="sber" class="bad"></span></div>`);
   const list = () => {
     const f = m.querySelector("#sbf").value,
       t = m.querySelector("#sbt").value;
     const ts = TOURS.filter(x => iso(x.start_ts) >= f && iso(x.start_ts) <= t).sort((a, b) => a.start_ts - b.start_ts);
     m.querySelector("#sbl").innerHTML = ts.length
-      ? ts.map(x => `<label class="r" style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-i="${esc(x.id)}" data-s="${x.start_ts}" checked><span>${dateS(x.date)} · ${esc(x.name)} <span class="mut">${nf(x.km, 1)} km</span></span></label>`).join("")
+      ? ts.map(x => `<label class="r g8 aic" style="display:flex"><input type="checkbox" data-i="${esc(x.id)}" data-s="${x.start_ts}" checked><span>${dateS(x.date)} · ${esc(x.name)} <span class="mut">${nf(x.km, 1)} km</span></span></label>`).join("")
       : '<p class="mut">Keine Touren in diesem Zeitraum.</p>';
   };
   m.querySelectorAll("input[type=date]").forEach(i => (i.onchange = list));
@@ -108,7 +108,7 @@ VIEWS.trips = async () => {
   await _tripsB();
   const sec = $("#tr");
   if (!sec || $("#sbbtn")) return;
-  sec.insertAdjacentHTML("afterbegin", `<div class="row" style="margin-bottom:10px"><button class="btn alt sm" id="sbbtn">＋ Mehrtagestour bilden …</button></div>`);
+  sec.insertAdjacentHTML("afterbegin", `<div class="row mb10"><button class="btn alt sm" id="sbbtn">＋ Mehrtagestour bilden …</button></div>`);
   $("#sbbtn").onclick = seriesBuildDialog;
 };
 const _serV = VIEWS.series;
@@ -119,7 +119,7 @@ VIEWS.series = async id => {
   if (!s || !row || $("#serren")) return;
   row.parentElement.insertAdjacentHTML("beforeend", `<button class="btn alt" id="serren">✎ Reihe umbenennen</button>`);
   $("#serren").onclick = () => {
-    const m = modal(`<h2>Mehrtagestour umbenennen</h2><p class="mut" style="font-size:14px">Alle ${s.n} Etappen heißen danach „Neuer Name – Tag N“ (die Nummern bleiben).</p><input id="srn" value="${esc(s.name)}" style="width:100%"><div class="row" style="margin-top:12px"><button class="btn" id="srok">Umbenennen</button><button class="btn ghost" id="srno">Abbrechen</button><span id="srer" class="bad"></span></div>`);
+    const m = modal(`<h2>Mehrtagestour umbenennen</h2><p class="mut fs14">Alle ${s.n} Etappen heißen danach „Neuer Name – Tag N“ (die Nummern bleiben).</p><input id="srn" value="${esc(s.name)}" class="w100"><div class="row mt12"><button class="btn" id="srok">Umbenennen</button><button class="btn ghost" id="srno">Abbrechen</button><span id="srer" class="bad"></span></div>`);
     m.querySelector("#srno").onclick = () => m.remove();
     m.querySelector("#srok").onclick = async () => {
       const name = m.querySelector("#srn").value.trim();

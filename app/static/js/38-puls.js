@@ -53,15 +53,15 @@ function pulsCard(t) {
       const tot = h.zones.reduce((a, b) => a + b, 0) || 1;
       const mm = s => (s >= 3600 ? Math.floor(s / 3600) + " h " + Math.round((s % 3600) / 60) + " min" : Math.round(s / 60) + " min");
       const bar = h.zones.map((s, i) => `<span style="flex:${Math.max(s, 0.001)};background:${ZC[i]}" title="${ZN[i]}: ${mm(s)}"></span>`).join("");
-      const leg = h.zones.map((s, i) => `<span style="white-space:nowrap"><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${ZC[i]};margin-right:5px"></i>Z${i + 1} ${ZN[i]}: ${mm(s)} (${Math.round((s / tot) * 100)} %)</span>`).join("");
+      const leg = h.zones.map((s, i) => `<span class="nw"><i class="br2 mr5" style="display:inline-block;width:10px;height:10px;background:${ZC[i]}"></i>Z${i + 1} ${ZN[i]}: ${mm(s)} (${Math.round((s / tot) * 100)} %)</span>`).join("");
       const d = document.createElement("div");
       d.className = "panel prof gap";
       d.id = "pulscard";
-      d.innerHTML = `<h2>Herzfrequenz</h2><div style="display:flex;gap:28px;flex-wrap:wrap;margin-bottom:8px"><div><b style="font-size:1.5em">${h.avg}</b> <span class="mut">Ø bpm</span></div><div><b style="font-size:1.5em">${h.max}</b> <span class="mut">max bpm</span></div><div><b style="font-size:1.5em">${h.min}</b> <span class="mut">min bpm</span></div></div>` +
-        `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${g}${bridge}<path d="${line}" fill="none" stroke="#c0504d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>` +
-        `<div style="display:flex;height:12px;border-radius:6px;overflow:hidden;margin:12px 0 8px">${bar}</div>` +
-        `<div class="mut" style="display:flex;gap:6px 16px;flex-wrap:wrap;font-size:.85em">${leg}</div>` +
-        `<div class="mut" style="font-size:.8em;margin-top:8px">Zonen nach ${h.hrmax} bpm Maximalpuls (einstellbar in der Verwaltung).</div>`;
+      d.innerHTML = `<h2>Herzfrequenz</h2><div class="g28 fxw mb8" style="display:flex"><div><b style="font-size:1.5em">${h.avg}</b> <span class="mut">Ø bpm</span></div><div><b style="font-size:1.5em">${h.max}</b> <span class="mut">max bpm</span></div><div><b style="font-size:1.5em">${h.min}</b> <span class="mut">min bpm</span></div></div>` +
+        `<svg viewBox="0 0 ${W} ${H}" class="w100" style="height:auto">${g}${bridge}<path d="${line}" fill="none" stroke="#c0504d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>` +
+        `<div class="br6 ovh m12-0-8" style="display:flex;height:12px">${bar}</div>` +
+        `<div class="mut g6-16 fxw" style="display:flex;font-size:.85em">${leg}</div>` +
+        `<div class="mut mt8" style="font-size:.8em">Zonen nach ${h.hrmax} bpm Maximalpuls (einstellbar in der Verwaltung).</div>`;
       prof.after(d);
     })
     .catch(() => {});

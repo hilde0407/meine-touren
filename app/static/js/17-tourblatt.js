@@ -34,8 +34,8 @@ VIEWS.sheet = async id => {
   await pdfPhotoLoad();
   $("#main").innerHTML = `<div class="sheet">
    <div class="row noprint"><a class="back" href="#/tour/${esc(t.id)}">‹ Zurück zur Tour</a><span class="sp"></span>${pdfPhotoBar()}${pdfBtn()}<button class="btn ghost" id="shp">Drucken</button></div>
-   <div style="margin-top:14px"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span class="mut" style="margin-left:8px">${dateL(t.date)}, ${timeS(t.date)} Uhr${t.g_country ? " · " + esc([t.g_place, t.g_state, t.g_country].filter(Boolean).join(", ")) : ""}</span></div>
-   <h1 style="font-size:34px;margin:8px 0 14px">${esc(t.name)}</h1>
+   <div class="mt14"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span class="mut ml8">${dateL(t.date)}, ${timeS(t.date)} Uhr${t.g_country ? " · " + esc([t.g_place, t.g_state, t.g_country].filter(Boolean).join(", ")) : ""}</span></div>
+   <h1 class="fs34 m8-0-14">${esc(t.name)}</h1>
    <div class="figs"><div class="fig"><div class="v">${nf(t.km, 2)}<span class="u">km</span></div><div class="l">Strecke</div></div><div class="fig"><div class="v">${nf(t.up_m, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div></div>
    <div class="fig"><div class="v">${nf(t.down_m, 0)}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60))}<span class="u">Std.</span></div><div class="l">Dauer</div></div>
    <div class="fig"><div class="v">${t.h ? nf(t.km / t.h, 1) : "–"}<span class="u">km/h</span></div><div class="l">Tempo</div></div><div id="kmax" class="fig" style="display:none"><div class="v" id="kmaxv"></div><div class="l">Höchster Punkt</div></div></div>

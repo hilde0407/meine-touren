@@ -29,11 +29,11 @@ VIEWS.tour = async id => {
     $("#esnd").insertAdjacentHTML("afterend", ` <button class="btn sm" id="eshow" title="Diashow der Fotos als Link senden – ohne Benutzerkonto ansehbar">Diashow senden</button>`);
     $("#eshow").onclick = async () => {
       const keep = k => { try { return localStorage.getItem("mt_show_" + k); } catch (e) { return null; } };
-      const m = modal(`<h3>Diashow senden</h3><p class="mut" style="font-size:14px">Erzeugt einen Link, den man <b>ohne Benutzerkonto</b> öffnen kann. Es werden nur die Fotos dieser Tour gezeigt.</p>
+      const m = modal(`<h3>Diashow senden</h3><p class="mut fs14">Erzeugt einen Link, den man <b>ohne Benutzerkonto</b> öffnen kann. Es werden nur die Fotos dieser Tour gezeigt.</p>
         <label>Fotos<br><select id="sh_b"><option value="0">Alle Fotos</option><option value="20">Nur die besten 20</option><option value="50">Nur die besten 50</option></select></label>
-        <label style="display:block;margin-top:10px">Link gültig<br><select id="sh_d"><option value="7">7 Tage</option><option value="30">30 Tage</option><option value="0">Unbegrenzt (bis ich ihn widerrufe)</option></select></label>
-        <label style="display:block;margin-top:10px"><input type="checkbox" id="sh_c"> Besucher dürfen Fotos kommentieren</label><p class="mut" style="font-size:13px;margin:4px 0 0">Kommentare sind für alle mit dem Link sichtbar; Gäste brauchen kein Konto. Du kannst sie in der Erzählung löschen.</p>
-        <div class="row" style="margin-top:14px;justify-content:flex-end"><button class="btn alt" id="sh_x">Abbrechen</button><button class="btn" id="sh_go">Senden</button></div>`);
+        <label class="mt10" style="display:block">Link gültig<br><select id="sh_d"><option value="7">7 Tage</option><option value="30">30 Tage</option><option value="0">Unbegrenzt (bis ich ihn widerrufe)</option></select></label>
+        <label class="mt10" style="display:block"><input type="checkbox" id="sh_c"> Besucher dürfen Fotos kommentieren</label><p class="mut fs13 m4-0-0">Kommentare sind für alle mit dem Link sichtbar; Gäste brauchen kein Konto. Du kannst sie in der Erzählung löschen.</p>
+        <div class="row mt14 jce"><button class="btn alt" id="sh_x">Abbrechen</button><button class="btn" id="sh_go">Senden</button></div>`);
       m.querySelector("#sh_c").checked = keep("c") === "1";
       m.querySelector("#sh_b").value = keep("b") || "0";
       m.querySelector("#sh_d").value = keep("d") || "30";

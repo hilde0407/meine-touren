@@ -157,11 +157,11 @@ function recLive(st) {
   const sp = (st.active_s || 0) > 180 && (st.dist_m || 0) > 200 ? st.dist_m / st.active_s : 1.2;   // m/s, anfangs Wanderschritt
   const eta = new Date(Date.now() + (rest / sp) * 1000), hh = String(eta.getHours()).padStart(2, "0") + ":" + String(eta.getMinutes()).padStart(2, "0");
   let nxt = "";
-  if (ri.off) nxt = '<div class="bad" style="font-size:20px;font-weight:700">⚠ Abseits der Route</div>';
+  if (ri.off) nxt = '<div class="bad fs20 fw700">⚠ Abseits der Route</div>';
   else if (ri.next_m !== undefined) {
     const a = ri.next_angle, ar = Math.abs(a) >= 150 ? "↩" : a > 0 ? "➡" : "⬅";
-    nxt = `<div style="font-size:34px;line-height:1.1">${ar} <b>${ri.next_m >= 1000 ? nf(ri.next_m / 1000, 1) + " km" : Math.max(10, Math.round(ri.next_m / 10) * 10) + " m"}</b></div><div class="mut" style="font-size:13px">Nächste Abbiegung</div>`;
-  } else nxt = '<div style="font-size:20px">Keine Abbiegung mehr</div>';
+    nxt = `<div class="fs34 lh1_1">${ar} <b>${ri.next_m >= 1000 ? nf(ri.next_m / 1000, 1) + " km" : Math.max(10, Math.round(ri.next_m / 10) * 10) + " m"}</b></div><div class="mut fs13">Nächste Abbiegung</div>`;
+  } else nxt = '<div class="fs20">Keine Abbiegung mehr</div>';
   let prof = "";
   const pr = recProfile(ri.name);
   if (pr) {
@@ -170,12 +170,12 @@ function recLive(st) {
     const pts = pr.d.map((m, i) => `${X(m).toFixed(1)},${Y(pr.e[i]).toFixed(1)}`).join(" ");
     let ie = 0; while (ie < pr.d.length - 1 && pr.d[ie] < prog) ie++;
     let upLeft = 0; for (let i = Math.max(1, ie); i < pr.e.length; i++) if (pr.e[i] > pr.e[i - 1] + 0.5) upLeft += pr.e[i] - pr.e[i - 1];
-    prof = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:70px;margin-top:8px" role="img"><polyline points="${pts}" fill="none" stroke="#2f6b45" stroke-width="2"/>` +
+    prof = `<svg viewBox="0 0 ${W} ${H}" class="w100 mt8" style="height:70px" role="img"><polyline points="${pts}" fill="none" stroke="#2f6b45" stroke-width="2"/>` +
       `<line x1="${X(prog).toFixed(1)}" x2="${X(prog).toFixed(1)}" y1="0" y2="${H}" stroke="#2f6bd9" stroke-width="2"/><circle cx="${X(prog).toFixed(1)}" cy="${Y(pr.e[ie]).toFixed(1)}" r="4" fill="#2f6bd9"/></svg>` +
-      `<div class="mut" style="font-size:13px">${pr.e[ie]} m · noch ↑ ${Math.round(upLeft)} m · höchster Punkt ${hi} m</div>`;
+      `<div class="mut fs13">${pr.e[ie]} m · noch ↑ ${Math.round(upLeft)} m · höchster Punkt ${hi} m</div>`;
   }
-  box.innerHTML = `${nxt}<div class="row" style="gap:16px;justify-content:center;margin-top:6px"><span>Ziel in <b>${nf(rest / 1000, 1)} km</b></span><span>Ankunft ca. <b>${hh} Uhr</b></span></div>` +
-    `<div style="height:6px;background:var(--line,#ddd);border-radius:3px;margin-top:8px"><div style="height:6px;width:${Math.min(100, (prog / ri.total_m) * 100).toFixed(0)}%;background:#2f6bd9;border-radius:3px"></div></div>${prof}`;
+  box.innerHTML = `${nxt}<div class="row g16 jcc mt6"><span>Ziel in <b>${nf(rest / 1000, 1)} km</b></span><span>Ankunft ca. <b>${hh} Uhr</b></span></div>` +
+    `<div class="br3 mt8" style="height:6px;background:var(--line,#ddd)"><div class="br3" style="height:6px;width:${Math.min(100, (prog / ri.total_m) * 100).toFixed(0)}%;background:#2f6bd9"></div></div>${prof}`;
 }
 
 VIEWS.record = async () => {
@@ -189,58 +189,58 @@ VIEWS.record = async () => {
   const draw = () => {
     st = recStatus();
     const s = st.state;
-    let h = '<div class="sec" style="margin-top:0"><h2>Aufzeichnen</h2></div>';
+    let h = '<div class="sec mt0"><h2>Aufzeichnen</h2></div>';
     if (!A.hasPermission())
       h += '<div class="panel"><p><b>Standort-Berechtigung fehlt.</b> Für die Aufzeichnung braucht die App Zugriff auf den genauen Standort.</p><button class="btn" id="rperm">Berechtigung erteilen</button></div>';
     if (s === "idle") {
-      h += `<div class="panel"><label class="mut">Sportart</label><select id="rsport" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px">${REC_SPORTS.map(([k, l]) => `<option value="${k}">${l}</option>`).join("")}</select>
-        ${typeof A.setRoute === "function" ? `<label class="mut">Route mit Sprachansagen (optional)</label><select id="rroute" style="width:100%;font-size:17px;padding:10px;margin:6px 0 4px"><option value="">Keine – frei aufzeichnen</option></select>
-        <div id="rrinfo" class="mut" style="font-size:13px;margin-bottom:12px">Lädt eine geplante oder frühere Strecke; unterwegs sagt die App an, wo du abbiegen musst.</div>` : ""}
-        ${typeof A.takePhoto === "function" ? `<label class="mut">Fotos während der Aufzeichnung</label><select id="rphm" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px"><option value="now">Sofort auf den Server laden</option><option value="end">Gesammelt am Ende laden</option></select>` : ""}
-        ${typeof A.setWeather === "function" ? `<label style="display:block;margin:0 0 10px"><input type="checkbox" id="rwxon" ${A.weatherOn() ? "checked" : ""}> Wetterwarnung unterwegs (Gewitter, Starkregen, Sturm, Kälteeinbruch)</label>` : ""}
-        <div class="row" style="gap:8px;margin:0 0 12px;align-items:center"><select id="rlh" style="padding:10px"><option value="3">3 Stunden</option><option value="12" selected>12 Stunden</option><option value="24">24 Stunden</option><option value="72">3 Tage</option></select><button class="btn alt" id="rlink">📡 Live-Standort für Kontakt teilen</button></div>
-        <div id="rlmsg" class="mut" style="font-size:13px;margin:-6px 0 12px"></div>
-        <label class="mut">Name (optional)</label><input id="rname" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px" placeholder="wird sonst automatisch vergeben">
-        <button class="btn" id="rstart" style="width:100%;font-size:20px;padding:16px">● Aufzeichnung starten</button>
-        <p class="mut" style="font-size:13px;margin-top:10px">Die Aufzeichnung läuft auch bei ausgeschaltetem Bildschirm weiter. Tipp: Akku-Optimierung für diese App ausschalten.</p>
-        <button class="btn alt" id="rbat" style="margin-top:6px">Akku-Einstellungen öffnen</button> <a class="btn alt" href="#/apptest" style="margin-top:6px">App-Test</a></div>`;
+      h += `<div class="panel"><label class="mut">Sportart</label><select id="rsport" class="w100 fs16 p10 m6-0-12">${REC_SPORTS.map(([k, l]) => `<option value="${k}">${l}</option>`).join("")}</select>
+        ${typeof A.setRoute === "function" ? `<label class="mut">Route mit Sprachansagen (optional)</label><select id="rroute" class="w100 fs16 p10 m6-0-4"><option value="">Keine – frei aufzeichnen</option></select>
+        <div id="rrinfo" class="mut fs13 mb12">Lädt eine geplante oder frühere Strecke; unterwegs sagt die App an, wo du abbiegen musst.</div>` : ""}
+        ${typeof A.takePhoto === "function" ? `<label class="mut">Fotos während der Aufzeichnung</label><select id="rphm" class="w100 fs16 p10 m6-0-12"><option value="now">Sofort auf den Server laden</option><option value="end">Gesammelt am Ende laden</option></select>` : ""}
+        ${typeof A.setWeather === "function" ? `<label class="m0-0-10" style="display:block"><input type="checkbox" id="rwxon" ${A.weatherOn() ? "checked" : ""}> Wetterwarnung unterwegs (Gewitter, Starkregen, Sturm, Kälteeinbruch)</label>` : ""}
+        <div class="row g8 m0-0-12 aic"><select id="rlh" class="p10"><option value="3">3 Stunden</option><option value="12" selected>12 Stunden</option><option value="24">24 Stunden</option><option value="72">3 Tage</option></select><button class="btn alt" id="rlink">📡 Live-Standort für Kontakt teilen</button></div>
+        <div id="rlmsg" class="mut fs13 mn6-0-12"></div>
+        <label class="mut">Name (optional)</label><input id="rname" class="w100 fs16 p10 m6-0-12" placeholder="wird sonst automatisch vergeben">
+        <button class="btn w100 fs20 p16" id="rstart">● Aufzeichnung starten</button>
+        <p class="mut fs13 mt10">Die Aufzeichnung läuft auch bei ausgeschaltetem Bildschirm weiter. Tipp: Akku-Optimierung für diese App ausschalten.</p>
+        <button class="btn alt mt6" id="rbat">Akku-Einstellungen öffnen</button> <a class="btn alt mt6" href="#/apptest">App-Test</a></div>`;
     } else if (s === "finished") {
       h += `<div class="panel"><h2>Aufzeichnung beendet</h2><p>${nf((st.dist_m || 0) / 1000, 2)} km · ${recDur(st.active_s || 0)} h · ↑ ${nf(st.up_m || 0, 0)} m · ↓ ${nf(st.down_m || 0, 0)} m</p>
-        <input id="rname" value="${esc(st.name)}" style="width:100%;font-size:17px;padding:10px;margin:6px 0 12px" placeholder="Name der Tour (leer lassen = automatisch)">
+        <input id="rname" value="${esc(st.name)}" class="w100 fs16 p10 m6-0-12" placeholder="Name der Tour (leer lassen = automatisch)">
         ${(() => {
           const pi = typeof A.photoInfo === "function" ? recPhotoInfo() : {};
-          return pi.pending ? `<p class="mut" style="font-size:13px">📷 ${pi.pending} Foto(s) werden mit hochgeladen.</p>` : "";
+          return pi.pending ? `<p class="mut fs13">📷 ${pi.pending} Foto(s) werden mit hochgeladen.</p>` : "";
         })()}
-        <button class="btn" id="rsend" style="width:100%;font-size:19px;padding:14px">Auf den Server speichern</button>
+        <button class="btn w100 fs20 p14" id="rsend">Auf den Server speichern</button>
         <p id="rmsg" class="mut"></p>
-        <button class="btn alt" id="rdrop" style="margin-top:6px">Verwerfen</button></div>`;
+        <button class="btn alt mt6" id="rdrop">Verwerfen</button></div>`;
     } else {
-      h += `<div class="panel" style="text-align:center"><div class="mut">${s === "paused" ? "⏸ pausiert" : st.gps ? "● nimmt auf" : "⚠ GPS ist ausgeschaltet"}</div>
-        <div id="rt" style="font-size:44px;font-weight:700;margin:6px 0">${recDur(st.active_s || 0)}</div>
+      h += `<div class="panel tac"><div class="mut">${s === "paused" ? "⏸ pausiert" : st.gps ? "● nimmt auf" : "⚠ GPS ist ausgeschaltet"}</div>
+        <div id="rt" class="fs44 fw700 m6-0">${recDur(st.active_s || 0)}</div>
         <div class="recgrid">${recCells(st)}</div>
-        <div id="rlive" class="panel" style="display:none;margin:12px 0 0;text-align:center"></div>
-        <div id="rwx" class="panel" style="display:none;margin:12px 0 0;border-left:5px solid #d97706"></div>
-        ${typeof A.routeInfo === "function" && recRouteInfo().has ? `<div class="mut" id="rgi" style="font-size:13px;margin-top:8px">🧭 ${esc(recRouteInfo().name)} · ${nf(recRouteInfo().km, 1)} km <label style="margin-left:8px"><input type="checkbox" id="rgon" ${recRouteInfo().on ? "checked" : ""}> Ansagen</label></div>` : ""}
-        ${typeof A.takePhoto === "function" ? '<button class="btn" id="rphoto" style="width:100%;font-size:20px;padding:16px;margin-top:12px">📷 Foto aufnehmen</button><div id="rphinfo" class="mut" style="font-size:13px;margin-top:4px"></div>' : ""}
-        ${typeof A.addWaypoint === "function" ? `<button class="btn alt" id="rwpb" style="width:100%;font-size:18px;padding:12px;margin-top:10px">📍 Wegpunkt setzen</button>
-          <div id="rwp" style="display:none;margin-top:8px"><div class="row" style="gap:6px;flex-wrap:wrap;justify-content:center">${REC_WP.map(w => `<button class="btn alt sm" data-wp="${esc(w)}">${esc(w)}</button>`).join("")}</div>
-          <div class="row" style="gap:6px;margin-top:8px"><input id="rwpt" maxlength="200" placeholder="Eigene Notiz" style="flex:1;font-size:16px;padding:10px"><button class="btn" id="rwps">Speichern</button></div></div>
-          <div id="rwpm" class="mut" style="font-size:13px;margin-top:4px">${st.wps ? `📍 ${st.wps} Wegpunkt(e) gesetzt` : ""}</div>` : ""}
-        <div class="row" style="gap:8px;margin-top:14px;justify-content:center">
+        <div id="rlive" class="panel m12-0-0 tac" style="display:none"></div>
+        <div id="rwx" class="panel m12-0-0" style="display:none;border-left:5px solid #d97706"></div>
+        ${typeof A.routeInfo === "function" && recRouteInfo().has ? `<div class="mut fs13 mt8" id="rgi">🧭 ${esc(recRouteInfo().name)} · ${nf(recRouteInfo().km, 1)} km <label class="ml8"><input type="checkbox" id="rgon" ${recRouteInfo().on ? "checked" : ""}> Ansagen</label></div>` : ""}
+        ${typeof A.takePhoto === "function" ? '<button class="btn w100 fs20 p16 mt12" id="rphoto">📷 Foto aufnehmen</button><div id="rphinfo" class="mut fs13 mt4"></div>' : ""}
+        ${typeof A.addWaypoint === "function" ? `<button class="btn alt w100 fs18 p12 mt10" id="rwpb">📍 Wegpunkt setzen</button>
+          <div id="rwp" class="mt8" style="display:none"><div class="row g6 fxw jcc">${REC_WP.map(w => `<button class="btn alt sm" data-wp="${esc(w)}">${esc(w)}</button>`).join("")}</div>
+          <div class="row g6 mt8"><input id="rwpt" maxlength="200" placeholder="Eigene Notiz" class="fx1 fs16 p10"><button class="btn" id="rwps">Speichern</button></div></div>
+          <div id="rwpm" class="mut fs13 mt4">${st.wps ? `📍 ${st.wps} Wegpunkt(e) gesetzt` : ""}</div>` : ""}
+        <div class="row g8 mt14 jcc">
           ${s === "paused" ? '<button class="btn" id="rres">▶ Weiter</button>' : '<button class="btn alt" id="rpause">⏸ Pause</button>'}
           <button class="btn holdstop" id="rstop"><span class="fill"></span><span class="lbl">■ Beenden – gedrückt halten</span></button></div></div>
-        <div id="rmap" style="height:300px;border-radius:12px;margin-top:12px"></div>`;
+        <div id="rmap" class="br12 mt12" style="height:300px"></div>`;
     }
     let bk = [];
     try {
       if (s === "idle" && typeof A.backups === "function") bk = JSON.parse(A.backups());
     } catch (e) {}
     if (bk.length)
-      h += `<div class="panel"><h2>Gesicherte Aufzeichnungen</h2><p class="mut" style="font-size:13px">Jede beendete Aufzeichnung wird zusätzlich auf dem Handy gesichert (die letzten 10). Falls eine Tour nicht auf dem Server angekommen ist, kannst du sie hier erneut speichern.</p>${bk
-        .map(b => `<div class="row" style="gap:8px;margin:6px 0"><span>${new Date(b.ts).toLocaleString("de-DE", {dateStyle: "short", timeStyle: "short"})} · ${Math.round(b.size / 1024)} kB</span><span class="sp"></span><button class="btn alt sm" data-bk="${esc(b.file)}">Auf den Server speichern</button></div>`)
+      h += `<div class="panel"><h2>Gesicherte Aufzeichnungen</h2><p class="mut fs13">Jede beendete Aufzeichnung wird zusätzlich auf dem Handy gesichert (die letzten 10). Falls eine Tour nicht auf dem Server angekommen ist, kannst du sie hier erneut speichern.</p>${bk
+        .map(b => `<div class="row g8 m6-0"><span>${new Date(b.ts).toLocaleString("de-DE", {dateStyle: "short", timeStyle: "short"})} · ${Math.round(b.size / 1024)} kB</span><span class="sp"></span><button class="btn alt sm" data-bk="${esc(b.file)}">Auf den Server speichern</button></div>`)
         .join("")}<p id="bkmsg" class="mut"></p></div>`;
     if (s === "idle" && typeof A.photoInfo === "function" && recPhotoInfo().pending)
-      h += `<div class="panel"><h2>Fotos warten auf den Upload</h2><p class="mut" style="font-size:13px">${recPhotoInfo().pending} Foto(s) aus früheren Aufzeichnungen liegen noch auf dem Handy (sie sind auch in der Galerie).</p><button class="btn alt" id="rphup">Jetzt hochladen</button> <span id="rphupm" class="mut"></span></div>`;
+      h += `<div class="panel"><h2>Fotos warten auf den Upload</h2><p class="mut fs13">${recPhotoInfo().pending} Foto(s) aus früheren Aufzeichnungen liegen noch auf dem Handy (sie sind auch in der Galerie).</p><button class="btn alt" id="rphup">Jetzt hochladen</button> <span id="rphupm" class="mut"></span></div>`;
     $("#main").innerHTML = h;
     if ($("#rphup"))
       $("#rphup").onclick = () => {
@@ -458,7 +458,7 @@ VIEWS.admin = async (...a) => {
   if (!A || $("#appbox")) return;
   const box = `<div class="panel" id="appbox"><h2>Android-App</h2>
     <p class="mut">Version ${esc(A.version())} · Server: ${esc(A.serverUrl())}</p>
-    <div class="row" style="gap:8px"><button class="btn alt" id="appsrv">Serveradresse ändern</button><button class="btn alt" id="appbat">Akku-Einstellungen</button><a class="btn" href="#/apptest">App-Test und Protokoll</a></div></div>`;
+    <div class="row g8"><button class="btn alt" id="appsrv">Serveradresse ändern</button><button class="btn alt" id="appbat">Akku-Einstellungen</button><a class="btn" href="#/apptest">App-Test und Protokoll</a></div></div>`;
   const body = document.querySelector('.atab[data-t="handy"] .gbody');
   if (body) body.insertAdjacentHTML("beforeend", box);
   else if ($("#save")) $("#save").closest(".row").insertAdjacentHTML("beforebegin", box);
@@ -467,9 +467,9 @@ VIEWS.admin = async (...a) => {
     m = nu.match(/^(https?):\/\/([^/]+)\/(.+)$/);
   $("#appbox").insertAdjacentHTML(
     "beforeend",
-    `<h3 style="margin:14px 0 4px">Push-Meldungen</h3><p class="mut" style="font-size:13px">${
+    `<h3 class="m14-0-4">Push-Meldungen</h3><p class="mut fs13">${
       m ? "Neue Touren und Warnungen kommen als echte Handy-Meldung, wenn die kostenlose <b>ntfy</b>-App das Thema abonniert hat." : "Trage unter Verwaltung → „Benachrichtigung“ eine ntfy-Adresse ein (z. B. https://ntfy.sh/mein-thema), dann lässt sich das hier mit einem Tipp abonnieren."
-    }</p><div class="row" style="gap:8px"><button class="btn alt" id="apush"${m ? "" : " disabled"}>In ntfy abonnieren</button><button class="btn alt" id="apushget">ntfy-App holen</button></div>`
+    }</p><div class="row g8"><button class="btn alt" id="apush"${m ? "" : " disabled"}>In ntfy abonnieren</button><button class="btn alt" id="apushget">ntfy-App holen</button></div>`
   );
   if ($("#apush") && m) $("#apush").onclick = () => A.openUrl(`ntfy://${m[2]}/${m[3]}${m[1] === "http" ? "?secure=false" : ""}`);
   $("#apushget").onclick = () => A.openUrl("https://ntfy.sh/app");
@@ -514,7 +514,7 @@ VIEWS.apptest = async () => {
       srv = v.ok || v.status === 401 ? `Server erreichbar (${Math.round(performance.now() - t0)} ms)` : "";
     } catch (e) {}
     const st = D.status || {};
-    $("#main").innerHTML = `<div class="sec" style="margin-top:0"><h2>App-Test</h2><span class="sub">Version ${esc(D.version || "")} · ${esc(D.device || "")} · Android ${esc(D.android || "")}</span></div>
+    $("#main").innerHTML = `<div class="sec mt0"><h2>App-Test</h2><span class="sub">Version ${esc(D.version || "")} · ${esc(D.device || "")} · Android ${esc(D.android || "")}</span></div>
     <div class="rows">
       ${ck(!!srv, srv, "Server nicht erreichbar", "Heimnetz/VPN prüfen, Adresse: " + esc(D.server || ""))}
       ${ck(D.loc_perm, "Standort-Berechtigung erteilt", "Standort-Berechtigung fehlt", "Ohne sie keine Aufzeichnung.")}
@@ -523,12 +523,12 @@ VIEWS.apptest = async () => {
       ${ck(D.battery_free, "Akku-Optimierung für die App aus", "Akku-Optimierung ist aktiv", "Android kann die Aufzeichnung im Hintergrund beenden. Unten „Akku-Einstellungen“ öffnen und die App ausnehmen.")}
       <div class="r"><span>Aufzeichnung: <b>${esc(st.state || "-")}</b>${st.count ? ` · ${st.count} Punkte` : ""}${st.fix_age_s >= 0 ? ` · letzter Fix vor ${st.fix_age_s} s (±${st.fix_acc_m} m)` : ""}</span></div>
     </div>
-    <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap">
+    <div class="row g8 mt12 fxw">
       <button class="btn" id="atgps">GPS-Test (15 s)</button><button class="btn alt" id="atperm">Berechtigung anfragen</button><button class="btn alt" id="atbat">Akku-Einstellungen</button></div>
-    <p id="atres" class="mut" style="margin-top:10px">${extra}</p>
+    <p id="atres" class="mut mt10">${extra}</p>
     <div class="sec"><h2>Protokoll</h2></div>
-    <pre id="atlog" style="white-space:pre-wrap;font-size:11px;max-height:320px;overflow:auto;background:#f3f5f1;padding:8px;border-radius:8px">${esc(A.logText() || "(leer)")}</pre>
-    <div class="row" style="gap:8px"><button class="btn" id="atsend">Diagnose senden / kopieren</button><button class="btn alt" id="atclr">Protokoll leeren</button></div>`;
+    <pre id="atlog" class="fs12 ova p8 br8" style="white-space:pre-wrap;max-height:320px;background:#f3f5f1">${esc(A.logText() || "(leer)")}</pre>
+    <div class="row g8"><button class="btn" id="atsend">Diagnose senden / kopieren</button><button class="btn alt" id="atclr">Protokoll leeren</button></div>`;
     const lg = $("#atlog");
     lg.scrollTop = lg.scrollHeight;
     $("#atperm").onclick = () => A.requestPermission();

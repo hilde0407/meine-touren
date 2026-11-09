@@ -83,7 +83,7 @@ function planProfile(dense, ele) {
   const line = ele.map((h, i) => `${i ? "L" : "M"}${x(d[i]).toFixed(1)},${y(h).toFixed(1)}`).join("");
   const ticks = [lo + pad, (lo + hi) / 2, hi - pad].map(v => `<text x="2" y="${y(v) + 4}" font-size="11" fill="currentColor" opacity=".6">${Math.round(v)} m</text><line x1="${L}" x2="${W - 6}" y1="${y(v)}" y2="${y(v)}" stroke="currentColor" opacity=".12"/>`).join("");
   const kms = [0, 0.25, 0.5, 0.75, 1].map(f => `<text x="${x(D * f)}" y="${H - 4}" font-size="11" text-anchor="${f === 0 ? "start" : f === 1 ? "end" : "middle"}" fill="currentColor" opacity=".6">${nf((D * f) / 1000, 1)} km</text>`).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${ticks}${kms}<path d="${line}L${x(D)},${H - B}L${L},${H - B}Z" fill="var(--green,#2f8f5f)" opacity=".22"/><path d="${line}" fill="none" stroke="var(--green,#2f8f5f)" stroke-width="2.2"/></svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}" class="w100" style="height:auto">${ticks}${kms}<path d="${line}L${x(D)},${H - B}L${L},${H - B}Z" fill="var(--green,#2f8f5f)" opacity=".22"/><path d="${line}" fill="none" stroke="var(--green,#2f8f5f)" stroke-width="2.2"/></svg>`;
 }
 
 const PLAN_PROFILE = s => ({racebike: "fastbike", mtb: "mtb"}[s] || (sportGrp(s) === "bike" ? "trekking" : "hiking-mountain"));
@@ -99,21 +99,21 @@ VIEWS.plan = async (pid, q) => {
   }
   const [plans, guides] = await Promise.all([api("/api/plans").catch(() => []), api("/api/guides").catch(() => [])]);
   const sports = Object.keys(SPORT);
-  const planRow = p => `<div class="r" data-p="${p.id}" style="cursor:pointer"><span>${esc(p.name)}<small>${sName(p.sport)} · ${nf(p.km || 0, 1)} km · ↑ ${nf(p.up || 0, 0)} m${p.est_h ? " · ca. " + hmm(p.est_h) + " h" : ""}</small></span><span><button class="btn ghost sm" data-d="${p.id}" title="Plan löschen">✕</button></span></div>`;
+  const planRow = p => `<div class="r cp" data-p="${p.id}"><span>${esc(p.name)}<small>${sName(p.sport)} · ${nf(p.km || 0, 1)} km · ↑ ${nf(p.up || 0, 0)} m${p.est_h ? " · ca. " + hmm(p.est_h) + " h" : ""}</small></span><span><button class="btn ghost sm" data-d="${p.id}" title="Plan löschen">✕</button></span></div>`;
   $("#main").innerHTML = `<div class="row"><a class="back" href="#/tours">‹ Alle Touren</a></div>
    <div class="sec"><h2>Tour planen</h2><span class="sub">Punkte in die Karte klicken – sie werden über bekannte Wege verbunden – oder eine GPX-Datei laden</span></div>
-   <div class="row" style="gap:8px;flex-wrap:wrap"><input id="pn" placeholder="Name der Planung" maxlength="120" style="min-width:230px"><select id="ps">${sports.map(s => `<option value="${s}" ${s === "hike" ? "selected" : ""}>${sName(s)}</option>`).join("")}</select>
-    <label class="chip on" style="cursor:pointer" title="Verbindet die Punkte über Wege und Straßen aus OpenStreetMap (BRouter). Aus: gerade Linien."><input type="checkbox" id="prt" checked style="display:none">Wegen folgen</label>
-    <label class="btn alt sm" style="cursor:pointer">GPX laden …<input type="file" id="pg" accept=".gpx,application/gpx+xml,text/xml" style="display:none"></label>
-    ${guides.length ? `<select id="pgd" style="max-width:260px"><option value="">Aus Wanderführer laden …</option>${guides.map(g => `<option value="${g.id}">${esc(g.book ? g.book + " – " : "")}${esc(g.title)}</option>`).join("")}</select>` : ""}
+   <div class="row g8 fxw"><input id="pn" placeholder="Name der Planung" maxlength="120" class="mnw230"><select id="ps">${sports.map(s => `<option value="${s}" ${s === "hike" ? "selected" : ""}>${sName(s)}</option>`).join("")}</select>
+    <label class="chip on cp" title="Verbindet die Punkte über Wege und Straßen aus OpenStreetMap (BRouter). Aus: gerade Linien."><input type="checkbox" id="prt" checked style="display:none">Wegen folgen</label>
+    <label class="btn alt sm cp">GPX laden …<input type="file" id="pg" accept=".gpx,application/gpx+xml,text/xml" style="display:none"></label>
+    ${guides.length ? `<select id="pgd" class="mw260"><option value="">Aus Wanderführer laden …</option>${guides.map(g => `<option value="${g.id}">${esc(g.book ? g.book + " – " : "")}${esc(g.title)}</option>`).join("")}</select>` : ""}
     <button class="btn ghost sm" id="pundo">↶ Letzten Punkt entfernen</button><button class="btn ghost sm" id="pclr">Leeren</button></div>
-   <div class="tmap" id="pm" style="margin-top:12px;height:min(60vh,520px)"></div>
-   <div id="pseg" class="wx" style="display:none;margin:8px 0 0"></div>
-   <p class="mut" style="font-size:13px;margin:6px 0 0">Klick auf die Karte setzt einen Punkt, Rechtsklick auf einen Punkt entfernt ihn. Ein Klick auf einen Abschnitt wählt ihn aus – dort lassen sich <b>Alternativen</b> anzeigen. Gestrichelt = gerade Linie (kein Weg gefunden oder „Wegen folgen“ aus).</p>
-   <div class="figs" id="pf" style="margin-top:18px"></div><div class="mut" id="pb" style="margin:8px 0 0"></div>
+   <div class="tmap mt12" id="pm" style="height:min(60vh,520px)"></div>
+   <div id="pseg" class="wx m8-0-0" style="display:none"></div>
+   <p class="mut fs13 m6-0-0">Klick auf die Karte setzt einen Punkt, Rechtsklick auf einen Punkt entfernt ihn. Ein Klick auf einen Abschnitt wählt ihn aus – dort lassen sich <b>Alternativen</b> anzeigen. Gestrichelt = gerade Linie (kein Weg gefunden oder „Wegen folgen“ aus).</p>
+   <div class="figs mt18" id="pf"></div><div class="mut m8-0-0" id="pb"></div>
    <div class="panel prof gap" style="display:none" id="pprof"><h2>Höhenprofil</h2><div id="pprofc"></div></div>
-   <div class="field" style="max-width:760px;margin:16px 0 0"><label for="pnote">Notiz zur Planung</label><textarea id="pnote" rows="2" placeholder="Anfahrt, Einkehr, beste Jahreszeit …"></textarea></div>
-   <div class="row" style="margin-top:12px"><button class="btn" id="psave">Plan speichern</button><button class="btn alt" id="pdl">⬇ Als GPX herunterladen</button><span id="pmsg" class="mut"></span></div>
+   <div class="field mw760 m16-0-0"><label for="pnote">Notiz zur Planung</label><textarea id="pnote" rows="2" placeholder="Anfahrt, Einkehr, beste Jahreszeit …"></textarea></div>
+   <div class="row mt12"><button class="btn" id="psave">Plan speichern</button><button class="btn alt" id="pdl">⬇ Als GPX herunterladen</button><span id="pmsg" class="mut"></span></div>
    <div class="sec"><h2>Gespeicherte Pläne</h2><span class="sub">${plans.length ? plans.length + " Pläne" : "noch keine"}</span></div>
    <div class="panel"><div class="rows" id="plist">${plans.length ? plans.map(planRow).join("") : `<p class="mut">Gespeicherte Planungen erscheinen hier.</p>`}</div></div>`;
   map = mkMap("pm", {layers: true});
@@ -146,7 +146,7 @@ VIEWS.plan = async (pid, q) => {
     if (P.stored || P.sel == null || P.sel >= P.wp.length - 1 || !routedOK()) return (el.style.display = "none");
     const r = segRes(P.sel);
     el.style.display = "";
-    el.innerHTML = `<b>Abschnitt ${P.sel + 1} von ${P.wp.length - 1}</b> ${r && r.pts ? `· ${nf(r.km, 2)} km · ↑ ${nf(r.up, 0)} m` : r && r.fail ? `· <span class="bad">kein Weg gefunden – gerade Linie</span>` : "· wird berechnet …"} <button class="btn alt sm" id="palts" style="margin-left:8px">Alternativen anzeigen</button><span id="paltl"></span>`;
+    el.innerHTML = `<b>Abschnitt ${P.sel + 1} von ${P.wp.length - 1}</b> ${r && r.pts ? `· ${nf(r.km, 2)} km · ↑ ${nf(r.up, 0)} m` : r && r.fail ? `· <span class="bad">kein Weg gefunden – gerade Linie</span>` : "· wird berechnet …"} <button class="btn alt sm ml8" id="palts">Alternativen anzeigen</button><span id="paltl"></span>`;
     $("#palts").onclick = () => showAlts(P.sel);
   };
   const redraw = () => {
@@ -468,13 +468,13 @@ VIEWS.admin = async (...a) => {
       <label class="pmode"><input type="radio" name="pm" value="public"> <b>Öffentlicher Dienst brouter.de</b><small>Nichts zu installieren. Die Koordinaten der geplanten Punkte werden an brouter.de gesendet.</small></label>
       <label class="pmode"><input type="radio" name="pm" value="local"> <b>Eigener BRouter auf diesem Server</b><small>Kostenlos, privat und schnell. Einmalig installieren (siehe unten), die Adresse ist dann <code>${esc(localUrl)}</code>.</small></label>
       <label class="pmode"><input type="radio" name="pm" value="custom"> <b>Anderer BRouter-Server im Netz</b><small>Du trägst die Adresse eines vorhandenen BRouter ein (z. B. auf einem NAS oder Raspberry Pi).</small></label>
-      <div class="field" id="purlf" style="margin-top:10px"><label>BRouter-Adresse</label><input data-k="brouter_url" id="purl" value="${esc(url)}" placeholder="http://192.168.178.50:17777/brouter"></div>
-      <div class="row" style="gap:8px;margin:6px 0"><button class="btn alt sm" id="ptest" type="button">Verbindung testen</button><span id="ptm" class="mut"></span></div>
-      <div id="pinst" style="display:none"><p class="mut" style="margin:10px 0 4px"><b>Installation auf dem Server</b> (Debian/Ubuntu, einmalig; lädt BRouter und die Karten-Kacheln für Deutschland/Alpenraum, je 100–400&nbsp;MB):</p>
-        <pre style="white-space:pre-wrap;user-select:all;margin:0 0 6px;padding:8px 10px;background:var(--surface);border:1px solid var(--rule);border-radius:8px">cd ~/meine-touren   # bzw. dein Installationsordner
+      <div class="field mt10" id="purlf"><label>BRouter-Adresse</label><input data-k="brouter_url" id="purl" value="${esc(url)}" placeholder="http://192.168.178.50:17777/brouter"></div>
+      <div class="row g8 m6-0"><button class="btn alt sm" id="ptest" type="button">Verbindung testen</button><span id="ptm" class="mut"></span></div>
+      <div id="pinst" style="display:none"><p class="mut m10-0-4"><b>Installation auf dem Server</b> (Debian/Ubuntu, einmalig; lädt BRouter und die Karten-Kacheln für Deutschland/Alpenraum, je 100–400&nbsp;MB):</p>
+        <pre class="m0-0-6 p8-10 br8" style="white-space:pre-wrap;user-select:all;background:var(--surface);border:1px solid var(--rule)">cd ~/meine-touren   # bzw. dein Installationsordner
 ${esc(cmd)}
 # andere Regionen, z. B. Kanaren: ${esc(cmd)} E5_N45 W20_N25</pre>
-        <p class="mut" style="font-size:13px;margin:0">Die App installiert nichts selbst (dafür sind Administratorrechte nötig). Danach „Verbindung testen“ und speichern. Ausführliche Anleitung: README → „Eigener BRouter-Server“.</p></div>
+        <p class="mut fs13 m0">Die App installiert nichts selbst (dafür sind Administratorrechte nötig). Danach „Verbindung testen“ und speichern. Ausführliche Anleitung: README → „Eigener BRouter-Server“.</p></div>
       <input type="hidden" data-k="plan_mode" id="pmode"></div></div>`
   );
   const upd = () => {

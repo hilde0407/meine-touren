@@ -102,10 +102,10 @@ VIEWS.tour = async id => {
     <div class="r"><span>Ø-Tempo in Bewegung<small>gesamt inkl. Pausen: ${nf(t.km / (A.total / 3600), 1)} km/h</small></span><b>${nf(t.km / Math.max(0.01, (A.total - A.pausedS) / 3600), 1)} km/h</b></div>`
         : ""
     }</div>
-   <h3 style="margin:16px 0 8px;font-size:18px">Steigung (Anteil der Strecke)</h3><div class="stack">${GR.map((b, k) => `<div style="width:${(A.band[k] / tot) * 100}%;background:${b[2]}" title="${b[3]}"></div>`).join("")}</div>
+   <h3 class="m16-0-8 fs18">Steigung (Anteil der Strecke)</h3><div class="stack">${GR.map((b, k) => `<div style="width:${(A.band[k] / tot) * 100}%;background:${b[2]}" title="${b[3]}"></div>`).join("")}</div>
    <div class="legend">${GR.map((b, k) => `<span><i style="background:${b[2]}"></i>${b[3]} ${nf(A.band[k] / 1000, 1)} km</span>`).join("")}</div>
-   <div class="row" style="margin-top:12px"><button class="btn alt sm" id="gtog">Steigung auf der Karte zeigen</button>${A.pauses.length ? `<button class="btn alt sm" id="ptog">Pausen auf der Karte zeigen</button>` : ""}
-    <select id="cmp" style="max-width:340px"><option value="">Mit anderer Tour vergleichen …</option>${others.map(x => `<option value="${x.o.id}">${dateS(x.o.date)} · ${esc(x.o.name)} (${nf(x.o.km, 1)} km)</option>`).join("")}</select></div>`;
+   <div class="row mt12"><button class="btn alt sm" id="gtog">Steigung auf der Karte zeigen</button>${A.pauses.length ? `<button class="btn alt sm" id="ptog">Pausen auf der Karte zeigen</button>` : ""}
+    <select id="cmp" class="mw340"><option value="">Mit anderer Tour vergleichen …</option>${others.map(x => `<option value="${x.o.id}">${dateS(x.o.date)} · ${esc(x.o.name)} (${nf(x.o.km, 1)} km)</option>`).join("")}</select></div>`;
   $("#profcard").after(box);
   const overlay = {};
   const withMap = fn => {
@@ -223,7 +223,7 @@ VIEWS.compare = async (_, q) => {
   const hasT = ca[0] && ca[0][3] != null && cb[0] && cb[0][3] != null;
   $("#main").innerHTML =
     `<div class="row"><a class="back" href="#/tour/${ta.id}">‹ ${esc(ta.name)}</a></div><div class="sec"><h2>Tourvergleich</h2></div>
-   <div class="legend" style="margin-bottom:10px"><span><i style="background:${cols[0]}"></i><a href="#/tour/${ta.id}">${esc(ta.name)}</a> (${dateS(ta.date)})</span><span><i style="background:${cols[1]}"></i><a href="#/tour/${tb.id}">${esc(tb.name)}</a> (${dateS(tb.date)})</span></div>
+   <div class="legend mb10"><span><i style="background:${cols[0]}"></i><a href="#/tour/${ta.id}">${esc(ta.name)}</a> (${dateS(ta.date)})</span><span><i style="background:${cols[1]}"></i><a href="#/tour/${tb.id}">${esc(tb.name)}</a> (${dateS(tb.date)})</span></div>
    <div class="grid g2"><div id="cm" class="cmap"></div><div><table class="cmp"><tr><th></th><th class="n">A</th><th class="n">B</th><th class="n">B − A</th></tr>
     ${row("Strecke", a.km, b.km, "km")}${row("Aufstieg", a.up, b.up, "m", 0)}${row("Dauer", a.h, b.h, "h", 2)}${row("Ø-Tempo gesamt", a.v, b.v, "km/h")}${row("Bewegungszeit", a.moving, b.moving, "h", 2)}${row("Pausen", a.pauses, b.pauses, "", 0)}</table>
     <div class="panel gap"><h3>Höhenprofil</h3>${
@@ -239,7 +239,7 @@ VIEWS.compare = async (_, q) => {
     }</div></div></div>
    ${
      hasT
-       ? `<div class="panel gap"><h3>Zeit über Strecke</h3><p class="mut" style="font-size:14px">Wo die Linien auseinanderlaufen, war eine Tour schneller (flacher = schneller, Stufen = Pausen).</p>${xyChart(
+       ? `<div class="panel gap"><h3>Zeit über Strecke</h3><p class="mut fs14">Wo die Linien auseinanderlaufen, war eine Tour schneller (flacher = schneller, Stufen = Pausen).</p>${xyChart(
            [
              {pts: tim(ca, a.A), color: cols[0]},
              {pts: tim(cb, b.A), color: cols[1]},
@@ -284,18 +284,18 @@ VIEWS.admin = async (...a) => {
   if (zr)
     zr.closest(".row").insertAdjacentHTML(
       "afterend",
-      `<p class="mut" style="font-size:14px;margin:-4px 0 8px">${z.state === "ok" ? "✓ Token gültig" : /^fail/.test(z.state || "") ? `<span class="bad">✗ Token ungültig: ${esc(z.state.slice(5))}</span>` : z.state === "none" ? "Kein Token gespeichert" : "Token noch nicht geprüft"}${age != null ? ` · gespeichert vor ${age} Tag${age === 1 ? "" : "en"}` : ""}${z.checked ? ` · zuletzt geprüft ${new Date(+z.checked * 1000).toLocaleString("de-DE")}` : ""} (wird täglich mitgeprüft)</p>`
+      `<p class="mut fs14 mn4-0-8">${z.state === "ok" ? "✓ Token gültig" : /^fail/.test(z.state || "") ? `<span class="bad">✗ Token ungültig: ${esc(z.state.slice(5))}</span>` : z.state === "none" ? "Kein Token gespeichert" : "Token noch nicht geprüft"}${age != null ? ` · gespeichert vor ${age} Tag${age === 1 ? "" : "en"}` : ""}${z.checked ? ` · zuletzt geprüft ${new Date(+z.checked * 1000).toLocaleString("de-DE")}` : ""} (wird täglich mitgeprüft)</p>`
     );
   sv.closest(".row").insertAdjacentHTML(
     "beforebegin",
-    `<div class="grid g2" style="margin-top:40px"><div class="panel"><h2>Foto-Eingang</h2>
+    `<div class="grid g2 mt40"><div class="panel"><h2>Foto-Eingang</h2>
     <p class="mut">Fotos einfach in den Eingangsordner kopieren (per <code>scp</code>, <code>rsync</code> oder SMB-Freigabe): <code>${esc(st.inbox || "/var/lib/meine-touren/inbox")}</code>. Sie werden automatisch verkleinert, mit Aufnahmezeit übernommen und Touren zugeordnet (Prüfung alle 5 Minuten).</p>
-    <p class="mut" style="font-size:13px">Beispiel vom Mac: <code>rsync -av ~/Pictures/Wanderung/ root@SERVER:${esc(st.inbox || "/var/lib/meine-touren/inbox")}/</code></p></div>
+    <p class="mut fs13">Beispiel vom Mac: <code>rsync -av ~/Pictures/Wanderung/ root@SERVER:${esc(st.inbox || "/var/lib/meine-touren/inbox")}/</code></p></div>
    <div class="panel"><h2>Wanderführer (z. B. Rother)</h2><p class="mut">Lade die GPX-Dateien deiner Wanderführer hoch (bei Rother im Download-Bereich zum Buch). Folgt eine Tour einer dieser Strecken, wird der Tourtitel aus dem Buch beim Umbenennen vorgeschlagen.</p>
     <div class="field"><label>Buch (z. B. „Rother Taunus“)</label><input id="gbook"></div>
-    <div class="row"><button class="btn" id="gup">GPX-Dateien auswählen …</button><input type="file" id="gfile" accept=".gpx" multiple hidden><span id="gres" class="mut"></span></div><div id="glist" style="margin-top:10px"></div></div>
+    <div class="row"><button class="btn" id="gup">GPX-Dateien auswählen …</button><input type="file" id="gfile" accept=".gpx" multiple hidden><span id="gres" class="mut"></span></div><div id="glist" class="mt10"></div></div>
    <div class="panel"><h2>Selbsttest</h2><p class="mut">Prüft Komoot-Zugang, Strecken, Zepp-Token, Internet-Dienste (Karten, Wetter, Höhendaten), Speicherplatz und Backup.</p>
-    <div class="row"><button class="btn alt" id="stest">Selbsttest starten</button></div><div id="stres" style="margin-top:10px"></div></div></div>`
+    <div class="row"><button class="btn alt" id="stest">Selbsttest starten</button></div><div id="stres" class="mt10"></div></div></div>`
   );
   const gl = async () => {
     const g = await api("/api/guides").catch(() => []),
@@ -306,7 +306,7 @@ VIEWS.admin = async (...a) => {
       Object.keys(by)
         .map(
           b =>
-            `<div class="r" style="display:flex;justify-content:space-between;gap:8px"><span>${esc(b || "(ohne Buch)")} <small class="mut">${by[b].length} Touren</small></span><button class="btn alt sm" data-gb="${esc(b)}">Entfernen</button></div>`
+            `<div class="r jcsb g8" style="display:flex"><span>${esc(b || "(ohne Buch)")} <small class="mut">${by[b].length} Touren</small></span><button class="btn alt sm" data-gb="${esc(b)}">Entfernen</button></div>`
         )
         .join("") || '<span class="mut">Noch keine Wanderführer hinterlegt.</span>';
     document.querySelectorAll("[data-gb]").forEach(
@@ -380,7 +380,7 @@ VIEWS.dash = async (...a) => {
     k.textContent = (i ? `${i + 1}. letzte Tour` : "Letzte Tour") + ", " + sName(t.sport);
     h1.textContent = t.name;
     w.textContent = `${dateL(t.date)}, ${timeS(t.date)} Uhr`;
-    btns.innerHTML = `<a class="btn" href="#/tour/${t.id}">Tour ansehen</a>${t.photos ? `<a class="btn alt" style="color:#fff" target="_blank" href="slideshow.html?tour=${t.id}">Diashow</a>` : ""}`;
+    btns.innerHTML = `<a class="btn" href="#/tour/${t.id}">Tour ansehen</a>${t.photos ? `<a class="btn alt c-white" target="_blank" href="slideshow.html?tour=${t.id}">Diashow</a>` : ""}`;
     signs.innerHTML = `<div class="sign">${nf(t.km, 1)}<small>Kilometer</small></div><div class="sign l">${nf(t.up_m, 0)}<small>Meter aufwärts</small></div><div class="sign">${nf(t.h, 1)}<small>Stunden</small></div>`;
     $("#hcnt").textContent = `${i + 1} / ${N}`;
     const old = hero.querySelector(".thumbrow");

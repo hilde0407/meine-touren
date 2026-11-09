@@ -121,14 +121,14 @@ VIEWS.admin = async (...a) => {
   const cfg = await api("/api/settings").catch(() => ({})),
     cur = cfg.live_mode || "off",
     box = `<div class="panel" id="livebox"><h2>Standort teilen</h2>
-    <p class="mut" style="font-size:13px">Zeigt Betrachtern (und dir selbst auf der Karte) deine zuletzt gemeldete Position. Die Android-App meldet sie während einer Aufzeichnung alle 30 Sekunden; mit „Immer“ auch die Ortungstaste auf der Karte. Es wird nur die letzte Position gespeichert, nicht der Verlauf.</p>
-    <div class="row" style="gap:8px"><select id="livem"><option value="off">Aus</option><option value="rec">Nur während einer Aufzeichnung</option><option value="on">Immer, wenn die Karte meinen Standort zeigt</option></select><button class="btn alt" id="livex">Letzten Standort löschen</button><span id="livemsg" class="mut"></span></div></div>`,
+    <p class="mut fs13">Zeigt Betrachtern (und dir selbst auf der Karte) deine zuletzt gemeldete Position. Die Android-App meldet sie während einer Aufzeichnung alle 30 Sekunden; mit „Immer“ auch die Ortungstaste auf der Karte. Es wird nur die letzte Position gespeichert, nicht der Verlauf.</p>
+    <div class="row g8"><select id="livem"><option value="off">Aus</option><option value="rec">Nur während einer Aufzeichnung</option><option value="on">Immer, wenn die Karte meinen Standort zeigt</option></select><button class="btn alt" id="livex">Letzten Standort löschen</button><span id="livemsg" class="mut"></span></div></div>`,
     body = document.querySelector('.atab[data-t="handy"] .gbody');
   if (body) body.insertAdjacentHTML("beforeend", box);
   else if ($("#save")) $("#save").closest(".row").insertAdjacentHTML("beforebegin", box);
   if (!$("#livem")) return;
   if (!$("#rescue") && $("#livebox"))
-    $("#livebox").insertAdjacentHTML("afterend", `<div class="panel" id="rescue"><h2>Verlorene App-Aufzeichnungen suchen</h2><p class="mut" style="font-size:13px">Vor Version 2.3.2 konnten Aufzeichnungen aus der Android-App im Altbestand statt in deinem Konto landen. Hier werden sie (aus den letzten 30 Tagen) in dein Konto übernommen.</p><button class="btn alt" id="rescueb">Suchen und übernehmen</button> <span id="rescuem" class="mut"></span></div>`);
+    $("#livebox").insertAdjacentHTML("afterend", `<div class="panel" id="rescue"><h2>Verlorene App-Aufzeichnungen suchen</h2><p class="mut fs13">Vor Version 2.3.2 konnten Aufzeichnungen aus der Android-App im Altbestand statt in deinem Konto landen. Hier werden sie (aus den letzten 30 Tagen) in dein Konto übernommen.</p><button class="btn alt" id="rescueb">Suchen und übernehmen</button> <span id="rescuem" class="mut"></span></div>`);
   if ($("#rescueb"))
     $("#rescueb").onclick = async () => {
       $("#rescuem").textContent = "Suche …";

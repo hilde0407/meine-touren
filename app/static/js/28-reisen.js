@@ -8,10 +8,10 @@ VIEWS.trip = async id => {
   bar.insertAdjacentHTML("beforeend", `<span class="sp"></span><button class="btn alt sm" id="tredit" title="Namen oder Zeitraum dieser Reise ändern">✎ Reise bearbeiten</button>`);
   $("#tredit").onclick = () => {
     const m = modal(`<h2>Reise bearbeiten</h2>
-     <p class="mut" style="font-size:14px">Name und Zeitraum der automatisch erkannten Reise. Ein anderer Zeitraum nimmt alle Touren dieser Tage auf (auch solche, die nicht weit von zu Hause waren) bzw. lässt Touren außerhalb weg.</p>
-     <div class="field"><label>Name</label><input id="tn" maxlength="120" value="${esc(tr.region)}" style="width:100%"></div>
-     <div class="row" style="gap:8px;align-items:center;margin-top:8px"><label>Von <input id="tf" type="date" value="${tr.start}"></label><label>bis <input id="tt" type="date" value="${tr.end}"></label></div>
-     <div class="row" style="margin-top:12px"><button class="btn" id="tok">Speichern</button>${tr.edited ? `<button class="btn alt" id="trs" title="Zurück zu Name und Zeitraum, wie sie erkannt wurden">Zurücksetzen</button>` : ""}<button class="btn ghost" id="tno">Abbrechen</button><span id="ter" class="bad"></span></div>`);
+     <p class="mut fs14">Name und Zeitraum der automatisch erkannten Reise. Ein anderer Zeitraum nimmt alle Touren dieser Tage auf (auch solche, die nicht weit von zu Hause waren) bzw. lässt Touren außerhalb weg.</p>
+     <div class="field"><label>Name</label><input id="tn" maxlength="120" value="${esc(tr.region)}" class="w100"></div>
+     <div class="row g8 aic mt8"><label>Von <input id="tf" type="date" value="${tr.start}"></label><label>bis <input id="tt" type="date" value="${tr.end}"></label></div>
+     <div class="row mt12"><button class="btn" id="tok">Speichern</button>${tr.edited ? `<button class="btn alt" id="trs" title="Zurück zu Name und Zeitraum, wie sie erkannt wurden">Zurücksetzen</button>` : ""}<button class="btn ghost" id="tno">Abbrechen</button><span id="ter" class="bad"></span></div>`);
     const send = async body => {
       try {
         await api(`/api/trips/${encodeURIComponent(id)}/edit`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(body)});
@@ -40,17 +40,17 @@ VIEWS.tripsheet = async id => {
   const perDay = days.map(d => {
     const a = ts.filter(t => t.date.slice(0, 10) === d);
     return `<tr class="dayh"><td colspan="6"><b>${dateL(d)}</b> <span class="mut">· ${nf(a.reduce((c, t) => c + t.km, 0), 1)} km · ↑ ${nf(a.reduce((c, t) => c + (t.up_m || 0), 0), 0)} m · ↓ ${nf(a.reduce((c, t) => c + (t.down_m || 0), 0), 0)} m</span></td></tr>` +
-      a.map(t => `<tr><td>${timeS(t.date)}</td><td style="text-align:left">${esc(t.name)}</td><td>${sName(t.sport)}</td><td>${nf(t.km, 1)}</td><td>${nf(t.up_m || 0, 0)}</td><td>${nf(t.down_m || 0, 0)}</td></tr>`).join("");
+      a.map(t => `<tr><td>${timeS(t.date)}</td><td class="tal">${esc(t.name)}</td><td>${sName(t.sport)}</td><td>${nf(t.km, 1)}</td><td>${nf(t.up_m || 0, 0)}</td><td>${nf(t.down_m || 0, 0)}</td></tr>`).join("");
   }).join("");
   $("#main").innerHTML = `<div class="sheet">
    <div class="row noprint"><a class="back" href="#/trip/${esc(id)}">‹ Zurück zur Reise</a><span class="sp"></span>${pdfPhotoBar()}${pdfBtn()}<button class="btn ghost" id="shp">Drucken</button></div>
-   <div class="mut" style="margin-top:14px">${dateL(tr.start)}${tr.end !== tr.start ? " – " + dateL(tr.end) : ""}</div>
-   <h1 style="font-size:34px;margin:8px 0 14px">${esc(tr.region)}${tr.country && tr.country !== tr.region ? ", " + esc(tr.country) : ""}</h1>
+   <div class="mut mt14">${dateL(tr.start)}${tr.end !== tr.start ? " – " + dateL(tr.end) : ""}</div>
+   <h1 class="fs34 m8-0-14">${esc(tr.region)}${tr.country && tr.country !== tr.region ? ", " + esc(tr.country) : ""}</h1>
    <div class="figs">${fig(ts.length, "", "Touren")}${fig(nf(sum(t => t.km), 1), "km", "Strecke")}${fig(nf(sum(t => t.up_m), 0), "m", "Aufstieg")}${fig(nf(sum(t => t.down_m), 0), "m", "Abstieg")}${fig(nf(sum(t => t.h), 1), "h", "Unterwegs")}${fig(days.length, "", "Tage")}</div>
-   <div class="tmap" id="tm" style="height:380px;margin-top:14px"></div>
-   <div id="tleg" class="mut" style="font-size:13px;margin:6px 0 0"></div>
+   <div class="tmap mt14" id="tm" style="height:380px"></div>
+   <div id="tleg" class="mut fs13 m6-0-0"></div>
    ${collStats(ts)}
-   <div class="sec"><h2>Tag für Tag</h2></div><div class="tblw"><table class="cstat"><thead><tr><th>Zeit</th><th style="text-align:left">Tour</th><th>Aktivität</th><th>km</th><th>↑ m</th><th>↓ m</th></tr></thead><tbody>${perDay}</tbody></table></div>
+   <div class="sec"><h2>Tag für Tag</h2></div><div class="tblw"><table class="cstat"><thead><tr><th>Zeit</th><th class="tal">Tour</th><th>Aktivität</th><th>km</th><th>↑ m</th><th>↓ m</th></tr></thead><tbody>${perDay}</tbody></table></div>
    <div class="thumbs sheetph" id="th"></div></div>`;
   map = mkMap("tm", {layers: false});
   map.setView([tr.lat || 50, tr.lng || 8], 8);
@@ -61,7 +61,7 @@ VIEWS.tripsheet = async id => {
     if (p.length > 1) L.polyline(p, {color: DAYC[days.indexOf(t.date.slice(0, 10)) % DAYC.length], weight: 4}).addTo(fg);
   });
   if (fg.getLayers().length) map.fitBounds(fg.getBounds(), {padding: [20, 20]});
-  $("#tleg").innerHTML = days.map((d, i) => `<span style="margin-right:12px;white-space:nowrap"><i style="display:inline-block;width:14px;height:4px;background:${DAYC[i % DAYC.length]};vertical-align:middle;margin-right:4px"></i>${dateS(d)}</span>`).join("");
+  $("#tleg").innerHTML = days.map((d, i) => `<span class="mr12 nw"><i class="vam mr4" style="display:inline-block;width:14px;height:4px;background:${DAYC[i % DAYC.length]}"></i>${dateS(d)}</span>`).join("");
   $("#shp").onclick = () => {
     map.invalidateSize();
     setTimeout(() => print(), 300);
@@ -105,8 +105,8 @@ VIEWS.trips = async (...a) => {
   await _trips28(...a);
   const hid = await api("/api/trips?hidden=1").catch(() => []);
   if (!hid.length || $("#trhidbox")) return;
-  $("#main").insertAdjacentHTML("beforeend", `<details id="trhidbox" style="margin-top:28px"><summary class="mut" style="cursor:pointer">Entfernte Reisen (${hid.length})</summary>${hid
-    .map(t => `<div class="r" style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule)"><span style="flex:1">${esc(t.region)} <small class="mut">${esc(t.start)}${t.end !== t.start ? " – " + esc(t.end) : ""}, ${t.tours.length} Touren</small></span><button class="btn alt sm" data-rt="${esc(t.id)}">Wiederherstellen</button></div>`)
+  $("#main").insertAdjacentHTML("beforeend", `<details id="trhidbox" class="mt28"><summary class="mut cp">Entfernte Reisen (${hid.length})</summary>${hid
+    .map(t => `<div class="r g10 aic p8-0" style="display:flex;border-bottom:1px solid var(--rule)"><span class="fx1">${esc(t.region)} <small class="mut">${esc(t.start)}${t.end !== t.start ? " – " + esc(t.end) : ""}, ${t.tours.length} Touren</small></span><button class="btn alt sm" data-rt="${esc(t.id)}">Wiederherstellen</button></div>`)
     .join("")}</details>`);
   document.querySelectorAll("[data-rt]").forEach(
     b =>

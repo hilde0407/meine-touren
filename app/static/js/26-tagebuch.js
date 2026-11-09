@@ -75,13 +75,13 @@ VIEWS.tour = async (...a) => {
       if (s && !$("#safety")) {
         anchor.insertAdjacentHTML(
           "afterend",
-          `<details class="panel" id="safety" ${s.set ? "open" : ""} style="margin:0 0 18px"><summary><b>Sicherheit</b> <span class="mut">– Lawinenlage, Gruppe, Notfallausrüstung (nur Notiz)</span></summary>
-           <div class="mut" style="margin:8px 0 2px">Lawinenwarnstufe (laut Lagebericht des Tages)</div>
+          `<details class="panel m0-0-18" id="safety" ${s.set ? "open" : ""}><summary><b>Sicherheit</b> <span class="mut">– Lawinenlage, Gruppe, Notfallausrüstung (nur Notiz)</span></summary>
+           <div class="mut m8-0-2">Lawinenwarnstufe (laut Lagebericht des Tages)</div>
            <div class="lvl" id="slvl">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-l="${n}" style="${n <= 2 ? "color:#000;" : n > 3 ? "color:#000;" : ""}border-left:10px solid ${AVAL[n][0]}" title="${AVAL[n][1]}">${n} <small>${AVAL[n][1]}</small></button>`).join("")}</div>
-           <div class="chips" id="sgear" style="margin:8px 0">${SAFE_GEAR.map(([k, l]) => `<label class="chip ${s.gear.includes(k) ? "on" : ""}" style="cursor:pointer"><input type="checkbox" value="${k}" ${s.gear.includes(k) ? "checked" : ""} style="display:none">${l}</label>`).join("")}</div>
+           <div class="chips m8-0" id="sgear">${SAFE_GEAR.map(([k, l]) => `<label class="chip ${s.gear.includes(k) ? "on" : ""} cp"><input type="checkbox" value="${k}" ${s.gear.includes(k) ? "checked" : ""} style="display:none">${l}</label>`).join("")}</div>
            <label>Gruppe<input id="sgrp" maxlength="200" value="${esc(s.grp)}" placeholder="z. B. zu dritt: Anna, Ben, ich"></label>
            <label>Notiz<textarea id="snote" rows="2" maxlength="1000" placeholder="Schneedecke, Gefahrenstellen, Umkehrpunkt …">${esc(s.note)}</textarea></label>
-           <div class="row"><button class="btn sm" id="ssave">Speichern</button><span id="smsg" class="mut"></span><span class="sp"></span><span class="mut" style="font-size:13px">Reine Dokumentation – ersetzt keinen Lawinenlagebericht.</span></div></details>`
+           <div class="row"><button class="btn sm" id="ssave">Speichern</button><span id="smsg" class="mut"></span><span class="sp"></span><span class="mut fs13">Reine Dokumentation – ersetzt keinen Lawinenlagebericht.</span></div></details>`
         );
         rememberSize($("#snote"), "snote");
         let lvl = s.level;
@@ -122,9 +122,9 @@ function showCompare(t) {
         hm = h => `${Math.floor(h)}:${pad2(Math.round((h % 1) * 60) % 60)} h`;
       $("#repnote").insertAdjacentHTML(
         "afterend",
-        `<details id="cmpseg" class="panel" style="margin:0 0 14px"><summary><b>Vergleich dieser Strecke</b> <span class="mut">– diese Tour: ${rank}. schnellste von ${L.length}${best.id === t.id ? " 🏆" : ""}</span></summary>${L.map(
+        `<details id="cmpseg" class="panel m0-0-14"><summary><b>Vergleich dieser Strecke</b> <span class="mut">– diese Tour: ${rank}. schnellste von ${L.length}${best.id === t.id ? " 🏆" : ""}</span></summary>${L.map(
           x => `<div class="cmprow ${x.id === t.id ? "me" : ""}"><a href="#/tour/${x.id}">${dateS(x.date)}</a><div class="cmpbar"><i style="width:${(x.h / mx) * 100}%${x.id === best.id ? ";background:#d98a1f" : ""}"></i></div><span>${hm(x.h)} · ${nf(x.km / x.h, 1)} km/h${x.id === best.id ? " 🏆" : ""}</span></div>`
-        ).join("")}<div class="mut" style="font-size:13px;margin-top:6px">Gesamtdauer inkl. Pausen. Bestzeit: ${dateS(best.date)} mit ${hm(best.h)}.</div></details>`
+        ).join("")}<div class="mut fs13 mt6">Gesamtdauer inkl. Pausen. Bestzeit: ${dateS(best.date)} mit ${hm(best.h)}.</div></details>`
       );
     }
   }

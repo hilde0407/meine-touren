@@ -39,7 +39,7 @@ VIEWS.search = async (_, q) => {
     : [];
   if (document.activeElement !== $("#gs") && $("#gs")) $("#gs").value = q.get("q") || "";
   $("#main").innerHTML =
-    `<div class="sec" style="margin-top:0"><h2>Suche: „${esc(q.get("q") || "")}“</h2><span class="sub">${a.length} Touren, ${nf(
+    `<div class="sec mt0"><h2>Suche: „${esc(q.get("q") || "")}“</h2><span class="sub">${a.length} Touren, ${nf(
       a.reduce((c, t) => c + t.km, 0),
       0
     )} km</span></div>
@@ -106,7 +106,7 @@ VIEWS.dash = async (n, q) => {
   box.id = "goals";
   box.style.marginTop = "34px";
   box.innerHTML = `<h2>Ziele ${yr}</h2>${goals.map(row).join("") || `<p class="mut">Noch kein Ziel für ${yr}. Setze dir eines, zum Beispiel 1000 km Wandern.</p>${prevGoals.length ? `<button class="btn sm alt" id="gcopy">Ziele aus ${yr - 1} übernehmen (${prevGoals.length})</button>` : ""}`}
-   <details><summary>Ziel hinzufügen</summary><div class="row" style="margin-top:8px"><select id="gm">${Object.entries(GM)
+   <details><summary>Ziel hinzufügen</summary><div class="row mt8"><select id="gm">${Object.entries(GM)
      .map(([k, v]) => `<option value="${k}">${v[1]}</option>`)
      .join("")}</select>
    <select id="gsp"><option value="">alle Sportarten</option>${Object.entries(GOAL_GRP).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join("")}${sp.map(s => `<option value="${s}">${sName(s)}</option>`).join("")}</select><input id="gt" type="number" min="1" placeholder="Zielwert" style="width:130px"><button class="btn sm" id="gadd">Speichern</button></div></details>`;
@@ -158,7 +158,7 @@ VIEWS.records = async (_, q) => {
   );
   if (fs && !allSp.includes(fs)) fs = "";
   const T = fs ? TOURS.filter(t => t.sport === fs) : TOURS;
-  const chips = `<div class="row" style="gap:6px;margin:-4px 0 18px;flex-wrap:wrap"><a class="chip${fs ? "" : " on"}" href="#/records?s=">Alle Aktivitäten</a>${allSp.map(x => `<a class="chip${fs === x ? " on" : ""}" href="#/records?s=${x}"><i class="sw" style="background:${sCol(x)}"></i>${sName(x)}</a>`).join("")}</div>`;
+  const chips = `<div class="row g6 mn4-0-18 fxw"><a class="chip${fs ? "" : " on"}" href="#/records?s=">Alle Aktivitäten</a>${allSp.map(x => `<a class="chip${fs === x ? " on" : ""}" href="#/records?s=${x}"><i class="sw" style="background:${sCol(x)}"></i>${sName(x)}</a>`).join("")}</div>`;
   const sum = (a, f) => a.reduce((c, t) => c + f(t), 0),
     km = sum(T, t => t.km),
     up = sum(T, t => t.up_m || 0),
@@ -197,13 +197,13 @@ VIEWS.records = async (_, q) => {
     .filter(a => !fs || (BY[a.id] && BY[a.id].sport === fs))
     .slice(0, 8);
   $("#main").innerHTML =
-    `<div class="sec" style="margin-top:0"><h2>Rekorde</h2><span class="sub">${nf(T.length, 0)} Touren seit ${T[T.length - 1].y}${fs ? " · " + sName(fs) : ""}</span></div>${chips}
+    `<div class="sec mt0"><h2>Rekorde</h2><span class="sub">${nf(T.length, 0)} Touren seit ${T[T.length - 1].y}${fs ? " · " + sName(fs) : ""}</span></div>${chips}
    <div class="figs"><div class="fig"><div class="v">${nf(km / 40075, 2)}<span class="u">×</span></div><div class="l">um die Erde (${nf(km, 0)} km)</div></div>
     <div class="fig"><div class="v">${nf(up / 8849, 1)}<span class="u">×</span></div><div class="l">Mount Everest bergauf (${nf(up, 0)} m)</div></div>
     <div class="fig"><div class="v">${nf(h / 24, 1)}<span class="u">Tage</span></div><div class="l">unterwegs (${nf(h, 0)} Std.)</div></div>
     <div class="fig"><div class="v">${nf(dayN, 0)}</div><div class="l">Tage mit Touren</div></div>
     <div class="fig"><div class="v">${longest}<span class="u">Wochen</span></div><div class="l">längste Serie · aktuell ${cur}</div></div></div>
-   <div class="grid g2" style="margin-top:36px">
+   <div class="grid g2 mt36">
     <div class="panel"><h2>Bestwerte gesamt</h2><div class="rows">${lnk(
       best(T, t => t.km),
       ["Längste Strecke", nf(best(T, t => t.km).km, 1) + " km"]
@@ -269,13 +269,13 @@ VIEWS.recap = async name => {
   sel.forEach(t => { if (t.g_place) { const o = byPlace[t.g_place] || (byPlace[t.g_place] = {n: 0, km: 0, st: t.g_state || t.g_country || ""}); o.n++; o.km += t.km; } });
   const places = Object.entries(byPlace).sort((a, b) => b[1].n - a[1].n || b[1].km - a[1].km),
     states = new Set(sel.map(t => t.g_state).filter(Boolean)).size, lands = new Set(sel.map(t => t.g_country).filter(Boolean)).size;
-  const placePanel = places.length ? `<div class="panel gap"><h2>Orte des Jahres</h2><div class="mut" style="font-size:14px;margin-bottom:8px">${places.length} Startorte${states ? ` · ${states} Bundesländer/Regionen` : ""}${lands ? ` · ${lands} ${lands === 1 ? "Land" : "Länder"}` : ""}</div><div class="rows">${places.slice(0, 8).map(([n, o]) => `<div class="row"><span>📌 ${esc(n)}${o.st ? ` <span class="mut">(${esc(o.st)})</span>` : ""}</span><span class="sp"></span><b>${o.n} ${o.n === 1 ? "Tour" : "Touren"} · ${nf(o.km, 0)} km</b></div>`).join("")}</div></div>` : "";
+  const placePanel = places.length ? `<div class="panel gap"><h2>Orte des Jahres</h2><div class="mut fs14 mb8">${places.length} Startorte${states ? ` · ${states} Bundesländer/Regionen` : ""}${lands ? ` · ${lands} ${lands === 1 ? "Land" : "Länder"}` : ""}</div><div class="rows">${places.slice(0, 8).map(([n, o]) => `<div class="row"><span>📌 ${esc(n)}${o.st ? ` <span class="mut">(${esc(o.st)})</span>` : ""}</span><span class="sp"></span><b>${o.n} ${o.n === 1 ? "Tour" : "Touren"} · ${nf(o.km, 0)} km</b></div>`).join("")}</div></div>` : "";
   await pdfPhotoLoad();
   const days = new Set(sel.map(t => t.date.slice(0, 10))).size,
     ph = await api(`/api/photos?year=${Y}&random=true&limit=${Math.max(12, PDFP.n)}`).catch(() => []);
   const dl = (a, b) => (b ? `${a >= b ? "+" : "−"}${nf((Math.abs(a - b) / b) * 100, 0)} % gegenüber ${Y - 1}` : "");
   $("#main").innerHTML =
-    `<div class="recap"><div class="noprint row" style="margin-bottom:10px"><a class="back" href="#/dash?y=${Y}">‹ Übersicht</a><span class="sp"></span>${pdfPhotoBar()}${pdfBtn()}<button class="btn ghost sm" data-act="print">Drucken</button></div>
+    `<div class="recap"><div class="noprint row mb10"><a class="back" href="#/dash?y=${Y}">‹ Übersicht</a><span class="sp"></span>${pdfPhotoBar()}${pdfBtn()}<button class="btn ghost sm" data-act="print">Drucken</button></div>
    <div class="rhero"><div class="k">Mein Tourenjahr</div><h1>${Y}</h1><div class="rs"><span><b>${nf(sel.length, 0)}</b> Touren</span><span><b>${nf(km, 0)}</b> km</span><span><b>${nf(up, 0)}</b> Höhenmeter</span><span><b>${nf(h, 0)}</b> Stunden</span><span><b>${days}</b> Tage unterwegs</span></div>
    <div class="rd">${[
      dl(
@@ -285,9 +285,9 @@ VIEWS.recap = async name => {
    ]
      .filter(Boolean)
      .join("")}</div></div>
-   <div class="grid g2" style="margin-top:34px"><div class="panel"><h2>Kilometer pro Monat</h2>${barChart(mm, MON, {ghost: pm, ghostLabel: Y - 1})}<div class="mut" style="font-size:14px">Stärkster Monat: ${MONL[bm]} mit ${nf(mm[bm], 0)} km</div></div>
-    <div class="panel"><h2>Sportarten</h2><div class="stack">${sp.map(([s, v]) => `<div style="width:${(v / km) * 100}%;background:${sCol(s)}"></div>`).join("")}</div><div class="rows" style="margin-top:10px">${sp.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${nf(v, 0)} km, ${nf((v / km) * 100, 0)} %</span></div>`).join("")}</div></div></div>
-   <div class="panel gap"><h2>Die fünf stärksten Touren</h2><div class="tl">${top.map(tourRow).join("")}</div><div class="mut" style="margin-top:10px">Meiste Höhenmeter: <a href="#/tour/${steep.id}">${esc(steep.name)}</a> (${nf(steep.up_m, 0)} m)</div></div>
+   <div class="grid g2 mt34"><div class="panel"><h2>Kilometer pro Monat</h2>${barChart(mm, MON, {ghost: pm, ghostLabel: Y - 1})}<div class="mut fs14">Stärkster Monat: ${MONL[bm]} mit ${nf(mm[bm], 0)} km</div></div>
+    <div class="panel"><h2>Sportarten</h2><div class="stack">${sp.map(([s, v]) => `<div style="width:${(v / km) * 100}%;background:${sCol(s)}"></div>`).join("")}</div><div class="rows mt10">${sp.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${nf(v, 0)} km, ${nf((v / km) * 100, 0)} %</span></div>`).join("")}</div></div></div>
+   <div class="panel gap"><h2>Die fünf stärksten Touren</h2><div class="tl">${top.map(tourRow).join("")}</div><div class="mut mt10">Meiste Höhenmeter: <a href="#/tour/${steep.id}">${esc(steep.name)}</a> (${nf(steep.up_m, 0)} m)</div></div>
    ${placePanel}
    ${ph.length ? `<div class="panel gap"><div class="row"><h2>Fotos des Jahres</h2><span class="sp"></span><a class="btn sm noprint" target="_blank" href="slideshow.html?year=${Y}">Diashow</a></div><div class="thumbs" id="rph">${ph.map((p, i) => `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=400" data-i="${i}"></div>`).join("")}</div></div>` : ""}</div>`;
   if (ph.length) bindThumbs($("#rph"), ph);
@@ -326,7 +326,7 @@ VIEWS.tour = async id => {
     };
   r.insertAdjacentHTML(
     "afterend",
-    `<div class="field" style="max-width:760px;margin:0 0 18px"><label for="note">Notiz zur Tour (Wetter, Begleitung, Einkehr …)</label><textarea id="note" rows="2" placeholder="Hier eine Notiz eintragen …">${esc(t.note || "")}</textarea><span id="notes" class="mut" style="font-size:13px"></span></div>`
+    `<div class="field mw760 m0-0-18"><label for="note">Notiz zur Tour (Wetter, Begleitung, Einkehr …)</label><textarea id="note" rows="2" placeholder="Hier eine Notiz eintragen …">${esc(t.note || "")}</textarea><span id="notes" class="mut fs13"></span></div>`
   );
   $("#note").onchange = async () => {
     try {
@@ -400,17 +400,17 @@ async function updatePanel() {
   b.innerHTML = `<div class="panel" style="margin-bottom:16px${u.newer ? ";border-color:var(--yellow)" : ""}"><h2>Updates</h2>
    <p>Installiert: <b>${esc(u.current)}</b>${u.latest ? ` · neueste Version auf GitHub: <b>${esc(u.latest)}</b>${u.published ? ` (${esc(u.published)})` : ""}` : ` · <span class="mut">GitHub war nicht erreichbar${u.error ? " (" + esc(u.error) + ")" : ""}</span>`}
    ${u.newer ? `<span class="bad"> – es gibt eine neuere Version</span>` : u.ok ? `<span class="ok"> ✓ aktuell</span>` : ""}</p>
-   ${notes && u.newer ? `<details><summary>Was ist neu?</summary><pre class="pre" style="white-space:pre-wrap;max-height:240px;overflow:auto">${esc(notes)}</pre></details>` : ""}
+   ${notes && u.newer ? `<details><summary>Was ist neu?</summary><pre class="pre ova" style="white-space:pre-wrap;max-height:240px">${esc(notes)}</pre></details>` : ""}
    <div class="row"><button class="btn alt" id="ucheck">Jetzt prüfen</button>
    ${u.newer && admin && u.can_install ? `<button class="btn" id="uinst">Version ${esc(u.latest)} installieren</button>` : ""}
    ${u.newer ? `<a class="btn alt" target="_blank" rel="noopener" href="${esc(u.url)}">Auf GitHub ansehen</a>` : ""}<span id="umsg"></span></div>
    ${
      u.newer && !u.can_install
-       ? `<p class="mut" style="font-size:13px">Die Installation aus der Oberfläche ist hier noch nicht eingerichtet. Im Container <b>einmal</b> ausführen: <code>${esc(u.command)}</code> – danach klappt es per Knopfdruck.</p>`
+       ? `<p class="mut fs13">Die Installation aus der Oberfläche ist hier noch nicht eingerichtet. Im Container <b>einmal</b> ausführen: <code>${esc(u.command)}</code> – danach klappt es per Knopfdruck.</p>`
        : ""
    }
-   <div class="field" style="margin-top:8px"><label>Regelmäßig (alle 6 Stunden) auf neue Versionen prüfen</label><select data-k="update_check"><option value="1">ja</option><option value="0">nein</option></select></div>
-   ${u.status && u.status.state === "error" ? `<p class="bad" style="font-size:13px">Letztes Update fehlgeschlagen: ${esc(u.status.message || "")}</p>` : ""}</div>`;
+   <div class="field mt8"><label>Regelmäßig (alle 6 Stunden) auf neue Versionen prüfen</label><select data-k="update_check"><option value="1">ja</option><option value="0">nein</option></select></div>
+   ${u.status && u.status.state === "error" ? `<p class="bad fs13">Letztes Update fehlgeschlagen: ${esc(u.status.message || "")}</p>` : ""}</div>`;
   const sel = b.querySelector('[data-k="update_check"]');
   if (sel) sel.value = u.enabled ? "1" : "0";
   const uc = b.querySelector("#ucheck");
@@ -438,7 +438,7 @@ VIEWS.admin = async (...a) => {
       b.innerHTML =
         `<h2>Zustand <span class="mut" style="font:400 16px var(--b)">${h.ok ? "– alles in Ordnung" : "– bitte prüfen"}</span></h2><div class="rows">${h.checks.map(c => `<div class="r"><span><i style="font-style:normal">${c.ok ? "✓" : "⚠"}</i> <span>${esc(c.name)}</span></span><span class="${c.ok ? "mut" : "bad"}"><span>${esc(c.detail)}</span>${c.hint ? ` – <span>${esc(c.hint)}</span>` : ""}${c.name === "Letztes Backup" && !c.ok ? ` <button class="btn sm" data-act="backup">Jetzt sichern</button>` : ""}</span></div>`).join("")}</div>` +
         (h.duplicates.length
-          ? `<p class="mut" style="margin-top:8px">Doppelte Namen: ${h.duplicates.map(d => esc(d.name) + " (" + d.tours.map(t => `<a href="#/tour/${t.id}">${t.date}</a>`).join(", ") + ")").join(" · ")}</p>`
+          ? `<p class="mut mt8">Doppelte Namen: ${h.duplicates.map(d => esc(d.name) + " (" + d.tours.map(t => `<a href="#/tour/${t.id}">${t.date}</a>`).join(", ") + ")").join(" · ")}</p>`
           : "");
       const bb = b.querySelector('[data-act="backup"]');
       if (bb)
@@ -460,17 +460,17 @@ VIEWS.admin = async (...a) => {
   updatePanel();
   sv.closest(".row").insertAdjacentHTML(
     "beforebegin",
-    `<div class="grid g2" style="margin-top:40px"><div class="panel"><h2>Sicherung</h2>
+    `<div class="grid g2 mt40"><div class="panel"><h2>Sicherung</h2>
    <p class="mut">Täglich um 03:40 Uhr wird die Datenbank (Touren, Notizen, Ziele, Zuordnungen) automatisch nach <code>${esc(st.backup_dir || "/var/backups/meine-touren")}</code> gesichert, die letzten 14 bleiben erhalten. Wiederherstellen: <code>${esc(st.app_name || "meine-touren")}-restore &lt;Datei&gt;</code> im Container.</p>
-   <div class="row"><a class="btn alt" href="/api/backup" download>Backup jetzt herunterladen</a></div><p class="mut" style="font-size:13px">Passwörter und Tokens sind im Download nicht enthalten. Fotos und Routen sind nicht enthalten, sie lassen sich neu laden.</p></div>
+   <div class="row"><a class="btn alt" href="/api/backup" download>Backup jetzt herunterladen</a></div><p class="mut fs13">Passwörter und Tokens sind im Download nicht enthalten. Fotos und Routen sind nicht enthalten, sie lassen sich neu laden.</p></div>
    <div class="panel" id="uipw"><h2>Zugriffsschutz</h2>${
      st.users
        ? `<p class="mut">Mit Benutzerverwaltung melden sich alle mit ihrem eigenen Benutzernamen und Passwort an (siehe „Benutzer“).</p>`
        : st.ui_pw_env
          ? `<p class="ok"><b>✓ Passwortschutz ist aktiv.</b></p><p class="mut">Das Passwort ist über <code>UI_PASSWORD</code> in <code>/etc/${esc(st.app_name || "meine-touren")}.env</code> festgelegt und lässt sich hier nicht ändern.</p>`
          : `${st.protected ? `<p class="ok"><b>✓ Passwortschutz ist aktiv.</b></p>` : `<p class="bad"><b>Die Oberfläche ist nicht passwortgeschützt.</b></p><p class="mut">Jeder im Netzwerk kann Touren, Fotos und Einstellungen sehen.</p>`}
-            <div class="row" style="gap:8px"><input type="password" id="uipw1" autocomplete="new-password" placeholder="${st.protected ? "Neues Passwort" : "Passwort festlegen"} (mind. 6 Zeichen)" style="max-width:260px"><input type="password" id="uipw2" autocomplete="new-password" placeholder="Wiederholen" style="max-width:200px"><button class="btn sm" id="uipws">${st.protected ? "Passwort ändern" : "Passwort setzen"}</button>${st.protected ? `<button class="btn ghost sm" id="uipwx">Schutz aufheben</button>` : ""}</div>
-            <p class="mut" style="font-size:13px">Der Browser fragt danach nach dem Passwort (Benutzername beliebig). Das Passwort wird nur als Hash im Datenordner gespeichert.</p><div id="uipwm"></div>`
+            <div class="row g8"><input type="password" id="uipw1" autocomplete="new-password" placeholder="${st.protected ? "Neues Passwort" : "Passwort festlegen"} (mind. 6 Zeichen)" class="mw260"><input type="password" id="uipw2" autocomplete="new-password" placeholder="Wiederholen" class="mw200"><button class="btn sm" id="uipws">${st.protected ? "Passwort ändern" : "Passwort setzen"}</button>${st.protected ? `<button class="btn ghost sm" id="uipwx">Schutz aufheben</button>` : ""}</div>
+            <p class="mut fs13">Der Browser fragt danach nach dem Passwort (Benutzername beliebig). Das Passwort wird nur als Hash im Datenordner gespeichert.</p><div id="uipwm"></div>`
    }</div></div>`
   );
   const setPw = async pw => {
@@ -534,7 +534,7 @@ VIEWS.map = async () => {
       L.circleMarker([p.lat, p.lng], {radius: p.est ? 4 : 5, color: "#fff", weight: 1.5, fillColor: "#e11d74", fillOpacity: p.est ? 0.6 : 0.95})
         .addTo(pl)
         .bindPopup(
-          `<img src="/pic/${p.id}?size=300" style="width:220px;border-radius:3px;display:block"><div style="margin-top:4px">${new Date(p.taken_ts * 1000).toLocaleString("de-DE")}${p.tour_id && BY[p.tour_id] ? `<br><a href="#/tour/${p.tour_id}">${esc(BY[p.tour_id].name)}</a>` : "<br>ohne Tour"}${p.est ? '<br><small style="opacity:.7">Position aus der Uhrzeit auf dem Track berechnet</small>' : ""}</div>`
+          `<img src="/pic/${p.id}?size=300" class="br3" style="width:220px;display:block"><div class="mt4">${new Date(p.taken_ts * 1000).toLocaleString("de-DE")}${p.tour_id && BY[p.tour_id] ? `<br><a href="#/tour/${p.tour_id}">${esc(BY[p.tour_id].name)}</a>` : "<br>ohne Tour"}${p.est ? '<br><small style="opacity:.7">Position aus der Uhrzeit auf dem Track berechnet</small>' : ""}</div>`
         );
     });
     $("#mph").textContent = `Fotos (${n})`;       // so sieht man, wie viele Fotos mit Standort gezeigt werden
@@ -573,7 +573,7 @@ VIEWS.map = async () => {
     const a = TOURS.filter(t => (!y || t.y === y) && !o.has(t.sport) && cleanPts(routes[t.id]).some(p => b.contains(p)));
     const md = document.createElement("div");
     md.className = "modal";
-    md.innerHTML = `<div class="mbox" style="max-width:760px"><div class="sec" style="margin:0 0 10px"><h2>Im Kartenausschnitt</h2><span class="sub">${a.length} Touren, ${nf(
+    md.innerHTML = `<div class="mbox" style="max-width:760px"><div class="sec m0-0-10"><h2>Im Kartenausschnitt</h2><span class="sub">${a.length} Touren, ${nf(
       a.reduce((c, t) => c + t.km, 0),
       0
     )} km, ${nf(
@@ -581,7 +581,7 @@ VIEWS.map = async () => {
       0
     )} m auf</span></div>
       <div class="tl">${a.slice(0, 300).map(tourRow).join("") || '<div class="empty">Keine Touren in diesem Ausschnitt. Zoome heraus oder verschiebe die Karte.</div>'}</div>
-      <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" id="mbc">Schließen</button></div></div>`;
+      <div class="row jce mt14"><button class="btn" id="mbc">Schließen</button></div></div>`;
     document.body.appendChild(md);
     md.querySelector("#mbc").onclick = () => md.remove();
     md.onclick = e => {
@@ -623,7 +623,7 @@ assignDialog = (sp, done) => {
         sel.dispatchEvent(new Event("input"));
         sel.insertAdjacentHTML(
           "afterend",
-          `<div class="mut" style="font-size:13px;margin-top:4px">📍 = das Foto wurde in der Nähe dieser Strecke aufgenommen (GPS)</div>`
+          `<div class="mut fs13 mt4">📍 = das Foto wurde in der Nähe dieser Strecke aufgenommen (GPS)</div>`
         );
       }
     });

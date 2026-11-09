@@ -44,7 +44,7 @@ VIEWS.admin = async (...a) => {
       if (!el) return;
       used.add(el);
       panels.forEach(p => el.contains(p) && used.add(p));       // Bereiche in verschobenen Containern (z. B. #upd) nicht noch einmal verschieben
-      if (k[0] !== "#" && el.querySelector(":scope > h2")) el.style.marginTop = "0";
+      if (k[0] !== "#" && el.querySelector(":scope > h2")) el.style.setProperty("margin-top", "0", "important");
       body.appendChild(el);
     });
     return sec;

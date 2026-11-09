@@ -440,6 +440,10 @@ Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → An
 
 **Fotos aus der App in einer anderen Zeitzone (ab Server 2.7.4 / App 2.5.1):** Die App schickt mit jedem Foto-Upload die Zeitzone des Telefons mit. Hat die Kamera keine Zeitzone ins Foto geschrieben, trägt der Server sie nach. Vorher wurde die Aufnahmezeit als Ortszeit des Servers gedeutet – war das Handy z. B. auf den Kanaren (UTC+0) und der Server in Deutschland, lag das Foto eine Stunde neben der Tour und wurde nicht zugeordnet.
 
+### Neu in 3.5.1 – Pulskurve geglättet, Stile aufgeräumt
+- **Pulskurve:** geglättet (gleitender Mittelwert); Messlücken (Pausen) erscheinen als weicher, gestrichelter Übergang statt als harte Gerade. Kennzahlen und Zonen rechnen weiter mit den Rohwerten.
+- **Stile:** Rund 600 Inline-Stilangaben in den Vorlagen sind durch Hilfsklassen ersetzt (pixelgleich, per Bildvergleich über 59 Ansichten geprüft). Schriftgrößen folgen einer festen Skala (12–44 px); ein Test verhindert Abweichungen.
+
 ### Neu in 3.5 – Aufräumen und Absichern
 - **Puls vollständig:** Backup enthält die Pulsdateien, Betrachter-Konten sehen die Pulskarte, die Spur-Korrektur behält den Puls, der GPX-Export enthält Zeit und Puls. Maximalpuls einstellbar (Verwaltung → „Heimatort und Puls“).
 - **Schutz-Header:** `nosniff`, Schutz vor Einbettung, Referrer-Policy für alle Antworten; für die Hauptoberfläche eine Content-Security-Policy ohne Inline-JavaScript.
