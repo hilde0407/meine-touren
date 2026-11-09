@@ -675,4 +675,11 @@ Wetterdienst nicht erreichbar: {} || Weather service not reachable: {} || Servic
 Noch keine Kommentare. || No comments yet. || Pas encore de commentaires. || Aún no hay comentarios.
 Kommentar schreiben … || Write a comment … || Écrire un commentaire … || Escribe un comentario …
 Bitte einen Kommentar eingeben || Please enter a comment || Veuillez saisir un commentaire || Introduce un comentario
+Heimatort || Home place || Lieu de résidence || Lugar de residencia
+Touren in der Nähe (bis etwa 60 km) zählen nicht als Reise. Leer lassen, dann erkennt die App den Heimatort aus deinen Touren. || Tours nearby (up to about 60 km) do not count as trips. Leave empty and the app detects your home from your tours. || Les sorties à proximité (jusqu'à 60 km environ) ne comptent pas comme voyage. Laissez vide pour que l'appli le déduise de vos sorties. || Las rutas cercanas (hasta unos 60 km) no cuentan como viaje. Déjalo vacío y la app lo deduce de tus rutas.
+Ort oder Adresse suchen … || Search place or address … || Rechercher un lieu ou une adresse … || Buscar lugar o dirección …
+Noch kein Heimatort eingetragen. || No home place set yet. || Aucun lieu de résidence défini. || Aún no hay lugar de residencia.
+Nichts gefunden. || Nothing found. || Rien trouvé. || No se encontró nada.
+Suche … || Searching … || Recherche … || Buscando …
+Bitte einen Ort eingeben || Please enter a place || Veuillez saisir un lieu || Introduce un lugar
 `;

@@ -141,3 +141,27 @@ def api_place(lat: float, lng: float):
         return {"name": extras.place_name(lat, lng)}
     except Exception:  # noqa
         return {"name": None}
+
+
+@router.get("/api/geo/search")
+def api_geo_search(q: str):
+    """Ortssuche (OpenStreetMap/Nominatim) für den Heimatort: bis zu 5 Treffer mit Name und Koordinaten."""
+    import time as _t
+    import requests
+    from . import extras
+    q = " ".join(q.split())[:120]
+    if len(q) < 2:
+        raise HTTPException(400, "Bitte einen Ort eingeben")
+    with extras._geo_lock:
+        wait = 1.1 - (_t.time() - extras._last_geo[0])
+        if wait > 0:
+            _t.sleep(wait)
+        extras._last_geo[0] = _t.time()
+        try:
+            r = requests.get("https://nominatim.openstreetmap.org/search", headers=extras.UA, timeout=10,
+                             params={"q": q, "format": "jsonv2", "limit": 5, "accept-language": "de", "addressdetails": 0})
+        except Exception as e:  # noqa
+            raise HTTPException(502, f"Ortssuche nicht erreichbar: {e}")
+    if r.status_code != 200:
+        raise HTTPException(502, f"Ortssuche: HTTP {r.status_code}")
+    return [{"name": e.get("display_name", ""), "lat": float(e["lat"]), "lng": float(e["lon"])} for e in r.json()]

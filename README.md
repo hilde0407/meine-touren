@@ -440,6 +440,9 @@ Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → An
 
 **Fotos aus der App in einer anderen Zeitzone (ab Server 2.7.4 / App 2.5.1):** Die App schickt mit jedem Foto-Upload die Zeitzone des Telefons mit. Hat die Kamera keine Zeitzone ins Foto geschrieben, trägt der Server sie nach. Vorher wurde die Aufnahmezeit als Ortszeit des Servers gedeutet – war das Handy z. B. auf den Kanaren (UTC+0) und der Server in Deutschland, lag das Foto eine Stunde neben der Tour und wurde nicht zugeordnet.
 
+### Neu in 3.3 – Heimatort
+In der **Verwaltung** gibt es das Feld **Heimatort**: Ort oder Adresse suchen (OpenStreetMap), Treffer anklicken, „Einstellungen speichern“. Touren in der Nähe (bis etwa 60 km) zählen dann nicht als Reise. Ohne Eintrag erkennt die App den Heimatort wie bisher aus deinen Touren. Die Android-App nutzt dieselbe Oberfläche; in **Mein Tourentagebuch** 1.2 ersetzt die Ortssuche die Eingabe von Koordinaten.
+
 ### Neu in 3.2 – Erzählung teilen, Kommentare für Besucher, Orte im Rückblick
 - **Diashow mit Kommentaren:** Beim „Diashow senden“ gibt es die Option „Besucher dürfen Fotos kommentieren“. Die Diashow-Seite zeigt dann 💬 an jedem Foto; Gäste schreiben ohne Konto (Name optional, am Autor steht „(Gast)“, höchstens 5 Kommentare pro Minute und Link, 500 Zeichen). Der Besitzer sieht und löscht die Kommentare in der Erzählung. Ohne die Option sieht und schreibt niemand Kommentare. Schnittstellen: `GET|POST /api/public/<Token>/comments`. Bedenke: Das ist nur sinnvoll, wenn der Server von außen erreichbar ist (Funnel, siehe oben).
 - **Erzählung teilen und drucken:** Auf der Erzählungsseite erzeugt „🔗 Teilen (mit Kommentaren)“ den Diashow-Link (30 Tage, Kommentare erlaubt) und kopiert ihn; „🖨 Drucken“ druckt die Zeitleiste mit Ortsnamen, Fotos und Kommentaren oder speichert sie als PDF. Kommentare stehen jetzt auch als Text unter den Fotos der Zeitleiste.

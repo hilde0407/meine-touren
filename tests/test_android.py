@@ -168,3 +168,29 @@ def test_trip_names_month_added_once():
         by[f"r{i}"] = {"g_place": None, "g_county": None}
     more2._unique_names(trips, by)
     assert [t["region"] for t in trips] == ["Andalusien (Juni 2019)"] * 2 + ["Hessen (Juni 2019)"] * 2 + ["Bayern (Juni 2019)"] * 2
+
+
+def test_manual_home_place(monkeypatch):
+    """Heimatort aus der Verwaltung ersetzt die automatische Erkennung; die Ortssuche liefert Name und Koordinaten."""
+    from fastapi.testclient import TestClient
+    from app import main, more2, db
+    c = TestClient(main.app)
+    tours = [{"lat": 48.0 + i * 0.01, "lng": 11.0, "start_ts": 1_700_000_000 + i * 86400 * 40} for i in range(20)]
+    c.post("/api/settings", json={"home_name": "", "home_lat": "", "home_lng": ""})
+    auto = more2.home_places(tours)
+    c.post("/api/settings", json={"home_name": "Hamburg", "home_lat": "53.55", "home_lng": "10.0"})
+    assert more2.home_places(tours) == [(53.55, 10.0)] != auto
+    s = c.get("/api/settings").json()
+    assert s["home_name"] == "Hamburg" and s["home_lat"] == "53.55"
+    c.post("/api/settings", json={"home_lat": "abc"})
+    assert more2.home_places(tours) == auto            # ungültige Eingabe: zurück zur Erkennung
+    c.post("/api/settings", json={"home_name": "", "home_lat": "", "home_lng": ""})
+
+    class R:
+        status_code = 200
+        def json(self): return [{"display_name": "Garmisch-Partenkirchen, Bayern, Deutschland", "lat": "47.49", "lon": "11.09"}]
+    import requests
+    monkeypatch.setattr(requests, "get", lambda *a, **k: R())
+    r = c.get("/api/geo/search?q=Garmisch").json()
+    assert r[0]["lat"] == 47.49 and r[0]["name"].startswith("Garmisch")
+    assert c.get("/api/geo/search?q=a").status_code == 400

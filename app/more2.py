@@ -57,6 +57,12 @@ async def api_set_tags(tour_id: str, request: Request):
 def home_places(tours):
     """Orte, an denen man sich allgemein aufhält (Zuhause, Zweitwohnsitz, Stammgebiet): Gebiete von etwa 30 km, in denen sehr viele Touren
     über viele verschiedene Monate gestartet wurden. Touren dort zählen nie als Reise. Ein Urlaubsort, den man nur jährlich besucht, fällt nicht darunter."""
+    try:                                                  # Heimatort von Hand eingetragen (Verwaltung): gilt statt der automatischen Erkennung
+        la, lo = float(db.get("home_lat")), float(db.get("home_lng"))
+        if -90 <= la <= 90 and -180 <= lo <= 180 and (la or lo):
+            return [(la, lo)]
+    except (TypeError, ValueError):
+        pass
     pts = [(t["lat"], t["lng"], datetime.fromtimestamp(t["start_ts"], tz=TZ).strftime("%Y-%m")) for t in tours]
     cl = []                                              # [lat, lng, n, Monate]
     for la, lo, mo in pts:

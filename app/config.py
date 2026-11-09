@@ -13,6 +13,9 @@ TZ_NAME = os.environ.get("TZ", "Europe/Berlin")
 DEFAULTS = {
     "pdf_photos": "1",           # 1 = Fotos in PDF-Berichten (Tourblatt, Reisebericht, Jahresrückblick)
     "pdf_photo_n": "6",          # Anzahl Fotos im PDF
+    "home_name": "",             # Heimatort (Anzeigename); zusammen mit home_lat/home_lng – leer = automatisch aus den Touren erkannt
+    "home_lat": "",
+    "home_lng": "",
     "plan_enabled": "1",         # 1 = Tourplanung ist eingeschaltet
     "plan_mode": "",             # public = brouter.de · local = BRouter auf diesem Server · custom = anderer Server; leer = automatisch (Adresse gesetzt → eigener Server)
     "brouter_url": "",           # leer = öffentlicher BRouter-Dienst (brouter.de); eigene Adresse z. B. http://192.168.1.5:17777/brouter
@@ -54,7 +57,7 @@ DEFAULTS = {
 SECRET_KEYS = {"zepp_password", "zepp_token", "komoot_password", "strava_client_secret", "strava_tokens", "suunto_client_secret", "suunto_key", "suunto_tokens", "garmin_tokens"}
 ENCRYPTED_KEYS = SECRET_KEYS | {"zepp_key"}     # werden verschlüsselt in der Datenbank abgelegt (app/secret.py)
 
-VERSION = "3.2.0 · Meine Touren (2026-11-08)"
+VERSION = "3.3.0 · Meine Touren (2026-11-08)"
 
 
 SYSTEM_DB = DATA_DIR / "system.sqlite"          # Benutzer, Sitzungen, Freigaben
