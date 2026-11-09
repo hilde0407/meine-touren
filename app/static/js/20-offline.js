@@ -58,7 +58,7 @@ const _adminO = VIEWS.admin;
 VIEWS.admin = async (...a) => {
   await _adminO(...a);
   if ($("#offprep") || !$("#main")) return;
-  $("#main").insertAdjacentHTML("beforeend", `<div class="panel" id="offprep" style="margin-top:24px"><h2>Offline-Nutzung</h2>
+  $("#main").insertAdjacentHTML("beforeend", `<div class="panel gap" id="offprep"><h2>Offline-Nutzung</h2>
    <p class="mut" style="font-size:14px">Lädt die letzten 8 Touren mit Strecke, einigen Fotos und den Kartenkacheln auf dieses Gerät. Danach lassen sie sich auch ohne Verbindung ansehen (z. B. unterwegs ohne Netz). Die App-Seiten werden automatisch zwischengespeichert; Daten und Karten, die du schon angesehen hast, ebenfalls.</p>
    <div class="row"><button class="btn alt" id="offb">Für Offline vorbereiten</button><button class="btn alt" id="offall">Alle Touren offline (Daten und Strecken)</button><span id="offm" class="mut"></span></div></div>`);
   const go = async all => {

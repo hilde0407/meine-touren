@@ -112,7 +112,7 @@ VIEWS.dash = async (_, q) => {
       <div class="r"><span>Stärkster Monat<small>${MONL[bestM]}</small></span><b>${nf(mm[bestM], 0)} km</b></div>`
           : '<div class="mut">Keine Touren</div>'
       }</div></div></div>
-  <div class="panel" style="margin-top:44px"><h2>Aktivität im Jahr ${hy}</h2>${heat(hy, byDay)}</div>
+  <div class="panel gap"><h2>Aktivität im Jahr ${hy}</h2>${heat(hy, byDay)}</div>
   ${otd.length ? `<div class="sec"><h2>An diesem Tag</h2><span class="sub">in früheren Jahren</span></div><div class="tl">${otd.map(tourRow).join("")}</div>` : ""}
   <div class="sec" id="memh"><h2>Erinnerungen</h2><span class="sub" id="memsub"></span></div><div id="mem" class="thumbs"></div></div>`;
   $(".years").onclick = e => {

@@ -269,7 +269,7 @@ VIEWS.recap = async name => {
   sel.forEach(t => { if (t.g_place) { const o = byPlace[t.g_place] || (byPlace[t.g_place] = {n: 0, km: 0, st: t.g_state || t.g_country || ""}); o.n++; o.km += t.km; } });
   const places = Object.entries(byPlace).sort((a, b) => b[1].n - a[1].n || b[1].km - a[1].km),
     states = new Set(sel.map(t => t.g_state).filter(Boolean)).size, lands = new Set(sel.map(t => t.g_country).filter(Boolean)).size;
-  const placePanel = places.length ? `<div class="panel" style="margin-top:34px"><h2>Orte des Jahres</h2><div class="mut" style="font-size:14px;margin-bottom:8px">${places.length} Startorte${states ? ` · ${states} Bundesländer/Regionen` : ""}${lands ? ` · ${lands} ${lands === 1 ? "Land" : "Länder"}` : ""}</div><div class="rows">${places.slice(0, 8).map(([n, o]) => `<div class="row"><span>📌 ${esc(n)}${o.st ? ` <span class="mut">(${esc(o.st)})</span>` : ""}</span><span class="sp"></span><b>${o.n} ${o.n === 1 ? "Tour" : "Touren"} · ${nf(o.km, 0)} km</b></div>`).join("")}</div></div>` : "";
+  const placePanel = places.length ? `<div class="panel gap"><h2>Orte des Jahres</h2><div class="mut" style="font-size:14px;margin-bottom:8px">${places.length} Startorte${states ? ` · ${states} Bundesländer/Regionen` : ""}${lands ? ` · ${lands} ${lands === 1 ? "Land" : "Länder"}` : ""}</div><div class="rows">${places.slice(0, 8).map(([n, o]) => `<div class="row"><span>📌 ${esc(n)}${o.st ? ` <span class="mut">(${esc(o.st)})</span>` : ""}</span><span class="sp"></span><b>${o.n} ${o.n === 1 ? "Tour" : "Touren"} · ${nf(o.km, 0)} km</b></div>`).join("")}</div></div>` : "";
   await pdfPhotoLoad();
   const days = new Set(sel.map(t => t.date.slice(0, 10))).size,
     ph = await api(`/api/photos?year=${Y}&random=true&limit=${Math.max(12, PDFP.n)}`).catch(() => []);
@@ -287,9 +287,9 @@ VIEWS.recap = async name => {
      .join("")}</div></div>
    <div class="grid g2" style="margin-top:34px"><div class="panel"><h2>Kilometer pro Monat</h2>${barChart(mm, MON, {ghost: pm, ghostLabel: Y - 1})}<div class="mut" style="font-size:14px">Stärkster Monat: ${MONL[bm]} mit ${nf(mm[bm], 0)} km</div></div>
     <div class="panel"><h2>Sportarten</h2><div class="stack">${sp.map(([s, v]) => `<div style="width:${(v / km) * 100}%;background:${sCol(s)}"></div>`).join("")}</div><div class="rows" style="margin-top:10px">${sp.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${nf(v, 0)} km, ${nf((v / km) * 100, 0)} %</span></div>`).join("")}</div></div></div>
-   <div class="panel" style="margin-top:34px"><h2>Die fünf stärksten Touren</h2><div class="tl">${top.map(tourRow).join("")}</div><div class="mut" style="margin-top:10px">Meiste Höhenmeter: <a href="#/tour/${steep.id}">${esc(steep.name)}</a> (${nf(steep.up_m, 0)} m)</div></div>
+   <div class="panel gap"><h2>Die fünf stärksten Touren</h2><div class="tl">${top.map(tourRow).join("")}</div><div class="mut" style="margin-top:10px">Meiste Höhenmeter: <a href="#/tour/${steep.id}">${esc(steep.name)}</a> (${nf(steep.up_m, 0)} m)</div></div>
    ${placePanel}
-   ${ph.length ? `<div class="panel" style="margin-top:34px"><div class="row"><h2>Fotos des Jahres</h2><span class="sp"></span><a class="btn sm noprint" target="_blank" href="slideshow.html?year=${Y}">Diashow</a></div><div class="thumbs" id="rph">${ph.map((p, i) => `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=400" data-i="${i}"></div>`).join("")}</div></div>` : ""}</div>`;
+   ${ph.length ? `<div class="panel gap"><div class="row"><h2>Fotos des Jahres</h2><span class="sp"></span><a class="btn sm noprint" target="_blank" href="slideshow.html?year=${Y}">Diashow</a></div><div class="thumbs" id="rph">${ph.map((p, i) => `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=400" data-i="${i}"></div>`).join("")}</div></div>` : ""}</div>`;
   if (ph.length) bindThumbs($("#rph"), ph);
   const mark = () => {                  // Fotos nur im Druck/PDF: aus oder nur die ersten n
     const pn = $("#rph") && $("#rph").closest(".panel");

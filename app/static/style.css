@@ -380,3 +380,33 @@ html.mob .tact-bar .tk,.tact-bar .tk{min-width:0}
 html.mob .tact-bar .tk{flex-direction:column;gap:2px;padding:6px 4px;font-size:14px;line-height:1.15;text-align:center;overflow-wrap:anywhere;hyphens:auto;min-height:56px}
 html.mob .tact-bar .tk>span{font-size:19px;line-height:1}
 @media(max-width:480px){.tact-bar{gap:6px}.tact-bar .tk{flex-direction:column;gap:2px;padding:6px 4px;font-size:14px;line-height:1.15;text-align:center;overflow-wrap:anywhere;min-height:56px}.tact-bar .tk>span{font-size:19px;line-height:1}}
+
+/* ===== Einheitliches Erscheinungsbild (3.5): gleiche Abstände, Einzüge, Bedienhöhen auf Desktop, Handy und in der App ===== */
+:root{--gap-panel:34px}
+html.mob{--gap-panel:24px}
+.panel.gap{margin-top:var(--gap-panel)}
+html.mob .inner .panel.gap{margin-top:var(--gap-panel)!important}
+/* Kopfzeile am Desktop: Name bricht nicht um, kein Menüpunkt wird abgeschnitten */
+.brand{white-space:nowrap;flex:none}
+@media(min-width:701px) and (max-width:1560px){.top{gap:14px;padding:0 16px}.brand{font-size:20px}nav a{padding:0 9px;font-size:15px}#gs{width:150px}}
+@media(min-width:701px) and (max-width:1180px){nav a{padding:0 6px;font-size:14px}#gs{width:110px}.umenu .un{display:none}}
+/* Hinweisleiste auf der Übersicht in derselben Spalte wie überall sonst */
+html:not(.mob) main.flush>.warnbar,html:not(.mob) main.wide>.warnbar{max-width:1132px;margin:16px auto 18px}
+/* Handy/App: ein Einzug (14 px) für Überschrift und Inhalt; Abschnitte ohne Kasten rücken nicht doppelt ein */
+html.mob main.flush .inner{padding:0}
+html.mob .panel{padding:12px 0 0}
+html.mob .atab .gbody>* .panel,html.mob details.agrp .panel{padding:0}
+html.mob .atab .gbody>.panel{padding:14px}
+/* Handy/App: alle Eingaben und Knöpfe gleich hoch (44 px), kleine Knöpfe 40 px */
+html.mob #main select,html.mob #main input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]){min-height:44px;height:auto}
+/* Handy/App: Reiter der Verwaltung in einer Zeile zum Wischen statt in drei umbrochenen Zeilen */
+html.mob .atabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+html.mob .atabs::-webkit-scrollbar{display:none}
+html.mob .atabs button{white-space:nowrap;flex:none}
+/* Handy/App: Zeilen mit Bezeichnung und Wert untereinander, wenn der Wert lang ist */
+html.mob .rows .r{flex-wrap:wrap}
+html.mob .rows .r>:first-child{flex:1 1 55%;min-width:0}
+/* Handy/App: Pfeile der Startseiten-Diashow verdecken die Überschrift nicht */
+html.mob .hnav{top:14px;transform:none;width:30px;height:36px;font-size:24px;background:#0b1d1e99}
+html.mob .hnav.r{right:10px}html.mob .hnav:not(.r){left:auto;right:46px}
+html.mob .hdots{right:88px;top:22px}

@@ -226,7 +226,7 @@ VIEWS.compare = async (_, q) => {
    <div class="legend" style="margin-bottom:10px"><span><i style="background:${cols[0]}"></i><a href="#/tour/${ta.id}">${esc(ta.name)}</a> (${dateS(ta.date)})</span><span><i style="background:${cols[1]}"></i><a href="#/tour/${tb.id}">${esc(tb.name)}</a> (${dateS(tb.date)})</span></div>
    <div class="grid g2"><div id="cm" class="cmap"></div><div><table class="cmp"><tr><th></th><th class="n">A</th><th class="n">B</th><th class="n">B − A</th></tr>
     ${row("Strecke", a.km, b.km, "km")}${row("Aufstieg", a.up, b.up, "m", 0)}${row("Dauer", a.h, b.h, "h", 2)}${row("Ø-Tempo gesamt", a.v, b.v, "km/h")}${row("Bewegungszeit", a.moving, b.moving, "h", 2)}${row("Pausen", a.pauses, b.pauses, "", 0)}</table>
-    <div class="panel" style="margin-top:20px"><h3>Höhenprofil</h3>${
+    <div class="panel gap"><h3>Höhenprofil</h3>${
       ca.length > 2 && cb.length > 2
         ? xyChart(
             [
@@ -239,7 +239,7 @@ VIEWS.compare = async (_, q) => {
     }</div></div></div>
    ${
      hasT
-       ? `<div class="panel" style="margin-top:30px"><h3>Zeit über Strecke</h3><p class="mut" style="font-size:14px">Wo die Linien auseinanderlaufen, war eine Tour schneller (flacher = schneller, Stufen = Pausen).</p>${xyChart(
+       ? `<div class="panel gap"><h3>Zeit über Strecke</h3><p class="mut" style="font-size:14px">Wo die Linien auseinanderlaufen, war eine Tour schneller (flacher = schneller, Stufen = Pausen).</p>${xyChart(
            [
              {pts: tim(ca, a.A), color: cols[0]},
              {pts: tim(cb, b.A), color: cols[1]},

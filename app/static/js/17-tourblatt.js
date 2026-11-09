@@ -40,7 +40,7 @@ VIEWS.sheet = async id => {
    <div class="fig"><div class="v">${nf(t.down_m, 0)}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60))}<span class="u">Std.</span></div><div class="l">Dauer</div></div>
    <div class="fig"><div class="v">${t.h ? nf(t.km / t.h, 1) : "–"}<span class="u">km/h</span></div><div class="l">Tempo</div></div><div id="kmax" class="fig" style="display:none"><div class="v" id="kmaxv"></div><div class="l">Höchster Punkt</div></div></div>
    <div class="tmap" id="tm" style="height:360px"></div>
-   <div class="panel prof" style="margin-top:18px" id="profcard"><h2>Höhenprofil</h2><div id="prof" class="mut">Wird geladen …</div></div>
+   <div class="panel prof gap" id="profcard"><h2>Höhenprofil</h2><div id="prof" class="mut">Wird geladen …</div></div>
    <div class="thumbs sheetph" id="th"></div></div>`;
   map = mkMap("tm", {layers: false});
   map.setView([t.lat || 50, t.lng || 8], 12);

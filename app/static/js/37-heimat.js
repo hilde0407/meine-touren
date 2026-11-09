@@ -7,7 +7,7 @@ VIEWS.admin = async (...a) => {
   if (!sv || $("#homep")) return;
   const s = await api("/api/settings").catch(() => ({}));
   const row = sv.parentElement;
-  row.insertAdjacentHTML("beforebegin", `<div class="panel" id="homep" style="margin-top:34px"><h2>Heimatort und Puls</h2>
+  row.insertAdjacentHTML("beforebegin", `<div class="panel gap" id="homep"><h2>Heimatort und Puls</h2>
     <p class="mut" style="font-size:14px;margin:0 0 8px">Touren in der Nähe (bis etwa 60 km) zählen nicht als Reise. Leer lassen, dann erkennt die App den Heimatort aus deinen Touren.</p>
     <div class="field"><label>Heimatort</label><div class="row" style="gap:6px"><input id="hsq" placeholder="Ort oder Adresse suchen …" value="${esc(s.home_name || "")}" style="flex:1"><button class="btn sm" id="hsb">Suchen</button><button class="btn alt sm" id="hsc" title="Heimatort entfernen">✕</button></div></div>
     <div id="hsr"></div>

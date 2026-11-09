@@ -16,9 +16,9 @@ VIEWS.check = async () => {
     <div class="r"><span>Noch mit Standardname</span><b>${r.default_names.length}</b></div>
     <div class="r"><span>Ohne gespeicherte Strecke / ohne Region / ohne Fotos</span><b>${G.no_route} / ${G.no_region} / ${G.no_photos}</b></div></div>
     <p class="mut" style="font-size:13px">Fehlende Strecken: Verwaltung → „Routen laden“. Fehlende Regionen: „Regionen bestimmen“.</p></div>
-   <div class="panel" style="margin-top:22px"><h2>Mögliche Duplikate</h2>${r.duplicates.length ? `<div class="rows">${r.duplicates.map(d => `<div class="r" style="display:block">${nm(d.a)}${d.a_local ? ` <button class="btn alt sm" data-del="${d.a}">lokal löschen</button>` : ""}<br>${nm(d.b)}${d.b_local ? ` <button class="btn alt sm" data-del="${d.b}">lokal löschen</button>` : ""}<small class="mut">${BY[d.a] ? dateS(BY[d.a].date) : ""} – gleiche Zeit, Startort und Länge</small></div>`).join("")}</div><p class="mut" style="font-size:13px">Lokale Touren (Zepp/GPX) lassen sich hier löschen, die Komoot-Tour nicht. Bei Komoot-Touren die Tour dort entfernen und „Komoot aktualisieren“ ausführen.</p>` : '<p class="ok">✓ Keine Duplikate gefunden.</p>'}</div>
-   <div class="panel" style="margin-top:22px"><h2>Auffällige Höhenmeter</h2>${r.suspicious.length ? `<div class="row"><button class="btn" id="fixall">Alle ${r.suspicious.length} korrigieren</button><span id="fixm" class="mut"></span></div><div class="rows" id="fixl">${r.suspicious.map(t => `<div class="r" data-id="${t.id}"><span>${nm(t.id)}<small class="bad">${nf(t.up_m, 0)} m Aufstieg auf ${nf(t.km, 1)} km</small></span><button class="btn alt sm" data-fix="${t.id}">Korrigieren</button></div>`).join("")}</div>` : '<p class="ok">✓ Keine auffälligen Höhen.</p>'}</div>
-   <div class="panel" style="margin-top:22px"><h2>Namen vergeben</h2>${
+   <div class="panel gap"><h2>Mögliche Duplikate</h2>${r.duplicates.length ? `<div class="rows">${r.duplicates.map(d => `<div class="r" style="display:block">${nm(d.a)}${d.a_local ? ` <button class="btn alt sm" data-del="${d.a}">lokal löschen</button>` : ""}<br>${nm(d.b)}${d.b_local ? ` <button class="btn alt sm" data-del="${d.b}">lokal löschen</button>` : ""}<small class="mut">${BY[d.a] ? dateS(BY[d.a].date) : ""} – gleiche Zeit, Startort und Länge</small></div>`).join("")}</div><p class="mut" style="font-size:13px">Lokale Touren (Zepp/GPX) lassen sich hier löschen, die Komoot-Tour nicht. Bei Komoot-Touren die Tour dort entfernen und „Komoot aktualisieren“ ausführen.</p>` : '<p class="ok">✓ Keine Duplikate gefunden.</p>'}</div>
+   <div class="panel gap"><h2>Auffällige Höhenmeter</h2>${r.suspicious.length ? `<div class="row"><button class="btn" id="fixall">Alle ${r.suspicious.length} korrigieren</button><span id="fixm" class="mut"></span></div><div class="rows" id="fixl">${r.suspicious.map(t => `<div class="r" data-id="${t.id}"><span>${nm(t.id)}<small class="bad">${nf(t.up_m, 0)} m Aufstieg auf ${nf(t.km, 1)} km</small></span><button class="btn alt sm" data-fix="${t.id}">Korrigieren</button></div>`).join("")}</div>` : '<p class="ok">✓ Keine auffälligen Höhen.</p>'}</div>
+   <div class="panel gap"><h2>Namen vergeben</h2>${
      r.default_names.length
        ? `<p class="mut">${r.default_names.length} Touren heißen noch wie vorgegeben. Mit „Vorschläge laden“ werden Namen aus Karte, Routen und Wanderführern vorbelegt; gespeichert wird erst mit „Speichern“.</p>
     <div class="row"><button class="btn" id="sugall">Vorschläge für die nächsten 10 laden</button><label class="chk" style="margin:0"><input type="checkbox" id="rkomall"> auch bei Komoot umbenennen</label><span id="sugm" class="mut"></span></div>
@@ -56,7 +56,7 @@ VIEWS.check = async () => {
       );
     first.insertAdjacentHTML(
       "afterend",
-      `<div class="panel" style="margin-top:22px" id="impl"><h2>Unplausible Touren</h2>
+      `<div class="panel gap" id="impl"><h2>Unplausible Touren</h2>
       <p class="mut">Fehlaufzeichnungen (fast keine Strecke) und Touren, deren Tempo nicht zur Sportart passt. Sie zählen in Rekorden und Statistiken mit. Du kannst die Sportart ändern (bleibt auch nach dem Komoot-Abgleich) oder die Tour ausblenden (Daten bleiben erhalten, jederzeit wieder einblendbar).</p>
       ${
         im.length

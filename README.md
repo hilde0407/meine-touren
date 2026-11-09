@@ -443,6 +443,7 @@ Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → An
 ### Neu in 3.5 – Aufräumen und Absichern
 - **Puls vollständig:** Backup enthält die Pulsdateien, Betrachter-Konten sehen die Pulskarte, die Spur-Korrektur behält den Puls, der GPX-Export enthält Zeit und Puls. Maximalpuls einstellbar (Verwaltung → „Heimatort und Puls“).
 - **Schutz-Header:** `nosniff`, Schutz vor Einbettung, Referrer-Policy für alle Antworten; für die Hauptoberfläche eine Content-Security-Policy ohne Inline-JavaScript.
+- **Einheitliche Oberfläche:** Gleiche Abstände zwischen Abschnitten, ein Einzug für Überschrift und Inhalt auf dem Handy, gleich hohe Eingaben und Knöpfe, Verwaltungs-Reiter zum Wischen, vollständige Menüleiste auch auf schmaleren Bildschirmen; die Einrichtungs- und Fehlerseite der Android-App im selben Erscheinungsbild.
 - **Test-Image:** Ein manuell gestarteter Docker-Build erzeugt nur noch den Tag `test` (`ghcr.io/hilde0407/meine-touren:test`); `latest` ändert sich erst mit einer veröffentlichten Version.
 
 ### Neu in 3.4.6 – Puls aus FIT-Dateien

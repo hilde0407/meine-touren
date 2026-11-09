@@ -1,15 +1,21 @@
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Meine Touren</title>
-<style>body{font-family:sans-serif;margin:0;padding:28px 20px;background:#f4f6f3;color:#1d2b22}
-h1{font-size:24px;margin:0 0 6px}p{color:#4d5d52;line-height:1.45}input{width:100%;box-sizing:border-box;font-size:18px;padding:12px;border:1px solid #9fb0a4;border-radius:10px;margin:8px 0}
-button{width:100%;font-size:18px;padding:14px;border:0;border-radius:10px;background:#2f6b45;color:#fff;margin-top:6px}small{color:#6b7a70}</style></head>
-<body><h1>⛰ Meine Touren</h1>
+<style>:root{--bg:#e9ede7;--surface:#f6f8f3;--ink:#0e2a2b;--mut:#5b6f6c;--rule:#c9d3cc;--forest:#0e2a2b;--yellow:#f2c230;--yellow-ink:#241d00}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1718;--surface:#10272a;--ink:#e3ece8;--mut:#8aa5a1;--rule:#25403f;--forest:#071314}}
+*{box-sizing:border-box}body{font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
+.top{background:var(--forest);color:#fff;height:50px;display:flex;align-items:center;gap:8px;padding:0 14px;font-weight:700;font-size:19px;letter-spacing:.3px}
+.top i{display:inline-block;width:22px;height:13px;background:var(--yellow);clip-path:polygon(0 0,72% 0,100% 50%,72% 100%,0 100%)}
+main{padding:20px 14px}h1{font-size:26px;line-height:1.15;margin:0 0 10px;padding-bottom:10px;border-bottom:2px solid var(--ink)}p{color:var(--mut);margin:12px 0}p b{color:var(--ink)}
+input{width:100%;font-family:inherit;font-size:16px;min-height:44px;padding:8px 11px;border:1.5px solid var(--rule);border-radius:6px;background:var(--surface);color:var(--ink);margin:6px 0}input:focus{border-color:var(--ink);outline:0}
+button{width:100%;min-height:48px;font-family:inherit;font-weight:600;font-size:17px;letter-spacing:.3px;padding:8px 16px;border:2px solid var(--yellow);border-radius:6px;background:var(--yellow);color:var(--yellow-ink);margin-top:8px}
+button.s{background:transparent;border-color:var(--ink);color:var(--ink)}small{color:var(--mut);font-size:14px}</style></head>
+<body><div class="top"><i></i>Meine Touren</div><main><h1>Mit dem Server verbinden</h1>
 <p>Gib die Adresse deines Meine-Touren-Servers ein, z.&thinsp;B. <b>http://192.168.178.230</b> oder deine HTTPS-/Tailscale-Adresse.</p>
 <input id="u" type="url" inputmode="url" placeholder="http://192.168.178.230" autocapitalize="off" autocomplete="off">
 <button onclick="go()">Verbinden</button>
-<p><small>Die Adresse lässt sich später in der Verwaltung unter „Auf dem Handy“ ändern.</small></p>
-<script>function go(){var v=document.getElementById('u').value.trim();if(v&&window.MTApp)MTApp.setServer(v)}</script><script>(function(){var T={en:{p:"Enter the address of your Meine Touren server, e.g. <b>http://192.168.178.230</b> or your HTTPS/Tailscale address.",b:"Connect",s:"You can change the address later in the administration under “On the phone”."},
-fr:{p:"Saisissez l’adresse de votre serveur Meine Touren, par ex. <b>http://192.168.178.230</b> ou votre adresse HTTPS/Tailscale.",b:"Se connecter",s:"Vous pourrez modifier l’adresse plus tard dans l’administration sous « Sur le téléphone »."},
-es:{p:"Introduce la dirección de tu servidor Meine Touren, p. ej. <b>http://192.168.178.230</b> o tu dirección HTTPS/Tailscale.",b:"Conectar",s:"Puedes cambiar la dirección más tarde en la administración, en «En el móvil»."}};
+<p><small>Die Adresse lässt sich später in der Verwaltung unter „Auf dem Handy“ ändern.</small></p></main>
+<script>function go(){var v=document.getElementById('u').value.trim();if(v&&window.MTApp)MTApp.setServer(v)}</script><script>(function(){var T={en:{h:"Connect to the server",p:"Enter the address of your Meine Touren server, e.g. <b>http://192.168.178.230</b> or your HTTPS/Tailscale address.",b:"Connect",s:"You can change the address later in the administration under “On the phone”."},
+fr:{h:"Se connecter au serveur",p:"Saisissez l’adresse de votre serveur Meine Touren, par ex. <b>http://192.168.178.230</b> ou votre adresse HTTPS/Tailscale.",b:"Se connecter",s:"Vous pourrez modifier l’adresse plus tard dans l’administration sous « Sur le téléphone »."},
+es:{h:"Conectar con el servidor",p:"Introduce la dirección de tu servidor Meine Touren, p. ej. <b>http://192.168.178.230</b> o tu dirección HTTPS/Tailscale.",b:"Conectar",s:"Puedes cambiar la dirección más tarde en la administración, en «En el móvil»."}};
 var l=((window.MTApp&&MTApp.lang&&MTApp.lang())||navigator.language||"de").slice(0,2),d=T[l];if(!d)return;document.documentElement.lang=l;
-document.querySelector("p").innerHTML=d.p;document.querySelector("button").textContent=d.b;document.querySelector("small").textContent=d.s;})()</script></body></html>
+document.querySelector("h1").textContent=d.h;document.querySelector("p").innerHTML=d.p;document.querySelector("button").textContent=d.b;document.querySelector("small").textContent=d.s;})()</script></body></html>

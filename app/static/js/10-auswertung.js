@@ -474,7 +474,7 @@ VIEWS.check = async (...a) => {
   if (!body) return;
   body.insertAdjacentHTML(
     "beforeend",
-    `<div class="panel" style="margin-top:22px"><h2>Umbenennen nach Regeln</h2><p class="mut">Wähle Touren aus, lege eine Regel fest, prüfe die Vorschau und wende sie an.</p>
+    `<div class="panel gap"><h2>Umbenennen nach Regeln</h2><p class="mut">Wähle Touren aus, lege eine Regel fest, prüfe die Vorschau und wende sie an.</p>
    <div class="filters"><input id="rn_q" placeholder="Name enthält …"><select id="rn_r"><option value="">Alle Regionen</option>${regionOpts()}</select><select id="rn_s"><option value="">Alle Sportarten</option>${[...new Set(TOURS.map(t => t.sport))].map(s => `<option value="${s}">${sName(s)}</option>`).join("")}</select></div>
    <div class="filters"><select id="rn_a"><option value="pre">Vorsilbe hinzufügen</option><option value="suf">Nachsilbe hinzufügen</option><option value="rep">Text ersetzen (Suchen → Ersetzen)</option><option value="date">Datum und Uhrzeit am Ende entfernen</option></select><input id="rn_x" placeholder="Text / Suchen"><input id="rn_y" placeholder="Ersetzen durch"></div>
    <div class="row"><label class="chk" style="margin:0"><input type="checkbox" id="rn_k"> auch bei Komoot umbenennen</label><button class="btn alt" id="rn_p">Vorschau</button><button class="btn" id="rn_go" disabled>Anwenden</button><span id="rn_m" class="mut"></span></div><div class="rows" id="rn_l" style="margin-top:10px"></div></div>`
@@ -541,7 +541,7 @@ VIEWS.admin = async (...a) => {
   const s = await api("/api/settings").catch(() => ({}));
   sv.closest(".row").insertAdjacentHTML(
     "beforebegin",
-    `<div class="panel" style="margin-top:30px"><h2>Benachrichtigung (optional)</h2><p class="mut">Trage eine Webhook-Adresse ein (z. B. ntfy, Gotify oder ein eigener Dienst). Bei einer neuen Warnung (Zepp-Token, Backup, Job-Fehler, Speicher) wird dort eine Textnachricht abgeliefert, höchstens stündlich geprüft. Leer = aus. Die App stellt keine Verbindung zu Home Assistant her.</p>
+    `<div class="panel gap"><h2>Benachrichtigung (optional)</h2><p class="mut">Trage eine Webhook-Adresse ein (z. B. ntfy, Gotify oder ein eigener Dienst). Bei einer neuen Warnung (Zepp-Token, Backup, Job-Fehler, Speicher) wird dort eine Textnachricht abgeliefert, höchstens stündlich geprüft. Leer = aus. Die App stellt keine Verbindung zu Home Assistant her.</p>
    <div class="field"><label>Webhook-Adresse</label><input data-k="notify_url" value="${esc(s.notify_url || "")}" placeholder="https://ntfy.sh/mein-thema"></div><div class="field"><label>Auch bei neuen Touren melden</label><select data-k="notify_events"><option value="1"${s.notify_events !== "0" ? " selected" : ""}>Ja (Aufzeichnung, Teilen-Menü, Import)</option><option value="0"${s.notify_events === "0" ? " selected" : ""}>Nein, nur Warnungen</option></select></div><div class="row"><button class="btn alt" id="ntest">Testnachricht senden (nach „Speichern“)</button><span id="ntm" class="mut"></span></div></div>`
   );
   $("#ntest").onclick = async () => {

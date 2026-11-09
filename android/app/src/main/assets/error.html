@@ -1,13 +1,19 @@
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Nicht erreichbar</title>
-<style>body{font-family:sans-serif;margin:0;padding:28px 20px;background:#f4f6f3;color:#1d2b22}
-p{color:#4d5d52;line-height:1.45}button{width:100%;font-size:18px;padding:14px;border:0;border-radius:10px;background:#2f6b45;color:#fff;margin-top:8px}
-.s{background:#e6ebe7;color:#1d2b22}</style></head>
-<body><h1>Server nicht erreichbar</h1>
+<style>:root{--bg:#e9ede7;--surface:#f6f8f3;--ink:#0e2a2b;--mut:#5b6f6c;--rule:#c9d3cc;--forest:#0e2a2b;--yellow:#f2c230;--yellow-ink:#241d00}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1718;--surface:#10272a;--ink:#e3ece8;--mut:#8aa5a1;--rule:#25403f;--forest:#071314}}
+*{box-sizing:border-box}body{font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
+.top{background:var(--forest);color:#fff;height:50px;display:flex;align-items:center;gap:8px;padding:0 14px;font-weight:700;font-size:19px;letter-spacing:.3px}
+.top i{display:inline-block;width:22px;height:13px;background:var(--yellow);clip-path:polygon(0 0,72% 0,100% 50%,72% 100%,0 100%)}
+main{padding:20px 14px}h1{font-size:26px;line-height:1.15;margin:0 0 10px;padding-bottom:10px;border-bottom:2px solid var(--ink)}p{color:var(--mut);margin:12px 0}p b{color:var(--ink)}
+input{width:100%;font-family:inherit;font-size:16px;min-height:44px;padding:8px 11px;border:1.5px solid var(--rule);border-radius:6px;background:var(--surface);color:var(--ink);margin:6px 0}input:focus{border-color:var(--ink);outline:0}
+button{width:100%;min-height:48px;font-family:inherit;font-weight:600;font-size:17px;letter-spacing:.3px;padding:8px 16px;border:2px solid var(--yellow);border-radius:6px;background:var(--yellow);color:var(--yellow-ink);margin-top:8px}
+button.s{background:transparent;border-color:var(--ink);color:var(--ink)}small{color:var(--mut);font-size:14px}</style></head>
+<body><div class="top"><i></i>Meine Touren</div><main><h1>Server nicht erreichbar</h1>
 <p id="m">Meine Touren konnte den Server nicht erreichen. Ist das Handy im Heimnetz oder per VPN (Tailscale) verbunden?</p>
 <p>Deine laufende Aufzeichnung ist davon <b>nicht</b> betroffen – sie läuft weiter und wird später hochgeladen.</p>
 <button onclick="location.href=u()">Erneut versuchen</button>
-<button class="s" onclick="MTApp.changeServer()">Serveradresse ändern</button>
+<button class="s" onclick="MTApp.changeServer()">Serveradresse ändern</button></main>
 <script>function u(){return decodeURIComponent((location.search.match(/u=([^&]*)/)||[])[1]||'')+'/'}</script><script>(function(){var T={en:{t:"Not reachable",h:"Server not reachable",m:"Meine Touren could not reach the server. Is the phone on your home network or connected via VPN (Tailscale)?",n:"Your running recording is <b>not</b> affected – it keeps going and will be uploaded later.",r:"Try again",c:"Change server address"},
 fr:{t:"Inaccessible",h:"Serveur inaccessible",m:"Meine Touren n’a pas pu joindre le serveur. Le téléphone est-il sur votre réseau domestique ou connecté par VPN (Tailscale) ?",n:"Votre enregistrement en cours n’est <b>pas</b> affecté – il continue et sera envoyé plus tard.",r:"Réessayer",c:"Modifier l’adresse du serveur"},
 es:{t:"Sin conexión",h:"Servidor no accesible",m:"Meine Touren no pudo conectar con el servidor. ¿Está el móvil en tu red doméstica o conectado por VPN (Tailscale)?",n:"La grabación en curso <b>no</b> se ve afectada: sigue y se subirá más tarde.",r:"Reintentar",c:"Cambiar la dirección del servidor"}};

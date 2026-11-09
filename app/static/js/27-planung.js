@@ -111,7 +111,7 @@ VIEWS.plan = async (pid, q) => {
    <div id="pseg" class="wx" style="display:none;margin:8px 0 0"></div>
    <p class="mut" style="font-size:13px;margin:6px 0 0">Klick auf die Karte setzt einen Punkt, Rechtsklick auf einen Punkt entfernt ihn. Ein Klick auf einen Abschnitt wählt ihn aus – dort lassen sich <b>Alternativen</b> anzeigen. Gestrichelt = gerade Linie (kein Weg gefunden oder „Wegen folgen“ aus).</p>
    <div class="figs" id="pf" style="margin-top:18px"></div><div class="mut" id="pb" style="margin:8px 0 0"></div>
-   <div class="panel prof" style="margin-top:18px;display:none" id="pprof"><h2>Höhenprofil</h2><div id="pprofc"></div></div>
+   <div class="panel prof gap" style="display:none" id="pprof"><h2>Höhenprofil</h2><div id="pprofc"></div></div>
    <div class="field" style="max-width:760px;margin:16px 0 0"><label for="pnote">Notiz zur Planung</label><textarea id="pnote" rows="2" placeholder="Anfahrt, Einkehr, beste Jahreszeit …"></textarea></div>
    <div class="row" style="margin-top:12px"><button class="btn" id="psave">Plan speichern</button><button class="btn alt" id="pdl">⬇ Als GPX herunterladen</button><span id="pmsg" class="mut"></span></div>
    <div class="sec"><h2>Gespeicherte Pläne</h2><span class="sub">${plans.length ? plans.length + " Pläne" : "noch keine"}</span></div>
