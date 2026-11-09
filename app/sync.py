@@ -249,10 +249,13 @@ def backfill_hr():
     for i, (r, f) in enumerate(todo, 1):
         jobs.progress(f"Puls {i}/{len(todo)}")
         try:
-            pts = zepp.decode_points(by[int(r["trackid"])], api.detail(by[int(r["trackid"])]))
+            det = api.detail(by[int(r["trackid"])])
+            pts = zepp.decode_points(by[int(r["trackid"])], det)
             hr = [(p[0], p[4]) for p in pts if p[4]]
             if not hr:
-                log(f"  {r['trackid']}: kein Puls in den Zepp-Daten")
+                raw = str(det.get("heart_rate") or "")
+                log(f"  {r['trackid']}: kein Puls erkannt – Zepp-Feld heart_rate: " + (f"{len(raw)} Zeichen, Anfang „{raw[:80]}“" if raw else "leer")
+                    + f"; Felder: {', '.join(sorted(det))[:200]}")
                 continue
             text, n = tracks.merge_hr(f.read_text(encoding="utf-8"), hr)
             if n:
