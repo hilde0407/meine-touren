@@ -15,12 +15,12 @@ def _deg(d):
     return int(d * 2 ** 31 / 180)
 
 
-def make_fit(t0, lat0=47.5, lon0=12.9, n=40, sport=17, sub=0, big=False, compressed=False, dev=False, nogps=False):
+def make_fit(t0, lat0=47.5, lon0=12.9, n=40, sport=17, sub=0, big=False, compressed=False, dev=False, nogps=False, hr=False):
     """Kleiner FIT-Schreiber nur für Tests (Definition + Datensätze, optional Big-Endian/komprimierte Zeit/Entwicklerfelder)."""
     e = ">" if big else "<"
     body = b""
     # Definition record (global 20): timestamp, lat, lon, altitude
-    fields = [(253, 4, 0x86), (0, 4, 0x85), (1, 4, 0x85), (2, 2, 0x84)]
+    fields = [(253, 4, 0x86), (0, 4, 0x85), (1, 4, 0x85), (2, 2, 0x84)] + ([(3, 1, 0x02)] if hr else [])
     hdr = 0x40 | (0x20 if dev else 0) | 0
     body += bytes([hdr, 0, 1 if big else 0]) + struct.pack(e + "H", 20) + bytes([len(fields)]) + b"".join(bytes(f) for f in fields)
     if dev:
@@ -29,6 +29,8 @@ def make_fit(t0, lat0=47.5, lon0=12.9, n=40, sport=17, sub=0, big=False, compres
     for i in range(n):
         la, lo = (0x7FFFFFFF, 0x7FFFFFFF) if nogps else (_deg(lat0 + i * 0.0003), _deg(lon0 + i * 0.0004))
         body += bytes([0]) + struct.pack(e + "IiiH", ts0 + i * 5, la, lo, int((1200 + i * 2) * 5 + 2500))
+        if hr:
+            body += bytes([120 + i % 30])
         if dev:
             body += b"\x01\x02"
     if compressed:                                      # Definition ohne Zeitstempel + komprimierte Köpfe
@@ -250,3 +252,15 @@ def test_suunto_forbidden_message(monkeypatch):
     with pytest.raises(devices.DeviceError) as e:
         devices._su_get("/v2/workouts")
     assert "Subscription-Key" in str(e.value)
+
+
+def test_fit_heart_rate_into_gpx_and_tour_list():
+    from app import tracks
+    gpx, sp = fitfile.to_gpx(make_fit(T0, hr=True))
+    assert "gpxtpx:hr" in gpx and "<gpxtpx:hr>120</gpxtpx:hr>" in gpx
+    assert "gpxtpx:hr" not in fitfile.to_gpx(make_fit(T0))[0]
+    tracks.adopt(gpx, "h.gpx", ident="fh1")
+    from fastapi.testclient import TestClient
+    from app import main
+    r = TestClient(main.app).get("/api/tours/fh1/hr").json()
+    assert r["n"] >= 30 and r["min"] >= 120 and r["max"] <= 149

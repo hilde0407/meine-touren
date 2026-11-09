@@ -440,6 +440,9 @@ Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → An
 
 **Fotos aus der App in einer anderen Zeitzone (ab Server 2.7.4 / App 2.5.1):** Die App schickt mit jedem Foto-Upload die Zeitzone des Telefons mit. Hat die Kamera keine Zeitzone ins Foto geschrieben, trägt der Server sie nach. Vorher wurde die Aufnahmezeit als Ortszeit des Servers gedeutet – war das Handy z. B. auf den Kanaren (UTC+0) und der Server in Deutschland, lag das Foto eine Stunde neben der Tour und wurde nicht zugeordnet.
 
+### Neu in 3.4.6 – Puls aus FIT-Dateien
+Der FIT-Import (Garmin, Suunto, Wahoo u. a., auch über das Garmin-Konto) übernimmt jetzt die Herzfrequenz. Bereits importierte Touren bekommen sie nicht nachträglich; Dateien erneut zu importieren, wird als Duplikat übersprungen (die Tour vorher löschen, wenn der Puls gewünscht ist).
+
 ### Neu in 3.4 – Puls und bessere 3D-Kamera
 - **Herzfrequenz direkt von der Uhr:** Der Zepp-Import (Verwaltung → Import) übernimmt jetzt auch den Puls und speichert ihn im GPX (`gpxtpx:hr`). GPX/TCX-Dateien mit Puls (z. B. aus Gadgetbridge) werden ebenfalls verstanden. Weder Komoot noch Strava werden benötigt.
 - **Pulskarte in der Tourseite:** Verlauf, Ø/Max/Min und Zeit in fünf Pulszonen. Maximalpuls standardmäßig 185 bpm (Einstellung `hr_max`) oder der höchste gemessene Wert. Bereits importierte Touren: Verwaltung → Zepp-Import → „Puls nachladen“ ergänzt den Puls nachträglich (Touren, Notizen und Fotos bleiben unverändert). Auch „Zepp-Import starten“ gleicht jetzt ab: Für jedes Zepp-Training, zu dem es schon eine Tour gibt (gleicher Start oder gleiche Strecke – auch aus Komoot oder GPX-Dateien), wird der Puls ergänzt.

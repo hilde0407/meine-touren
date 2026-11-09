@@ -142,7 +142,8 @@ def _use(gnum, v, points, session):
         alt = (alt / 5.0 - 500) if alt is not None else None
         if alt is None and v.get(2) is not None:
             alt = v[2] / 5.0 - 500
-        points.append((ts + FIT_EPOCH, la, lo, alt))
+        hr = v.get(3)                                # Herzfrequenz (uint8, bpm)
+        points.append((ts + FIT_EPOCH, la, lo, alt, hr if hr is not None and 30 <= hr <= 240 else None))
     elif gnum == 18 and not session:                 # session (erste genügt)
         session.update({k: v[k] for k in (5, 6) if k in v})
     elif gnum == 12 and not session and 0 in v:      # sport
@@ -165,10 +166,11 @@ def to_gpx(data, name=""):
     sp = sport_name(sport)
     f = lambda t: datetime.fromtimestamp(t, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     body = "".join(
-        f'<trkpt lat="{la:.7f}" lon="{lo:.7f}">' + (f"<ele>{al:.1f}</ele>" if al is not None else "") + f"<time>{f(t)}</time></trkpt>\n"
-        for t, la, lo, al in pts)
+        f'<trkpt lat="{la:.7f}" lon="{lo:.7f}">' + (f"<ele>{al:.1f}</ele>" if al is not None else "") + f"<time>{f(t)}</time>"
+        + (f"<extensions><gpxtpx:TrackPointExtension><gpxtpx:hr>{hr}</gpxtpx:hr></gpxtpx:TrackPointExtension></extensions>" if hr else "") + "</trkpt>\n"
+        for t, la, lo, al, hr in pts)
     nm = escape(name or "Aktivität")
-    gpx = ('<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Meine Touren (FIT)" xmlns="http://www.topografix.com/GPX/1/1">\n'
+    gpx = ('<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Meine Touren (FIT)" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1">\n'
            f"<metadata><name>{nm}</name><time>{f(pts[0][0])}</time></metadata>\n"
            f"<trk><name>{nm}</name>" + (f"<type>{sp}</type>" if sp else "") + f"<trkseg>\n{body}</trkseg></trk></gpx>\n")
     return gpx, sp
