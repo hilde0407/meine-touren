@@ -231,6 +231,14 @@ def hr_sidecar(tid):
     return config.TRACK_DIR / f"{tid}.hr.json"
 
 
+def _sc_load(path):
+    import json
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+
+
 def _zepp_api():
     token = db.get("zepp_token")
     em, pw = db.get("zepp_email"), db.get("zepp_password")
@@ -263,7 +271,7 @@ def backfill_hr(api=None):
             continue
         gf = tracks.gpx_file(t["id"])
         sc = hr_sidecar(t["id"])
-        if (sc.exists() and sc.stat().st_size > 4) or (gf.exists() and "gpxtpx:hr" in gf.read_text(encoding="utf-8", errors="ignore")):
+        if (sc.exists() and len(_sc_load(sc)) >= 5) or (gf.exists() and "gpxtpx:hr" in gf.read_text(encoding="utf-8", errors="ignore")):
             continue
         todo.append((s, t, gf))
     log(f"Puls abgleichen: {len(todo)} Touren mit passendem Zepp-Training, aber ohne Puls")
@@ -285,6 +293,7 @@ def backfill_hr(api=None):
                 if n:
                     gf.write_text(text, encoding="utf-8")
             done += 1
+            log(f"  {t['id']}: {len(hr)} Pulswerte (Zepp-Daten: {len(str(det.get('heart_rate') or ''))} Zeichen, {len(pts)} Streckenpunkte)")
         except Exception as e:  # noqa
             log(f"  {t['id']}: {e}")
         time.sleep(0.2)
