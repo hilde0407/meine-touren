@@ -10,7 +10,7 @@ def _pts(n=40, hr=True):
     s = {"trackid": "1700000000"}
     ll = ";".join(["5000000000,800000000"] + ["100,100"] * (n - 1))
     d = {"longitude_latitude": ll, "time": ";".join(["0"] + ["10"] * (n - 1)), "altitude": ";".join(["10000"] * n),
-         "heart_rate": ";".join(f"{10 if i else 0},{100 + i}" for i in range(n)) if hr else "", "gait": ""}
+         "heart_rate": ";".join(("0,100" if i == 0 else "10,1") for i in range(n)) if hr else "", "gait": ""}
     return s, zepp.decode_points(s, d)
 
 
@@ -61,7 +61,7 @@ def test_backfill_matches_existing_tour_without_gpx(monkeypatch):
     db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,status,source) VALUES(?,?,?,?,?,?,?,?,?)",
                ("k99", "Komoot-Tour", "hike", 1700000030, 1700000400, 500.0, 370, "tour_recorded", "komoot"))
     det = {"longitude_latitude": ";".join(["5000000000,800000000"] + ["100,100"] * 39), "time": ";".join(["0"] + ["10"] * 39),
-           "altitude": ";".join(["10000"] * 40), "heart_rate": ";".join(f"{10 if i else 0},{100 + i}" for i in range(40)), "gait": ""}
+           "altitude": ";".join(["10000"] * 40), "heart_rate": ";".join(("0,100" if i == 0 else "10,1") for i in range(40)), "gait": ""}
 
     class Api:
         def history(self): return [{"trackid": "1700000000", "dis": "500", "run_time": "390"}]

@@ -210,11 +210,12 @@ def decode_points(summary, detail):
 
 
 def _hr_at(raw, all_t):
-    """Pulswert (Schläge/min, None = unbekannt) zu jedem Zeitpunkt: letzter gemessener Wert, höchstens 30 s alt."""
+    """Pulswert (Schläge/min, None = unbekannt) zu jedem Zeitpunkt. Zepp liefert „Zeitabstand,Pulsänderung“ je Messung (leerer Zeitabstand = 1 s,
+    erster Puls absolut, danach Änderungen); es gilt der letzte Wert, höchstens 30 s alt."""
     try:
         rows = [v.split(",") for v in filter(None, (raw or "").split(";"))]
-        ts = list(accumulate(int(r[0] or 1) for r in rows))
-        vals = [int(r[1]) if len(r) > 1 and r[1] else 0 for r in rows]
+        ts = list(accumulate(int(r[0]) if r[0] != "" else 1 for r in rows))
+        vals = list(accumulate(int(r[1]) if len(r) > 1 and r[1] != "" else 0 for r in rows))
     except (ValueError, IndexError):
         return [None] * len(all_t)
     out, j = [], -1

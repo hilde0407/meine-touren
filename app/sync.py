@@ -262,7 +262,8 @@ def backfill_hr(api=None):
         if not t:
             continue
         gf = tracks.gpx_file(t["id"])
-        if hr_sidecar(t["id"]).exists() or (gf.exists() and "gpxtpx:hr" in gf.read_text(encoding="utf-8", errors="ignore")):
+        sc = hr_sidecar(t["id"])
+        if (sc.exists() and sc.stat().st_size > 4) or (gf.exists() and "gpxtpx:hr" in gf.read_text(encoding="utf-8", errors="ignore")):
             continue
         todo.append((s, t, gf))
     log(f"Puls abgleichen: {len(todo)} Touren mit passendem Zepp-Training, aber ohne Puls")
