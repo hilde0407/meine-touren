@@ -27,12 +27,33 @@ const brg = (a, b) => {
     x = Math.cos(a[0] * r) * Math.sin(b[0] * r) - Math.sin(a[0] * r) * Math.cos(b[0] * r) * Math.cos((b[1] - a[1]) * r);
   return (Math.atan2(y, x) / r + 360) % 360;
 };
-function flightPath(raw) {
+/* Berge im Weg: Prüft entlang des Sehstrahls von der Kamera zum Streckenpunkt, ob das Gelände die Sicht verdeckt, und liefert den
+   steilsten Neigungswinkel (≤ base), bei dem die Sicht frei ist. elev(lng,lat) = Gelände relativ zum Streckenpunkt (null = unbekannt). */
+function clearPitch(elev, lng, lat, bearing, base, D, floor = 28) {
+  const br = (bearing * Math.PI) / 180,
+    kx = 111320 * Math.cos((lat * Math.PI) / 180),
+    ky = 110540,
+    aim = 25;                                        // Blickziel etwas über dem Boden, damit der Punkt selbst nicht verdeckt ist
+  for (let th = base; th >= floor; th -= 4) {
+    const a = (th * Math.PI) / 180,
+      dh = D * Math.sin(a),
+      hz = D * Math.cos(a);
+    let ok = true;
+    for (let k = 1; k <= 14 && ok; k++) {
+      const f = k / 15,
+        e = elev(lng - (Math.sin(br) * dh * (1 - f)) / kx, lat - (Math.cos(br) * dh * (1 - f)) / ky);
+      if (e != null && e > aim + (hz - aim) * (1 - f) - 25) ok = false;
+    }
+    if (ok) return th;
+  }
+  return floor;
+}
+function flightPath(raw, cap = 900) {
   // gleichmäßig nach Strecke abtasten, Höhe auffüllen, Kamerapfad glätten
   const cum = [0];
   for (let i = 1; i < raw.length; i++) cum.push(cum[i - 1] + hav(raw[i - 1], raw[i]));
   const total = cum[cum.length - 1] || 1,
-    N = Math.max(60, Math.min(900, Math.round(total / 8))),
+    N = Math.max(60, Math.min(cap, Math.round(total / 8))),
     P = [];
   let la = raw.find(p => p[2] != null)?.[2] ?? 0;
   const alt = raw.map(p => (la = p[2] ?? la));
@@ -66,6 +87,47 @@ function flightPath(raw) {
   });
   return {P, S, total, cum};
 }
+/* Reiseflug: Touren nacheinander; dazwischen steigt die Kamera auf, überfliegt die Lücke mit sanft an- und abschwellendem Tempo
+   (Positionen mit smoothstep) und sinkt über der nächsten Tour wieder ab. T = Zeitpunkt (s) jedes Punkts, tq = Fortschritt im Übergang. */
+function flightSet(raws, names) {
+  const parts = raws.map(r => flightPath(r, 400)),
+    nTour = parts.reduce((a, p) => a + p.P.length, 0),
+    step = 90 / nTour,
+    P = [],
+    S = [],
+    T = [];
+  let off = 0,
+    up = 0,
+    t = 0;
+  parts.forEach((pt, i) => {
+    if (P.length) {
+      const a = P[P.length - 1],
+        b = pt.P[0],
+        km = hav([a.lat, a.lng], [b.lat, b.lng]) / 1000,
+        sec = Math.max(4, Math.min(10, 3.5 + km * 0.12)),
+        K = Math.round(sec * 30),
+        lift = Math.max(1.5, Math.min(3.4, 1 + Math.log2(1 + km) * 0.55));
+      for (let j = 1; j < K; j++) {
+        const q = j / K,
+          e = q * q * (3 - 2 * q),
+          o = {lat: a.lat + (b.lat - a.lat) * e, lng: a.lng + (b.lng - a.lng) * e, alt: a.alt + (b.alt - a.alt) * e, d: off, up, trans: true, tq: q, lift, name: names[i]};
+        t += sec / K;
+        T.push(t);
+        P.push(o);
+        S.push({lat: o.lat, lng: o.lng});
+      }
+    }
+    pt.P.forEach((p, k) => {
+      if (P.length) t += step;
+      T.push(t);
+      P.push({...p, d: p.d + off, up: p.up + up, name: names[i]});
+      S.push(pt.S[k]);
+    });
+    off += pt.total;
+    up += pt.P[pt.P.length - 1].up;
+  });
+  return {P, S, total: off, cum: null, T, Ttot: t || 1};
+}
 VIEWS.flight = async id => {
   id = decodeURIComponent(id || "");
   const SET = id.startsWith("set:"),
@@ -87,12 +149,16 @@ VIEWS.flight = async id => {
     <select id="fv" title="Tempo"><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option></select>
     <select id="fc" title="Kamera"><option value="follow">Kamera folgt</option><option value="free">Kamera frei</option></select>
     <select id="fz" title="Flughöhe"><option value="16">nah</option><option value="14.8" selected>mittel</option><option value="13.4">weit</option></select>
-    <select id="fpi" title="Neigung"><option value="55">flach</option><option value="68" selected>schräg</option><option value="78">sehr schräg</option></select>
+    <select id="fpi" title="Neigung"><option value="auto" selected>automatisch (weicht Bergen aus)</option><option value="55">flach</option><option value="68">schräg</option><option value="78">sehr schräg</option></select>
     <select id="fb" title="Karte"><option value="osm">Straßenkarte</option><option value="topo">Topografisch</option><option value="sat">Satellit</option></select>
     <button class="btn ghost sm" id="frec" title="Flug als Video aufnehmen und speichern">⏺ Video</button><button class="btn ghost sm" id="ffs" title="Vollbild">⛶</button></div><div class="fph" id="fph"><img id="fphi" alt=""><span id="fphc"></span></div><div class="fmsg" id="fmsg">Lade Strecke …</div></div>`;
-  const raw = cleanPts(
-    await api(SET ? `/api/collection/coords?ids=${encodeURIComponent(id.slice(4))}` : `/api/tours/${t.id}/coords`).catch(() => [])
-  );
+  let raws = [];
+  if (SET)
+    for (const tid of id.slice(4).split(",").filter(x => BY[x]).sort((a, b) => (BY[a].start_ts || 0) - (BY[b].start_ts || 0))) {
+      const r = cleanPts(await api(`/api/tours/${tid}/coords`).catch(() => []));
+      if (r.length >= 2) raws.push({r, name: BY[tid].name || tid});
+    }
+  const raw = SET ? raws.flatMap(x => x.r) : cleanPts(await api(`/api/tours/${t.id}/coords`).catch(() => []));
   if (raw.length < 2) {
     $("#fmsg").textContent = "Für diese Tour liegt noch keine Strecke vor (Tour mit Komoot abgleichen).";
     return;
@@ -103,7 +169,8 @@ VIEWS.flight = async id => {
     $("#fmsg").textContent = "Dieser Browser unterstützt kein WebGL, die 3D-Ansicht ist nicht möglich.";
     return;
   }
-  const {P, S, total, cum} = flightPath(raw),
+  const FS = SET ? flightSet(raws.map(x => x.r), raws.map(x => x.name)) : flightPath(raw),
+    {P, S, total, cum} = FS,
     N = P.length,
     lnglat = p => [p.lng, p.lat];
   const ras = (tiles, max, attr) => ({type: "raster", tiles, tileSize: 256, maxzoom: max, attribution: attr}),
@@ -147,7 +214,30 @@ VIEWS.flight = async id => {
   const dot = document.createElement("div");
   dot.className = "fdot";
   const mk = new maplibregl.Marker({element: dot}).setLngLat(lnglat(P[0])).addTo(m);
-  const line = (a, b) => ({type: "Feature", geometry: {type: "LineString", coordinates: P.slice(a, b).map(lnglat)}});
+  const line = (a, b) => {                      // Übergänge zwischen Touren werden nicht als Linie gezeichnet
+    const segs = [];
+    let cur = [];
+    for (let i = a; i < b; i++) {
+      if (P[i].trans) {
+        if (cur.length > 1) segs.push(cur);
+        cur = [];
+      } else cur.push(lnglat(P[i]));
+    }
+    if (cur.length > 1) segs.push(cur);
+    return {type: "Feature", geometry: {type: "MultiLineString", coordinates: segs.length ? segs : [[lnglat(P[0]), lnglat(P[0])]]}};
+  };
+  const Ttot = SET ? FS.Ttot : 100,
+    fOf = uu => {                               // Position (Punktindex) zur Abspielzeit u (0..1)
+      if (!SET) return uu * (N - 1);
+      const tt = uu * Ttot;
+      let lo = 0,
+        hi = N - 1;
+      while (hi - lo > 1) {
+        const mid = (lo + hi) >> 1;
+        FS.T[mid] <= tt ? (lo = mid) : (hi = mid);
+      }
+      return Math.min(N - 1, lo + Math.max(0, Math.min(1, (tt - FS.T[lo]) / (FS.T[hi] - FS.T[lo] || 1))));
+    };
   m.once("style.load", () => {
     m.setTerrain({source: "dem", exaggeration: 1.5});
     m.addSource("full", {type: "geojson", data: line(0, N)});
@@ -183,14 +273,19 @@ VIEWS.flight = async id => {
     last = 0,
     follow = true,
     dragged = false,
-    lastDone = -1;
+    lastDone = -1,
+    pitchNow = 68,
+    pitchAt = 0,
+    pitchWant = 68,
+    zBase = 14.8,
+    zoomLift = 0;
   const at = (A, f, key) => {
     const i = Math.min(N - 2, Math.floor(f)),
       r = f - i;
     return A[i][key] + (A[i + 1][key] - A[i][key]) * r;
   };
   const place = () => {
-    const f = u * (N - 1),
+    const f = fOf(u),
       lat = at(S, f, "lat"),
       lng = at(S, f, "lng"),
       cur = {lat: at(P, f, "lat"), lng: at(P, f, "lng")};
@@ -207,6 +302,8 @@ VIEWS.flight = async id => {
   const hud = f => {
     const i = Math.min(N - 1, Math.round(f)),
       p = P[i];
+    if (SET && p.trans) return ($("#fh").innerHTML = `✈ weiter zu <b>${esc(p.name)}</b>`);
+    if (SET) return ($("#fh").innerHTML = `<b>${esc(p.name)}</b> · ${nf(p.d / 1000, 1)} / ${nf(total / 1000, 1)} km · ${nf(p.alt, 0)} m`);
     $("#fh").innerHTML = `<b>${nf(p.d / 1000, 1)}</b> / ${nf(total / 1000, 1)} km · <b>${nf(p.alt, 0)}</b> m · ↑ ${nf(p.up, 0)} m`;
   };
   // Fotos entlang der Strecke: Marker + Einblendung beim Vorbeifliegen
@@ -246,7 +343,7 @@ VIEWS.flight = async id => {
       H = rec.c.height,
       x = rec.x;
     x.drawImage(c, 0, 0, W, H);
-    const p = P[Math.min(N - 1, Math.round(u * (N - 1)))];
+    const p = P[Math.min(N - 1, Math.round(fOf(u)))];
     x.fillStyle = "rgba(14,42,43,.8)";
     x.fillRect(0, 0, W, 48);
     x.textBaseline = "middle";
@@ -311,12 +408,13 @@ VIEWS.flight = async id => {
     mr.start(500);
     $("#frec").textContent = "⏹ Aufnahme beenden (läuft …)";
   };
+  const rec_skip = () => false;
   const tick = now => {
     if (map !== m) return;
     const dt = Math.max(0, Math.min(100, now - last));
     last = now;
     if (playing) {
-      u += (dt / 1000 / 100) * +$("#fv").value;
+      u += (dt / 1000 / Ttot) * +$("#fv").value;
       if (u >= 1) {
         u = 1;
         playing = false;
@@ -339,7 +437,30 @@ VIEWS.flight = async id => {
     if (follow) {
       const d = ((tgt - bear + 540) % 360) - 180;
       bear = (bear + d * Math.min(1, dt / 600) + 360) % 360;
-      m.jumpTo({center: [lng, lat], bearing: bear});
+      const o = {center: [lng, lat], bearing: bear};
+      if ($("#fpi").value === "auto" && !rec_skip()) {     // Gelände im Weg? Neigung sanft verringern (Blick steiler von oben), danach wieder zurück
+        if (now - pitchAt > 130) {
+          pitchAt = now;
+          try {
+            const pm = (512 * 2 ** m.getZoom()) / (40075016.686 * Math.cos((lat * Math.PI) / 180)),
+              D = m.transform.cameraToCenterDistance / pm;
+            pitchWant = isFinite(D) && D > 0 ? clearPitch((a, b) => m.queryTerrainElevation([a, b]), lng, lat, bear, 68, D) : 68;
+          } catch (e) {
+            pitchWant = 68;
+          }
+        }
+        const pt = P[Math.min(N - 1, Math.round(f))];
+        if (SET && pt.trans) pitchWant = Math.min(pitchWant, 68 - 22 * Math.sin(Math.PI * pt.tq));    // im Übergang steiler von oben
+        const step = Math.min(1, dt / 700);                 // weich: ca. 0,7 s Annäherung, nach unten schneller als nach oben
+        pitchNow += (pitchWant - pitchNow) * step * (pitchWant < pitchNow ? 1 : 0.35);
+        o.pitch = pitchNow;
+      }
+      if (SET) {                                            // Reiseflug: im Übergang aufsteigen (herauszoomen) und danach wieder absinken
+        const pt = P[Math.min(N - 1, Math.round(f))];
+        zoomLift += ((pt.trans ? pt.lift * Math.sin(Math.PI * pt.tq) : 0) - zoomLift) * Math.min(1, dt / 450);
+        o.zoom = zBase - zoomLift;
+      }
+      m.jumpTo(o);
     }
     requestAnimationFrame(tick);
   };
@@ -358,8 +479,14 @@ VIEWS.flight = async id => {
     follow = $("#fc").value === "follow";
     if (follow) bear = m.getBearing();
   };
-  $("#fz").onchange = () => m.setZoom(+$("#fz").value);
-  $("#fpi").onchange = () => m.setPitch(+$("#fpi").value);
+  $("#fz").onchange = () => {
+    zBase = +$("#fz").value;
+    m.setZoom(zBase - (follow ? zoomLift : 0));
+  };
+  $("#fpi").onchange = () => {
+    if ($("#fpi").value === "auto") pitchNow = m.getPitch();
+    else m.setPitch(+$("#fpi").value);
+  };
   $("#fb").onchange = () => {
     setStyle($("#fb").value);
     try {

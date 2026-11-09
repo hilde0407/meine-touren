@@ -195,6 +195,7 @@ VIEWS.tour = async id => {
         .addTo(map)
         .bindTooltip("Ziel");
       profile(c, t);
+      if (window.pulsCard) pulsCard(t);
       return c;
     })
     .catch(e => {

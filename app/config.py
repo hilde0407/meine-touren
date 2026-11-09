@@ -14,6 +14,7 @@ DEFAULTS = {
     "pdf_photos": "1",           # 1 = Fotos in PDF-Berichten (Tourblatt, Reisebericht, Jahresrückblick)
     "pdf_photo_n": "6",          # Anzahl Fotos im PDF
     "home_name": "",             # Heimatort (Anzeigename); zusammen mit home_lat/home_lng – leer = automatisch aus den Touren erkannt
+    "hr_max": "",                # Maximalpuls für die Pulszonen (leer = 185 bzw. höchster gemessener Wert)
     "home_lat": "",
     "home_lng": "",
     "plan_enabled": "1",         # 1 = Tourplanung ist eingeschaltet
@@ -57,7 +58,7 @@ DEFAULTS = {
 SECRET_KEYS = {"zepp_password", "zepp_token", "komoot_password", "strava_client_secret", "strava_tokens", "suunto_client_secret", "suunto_key", "suunto_tokens", "garmin_tokens"}
 ENCRYPTED_KEYS = SECRET_KEYS | {"zepp_key"}     # werden verschlüsselt in der Datenbank abgelegt (app/secret.py)
 
-VERSION = "3.3.0 · Meine Touren (2026-11-08)"
+VERSION = "3.4.0 · Meine Touren (2026-11-09)"
 
 
 SYSTEM_DB = DATA_DIR / "system.sqlite"          # Benutzer, Sitzungen, Freigaben

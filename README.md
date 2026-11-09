@@ -440,6 +440,11 @@ Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → An
 
 **Fotos aus der App in einer anderen Zeitzone (ab Server 2.7.4 / App 2.5.1):** Die App schickt mit jedem Foto-Upload die Zeitzone des Telefons mit. Hat die Kamera keine Zeitzone ins Foto geschrieben, trägt der Server sie nach. Vorher wurde die Aufnahmezeit als Ortszeit des Servers gedeutet – war das Handy z. B. auf den Kanaren (UTC+0) und der Server in Deutschland, lag das Foto eine Stunde neben der Tour und wurde nicht zugeordnet.
 
+### Neu in 3.4 – Puls und bessere 3D-Kamera
+- **Herzfrequenz direkt von der Uhr:** Der Zepp-Import (Verwaltung → Import) übernimmt jetzt auch den Puls und speichert ihn im GPX (`gpxtpx:hr`). GPX/TCX-Dateien mit Puls (z. B. aus Gadgetbridge) werden ebenfalls verstanden. Weder Komoot noch Strava werden benötigt.
+- **Pulskarte in der Tourseite:** Verlauf, Ø/Max/Min und Zeit in fünf Pulszonen. Maximalpuls standardmäßig 185 bpm (Einstellung `hr_max`) oder der höchste gemessene Wert. Bereits importierte Touren ohne Puls: Training in Zepp erneut importieren.
+- **3D-Flug:** Im Modus „Kamera folgt“ weicht die Neigung Bergen automatisch aus (Auswahl „Neigung: automatisch“; feste Werte bleiben möglich). Der Reiseflug („3D-Flug über alles“) fliegt die Touren nacheinander ab: zwischen zwei Touren steigt die Kamera auf, überfliegt die Lücke mit sanft an- und abschwellendem Tempo und sinkt über der nächsten Tour wieder ab.
+
 ### Neu in 3.3 – Heimatort
 In der **Verwaltung** gibt es das Feld **Heimatort**: Ort oder Adresse suchen (OpenStreetMap), Treffer anklicken, „Einstellungen speichern“. Touren in der Nähe (bis etwa 60 km) zählen dann nicht als Reise. Ohne Eintrag erkennt die App den Heimatort wie bisher aus deinen Touren. Die Android-App nutzt dieselbe Oberfläche; in **Mein Tourentagebuch** 1.2 ersetzt die Ortssuche die Eingabe von Koordinaten.
 

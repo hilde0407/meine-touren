@@ -682,4 +682,12 @@ Noch kein Heimatort eingetragen. || No home place set yet. || Aucun lieu de rés
 Nichts gefunden. || Nothing found. || Rien trouvé. || No se encontró nada.
 Suche … || Searching … || Recherche … || Buscando …
 Bitte einen Ort eingeben || Please enter a place || Veuillez saisir un lieu || Introduce un lugar
+Herzfrequenz || Heart rate || Fréquence cardiaque || Frecuencia cardíaca
+Sehr leicht || Very light || Très léger || Muy suave
+Leicht (Fettverbrennung) || Light (fat burning) || Léger (brûle-graisses) || Suave (quema de grasa)
+Moderat (Ausdauer) || Moderate (endurance) || Modéré (endurance) || Moderado (resistencia)
+Hart (Tempo) || Hard (tempo) || Intense (tempo) || Intenso (ritmo)
+Maximal || Maximum || Maximal || Máximo
+Neigung: automatisch (weicht Bergen aus) || Tilt: automatic (avoids mountains) || Inclinaison : automatique (évite les montagnes) || Inclinación: automática (evita montañas)
+weiter zu || next: || ensuite vers || a continuación:
 `;

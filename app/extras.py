@@ -147,6 +147,32 @@ def api_gpx(tour_id: str):
     return Response(tour_gpx(t, pts), media_type="application/gpx+xml", headers={"Content-Disposition": f'attachment; filename="{fn}.gpx"'})
 
 
+@router.get("/api/tours/{tour_id}/hr")
+def api_hr(tour_id: str):
+    """Pulsverlauf einer lokalen Tour (aus den Herzfrequenz-Werten der GPX-Datei)."""
+    from . import gpxtools, tracks
+    f = tracks.gpx_file(tour_id)
+    if not f.exists():
+        return {"n": 0}
+    typ, raw = gpxtools._points_gpx_hr(f.read_text(encoding="utf-8", errors="ignore"))
+    rows = [(gpxtools.parse_time(t), hr, i) for i, (la, lo, el, t, hr) in enumerate(raw) if hr and not (la == 0 and lo == 0)]
+    if len(rows) < 5:
+        return {"n": 0}
+    t0 = gpxtools.parse_time(raw[0][3])
+    pts = [[int((t - t0).total_seconds()), hr, i] for t, hr, i in rows]     # [Sekunden, Puls, Punktindex]
+    try:
+        hmax = int(db.get("hr_max") or 0) or 185
+    except ValueError:
+        hmax = 185
+    hmax = max(hmax, max(p[1] for p in pts))
+    zs = [0] * 5
+    for a, b in zip(pts, pts[1:]):
+        dt = min(b[0] - a[0], 30)
+        zs[min(4, max(0, int((a[1] / hmax - 0.5) / 0.1)))] += dt
+    vals = [p[1] for p in pts]
+    return {"n": len(pts), "pts": pts, "avg": round(sum(vals) / len(vals)), "max": max(vals), "min": min(vals), "hrmax": hmax, "zones": zs, "total": len(raw)}
+
+
 # ---------- Rekorde: höchste Punkte aus den gespeicherten Strecken ----------
 _alt_cache = {}
 

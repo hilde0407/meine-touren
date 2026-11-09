@@ -205,13 +205,33 @@ def decode_points(summary, detail):
     al = _interp_col(alt, track_times, all_t)
     from .elev import clean
     hs = clean([h / 100 for h in al])                       # Platzhalterwerte („keine Höhe“) nicht als echte Höhe übernehmen
-    return [(start + t, a / 1e8, o / 1e8, h) for t, a, o, h in zip(all_t, la, lo, hs)]
+    hr = _hr_at(detail.get("heart_rate"), all_t)
+    return [(start + t, a / 1e8, o / 1e8, h, b) for t, a, o, h, b in zip(all_t, la, lo, hs, hr)]
+
+
+def _hr_at(raw, all_t):
+    """Pulswert (Schläge/min, None = unbekannt) zu jedem Zeitpunkt: letzter gemessener Wert, höchstens 30 s alt."""
+    try:
+        rows = [v.split(",") for v in filter(None, (raw or "").split(";"))]
+        ts = list(accumulate(int(r[0] or 1) for r in rows))
+        vals = [int(r[1]) if len(r) > 1 and r[1] else 0 for r in rows]
+    except (ValueError, IndexError):
+        return [None] * len(all_t)
+    out, j = [], -1
+    for t in all_t:
+        while j + 1 < len(ts) and ts[j + 1] <= t:
+            j += 1
+        v = vals[j] if j >= 0 and t - ts[j] <= 30 else 0
+        out.append(v if 30 <= v <= 240 else None)
+    return out
 
 
 def points_to_gpx(summary, pts, sport):
     from datetime import datetime, timezone
     iso = lambda ts: datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    body = "".join(f'<trkpt lat="{la}" lon="{lo}"><ele>{al}</ele><time>{iso(t)}</time></trkpt>\n' for t, la, lo, al in pts)
-    return (f'<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Zepp" xmlns="http://www.topografix.com/GPX/1/1">\n'
+    body = "".join(f'<trkpt lat="{la}" lon="{lo}"><ele>{al}</ele><time>{iso(t)}</time>'
+                   + (f'<extensions><gpxtpx:TrackPointExtension><gpxtpx:hr>{hr}</gpxtpx:hr></gpxtpx:TrackPointExtension></extensions>' if hr else "")
+                   + '</trkpt>\n' for t, la, lo, al, hr in pts)
+    return (f'<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Zepp" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1">\n'
             f'<metadata><time>{iso(int(summary["trackid"]))}</time></metadata>\n'
             f'<trk><name>{iso(int(summary["trackid"]))}</name><type>{sport}</type><trkseg>\n{body}</trkseg></trk></gpx>\n')
