@@ -369,3 +369,7 @@ html:not(.mob) .tact-bar .tk{flex:0 0 auto;min-height:38px;font-size:15px;paddin
 .tactl .tl{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;padding:12px 16px;min-height:52px}
 .tactl .tl small{font-weight:400;color:var(--mut,#5d716f);font-size:13px}
 .tactl .tl.danger{margin-top:10px;color:#b42318;border-color:#b4231855}
+
+.hrt{color:#d6453d;display:inline-block;animation:hrt 1.1s ease-in-out infinite;transform-origin:center}
+@keyframes hrt{0%,100%{transform:scale(1)}14%{transform:scale(1.28)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.hrt{animation:none}}

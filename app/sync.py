@@ -239,6 +239,36 @@ def _sc_load(path):
         return []
 
 
+_HR_CACHE = {}
+
+
+def tours_with_hr():
+    """IDs aller Touren mit Pulsdaten (Zusatzdatei oder Puls im lokalen GPX); billig, da nur Dateigrößen/-zeiten geprüft werden."""
+    ids = set()
+    if not config.TRACK_DIR.exists():
+        return ids
+    for f in config.TRACK_DIR.iterdir():
+        n = f.name
+        try:
+            st = f.stat()
+        except OSError:
+            continue
+        if n.endswith(".hr.json"):
+            if st.st_size >= 40:
+                ids.add(n[:-8])
+        elif n.endswith(".gpx"):
+            c = _HR_CACHE.get(n)
+            if not c or c[0] != st.st_mtime_ns:
+                try:
+                    has = "gpxtpx:hr" in f.read_text(encoding="utf-8", errors="ignore")
+                except OSError:
+                    has = False
+                c = _HR_CACHE[n] = (st.st_mtime_ns, has)
+            if c[1]:
+                ids.add(n[:-4])
+    return ids
+
+
 def _zepp_api():
     token = db.get("zepp_token")
     em, pw = db.get("zepp_email"), db.get("zepp_password")

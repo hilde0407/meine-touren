@@ -256,7 +256,9 @@ def api_tours(year: int = 0, q: str = "", limit: int = 20000):
         "SELECT t.*, (SELECT COUNT(*) FROM photos p WHERE p.tour_id=t.id) AS photos, (SELECT note FROM tour_notes n WHERE n.id=t.id) AS note, (SELECT stars FROM tour_rating r WHERE r.id=t.id) AS stars, (SELECT orig_up FROM elev_fix e WHERE e.id=t.id) AS fix_up, (SELECT group_concat(tag, '|') FROM tour_tags x WHERE x.id=t.id) AS tags, g.country AS g_country, g.state AS g_state, g.county AS g_county, g.place AS g_place FROM tours t LEFT JOIN tour_geo g ON g.id=t.id "
         "WHERE t.start_ts IS NOT NULL ORDER BY t.start_ts DESC LIMIT ?", (limit,))
     out = []
+    hr_ids = sync.tours_with_hr()
     for t in rows:
+        t["has_hr"] = t["id"] in hr_ids
         d = datetime.fromtimestamp(t["start_ts"], tz=TZ)
         if year and d.year != year:
             continue

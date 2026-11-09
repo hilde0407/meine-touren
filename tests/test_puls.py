@@ -70,3 +70,14 @@ def test_backfill_matches_existing_tour_without_gpx(monkeypatch):
     r = TestClient(main.app).get("/api/tours/k99/hr").json()
     assert r["n"] >= 30 and r["max"] > 120
     sync.backfill_hr(Api())                                   # zweiter Lauf: nichts mehr zu tun
+
+
+def test_tour_list_flags_hr():
+    from fastapi.testclient import TestClient
+    from app import main
+    s, pts = _pts()
+    tracks.adopt(zepp.points_to_gpx(s, pts, "hike"), "h.gpx", ident="zt8")
+    s2, p2 = _pts(hr=False)
+    tracks.adopt(zepp.points_to_gpx(s2, p2, "hike"), "h2.gpx", ident="zt9")
+    r = {t["id"]: t["has_hr"] for t in TestClient(main.app).get("/api/tours").json()}
+    assert r["zt8"] is True and r["zt9"] is False

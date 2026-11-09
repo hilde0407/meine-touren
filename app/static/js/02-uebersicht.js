@@ -158,7 +158,7 @@ VIEWS.dash = async (_, q) => {
 const seasonOfMonth = m => (m >= 5 && m <= 10 ? "sommer" : "winter");
 const seasonOf = d => seasonOfMonth(+String(d).slice(5, 7));
 function tourRow(t) {
-  return `<a class="tr" href="#/tour/${t.id}">${miniRoute(t.id, t.sport)}<span><div class="nm">${esc(t.name)}</div><div class="s"><span>${dateS(t.date)}, ${timeS(t.date)}</span><span><i style="background:${sCol(t.sport)}"></i>${sName(t.sport)}</span>${t.photos ? `<span>${t.photos} Fotos</span>` : ""}${t.stars ? `<span class="stars" title="Meine Bewertung">${"★".repeat(t.stars)}</span>` : ""}</div></span>
+  return `<a class="tr" href="#/tour/${t.id}">${miniRoute(t.id, t.sport)}<span><div class="nm">${esc(t.name)}</div><div class="s"><span>${dateS(t.date)}, ${timeS(t.date)}</span><span><i style="background:${sCol(t.sport)}"></i>${sName(t.sport)}</span>${t.photos ? `<span>${t.photos} Fotos</span>` : ""}${t.has_hr ? `<span class="hrt" title="Mit Herzfrequenz">❤</span>` : ""}${t.stars ? `<span class="stars" title="Meine Bewertung">${"★".repeat(t.stars)}</span>` : ""}</div></span>
   <span class="n"><span>${nf(t.km, 1)}<small>km</small></span><span>${nf(t.up_m, 0)}<small>m auf</small></span><span>${nf(t.h, 1)}<small>Std.</small></span></span></a>`;
 }
 
