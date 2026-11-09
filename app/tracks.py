@@ -13,6 +13,41 @@ def gpx_file(tid):
     return config.TRACK_DIR / f"{tid}.gpx"
 
 
+def hr_sidecar(tid):
+    """Zusatzdatei mit dem Puls einer Tour: [[Sekunden seit Start, bpm], …] (für Touren ohne eigenes GPX, z. B. aus Komoot)."""
+    return config.TRACK_DIR / f"{tid}.hr.json"
+
+
+def hr_series(tid, text=None):
+    """Puls einer Tour als [(unix_ts, bpm)] – aus der Zusatzdatei, sonst aus dem lokalen GPX (text = bereits gelesener GPX-Text)."""
+    import json
+    tid = str(tid)
+    sc = hr_sidecar(tid)
+    if text is None and sc.exists():
+        try:
+            data = json.loads(sc.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            data = []
+        t = db.one("SELECT start_ts FROM tours WHERE id=?", (tid,))
+        if len(data) >= 5 and t and t["start_ts"]:
+            return [(t["start_ts"] + int(a), int(b)) for a, b in data]
+    if text is None:
+        f = gpx_file(tid)
+        if not f.exists():
+            return []
+        text = f.read_text(encoding="utf-8", errors="ignore")
+    if "gpxtpx:hr" not in text and "<hr>" not in text:
+        return []
+    out = []
+    for la, lo, el, t, hr in gpxtools._points_gpx_hr(text)[1]:
+        if hr:
+            try:
+                out.append((gpxtools.parse_time(t).timestamp(), hr))
+            except ValueError:
+                pass
+    return out
+
+
 def points_from_gpx(text):
     """[(lat, lng, alt, t_ms_seit_start)] aus GPX-Text."""
     typ, raw = gpxtools._points_gpx(text)
@@ -85,7 +120,7 @@ def delete_local(tid):
         col = "tour_id" if tb in ("tour_uploads", "tour_wps") else "id"
         db.execute(f"DELETE FROM {tb} WHERE {col}=?", (str(tid),))
     db.execute("UPDATE photos SET tour_id=NULL WHERE tour_id=? AND COALESCE(manual,0)=0", (str(tid),))
-    for p in (gpx_file(tid), config.TRACK_DIR / f"{tid}.hr.json", routes.path_full(tid), routes.path_small(tid)):
+    for p in (gpx_file(tid), hr_sidecar(tid), routes.path_full(tid), routes.path_small(tid)):
         p.unlink(missing_ok=True)
 
 

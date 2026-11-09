@@ -1,6 +1,6 @@
 name: Docker-Image
 
-# Baut das Image bei jeder Release (und manuell) und legt es in der GitHub Container Registry ab.
+# Release -> Tags <Version> und latest. Manuell gestartet -> nur Tag „test“ (zum Ausprobieren auf dem eigenen Server, ohne latest zu verändern).
 on:
   release:
     types: [published]
@@ -29,8 +29,8 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest
-            type=raw,value=main,enable=${{ github.event_name == 'workflow_dispatch' }}
+            type=raw,value=latest,enable=${{ github.event_name == 'release' }}
+            type=raw,value=test,enable=${{ github.event_name == 'workflow_dispatch' }}
       - uses: docker/build-push-action@v6
         with:
           context: .

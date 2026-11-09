@@ -168,11 +168,11 @@ def test_browser_add_photos_to_tour_with_wrong_camera_clock(tour_server):
         assert "(per GPS)" in txt and "−3 Std. 7 Min." in txt
         pg.click("[data-mp='0']")
         pg.wait_for_selector("[data-map='0'].leaflet-container", timeout=10000)
-        pg.wait_for_function("document.querySelector(\"[data-map='0']\").textContent.includes('6 von 6 Fotos liegen nach ihrer Zeit auf der Strecke')", timeout=10000)
+        pg.wait_for_function("() => document.querySelector(\"[data-map='0']\").textContent.includes('6 von 6 Fotos liegen nach ihrer Zeit auf der Strecke')", timeout=10000)
         if os.environ.get("MT_SHOT"):
             pg.screenshot(path=os.environ["MT_SHOT"])
         pg.click("#pigo")
-        pg.wait_for_function("document.querySelector('#pib') && document.querySelector('#pib').textContent.includes('✓')", timeout=90000)
+        pg.wait_for_function("() => document.querySelector('#pib') && document.querySelector('#pib').textContent.includes('✓')", timeout=90000)
         ph = json.load(urllib.request.urlopen(f"{base}/api/photos?tour_id={tid}&limit=50"))
         assert len(ph) == 6
         got = sorted(p["taken_ts"] for p in ph)

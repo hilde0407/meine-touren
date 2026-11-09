@@ -222,51 +222,10 @@ def export_zepp(limit=None):
         log(f"Zepp: {n_ad} Training(s) als lokale Tour übernommen")
     log(f"Zepp: {n_gps} GPS-Dateien geschrieben nach {config.EXPORT_DIR} (es wird nichts hochgeladen)")
     try:
-        backfill_hr(api)                                 # passende vorhandene Touren (auch Komoot/Datei) um den Puls ergänzen
+        from . import puls
+        puls.backfill_hr(api)                                 # passende vorhandene Touren (auch Komoot/Datei) um den Puls ergänzen
     except Exception as e:  # noqa
         log(f"Puls abgleichen fehlgeschlagen: {e}")
-
-
-def hr_sidecar(tid):
-    return config.TRACK_DIR / f"{tid}.hr.json"
-
-
-def _sc_load(path):
-    import json
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return []
-
-
-_HR_CACHE = {}
-
-
-def tours_with_hr():
-    """IDs aller Touren mit Pulsdaten (Zusatzdatei oder Puls im lokalen GPX); billig, da nur Dateigrößen/-zeiten geprüft werden."""
-    ids = set()
-    if not config.TRACK_DIR.exists():
-        return ids
-    for f in config.TRACK_DIR.iterdir():
-        n = f.name
-        try:
-            st = f.stat()
-        except OSError:
-            continue
-        if n.endswith(".hr.json"):
-            if st.st_size >= 40:
-                ids.add(n[:-8])
-        elif n.endswith(".gpx"):
-            c = _HR_CACHE.get(n)
-            if not c or c[0] != st.st_mtime_ns:
-                try:
-                    has = "gpxtpx:hr" in f.read_text(encoding="utf-8", errors="ignore")
-                except OSError:
-                    has = False
-                c = _HR_CACHE[n] = (st.st_mtime_ns, has)
-            if c[1]:
-                ids.add(n[:-4])
-    return ids
 
 
 def _zepp_api():
@@ -282,52 +241,6 @@ def _zepp_api():
     if not token:
         raise RuntimeError("Zepp-Zugangsdaten fehlen (Einstellungen)")
     return zepp.ZeppApi(token, db.get("zepp_host"))
-
-
-def backfill_hr(api=None):
-    """Puls zu Touren nachladen, für die es ein passendes Zepp-Training gibt (gleiche ID z<Nr> oder gleicher Start/gleiche Strecke –
-    auch Komoot- oder Datei-Touren). Touren, Notizen und Fotos bleiben unberührt: der Puls kommt in eine Zusatzdatei (und ins lokale GPX)."""
-    import json
-    api = api or _zepp_api()
-    config.TRACK_DIR.mkdir(parents=True, exist_ok=True)
-    tours = db.query("SELECT id,start_ts,dist_m,dur_s FROM tours")
-    byid = {t["id"]: t for t in tours}
-    tol = db.get_int("dup_tolerance_s", 300)
-    todo = []
-    for s in api.history():
-        tr = int(s["trackid"])
-        t = byid.get(f"z{tr}") or is_duplicate(tr, float(s.get("dis") or 0), int(float(s.get("run_time") or 0)), tours, tol)
-        if not t:
-            continue
-        gf = tracks.gpx_file(t["id"])
-        sc = hr_sidecar(t["id"])
-        if (sc.exists() and len(_sc_load(sc)) >= 5) or (gf.exists() and "gpxtpx:hr" in gf.read_text(encoding="utf-8", errors="ignore")):
-            continue
-        todo.append((s, t, gf))
-    log(f"Puls abgleichen: {len(todo)} Touren mit passendem Zepp-Training, aber ohne Puls")
-    done = 0
-    for i, (s, t, gf) in enumerate(todo, 1):
-        jobs.progress(f"Puls {i}/{len(todo)}")
-        try:
-            det = api.detail(s)
-            pts = zepp.decode_points(s, det)
-            hr = [(p[0], p[4]) for p in pts if p[4]]
-            if not hr:
-                raw = str(det.get("heart_rate") or "")
-                log(f"  {t['id']}: kein Puls erkannt – Zepp-Feld heart_rate: " + (f"{len(raw)} Zeichen, Anfang „{raw[:80]}“" if raw else "leer"))
-                hr_sidecar(t["id"]).write_text("[]", encoding="utf-8")            # nicht bei jedem Lauf erneut abfragen
-                continue
-            hr_sidecar(t["id"]).write_text(json.dumps([[a - int(s["trackid"]), b] for a, b in hr]), encoding="utf-8")
-            if gf.exists():
-                text, n = tracks.merge_hr(gf.read_text(encoding="utf-8"), hr)
-                if n:
-                    gf.write_text(text, encoding="utf-8")
-            done += 1
-            log(f"  {t['id']}: {len(hr)} Pulswerte (Zepp-Daten: {len(str(det.get('heart_rate') or ''))} Zeichen, {len(pts)} Streckenpunkte)")
-        except Exception as e:  # noqa
-            log(f"  {t['id']}: {e}")
-        time.sleep(0.2)
-    log(f"Puls abgleichen: {done} Touren ergänzt")
 
 
 def adopt_workout(trackid):

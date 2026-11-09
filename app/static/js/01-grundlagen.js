@@ -422,3 +422,16 @@ function loadRoutesLater() {
   if (ROUTES) return;
   loadRoutes().then(patchMinis).catch(() => {});
 }
+
+/* Kleine Aktionen ohne eingebettetes JavaScript im HTML (damit die Content-Security-Policy Inline-Skripte verbieten kann) */
+document.addEventListener("click", e => {
+  const el = e.target.closest && e.target.closest("[data-act]");
+  if (!el) return;
+  const a = el.dataset.act;
+  if (a === "print") print();
+  else if (a === "select") el.select && el.select();
+  else if (a === "back") {
+    e.preventDefault();
+    history.back();
+  }
+});

@@ -440,6 +440,11 @@ Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → An
 
 **Fotos aus der App in einer anderen Zeitzone (ab Server 2.7.4 / App 2.5.1):** Die App schickt mit jedem Foto-Upload die Zeitzone des Telefons mit. Hat die Kamera keine Zeitzone ins Foto geschrieben, trägt der Server sie nach. Vorher wurde die Aufnahmezeit als Ortszeit des Servers gedeutet – war das Handy z. B. auf den Kanaren (UTC+0) und der Server in Deutschland, lag das Foto eine Stunde neben der Tour und wurde nicht zugeordnet.
 
+### Neu in 3.5 – Aufräumen und Absichern
+- **Puls vollständig:** Backup enthält die Pulsdateien, Betrachter-Konten sehen die Pulskarte, die Spur-Korrektur behält den Puls, der GPX-Export enthält Zeit und Puls. Maximalpuls einstellbar (Verwaltung → „Heimatort und Puls“).
+- **Schutz-Header:** `nosniff`, Schutz vor Einbettung, Referrer-Policy für alle Antworten; für die Hauptoberfläche eine Content-Security-Policy ohne Inline-JavaScript.
+- **Test-Image:** Ein manuell gestarteter Docker-Build erzeugt nur noch den Tag `test` (`ghcr.io/hilde0407/meine-touren:test`); `latest` ändert sich erst mit einer veröffentlichten Version.
+
 ### Neu in 3.4.6 – Puls aus FIT-Dateien
 Der FIT-Import (Garmin, Suunto, Wahoo u. a., auch über das Garmin-Konto) übernimmt jetzt die Herzfrequenz. Bereits importierte Touren bekommen sie nicht nachträglich; Dateien erneut zu importieren, wird als Duplikat übersprungen (die Tour vorher löschen, wenn der Puls gewünscht ist).
 

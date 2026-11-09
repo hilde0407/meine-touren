@@ -355,7 +355,11 @@ def apply(tid, remove_spikes=True, exclude=(), smooth=False, set_dur_s=None, set
     if set_start_ts:
         t = dict(t); t["start_ts"] = int(set_start_ts)
     if local:
-        tracks.gpx_file(tid).write_text(build_gpx(t, keep), encoding="utf-8")
+        hr = tracks.hr_series(tid, tracks.gpx_file(tid).read_text(encoding="utf-8", errors="ignore"))    # Puls der bisherigen Datei behalten
+        new_gpx = build_gpx(t, keep)
+        if hr:
+            new_gpx = tracks.merge_hr(new_gpx, hr)[0]
+        tracks.gpx_file(tid).write_text(new_gpx, encoding="utf-8")
     routes.store(tid, [tuple(p) for p in keep])
     cur_t = db.one("SELECT start_ts, end_ts FROM tours WHERE id=?", (tid,))
     o_end = fx["orig_end"] if fx and fx["orig_end"] else cur_t["end_ts"]

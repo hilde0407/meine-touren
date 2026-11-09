@@ -19,7 +19,7 @@ U=$(cat "$T/uid")
 systemctl stop "$NAME"
 [ -f "$DATA/komoot_hub.sqlite" ] && cp "$DATA/komoot_hub.sqlite" "$DATA/komoot_hub.sqlite.vor-restore"
 cp "$T/komoot_hub.sqlite" "$DATA/komoot_hub.sqlite"; chown "$SVCUSER:$SVCUSER" "$DATA/komoot_hub.sqlite"
-[ -d "$T/tracks" ] && mkdir -p "$DATA/tracks" && cp -n "$T"/tracks/*.gpx "$DATA/tracks/" && chown -R "$SVCUSER:$SVCUSER" "$DATA/tracks"
+[ -d "$T/tracks" ] && mkdir -p "$DATA/tracks" && cp -n "$T"/tracks/* "$DATA/tracks/" && chown -R "$SVCUSER:$SVCUSER" "$DATA/tracks"
 rm -f "$DATA/komoot_hub.sqlite-wal" "$DATA/komoot_hub.sqlite-shm"
 systemctl start "$NAME"
 echo "Wiederhergestellt aus $F${U:+ (Benutzer $U)} (vorheriger Stand: komoot_hub.sqlite.vor-restore)."

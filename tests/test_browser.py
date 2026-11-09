@@ -69,6 +69,7 @@ def page(app_url):
         pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(app_url) else r.continue_())   # keine Kartenkacheln/Internet
         pg.errors = []
         pg.on("pageerror", lambda e: pg.errors.append(str(e) + " @ " + (e.stack or "")[:1500]))
+        pg.on("console", lambda m: pg.errors.append("CSP: " + m.text) if "Content Security Policy" in m.text else None)   # Verstöße gegen die CSP zählen als Fehler
         pg.goto(app_url + "/#/dash"); pg.wait_for_timeout(1500)
         yield pg
         b.close()
@@ -678,10 +679,10 @@ def test_record_view_app(page):
     assert page.locator("#rsend").count() == 0, "zu kurz gehalten darf nicht beenden"
     page.mouse.move(box["x"] + 20, box["y"] + 10); page.mouse.down(); page.wait_for_timeout(1900); page.mouse.up(); page.wait_for_timeout(900)
     assert page.locator("#rsend").count() == 1
-    page.click("#rsend"); page.wait_for_function("location.hash.startsWith('#/tour/')", timeout=8000)
+    page.click("#rsend"); page.wait_for_function("() => location.hash.startsWith('#/tour/')", timeout=8000)
 
     page.goto(base + "#/apptest"); page.wait_for_timeout(800)
-    page.wait_for_function("document.querySelector('#main') && document.querySelector('#main').innerText.includes('Server erreichbar')", timeout=15000)
+    page.wait_for_function("() => document.querySelector('#main') && document.querySelector('#main').innerText.includes('Server erreichbar')", timeout=15000)
     t = page.inner_text("#main")
     assert "Server erreichbar" in t and "Akku-Optimierung ist aktiv" in t and "GPS ist eingeschaltet" in t
 
@@ -702,7 +703,7 @@ def test_record_route_guidance(page):
     page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(800)
     page.goto(base + "#/record"); page.wait_for_timeout(800)
     assert page.locator("#rroute").count() == 1
-    page.wait_for_function("document.querySelectorAll('#rroute option').length > 1", timeout=5000)
+    page.wait_for_function("() => document.querySelectorAll('#rroute option').length > 1", timeout=5000)
     opts = page.eval_on_selector_all("#rroute option", "o => o.map(x => x.textContent)")
     assert any("Gipfelrunde" in o for o in opts), opts
     page.select_option("#rroute", label=[o for o in opts if "Gipfelrunde" in o][0]); page.wait_for_timeout(700)
@@ -730,10 +731,10 @@ def test_share_send_button(page):
     """„Senden“ erzeugt einen Link und reicht ihn an das Android-Auswahlmenü (MTApp.shareText) weiter."""
     base = page.url.split("#")[0]
     page.set_viewport_size({"width": 390, "height": 844})
-    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
     page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.3.0', serverUrl: () => ''}")
     page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(1200)
-    page.evaluate("document.querySelector('#esnd').click()"); page.wait_for_function("window._sent", timeout=8000)
+    page.evaluate("document.querySelector('#esnd').click()"); page.wait_for_function("() => window._sent", timeout=8000)
     sent = page.evaluate("window._sent")
     assert "/s/" in sent and "km" in sent
     page.set_viewport_size({"width": 1280, "height": 900})
@@ -743,11 +744,11 @@ def test_share_slideshow_button(page):
     """„Diashow senden“ erzeugt einen Diashow-Link; die öffentliche Seite zeigt Titel, Bedienelemente und lädt ohne Konto."""
     base = page.url.split("#")[0]
     page.set_viewport_size({"width": 390, "height": 844})
-    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
     page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.5.0', serverUrl: () => ''}")
     page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(1200)
     page.once("dialog", lambda d: d.accept())             # falls die Tour keine Fotos hat
-    page.evaluate("document.querySelector('#eshow').click()"); page.wait_for_selector("#sh_go"); page.select_option("#sh_d", "7"); page.click("#sh_go"); page.wait_for_function("window._sent", timeout=8000)
+    page.evaluate("document.querySelector('#eshow').click()"); page.wait_for_selector("#sh_go"); page.select_option("#sh_d", "7"); page.click("#sh_go"); page.wait_for_function("() => window._sent", timeout=8000)
     sent = page.evaluate("window._sent")
     assert "Diashow" in sent and "/s/" in sent
     link = sent.split()[-1]
@@ -764,7 +765,7 @@ def test_mobile_tour_menus(page):
     """Mobile Tour-Ansicht: zwei Menüknöpfe statt elf Einzelknöpfe; Menüpunkte lösen die ursprünglichen Funktionen aus."""
     base = page.url.split("#")[0]
     page.set_viewport_size({"width": 390, "height": 844})
-    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
     page.goto(base + "#/tour/" + page.evaluate("TOURS.find(t => t.source === 'local').id")); page.wait_for_selector(".tact .tk", timeout=8000)
     vis = page.evaluate("[...document.querySelectorAll('#main .tact > *')].filter(e => e.offsetParent && e.textContent.trim()).map(e => e.className)")
     assert len(vis) <= 2 and page.is_visible("#main .tact-bar")                  # nur Menüleiste (und ggf. „lokal gespeichert“)
@@ -813,7 +814,7 @@ def test_mobile_map_and_more_menu(page):
 def test_viewer_ui(page):
     """Betrachter: kein Verwaltungs-Menü, keine Bearbeiten-Knöpfe; Karte lädt ohne Fehler."""
     base = page.url.split("#")[0]
-    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
     page.evaluate("ME.user = {name:'Oma', role:'viewer'}; applyView()")
     assert page.evaluate("document.documentElement.classList.contains('viewer')")
     assert not page.is_visible("nav a[data-k=admin]")
@@ -826,7 +827,7 @@ def test_viewer_ui(page):
 def test_viewer_tour_page_readonly(page):
     """Betrachter: Tourseite ohne Umbenennen, Höhenkorrektur, Foto-Bearbeitung, PDF und Teilen; GPX bleibt."""
     base = page.url.split("#")[0]
-    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
     page.evaluate("ME.user = {name:'Oma', role:'viewer'}; applyView()")
     page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(2000)
     for sel in ("#ren", "#efix", "#etag", "#eshr", "#esheet", "#eup", "#padd", "#pgps", "#esnd"):
@@ -877,7 +878,7 @@ def test_record_live_values_and_photos(page):
     box = page.locator("#rstop").bounding_box()
     page.mouse.move(box["x"] + 20, box["y"] + 10); page.mouse.down(); page.wait_for_timeout(1900); page.mouse.up(); page.wait_for_timeout(900)
     assert "2 Foto" in page.inner_text("#main")
-    page.click("#rsend"); page.wait_for_function("location.hash.startsWith('#/tour/')", timeout=15000)
+    page.click("#rsend"); page.wait_for_function("() => location.hash.startsWith('#/tour/')", timeout=15000)
     assert "upload" in page.evaluate("window._calls")
 
 
@@ -947,7 +948,7 @@ def test_waypoints_and_story(page, app_url):
     page.wait_for_selector("#stl .stev", timeout=20000)
     page.goto(base + f"#/story/{tid}")
     page.wait_for_selector("#stl .stev", timeout=20000)
-    page.wait_for_function("document.querySelectorAll('#sm .leaflet-marker-icon').length >= 3", timeout=10000)
+    page.wait_for_function("() => document.querySelectorAll('#sm .leaflet-marker-icon').length >= 3", timeout=10000)
     t = page.inner_text("#stl")
     assert "Rast am Bach" in t and "Start" in t and "Ziel" in t, t
     assert page.locator("#sm .leaflet-marker-icon").count() >= 3
@@ -958,13 +959,13 @@ def test_story_photo_markers(page, app_url):
     """Erzählung: Fotos ohne GPS erscheinen an der aus der Aufnahmezeit berechneten Stelle der Strecke als 📷 auf der Karte."""
     import json as _j
     base = page.url.split("#")[0]
-    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
     t = page.evaluate("(()=>{const t=TOURS.find(t => t.source === 'local' && t.h > 0.5);return {id:t.id,ts:t.start_ts}})()")
     fake = [{"id": 900 + j, "taken_ts": t["ts"] + 300 * j, "lat": None, "lng": None, "manual": 0} for j in range(6)]
     page.route("**/api/photos?tour_id=*", lambda r: r.fulfill(status=200, content_type="application/json", body=_j.dumps(fake)))
     page.goto(base + f"#/story/{t['id']}")
     page.wait_for_selector("#stl .stev", timeout=20000)
-    page.wait_for_function("[...document.querySelectorAll('#sm .leaflet-marker-icon')].filter(e => e.textContent.includes('\\u{1F4F7}')).length >= 6", timeout=15000)
+    page.wait_for_function("() => [...document.querySelectorAll('#sm .leaflet-marker-icon')].filter(e => e.textContent.includes('\\u{1F4F7}')).length >= 6", timeout=15000)
     page.unroute("**/api/photos?tour_id=*")
 
 

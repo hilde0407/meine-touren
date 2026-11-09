@@ -56,7 +56,7 @@ def test_merge_hr_backfill():
 def test_backfill_matches_existing_tour_without_gpx(monkeypatch):
     """Eine Komoot-Tour (ohne lokales GPX) bekommt den Puls über das passende Zepp-Training."""
     from fastapi.testclient import TestClient
-    from app import main, sync
+    from app import main, puls
     s, pts = _pts()
     db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,status,source) VALUES(?,?,?,?,?,?,?,?,?)",
                ("k99", "Komoot-Tour", "hike", 1700000030, 1700000400, 500.0, 370, "tour_recorded", "komoot"))
@@ -66,10 +66,10 @@ def test_backfill_matches_existing_tour_without_gpx(monkeypatch):
     class Api:
         def history(self): return [{"trackid": "1700000000", "dis": "500", "run_time": "390"}]
         def detail(self, sm): return det
-    sync.backfill_hr(Api())
+    puls.backfill_hr(Api())
     r = TestClient(main.app).get("/api/tours/k99/hr").json()
     assert r["n"] >= 30 and r["max"] > 120
-    sync.backfill_hr(Api())                                   # zweiter Lauf: nichts mehr zu tun
+    puls.backfill_hr(Api())                                   # zweiter Lauf: nichts mehr zu tun
 
 
 def test_tour_list_flags_hr():
@@ -81,3 +81,34 @@ def test_tour_list_flags_hr():
     tracks.adopt(zepp.points_to_gpx(s2, p2, "hike"), "h2.gpx", ident="zt9")
     r = {t["id"]: t["has_hr"] for t in TestClient(main.app).get("/api/tours").json()}
     assert r["zt8"] is True and r["zt9"] is False
+
+
+def test_hr_survives_trackfix_export_backup():
+    import io, zipfile
+    from fastapi.testclient import TestClient
+    from app import main, trackfix, extras, sync
+    c = TestClient(main.app)
+    s, pts = _pts()
+    tracks.adopt(zepp.points_to_gpx(s, pts, "hike"), "t.gpx", ident="zt20")
+    # Spur-Korrektur schreibt das GPX neu – der Puls bleibt
+    trackfix.apply("zt20", remove_spikes=True, smooth=True)
+    assert "gpxtpx:hr" in tracks.gpx_file("zt20").read_text()
+    assert c.get("/api/tours/zt20/hr").json()["n"] >= 30
+    # Export enthält Zeit und Puls
+    g = c.get("/api/tours/zt20/gpx").text
+    assert "<time>" in g and "gpxtpx:hr" in g and "xmlns:gpxtpx" in g
+    # Puls-Zusatzdatei (Komoot-Tour) kommt ins Backup und in den Export
+    db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,status,source) VALUES(?,?,?,?,?,?,?,?,?)",
+               ("k77", "K", "hike", 1700000000, 1700000400, 500.0, 400, "tour_recorded", "komoot"))
+    from app import routes
+    routes.store("k77", [(50 + i * 1e-5, 8 + i * 1e-5, 100.0, i * 10000) for i in range(40)])
+    import json
+    tracks.hr_sidecar("k77").write_text(json.dumps([[i * 10, 100 + i] for i in range(40)]))
+    assert "gpxtpx:hr" in c.get("/api/tours/k77/gpx").text
+    z = zipfile.ZipFile(io.BytesIO(extras.make_backup()[1]))
+    assert "tracks/k77.hr.json" in z.namelist() and "tracks/zt20.gpx" in z.namelist()
+
+
+def test_viewer_may_read_hr():
+    from app import main
+    assert main.VIEWER_GET.match("/api/tours/abc/hr") and not main.VIEWER_GET.match("/api/tours/abc/elev-fix")

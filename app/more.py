@@ -387,7 +387,14 @@ def warm_repeats():
                 api_repeats()
         except Exception:  # noqa
             pass
-    threading.Thread(target=run, daemon=True).start()
+    old = _WARM.get(uid)
+    if old is not None and old.is_alive():           # läuft für diesen Benutzer schon: nicht bei jedem Seitenaufruf einen weiteren Faden starten
+        return
+    _WARM[uid] = th = threading.Thread(target=run, daemon=True)
+    th.start()
+
+
+_WARM = {}
 
 
 @router.get("/api/repeats")

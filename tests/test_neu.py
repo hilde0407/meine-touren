@@ -108,7 +108,7 @@ def test_browser_admin_and_folder_upload(server, tmp_path):
         pg.wait_for_selector("#pigo:not([disabled])", timeout=30000)
         assert "3 Fotos importieren" in pg.inner_text("#pigo")
         pg.click("#pigo")
-        pg.wait_for_function("document.querySelector('#pib') && document.querySelector('#pib').textContent.includes('✓')", timeout=90000)
+        pg.wait_for_function("() => document.querySelector('#pib') && document.querySelector('#pib').textContent.includes('✓')", timeout=90000)
         n = json.load(urllib.request.urlopen(base + "/api/photos?limit=50"))
         assert len(n) == 3
         assert not errs

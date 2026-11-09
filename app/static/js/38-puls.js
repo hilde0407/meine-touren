@@ -31,7 +31,7 @@ function pulsCard(t) {
         `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${g}<path d="${line}" fill="none" stroke="#c0504d" stroke-width="1.6"/></svg>` +
         `<div style="display:flex;height:12px;border-radius:6px;overflow:hidden;margin:12px 0 8px">${bar}</div>` +
         `<div class="mut" style="display:flex;gap:6px 16px;flex-wrap:wrap;font-size:.85em">${leg}</div>` +
-        `<div class="mut" style="font-size:.8em;margin-top:8px">Zonen nach ${h.hrmax} bpm Maximalpuls (Einstellung „hr_max“).</div>`;
+        `<div class="mut" style="font-size:.8em;margin-top:8px">Zonen nach ${h.hrmax} bpm Maximalpuls (einstellbar in der Verwaltung).</div>`;
       prof.after(d);
     })
     .catch(() => {});

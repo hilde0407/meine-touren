@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, begleiter, zepp
+from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, begleiter, zepp
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -32,10 +32,22 @@ app = FastAPI(title="Meine Touren", lifespan=lifespan)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 
+_EXT = "https://tile.openstreetmap.org https://tile.opentopomap.org https://server.arcgisonline.com https://s3.amazonaws.com"
+# Für die Hauptoberfläche: nur eigene Skripte (kein Inline-JavaScript), Kacheln/Höhendaten nur von den bekannten Kartenservern.
+CSP_APP = ("default-src 'self'; script-src 'self' blob:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; "
+           f"img-src 'self' data: blob: {_EXT}; connect-src 'self' {_EXT}; font-src 'self' data:; media-src 'self' blob:; "
+           "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'")
+
+
 @app.middleware("http")
 async def no_stale_static(request: Request, call_next):
     r = await call_next(request)
     p = request.url.path
+    r.headers.setdefault("X-Content-Type-Options", "nosniff")
+    r.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    r.headers.setdefault("Referrer-Policy", "same-origin")
+    if p in ("/", "/index.html"):
+        r.headers.setdefault("Content-Security-Policy", CSP_APP)
     if not p.startswith(("/photo/", "/pic/", "/api/")) and "cache-control" not in r.headers:
         r.headers["Cache-Control"] = "no-cache"      # Browser prüft bei jedem Aufruf auf neue Programmdateien
     return r
@@ -43,7 +55,7 @@ async def no_stale_static(request: Request, call_next):
 
 VIEWER_GET = re.compile(
     r"^(/api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings"
-    r"|tours|tours/[^/]+|tours/[^/]+/(coords|best-photos|weather|gpx)|trips/[^/]+|records/altitude|weather/stats)"
+    r"|tours|tours/[^/]+|tours/[^/]+/(coords|best-photos|weather|gpx|hr)|trips/[^/]+|records/altitude|weather/stats)"
     r"|/photo/[^/]+|/pic/[^/]+|/tiles/.+)$")
 OPEN_API = ("/api/version", "/api/me", "/api/login", "/api/logout", "/api/setup", "/api/zepp-token", "/api/forgot", "/api/reset")
 PROTECTED = ("/api/", "/photo/", "/sphoto/", "/pic/", "/spic/")
@@ -256,7 +268,7 @@ def api_tours(year: int = 0, q: str = "", limit: int = 20000):
         "SELECT t.*, (SELECT COUNT(*) FROM photos p WHERE p.tour_id=t.id) AS photos, (SELECT note FROM tour_notes n WHERE n.id=t.id) AS note, (SELECT stars FROM tour_rating r WHERE r.id=t.id) AS stars, (SELECT orig_up FROM elev_fix e WHERE e.id=t.id) AS fix_up, (SELECT group_concat(tag, '|') FROM tour_tags x WHERE x.id=t.id) AS tags, g.country AS g_country, g.state AS g_state, g.county AS g_county, g.place AS g_place FROM tours t LEFT JOIN tour_geo g ON g.id=t.id "
         "WHERE t.start_ts IS NOT NULL ORDER BY t.start_ts DESC LIMIT ?", (limit,))
     out = []
-    hr_ids = sync.tours_with_hr()
+    hr_ids = puls.tours_with_hr()
     for t in rows:
         t["has_hr"] = t["id"] in hr_ids
         d = datetime.fromtimestamp(t["start_ts"], tz=TZ)
@@ -404,7 +416,7 @@ JOBS = {
     "photos": ("Fotos indizieren", lambda dry: photos.scan()),
     "photo-import": ("Fotos übernehmen", lambda dry: (photos.import_from(), photos.scan())),
     "elev-local": ("Höhenmeter lokaler Touren neu berechnen", lambda dry: elev.recompute_local()),
-    "hr-backfill": ("Puls für Zepp-Touren nachladen", lambda dry: sync.backfill_hr()),
+    "hr-backfill": ("Puls für Zepp-Touren nachladen", lambda dry: puls.backfill_hr()),
     "export": ("Zepp-Import (ohne Upload)", lambda dry: sync.export_zepp()),
 }
 
@@ -856,6 +868,7 @@ def photo(photo_id: int, request: Request, size: int = 1600):
 
 
 app.include_router(extras.router)
+app.include_router(puls.router)
 app.include_router(more.router)
 app.include_router(more2.router)
 app.include_router(gear.router)
