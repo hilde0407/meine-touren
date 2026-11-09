@@ -402,6 +402,7 @@ JOBS = {
     "photos": ("Fotos indizieren", lambda dry: photos.scan()),
     "photo-import": ("Fotos übernehmen", lambda dry: (photos.import_from(), photos.scan())),
     "elev-local": ("Höhenmeter lokaler Touren neu berechnen", lambda dry: elev.recompute_local()),
+    "hr-backfill": ("Puls für Zepp-Touren nachladen", lambda dry: sync.backfill_hr()),
     "export": ("Zepp-Import (ohne Upload)", lambda dry: sync.export_zepp()),
 }
 

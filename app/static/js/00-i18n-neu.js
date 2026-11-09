@@ -690,4 +690,5 @@ Hart (Tempo) || Hard (tempo) || Intense (tempo) || Intenso (ritmo)
 Maximal || Maximum || Maximal || Máximo
 Neigung: automatisch (weicht Bergen aus) || Tilt: automatic (avoids mountains) || Inclinaison : automatique (évite les montagnes) || Inclinación: automática (evita montañas)
 weiter zu || next: || ensuite vers || a continuación:
+Puls nachladen || Reload heart rate || Recharger la fréquence cardiaque || Recargar frecuencia cardíaca
 `;

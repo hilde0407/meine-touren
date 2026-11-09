@@ -36,3 +36,18 @@ def test_hr_roundtrip_and_api():
     s, p2 = _pts(hr=False)
     tracks.adopt(zepp.points_to_gpx(s, p2, "hike"), "n.gpx", ident="zt2")
     assert TestClient(main.app).get("/api/tours/zt2/hr").json() == {"n": 0}
+
+
+def test_merge_hr_backfill():
+    s, pts = _pts(hr=False)
+    tracks.adopt(zepp.points_to_gpx(s, pts, "hike"), "m.gpx", ident="zt3")
+    f = tracks.gpx_file("zt3")
+    assert "gpxtpx:hr" not in f.read_text()
+    s2, pts2 = _pts()
+    txt, n = tracks.merge_hr(f.read_text(), [(p[0], p[4]) for p in pts2 if p[4]])
+    assert n >= 30 and "xmlns:gpxtpx" in txt
+    f.write_text(txt)
+    from fastapi.testclient import TestClient
+    from app import main
+    assert TestClient(main.app).get("/api/tours/zt3/hr").json()["n"] >= 30
+    assert tracks.merge_hr(txt, [(p[0], 99) for p in pts2])[1] == 0         # vorhandener Puls bleibt

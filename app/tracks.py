@@ -87,3 +87,34 @@ def delete_local(tid):
     db.execute("UPDATE photos SET tour_id=NULL WHERE tour_id=? AND COALESCE(manual,0)=0", (str(tid),))
     for p in (gpx_file(tid), routes.path_full(tid), routes.path_small(tid)):
         p.unlink(missing_ok=True)
+
+
+def merge_hr(text, hrpts, max_gap=30):
+    """Puls (Liste (unix_ts, bpm), aufsteigend) in die Trackpunkte einer GPX-Datei eintragen, wo noch keiner steht. -> (Text, Anzahl)."""
+    from bisect import bisect_left
+    ts = [p[0] for p in hrpts]
+    n = 0
+
+    def one(m):
+        nonlocal n
+        attr, inner = m.group(1), m.group(2)
+        tm = re.search(r"<time>([^<]*)</time>", inner)
+        if not tm or "<gpxtpx:hr>" in inner or not ts:
+            return m.group(0)
+        try:
+            t = gpxtools.parse_time(tm.group(1)).timestamp()
+        except ValueError:
+            return m.group(0)
+        i = bisect_left(ts, t)
+        c = [j for j in (i - 1, i) if 0 <= j < len(ts)]
+        j = min(c, key=lambda j: abs(ts[j] - t))
+        if abs(ts[j] - t) > max_gap:
+            return m.group(0)
+        n += 1
+        ext = f"<extensions><gpxtpx:TrackPointExtension><gpxtpx:hr>{hrpts[j][1]}</gpxtpx:hr></gpxtpx:TrackPointExtension></extensions>"
+        return f"<trkpt{attr}>{inner}{ext}</trkpt>"
+
+    out = re.sub(r"<trkpt\b([^>]*)>(.*?)</trkpt>", one, text, flags=re.S)
+    if n and "xmlns:gpxtpx" not in out:
+        out = out.replace("<gpx ", '<gpx xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" ', 1)
+    return out, n

@@ -223,6 +223,47 @@ def export_zepp(limit=None):
     log(f"Zepp: {n_gps} GPS-Dateien geschrieben nach {config.EXPORT_DIR} (es wird nichts hochgeladen)")
 
 
+def backfill_hr():
+    """Puls für bereits übernommene Zepp-Touren nachladen (Touren, Notizen, Fotos bleiben unberührt; nur das GPX wird um den Puls ergänzt)."""
+    token = db.get("zepp_token")
+    em, pw = db.get("zepp_email"), db.get("zepp_password")
+    if em and pw:
+        try:
+            token, _ = zepp.login(em, pw)
+        except Exception as e:
+            if not token:
+                raise
+            log(f"Zepp-Login fehlgeschlagen ({e}); versuche gespeichertes Token")
+    if not token:
+        raise RuntimeError("Zepp-Zugangsdaten fehlen (Einstellungen)")
+    api = zepp.ZeppApi(token, db.get("zepp_host"))
+    by = {int(s["trackid"]): s for s in api.history()}
+    rows = db.query("SELECT trackid, komoot_id FROM workouts WHERE status='local' AND komoot_id IS NOT NULL")
+    todo = []
+    for r in rows:
+        f = tracks.gpx_file(r["komoot_id"])
+        if f.exists() and int(r["trackid"]) in by and "gpxtpx:hr" not in f.read_text(encoding="utf-8", errors="ignore"):
+            todo.append((r, f))
+    log(f"Puls nachladen: {len(todo)} von {len(rows)} Zepp-Touren ohne Puls")
+    done = 0
+    for i, (r, f) in enumerate(todo, 1):
+        jobs.progress(f"Puls {i}/{len(todo)}")
+        try:
+            pts = zepp.decode_points(by[int(r["trackid"])], api.detail(by[int(r["trackid"])]))
+            hr = [(p[0], p[4]) for p in pts if p[4]]
+            if not hr:
+                log(f"  {r['trackid']}: kein Puls in den Zepp-Daten")
+                continue
+            text, n = tracks.merge_hr(f.read_text(encoding="utf-8"), hr)
+            if n:
+                f.write_text(text, encoding="utf-8")
+                done += 1
+        except Exception as e:  # noqa
+            log(f"  {r['trackid']}: {e}")
+        time.sleep(0.2)
+    log(f"Puls nachladen: {done} Touren ergänzt")
+
+
 def adopt_workout(trackid):
     """Zepp-Training als lokale Tour übernehmen (kein Upload). Gibt die Tour-ID zurück."""
     r = db.one("SELECT * FROM workouts WHERE trackid=?", (int(trackid),))
