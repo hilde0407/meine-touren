@@ -494,7 +494,7 @@ def test_goal_sport_groups(page):
     page.goto(base + "#/dash"); page.wait_for_timeout(700)
     r = page.evaluate("""() => { const y = TOURS[0].y; return ['grp:foot', 'grp:bike', 'grp:ski', 'hike', ''].map(s => goalVal({year: y, sport: s, metric: 'count'}, TOURS)); }""")
     assert r[0] + r[1] + r[2] >= 1 and r[4] >= r[3]
-    page.goto(base + "#/dash"); page.wait_for_timeout(1500)
+    page.goto(base + "#/stats"); page.wait_for_timeout(1500)
     assert page.evaluate("[...document.querySelectorAll('#gsp option')].map(o => o.textContent).join('|')").count("Alle Rad-Sportarten") == 1
     assert not page.errors, page.errors
 
@@ -1006,10 +1006,10 @@ def test_nav_statistik_und_entwicklermodus(page, app_url):
     """Menü: sechs Hauptpunkte; Rekorde/Auswertung unter „Statistik“; Prüfen in der Verwaltung; Entwickleransichten hinter einem Schalter."""
     page.evaluate("() => localStorage.setItem('mt_debug', '0')"); page.reload(); page.wait_for_timeout(1500)
     keys = page.evaluate("() => [...document.querySelectorAll('#nav a')].map(a => a.dataset.k)")
-    assert keys[:6] == ["dash", "map", "tours", "trips", "photos", "places"] and "check" not in keys and "admin" not in keys
+    assert keys[:6] == ["dash", "map", "tours", "trips", "photos", "stats"] and "check" not in keys and "admin" not in keys
     page.evaluate("() => location.hash = '#/records'"); page.wait_for_timeout(1200)
     assert page.locator(".segtabs a.on").inner_text() == "Rekorde"
-    assert page.locator('#nav a[data-k="places"]').get_attribute("class") == "on"
+    assert page.locator('#nav a[data-k="stats"]').get_attribute("class") == "on"
     page.locator(".segtabs a", has_text="Auswertung").click(); page.wait_for_timeout(1200)
     assert page.locator(".segtabs a.on").inner_text() == "Auswertung"
     page.locator("#hadm").click(); page.wait_for_timeout(1800)
@@ -1023,4 +1023,21 @@ def test_nav_statistik_und_entwicklermodus(page, app_url):
     page.locator("#atabs .atlink").click(); page.wait_for_timeout(1200)
     assert "Prüfen" in page.locator("#main h1, #main h2").first.inner_text() and page.locator(".backl").count() == 1
     page.evaluate("() => localStorage.setItem('mt_debug', '0')")
+    assert not page.errors, page.errors
+
+
+def test_startseite_und_statistik_uebersicht(page, app_url):
+    """Neue Startseite (zuletzt unterwegs, Jahr, letzte Touren); die bisherige Übersicht liegt unter Statistik."""
+    page.evaluate("() => location.hash = '#/dash'"); page.wait_for_timeout(1800)
+    assert page.locator("main.home .hlast h1").count() == 1 and page.locator(".hcards .hcard").count() >= 2
+    assert page.locator('#nav a[data-k="dash"]').get_attribute("class") == "on"
+    first = page.locator(".hlast h1").inner_text()
+    page.locator("#hnext").click(); page.wait_for_timeout(900)
+    assert page.locator(".hlast h1").inner_text() != first                      # Blättern zur vorherigen Tour
+    page.evaluate("() => location.hash = '#/stats'"); page.wait_for_timeout(1800)
+    assert page.locator(".segtabs a.on").inner_text() == "Übersicht" and page.locator(".figs .fig").count() >= 4
+    assert page.locator('#nav a[data-k="stats"]').get_attribute("class") == "on"
+    page.locator(".years button").nth(1).click(); page.wait_for_timeout(1500)   # Jahr wählen bleibt in der Statistik
+    assert "y=" in page.url and page.locator(".segtabs a.on").inner_text() == "Übersicht"
+    assert page.locator('#nav a[data-k="stats"]').get_attribute("class") == "on"
     assert not page.errors, page.errors

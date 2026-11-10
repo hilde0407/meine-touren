@@ -10,10 +10,10 @@ document.documentElement.classList.toggle("dbg", dbgOn());
 
 /* ---- Menüleiste: sechs Hauptpunkte; Verwaltung als Zahnrad rechts, „Prüfen“ liegt in der Verwaltung ---- */
 {
-  const std = ["dash", "map", "tours", "records", "trips", "places", "photos", "check", "admin"],
+  const std = ["dash", "map", "tours", "records", "trips", "places", "photos", "check", "admin", "stats"],
     extra = NAV.filter(([k]) => !std.includes(k));           // z. B. „Aufzeichnen“ in der Android-App
   NAV.length = 0;
-  NAV.push(["dash", "Übersicht"], ["map", "Karte"], ["tours", "Touren"], ["trips", "Reisen"], ["photos", "Fotos"], ["places", "Statistik"], ...extra);
+  NAV.push(["dash", "Übersicht"], ["map", "Karte"], ["tours", "Touren"], ["trips", "Reisen"], ["photos", "Fotos"], ["stats", "Statistik"], ...extra);
   if (typeof recApp === "function" && recApp() && !NAV.some(x => x[0] === "record")) NAV.push(["record", "● Aufzeichnen"]);
 }
 $("#nav").innerHTML = NAV.map(([k, l]) => `<a href="#/${k}" data-k="${k}">${l}</a>`).join("");
@@ -26,10 +26,12 @@ $("#nav").innerHTML = NAV.map(([k, l]) => `<a href="#/${k}" data-k="${k}">${l}</
   a.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>`;
   $(".top").insertBefore(a, $("#busy"));
 }
-const NAV_OF = {tour: "tours", story: "tours", flight: "tours", plan: "tours", sheet: "tours", compare: "tours", series: "tours", trip: "trips", tripsheet: "trips", album: "photos", shared: "photos", records: "places", recap: "places"};
+const NAV_OF = {tour: "tours", story: "tours", flight: "tours", plan: "tours", sheet: "tours", compare: "tours", series: "tours", trip: "trips", tripsheet: "trips", album: "photos", shared: "photos", records: "stats", recap: "stats", places: "stats"};
 function navFix() {
-  const k = (location.hash || "#/dash").replace(/^#\/?/, "").split(/[/?]/)[0] || "dash",
-    on = NAV_OF[k] || k;
+  const h = (location.hash || "#/dash").replace(/^#\/?/, "");
+  let k = h.split(/[/?]/)[0] || "dash";
+  if (k === "dash" && h.includes("?")) k = "stats";                 // Übersicht mit gewähltem Jahr/Sport = Statistik
+  const on = NAV_OF[k] || k;
   document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("on", a.dataset.k === on));
   $("#hadm") && $("#hadm").classList.toggle("on", k === "admin" || k === "check" || k === "apptest");
   document.documentElement.dataset.view = k;
@@ -39,7 +41,7 @@ new MutationObserver(navFix).observe($("#main"), {childList: true});
 
 /* ---- Handy: „Mehr“-Menü mit denselben Bezeichnungen; App-Test nur im Entwicklermodus ---- */
 if (typeof MORE !== "undefined") {
-  MORE.forEach(x => x[0] === "places" && (x[1] = "Statistik"));
+  MORE.forEach(x => x[0] === "places" && ((x[0] = "stats"), (x[1] = "Statistik")));
   const drop = k => {
     const i = MORE.findIndex(x => x[0] === k);
     if (i >= 0) MORE.splice(i, 1);
@@ -51,8 +53,9 @@ if (typeof MORE !== "undefined") {
 function statTabs(cur) {
   const main = $("#main");
   if (!main || main.querySelector(".segtabs") || main.querySelector(".empty")) return;
-  const wb = main.querySelector(":scope > .warnbar");
-  (wb || main).insertAdjacentHTML(wb ? "afterend" : "afterbegin", `<div class="segtabs" role="tablist"><a role="tab" href="#/places" class="${cur === "places" ? "on" : ""}">Auswertung</a><a role="tab" href="#/records" class="${cur === "records" ? "on" : ""}">Rekorde</a></div>`);
+  const inner = cur === "stats" ? main.querySelector(".inner") : null,
+    wb = inner ? null : main.querySelector(":scope > .warnbar");
+  (wb || inner || main).insertAdjacentHTML(wb ? "afterend" : "afterbegin", `<div class="segtabs" role="tablist"><a role="tab" href="#/stats" class="${cur === "stats" ? "on" : ""}">Übersicht</a><a role="tab" href="#/places" class="${cur === "places" ? "on" : ""}">Auswertung</a><a role="tab" href="#/records" class="${cur === "records" ? "on" : ""}">Rekorde</a></div>`);
 }
 {
   const p0 = VIEWS.places,

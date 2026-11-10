@@ -691,4 +691,25 @@ Maximal || Maximum || Maximal || Máximo
 Neigung: automatisch (weicht Bergen aus) || Tilt: automatic (avoids mountains) || Inclinaison : automatique (évite les montagnes) || Inclinación: automática (evita montañas)
 weiter zu || next: || ensuite vers || a continuación:
 Puls nachladen || Reload heart rate || Recharger la fréquence cardiaque || Recargar frecuencia cardíaca
+Statistik || Statistics || Statistiques || Estadísticas
+Entwicklermodus || Developer mode || Mode développeur || Modo desarrollador
+Entwickleransichten anzeigen || Show developer views || Afficher les vues développeur || Mostrar vistas de desarrollador
+Blendet Ansichten ein, die nur zur Fehlersuche gebraucht werden: Selbsttest, vollständiges Protokoll, App-Test, Suche nach verlorenen Aufzeichnungen und Token-Test. || Shows views that are only needed for troubleshooting: self-test, full log, app test, search for lost recordings and token test. || Affiche les vues utiles uniquement au dépannage : autotest, journal complet, test de l'appli, recherche d'enregistrements perdus et test du jeton. || Muestra vistas que solo se necesitan para diagnosticar fallos: autotest, registro completo, prueba de la app, búsqueda de grabaciones perdidas y prueba del token.
+Nur im Entwicklermodus || Developer mode only || Uniquement en mode développeur || Solo en modo desarrollador
+Den App-Test schaltest du in der Verwaltung unter „Übersicht → Entwicklermodus“ ein. || Enable the app test in Administration under "Overview → Developer mode". || Activez le test de l'appli dans l'administration sous « Aperçu → Mode développeur ». || Activa la prueba de la app en Administración, en «Resumen → Modo desarrollador».
+Zur Verwaltung || Go to administration || Vers l'administration || Ir a administración
+Prüfen & Aufräumen || Check & clean up || Vérifier et nettoyer || Revisar y limpiar
+‹ Verwaltung || ‹ Administration || ‹ Administration || ‹ Administración
+Zuletzt unterwegs || Latest outings || Dernières sorties || Últimas salidas
+Zur Statistik || Go to statistics || Vers les statistiques || Ir a estadísticas
+Dein Jahr {} || Your year {} || Votre année {} || Tu año {}
+Alle {} Touren || All {} tours || Les {} sorties || Las {} rutas
+{} % gegenüber {} bis heute || {} % compared with {} to date || {} % par rapport à {} à ce jour || {} % respecto a {} hasta hoy
+Stunden unterwegs || Hours out || Heures en route || Horas en ruta
+Puls aufgezeichnet || Heart rate recorded || Pouls enregistré || Pulso registrado
+Zufalls-Diashow || Random slideshow || Diaporama aléatoire || Presentación aleatoria
+Neuere Tour || Newer tour || Sortie plus récente || Ruta más reciente
+Ältere Tour || Older tour || Sortie plus ancienne || Ruta más antigua
+Kilometer pro Monat || Kilometres per month || Kilomètres par mois || Kilómetros por mes
+Keine Messwerte (Pause) || No readings (pause) || Aucune mesure (pause) || Sin datos (pausa)
 `;

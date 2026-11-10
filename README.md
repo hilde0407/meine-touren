@@ -440,6 +440,10 @@ Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → An
 
 **Fotos aus der App in einer anderen Zeitzone (ab Server 2.7.4 / App 2.5.1):** Die App schickt mit jedem Foto-Upload die Zeitzone des Telefons mit. Hat die Kamera keine Zeitzone ins Foto geschrieben, trägt der Server sie nach. Vorher wurde die Aufnahmezeit als Ortszeit des Servers gedeutet – war das Handy z. B. auf den Kanaren (UTC+0) und der Server in Deutschland, lag das Foto eine Stunde neben der Tour und wurde nicht zugeordnet.
 
+### Neu in 3.7 – neue Startseite
+- **Startseite:** Aufmacher „Zuletzt unterwegs“ mit Foto oder Streckenform, Wegweiser-Zahlen, Puls-Hinweis und Blättern durch die letzten Touren; „Dein Jahr“ mit Vergleich zum Vorjahr bis zum heutigen Tag, Monatsbalken und Zielen; die letzten Touren als Karten; „An diesem Tag“ und Erinnerungen.
+- **Statistik → Übersicht:** Die bisherige Übersicht (alle Zahlen, Jahre, Sportarten, Ziele, Diagramme, Bestwerte) ist jetzt der erste Reiter der Statistik.
+
 ### Neu in 3.6 – neues Erscheinungsbild, aufgeräumtes Menü, Entwicklermodus
 - **Menü:** sechs Hauptpunkte (Übersicht, Karte, Touren, Reisen, Fotos, Statistik). „Statistik“ fasst Auswertung und Rekorde zusammen (oben umschaltbar). Die Verwaltung liegt hinter dem Zahnrad rechts oben; „Prüfen & Aufräumen“ ist ein Reiter der Verwaltung.
 - **Erscheinungsbild:** Abschnitte als ruhige Flächen statt Linien, einheitliche Knöpfe und Eingaben, Gelb nur noch für die Hauptaktion und die Wegweiser; gezeichnete Symbole statt Emojis in der Handy-Leiste und im Tour-Menü. Der Backup-Hinweis erscheint nur noch auf der Startseite und in der Verwaltung.
