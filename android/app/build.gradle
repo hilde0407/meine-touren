@@ -2,6 +2,10 @@ plugins {
     id 'com.android.application'
 }
 
+// Die App trägt dieselbe Versionsnummer wie der Server (app/config.py), damit man in der App sieht, welcher Stand installiert ist.
+def mtVer = (file('../../app/config.py').text =~ /VERSION = "(\d+)\.(\d+)\.(\d+)/)[0]
+def mtCode = mtVer[1].toInteger() * 10000 + mtVer[2].toInteger() * 100 + mtVer[3].toInteger()
+
 android {
     namespace 'de.meinetouren.app'
     compileSdk 34
@@ -10,8 +14,8 @@ android {
         applicationId 'de.meinetouren.app'
         minSdk 26
         targetSdk 34
-        versionCode 300
-        versionName '3.0.0'
+        versionCode mtCode
+        versionName "${mtVer[1]}.${mtVer[2]}.${mtVer[3]}"
     }
 
     signingConfigs {

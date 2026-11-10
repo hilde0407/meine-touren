@@ -1,10 +1,17 @@
 name: Docker-Image
 
 # Release -> Tags <Version> und latest. Manuell gestartet -> nur Tag „test“ (zum Ausprobieren auf dem eigenen Server, ohne latest zu verändern).
+# Aufruf aus „Veröffentlichen“ (workflow_call mit version) -> Tags <Version> und latest.
 on:
   release:
     types: [published]
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -29,8 +36,9 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest,enable=${{ github.event_name == 'release' }}
-            type=raw,value=test,enable=${{ github.event_name == 'workflow_dispatch' }}
+            type=raw,value=${{ inputs.version }},enable=${{ inputs.version != '' && inputs.version != null }}
+            type=raw,value=latest,enable=${{ github.event_name == 'release' || (inputs.version != '' && inputs.version != null) }}
+            type=raw,value=test,enable=${{ github.event_name == 'workflow_dispatch' && (inputs.version == '' || inputs.version == null) }}
       - uses: docker/build-push-action@v6
         with:
           context: .

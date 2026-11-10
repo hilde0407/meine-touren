@@ -9,6 +9,12 @@ on:
         description: "Optional: APK an diese Veröffentlichung anhängen (z. B. v2.4.0)"
         required: false
         default: ""
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -72,7 +78,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "${{ github.event.release.tag_name }}" MeineTouren.apk --clobber
       - name: APK an eine bestehende Veröffentlichung anhängen (manueller Start mit Tag)
-        if: github.event_name == 'workflow_dispatch' && inputs.tag != ''
+        if: github.event_name != 'release' && inputs.tag != '' && inputs.tag != null
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "${{ inputs.tag }}" MeineTouren.apk --clobber

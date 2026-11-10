@@ -1,0 +1,48 @@
+name: Veröffentlichen
+
+# Legt die Veröffentlichung für die Version aus app/config.py an (Tag v<Version> auf dem aktuellen Stand von main),
+# baut danach das Docker-Image (<Version> und latest) und die Android-App und hängt die APK an.
+# Start: Actions -> „Veröffentlichen“ -> Run workflow (oder per API). Die Beschreibung kommt aus docs/versionen/<Version>.md.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        run: |
+          V=$(grep -oP 'VERSION = "\K[0-9]+\.[0-9]+\.[0-9]+' app/config.py)
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+      - name: Veröffentlichung anlegen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          V: ${{ steps.v.outputs.version }}
+        run: |
+          if gh release view "v$V" >/dev/null 2>&1; then echo "v$V ist bereits veröffentlicht"; exit 1; fi
+          N="docs/versionen/$V.md"
+          [ -f "$N" ] || { mkdir -p docs/versionen; echo "Details in der README (Abschnitt „Neu in …“)." > "$N"; }
+          gh release create "v$V" --target "$GITHUB_SHA" --title "Meine Touren $V" --notes-file "$N"
+  docker:
+    needs: release
+    uses: ./.github/workflows/docker.yml
+    with:
+      version: ${{ needs.release.outputs.version }}
+    permissions:
+      contents: read
+      packages: write
+  android:
+    needs: release
+    uses: ./.github/workflows/android.yml
+    with:
+      tag: v${{ needs.release.outputs.version }}
+    secrets: inherit
+    permissions:
+      contents: write
