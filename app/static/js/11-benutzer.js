@@ -140,14 +140,14 @@ function applyView() {
     document.body.appendChild(tb);
   }
   const T = [
-    ["dash", "Übersicht", "🏠"],
-    ["map", "Karte", "🗺"],
-    ["tours", "Touren", "🥾"],
-    ["photos", "Fotos", "🖼"],
+    ["dash", "Übersicht", `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>`],
+    ["map", "Karte", `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>`],
+    ["tours", "Touren", `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 19l6-10 4 6 2-3 6 7z"/><circle cx="17" cy="6" r="1.6"/></svg>`],
+    ["photos", "Fotos", `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>`],
   ];
   tb.innerHTML =
     T.map(([k, l, i]) => `<a href="#/${k}" data-k="${k}"><span class="ti">${i}</span><span>${l}</span></a>`).join("") +
-    `<button id="tmore"><span class="ti">☰</span><span>Mehr</span></button>`;
+    `<button id="tmore"><span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span><span>Mehr</span></button>`;
   $("#tmore").onclick = () => {
     const items = isViewer() ? MORE.filter(x => ["trips", "places"].includes(x[0])) : MORE,
       lnk = ([k, l]) => `<a class="btn alt" href="#/${k}">${l}</a>`,

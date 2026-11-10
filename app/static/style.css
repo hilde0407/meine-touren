@@ -439,3 +439,56 @@ html.mob .hdots{right:88px;top:22px}
 :where(.p6-10){padding:6px 10px!important}:where(.p6-12){padding:6px 12px!important}:where(.p8){padding:8px!important}:where(.p8-0){padding:8px 0!important}:where(.p8-10){padding:8px 10px!important}:where(.pl14){padding-left:14px!important}
 :where(.pl18){padding-left:18px!important}:where(.pl20){padding-left:20px!important}:where(.tac){text-align:center!important}:where(.tal){text-align:left!important}:where(.tar){text-align:right!important}:where(.tdn){text-decoration:none!important}
 :where(.vam){vertical-align:middle!important}:where(.w100){width:100%!important}
+
+/* ===================== Erscheinungsbild 4: ruhige Flächen statt Linien, klare Hierarchie, Gelb nur für Aktionen und Wegweiser ===================== */
+:root{--bg:#f3f5f0;--card:#fff;--surface:#fff;--ink:#12292a;--mut:#5a6b68;--rule:#dde3dc;--soft:#e9eee8;--forest:#10292a;--r:6px;--r-l:10px}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1617;--card:#11262a;--surface:#0e2023;--ink:#e4ece9;--mut:#8fa7a3;--rule:#22393a;--soft:#17302f;--forest:#081415}}
+body{background-image:none}
+/* Kopfzeile */
+.top{height:56px;gap:22px;box-shadow:0 1px 0 #ffffff14 inset}
+nav a{font:600 16px var(--d);color:#b3c6c1;padding:0 12px;border-bottom-width:3px}
+#hadm{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;color:#b3c6c1;margin-left:8px;flex:none}
+#hadm:hover,#hadm.on{color:#fff;background:#ffffff1a}#hadm.on{box-shadow:0 0 0 2px var(--yellow) inset}
+html.viewer #hadm,html.mob #hadm{display:none}
+#gs{background:#ffffff12;border:1px solid #ffffff22;color:#fff;border-radius:18px}
+/* Abschnitte als Flächen */
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:var(--r-l);padding:20px 22px 22px;margin-top:16px}
+.panel>h2,.panel>h3{font-size:22px;margin-bottom:12px}
+.panel .panel{background:transparent;border:0;border-top:1px solid var(--rule);border-radius:0;padding:16px 0 0;margin-top:18px}
+.panel.gap{margin-top:20px}html.mob .inner .panel.gap{margin-top:14px!important}
+html.mob .panel{padding:16px 14px 16px}html.mob .panel .panel{padding:14px 0 0}
+html.mob .atab .gbody>.panel{padding:16px 14px}
+.grid{gap:20px}.grid>.panel{margin-top:0}
+.sec{margin:38px 0 14px}.sec h2{font-size:26px}
+main>h1,.inner>h1{font-size:34px}
+/* Tourenliste und Zeilen */
+.tl{background:var(--card);border:1px solid var(--rule);border-radius:var(--r-l);overflow:hidden}
+.tr{padding:12px 16px}.tr:last-child{border-bottom:0}
+.tr:hover{background:color-mix(in srgb,var(--yellow) 12%,var(--card))}
+/* Knöpfe und Eingaben */
+.btn{border-width:1.5px;padding:8px 16px;border-radius:var(--r)}
+.btn.alt{border-color:color-mix(in srgb,var(--ink) 38%,transparent);opacity:1;background:var(--card)}
+.btn.alt:hover{border-color:var(--ink);filter:none}
+.btn.ghost{background:var(--card)}
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]),select,textarea{background:var(--card);border:1px solid color-mix(in srgb,var(--ink) 24%,transparent);border-radius:var(--r)}
+input:focus,select:focus,textarea:focus{border-color:var(--ink);outline:2px solid color-mix(in srgb,var(--yellow) 70%,transparent);outline-offset:1px}
+.chip{background:var(--card);border-width:1px}
+/* Hinweisleiste */
+.warnbar{border:1px solid #e8cf7a;border-left:4px solid var(--yellow);border-radius:var(--r);background:#fff8dc;color:#3a3000}
+@media (prefers-color-scheme:dark){.warnbar{background:#2a2508;border-color:#5d5113;color:#f1e6ad}}
+/* Reiter: Jahre, Verwaltung, Statistik */
+.years button{font-size:22px;padding:6px 0 8px;border-bottom-width:3px}.years{gap:6px 22px}
+.segtabs{display:inline-flex;background:var(--soft);border-radius:8px;padding:3px;margin:0 0 18px;gap:2px}
+.segtabs a{padding:6px 18px;border-radius:6px;text-decoration:none;font:600 16px var(--d);color:var(--mut)}
+.segtabs a.on{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--rule)}
+.atabs .atlink{display:inline-flex;align-items:center;padding:0 14px;text-decoration:none;font:600 16px var(--d);color:var(--mut);white-space:nowrap;border-left:1px solid var(--rule);margin-left:6px}
+.atabs .atlink:hover{color:var(--ink)}
+.backl{display:inline-block;margin-bottom:10px;color:var(--mut);text-decoration:none;font:500 15px var(--b)}.backl:hover{color:var(--ink)}
+/* Entwickleransichten nur im Entwicklermodus */
+html:not(.dbg) [data-dev],html:not(.dbg) a[href="#/apptest"]{display:none!important}
+html:not(.dbg) .logpanel .pre{max-height:9.5em;overflow:auto}
+/* Der Backup-Hinweis gehört auf die Startseite und in die Verwaltung, nicht auf jede Seite */
+html:not([data-view=dash]):not([data-view=admin]) #main>.warnbar{display:none}
+#tabbar .ti svg{display:block;margin:0 auto}
+.tact-bar .tk{display:inline-flex;align-items:center;gap:8px}.tact-bar .tk>span{display:inline-flex}
+.tact-bar .tk:not(:first-child){background:var(--card);border-color:color-mix(in srgb,var(--ink) 38%,transparent);color:var(--ink)}

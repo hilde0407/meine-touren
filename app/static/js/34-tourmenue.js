@@ -2,7 +2,7 @@
    Die ursprünglichen Knöpfe bleiben im Dokument (nur ausgeblendet); das Menü löst sie aus – so bleibt jede Funktion unverändert. */
 const TACT = [
   {
-    key: "view", icon: "👁", label: "Ansehen", title: "Tour ansehen",
+    key: "view", icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>`, label: "Ansehen", title: "Tour ansehen",
     items: [
       ["storybtn", "Erzählung", "Zeitleiste mit Wegpunkten, Fotos und Kommentaren"],
       ["e3d", "3D-Flug", "Die Strecke im 3D-Gelände abfliegen"],
@@ -10,7 +10,7 @@ const TACT = [
     ],
   },
   {
-    key: "share", icon: "📤", label: "Teilen & Export", title: "Teilen & Export",
+    key: "share", icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7h14v-7"/></svg>`, label: "Teilen & Export", title: "Teilen & Export",
     items: [
       ["-", "Senden und Links"],
       ["esnd", "Link senden", "Karte und Zahlen an WhatsApp, Signal, E-Mail …"],
@@ -22,7 +22,7 @@ const TACT = [
     ],
   },
   {
-    key: "edit", icon: "✎", label: "Bearbeiten", title: "Tour bearbeiten",
+    key: "edit", icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>`, label: "Bearbeiten", title: "Tour bearbeiten",
     items: [
       ["-", "Beschriften"],
       ["ren", "Umbenennen", ""],

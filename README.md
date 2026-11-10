@@ -440,6 +440,11 @@ Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → An
 
 **Fotos aus der App in einer anderen Zeitzone (ab Server 2.7.4 / App 2.5.1):** Die App schickt mit jedem Foto-Upload die Zeitzone des Telefons mit. Hat die Kamera keine Zeitzone ins Foto geschrieben, trägt der Server sie nach. Vorher wurde die Aufnahmezeit als Ortszeit des Servers gedeutet – war das Handy z. B. auf den Kanaren (UTC+0) und der Server in Deutschland, lag das Foto eine Stunde neben der Tour und wurde nicht zugeordnet.
 
+### Neu in 3.6 – neues Erscheinungsbild, aufgeräumtes Menü, Entwicklermodus
+- **Menü:** sechs Hauptpunkte (Übersicht, Karte, Touren, Reisen, Fotos, Statistik). „Statistik“ fasst Auswertung und Rekorde zusammen (oben umschaltbar). Die Verwaltung liegt hinter dem Zahnrad rechts oben; „Prüfen & Aufräumen“ ist ein Reiter der Verwaltung.
+- **Erscheinungsbild:** Abschnitte als ruhige Flächen statt Linien, einheitliche Knöpfe und Eingaben, Gelb nur noch für die Hauptaktion und die Wegweiser; gezeichnete Symbole statt Emojis in der Handy-Leiste und im Tour-Menü. Der Backup-Hinweis erscheint nur noch auf der Startseite und in der Verwaltung.
+- **Entwicklermodus:** Selbsttest, App-Test, die Suche nach verlorenen Aufzeichnungen und der Token-Test sind ausgeblendet; das Protokoll zeigt nur die letzten Zeilen. Einschalten: Verwaltung → Übersicht → „Entwickleransichten anzeigen“ (gilt pro Browser).
+
 ### Neu in 3.5.1 – Pulskurve geglättet, Stile aufgeräumt
 - **Pulskurve:** geglättet (gleitender Mittelwert); Messlücken (Pausen) erscheinen als weicher, gestrichelter Übergang statt als harte Gerade. Kennzahlen und Zonen rechnen weiter mit den Rohwerten.
 - **Stile:** Rund 600 Inline-Stilangaben in den Vorlagen sind durch Hilfsklassen ersetzt (pixelgleich, per Bildvergleich über 59 Ansichten geprüft). Schriftgrößen folgen einer festen Skala (12–44 px); ein Test verhindert Abweichungen.

@@ -25,7 +25,8 @@ if (recApp()) {
   if (typeof MORE !== "undefined" && !MORE.some(x => x[0] === "record")) MORE.unshift(["record", "● Aufzeichnen"], ["apptest", "App-Test"]);
   const nav = document.querySelector("#nav");
   if (nav && !nav.querySelector('[data-k="record"]')) {
-    nav.querySelector('[data-k="admin"]').insertAdjacentHTML("beforebegin", '<a href="#/record" data-k="record">● Aufzeichnen</a>');
+    const adm = nav.querySelector('[data-k="admin"]');
+    (adm || nav).insertAdjacentHTML(adm ? "beforebegin" : "beforeend", '<a href="#/record" data-k="record">● Aufzeichnen</a>');
   }
 }
 

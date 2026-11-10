@@ -682,6 +682,8 @@ def test_record_view_app(page):
     page.click("#rsend"); page.wait_for_function("() => location.hash.startsWith('#/tour/')", timeout=8000)
 
     page.goto(base + "#/apptest"); page.wait_for_timeout(800)
+    assert "Nur im Entwicklermodus" in page.locator("#main").inner_text()          # App-Test ist eine Entwickleransicht
+    page.evaluate("() => localStorage.setItem('mt_debug', '1')"); page.reload(); page.wait_for_timeout(800)
     page.wait_for_function("() => document.querySelector('#main') && document.querySelector('#main').innerText.includes('Server erreichbar')", timeout=15000)
     t = page.inner_text("#main")
     assert "Server erreichbar" in t and "Akku-Optimierung ist aktiv" in t and "GPS ist eingeschaltet" in t
@@ -998,3 +1000,27 @@ def test_record_weather_and_live_link(page, app_url):
     assert "Gewittergefahr in etwa 2 Stunden" in t and "Sturmböen bis 70 km/h in der nächsten Stunde" in t, t
     assert not errs, errs
     ctx.close()
+
+
+def test_nav_statistik_und_entwicklermodus(page, app_url):
+    """Menü: sechs Hauptpunkte; Rekorde/Auswertung unter „Statistik“; Prüfen in der Verwaltung; Entwickleransichten hinter einem Schalter."""
+    page.evaluate("() => localStorage.setItem('mt_debug', '0')"); page.reload(); page.wait_for_timeout(1500)
+    keys = page.evaluate("() => [...document.querySelectorAll('#nav a')].map(a => a.dataset.k)")
+    assert keys[:6] == ["dash", "map", "tours", "trips", "photos", "places"] and "check" not in keys and "admin" not in keys
+    page.evaluate("() => location.hash = '#/records'"); page.wait_for_timeout(1200)
+    assert page.locator(".segtabs a.on").inner_text() == "Rekorde"
+    assert page.locator('#nav a[data-k="places"]').get_attribute("class") == "on"
+    page.locator(".segtabs a", has_text="Auswertung").click(); page.wait_for_timeout(1200)
+    assert page.locator(".segtabs a.on").inner_text() == "Auswertung"
+    page.locator("#hadm").click(); page.wait_for_timeout(1800)
+    assert page.locator("#atabs .atlink").count() == 1
+    assert not page.locator("#stest").is_visible()                     # Selbsttest: nur im Entwicklermodus
+    page.locator('#atabs [data-t="uebersicht"]').click()
+    page.locator("#dbgsw").check(); page.wait_for_timeout(2500)        # lädt neu
+    page.evaluate("() => location.hash = '#/admin'"); page.wait_for_timeout(1800)
+    page.locator('#atabs [data-t="uebersicht"]').click()
+    assert page.locator("#stest").is_visible()
+    page.locator("#atabs .atlink").click(); page.wait_for_timeout(1200)
+    assert "Prüfen" in page.locator("#main h1, #main h2").first.inner_text() and page.locator(".backl").count() == 1
+    page.evaluate("() => localStorage.setItem('mt_debug', '0')")
+    assert not page.errors, page.errors
