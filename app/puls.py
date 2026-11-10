@@ -39,13 +39,13 @@ def tours_with_hr():
             if st.st_size >= 40:
                 ids.add(n[:-8])
         elif n.endswith(".gpx"):
-            c = _HR_CACHE.get(n)
+            c = _HR_CACHE.get(str(f))
             if not c or c[0] != st.st_mtime_ns:
                 try:
                     has = "gpxtpx:hr" in f.read_text(encoding="utf-8", errors="ignore")
                 except OSError:
                     has = False
-                c = _HR_CACHE[n] = (st.st_mtime_ns, has)
+                c = _HR_CACHE[str(f)] = (st.st_mtime_ns, has)
             if c[1]:
                 ids.add(n[:-4])
     return ids
@@ -97,38 +97,82 @@ def backfill_hr(api=None):
     log(f"Puls abgleichen: {done} Touren ergänzt")
 
 
+def _series(tour_id):
+    """Pulsverlauf einer Tour als [[Sekunden seit Start, bpm, Punktindex], …] und die Zahl der Streckenpunkte."""
+    side = hr_sidecar(tour_id)
+    sd = _sc_load(side) if side.exists() else []
+    if sd:
+        return [[int(a), int(b), i] for i, (a, b) in enumerate(sd)], len(sd)
+    f = tracks.gpx_file(tour_id)
+    if not f.exists():
+        return [], 0
+    typ, raw = gpxtools._points_gpx_hr(f.read_text(encoding="utf-8", errors="ignore"))
+    rows = [(gpxtools.parse_time(t), hr, i) for i, (la, lo, el, t, hr) in enumerate(raw) if hr and not (la == 0 and lo == 0)]
+    if len(rows) < 5:
+        return [], len(raw)
+    t0 = gpxtools.parse_time(raw[0][3])
+    return [[int((t - t0).total_seconds()), hr, i] for t, hr, i in rows], len(raw)
+
+
+def _hr_max():
+    try:
+        return int(db.get("hr_max") or 0) or 185
+    except ValueError:
+        return 185
+
+
+def _zone(bpm, hmax):
+    return min(4, max(0, int((bpm / hmax - 0.5) / 0.1)))
+
+
 @router.get("/api/tours/{tour_id}/hr")
 def api_hr(tour_id: str):
-    """Pulsverlauf einer lokalen Tour (aus den Herzfrequenz-Werten der GPX-Datei)."""
-    side = hr_sidecar(tour_id)
-    sd = json.loads(side.read_text(encoding="utf-8")) if side.exists() else []
-    if sd:
-        pts = [[int(a), int(b), i] for i, (a, b) in enumerate(sd)]
-        total = len(pts)
-    else:
-        f = tracks.gpx_file(tour_id)
-        if not f.exists():
-            return {"n": 0}
-        typ, raw = gpxtools._points_gpx_hr(f.read_text(encoding="utf-8", errors="ignore"))
-        rows = [(gpxtools.parse_time(t), hr, i) for i, (la, lo, el, t, hr) in enumerate(raw) if hr and not (la == 0 and lo == 0)]
-        if len(rows) >= 5:
-            t0 = gpxtools.parse_time(raw[0][3])
-            pts = [[int((t - t0).total_seconds()), hr, i] for t, hr, i in rows]     # [Sekunden, Puls, Punktindex]
-        else:
-            pts = []
-        total = len(raw)
+    """Pulsverlauf einer Tour mit Durchschnitt, Extremwerten und Zeit in den fünf Pulszonen."""
+    pts, total = _series(tour_id)
     if len(pts) < 5:
         return {"n": 0}
-    try:
-        hmax = int(db.get("hr_max") or 0) or 185
-    except ValueError:
-        hmax = 185
-    hmax = max(hmax, max(p[1] for p in pts))
+    hmax = max(_hr_max(), max(p[1] for p in pts))
     zs = [0] * 5
     for a, b in zip(pts, pts[1:]):
-        dt = min(b[0] - a[0], 30)
-        zs[min(4, max(0, int((a[1] / hmax - 0.5) / 0.1)))] += dt
+        zs[_zone(a[1], hmax)] += min(b[0] - a[0], 30)
     vals = [p[1] for p in pts]
     return {"n": len(pts), "pts": pts, "avg": round(sum(vals) / len(vals)), "max": max(vals), "min": min(vals), "hrmax": hmax, "zones": zs, "total": total}
 
 
+_SUM = {}      # Dateipfad -> (Änderungszeit, {bpm: Sekunden}, Durchschnitt, Maximum)
+
+
+def _hist(tour_id):
+    """Sekunden je Pulswert einer Tour (zwischengespeichert, solange sich die Datei nicht ändert)."""
+    side = hr_sidecar(tour_id)
+    f = side if side.exists() and side.stat().st_size >= 40 else tracks.gpx_file(tour_id)
+    if not f.exists():
+        return None
+    key, mt = str(f), f.stat().st_mtime_ns
+    c = _SUM.get(key)
+    if not c or c[0] != mt:
+        pts, _ = _series(tour_id)
+        h = {}
+        for a, b in zip(pts, pts[1:]):
+            h[a[1]] = h.get(a[1], 0) + min(b[0] - a[0], 30)
+        vals = [p[1] for p in pts]
+        c = _SUM[key] = (mt, h, round(sum(vals) / len(vals)) if vals else 0, max(vals) if vals else 0)
+    return c
+
+
+@router.get("/api/hr/stats")
+def api_hr_stats():
+    """Belastung je Tour: Durchschnitts- und Maximalpuls sowie Sekunden in den fünf Pulszonen (einheitlicher Maximalpuls für alle Touren)."""
+    rows = []
+    for tid in sorted(tours_with_hr()):
+        c = _hist(tid)
+        if c and c[1]:
+            rows.append((tid, c))
+    hmax = max([_hr_max()] + [c[3] for _, c in rows])
+    out = []
+    for tid, (_, h, avg, mx) in rows:
+        zs = [0] * 5
+        for bpm, sec in h.items():
+            zs[_zone(bpm, hmax)] += sec
+        out.append({"id": tid, "avg": avg, "max": mx, "zones": zs})
+    return {"hrmax": hmax, "tours": out}

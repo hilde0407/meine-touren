@@ -94,6 +94,16 @@ VIEWS.story = async id => {
       .on("popupopen", ev2 => { const im = ev2.popup.getElement().querySelector("img[data-p]"); if (im) im.onclick = () => openPhoto(+im.dataset.p); });
   });
   ev.forEach((e, i) => { if (e.pos && e.kind !== "ph") L.marker(e.pos, {icon: wpIcon(icon(e.kind))}).addTo(map).bindPopup(esc(e.txt)); });
+  if (window.hrData)                                       // Puls zum Zeitpunkt jeder Station
+    hrData(t.id).then(h => {
+      if (!h || !h.n) return;
+      const f = hrLookup(h);
+      ev.forEach((e, i) => {
+        const bpm = f(e.ts - t.start_ts),
+          box = document.querySelector(`#stl .stev[data-e="${i}"] .mnw78`);
+        if (bpm && box && !box.querySelector(".sthr")) box.insertAdjacentHTML("beforeend", `<div class="sthr fs13" title="Puls zu diesem Zeitpunkt"><span style="color:${HR_ZC[hrZone(bpm, h.hrmax)]}">❤</span> ${bpm}</div>`);
+      });
+    });
   (async () => {   // Ortsnamen der Stationen nachladen (zwischengespeichert; ohne Internet bleibt die Zeile leer)
     for (let i = 0; i < ev.length; i++) {
       const e = ev[i];

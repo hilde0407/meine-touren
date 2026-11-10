@@ -66,6 +66,7 @@ function flightPath(raw, cap = 900) {
       lng: raw[j][1] + (raw[j + 1][1] - raw[j][1]) * f,
       alt: alt[j] + (alt[j + 1] - alt[j]) * f,
       d,
+      t: raw[j][3] != null && raw[j + 1][3] != null && raw[0][3] != null ? (raw[j][3] + (raw[j + 1][3] - raw[j][3]) * f - raw[0][3]) / 1000 : null,
     });
   }
   const w = Math.max(3, Math.round(N / 80)),
@@ -299,12 +300,22 @@ VIEWS.flight = async id => {
       tgt = brg([lat, lng], [look.lat, look.lng]);
     return {lat, lng, tgt, f};
   };
+  let flHr = null,
+    flHrMax = 185;
+  if (!SET && window.hrData)
+    hrData(t.id).then(h => {
+      if (h && h.n) {
+        flHr = hrLookup(h);
+        flHrMax = h.hrmax;
+      }
+    });
   const hud = f => {
     const i = Math.min(N - 1, Math.round(f)),
       p = P[i];
     if (SET && p.trans) return ($("#fh").innerHTML = `✈ weiter zu <b>${esc(p.name)}</b>`);
     if (SET) return ($("#fh").innerHTML = `<b>${esc(p.name)}</b> · ${nf(p.d / 1000, 1)} / ${nf(total / 1000, 1)} km · ${nf(p.alt, 0)} m`);
-    $("#fh").innerHTML = `<b>${nf(p.d / 1000, 1)}</b> / ${nf(total / 1000, 1)} km · <b>${nf(p.alt, 0)}</b> m · ↑ ${nf(p.up, 0)} m`;
+    const bpm = flHr && p.t != null ? flHr(p.t) : null;
+    $("#fh").innerHTML = `<b>${nf(p.d / 1000, 1)}</b> / ${nf(total / 1000, 1)} km · <b>${nf(p.alt, 0)}</b> m · ↑ ${nf(p.up, 0)} m` + (bpm ? ` · <span style="color:${HR_ZC[hrZone(bpm, flHrMax)]}">❤</span> <b>${bpm}</b>` : "");
   };
   // Fotos entlang der Strecke: Marker + Einblendung beim Vorbeifliegen
   const phs = PHS0;

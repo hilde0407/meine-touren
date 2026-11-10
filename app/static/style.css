@@ -570,3 +570,9 @@ html.mob .top{position:sticky}
 /* Handy/App: Knöpfe über der Fotoliste in gleich breiten Spalten, zwei je Zeile */
 html.mob[data-view=photos] #main .sec.mt0 .btn{flex:1 1 calc(50% - 6px);min-width:0;justify-content:center;text-align:center;padding:6px 8px;font-size:15px;white-space:nowrap;margin:0}
 html.mob[data-view=photos] #main .sec.mt0{gap:8px}html.mob[data-view=photos] #main .sec.mt0 .sp{display:none}
+
+/* Puls: Zonenbalken, Legende, Diagramme */
+.zbar{display:flex;height:12px;border-radius:6px;overflow:hidden;margin:4px 0 8px}
+.zleg{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:14px;margin-bottom:10px}.zleg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+svg.chart{width:100%;height:auto;display:block}svg.chart text{font:13px var(--b);fill:var(--mut)}
+.rows a.r{text-decoration:none;color:inherit}.rows a.r:hover>span:first-child{text-decoration:underline}

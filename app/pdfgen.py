@@ -559,6 +559,15 @@ def api_tour_pdf(tour_id: str, photos_on: int = 1, n: int = 6):
            ["Aufstieg / Abstieg", f"{_nf(t['up_m'])} m / {_nf(t['down_m'])} m"], ["Höhenmeter je km", f"{_nf((t['up_m'] or 0) / km, 0)} m" if km else "-"]]
     if prof:
         det.append(["Höchster / tiefster Punkt", f"{_nf(hl[1])} m / {_nf(hl[0])} m"])
+    try:                                                   # Puls, falls zur Tour aufgezeichnet
+        from . import puls
+        hr = puls.api_hr(tour_id)
+    except Exception:  # noqa
+        hr = {"n": 0}
+    if hr.get("n"):
+        zt = sum(hr["zones"]) or 1
+        det.append(["Puls (Ø / max / min)", f"{hr['avg']} / {hr['max']} / {hr['min']} bpm"])
+        det.append(["Zeit in den Pulszonen 1–5", "  ·  ".join(f"Z{i + 1} {round(z / zt * 100)} %" for i, z in enumerate(hr["zones"]))])
     pk = db.one("SELECT name,alt FROM tour_peak WHERE id=?", (tour_id,))
     if pk and pk["alt"]:
         det.append(["Gipfel", f"{pk['name'] or '-'} ({_nf(pk['alt'])} m)"])

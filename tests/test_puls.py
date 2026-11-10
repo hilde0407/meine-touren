@@ -112,3 +112,30 @@ def test_hr_survives_trackfix_export_backup():
 def test_viewer_may_read_hr():
     from app import main
     assert main.VIEWER_GET.match("/api/tours/abc/hr") and not main.VIEWER_GET.match("/api/tours/abc/elev-fix")
+
+
+def test_hr_stats_all_tours():
+    from fastapi.testclient import TestClient
+    from app import main
+    c = TestClient(main.app)
+    s, pts = _pts()
+    tracks.adopt(zepp.points_to_gpx(s, pts, "hike"), "a.gpx", ident="zs1")
+    s2, p2 = _pts(hr=False)
+    tracks.adopt(zepp.points_to_gpx(s2, p2, "hike"), "b.gpx", ident="zs2")
+    r = c.get("/api/hr/stats").json()
+    ids = {t["id"]: t for t in r["tours"]}
+    assert "zs1" in ids and "zs2" not in ids and r["hrmax"] >= 185
+    assert sum(ids["zs1"]["zones"]) > 300 and 100 <= ids["zs1"]["avg"] <= 140
+    assert c.get("/api/hr/stats").json() == r                      # zweiter Aufruf aus dem Zwischenspeicher
+    assert main.VIEWER_GET.match("/api/hr/stats")
+
+
+def test_tour_pdf_with_hr():
+    import pytest
+    pytest.importorskip("reportlab")
+    from fastapi.testclient import TestClient
+    from app import main
+    s, pts = _pts()
+    tracks.adopt(zepp.points_to_gpx(s, pts, "hike"), "p.gpx", ident="zp1")
+    r = TestClient(main.app).get("/api/tours/zp1/pdf?photos_on=0")
+    assert r.status_code == 200 and r.content[:4] == b"%PDF"

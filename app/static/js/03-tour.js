@@ -128,7 +128,9 @@ VIEWS.tour = async id => {
     cl = null,
     tseg = null,
     tcc = [],
-    tleg = null;
+    tleg = null,
+    hrF = null,
+    hrMax = 185;
   const paintBy = () => {
     if (tseg) {
       map.removeLayer(tseg);
@@ -139,7 +141,7 @@ VIEWS.tour = async id => {
       tleg = null;
     }
     if (!tl) return;
-    const on = TS.by !== "none" && tcc.length > 8;
+    const on = TS.by !== "none" && tcc.length > 8 && (TS.by !== "hr" || hrF);
     tl.setStyle({opacity: on ? 0 : 0.92});
     if (!on) return;
     const n = tcc.length,
@@ -150,6 +152,7 @@ VIEWS.tour = async id => {
         const a = Math.max(0, i - w),
           b = Math.min(n - 1, i + w + 1),
           dd = d[b] - d[a] || 1;
+        if (TS.by === "hr") return tcc[i][3] != null ? hrF((tcc[i][3] - tcc[0][3]) / 1000) : null;
         if (TS.by === "grade") return tcc[a][2] != null && tcc[b][2] != null ? ((tcc[b][2] - tcc[a][2]) / dd) * 100 : 0;
         return tcc[a][3] != null && tcc[b][3] != null && tcc[b][3] > tcc[a][3] ? (dd / ((tcc[b][3] - tcc[a][3]) / 1000)) * 3.6 : null;
       };
@@ -158,7 +161,7 @@ VIEWS.tour = async id => {
     const q = f => (s.length ? s[Math.min(s.length - 1, Math.floor(f * s.length))] : 0),
       cuts = [q(0.2), q(0.4), q(0.6), q(0.8)],
       SC = ["#2b6cb0", "#63b3ed", "#68d391", "#f6ad55", "#e53e3e"];
-    const col = x => (TS.by === "grade" ? grCol(x) : x == null ? "#999" : SC[cuts.filter(c => x >= c).length]);
+    const col = x => (TS.by === "grade" ? grCol(x) : x == null ? "#999" : TS.by === "hr" ? HR_ZC[hrZone(x, hrMax)] : SC[cuts.filter(c => x >= c).length]);
     tseg = L.layerGroup(
       v.map((x, i) =>
         L.polyline(
@@ -167,13 +170,15 @@ VIEWS.tour = async id => {
             [tcc[i + 1][0], tcc[i + 1][1]],
           ],
           {color: col(x), weight: TS.weight + 1, opacity: 0.95, lineCap: "butt"}
-        ).bindTooltip(x == null ? "–" : TS.by === "grade" ? `${nf(x, 0)} % Steigung` : `${nf(x, 1)} km/h`)
+        ).bindTooltip(x == null ? "–" : TS.by === "grade" ? `${nf(x, 0)} % Steigung` : TS.by === "hr" ? `${x} bpm` : `${nf(x, 1)} km/h`)
       )
     ).addTo(map);
     tleg = document.createElement("div");
     tleg.className = "tleg";
     tleg.innerHTML =
-      TS.by === "grade"
+      TS.by === "hr"
+        ? HR_ZC.map((c, i) => `<span title="${HR_ZN[i]}"><i style="background:${c}"></i>Z${i + 1}</span>`).join("")
+        : TS.by === "grade"
         ? GR.map(g => `<span><i style="background:${g[2]}"></i>${g[3]}</span>`).join("")
         : SC.map((c, i) => `<span><i style="background:${c}"></i>${i === 0 ? "langsam" : i === 4 ? "schnell" : ""}</span>`).join("");
     document.getElementById("tm").appendChild(tleg);
@@ -196,6 +201,14 @@ VIEWS.tour = async id => {
         .bindTooltip("Ziel");
       profile(c, t);
       if (window.pulsCard) pulsCard(t);
+      if (window.hrData)
+        hrData(t.id).then(h => {
+          if (!h || !h.n) return;
+          hrF = hrLookup(h);
+          hrMax = h.hrmax;
+          profileHr(h);
+          if (TS.by === "hr") paintBy();
+        });
       return c;
     })
     .catch(e => {

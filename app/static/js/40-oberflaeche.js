@@ -26,7 +26,7 @@ $("#nav").innerHTML = NAV.map(([k, l]) => `<a href="#/${k}" data-k="${k}">${l}</
   a.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>`;
   $(".top").insertBefore(a, $("#busy"));
 }
-const NAV_OF = {tour: "tours", story: "tours", flight: "tours", plan: "tours", sheet: "tours", compare: "tours", series: "tours", trip: "trips", tripsheet: "trips", album: "photos", shared: "photos", records: "stats", recap: "stats", places: "stats"};
+const NAV_OF = {tour: "tours", story: "tours", flight: "tours", plan: "tours", sheet: "tours", compare: "tours", series: "tours", trip: "trips", tripsheet: "trips", album: "photos", shared: "photos", records: "stats", recap: "stats", places: "stats", pulse: "stats"};
 function navFix() {
   const h = (location.hash || "#/dash").replace(/^#\/?/, "");
   let k = h.split(/[/?]/)[0] || "dash";
@@ -55,7 +55,7 @@ function statTabs(cur) {
   if (!main || main.querySelector(".segtabs") || main.querySelector(".empty")) return;
   const inner = cur === "stats" ? main.querySelector(".inner") : null,
     wb = inner ? null : main.querySelector(":scope > .warnbar");
-  (wb || inner || main).insertAdjacentHTML(wb ? "afterend" : "afterbegin", `<div class="segtabs" role="tablist"><a role="tab" href="#/stats" class="${cur === "stats" ? "on" : ""}">Übersicht</a><a role="tab" href="#/places" class="${cur === "places" ? "on" : ""}">Auswertung</a><a role="tab" href="#/records" class="${cur === "records" ? "on" : ""}">Rekorde</a></div>`);
+  (wb || inner || main).insertAdjacentHTML(wb ? "afterend" : "afterbegin", `<div class="segtabs" role="tablist"><a role="tab" href="#/stats" class="${cur === "stats" ? "on" : ""}">Übersicht</a><a role="tab" href="#/places" class="${cur === "places" ? "on" : ""}">Auswertung</a><a role="tab" href="#/records" class="${cur === "records" ? "on" : ""}">Rekorde</a>${TOURS.some(t => t.has_hr) ? `<a role="tab" href="#/pulse" class="${cur === "pulse" ? "on" : ""}">Puls</a>` : ""}</div>`);
 }
 {
   const p0 = VIEWS.places,
