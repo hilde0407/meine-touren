@@ -1041,3 +1041,21 @@ def test_startseite_und_statistik_uebersicht(page, app_url):
     assert "y=" in page.url and page.locator(".segtabs a.on").inner_text() == "Übersicht"
     assert page.locator('#nav a[data-k="stats"]').get_attribute("class") == "on"
     assert not page.errors, page.errors
+
+
+def test_bedienelemente_lesbar(page, app_url):
+    """Kein Knopf, Chip oder Auswahlfeld darf Schrift in (fast) derselben Farbe wie seine eigene Fläche haben (z. B. weiß auf weiß)."""
+    js = """() => { const P = c => { const m = c.match(/rgba?\\(([^)]+)\\)/); if (!m) return null; const a = m[1].split(/[, /]+/).map(Number); return {r: a[0], g: a[1], b: a[2], a: a.length > 3 ? a[3] : 1}; };
+      const lum = c => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(c.r) + .7152 * f(c.g) + .0722 * f(c.b); };
+      const bad = [];
+      document.querySelectorAll('#main button, #main a.btn, #main select, #main .chip, #main input[type=text], #main input[type=search]').forEach(e => {
+        const r = e.getBoundingClientRect(), cs = getComputedStyle(e); if (r.width < 8 || cs.visibility === 'hidden' || cs.display === 'none') return;
+        const fg = P(cs.color), bg = P(cs.backgroundColor); if (!fg || !bg || bg.a < .9 || fg.a < .5) return;
+        const a = lum(fg), b = lum(bg), cr = (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+        if (cr < 2) bad.push(e.tagName + '.' + e.className + '#' + e.id + ' ' + cr.toFixed(1)); });
+      return bad; }"""
+    tid = page.evaluate("() => TOURS.find(t => t.source === 'local').id")
+    for v in ("map", f"flight/{tid}", "dash", "photos", f"tour/{tid}", "stats"):
+        page.evaluate(f"() => location.hash = '#/{v}'"); page.wait_for_timeout(1500)
+        bad = [b for b in page.evaluate(js) if "BUTTON.st" not in b]            # leere Bewertungssterne sind absichtlich blass
+        assert not bad, (v, bad)
