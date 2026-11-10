@@ -492,3 +492,6 @@ html:not([data-view=dash]):not([data-view=admin]) #main>.warnbar{display:none}
 #tabbar .ti svg{display:block;margin:0 auto}
 .tact-bar .tk{display:inline-flex;align-items:center;gap:8px}.tact-bar .tk>span{display:inline-flex}
 .tact-bar .tk:not(:first-child){background:var(--card);border-color:color-mix(in srgb,var(--ink) 38%,transparent);color:var(--ink)}
+/* Helle Umriss-Knöpfe auf dunklem Grund (Aufmacher der Startseite, Jahresrückblick): durchsichtig statt weißer Fläche */
+.btn.alt.c-white,.hero .btn.alt,.hero .btn.ghost{background:transparent;border-color:#ffffff8c;color:#fff}
+.btn.alt.c-white:hover,.hero .btn.alt:hover{border-color:#fff;background:#ffffff1a}
