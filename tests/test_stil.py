@@ -22,7 +22,7 @@ def test_font_sizes_on_scale():
 def test_inline_styles_stay_rare():
     """Statische Abstände/Schriftgrößen gehören in Klassen; inline bleiben nur berechnete oder per JS geschaltete Werte."""
     n = sum(len(re.findall(r'style="', f.read_text(encoding="utf-8"))) for f in JS)
-    assert n <= 190, f"{n} Inline-Stile (Grenze 190) – bitte Hilfsklassen aus style.css verwenden"
+    assert n <= 185, f"{n} Inline-Stile (Grenze 185) – bitte Hilfsklassen aus style.css verwenden"
 
 
 def test_helper_classes_defined():

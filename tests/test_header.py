@@ -27,3 +27,17 @@ def test_app_has_no_inline_script():
         t = f.read_text(encoding="utf-8")
         assert not re.search(r'\son(click|change|input|error|load|submit)="', t), f.name
         assert 'href="javascript:' not in t and 'javascript:history' not in t, f.name
+
+
+def test_nebenseiten_csp_und_kein_inline_script():
+    """Auch Freigabe-, Diashow- und Rücksetz-Seite laufen unter der CSP und enthalten kein Inline-JavaScript."""
+    from fastapi.testclient import TestClient
+    from app import main
+    c = TestClient(main.app)
+    for n in ("reset", "share", "show", "slideshow"):
+        html = (ST / f"{n}.html").read_text(encoding="utf-8")
+        assert not re.search(r"<script(?![^>]*\bsrc=)[^>]*>", html), n
+        assert not re.search(r'\son(click|change|input|error|load|submit)="', html), n
+        assert (ST / "js" / f"seite-{n}.js").exists()
+    for p in ("/slideshow.html", "/share.html", "/s/gibtsnicht", "/reset/gibtsnicht"):
+        assert "script-src 'self' blob:;" in c.get(p).headers.get("content-security-policy", ""), p

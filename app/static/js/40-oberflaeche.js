@@ -117,3 +117,65 @@ const DEV_PANELS = ["Selbsttest", "Verlorene App-Aufzeichnungen"];
       await t0(...a);
     };
 }
+
+/* ---- Gezeichnete Symbole statt Emojis am Anfang von Knöpfen, Chips und Links ----
+   Die Vorlagen schreiben weiterhin z. B. „🗑 Löschen“; hier wird das führende Zeichen durch ein Liniensymbol in Schriftfarbe ersetzt.
+   So sehen alle Knöpfe einheitlich aus – unabhängig davon, wie das Betriebssystem Emojis zeichnet. */
+const BTN_ICONS = {
+  "⛰": '<path d="M3 19l6-11 4 7 2-3 6 7z"/>',
+  "✎": '<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',
+  "⬆": '<path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 20h14"/>',
+  "⬇": '<path d="M12 4v12M7 11l5 5 5-5"/><path d="M5 20h14"/>',
+  "🎨": '<path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 2-2 0-1.6 1-2 2.5-2H18a3 3 0 0 0 3-3c0-6-4-11-9-11z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="15" cy="7.5" r="1"/>',
+  "🏷": '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/>',
+  "📍": '<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.500c0 5.300 7 11.500 7 11.500z"/><circle cx="12" cy="9.500" r="2.500"/>',
+  "📌": '<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.500c0 5.300 7 11.500 7 11.500z"/><circle cx="12" cy="9.500" r="2.500"/>',
+  "📖": '<path d="M3 5c3-1 6-1 9 1v14c-3-2-6-2-9-1z"/><path d="M21 5c-3-1-6-1-9 1v14c3-2 6-2 9-1z"/>',
+  "📡": '<path d="M5 19a9 9 0 0 1 0-14M8 16a5 5 0 0 1 0-8M19 19a9 9 0 0 0 0-14M16 16a5 5 0 0 0 0-8"/><circle cx="12" cy="12" r="1.500"/>',
+  "🔗": '<path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1"/><path d="M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/>',
+  "🖨": '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
+  "🗑": '<path d="M4 7h16M10 4h4M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/>',
+  "🗺": '<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/>',
+  "🧹": '<path d="M5 19c2-1 3-3 3-6"/><path d="M3 21l18-18"/><path d="M14 4l6 6"/><path d="M9 15l2 2"/>',
+  "⏺": '<circle cx="12" cy="12" r="6" fill="currentColor"/>',
+  "⏸": '<path d="M9 5v14M15 5v14"/>',
+  "▶": '<path d="M7 5l12 7-12 7z" fill="currentColor"/>',
+  "⏹": '<rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor"/>',
+  "⌖": '<circle cx="12" cy="12" r="6"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>',
+  "↶": '<path d="M9 7L4 12l5 5"/><path d="M4 12h10a6 6 0 0 1 0 12"/>',
+  "⟳": '<path d="M20 12a8 8 0 1 1-2.300-5.700"/><path d="M20 4v5h-5"/>',
+  "📷": '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.500"/>',
+  "💬": '<path d="M4 5h16v11H9l-5 4z"/>',
+  "🔁": '<path d="M4 9h13l-3-3M20 15H7l3 3"/>',
+  "👥": '<circle cx="9" cy="9" r="3"/><path d="M3 20c0-3.300 2.700-6 6-6s6 2.700 6 6"/><path d="M16 6.500a3 3 0 0 1 0 5.500M18 14.500c2 .8 3 2.800 3 5.500"/>',
+  "🏆": '<path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 14v4M8 20h8"/>',
+  "🎒": '<rect x="6" y="8" width="12" height="13" rx="3"/><path d="M9 8V6a3 3 0 0 1 6 0v2M9 15h6"/>',
+  "🧭": '<circle cx="12" cy="12" r="9"/><path d="M15.500 8.500l-2 5-5 2 2-5z"/>',
+  "🎯": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
+  "🏁": '<path d="M5 21V4M5 4h13l-2 4 2 4H5"/>',
+  "💡": '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.500 10.900c.6.500 1 1.300 1 2.100h5c0-.8.400-1.600 1-2.100A6 6 0 0 0 12 3z"/>',
+  "⛶": '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+};
+const BTN_ICON_RE = new RegExp("^\\s*(" + Object.keys(BTN_ICONS).join("|") + ")\\uFE0F?\\s*");
+function iconize() {
+  document.querySelectorAll("button, a.btn, .chip, a.back, a.hmore, summary").forEach(e => {
+    const n = e.firstChild;
+    if (!n || n.nodeType !== 3) return;
+    const m = n.nodeValue.match(BTN_ICON_RE);
+    if (!m) return;
+    n.nodeValue = n.nodeValue.slice(m[0].length);
+    e.insertAdjacentHTML("afterbegin", `<svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${BTN_ICONS[m[1]]}</svg>`);
+  });
+}
+{
+  let pend = false;
+  new MutationObserver(() => {
+    if (pend) return;
+    pend = true;
+    requestAnimationFrame(() => {
+      pend = false;
+      iconize();
+    });
+  }).observe(document.body, {childList: true, subtree: true, characterData: true});
+  iconize();
+}

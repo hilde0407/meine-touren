@@ -417,7 +417,7 @@ html.mob .hdots{right:88px;top:22px}
 :where(.br3){border-radius:3px!important}:where(.br6){border-radius:6px!important}:where(.br8){border-radius:8px!important}:where(.c-white){color:#fff!important}:where(.cp){cursor:pointer!important}
 :where(.fs12){font-size:12px!important}:where(.fs13){font-size:13px!important}:where(.fs14){font-size:14px!important}:where(.fs15){font-size:15px!important}:where(.fs16){font-size:16px!important}
 :where(.fs18){font-size:18px!important}:where(.fs20){font-size:20px!important}:where(.fs34){font-size:34px!important}:where(.fs44){font-size:44px!important}:where(.fw600){font-weight:600!important}
-:where(.fw700){font-weight:700!important}:where(.fx1){flex:1!important}:where(.fxw){flex-wrap:wrap!important}:where(.g10){gap:10px!important}:where(.g12){gap:12px!important}:where(.g16){gap:16px!important}
+:where(.fw700){font-weight:700!important}:where(.fx){display:flex!important}:where(.h12){height:12px!important}:where(.ha){height:auto!important}:where(.fx1){flex:1!important}:where(.fxw){flex-wrap:wrap!important}:where(.g10){gap:10px!important}:where(.g12){gap:12px!important}:where(.g16){gap:16px!important}
 :where(.g28){gap:28px!important}:where(.g6){gap:6px!important}:where(.g6-16){gap:6px 16px!important}:where(.g8){gap:8px!important}:where(.jcc){justify-content:center!important}:where(.jce){justify-content:flex-end!important}
 :where(.jcsb){justify-content:space-between!important}:where(.lh1_1){line-height:1.1!important}:where(.lh1_5){line-height:1.5!important}:where(.lh1_6){line-height:1.6!important}:where(.m0){margin:0!important}:where(.m0-0-10){margin:0 0 10px!important}
 :where(.m0-0-12){margin:0 0 12px!important}:where(.m0-0-14){margin:0 0 14px!important}:where(.m0-0-18){margin:0 0 18px!important}:where(.m0-0-6){margin:0 0 6px!important}:where(.m0-0-8){margin:0 0 8px!important}:where(.m10-0){margin:10px 0!important}
@@ -576,3 +576,16 @@ html.mob[data-view=photos] #main .sec.mt0{gap:8px}html.mob[data-view=photos] #ma
 .zleg{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:14px;margin-bottom:10px}.zleg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
 svg.chart{width:100%;height:auto;display:block}svg.chart text{font:13px var(--b);fill:var(--mut)}
 .rows a.r{text-decoration:none;color:inherit}.rows a.r:hover>span:first-child{text-decoration:underline}
+/* Liniensymbole in Knöpfen */
+svg.ic{display:inline-block;vertical-align:-3px;margin-right:6px;flex:none}
+.btn.sm svg.ic,.chip svg.ic{width:15px;height:15px;margin-right:5px}
+
+/* Löschen-Knöpfe: auch im Dunkelmodus lesbar */
+.btn[data-danger]{color:#b3261e;border-color:#b3261e}
+@media (prefers-color-scheme:dark){.btn[data-danger]{color:#ff9d94;border-color:#ff9d94}}
+
+/* Puls-Ansicht: Kennzahlen, Zonenband und Legende */
+.hrkpi b{font-size:24px}
+.hrleg{font-size:13px}
+.hrnote{font-size:13px}
+.hrink{color:#c0504d}

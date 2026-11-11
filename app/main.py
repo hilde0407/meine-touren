@@ -46,7 +46,7 @@ async def no_stale_static(request: Request, call_next):
     r.headers.setdefault("X-Content-Type-Options", "nosniff")
     r.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
     r.headers.setdefault("Referrer-Policy", "same-origin")
-    if p in ("/", "/index.html"):
+    if p in ("/", "/index.html", "/share.html", "/show.html", "/slideshow.html", "/reset.html") or p.startswith(("/s/", "/reset/")):
         r.headers.setdefault("Content-Security-Policy", CSP_APP)
     if not p.startswith(("/photo/", "/pic/", "/api/")) and "cache-control" not in r.headers:
         r.headers["Cache-Control"] = "no-cache"      # Browser prüft bei jedem Aufruf auf neue Programmdateien

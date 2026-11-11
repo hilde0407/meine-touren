@@ -81,11 +81,11 @@ function pulsCard(t) {
       const d = document.createElement("div");
       d.className = "panel prof gap";
       d.id = "pulscard";
-      d.innerHTML = `<h2>Herzfrequenz</h2><div class="g28 fxw mb8" style="display:flex"><div><b style="font-size:1.5em">${h.avg}</b> <span class="mut">Ø bpm</span></div><div><b style="font-size:1.5em">${h.max}</b> <span class="mut">max bpm</span></div><div><b style="font-size:1.5em">${h.min}</b> <span class="mut">min bpm</span></div></div>` +
-        `<svg viewBox="0 0 ${W} ${H}" class="w100" style="height:auto">${g}${bridge}<path d="${line}" fill="none" stroke="#c0504d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>` +
-        `<div class="br6 ovh m12-0-8" style="display:flex;height:12px">${bar}</div>` +
-        `<div class="mut g6-16 fxw" style="display:flex;font-size:.85em">${leg}</div>` +
-        `<div class="mut mt8" style="font-size:.8em">Zonen nach ${h.hrmax} bpm Maximalpuls (einstellbar in der Verwaltung).</div>`;
+      d.innerHTML = `<h2>Herzfrequenz</h2><div class="g28 fxw mb8 fx hrkpi"><div><b>${h.avg}</b> <span class="mut">Ø bpm</span></div><div><b>${h.max}</b> <span class="mut">max bpm</span></div><div><b>${h.min}</b> <span class="mut">min bpm</span></div></div>` +
+        `<svg viewBox="0 0 ${W} ${H}" class="w100 ha">${g}${bridge}<path d="${line}" fill="none" stroke="#c0504d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>` +
+        `<div class="br6 ovh m12-0-8 fx h12">${bar}</div>` +
+        `<div class="mut g6-16 fxw fx hrleg">${leg}</div>` +
+        `<div class="mut mt8 hrnote">Zonen nach ${h.hrmax} bpm Maximalpuls (einstellbar in der Verwaltung).</div>`;
       prof.after(d);
     })
     .catch(() => {});
@@ -126,7 +126,7 @@ function profileHr(h) {
     <text x="${W - 4}" y="${y(lo + 5) - 2}" text-anchor="end" fill="#c0504d" font-size="12">${Math.round(lo + 5)} bpm</text>`;
   svg.appendChild(g);
   const pc = $("#profcard");
-  if (pc && !pc.querySelector(".phrl")) pc.insertAdjacentHTML("beforeend", `<div class="mut fs13 phrl"><span style="color:#c0504d">━</span> Puls</div>`);
+  if (pc && !pc.querySelector(".phrl")) pc.insertAdjacentHTML("beforeend", `<div class="mut fs13 phrl"><span class="hrink">━</span> Puls</div>`);
 }
 
 /* =====================  Statistik → Puls: Belastung über alle Touren mit Pulsdaten  ===================== */
