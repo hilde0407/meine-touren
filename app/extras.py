@@ -286,122 +286,6 @@ def api_weather(tour_id: str):
     return w
 
 
-# ---------- Selbsttest ----------
-@router.post("/api/selftest")
-def api_selftest():
-    from . import sync as _sync
-    res = []
-
-    def chk(name, fn):
-        try:
-            d = fn(); res.append({"name": name, "ok": True, "detail": d or ""})
-        except Exception as e:  # noqa
-            res.append({"name": name, "ok": False, "detail": str(e)[:200]})
-
-    chk("Datenbank schreibbar", lambda: (db.execute("INSERT OR REPLACE INTO settings(k,v) VALUES('selftest','1')") and "") or "ok")
-
-    def disk():
-        u = shutil.disk_usage(config.DATA_DIR); free = u.free / 1e9
-        if free < 1:
-            raise RuntimeError(f"nur noch {free:.1f} GB frei")
-        return f"{free:.1f} GB frei"
-    chk("Speicherplatz", disk)
-    kc = {}
-
-    def kl():
-        kc["k"] = _sync._komoot(True); return f"angemeldet als {kc['k'].user_id}"
-    chk("Komoot-Anmeldung", kl)
-    if "k" in kc:
-        def tl():
-            n = len(kc["k"].tours()); return f"{n} Touren bei Komoot"
-        chk("Komoot-Tourenliste", tl)
-
-        def co():
-            t = db.one("SELECT id,name FROM tours ORDER BY start_ts DESC LIMIT 1")
-            if not t:
-                raise RuntimeError("keine Tour geladen")
-            p = kc["k"].coordinates(t["id"])
-            if not p:
-                raise RuntimeError("keine Streckenpunkte")
-            return f"{len(p)} Punkte für „{t['name']}“"
-        chk("Komoot-Strecke abrufen", co)
-    if db.get("zepp_token"):
-        def zp():
-            st = _sync.check_zepp()
-            if st != "ok":
-                raise RuntimeError(st.replace("fail:", ""))
-            return "Token gültig"
-        chk("Zepp-Token", zp)
-    chk("Kartenkacheln (Internet)", lambda: (requests.get(TILE_UP["osm"].format(z=1, x=0, y=0), headers=UA, timeout=8).raise_for_status() or "erreichbar"))
-    chk("Wetterdienst (Internet)", lambda: (requests.get("https://api.open-meteo.com/v1/forecast?latitude=50&longitude=8&hourly=temperature_2m&forecast_days=1", headers=UA, timeout=8).raise_for_status() or "erreichbar"))
-    chk("Höhendaten für 3D (Internet)", lambda: (requests.get("https://s3.amazonaws.com/elevation-tiles-prod/terrarium/0/0/0.png", headers=UA, timeout=8).raise_for_status() or "erreichbar"))
-
-    def bk():
-        d = config.backup_dirs(ctx.uid())[0]; fs = sorted(list(d.glob("meine-touren-*.zip")) + list(d.glob("komoot-hub-*.zip")), key=lambda f: f.stat().st_mtime) if d.exists() else []
-        if not fs:
-            raise RuntimeError("noch kein automatisches Backup vorhanden (läuft nachts um 03:40)")
-        age = (time.time() - fs[-1].stat().st_mtime) / 3600
-        return f"{len(fs)} Backups, letztes vor {age:.0f} Std."
-    chk("Automatisches Backup", bk)
-    def integ():
-        r = db.one("PRAGMA integrity_check")
-        v = list(r.values())[0] if r else "?"
-        if v != "ok":
-            raise RuntimeError(f"Datenbank meldet: {v}")
-        return "Datenbank in Ordnung"
-    chk("Datenbank-Integrität", integ)
-
-    def dirs():
-        bad = []
-        for n, d in (("Fotobibliothek", config.LIB_DIR), ("Eingang", config.INBOX_DIR), ("Backup", config.backup_dirs(ctx.uid())[0]), ("Strecken", config.TRACK_DIR)):
-            try:
-                d.mkdir(parents=True, exist_ok=True)
-                probe = d / ".schreibtest"
-                probe.write_text("ok"); probe.unlink()
-            except Exception as e:  # noqa
-                bad.append(f"{n}: {str(e)[:60]}")
-        if bad:
-            raise RuntimeError("; ".join(bad))
-        return "Foto-, Eingangs-, Backup- und Streckenordner beschreibbar"
-    chk("Schreibrechte der Ordner", dirs)
-
-    def phfiles():
-        rows = db.query("SELECT path FROM photos ORDER BY RANDOM() LIMIT 40")
-        if not rows:
-            return "noch keine Fotos"
-        miss = sum(1 for r in rows if not Path(r["path"]).exists())
-        if miss > len(rows) * 0.2:
-            raise RuntimeError(f"{miss} von {len(rows)} geprüften Foto-Dateien fehlen (Quellordner nicht verbunden?)")
-        return f"{len(rows) - miss} von {len(rows)} Stichproben vorhanden"
-    chk("Foto-Dateien erreichbar", phfiles)
-
-    def heic():
-        from . import photos
-        return "HEIC/HEIF wird unterstützt" if photos.heic_supported() else "HEIC/HEIF nicht installiert (optional: pip install pillow-heif)"
-    chk("HEIC-Unterstützung", heic)
-
-    def imp():
-        from . import more
-        n = len(more.implausible([dict(t) for t in db.query("SELECT * FROM tours")]))
-        return f"{n} Touren unter „Prüfen“ auffällig" if n else "keine auffälligen Touren"
-    chk("Auffällige Touren", imp)
-
-    def upd():
-        r = requests.get("https://api.github.com/repos/hilde0407/meine-touren/releases/latest", headers=UA, timeout=8)
-        r.raise_for_status()
-        return f"GitHub erreichbar, neueste Version {r.json().get('tag_name', '?')}"
-    chk("Update-Prüfung (GitHub)", upd)
-
-    def upsvc():
-        mode = (os.environ.get("MT_SELF_UPDATE") == "1" and "lokal") or ("Dienst" if Path("/etc/systemd/system").exists() else "manuell")
-        if mode == "Dienst" and not os.access(config.DATA_DIR, os.W_OK):
-            raise RuntimeError("Datenordner nicht beschreibbar – Update-Anforderung nicht möglich")
-        return f"Update-Weg: {mode}"
-    chk("Update-Weg", upsvc)
-    chk("Fotobibliothek", lambda: f"{db.one('SELECT COUNT(*) n FROM photos')['n']} Fotos, Eingang: {config.INBOX_DIR}")
-    return res
-
-
 # ---------- Namensvorschläge aus Kartendaten (Nominatim + Overpass, beide OpenStreetMap) ----------
 SPORT_NAME = {"hike": "Wanderung", "touringbicycle": "Radtour", "e_touringbicycle": "E-Bike-Tour", "racebike": "Rennradtour", "mtb": "MTB-Tour",
               "jogging": "Lauf", "skialpin": "Skifahren", "skitour": "Skitour", "nordic": "Langlauf", "snowshoe": "Schneeschuhwanderung",
@@ -564,6 +448,7 @@ def name_suggestions(t, pts, part="all"):
     want_peak = part in ("all", "peak") and hi is not None and start[2] is not None and hi[2] - start[2] >= 150 and t["sport"] in ("hike", "mountaineering", "skitour", "snowshoe", "nordicwalking", "skialpin")
 
     def do_guides():
+        from .wanderfuehrer import guide_matches
         return safe(guide_matches, pts) if part in ("all", "guides") else []
 
     def do_trails():
@@ -679,135 +564,6 @@ def geo_fill(dry=False, limit=None, fetch=None):
     return ok
 
 
-# ---------- Wanderführer (z. B. Rother): Tourtitel aus eigenen GPX-Downloads ----------
-from xml.etree import ElementTree as ET
-from fastapi import Request
-
-
-def _guide_parse(text, fallback):
-    root = ET.fromstring(text)
-    loc = lambda el: el.tag.split("}")[-1]
-    pts, names = [], []
-    for el in root.iter():
-        n = loc(el)
-        if n == "trkpt" or n == "rtept":
-            try:
-                pts.append((float(el.get("lat")), float(el.get("lon"))))
-            except (TypeError, ValueError):
-                pass
-        elif n == "name" and (el.text or "").strip():
-            names.append(el.text.strip())
-    if len(pts) < 3:
-        raise ValueError("keine Streckenpunkte")
-    step = max(1, len(pts) // 400)
-    title = next((x for x in names if not re.fullmatch(r"[\w\- ]*\.gpx", x, re.I)), None) or re.sub(r"\.gpx$", "", fallback, flags=re.I)
-    return title, pts[::step] + ([pts[-1]] if step > 1 else [])
-
-
-def guide_stats(text, pts):
-    """Länge (km) aus den Punkten, Aufstieg (m) aus den Höhenangaben der GPX-Datei (None, falls keine vorhanden)."""
-    import math
-    km = 0.0
-    for a, b in zip(pts, pts[1:]):
-        dy = (b[0] - a[0]) * 111.2
-        dx = (b[1] - a[1]) * 111.2 * math.cos(math.radians((a[0] + b[0]) / 2))
-        km += (dx * dx + dy * dy) ** 0.5
-    up = None
-    try:
-        els = []
-        for el in ET.fromstring(text).iter():
-            if el.tag.split("}")[-1] in ("trkpt", "rtept"):
-                for ch in el:
-                    if ch.tag.split("}")[-1] == "ele" and ch.text:
-                        els.append(float(ch.text))
-        if len(els) >= 3:
-            sm = [sum(els[max(0, i - 2):i + 3]) / len(els[max(0, i - 2):i + 3]) for i in range(len(els))]
-            up, ref = 0.0, sm[0]
-            for v in sm[1:]:                       # Schwelle 3 m gegen Rauschen
-                if v - ref >= 3:
-                    up += v - ref; ref = v
-                elif ref - v >= 3:
-                    ref = v
-    except Exception:  # noqa
-        up = None
-    return round(km, 2), (round(up) if up is not None else None)
-
-
-def _seg_dist(p, a, b):
-    k = 111000.0
-    cx = 0.65  # cos(~50°)
-    px, py, ax, ay, bx, by = p[1] * k * cx, p[0] * k, a[1] * k * cx, a[0] * k, b[1] * k * cx, b[0] * k
-    dx, dy = bx - ax, by - ay
-    L = dx * dx + dy * dy
-    u = 0 if L == 0 else max(0, min(1, ((px - ax) * dx + (py - ay) * dy) / L))
-    return ((px - ax - u * dx) ** 2 + (py - ay - u * dy) ** 2) ** 0.5
-
-
-def _covered(samples, line, r):
-    hit = 0
-    for p in samples:
-        for i in range(len(line) - 1):
-            a = line[i]
-            if abs(a[0] - p[0]) > 0.01 or abs(a[1] - p[1]) > 0.015:
-                continue
-            if _seg_dist(p, a, line[i + 1]) <= r:
-                hit += 1; break
-    return hit / max(1, len(samples))
-
-
-def guide_matches(pts):
-    gs = db.query("SELECT id,book,title,pts FROM guide_tours")
-    if not gs or len(pts) < 5:
-        return []
-    n = min(40, len(pts))
-    samp = [(pts[int(i * (len(pts) - 1) / max(1, n - 1))][0], pts[int(i * (len(pts) - 1) / max(1, n - 1))][1]) for i in range(n)]
-    out = []
-    for g in gs:
-        line = json.loads(g["pts"])
-        la, lo = [p[0] for p in line], [p[1] for p in line]
-        if min(la) - 0.02 > max(s[0] for s in samp) or max(la) + 0.02 < min(s[0] for s in samp) or min(lo) - 0.03 > max(s[1] for s in samp) or max(lo) + 0.03 < min(s[1] for s in samp):
-            continue
-        c1 = _covered(samp, line, 80)                       # Anteil meiner Tour auf der Buchtour
-        if c1 < 0.6:
-            continue
-        step = max(1, len(line) // 40)
-        c2 = _covered(line[::step], [(p[0], p[1]) for p in pts], 120)   # Anteil der Buchtour, den ich gegangen bin
-        if c2 >= 0.5:
-            out.append((c1 * c2, g["book"], g["title"]))
-    out.sort(reverse=True)
-    return [(b, t) for _, b, t in out[:2]]
-
-
-@router.get("/api/guides")
-def api_guides():
-    return db.query("SELECT id,book,title FROM guide_tours ORDER BY book,title")
-
-
-@router.post("/api/guides")
-async def api_guides_add(request: Request):
-    data = await request.json()
-    book = (data.get("book") or "").strip()[:80]
-    ok, bad = 0, []
-    for it in data.get("items") or []:
-        try:
-            title, pts = _guide_parse(it.get("gpx", ""), it.get("name", "Tour"))
-            km, up = guide_stats(it.get("gpx", ""), pts)
-            db.execute("INSERT INTO guide_tours(book,title,pts,km,up) VALUES(?,?,?,?,?)", (book, title[:200], json.dumps([[round(a, 5), round(b, 5)] for a, b in pts]), km, up))
-            ok += 1
-        except Exception as ex:  # noqa
-            bad.append(f"{it.get('name', '?')}: {ex}")
-    return {"added": ok, "failed": bad}
-
-
-@router.delete("/api/guides/{gid}")
-def api_guides_del(gid: str):
-    if gid.startswith("book:"):
-        db.execute("DELETE FROM guide_tours WHERE book=?", (gid[5:],))
-    else:
-        db.execute("DELETE FROM guide_tours WHERE id=?", (int(gid),))
-    return {"ok": True}
-
-
 def newest_backup():
     fs = [p for d in config.backup_dirs(ctx.uid()) if d.exists() for p in d.glob("*.zip")]
     return max(fs, key=lambda p: p.stat().st_mtime) if fs else None
@@ -841,3 +597,15 @@ def auto_backup(max_age_s=23 * 3600):
             err = f"{d}: {e}"
     db.put("backup_err", err or "unbekannt")
     return None
+
+
+# ---------- Wanderführer: ausgelagert nach wanderfuehrer.py, hier nur noch die gewohnten Namen ----------
+def __getattr__(name):
+    """Ausgelagerte Funktionen bleiben unter ihrem gewohnten Namen erreichbar."""
+    if name in ("_guide_parse", "guide_stats", "guide_matches", "_seg_dist", "_covered", "GUIDE_DIR"):
+        from . import wanderfuehrer
+        return getattr(wanderfuehrer, name)
+    if name == "api_selftest":
+        from . import selbsttest
+        return selbsttest.api_selftest
+    raise AttributeError(name)

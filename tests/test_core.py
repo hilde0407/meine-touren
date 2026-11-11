@@ -20,8 +20,8 @@ def fresh():
         if not any(v["state"]["running"] for v in list(jobs._S.values())):
             break
         time.sleep(0.05)
-    from app import more
-    for th in list(more._WARM.values()):      # Vorberechnung aus dem vorherigen Test darf die neue Datenbank nicht mehr anfassen
+    from app import wiederholungen
+    for th in list(wiederholungen._WARM.values()):      # Vorberechnung aus dem vorherigen Test darf die neue Datenbank nicht mehr anfassen
         th.join(timeout=10)
     db.close_all()
     from app import auth

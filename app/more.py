@@ -225,87 +225,6 @@ def api_check():
     }
 
 
-# ---------- Gipfel ----------
-def _peak_candidates():
-    """Touren, für die ein Gipfel infrage kommt (Wandersportart, mind. 150 m Aufstieg) und die noch nicht bestimmt sind."""
-    return db.query(f"SELECT id,sport,up_m FROM tours WHERE id NOT IN (SELECT id FROM tour_peak) ORDER BY start_ts DESC")
-
-
-def peaks_pending():
-    """Anzahl wirklich bearbeitbarer Touren: Strecke liegt lokal vor und die Tour kommt infrage."""
-    n = 0
-    for t in _peak_candidates():
-        if t["sport"] in HIKE and (t["up_m"] or 0) >= 150 and routes.path_full(t["id"]).exists():
-            n += 1
-    return n
-
-
-def peaks_fill(limit=None, fetch=None, retry_wait=8):
-    """Gipfel bestimmen. Jedes Ergebnis wird sofort gespeichert; ein erneuter Start macht dort weiter, wo der letzte aufgehört hat."""
-    fetch = fetch or extras.peak_name
-    ok = n = fails = skipped = 0
-    now = int(time.time())
-    todo = []
-    for t in _peak_candidates():
-        if t["sport"] not in HIKE or (t["up_m"] or 0) < 150:      # kommt nie infrage: ohne Netzwerk als erledigt vermerken
-            db.execute("INSERT OR REPLACE INTO tour_peak(id,name,alt,lat,lng) VALUES(?,?,?,?,?)", (t["id"], "", None, None, None)); continue
-        if not routes.path_full(t["id"]).exists():                 # Strecke fehlt noch: später (nach „Strecken lokal sichern“) erneut
-            skipped += 1; continue
-        todo.append(t)
-    failed = {r["k"][9:]: r["ts"] for r in db.query("SELECT k,ts FROM geocache WHERE k LIKE 'peakfail:%'")}
-    fresh = lambda t: now - failed.get(t["id"], 0) < 6 * 3600     # vor Kurzem gescheitert: erst die übrigen Touren, dann diese
-    todo = [t for t in todo if not fresh(t)] + [t for t in todo if fresh(t)]
-    total = len(todo) if not limit else min(limit, len(todo))
-    jobs.log(f"Gipfel: {total} Touren zu bearbeiten (jedes Ergebnis wird sofort gespeichert)")
-    for t in todo:
-        if limit and n >= limit:
-            break
-        pts = routes.load(t["id"])
-        alts = [p for p in (pts or []) if len(p) > 2 and p[2] is not None]
-        if len(alts) < 5:
-            db.execute("INSERT OR REPLACE INTO tour_peak(id,name,alt,lat,lng) VALUES(?,?,?,?,?)", (t["id"], "", None, None, None)); continue
-        hi = max(alts, key=lambda p: p[2]); n += 1
-        jobs.progress(f"Gipfel {n} von {total} · {ok} bestimmt")
-        name, err, t0 = None, None, time.monotonic()
-        for attempt in range(2):                                   # Overpass begrenzt Anfragen: kurz warten und erneut versuchen
-            try:
-                name = fetch(hi[0], hi[1]); err = None; break
-            except Exception as e:  # noqa
-                err = e
-                if attempt < 1:
-                    time.sleep(retry_wait)
-        if err is not None:
-            fails += 1
-            db.execute("INSERT OR REPLACE INTO geocache(k,name,ts) VALUES(?,?,?)", (f"peakfail:{t['id']}", "", int(time.time())))
-            if fails == 1 or fails % 5 == 0:
-                jobs.log(f"  Gipfel: {err}")
-            if fails >= 5:
-                jobs.log("  Gipfel: Overpass antwortet nicht – Abbruch, bereits Bestimmtes bleibt gespeichert. Später einfach erneut starten."); break
-            continue
-        fails = 0
-        db.execute("DELETE FROM geocache WHERE k=?", (f"peakfail:{t['id']}",))
-        db.execute("INSERT OR REPLACE INTO tour_peak(id,name,alt,lat,lng) VALUES(?,?,?,?,?)", (t["id"], name or "", hi[2], hi[0], hi[1]))
-        ok += 1
-        if time.monotonic() - t0 > 0.05:                           # nur nach echten Abfragen pausieren (Zwischenspeicher-Treffer sofort)
-            time.sleep(1.0)
-    jobs.log(f"Gipfel: {ok} bestimmt" + (f", {skipped} Touren ohne lokale Strecke übersprungen" if skipped else "") + f", noch offen: {peaks_pending()}")
-    return ok
-
-
-@router.get("/api/places")
-@memo.cached
-def api_places():
-    starts = db.query("SELECT g.place AS place, g.state AS state, COUNT(*) AS n, ROUND(SUM(t.dist_m)/1000.0,0) AS km FROM tour_geo g JOIN tours t ON t.id=g.id "
-                      "WHERE g.place IS NOT NULL AND g.place!='' GROUP BY g.place, g.state ORDER BY n DESC, km DESC LIMIT 25")
-    rows = db.query("SELECT p.name, p.alt, t.id, t.start_ts FROM tour_peak p JOIN tours t ON t.id=p.id WHERE p.name!='' ORDER BY t.start_ts DESC")
-    peaks = {}
-    for r in rows:
-        d = peaks.setdefault(r["name"], {"name": r["name"], "alt": r["alt"], "n": 0, "tours": []})
-        d["n"] += 1; d["tours"].append(r["id"]); d["alt"] = max(d["alt"] or 0, r["alt"] or 0)
-    pending = peaks_pending()
-    return {"starts": starts, "peaks": sorted(peaks.values(), key=lambda p: (-p["n"], -(p["alt"] or 0)))[:40], "pending_peaks": pending}
-
-
 # ---------- Wanderführer-Fortschritt ----------
 @router.get("/api/guides/progress")
 @memo.cached
@@ -331,111 +250,6 @@ def api_guides_progress():
                 done = (tid, ts); break
         books.setdefault(g["book"] or "(ohne Buch)", []).append({"id": g["id"], "title": g["title"], "tour": done[0] if done else None, "ts": done[1] if done else None})
     return [{"book": b, "total": len(v), "done": sum(1 for x in v if x["tour"]), "tours": v} for b, v in books.items()]
-
-
-# ---------- Wie oft bin ich diese Strecke gegangen? ----------
-def _pline(pts):
-    step = max(1, len(pts) // 250)
-    line = [(p[0], p[1]) for p in pts[::step]]
-    if line[-1] != (pts[-1][0], pts[-1][1]):
-        line.append((pts[-1][0], pts[-1][1]))
-    return line
-
-
-def _cover(samp, line, r_m, cos):
-    """Anteil der Stützpunkte `samp`, die höchstens r_m Meter von der Linie `line` entfernt liegen."""
-    k = 111000.0
-    hit = 0
-    for p in samp:
-        px, py = p[1] * k * cos, p[0] * k
-        best = 1e18
-        for a, b in zip(line, line[1:]):
-            if abs(a[0] - p[0]) > 0.02 and abs(b[0] - p[0]) > 0.02:
-                continue
-            ax, ay, bx, by = a[1] * k * cos, a[0] * k, b[1] * k * cos, b[0] * k
-            dx, dy = bx - ax, by - ay
-            L = dx * dx + dy * dy
-            u = 0 if L == 0 else max(0, min(1, ((px - ax) * dx + (py - ay) * dy) / L))
-            d = ((px - ax - u * dx) ** 2 + (py - ay - u * dy) ** 2) ** 0.5
-            if d < best:
-                best = d
-                if d <= r_m:
-                    break
-        if best <= r_m:
-            hit += 1
-    return hit / max(1, len(samp))
-
-
-def _repeats_sig():
-    r = db.one("SELECT COUNT(*) n, COALESCE(SUM(dist_m),0) d, COALESCE(MAX(start_ts),0) m FROM tours") or {}
-    h = db.one("SELECT COUNT(*) n FROM tour_hidden") or {}
-    try:
-        cd = (config.CACHE_DIR / "coords").stat().st_mtime_ns
-    except OSError:
-        cd = None
-    return (r.get("n"), r.get("d"), r.get("m"), h.get("n"), cd)
-
-
-def warm_repeats():
-    """Wiederholungs-Auswertung im Hintergrund vorberechnen, damit die Übersicht nicht darauf warten muss."""
-    from . import ctx
-    uid = ctx.uid()
-
-    def run():
-        try:
-            with ctx.as_user(uid):
-                api_repeats()
-        except Exception:  # noqa
-            pass
-    old = _WARM.get(uid)
-    if old is not None and old.is_alive():           # läuft für diesen Benutzer schon: nicht bei jedem Seitenaufruf einen weiteren Faden starten
-        return
-    _WARM[uid] = th = threading.Thread(target=run, daemon=True)
-    th.start()
-
-
-_WARM = {}
-
-
-@router.get("/api/repeats")
-@memo.cached(sig=_repeats_sig)
-def api_repeats():
-    """Touren, die dieselbe Strecke mehrfach gegangen wurden: {tour_id: {"n": Anzahl, "with": [{"id","start_ts"}, …]}} (nur n >= 2)."""
-    import math
-    hidden = {r["id"] for r in db.query("SELECT id FROM tour_hidden")}
-    items = []
-    for t in db.query("SELECT id,start_ts,dist_m FROM tours ORDER BY start_ts"):
-        if t["id"] in hidden or (t["dist_m"] or 0) < 1000:
-            continue
-        pts = routes.load(t["id"])
-        if not pts or len(pts) < 5:
-            continue
-        line = _pline(pts)
-        la, lo = [p[0] for p in line], [p[1] for p in line]
-        n = min(50, len(line))
-        samp = [line[int(i * (len(line) - 1) / max(1, n - 1))] for i in range(n)]
-        items.append({"id": t["id"], "ts": t["start_ts"], "km": (t["dist_m"] or 0) / 1000, "line": line, "samp": samp,
-                      "bb": (min(la), max(la), min(lo), max(lo)), "cos": math.cos(math.radians(sum(la) / len(la)))})
-    out = {}
-    srt = sorted(items, key=lambda x: x["bb"][0])           # Sweep nach Südkante: spätere Touren beginnen weiter nördlich
-    for i, a in enumerate(srt):
-        for b in srt[i + 1:]:
-            if b["bb"][0] > a["bb"][1] + 0.003:
-                break
-            if a["bb"][3] + 0.004 < b["bb"][2] or b["bb"][3] + 0.004 < a["bb"][2]:
-                continue
-            if not 0.8 <= a["km"] / max(b["km"], 1e-6) <= 1.25:
-                continue
-            if _cover(a["samp"][:: max(1, len(a["samp"]) // 5)], b["line"], 60, a["cos"]) < 0.6:     # schneller Vortest mit wenigen Punkten
-                continue
-            if _cover(a["samp"], b["line"], 60, a["cos"]) >= 0.85 and _cover(b["samp"], a["line"], 60, a["cos"]) >= 0.85:
-                out.setdefault(a["id"], []).append(b)
-                out.setdefault(b["id"], []).append(a)
-    ts = {x["id"]: x["ts"] for x in items}
-    res = {}
-    for tid, others in out.items():
-        res[tid] = {"n": len(others) + 1, "with": sorted([{"id": o["id"], "start_ts": o["ts"]} for o in others], key=lambda x: x["start_ts"]), "start_ts": ts[tid]}
-    return res
 
 
 # ---------- Unbenutzte Fotos (keiner Tour zugeordnet) aufräumen ----------
@@ -597,3 +411,14 @@ def api_safety_set(tour_id: str, body: dict):
     else:
         db.execute("INSERT OR REPLACE INTO tour_safety(id,level,grp,gear,note) VALUES(?,?,?,?,?)", (tour_id, lv, grp, gear, note))
     return {"ok": True}
+
+
+# ---------- Wiederholungen: ausgelagert nach wiederholungen.py, hier nur noch die gewohnten Namen ----------
+def __getattr__(name):
+    if name in ("api_repeats", "warm_repeats", "_repeats_sig", "_pline", "_cover", "_WARM"):
+        from . import wiederholungen
+        return getattr(wiederholungen, name)
+    if name in ("peaks_fill", "peaks_pending", "_peak_candidates", "api_places"):
+        from . import gipfel
+        return getattr(gipfel, name)
+    raise AttributeError(name)

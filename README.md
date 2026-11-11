@@ -391,6 +391,11 @@ Das Skript installiert Java, lädt BRouter 1.7.7 und die Kartenkacheln (je ca. 1
 ## Für Entwickler
 
 - Oberfläche ohne Build-Schritt: `app/static/js/01-grundlagen.js` … `12-start.js` werden in dieser Reihenfolge von `index.html` geladen (gemeinsamer globaler Bereich). Formatierung mit Prettier (`.prettierrc`): `npx prettier --write app/static/js/*.js`.
+- Aufbau des Servers: `app/main.py` hält Start, Schutz-Header und den Verteiler. Jeder Bereich liegt in einem eigenen Modul mit eigenem `APIRouter`:
+  `sync.py` (Komoot/Zepp holen), `puls.py` (Herzfrequenz), `gipfel.py` (Gipfelnamen), `wiederholungen.py` (gleiche Strecke mehrfach),
+  `wanderfuehrer.py` (Buchtouren erkennen), `selbsttest.py` (Prüfung ohne Änderung), `photos.py`, `pdfgen.py`, `trackfix.py`, `security.py`, `users_api.py`.
+  `extras.py`, `more.py` und `more2.py` sind historisch gewachsene Sammelstellen, aus denen Stück für Stück eigene Module herausgelöst werden;
+  die gewohnten Namen bleiben dort über `__getattr__` erreichbar, damit nichts bricht.
 - Tests: `python -m pytest -q tests` – darunter Browsertests mit Playwright (`pip install playwright && python -m playwright install chromium`), die jede Ansicht mit Beispieldaten öffnen und auf JavaScript-Fehler prüfen.
 
 **Betrachter und Standort (ab 2.3.0):** Unter Konto & Freigaben → „Neuer Benutzer“ gibt es die Rolle **Betrachter (nur ansehen)**. Ein Betrachter sieht die Touren, Fotos, Reisen, Auswertung und die Karte des gewählten Benutzers, kann aber nichts ändern, nichts hochladen und hat weder Verwaltung noch Einstellungen (der Server lehnt alles außer Ansehen mit „403“ ab). Unter Verwaltung → „Standort teilen“ wird festgelegt, ob die zuletzt gemeldete Position des Besitzers sichtbar ist (Aus / nur während einer Aufzeichnung / immer). Die Android-App meldet sie während einer Aufzeichnung alle 30 Sekunden (dafür die neue APK installieren); auf der Karte erscheint sie als roter Punkt mit „vor x Min.“. Der Knopf „⌖ Ich“ zeigt jedem Benutzer den eigenen Standort als blauen Punkt. Es wird nur die letzte Position gespeichert. Die mobile Karte füllt jetzt den Platz zwischen Kopfzeile und Tab-Leiste, und „Mehr“ trennt die Hauptpunkte (Reisen, Auswertung, Geteilte Fotos) von Einstellungen & Prüfung.
