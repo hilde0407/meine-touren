@@ -150,7 +150,7 @@ textarea{width:100%;font:inherit;background:var(--surface);color:var(--ink);bord
 .fdot{width:18px;height:18px;border-radius:50%;background:#f2c230;border:3px solid #fff;box-shadow:0 0 0 3px #0e2a2b80,0 2px 8px #0008}
 @media(max-width:700px){.fbar .ft{font-size:16px}.fh{font-size:13px}.fctl{bottom:8px}}
 
-.fph{position:absolute;left:14px;bottom:92px;width:min(300px,42vw);background:#fff;padding:5px;border-radius:4px;box-shadow:0 4px 18px #0007;z-index:6;opacity:0;transform:translateY(10px);transition:.35s;pointer-events:none}.fph.on{opacity:1;transform:none}
+.fph{position:absolute;left:14px;top:66px;width:min(300px,42vw);background:#fff;padding:5px;border-radius:4px;box-shadow:0 4px 18px #0007;z-index:6;opacity:0;transform:translateY(10px);transition:.35s;pointer-events:none}.fph.on{opacity:1;transform:none}
 .fph img{display:block;width:100%;border-radius:2px}.fph span{display:block;text-align:center;font-size:13px;color:#333;padding-top:3px}
 .fcam{width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid #e11d74;box-shadow:0 1px 4px #0008}
 
