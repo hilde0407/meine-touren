@@ -549,6 +549,20 @@ VIEWS.flight = async id => {
   $("#fs").oninput = () => {
     u = +$("#fs").value / 1000;
   };
+  // Bedienelemente blenden sich beim Abspielen nach ein paar Sekunden aus; ein Tipp auf die Karte bringt sie zurück
+  const flEl = $("#fl");
+  let hideT = null;
+  const wake = () => {
+    flEl.classList.remove("idle");
+    clearTimeout(hideT);
+    hideT = setTimeout(function again() {
+      if (!flEl.isConnected) return;
+      if (playing) flEl.classList.add("idle");
+      else hideT = setTimeout(again, 2000);
+    }, 4000);
+  };
+  ["pointerdown", "pointermove", "wheel", "keydown"].forEach((ev) => flEl.addEventListener(ev, wake, { passive: true, capture: true }));
+  wake();
   $("#fc").onchange = () => {
     follow = $("#fc").value === "follow";
     if (follow) bear = m.getBearing();

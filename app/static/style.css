@@ -589,3 +589,5 @@ svg.ic{display:inline-block;vertical-align:-3px;margin-right:6px;flex:none}
 .hrleg{font-size:13px}
 .hrnote{font-size:13px}
 .hrink{color:#c0504d}
+
+.fbar,.fctl{transition:opacity .5s}.flight.idle .fbar,.flight.idle .fctl{opacity:0;pointer-events:none}
