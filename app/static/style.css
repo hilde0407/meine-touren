@@ -158,7 +158,7 @@ textarea{width:100%;font:inherit;background:var(--surface);color:var(--ink);bord
 .notice{margin:18px 0 0;padding:10px 14px;background:#f2c23033;border-left:4px solid var(--yellow);border-radius:4px}
 table.cmp{width:100%;border-collapse:collapse}table.cmp td,table.cmp th{padding:7px 8px;border-bottom:1px solid var(--rule);text-align:left}table.cmp .n{text-align:right;font-variant-numeric:tabular-nums}
 .cmap{height:380px;border-radius:6px;overflow:hidden}
-.fmsg.small{inset:auto;top:68px;left:50%;transform:translateX(-50%);font:600 14px var(--b);background:#fffd;padding:6px 12px;border-radius:6px;color:#333}
+.fmsg.prog{inset:auto;top:74px;left:50%;transform:translateX(-50%);z-index:8;font:600 15px var(--b);background:#0e2a2bdd;color:#fff;padding:8px 16px;border-radius:10px}.fmsg.small{inset:auto;top:68px;left:50%;transform:translateX(-50%);font:600 14px var(--b);background:#fffd;padding:6px 12px;border-radius:6px;color:#333}
 .panel>svg.chart{max-width:760px}
 
 .hnav{position:absolute;top:50%;left:10px;z-index:460;transform:translateY(-50%);width:44px;height:64px;border:0;border-radius:6px;background:#0b1d1ecc;color:#fff;font:400 34px/1 var(--b);cursor:pointer}

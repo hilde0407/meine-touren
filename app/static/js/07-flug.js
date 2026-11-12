@@ -152,6 +152,7 @@ VIEWS.flight = async id => {
     <select id="fz" title="Flughöhe"><option value="16">nah</option><option value="14.8" selected>mittel</option><option value="13.4">weit</option></select>
     <select id="fpi" title="Neigung"><option value="auto" selected>automatisch (weicht Bergen aus)</option><option value="55">flach</option><option value="68">schräg</option><option value="78">sehr schräg</option></select>
     <select id="fb" title="Karte"><option value="osm">Straßenkarte</option><option value="topo">Topografisch</option><option value="sat">Satellit</option></select>
+    <select id="fq" title="Videoqualität"><option value="1280">Video: Standard</option><option value="1600" selected>Video: Hoch</option><option value="1920">Video: Sehr hoch</option></select>
     <button class="btn ghost sm" id="frec" title="Flug als Video aufnehmen und speichern">⏺ Video</button><button class="btn ghost sm" id="ffs" title="Vollbild">⛶</button></div><div class="fph" id="fph"><img id="fphi" alt=""><span id="fphc"></span></div><div class="fmsg" id="fmsg">Lade Strecke …</div></div>`;
   let raws = [];
   if (SET)
@@ -383,23 +384,80 @@ VIEWS.flight = async id => {
     r.mr.stop();
     $("#frec").textContent = "⏺ Video";
   };
-  $("#frec").onclick = () => {
+  /** Vor der Aufnahme die Strecke einmal im Schnelldurchlauf abfahren, damit Kartenkacheln und Höhendaten schon geladen sind (keine weißen Flächen im Video). */
+  let mapErr = 0, preparing = false;
+  m.on("error", () => mapErr++);
+  const prewarm = async zoom => {
+    const steps = Math.min(40, Math.max(12, Math.round(N / 12))),
+      t0 = performance.now(),
+      e0 = mapErr,
+      g = $("#fmsg"),
+      u0 = u;
+    g.classList.add("prog");
+    for (let k = 0; k <= steps; k++) {
+      if (map !== m || performance.now() - t0 > 60000 || mapErr - e0 >= 4) break;     // bei schlechter oder fehlender Verbindung nicht ewig warten
+      u = k / steps;
+      const {lat, lng, tgt, f} = place(),
+        pt = P[Math.min(N - 1, Math.round(f))],
+        lift = SET && pt.trans ? pt.lift * Math.sin(Math.PI * pt.tq) : 0;
+      m.jumpTo({center: [lng, lat], bearing: tgt, pitch: 62, zoom: zoom - lift});
+      g.textContent = "Karte wird geladen … " + Math.round((k / steps) * 100) + " %";
+      g.style.display = "";
+      await new Promise(ok => {
+        let done = false;
+        const fin = () => {
+          if (!done) {
+            done = true;
+            ok();
+          }
+        };
+        m.once("idle", fin);
+        setTimeout(fin, 3000);
+        m.triggerRepaint();
+      });
+    }
+    u = u0;
+    g.style.display = "none";
+    g.classList.remove("prog");
+  };
+  $("#frec").onclick = async () => {
     if (rec) return stopRec();
+    if (preparing) return;
     const mime =
       window.MediaRecorder &&
       ["video/mp4;codecs=avc1.42E01E", "video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"].find(x =>
         MediaRecorder.isTypeSupported(x)
       );
     if (!mime) return alert("Dieser Browser kann keine Videos aufnehmen (Chrome, Edge, Firefox oder Safari 14.1+ verwenden).");
+    preparing = true;
+    $("#frec").disabled = true;
+    playing = false;
+    follow = false;
+    const want = +$("#fq").value,
+      css = $("#fm").clientWidth || 800,
+      oldPR = m.getPixelRatio ? m.getPixelRatio() : window.devicePixelRatio;
+    try {
+      try {
+        m.setPixelRatio(Math.min(3, Math.max(1, want / css)));
+      } catch (e) {}
+      await prewarm(zBase + 0.9);
+    } finally {
+      preparing = false;
+      $("#frec").disabled = false;
+    }
+    if (map !== m) return;
     const c = m.getCanvas(),
-      W = Math.min(c.width, 1280),
+      W = Math.min(c.width, want),
       oc = document.createElement("canvas");
     oc.width = W;
     oc.height = Math.round((W * c.height) / c.width);
-    const mr = new MediaRecorder(oc.captureStream(30), {mimeType: mime, videoBitsPerSecond: 6e6}),
+    const mr = new MediaRecorder(oc.captureStream(30), {mimeType: mime, videoBitsPerSecond: want >= 1920 ? 12e6 : want >= 1600 ? 9e6 : 6e6}),
       chunks = [];
     mr.ondataavailable = e => e.data.size && chunks.push(e.data);
     mr.onstop = () => {
+      try {
+        m.setPixelRatio(oldPR);
+      } catch (e) {}
       const a = document.createElement("a"),
         ext = mime.includes("mp4") ? "mp4" : "webm";
       a.href = URL.createObjectURL(new Blob(chunks, {type: mime.split(";")[0]}));
@@ -407,7 +465,7 @@ VIEWS.flight = async id => {
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 60000);
     };
-    rec = {c: oc, x: oc.getContext("2d"), mr, ending: false};
+    rec = {c: oc, x: oc.getContext("2d"), mr, ending: false, stall: 0};
     u = 0;
     prevU = 0;
     playing = true;
@@ -422,8 +480,12 @@ VIEWS.flight = async id => {
   const rec_skip = () => false;
   const tick = now => {
     if (map !== m) return;
-    const dt = Math.max(0, Math.min(100, now - last));
+    let dt = Math.max(0, Math.min(100, now - last));
     last = now;
+    if (rec && !rec.ending && !m.areTilesLoaded() && rec.stall < 1500) {     // bei der Aufnahme kurz warten, bis die Kacheln da sind
+      rec.stall += dt;
+      dt = 0;
+    } else if (rec && m.areTilesLoaded()) rec.stall = 0;
     if (playing) {
       u += (dt / 1000 / Ttot) * +$("#fv").value;
       if (u >= 1) {
@@ -471,6 +533,7 @@ VIEWS.flight = async id => {
         zoomLift += ((pt.trans ? pt.lift * Math.sin(Math.PI * pt.tq) : 0) - zoomLift) * Math.min(1, dt / 450);
         o.zoom = zBase - zoomLift;
       }
+      if (rec) o.zoom = zBase + 0.9 - zoomLift;                 // Aufnahme etwas näher am Gelände
       m.jumpTo(o);
     }
     requestAnimationFrame(tick);
