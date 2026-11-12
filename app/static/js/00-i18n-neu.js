@@ -314,6 +314,7 @@ Zu Strava, Komoot … senden || Send to Strava, Komoot … || Envoyer vers Strav
 Daten und Track neu laden || Reload data and track || Recharger les données et le tracé || Volver a cargar datos y trazado
 Tour löschen || Delete tour || Supprimer le parcours || Eliminar ruta
 Lokale Tour entfernen || Remove local tour || Retirer le parcours local || Quitar ruta local
+Aus Meine Touren entfernen || Remove from Meine Touren || Retirer de Meine Touren || Quitar de Meine Touren
 Bewahre diese Codes sicher auf (z. B. ausgedruckt oder im Passwort-Manager). Jeder Code funktioniert || Keep these codes safe (e.g. printed or in a password manager). Each code works || Conservez ces codes en lieu sûr (p. ex. imprimés ou dans un gestionnaire de mots de passe). Chaque code ne fonctionne qu’ || Guarda estos códigos en un lugar seguro (p. ej. impresos o en un gestor de contraseñas). Cada código funciona
 und ersetzt den Authenticator-Code, falls dein Handy weg ist. || and replaces the authenticator code if your phone is gone. || et remplace le code d’authentification si votre téléphone est perdu. || y sustituye al código de autenticación si pierdes el móvil.
 Sie werden nur jetzt angezeigt. || They are only shown now. || Ils ne sont affichés que maintenant. || Solo se muestran ahora.

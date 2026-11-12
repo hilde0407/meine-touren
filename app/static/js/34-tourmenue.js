@@ -35,7 +35,7 @@ const TACT = [
       ["eup", "Hochladen", "Zu Strava, Komoot … senden"],
       ["ksync", "Mit Komoot abgleichen", "Daten und Track neu laden"],
       ["-", "Entfernen"],
-      ["edel", "Tour löschen", "Lokale Tour entfernen", "danger"],
+      ["edel", "Tour löschen", "Aus Meine Touren entfernen", "danger"],
     ],
   },
 ];

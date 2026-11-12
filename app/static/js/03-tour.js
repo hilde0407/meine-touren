@@ -114,7 +114,7 @@ VIEWS.tour = async id => {
     `<div class="row"><a class="back" href="${window._from || "#/tours"}">${window._from ? (window._from.startsWith("#/trip/") ? "‹ Zurück zur Reise" : "‹ Zurück zum Album") : "‹ Alle Touren"}</a><span class="sp"></span>${pv ? `<a class="btn ghost sm" href="#/tour/${pv.id}">Vorherige</a>` : ""}${nx ? `<a class="btn ghost sm" href="#/tour/${nx.id}">Nächste</a>` : ""}</div>
    <div class="mt18"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span class="mut ml8">${dateL(t.date)}, ${timeS(t.date)} Uhr</span>${t.g_country ? `<span class="mut ml8">· ${esc([t.g_place, t.g_state, t.g_country].filter(Boolean).join(", "))}</span>` : ""}</div>
    <h1 class="m10-0-18" style="font-size:clamp(34px,5vw,56px)"><span id="tname">${esc(t.name)}</span> <button class="btn ghost sm vam fs15" id="ren" title="Tour umbenennen">✎ Umbenennen</button></h1>
-   <div class="row mn6-0-14">${t.source === "local" ? `<span class="tag" style="background:var(--yellow);color:#000" title="Diese Tour liegt nur lokal vor (Strecke als GPX im Datenordner)">lokal gespeichert</span>` : `<button class="btn ghost sm" id="ksync" title="Daten und GPS-Track neu von Komoot laden">⟳ Mit Komoot abgleichen</button>`}<button class="btn ghost sm" id="eup" title="Zu Komoot, Strava … hochladen">⬆ Hochladen</button><a class="btn ghost sm" id="egpx" href="/api/tours/${encodeURIComponent(t.id)}/gpx" title="Strecke als GPX-Datei herunterladen">⬇ GPX</a>${t.source === "local" ? `<button class="btn ghost sm" id="edel" title="Lokale Tour löschen">🗑 Löschen</button>` : ""}<button class="btn ghost sm" id="etag" title="Schlagworte / Alben">🏷 Tags</button><button class="btn ghost sm" id="eshr" title="Öffentlichen Link erzeugen">🔗 Teilen</button><button class="btn ghost sm" id="etc" title="Farbe und Breite der Strecke">🎨 Streckenfarbe</button><button class="btn ghost sm" id="efix" title="Höhen mit Geländemodell neu berechnen"></button><span id="ksm" class="mut fs14"></span></div><div id="upst" class="chips mn4-0-10"></div><div id="tagl" class="chips mn4-0-12"></div><div id="ewarn"></div>
+   <div class="row mn6-0-14">${t.source === "local" ? `<span class="tag" style="background:var(--yellow);color:#000" title="Diese Tour liegt nur lokal vor (Strecke als GPX im Datenordner)">lokal gespeichert</span>` : `<button class="btn ghost sm" id="ksync" title="Daten und GPS-Track neu von Komoot laden">⟳ Mit Komoot abgleichen</button>`}<button class="btn ghost sm" id="eup" title="Zu Komoot, Strava … hochladen">⬆ Hochladen</button><a class="btn ghost sm" id="egpx" href="/api/tours/${encodeURIComponent(t.id)}/gpx" title="Strecke als GPX-Datei herunterladen">⬇ GPX</a><button class="btn ghost sm" id="edel" title="Tour löschen">🗑 Löschen</button><button class="btn ghost sm" id="etag" title="Schlagworte / Alben">🏷 Tags</button><button class="btn ghost sm" id="eshr" title="Öffentlichen Link erzeugen">🔗 Teilen</button><button class="btn ghost sm" id="etc" title="Farbe und Breite der Strecke">🎨 Streckenfarbe</button><button class="btn ghost sm" id="efix" title="Höhen mit Geländemodell neu berechnen"></button><span id="ksm" class="mut fs14"></span></div><div id="upst" class="chips mn4-0-10"></div><div id="tagl" class="chips mn4-0-12"></div><div id="ewarn"></div>
    <div class="figs"><div class="fig"><div class="v">${nf(t.km, 2)}<span class="u">km</span></div><div class="l">Strecke</div></div><div class="fig"><div class="v">${nf(t.up_m, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div></div>
    <div class="fig"><div class="v">${nf(t.down_m, 0)}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60))}<span class="u">Std.</span></div><div class="l">Dauer</div></div>
    <div class="fig"><div class="v">${t.h ? nf(t.km / t.h, 1) : "–"}<span class="u">km/h</span></div><div class="l">Tempo im Schnitt</div></div><div id="kmax" class="fig" style="display:none"><div class="v" id="kmaxv"></div><div class="l">Höchster Punkt</div></div></div>
@@ -245,7 +245,39 @@ VIEWS.tour = async id => {
   });
   $("#eup").onclick = () => uploadDialog(t);
   uploadChips(t);
-  if ($("#edel"))
+  if ($("#edel") && t.source !== "local")
+    $("#edel").onclick = () => {
+      // Tour von Komoot: nur hier entfernen (kommt beim Abgleich nicht wieder) oder auch bei Komoot endgültig löschen
+      const m = document.createElement("div");
+      m.className = "modal";
+      m.innerHTML = `<div class="mbox"><h3>Tour löschen?</h3><p>„${esc(t.name)}“ (${nf(t.km, 2)} km) wird aus Meine Touren entfernt – mit Strecke, Notizen und Tags. Zugeordnete Fotos bleiben erhalten.</p>
+        <label class="chk"><input type="checkbox" id="dk"> <b>auch bei Komoot endgültig löschen</b> <span class="mut">(lässt sich nicht rückgängig machen)</span></label>
+        <p class="mut fs13">Ohne Häkchen bleibt die Tour bei Komoot und wird beim nächsten Abgleich nicht wieder übernommen.</p>
+        <div id="dm" class="mut"></div><div class="mt18 g8 jce" style="display:flex"><button class="btn alt" id="dx">Abbrechen</button><button class="btn c-white" id="dok" style="background:var(--bad,#b3261e);border-color:var(--bad,#b3261e)">Löschen</button></div></div>`;
+      document.body.appendChild(m);
+      m.querySelector("#dx").onclick = () => m.remove();
+      m.onclick = e => {
+        if (e.target === m) m.remove();
+      };
+      m.querySelector("#dok").onclick = async e => {
+        const k = !!m.querySelector("#dk").checked;
+        if (k && !confirm(`„${t.name}“ wirklich auch bei Komoot endgültig löschen?`)) return;
+        e.target.disabled = true;
+        m.querySelector("#dm").textContent = "Wird gelöscht …";
+        try {
+          const r = await api(`/api/tours/${encodeURIComponent(t.id)}/delete`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({komoot: k})});
+          m.remove();
+          if (r.komoot) alert("Gelöscht – " + r.komoot + ".");
+          ROUTES = null;
+          await loadTours();
+          location.hash = "#/tours";
+        } catch (x) {
+          m.querySelector("#dm").innerHTML = `<span class="bad">${esc(x.message)}</span>`;
+          e.target.disabled = false;
+        }
+      };
+    };
+  else if ($("#edel"))
     $("#edel").onclick = async () => {
       if (
         !confirm(
