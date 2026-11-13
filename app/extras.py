@@ -209,6 +209,9 @@ def api_tile(style: str, z: int, x: int, y: int):
                 tmp = f.with_name(f"{f.stem}.{uuid.uuid4().hex}.tmp")
                 try:
                     tmp.write_bytes(r.content); tmp.replace(f)
+                except OSError:
+                    if not f.exists():                # Windows verweigert das Ersetzen, wenn ein anderer Abruf gerade dieselbe Kachel schreibt – dann gewinnt dieser
+                        raise
                 finally:
                     tmp.unlink(missing_ok=True)       # nach Erfolg schon weg, bei Fehler keine Reste
                 fresh = True
