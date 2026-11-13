@@ -723,4 +723,44 @@ Höhe aus Zepp übernommen: ↑ {} m (vorher {} m) || Elevation taken from Zepp:
 Höhen aus der Zepp-Uhr übernommen (Komoot/GPS meldete {} m Aufstieg). || Elevation taken from the Zepp watch (Komoot/GPS reported {} m of ascent). || Altitudes reprises de la montre Zepp (Komoot/GPS indiquait {} m de montée). || Altitudes tomadas del reloj Zepp (Komoot/GPS indicaba {} m de subida).
 Auf-/Abstieg aus der barometrischen Höhe der Zepp-Uhr übernehmen || Use ascent/descent from the Zepp watch’s barometric elevation || Reprendre la montée/descente de l’altitude barométrique de la montre Zepp || Usar la subida/bajada de la altitud barométrica del reloj Zepp
 Auf-/Abstieg von Komoot- und Datei-Touren mit der barometrischen Höhe der Uhr (Zepp) neu berechnen, wenn es ein passendes Training gibt. Bereits korrigierte Touren bleiben unberührt; je Tour wiederherstellbar. || Recalculate ascent/descent of Komoot and file tours from the watch’s (Zepp) barometric elevation when a matching workout exists. Already corrected tours are left alone; restorable per tour. || Recalculer la montée/descente des parcours Komoot et fichiers avec l’altitude barométrique de la montre (Zepp) s’il existe une activité correspondante. Les parcours déjà corrigés restent intacts ; restauration possible par parcours. || Recalcular subida/bajada de rutas de Komoot y de archivo con la altitud barométrica del reloj (Zepp) si hay un entrenamiento coincidente. Las rutas ya corregidas no se tocan; restaurable por ruta.
+Messwerte || Measurements || Mesures || Mediciones
+Meine Geräte || My devices || Mes appareils || Mis dispositivos
+Quelle: || Source: || Source : || Fuente:
+Gerät dieser Tour || Device of this tour || Appareil de ce parcours || Dispositivo de esta ruta
+Gerät dieser Tour ändern || Change the device of this tour || Changer l’appareil de ce parcours || Cambiar el dispositivo de esta ruta
+automatisch (nach Art der Quelle und Datum) || automatic (by type of source and date) || automatique (selon le type de source et la date) || automático (según el tipo de fuente y la fecha)
+Noch kein Gerät angelegt. || No device added yet. || Aucun appareil ajouté pour l’instant. || Aún no hay ningún dispositivo.
+Noch kein Gerät angelegt – in der Verwaltung unter „Meine Geräte“. || No device added yet – see “My devices” in Admin. || Aucun appareil ajouté – voir « Mes appareils » dans l’administration. || Aún no hay dispositivos: consulta «Mis dispositivos» en Administración.
++ Neues Gerät || + New device || + Nouvel appareil || + Nuevo dispositivo
+Neues Gerät || New device || Nouvel appareil || Nuevo dispositivo
+Gerät bearbeiten || Edit device || Modifier l’appareil || Editar dispositivo
+Name || Name || Nom || Nombre
+Art || Type || Type || Tipo
+Modell (optional) || Model (optional) || Modèle (facultatif) || Modelo (opcional)
+Im Gebrauch ab || In use since || Utilisé depuis || En uso desde
+bis (leer = noch im Gebrauch) || until (empty = still in use) || jusqu’au (vide = encore utilisé) || hasta (vacío = aún en uso)
+Mit mehreren Geräten gleicher Art entscheidet das Tourdatum, zu welchem Gerät eine Tour gehört. || With several devices of the same type, the tour date decides which device a tour belongs to. || Avec plusieurs appareils du même type, la date du parcours décide à quel appareil il appartient. || Con varios dispositivos del mismo tipo, la fecha de la ruta decide a cuál pertenece.
+aktiv (deaktivierte Geräte behalten ihre Touren, ihre Messwerte werden aber eingeklappt) || active (deactivated devices keep their tours, but their measurements are collapsed) || actif (les appareils désactivés gardent leurs parcours, mais leurs mesures sont repliées) || activo (los dispositivos desactivados conservan sus rutas, pero sus mediciones se pliegan)
+Touren zuordnen … || Assign tours … || Attribuer des parcours … || Asignar rutas …
+Alle Touren im Zeitraum werden fest diesem Gerät zugeordnet (jederzeit je Tour änderbar). || All tours in the period are assigned to this device (can be changed per tour at any time). || Tous les parcours de la période sont attribués à cet appareil (modifiable à tout moment pour chaque parcours). || Todas las rutas del periodo se asignan a este dispositivo (se puede cambiar por ruta en cualquier momento).
+Touren umhängen || Move tours || Transférer les parcours || Mover rutas
+Umhängen und löschen || Move and delete || Transférer et supprimer || Mover y eliminar
+Auf dieses Gerät umhängen || Move to this device || Transférer vers cet appareil || Mover a este dispositivo
+Trotzdem anzeigen || Show anyway || Afficher quand même || Mostrar de todos modos
+Nicht jetzt || Not now || Pas maintenant || Ahora no
+Möchtest du dafür ein Gerät anlegen? Es wird nichts ohne deine Bestätigung angelegt. || Would you like to add a device for them? Nothing is created without your confirmation. || Voulez-vous ajouter un appareil pour eux ? Rien n’est créé sans votre confirmation. || ¿Quieres añadir un dispositivo para ellas? No se crea nada sin tu confirmación.
+Lege deine Aufnahmegeräte an und benenne sie selbst – der Name erscheint bei jeder Tour („Quelle“). Welche Messwerte eine Tour zeigt, richtet sich nach dem, was das Gerät wirklich geliefert hat. || Add your recording devices and name them yourself – the name appears on every tour (“Source”). Which measurements a tour shows depends on what the device actually delivered. || Ajoutez vos appareils d’enregistrement et nommez-les vous-même – le nom apparaît sur chaque parcours (« Source »). Les mesures affichées dépendent de ce que l’appareil a réellement fourni. || Añade tus dispositivos de grabación y ponles nombre: el nombre aparece en cada ruta («Fuente»). Las mediciones que se muestran dependen de lo que el dispositivo haya entregado realmente.
+Messwerte der Geräte nachladen || Reload device measurements || Recharger les mesures des appareils || Volver a cargar las mediciones de los dispositivos
+Kalorien || Calories || Calories || Calorías
+Geschwindigkeit || Speed || Vitesse || Velocidad
+Schrittfrequenz || Cadence (steps) || Cadence de pas || Cadencia de pasos
+Trittfrequenz || Pedalling cadence || Cadence de pédalage || Cadencia de pedaleo
+Leistung || Power || Puissance || Potencia
+Temperatur || Temperature || Température || Temperatura
+Atemfrequenz || Respiration rate || Fréquence respiratoire || Frecuencia respiratoria
+Schrittlänge || Stride length || Longueur de foulée || Longitud de zancada
+Bodenkontaktzeit || Ground contact time || Temps de contact au sol || Tiempo de contacto con el suelo
+Vertikale Oszillation || Vertical oscillation || Oscillation verticale || Oscilación vertical
+Luftdruck || Air pressure || Pression atmosphérique || Presión atmosférica
+Tempo (Pace) || Pace || Allure || Ritmo
 `;

@@ -16,7 +16,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp
+from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -55,8 +55,8 @@ async def no_stale_static(request: Request, call_next):
 
 
 VIEWER_GET = re.compile(
-    r"^(/api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings|hr/stats"
-    r"|tours|tours/[^/]+|tours/[^/]+/(coords|best-photos|weather|gpx|hr)|trips/[^/]+|records/altitude|weather/stats)"
+    r"^(/api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings|hr/stats|my-devices"
+    r"|tours|tours/[^/]+|tours/[^/]+/(coords|best-photos|weather|gpx|hr|metrics)|trips/[^/]+|records/altitude|weather/stats)"
     r"|/photo/[^/]+|/pic/[^/]+|/tiles/.+)$")
 # Ohne Anmeldung nur diese Pfade – exakt verglichen (ein Präfix würde auch /api/me/2fa/… oder /api/zepp-token/test öffnen).
 # /api/reset/<Token> (Passwort-Link) ist der einzige offene Unterpfad.
@@ -279,8 +279,14 @@ def api_tours(year: int = 0, q: str = "", limit: int = 20000):
         "WHERE t.start_ts IS NOT NULL ORDER BY t.start_ts DESC LIMIT ?", (limit,))
     out = []
     hr_ids = puls.tours_with_hr()
+    try:
+        asg = mydevices.assignments()
+    except Exception:  # noqa
+        asg = {}
     for t in rows:
         t["has_hr"] = t["id"] in hr_ids
+        a = asg.get(t["id"])
+        t["dev"] = a[0]["name"] if a and a[0] else None
         d = datetime.fromtimestamp(t["start_ts"], tz=TZ)
         if year and d.year != year:
             continue
@@ -430,6 +436,7 @@ JOBS = {
     "photo-import": ("Fotos übernehmen", lambda dry: (photos.import_from(), photos.scan())),
     "elev-local": ("Höhenmeter lokaler Touren neu berechnen", lambda dry: elev.recompute_local()),
     "hr-backfill": ("Puls für Zepp-Touren nachladen", lambda dry: puls.backfill_hr()),
+    "met-backfill": ("Messwerte der Geräte nachladen", lambda dry: metrics.backfill()),
     "elev-zepp": ("Höhe aus Zepp-Uhr abgleichen", lambda dry: elev.zepp_fix_all()),
     "export": ("Zepp-Import (ohne Upload)", lambda dry: sync.export_zepp()),
 }
@@ -580,7 +587,7 @@ async def api_record_upload(request: Request):
         return {"id": tid, "dup": True}
     if sport not in gpxtools.LABEL:
         sport = None
-    t, _ = await asyncio.get_running_loop().run_in_executor(None, contextvars.copy_context().run, lambda: tracks.adopt(gpx, "rec.gpx", name=name, sport=sport))
+    t, _ = await asyncio.get_running_loop().run_in_executor(None, contextvars.copy_context().run, lambda: tracks.adopt(gpx, "rec.gpx", name=name, sport=sport, src="phone"))
     try:
         wps.save(t["id"], wps.from_gpx(gpx))
     except Exception:  # noqa
@@ -614,7 +621,7 @@ async def api_record_rescue(request: Request):
                 continue
             found += 1
             try:
-                t, _ = tracks.adopt(f.read_text(encoding="utf-8"), "rec.gpx", ident=tid)
+                t, _ = tracks.adopt(f.read_text(encoding="utf-8"), "rec.gpx", ident=tid, src="phone")
                 done.append({"id": t["id"], "name": t["name"], "km": round((t["dist_m"] or 0) / 1000, 1), "date": t["start_ts"]})
             except Exception:  # noqa
                 pass
@@ -887,6 +894,8 @@ app.include_router(selbsttest.router)
 app.include_router(wiederholungen.router)
 app.include_router(gipfel.router)
 app.include_router(puls.router)
+app.include_router(metrics.router)
+app.include_router(mydevices.router)
 app.include_router(more.router)
 app.include_router(more2.router)
 app.include_router(gear.router)

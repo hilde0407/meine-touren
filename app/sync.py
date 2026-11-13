@@ -1,9 +1,10 @@
 """Pipeline: Zepp-Import -> GPX-Dateien -> Doppelten-Prüfung -> Komoot-Upload."""
+import json
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import elev, config, db, gpxtools, jobs, komoot as komoot_mod, photos, portals, routes, trackfix, tracks, zepp
+from . import elev, config, db, gpxtools, jobs, komoot as komoot_mod, metrics, photos, portals, routes, trackfix, tracks, zepp
 from .jobs import log
 
 
@@ -194,7 +195,8 @@ def export_zepp(limit=None):
         dist, dur = float(s.get("dis") or 0), int(float(s.get("run_time") or 0))
         end_ts = int(s.get("end_time") or tid + dur)
         try:
-            pts = zepp.decode_points(s, api.detail(s))
+            det = api.detail(s)
+            pts = zepp.decode_points(s, det)
         except Exception as e:
             log(f"  {tid}: Detail-Fehler {e}")
             continue
@@ -206,6 +208,12 @@ def export_zepp(limit=None):
         path.parent.mkdir(parents=True, exist_ok=True)
         gpx = zepp.points_to_gpx(s, pts, sport)
         path.write_text(gpx, encoding="utf-8")
+        try:                                                   # Messwerte (Tempo, Kadenz …) neben die GPX-Datei legen; nur geprüfte Spalten, sonst nichts
+            samples, sm = metrics.zepp_samples(s, det, pts)
+            md = metrics.build(samples, tid, "zepp", "Amazfit/Zepp", sm)
+            path.with_suffix(".met.json").write_text(json.dumps(md, separators=(",", ":")), encoding="utf-8")
+        except Exception as e:  # noqa
+            log(f"  {tid}: Messwerte nicht gelesen ({e})")
         n_gps += 1
         db.execute("INSERT OR REPLACE INTO workouts VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
                    (tid, tid, end_ts, s.get("type"), sport, dist, dur, str(path),
@@ -260,7 +268,8 @@ def adopt_workout(trackid):
             db.execute("UPDATE workouts SET status=?, komoot_id=?, updated=? WHERE trackid=? AND status IN ('new','local')", ("dup", dup["id"], int(time.time()), int(trackid)))
             log(f"  Training {trackid}: schon vorhanden als Tour {dup['id']} – nicht doppelt übernommen")
             return dup["id"]
-        tracks.adopt(p.read_text(encoding="utf-8"), p.name, ident=tid)
+        tracks.adopt(p.read_text(encoding="utf-8"), p.name, ident=tid, src="zepp")
+        metrics.adopt_staged(tid, p)
         photos.assign_all()
     db.execute("UPDATE workouts SET status=?, komoot_id=?, updated=? WHERE trackid=? AND status IN ('new','local')",
                ("local", tid, int(time.time()), int(trackid)))
@@ -286,6 +295,13 @@ def import_items(items, portals_=(), dry_run=False, k=None):
         if dup:
             tid, state = dup["id"], "skipped_dup"
             log(f"  {c['name']}: schon vorhanden (Tour {tid})")
+            if not dry_run:
+                try:                                           # Messwerte der neuen Datei nachtragen, falls die vorhandene Tour keine hat
+                    o = metrics.load(tid)
+                    if not metrics.has_series(o):
+                        metrics.store_from_text(tid, text, fname, t0=dup["start_ts"], force=bool(o))
+                except Exception:  # noqa
+                    pass
         else:
             if dry_run:
                 results.append((label, "would_upload", "")); log(f"  {c['name']}: wäre neu ({c['dist_m']/1000:.1f} km)"); continue

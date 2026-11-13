@@ -1082,3 +1082,43 @@ def test_bedienelemente_lesbar(page, app_url):
         page.evaluate(f"() => location.hash = '#/{v}'"); page.wait_for_timeout(1500)
         bad = [b for b in page.evaluate(js) if "BUTTON.st" not in b]            # leere Bewertungssterne sind absichtlich blass
         assert not bad, (v, bad)
+
+
+def test_messwerte_and_meine_geraete(page):
+    """Tourseite: Messwerte-Chips nur für vorhandene Kanäle (hier nur aus GPS abgeleitet), Hover-Wert, Quelle; Verwaltung: „Meine Geräte“ anlegen, Tour zeigt den Namen, Löschen."""
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    tid = page.evaluate("async () => { for (const t of TOURS.filter(t => t.source === 'local')) { const m = await api('/api/tours/' + t.id + '/metrics').catch(() => null); if (m && m.channels && m.channels.speed && m.src) return [t.id, m.src]; } return null; }")
+    assert tid, "keine lokale Tour mit Messwerten gefunden"
+    tid, kind = tid
+    page.goto(base + "#/tour/" + tid); page.wait_for_selector("#metcard .chip", timeout=10000)
+    chips = page.locator("#metchips [data-k]").all_inner_texts()
+    assert any("Geschwindigkeit" in c for c in chips) and any("Pace" in c for c in chips)
+    assert not any("Leistung" in c or "Atem" in c or "Temperatur" in c for c in chips)          # nichts anzeigen, was nicht vorhanden ist
+    assert page.locator("#metcard svg.metsvg").count() >= 1 and "Quelle:" in page.inner_text("#metcard") and "berechnet" in page.inner_text("#metcard")
+    page.locator("#metcard svg.metsvg").first.scroll_into_view_if_needed()
+    box = page.locator("#metcard svg.metsvg").first.bounding_box()
+    page.mouse.move(box["x"] + box["width"] * 0.5, box["y"] + box["height"] * 0.5)
+    page.wait_for_function("() => { const t = document.querySelector('#mettip'); return t && !t.hidden && /km\\/h/.test(t.textContent); }", timeout=4000)
+    n = page.locator("#metcard svg.metsvg").count()
+    page.locator("#metchips [data-k='pace']").click()                                             # Auswahl umschalten und merken
+    page.wait_for_function("n => document.querySelectorAll('#metcard svg.metsvg').length !== n", arg=n, timeout=4000)
+    assert page.evaluate("() => localStorage.getItem('mt_met_sel')") is not None
+    # Meine Geräte
+    page.goto(base + "#/admin?tab=quellen"); page.wait_for_selector("#devsec #dvnew", timeout=10000)
+    assert "Meine Geräte" in page.inner_text("#devsec h2")
+    page.click("#dvnew"); page.fill("#dvn", "Test-Uhr alt"); page.select_option("#dvk", kind); page.click("#dvsave")
+    page.wait_for_selector("#devsec [data-dv]", timeout=6000)
+    assert "Test-Uhr alt" in page.inner_text("#devsec")
+    page.goto(base + "#/tour/" + tid); page.wait_for_selector("#devrow", timeout=8000)
+    page.wait_for_function("() => /Test-Uhr alt/.test(document.querySelector('#devrow').textContent)", timeout=6000)
+    page.goto(base + "#/admin?tab=quellen"); page.wait_for_selector("#devsec [data-dv]", timeout=8000)
+    page.locator("#devsec [data-dv]").first.click(); page.wait_for_selector("#dvn")
+    page.fill("#dvn", "Test-Uhr neu"); page.click("#dvsave")
+    page.wait_for_function("() => /Test-Uhr neu/.test(document.querySelector('#devsec').textContent)", timeout=6000)
+    page.locator("#devsec [data-dv]").first.click(); page.wait_for_selector("#dvdel")
+    page.once("dialog", lambda d: d.accept())
+    page.click("#dvdel")                                               # Touren hängen daran: Umhängen-Dialog erscheint statt Löschen
+    page.wait_for_selector("#dverr, #mvto", timeout=6000)
+    assert page.locator("#mvto").count() == 0 and "umhängen" in page.inner_text("#dverr")   # kein anderes Gerät vorhanden: Hinweis
+    page.click("#dvcancel")

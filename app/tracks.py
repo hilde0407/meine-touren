@@ -91,7 +91,7 @@ def gpx_for(tid):
             f"<trk><name>{name}</name><type>{t['sport'] or 'hike'}</type><trkseg>\n" + "\n".join(body) + "\n</trkseg></trk></gpx>\n")
 
 
-def adopt(text, filename="", prefix="g", ident=None, name=None, sport=None, tours=None):
+def adopt(text, filename="", prefix="g", ident=None, name=None, sport=None, tours=None, src=None):
     """GPX/TCX als lokale Tour anlegen. Gibt die Tour (dict) zurück."""
     c = gpxtools.convert(text, filename, db.get("default_sport") or "hike")
     c["gpx"] = elev.clean_gpx(c["gpx"])[0]
@@ -109,6 +109,11 @@ def adopt(text, filename="", prefix="g", ident=None, name=None, sport=None, tour
                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
                (tid, nm, sport or c["sport"], c["start_ts"], c["end_ts"], c["dist_m"], c["end_ts"] - c["start_ts"], up, down,
                 items[0][0], items[0][1], "tour_recorded", "local"))
+    try:
+        from . import metrics
+        metrics.store_from_text(tid, text, filename, t0=c["start_ts"], src=src, sport=sport or c["sport"])      # Messwerte des Geräts (Zusatzdatei); Fehler stören den Import nie
+    except Exception:  # noqa
+        pass
     return db.one("SELECT * FROM tours WHERE id=?", (tid,)), c
 
 
@@ -122,6 +127,8 @@ def delete_local(tid):
     db.execute("UPDATE photos SET tour_id=NULL WHERE tour_id=? AND COALESCE(manual,0)=0", (str(tid),))
     for p in (gpx_file(tid), hr_sidecar(tid), routes.path_full(tid), routes.path_small(tid)):
         p.unlink(missing_ok=True)
+    from . import metrics
+    metrics.forget(tid)
 
 
 def merge_hr(text, hrpts, max_gap=30):

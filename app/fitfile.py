@@ -2,7 +2,10 @@
 
 Unterstützt: 12/14-Byte-Kopf, Definitions- und Datensätze, komprimierte Zeitstempel, Entwicklerfelder
 (werden übersprungen), aneinandergehängte FIT-Dateien. Gelesen werden nur GPS-Punkte (record) sowie Sportart
-(session/sport). Prüfsummen werden nicht erzwungen, damit leicht beschädigte Dateien noch brauchbar sind.
+(session/sport). Zusätzlich werden – soweit die Datei sie enthält – Geschwindigkeit, Kadenz, Leistung, Temperatur, Atemfrequenz,
+Schrittlänge, Bodenkontaktzeit, vertikale Oszillation und Luftdruck je Punkt gelesen (landen als GPX-Erweiterung, siehe metrics.py),
+dazu Hersteller/Produkt (file_id, device_info) und Zusammenfassung (Kalorien, Trainingseffekt).
+Prüfsummen werden nicht erzwungen, damit leicht beschädigte Dateien noch brauchbar sind.
 """
 import gzip
 import io
@@ -43,8 +46,9 @@ def is_fit(data):
     return len(data) >= 12 and data[8:12] == b".FIT"
 
 
-def _decode(data):
-    """Gibt (punkte, sportart_tuple) zurück; punkte = [(unix_s, lat, lon, alt_or_None)]."""
+def _decode(data, meta=None):
+    """Gibt (punkte, sportart_tuple) zurück; punkte = [(unix_s, lat, lon, alt_or_None, hr, extra_dict)].
+    meta (dict, optional) bekommt 'dev' (Hersteller/Produkt) und 'sum' (Zusammenfassung der Aktivität)."""
     pos, n = 0, len(data)
     points, sport = [], None
     while pos + 12 <= n and data[pos + 8:pos + 12] == b".FIT":
@@ -52,7 +56,7 @@ def _decode(data):
         dsize = struct.unpack_from("<I", data, pos + 4)[0]
         start, end = pos + hsize, min(pos + hsize + dsize, n)
         sport_box = []
-        _records(data, start, end, points, sport_box)
+        _records(data, start, end, points, sport_box, meta)
         if sport_box:
             sport = sport or sport_box[0]
         pos = end + 2                               # 2 Byte Prüfsumme
@@ -61,7 +65,7 @@ def _decode(data):
     return points, sport
 
 
-def _records(data, p, end, points, sport_box):
+def _records(data, p, end, points, sport_box, meta=None):
     defs = {}                                       # lokale Nachrichtennummer -> (global, endian, felder, dev_bytes)
     last_ts = 0
     session = {}
@@ -79,7 +83,7 @@ def _records(data, p, end, points, sport_box):
                 raise FitError("Datensatz ohne Definition")
             vals, p = _read(data, p, d)
             vals[253] = last_ts
-            _use(d[0], vals, points, session)
+            _use(d[0], vals, points, session, meta)
             continue
         local = h & 0x0F
         if h & 0x40:                                # Definition
@@ -105,7 +109,7 @@ def _records(data, p, end, points, sport_box):
         vals, p = _read(data, p, d)
         if 253 in vals and isinstance(vals[253], int):
             last_ts = vals[253]
-        _use(d[0], vals, points, session)
+        _use(d[0], vals, points, session, meta)
     if session:
         sport_box.append((session.get(5), session.get(6)))
 
@@ -119,7 +123,12 @@ def _read(data, p, d):
         if info is None or len(raw) < size:
             continue
         ch, isz, invalid = info
-        if ch == "s" or size % isz or size == 0:
+        if ch == "s" and size > 0:                   # Text (z. B. Produktname)
+            txt = raw.split(b"\0")[0].decode("utf-8", "replace").strip()
+            if txt:
+                vals[num] = txt
+            continue
+        if size % isz or size == 0:
             continue
         if size != isz:                              # Feld mit mehreren Werten (Array): nur erstes Element
             raw = raw[:isz]
@@ -130,7 +139,7 @@ def _read(data, p, d):
     return vals, p + dev
 
 
-def _use(gnum, v, points, session):
+def _use(gnum, v, points, session, meta=None):
     if gnum == 20:                                   # record
         lat, lon, ts = v.get(0), v.get(1), v.get(253)
         if lat is None or lon is None or ts is None:
@@ -143,11 +152,74 @@ def _use(gnum, v, points, session):
         if alt is None and v.get(2) is not None:
             alt = v[2] / 5.0 - 500
         hr = v.get(3)                                # Herzfrequenz (uint8, bpm)
-        points.append((ts + FIT_EPOCH, la, lo, alt, hr if hr is not None and 30 <= hr <= 240 else None))
+        points.append((ts + FIT_EPOCH, la, lo, alt, hr if hr is not None and 30 <= hr <= 240 else None, _extra(v)))
     elif gnum == 18 and not session:                 # session (erste genügt)
         session.update({k: v[k] for k in (5, 6) if k in v})
+        if meta is not None:
+            _summary(v, meta)
+    elif gnum == 0 and meta is not None:             # file_id: Hersteller/Produkt
+        d = meta.setdefault("dev", {})
+        for k, key in ((1, "manu"), (2, "prod"), (8, "name")):
+            if k in v and key not in d:
+                d[key] = v[k]
+    elif gnum == 23 and meta is not None and v.get(0, 0) == 0:   # device_info der Aufzeichnung (Index 0 = Aufzeichnungsgerät)
+        d = meta.setdefault("dev", {})
+        for k, key in ((2, "manu"), (4, "prod"), (27, "name")):
+            if k in v and key not in d:
+                d[key] = v[k]
     elif gnum == 12 and not session and 0 in v:      # sport
         session.update({5: v[0], 6: v.get(1)})
+
+
+def _extra(v):
+    """Zusatzmesswerte eines record-Satzes (SI-Einheiten); fehlende Felder fehlen im Ergebnis."""
+    ex = {}
+
+    def put(key, num, scale, lo, hi):
+        x = v.get(num)
+        if isinstance(x, (int, float)) and not isinstance(x, bool):
+            x = x / scale
+            if lo <= x <= hi:
+                ex[key] = x
+    put("speed", 73, 1000.0, 0, 90)                  # m/s (enhanced), sonst 6
+    if "speed" not in ex:
+        put("speed", 6, 1000.0, 0, 90)
+    put("pow", 7, 1.0, 0, 5000)
+    put("temp", 13, 1.0, -60, 70)
+    put("resp", 108, 100.0, 1, 120)
+    if "resp" not in ex:
+        put("resp", 99, 1.0, 1, 120)
+    put("stride", 85, 10000.0, 0.1, 4)               # mm (Faktor 10) -> m
+    put("gct", 41, 10.0, 50, 2000)                   # ms
+    put("vosc", 39, 10.0, 5, 400)                    # mm
+    put("press", 91, 100.0, 300, 1100)               # Pa -> hPa
+    c = v.get(4)
+    if isinstance(c, (int, float)) and 0 < c < 255:
+        ex["cad"] = c + (v.get(53, 0) or 0) / 128.0  # volle Umdrehungen/Schritte (Hälfte) + Bruchteil
+    return ex
+
+
+def _summary(v, meta):
+    sm = meta.setdefault("sum", {})
+    for k, key, scale, lo, hi in ((11, "kcal", 1, 1, 30000), (24, "te", 10.0, 0, 5.5), (137, "ate", 10.0, 0, 5.5)):
+        x = v.get(k)
+        if isinstance(x, (int, float)) and lo <= x / scale <= hi and key not in sm:
+            sm[key] = round(x / scale, 1) if scale != 1 else int(x)
+
+
+MANUFACTURER = {1: "garmin", 13: "garmin", 15: "garmin", 23: "suunto", 123: "polar", 258: "zepp"}
+BRAND = {"garmin": "Garmin", "suunto": "Suunto", "polar": "Polar", "zepp": "Amazfit/Zepp"}
+FOOT_SPORTS = {1, 11, 17, 35}                        # Laufen, Gehen, Wandern, Schneeschuhwandern: Kadenz = Schritte/min (beide Beine)
+
+
+def device_info(meta):
+    """(art, anzeigename) aus Hersteller/Produkt der FIT-Datei; ('', '') wenn nichts bekannt."""
+    d = (meta or {}).get("dev") or {}
+    src = MANUFACTURER.get(d.get("manu"), "other" if d.get("manu") not in (None, 0) else "")
+    name = str(d.get("name") or "").strip()
+    if not name and src in BRAND:
+        name = BRAND[src]
+    return src, name[:80]
 
 
 def sport_name(sport):
@@ -157,21 +229,46 @@ def sport_name(sport):
     return SUB_SPORT.get((s, sub)) or SPORT.get(s, "")
 
 
+def _ext_xml(hr, ex):
+    parts = []
+    if hr:
+        parts.append(f"<gpxtpx:hr>{hr}</gpxtpx:hr>")
+    for k, tag, fmt in (("cad", "gpxtpx:cad", "{:.0f}"), ("temp", "gpxtpx:atemp", "{:.0f}"), ("speed", "mt:speed", "{:.2f}"), ("pow", "mt:power", "{:.0f}"),
+                        ("resp", "mt:resp", "{:.1f}"), ("stride", "mt:stride", "{:.3f}"), ("gct", "mt:gct", "{:.0f}"), ("vosc", "mt:vosc", "{:.1f}"), ("press", "mt:press", "{:.1f}")):
+        if k in ex:
+            parts.append(f"<{tag}>{fmt.format(ex[k])}</{tag}>")
+    return "<extensions><gpxtpx:TrackPointExtension>" + "".join(parts) + "</gpxtpx:TrackPointExtension></extensions>" if parts else ""
+
+
 def to_gpx(data, name=""):
     """FIT-Bytes -> (gpx_text, sport). Löst FitError / ValueError (keine GPS-Punkte) aus."""
-    pts, sport = _decode(data)
+    meta = {}
+    pts, sport = _decode(data, meta)
     if not pts:
         raise ValueError("Keine GPS-Punkte")
     pts.sort(key=lambda x: x[0])
     sp = sport_name(sport)
+    foot = bool(sport and sport[0] in FOOT_SPORTS)
     f = lambda t: datetime.fromtimestamp(t, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    def ex_of(p):
+        ex = dict(p[5]) if len(p) > 5 else {}
+        if foot and "cad" in ex:
+            ex["cad"] *= 2                                   # FIT zählt beim Gehen/Laufen Schritte je Bein
+        return ex
     body = "".join(
         f'<trkpt lat="{la:.7f}" lon="{lo:.7f}">' + (f"<ele>{al:.1f}</ele>" if al is not None else "") + f"<time>{f(t)}</time>"
-        + (f"<extensions><gpxtpx:TrackPointExtension><gpxtpx:hr>{hr}</gpxtpx:hr></gpxtpx:TrackPointExtension></extensions>" if hr else "") + "</trkpt>\n"
-        for t, la, lo, al, hr in pts)
+        + _ext_xml(hr, ex_of((t, la, lo, al, hr) + tuple(rest))) + "</trkpt>\n"
+        for t, la, lo, al, hr, *rest in pts)
     nm = escape(name or "Aktivität")
-    gpx = ('<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Meine Touren (FIT)" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1">\n'
-           f"<metadata><name>{nm}</name><time>{f(pts[0][0])}</time></metadata>\n"
+    src, dev = device_info(meta)
+    mx = ""
+    if src or meta.get("sum"):
+        mx = "<extensions>" + (f'<mt:device src="{src}">{escape(dev)}</mt:device>' if src else "") \
+             + ("<mt:sum " + " ".join(f'{k}="{v}"' for k, v in meta["sum"].items()) + "/>" if meta.get("sum") else "") + "</extensions>"
+    gpx = ('<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Meine Touren (FIT)" xmlns="http://www.topografix.com/GPX/1/1" '
+           'xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:mt="https://meine-touren.invalid/ns/1">\n'
+           f"<metadata><name>{nm}</name><time>{f(pts[0][0])}</time>{mx}</metadata>\n"
            f"<trk><name>{nm}</name>" + (f"<type>{sp}</type>" if sp else "") + f"<trkseg>\n{body}</trkseg></trk></gpx>\n")
     return gpx, sp
 

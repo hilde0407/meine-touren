@@ -21,7 +21,7 @@ import requests
 from fastapi import APIRouter, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import RedirectResponse
 
-from . import config, ctx, db, fitfile, gpxtools, jobs, portals, sync
+from . import config, ctx, db, fitfile, gpxtools, jobs, metrics, mydevices, portals, sync
 from .jobs import log
 
 router = APIRouter()
@@ -510,6 +510,7 @@ def api_devices(request: Request):
         "suunto": {"configured": suunto_configured(), "connected": suunto_connected(), "imported": cnt("suunto"),
                    "checked": db.get("suunto_checked") or "", "redirect": _redirect(request, "suunto")},
         "files": cnt("datei"),
+        **mydevices.list_payload(),                     # „Meine Geräte“ (Schlüssel devices, kinds); dieselben Daten unter /api/my-devices
     }
 
 

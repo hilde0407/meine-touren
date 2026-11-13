@@ -108,6 +108,9 @@ def _open(path):
             conn.execute("ALTER TABLE plans ADD COLUMN wps TEXT")      # Wegpunkte, gewählte Alternativen, Wegführung (JSON)
         if "src" not in {r["name"] for r in conn.execute("PRAGMA table_info(elev_fix)")}:
             conn.execute("ALTER TABLE elev_fix ADD COLUMN src TEXT")          # 'zepp' = Höhe aus der Uhr, sonst (NULL) Geländemodell
+        conn.execute("CREATE TABLE IF NOT EXISTS devices (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, kind TEXT, model TEXT, since TEXT, until TEXT, active INTEGER DEFAULT 1, note TEXT)")   # Meine Geräte (Uhr, Handy …)
+        conn.execute("CREATE TABLE IF NOT EXISTS tour_device (tour_id TEXT PRIMARY KEY, device_id INTEGER)")   # ausdrückliche Zuordnung Tour -> Gerät (sonst automatisch nach Art und Datum)
+        conn.execute("CREATE TABLE IF NOT EXISTS tour_source (tour_id TEXT PRIMARY KEY, src TEXT, name TEXT)")   # Art/Name der Aufzeichnungsquelle je Tour (zepp, garmin, suunto, polar, phone, other)
         conn.commit()
         _conns[path] = conn
         return conn
