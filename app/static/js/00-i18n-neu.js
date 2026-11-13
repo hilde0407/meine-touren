@@ -713,4 +713,14 @@ Neuere Tour || Newer tour || Sortie plus récente || Ruta más reciente
 Ältere Tour || Older tour || Sortie plus ancienne || Ruta más antigua
 Kilometer pro Monat || Kilometres per month || Kilomètres par mois || Kilómetros por mes
 Keine Messwerte (Pause) || No readings (pause) || Aucune mesure (pause) || Sin datos (pausa)
+Höhe aus Uhr abgleichen (Zepp) || Match elevation with watch (Zepp) || Rapprocher l’altitude de la montre (Zepp) || Ajustar altitud con el reloj (Zepp)
+⌚ Höhe aus Uhr abgleichen (Zepp) || ⌚ Match elevation with watch (Zepp) || ⌚ Rapprocher l’altitude de la montre (Zepp) || ⌚ Ajustar altitud con el reloj (Zepp)
+Höhe aus Uhr abgleichen || Match elevation with watch || Rapprocher l’altitude de la montre || Ajustar altitud con el reloj
+Barometrische Höhe der Uhr übernehmen || Use the watch’s barometric elevation || Reprendre l’altitude barométrique de la montre || Usar la altitud barométrica del reloj
+Gleiche Höhe mit der Uhr ab … || Matching elevation with the watch … || Rapprochement de l’altitude avec la montre … || Ajustando la altitud con el reloj …
+Höhenabgleich fehlgeschlagen: || Elevation match failed: || Le rapprochement de l’altitude a échoué : || El ajuste de altitud ha fallado:
+Höhe aus Zepp übernommen: ↑ {} m (vorher {} m) || Elevation taken from Zepp: ↑ {} m (before {} m) || Altitude reprise de Zepp : ↑ {} m (avant {} m) || Altitud tomada de Zepp: ↑ {} m (antes {} m)
+Höhen aus der Zepp-Uhr übernommen (Komoot/GPS meldete {} m Aufstieg). || Elevation taken from the Zepp watch (Komoot/GPS reported {} m of ascent). || Altitudes reprises de la montre Zepp (Komoot/GPS indiquait {} m de montée). || Altitudes tomadas del reloj Zepp (Komoot/GPS indicaba {} m de subida).
+Auf-/Abstieg aus der barometrischen Höhe der Zepp-Uhr übernehmen || Use ascent/descent from the Zepp watch’s barometric elevation || Reprendre la montée/descente de l’altitude barométrique de la montre Zepp || Usar la subida/bajada de la altitud barométrica del reloj Zepp
+Auf-/Abstieg von Komoot- und Datei-Touren mit der barometrischen Höhe der Uhr (Zepp) neu berechnen, wenn es ein passendes Training gibt. Bereits korrigierte Touren bleiben unberührt; je Tour wiederherstellbar. || Recalculate ascent/descent of Komoot and file tours from the watch’s (Zepp) barometric elevation when a matching workout exists. Already corrected tours are left alone; restorable per tour. || Recalculer la montée/descente des parcours Komoot et fichiers avec l’altitude barométrique de la montre (Zepp) s’il existe une activité correspondante. Les parcours déjà corrigés restent intacts ; restauration possible par parcours. || Recalcular subida/bajada de rutas de Komoot y de archivo con la altitud barométrica del reloj (Zepp) si hay un entrenamiento coincidente. Las rutas ya corregidas no se tocan; restaurable por ruta.
 `;

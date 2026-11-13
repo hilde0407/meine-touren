@@ -106,6 +106,8 @@ def _open(path):
         conn.execute("CREATE TABLE IF NOT EXISTS plans (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, sport TEXT, pts TEXT, km REAL, up REAL, down REAL, max_alt REAL, est_h REAL, note TEXT, ts INTEGER)")   # geplante Touren
         if "wps" not in {r["name"] for r in conn.execute("PRAGMA table_info(plans)")}:
             conn.execute("ALTER TABLE plans ADD COLUMN wps TEXT")      # Wegpunkte, gewählte Alternativen, Wegführung (JSON)
+        if "src" not in {r["name"] for r in conn.execute("PRAGMA table_info(elev_fix)")}:
+            conn.execute("ALTER TABLE elev_fix ADD COLUMN src TEXT")          # 'zepp' = Höhe aus der Uhr, sonst (NULL) Geländemodell
         conn.commit()
         _conns[path] = conn
         return conn

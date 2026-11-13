@@ -184,6 +184,153 @@ def restore(tid):
     return True
 
 
+class ZeppFixError(RuntimeError):
+    """Fachlicher Fehler beim Zepp-Abgleich (Meldung ist für die Oberfläche gedacht)."""
+
+
+def align_zepp(items, zpts, t0=None):
+    """Höhen einer Tour mit der barometrischen Uhr-Höhe abgleichen. -> neue Höhenliste (je Tourpunkt) oder None, wenn Zepp nicht taugt.
+
+    items: [(lat, lng, alt, t_ms)] – t_ms ist die Zeit seit Tourstart (Komoot/GPX-Konvention), t0 der Unix-Start der Tour (s),
+    damit Tour- und Zepp-Zeit (Unix-Sekunden) vergleichbar werden. Ohne t0 oder ohne Zeiten wird die Tour gleichmäßig über den Zepp-Zeitraum gelegt.
+    zpts: [(unix_ts, alt_m)].
+    Das Barometer driftet absolut, ist aber im Verlauf genau; Komoot-/GPS-Höhen sind absolut brauchbar, im Verlauf aber ungenau.
+    Darum: Verlauf von Zepp, Niveau der Originalhöhen (Median der Differenz, robust gegen Ausreißer)."""
+    from bisect import bisect_left
+    from statistics import median
+    z = sorted((float(t), float(h)) for t, h in zpts if h is not None and -500.0 <= h <= 9000.0)   # Platzhalter („keine Höhe“) fallen hier raus
+    if len(z) < 6 or not items or max(h for _, h in z) - min(h for _, h in z) < 0.01:             # konstante Höhe = keine echten Messwerte
+        return None
+    zt = [t for t, _ in z]
+    n = len(items)
+    if t0 is not None and all(p[3] is not None for p in items):
+        ts = [t0 + p[3] / 1000.0 for p in items]
+    else:
+        ts = [zt[0] + (zt[-1] - zt[0]) * i / max(1, n - 1) for i in range(n)]
+    tol = 30.0
+    zv = []
+    for t in ts:
+        if t < zt[0] - tol or t > zt[-1] + tol:
+            zv.append(None)
+            continue
+        j = bisect_left(zt, t)
+        if j <= 0:
+            zv.append(z[0][1])
+        elif j >= len(z):
+            zv.append(z[-1][1])
+        else:
+            (ta, ha), (tb, hb) = z[j - 1], z[j]
+            zv.append(ha if tb == ta else ha + (hb - ha) * (t - ta) / (tb - ta))
+    if sum(v is not None for v in zv) < 0.8 * n:
+        return None
+    diffs = [v - p[2] for v, p in zip(zv, items) if v is not None and p[2] is not None and -500.0 <= p[2] <= 9000.0]
+    off = median(diffs) if diffs else 0.0                 # ohne Originalhöhen bleibt Zepp unverändert
+    return [round(v - off, 1) if v is not None else p[2] for v, p in zip(zv, items)]
+
+
+def _zepp_match(api, t, tol):
+    """Zepp-Training zu einer Tour: gleiche ID z<Nr>, sonst gleicher Start/gleiche Strecke wie bei puls.backfill_hr."""
+    from . import sync
+    hist = api.history()
+    if str(t["id"]).startswith("z"):
+        for s in hist:
+            if f"z{int(s['trackid'])}" == str(t["id"]):
+                return s
+    for s in hist:
+        if sync.is_duplicate(int(s["trackid"]), float(s.get("dis") or 0), int(float(s.get("run_time") or 0)), [t], tol):
+            return s
+    return None
+
+
+def _zepp_apply(t, s, api):
+    """Detail des Trainings laden, abgleichen und speichern. Gleiche Sicherung wie fix(): Original einmalig in <id>.orig.json, elev_fix hält die alten Werte."""
+    from . import sync, zepp
+    tid = str(t["id"])
+    cur = db.one("SELECT * FROM elev_fix WHERE id=?", (tid,))
+    # Bei bereits korrigierter Tour bleibt das ursprüngliche Original die Basis (wie fix()), sonst würde das Korrigierte zum „Original“.
+    pts = (json.loads(orig_path(tid).read_text()) if cur and orig_path(tid).exists() else None) or routes.load(tid)
+    if not pts or len(pts) < 5:
+        raise ZeppFixError("Keine Streckenpunkte vorhanden")
+    zp = [(p[0], p[3]) for p in zepp.decode_points(s, api.detail(s))]
+    # Tourzeit ist relativ zum Tourstart; Zepp-Zeit absolut. Startet die Tour (Zeitzone/Sommerzeit) um ganze Stunden versetzt zum Training,
+    # wird die Tour auf den Trainingsstart gelegt (wie is_duplicate den Versatz toleriert).
+    tr = int(s["trackid"])
+    t0 = t["start_ts"] if t["start_ts"] else tr
+    d = tr - t0
+    tol = db.get_int("dup_tolerance_s", 300)
+    if abs(d) > tol:
+        h = round(d / 3600)
+        t0 += h * 3600 if h and abs(d - h * 3600) <= tol else 0
+    if str(tid) == f"z{tr}":
+        t0 = tr
+    alts = align_zepp(pts, zp, t0)
+    if alts is None:
+        raise ZeppFixError("Zepp-Training hat keine brauchbaren Höhendaten")
+    up, down = ascent(smooth(clean([a for a in alts if a is not None]), 3, 3))     # wie recompute_local für lokale Touren
+    if not cur:
+        orig_path(tid).write_text(json.dumps(pts))
+    new = [[p[0], p[1], a, p[3]] for p, a in zip(pts, alts)]
+    routes.D.mkdir(parents=True, exist_ok=True)
+    routes.path_full(tid).write_text(json.dumps(new))
+    o_up, o_down = (cur["orig_up"], cur["orig_down"]) if cur else (t["up_m"], t["down_m"])
+    with db.cur() as c:
+        c.execute("INSERT OR REPLACE INTO elev_fix(id,orig_up,orig_down,up_m,down_m,ts,src) VALUES(?,?,?,?,?,?,?)", (tid, o_up, o_down, up, down, int(time.time()), "zepp"))
+        c.execute("UPDATE tours SET up_m=?,down_m=? WHERE id=?", (up, down, tid))
+    return {"up": up, "down": down, "up_m": up, "down_m": down, "orig_up": o_up, "orig_down": o_down}
+
+
+def zepp_fix(tid, api=None):
+    """Höhe EINER Tour aus der Zepp-Uhr (Barometer) übernehmen. Rückgabe {up, down, orig_up, orig_down}; Original bleibt über restore() wiederherstellbar."""
+    from . import sync
+    tid = str(tid)
+    t = db.one("SELECT * FROM tours WHERE id=?", (tid,))
+    if not t:
+        raise KeyError(tid)
+    if api is None:
+        try:
+            api = sync._zepp_api()
+        except RuntimeError as e:
+            if "Zugangsdaten fehlen" in str(e):
+                raise ZeppFixError("Kein Zepp-Zugang eingerichtet (Einstellungen)")
+            raise ZeppFixError(f"Zepp-Anmeldung fehlgeschlagen: {e}")
+    s = _zepp_match(api, t, db.get_int("dup_tolerance_s", 300))
+    if not s:
+        raise ZeppFixError("Kein passendes Zepp-Training gefunden")
+    return _zepp_apply(t, s, api)
+
+
+def zepp_fix_all(api=None):
+    """Job: Höhe aller Touren mit passendem Zepp-Training abgleichen. Bereits korrigierte/abgeglichene Touren bleiben unberührt
+    (einzeln jederzeit erneut möglich); z<Nr>-Touren haben die Uhr-Höhe ohnehin schon."""
+    from . import jobs, sync
+    api = api or sync._zepp_api()
+    tours = db.query("SELECT * FROM tours")
+    byid = {t["id"]: t for t in tours}
+    fixed = {r["id"] for r in db.query("SELECT id FROM elev_fix")}
+    tol = db.get_int("dup_tolerance_s", 300)
+    todo, seen = [], set()
+    for s in api.history():
+        tr = int(s["trackid"])
+        t = byid.get(f"z{tr}") or sync.is_duplicate(tr, float(s.get("dis") or 0), int(float(s.get("run_time") or 0)), tours, tol)
+        if not t or t["id"] in fixed or t["id"] in seen or str(t["id"]).startswith("z"):
+            continue
+        seen.add(t["id"])
+        todo.append((s, t))
+    jobs.log(f"Höhe abgleichen: {len(todo)} Touren mit passendem Zepp-Training")
+    done = 0
+    for i, (s, t) in enumerate(todo, 1):
+        jobs.progress(f"Höhe {i}/{len(todo)}")
+        try:
+            r = _zepp_apply(t, s, api)
+            done += 1
+            jobs.log(f"  {t['id']}: Aufstieg {round(r['orig_up'] or 0)} m → {round(r['up'])} m")
+        except Exception as e:  # noqa
+            jobs.log(f"  {t['id']}: {e}")
+        time.sleep(0.2)
+    jobs.log(f"Höhe abgleichen: {done} Touren abgeglichen")
+    return done
+
+
 def drop(tid):
     """Korrektur verwerfen, ohne Werte zurückzuschreiben (Komoot-Daten werden gerade frisch geladen)."""
     tid = str(tid)

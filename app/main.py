@@ -275,7 +275,7 @@ def api_stats():
 @app.get("/api/tours")
 def api_tours(year: int = 0, q: str = "", limit: int = 20000):
     rows = db.query(
-        "SELECT t.*, (SELECT COUNT(*) FROM photos p WHERE p.tour_id=t.id) AS photos, (SELECT note FROM tour_notes n WHERE n.id=t.id) AS note, (SELECT stars FROM tour_rating r WHERE r.id=t.id) AS stars, (SELECT orig_up FROM elev_fix e WHERE e.id=t.id) AS fix_up, (SELECT group_concat(tag, '|') FROM tour_tags x WHERE x.id=t.id) AS tags, g.country AS g_country, g.state AS g_state, g.county AS g_county, g.place AS g_place FROM tours t LEFT JOIN tour_geo g ON g.id=t.id "
+        "SELECT t.*, (SELECT COUNT(*) FROM photos p WHERE p.tour_id=t.id) AS photos, (SELECT note FROM tour_notes n WHERE n.id=t.id) AS note, (SELECT stars FROM tour_rating r WHERE r.id=t.id) AS stars, (SELECT orig_up FROM elev_fix e WHERE e.id=t.id) AS fix_up, (SELECT src FROM elev_fix e WHERE e.id=t.id) AS fix_src, (SELECT group_concat(tag, '|') FROM tour_tags x WHERE x.id=t.id) AS tags, g.country AS g_country, g.state AS g_state, g.county AS g_county, g.place AS g_place FROM tours t LEFT JOIN tour_geo g ON g.id=t.id "
         "WHERE t.start_ts IS NOT NULL ORDER BY t.start_ts DESC LIMIT ?", (limit,))
     out = []
     hr_ids = puls.tours_with_hr()
@@ -430,6 +430,7 @@ JOBS = {
     "photo-import": ("Fotos übernehmen", lambda dry: (photos.import_from(), photos.scan())),
     "elev-local": ("Höhenmeter lokaler Touren neu berechnen", lambda dry: elev.recompute_local()),
     "hr-backfill": ("Puls für Zepp-Touren nachladen", lambda dry: puls.backfill_hr()),
+    "elev-zepp": ("Höhe aus Zepp-Uhr abgleichen", lambda dry: elev.zepp_fix_all()),
     "export": ("Zepp-Import (ohne Upload)", lambda dry: sync.export_zepp()),
 }
 

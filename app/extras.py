@@ -532,6 +532,20 @@ def api_elev_fix(tour_id: str):
         raise HTTPException(502, str(e))
 
 
+@router.post("/api/tours/{tour_id}/elev-zepp")
+def api_elev_zepp(tour_id: str):
+    """Höhe aus der barometrischen Uhr-Höhe (Zepp) übernehmen; Wiederherstellen läuft über elev-restore."""
+    from . import elev
+    try:
+        return elev.zepp_fix(tour_id)
+    except KeyError:
+        raise HTTPException(404, "Tour nicht gefunden")
+    except elev.ZeppFixError as e:
+        raise HTTPException(422, str(e))
+    except Exception as e:  # noqa
+        raise HTTPException(502, str(e))
+
+
 @router.post("/api/tours/{tour_id}/elev-restore")
 def api_elev_restore(tour_id: str):
     from . import elev

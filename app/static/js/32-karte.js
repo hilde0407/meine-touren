@@ -8,7 +8,7 @@
 
 /* Betrachter: Bedienelemente zum Ändern, Hochladen, Teilen und für PDFs entfernen (api() in 01-grundlagen.js sendet für Betrachter nur Abfragen) */
 const VHIDE =
-  "#ren,#ksync,#eup,#edel,#etag,#eshr,#etc,#efix,#padd,#pgps,#pimp,#pbest,#shr,#esnd,#esheet,#shp,#pdfdl,#trpdf,#tredit,#trhide,#sbbtn,#serren,#chb,#offb,#stclr,#ssave,#snote,#sgrp,#gedit,#gnew,#starrow,.pdfctl,a[href*='pdf'],a[href^='#/sheet'],a[href^='#/tripsheet'],a[href^='#/compare'],a[href^='#/plan'],a[href^='#/record']";
+  "#ren,#ksync,#eup,#edel,#etag,#eshr,#etc,#efix,#ezepp,#padd,#pgps,#pimp,#pbest,#shr,#esnd,#esheet,#shp,#pdfdl,#trpdf,#tredit,#trhide,#sbbtn,#serren,#chb,#offb,#stclr,#ssave,#snote,#sgrp,#gedit,#gnew,#starrow,.pdfctl,a[href*='pdf'],a[href^='#/sheet'],a[href^='#/tripsheet'],a[href^='#/compare'],a[href^='#/plan'],a[href^='#/record']";
 const VTXT = /^(Fotos (zuordnen|bearbeiten|importieren|hinzufügen)|Tourblatt|PDF|Senden|Teilen|Löschen|Keine Reise|Entfernte Reisen)/;
 function viewerLock() {
   if (!isViewer()) return;

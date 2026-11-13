@@ -30,6 +30,7 @@ const TACT = [
       ["-", "Strecke und Höhen"],
       ["etc", "Streckenfarbe", "Farbe und Breite auf der Karte"],
       ["efix", "Höhen korrigieren", "Mit Geländemodell neu berechnen"],
+      ["ezepp", "Höhe aus Uhr abgleichen (Zepp)", "Barometrische Höhe der Uhr übernehmen"],
       ["etfix", "Track korrigieren", "Fehlpunkte und Pausen bereinigen"],
       ["-", "Abgleich und Upload"],
       ["eup", "Hochladen", "Zu Strava, Komoot … senden"],
