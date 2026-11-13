@@ -309,7 +309,7 @@ VIEWS.tour = async id => {
   const t = BY[id],
     r = ($("#ksync") || $("#eup")) && ($("#ksync") || $("#eup")).closest(".row");
   if (!t || !r) return;
-  if ($("#ksync"))           // Komoot-Touren: zusätzliche Knöpfe (GPX steht schon in der Leiste)
+  if (!$("#e3d"))           // 3D-Flug und Diashow-Link für alle Touren (Komoot, Zepp, lokale Dateien, Aufzeichnungen)
   r.insertAdjacentHTML(
     "beforeend",
     `<a class="btn ghost sm" id="e3d" href="#/flight/${encodeURIComponent(id)}" title="Die Strecke im 3D-Gelände abfliegen">🛰 3D-Flug</a>${t.photos ? `<button class="btn ghost sm" id="shr" title="Link zur Foto-Diashow dieser Tour kopieren">🔗 Diashow-Link</button>` : ""}`

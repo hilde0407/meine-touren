@@ -742,6 +742,15 @@ def test_share_send_button(page):
     page.set_viewport_size({"width": 1280, "height": 900})
 
 
+def test_3d_flug_fuer_lokale_tour(page):
+    """Auch Touren ohne Komoot (Zepp, GPX-Datei, Aufzeichnung) bieten den 3D-Flug an."""
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    tid = _tour_id(page)
+    page.goto(base + "#/tour/" + tid); page.wait_for_selector("#e3d", state="attached", timeout=8000)
+    assert page.get_attribute("#e3d", "href") == "#/flight/" + tid
+
+
 def test_links_overview(page):
     """Übersicht „Freigegebene Links“: Links erscheinen mit Tourname, Laufzeit lässt sich ändern, Widerruf entfernt sie."""
     base = page.url.split("#")[0]

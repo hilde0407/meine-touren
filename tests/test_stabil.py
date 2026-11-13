@@ -206,17 +206,20 @@ def test_umzugspaket_komplett(tmp_path):
     assert not (tmp_path / "evil.txt").exists()
 
 
-def test_umzugspaket_api(fresh):
+def test_umzugspaket_api(fresh, tmp_path, monkeypatch):
     from fastapi.testclient import TestClient
     from app import main, extras
     import time
+    from app import config
+    monkeypatch.setattr(config, "BACKUP_ROOT", tmp_path / "bk")
     c = TestClient(main.app)
     assert c.post("/api/backup/full").json() == {"started": True}
-    for _ in range(100):
-        if not c.get("/api/jobs").json().get("running"):
+    l = []
+    for _ in range(100):                                 # Job läuft im Hintergrund: warten, bis das Paket in der Liste steht
+        l = c.get("/api/backup/full").json()
+        if l:
             break
         time.sleep(0.1)
-    l = c.get("/api/backup/full").json()
     assert l and l[0]["name"].startswith("meine-touren-umzug-")
     r = c.get("/api/backup/full/" + l[0]["name"]); assert r.status_code == 200 and r.content[:2] == b"PK"
     assert c.get("/api/backup/full/..%2Fetc%2Fpasswd").status_code == 404
