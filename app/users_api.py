@@ -27,6 +27,12 @@ def _admin(request: Request):
 
 
 def _ip(request: Request):
+    """Client-Adresse für Sperren/Drosselung. X-Forwarded-For nur mit TRUST_PROXY=1: sonst könnte jeder die Adresse frei wählen
+    und die Sperre umgehen. Ausgewertet wird der letzte Eintrag (vom eigenen Proxy angehängt, nicht vom Client fälschbar)."""
+    if os.environ.get("TRUST_PROXY") == "1":
+        fwd = (request.headers.get("x-forwarded-for") or "").split(",")[-1].strip()
+        if fwd:
+            return fwd
     return request.client.host if request.client else ""
 
 

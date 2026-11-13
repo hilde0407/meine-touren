@@ -138,6 +138,9 @@ def cur():
         try:
             yield c
             conn.commit()
+        except BaseException:
+            conn.rollback()       # sonst bleibt die halbe Transaktion auf der geteilten Verbindung offen und wird vom nächsten cur() mit-committet
+            raise
         finally:
             c.close()
 

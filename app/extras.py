@@ -5,6 +5,7 @@ import json
 import shutil
 import sqlite3
 import tempfile
+import uuid
 import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -204,7 +205,12 @@ def api_tile(style: str, z: int, x: int, y: int):
             r = requests.get(TILE_UP[style].format(z=z, x=x, y=y), headers=UA, timeout=8)
             if r.status_code == 200 and r.content:
                 f.parent.mkdir(parents=True, exist_ok=True)
-                tmp = f.with_suffix(".tmp"); tmp.write_bytes(r.content); tmp.replace(f)
+                # eindeutiger Temp-Name: zwei gleichzeitige Abrufe derselben Kachel dürfen sich nicht die Datei wegnehmen
+                tmp = f.with_name(f"{f.stem}.{uuid.uuid4().hex}.tmp")
+                try:
+                    tmp.write_bytes(r.content); tmp.replace(f)
+                finally:
+                    tmp.unlink(missing_ok=True)       # nach Erfolg schon weg, bei Fehler keine Reste
                 fresh = True
         except requests.RequestException:
             pass

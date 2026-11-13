@@ -173,12 +173,25 @@ def delete_user(uid, with_data=False):
 
 # ---------- Anmeldung ----------
 _fail = {}
+_fail_prune = 0.0
+
+
+def _prune_fail(now):
+    """Abgelaufene Fehlversuche löschen (höchstens einmal pro Minute) – sonst wächst _fail mit jedem je getippten Namen."""
+    global _fail_prune
+    if now - _fail_prune < 60:
+        return
+    _fail_prune = now
+    for k, v in list(_fail.items()):
+        if not any(now - t < 300 for t in v):
+            _fail.pop(k, None)
 
 
 def check_login(name, pw, ip=""):
     """Name und Passwort prüfen (mit Sperre nach zu vielen Fehlversuchen). Gibt die Benutzerzeile zurück."""
     key = (name or "").strip().lower() + "|" + ip
-    now = time.time(); f = [t for t in _fail.get(key, []) if now - t < 300]
+    now = time.time(); _prune_fail(now)
+    f = [t for t in _fail.get(key, []) if now - t < 300]
     if len(f) >= 6:
         raise PermissionError("Zu viele Versuche – bitte in ein paar Minuten erneut versuchen")
     u = q1("SELECT * FROM users WHERE (lower(name)=lower(?) OR uid=?) AND active=1", (name.strip(), slug(name)))

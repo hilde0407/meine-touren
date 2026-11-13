@@ -52,6 +52,28 @@ class Komoot:
             self.login()
         return (self.user_id, self.token)
 
+    def _get(self, url, params=None, timeout=30, tries=3):
+        """GET mit Neuanmeldung bei 401 (wie rename/delete) und kurzem Backoff bei 429/5xx bzw. Netzfehlern.
+        Gibt die letzte Antwort zurück; nur bei dauerhaftem Netzfehler eine KomootError."""
+        relogin = False
+        for i in range(tries):
+            try:
+                r = requests.get(url, params=params, auth=self._auth(), timeout=timeout)
+            except requests.RequestException as e:
+                if i == tries - 1:
+                    raise KomootError(f"Komoot nicht erreichbar: {e}")
+                time.sleep(0.5 * 2 ** i)
+                continue
+            if r.status_code == 401 and not relogin:
+                relogin = True
+                self.token = None             # Token abgelaufen: einmal neu anmelden
+                r = requests.get(url, params=params, auth=self._auth(), timeout=timeout)
+            if (r.status_code == 429 or r.status_code >= 500) and i < tries - 1:
+                time.sleep(0.5 * 2 ** i)
+                continue
+            return r
+        return r
+
     @staticmethod
     def _parse(t, status="tour_recorded"):
         sp = t.get("start_point") or {}
@@ -64,7 +86,7 @@ class Komoot:
                 "lat": sp.get("lat"), "lng": sp.get("lng"), "status": t.get("type", status)}
 
     def tour(self, tour_id):
-        r = requests.get(f"{BASE}/v007/tours/{tour_id}", auth=self._auth(), timeout=30)
+        r = self._get(f"{BASE}/v007/tours/{tour_id}")
         if r.status_code == 404:
             raise KomootError("Tour bei Komoot nicht gefunden (gelöscht?)")
         if r.status_code != 200:
@@ -74,9 +96,8 @@ class Komoot:
     def tours(self, status="tour_recorded"):
         out, page = [], 0
         while True:
-            r = requests.get(f"{BASE}/v007/users/{self.user_id or self._auth()[0]}/tours/", auth=self._auth(),
-                             params={"type": status, "limit": 100, "page": page,
-                                     "sort_field": "date", "sort_direction": "desc"}, timeout=60)
+            r = self._get(f"{BASE}/v007/users/{self.user_id or self._auth()[0]}/tours/",
+                          {"type": status, "limit": 100, "page": page, "sort_field": "date", "sort_direction": "desc"}, timeout=60)
             if r.status_code != 200:
                 raise KomootError(f"Tourenliste: HTTP {r.status_code}")
             j = r.json()
@@ -89,16 +110,23 @@ class Komoot:
         return out
 
     def coordinates(self, tour_id):
-        """Liste [(lat, lng, alt, t_ms)]. Zwei bekannte Varianten, die zweite als Rückfall."""
+        """Liste [(lat, lng, alt, t_ms)]. Zwei bekannte Varianten, die zweite als Rückfall.
+        [] heißt wirklich „Komoot hat keine Punkte“; ein Fehler (HTTP, Netz) wird als KomootError gemeldet,
+        damit er nicht als leere Strecke gespeichert wird."""
+        got200, status = False, None
         for url, params in ((f"{BASE}/v007/tours/{tour_id}/coordinates", {}),
                             (f"{BASE}/v007/tours/{tour_id}", {"_embedded": "coordinates"})):
-            r = requests.get(url, params=params, auth=self._auth(), timeout=60)
+            r = self._get(url, params, timeout=60)
             if r.status_code != 200:
+                status = r.status_code
                 continue
+            got200 = True
             j = r.json()
             items = j.get("items") or ((j.get("_embedded") or {}).get("coordinates") or {}).get("items")
             if items:
                 return [(i["lat"], i["lng"], i.get("alt"), i.get("t")) for i in items]
+        if not got200:
+            raise KomootError(f"Streckenpunkte laden: HTTP {status}")
         return []
 
     def rename(self, tour_id, name):

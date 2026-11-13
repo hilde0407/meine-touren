@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import contextvars
+import html
 import os
 import re
 import hmac
@@ -57,7 +58,13 @@ VIEWER_GET = re.compile(
     r"^(/api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings|hr/stats"
     r"|tours|tours/[^/]+|tours/[^/]+/(coords|best-photos|weather|gpx|hr)|trips/[^/]+|records/altitude|weather/stats)"
     r"|/photo/[^/]+|/pic/[^/]+|/tiles/.+)$")
-OPEN_API = ("/api/version", "/api/me", "/api/login", "/api/logout", "/api/setup", "/api/zepp-token", "/api/forgot", "/api/reset")
+# Ohne Anmeldung nur diese Pfade – exakt verglichen (ein Präfix würde auch /api/me/2fa/… oder /api/zepp-token/test öffnen).
+# /api/reset/<Token> (Passwort-Link) ist der einzige offene Unterpfad.
+OPEN_API = frozenset(("/api/version", "/api/me", "/api/login", "/api/login/2fa", "/api/logout", "/api/setup", "/api/zepp-token", "/api/forgot", "/api/reset"))
+
+
+def _open_api(path):
+    return path in OPEN_API or path.startswith("/api/reset/")
 PROTECTED = ("/api/", "/photo/", "/sphoto/", "/pic/", "/spic/")
 
 
@@ -95,7 +102,7 @@ async def auth_mw(request: Request, call_next):
     elif u:
         request.state.user = u
         ctx._uid.set(u["uid"])
-    elif path.startswith(PROTECTED) and not path.startswith(OPEN_API) and not public:
+    elif path.startswith(PROTECTED) and not _open_api(path) and not public:
         return JSONResponse({"detail": "Bitte anmelden"}, status_code=401)
     return await call_next(request)
 
@@ -204,7 +211,7 @@ def _token_page(msg, ok):
     color = "#2f6b4f" if ok else "#c0392b"
     return HTMLResponse(f"""<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
 <title>Zepp-Token</title><body style="font:16px system-ui;max-width:560px;margin:12vh auto;padding:0 16px">
-<h2 style="color:{color}">{msg}</h2><p><a href="/#cfg">Zurück zu Meine Touren</a></p></body>""")
+<h2 style="color:{color}">{html.escape(str(msg))}</h2><p><a href="/#cfg">Zurück zu Meine Touren</a></p></body>""")
 
 
 @app.post("/api/zepp-token")
@@ -218,8 +225,11 @@ async def zepp_token_form(request: Request):
     if auth.users_exist() and not request.state.user:
         # Lesezeichen kommt von einer fremden Seite (ohne Anmelde-Cookie): Benutzerschlüssel prüfen
         u, k = str(form.get("u", "")), str(form.get("k", ""))
-        with ctx.as_user(u):
-            good = bool(k) and hmac.compare_digest(db.get("zepp_key") or "x", k)
+        # u erst gegen Format und Benutzertabelle prüfen, bevor irgendeine Datenbank geöffnet wird (db.get legt sonst Ordner/Datei an)
+        good = False
+        if re.fullmatch(r"[a-z0-9_-]{1,30}", u) and auth.q1("SELECT 1 x FROM users WHERE uid=? AND active=1", (u,)):
+            with ctx.as_user(u):
+                good = bool(k) and hmac.compare_digest(db.get("zepp_key") or "x", k)
         if not good:
             return _token_page("Das Lesezeichen ist ungültig oder abgelaufen – bitte in der Verwaltung neu anlegen.", False)
         ctx._uid.set(u)
@@ -379,7 +389,10 @@ def api_diag_coords():
     if not t:
         raise HTTPException(400, "Noch keine Touren geladen")
     k = sync._komoot()
-    items = k.coordinates(t["id"])
+    try:
+        items = k.coordinates(t["id"])
+    except Exception as e:  # noqa
+        raise HTTPException(502, str(e))
     return {"tour": t["id"], "punkte": len(items)}
 
 

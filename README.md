@@ -377,6 +377,10 @@ Die Verwaltung zeigt oben eine Zustandsprüfung (Komoot-Zugang, Backup, Datenban
 
 Komoot-Passwort, Strava- und Zepp-Zugangsdaten liegen verschlüsselt (AES-256-GCM) in der Datenbank. Der Schlüssel steht in `<Datenordner>/secret.key` (wird beim ersten Start angelegt, nur für den Dienstbenutzer lesbar) oder – wenn gesetzt – in der Umgebungsvariable `MT_SECRET_KEY`. Die Schlüsseldatei ist absichtlich **nicht** Teil der Sicherungen. Wer eine Sicherung auf einem neuen Rechner einspielt, kopiert `secret.key` mit oder gibt die Zugangsdaten danach in der Verwaltung neu ein. Vorhandene Klartext-Einträge älterer Versionen werden beim ersten Lesen automatisch verschlüsselt.
 
+### Hinter einem Reverse-Proxy (`TRUST_PROXY`)
+
+Die Anmeldesperre (nach sechs Fehlversuchen) und die Drosselung arbeiten je Name und Client-Adresse. Läuft die App hinter Nginx, Caddy, Traefik, Docker oder Tailscale Serve, sieht sie sonst bei allen dieselbe Adresse. Mit der Umgebungsvariable `TRUST_PROXY=1` wird der letzte Eintrag des Headers `X-Forwarded-For` verwendet. Standard ist **aus**; nur setzen, wenn die App ausschließlich über den eigenen Proxy erreichbar ist, der den Header selbst setzt.
+
 ### Eigener BRouter-Server (Routenplanung ohne brouter.de)
 
 Auf dem Server (Debian/Ubuntu, z. B. dem Proxmox-Container) als root:
