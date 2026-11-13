@@ -6,6 +6,16 @@ set -euo pipefail
 if [ -d /opt/komoot-hub ] && [ ! -d /opt/meine-touren ]; then NAME=komoot-hub; SVCUSER=komoot; else NAME=meine-touren; SVCUSER=touren; fi
 APP=/opt/$NAME; DATA=/var/lib/$NAME; ENVF=/etc/$NAME.env; BACKUPS=/var/backups/$NAME
 F="${1:-}"; [ -f "$F" ] || { echo "Aufruf: $0 <backup.zip>"; ls -1 "$BACKUPS" 2>/dev/null | tail -5; exit 1; }
+# Umzugspaket (komplette Sicherung: alle Benutzer, Fotos, Strecken, Schlüssel): ersetzt den ganzen Datenordner
+if python3 -c "import sys,zipfile; sys.exit(0 if 'UMZUG.txt' in zipfile.ZipFile(sys.argv[1]).namelist() else 1)" "$F"; then
+  systemctl stop "$NAME" 2>/dev/null || true
+  python3 "$APP/app/umzug.py" restore "$F" "$DATA"
+  chown -R "$SVCUSER:$SVCUSER" "$DATA"
+  systemctl start "$NAME"
+  echo "Umzugspaket wiederhergestellt nach $DATA."
+  echo "Noch von Hand: /etc/$NAME.env vom alten Server übernehmen (Einstellungen des Dienstes, ggf. MT_SECRET_KEY, UI_PASSWORD), dann: systemctl restart $NAME"
+  exit 0
+fi
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 python3 - "$F" "$T" <<'PY'
 import sys, zipfile

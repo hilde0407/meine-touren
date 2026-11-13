@@ -10,9 +10,11 @@ import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi.responses import FileResponse
 
-from . import config, ctx, db, routes
+from . import config, ctx, db, jobs, routes
+from .jobs import log
 from .gpxtools import TZ
 
 router = APIRouter()
@@ -73,6 +75,43 @@ def api_backup_now():
 def api_backup():
     name, data = make_backup(strip_secrets=True)
     return Response(data, media_type="application/zip", headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
+
+# ---------- Umzugspaket (komplette Sicherung für einen neuen Server) ----------
+def _admin_only(request: Request):
+    u = getattr(request.state, "user", None)
+    if u and u["role"] != "admin":
+        raise HTTPException(403, "Nur für Administratoren")
+
+
+def _umzug_dir():
+    return config.BACKUP_ROOT / "umzug"
+
+
+@router.post("/api/backup/full")
+def api_backup_full(request: Request):
+    """Umzugspaket im Hintergrund erstellen (Datenbanken, Fotos, Strecken, Schlüssel – der gesamte Datenordner)."""
+    _admin_only(request)
+    from . import umzug
+    if not jobs.start("Umzugspaket erstellen", lambda: log(f"Umzugspaket: {umzug.make(config.DATA_DIR, _umzug_dir(), config.VERSION)}")):
+        raise HTTPException(409, "Es läuft bereits ein Job")
+    return {"started": True}
+
+
+@router.get("/api/backup/full")
+def api_backup_full_list(request: Request):
+    _admin_only(request)
+    d = _umzug_dir()
+    return [{"name": f.name, "size": f.stat().st_size, "ts": int(f.stat().st_mtime)} for f in sorted(d.glob("meine-touren-umzug-*.zip"), reverse=True)] if d.is_dir() else []
+
+
+@router.get("/api/backup/full/{name}")
+def api_backup_full_get(name: str, request: Request):
+    _admin_only(request)
+    f = _umzug_dir() / Path(name).name
+    if not re.fullmatch(r"meine-touren-umzug-[0-9_-]+\.zip", f.name) or not f.is_file():
+        raise HTTPException(404)
+    return FileResponse(f, media_type="application/zip", filename=f.name)
 
 
 # ---------- Notizen ----------

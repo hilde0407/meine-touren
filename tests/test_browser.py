@@ -742,6 +742,20 @@ def test_share_send_button(page):
     page.set_viewport_size({"width": 1280, "height": 900})
 
 
+def test_links_overview(page):
+    """Übersicht „Freigegebene Links“: Links erscheinen mit Tourname, Laufzeit lässt sich ändern, Widerruf entfernt sie."""
+    base = page.url.split("#")[0]
+    page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
+    page.evaluate("async () => { const id = TOURS[0].id; for (const b of [{days: 7}, {show: true}]) await api('/api/tours/' + id + '/share', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(b)}); }")
+    page.goto(base + "#/links"); page.wait_for_selector("[data-rv]", timeout=8000)
+    assert page.locator("[data-rv]").count() >= 2 and "Diashow" in page.inner_text("#lkb")
+    page.locator("[data-d]").first.select_option("0"); page.wait_for_selector("text=unbegrenzt gültig")
+    n = page.locator("[data-rv]").count()
+    page.once("dialog", lambda d: d.accept())
+    page.locator("[data-rv]").first.click(); page.wait_for_function("n => document.querySelectorAll('[data-rv]').length === n - 1", arg=n, timeout=8000)
+    page.goto(base + "#/admin"); page.wait_for_selector("#lklink", timeout=8000)
+
+
 def test_share_slideshow_button(page):
     """„Diashow senden“ erzeugt einen Diashow-Link; die öffentliche Seite zeigt Titel, Bedienelemente und lädt ohne Konto."""
     base = page.url.split("#")[0]

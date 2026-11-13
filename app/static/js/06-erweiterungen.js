@@ -458,11 +458,15 @@ VIEWS.admin = async (...a) => {
       if (b) b.remove();
     });
   updatePanel();
+  setTimeout(umzugInit, 0);
   sv.closest(".row").insertAdjacentHTML(
     "beforebegin",
     `<div class="grid g2 mt40"><div class="panel"><h2>Sicherung</h2>
    <p class="mut">Täglich um 03:40 Uhr wird die Datenbank (Touren, Notizen, Ziele, Zuordnungen) automatisch nach <code>${esc(st.backup_dir || "/var/backups/meine-touren")}</code> gesichert, die letzten 14 bleiben erhalten. Wiederherstellen: <code>${esc(st.app_name || "meine-touren")}-restore &lt;Datei&gt;</code> im Container.</p>
-   <div class="row"><a class="btn alt" href="/api/backup" download>Backup jetzt herunterladen</a></div><p class="mut fs13">Passwörter und Tokens sind im Download nicht enthalten. Fotos und Routen sind nicht enthalten, sie lassen sich neu laden.</p></div>
+   <div class="row"><a class="btn alt" href="/api/backup" download>Backup jetzt herunterladen</a></div><p class="mut fs13">Passwörter und Tokens sind im Download nicht enthalten. Fotos und Routen sind nicht enthalten.</p>
+   <h3 class="mt16">Umzug auf einen neuen Server</h3>
+   <p class="mut">Das <b>Umzugspaket</b> enthält alles: alle Benutzer, Touren mit Notizen und Kommentaren, Freigabelinks, Fotos, Strecken samt Original-Höhen, gespeicherte Zugangsdaten samt Schlüssel. Auf dem neuen Server zuerst installieren, dann <code>${esc(st.app_name || "meine-touren")}-restore &lt;Paket&gt;</code> – danach läuft alles wie vorher. Das Paket enthält Passwörter und Schlüssel: gut aufbewahren. Es kann groß werden (Fotos).</p>
+   <div class="row"><button class="btn" id="umzmk">Umzugspaket erstellen</button><span id="umzst" class="mut"></span></div><div id="umzls" class="mt8"></div></div>
    <div class="panel" id="uipw"><h2>Zugriffsschutz</h2>${
      st.users
        ? `<p class="mut">Mit Benutzerverwaltung melden sich alle mit ihrem eigenen Benutzernamen und Passwort an (siehe „Benutzer“).</p>`
@@ -628,3 +632,26 @@ assignDialog = (sp, done) => {
       }
     });
 };
+
+
+/* Umzugspaket (komplette Sicherung): erstellen, auflisten, herunterladen */
+async function umzugInit() {
+  const mk = $("#umzmk"), ls = $("#umzls"), stx = $("#umzst");
+  if (!mk) return;
+  const fmt = n => (n > 1e9 ? (n / 1e9).toFixed(1) + " GB" : (n / 1e6).toFixed(1) + " MB");
+  const list = async () => {
+    const l = await api("/api/backup/full").catch(() => []);
+    ls.innerHTML = l.map(x => `<div class="row g8"><a href="/api/backup/full/${encodeURIComponent(x.name)}" download>${esc(x.name)}</a><small class="mut">${fmt(x.size)} · ${new Date(x.ts * 1000).toLocaleString("de-DE")}</small></div>`).join("") || '<small class="mut">Noch kein Umzugspaket erstellt.</small>';
+  };
+  const poll = async () => {
+    const j = await api("/api/jobs").catch(() => null);
+    if (j && j.running) { stx.textContent = (j.running || "") + " …"; mk.disabled = true; setTimeout(poll, 3000); return; }
+    mk.disabled = false;
+    stx.textContent = j && j.finished && j.ok === false ? "Fehlgeschlagen – siehe Protokoll" : "";
+    list();
+  };
+  mk.onclick = async () => {
+    try { await api("/api/backup/full", {method: "POST"}); stx.textContent = "Wird erstellt …"; mk.disabled = true; setTimeout(poll, 2000); } catch (e) { stx.textContent = e.message; }
+  };
+  list();
+}

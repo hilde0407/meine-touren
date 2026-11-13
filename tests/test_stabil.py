@@ -144,3 +144,79 @@ def test_ip_nur_mit_trust_proxy(monkeypatch):
     assert users_api._ip(Rq()) == "10.0.0.1"
     monkeypatch.setenv("TRUST_PROXY", "1")
     assert users_api._ip(Rq()) == "5.5.5.5"
+
+
+def test_freigaben_uebersicht_verwalten(fresh):
+    """Alle Links an einem Ort: Liste mit Tourname, Laufzeit ändern, Kommentare, Abgelaufene entfernen, Widerruf."""
+    import time
+    from app import db
+    from fastapi.testclient import TestClient
+    from app import main
+    from tests.test_core import gpx
+    c = TestClient(main.app)
+    c.post("/api/share-target", files=[("files", ("Runde.gpx", gpx("Workout--2025-06-01--08-00-00.gpx").encode(), "application/octet-stream"))], follow_redirects=False)
+    tid = db.one("SELECT id FROM tours")["id"]
+    a = c.post(f"/api/tours/{tid}/share", json={"days": 7}).json()["token"]
+    b = c.post(f"/api/tours/{tid}/share", json={"show": True, "comments": True}).json()["token"]
+    lst = c.get("/api/shares").json()
+    assert {x["token"] for x in lst} == {a, b} and all(x["name"] for x in lst)
+    assert next(x for x in lst if x["token"] == b)["comments"] == 1
+    r = c.patch(f"/api/share/{b}", json={"days": 30, "comments": False}).json()
+    assert r["comments"] == 0 and r["exp"] > time.time() + 29 * 86400
+    assert c.patch(f"/api/share/{b}", json={"days": 0}).json()["exp"] is None
+    assert c.patch(f"/api/share/{a}", json={"comments": True}).json()["comments"] == 0       # nur Diashows haben Kommentare
+    assert c.patch(f"/api/share/{b}", json={"days": -1}).status_code == 400 and c.patch("/api/share/gibtsnicht", json={}).status_code == 404
+    db.execute("UPDATE shares SET exp=? WHERE token=?", (int(time.time()) - 5, a))
+    assert c.get(f"/api/public/{a}").status_code in (404, 410)
+    assert c.post("/api/shares/purge-expired").json() == {"removed": 1}
+    assert [x["token"] for x in c.get("/api/shares").json()] == [b]
+    assert c.delete(f"/api/share/{b}").status_code == 200 and c.get("/api/shares").json() == []
+
+
+def test_umzugspaket_komplett(tmp_path):
+    """Umzugspaket: Datenbanken, Fotos, Strecken, Schlüssel sind drin, Vorschaubilder/Kacheln nicht; Wiederherstellen ergibt identische Daten."""
+    import sqlite3
+    import zipfile
+    import pytest
+    from app import umzug
+    src = tmp_path / "alt"
+    (src / "users/u1/photos/2025").mkdir(parents=True); (src / "users/u1/cache/coords").mkdir(parents=True); (src / "users/u1/cache/thumb/ab").mkdir(parents=True)
+    (src / "tilecache").mkdir(); (src / "backups").mkdir()
+    for n in ("users/u1/komoot_hub.sqlite", "system.sqlite"):
+        c = sqlite3.connect(src / n); c.execute("CREATE TABLE tour_notes(id TEXT, note TEXT)"); c.execute("INSERT INTO tour_notes VALUES('a','Notiz äöü')"); c.commit(); c.close()
+    (src / "users/u1/photos/2025/f.jpg").write_bytes(b"\xff\xd8JPEGDATA")
+    (src / "users/u1/cache/coords/a.orig.json").write_text("[1,2]")
+    (src / "users/u1/cache/thumb/ab/t.jpg").write_bytes(b"thumb")
+    (src / "tilecache/k.png").write_bytes(b"tile"); (src / "backups/x.zip").write_bytes(b"old")
+    (src / "secret.key").write_text("geheim"); (src / "ui_password.json").write_text("{}")
+    pkg = umzug.make(src, tmp_path / "out", "t", keep=2)
+    names = set(zipfile.ZipFile(pkg).namelist())
+    assert {"UMZUG.txt", "data/secret.key", "data/system.sqlite", "data/users/u1/komoot_hub.sqlite", "data/users/u1/photos/2025/f.jpg",
+            "data/users/u1/cache/coords/a.orig.json", "data/ui_password.json"} <= names
+    assert not any("thumb" in n or "tilecache" in n or "backups" in n for n in names) and umzug.is_package(pkg)
+    neu = tmp_path / "neu"
+    assert umzug.restore(pkg, neu) == 6
+    assert (neu / "users/u1/photos/2025/f.jpg").read_bytes() == b"\xff\xd8JPEGDATA" and (neu / "secret.key").read_text() == "geheim"
+    assert sqlite3.connect(neu / "users/u1/komoot_hub.sqlite").execute("SELECT note FROM tour_notes").fetchone()[0] == "Notiz äöü"
+    bad = tmp_path / "bad.zip"
+    with zipfile.ZipFile(bad, "w") as z:
+        z.writestr("UMZUG.txt", "x"); z.writestr("data/../../evil.txt", "x")
+    with pytest.raises(RuntimeError):
+        umzug.restore(bad, tmp_path / "ziel")
+    assert not (tmp_path / "evil.txt").exists()
+
+
+def test_umzugspaket_api(fresh):
+    from fastapi.testclient import TestClient
+    from app import main, extras
+    import time
+    c = TestClient(main.app)
+    assert c.post("/api/backup/full").json() == {"started": True}
+    for _ in range(100):
+        if not c.get("/api/jobs").json().get("running"):
+            break
+        time.sleep(0.1)
+    l = c.get("/api/backup/full").json()
+    assert l and l[0]["name"].startswith("meine-touren-umzug-")
+    r = c.get("/api/backup/full/" + l[0]["name"]); assert r.status_code == 200 and r.content[:2] == b"PK"
+    assert c.get("/api/backup/full/..%2Fetc%2Fpasswd").status_code == 404

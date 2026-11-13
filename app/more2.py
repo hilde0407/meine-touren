@@ -403,6 +403,39 @@ def api_share_del(token: str):
     return {"ok": True}
 
 
+@router.get("/api/shares")
+def api_shares_all():
+    """Alle freigegebenen Links (Touren und Diashows) des angemeldeten Benutzers mit Tourname, Laufzeit und Aufrufen."""
+    return db.query("SELECT s.token,s.tour_id,s.photos,s.trim,s.ts,s.exp,s.views,s.best,s.comments,t.name,t.sport,t.start_ts "
+                    "FROM shares s LEFT JOIN tours t ON t.id=s.tour_id ORDER BY s.ts DESC")
+
+
+@router.patch("/api/share/{token}")
+async def api_share_patch(token: str, request: Request):
+    """Laufzeit ändern (days: 0 = unbegrenzt, sonst ab jetzt) und bei Diashows Kommentare erlauben/sperren."""
+    if not db.one("SELECT 1 FROM shares WHERE token=?", (token,)):
+        raise HTTPException(404)
+    d = await request.json()
+    if "days" in d:
+        days = int(d.get("days") or 0)
+        if days < 0 or days > 3650:
+            raise HTTPException(400, "Ungültige Laufzeit")
+        db.execute("UPDATE shares SET exp=? WHERE token=?", (int(time.time()) + days * 86400 if days else None, token))
+    if "comments" in d:
+        db.execute("UPDATE shares SET comments=? WHERE token=? AND photos=2", (1 if d.get("comments") else 0, token))
+    return db.one("SELECT token,exp,comments FROM shares WHERE token=?", (token,))
+
+
+@router.post("/api/shares/purge-expired")
+def api_shares_purge():
+    """Alle abgelaufenen Links entfernen."""
+    rows = db.query("SELECT token FROM shares WHERE exp IS NOT NULL AND exp<?", (int(time.time()),))
+    for r in rows:
+        db.execute("DELETE FROM shares WHERE token=?", (r["token"],))
+        auth.q("DELETE FROM share_index WHERE token=? AND uid=?", (r["token"], ctx.uid() or ""))
+    return {"removed": len(rows)}
+
+
 class ShareGone(HTTPException):
     """Link nicht (mehr) gültig; exp = Ablaufzeit, wenn er abgelaufen ist."""
     def __init__(self, exp=None):
