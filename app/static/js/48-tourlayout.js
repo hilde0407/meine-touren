@@ -1,13 +1,14 @@
-/* =====================  3.15.0: Neue Tourseite – Gliederung, einheitliche Abschnittsköpfe, Sprung-Leiste  =====================
-   Aufbau der Tourseite (von oben): Überblick (Titel, Kennzahlen) · Abschnitts-Leiste · Gruppen
-     Streckenverlauf Karte · Höhenprofil · Wegpunkte
-     Aufzeichnung   je Gerät ein Block (Messwerte · Training laut Uhr · Puls), danach Wetter
+/* =====================  3.15.0 Neue Tourseite · 3.16.0 Tourseite schlanker, Auswertung als Unterseite  =====================
+   Hauptseite #/tour/<id> (von oben): Überblick (Titel, Kennzahlen) · Streckenverlauf (Karte · Höhenprofil · Puls · Wegpunkte) · Einstieg „Detaillierte Auswertung“ · Fotos
+   Unterseite #/tour/<id>/auswertung (VIEWS.tourauswertung in 03-tour.js): Abschnitts-Leiste · Gruppen
+     Aufzeichnung   je Gerät ein Block (Messwerte · Training laut Uhr), danach Wetter
      Auswertung dieser Tour  Analyse · Tempo nach Steigung · Ähnliche Touren im Vergleich · Vergleich dieser Strecke
-     Fotos & Notizen
    Alle Abschnitte sind <details> mit gleichem Kopf (Symbol, Titel, Kurzaussage – auch zugeklappt sichtbar). Offen/zu merkt sich localStorage
-   unter „mt_trf_<Schlüssel>“ (wie die einklappbaren Abschnitte seit 3.12.0). Die Module 36/38/43/45/46/47/08 legen ihre Karten mit tlCard() an und hängen sie
-   irgendwo auf der Seite ein; tlArrange() sortiert sie – auch wenn sie erst später (nach dem Laden der Daten) erscheinen – an ihren Platz.
-   Gehört eine Karte zu einem Gerät (tlDev), bekommt jedes verschiedene Gerät einen eigenen Block; ohne oder mit einem Gerät gibt es keine Zwischenüberschrift. */
+   unter „mt_trf_<Schlüssel>“ (wie die einklappbaren Abschnitte seit 3.12.0). Die Module 36/38/43/45/46/47/08/26 legen ihre Karten mit tlCard() an und hängen sie
+   an tlAnc(); tlArrange() sortiert sie – auch wenn sie erst später (nach dem Laden der Daten) erscheinen – an ihren Platz.
+   Auf der Hauptseite werden die Detail-Karten (Messwerte, Training laut Uhr, Analyse, Tempo, Ähnliche, Vergleich, Wetter) nicht gezeigt: tlArrange() nimmt sie sofort wieder heraus
+   und merkt sich nur ihre Kurzaussage (TL_SUM) für den Einstieg. Gehört eine Karte zu einem Gerät (tlDev), bekommt auf der Unterseite jedes verschiedene Gerät einen eigenen Block;
+   ohne oder mit einem Gerät gibt es keine Zwischenüberschrift. */
 const TL_ICON = {
   map: '<path d="M3 6.5l6-2.5 6 2.5 6-2.5v13.5l-6 2.5-6-2.5-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
   prof: '<path d="M3 19h18"/><path d="M3 15l5-7 4 5 3-3 6 5"/>',
@@ -66,16 +67,17 @@ function tlDev(w, dv, name) {
 }
 
 const TL_CHIPS = [
-  ["map", "Karte", ["map"]],
-  ["prof", "Höhe", ["prof"]],
-  ["wp", "Wegpunkte", ["wp"]],
-  ["dev", "Gerät & Messwerte", ["met", "uhr", "puls"]],
+  ["dev", "Gerät & Messwerte", ["met", "uhr"]],
   ["wx", "Wetter", ["wx"]],
   ["ana", "Analyse", ["ana", "steig"]],
   ["cmp", "Vergleich", ["aehn", "cmp"]],
-  ["photos", "Fotos", ["photos"]],
-  ["notes", "Notizen", ["notes"]],
 ];
+/* Detail-Karten (Kennung → Abschnitt), die nur auf der Unterseite stehen */
+const TL_DET = [["metcard", "met"], ["uhrcard", "uhr"], ["steigcard", "steig"], ["aehncard", "aehn"], ["anacard", "ana"], ["cmpseg", "cmp"]];
+/* Reihenfolge der Kernaussagen im Einstieg (die ersten drei mit Aussage) */
+const TL_SUMPRIO = ["uhr", "ana", "steig", "wx", "aehn", "cmp", "met"];
+const TL_SUMORDER = ["met", "uhr", "wx", "ana", "steig", "aehn", "cmp"];
+let TL_SUM = {};
 /* Die Kennung „tl“ gibt es auch in anderen Ansichten (Tourenliste): nur unser Container zählt */
 const tlRoot = () => {
   const r = document.getElementById("tl");
@@ -115,13 +117,74 @@ function tlDevHead(key, name) {
 function tlArrange() {
   const root = tlRoot();
   if (!root) return false;
-  const gb = n => document.getElementById("tlgb-" + n),
-    t = BY[root.dataset.tid];
+  const gb = n => document.getElementById("tlgb-" + n);
+  if (root.classList.contains("tlsub")) tlArrangeSub(root, gb);
+  else tlArrangeMain(root, gb);
+  // ---- Gruppen ohne Inhalt ausblenden
+  root.querySelectorAll(".tlg:not(.tlsumg)").forEach(g => {
+    const any = [...g.querySelectorAll("details.tls")].some(d => !d.hidden);
+    if (g.hidden === any) g.hidden = !any;
+  });
+  tlNav();
+  return true;
+}
+
+/* Hauptseite: Strecke, Einstieg, Fotos; Detail-Karten werden herausgenommen und nur als Kurzaussage gemerkt */
+function tlArrangeMain(root, gb) {
+  const t = BY[root.dataset.tid];
+  // ---- Detail-Karten und Wetter: nicht hier, nur die Kurzaussage merken
+  TL_DET.forEach(([id, sec]) => {
+    const el = document.getElementById(id);
+    if (!el || el.closest(".tlsub")) return;
+    const ti = el.querySelector(".tlt"),
+      k = el.querySelector(".tlk");
+    TL_SUM[sec] = {title: ti ? ti.textContent : "", badge: k ? k.innerHTML : ""};
+    el.remove();
+  });
+  const wx = document.querySelector("#main .figs + .wx");
+  if (wx) {
+    TL_SUM.wx = {title: "Wetter", badge: esc(wx.textContent.split(" · ").slice(0, 2).join(" · "))};
+    wx.remove();
+  }
+  const dr = document.getElementById("devrow");
+  if (dr) dr.remove();
   // ---- Strecke
-  const wp = document.getElementById("wpcard");
-  tlPlace(gb("route"), [tlSec("map"), tlSec("prof"), wp]);
+  tlPlace(gb("route"), [tlSec("map"), tlSec("prof"), document.getElementById("pulscard"), document.getElementById("wpcard")]);
   const pc = document.getElementById("profcard");
   if (tlSec("prof")) tlSec("prof").hidden = !pc || pc.style.display === "none";
+  // ---- Einstieg in die Unterseite
+  tlSumDraw(root, t);
+  // ---- Fotos (Bewertung, Notiz, Ausrüstung und Sicherheitsnotiz stehen wie in 3.14.0 oben im Kopf der Seite und werden hier nicht umgesetzt)
+  tlPlace(gb("more"), [tlSec("photos")]);
+}
+
+/* Einstieg „Detaillierte Auswertung ansehen ›“ mit zwei bis drei Kernaussagen – nur, wenn es überhaupt Auswertungsdaten gibt */
+function tlSumDraw(root, t) {
+  const g = document.getElementById("tlg-sum"),
+    box = document.getElementById("tlgb-sum");
+  if (!g || !box || !t) return;
+  const have = TL_SUMORDER.filter(k => TL_SUM[k]),
+    rows = TL_SUMPRIO.filter(k => TL_SUM[k] && TL_SUM[k].badge.trim()).slice(0, 3),
+    sig = have.join(".") + "|" + rows.map(k => k + TL_SUM[k].badge).join("|");
+  if (g.hidden === !have.length && box.dataset.sig === sig) return;
+  g.hidden = !have.length;
+  if (box.dataset.sig === sig) return;
+  box.dataset.sig = sig;
+  if (!have.length) {
+    box.innerHTML = "";
+    return;
+  }
+  if (!document.getElementById("tlsum"))                                     // Der Link bleibt stehen (kein Neuaufbau, wenn weitere Kurzaussagen eintreffen)
+    box.innerHTML = `<div class="tlsum" id="tlsum"><ul class="tlsrows"></ul><p class="tlsin"></p><a class="btn tlsgo" id="tlsgo" href="#/tour/${esc(String(t.id))}/auswertung">Detaillierte Auswertung ansehen ›</a></div>`;
+  const ul = box.querySelector(".tlsrows");
+  ul.hidden = !rows.length;
+  ul.innerHTML = rows.map(k => `<li>${tlIcon(TL_ICONOF[k])}<span class="tlsn">${esc(TL_SUM[k].title)}</span><span class="tlsv">${TL_SUM[k].badge}</span></li>`).join("");
+  box.querySelector(".tlsin").innerHTML = `<span>Enthält:</span> ${have.map(k => esc(TL_SUM[k].title)).join(" · ")}`;
+}
+const TL_ICONOF = {met: "met", uhr: "watch", wx: "cloud", ana: "trend", steig: "trend", aehn: "cmp", cmp: "cmp"};
+
+/* Unterseite: Aufzeichnung (Blöcke je Gerät, Wetter) und Auswertung */
+function tlArrangeSub(root, gb) {
   // ---- Aufzeichnung: Blöcke je Gerät
   const rec = gb("rec"),
     dr = document.getElementById("devrow");
@@ -130,7 +193,7 @@ function tlArrange() {
     rec.insertAdjacentHTML("afterbegin", '<div id="tlrec" class="tlrec"></div>');
     host = document.getElementById("tlrec");
   }
-  const cards = [["met", "metcard"], ["uhr", "uhrcard"], ["puls", "pulscard"]].map(([k, id]) => [k, document.getElementById(id)]).filter(x => x[1]),
+  const cards = [["met", "metcard"], ["uhr", "uhrcard"]].map(([k, id]) => [k, document.getElementById(id)]).filter(x => x[1]),
     strong = [];
   cards.forEach(([, el]) => el.dataset.tlkey && !strong.includes(el.dataset.tlkey) && strong.push(el.dataset.tlkey));
   if (dr && strong.includes(dr.dataset.tlkey)) strong.splice(0, strong.length, dr.dataset.tlkey, ...strong.filter(x => x !== dr.dataset.tlkey));
@@ -172,29 +235,15 @@ function tlArrange() {
   // ---- Auswertung
   const ev = [document.getElementById("anacard"), document.getElementById("steigcard"), document.getElementById("aehncard"), document.getElementById("cmpseg")];
   tlPlace(gb("eval"), ev);
-  // ---- Fotos und Notizen
-  const nt = [document.getElementById("starrow"), document.querySelector("#note") && document.querySelector("#note").closest(".field"), document.getElementById("gearrow"), document.getElementById("safety")];
-  if (nt.some(Boolean)) {
-    const s = tlLazy("notes", {key: "tl_notes", icon: "note", title: "Notizen & Ausrüstung", def: true, bodyCls: "tlnotes"}, gb("more"));
-    tlPlace(s.querySelector(".tlsb"), nt);
-    const st = t && t.stars ? "★".repeat(t.stars) : "",
-      src = [st, t && t.note ? "Notiz" : ""].filter(Boolean).join(" · ");
-    tlSetBadge(s, src);
-  }
-  tlPlace(gb("more"), [tlSec("photos"), tlSec("notes")]);
-  // ---- Gruppen ohne Inhalt ausblenden
-  root.querySelectorAll(".tlg").forEach(g => {
-    const any = [...g.querySelectorAll("details.tls")].some(d => !d.hidden);
-    if (g.hidden === any) g.hidden = !any;
-  });
-  tlNav();
-  return true;
 }
 
 /* Abschnitts-Leiste: nur Sprung-Chips für Abschnitte, die es auf dieser Tour gibt */
 function tlNav() {
   const nav = document.getElementById("tlnav");
-  if (!nav) return;
+  if (!nav) {
+    document.documentElement.style.setProperty("--tlnavh", "0px");
+    return;
+  }
   const list = TL_CHIPS.map(([k, label, ids]) => [k, label, ids.filter(i => tlVis(tlSec(i)))]).filter(c => c[2].length),
     sig = list.map(c => c[0] + ":" + c[2].join(".")).join("|");
   nav.hidden = list.length < 2;
@@ -288,7 +337,14 @@ window.tlRefresh = () => {
 };
 const _tour48 = VIEWS.tour;
 VIEWS.tour = async (...a) => {
+  TL_SUM = {};
   tlWatch();
   await _tour48(...a);
+  tlRefresh();
+};
+const _aus48 = VIEWS.tourauswertung;
+VIEWS.tourauswertung = async (...a) => {
+  tlWatch();
+  await _aus48(...a);
   tlRefresh();
 };

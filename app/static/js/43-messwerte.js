@@ -63,7 +63,7 @@ const MET_SUM = [["kcal", "Kalorien", "kcal", 0], ["te", "Trainingseffekt aerob"
 async function metCard(t) {
   const old = $("#metcard");
   if (old) old.remove();
-  const anchor = $("#pulscard") || $("#profcard");
+  const anchor = $("#pulscard") || tlAnc();
   if (!anchor || !t) return;
   const m = await metData(t.id);
   if (!m || $("#metcard")) return;
@@ -75,7 +75,7 @@ async function metCard(t) {
   const d = tlCard("metcard", {sec: "met", key: "tl_met", icon: "met", title: "Messwerte", def: true}),
     body = tlBody(d);
   tlDev(d, m.device, m.source);
-  (($("#pulscard") || $("#profcard")).after(d));
+  (($("#pulscard") || tlAnc()).after(d));
   const draw = () => {
     tlSetBadge(d, esc(keys.slice(0, 3).map(k => m.channels[k].label).join(", ") + (keys.length > 3 ? " +" + (keys.length - 3) : "")) || esc(sums.map(s => s[1]).join(", ")));
     if (!show) {
@@ -142,7 +142,7 @@ const dvMonth = d => (d && /^\d{4}-\d\d/.test(d) ? d.slice(5, 7) + "/" + d.slice
 
 /* Zeile „Quelle: …“ auf der Tourseite (mit Auswahl, falls die automatische Zuordnung nicht stimmt) */
 async function metDevRow(t) {
-  const anchor = $("#ewarn");
+  const anchor = $("#ewarn") || $("#tlsubanc");
   if (!t || !anchor) return;
   const draw = async () => {
     const [m, dv] = await Promise.all([metData(t.id, true), api("/api/my-devices").catch(() => ({devices: []}))]);
@@ -185,7 +185,7 @@ async function metDevRow(t) {
       };
     };
   };
-  draw().catch(() => {});
+  return draw().catch(() => {});
 }
 const devKindLabel = (dv, k) => ((dv.kinds || []).find(x => x.kind === k) || {label: k}).label;
 
@@ -195,10 +195,13 @@ VIEWS.tour = async (...a) => {
   const t = BY[a[0]];
   if (!t) return;
   MET_CACHE.delete(t.id);
-  metDevRow(t);
-  const tryCard = (n = 0) => {
+  const tryCard = (n = 0) => {                      // Hauptseite: nur für die Kurzaussage im Einstieg (48-tourlayout.js nimmt die Karte wieder heraus)
     if ($("#profcard")) metCard(t).catch(() => {});
     else if (n < 20) setTimeout(() => tryCard(n + 1), 150);
   };
   tryCard();
 };
+tlOnSub(t => {
+  MET_CACHE.delete(t.id);
+  return Promise.all([metDevRow(t), metCard(t).catch(() => {})]);
+});

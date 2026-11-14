@@ -229,7 +229,7 @@ def test_garmin_device_has_no_zepp_part(pw, apps):
 
 def test_tour_page_link_opens_tour_dialog(pw, apps):
     tid = f"z{T0 + 10}"
-    pg = _page(pw, apps["zepp"], path=f"#/tour/{tid}", wait="#metcard")
+    pg = _page(pw, apps["zepp"], path=f"#/tour/{tid}/auswertung", wait="#metcard")
     try:
         assert pg.locator("#dvulink").inner_text() == "Alle Felder dieser Tour"
         pg.click("#dvulink")
@@ -300,7 +300,7 @@ def test_mobile_390_no_horizontal_scroll(pw, apps):
     finally:
         pg.browser_.close()
     tid = f"z{T0 + 10}"
-    pg = _page(pw, apps["zepp"], width=390, height=844, dpr=2, path=f"#/tour/{tid}", wait="#metcard")
+    pg = _page(pw, apps["zepp"], width=390, height=844, dpr=2, path=f"#/tour/{tid}/auswertung", wait="#metcard")
     try:
         assert pg.evaluate("document.documentElement.scrollWidth") <= 391
         pg.locator("#dvulink").scroll_into_view_if_needed()

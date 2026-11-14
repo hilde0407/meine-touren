@@ -143,7 +143,7 @@ CONTRAST = """() => {
 
 
 def test_card_collapsed_by_default_with_key_statement_and_state_is_remembered(pw, apps):
-    pg = _page(pw, apps["full"], "tour/r5", "#aehncard")
+    pg = _page(pw, apps["full"], "tour/r5/auswertung", "#aehncard")
     try:
         d = pg.locator("#aehncard details")
         assert d.count() == 1 and not d.evaluate("e => e.open")
@@ -166,7 +166,7 @@ def test_card_collapsed_by_default_with_key_statement_and_state_is_remembered(pw
 
 
 def test_rows_values_deviation_chart_and_links(pw, apps):
-    pg = _page(pw, apps["full"], "tour/r4", "#aehncard", dpr=2)
+    pg = _page(pw, apps["full"], "tour/r4/auswertung", "#aehncard", dpr=2)
     try:
         _open(pg)
         assert pg.locator("#aehncard .aer").count() == 7 and pg.locator("#aehncard .aer.cur").count() == 1
@@ -189,9 +189,9 @@ def test_rows_values_deviation_chart_and_links(pw, apps):
         for bad in ("NaN", "undefined", "null", "Infinity"):
             assert bad not in t and bad not in pg.locator("#aehncard svg.aesvg").inner_html(), bad
         href = pg.locator("#aehncard .aer a").first.get_attribute("href")
-        assert href.startswith("#/tour/r")
+        assert href.startswith("#/tour/r") and href.endswith("/auswertung")
         pg.locator("#aehncard .aer a").first.click()
-        pg.wait_for_function("() => location.hash !== '#/tour/r4'")
+        pg.wait_for_function("() => location.hash !== '#/tour/r4/auswertung'")
         pg.wait_for_selector("#aehncard .aer.cur")
         assert pg.locator("#aehncard .aer.cur").count() == 1 and pg.locator("#aehncard .aer.cur a").count() == 0
         assert not pg.errors, pg.errors
@@ -200,24 +200,24 @@ def test_rows_values_deviation_chart_and_links(pw, apps):
 
 
 def test_key_statement_faster_than_some(pw, apps):
-    pg = _page(pw, apps["full"], "tour/r6", "#aehncard")
+    pg = _page(pw, apps["full"], "tour/r6/auswertung", "#aehncard")
     try:
         assert "Schneller als 3 von 5 früheren Läufen" in pg.locator("#aehncard summary").inner_text()
         pg.locator("#aehncard summary").click()
-        assert "Schnellster Lauf" in pg.locator("#aehncard .aer", has_text="05.10.2026").inner_text()
+        assert pg.locator("#aehncard .aer", has_text="Schnellster Lauf").count() == 1        # (kein festes Datum: die Daten sind relativ zu „heute“)
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
 
 
 def test_key_statement_first_run_and_missing_time_of_current(pw, apps):
-    pg = _page(pw, apps["full"], "tour/r0", "#aehncard")
+    pg = _page(pw, apps["full"], "tour/r0/auswertung", "#aehncard")
     try:
         assert "Erster Lauf dieser Strecke" in pg.locator("#aehncard summary").inner_text()
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
-    pg = _page(pw, apps["full"], "tour/r3", "#aehncard")
+    pg = _page(pw, apps["full"], "tour/r3/auswertung", "#aehncard")
     try:
         assert "6 Wiederholungen" in pg.locator("#aehncard summary").inner_text() and "Tempo" not in pg.locator("#aehncard summary").inner_text()
         pg.locator("#aehncard summary").click()
@@ -237,7 +237,7 @@ def test_absent_without_repeat(pw, apps):
 
 
 def test_english_translation(pw, apps):
-    pg = _page(pw, apps["full"], "tour/r4", "#aehncard", locale="en-US")
+    pg = _page(pw, apps["full"], "tour/r4/auswertung", "#aehncard", locale="en-US")
     try:
         _open(pg)
         t = pg.locator("#aehncard").inner_text()
@@ -251,7 +251,7 @@ def test_english_translation(pw, apps):
 
 @pytest.mark.parametrize("loc,word", [("fr-FR", "Parcours similaires comparés"), ("es-ES", "Rutas similares comparadas")])
 def test_french_spanish_translation(pw, apps, loc, word):
-    pg = _page(pw, apps["full"], "tour/r4", "#aehncard", locale=loc)
+    pg = _page(pw, apps["full"], "tour/r4/auswertung", "#aehncard", locale=loc)
     try:
         _open(pg)
         t = pg.locator("#aehncard").inner_text()
@@ -263,7 +263,7 @@ def test_french_spanish_translation(pw, apps, loc, word):
 
 @pytest.mark.parametrize("scheme", ["light", "dark"])
 def test_contrast_in_light_and_dark(pw, apps, scheme):
-    pg = _page(pw, apps["full"], "tour/r4", "#aehncard", scheme=scheme, dpr=2)
+    pg = _page(pw, apps["full"], "tour/r4/auswertung", "#aehncard", scheme=scheme, dpr=2)
     try:
         _open(pg)
         c = pg.evaluate(CONTRAST)
@@ -278,7 +278,7 @@ def test_contrast_in_light_and_dark(pw, apps, scheme):
 
 @pytest.mark.parametrize("scheme", ["light", "dark"])
 def test_mobile_390_no_horizontal_scroll(pw, apps, scheme):
-    pg = _page(pw, apps["full"], "tour/r4", "#aehncard", width=390, height=844, scheme=scheme, dpr=2)
+    pg = _page(pw, apps["full"], "tour/r4/auswertung", "#aehncard", width=390, height=844, scheme=scheme, dpr=2)
     try:
         _open(pg)
         pg.wait_for_timeout(300)

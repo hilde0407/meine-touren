@@ -969,3 +969,36 @@ details.tls[open]>summary{border-bottom:1px solid var(--rule);border-radius:var(
 }
 @media (prefers-reduced-motion:reduce){details.tls>summary::before{transition:none}}
 @media print{.tlnav{display:none!important}}
+
+/* =====================  3.16.0: Tourseite schlanker – Einstieg „Detaillierte Auswertung“ und Unterseite  ===================== */
+.tlsum{position:relative;display:flex;flex-direction:column;gap:12px;padding:16px 18px 18px;background:var(--card);border:1px solid var(--rule);border-left:5px solid var(--bars);border-radius:var(--r-l);min-width:0}
+.tlsum:hover{border-color:var(--ink);border-left-color:var(--bars)}
+.tlsum:has(.tlsgo:focus-visible){outline:3px solid var(--ink);outline-offset:2px}
+.tlsrows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tlsrows li{display:grid;grid-template-columns:22px minmax(130px,200px) minmax(0,1fr);align-items:center;gap:4px 12px}
+.tlsn{font:600 16px var(--d);color:var(--ink)}
+.tlsv{font:500 16px var(--b);color:var(--ink);min-width:0}
+.tlsv b{font-variant-numeric:tabular-nums}
+.tlsin{margin:0;color:var(--mut);font-size:15px}
+.tlsgo{align-self:flex-start;font-size:18px;padding:10px 22px}
+.tlsgo::after{content:"";position:absolute;inset:0;border-radius:var(--r-l)}
+.tlsgo:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.tlsubhead{margin:14px 0 0}
+.tlsubeb{display:inline-block;font:600 14px var(--d);letter-spacing:.6px;text-transform:uppercase;color:var(--mut)}
+.tlsubt{font:700 34px/1.1 var(--d);margin:4px 0 8px;overflow-wrap:anywhere}
+.tlsubfig{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin:0;font-size:16px;color:var(--mut)}
+.tlsubfig .tag{font-size:14px}
+.tlload{margin:26px 0 0}
+.tlload[hidden],.tlempty[hidden]{display:none}
+.tlempty{padding:46px 10px}
+.tlsub{margin-top:8px}
+@media (max-width:700px){
+  .tlsrows li{grid-template-columns:22px minmax(0,1fr)}
+  .tlsrows .tlsv{grid-column:2}
+  .tlsum{padding:14px 14px 16px}
+  .tlsgo{align-self:stretch;text-align:center}
+  .tlsubt{font-size:26px}
+}
+.tlsrows[hidden]{display:none}
+.tlsgo:hover,.tlsum:hover .tlsgo{filter:none}
+.tlsum:hover .tlsgo{background:color-mix(in srgb,var(--yellow) 88%,#fff)}

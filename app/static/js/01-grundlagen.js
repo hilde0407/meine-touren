@@ -244,8 +244,9 @@ const years = () => [...new Set(TOURS.map(t => t.y))].sort((a, b) => b - a);
 /* ---------- Router ---------- */
 async function route() {
   const [path, qs] = (location.hash || "#/dash").replace(/^#\/?/, "").split("?");
-  const [k = "dash", name] = path.split("/");
-  document.querySelectorAll("nav a").forEach(a => a.classList.toggle("on", a.dataset.k === (k === "tour" || k === "story" || k === "flight" || k === "plan" ? "tours" : k === "tripsheet" || k === "trip" ? "trips" : k)));
+  const [k0 = "dash", name, sub] = path.split("/");
+  const k = k0 === "tour" && sub === "auswertung" ? "tourauswertung" : k0;      // #/tour/<id>/auswertung = Unterseite der Tour (3.16.0)
+  document.querySelectorAll("nav a").forEach(a => a.classList.toggle("on", a.dataset.k === (k === "tour" || k === "tourauswertung" || k === "story" || k === "flight" || k === "plan" ? "tours" : k === "tripsheet" || k === "trip" ? "trips" : k)));
   document.querySelectorAll(".modal").forEach(m => m.remove());
   clearInterval(pollTimer);
   if (map) {
@@ -259,9 +260,9 @@ async function route() {
   if (k !== "search" && $("#gs")) $("#gs").value = "";
   $("#main").className = k === "map" ? "wide" : "";
   window.scrollTo(0, 0);
-  if (k === "tour" && /^#\/(trip|album)\//.test(window._cur || ""))
+  if ((k === "tour" || k === "tourauswertung") && /^#\/(trip|album)\//.test(window._cur || ""))
     window._from = window._cur; // Rücksprung zur Reise bzw. zum Album merken
-  else if (k !== "tour" && k !== "flight") window._from = null;
+  else if (k !== "tour" && k !== "tourauswertung" && k !== "flight") window._from = null;
   window._cur = location.hash;
   const tok = (window._rt = (window._rt || 0) + 1); // nur die zuletzt geöffnete Seite darf Fehler anzeigen
   try {

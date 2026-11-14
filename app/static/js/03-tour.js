@@ -103,6 +103,39 @@ async function uploadDialog(t) {
   };
 }
 
+/* ---------- Tourseite und Unterseite „Auswertung“ (3.16.0) ----------
+   #/tour/<id>            Hauptseite: Kopf, Karte, Höhenprofil (mit Puls), Wegpunkte, Einstieg „Detaillierte Auswertung“, Fotos (Bewertung, Notiz, Ausrüstung, Sicherheit stehen wie in 3.14.0 im Kopf)
+   #/tour/<id>/auswertung Unterseite: Aufzeichnung (Gerät, Messwerte, Training laut Uhr, Wetter) und Auswertung (Analyse, Tempo nach Steigung, Ähnliche Touren, Vergleich)
+   Die Module für die Detail-Karten (08, 26, 43, 45, 46, 47) hängen ihre Karten an tlAnc(): auf der Hauptseite das Höhenprofil (dort nimmt 48-tourlayout.js sie
+   sofort wieder heraus und merkt sich nur die Kurzaussage für den Einstieg), auf der Unterseite ein unsichtbarer Anker im Container der Unterseite. */
+const tlAnc = () => $("#profcard") || $("#tlsubanc");
+const TL_DETAIL = [];
+/* Ein Modul meldet hier, wie es seine Karte(n) für die Unterseite aufbaut: fn(t) → Promise (fertig, wenn Daten geladen und Karten eingehängt sind) */
+const tlOnSub = fn => TL_DETAIL.push(fn);
+VIEWS.tourauswertung = async id => {
+  const t = BY[id];
+  if (!t) throw new Error("Tour nicht gefunden");
+  const hm = `${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60) % 60)}`;
+  $("#main").innerHTML =
+    `<div class="row"><a class="back" id="tlback" href="#/tour/${esc(String(t.id))}">‹ Zurück zur Tour</a></div>
+   <div class="tlsubhead"><span class="tlsubeb">Detaillierte Auswertung</span>
+   <h1 class="tlsubt">${esc(t.name)}</h1>
+   <p class="tlsubfig"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span>${dateL(t.date)}</span> <span>${nf(t.km, 1)} km</span> <span>${nf(t.up_m, 0)} m aufwärts</span> <span>${hm} Std.</span>${t.h ? ` <span>${nf(t.km / t.h, 1)} km/h</span>` : ""}</p></div>
+   <nav class="tlnav" id="tlnav" aria-label="Abschnitte dieser Auswertung" hidden></nav>
+   <p class="mut tlload" id="tlload" role="status">Auswertung wird geladen …</p>
+   <div class="tlx tlsub" id="tl" data-tid="${esc(String(t.id))}"><div id="tlsubanc" hidden></div>
+   <section class="tlg" id="tlg-rec" aria-labelledby="tlgh-rec" hidden><h2 class="tlgh" id="tlgh-rec">Aufzeichnung</h2><div class="tlgb" id="tlgb-rec"></div></section>
+   <section class="tlg" id="tlg-eval" aria-labelledby="tlgh-eval" hidden><h2 class="tlgh" id="tlgh-eval">Auswertung dieser Tour</h2><div class="tlgb" id="tlgb-eval"></div></section>
+   <div class="empty tlempty" id="tlempty" hidden><h2>Für diese Tour gibt es keine Auswertung</h2><p class="mut">Es liegen weder Messwerte noch Uhr-Daten oder eine Strecke mit Höhen vor.</p><p><a class="btn alt" href="#/tour/${esc(String(t.id))}">‹ Zurück zur Tour</a></p></div></div>`;
+  await Promise.allSettled(TL_DETAIL.map(f => Promise.resolve().then(() => f(t))));
+  if (!$("#tl.tlsub")) return;                                     // inzwischen eine andere Seite
+  if (window.tlRefresh) tlRefresh();
+  $("#tlload").hidden = true;
+  const any = [...document.querySelectorAll("#tl details.tls")].some(d => !d.hidden);
+  $("#tlempty").hidden = any;
+  if ($("#tlnav") && !any) $("#tlnav").hidden = true;
+};
+
 /* ---------- Tourdetail ---------- */
 VIEWS.tour = async id => {
   const t = BY[id];
@@ -118,15 +151,13 @@ VIEWS.tour = async id => {
    <div class="figs"><div class="fig"><div class="v">${nf(t.km, 2)}<span class="u">km</span></div><div class="l">Strecke</div></div><div class="fig"><div class="v">${nf(t.up_m, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div></div>
    <div class="fig"><div class="v">${nf(t.down_m, 0)}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60))}<span class="u">Std.</span></div><div class="l">Dauer</div></div>
    <div class="fig"><div class="v">${t.h ? nf(t.km / t.h, 1) : "–"}<span class="u">km/h</span></div><div class="l">Tempo im Schnitt</div></div><div id="kmax" class="fig" style="display:none"><div class="v" id="kmaxv"></div><div class="l">Höchster Punkt</div></div></div>
-   <nav class="tlnav" id="tlnav" aria-label="Abschnitte dieser Tour" hidden></nav>
    <div class="tlx" id="tl" data-tid="${esc(String(t.id))}">
    <section class="tlg" id="tlg-route" aria-labelledby="tlgh-route"><h2 class="tlgh" id="tlgh-route">Streckenverlauf</h2><div class="tlgb" id="tlgb-route">
    ${tlSecHtml({id: "map", key: "tl_map", icon: "map", title: "Karte", badge: `${nf(t.km, 1)} km`, def: true, bodyCls: "tlmap", body: '<div class="tmap" id="tm"></div>'})}
    ${tlSecHtml({id: "prof", key: "tl_prof", icon: "prof", title: "Höhenprofil", def: true, bodyCls: "tlprof", body: '<div class="prof" id="profcard"><div id="prof" class="mut">Wird geladen …</div></div>'})}
    </div></section>
-   <section class="tlg" id="tlg-rec" aria-labelledby="tlgh-rec" hidden><h2 class="tlgh" id="tlgh-rec">Aufzeichnung</h2><div class="tlgb" id="tlgb-rec"></div></section>
-   <section class="tlg" id="tlg-eval" aria-labelledby="tlgh-eval" hidden><h2 class="tlgh" id="tlgh-eval">Auswertung dieser Tour</h2><div class="tlgb" id="tlgb-eval"></div></section>
-   <section class="tlg" id="tlg-more" aria-labelledby="tlgh-more"><h2 class="tlgh" id="tlgh-more">Fotos &amp; Notizen</h2><div class="tlgb" id="tlgb-more">
+   <section class="tlg tlsumg" id="tlg-sum" aria-labelledby="tlgh-sum" hidden><h2 class="tlgh" id="tlgh-sum">Auswertung dieser Tour</h2><div class="tlgb" id="tlgb-sum"></div></section>
+   <section class="tlg" id="tlg-more" aria-labelledby="tlgh-more"><h2 class="tlgh" id="tlgh-more">Fotos zur Tour</h2><div class="tlgb" id="tlgb-more">
    ${tlSecHtml({id: "photos", key: "tl_photos", icon: "cam", title: "Fotos", def: true, body: '<div class="tlbar"><span class="sub" id="pc"></span><span class="sp"></span><button class="btn sm alt" id="padd">Fotos hinzufügen …</button><button class="btn sm alt" id="pgps" title="Vergleicht den Aufnahmeort der Fotos mit der Strecke und korrigiert eine falsch gestellte Kamerauhr">Zeit per GPS prüfen</button><a class="btn sm" id="ss" hidden target="_blank">Diashow</a></div><div class="thumbs" id="th"></div>'})}
    </div></section></div>
    ${t.source === "local" ? "" : `<p class="mt30"><a class="back" target="_blank" href="https://www.komoot.com/tour/${t.id}">In Komoot öffnen</a></p>`}`;

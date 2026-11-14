@@ -133,10 +133,8 @@ VIEWS.tour = async (...a) => {
 function steepButton(t) {
   let k = 0;
   const go = () => {
-    const g = $("#gtog");
-    if (!g || !map || !map.addControl) return k++ < 40 && setTimeout(go, 200);
+    if (!window.tlSlope || !map || !map.addControl) return k++ < 40 && setTimeout(go, 200);
     if (document.querySelector("#tm .smap")) return;
-    g.style.display = "none";
     const ski = sportGrp(t.sport) === "ski" || t.sport === "snowshoe";
     const C = L.Control.extend({
       options: {position: "topleft"},
@@ -147,8 +145,7 @@ function steepButton(t) {
         b.textContent = "⛰ Steigung";
         L.DomEvent.disableClickPropagation(b);
         b.onclick = () => {
-          g.click();
-          const on = /ausblenden/.test(g.textContent);
+          const on = window.tlSlope();
           b.classList.toggle("on", on);
           const old = document.querySelector("#tm .sleg");
           if (old) old.remove();
@@ -163,6 +160,10 @@ function steepButton(t) {
       },
     });
     map.addControl(new C());
+    if (window.tlWantSlope) {                    // Verweis „Steigung auf der Karte zeigen“ aus der Unterseite Auswertung
+      window.tlWantSlope = false;
+      document.querySelector("#tm .smap").click();
+    }
   };
   go();
 }

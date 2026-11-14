@@ -135,13 +135,13 @@ function uhrBadge(u) {
 async function uhrCard(t) {
   const old = $("#uhrcard");
   if (old) old.remove();
-  if (!t || !$("#profcard")) return;
+  if (!t || !tlAnc()) return;
   const u = await uhrData(t.id);
-  if (!u || !uhrHas(u) || $("#uhrcard") || !$("#profcard") || !BY[t.id]) return;
+  if (!u || !uhrHas(u) || $("#uhrcard") || !tlAnc() || !BY[t.id]) return;
   const d = tlCard("uhrcard", {sec: "uhr", key: "tl_uhr", icon: "watch", title: "Training laut Uhr", def: true, badge: uhrBadge(u)}),
     body = tlBody(d);
   tlDev(d, u.device, "Amazfit/Zepp");
-  ($("#metcard") || $("#pulscard") || $("#profcard")).after(d);
+  ($("#metcard") || $("#pulscard") || tlAnc()).after(d);
   let busy = false,
     msg = "";
   const draw = () => {
@@ -188,3 +188,7 @@ VIEWS.tour = async (...a) => {
   };
   tryCard();
 };
+tlOnSub(t => {
+  UHR_CACHE.delete(t.id);
+  return uhrCard(t).catch(() => {});
+});

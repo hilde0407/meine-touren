@@ -356,14 +356,14 @@ VIEWS.stats = async (...a) => {
 async function steigCard(t) {
   const old = $("#steigcard");
   if (old) old.remove();
-  if (!t || !$("#profcard")) return;
+  if (!t || !tlAnc()) return;
   let d;
   try {
     d = await api("/api/tours/" + encodeURIComponent(t.id) + "/tempo");
   } catch (e) {
     return;
   }
-  if (!d || d.status !== "ok" || $("#steigcard") || !$("#profcard") || !BY[t.id]) return;
+  if (!d || d.status !== "ok" || $("#steigcard") || !tlAnc() || !BY[t.id]) return;
   const k = d.klassen,
     tile = (key, lab, tip, extra) => (k[key] ? `<div class="utile" title="${esc(tip)}"><b>${nf(k[key].kmh, 1)} km/h</b><span class="mut">${lab}</span><small class="mut">${extra}</small></div>` : ""),
     km = key => nf(k[key].dist_m / 1000, 1) + " km";
@@ -374,7 +374,7 @@ async function steigCard(t) {
     key = [k.auf ? `<span>Bergauf</span> <b>${nf(k.auf.kmh, 1)} km/h</b>${d.vert_mh != null ? ` · <b>${nf(d.vert_mh, 0)} m/h</b>` : ""}` : "", k.eben ? `<span>Eben</span> <b>${nf(k.eben.kmh, 1)} km/h</b>` : "", k.ab ? `<span>Bergab</span> <b>${nf(k.ab.kmh, 1)} km/h</b>` : ""].filter(Boolean).join(" · ");
   const c = tlCard("steigcard", {sec: "steig", key: "steig", icon: "trend", title: "Tempo nach Steigung", badge: key, def: false});
   tlBody(c).innerHTML = `<div class="utiles">${tiles}</div><div class="mut hrnote"><span>Aus Strecke, Höhe und Zeit berechnet.</span> <span>Nur Bewegungszeit: Pausen unter 0,3 km/h sind herausgenommen; die Steigung ist über etwa 50 m geglättet (bergauf über 5 %, bergab unter −5 %).</span></div>`;
-  ($("#uhrcard") || $("#metcard") || $("#pulscard") || $("#profcard")).after(c);
+  ($("#uhrcard") || $("#metcard") || $("#pulscard") || tlAnc()).after(c);
 }
 
 const _tour46 = VIEWS.tour;
@@ -388,3 +388,4 @@ VIEWS.tour = async (...a) => {
   };
   tryCard();
 };
+tlOnSub(t => steigCard(t).catch(() => {}));

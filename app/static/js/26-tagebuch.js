@@ -111,9 +111,12 @@ VIEWS.tour = async (...a) => {
   else go();
 };
 
+/* Unterseite „Auswertung“: Vergleich dieser Strecke, sobald die Wiederholungs-Auswertung da ist */
+tlOnSub(t => (window.REPP || Promise.resolve()).then(() => showCompare(t)));
 function showCompare(t) {
-  const r = REP[t.id];
-  if (r && !$("#cmpseg") && $("#repnote")) {
+  const r = REP[t.id],
+    anc = $("#repnote") || $("#tlsubanc");
+  if (r && !$("#cmpseg") && anc) {
     const L = [t, ...r.with.map(x => BY[x.id]).filter(Boolean)].sort((x, y) => x.start_ts - y.start_ts).filter(x => x.h > 0.05),
       best = L.reduce((m, x) => (x.h < m.h ? x : m), L[0] || t);
     if (L.length >= 2) {
@@ -124,7 +127,7 @@ function showCompare(t) {
       tlBody(cc).innerHTML = L.map(
         x => `<div class="cmprow ${x.id === t.id ? "me" : ""}"><a href="#/tour/${x.id}">${dateS(x.date)}</a><div class="cmpbar"><i style="width:${(x.h / mx) * 100}%${x.id === best.id ? ";background:#d98a1f" : ""}"></i></div><span>${hm(x.h)} · ${nf(x.km / x.h, 1)} km/h${x.id === best.id ? " 🏆" : ""}</span></div>`
       ).join("") + `<div class="mut fs13 mt6">Gesamtdauer inkl. Pausen. Bestzeit: ${dateS(best.date)} mit ${hm(best.h)}.</div>`;
-      $("#repnote").after(cc);
+      anc.after(cc);
     }
   }
 }

@@ -50,16 +50,20 @@ const fmtH = s => {
     m = Math.round((s % 3600) / 60);
   return h ? `${h}:${pad2(m)} h` : `${m} min`;
 };
-const _tour2 = VIEWS.tour;
-VIEWS.tour = async id => {
-  await _tour2(id);
-  const t = BY[id];
-  if (!t || !$("#profcard")) return;
+/* Wetter und Analyse: Karten für die Unterseite „Auswertung“ (auf der Hauptseite nur, damit der Einstieg Kurzaussagen hat – 48-tourlayout.js nimmt sie wieder heraus).
+   Liefert {wx: Promise} – die Unterseite wartet darauf, bevor sie „keine Auswertung“ meldet. */
+async function anaRun(id) {
+  const t = BY[id],
+    none = {wx: null};
+  if (!t || !tlAnc()) return none;
+  const onSub = !$("#profcard");
+  window.tlSlope = null;
+  window.tlWantSlope = false;
   // Wetter
-  api(`/api/tours/${encodeURIComponent(id)}/weather`)
+  const wxp = api(`/api/tours/${encodeURIComponent(id)}/weather`)
     .then(w => {
-      const f = document.querySelector("#main .figs");
-      if (!f || !$("#ksync")) return;
+      const f = document.querySelector("#main .figs") || $("#tlsubanc");
+      if (!f || t.source === "local" || !tlAnc()) return;
       const ic =
         w.code >= 95
           ? "⛈"
@@ -82,7 +86,7 @@ VIEWS.tour = async id => {
     .catch(() => {});
   // Analyse
   const c = cleanPts(await api(`/api/tours/${encodeURIComponent(id)}/coords`).catch(() => []));
-  if (c.length < 10 || !$("#profcard")) return;
+  if (c.length < 10 || !tlAnc()) return {wx: wxp};
   const A = analyse(c),
     others = TOURS.filter(o => o.id !== id && o.sport === t.sport)
       .map(o => ({
@@ -103,55 +107,57 @@ VIEWS.tour = async id => {
     }</div>
    <h3 class="m16-0-8 fs18">Steigung (Anteil der Strecke)</h3><div class="stack">${GR.map((b, k) => `<div style="width:${(A.band[k] / tot) * 100}%;background:${b[2]}" title="${b[3]}"></div>`).join("")}</div>
    <div class="legend">${GR.map((b, k) => `<span><i style="background:${b[2]}"></i>${b[3]} ${nf(A.band[k] / 1000, 1)} km</span>`).join("")}</div>
-   <div class="row mt12"><button class="btn alt sm" id="gtog">Steigung auf der Karte zeigen</button>${A.pauses.length ? `<button class="btn alt sm" id="ptog">Pausen auf der Karte zeigen</button>` : ""}
+   <div class="row mt12"><a class="btn alt sm" id="gtog" href="#/tour/${esc(String(id))}?karte=steigung">Steigung auf der Karte zeigen</a>${A.pauses.length ? `<a class="btn alt sm" id="ptog" href="#/tour/${esc(String(id))}?karte=pausen">Pausen auf der Karte zeigen</a>` : ""}
     <select id="cmp" class="mw340"><option value="">Mit anderer Tour vergleichen …</option>${others.map(x => `<option value="${x.o.id}">${dateS(x.o.date)} · ${esc(x.o.name)} (${nf(x.o.km, 1)} km)</option>`).join("")}</select></div>`;
-  $("#profcard").after(box);
-  const overlay = {};
+  tlAnc().after(box);
+  $("#cmp").onchange = e => {
+    if (e.target.value) location.hash = `#/compare?a=${encodeURIComponent(id)}&b=${encodeURIComponent(e.target.value)}`;
+  };
+  if (onSub) return {wx: wxp};                      // die Karte gibt es nur auf der Hauptseite: die Knöpfe oben verweisen dorthin (?karte=steigung / ?karte=pausen)
   const withMap = fn => {
     let k = 0;
     const w = () => (map && map.addLayer ? fn() : k++ < 30 && setTimeout(w, 150));
     w();
   };
-  $("#gtog").onclick = e =>
-    withMap(() => {
-      if (overlay.g) {
-        map.removeLayer(overlay.g);
-        overlay.g = null;
-        e.target.textContent = "Steigung auf der Karte zeigen";
-        return;
-      }
-      overlay.g = L.layerGroup(
-        A.segs.map(sg =>
-          L.polyline(
-            c.slice(sg.a, sg.b + 1).map(p => [p[0], p[1]]),
-            {color: (typeof sportGrp === "function" && (sportGrp(t.sport) === "ski" || t.sport === "snowshoe")) && Math.abs(sg.g) >= STEEP30 ? "#7e22ce" : grCol(sg.g), weight: 7, opacity: 0.95}
-          ).bindTooltip(`${nf(sg.g, 0)} % Steigung`)
-        )
-      ).addTo(map);
-      e.target.textContent = "Steigung ausblenden";
-    });
-  if ($("#ptog"))
-    $("#ptog").onclick = e =>
-      withMap(() => {
-        if (overlay.p) {
-          map.removeLayer(overlay.p);
-          overlay.p = null;
-          e.target.textContent = "Pausen auf der Karte zeigen";
-          return;
-        }
-        overlay.p = L.layerGroup(
-          A.pauses.map(p =>
-            L.circleMarker([p.lat, p.lng], {radius: 9, color: "#fff", weight: 2, fillColor: "#7b61c9", fillOpacity: 1}).bindTooltip(
-              `Pause ${fmtH(p.dur)}, ${nf(p.t / 60000, 0)} Min. nach dem Start`
-            )
-          )
-        ).addTo(map);
-        e.target.textContent = "Pausen ausblenden";
-      });
-  $("#cmp").onchange = e => {
-    if (e.target.value) location.hash = `#/compare?a=${encodeURIComponent(id)}&b=${encodeURIComponent(e.target.value)}`;
+  /* Steigungsfärbung auf der Karte: der Knopf „⛰ Steigung“ auf der Karte (24-sport.js) schaltet sie über window.tlSlope; gibt zurück, ob sie jetzt an ist */
+  let slope = null;
+  window.tlSlope = () => {
+    if (!map || !map.addLayer) return false;
+    if (slope) {
+      map.removeLayer(slope);
+      slope = null;
+      return false;
+    }
+    slope = L.layerGroup(
+      A.segs.map(sg =>
+        L.polyline(
+          c.slice(sg.a, sg.b + 1).map(p => [p[0], p[1]]),
+          {color: (typeof sportGrp === "function" && (sportGrp(t.sport) === "ski" || t.sport === "snowshoe")) && Math.abs(sg.g) >= STEEP30 ? "#7e22ce" : grCol(sg.g), weight: 7, opacity: 0.95}
+        ).bindTooltip(`${nf(sg.g, 0)} % Steigung`)
+      )
+    ).addTo(map);
+    return true;
   };
+  const want = new URLSearchParams(location.hash.split("?")[1] || "").get("karte");
+  if (want === "steigung") window.tlWantSlope = true;                 // Verweis aus der Unterseite: steepButton (24-sport.js) schaltet die Färbung ein
+  else if (want === "pausen" && A.pauses.length)
+    withMap(() =>
+      L.layerGroup(
+        A.pauses.map(p =>
+          L.circleMarker([p.lat, p.lng], {radius: 9, color: "#fff", weight: 2, fillColor: "#7b61c9", fillOpacity: 1}).bindTooltip(
+            `Pause ${fmtH(p.dur)}, ${nf(p.t / 60000, 0)} Min. nach dem Start`
+          )
+        )
+      ).addTo(map)
+    );
+  return {wx: wxp};
+}
+const _tour2 = VIEWS.tour;
+VIEWS.tour = async id => {
+  await _tour2(id);
+  await anaRun(id);
 };
+tlOnSub(t => anaRun(t.id).then(r => r && r.wx));
 
 /* ---- Tourvergleich ---- */
 function xyChart(series, o) {

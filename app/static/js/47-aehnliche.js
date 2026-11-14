@@ -27,7 +27,7 @@ function aeDeltas(r) {
 }
 function aeRow(r, bestId) {
   const dl = r.aktuell ? {} : aeDeltas(r),
-    head = r.aktuell ? `<span class="aedt">${esc(dateS(r.datum))}</span>` : `<a class="aedt" href="#/tour/${encodeURIComponent(r.id)}">${esc(dateS(r.datum))}</a>`,
+    head = r.aktuell ? `<span class="aedt">${esc(dateS(r.datum))}</span>` : `<a class="aedt" href="#/tour/${encodeURIComponent(r.id)}/auswertung" title="Auswertung dieser Tour">${esc(dateS(r.datum))}</a>`,
     tags = (r.aktuell ? `<span class="aetag cur">Diese Tour</span>` : "") + (r.id === bestId ? `<span class="aetag">Schnellster Lauf</span>` : ""),
     sub = [r.name ? `<span>${esc(r.name)}</span>` : "", r.geraet ? `<span class="aedev">${esc(r.geraet)}</span>` : ""].filter(Boolean).join(" · ");
   return `<li class="aer${r.aktuell ? " cur" : ""}"><div class="aeh">${head}${tags}</div>${sub ? `<div class="aesub">${sub}</div>` : ""}<div class="aem">` +
@@ -85,7 +85,7 @@ function aeDrawChart(card, d) {
 async function aeCard(t) {
   const old = $("#aehncard");
   if (old) old.remove();
-  if (!t || !$("#profcard")) return;
+  if (!t || !tlAnc()) return;
   let d;
   try {
     d = await api("/api/tours/" + encodeURIComponent(t.id) + "/aehnliche");
@@ -96,7 +96,7 @@ async function aeCard(t) {
   try {
     cur = decodeURIComponent((location.hash.split("?")[0].split("/")[2]) || "");
   } catch (e) {}
-  if (!d || d.status !== "ok" || $("#aehncard") || !$("#profcard") || !BY[t.id] || cur !== String(t.id)) return;
+  if (!d || d.status !== "ok" || $("#aehncard") || !tlAnc() || !BY[t.id] || cur !== String(t.id)) return;
   const a = d.aussage, said = aeSaid(a), n = d.anzahl - 1,
     key = (said ? `<b>${said}</b> · ` : "") + `<span>${n === 1 ? "1 Wiederholung" : n + " Wiederholungen"}</span>`,
     nowT = d.touren.find(r => r.aktuell),
@@ -115,7 +115,7 @@ async function aeCard(t) {
     const ro = new ResizeObserver(() => (c.isConnected ? draw() : ro.disconnect()));
     ro.observe(c);
   }
-  ($("#steigcard") || $("#uhrcard") || $("#metcard") || $("#pulscard") || $("#profcard")).after(c);
+  ($("#steigcard") || $("#uhrcard") || $("#metcard") || $("#pulscard") || tlAnc()).after(c);
   draw();
 }
 
@@ -130,3 +130,4 @@ VIEWS.tour = async (...a) => {
   };
   tryCard();
 };
+tlOnSub(t => aeCard(t).catch(() => {}));

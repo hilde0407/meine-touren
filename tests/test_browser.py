@@ -455,7 +455,7 @@ def test_stars_safety_compare_and_note_size(page):
     other = page.evaluate("TOURS.filter(t => t.source === 'local')[1].id")
     page.evaluate("""async id => { await api('/api/tours/' + id + '/sport', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({sport: 'skitour'})}); await loadTours(); }""", tid)
     page.evaluate("window.REPP")      # echte Wiederholungs-Auswertung abwarten (4 gleiche Runden)
-    page.goto(base + "#/tour/" + tid); page.wait_for_selector("#starrow", timeout=20000); page.wait_for_selector("#cmpseg", timeout=10000)
+    page.goto(base + "#/tour/" + tid); page.wait_for_selector("#starrow", timeout=20000)
     # Sterne
     page.click("#starrow .st[data-n='4']"); page.wait_for_timeout(400)
     assert page.evaluate("BY[%r].stars" % tid) == 4 and page.locator("#starrow .st.on").count() == 4
@@ -465,8 +465,10 @@ def test_stars_safety_compare_and_note_size(page):
     page.click("#sgear label:has-text('LVS')"); page.fill("#snote", "Triebschnee am Grat"); page.click("#ssave"); page.wait_for_timeout(500)
     assert "gespeichert" in page.inner_text("#smsg")
     assert page.evaluate("api('/api/tours/%s/safety').then(s => [s.level, s.gear, s.note])" % tid) == [3, ["lvs"], "Triebschnee am Grat"]
-    # Vergleich derselben Strecke
+    # Vergleich derselben Strecke: steht seit 3.16.0 auf der Unterseite Auswertung
+    page.goto(base + "#/tour/" + tid + "/auswertung"); page.wait_for_selector("#cmpseg", timeout=10000)
     assert page.locator("#cmpseg").count() == 1 and "schnellste von" in page.inner_text("#cmpseg")
+    page.goto(base + "#/tour/" + tid); page.wait_for_selector("#starrow", timeout=20000)
     # Größe der Notizbox wird gemerkt
     page.evaluate("document.querySelector('#note').style.height = '210px'"); page.wait_for_timeout(900)
     assert "210" in page.evaluate("localStorage.getItem('size:note')")
@@ -1102,7 +1104,7 @@ def test_messwerte_and_meine_geraete(page):
     tid = page.evaluate("async () => { for (const t of TOURS.filter(t => t.source === 'local')) { const m = await api('/api/tours/' + t.id + '/metrics').catch(() => null); if (m && m.channels && m.channels.speed && m.src) return [t.id, m.src]; } return null; }")
     assert tid, "keine lokale Tour mit Messwerten gefunden"
     tid, kind = tid
-    page.goto(base + "#/tour/" + tid); page.wait_for_selector("#metcard .chip", timeout=10000)
+    page.goto(base + "#/tour/" + tid + "/auswertung"); page.wait_for_selector("#metcard .chip", timeout=10000)
     chips = page.locator("#metchips [data-k]").all_inner_texts()
     assert any("Geschwindigkeit" in c for c in chips) and any("Pace" in c for c in chips)
     assert not any("Leistung" in c or "Atem" in c or "Temperatur" in c for c in chips)          # nichts anzeigen, was nicht vorhanden ist
@@ -1126,7 +1128,7 @@ def test_messwerte_and_meine_geraete(page):
     card = page.inner_text("#devsec .dvcard")
     assert "Test-Uhr alt" in card and "Modell X" in card and "seit 01/2020" in card and "aktuell" in card and "Aktiv" in card, card
     assert page.locator("#devsec .dvcard .dvav svg").count() == 1                                 # Symbol statt Foto
-    page.goto(base + "#/tour/" + tid); page.wait_for_selector("#devrow", timeout=8000)
+    page.goto(base + "#/tour/" + tid + "/auswertung"); page.wait_for_selector("#devrow", timeout=8000)
     page.wait_for_function("() => /Test-Uhr alt/.test(document.querySelector('#devrow').textContent)", timeout=6000)
     assert "Aufgezeichnet mit" in page.inner_text("#devrow")
     page.goto(base + "#/admin?tab=quellen"); page.wait_for_selector("#devsec .dvcard", timeout=8000)

@@ -236,7 +236,7 @@ def test_stats_pending_zepp_tours_show_hint_and_job_button(pw, apps):
 
 
 def test_tour_page_fatigue_and_slope_sections(pw, apps):
-    pg = _page(pw, apps["full"], f"tour/{apps['fat']}", "#uhrcard")
+    pg = _page(pw, apps["full"], f"tour/{apps['fat']}/auswertung", "#uhrcard")
     try:
         pg.wait_for_selector("#steigcard", timeout=15000)
         f = pg.locator("#uhrcard details[data-trf='uhr_erm']")
@@ -250,7 +250,7 @@ def test_tour_page_fatigue_and_slope_sections(pw, apps):
         assert not s.evaluate("e => e.open") and "Bergauf" in s.locator("summary").inner_text() and "km/h" in s.locator("summary").inner_text()
         s.locator("summary").click()
         assert pg.locator("#steigcard .utile").count() >= 2 and "Nur Bewegungszeit" in pg.locator("#steigcard").inner_text()
-        ids = pg.evaluate("[...document.querySelectorAll('#profcard, #pulscard, #metcard, #uhrcard, #steigcard')].map(e => e.id)")
+        ids = pg.evaluate("[...document.querySelectorAll('#metcard, #uhrcard, #steigcard')].map(e => e.id)")
         assert ids.index("steigcard") == len(ids) - 1 and ids.index("uhrcard") < ids.index("steigcard")
         assert not pg.errors, pg.errors
         _shot(pg, "tour-desktop-uhr.png", "#uhrcard")
@@ -260,12 +260,12 @@ def test_tour_page_fatigue_and_slope_sections(pw, apps):
 
 
 def test_tour_page_without_track_has_no_slope_card_and_fold_state_survives_reload(pw, apps):
-    pg = _page(pw, apps["full"], "tour/" + apps["g"], None)
+    pg = _page(pw, apps["full"], "tour/" + apps["g"] + "/auswertung", None)
     try:
         assert pg.locator("#steigcard").count() == 1                                        # g1 hat eine Strecke
     finally:
         pg.browser_.close()
-    pg = _page(pw, apps["empty"], "tour/g0", None)
+    pg = _page(pw, apps["empty"], "tour/g0/auswertung", None)
     try:
         assert pg.locator("#steigcard").count() == 0 and pg.locator("#uhrcard").count() == 0 and not pg.errors, pg.errors
     finally:
@@ -287,7 +287,7 @@ def test_mobile_390_no_horizontal_scroll(pw, apps):
         _shot(pg, "stat-tempo-390.png", "#tpsec")
     finally:
         pg.browser_.close()
-    pg = _page(pw, apps["full"], f"tour/{apps['fat']}", "#steigcard", width=390, height=844, dpr=2)
+    pg = _page(pw, apps["full"], f"tour/{apps['fat']}/auswertung", "#steigcard", width=390, height=844, dpr=2)
     try:
         pg.locator("#uhrcard details[data-trf='uhr_erm'] summary").click()
         pg.locator("#steigcard summary").click()
@@ -334,7 +334,7 @@ def test_contrast_stats_and_tour(pw, apps, scheme):
         _shot(pg, f"stat-tempo-{scheme}.png", "#tpsec")
     finally:
         pg.browser_.close()
-    pg = _page(pw, apps["full"], f"tour/{apps['fat']}", "#steigcard", scheme=scheme, dpr=2)
+    pg = _page(pw, apps["full"], f"tour/{apps['fat']}/auswertung", "#steigcard", scheme=scheme, dpr=2)
     try:
         pg.locator("#uhrcard details[data-trf='uhr_erm'] summary").click()
         pg.locator("#steigcard summary").click()

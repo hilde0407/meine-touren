@@ -131,11 +131,11 @@ def _page(pw, url, tid, width=1280, height=1000, scheme="light", dpr=1, locale="
     pg.errors = []
     pg.on("pageerror", lambda e: pg.errors.append(str(e)))
     pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(url) else r.continue_())
-    pg.goto(f"{url}/#/tour/{tid}")
+    pg.goto(f"{url}/#/tour/{tid}/auswertung")
     if wait:
         pg.wait_for_selector(wait, timeout=10000)
     else:
-        pg.wait_for_selector("#profcard", timeout=10000)
+        pg.wait_for_function("() => { const l = document.querySelector('#tlload'); return !!l && l.hidden; }", timeout=10000)
         pg.wait_for_timeout(1500)
     pg.wait_for_timeout(300)
     pg.browser_ = b
@@ -169,8 +169,8 @@ def test_section_content_and_order(pw, apps):
         for bad in ("-1", "-274", "-361", "2004831", "avg_pace", "NaN", "undefined", "null"):
             assert bad not in t, bad
         assert "title" in c.locator(".utc").first.evaluate("e => Object.keys(e.attributes).map(a => e.attributes[a].name).join()") and "Kilometer 1: 10:50 min/km, Puls 112 bpm, 112 Schritte/min" == c.locator(".utc").first.get_attribute("title")
-        ids = pg.evaluate("[...document.querySelectorAll('#profcard, #pulscard, #metcard, #uhrcard')].map(e => e.id)")
-        assert ids.index("metcard") < ids.index("uhrcard") < ids.index("pulscard")        # 3.15.0: Messwerte, Training laut Uhr, Puls (je Gerät ein Block)
+        ids = pg.evaluate("[...document.querySelectorAll('#metcard, #uhrcard, #pulscard')].map(e => e.id)")
+        assert ids == ["metcard", "uhrcard"]        # 3.16.0 Unterseite: Messwerte, Training laut Uhr (der Puls steht auf der Tourseite)
         assert not pg.errors, pg.errors
         _shot(pg, "uhrtraining-desktop.png")
     finally:

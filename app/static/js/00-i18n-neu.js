@@ -1398,4 +1398,14 @@ Streckenverlauf || Route || Tracé || Recorrido
 Auswertung dieser Tour || Evaluation of this tour || Évaluation de ce parcours || Evaluación de esta ruta
 Vergleich || Comparison || Comparaison || Comparación
 Aufzeichnung || Recording || Enregistrement || Grabación
+Detaillierte Auswertung || Detailed evaluation || Évaluation détaillée || Evaluación detallada
+Detaillierte Auswertung ansehen › || View detailed evaluation › || Voir l’évaluation détaillée › || Ver la evaluación detallada ›
+‹ Zurück zur Tour || ‹ Back to the tour || ‹ Retour au parcours || ‹ Volver a la ruta
+Enthält: || Includes: || Contient : || Incluye:
+Abschnitte dieser Auswertung || Sections of this evaluation || Sections de cette évaluation || Secciones de esta evaluación
+Auswertung wird geladen … || Loading evaluation … || Chargement de l’évaluation … || Cargando la evaluación …
+Für diese Tour gibt es keine Auswertung || There is no evaluation for this tour || Il n’y a pas d’évaluation pour ce parcours || No hay evaluación para esta ruta
+Es liegen weder Messwerte noch Uhr-Daten oder eine Strecke mit Höhen vor. || There are no readings, no watch data and no track with elevation. || Il n’y a ni mesures, ni données de montre, ni tracé avec altitudes. || No hay mediciones, ni datos del reloj, ni un recorrido con altitudes.
+{} Std. || {} h || {} h || {} h
+Fotos zur Tour || Photos of the tour || Photos du parcours || Fotos de la ruta
 `;
