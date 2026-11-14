@@ -369,6 +369,7 @@ def forget(tid):
     try:
         db.execute("DELETE FROM tour_source WHERE tour_id=?", (str(tid),))
         db.execute("DELETE FROM tour_device WHERE tour_id=?", (str(tid),))
+        db.execute("DELETE FROM tour_zsrc WHERE tour_id=?", (str(tid),))
     except Exception:  # noqa
         pass
 

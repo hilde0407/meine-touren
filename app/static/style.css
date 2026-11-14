@@ -591,3 +591,62 @@ svg.ic{display:inline-block;vertical-align:-3px;margin-right:6px;flex:none}
 .hrink{color:#c0504d}
 
 .fbar,.fctl{transition:opacity .5s}.flight.idle .fbar,.flight.idle .fctl{opacity:0;pointer-events:none}
+
+/* =====================  Meine Geräte (3.9.1): Kartenliste, Dialoge, Gerätezeile der Tourseite  ===================== */
+:root{--dv-tint:color-mix(in srgb,var(--bars) 13%,var(--card));--dv-ok:#1d6b46;--dv-ok-bg:color-mix(in srgb,#2f8f5f 14%,var(--card))}
+@media (prefers-color-scheme:dark){:root{--dv-ok:#86dbb0;--dv-ok-bg:color-mix(in srgb,#2f8f5f 24%,var(--card))}}
+.dvav{display:inline-flex;align-items:center;justify-content:center;flex:none;width:64px;height:64px;border-radius:18px;background:var(--dv-tint);color:var(--bars);overflow:hidden}
+.dvav svg{width:70%;height:70%}.dvav img{width:100%;height:100%;object-fit:cover;display:block}
+.dvav.lg{width:96px;height:96px;border-radius:24px}.dvav.xs{width:26px;height:26px;border-radius:8px}
+.dvhead{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:6px}.dvhead h2{margin:0!important}.dvhead .sp{flex:1}
+.dvintro{margin:0 0 16px!important;max-width:80ch}
+.dvlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:12px}
+.dvcard{position:relative;display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--rule);border-radius:var(--r-l);background:var(--card);cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.dvcard:hover{border-color:color-mix(in srgb,var(--ink) 35%,transparent);box-shadow:0 2px 10px #0e2a2b14}
+.dvcard.off .dvav{filter:grayscale(1);opacity:.75}.dvcard.off .dvn{color:var(--mut)}
+.dvbody{flex:1;min-width:0;padding-right:34px}
+.dvn{font:700 22px/1.15 var(--d);overflow-wrap:anywhere}
+.dvsub,.dvper{display:block;color:var(--mut);font-size:15px;margin-top:3px;overflow-wrap:anywhere}
+.dvper{margin-top:1px}.dvper span+span::before{content:" · "}
+.dvchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.dvc{display:inline-block;padding:1px 10px;border-radius:99px;font:500 14px/1.6 var(--b);background:var(--soft);color:var(--mut)}
+.dvc.on{background:var(--dv-ok-bg);color:var(--dv-ok)}
+.dvmore{position:absolute;top:8px;right:8px;width:38px;height:38px;border:0;border-radius:50%;background:transparent;color:var(--mut);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.dvmore:hover,.dvmore[aria-expanded=true]{background:var(--soft);color:var(--ink)}.dvmore svg{width:22px;height:22px}
+.dvmenu{position:fixed;z-index:1200;min-width:230px;background:var(--card);color:var(--ink);border:1px solid var(--rule);border-radius:var(--r-l);box-shadow:0 10px 30px #0006;padding:6px}
+.dvmenu button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;color:inherit;padding:9px 12px;border-radius:var(--r);font:500 16px var(--b);cursor:pointer}
+.dvmenu button:hover,.dvmenu button:focus-visible{background:var(--soft)}.dvmenu button.bad{color:#b2443f}.dvmenu hr{border:0;border-top:1px solid var(--rule);margin:5px 4px}
+@media (prefers-color-scheme:dark){.dvmenu button.bad{color:#f08a84}}
+.dvmenu svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.dvempty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:30px 18px;border:1.5px dashed var(--rule);border-radius:var(--r-l)}
+.dvempty .dvav{width:84px;height:84px;border-radius:24px;margin-bottom:6px}.dvempty h3{font-size:22px}.dvempty p{margin:0;color:var(--mut);max-width:46ch}
+.dvempty .row{justify-content:center;margin:14px 0 0}
+.dvhint{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 14px;border:1px solid color-mix(in srgb,var(--yellow) 60%,var(--rule));border-left:4px solid var(--yellow);border-radius:var(--r);background:color-mix(in srgb,var(--yellow) 10%,var(--card));margin:0 0 14px}
+.dvhint>span:first-child{flex:1;min-width:220px}.dvhint b{display:block}
+/* Dialoge */
+.mbox.dvbox{max-width:600px;padding:22px 24px}.mbox.dvbox>h2{font-size:26px;margin-bottom:4px}.mbox.dvbox .dvlead{margin:2px 0 14px;color:var(--mut)}
+.dvf{margin:14px 0 0;border:0;padding:0;min-width:0}.dvf>label,.dvf>legend{display:block;font:600 15px var(--b);margin:0 0 4px;padding:0}
+.dvf input:not([type=checkbox]),.dvf select{width:100%}.dvh{display:block;color:var(--mut);font-size:14px;line-height:1.4;margin-top:4px}
+.dvf2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.dvf2 label{font:500 14px var(--b);display:block;margin-bottom:3px}
+.dvtop{display:flex;gap:16px;align-items:center;margin:12px 0 2px}.dvtop .row{margin:0 0 6px}
+.dvadv{margin-top:14px;border-top:1px solid var(--rule);padding-top:8px}.dvadv summary{cursor:pointer;font:600 15px var(--b);padding:4px 0}
+.dvfoot{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:20px}
+.dvpickrow{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--rule);border-radius:var(--r);margin:8px 0;cursor:pointer;background:var(--card)}
+.dvpickrow:has(input:checked){border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}.dvpickrow input{flex:none}.dvpickrow b{display:block;font-weight:600}.dvpickrow small{color:var(--mut)}
+.dvprobe{display:grid;gap:12px;margin-top:10px}
+.dvpr{border:1px solid var(--rule);border-radius:var(--r-l);padding:12px 14px;background:var(--card)}.dvpr.dis{opacity:.7}
+.dvpr>label.chk{display:flex;gap:8px;align-items:center;margin:0 0 6px;font:600 16px var(--b)}
+.dvpr .dvf2{margin-top:6px}.dvpr input:not([type=checkbox]),.dvpr select{width:100%}
+.dvmeta{color:var(--mut);font-size:14px;line-height:1.45;margin:2px 0 6px}.dvmeta code{background:var(--soft);padding:0 5px;border-radius:4px;color:var(--ink)}
+.dvwarn{font-size:14px;color:var(--ink);background:color-mix(in srgb,var(--yellow) 14%,var(--card));border-radius:var(--r);padding:6px 10px;margin:6px 0}
+.dvspin{display:inline-block;width:16px;height:16px;border:2.5px solid var(--rule);border-top-color:var(--ink);border-radius:50%;animation:dvspin .8s linear infinite;vertical-align:-3px;margin-right:8px}
+@keyframes dvspin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){.dvspin{animation:none}}
+/* Gerätezeile der Tourseite und Quelle unter den Messwerten */
+.dvrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:6px 8px 6px 6px;border:1px solid var(--rule);border-radius:99px;background:var(--card);width:fit-content;max-width:100%}
+.dvrow .dvt{display:flex;flex-direction:column;line-height:1.2;min-width:0}.dvrow .dvt b{font:600 16px var(--d)}.dvrow .dvt small{color:var(--mut);font-size:13px}
+.dvrow .dvedit{border:0;background:var(--soft);color:var(--ink);border-radius:99px;padding:3px 12px;font:600 14px var(--b);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.dvrow .dvedit:hover{background:color-mix(in srgb,var(--ink) 14%,var(--soft))}.dvrow .dvedit svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.dvsrc{display:inline-flex;align-items:center;gap:6px;vertical-align:middle}
+html.mob .dvlist{grid-template-columns:1fr}html.mob .dvf2{grid-template-columns:1fr}html.mob .dvmenu button{min-height:44px}html.mob .dvmore{width:44px;height:44px;top:4px;right:4px}
+html.mob .dvrow{border-radius:16px}
+.mbox.dvbox .dvfoot{position:sticky;bottom:-22px;background:var(--bg);padding:12px 0 6px;margin-bottom:-6px;z-index:1}

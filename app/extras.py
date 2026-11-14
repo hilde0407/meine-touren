@@ -51,6 +51,10 @@ def make_backup(dest_dir=None, strip_secrets=False, keep=14):
             if not strip_secrets and config.TRACK_DIR.exists():       # lokale Touren: Original-GPX gehören zum Datenbestand
                 for g in sorted(list(config.TRACK_DIR.glob("*.gpx")) + list(config.TRACK_DIR.glob("*.hr.json")) + list(config.TRACK_DIR.glob("*.met.json"))):
                     z.write(g, f"tracks/{g.name}")
+            dd = config.DB_PATH.parent / "devices"
+            if not strip_secrets and dd.is_dir():                      # eigene Gerätefotos („Meine Geräte“)
+                for g in sorted(dd.glob("*.jpg")):
+                    z.write(g, f"devices/{g.name}")
             z.writestr("INFO.txt", f"Meine Touren Backup {datetime.now(TZ).isoformat()}\nWiederherstellen: deploy/restore.sh <datei.zip>\n")
     name = f"meine-touren-{datetime.now(TZ):%Y-%m-%d_%H%M}.zip"
     if dest_dir is None:

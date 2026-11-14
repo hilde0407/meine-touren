@@ -763,4 +763,85 @@ Bodenkontaktzeit || Ground contact time || Temps de contact au sol || Tiempo de 
 Vertikale Oszillation || Vertical oscillation || Oscillation verticale || Oscilación vertical
 Luftdruck || Air pressure || Pression atmosphérique || Presión atmosférica
 Tempo (Pace) || Pace || Allure || Ritmo
+Geräte aus Zepp ermitteln || Detect devices from Zepp || Détecter les appareils depuis Zepp || Detectar dispositivos desde Zepp
+Gerät aus Zepp ermitteln || Detect a device from Zepp || Détecter un appareil depuis Zepp || Detectar un dispositivo desde Zepp
+Gerät von Hand anlegen || Add a device manually || Ajouter un appareil à la main || Añadir un dispositivo a mano
++ Gerät anlegen || + Add device || + Ajouter un appareil || + Añadir dispositivo
+Gerät anlegen … || Add device … || Ajouter l’appareil … || Añadir dispositivo …
+Noch kein Gerät angelegt || No device added yet || Aucun appareil ajouté pour l’instant || Aún no hay ningún dispositivo
+Lege deine Uhren und Handys an, damit bei jeder Tour steht, womit sie aufgezeichnet wurde. || Add your watches and phones so every tour shows what recorded it. || Ajoutez vos montres et téléphones pour que chaque parcours indique avec quoi il a été enregistré. || Añade tus relojes y móviles para que cada ruta indique con qué se grabó.
+Deine Aufnahmegeräte mit eigenem Namen. Der Name erscheint bei jeder Tour als „Quelle“; welche Messwerte eine Tour zeigt, richtet sich nach dem, was das Gerät wirklich geliefert hat. || Your recording devices with names of your own. The name appears on every tour as “Source”; which measurements a tour shows depends on what the device actually delivered. || Vos appareils d’enregistrement avec un nom de votre choix. Le nom apparaît sur chaque parcours comme « Source » ; les mesures affichées dépendent de ce que l’appareil a réellement fourni. || Tus dispositivos de grabación con el nombre que quieras. El nombre aparece en cada ruta como «Fuente»; las mediciones que se muestran dependen de lo que el dispositivo haya entregado realmente.
+Aktionen || Actions || Actions || Acciones
+Bearbeiten || Edit || Modifier || Editar
+Foto ändern oder entfernen || Change or remove photo || Changer ou retirer la photo || Cambiar o quitar la foto
+Foto hinzufügen || Add photo || Ajouter une photo || Añadir foto
+Deaktivieren || Deactivate || Désactiver || Desactivar
+Aktivieren || Activate || Activer || Activar
+Aktiv || Active || Actif || Activo
+Deaktiviert || Deactivated || Désactivé || Desactivado
+deaktiviert || deactivated || désactivé || desactivado
+von Hand zugeordnet || assigned manually || attribué à la main || asignado a mano
+Aufgezeichnet mit || Recorded with || Enregistré avec || Grabado con
+Zeitraum unbegrenzt || No time limit || Période illimitée || Sin límite de tiempo
+aktuell || current || actuel || actual
+seit {} || since {} || depuis {} || desde {}
+bis {} || until {} || jusqu’à {} || hasta {}
+Noch keine Touren || No tours yet || Aucun parcours pour l’instant || Aún no hay rutas
+Zepp meldet: {} || Zepp reports: {} || Zepp indique : {} || Zepp indica: {}
+Zepp meldet: || Zepp reports: || Zepp indique : || Zepp indica:
+{}: {} Touren ohne Gerät || {}: {} tours without a device || {} : {} parcours sans appareil || {}: {} rutas sin dispositivo
+{}: 1 Tour ohne Gerät || {}: 1 tour without a device || {} : 1 parcours sans appareil || {}: 1 ruta sin dispositivo
+Foto wählen || Choose photo || Choisir une photo || Elegir foto
+Foto entfernen || Remove photo || Retirer la photo || Quitar foto
+Dein eigenes Foto, zum Beispiel von der Uhr am Handgelenk. Es bleibt auf deinem Server und wird auf höchstens 512 Pixel verkleinert. || Your own photo, for example of the watch on your wrist. It stays on your server and is scaled down to at most 512 pixels. || Votre propre photo, par exemple de la montre au poignet. Elle reste sur votre serveur et est réduite à 512 pixels au maximum. || Tu propia foto, por ejemplo del reloj en la muñeca. Se queda en tu servidor y se reduce a 512 píxeles como máximo.
+z. B. Amazfit Balance 2 || e.g. Amazfit Balance 2 || p. ex. Amazfit Balance 2 || p. ej. Amazfit Balance 2
+So heißt das Gerät bei allen Touren („Quelle“). Du kannst es jederzeit umbenennen. || This is the device’s name on all tours (“Source”). You can rename it at any time. || C’est le nom de l’appareil sur tous les parcours (« Source »). Vous pouvez le renommer à tout moment. || Es el nombre del dispositivo en todas las rutas («Fuente»). Puedes cambiarlo cuando quieras.
+Touren einer Zepp-Uhr gehören zu einem Zepp-Gerät, Garmin-Touren zu einem Garmin-Gerät usw. || Tours from a Zepp watch belong to a Zepp device, Garmin tours to a Garmin device, and so on. || Les parcours d’une montre Zepp appartiennent à un appareil Zepp, ceux de Garmin à un appareil Garmin, etc. || Las rutas de un reloj Zepp pertenecen a un dispositivo Zepp, las de Garmin a uno Garmin, etc.
+z. B. Balance 2 || e.g. Balance 2 || p. ex. Balance 2 || p. ej. Balance 2
+Nur zur Anzeige: Das Modell steht in der Geräteliste unter dem Namen und hilft, ähnliche Geräte auseinanderzuhalten. An der Auswertung ändert es nichts. || Display only: the model is shown below the name in the device list and helps tell similar devices apart. It does not change any analysis. || Affichage uniquement : le modèle apparaît sous le nom dans la liste et aide à distinguer des appareils semblables. Il ne change rien à l’analyse. || Solo para mostrar: el modelo aparece bajo el nombre en la lista y ayuda a distinguir dispositivos parecidos. No cambia nada en el análisis.
+Im Gebrauch || In use || En service || En uso
+Seit || Since || Depuis || Desde
+Bis || Until || Jusqu’au || Hasta
+Bis (leer = aktuell) || Until (empty = current) || Jusqu’au (vide = actuel) || Hasta (vacío = actual)
+Beides ist optional, leer heißt unbegrenzt. Hast du mehrere Geräte gleicher Art, entscheidet das Tourdatum: beim alten Gerät „Bis“, beim neuen „Seit“ eintragen. || Both are optional; empty means unlimited. With several devices of the same type the tour date decides: enter “Until” on the old device and “Since” on the new one. || Les deux sont facultatifs ; vide = illimité. Avec plusieurs appareils du même type, la date du parcours décide : indiquez « Jusqu’au » pour l’ancien et « Depuis » pour le nouveau. || Ambos son opcionales; vacío significa sin límite. Con varios dispositivos del mismo tipo decide la fecha de la ruta: indica «Hasta» en el antiguo y «Desde» en el nuevo.
+Notiz (optional) || Note (optional) || Remarque (facultatif) || Nota (opcional)
+Deaktivierte Geräte behalten ihre Touren, ihre Messwerte werden aber eingeklappt. || Deactivated devices keep their tours, but their measurements are collapsed. || Les appareils désactivés gardent leurs parcours, mais leurs mesures sont repliées. || Los dispositivos desactivados conservan sus rutas, pero sus mediciones se pliegan.
+Erweitert || Advanced || Avancé || Avanzado
+Zepp-Kennung || Zepp identifier || Identifiant Zepp || Identificador de Zepp
+So meldet sich die Uhr in der Zepp-Cloud. Mit Kennung werden Touren dieser Uhr auch dann richtig zugeordnet, wenn sich die Zeiträume überschneiden. Am einfachsten über „Geräte aus Zepp ermitteln“ eintragen lassen. || This is how the watch identifies itself in the Zepp cloud. With an identifier, tours from this watch are assigned correctly even if time periods overlap. Easiest is to let “Detect devices from Zepp” fill it in. || C’est ainsi que la montre s’identifie dans le cloud Zepp. Avec l’identifiant, les parcours de cette montre sont attribués correctement même si les périodes se chevauchent. Le plus simple : laisser « Détecter les appareils depuis Zepp » le renseigner. || Así se identifica el reloj en la nube de Zepp. Con el identificador, las rutas de este reloj se asignan bien aunque los periodos se solapen. Lo más fácil es dejar que «Detectar dispositivos desde Zepp» lo rellene.
+Das Bild ist zu groß (höchstens 8 MB). || The image is too large (8 MB at most). || L’image est trop volumineuse (8 Mo au maximum). || La imagen es demasiado grande (8 MB como máximo).
+Touren zuordnen || Assign tours || Attribuer des parcours || Asignar rutas
+Alle Touren zwischen zwei Daten gehören ab jetzt fest zu diesem Gerät. Das ist nützlich, wenn die automatische Zuordnung nicht stimmt – zum Beispiel weil du die Uhr zwischendurch gewechselt hast. || All tours between two dates now belong firmly to this device. Useful when the automatic assignment is wrong – for example because you switched watches in between. || Tous les parcours entre deux dates appartiennent désormais à cet appareil. Utile quand l’attribution automatique est fausse – par exemple si vous avez changé de montre entre-temps. || Todas las rutas entre dos fechas pasan a pertenecer a este dispositivo. Útil cuando la asignación automática no es correcta, por ejemplo si cambiaste de reloj entremedias.
+Du kannst das jederzeit bei einzelnen Touren ändern („Quelle“ → „Ändern“ → „Automatisch“). || You can change this for single tours at any time (“Source” → “Change” → “Automatic”). || Vous pouvez le modifier à tout moment pour chaque parcours (« Source » → « Modifier » → « Automatique »). || Puedes cambiarlo en cualquier momento para cada ruta («Fuente» → «Cambiar» → «Automático»).
+Von (einschließlich) || From (inclusive) || Du (inclus) || Desde (incluido)
+Bis (einschließlich) || Until (inclusive) || Au (inclus) || Hasta (incluido)
+Das betrifft {} Touren. || This affects {} tours. || Cela concerne {} parcours. || Esto afecta a {} rutas.
+Das betrifft 1 Tour. || This affects 1 tour. || Cela concerne 1 parcours. || Esto afecta a 1 ruta.
+Bitte mindestens ein Datum angeben. || Please enter at least one date. || Veuillez indiquer au moins une date. || Indica al menos una fecha.
+{} Touren zugeordnet. || {} tours assigned. || {} parcours attribués. || {} rutas asignadas.
+„{}“ entfernen? || Remove “{}”? || Supprimer « {} » ? || ¿Quitar «{}»?
+Welches Gerät hat diese Tour aufgezeichnet? || Which device recorded this tour? || Quel appareil a enregistré ce parcours ? || ¿Qué dispositivo grabó esta ruta?
+Automatisch || Automatic || Automatique || Automático
+nach Art der Quelle und Datum || by type of source and date || selon le type de source et la date || según el tipo de fuente y la fecha
+Zepp merkt sich bei jedem Training, von welchem Gerät es kam. Daraus lässt sich ablesen, welche Uhren du hattest und wann. || Zepp remembers which device each workout came from. That shows which watches you had and when. || Zepp retient de quel appareil provient chaque entraînement. On peut en déduire quelles montres vous avez eues et quand. || Zepp guarda de qué dispositivo procede cada entrenamiento. Así se ve qué relojes tuviste y cuándo.
+Zepp-Verlauf wird gelesen – das kann bei vielen Trainings eine Weile dauern … || Reading the Zepp history – this can take a while with many workouts … || Lecture de l’historique Zepp – cela peut prendre un moment s’il y a beaucoup d’entraînements … || Leyendo el historial de Zepp: puede tardar un rato si hay muchos entrenamientos …
+Zugangsdaten bzw. Token prüfst du in der Verwaltung beim Zepp-Import. || Check your login details or token in Admin under the Zepp import. || Vérifiez vos identifiants ou le jeton dans l’administration, sous l’import Zepp. || Comprueba tus datos de acceso o el token en Administración, en la importación de Zepp.
+Zepp hat keine Trainings mit Quellenkennung gemeldet. || Zepp reported no workouts with a source identifier. || Zepp n’a signalé aucun entraînement avec identifiant de source. || Zepp no ha informado de entrenamientos con identificador de origen.
+Zepp meldet {} Trainings von einer Quelle. || Zepp reports {} workouts from one source. || Zepp signale {} entraînements d’une seule source. || Zepp informa de {} entrenamientos de un solo origen.
+Zepp meldet {} Trainings von {} Quellen. || Zepp reports {} workouts from {} sources. || Zepp signale {} entraînements de {} sources. || Zepp informa de {} entrenamientos de {} orígenes.
+Prüfe die Vorschläge, ändere sie nach Bedarf und wähle, was angelegt werden soll. Vorher wird nichts gespeichert. || Check the suggestions, change them if needed and choose what to create. Nothing is saved before that. || Vérifiez les propositions, modifiez-les si besoin et choisissez ce qui doit être créé. Rien n’est enregistré avant. || Revisa las propuestas, cámbialas si hace falta y elige qué crear. Antes no se guarda nada.
+Bereits angelegt als „{}“ || Already added as “{}” || Déjà ajouté sous « {} » || Ya añadido como «{}»
+Zepp-Uhr {} || Zepp watch {} || Montre Zepp {} || Reloj Zepp {}
+Zepp-Uhr || Zepp watch || Montre Zepp || Reloj Zepp
+{} Trainings || {} workouts || {} entraînements || {} entrenamientos
+{} bis {} || {} to {} || {} au {} || {} al {}
+Der Zeitraum überschneidet sich mit einer anderen Quelle. Zepp kann Uhr und Handy-App parallel melden – bitte prüfen, ob das wirklich zwei Geräte sind. || The period overlaps with another source. Zepp can report a watch and the phone app in parallel – please check whether these really are two devices. || La période chevauche une autre source. Zepp peut signaler la montre et l’appli du téléphone en parallèle – vérifiez qu’il s’agit bien de deux appareils. || El periodo se solapa con otro origen. Zepp puede informar a la vez del reloj y de la app del móvil: comprueba si realmente son dos dispositivos.
+Was soll damit passieren? || What should happen with it? || Que faire de cela ? || ¿Qué hacer con ello?
+Als neues Gerät anlegen || Add as a new device || Ajouter comme nouvel appareil || Añadir como dispositivo nuevo
+Kennung zu „{}“ hinzufügen || Add identifier to “{}” || Ajouter l’identifiant à « {} » || Añadir identificador a «{}»
+Welches Modell hinter einer Kennung steckt, kann die App nicht zuverlässig erkennen – trage es selbst ein, wenn du magst. || The app cannot reliably tell which model is behind an identifier – enter it yourself if you like. || L’application ne peut pas déterminer de façon fiable quel modèle se cache derrière un identifiant – indiquez-le vous-même si vous le souhaitez. || La app no puede saber con fiabilidad qué modelo hay tras un identificador: indícalo tú si quieres.
+Technische Angaben || Technical details || Informations techniques || Datos técnicos
+Felder eines Zepp-Trainings: || Fields of a Zepp workout: || Champs d’un entraînement Zepp : || Campos de un entrenamiento de Zepp:
+Ausgewählte übernehmen || Apply selected || Appliquer la sélection || Aplicar selección
+Bitte mindestens eine Quelle auswählen. || Please select at least one source. || Veuillez sélectionner au moins une source. || Selecciona al menos un origen.
 `;

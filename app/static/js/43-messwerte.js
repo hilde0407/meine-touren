@@ -93,7 +93,7 @@ async function metCard(t) {
     const der = keys.some(k => m.channels[k].derived);
     const src = m.device ? esc(m.device.name) + (m.source && m.source !== m.device.name ? ` (${esc(m.source)})` : "") : esc(m.source || "unbekannt");
     d.innerHTML = `<h2>Messwerte</h2>${keys.length ? `<div class="chips mb8" id="metchips">${chips}</div>` : ""}${sm}${charts}<div class="tip" id="mettip" hidden></div>` +
-      `<div class="mut mt8 hrnote">Quelle: ${src}${der ? " · * aus GPS-Strecke und Zeit berechnet (kein Messwert des Geräts)" : ""}</div>`;
+      `<div class="mut mt8 hrnote"><span class="dvsrc">${m.device ? dvAvatar(m.device, "xs") : ""}<span>Quelle:</span> <span>${src}</span></span>${der ? " · * aus GPS-Strecke und Zeit berechnet (kein Messwert des Geräts)" : ""}</div>`;
     d.querySelectorAll("#metchips i[data-c]").forEach(i => (i.style.background = i.dataset.c));
     d.querySelectorAll("#metchips [data-k]").forEach(b => (b.onclick = () => {
       const cur = metSel(keys), k = b.dataset.k;
@@ -123,7 +123,21 @@ async function metCard(t) {
   draw();
 }
 
-/* Zeile „Gerät: …“ auf der Tourseite (mit Auswahl, falls die automatische Zuordnung nicht stimmt) */
+/* ---------- Symbole und Bilder der Geräte (ohne Markenlogos, einfarbig) ---------- */
+const DV_STRAP = `<path d="M18 13V6.5A1.5 1.5 0 0 1 19.5 5h9A1.5 1.5 0 0 1 30 6.5V13M18 35v6.5a1.5 1.5 0 0 0 1.5 1.5h9a1.5 1.5 0 0 0 1.5-1.5V35"/>`,
+  DV_ICON = {
+    zepp: `${DV_STRAP}<rect x="13" y="13" width="22" height="22" rx="7"/><path d="M35 22h2.5v4H35M24 19v5.5l3.5 2"/>`,
+    garmin: `${DV_STRAP}<circle cx="24" cy="24" r="11"/><path d="M24 16v2M24 30v2M16 24h2M30 24h2M24 24l3 2"/>`,
+    suunto: `${DV_STRAP}<circle cx="24" cy="24" r="11"/><path d="M24 17.5l3 6.5-3 6.5-3-6.5z"/>`,
+    polar: `${DV_STRAP}<rect x="13" y="13" width="22" height="22" rx="4"/><path d="M17 25h4l2-5 3 9 2-4h3"/>`,
+    phone: `<rect x="14" y="5" width="20" height="38" rx="4.5"/><path d="M21 9.5h6"/><circle cx="24" cy="37.5" r="1.3"/>`,
+    other: `<path d="M24 6a10 10 0 0 1 10 10c0 7.5-10 18-10 18S14 23.5 14 16A10 10 0 0 1 24 6z"/><circle cx="24" cy="16" r="3.5"/><path d="M15 41h18"/>`,
+  };
+const dvIcon = k => `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${DV_ICON[k] || DV_ICON.other}</svg>`;
+const dvAvatar = (g, cls) => `<span class="dvav ${cls || ""}">${g.photo ? `<img src="/api/my-devices/${g.id}/photo?v=${g.photo}" alt="" loading="lazy">` : dvIcon(g.kind)}</span>`;
+const dvMonth = d => (d && /^\d{4}-\d\d/.test(d) ? d.slice(5, 7) + "/" + d.slice(0, 4) : "");
+
+/* Zeile „Quelle: …“ auf der Tourseite (mit Auswahl, falls die automatische Zuordnung nicht stimmt) */
 async function metDevRow(t) {
   const anchor = $("#ewarn");
   if (!t || !anchor) return;
@@ -133,19 +147,25 @@ async function metDevRow(t) {
     let row = $("#devrow");
     if (!m.device && !m.source && !dv.devices.length) return row && row.remove();
     if (!row) {
-      anchor.insertAdjacentHTML("beforebegin", `<div id="devrow" class="row mn4-0-12 g8"></div>`);
+      anchor.insertAdjacentHTML("beforebegin", `<div id="devrow" class="dvrow"></div>`);
       row = $("#devrow");
     }
-    const name = m.device ? m.device.name : m.source || "unbekannt";
-    row.innerHTML = `<span class="mut">Quelle:</span><span class="chip on">${esc(name)}${m.device && !m.device.active ? " (deaktiviert)" : ""}</span>` +
-      (typeof isViewer === "function" && isViewer() ? "" : `<button class="btn ghost sm" id="devedit" title="Gerät dieser Tour ändern">✎</button>`);
+    const g = m.device,
+      name = g ? g.name : m.source || "unbekannt",
+      sub = g ? [g.model, !g.active ? "deaktiviert" : "", g.manual ? "von Hand zugeordnet" : ""].filter(Boolean) : [];
+    row.innerHTML = (g ? dvAvatar(g, "xs") : `<span class="dvav xs">${dvIcon("other")}</span>`) +
+      `<span class="dvt"><small>Aufgezeichnet mit</small><b>${esc(name)}</b>${sub.length ? `<small>${sub.map(x => `<span>${esc(x)}</span>`).join(" · ")}</small>` : ""}</span>` +
+      (typeof isViewer === "function" && isViewer() ? "" : `<button class="dvedit" id="devedit" title="Gerät dieser Tour ändern"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg><span>Ändern</span></button>`);
     const be = $("#devedit");
     if (be) be.onclick = () => {
-      const mo = modal(`<h2>Gerät dieser Tour</h2>
-        <label class="row g8"><input type="radio" name="dvm" value="" ${m.device && m.device.manual ? "" : "checked"}> automatisch (nach Art der Quelle und Datum)</label>
-        ${dv.devices.map(g => `<label class="row g8 m4-0"><input type="radio" name="dvm" value="${g.id}" ${m.device && m.device.manual && m.device.id === g.id ? "checked" : ""}> ${esc(g.name)}${g.active ? "" : " (deaktiviert)"} <span class="mut">${esc(devKindLabel(dv, g.kind))}</span></label>`).join("")}
+      const cur = m.device && m.device.manual ? m.device.id : 0;
+      const pick = (val, av, title, small, on) => `<label class="dvpickrow"><input type="radio" name="dvm" value="${val}" ${on ? "checked" : ""}>${av}<span><b>${title}</b><small>${small}</small></span></label>`;
+      const mo = modal(`<h2>Gerät dieser Tour</h2><p class="dvlead">Welches Gerät hat diese Tour aufgezeichnet?</p>
+        ${pick("", `<span class="dvav xs">${dvIcon("other")}</span>`, "Automatisch", "nach Art der Quelle und Datum", !cur)}
+        ${dv.devices.map(x => pick(x.id, dvAvatar(x, "xs"), esc(x.name) + (x.active ? "" : " (deaktiviert)"), esc([devKindLabel(dv, x.kind), x.model].filter(Boolean).join(" · ")), cur === x.id)).join("")}
         ${dv.devices.length ? "" : `<p class="mut">Noch kein Gerät angelegt – in der Verwaltung unter „Meine Geräte“.</p>`}
-        <div class="row mt14"><button class="btn" id="dvok">Speichern</button><button class="btn ghost" id="dvno">Abbrechen</button></div><div id="dverr" class="bad"></div>`);
+        <div class="dvfoot"><button class="btn" id="dvok">Speichern</button><button class="btn ghost" id="dvno">Abbrechen</button></div><div id="dverr" class="bad"></div>`);
+      mo.querySelector(".mbox").classList.add("dvbox");
       $("#dvno").onclick = () => mo.remove();
       $("#dvok").onclick = async () => {
         const v = (mo.querySelector("input[name=dvm]:checked") || {}).value;
@@ -177,106 +197,4 @@ VIEWS.tour = async (...a) => {
     else if (n < 20) setTimeout(() => tryCard(n + 1), 150);
   };
   tryCard();
-};
-
-/* ---------- Verwaltung: Meine Geräte ---------- */
-function devForm(dv, g, done) {
-  g = g || {kind: "zepp", active: true};
-  const m = modal(`<h2>${g.id ? "Gerät bearbeiten" : "Neues Gerät"}</h2>
-   <label>Name<input id="dvn" maxlength="80" value="${esc(g.name || "")}" placeholder="z. B. Amazfit Balance 2, Garmin Fenix – alt"></label>
-   <label>Art<select id="dvk">${dv.kinds.map(k => `<option value="${k.kind}" ${k.kind === g.kind ? "selected" : ""}>${esc(k.label)}</option>`).join("")}</select></label>
-   <label>Modell (optional)<input id="dvm" maxlength="80" value="${esc(g.model || "")}"></label>
-   <div class="row mt10"><label>Im Gebrauch ab<input type="date" id="dvs" value="${esc(g.since || "")}"></label><label>bis (leer = noch im Gebrauch)<input type="date" id="dvu" value="${esc(g.until || "")}"></label></div>
-   <p class="mut fs13">Mit mehreren Geräten gleicher Art entscheidet das Tourdatum, zu welchem Gerät eine Tour gehört.</p>
-   <label class="chk"><input type="checkbox" id="dva" ${g.active ? "checked" : ""}> aktiv (deaktivierte Geräte behalten ihre Touren, ihre Messwerte werden aber eingeklappt)</label>
-   <label>Notiz<input id="dvt" maxlength="300" value="${esc(g.note || "")}"></label>
-   <div class="row mt14"><button class="btn" id="dvsave">Speichern</button><button class="btn ghost" id="dvcancel">Abbrechen</button><span class="sp"></span>${g.id ? `<button class="btn ghost" id="dvrange">Touren zuordnen …</button><button class="btn ghost" id="dvdel">Löschen</button>` : ""}</div><div id="dverr" class="bad"></div>`);
-  $("#dvcancel").onclick = () => m.remove();
-  $("#dvsave").onclick = async () => {
-    const body = {name: $("#dvn").value, kind: $("#dvk").value, model: $("#dvm").value, since: $("#dvs").value, until: $("#dvu").value, active: $("#dva").checked, note: $("#dvt").value};
-    try {
-      if (g.id) await api("/api/devices/" + g.id, {method: "PATCH", headers: {"content-type": "application/json"}, body: JSON.stringify(body)});
-      else await api("/api/devices", METJ(body));
-      MET_CACHE.clear();
-      m.remove();
-      done();
-    } catch (e) {
-      $("#dverr").textContent = e.message;
-    }
-  };
-  if (!g.id) return;
-  $("#dvrange").onclick = () => {
-    m.remove();
-    const r = modal(`<h2>Touren „${esc(g.name)}“ zuordnen</h2><p class="mut">Alle Touren im Zeitraum werden fest diesem Gerät zugeordnet (jederzeit je Tour änderbar).</p>
-      <div class="row"><label>von<input type="date" id="rf"></label><label>bis<input type="date" id="rt"></label></div>
-      <div class="row mt14"><button class="btn" id="rok">Zuordnen</button><button class="btn ghost" id="rno">Abbrechen</button></div><div id="rerr" class="bad"></div>`);
-    $("#rno").onclick = () => r.remove();
-    $("#rok").onclick = async () => {
-      try {
-        const res = await api("/api/devices/assign-range", METJ({device_id: g.id, from: $("#rf").value, to: $("#rt").value}));
-        r.remove();
-        MET_CACHE.clear();
-        alert(`${res.n} Touren zugeordnet.`);
-        done();
-      } catch (e) {
-        $("#rerr").textContent = e.message;
-      }
-    };
-  };
-  $("#dvdel").onclick = async () => {
-    if (!confirm(`„${g.name}“ entfernen?`)) return;
-    try {
-      await api("/api/devices/" + g.id, {method: "DELETE"});
-      m.remove();
-      done();
-    } catch (e) {
-      const others = dv.devices.filter(x => x.id !== g.id);
-      if (!/umhängen/.test(e.message)) return ($("#dverr").textContent = e.message);
-      if (!others.length) return ($("#dverr").textContent = e.message + " Lege dafür zuerst ein anderes Gerät an.");
-      m.remove();
-      const mv = modal(`<h2>Touren umhängen</h2><p>${esc(e.message)}</p><label>Auf dieses Gerät umhängen<select id="mvto">${others.map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join("")}</select></label>
-        <div class="row mt14"><button class="btn" id="mvok">Umhängen und löschen</button><button class="btn ghost" id="mvno">Abbrechen</button></div><div id="mverr" class="bad"></div>`);
-      $("#mvno").onclick = () => mv.remove();
-      $("#mvok").onclick = async () => {
-        try {
-          await api(`/api/devices/${g.id}?move_to=${$("#mvto").value}`, {method: "DELETE"});
-          mv.remove();
-          MET_CACHE.clear();
-          done();
-        } catch (e2) {
-          $("#mverr").textContent = e2.message;
-        }
-      };
-    }
-  };
-}
-
-async function devPanel() {
-  const root = $("#devsec");
-  if (!root) return;
-  const [dv, sug] = await Promise.all([api("/api/my-devices"), api("/api/devices/suggestions").catch(() => [])]);
-  const hidden = k => { try { return localStorage.getItem("mt_devsug_" + k) === "1"; } catch (e) { return false; } };
-  const sugs = sug.filter(s => !hidden(s.kind));
-  root.innerHTML = `<h2>Meine Geräte</h2><p class="mut">Lege deine Aufnahmegeräte an und benenne sie selbst – der Name erscheint bei jeder Tour („Quelle“). Welche Messwerte eine Tour zeigt, richtet sich nach dem, was das Gerät wirklich geliefert hat.</p>
-    ${sugs.map(s => `<div class="panel mb12" data-sug="${esc(s.kind)}"><b>${esc(s.label)}-Touren gefunden (${s.n})</b><div class="mut">Möchtest du dafür ein Gerät anlegen? Es wird nichts ohne deine Bestätigung angelegt.</div>
-      <div class="row mt8"><button class="btn sm" data-sy="${esc(s.kind)}" data-nm="${esc(s.name)}">Gerät „${esc(s.name)}“ anlegen …</button><button class="btn ghost sm" data-sn="${esc(s.kind)}">Nicht jetzt</button></div></div>`).join("")}
-    ${dv.devices.length
-      ? `<div class="rows">${dv.devices.map(g => `<div class="r cp${g.active ? "" : " mut"}" data-dv="${g.id}"><span>${esc(g.name)}${g.active ? "" : " (deaktiviert)"}<small>${esc(devKindLabel(dv, g.kind))}${g.model ? " · " + esc(g.model) : ""}${g.since ? " · ab " + esc(g.since) : ""}${g.until ? " · bis " + esc(g.until) : ""}${g.note ? " · " + esc(g.note) : ""}</small></span><span class="tar"><b>${g.n}</b><small>Touren</small></span></div>`).join("")}</div>`
-      : `<p class="mut">Noch kein Gerät angelegt.</p>`}
-    <div class="row mt10"><button class="btn sm alt" id="dvnew">+ Neues Gerät</button></div>`;
-  $("#dvnew").onclick = () => devForm(dv, null, devPanel);
-  root.querySelectorAll("[data-dv]").forEach(r => (r.onclick = () => devForm(dv, dv.devices.find(g => g.id === +r.dataset.dv), devPanel)));
-  root.querySelectorAll("[data-sy]").forEach(b => (b.onclick = () => devForm(dv, {kind: b.dataset.sy, name: b.dataset.nm, active: true}, devPanel)));
-  root.querySelectorAll("[data-sn]").forEach(b => (b.onclick = () => {
-    try { localStorage.setItem("mt_devsug_" + b.dataset.sn, "1"); } catch (e) {}
-    devPanel();
-  }));
-}
-const _adm43 = VIEWS.admin;
-VIEWS.admin = async (...a) => {
-  await _adm43(...a);
-  const host = document.querySelector('.atab[data-t="quellen"] .gbody') || $("#main");
-  if (!host || $("#devsec")) return;
-  host.insertAdjacentHTML("afterbegin", `<div class="panel acard" id="devsec"></div>`);
-  devPanel().catch(() => {});
 };

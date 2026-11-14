@@ -1104,21 +1104,81 @@ def test_messwerte_and_meine_geraete(page):
     page.locator("#metchips [data-k='pace']").click()                                             # Auswahl umschalten und merken
     page.wait_for_function("n => document.querySelectorAll('#metcard svg.metsvg').length !== n", arg=n, timeout=4000)
     assert page.evaluate("() => localStorage.getItem('mt_met_sel')") is not None
-    # Meine Geräte
-    page.goto(base + "#/admin?tab=quellen"); page.wait_for_selector("#devsec #dvnew", timeout=10000)
-    assert "Meine Geräte" in page.inner_text("#devsec h2")
-    page.click("#dvnew"); page.fill("#dvn", "Test-Uhr alt"); page.select_option("#dvk", kind); page.click("#dvsave")
-    page.wait_for_selector("#devsec [data-dv]", timeout=6000)
-    assert "Test-Uhr alt" in page.inner_text("#devsec")
+    # Meine Geräte: leerer Zustand -> Dialog -> Kartenliste -> Tourseite zeigt den Namen -> Menü -> Löschen verweigert (Touren hängen daran)
+    page.goto(base + "#/admin?tab=quellen"); page.wait_for_selector("#devsec .dvempty", timeout=10000)
+    assert page.locator("#dvzepp").count() == 1 and page.locator("#dvnew2").count() == 1          # einladender leerer Zustand mit beiden Wegen
+    page.click("#dvnew2"); page.wait_for_selector("#dvn")
+    assert "Modell (optional)" in page.inner_text(".dvbox") and "An der Auswertung ändert es nichts" in page.inner_text(".dvbox")   # Hilfetext zum Modell
+    page.fill("#dvn", "Test-Uhr alt"); page.select_option("#dvk", kind); page.fill("#dvm", "Modell X"); page.fill("#dvs", "2020-01-01")
+    page.click("#dvsave")
+    page.wait_for_selector("#devsec .dvcard", timeout=6000)
+    card = page.inner_text("#devsec .dvcard")
+    assert "Test-Uhr alt" in card and "Modell X" in card and "seit 01/2020" in card and "aktuell" in card and "Aktiv" in card, card
+    assert page.locator("#devsec .dvcard .dvav svg").count() == 1                                 # Symbol statt Foto
     page.goto(base + "#/tour/" + tid); page.wait_for_selector("#devrow", timeout=8000)
     page.wait_for_function("() => /Test-Uhr alt/.test(document.querySelector('#devrow').textContent)", timeout=6000)
-    page.goto(base + "#/admin?tab=quellen"); page.wait_for_selector("#devsec [data-dv]", timeout=8000)
-    page.locator("#devsec [data-dv]").first.click(); page.wait_for_selector("#dvn")
+    assert "Aufgezeichnet mit" in page.inner_text("#devrow")
+    page.goto(base + "#/admin?tab=quellen"); page.wait_for_selector("#devsec .dvcard", timeout=8000)
+    page.locator("#devsec .dvcard").first.click(); page.wait_for_selector("#dvn")                 # Karte öffnet den Dialog
     page.fill("#dvn", "Test-Uhr neu"); page.click("#dvsave")
     page.wait_for_function("() => /Test-Uhr neu/.test(document.querySelector('#devsec').textContent)", timeout=6000)
-    page.locator("#devsec [data-dv]").first.click(); page.wait_for_selector("#dvdel")
-    page.once("dialog", lambda d: d.accept())
-    page.click("#dvdel")                                               # Touren hängen daran: Umhängen-Dialog erscheint statt Löschen
-    page.wait_for_selector("#dverr, #mvto", timeout=6000)
-    assert page.locator("#mvto").count() == 0 and "umhängen" in page.inner_text("#dverr")   # kein anderes Gerät vorhanden: Hinweis
+    page.locator("#devsec .dvmore").first.click(); page.wait_for_selector(".dvmenu")
+    assert {"Bearbeiten", "Touren zuordnen …", "Deaktivieren", "Löschen …"} <= set(page.locator(".dvmenu button").all_inner_texts()) | {"Löschen …"}
+    msgs = []
+    page.once("dialog", lambda d: (msgs.append(d.message), d.accept()))
+    page.locator(".dvmenu button", has_text="Löschen").click()
+    page.wait_for_timeout(800)
+    page.on("dialog", lambda d: d.accept())
+    assert page.locator("#devsec .dvcard").count() == 1                                           # Touren hängen daran: nicht gelöscht
+    page.locator("#devsec .dvmore").first.click()                                                  # Deaktivieren über das Menü
+    page.locator(".dvmenu button", has_text="Deaktivieren").click()
+    page.wait_for_function("() => /Deaktiviert/.test(document.querySelector('#devsec .dvcard').textContent)", timeout=6000)
+    assert page.locator("#devsec .dvcard.off").count() == 1
+    assert not page.errors, page.errors
+
+
+def test_meine_geraete_foto_zepp_dialog_und_handy(page, tmp_path):
+    """Foto im Dialog wählen (Vorschau, Speichern, Anzeige in Karte), „Geräte aus Zepp ermitteln“ mit nachgebauter Antwort, Handybreite ohne Überlauf."""
+    import json
+    from PIL import Image
+    base = page.url.split("#")[0]
+    png = tmp_path / "uhr.png"
+    Image.new("RGB", (800, 600), (30, 120, 90)).save(png)
+    probe = {"sources": [
+        {"zsrc": "run.46.huami.com", "n": 12, "first": "2021-05-02", "last": "2024-02-20", "sports": [{"sport": "hike", "label": "Wandern", "n": 12}], "device": None, "overlaps": []},
+        {"zsrc": "watch.52.huami.com", "n": 30, "first": "2024-03-01", "last": "2026-11-10", "sports": [{"sport": "hike", "label": "Wandern", "n": 30}], "device": None, "overlaps": []}],
+        "total": 42, "without_source": 0, "sample_keys": ["dis", "source", "trackid"]}
+    page.goto(base + "#/dash"); page.goto(base + "#/admin?tab=quellen"); page.wait_for_selector("#devsec .dvcard", timeout=10000)
+    page.locator("#devsec .dvcard").first.click(); page.wait_for_selector("#dvfile", state="attached")
+    page.set_input_files("#dvfile", str(png))
+    page.wait_for_selector("#dvpv img", timeout=4000)                                              # Vorschau
+    page.click("#dvsave")
+    page.wait_for_selector("#devsec .dvcard .dvav img", timeout=8000)
+    assert page.evaluate("async () => (await fetch(document.querySelector('#devsec .dvav img').src)).headers.get('content-type')") == "image/jpeg"
+    page.locator("#devsec .dvcard").first.click(); page.wait_for_selector("#dvpclr:not([hidden])")
+    page.click("#dvpclr"); page.click("#dvsave")                                                   # Foto wieder entfernen
+    page.wait_for_function("() => !document.querySelector('#devsec .dvcard .dvav img')", timeout=8000)
+    # Zepp ermitteln (gemockt): zwei Kennungen, Name/Seit/Bis vorgeschlagen, Anlegen erst nach Bestätigung
+    page.route("**/api/devices/zepp-probe", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps(probe)))
+    page.click("#dvzepp"); page.wait_for_selector(".dvpr .znm", timeout=6000)
+    assert page.locator(".dvpr").count() == 2 and "run.46.huami.com" in page.inner_text(".dvprobe")
+    assert page.locator(".dvpr .znm").first.input_value() == "Zepp-Uhr 1" and page.locator(".dvpr .zs").first.input_value() == "2021-05-02"
+    assert page.locator(".dvpr .zu").first.input_value() == "2024-02-20" and page.locator(".dvpr .zu").nth(1).input_value() == ""   # neueste Uhr: „aktuell“
+    n0 = page.locator("#devsec .dvcard").count()
+    page.locator(".dvpr .zon").nth(1).uncheck()
+    page.click("#zok"); page.wait_for_function("n => document.querySelectorAll('#devsec .dvcard').length === n + 1", arg=n0, timeout=8000)
+    assert "Zepp meldet: run.46.huami.com" in page.inner_text("#devsec")                         # kein Modell geraten, Kennung als Hinweis
+    page.unroute("**/api/devices/zepp-probe")
+    page.route("**/api/devices/zepp-probe", lambda r: r.fulfill(status=422, content_type="application/json", body=json.dumps({"detail": "Zepp ist nicht erreichbar: Token abgelaufen"})))
+    page.click("#dvzepp"); page.wait_for_selector(".dvbox .bad", timeout=6000)
+    assert "Token abgelaufen" in page.inner_text(".dvbox")
+    page.click("#zclose")
+    page.unroute("**/api/devices/zepp-probe")
+    # Handybreite: nichts läuft über den Rand
+    page.set_viewport_size({"width": 390, "height": 800}); page.reload(); page.wait_for_selector("#devsec .dvcard", timeout=10000)
+    assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+    page.locator("#devsec .dvcard").first.click(); page.wait_for_selector("#dvn")
+    assert page.evaluate("() => { const b = document.querySelector('.dvbox').getBoundingClientRect(); return b.left >= 0 && b.right <= innerWidth + 1; }")
     page.click("#dvcancel")
+    page.set_viewport_size({"width": 1280, "height": 900})
+    assert not page.errors, page.errors

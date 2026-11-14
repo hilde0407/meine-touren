@@ -4,7 +4,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import elev, config, db, gpxtools, jobs, komoot as komoot_mod, metrics, photos, portals, routes, trackfix, tracks, zepp
+from . import elev, config, db, gpxtools, jobs, komoot as komoot_mod, metrics, mydevices, photos, portals, routes, trackfix, tracks, zepp
 from .jobs import log
 
 
@@ -177,6 +177,10 @@ def export_zepp(limit=None):
     api = zepp.ZeppApi(token, db.get("zepp_host"))
     summaries = api.history()
     log(f"Zepp: {len(summaries)} Trainings im Verlauf (Server {api.host})")
+    try:
+        mydevices.note_zsrc(summaries)                         # Zepp-Kennung je Training merken (für „Meine Geräte“)
+    except Exception as e:  # noqa
+        log(f"Zepp-Kennungen nicht gemerkt: {e}")
     tours_k = db.query("SELECT start_ts,dist_m,dur_s FROM tours")
     tol = db.get_int("dup_tolerance_s", 300)
     known = {r["trackid"] for r in db.query("SELECT trackid FROM workouts")}

@@ -21,7 +21,7 @@ python3 - "$F" "$T" <<'PY'
 import sys, zipfile
 z = zipfile.ZipFile(sys.argv[1]); z.extract("komoot_hub.sqlite", sys.argv[2])
 for n in z.namelist():
-    if n.startswith("tracks/"): z.extract(n, sys.argv[2])
+    if n.startswith(("tracks/", "devices/")) and ".." not in n: z.extract(n, sys.argv[2])
 open(sys.argv[2] + "/uid", "w").write(z.read("UID.txt").decode() if "UID.txt" in z.namelist() else "")
 PY
 U=$(cat "$T/uid")
@@ -30,6 +30,7 @@ systemctl stop "$NAME"
 [ -f "$DATA/komoot_hub.sqlite" ] && cp "$DATA/komoot_hub.sqlite" "$DATA/komoot_hub.sqlite.vor-restore"
 cp "$T/komoot_hub.sqlite" "$DATA/komoot_hub.sqlite"; chown "$SVCUSER:$SVCUSER" "$DATA/komoot_hub.sqlite"
 [ -d "$T/tracks" ] && mkdir -p "$DATA/tracks" && cp -n "$T"/tracks/* "$DATA/tracks/" && chown -R "$SVCUSER:$SVCUSER" "$DATA/tracks"
+[ -d "$T/devices" ] && mkdir -p "$DATA/devices" && cp -n "$T"/devices/* "$DATA/devices/" && chown -R "$SVCUSER:$SVCUSER" "$DATA/devices"
 rm -f "$DATA/komoot_hub.sqlite-wal" "$DATA/komoot_hub.sqlite-shm"
 systemctl start "$NAME"
 echo "Wiederhergestellt aus $F${U:+ (Benutzer $U)} (vorheriger Stand: komoot_hub.sqlite.vor-restore)."

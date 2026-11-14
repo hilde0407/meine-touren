@@ -111,6 +111,9 @@ def _open(path):
         conn.execute("CREATE TABLE IF NOT EXISTS devices (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, kind TEXT, model TEXT, since TEXT, until TEXT, active INTEGER DEFAULT 1, note TEXT)")   # Meine Geräte (Uhr, Handy …)
         conn.execute("CREATE TABLE IF NOT EXISTS tour_device (tour_id TEXT PRIMARY KEY, device_id INTEGER)")   # ausdrückliche Zuordnung Tour -> Gerät (sonst automatisch nach Art und Datum)
         conn.execute("CREATE TABLE IF NOT EXISTS tour_source (tour_id TEXT PRIMARY KEY, src TEXT, name TEXT)")   # Art/Name der Aufzeichnungsquelle je Tour (zepp, garmin, suunto, polar, phone, other)
+        if "zsrc" not in {r["name"] for r in conn.execute("PRAGMA table_info(devices)")}:
+            conn.execute("ALTER TABLE devices ADD COLUMN zsrc TEXT")            # rohe Zepp-Kennung der Quelle (z. B. „run.46.huami.com“); nur ergänzt, nie gelöscht
+        conn.execute("CREATE TABLE IF NOT EXISTS tour_zsrc (tour_id TEXT PRIMARY KEY, zsrc TEXT)")   # Zepp-Kennung der Quelle je Tour (aus dem Zepp-Verlauf)
         conn.commit()
         _conns[path] = conn
         return conn
