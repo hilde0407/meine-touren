@@ -93,7 +93,9 @@ async function metCard(t) {
     const der = keys.some(k => m.channels[k].derived);
     const src = m.device ? esc(m.device.name) + (m.source && m.source !== m.device.name ? ` (${esc(m.source)})` : "") : esc(m.source || "unbekannt");
     d.innerHTML = `<h2>Messwerte</h2>${keys.length ? `<div class="chips mb8" id="metchips">${chips}</div>` : ""}${sm}${charts}<div class="tip" id="mettip" hidden></div>` +
-      `<div class="mut mt8 hrnote"><span class="dvsrc">${m.device ? dvAvatar(m.device, "xs") : ""}<span>Quelle:</span> <span>${src}</span></span>${der ? " · * aus GPS-Strecke und Zeit berechnet (kein Messwert des Geräts)" : ""}</div>`;
+      `<div class="mut mt8 hrnote"><span class="dvsrc">${m.device ? dvAvatar(m.device, "xs") : ""}<span>Quelle:</span> <span>${src}</span></span>${der ? " · * aus GPS-Strecke und Zeit berechnet (kein Messwert des Geräts)" : ""} · <button type="button" class="dvulink" id="dvulink">Alle Felder dieser Tour</button></div>`;
+    const ul = $("#dvulink");
+    if (ul) ul.onclick = () => dvUhrFelder("tour", t.id, t.name);
     d.querySelectorAll("#metchips i[data-c]").forEach(i => (i.style.background = i.dataset.c));
     d.querySelectorAll("#metchips [data-k]").forEach(b => (b.onclick = () => {
       const cur = metSel(keys), k = b.dataset.k;

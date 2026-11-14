@@ -688,3 +688,34 @@ html.mob .dvrow{border-radius:16px}
 @media (max-width:520px){.dvkv{font-size:24px}.dvsg{flex-direction:column;align-items:stretch}.dvbadul .btn{width:100%}}
 html.mob .dvq>summary{min-height:48px}
 .dvbadul li[hidden]{display:none}.dvmoreb{margin-top:10px}
+/* „Was liefert diese Uhr?“ / „Alle Felder dieser Tour“ (3.10.1) */
+.dvuhr,.dvulink{border:0;background:none;padding:6px 0;margin:4px 0 0;font:600 15px var(--b);color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;text-align:left;min-height:32px}
+.dvulink{display:inline;margin:0;padding:4px 2px;font-size:14px;min-height:0}
+.dvuhr:hover,.dvulink:hover{text-decoration-thickness:2px}
+.dvuhr:focus-visible,.dvulink:focus-visible,.dvuchk input:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:3px}
+.mbox.dvbox.dvubox{max-width:900px}
+.dvubody{min-width:0}.dvuh{font-size:15px;margin:4px 0 8px;line-height:1.45}
+.dvuempty{padding:12px 14px;border:1px solid var(--rule);border-left:4px solid var(--yellow);border-radius:var(--r);background:var(--card);margin:6px 0 12px}
+.dvuempty ul{margin:6px 0 0;padding-left:20px}.dvuempty li{margin:3px 0}
+.dvusrc{margin:16px 0 0}.dvusrc h3{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:0 0 6px;font:700 18px var(--d)}
+.dvut{width:100%;border-collapse:collapse;font-size:15px;table-layout:fixed}
+.dvut th,.dvut td{padding:8px 10px;border-top:1px solid var(--rule);border-bottom:0;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+.dvut thead th{font:600 14px var(--b);color:var(--mut);border-top:0;border-bottom:2px solid var(--rule)}
+.dvut thead th:first-child,.dvut tbody th{width:38%}.dvut thead th:nth-child(2),.dvut thead th:nth-child(4){width:17%}
+.dvut tbody th{font-weight:500}.dvut code{font:600 14px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);background:var(--soft);padding:1px 6px;border-radius:4px}
+.dvut small{display:block;color:var(--mut);font-size:14px;line-height:1.4;margin-top:2px}
+.dvut td span{display:block}.dvut tr.empty th code,.dvut tr.empty td{opacity:1}.dvut tr.empty td span.mut{color:var(--mut)}
+.dvuy,.dvun{display:inline-flex!important;align-items:center;gap:5px;padding:1px 10px 1px 6px;border-radius:99px;font:600 14px/1.6 var(--b);width:max-content}
+.dvuy{background:var(--dv-ok-bg);color:var(--dv-ok)}.dvun{background:var(--soft);color:var(--mut)}.dvun.has{background:var(--dv-warn-bg);color:var(--dv-warn)}
+.dvuy svg,.dvun svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.dvuchk{display:flex;align-items:center;gap:8px;font:500 15px var(--b);cursor:pointer;min-height:32px;margin:8px 0 2px}.dvuchk input{width:18px;height:18px;flex:none}
+.mbox.dvubox .dvfoot{align-items:center}.mbox.dvubox .dvfoot .sp{flex:1}
+@media (max-width:640px){
+  .mbox.dvbox.dvubox{padding:18px 14px}
+  .dvut,.dvut tbody,.dvut tr,.dvut td,.dvut tbody th{display:block;width:auto}.dvut thead{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .dvut tbody tr{border:1px solid var(--rule);border-radius:var(--r);background:var(--card);margin:0 0 8px;padding:6px 0}
+  .dvut th,.dvut td{border-top:0;padding:4px 12px}.dvut tbody th{width:auto!important}
+  .dvut td{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}.dvut td::before{content:attr(data-l);flex:0 0 118px;font:600 13px var(--b);color:var(--mut)}
+  .dvut td>*{flex:1 1 auto;min-width:0}.dvut td span{display:inline-block}.dvut td>.dvuy,.dvut td>.dvun{flex:0 0 auto}
+}
+.dvubox [hidden]{display:none!important}

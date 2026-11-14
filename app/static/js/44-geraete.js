@@ -6,6 +6,7 @@ const DV_SVG = {
   off: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg>`,
   on: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.5l3 3 5-6"/></svg>`,
   del: `<svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13"/></svg>`,
+  info: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.1"/></svg>`,
   dots: `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5.5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="18.5" r="1.9"/></svg>`,
 };
 const dvJson = (m, o) => ({method: m, headers: {"content-type": "application/json"}, body: JSON.stringify(o)});
@@ -383,6 +384,71 @@ async function dvQRun(root, btn, again) {
   again();
 }
 
+/* ---------- „Was liefert diese Uhr?“ (Gerät) und „Alle Felder dieser Tour“: zeigt, welche Felder die Quellen wirklich enthalten (nur lesen) ---------- */
+const DVU_NF = x => (Number.isInteger(x) ? nf(x, 0) : nf(x, Math.abs(x) >= 100 ? 0 : Math.abs(x) >= 10 ? 1 : 2));
+const DVU_STATE = {ok: "ok", kein_zugang: "none", fehler: "bad", kein_training: "none", nicht_zutreffend: "none", keine_datei: "none", keine_touren: "none"};
+const DVU_STLAB = {kein_zugang: "kein Zepp-Zugang", fehler: "nicht erreichbar", kein_training: "kein Training zugeordnet", nicht_zutreffend: "nicht zutreffend", keine_datei: "nicht vorhanden", keine_touren: "keine Touren"};
+function dvuRange(f) {
+  if (f.hidden) return `<span class="mut" title="Koordinaten, Kennungen und Zeitstempel zeigt die Diagnose nie an">nicht angezeigt</span>`;
+  if (f.min == null) return `<span class="mut">–</span>`;
+  const u = f.unit && f.unit !== "roh" ? " " + esc(f.unit) : "";
+  const r = f.min === f.max ? DVU_NF(f.min) + u : `${DVU_NF(f.min)} bis ${DVU_NF(f.max)}${u}`;
+  return `<span>${r}</span>${f.median != null && f.min !== f.max ? `<small>Median ${DVU_NF(f.median)}</small>` : ""}${f.unit === "roh" ? `<small>Rohwert</small>` : ""}`;
+}
+function dvuRow(f, src, scope) {
+  const pres = scope === "tour" ? (f.n > 0 ? `<span>vorhanden</span><small>${DVU_NF(f.n)} ${f.n === 1 ? "Wert" : "Werte"}${f.share != null && f.share < 1 ? `, ${nf(f.share * 100, 0)} % gefüllt` : ""}</small>` : `<span class="mut">leer</span>`)
+    : `<span>${f.n_tours} von ${src.tours_checked}</span><small>${f.n_tours ? (f.share != null ? `${nf(f.share * 100, 0)} % gefüllt` : f.type) : "immer leer"}</small>`;
+  const use = f.used ? `<span class="dvuy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>ja</span>`
+    : `<span class="dvun ${f.n_tours ? "has" : ""}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg>nein</span>`;
+  return `<tr class="${f.used ? "" : "unused"}${f.n_tours ? "" : " empty"}"><th scope="row"><code>${esc(f.name)}</code>${f.text ? `<small>${esc(f.text)}</small>` : ""}</th>
+    <td data-l="${scope === "tour" ? "Vorhanden" : "In Touren"}">${pres}</td><td data-l="Bereich">${dvuRange(f)}</td><td data-l="Wird ausgewertet">${use}</td></tr>`;
+}
+function dvuBody(rep, only) {
+  const scope = rep.scope, any = rep.sources.some(s => s.state === "ok");
+  let h = "", one = false;
+  if (!any) {
+    const hints = [...new Set(rep.sources.map(s => s.hint).filter(Boolean))];
+    one = hints.length === 1;                                  // gleiche Erklärung nicht je Quelle wiederholen
+    h += `<div class="dvuempty"><b>Für ${scope === "tour" ? "diese Tour" : "dieses Gerät"} liegen noch keine Felder vor.</b><ul>${hints.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
+  }
+  rep.sources.forEach(s => {
+    const fl = only ? s.fields.filter(f => !f.used && f.n_tours) : s.fields;
+    const nUn = s.fields.filter(f => !f.used && f.n_tours).length;
+    h += `<section class="dvusrc"><h3>${esc(s.label)}<span class="dvqs ${DVU_STATE[s.state] || "none"}">${s.state === "ok" ? (scope === "device" ? `${s.tours_checked} von ${rep.tours_checked} Touren` : `${s.fields.length} Felder`) : esc(DVU_STLAB[s.state] || s.state)}</span></h3>`;
+    if (s.state !== "ok") h += one ? "" : `<p class="mut dvuh">${esc(s.hint || "")}</p>`;
+    else {
+      if (s.bad) h += `<p class="mut dvuh">Die FIT-Datei ist beschädigt; gezeigt wird, was gelesen werden konnte.</p>`;
+      if (s.candidates > 1) h += `<p class="mut dvuh">Zu dieser Tour passen ${s.candidates} Zepp-Trainings; gezeigt wird das zeitlich nächste.</p>`;
+      h += fl.length ? `<table class="dvut"><thead><tr><th scope="col">Feld</th><th scope="col">${scope === "tour" ? "Vorhanden" : "In Touren"}</th><th scope="col">Bereich</th><th scope="col">Wird ausgewertet</th></tr></thead>
+        <tbody>${fl.map(f => dvuRow(f, s, scope)).join("")}</tbody></table>` : `<p class="mut dvuh">${only ? "Alles, was hier vorhanden ist, wird bereits ausgewertet." : "Keine Felder."}</p>`;
+      if (!only && nUn) h += `<p class="mut dvuh">${nUn} ${nUn === 1 ? "Feld ist" : "Felder sind"} vorhanden, ${nUn === 1 ? "wird" : "werden"} aber noch nicht ausgewertet.</p>`;
+    }
+    h += `</section>`;
+  });
+  if (rep.fit_truncated) h += `<p class="mut dvuh">Die Suche nach FIT-Originaldateien wurde nach ${rep.fit_scanned} Dateien beendet (Obergrenze) – es kann weitere geben.</p>`;
+  return h;
+}
+async function dvUhrFelder(scope, id, name) {
+  const dev = scope === "device";
+  const m = dvBox(`<h2>${dev ? "Was liefert diese Uhr?" : "Alle Felder dieser Tour"}</h2><p class="dvlead">${esc(name || "")}</p><label class="dvuchk"><input type="checkbox" id="dvuonly"> Nur Felder, die noch nicht ausgewertet werden</label><div id="dvubody" class="dvubody" aria-live="polite"><p class="mut">Wird gelesen … ${dev ? "Bei Zepp-Uhren kann das einige Sekunden dauern." : ""}</p></div>
+    <div class="dvfoot"><span class="sp"></span>${dev ? `<a class="btn alt sm" id="dvudl" href="/api/devices/${id}/uhr-felder.json?download=1" download title="Enthält nur Feldnamen, Zähler und Wertebereiche – keine Koordinaten, Tournamen oder Zugangsdaten">Als Datei speichern</a>` : ""}<button class="btn ghost sm" id="dvuclose" type="button">Schließen</button></div>`);
+  m.querySelector(".mbox").classList.add("dvubox");
+  $("#dvuclose").onclick = () => m.remove();
+  const body = $("#dvubody");
+  try {
+    const rep = await api(dev ? `/api/devices/${id}/uhr-felder` : `/api/tours/${encodeURIComponent(id)}/uhr-felder`);
+    const draw = () => {
+      const dl = $("#dvudl");
+      if (dl) dl.hidden = !rep.tours_checked;
+      body.innerHTML = (dev && !rep.tours_checked ? "" : dev ? `<p class="mut dvuh">Gelesen werden die ${rep.tours_checked} neuesten Touren dieses Geräts${rep.tours_total > rep.tours_checked ? ` (von ${rep.tours_total}; höchstens ${rep.limit})` : ` (alle ${rep.tours_total})`}. Es wird nichts gespeichert oder verändert.</p>` : `<p class="mut dvuh">Es wird nur gelesen – nichts gespeichert oder verändert. Koordinaten, Kennungen und Zeitstempel werden nie angezeigt.</p>`) + dvuBody(rep, $("#dvuonly").checked);
+    };
+    $("#dvuonly").onchange = draw;
+    draw();
+  } catch (e) {
+    body.innerHTML = `<p class="bad">${esc(e.message)}</p><p class="mut">Die Diagnose konnte nicht gelesen werden. Prüfe die Verbindung und ob du angemeldet bist.</p>`;
+  }
+}
+
 /* ---------- Abschnitt in der Verwaltung ---------- */
 async function devPanel() {
   const root = $("#devsec");
@@ -400,7 +466,8 @@ async function devPanel() {
       <span class="dvper">${dvPeriod(g).map(x => `<span>${esc(x)}</span>`).join("")}</span>
       ${g.note ? `<span class="dvsub">${esc(g.note)}</span>` : ""}
       <div class="dvchips"><span class="dvc ${g.active ? "on" : ""}">${g.active ? "Aktiv" : "Deaktiviert"}</span><span class="dvc">${dvTours(g.n)}</span></div>
-      ${dvGives(qmap[g.id])}</div>
+      ${dvGives(qmap[g.id])}
+      <button class="dvuhr" type="button" data-uhr="${g.id}">Was liefert diese Uhr?</button></div>
       ${viewer ? "" : `<button class="dvmore" aria-haspopup="menu" aria-expanded="false" title="Aktionen" aria-label="Aktionen">${DV_SVG.dots}</button>`}
       ${qmap[g.id] ? `<details class="dvq" data-q="${g.id}" ${DVQ_OPEN.has(g.id) ? "open" : ""}><summary><span>Genauigkeit</span>${qmap[g.id].n_eval ? `<span class="dvqs ${DVQ_CLS[qmap[g.id].verdict.level] || "none"}">${esc(qmap[g.id].verdict.label)}</span>` : `<span class="dvqs none">noch nicht ausgewertet</span>`}</summary><div class="dvqb">${dvQBody(qa, qmap[g.id], viewer)}</div></details>` : ""}</div>`;
   const empty = `<div class="dvempty"><span class="dvav">${dvIcon("zepp")}</span><h3>Noch kein Gerät angelegt</h3>
@@ -464,14 +531,17 @@ async function devPanel() {
   if (bn) bn.onclick = () => devForm(dv, null, again);
   root.querySelectorAll("[data-dv]").forEach(r => {
     const g = dv.devices.find(x => x.id === +r.dataset.dv);
+    const ub = r.querySelector(".dvuhr");
+    if (ub) ub.onclick = e => { e.stopPropagation(); dvUhrFelder("device", g.id, g.name); };
     if (viewer) return;
-    r.onclick = e => { if (!e.target.closest(".dvmore, .dvq")) devForm(dv, g, again); };
+    r.onclick = e => { if (!e.target.closest(".dvmore, .dvq, .dvuhr")) devForm(dv, g, again); };
     const mb = r.querySelector(".dvmore");
     mb.onclick = e => {
       e.stopPropagation();
       dvMenu(mb, [
         {icon: DV_SVG.edit, label: "Bearbeiten", run: () => devForm(dv, g, again)},
         {icon: DV_SVG.photo, label: g.photo ? "Foto ändern oder entfernen" : "Foto hinzufügen", run: () => devForm(dv, g, again)},
+        {icon: DV_SVG.info, label: "Was liefert diese Uhr?", run: () => dvUhrFelder("device", g.id, g.name)},
         {icon: DV_SVG.range, label: "Touren zuordnen …", run: () => devRange(dv, g, again)},
         {icon: g.active ? DV_SVG.off : DV_SVG.on, label: g.active ? "Deaktivieren" : "Aktivieren", run: async () => {
           try { await api("/api/devices/" + g.id, dvJson("PATCH", {active: !g.active})); MET_CACHE.clear(); } catch (er) { alert(er.message); }

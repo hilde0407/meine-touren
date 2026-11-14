@@ -940,4 +940,132 @@ Höhe aus Geländemodell neu berechnen || Recalculate elevation from terrain mod
 Höhe aus Uhr (Zepp) abgleichen || Match elevation with watch (Zepp) || Rapprocher le dénivelé de la montre (Zepp) || Ajustar el desnivel con el reloj (Zepp)
 GPS-Track bereinigen … || Clean GPS track … || Nettoyer la trace GPS … || Limpiar track GPS …
 Nur ein Hinweis: die Strecke wird nicht verändert. || Just a note: the distance is not changed. || Simple remarque : la distance n’est pas modifiée. || Solo una nota: la distancia no se modifica.
+Was liefert diese Uhr? || What does this watch deliver? || Que fournit cette montre ? || ¿Qué datos entrega este reloj?
+Alle Felder dieser Tour || All fields of this tour || Tous les champs de ce parcours || Todos los campos de esta ruta
+Als Datei speichern || Save as file || Enregistrer dans un fichier || Guardar como archivo
+Nur Felder, die noch nicht ausgewertet werden || Only fields that are not evaluated yet || Uniquement les champs pas encore exploités || Solo campos que aún no se evalúan
+Wird gelesen … || Reading … || Lecture en cours … || Leyendo …
+Bei Zepp-Uhren kann das einige Sekunden dauern. || With Zepp watches this can take a few seconds. || Avec les montres Zepp, cela peut prendre quelques secondes. || Con relojes Zepp esto puede tardar unos segundos.
+Feld || Field || Champ || Campo
+In Touren || In tours || Dans les parcours || En rutas
+Vorhanden || Present || Présent || Presente
+Bereich || Range || Plage || Rango
+Wird ausgewertet || Evaluated || Exploité || Se evalúa
+ja || yes || oui || sí
+nein || no || non || no
+nicht angezeigt || not shown || non affiché || no se muestra
+Koordinaten, Kennungen und Zeitstempel zeigt die Diagnose nie an || The diagnosis never shows coordinates, identifiers or timestamps || Le diagnostic n’affiche jamais de coordonnées, d’identifiants ni d’horodatages || El diagnóstico nunca muestra coordenadas, identificadores ni marcas de tiempo
+Enthält nur Feldnamen, Zähler und Wertebereiche – keine Koordinaten, Tournamen oder Zugangsdaten || Contains only field names, counts and value ranges – no coordinates, tour names or credentials || Contient uniquement des noms de champs, des compteurs et des plages de valeurs – ni coordonnées, ni noms de parcours, ni identifiants || Solo contiene nombres de campos, recuentos y rangos de valores: sin coordenadas, nombres de rutas ni credenciales
+Rohwert || raw value || valeur brute || valor bruto
+Median {} || Median {} || Médiane {} || Mediana {}
+{} % gefüllt || {} % filled || {} % renseigné || {} % con datos
+immer leer || always empty || toujours vide || siempre vacío
+vorhanden || present || présent || presente
+leer || empty || vide || vacío
+{} Wert || {} value || {} valeur || {} valor
+{} Werte || {} values || {} valeurs || {} valores
+{} Wert, {} % gefüllt || {} value, {} % filled || {} valeur, {} % renseigné || {} valor, {} % con datos
+{} Werte, {} % gefüllt || {} values, {} % filled || {} valeurs, {} % renseigné || {} valores, {} % con datos
+Zahl || Number || Nombre || Número
+Zahlenliste || List of numbers || Liste de nombres || Lista de números
+Messreihe || Series || Série de mesures || Serie de medidas
+Objekt || Object || Objet || Objeto
+Liste || List || Liste || Lista
+Wahrheitswert || Truth value || Valeur booléenne || Valor lógico
+kein Zepp-Zugang || no Zepp access || pas d’accès Zepp || sin acceso a Zepp
+nicht erreichbar || not reachable || injoignable || no accesible
+kein Training zugeordnet || no workout matched || aucun entraînement associé || ningún entrenamiento asignado
+nicht zutreffend || not applicable || non applicable || no aplicable
+nicht vorhanden || not available || non disponible || no disponible
+keine Touren || no tours || aucun parcours || sin rutas
+{} von {} Touren || {} of {} tours || {} sur {} parcours || {} de {} rutas
+{} Felder || {} fields || {} champs || {} campos
+Zepp: Trainings-Zusammenfassung || Zepp: workout summary || Zepp : résumé de l’entraînement || Zepp: resumen del entrenamiento
+Zepp: Detaildaten (Kanäle) || Zepp: detail data (channels) || Zepp : données détaillées (canaux) || Zepp: datos de detalle (canales)
+FIT-Originaldatei || Original FIT file || Fichier FIT d’origine || Archivo FIT original
+GPX-Spur || GPX track || Trace GPX || Track GPX
+Messwert-Datei (ausgewertet) || Measurement file (evaluated) || Fichier de mesures (exploité) || Archivo de medidas (evaluado)
+Die FIT-Datei ist beschädigt; gezeigt wird, was gelesen werden konnte. || The FIT file is damaged; what could be read is shown. || Le fichier FIT est endommagé ; seul ce qui a pu être lu est affiché. || El archivo FIT está dañado; se muestra lo que se pudo leer.
+Zu dieser Tour passen {} Zepp-Trainings; gezeigt wird das zeitlich nächste. || {} Zepp workouts match this tour; the closest in time is shown. || {} entraînements Zepp correspondent à ce parcours ; le plus proche dans le temps est affiché. || A esta ruta le corresponden {} entrenamientos de Zepp; se muestra el más cercano en el tiempo.
+Alles, was hier vorhanden ist, wird bereits ausgewertet. || Everything present here is already evaluated. || Tout ce qui est présent ici est déjà exploité. || Todo lo que hay aquí ya se evalúa.
+Keine Felder. || No fields. || Aucun champ. || Sin campos.
+{} Feld ist vorhanden, wird aber noch nicht ausgewertet. || {} field is present but not evaluated yet. || {} champ est présent mais pas encore exploité. || {} campo está presente, pero aún no se evalúa.
+{} Felder sind vorhanden, werden aber noch nicht ausgewertet. || {} fields are present but not evaluated yet. || {} champs sont présents mais pas encore exploités. || {} campos están presentes, pero aún no se evalúan.
+Die Suche nach FIT-Originaldateien wurde nach {} Dateien beendet (Obergrenze) – es kann weitere geben. || The search for original FIT files stopped after {} files (limit) – there may be more. || La recherche de fichiers FIT d’origine s’est arrêtée après {} fichiers (limite) – il peut y en avoir d’autres. || La búsqueda de archivos FIT originales terminó tras {} archivos (límite); puede haber más.
+Für diese Tour liegen noch keine Felder vor. || There are no fields for this tour yet. || Aucun champ n’est encore disponible pour ce parcours. || Aún no hay campos para esta ruta.
+Für dieses Gerät liegen noch keine Felder vor. || There are no fields for this device yet. || Aucun champ n’est encore disponible pour cet appareil. || Aún no hay campos para este dispositivo.
+Gelesen werden die {} neuesten Touren dieses Geräts (von {}; höchstens {}). || The {} newest tours of this device are read (of {}; at most {}). || Les {} parcours les plus récents de cet appareil sont lus (sur {} ; au maximum {}). || Se leen las {} rutas más recientes de este dispositivo (de {}; como máximo {}).
+Gelesen werden die {} neuesten Touren dieses Geräts (alle {}). || The {} newest tours of this device are read (all {}). || Les {} parcours les plus récents de cet appareil sont lus (tous : {}). || Se leen las {} rutas más recientes de este dispositivo (todas: {}).
+Es wird nichts gespeichert oder verändert. || Nothing is saved or changed. || Rien n’est enregistré ni modifié. || No se guarda ni se modifica nada.
+Es wird nur gelesen – nichts gespeichert oder verändert. || Read only – nothing is saved or changed. || Lecture seule – rien n’est enregistré ni modifié. || Solo lectura: no se guarda ni se modifica nada.
+Koordinaten, Kennungen und Zeitstempel werden nie angezeigt. || Coordinates, identifiers and timestamps are never shown. || Les coordonnées, identifiants et horodatages ne sont jamais affichés. || Las coordenadas, los identificadores y las marcas de tiempo nunca se muestran.
+Die Diagnose konnte nicht gelesen werden. || The diagnosis could not be read. || Le diagnostic n’a pas pu être lu. || No se pudo leer el diagnóstico.
+Prüfe die Verbindung und ob du angemeldet bist. || Check the connection and whether you are signed in. || Vérifiez la connexion et que vous êtes connecté. || Comprueba la conexión y si has iniciado sesión.
+Es ist kein Zepp-Zugang eingerichtet (Einstellungen → Zepp). || No Zepp access is set up (Settings → Zepp). || Aucun accès Zepp n’est configuré (Réglages → Zepp). || No hay acceso a Zepp configurado (Ajustes → Zepp).
+Ohne Zugang können die Zepp-Felder nicht gelesen werden. || Without access the Zepp fields cannot be read. || Sans accès, les champs Zepp ne peuvent pas être lus. || Sin acceso no se pueden leer los campos de Zepp.
+Zepp ist nicht erreichbar oder die Zugangsdaten stimmen nicht || Zepp is not reachable or the credentials are wrong || Zepp est injoignable ou les identifiants sont incorrects || Zepp no está accesible o las credenciales son incorrectas
+Zepp ist nicht erreichbar oder die Zugangsdaten stimmen nicht: {} || Zepp is not reachable or the credentials are wrong: {} || Zepp est injoignable ou les identifiants sont incorrects : {} || Zepp no está accesible o las credenciales son incorrectas: {}
+Zu dieser Tour wurde im Zepp-Verlauf kein passendes Training gefunden (Start, Dauer und Strecke passen zu keinem). || No matching workout was found in the Zepp history for this tour (start, duration and distance fit none). || Aucun entraînement correspondant n’a été trouvé dans l’historique Zepp pour ce parcours (début, durée et distance ne correspondent à aucun). || No se encontró en el historial de Zepp ningún entrenamiento que coincida con esta ruta (inicio, duración y distancia no encajan con ninguno).
+Diese Quelle gibt es nur bei Zepp-Uhren. || This source exists only for Zepp watches. || Cette source n’existe que pour les montres Zepp. || Esta fuente solo existe en relojes Zepp.
+Nicht vorhanden. || Not available. || Non disponible. || No disponible.
+Diesem Gerät sind noch keine Touren zugeordnet. || No tours are assigned to this device yet. || Aucun parcours n’est encore associé à cet appareil. || Aún no hay rutas asignadas a este dispositivo.
+Keine FIT-Originaldatei zu dieser Tour gefunden (gesucht wird in Eingang und Export). || No original FIT file found for this tour (searched in inbox and export). || Aucun fichier FIT d’origine trouvé pour ce parcours (recherche dans la boîte de réception et l’export). || No se encontró ningún archivo FIT original para esta ruta (se busca en la bandeja de entrada y en la exportación).
+Beim Import wird die FIT-Datei in eine GPX-Spur umgewandelt – ihre Messwerte stehen unter „GPX-Spur“. || On import the FIT file is converted into a GPX track – its measurements are listed under “GPX track”. || À l’import, le fichier FIT est converti en trace GPX – ses mesures figurent sous « Trace GPX ». || Al importar, el archivo FIT se convierte en un track GPX; sus medidas aparecen en «Track GPX».
+Zu dieser Tour ist keine GPX-Spur gespeichert (zum Beispiel Komoot-Touren ohne Datei). || No GPX track is stored for this tour (for example Komoot tours without a file). || Aucune trace GPX n’est enregistrée pour ce parcours (par exemple les parcours Komoot sans fichier). || No hay un track GPX guardado para esta ruta (por ejemplo, rutas de Komoot sin archivo).
+Noch keine Messwert-Datei (Verwaltung → „Messwerte nachladen“). || No measurement file yet (Admin → “Reload measurements”). || Pas encore de fichier de mesures (Administration → « Recharger les mesures »). || Aún no hay archivo de medidas (Administración → «Recargar medidas»).
+vermutlich: {} || probably: {} || probablement : {} || probablemente: {}
+unbekannte Erweiterung der Spur – wird nicht ausgewertet || unknown track extension – not evaluated || extension de trace inconnue – non exploitée || extensión de track desconocida: no se evalúa
+wird aus der Spur gelesen || read from the track || lu depuis la trace || se lee del track
+unbekanntes Feld – wird nicht ausgewertet (Nachricht {}, Feld {}) || unknown field – not evaluated (message {}, field {}) || champ inconnu – non exploité (message {}, champ {}) || campo desconocido: no se evalúa (mensaje {}, campo {})
+Start des Trainings (Unix-Zeit) – zugleich Kennung || Start of the workout (Unix time) – also its identifier || Début de l’entraînement (heure Unix) – sert aussi d’identifiant || Inicio del entrenamiento (hora Unix), también su identificador
+Kennung der Uhr bzw. App, die das Training aufgezeichnet hat || Identifier of the watch or app that recorded the workout || Identifiant de la montre ou de l’appli qui a enregistré l’entraînement || Identificador del reloj o de la app que grabó el entrenamiento
+Nummer der Sportart || Sport number || Numéro du sport || Número del deporte
+Strecke in Metern || Distance in metres || Distance en mètres || Distancia en metros
+Dauer in Sekunden || Duration in seconds || Durée en secondes || Duración en segundos
+Ende des Trainings (Unix-Zeit) || End of the workout (Unix time) || Fin de l’entraînement (heure Unix) || Fin del entrenamiento (hora Unix)
+Kalorien (kcal) || Calories (kcal) || Calories (kcal) || Calorías (kcal)
+Zeitabstände zwischen den Streckenpunkten || Time gaps between track points || Intervalles de temps entre les points de la trace || Intervalos de tiempo entre los puntos del track
+GPS-Position (Koordinaten werden hier nie angezeigt) || GPS position (coordinates are never shown here) || Position GPS (les coordonnées ne sont jamais affichées ici) || Posición GPS (aquí nunca se muestran las coordenadas)
+Höhe in Zentimetern || Elevation in centimetres || Altitude en centimètres || Altitud en centímetros
+Puls: Zeitabstand, Pulsänderung || Heart rate: time gap, change in heart rate || Pouls : intervalle de temps, variation du pouls || Pulso: intervalo de tiempo, variación del pulso
+Schritt-Daten (Schrittlänge, Kadenz) – wird nur übernommen, wenn es zur GPS-Geschwindigkeit passt || Step data (stride length, cadence) – only used if it fits the GPS speed || Données de pas (longueur de foulée, cadence) – utilisées seulement si elles concordent avec la vitesse GPS || Datos de pasos (longitud de zancada, cadencia): solo se usan si encajan con la velocidad GPS
+Geschwindigkeit – wird nur übernommen, wenn die Einheit zur GPS-Geschwindigkeit passt || Speed – only used if the unit fits the GPS speed || Vitesse – utilisée seulement si l’unité concorde avec la vitesse GPS || Velocidad: solo se usa si la unidad encaja con la velocidad GPS
+Trittfrequenz (Rad) || Pedalling cadence (bike) || Cadence de pédalage (vélo) || Cadencia de pedaleo (bici)
+VO2max (geschätzte maximale Sauerstoffaufnahme) || VO2max (estimated maximal oxygen uptake) || VO2max (consommation maximale d’oxygène estimée) || VO2máx (consumo máximo de oxígeno estimado)
+Erholungszeit || Recovery time || Temps de récupération || Tiempo de recuperación
+Trainingsbelastung || Training load || Charge d’entraînement || Carga de entrenamiento
+Trainingseffekt || Training effect || Effet d’entraînement || Efecto del entrenamiento
+Belastung/Stress || Strain/stress || Charge/stress || Carga/estrés
+Tempo (Minuten je km) || Pace (minutes per km) || Allure (minutes par km) || Ritmo (minutos por km)
+Kadenz/Schrittfrequenz || Cadence/step rate || Cadence/fréquence de pas || Cadencia/frecuencia de paso
+Höhe bzw. Höhenmeter || Elevation or metres of climb || Altitude ou dénivelé || Altitud o desnivel
+Schwimmen || Swimming || Natation || Natación
+GPS-Position (Breite) || GPS position (latitude) || Position GPS (latitude) || Posición GPS (latitud)
+GPS-Position (Länge) || GPS position (longitude) || Position GPS (longitude) || Posición GPS (longitud)
+Höhe (genau) || Elevation (precise) || Altitude (précise) || Altitud (precisa)
+Kadenz || Cadence || Cadence || Cadencia
+Kadenz (Bruchteil) || Cadence (fraction) || Cadence (fraction) || Cadencia (fracción)
+Strecke seit Start || Distance since start || Distance depuis le départ || Distancia desde el inicio
+Geschwindigkeit (genau) || Speed (precise) || Vitesse (précise) || Velocidad (precisa)
+Atemfrequenz (genau) || Respiration rate (precise) || Fréquence respiratoire (précise) || Frecuencia respiratoria (precisa)
+Zeitstempel || Timestamp || Horodatage || Marca de tiempo
+Start der Sitzung || Start of the session || Début de la session || Inicio de la sesión
+Sportart || Sport || Sport || Deporte
+Unter-Sportart || Sub-sport || Sous-sport || Subdeporte
+Gesamtzeit || Total time || Temps total || Tiempo total
+Zeit in Bewegung || Moving time || Temps en mouvement || Tiempo en movimiento
+Gesamtstrecke || Total distance || Distance totale || Distancia total
+Ø Geschwindigkeit || Avg. speed || Vitesse moy. || Velocidad media
+Höchstgeschwindigkeit || Top speed || Vitesse maximale || Velocidad máxima
+Ø Puls || Avg. heart rate || Pouls moy. || Pulso medio
+Höchster Puls || Highest heart rate || Pouls maximal || Pulso máximo
+Aufstieg || Ascent || Montée || Subida
+Abstieg || Descent || Descente || Bajada
+Trainingseffekt (aerob) || Training effect (aerobic) || Effet d’entraînement (aérobie) || Efecto del entrenamiento (aeróbico)
+Trainingseffekt (anaerob) || Training effect (anaerobic) || Effet d’entraînement (anaérobie) || Efecto del entrenamiento (anaeróbico)
+Hersteller-Nummer || Manufacturer number || Numéro du fabricant || Número del fabricante
+Produkt-Nummer || Product number || Numéro du produit || Número del producto
+Produktname || Product name || Nom du produit || Nombre del producto
+Seriennummer || Serial number || Numéro de série || Número de serie
+Erstellt am || Created on || Créé le || Creado el
 `;

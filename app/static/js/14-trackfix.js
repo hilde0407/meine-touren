@@ -76,7 +76,7 @@ function trackFixDialog(id, done) {
     // Karte
     try {
       const mp = L.map(b.querySelector("#tfm"), {zoomControl: true});
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 18, attribution: "© OpenStreetMap"}).addTo(mp);
+      tileL("osm", "https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 18, attribution: "© OpenStreetMap"}).addTo(mp);
       const base = L.polyline(a.line, {color: "#2a7f62", weight: 4}).addTo(mp);
       a.fast.forEach(f => L.polyline(f.line, {color: "#e8a200", weight: 6, opacity: 0.9}).addTo(mp).bindTooltip(`${nf(f.avg, 0)} km/h`));
       a.spikes.forEach(s => L.circleMarker(s.at, {radius: 7, color: "#c0392b", fillColor: "#c0392b", fillOpacity: 0.8}).addTo(mp).bindTooltip(`${s.n} Ausreißer`));

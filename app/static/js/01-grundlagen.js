@@ -376,7 +376,8 @@ function heat(year, byDay) {
 const TBASE = location.origin + location.pathname.replace(/[^/]*$/, "");
 function tileL(style, direct, o) {
   // Kacheln über den Cache des Servers, bei Fehlern direkt vom Anbieter
-  const l = L.tileLayer(TBASE + `tiles/${style}/{z}/{x}/{y}`, o);
+  // referrerPolicy: Beim Ausweichen direkt zum Anbieter verlangt OpenStreetMap eine Herkunftsangabe (sonst „Access blocked“)
+  const l = L.tileLayer(TBASE + `tiles/${style}/{z}/{x}/{y}`, {referrerPolicy: "strict-origin-when-cross-origin", ...o});
   let err = 0;
   l.on("tileerror", () => {
     if (++err === 4) l.setUrl(direct);

@@ -69,6 +69,7 @@ def _records(data, p, end, points, sport_box, meta=None):
     defs = {}                                       # lokale Nachrichtennummer -> (global, endian, felder, dev_bytes)
     last_ts = 0
     session = {}
+    tap = meta.get("_tap") if meta else None        # Diagnose (scan): bekommt jeden Datensatz samt unbekannter Felder
     while p < end:
         h = data[p]; p += 1
         if h & 0x80:                                # komprimierter Zeitstempel
@@ -83,6 +84,8 @@ def _records(data, p, end, points, sport_box, meta=None):
                 raise FitError("Datensatz ohne Definition")
             vals, p = _read(data, p, d)
             vals[253] = last_ts
+            if tap:
+                tap(d[0], vals)
             _use(d[0], vals, points, session, meta)
             continue
         local = h & 0x0F
@@ -109,6 +112,8 @@ def _records(data, p, end, points, sport_box, meta=None):
         vals, p = _read(data, p, d)
         if 253 in vals and isinstance(vals[253], int):
             last_ts = vals[253]
+        if tap:
+            tap(d[0], vals)
         _use(d[0], vals, points, session, meta)
     if session:
         sport_box.append((session.get(5), session.get(6)))
@@ -205,6 +210,36 @@ def _summary(v, meta):
         x = v.get(k)
         if isinstance(x, (int, float)) and lo <= x / scale <= hi and key not in sm:
             sm[key] = round(x / scale, 1) if scale != 1 else int(x)
+
+
+SCAN_CAP = 20000                                     # je Feld höchstens so viele Zahlenwerte für Kennzahlen merken
+
+
+def scan(data):
+    """Diagnose: ALLE Nachrichten- und Feldnummern einer FIT-Datei (auch unbekannte, nicht ausgewertete) mit Anzahl und Zahlenwerten (roh, unskaliert).
+    Rückgabe {"fields": {(nachricht, feld): {"n": Anzahl, "vals": [Zahlen …], "text": Anzahl Textwerte}}, "starts": [Unix-s …], "bad": bool}.
+    Felder mit mehreren Werten (Arrays) zählen nur ihr erstes Element (wie beim normalen Lesen); beschädigte Dateien liefern, was bis dahin gelesen wurde."""
+    fields, starts, rec_seen = {}, [], []
+
+    def tap(g, vals):
+        for f, v in vals.items():
+            e = fields.setdefault((g, f), {"n": 0, "vals": [], "text": 0})
+            e["n"] += 1
+            if isinstance(v, str):
+                e["text"] += 1
+            elif isinstance(v, (int, float)) and not isinstance(v, bool) and len(e["vals"]) < SCAN_CAP:
+                e["vals"].append(v)
+        ts = vals.get(253) if g == 20 else vals.get(2) if g == 18 else None
+        if isinstance(ts, int) and ts > 0 and (g == 18 or not rec_seen):
+            if g == 20:
+                rec_seen.append(1)                       # nur der erste Punkt
+            starts.append(ts + FIT_EPOCH)                # Start der Sitzung und erster Punkt
+    bad = False
+    try:
+        _decode(data, {"_tap": tap})
+    except (FitError, struct.error, IndexError):
+        bad = True
+    return {"fields": fields, "starts": starts, "bad": bad}
 
 
 MANUFACTURER = {1: "garmin", 13: "garmin", 15: "garmin", 23: "suunto", 123: "polar", 258: "zepp"}
