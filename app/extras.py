@@ -49,7 +49,7 @@ def make_backup(dest_dir=None, strip_secrets=False, keep=14):
                 a.close(); b.close()
                 z.write(st, "system.sqlite")
             if not strip_secrets and config.TRACK_DIR.exists():       # lokale Touren: Original-GPX gehören zum Datenbestand
-                for g in sorted(list(config.TRACK_DIR.glob("*.gpx")) + list(config.TRACK_DIR.glob("*.hr.json")) + list(config.TRACK_DIR.glob("*.met.json"))):
+                for g in sorted(list(config.TRACK_DIR.glob("*.gpx")) + list(config.TRACK_DIR.glob("*.hr.json")) + list(config.TRACK_DIR.glob("*.met.json")) + list(config.TRACK_DIR.glob("*.uhr.json"))):
                     z.write(g, f"tracks/{g.name}")
             dd = config.DB_PATH.parent / "devices"
             if not strip_secrets and dd.is_dir():                      # eigene Gerätefotos („Meine Geräte“)

@@ -1068,4 +1068,60 @@ Produkt-Nummer || Product number || Numéro du produit || Número del producto
 Produktname || Product name || Nom du produit || Nombre del producto
 Seriennummer || Serial number || Numéro de série || Número de serie
 Erstellt am || Created on || Créé le || Creado el
+Training laut Uhr || Training according to the watch || Entraînement selon la montre || Entrenamiento según el reloj
+Anstrengung (deine Angabe) || Effort (your rating) || Effort (votre évaluation) || Esfuerzo (tu valoración)
+Schritte || Steps || Pas || Pasos
+Schrittfrequenz Ø || Avg. step rate || Cadence moyenne || Cadencia media
+Schritte/min || Steps/min || Pas/min || Pasos/min
+Puls Ø || Heart rate avg. || FC moyenne || FC media
+Puls höchster || Highest heart rate || FC maximale || FC máxima
+Puls niedrigster || Lowest heart rate || FC minimale || FC mínima
+Pausenzeit || Pause time || Temps de pause || Tiempo de pausa
+Pausen laut Uhr || Pauses according to the watch || Pauses selon la montre || Pausas según el reloj
+Skala laut Zepp (Rohwert in Zehnteln), nicht mit Garmin vergleichbar || Zepp scale (raw value in tenths), not comparable with Garmin || Échelle Zepp (valeur brute en dixièmes), non comparable à Garmin || Escala de Zepp (valor bruto en décimas), no comparable con Garmin
+Skala laut Zepp, nicht mit Garmin vergleichbar || Zepp scale, not comparable with Garmin || Échelle Zepp, non comparable à Garmin || Escala de Zepp, no comparable con Garmin
+Deine Angabe auf der Uhr, Skala laut Zepp || Your rating on the watch, Zepp scale || Votre évaluation sur la montre, échelle Zepp || Tu valoración en el reloj, escala de Zepp
+Höhenmeter laut Uhr || Elevation according to the watch || Dénivelé selon la montre || Desnivel según el reloj
+m Aufstieg || m ascent || m de montée || m de subida
+m Abstieg || m descent || m de descente || m de bajada
+m höchster Punkt || m highest point || m point le plus haut || m punto más alto
+m tiefster Punkt || m lowest point || m point le plus bas || m punto más bajo
+Pulszonen laut Uhr || Heart rate zones according to the watch || Zones de fréquence cardiaque selon la montre || Zonas de frecuencia cardíaca según el reloj
+Zone || Zone || Zone || Zona
+Zone {}: {} || Zone {}: {} || Zone {} : {} || Zona {}: {}
+bis || up to || jusqu’à || hasta
+Tempo je Kilometer || Pace per kilometre || Allure par kilomètre || Ritmo por kilómetro
+Kilometer || Kilometre || Kilomètre || Kilómetro
+Puls (bpm) || Heart rate (bpm) || FC (bpm) || FC (lpm)
+Kürzere Balken = schneller. || Shorter bars = faster. || Barres plus courtes = plus rapide. || Barras más cortas = más rápido.
+Der hellere Balken ist das letzte Teilstück (kürzer als ein Kilometer). || The lighter bar is the last partial section (shorter than one kilometre). || La barre plus claire est le dernier tronçon (moins d’un kilomètre). || La barra más clara es el último tramo (menos de un kilómetro).
+Wetter laut Uhr || Weather according to the watch || Météo selon la montre || Tiempo según el reloj
+°C Temperatur || °C temperature || °C température || °C temperatura
+% Luftfeuchte || % humidity || % d’humidité || % de humedad
+geladen am || loaded on || chargé le || cargado el
+Von Zepp neu laden || Reload from Zepp || Recharger depuis Zepp || Volver a cargar desde Zepp
+Lade von Zepp … || Loading from Zepp … || Chargement depuis Zepp … || Cargando desde Zepp …
+Neu von Zepp geladen. || Reloaded from Zepp. || Rechargé depuis Zepp. || Vuelto a cargar desde Zepp.
+Trainingseffekt: Skala laut Zepp (Rohwert in Zehnteln gelesen, 26 = 2,6) – nicht mit Garmin vergleichbar. || Training effect: Zepp scale (raw value read in tenths, 26 = 2.6) – not comparable with Garmin. || Effet d’entraînement : échelle Zepp (valeur brute lue en dixièmes, 26 = 2,6) – non comparable à Garmin. || Efecto de entrenamiento: escala de Zepp (valor bruto leído en décimas, 26 = 2,6) – no comparable con Garmin.
+Belastung und Anstrengung: Skalen laut Zepp, nicht mit Garmin oder Suunto vergleichbar. || Load and effort: Zepp scales, not comparable with Garmin or Suunto. || Charge et effort : échelles Zepp, non comparables à Garmin ou Suunto. || Carga y esfuerzo: escalas de Zepp, no comparables con Garmin ni Suunto.
+Pulszonen: Zeiten und Obergrenzen laut Uhr, so gedeutet – die Summe der Zonenzeiten passt zur Dauer. || Heart rate zones: times and upper limits according to the watch, interpreted this way – the sum of the zone times matches the duration. || Zones de fréquence cardiaque : durées et limites supérieures selon la montre, interprétées ainsi – la somme des durées correspond à la durée totale. || Zonas de frecuencia cardíaca: tiempos y límites superiores según el reloj, interpretados así – la suma de los tiempos de zona coincide con la duración.
+Kilometerwerte: Kilometer-Nr., Zeit und Puls je Kilometer laut Uhr; die Spalten sind von Zepp nicht dokumentiert und wurden gegen Dauer und Strecke geprüft. || Kilometre values: kilometre number, time and heart rate per kilometre according to the watch; Zepp does not document the columns, so they were checked against duration and distance. || Valeurs au kilomètre : numéro du kilomètre, temps et fréquence cardiaque par kilomètre selon la montre ; Zepp ne documente pas ces colonnes, elles ont été vérifiées par rapport à la durée et à la distance. || Valores por kilómetro: número de kilómetro, tiempo y frecuencia cardíaca por kilómetro según el reloj; Zepp no documenta las columnas, por eso se comprobaron con la duración y la distancia.
+Höhenmeter laut Uhr können von den Höhenmetern der Tour abweichen (andere Messung und Glättung). || Elevation according to the watch may differ from the tour’s elevation (different measurement and smoothing). || Le dénivelé selon la montre peut différer de celui du parcours (mesure et lissage différents). || El desnivel según el reloj puede diferir del de la ruta (otra medición y otro suavizado).
+Wetter laut Uhr (Temperatur und Luftfeuchte); die Deutung der Felder ist nicht von Zepp dokumentiert. || Weather according to the watch (temperature and humidity); Zepp does not document how the fields are to be read. || Météo selon la montre (température et humidité) ; Zepp ne documente pas l’interprétation des champs. || Tiempo según el reloj (temperatura y humedad); Zepp no documenta cómo interpretar los campos.
+Die Kilometerwerte konnten nicht geladen werden – „Von Zepp neu laden“ versucht es erneut. || The kilometre values could not be loaded – “Reload from Zepp” tries again. || Les valeurs au kilomètre n’ont pas pu être chargées – « Recharger depuis Zepp » réessaie. || No se pudieron cargar los valores por kilómetro: «Volver a cargar desde Zepp» lo intenta de nuevo.
+Es ist kein Zepp-Zugang eingerichtet (Einstellungen → Zepp). Gespeicherte Werte bleiben sichtbar. || No Zepp access is set up (Settings → Zepp). Saved values remain visible. || Aucun accès Zepp n’est configuré (Réglages → Zepp). Les valeurs enregistrées restent visibles. || No hay acceso a Zepp configurado (Ajustes → Zepp). Los valores guardados siguen visibles.
+Zepp ist gerade nicht erreichbar oder die Zugangsdaten stimmen nicht. Gespeicherte Werte bleiben sichtbar. || Zepp is currently unreachable or the login details are wrong. Saved values remain visible. || Zepp est actuellement inaccessible ou les identifiants sont incorrects. Les valeurs enregistrées restent visibles. || Zepp no está disponible ahora o los datos de acceso son incorrectos. Los valores guardados siguen visibles.
+Zu dieser Tour wurde im Zepp-Verlauf kein passendes Training gefunden. || No matching training was found in the Zepp history for this tour. || Aucun entraînement correspondant n’a été trouvé dans l’historique Zepp pour ce parcours. || No se encontró ningún entrenamiento que coincida en el historial de Zepp para esta ruta.
+Zu dieser Tour passen mehrere Zepp-Trainings – es wird nichts angezeigt, um nichts zu verwechseln. || Several Zepp trainings match this tour – nothing is shown, to avoid mixing them up. || Plusieurs entraînements Zepp correspondent à ce parcours – rien n’est affiché pour éviter toute confusion. || Varios entrenamientos de Zepp coinciden con esta ruta: no se muestra nada para no confundirlos.
+Diese Tour stammt nicht von einer Zepp-Uhr. || This tour does not come from a Zepp watch. || Ce parcours ne provient pas d’une montre Zepp. || Esta ruta no procede de un reloj Zepp.
+Noch nicht von Zepp geladen. || Not yet loaded from Zepp. || Pas encore chargé depuis Zepp. || Aún no se ha cargado desde Zepp.
+Die Uhr hat zu diesem Training keine auswertbaren Werte geliefert. || The watch delivered no usable values for this training. || La montre n’a fourni aucune valeur exploitable pour cet entraînement. || El reloj no ha proporcionado valores utilizables para este entrenamiento.
+Kilometer {}: {} min/km || Kilometre {}: {} min/km || Kilomètre {} : {} min/km || Kilómetro {}: {} min/km
+Kilometer {}: {} min/km, Puls {} bpm || Kilometre {}: {} min/km, heart rate {} bpm || Kilomètre {} : {} min/km, FC {} bpm || Kilómetro {}: {} min/km, FC {} lpm
+Kilometer {}: {} min/km, {} Schritte/min || Kilometre {}: {} min/km, {} steps/min || Kilomètre {} : {} min/km, {} pas/min || Kilómetro {}: {} min/km, {} pasos/min
+Kilometer {}: {} min/km, Puls {} bpm, {} Schritte/min || Kilometre {}: {} min/km, heart rate {} bpm, {} steps/min || Kilomètre {} : {} min/km, FC {} bpm, {} pas/min || Kilómetro {}: {} min/km, FC {} lpm, {} pasos/min
+Letztes Teilstück ({} km): {} min/km || Last partial section ({} km): {} min/km || Dernier tronçon ({} km) : {} min/km || Último tramo ({} km): {} min/km
+Letztes Teilstück ({} km): {} min/km, Puls {} bpm || Last partial section ({} km): {} min/km, heart rate {} bpm || Dernier tronçon ({} km) : {} min/km, FC {} bpm || Último tramo ({} km): {} min/km, FC {} lpm
+Letztes Teilstück ({} km): {} min/km, {} Schritte/min || Last partial section ({} km): {} min/km, {} steps/min || Dernier tronçon ({} km) : {} min/km, {} pas/min || Último tramo ({} km): {} min/km, {} pasos/min
+Letztes Teilstück ({} km): {} min/km, Puls {} bpm, {} Schritte/min || Last partial section ({} km): {} min/km, heart rate {} bpm, {} steps/min || Dernier tronçon ({} km) : {} min/km, FC {} bpm, {} pas/min || Último tramo ({} km): {} min/km, FC {} lpm, {} pasos/min
 `;

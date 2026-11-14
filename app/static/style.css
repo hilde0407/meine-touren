@@ -719,3 +719,31 @@ html.mob .dvq>summary{min-height:48px}
   .dvut td>*{flex:1 1 auto;min-width:0}.dvut td span{display:inline-block}.dvut td>.dvuy,.dvut td>.dvun{flex:0 0 auto}
 }
 .dvubox [hidden]{display:none!important}
+
+/* „Training laut Uhr“ (3.11.0) */
+:root{--utbar:#2f8f5f}
+@media (prefers-color-scheme:dark){:root{--utbar:#5cc28f}}
+#uhrcard .uth{font:600 16px var(--d);margin:18px 0 6px}
+#uhrcard .utsrc{margin:-2px 0 12px}
+.utiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:10px;margin:4px 0 6px}
+.utile{border:1px solid var(--rule);border-radius:var(--r-l,10px);background:var(--soft);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.utile b{font:600 26px/1.1 var(--d);font-variant-numeric:tabular-nums}
+.utile span{font-size:14px;line-height:1.25}
+.utile small{font-size:13px}
+.utsp{overflow-x:auto;padding-bottom:4px}
+.utgrid{display:grid;grid-template-columns:max-content repeat(var(--n),minmax(40px,1fr));align-items:end;gap:4px 4px;min-width:min-content}
+.utgrid>*{min-width:0;text-align:center;font-size:13px;font-variant-numeric:tabular-nums}
+.utl{min-width:max-content!important;position:sticky;left:0;background:var(--card);z-index:1;white-space:nowrap;text-align:left!important;color:var(--mut);padding-right:8px;font-size:13px;line-height:1.2;align-self:center}
+.utv{font-weight:600;color:var(--ink)}
+.utc{height:120px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid var(--rule)}
+.utc i{display:block;width:70%;background:var(--utbar);border-radius:3px 3px 0 0}
+.utc.part i{opacity:.55}
+.utc:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.utk{color:var(--mut)}
+.utp{color:var(--ink);border-top:1px solid var(--rule);padding-top:3px}
+.utnotes{margin:14px 0 0;padding-left:18px}
+.utnotes li{margin:2px 0}
+.utfoot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+.utline{display:flex;gap:4px 24px}
+.uz1{background:#8fb8d8}.uz2{background:#6bb38a}.uz3{background:#c9b63a}.uz4{background:#e2b13c}.uz5{background:#e0803c}.uz6{background:#c0504d}
+.utsw{display:inline-block;width:10px;height:10px}

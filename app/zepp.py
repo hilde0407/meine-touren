@@ -140,6 +140,7 @@ class ZeppApi:
 
 # ---- Spurdekodierung -------------------------------------------------------
 NO_VALUE = -2000000
+MIN_ALT_CM = -50000          # tiefer als −500 m (in cm) ist keine echte Höhe
 
 
 def _col(s, idx=None, default_one=False):
@@ -195,7 +196,7 @@ def decode_points(summary, detail):
     times = _col(detail.get("time"))
     lat = _col(ll, 0)
     lon = _col(ll, 1)
-    alt = _col(detail.get("altitude"))
+    alt = array.array("q", (NO_VALUE if v < MIN_ALT_CM else v for v in _col(detail.get("altitude"))))   # Platzhalter (z. B. −2 004 831 cm) gelten als „keine Höhe“ und werden nie zwischen echte Werte interpoliert
     track_times = array.array("q", accumulate(times))
     hr_times = array.array("q", accumulate(_col(detail.get("heart_rate"), 0, True)))
     step_times = array.array("q", accumulate(_col(detail.get("gait"), 0)))

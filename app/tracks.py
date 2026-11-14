@@ -127,8 +127,9 @@ def delete_local(tid):
     db.execute("UPDATE photos SET tour_id=NULL WHERE tour_id=? AND COALESCE(manual,0)=0", (str(tid),))
     for p in (gpx_file(tid), hr_sidecar(tid), routes.path_full(tid), routes.path_small(tid)):
         p.unlink(missing_ok=True)
-    from . import metrics
+    from . import metrics, uhrtraining
     metrics.forget(tid)
+    uhrtraining.forget(tid)
 
 
 def merge_hr(text, hrpts, max_gap=30):
