@@ -266,3 +266,17 @@ def test_match_all_assigns_komoot_tours_recorded_with_watch(fresh):
     assert mydevices.device_of("k3") is None                                   # Garmin bleibt unberührt
     assert mydevices.device_of("k5") is None                                   # ohne Zepp-Training keine Zuordnung
     assert mydevices.match_all(type("A", (), {"history": lambda s: hist})())["changed"] == 0   # zweiter Lauf ändert nichts
+
+
+def test_match_overlap_when_times_differ(fresh):
+    """Komoot zählt Pausen mit und startet etwas später: kein exaktes Duplikat, aber klare zeitliche Überlappung mit ähnlicher Strecke."""
+    ts = 1_700_000_000
+    db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,status,source) VALUES('k1','k1','hike',?,?,6800,9600,'t','komoot')", (ts + 1500, ts + 1500 + 9600))
+    db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,status,source) VALUES('k2','k2','hike',?,?,6800,9600,'t','komoot')", (ts + 5 * 86400, ts + 5 * 86400 + 9600))
+    h = [{"trackid": str(ts), "type": "6", "dis": "7100", "run_time": "7200", "source": "run.9568513.huami.com"}]
+    r = mydevices.match_summaries(h)
+    assert r["matched"] == 1 and r["changed"] == 1
+    assert mydevices.tour_kind("k1", "zepp") == "zepp" and db.one("SELECT src FROM tour_source WHERE tour_id='k2'") is None
+    far = [{"trackid": str(ts), "type": "6", "dis": "30000", "run_time": "7200", "source": "x"}]       # Strecke passt nicht
+    db.execute("DELETE FROM tour_source")
+    assert mydevices.match_summaries(far)["matched"] == 0

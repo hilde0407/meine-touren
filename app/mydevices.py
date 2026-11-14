@@ -397,6 +397,27 @@ def probe_summaries(summaries):
             "sample_keys": sorted(sample.keys()) if sample else []}
 
 
+def _overlap(tr, dis, rt, tours):
+    """Zweite Chance für Touren, deren Zeiten/Strecke nicht exakt zum Zepp-Training passen (z. B. Komoot zählt Pausen mit, Start um Minuten
+    verschoben): zeitliche Überlappung von mindestens 60 % der kürzeren Dauer UND ähnliche Strecke (±35 %). Beste Überlappung gewinnt."""
+    if rt <= 0:
+        return None
+    best, bs = None, 0.0
+    for t in tours:
+        st, du = t["start_ts"], t["dur_s"]
+        if not st or not du:
+            continue
+        ov = min(tr + rt, st + du) - max(tr, st)
+        if ov <= 0 or ov < 0.6 * min(rt, du):
+            continue
+        d = t["dist_m"]
+        if dis and d and not (0.65 <= d / dis <= 1.35):
+            continue
+        if ov > bs:
+            best, bs = t, ov
+    return best
+
+
 def match_summaries(summaries, tours=None):
     """Zepp-Trainings den vorhandenen Touren zuordnen (gleiche ID z<Nr> oder gleicher Start/gleiche Strecke – auch Komoot- und Datei-Touren,
     die mit der Uhr aufgezeichnet wurden) und je Tour Art=zepp sowie die Zepp-Kennung merken. Danach findet die automatische Geräte-Zuordnung
@@ -416,7 +437,8 @@ def match_summaries(summaries, tours=None):
             continue
         try:
             tr = int(s["trackid"])
-            t = byid.get(f"z{tr}") or sync.is_duplicate(tr, float(s.get("dis") or 0), int(float(s.get("run_time") or 0)), tours, tol)
+            dis, rt = float(s.get("dis") or 0), int(float(s.get("run_time") or 0))
+            t = byid.get(f"z{tr}") or sync.is_duplicate(tr, dis, rt, tours, tol) or _overlap(tr, dis, rt, tours)
         except (KeyError, TypeError, ValueError):
             continue
         if not t:
