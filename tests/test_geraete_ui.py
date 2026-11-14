@@ -225,3 +225,10 @@ def test_migration_adds_zsrc_idempotently_and_keeps_data(tmp_path):
         assert (r["name"], r["model"], r["note"], r["zsrc"]) == ("Alt", "Balance 2", "Notiz", None)
     assert c.execute("SELECT 1 FROM sqlite_master WHERE name='tour_zsrc'").fetchone()
     db.close_all()
+
+
+def test_zepp_geraeteliste_modellname():
+    from app import zepp_devices as z
+    assert z.model_for("run.9568515.huami.com") == "Amazfit Balance 2" and z.model_for("9568512") == "Amazfit Balance 2"
+    assert z.model_for("run.8716545.huami.com") == "Amazfit T-Rex 3" and z.model_for("418") == "Amazfit T-Rex 2"
+    assert z.model_for("run.46.huami.com") == "" and z.model_for(None) == "" and z.model_for("irgendwas") == ""

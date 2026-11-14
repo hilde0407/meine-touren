@@ -102,6 +102,7 @@ VIEWS.map = async () => {
     } catch (e) {
       lastLive = null;
     }
+    if (!$("#mlive")) return clearInterval(timer);   // Seite wurde während der Abfrage verlassen
     $("#mlive").style.display = lastLive ? "" : "none";
     if (lastLive && lastLive.name) $("#mlive").textContent = "📍 " + lastLive.name;
     showLive(lastLive);

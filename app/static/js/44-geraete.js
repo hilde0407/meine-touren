@@ -185,14 +185,14 @@ function devZepp(dv, done) {
     const free = dv.devices.filter(x => x.kind === "zepp" && !x.zsrc);
     body.innerHTML = `<p>${src.length === 1 ? `Zepp meldet ${res.total} Trainings von einer Quelle.` : `Zepp meldet ${res.total} Trainings von ${src.length} Quellen.`}</p><p class="mut">Prüfe die Vorschläge, ändere sie nach Bedarf und wähle, was angelegt werden soll. Vorher wird nichts gespeichert.</p>
       <div class="dvprobe">${src.map((x, i) => `<div class="dvpr ${x.device ? "dis" : ""}" data-i="${i}">
-        <label class="chk"><input type="checkbox" class="zon" ${x.device ? "disabled" : "checked"}> <span>${x.device ? `Bereits angelegt als „${esc(x.device.name)}“` : src.length > 1 ? `Zepp-Uhr ${i + 1}` : "Zepp-Uhr"}</span></label>
+        <label class="chk"><input type="checkbox" class="zon" ${x.device ? "disabled" : "checked"}> <span>${x.device ? `Bereits angelegt als „${esc(x.device.name)}“` : x.model || (src.length > 1 ? `Zepp-Uhr ${i + 1}` : "Zepp-Uhr")}</span></label>
         <div class="dvmeta"><span>Zepp meldet: </span><code>${esc(x.zsrc)}</code> · <span>${x.n} Trainings</span> · <span>${esc(dvDay(x.first))} bis ${esc(dvDay(x.last))}</span><br><span>${x.sports.slice(0, 4).map(s => `${esc(s.label)} ${s.n}`).join(", ")}</span></div>
         ${x.overlaps.length ? `<div class="dvwarn">Der Zeitraum überschneidet sich mit einer anderen Quelle. Zepp kann Uhr und Handy-App parallel melden – bitte prüfen, ob das wirklich zwei Geräte sind.</div>` : ""}
         ${x.device ? "" : `<div class="zfields">
           ${free.length ? `<div class="dvf"><label>Was soll damit passieren?</label><select class="zat"><option value="0">Als neues Gerät anlegen</option>${free.map(f => `<option value="${f.id}">Kennung zu „${esc(f.name)}“ hinzufügen</option>`).join("")}</select></div>` : ""}
-          <div class="dvf2 zn"><div><label>Name</label><input class="znm" maxlength="80" value="${esc(src.length > 1 ? `Zepp-Uhr ${i + 1}` : "Zepp-Uhr")}"></div><div><label>Modell (optional)</label><input class="zmo" maxlength="80" placeholder="z. B. Balance 2"></div></div>
+          <div class="dvf2 zn"><div><label>Name</label><input class="znm" maxlength="80" value="${esc(x.model || (src.length > 1 ? `Zepp-Uhr ${i + 1}` : "Zepp-Uhr"))}"></div><div><label>Modell (optional)</label><input class="zmo" maxlength="80" value="${esc(x.model)}" placeholder="z. B. Balance 2"></div></div>
           <div class="dvf2 zd"><div><label>Seit</label><input type="date" class="zs" value="${esc(x.first)}"></div><div><label>Bis (leer = aktuell)</label><input type="date" class="zu" value="${x === latest ? "" : esc(x.last)}"></div></div></div>`}</div>`).join("")}</div>
-      <small class="dvh">Welches Modell hinter einer Kennung steckt, kann die App nicht zuverlässig erkennen – trage es selbst ein, wenn du magst.</small>
+      <small class="dvh">Das Modell wird anhand der Zepp-Geräteliste erkannt, soweit die Kennung dort vorkommt; sonst trage es selbst ein.</small>
       <details class="dvadv"><summary>Technische Angaben</summary><p class="dvmeta">Felder eines Zepp-Trainings: ${res.sample_keys.map(k => `<code>${esc(k)}</code>`).join(" ")}</p></details>
       <div class="dvfoot"><button class="btn" id="zok">Ausgewählte übernehmen</button><button class="btn ghost" id="zno">Abbrechen</button></div><div id="zerr" class="bad mt8"></div>`;
     $("#zno").onclick = () => m.remove();

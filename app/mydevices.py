@@ -355,7 +355,7 @@ def api_photo_del(did: int):
 # ---------------------------------------------------------------------------------------------- Aus Zepp ermitteln
 def probe_summaries(summaries):
     """Aus den Verlaufseinträgen der Zepp-Cloud je verschiedener Kennung („source“): Anzahl, erstes/letztes Datum, Sportarten.
-    Bekannt ist nur die Kennung selbst – ein Modellname wird NICHT daraus abgeleitet."""
+    Der Modellname kommt aus der Zepp-Geräteliste (app/zepp_devices.py), sofern die Kennung dort vorkommt."""
     from . import gpxtools
     groups, keys, nokey = {}, set(), 0
     sample = None
@@ -389,7 +389,7 @@ def probe_summaries(summaries):
         k = known.get(g["zsrc"])
         out.append({"zsrc": g["zsrc"], "n": g["n"], "first": a, "last": b,
                     "sports": [{"sport": sp, "label": gpxtools.LABEL.get(sp, sp), "n": n} for sp, n in sorted(g["sports"].items(), key=lambda x: -x[1])],
-                    "device": {"id": k["id"], "name": k["name"]} if k else None})
+                    "device": {"id": k["id"], "name": k["name"]} if k else None, "model": __import__("app.zepp_devices", fromlist=["x"]).model_for(g["zsrc"])})
     out.sort(key=lambda x: (x["first"], x["zsrc"]))
     for x in out:
         x["overlaps"] = [y["zsrc"] for y in out if y is not x and y["first"] <= x["last"] and x["first"] <= y["last"]]
