@@ -269,6 +269,48 @@ def api_assign_range(body: dict):
     return {"ok": True, "n": n}
 
 
+@router.get("/api/devices/manual-check")
+def api_manual_check():
+    """Von Hand gesetzte Zuordnungen: wie viele insgesamt und wie viele widersprechen dem Zeitraum (seit/bis) ihres Geräts."""
+    return _manual_stats()
+
+
+def _manual_stats():
+    devs = {d["id"]: d for d in db.query("SELECT * FROM devices")}
+    days = {t["id"]: _day(t["start_ts"]) for t in db.query("SELECT id, start_ts FROM tours")}
+    total = bad = 0
+    per = {}
+    for r in db.query("SELECT tour_id, device_id FROM tour_device"):
+        d, day = devs.get(r["device_id"]), days.get(r["tour_id"])
+        if not d or not day:
+            continue
+        total += 1
+        if (d["since"] and day < d["since"]) or (d["until"] and day > d["until"]):
+            bad += 1
+            per[d["name"]] = per.get(d["name"], 0) + 1
+    return {"total": total, "outside": bad, "by_device": per}
+
+
+@router.post("/api/devices/reset-manual")
+def api_reset_manual(body: dict):
+    """Von Hand gesetzte Zuordnungen zurücknehmen, damit die automatische Zuordnung (Art, Zepp-Kennung, Datum) wieder gilt.
+    mode='outside' (Standard): nur solche, die dem Zeitraum (seit/bis) des Geräts widersprechen; mode='all': alle."""
+    mode = body.get("mode") or "outside"
+    if mode not in ("outside", "all"):
+        raise HTTPException(400, "Unbekannter Modus")
+    devs = {d["id"]: d for d in db.query("SELECT * FROM devices")}
+    days = {t["id"]: _day(t["start_ts"]) for t in db.query("SELECT id, start_ts FROM tours")}
+    n = 0
+    for r in db.query("SELECT tour_id, device_id FROM tour_device"):
+        d, day = devs.get(r["device_id"]), days.get(r["tour_id"])
+        gone = d is None or not day
+        out = d is not None and day and ((d["since"] and day < d["since"]) or (d["until"] and day > d["until"]))
+        if mode == "all" or gone or out:
+            db.execute("DELETE FROM tour_device WHERE tour_id=?", (r["tour_id"],))
+            n += 1
+    return {"ok": True, "reset": n}
+
+
 @router.get("/api/devices/suggestions")
 def api_suggestions():
     """Vorschläge aus vorhandenen Touren: Quellenarten, für die es noch kein Gerät gibt. Es wird nichts angelegt."""
@@ -450,8 +492,7 @@ def match_summaries(summaries, tours=None):
         seen.add(tid)
         res["matched"] += 1
         if tid in manual:
-            res["skipped_manual"] += 1
-            continue
+            res["skipped_manual"] += 1              # Gerät bleibt wie von Hand gesetzt; Art und Kennung werden trotzdem gemerkt (für späteres Zurücksetzen)
         if srcs.get(tid, "") in KINDS and srcs[tid] != "zepp":
             res["skipped_other"] += 1
             continue

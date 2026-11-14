@@ -260,9 +260,10 @@ def test_match_all_assigns_komoot_tours_recorded_with_watch(fresh):
     assert mydevices.device_of("k1") is None
     hist = [{"trackid": str(ts + i * 86400), "type": "6", "dis": "9000", "run_time": "3000", "source": "run.9568515.huami.com"} for i in range(4)]
     r = mydevices.match_all(type("A", (), {"history": lambda s: hist})())
-    assert r["matched"] == 4 and r["skipped_manual"] == 1 and r["skipped_other"] == 1 and r["changed"] == 2
+    assert r["matched"] == 4 and r["skipped_manual"] == 1 and r["skipped_other"] == 1 and r["changed"] == 3
     assert mydevices.device_of("k1")["id"] == dev and mydevices.device_of("k2")["id"] == dev
     assert mydevices.device_of("k4")["id"] == other and mydevices.device_of("k4")["manual"]
+    assert db.one("SELECT src FROM tour_source WHERE tour_id='k4'")["src"] == "zepp"       # Art wird auch bei Handzuordnung gemerkt
     assert mydevices.device_of("k3") is None                                   # Garmin bleibt unberührt
     assert mydevices.device_of("k5") is None                                   # ohne Zepp-Training keine Zuordnung
     assert mydevices.match_all(type("A", (), {"history": lambda s: hist})())["changed"] == 0   # zweiter Lauf ändert nichts
@@ -280,3 +281,22 @@ def test_match_overlap_when_times_differ(fresh):
     far = [{"trackid": str(ts), "type": "6", "dis": "30000", "run_time": "7200", "source": "x"}]       # Strecke passt nicht
     db.execute("DELETE FROM tour_source")
     assert mydevices.match_summaries(far)["matched"] == 0
+
+
+def test_reset_manual_outside_range(fresh):
+    """Von Hand gesetzte Zuordnung außerhalb des Gerätezeitraums wird erkannt und zurückgesetzt; passende bleibt."""
+    ts = 1_700_000_000
+    for i, d in enumerate((0, 400)):
+        db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,status,source) VALUES(?,?,'hike',?,?,1000,100,'t','komoot')", (f"t{i}", f"t{i}", ts + d * 86400, ts + d * 86400 + 100))
+    day1 = mydevices._day(ts + 400 * 86400)
+    old = db.execute("INSERT INTO devices(name,kind,model,since,until,active,note,zsrc) VALUES('Alt','zepp','','',?,1,'','z1')", (mydevices._day(ts + 100 * 86400),))
+    neu = db.execute("INSERT INTO devices(name,kind,model,since,until,active,note,zsrc) VALUES('Neu','zepp','',?,'',1,'','z2')", (mydevices._day(ts + 100 * 86400),))
+    for t in ("t0", "t1"):
+        db.execute("INSERT INTO tour_device(tour_id,device_id) VALUES(?,?)", (t, neu))      # t0 liegt VOR „seit“ des neuen Geräts
+    c = _client()
+    j = c.get("/api/devices/manual-check").json()
+    assert j == {"total": 2, "outside": 1, "by_device": {"Neu": 1}}
+    assert c.post("/api/devices/reset-manual", json={"mode": "outside"}).json()["reset"] == 1
+    assert db.one("SELECT 1 FROM tour_device WHERE tour_id='t0'") is None and db.one("SELECT 1 FROM tour_device WHERE tour_id='t1'")
+    assert c.post("/api/devices/reset-manual", json={"mode": "all"}).json()["reset"] == 1
+    assert c.post("/api/devices/reset-manual", json={"mode": "x"}).status_code == 400
