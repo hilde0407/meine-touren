@@ -239,5 +239,7 @@ def test_zepp_kennungen_aus_echten_antworten():
     assert z.guess_for("run.64.huami.com") == ("Amazfit GTR 2", True)
     assert z.guess_for("run.230.huami.com") == ("Amazfit GTR 3 Pro", True)
     assert z.guess_for("run.7930113.huami.com") == ("Amazfit GTR 4", True)
-    for k in ("run.watch.everest.huami.com", "run.watch.qogir.huami.com", "run.watch.huami.com", "run.36.huami.com"):
-        assert z.guess_for(k) == ("", False), k      # Codenamen/Altnummern: kein Modell raten
+    assert z.guess_for("run.watch.everest.huami.com") == ("Amazfit Stratos", False)    # Vermutung, nicht sicher
+    assert z.guess_for("run.watch.qogir.huami.com") == ("Amazfit Verge", False)
+    assert z.guess_for("run.watch.huami.com") == ("Amazfit Pace", False)
+    assert z.guess_for("run.36.huami.com") == ("", False)

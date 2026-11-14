@@ -187,7 +187,8 @@ function devZepp(dv, done) {
       <div class="dvprobe">${src.map((x, i) => `<div class="dvpr ${x.device ? "dis" : ""}" data-i="${i}">
         <label class="chk"><input type="checkbox" class="zon" ${x.device ? "disabled" : "checked"}> <span>${x.device ? `Bereits angelegt als „${esc(x.device.name)}“` : x.model || (src.length > 1 ? `Zepp-Uhr ${i + 1}` : "Zepp-Uhr")}</span></label>
         <div class="dvmeta"><span>Zepp meldet: </span><code>${esc(x.zsrc)}</code> · <span>${x.n} Trainings</span> · <span>${esc(dvDay(x.first))} bis ${esc(dvDay(x.last))}</span><br><span>${x.sports.slice(0, 4).map(s => `${esc(s.label)} ${s.n}`).join(", ")}</span></div>
-        ${!x.model && !x.device ? `<div class="dvwarn">Zepp nennt hier nur einen allgemeinen Codenamen, kein Modell. Vergib selbst einen Namen (z. B. „Amazfit Stratos“) – am Zeitraum erkennst du die Uhr.</div>` : ""}
+        ${x.model && !x.model_sure && !x.device ? `<div class="dvwarn"><b>Vermutlich ${esc(x.model)}.</b> Die Kennung ist nur ein Codename der Uhren-Generation, kein Modell. Bitte prüfen und bei Bedarf ändern.</div>` : ""}
+        ${!x.model && !x.device ? `<div class="dvwarn">Zepp nennt hier nur eine allgemeine Altnummer, kein Modell. Vergib selbst einen Namen – am Zeitraum erkennst du die Uhr.</div>` : ""}
         ${x.overlaps.length ? `<div class="dvwarn">Der Zeitraum überschneidet sich mit einer anderen Quelle. Zepp kann Uhr und Handy-App parallel melden – bitte prüfen, ob das wirklich zwei Geräte sind.</div>` : ""}
         ${x.device ? "" : `<div class="zfields">
           ${free.length ? `<div class="dvf"><label>Was soll damit passieren?</label><select class="zat"><option value="0">Als neues Gerät anlegen</option>${free.map(f => `<option value="${f.id}">Kennung zu „${esc(f.name)}“ hinzufügen</option>`).join("")}</select></div>` : ""}
