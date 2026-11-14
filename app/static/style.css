@@ -816,3 +816,71 @@ details.trsec[open]>summary .trfk{display:none}
 #blsec .utiles,#tpsec .utiles{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
 details.trsub .tblw{max-height:340px;overflow:auto}
 .utile small span,details.trsub .trfk span,details.trsub .trfk b{white-space:nowrap}
+
+/* =====================  3.13.0: einheitliche Dialoge, Fortschrittsbalken, einklappbare Abschnitte der Genauigkeit, Sammel-Korrektur  ===================== */
+/* Dialoge (uiConfirm / uiAlert, js/00-dialog.js) */
+.uidlg{position:fixed;inset:0;z-index:3000;background:#0009;display:flex;align-items:center;justify-content:center;padding:16px}
+.uibox{background:var(--card,var(--bg));color:var(--ink);border:1px solid var(--rule);border-top:5px solid var(--yellow);border-radius:var(--r-l,10px);box-shadow:0 18px 50px #0008;width:min(460px,100%);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow:auto;padding:20px 22px 18px}
+.uibox.danger{border-top-color:var(--dv-bad)}
+.uibox:focus{outline:none}
+.uibox h2{margin:0 0 8px;font:700 24px/1.15 var(--d)}
+.uitext{font-size:16px;line-height:1.5;overflow-wrap:anywhere}.uitext p{margin:0 0 10px;white-space:pre-line}.uitext p:last-child{margin-bottom:0}
+.uifoot{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px}
+.uifoot .btn{min-height:44px}
+.uifoot .btn:focus-visible,.uidlg button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.uibox.danger .uidanger{background:var(--dv-bad);border-color:var(--dv-bad);color:var(--card,#fff)}
+@media (prefers-reduced-motion:no-preference){.uibox{animation:uipop .12s ease-out}@keyframes uipop{from{transform:translateY(6px);opacity:0}}}
+@media (max-width:420px){.uifoot{flex-direction:column-reverse}.uifoot .btn{width:100%}}
+
+/* Fortschrittsbalken (role=progressbar) und Job-Kasten */
+.dvbar{height:12px;border-radius:99px;background:var(--soft);border:1px solid var(--rule);overflow:hidden;margin:6px 0}
+.dvbar>span{display:block;height:100%;background:var(--bars);border-radius:99px;transition:width .4s ease}
+.dvbar.ind>span{width:34%;animation:dvind 1.3s ease-in-out infinite}
+@keyframes dvind{0%{margin-left:-34%}100%{margin-left:100%}}
+@media (prefers-reduced-motion:reduce){.dvbar>span{transition:none}.dvbar.ind>span{animation:none;width:100%;opacity:.5}}
+.dvjob{border:1px solid var(--rule);border-left:4px solid var(--bars);border-radius:var(--r);padding:12px 14px;margin:0 0 14px;background:var(--card)}
+.dvjob[hidden]{display:none}
+.dvjobt{font:700 18px var(--d)}.dvjobs{font-size:14px;min-height:1.3em}
+.dvstat{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--rule);border-left:4px solid var(--dv-ok);border-radius:var(--r);background:var(--card);margin:0 0 14px}
+.dvstat.warn{border-left-color:var(--yellow)}
+.dvstatt{flex:1;min-width:min(100%,260px)}.dvstatt b{display:block;font-size:18px}.dvstatt .mut{display:block;font-size:14px}
+.dvstat .dvbar{max-width:420px}
+.dvopen{margin:8px 0 0;padding:8px 12px;border-left:4px solid var(--yellow);background:color-mix(in srgb,var(--yellow) 10%,var(--card));border-radius:var(--r)}
+.dvopen b{display:block}
+
+/* Einklappbare Abschnitte der Genauigkeit: gleicher Kopf wie „Genauigkeit“, Wichtiges offen */
+.dvsec{border:1px solid var(--rule);border-radius:var(--r-l);background:color-mix(in srgb,var(--soft) 30%,var(--card));margin:12px 0}
+.dvsec>summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;min-height:44px;padding:8px 14px;font:700 18px var(--d);list-style:none}
+.dvsec>summary::-webkit-details-marker{display:none}
+.dvsec>summary::before{content:"";width:8px;height:8px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:rotate(-45deg);transition:transform .15s;margin:0 4px 0 2px;flex:none}
+.dvsec[open]>summary::before{transform:rotate(45deg)}
+.dvsec>summary:focus-visible,.dvq>summary:focus-visible,.dvhow>summary:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:var(--r-l)}
+.dvsect{margin-right:2px}
+.dvsecb{padding:0 14px 14px;min-width:0}
+.dvstand .dvqfoot{margin:10px 0 0!important}.dvstand p{margin:6px 0}
+.dvsplit{display:grid;grid-template-columns:1fr auto;gap:4px 14px;max-width:420px;margin:6px 0 4px;padding:8px 12px;border:1px solid var(--rule);border-radius:var(--r);background:var(--card);font-size:15px}
+.dvsplit b{text-align:right;font-variant-numeric:tabular-nums}.dvsl{color:var(--mut)}
+.dvsplith{margin:2px 0 10px!important;max-width:70ch}
+.dvbatchbar{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;margin:0 0 10px}.dvbatchbar .dvh{margin:0}
+.dvbatchl{margin:4px 0 8px}
+.dvundo{margin-right:10px}
+
+/* Sammel-Korrektur (Dialog) */
+.mbox.dvbox.dvbatchbox{max-width:760px}
+.dvbintro{margin:6px 0 0;line-height:1.5}
+.dvbmeth .dvpickrow{margin:6px 0;padding:12px 14px;line-height:1.35;display:flex;flex-direction:row;align-items:flex-start;gap:12px;text-align:left}.dvbmeth .dvpickrow input{width:20px;height:20px;margin:2px 0 0;flex:none}.dvbmeth .dvpickrow>span{display:block;min-width:0}.dvbmeth .dvpickrow small{display:block;margin-top:2px}
+.dvblist{border:1px solid var(--rule);border-radius:var(--r);margin-top:14px;background:var(--card);overflow:hidden}
+.dvbtools{display:flex;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--rule);flex-wrap:wrap}.dvbtools .sp{flex:1}
+.dvbcount{font:600 15px var(--b)}
+.dvbul{list-style:none;margin:0;padding:0;max-height:min(40vh,340px);overflow:auto}
+.dvbul li+li{border-top:1px solid var(--rule)}
+.dvbrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:9px 12px;cursor:pointer;min-height:48px}
+.dvbrow:hover{background:color-mix(in srgb,var(--yellow) 10%,var(--card))}
+.dvbrow input{width:20px;height:20px;margin:0}.dvbrow input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.dvbname{display:flex;flex-direction:column;min-width:0}.dvbname b{overflow-wrap:anywhere}.dvbname .mut{font-size:14px}
+.dvbnum{display:flex;gap:2px 14px;flex-wrap:wrap;justify-content:flex-end;font-size:14px;color:var(--mut)}
+.dvbnum b{color:var(--ink);font-variant-numeric:tabular-nums}.dvbnew b{color:var(--dv-ok)}
+.dvbsum{margin:14px 0 0;padding:10px 12px;border-left:4px solid var(--yellow);background:color-mix(in srgb,var(--yellow) 10%,var(--card));border-radius:var(--r)}
+.dvbsum b{display:block}.dvbsum .dvh{margin-top:2px}
+.dvbdone{font-size:18px;margin:6px 0}
+@media (max-width:520px){.dvbrow{grid-template-columns:auto minmax(0,1fr)}.dvbnum{grid-column:2;justify-content:flex-start}.mbox.dvbox.dvbatchbox{padding:18px 14px}}

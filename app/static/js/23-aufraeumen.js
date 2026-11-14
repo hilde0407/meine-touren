@@ -10,7 +10,7 @@ VIEWS.photos = async (...a) => {
 async function cleanUnusedDialog() {
   const u = await api("/api/photos-unused");
   if (!u.count) {
-    alert("Alle Fotos sind einer Tour zugeordnet – es gibt nichts aufzuräumen.");
+    uiAlert("Alle Fotos sind einer Tour zugeordnet – es gibt nichts aufzuräumen.");
     return;
   }
   const mb = b => (b / 1048576 >= 1024 ? nf(b / 1073741824, 1) + " GB" : nf(b / 1048576, 0) + " MB");
@@ -38,7 +38,7 @@ async function cleanUnusedDialog() {
     try {
       const r = await api("/api/photos-unused/delete", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({years: ys})});
       m.remove();
-      alert(`${r.deleted} Fotos gelöscht.`);
+      uiAlert(`${r.deleted} Fotos gelöscht.`);
       route();
     } catch (e) {
       m.querySelector("#cuer").textContent = e.message;

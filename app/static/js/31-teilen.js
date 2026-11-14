@@ -9,7 +9,7 @@ async function shareOut(title, text, url) {
       return true;
     }
     await navigator.clipboard.writeText(full);
-    alert("In die Zwischenablage kopiert");
+    uiAlert("In die Zwischenablage kopiert");
   } catch (e) {}
   return false;
 }
@@ -45,7 +45,7 @@ VIEWS.tour = async id => {
         b.disabled = true;
         try {
           const n = (await api(`/api/photos?tour_id=${encodeURIComponent(t.id)}`).catch(() => null)) || [];
-          if (Array.isArray(n) && !n.filter(x => x.manual !== 2).length && !confirm("Zu dieser Tour wurden keine Fotos gefunden. Trotzdem Link erstellen?")) { b.disabled = false; return; }
+          if (Array.isArray(n) && !n.filter(x => x.manual !== 2).length && !await uiConfirm("Zu dieser Tour wurden keine Fotos gefunden. Trotzdem Link erstellen?")) { b.disabled = false; return; }
           const s = await api(`/api/tours/${encodeURIComponent(t.id)}/share`, {
             method: "POST",
             headers: {"content-type": "application/json"},
@@ -55,7 +55,7 @@ VIEWS.tour = async id => {
           await shareOut(t.name, `Diashow: ${t.name} (${dateL(t.date)})`, location.origin + s.url);
         } catch (e) {
           b.disabled = false;
-          alert("Link konnte nicht erstellt werden: " + e.message);
+          uiAlert("Link konnte nicht erstellt werden: " + e.message);
         }
       };
     };
@@ -71,7 +71,7 @@ VIEWS.tour = async id => {
       });
       await shareOut(t.name, tourShareText(t), location.origin + s.url);
     } catch (e) {
-      alert("Link konnte nicht erstellt werden: " + e.message);
+      uiAlert("Link konnte nicht erstellt werden: " + e.message);
     }
     b.disabled = false;
   };

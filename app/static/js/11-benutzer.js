@@ -335,7 +335,7 @@ VIEWS.account = async () => {
         await api("/api/users/" + u, {method: "PATCH", headers: J, body: JSON.stringify(d)});
         VIEWS.account();
       } catch (e) {
-        alert(e.message);
+        uiAlert(e.message);
       }
     };
   document
@@ -360,9 +360,9 @@ VIEWS.account = async () => {
   );
   document.querySelectorAll("[data-u2]").forEach(
     b =>
-      (b.onclick = () => {
+      (b.onclick = async () => {
         const u = us.find(x => x.uid === b.dataset.u2);
-        if (confirm(`Zwei-Faktor-Anmeldung von „${u.name}“ ausschalten? Der Benutzer kann sie danach neu einrichten.`)) patch(b.dataset.u2, {reset_2fa: true});
+        if (await uiConfirm({text: `Zwei-Faktor-Anmeldung von „${u.name}“ ausschalten? Der Benutzer kann sie danach neu einrichten.`, danger: true, ok: "Ausschalten"})) patch(b.dataset.u2, {reset_2fa: true});
       })
   );
   document
@@ -372,15 +372,13 @@ VIEWS.account = async () => {
     b =>
       (b.onclick = async () => {
         const u = us.find(x => x.uid === b.dataset.ud);
-        const all = confirm(
-          `„${u.name}“ löschen?\n\nOK = Benutzer UND alle seine Touren, Fotos und Daten unwiderruflich löschen.\nAbbrechen = nichts tun.`
-        );
+        const all = await uiConfirm({text: `„${u.name}“ löschen?\n\nDer Benutzer UND alle seine Touren, Fotos und Daten werden unwiderruflich gelöscht.`, danger: true, ok: "Benutzer und Daten löschen"});
         if (!all) return;
         try {
           await api(`/api/users/${b.dataset.ud}?data=1`, {method: "DELETE"});
           VIEWS.account();
         } catch (e) {
-          alert(e.message);
+          uiAlert(e.message);
         }
       })
   );
@@ -448,7 +446,7 @@ VIEWS.shared = async () => {
       btn.textContent = `✓ ${r.total} übernommen`;
     } catch (e) {
       btn.disabled = false;
-      alert(e.message);
+      uiAlert(e.message);
     }
   };
   document.querySelectorAll("[data-all]").forEach(
@@ -500,9 +498,9 @@ VIEWS.tour = async (id, q) => {
             body: JSON.stringify({grantee: m.querySelector("#fg").value, scope: "tour", ref: t.id}),
           });
           m.remove();
-          alert("Freigegeben. Verwalten unter „Konto & Freigaben“.");
+          uiAlert("Freigegeben. Verwalten unter „Konto & Freigaben“.");
         } catch (e) {
-          alert(e.message);
+          uiAlert(e.message);
         }
       };
     };
@@ -533,7 +531,7 @@ VIEWS.tour = async (id, q) => {
               VIEWS.tour(id, q);
             } catch (e) {
               b.disabled = false;
-              alert(e.message);
+              uiAlert(e.message);
             }
           })
       );

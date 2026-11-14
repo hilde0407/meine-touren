@@ -1231,4 +1231,129 @@ Die Kilometerwerte werden beim ersten Öffnen der Tour von Zepp geladen. || The 
 So wird verglichen || How the comparison works || Comment la comparaison est faite || Cómo se compara
 Die härtesten Wochen und Touren || The hardest weeks and tours || Les semaines et parcours les plus durs || Las semanas y rutas más duras
 Hinweise zur Quelle || Notes on the source || Remarques sur la source || Notas sobre la fuente
+Hinweis || Notice || Remarque || Aviso
+Bitte bestätigen || Please confirm || Veuillez confirmer || Confirma, por favor
+Bist du sicher? || Are you sure? || Es-tu sûr ? || ¿Seguro?
+OK || OK || OK || OK
+Ja, ausführen || Yes, do it || Oui, exécuter || Sí, ejecutar
+Löschen || Delete || Supprimer || Eliminar
+Entfernen || Remove || Retirer || Quitar
+Trennen || Disconnect || Déconnecter || Desconectar
+Verwerfen || Discard || Abandonner || Descartar
+Widerrufen || Revoke || Révoquer || Revocar
+Aufheben || Remove protection || Désactiver || Desactivar
+Ausschalten || Turn off || Désactiver || Desactivar
+Zurücknehmen || Undo || Annuler || Deshacer
+Zurücksetzen || Reset || Réinitialiser || Restablecer
+Original behalten || Keep the original || Garder l’original || Conservar el original
+Neu berechnete Höhen übernehmen? || Apply the recalculated elevations? || Appliquer les altitudes recalculées ? || ¿Aplicar las altitudes recalculadas?
+Neu berechnet: {} m Aufstieg, {} m Abstieg (vorher {} m / {} m). || Recalculated: {} m ascent, {} m descent (before: {} m / {} m). || Recalculé : {} m de montée, {} m de descente (avant : {} m / {} m). || Recalculado: {} m de subida, {} m de bajada (antes: {} m / {} m).
+Benutzer und Daten löschen || Delete user and data || Supprimer l’utilisateur et les données || Eliminar usuario y datos
+Der Benutzer UND alle seine Touren, Fotos und Daten werden unwiderruflich gelöscht. || The user AND all their tours, photos and data will be deleted irreversibly. || L’utilisateur ET tous ses parcours, photos et données seront supprimés définitivement. || El usuario Y todas sus rutas, fotos y datos se eliminarán de forma irreversible.
+Import abbrechen? || Cancel the import? || Annuler l’import ? || ¿Cancelar la importación?
+Weiterlaufen lassen || Let it run || Laisser continuer || Dejar que siga
+Zeitkorrektur ebenfalls zurücksetzen? || Reset the time correction as well? || Réinitialiser aussi la correction d’heure ? || ¿Restablecer también la corrección de hora?
+Zuordnung lösen und Zeitkorrektur zurücksetzen || Unassign and reset the time correction || Dissocier et réinitialiser la correction d’heure || Desasignar y restablecer la corrección de hora
+Nur Zuordnung lösen || Only unassign || Dissocier seulement || Solo desasignar
+Wer „Nur Zuordnung lösen“ wählt oder abbricht, löst nur die Zuordnung; danach werden die Fotos wieder automatisch nach Zeit zugeordnet. || Choosing “Only unassign” or cancelling only unassigns the photos; afterwards they are assigned automatically by time again. || Avec « Dissocier seulement » (ou en annulant), seules les associations sont supprimées ; les photos sont ensuite de nouveau associées automatiquement selon l’heure. || Si eliges «Solo desasignar» o cancelas, solo se quita la asignación; después las fotos vuelven a asignarse automáticamente por hora.
+Gerät entfernen? || Remove device? || Retirer l’appareil ? || ¿Quitar el dispositivo?
+Nicht möglich || Not possible || Impossible || No es posible
+Touren zugeordnet || Tours assigned || Parcours associés || Rutas asignadas
+Umgestellt || Switched || Modifié || Cambiado
+Alle Handzuordnungen zurücksetzen? || Reset all manual assignments? || Réinitialiser toutes les associations manuelles ? || ¿Restablecer todas las asignaciones manuales?
+Jetzt automatisch zuordnen? || Assign automatically now? || Associer automatiquement maintenant ? || ¿Asignar automáticamente ahora?
+Zuordnen || Assign || Associer || Asignar
+Später || Later || Plus tard || Más tarde
+Höhe aus Geländemodell neu berechnen? || Recalculate elevation from the terrain model? || Recalculer l’altitude à partir du modèle de terrain ? || ¿Recalcular la altitud con el modelo del terreno?
+Höhe aus Uhr (Zepp) abgleichen? || Match elevation with the watch (Zepp)? || Aligner l’altitude sur la montre (Zepp) ? || ¿Ajustar la altitud con el reloj (Zepp)?
+Höhenkorrektur zurücknehmen? || Undo the elevation correction? || Annuler la correction d’altitude ? || ¿Deshacer la corrección de altitud?
+Ausführen || Run || Exécuter || Ejecutar
+Fortschritt || Progress || Progression || Progreso
+Fortschritt der Auswertung || Progress of the evaluation || Progression de l’évaluation || Progreso de la evaluación
+Fortschritt der Korrektur || Progress of the correction || Progression de la correction || Progreso de la corrección
+{} von {} Touren geprüft || {} of {} tours checked || {} parcours sur {} vérifiés || {} de {} rutas comprobadas
+{} von {} Touren korrigiert || {} of {} tours corrected || {} parcours sur {} corrigés || {} de {} rutas corregidas
+Auswertungsstand || Evaluation status || État de l’évaluation || Estado de la evaluación
+vollständig || complete || complet || completa
+noch {} offen || {} still open || {} encore ouverts || {} aún abiertas
+keine || none || aucune || ninguna
+Weiter auswerten || Continue evaluating || Poursuivre l’évaluation || Seguir evaluando
+Noch 1 Tour offen – erneut starten. || 1 tour still open – start again. || Encore 1 parcours ouvert – relancer. || Queda 1 ruta abierta: inicia de nuevo.
+Noch {} Touren offen – erneut starten. || {} tours still open – start again. || Encore {} parcours ouverts – relancer. || Quedan {} rutas abiertas: inicia de nuevo.
+Noch 1 Tour mit auffälliger Höhe offen – erneut starten. || 1 tour with conspicuous elevation still open – start again. || Encore 1 parcours avec altitude suspecte – relancer. || Queda 1 ruta con altitud llamativa: inicia de nuevo.
+Noch {} Touren mit auffälliger Höhe offen – erneut starten. || {} tours with conspicuous elevation still open – start again. || Encore {} parcours avec altitude suspecte – relancer. || Quedan {} rutas con altitud llamativa: inicia de nuevo.
+Offen sind Touren, bei denen noch Geländekacheln oder Zepp-Details fehlen. Je Lauf gibt es Obergrenzen, damit nichts überlastet wird. || Open tours are those still missing terrain tiles or Zepp details. Each run has upper limits so that nothing is overloaded. || Les parcours ouverts sont ceux pour lesquels il manque encore des tuiles de terrain ou des détails Zepp. Chaque exécution a des limites pour éviter toute surcharge. || Las rutas abiertas son las que aún carecen de teselas del terreno o detalles de Zepp. Cada ejecución tiene límites para no sobrecargar nada.
+Zuletzt ausgewertet am {}, {} von {} Touren. || Last evaluated on {}, {} of {} tours. || Dernière évaluation le {}, {} parcours sur {}. || Última evaluación el {}, {} de {} rutas.
+Alle Touren sind ausgewertet. || All tours have been evaluated. || Tous les parcours sont évalués. || Todas las rutas están evaluadas.
+{} mit Detail (genau), {} nur Zusammenfassung (grob). || {} with detail (exact), {} summary only (rough). || {} avec détail (précis), {} résumé seul (approximatif). || {} con detalle (exacto), {} solo resumen (aproximado).
+Höhenvergleich: genau und grob || Elevation comparison: exact and rough || Comparaison d’altitude : précise et approximative || Comparación de altitud: exacta y aproximada
+Mit Detail (genau) || With detail (exact) || Avec détail (précis) || Con detalle (exacto)
+Nur Zusammenfassung (grob) || Summary only (rough) || Résumé seul (approximatif) || Solo resumen (aproximado)
+Grobe Werte kommen aus dem Auf- und Abstieg, den die Uhr selbst meldet; sie haben großzügigere Grenzen (gut bis {} %, mäßig bis {} %) und werden nicht mit den genauen Werten vermischt. || Rough values come from the ascent and descent the watch reports itself; they have more generous limits (good up to {} %, fair up to {} %) and are never mixed with the exact values. || Les valeurs approximatives viennent du dénivelé que la montre indique elle-même ; leurs limites sont plus larges (bon jusqu’à {} %, moyen jusqu’à {} %) et elles ne sont jamais mélangées aux valeurs précises. || Los valores aproximados proceden del desnivel que informa el propio reloj; tienen límites más amplios (bueno hasta {} %, regular hasta {} %) y nunca se mezclan con los valores exactos.
+Die Einschätzung der Höhe beruht hier nur auf den groben Werten. || Here the elevation rating is based on the rough values only. || Ici, l’appréciation de l’altitude repose uniquement sur les valeurs approximatives. || Aquí la valoración de la altitud se basa solo en los valores aproximados.
+gut (grob) || good (rough) || bon (approximatif) || bueno (aproximado)
+mäßig (grob) || fair (rough) || moyen (approximatif) || regular (aproximado)
+auffällig (grob) || conspicuous (rough) || suspect (approximatif) || llamativo (aproximado)
+{} Tour (grob), Aufstieg {} m || {} tour (rough), ascent {} m || {} parcours (approximatif), montée {} m || {} ruta (aproximado), subida {} m
+{} Touren (grob), Aufstieg {} m || {} tours (rough), ascent {} m || {} parcours (approximatif), montée {} m || {} rutas (aproximado), subida {} m
+Aufstieg {} m laut Uhr, {} m laut Gelände (grob) || Ascent {} m according to the watch, {} m according to the terrain (rough) || Montée {} m selon la montre, {} m selon le terrain (approximatif) || Subida {} m según el reloj, {} m según el terreno (aproximado)
+Sammel-Korrektur || Bulk correction || Correction groupée || Corrección en bloque
+zurückgenommen || undone || annulée || deshecha
+Letzter Sammel-Lauf am {}: {} Tour korrigiert ({}), Aufstieg zusammen {} m. || Last bulk run on {}: {} tour corrected ({}), ascent together {} m. || Dernière correction groupée le {} : {} parcours corrigé ({}), montée cumulée {} m. || Última corrección en bloque el {}: {} ruta corregida ({}), subida total {} m.
+Letzter Sammel-Lauf am {}: {} Touren korrigiert ({}), Aufstieg zusammen {} m. || Last bulk run on {}: {} tours corrected ({}), ascent together {} m. || Dernière correction groupée le {} : {} parcours corrigés ({}), montée cumulée {} m. || Última corrección en bloque el {}: {} rutas corregidas ({}), subida total {} m.
+Höhe von der Uhr || elevation from the watch || altitude de la montre || altitud del reloj
+Höhe aus dem Geländemodell || elevation from the terrain model || altitude du modèle de terrain || altitud del modelo del terreno
+Der letzte Sammel-Lauf vom {} ist zurückgenommen. || The last bulk run from {} has been undone. || La dernière correction groupée du {} a été annulée. || La última corrección en bloque del {} se ha deshecho.
+Alles rückgängig machen || Undo everything || Tout annuler || Deshacerlo todo
+Nur dieser Lauf wird zurückgenommen; Touren, die du inzwischen selbst geändert hast, bleiben unberührt. || Only this run is undone; tours you have changed yourself in the meantime are left untouched. || Seule cette exécution est annulée ; les parcours que tu as modifiés entre-temps ne sont pas touchés. || Solo se deshace esta ejecución; las rutas que hayas cambiado mientras tanto no se tocan.
+Alle auffälligen Höhen korrigieren … || Correct all conspicuous elevations … || Corriger toutes les altitudes suspectes … || Corregir todas las altitudes llamativas …
+Du siehst vorher eine Liste und entscheidest, was geändert wird. || You see a list first and decide what is changed. || Tu vois d’abord une liste et tu décides ce qui est modifié. || Primero ves una lista y decides qué se cambia.
+Auffällige Höhen korrigieren || Correct conspicuous elevations || Corriger les altitudes suspectes || Corregir altitudes llamativas
+Liste wird geladen … || Loading the list … || Chargement de la liste … || Cargando la lista …
+Keine Tour mit offener Höhen-Auffälligkeit. Hier gibt es nichts zu korrigieren. || No tour with an open elevation anomaly. Nothing to correct here. || Aucun parcours avec une anomalie d’altitude ouverte. Rien à corriger ici. || Ninguna ruta con una anomalía de altitud abierta. Aquí no hay nada que corregir.
+Du siehst zuerst, was sich ändern würde. || First you see what would change. || Tu vois d’abord ce qui changerait. || Primero ves lo que cambiaría.
+Es passiert nichts, bevor du unten auf „Korrigieren“ klickst. || Nothing happens until you click “Correct” below. || Rien ne se passe tant que tu ne cliques pas sur « Corriger » ci-dessous. || No pasa nada hasta que pulses «Corregir» abajo.
+Jede Tour wird einzeln korrigiert, das Original bleibt erhalten, und den ganzen Lauf kannst du danach mit einem Klick zurücknehmen. Strecke und Zeit werden nicht verändert. || Each tour is corrected individually, the original is kept, and you can undo the whole run with one click afterwards. Route and time are not changed. || Chaque parcours est corrigé séparément, l’original est conservé et tu peux annuler toute l’exécution d’un clic. Le tracé et la durée ne sont pas modifiés. || Cada ruta se corrige por separado, el original se conserva y después puedes deshacer toda la ejecución con un clic. El trazado y el tiempo no se modifican.
+Methode || Method || Méthode || Método
+Aus dem Geländemodell berechnen || Calculate from the terrain model || Calculer à partir du modèle de terrain || Calcular con el modelo del terreno
+Von der Uhr (Zepp) übernehmen || Take from the watch (Zepp) || Reprendre de la montre (Zepp) || Tomar del reloj (Zepp)
+Kartendaten werden bei Bedarf aus dem Internet geladen (begrenzt je Lauf). || Map data is loaded from the internet when needed (limited per run). || Les données cartographiques sont chargées depuis Internet au besoin (limité par exécution). || Los datos del mapa se descargan de Internet si hace falta (limitado por ejecución).
+Der Höhenverlauf der barometrischen Uhr wird aus der Zepp-Cloud übernommen. || The elevation profile of the barometric watch is taken from the Zepp cloud. || Le profil d’altitude de la montre barométrique est repris du cloud Zepp. || El perfil de altitud del reloj barométrico se toma de la nube de Zepp.
+Die Methode „Uhr (Zepp)“ gibt es erst, wenn in der Verwaltung ein Zepp-Zugang eingerichtet ist. || The “Watch (Zepp)” method is only available once a Zepp access is set up in Admin. || La méthode « Montre (Zepp) » n’existe qu’une fois un accès Zepp configuré dans l’administration. || El método «Reloj (Zepp)» solo existe cuando hay un acceso a Zepp configurado en Administración.
+Alle || All || Tous || Todas
+Keine || None || Aucun || Ninguna
+{} von {} Touren ausgewählt || {} of {} tours selected || {} parcours sur {} sélectionnés || {} de {} rutas seleccionadas
+Uhr: grob || Watch: rough || Montre : approximatif || Reloj: aproximado
+Gelände || Terrain || Terrain || Terreno
+neu || new || nouveau || nuevo
+{} Touren, ändert den Aufstieg um insgesamt {} || {} tours, changes the ascent by {} in total || {} parcours, modifie la montée de {} au total || {} rutas, cambia la subida en {} en total
+{} Tour, ändert den Aufstieg um insgesamt {} || {} tour, changes the ascent by {} in total || {} parcours, modifie la montée de {} au total || {} ruta, cambia la subida en {} en total
+{} Touren, ändert den Aufstieg um insgesamt {}. || {} tours, changes the ascent by {} in total. || {} parcours, modifie la montée de {} au total. || {} rutas, cambia la subida en {} en total.
+{} Tour, ändert den Aufstieg um insgesamt {}. || {} tour, changes the ascent by {} in total. || {} parcours, modifie la montée de {} au total. || {} ruta, cambia la subida en {} en total.
+Aufstieg aller gewählten Touren von {} m auf etwa {} m. Der genaue Wert wird beim Korrigieren neu berechnet. || Ascent of all selected tours from {} m to about {} m. The exact value is recalculated when correcting. || Montée de tous les parcours choisis : de {} m à environ {} m. La valeur exacte est recalculée lors de la correction. || Subida de todas las rutas elegidas: de {} m a unos {} m. El valor exacto se recalcula al corregir.
+In einem Lauf werden höchstens {} Touren korrigiert; der Rest bleibt offen und lässt sich danach mit einem neuen Start erledigen. || At most {} tours are corrected per run; the rest stays open and can be done afterwards with a new start. || Au plus {} parcours sont corrigés par exécution ; le reste reste ouvert et peut être traité ensuite par un nouveau lancement. || En cada ejecución se corrigen como máximo {} rutas; el resto queda abierto y se puede hacer después con un nuevo inicio.
+Keine Tour ausgewählt. || No tour selected. || Aucun parcours sélectionné. || Ninguna ruta seleccionada.
+Korrigieren … || Correct … || Corriger … || Corregir …
+Korrigieren || Correct || Corriger || Corregir
+{} Touren korrigieren? || Correct {} tours? || Corriger {} parcours ? || ¿Corregir {} rutas?
+{} Tour korrigieren? || Correct {} tour? || Corriger {} parcours ? || ¿Corregir {} ruta?
+Methode: {}. || Method: {}. || Méthode : {}. || Método: {}.
+Die Originale bleiben erhalten; den ganzen Lauf kannst du danach rückgängig machen. || The originals are kept; you can undo the whole run afterwards. || Les originaux sont conservés ; tu peux ensuite annuler toute l’exécution. || Los originales se conservan; después puedes deshacer toda la ejecución.
+{} Tour korrigiert || {} tour corrected || {} parcours corrigé || {} ruta corregida
+{} Touren korrigiert || {} tours corrected || {} parcours corrigés || {} rutas corregidas
+Es wurde nichts korrigiert || Nothing was corrected || Rien n’a été corrigé || No se corrigió nada
+, Aufstieg zusammen {}. || , ascent together {}. || , montée cumulée {}. || , subida total {}.
+{} übersprungen || {} skipped || {} ignorés || {} omitidas
+{} nicht möglich || {} not possible || {} impossibles || {} no posibles
+Einzelheiten stehen im Protokoll der Verwaltung. || Details are in the log in Admin. || Les détails figurent dans le journal de l’administration. || Los detalles están en el registro de Administración.
+Der Lauf ist mit einem Fehler beendet worden. Schon Korrigiertes bleibt (einzeln wiederherstellbar); du kannst erneut starten. || The run ended with an error. What was already corrected stays (restorable one by one); you can start again. || L’exécution s’est terminée par une erreur. Ce qui est déjà corrigé reste (restaurable individuellement) ; tu peux relancer. || La ejecución terminó con un error. Lo ya corregido se mantiene (restaurable una a una); puedes volver a iniciar.
+Diesen Sammel-Lauf rückgängig machen? || Undo this bulk run? || Annuler cette correction groupée ? || ¿Deshacer esta corrección en bloque?
+Alle Touren dieses Laufs bekommen ihre ursprünglichen Höhen und Höhenmeter zurück. Touren, die du inzwischen selbst geändert oder zurückgenommen hast, bleiben unberührt. || All tours of this run get their original elevations and ascent back. Tours you have changed or undone yourself in the meantime are left untouched. || Tous les parcours de cette exécution retrouvent leurs altitudes et dénivelés d’origine. Les parcours que tu as modifiés ou annulés entre-temps ne sont pas touchés. || Todas las rutas de esta ejecución recuperan sus altitudes y desniveles originales. Las rutas que hayas cambiado o deshecho mientras tanto no se tocan.
+Rückgängig gemacht || Undone || Annulé || Deshecho
+{} Tour wiederhergestellt. || {} tour restored. || {} parcours restauré. || {} ruta restaurada.
+{} Touren wiederhergestellt. || {} tours restored. || {} parcours restaurés. || {} rutas restauradas.
+{} unberührt gelassen (inzwischen anders geändert). || {} left untouched (changed otherwise in the meantime). || {} laissés intacts (modifiés autrement entre-temps). || {} sin tocar (cambiadas de otro modo mientras tanto).
+Auffällige Touren || Conspicuous tours || Parcours suspects || Rutas llamativas
+Höhenvergleich || Elevation comparison || Comparaison d’altitude || Comparación de altitud
+Touren || Tours || Parcours || Rutas
 `;

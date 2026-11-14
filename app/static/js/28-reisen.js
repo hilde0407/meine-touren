@@ -92,7 +92,7 @@ VIEWS.trip = async id => {
   if (b && !$("#trhide")) {
     b.insertAdjacentHTML("afterend", ` <button class="btn alt sm" id="trhide" title="Diese Gruppe ist keine Reise (z. B. ein Tagesausflug) – aus der Liste entfernen. Die Touren bleiben erhalten.">Keine Reise</button>`);
     $("#trhide").onclick = async () => {
-      if (!confirm("Diese Gruppe aus den Reisen entfernen? Die Touren selbst bleiben unverändert, die Reise lässt sich später unter „Reisen“ wiederherstellen.")) return;
+      if (!await uiConfirm({text: "Diese Gruppe aus den Reisen entfernen? Die Touren selbst bleiben unverändert, die Reise lässt sich später unter „Reisen“ wiederherstellen.", danger: true, ok: "Entfernen"})) return;
       await api(`/api/trips/${encodeURIComponent(id)}/hide`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({hide: true})});
       location.hash = "#/trips";
     };

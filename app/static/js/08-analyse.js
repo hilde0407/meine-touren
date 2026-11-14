@@ -312,7 +312,7 @@ VIEWS.admin = async (...a) => {
     document.querySelectorAll("[data-gb]").forEach(
       b =>
         (b.onclick = async () => {
-          if (confirm("Alle Touren dieses Buchs entfernen?")) {
+          if (await uiConfirm({text: "Alle Touren dieses Buchs entfernen?", danger: true, ok: "Entfernen"})) {
             await api("/api/guides/" + encodeURIComponent("book:" + b.dataset.gb), {method: "DELETE"});
             gl();
           }

@@ -115,7 +115,7 @@ function photoChain(map, t, coords, ph) {
       <button class="btn sm" id="chok" ${delta ? "" : "disabled"}>Speichern</button><button class="btn alt sm" id="chre" title="Alle bisherigen Zeitverschiebungen der Fotos dieser Tour zurücknehmen">Original-Zeiten</button><button class="btn alt sm" id="chno">Abbrechen</button><span id="cher" class="bad"></span></div>`;
     $("#chno").onclick = () => end(true);
     $("#chre").onclick = async () => {
-      if (!confirm("Alle Zeitverschiebungen der Fotos dieser Tour zurücknehmen (zurück auf die Aufnahmezeit der Kamera)?")) return;
+      if (!await uiConfirm({text: "Alle Zeitverschiebungen der Fotos dieser Tour zurücknehmen (zurück auf die Aufnahmezeit der Kamera)?", danger: true, ok: "Zurücknehmen"})) return;
       try {
         await api("/api/photo-shift", {
           method: "POST",

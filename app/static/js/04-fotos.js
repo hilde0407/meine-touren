@@ -156,9 +156,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
     if (a === "shift") return shiftDialog(ids.map(i => ph.find(p => p.id === i)).filter(Boolean), () => route());
     if (a === "del") {
       if (
-        !confirm(
-          `${ids.length} Foto(s) endgültig löschen?\n\nGelöscht wird die Kopie in Meine Touren (nicht dein Original auf dem Rechner). Die Fotos werden beim nächsten Import nicht erneut übernommen.`
-        )
+        !await uiConfirm({text: `${ids.length} Foto(s) endgültig löschen?\n\nGelöscht wird die Kopie in Meine Touren (nicht dein Original auf dem Rechner). Die Fotos werden beim nächsten Import nicht erneut übernommen.`, danger: true, ok: "Löschen"})
       )
         return;
       await api("/api/photo-delete", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({ids})});
@@ -167,9 +165,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
     }
     if (a === "rm") {
       if (
-        !confirm(
-          `${ids.length} Foto(s) aus dieser Tour entfernen?\n\nSie werden keiner Tour mehr zugeordnet (auch nicht automatisch) und erscheinen unter „Fotos“ bei „Ohne Tour“.`
-        )
+        !await uiConfirm({text: `${ids.length} Foto(s) aus dieser Tour entfernen?\n\nSie werden keiner Tour mehr zugeordnet (auch nicht automatisch) und erscheinen unter „Fotos“ bei „Ohne Tour“.`, danger: true, ok: "Entfernen"})
       )
         return;
       await api("/api/photo-unassign", {
@@ -180,9 +176,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
       return route();
     }
     if (a === "un") {
-      const rs = confirm(
-        "Zeitkorrektur dieser Fotos ebenfalls zurücksetzen?\n\nOK = Zuordnung lösen und Zeitkorrektur zurücksetzen\nAbbrechen = nur Zuordnung lösen (danach wieder automatisch nach Zeit)"
-      );
+      const rs = await uiConfirm({title: "Zeitkorrektur ebenfalls zurücksetzen?", text: "Zeitkorrektur dieser Fotos ebenfalls zurücksetzen?\n\nWer „Nur Zuordnung lösen“ wählt oder abbricht, löst nur die Zuordnung; danach werden die Fotos wieder automatisch nach Zeit zugeordnet.", ok: "Zuordnung lösen und Zeitkorrektur zurücksetzen", cancel: "Nur Zuordnung lösen"});
       await api("/api/photo-unassign", {
         method: "POST",
         headers: {"content-type": "application/json"},
@@ -437,8 +431,8 @@ function photoImportModal(o = {}) {
     if (e.target === m && !busy) m.remove();
   };
   q(".mbox").style.maxWidth = "720px";
-  const close = () => {
-    if (busy && !confirm("Der Import läuft noch. Wirklich abbrechen?")) return;
+  const close = async () => {
+    if (busy && !(await uiConfirm({title: "Import abbrechen?", text: "Der Import läuft noch. Wirklich abbrechen?", ok: "Abbrechen", cancel: "Weiterlaufen lassen", danger: true}))) return;
     stop = true;
     m.remove();
     if (/^#\/(photos|tour|admin)/.test(location.hash))
@@ -859,12 +853,10 @@ const s_max = () => document.querySelector('[data-k="photo_max_side"]')?.value,
 /* Zeit der Fotos per Aufnahmeort mit der Strecke abgleichen (Kamerauhr falsch gestellt) */
 async function gpsAlign(t) {
   const r = await api(`/api/photo-offset?tour_id=${encodeURIComponent(t.id)}`);
-  if (!r.ok) return alert("Zeitabgleich nicht möglich:\n\n" + r.reason);
-  if (r.aligned) return alert(`Die Zeiten der Fotos passen zur Strecke (${r.n} von ${r.of} Fotos mit Aufnahmeort geprüft).`);
+  if (!r.ok) return uiAlert("Zeitabgleich nicht möglich:\n\n" + r.reason);
+  if (r.aligned) return uiAlert(`Die Zeiten der Fotos passen zur Strecke (${r.n} von ${r.of} Fotos mit Aufnahmeort geprüft).`);
   if (
-    !confirm(
-      `Die Kamerauhr scheint ${shiftTxt(Math.abs(r.delta_s)).replace("+", "")} ${r.delta_s > 0 ? "nachzugehen" : "vorzugehen"}.\n\nAus dem Aufnahmeort von ${r.n} von ${r.of} Fotos ergibt sich eine Korrektur von ${shiftTxt(r.delta_s)}. Die Fotos aus diesem Zeitraum werden korrigiert und dieser Tour zugeordnet.\n\nÜbernehmen?`
-    )
+    !await uiConfirm(`Die Kamerauhr scheint ${shiftTxt(Math.abs(r.delta_s)).replace("+", "")} ${r.delta_s > 0 ? "nachzugehen" : "vorzugehen"}.\n\nAus dem Aufnahmeort von ${r.n} von ${r.of} Fotos ergibt sich eine Korrektur von ${shiftTxt(r.delta_s)}. Die Fotos aus diesem Zeitraum werden korrigiert und dieser Tour zugeordnet.\n\nÜbernehmen?`)
   )
     return;
   await api("/api/photo-offset", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({tour_id: t.id, delta_s: r.delta_s, ids: r.ids})});

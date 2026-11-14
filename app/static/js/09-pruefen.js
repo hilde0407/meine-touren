@@ -104,7 +104,7 @@ VIEWS.check = async () => {
             };
             m.querySelector("#dok").onclick = async e => {
               const k = !!m.querySelector("#dk")?.checked;
-              if (k && !confirm(`„${d.name}“ wirklich auch bei Komoot endgültig löschen?`)) return;
+              if (k && !await uiConfirm({text: `„${d.name}“ wirklich auch bei Komoot endgültig löschen?`, danger: true, ok: "Löschen"})) return;
               e.target.disabled = true;
               m.querySelector("#dm").textContent = "Wird gelöscht …";
               try {
@@ -114,7 +114,7 @@ VIEWS.check = async () => {
                   body: JSON.stringify({komoot: k}),
                 });
                 m.remove();
-                if (r.komoot) alert("Gelöscht – " + r.komoot + ".");
+                if (r.komoot) uiAlert("Gelöscht – " + r.komoot + ".");
                 await after();
               } catch (x) {
                 m.querySelector("#dm").innerHTML = `<span class="bad">${esc(x.message)}</span>`;
@@ -136,10 +136,10 @@ VIEWS.check = async () => {
                 headers: {"content-type": "application/json"},
                 body: JSON.stringify({sport: row.querySelector(".isp").value, komoot: !!row.querySelector(".iko")?.checked}),
               });
-              if (r.komoot && !/geändert$/.test(r.komoot)) alert(r.komoot);
+              if (r.komoot && !/geändert$/.test(r.komoot)) uiAlert(r.komoot);
               await after();
             } catch (e) {
-              alert(e.message);
+              uiAlert(e.message);
               b.disabled = false;
             }
           })
@@ -159,7 +159,7 @@ VIEWS.check = async () => {
               await loadTours();
               trackFixDialog(id, after);
             } catch (e) {
-              alert(e.message);
+              uiAlert(e.message);
               b.disabled = false;
             }
           })
@@ -179,7 +179,7 @@ VIEWS.check = async () => {
               });
               await after();
             } catch (e) {
-              alert(e.message);
+              uiAlert(e.message);
               b.disabled = false;
             }
           })
@@ -217,13 +217,13 @@ VIEWS.check = async () => {
     b =>
       (b.onclick = async () => {
         const id = b.dataset.del;
-        if (!confirm(`Die lokale Tour „${BY[id]?.name || id}“ löschen? Die Komoot-Tour bleibt unberührt.`)) return;
+        if (!await uiConfirm({text: `Die lokale Tour „${BY[id]?.name || id}“ löschen? Die Komoot-Tour bleibt unberührt.`, danger: true, ok: "Löschen"})) return;
         try {
           await api(`/api/tours/${encodeURIComponent(id)}`, {method: "DELETE"});
           await loadTours();
           route();
         } catch (x) {
-          alert(x.message);
+          uiAlert(x.message);
         }
       })
   );
@@ -284,7 +284,7 @@ VIEWS.check = async () => {
           if (BY[b.dataset.save]) BY[b.dataset.save].name = nn;
         } catch (e) {
           b.disabled = false;
-          alert("Umbenennen fehlgeschlagen: " + e.message);
+          uiAlert("Umbenennen fehlgeschlagen: " + e.message);
         }
       })
   );

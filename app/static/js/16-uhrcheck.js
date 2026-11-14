@@ -46,7 +46,7 @@ VIEWS.check = async () => {
             list = list.filter(y => y.tour_id !== id);
             draw();
           } catch (e) {
-            alert(e.message);
+            uiAlert(e.message);
             btn.disabled = false;
           }
         })

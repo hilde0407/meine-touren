@@ -111,7 +111,7 @@ VIEWS.admin = async (_, q) => {
     try {
       await api(u, o);
     } catch (e) {
-      alert(e.message);
+      uiAlert(e.message);
     }
     poll();
   };
@@ -146,17 +146,17 @@ VIEWS.admin = async (_, q) => {
   $("#bm").setAttribute("href", "javascript:" + encodeURIComponent(code));
   $("#bm").onclick = e => {
     e.preventDefault();
-    alert("Bitte den Knopf mit der Maus in die Lesezeichenleiste ziehen, nicht anklicken.");
+    uiAlert("Bitte den Knopf mit der Maus in die Lesezeichenleiste ziehen, nicht anklicken.");
   };
   const picked = () => [...document.querySelectorAll(".pk:checked")].map(c => +c.value);
   if ($("#pall")) {
     $("#pall").onclick = () => document.querySelectorAll(".pk").forEach(c => (c.checked = true));
-    const up = (dry, local) => {
+    const up = async (dry, local) => {
       const ids = picked();
-      if (!ids.length) return alert("Bitte zuerst Trainings auswählen.");
+      if (!ids.length) return uiAlert("Bitte zuerst Trainings auswählen.");
       const ps = local ? [] : [...document.querySelectorAll(".zp:checked")].map(c => c.value);
-      if (!local && !ps.length) return alert("Bitte mindestens ein Portal ankreuzen – oder „Lokal übernehmen“ wählen.");
-      if (!dry && ps.length && !confirm(`${ids.length} Training(s) lokal übernehmen und zu ${ps.join(" + ")} hochladen?`)) return;
+      if (!local && !ps.length) return uiAlert("Bitte mindestens ein Portal ankreuzen – oder „Lokal übernehmen“ wählen.");
+      if (!dry && ps.length && !await uiConfirm(`${ids.length} Training(s) lokal übernehmen und zu ${ps.join(" + ")} hochladen?`)) return;
       run("/api/zepp-upload", {
         method: "POST",
         headers: {"content-type": "application/json"},
@@ -168,12 +168,12 @@ VIEWS.admin = async (_, q) => {
     $("#pdry").onclick = () => up(true, false);
   }
   folderUpload();
-  $("#upl").onclick = () => {
+  $("#upl").onclick = async () => {
     const fd = new FormData();
     [...$("#files").files].forEach(x => fd.append("files", x));
     if (!$("#files").files.length) return;
     const ps = [...document.querySelectorAll(".fp:checked")].map(c => c.value);
-    if (!$("#dry").checked && ps.length && !confirm(`Dateien lokal speichern und zu ${ps.join(" + ")} hochladen?`)) return;
+    if (!$("#dry").checked && ps.length && !await uiConfirm(`Dateien lokal speichern und zu ${ps.join(" + ")} hochladen?`)) return;
     run(`/api/import-activity-files?dry_run=${$("#dry").checked}&portals=${ps.join(",")}`, {method: "POST", body: fd});
   };
   const dres = (id, html) => $(id) && ($(id).innerHTML = html);
@@ -211,7 +211,7 @@ VIEWS.admin = async (_, q) => {
     };
   if ($("#gdis"))
     $("#gdis").onclick = async () => {
-      if (!confirm("Garmin-Verbindung trennen? Bereits übernommene Touren bleiben erhalten.")) return;
+      if (!await uiConfirm({text: "Garmin-Verbindung trennen? Bereits übernommene Touren bleiben erhalten.", danger: true, ok: "Trennen"})) return;
       await api("/api/garmin/disconnect", {method: "POST"});
       route();
     };
@@ -231,7 +231,7 @@ VIEWS.admin = async (_, q) => {
     };
   if ($("#sundis"))
     $("#sundis").onclick = async () => {
-      if (!confirm("Suunto-Verbindung trennen? Bereits übernommene Touren bleiben erhalten.")) return;
+      if (!await uiConfirm({text: "Suunto-Verbindung trennen? Bereits übernommene Touren bleiben erhalten.", danger: true, ok: "Trennen"})) return;
       await api("/api/suunto/disconnect", {method: "POST"});
       route();
     };
@@ -246,7 +246,7 @@ VIEWS.admin = async (_, q) => {
   };
   if ($("#sdis"))
     $("#sdis").onclick = async () => {
-      if (!confirm("Strava-Verbindung trennen?")) return;
+      if (!await uiConfirm({text: "Strava-Verbindung trennen?", danger: true, ok: "Trennen"})) return;
       await api("/api/strava/disconnect", {method: "POST"});
       route();
     };

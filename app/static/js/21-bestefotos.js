@@ -35,7 +35,7 @@ VIEWS.tour = async (id, q) => {
         ss.textContent = "Diashow der besten";
       }
     } catch (e) {
-      alert("Auswahl nicht möglich: " + e.message);
+      uiAlert("Auswahl nicht möglich: " + e.message);
       b.textContent = "⭐ Beste Fotos";
     }
     b.disabled = false;

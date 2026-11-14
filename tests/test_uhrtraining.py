@@ -396,7 +396,7 @@ def test_sidecar_in_backup_and_umzug_and_deleted_with_tour(tmp_path, monkeypatch
 
 def test_main_page_loads_script_and_version():
     from app import config as cfg
-    assert cfg.VERSION.startswith("3.12.0 · Meine Touren")
+    assert cfg.VERSION.startswith("3.13.0 · Meine Touren")
     html = (Path(__file__).resolve().parent.parent / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("js/44-geraete.js") < html.index("js/45-uhrtraining.js")
 

@@ -428,7 +428,7 @@ VIEWS.flight = async id => {
       ["video/mp4;codecs=avc1.42E01E", "video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"].find(x =>
         MediaRecorder.isTypeSupported(x)
       );
-    if (!mime) return alert("Dieser Browser kann keine Videos aufnehmen (Chrome, Edge, Firefox oder Safari 14.1+ verwenden).");
+    if (!mime) return uiAlert("Dieser Browser kann keine Videos aufnehmen (Chrome, Edge, Firefox oder Safari 14.1+ verwenden).");
     preparing = true;
     $("#frec").disabled = true;
     playing = false;

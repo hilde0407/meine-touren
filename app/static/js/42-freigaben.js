@@ -63,12 +63,12 @@ VIEWS.links = async () => {
     el.querySelectorAll("[data-d]").forEach(s => (s.onchange = () => s.value !== "" && patch(s, {days: +s.value})));
     el.querySelectorAll("[data-c]").forEach(b => (b.onclick = () => patch(b, {comments: +b.dataset.c})));
     el.querySelectorAll("[data-rv]").forEach(b => (b.onclick = async () => {
-      if (!confirm("Diesen Link widerrufen? Wer ihn hat, kann die Freigabe danach nicht mehr öffnen.")) return;
+      if (!await uiConfirm({text: "Diesen Link widerrufen? Wer ihn hat, kann die Freigabe danach nicht mehr öffnen.", danger: true, ok: "Widerrufen"})) return;
       await api("/api/share/" + encodeURIComponent(tok(b)), {method: "DELETE"});
       await load();
     }));
     if ($("#lkpurge")) $("#lkpurge").onclick = async () => {
-      if (!confirm(`${exp} abgelaufene Links endgültig entfernen?`)) return;
+      if (!await uiConfirm({text: `${exp} abgelaufene Links endgültig entfernen?`, danger: true, ok: "Entfernen"})) return;
       await api("/api/shares/purge-expired", {method: "POST"});
       await load();
     };

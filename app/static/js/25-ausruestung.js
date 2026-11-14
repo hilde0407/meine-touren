@@ -35,7 +35,7 @@ function gearForm(g, done) {
   };
   if (g.id)
     m.querySelector("#gdel").onclick = async () => {
-      if (!confirm(`„${g.name}“ entfernen? Die Touren bleiben unverändert.`)) return;
+      if (!await uiConfirm({text: `„${g.name}“ entfernen? Die Touren bleiben unverändert.`, danger: true, ok: "Entfernen"})) return;
       await api(`/api/gear/${g.id}`, {method: "DELETE"});
       m.remove();
       done();

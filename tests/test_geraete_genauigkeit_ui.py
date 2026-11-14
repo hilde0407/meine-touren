@@ -159,11 +159,14 @@ def test_open_section_kpis_chart_list_and_suggestion_dialog(pw, app_url):
         li.locator("button").click()
         pg.wait_for_selector(".dvsug")
         assert "Höhe aus Geländemodell neu berechnen" in pg.inner_text(".dvsug") and "Es passiert nichts, bevor du es bestätigst" in pg.inner_text(".dvbox")
-        dialogs, mode = [], {"accept": False}
-        pg.on("dialog", lambda d: (dialogs.append(d.message), d.accept() if mode["accept"] else d.dismiss()))
+        # Bestätigung ist jetzt der gemeinsame Dialog (kein Browser-confirm): Abbrechen ändert nichts
         pg.locator(".dvsug button", has_text="Ausführen").first.click()
+        pg.wait_for_selector(".uidlg [role=dialog], .uidlg [role=alertdialog]")
+        dlg = pg.locator(".uidlg .uibox")
+        assert dlg.get_attribute("aria-modal") == "true" and "Höhe aus Geländemodell neu berechnen?" in dlg.inner_text()
+        pg.locator(".uidlg .uifoot button", has_text="Abbrechen").click()
         pg.wait_for_timeout(300)
-        assert dialogs and "Höhe aus Geländemodell neu berechnen?" in dialogs[0] and not pg.posts   # abgebrochen: kein Aufruf
+        assert not pg.locator(".uidlg").count() and not pg.posts                               # abgebrochen: kein Aufruf
         # bestätigen (Antwort nachgebaut) und rückgängig machen
         calls = []
 
@@ -172,8 +175,9 @@ def test_open_section_kpis_chart_list_and_suggestion_dialog(pw, app_url):
             route.fulfill(status=200, content_type="application/json", body='{"up_m":420,"down_m":415,"orig_up":610,"orig_down":600,"ok":true}')
         pg.route("**/api/tours/*/elev-fix", fake)
         pg.route("**/api/tours/*/elev-restore", fake)
-        mode["accept"] = True
         pg.locator(".dvsug button", has_text="Ausführen").first.click()
+        pg.wait_for_selector(".uidlg")
+        pg.locator(".uidlg .uifoot button", has_text="Ausführen").click()                      # bestätigen
         pg.wait_for_selector("#dvsundo", timeout=5000)
         assert calls == ["elev-fix"] and "Aufstieg 420 m" in pg.inner_text(".dvsres") and "vorher 610 m" in pg.inner_text(".dvsres")
         pg.click("#dvsundo")

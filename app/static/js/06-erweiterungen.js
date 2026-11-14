@@ -113,7 +113,7 @@ VIEWS.dash = async (n, q) => {
   fg.after(box);
   box.onclick = async e => {
     const g = e.target.dataset.g;
-    if (g && confirm("Ziel löschen?")) {
+    if (g && await uiConfirm({text: "Ziel löschen?", danger: true, ok: "Löschen"})) {
       await api(`/api/goals/${g}`, {method: "DELETE"});
       route();
     }
@@ -348,9 +348,7 @@ VIEWS.tour = async id => {
 const isAdmin = () => !ME.users_enabled || (ME.user && ME.user.role === "admin");
 async function installUpdate(u, say) {
   if (
-    !confirm(
-      `Version ${u.latest} jetzt installieren?\n\nVorher wird eine Sicherung aller Daten angelegt. Die Seite ist während der Installation kurz nicht erreichbar.`
-    )
+    !await uiConfirm(`Version ${u.latest} jetzt installieren?\n\nVorher wird eine Sicherung aller Daten angelegt. Die Seite ist während der Installation kurz nicht erreichbar.`)
   )
     return;
   const before = u.current;
@@ -449,7 +447,7 @@ VIEWS.admin = async (...a) => {
             route();
           } catch (e) {
             bb.disabled = false;
-            alert(e.message || e);
+            uiAlert(e.message || e);
           }
         };
     })
@@ -493,7 +491,7 @@ VIEWS.admin = async (...a) => {
       if (a.length < 6) return ($("#uipwm").innerHTML = `<span class="bad">Das Passwort braucht mindestens 6 Zeichen.</span>`);
       setPw(a);
     };
-  if ($("#uipwx")) $("#uipwx").onclick = () => confirm("Passwortschutz wirklich aufheben? Danach kann jeder im Netzwerk die App öffnen.") && setPw("");
+  if ($("#uipwx")) $("#uipwx").onclick = async () => (await uiConfirm({text: "Passwortschutz wirklich aufheben? Danach kann jeder im Netzwerk die App öffnen.", danger: true, ok: "Aufheben"})) && setPw("");
 };
 
 /* ---- Karte: Heatmap und Fotos ---- */

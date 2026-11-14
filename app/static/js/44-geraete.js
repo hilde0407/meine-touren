@@ -139,7 +139,7 @@ function devRange(dv, g, done) {
       const res = await api("/api/devices/assign-range", METJ({device_id: g.id, from: $("#rf").value, to: $("#rt").value}));
       m.remove();
       MET_CACHE.clear();
-      alert(`${res.n} Touren zugeordnet.`);
+      uiAlert({title: "Touren zugeordnet", text: `${res.n} Touren zugeordnet.`});
       done();
     } catch (e) {
       $("#rerr").textContent = e.message;
@@ -149,14 +149,14 @@ function devRange(dv, g, done) {
 
 /* ---------- Löschen (mit Umhängen) ---------- */
 async function devDelete(dv, g, done) {
-  if (!confirm(`„${g.name}“ entfernen?`)) return;
+  if (!(await uiConfirm({title: "Gerät entfernen?", text: `„${g.name}“ entfernen?`, ok: "Entfernen", danger: true}))) return;
   try {
     await api("/api/devices/" + g.id, {method: "DELETE"});
     done();
   } catch (e) {
     const others = dv.devices.filter(x => x.id !== g.id);
-    if (!/umhängen/.test(e.message)) return alert(e.message);
-    if (!others.length) return alert(e.message + " Lege dafür zuerst ein anderes Gerät an.");
+    if (!/umhängen/.test(e.message)) return uiAlert({title: "Nicht möglich", text: e.message});
+    if (!others.length) return uiAlert({title: "Nicht möglich", text: e.message + " Lege dafür zuerst ein anderes Gerät an."});
     const mv = dvBox(`<h2>Touren umhängen</h2><p>${esc(e.message)}</p><div class="dvf"><label for="mvto">Auf dieses Gerät umhängen</label><select id="mvto">${others.map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join("")}</select></div>
       <div class="dvfoot"><button class="btn" id="mvok">Umhängen und löschen</button><button class="btn ghost" id="mvno">Abbrechen</button></div><div id="mverr" class="bad mt8"></div>`);
     $("#mvno").onclick = () => mv.remove();
@@ -237,6 +237,8 @@ const dvDay = d => (/^\d{4}-\d\d-\d\d$/.test(d || "") ? `${d.slice(8)}.${d.slice
 
 /* ---------- Genauigkeit der Uhren (3.10.0): Kennzahlen, Punktdiagramm, auffällige Touren, Korrekturvorschläge ---------- */
 const DVQ_OPEN = new Set();
+/* Zustand „Genauigkeit aufgeklappt“ je Gerät: im Speicher und im Browser (localStorage, mit try/catch) */
+const dvqOpen = id => { if (DVQ_OPEN.has(id)) return true; try { return localStorage.getItem("mt_dvq_" + id) === "1"; } catch (e) { return false; } };
 const DVQ_CLS = {"gut": "ok", "mäßig": "warn", "auffällig": "bad"};
 const dvPct = v => (v > 0.04 ? "+" : v < -0.04 ? "−" : "") + nf(Math.abs(v), 1) + " %";
 const dvQTime = ts => (ts ? new Date(ts * 1000).toLocaleDateString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric"}) : "");
@@ -253,8 +255,23 @@ function dvDots(a, lim, good, ok, label) {
     <text class="dvax" x="${pad}" y="70" text-anchor="start">${dvPct(-lim).replace(" %", "")} %</text><text class="dvax" x="${x(0)}" y="70" text-anchor="middle">0</text><text class="dvax" x="${W - pad}" y="70" text-anchor="end">${dvPct(lim)}</text></svg>`;
 }
 
+/* Einklappbare Abschnitte der Genauigkeit: einheitlicher Kopf (Titel + Kennzeichen), Zustand je Abschnitt im Browser (localStorage, mit try/catch).
+   Wichtiges ist standardmäßig offen, Erläuterungen sind zu. */
+const dvSecOpen = (id, def) => { try { const v = localStorage.getItem("mt_dvsec_" + id); return v === null ? def : v === "1"; } catch (e) { return def; } };
+const dvSec = (id, title, badge, body, def = true) => { const o = dvSecOpen(id, def); return `<details class="dvsec" data-sec="${id}" ${o ? "open" : ""}><summary aria-expanded="${o}"><span class="dvsect">${title}</span>${badge || ""}</summary><div class="dvsecb">${body}</div></details>`; };
+function dvSecWire(root) {
+  root.querySelectorAll("details.dvsec").forEach(d => d.addEventListener("toggle", () => {
+    d.querySelector("summary").setAttribute("aria-expanded", d.open ? "true" : "false");
+    try { localStorage.setItem("mt_dvsec_" + d.dataset.sec, d.open ? "1" : "0"); } catch (e) {}
+  }));
+}
+/* Fortschrittsbalken (ruhender Zustand): role=progressbar mit aria-valuenow; die Zahl steht zusätzlich als Text daneben */
+const dvBar = (done, total, label) => `<div class="dvbar" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}" aria-label="${esc(label)}"><span style="width:${total ? Math.round((100 * done) / total) : 0}%"></span></div>`;
+const dvOpenText = n => (n === 1 ? "Noch 1 Tour offen – erneut starten." : `Noch ${n} Touren offen – erneut starten.`);
+
 function dvQBody(q, g, viewer) {
-  const run = viewer ? "" : `<button class="btn alt sm dvqrun" type="button">Genauigkeit auswerten</button>`;
+  const pr = g.progress || {total: 0, done: 0, open: 0, n_detail: 0, n_summary: 0};
+  const run = viewer ? "" : `<button class="btn ${pr.open && g.n_eval ? "" : "alt "}sm dvqrun" type="button">${pr.open && g.n_eval ? "Weiter auswerten" : "Genauigkeit auswerten"}</button>`;
   const prog = `<span class="dvqprog" role="status" aria-live="polite"></span>`;
   if (!g.n_eval) {
     return `<div class="dvqempty"><p><b>Noch nicht ausgewertet.</b></p>
@@ -264,31 +281,44 @@ function dvQBody(q, g, viewer) {
       <p class="mut">Die Auswertung liest nur und verändert keine Tour.</p><div class="row">${run}${prog}</div></div>`;
   }
   const v = g.verdict, cls = DVQ_CLS[v.level] || "none";
-  const tile = (lab, val, sub, a) => `<div class="dvk"><span class="dvkl">${lab}</span><span class="dvkv">${val}</span><span class="dvks ${a && a.level ? DVQ_CLS[a.level] : "none"}">${a && a.level ? a.level : "keine Einschätzung"}</span><span class="dvkn">${sub}</span></div>`;
+  const tile = (lab, val, sub, a, rough) => `<div class="dvk"><span class="dvkl">${lab}</span><span class="dvkv">${val}</span><span class="dvks ${a && a.level ? DVQ_CLS[a.level] : "none"}">${a && a.level ? a.level + (rough ? " (grob)" : "") : "keine Einschätzung"}</span><span class="dvkn">${sub}</span></div>`;
   const d = g.dist, h = g.height, p = g.gps, r = g.hr;
   const tiles = [
     tile("Strecke", d.n ? dvPct(d.median) : "–", d.n ? `${d.n} ${d.n === 1 ? "Tour" : "Touren"} verglichen${d.n_implausible ? `, ${d.n_implausible} unplausibel` : ""}` : d.n_implausible ? `${d.n_implausible} unplausibel` : "nicht vergleichbar", d),
-    tile("Höhe", h.n_pct ? dvPct(h.up_err_pct.median) : "–", h.n ? `${h.n} ${h.n === 1 ? "Tour" : "Touren"}, Aufstieg ${h.up_err_m.median > 0 ? "+" : h.up_err_m.median < 0 ? "−" : ""}${nf(Math.abs(h.up_err_m.median), 0)} m` : "nicht vergleichbar", h),
+    tile("Höhe", h.n_pct ? dvPct(h.up_err_pct.median) : "–", h.n ? `${h.n} ${h.n === 1 ? "Tour" : "Touren"}${h.rough ? " (grob)" : ""}, Aufstieg ${h.up_err_m.median > 0 ? "+" : h.up_err_m.median < 0 ? "−" : ""}${nf(Math.abs(h.up_err_m.median), 0)} m` : "nicht vergleichbar", h, h.rough),
     tile("GPS-Spur", p.n ? `${nf(p.jump_tours_pct, 0)} %` : "–", p.n ? `Touren mit Sprüngen (von ${p.n})` : "keine Spur", p),
     tile("Puls", r.n ? `${nf(r.bad_tours_pct, 0)} %` : "–", r.n ? `Touren mit Aussetzern (von ${r.n})` : "kein Puls", r),
   ].join("");
   const th = q.thresholds;
   const chart = (a, lim, t, title, cap) => (a.points && a.points.length >= 2 ? `<figure class="dvfig"><figcaption>${title}</figcaption>${dvDots(a, lim, t[0], t[1], title)}<small class="dvh">${cap} ${dvPct(a.p25)} bis ${dvPct(a.p75)}, Median ${dvPct(a.median)}.</small></figure>` : "");
   const hs = h.up_err_pct;
+  /* genau (Track der Uhr oder abgerufenes Zepp-Detail) und grob (nur Zusammenfassung der Uhr) bleiben getrennt und sind so benannt */
+  const split = h.n_summary ? `<div class="dvsplit" role="group" aria-label="Höhenvergleich: genau und grob"><span class="dvsl">Mit Detail (genau)</span><b>${dvTours(h.n_detail || 0)}</b><span class="dvsl">Nur Zusammenfassung (grob)</span><b>${dvTours(h.n_summary)}</b></div>
+    <span class="dvh dvsplith">Grobe Werte kommen aus dem Auf- und Abstieg, den die Uhr selbst meldet; sie haben großzügigere Grenzen (gut bis ${nf(th.height_summary[0], 0)} %, mäßig bis ${nf(th.height_summary[1], 0)} %) und werden nicht mit den genauen Werten vermischt.</span>${h.rough ? `<span class="dvh dvsplith">Die Einschätzung der Höhe beruht hier nur auf den groben Werten.</span>` : ""}` : "";
+  const stand = `<div class="dvstand">${pr.total ? dvBar(pr.done, pr.total, "Fortschritt der Auswertung") : ""}
+    <p class="mut dvqwhen">Zuletzt ausgewertet am ${esc(dvQTime(q.computed_at))}${pr.total ? `, ${pr.done} von ${pr.total} Touren` : ""}.</p>
+    ${pr.open ? `<p class="dvopen" role="status"><b>${dvOpenText(pr.open)}</b><span class="dvh">Offen sind Touren, bei denen noch Geländekacheln oder Zepp-Details fehlen. Je Lauf gibt es Obergrenzen, damit nichts überlastet wird.</span></p>` : ""}
+    <div class="row dvqfoot">${run}${prog}</div></div>`;
+  const bat = g.batch && !viewer ? dvSec("batch", "Sammel-Korrektur", g.batch.n_done ? `<span class="dvqs ok">${g.batch.n_done}</span>` : `<span class="dvqs none">zurückgenommen</span>`,
+    `<p class="dvbatchl">${g.batch.n_done ? `Letzter Sammel-Lauf am ${esc(dvQTime(g.batch.ts))}: ${g.batch.n_done} ${g.batch.n_done === 1 ? "Tour" : "Touren"} korrigiert (${g.batch.method === "zepp" ? "Höhe von der Uhr" : "Höhe aus dem Geländemodell"}), Aufstieg zusammen ${g.batch.delta_up > 0 ? "+" : g.batch.delta_up < 0 ? "−" : ""}${nf(Math.abs(g.batch.delta_up), 0)} m.` : `Der letzte Sammel-Lauf vom ${esc(dvQTime(g.batch.ts))} ist zurückgenommen.`}</p>
+     ${g.batch.n_done ? `<button class="btn alt sm dvundo" type="button" data-batch="${esc(g.batch.id)}">Alles rückgängig machen</button><span class="dvh">Nur dieser Lauf wird zurückgenommen; Touren, die du inzwischen selbst geändert hast, bleiben unberührt.</span>` : ""}`, true) : "";
+  const batchBtn = !viewer && g.flagged_height ? `<div class="dvbatchbar"><button class="btn sm dvbatch" type="button">Alle auffälligen Höhen korrigieren …</button><span class="dvh">Du siehst vorher eine Liste und entscheidest, was geändert wird.</span></div>` : "";
   return `<div class="dvqv ${cls}"><b>${esc(v.label)}</b>${g.period ? `<span class="mut"> · ${esc(dvDay(g.period.from))} bis ${esc(dvDay(g.period.to))}</span>` : ""}</div>
     <ul class="dvfind">${v.findings.map(f => `<li>${esc(f)}</li>`).join("")}</ul>
     <div class="dvkpi">${tiles}</div>
+    ${split}
     <div class="dvfigs">${chart(d, 20, th.dist, "Strecke: Abweichung der Uhr je Tour", "Mittlere Hälfte der Touren:")}${hs.n ? chart({points: h.points, p25: hs.p25, p75: hs.p75, median: hs.median}, 60, th.height, "Aufstieg: Abweichung vom Geländemodell je Tour", "Mittlere Hälfte der Touren:") : ""}</div>
     ${g.tips.map(t => `<p class="dvtip">${esc(t.text)}</p>`).join("")}
-    <div class="row dvqfoot">${run}${prog}<span class="mut dvqwhen">Zuletzt ausgewertet am ${esc(dvQTime(q.computed_at))}.</span></div>
+    ${dvSec("stand", "Auswertungsstand", pr.open ? `<span class="dvqs warn">noch ${pr.open} offen</span>` : `<span class="dvqs ok">vollständig</span>`, stand, true)}
     <details class="dvhow"><summary>Wie wird bewertet?</summary><p class="dvh">Strecke: gut bis ${nf(th.dist[0], 0)} %, mäßig bis ${nf(th.dist[1], 0)} % mittlere Abweichung. Höhe: gut bis ${nf(th.height[0], 0)} %, mäßig bis ${nf(th.height[1], 0)} % gegenüber dem Geländemodell (das Modell glättet Gelände und unterschätzt Aufstiege etwas). GPS-Spur: gut, wenn höchstens ${nf(th.gps[0], 0)} % der Touren Sprünge haben, mäßig bis ${nf(th.gps[1], 0)} %. Puls: gut, wenn höchstens ${nf(th.hr[0], 0)} % der Touren Aussetzer haben, mäßig bis ${nf(th.hr[1], 0)} %. Eine Einschätzung gibt es ab ${q.min_n} verglichenen Touren. Strecke und Höhe der Touren werden dabei nie verändert.</p></details>
-    <div class="dvbad" data-bad="${g.id}">${g.flagged ? `<h4>Auffällige Touren (${g.flagged})</h4><div class="dvbadl mut">Wird geladen …</div>` : `<p class="mut">Keine auffälligen Touren.</p>`}</div>`;
+    ${dvSec("auff", "Auffällige Touren", g.flagged ? `<span class="dvqs warn">${g.flagged}</span>` : `<span class="dvqs ok">keine</span>`, `${batchBtn}<div class="dvbad" data-bad="${g.id}">${g.flagged ? `<div class="dvbadl mut">Wird geladen …</div>` : `<p class="mut">Keine auffälligen Touren.</p>`}</div>`, true)}
+    ${bat}`;
 }
 
 const DVQ_FLAG = f => ({
   dist_implausible: `Strecke unplausibel: Uhr ${nf((f.dev_m || 0) / 1000, 1)} km, Tour ${nf((f.tour_m || 0) / 1000, 1)} km`,
   dist: `Strecke ${nf(Math.abs(f.pct), 1)} % ${f.pct < 0 ? "kürzer" : "länger"}`,
-  height: `Aufstieg ${nf(f.up_dev, 0)} m laut Uhr, ${nf(f.up_dem, 0)} m laut Gelände`,
+  height: `Aufstieg ${nf(f.up_dev, 0)} m laut Uhr, ${nf(f.up_dem, 0)} m laut Gelände${f.rough ? " (grob)" : ""}`,
   gps_jumps: `${f.n} ${f.n === 1 ? "GPS-Sprung" : "GPS-Sprünge"}`,
   gps_gaps: `${nf(f.pct, 0)} % Lücken oder Pausen`,
   hr: `${nf(f.pct, 0)} % Puls unplausibel`,
@@ -337,7 +367,7 @@ function dvSuggest(t, g, again) {
   m.querySelectorAll(".dvsug button[data-i]").forEach(b => (b.onclick = async () => {
     const s = t.suggest[+b.dataset.i];
     if (s.action === "trackfix") { m.remove(); return trackFixDialog(t.id, () => { MET_CACHE.clear(); loadTours().catch(() => {}); again(); }); }
-    if (!confirm(`${s.label}?\n\n${info[s.action] || ""}`)) return;
+    if (!(await uiConfirm({title: `${s.label}?`, text: info[s.action] || "", ok: "Ausführen"}))) return;
     b.disabled = true;
     res.textContent = "Wird ausgeführt …";
     try {
@@ -359,31 +389,182 @@ function dvSuggest(t, g, again) {
   }));
 }
 
+/* ---------- Hintergrundjobs: Fortschritt mit Balken ---------- */
+/* Balken und Texte werden einmal angelegt und danach nur noch aktualisiert (kein Neuzeichnen: ruhig für Screenreader und ohne Flackern). */
+function dvJobBar(host) {
+  if (!host.querySelector(".dvbar")) host.innerHTML = `<div class="dvjobt"></div><div class="dvbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Fortschritt"><span></span></div><div class="dvjobs mut"></div>`;
+  const t = host.querySelector(".dvjobt"), bar = host.querySelector(".dvbar"), fill = bar.firstElementChild, sub = host.querySelector(".dvjobs");
+  return (text, done, total, note) => {
+    if (total > 0) {
+      bar.classList.remove("ind");
+      bar.setAttribute("aria-valuemax", total);
+      bar.setAttribute("aria-valuenow", done);
+      bar.setAttribute("aria-valuetext", text);
+      fill.style.width = Math.min(100, Math.round((100 * done) / total)) + "%";
+    } else {
+      bar.classList.add("ind");                               // Gesamtzahl noch unbekannt: laufender Streifen statt einer Zahl
+      bar.removeAttribute("aria-valuenow");
+      fill.style.width = "";
+    }
+    t.textContent = text;
+    sub.textContent = note || "";
+  };
+}
+const dvDoneText = (d, t) => `${d} von ${t} Touren geprüft`;
+/* wartet, bis der Job fertig ist; on(j) bei jedem Stand von /api/jobs (neu: j.done / j.total). Rückgabe: letzter Stand oder null (Server nicht erreichbar) */
+async function dvWatch(on) {
+  for (let i = 0; i < 3000; i++) {
+    await new Promise(r => setTimeout(r, i ? 1200 : 500));
+    const j = await api("/api/jobs").catch(() => null);
+    if (!j) return null;
+    on(j);
+    if (!j.running) return j;
+  }
+  return null;
+}
+
 /* Auswertung im Hintergrund starten und Fortschritt anzeigen */
 async function dvQRun(root, btn, again) {
   const progs = [...root.querySelectorAll(".dvqprog")], btns = [...root.querySelectorAll(".dvqrun")];
   const say = t => progs.forEach(p => (p.textContent = t));
+  let box = $("#dvqjob", root);
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "dvqjob"; box.className = "dvjob";
+    box.setAttribute("role", "group"); box.setAttribute("aria-label", "Fortschritt der Auswertung");
+    const anchor = root.querySelector(".dvintro");
+    if (anchor) anchor.after(box); else root.prepend(box);
+  }
+  box.hidden = false;
+  const upd = dvJobBar(box);
   btns.forEach(b => (b.disabled = true));
   say("Wird gestartet …");
+  upd("Wird gestartet …", 0, 0);
   try {
     await api("/api/jobs/dev-quality", {method: "POST"});
-    for (let i = 0; i < 600; i++) {
-      await new Promise(r => setTimeout(r, 1500));
-      const j = await api("/api/jobs").catch(() => null);
-      if (!j) break;
+    const j = await dvWatch(j => {
       const last = (j.log || []).filter(x => /Genauigkeit/.test(x)).slice(-1)[0] || "";
-      say(j.running ? j.progress || last.replace(/^\d\d:\d\d:\d\d /, "") || "Läuft …" : "");
-      if (!j.running) {
-        if (j.ok === false) throw new Error("Die Auswertung ist fehlgeschlagen. Details stehen im Protokoll der Verwaltung.");
-        break;
+      const txt = j.progress || last.replace(/^\d\d:\d\d:\d\d /, "") || "Läuft …";
+      if (j.running) {
+        say(txt);
+        upd(j.total > 0 ? dvDoneText(j.done || 0, j.total) : txt, j.done || 0, j.total || 0, j.total > 0 ? txt : "");
       }
-    }
+    });
+    if (j && j.ok === false) throw new Error("Die Auswertung ist fehlgeschlagen. Details stehen im Protokoll der Verwaltung.");
   } catch (e) {
     say(e.message);
+    upd(e.message, 0, 0);
     btns.forEach(b => (b.disabled = false));
     return;
   }
   again();
+}
+
+/* ---------- Sammel-Korrektur der Höhen: Vorschau → Bestätigung → Hintergrundjob → „Alles rückgängig machen“ ---------- */
+const dvSigned = v => (v > 0 ? "+" : v < 0 ? "−" : "") + nf(Math.abs(v), 0) + " m";
+async function dvBatch(g, again) {
+  const m = dvBox(`<h2>Auffällige Höhen korrigieren</h2><p class="dvlead">${esc(g.name)}</p><div id="bxbody" aria-live="polite"><p class="mut"><span class="dvspin"></span>Liste wird geladen …</p></div>`);
+  m.querySelector(".mbox").classList.add("dvbatchbox");
+  const body = $("#bxbody", m);
+  let changed = false;
+  const close = () => { m.remove(); if (changed) again(); };
+  const closeBtn = html => `<div class="dvfoot"><button class="btn ghost" id="bxclose" type="button">${html}</button></div>`;
+  let pv;
+  try {
+    pv = await api(`/api/devices/${g.id}/quality/fix-preview`);
+  } catch (e) {
+    body.innerHTML = `<p class="bad">${esc(e.message)}</p>${closeBtn("Schließen")}`;
+    $("#bxclose", m).onclick = close;
+    return;
+  }
+  if (!pv.total) {
+    body.innerHTML = `<p>Keine Tour mit offener Höhen-Auffälligkeit. Hier gibt es nichts zu korrigieren.</p>${closeBtn("Schließen")}`;
+    $("#bxclose", m).onclick = close;
+    return;
+  }
+  const one = pv.methods.length === 1;
+  body.innerHTML = `<p class="dvbintro">Du siehst zuerst, was sich ändern würde. <b>Es passiert nichts, bevor du unten auf „Korrigieren“ klickst.</b> Jede Tour wird einzeln korrigiert, das Original bleibt erhalten, und den ganzen Lauf kannst du danach mit einem Klick zurücknehmen. Strecke und Zeit werden nicht verändert.</p>
+    <fieldset class="dvf dvbmeth"><legend>Methode</legend>${pv.methods.map((x, i) => `<label class="dvpickrow"><input type="radio" name="bxm" value="${x.id}" ${i === 0 ? "checked" : ""}><span><b>${esc(x.label)}</b><small>${x.id === "dem" ? "Kartendaten werden bei Bedarf aus dem Internet geladen (begrenzt je Lauf)." : "Der Höhenverlauf der barometrischen Uhr wird aus der Zepp-Cloud übernommen."}</small></span></label>`).join("")}</fieldset>
+    ${pv.zepp_missing ? `<p class="dvh">Die Methode „Uhr (Zepp)“ gibt es erst, wenn in der Verwaltung ein Zepp-Zugang eingerichtet ist.</p>` : ""}
+    <div class="dvblist" role="group" aria-label="Touren">
+      <div class="dvbtools"><span class="dvbcount" id="bxcount"></span><span class="sp"></span><button class="btn ghost sm" id="bxall" type="button">Alle</button><button class="btn ghost sm" id="bxnone" type="button">Keine</button></div>
+      <ul class="dvbul">${pv.tours.map((t, i) => `<li><label class="dvbrow"><input type="checkbox" class="bxt" data-i="${i}" checked><span class="dvbname"><b>${esc(t.name)}</b><span class="mut">${esc(dvDay(t.day))}${t.rough ? " · Uhr: grob" : ""}</span></span>
+        <span class="dvbnum"><span>Uhr <b>${nf(t.up_dev, 0)} m</b></span><span>Gelände <b>${nf(t.up_dem, 0)} m</b></span><span class="dvbnew">neu <b data-new>–</b></span></span></label></li>`).join("")}</ul></div>
+    <p class="dvbsum" id="bxsum" role="status" aria-live="polite"></p>
+    <div class="dvfoot"><button class="btn" id="bxgo" type="button">Korrigieren …</button><button class="btn ghost" id="bxno" type="button">Abbrechen</button></div>`;
+  const boxes = [...m.querySelectorAll(".bxt")];
+  const method = () => (m.querySelector("input[name=bxm]:checked") || {}).value || "dem";
+  const sel = () => boxes.filter(b => b.checked).map(b => pv.tours[+b.dataset.i]);
+  const refresh = () => {
+    const mt = method(), s = sel();
+    boxes.forEach(b => { const t = pv.tours[+b.dataset.i]; b.closest("li").querySelector("[data-new]").textContent = nf(t.new[mt] ?? 0, 0) + " m"; });
+    const a = s.reduce((x, t) => x + (t.up_now || 0), 0), n = s.reduce((x, t) => x + (t.new[mt] || 0), 0);
+    $("#bxcount", m).textContent = `${s.length} von ${pv.total} Touren ausgewählt`;
+    $("#bxsum", m).innerHTML = s.length ? `<b>${s.length} ${s.length === 1 ? "Tour" : "Touren"}, ändert den Aufstieg um insgesamt ${esc(dvSigned(n - a))}</b><span class="dvh">Aufstieg aller gewählten Touren von ${nf(a, 0)} m auf etwa ${nf(n, 0)} m. Der genaue Wert wird beim Korrigieren neu berechnet.</span>${s.length > pv.cap ? `<span class="dvh">In einem Lauf werden höchstens ${pv.cap} Touren korrigiert; der Rest bleibt offen und lässt sich danach mit einem neuen Start erledigen.</span>` : ""}` : `<span class="mut">Keine Tour ausgewählt.</span>`;
+    $("#bxgo", m).disabled = !s.length;
+  };
+  boxes.forEach(b => (b.onchange = refresh));
+  m.querySelectorAll("input[name=bxm]").forEach(r => (r.onchange = refresh));
+  $("#bxall", m).onclick = () => { boxes.forEach(b => (b.checked = true)); refresh(); };
+  $("#bxnone", m).onclick = () => { boxes.forEach(b => (b.checked = false)); refresh(); };
+  $("#bxno", m).onclick = close;
+  refresh();
+  $("#bxgo", m).onclick = async () => {
+    const s = sel(), mt = method();
+    if (!s.length) return;
+    const lab = pv.methods.find(x => x.id === mt).label;
+    const ok = await uiConfirm({title: `${s.length} ${s.length === 1 ? "Tour" : "Touren"} korrigieren?`, ok: "Korrigieren",
+      text: `Methode: ${lab}.\n\n${$("#bxsum", m).firstElementChild.textContent}.\n\nDie Originale bleiben erhalten; den ganzen Lauf kannst du danach rückgängig machen.`});
+    if (!ok) return;
+    $("#bxgo", m).disabled = true;
+    changed = true;
+    body.innerHTML = `<div class="dvjob" id="bxjob" role="group" aria-label="Fortschritt der Korrektur"></div><div id="bxres" role="status" aria-live="polite"></div>`;
+    const upd = dvJobBar($("#bxjob", m));
+    upd("Wird gestartet …", 0, 0);
+    let fin = null;
+    try {
+      const st = await api(`/api/devices/${g.id}/quality/fix`, METJ({method: mt, tours: s.map(t => t.id)}));
+      upd(`0 von ${st.will_run} Touren korrigiert`, 0, st.will_run);
+      fin = await dvWatch(j => { if (j.running) upd(j.total > 0 ? `${j.done || 0} von ${j.total} Touren korrigiert` : j.progress || "Läuft …", j.done || 0, j.total || 0, j.progress || ""); });
+    } catch (e) {
+      $("#bxres", m).innerHTML = `<p class="bad">${esc(e.message)}</p>${closeBtn("Schließen")}`;
+      $("#bxjob", m).hidden = true;
+      $("#bxclose", m).onclick = close;
+      return;
+    }
+    MET_CACHE.clear();
+    await loadTours().catch(() => {});
+    let q = null;
+    try { q = ((await api("/api/devices/quality")).devices || []).find(x => x.id === g.id); } catch (e) {}
+    const b = q && q.batch, rest = q ? q.flagged_height : 0;
+    const line = ((fin && fin.log) || []).filter(x => /Korrigiert: \d+ Touren/.test(x)).slice(-1)[0] || "";
+    const nSkip = +((line.match(/(\d+) übersprungen/) || [])[1] || 0), nFail = +((line.match(/(\d+) nicht möglich/) || [])[1] || 0);
+    $("#bxjob", m).hidden = true;
+    $("#bxres", m).innerHTML = `<p class="dvbdone"><b>${b && b.n_done ? `${b.n_done} ${b.n_done === 1 ? "Tour" : "Touren"} korrigiert` : "Es wurde nichts korrigiert"}</b>${b && b.n_done ? `, Aufstieg zusammen ${esc(dvSigned(b.delta_up))}` : ""}.</p>
+      ${nSkip || nFail ? `<p class="dvh">${nSkip ? `<span>${nSkip} übersprungen</span> ` : ""}${nFail ? `<span>${nFail} nicht möglich</span> ` : ""}<span>Einzelheiten stehen im Protokoll der Verwaltung.</span></p>` : ""}
+      ${fin && fin.ok === false ? `<p class="bad">Der Lauf ist mit einem Fehler beendet worden. Schon Korrigiertes bleibt (einzeln wiederherstellbar); du kannst erneut starten.</p>` : ""}
+      ${rest ? `<p class="dvopen"><b>${rest === 1 ? "Noch 1 Tour mit auffälliger Höhe offen – erneut starten." : `Noch ${rest} Touren mit auffälliger Höhe offen – erneut starten.`}</b></p>` : ""}
+      <div class="dvfoot">${b && b.n_done ? `<button class="btn alt" id="bxundo" type="button" data-batch="${esc(b.id)}">Alles rückgängig machen</button>` : ""}<button class="btn ghost" id="bxclose" type="button">Schließen</button></div>`;
+    $("#bxclose", m).onclick = close;
+    const ub = $("#bxundo", m);
+    if (ub) ub.onclick = () => dvUndo(g, ub.dataset.batch, async () => { MET_CACHE.clear(); await loadTours().catch(() => {}); close(); });
+    $("#bxclose", m).focus();
+  };
+  $("#bxgo", m).focus();
+}
+/* Alles rückgängig machen – nur dieser Sammel-Lauf */
+async function dvUndo(g, batch, after) {
+  const ok = await uiConfirm({title: "Diesen Sammel-Lauf rückgängig machen?", ok: "Rückgängig machen", danger: true,
+    text: "Alle Touren dieses Laufs bekommen ihre ursprünglichen Höhen und Höhenmeter zurück. Touren, die du inzwischen selbst geändert oder zurückgenommen hast, bleiben unberührt."});
+  if (!ok) return;
+  try {
+    const r = await api(`/api/devices/${g.id}/quality/fix-undo`, METJ({batch}));
+    MET_CACHE.clear();
+    await uiAlert({title: "Rückgängig gemacht", text: `${r.restored} ${r.restored === 1 ? "Tour" : "Touren"} wiederhergestellt.` + (r.changed ? `\n\n${r.changed} unberührt gelassen (inzwischen anders geändert).` : "")});
+  } catch (e) {
+    await uiAlert({title: "Nicht möglich", text: e.message});
+  }
+  await after();
 }
 
 /* ---------- „Was liefert diese Uhr?“ (Gerät) und „Alle Felder dieser Tour“: zeigt, welche Felder die Quellen wirklich enthalten (nur lesen) ---------- */
@@ -471,12 +652,13 @@ async function devPanel() {
       ${dvGives(qmap[g.id])}
       <button class="dvuhr" type="button" data-uhr="${g.id}">Was liefert diese Uhr?</button></div>
       ${viewer ? "" : `<button class="dvmore" aria-haspopup="menu" aria-expanded="false" title="Aktionen" aria-label="Aktionen">${DV_SVG.dots}</button>`}
-      ${qmap[g.id] ? `<details class="dvq" data-q="${g.id}" ${DVQ_OPEN.has(g.id) ? "open" : ""}><summary><span>Genauigkeit</span>${qmap[g.id].n_eval ? `<span class="dvqs ${DVQ_CLS[qmap[g.id].verdict.level] || "none"}">${esc(qmap[g.id].verdict.label)}</span>` : `<span class="dvqs none">noch nicht ausgewertet</span>`}</summary><div class="dvqb">${dvQBody(qa, qmap[g.id], viewer)}</div></details>` : ""}</div>`;
+      ${qmap[g.id] ? `<details class="dvq" data-q="${g.id}" ${dvqOpen(g.id) ? "open" : ""}><summary aria-expanded="${dvqOpen(g.id)}"><span>Genauigkeit</span>${qmap[g.id].n_eval ? `<span class="dvqs ${DVQ_CLS[qmap[g.id].verdict.level] || "none"}">${esc(qmap[g.id].verdict.label)}</span>` : `<span class="dvqs none">noch nicht ausgewertet</span>`}</summary><div class="dvqb">${dvQBody(qa, qmap[g.id], viewer)}</div></details>` : ""}</div>`;
   const empty = `<div class="dvempty"><span class="dvav">${dvIcon("zepp")}</span><h3>Noch kein Gerät angelegt</h3>
       <p>Lege deine Uhren und Handys an, damit bei jeder Tour steht, womit sie aufgezeichnet wurde.</p>
       ${viewer ? "" : `<div class="row"><button class="btn" id="dvzepp">Gerät aus Zepp ermitteln</button><button class="btn alt" id="dvnew2">Gerät von Hand anlegen</button></div>`}</div>`;
   root.innerHTML = `<div class="dvhead"><h2>Meine Geräte</h2><span class="sp"></span>${viewer || !dv.devices.length ? "" : `${mc && mc.total ? `<button class="btn ghost sm" id="dvall" title="Alle ${mc.total} von Hand gesetzten Zuordnungen zurücknehmen; danach entscheidet die Automatik (Art, Zepp-Kennung, Datum)">Alle Handzuordnungen zurücksetzen</button>` : ""}<button class="btn alt sm" id="dvmatch" title="Alle Touren mit passendem Zepp-Training dem richtigen Gerät zuordnen">Touren automatisch zuordnen</button>${qa ? `<button class="btn alt sm dvqrun" id="dvqall" title="Vergleicht, was die Uhren gemessen haben, mit Strecke, Geländemodell und GPS-Spur. Verändert keine Tour.">Genauigkeit auswerten</button>` : ""}<button class="btn alt sm" id="dvzepp">Geräte aus Zepp ermitteln</button><button class="btn sm" id="dvnew">+ Gerät anlegen</button>`}</div>
     <p class="mut dvintro">Deine Aufnahmegeräte mit eigenem Namen. Der Name erscheint bei jeder Tour als „Quelle“; welche Messwerte eine Tour zeigt, richtet sich nach dem, was das Gerät wirklich geliefert hat.</p>
+    ${qa && qa.progress && qa.progress.total && qa.computed_at ? `<div class="dvstat ${qa.progress.open ? "warn" : ""}" id="dvqstat" role="status"><div class="dvstatt"><b>${qa.progress.open ? dvOpenText(qa.progress.open) : "Alle Touren sind ausgewertet."}</b><span class="mut">Zuletzt ausgewertet am ${esc(dvQTime(qa.computed_at))}, ${qa.progress.done} von ${qa.progress.total} Touren.</span>${qa.progress.n_summary ? `<span class="mut">${qa.progress.n_detail} mit Detail (genau), ${qa.progress.n_summary} nur Zusammenfassung (grob).</span>` : ""}${dvBar(qa.progress.done, qa.progress.total, "Fortschritt der Auswertung")}</div>${viewer || !qa.progress.open ? "" : `<button class="btn sm dvqrun" type="button">Weiter auswerten</button>`}</div>` : ""}
     ${mc && mc.redundant && !viewer ? `<div class="dvhint" id="dvred"><span><b>${mc.redundant} ${mc.redundant === 1 ? "Tour steht" : "Touren stehen"} als „von Hand zugeordnet“, entspr${mc.redundant === 1 ? "icht" : "echen"} aber der automatischen Zuordnung</b><span class="mut">Die Zuordnung ändert sich dabei nicht – nur der Zusatz „von Hand“ entfällt, und künftige Änderungen (z. B. neues Gerät, geänderter Zeitraum) wirken wieder automatisch.</span></span>
       <button class="btn sm" id="dvredok">Auf automatisch umstellen</button></div>` : ""}
     ${mc && mc.outside && !viewer ? `<div class="dvhint" id="dvmc"><span><b>${mc.outside} von Hand gesetzte ${mc.outside === 1 ? "Zuordnung widerspricht" : "Zuordnungen widersprechen"} dem Zeitraum ihres Geräts</b><span class="mut">${Object.entries(mc.by_device).map(([n, k]) => `${esc(n)}: ${k}`).join(" · ")} – die Touren liegen vor „seit“ bzw. nach „bis“ des Geräts. Zurücksetzen übergibt sie wieder der automatischen Zuordnung (Zepp-Kennung und Datum); andere von Hand gesetzte Zuordnungen bleiben.</span></span>
@@ -489,20 +671,20 @@ async function devPanel() {
   if (bz) bz.onclick = () => devZepp(dv, again);
   const ab = $("#dvall");
   if (ab) ab.onclick = async () => {
-    if (!confirm(`Alle ${mc.total} von Hand gesetzten Zuordnungen zurücksetzen? Danach entscheidet die automatische Zuordnung (Art, Zepp-Kennung, Datum). Bewusst gesetzte Geräte gehen dabei verloren.`)) return;
+    if (!(await uiConfirm({title: "Alle Handzuordnungen zurücksetzen?", ok: "Zurücksetzen", danger: true, text: `Alle ${mc.total} von Hand gesetzten Zuordnungen zurücksetzen? Danach entscheidet die automatische Zuordnung (Art, Zepp-Kennung, Datum). Bewusst gesetzte Geräte gehen dabei verloren.`}))) return;
     ab.disabled = true;
     try {
       const r = await api("/api/devices/reset-manual", METJ({mode: "all"}));
       MET_CACHE.clear();
-      if (confirm(`${r.reset} Zuordnungen zurückgesetzt. Jetzt alle Touren automatisch den Uhren zuordnen?`) && $("#dvmatch")) { $("#dvmatch").click(); return; }
+      if ((await uiConfirm({title: "Jetzt automatisch zuordnen?", ok: "Zuordnen", cancel: "Später", text: `${r.reset} Zuordnungen zurückgesetzt. Jetzt alle Touren automatisch den Uhren zuordnen?`})) && $("#dvmatch")) { $("#dvmatch").click(); return; }
       await loadTours().catch(() => {});
-    } catch (e) { alert(e.message); }
+    } catch (e) { await uiAlert({title: "Nicht möglich", text: e.message}); }
     again();
   };
   const rb = $("#dvredok");
   if (rb) rb.onclick = async () => {
     rb.disabled = true;
-    try { const r = await api("/api/devices/reset-manual", METJ({mode: "redundant"})); MET_CACHE.clear(); await loadTours().catch(() => {}); alert(`${r.reset} Touren auf automatische Zuordnung umgestellt.`); } catch (e) { alert(e.message); }
+    try { const r = await api("/api/devices/reset-manual", METJ({mode: "redundant"})); MET_CACHE.clear(); await loadTours().catch(() => {}); uiAlert({title: "Umgestellt", text: `${r.reset} Touren auf automatische Zuordnung umgestellt.`}); } catch (e) { await uiAlert({title: "Nicht möglich", text: e.message}); }
     again();
   };
   const mcb = $("#dvmcok");
@@ -511,9 +693,9 @@ async function devPanel() {
     try {
       const r = await api("/api/devices/reset-manual", METJ({mode: "outside"}));
       MET_CACHE.clear();
-      if (confirm(`${r.reset} Zuordnungen zurückgesetzt. Jetzt alle Touren automatisch den Uhren zuordnen?`) && $("#dvmatch")) { $("#dvmatch").click(); return; }
+      if ((await uiConfirm({title: "Jetzt automatisch zuordnen?", ok: "Zuordnen", cancel: "Später", text: `${r.reset} Zuordnungen zurückgesetzt. Jetzt alle Touren automatisch den Uhren zuordnen?`})) && $("#dvmatch")) { $("#dvmatch").click(); return; }
       await loadTours().catch(() => {});
-    } catch (e) { alert(e.message); }
+    } catch (e) { await uiAlert({title: "Nicht möglich", text: e.message}); }
     again();
   };
   const bm = $("#dvmatch");
@@ -526,7 +708,7 @@ async function devPanel() {
         const j = await api("/api/jobs").catch(() => null);
         if (!j || !j.running) break;
       }
-    } catch (e) { alert(e.message); }
+    } catch (e) { uiAlert({title: "Nicht möglich", text: e.message}); }
     await loadTours().catch(() => {});
     again();
   };
@@ -546,7 +728,7 @@ async function devPanel() {
         {icon: DV_SVG.info, label: "Was liefert diese Uhr?", run: () => dvUhrFelder("device", g.id, g.name)},
         {icon: DV_SVG.range, label: "Touren zuordnen …", run: () => devRange(dv, g, again)},
         {icon: g.active ? DV_SVG.off : DV_SVG.on, label: g.active ? "Deaktivieren" : "Aktivieren", run: async () => {
-          try { await api("/api/devices/" + g.id, dvJson("PATCH", {active: !g.active})); MET_CACHE.clear(); } catch (er) { alert(er.message); }
+          try { await api("/api/devices/" + g.id, dvJson("PATCH", {active: !g.active})); MET_CACHE.clear(); } catch (er) { await uiAlert({title: "Nicht möglich", text: er.message}); }
           again();
         }},
         "-",
@@ -557,7 +739,15 @@ async function devPanel() {
   root.querySelectorAll("details.dvq").forEach(dt => {
     const id = +dt.dataset.q, g = qmap[id];
     const load = () => { if (!dt.dataset.loaded) { dt.dataset.loaded = "1"; dvQBad(dt, g, viewer, again); } };
-    dt.addEventListener("toggle", () => { if (dt.open) { DVQ_OPEN.add(id); load(); } else DVQ_OPEN.delete(id); });
+    dt.addEventListener("toggle", () => {
+      dt.querySelector("summary").setAttribute("aria-expanded", dt.open ? "true" : "false");
+      if (dt.open) { DVQ_OPEN.add(id); load(); } else DVQ_OPEN.delete(id);
+      try { localStorage.setItem("mt_dvq_" + id, dt.open ? "1" : "0"); } catch (e) {}
+    });
+    dvSecWire(dt);
+    const bb = dt.querySelector(".dvbatch");
+    if (bb) bb.onclick = e => { e.stopPropagation(); dvBatch(g, again); };
+    dt.querySelectorAll(".dvundo").forEach(ub => (ub.onclick = e => { e.stopPropagation(); dvUndo(g, ub.dataset.batch, async () => { MET_CACHE.clear(); await loadTours().catch(() => {}); again(); }); }));
     if (dt.open) load();
   });
   root.querySelectorAll(".dvqrun").forEach(b => (b.onclick = e => { e.stopPropagation(); dvQRun(root, b, again); }));

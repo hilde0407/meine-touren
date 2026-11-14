@@ -200,8 +200,8 @@ def test_photo_chain_drag_moves_all_and_saves(page):
     after = ts()
     diffs = {a - b for a, b in zip(after, before)}
     assert len(diffs) == 1 and abs(diffs.pop() - 1200) < 60              # alle Fotos um denselben Betrag verschoben
-    page.once("dialog", lambda d: d.accept())
-    page.click("#chb"); page.click("#chre"); page.wait_for_timeout(1500)
+    page.click("#chb"); page.click("#chre")
+    page.wait_for_selector(".uidlg .uibox"); page.locator(".uidlg .uifoot button", has_text="Zurücknehmen").click(); page.wait_for_timeout(1500)
     assert ts() == before                                                # Original-Zeiten wiederhergestellt
     assert not page.errors, page.errors
 
@@ -760,8 +760,9 @@ def test_links_overview(page):
     assert page.locator("[data-rv]").count() >= 2 and "Diashow" in page.inner_text("#lkb")
     page.locator("[data-d]").first.select_option("0"); page.wait_for_selector("text=unbegrenzt gültig")
     n = page.locator("[data-rv]").count()
-    page.once("dialog", lambda d: d.accept())
-    page.locator("[data-rv]").first.click(); page.wait_for_function("n => document.querySelectorAll('[data-rv]').length === n - 1", arg=n, timeout=8000)
+    page.locator("[data-rv]").first.click()
+    page.wait_for_selector(".uidlg .uibox"); page.locator(".uidlg .uifoot button", has_text="Widerrufen").click()
+    page.wait_for_function("n => document.querySelectorAll('[data-rv]').length === n - 1", arg=n, timeout=8000)
     page.goto(base + "#/admin"); page.wait_for_selector("#lklink", timeout=8000)
 
 
@@ -772,8 +773,18 @@ def test_share_slideshow_button(page):
     page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
     page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.5.0', serverUrl: () => ''}")
     page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(1200)
-    page.once("dialog", lambda d: d.accept())             # falls die Tour keine Fotos hat
-    page.evaluate("document.querySelector('#eshow').click()"); page.wait_for_selector("#sh_go"); page.select_option("#sh_d", "7"); page.click("#sh_go"); page.wait_for_function("() => window._sent", timeout=8000)
+    page.evaluate("document.querySelector('#eshow').click()")
+    page.wait_for_selector("#sh_go, .uidlg .uibox")
+    if page.locator(".uidlg .uibox").count():                # falls die Tour keine Fotos hat: Rückfrage im gemeinsamen Dialog bestätigen
+        page.locator(".uidlg .uifoot button").last.click()
+    page.wait_for_selector("#sh_go"); page.select_option("#sh_d", "7"); page.click("#sh_go")
+    for _ in range(40):                                      # ohne Fotos fragt der Dialog erst nach „Senden“ (Link trotzdem erstellen?)
+        if page.evaluate("window._sent") or page.locator(".uidlg .uibox").count():
+            break
+        page.wait_for_timeout(200)
+    if page.locator(".uidlg .uibox").count():
+        page.locator(".uidlg .uifoot button").last.click()
+    page.wait_for_function("() => window._sent", timeout=8000)
     sent = page.evaluate("window._sent")
     assert "Diashow" in sent and "/s/" in sent
     link = sent.split()[-1]
@@ -1124,11 +1135,13 @@ def test_messwerte_and_meine_geraete(page):
     page.wait_for_function("() => /Test-Uhr neu/.test(document.querySelector('#devsec').textContent)", timeout=6000)
     page.locator("#devsec .dvmore").first.click(); page.wait_for_selector(".dvmenu")
     assert {"Bearbeiten", "Touren zuordnen …", "Deaktivieren", "Löschen …"} <= set(page.locator(".dvmenu button").all_inner_texts()) | {"Löschen …"}
-    msgs = []
-    page.once("dialog", lambda d: (msgs.append(d.message), d.accept()))
     page.locator(".dvmenu button", has_text="Löschen").click()
+    page.wait_for_selector(".uidlg .uibox")
+    assert "entfernen?" in page.inner_text(".uidlg .uibox") and page.locator(".uidlg [role=alertdialog]").count() == 1
+    page.locator(".uidlg .uifoot button", has_text="Entfernen").click()
     page.wait_for_timeout(800)
-    page.on("dialog", lambda d: d.accept())
+    if page.locator(".uidlg .uibox").count():                                                      # Hinweis „Touren hängen daran“: schließen
+        page.locator(".uidlg .uifoot button").last.click()
     assert page.locator("#devsec .dvcard").count() == 1                                           # Touren hängen daran: nicht gelöscht
     page.locator("#devsec .dvmore").first.click()                                                  # Deaktivieren über das Menü
     page.locator(".dvmenu button", has_text="Deaktivieren").click()

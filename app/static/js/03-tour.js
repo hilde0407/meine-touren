@@ -35,7 +35,7 @@ async function uploadDialog(t) {
   try {
     [pf, st] = await Promise.all([api("/api/portals"), api(`/api/tours/${encodeURIComponent(t.id)}/uploads`)]);
   } catch (e) {
-    return alert(e.message);
+    return uiAlert(e.message);
   }
   const m = document.createElement("div");
   m.className = "modal";
@@ -233,7 +233,7 @@ VIEWS.tour = async id => {
     try {
       await gpsAlign(t);
     } catch (e) {
-      alert(e.message || e);
+      uiAlert(e.message || e);
     }
   };
   if (ph.length) photoSelect(ph, 0, {box: "#th", anchor: "#pc", tour: true});
@@ -261,13 +261,13 @@ VIEWS.tour = async id => {
       };
       m.querySelector("#dok").onclick = async e => {
         const k = !!m.querySelector("#dk").checked;
-        if (k && !confirm(`„${t.name}“ wirklich auch bei Komoot endgültig löschen?`)) return;
+        if (k && !await uiConfirm({text: `„${t.name}“ wirklich auch bei Komoot endgültig löschen?`, danger: true, ok: "Löschen"})) return;
         e.target.disabled = true;
         m.querySelector("#dm").textContent = "Wird gelöscht …";
         try {
           const r = await api(`/api/tours/${encodeURIComponent(t.id)}/delete`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({komoot: k})});
           m.remove();
-          if (r.komoot) alert("Gelöscht – " + r.komoot + ".");
+          if (r.komoot) uiAlert("Gelöscht – " + r.komoot + ".");
           ROUTES = null;
           await loadTours();
           location.hash = "#/tours";
@@ -280,9 +280,7 @@ VIEWS.tour = async id => {
   else if ($("#edel"))
     $("#edel").onclick = async () => {
       if (
-        !confirm(
-          `Lokale Tour „${t.name}“ samt gespeicherter Strecke löschen? Bereits hochgeladene Kopien bei Komoot/Strava bleiben bestehen.`
-        )
+        !await uiConfirm({text: `Lokale Tour „${t.name}“ samt gespeicherter Strecke löschen? Bereits hochgeladene Kopien bei Komoot/Strava bleiben bestehen.`, danger: true, ok: "Löschen"})
       )
         return;
       try {
@@ -291,7 +289,7 @@ VIEWS.tour = async id => {
         await loadTours();
         location.hash = "#/tours";
       } catch (e) {
-        alert(e.message);
+        uiAlert(e.message);
       }
     };
   if ($("#ksync"))
@@ -338,7 +336,7 @@ VIEWS.tour = async id => {
         } catch (e) {
           z.disabled = b.disabled = false;
           $("#ksm").textContent = "";
-          alert("Höhenabgleich fehlgeschlagen: " + e.message);
+          uiAlert("Höhenabgleich fehlgeschlagen: " + e.message);
         }
       };
     }
@@ -354,9 +352,8 @@ VIEWS.tour = async id => {
         else {
           const r = await api(`/api/tours/${encodeURIComponent(t.id)}/elev-fix`, {method: "POST"});
           if (
-            !confirm(
-              `Neu berechnet: ${nf(r.up_m, 0)} m Aufstieg, ${nf(r.down_m, 0)} m Abstieg (vorher ${nf(r.orig_up, 0)} m / ${nf(r.orig_down, 0)} m).\n\nOK = übernehmen, Abbrechen = Original behalten`
-            )
+            !(await uiConfirm({title: "Neu berechnete Höhen übernehmen?", ok: "Übernehmen", cancel: "Original behalten",
+              text: `Neu berechnet: ${nf(r.up_m, 0)} m Aufstieg, ${nf(r.down_m, 0)} m Abstieg (vorher ${nf(r.orig_up, 0)} m / ${nf(r.orig_down, 0)} m).`}))
           )
             await api(`/api/tours/${encodeURIComponent(t.id)}/elev-restore`, {method: "POST"});
         }
@@ -365,7 +362,7 @@ VIEWS.tour = async id => {
       } catch (e) {
         b.disabled = false;
         $("#ksm").textContent = "";
-        alert("Höhenkorrektur fehlgeschlagen: " + e.message);
+        uiAlert("Höhenkorrektur fehlgeschlagen: " + e.message);
       }
     };
   })();
@@ -470,9 +467,9 @@ VIEWS.tour = async id => {
         t.name = nn;
         $("#tname").textContent = t.name;
         close();
-        if (kom && !r.komoot) alert("Hier umbenannt, aber bei Komoot hat es nicht geklappt:\n" + r.warning);
+        if (kom && !r.komoot) uiAlert("Hier umbenannt, aber bei Komoot hat es nicht geklappt:\n" + r.warning);
       } catch (e) {
-        alert("Umbenennen fehlgeschlagen: " + e.message);
+        uiAlert("Umbenennen fehlgeschlagen: " + e.message);
       }
     };
   };

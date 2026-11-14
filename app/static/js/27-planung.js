@@ -375,7 +375,7 @@ VIEWS.plan = async (pid, q) => {
     const d = e.target.dataset.d,
       r = e.target.closest("[data-p]");
     if (d) {
-      if (confirm("Diesen Plan löschen?")) {
+      if (await uiConfirm({text: "Diesen Plan löschen?", danger: true, ok: "Löschen"})) {
         await api(`/api/plans/${d}`, {method: "DELETE"});
         route();
       }

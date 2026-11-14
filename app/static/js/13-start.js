@@ -117,7 +117,7 @@ async function healthBanner() {
         } catch (e) {
           bb.disabled = false;
           bb.textContent = "Jetzt sichern";
-          alert(e.message || e);
+          uiAlert(e.message || e);
         }
       };
   } catch (e) {}

@@ -16,7 +16,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, uhrdiag, uhrtraining, belastung, steigung
+from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -439,6 +439,7 @@ JOBS = {
     "met-backfill": ("Messwerte der Geräte nachladen", lambda dry: metrics.backfill()),
     "dev-match": ("Touren den Zepp-Uhren zuordnen", lambda dry: mydevices.match_all()),
     "dev-quality": ("Genauigkeit der Uhren auswerten", lambda dry: devquality.run()),
+    "dev-quality-fix": (devbatch.LABEL, lambda dry: devbatch.run()),
     "uhr-alle": ("Uhr-Daten aller Touren laden", lambda dry: uhrtraining.load_all(dry=dry)),
     "elev-zepp": ("Höhe aus Zepp-Uhr abgleichen", lambda dry: elev.zepp_fix_all()),
     "export": ("Zepp-Import (ohne Upload)", lambda dry: sync.export_zepp()),
@@ -900,6 +901,7 @@ app.include_router(puls.router)
 app.include_router(metrics.router)
 app.include_router(mydevices.router)
 app.include_router(devquality.router)
+app.include_router(devbatch.router)
 app.include_router(uhrdiag.router)
 app.include_router(uhrtraining.router)
 app.include_router(belastung.router)

@@ -29,7 +29,7 @@ VIEWS.tour = async id => {
         route();
       };
     } else if (dl) {
-      if (!confirm("Wegpunkt löschen?")) return;
+      if (!await uiConfirm({text: "Wegpunkt löschen?", danger: true, ok: "Löschen"})) return;
       await api(`/api/tours/${id}/wps/${dl.dataset.wdel}`, {method: "DELETE"});
       route();
     }
@@ -81,7 +81,7 @@ VIEWS.story = async id => {
       const r = await api(`/api/tours/${encodeURIComponent(id)}/share`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({show: true, trim: true, days: 30, comments: true})});
       const u = location.origin + r.url;
       try { await navigator.clipboard.writeText(u); $("#sshare").textContent = "✓ Link kopiert (30 Tage)"; } catch (e) { prompt("Link zur Diashow:", u); }
-    } catch (e) { alert("Link konnte nicht erstellt werden: " + e.message); }
+    } catch (e) { uiAlert("Link konnte nicht erstellt werden: " + e.message); }
   };
   map = mkMap("sm", {layers: true});
   if (co.length > 1) {
@@ -137,7 +137,7 @@ VIEWS.story = async id => {
           draw(); cmRefresh();
           const sp = document.querySelector(`.sph[data-p="${pid}"]`);
           if (sp) { let b = sp.querySelector(".scn"); if (!b) { b = document.createElement("b"); b.className = "scn"; b.style.cssText = "position:absolute;right:4px;bottom:4px;background:#000a;color:#fff;border-radius:10px;padding:1px 7px;font-size:12px"; sp.appendChild(b); } b.textContent = "💬 " + CM[pid].length; }
-        } catch (er) { alert(er.message || "Fehler"); }
+        } catch (er) { uiAlert(er.message || "Fehler"); }
       };
       ov.querySelector("#pcs").onclick = send;
       ov.querySelector("#pci").onkeydown = e => { if (e.key === "Enter") send(); };

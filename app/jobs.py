@@ -15,7 +15,7 @@ def _s():
     u = ctx.uid()
     with _g:
         if u not in _S:
-            _S[u] = {"lock": threading.Lock(), "state": {"running": None, "started": None, "finished": None, "ok": None, "progress": ""}, "log": deque(maxlen=800)}
+            _S[u] = {"lock": threading.Lock(), "state": {"running": None, "started": None, "finished": None, "ok": None, "progress": "", "done": None, "total": None}, "log": deque(maxlen=800)}
         return _S[u]
 
 
@@ -27,8 +27,13 @@ def log(msg):
     _s()["log"].append(time.strftime("%H:%M:%S ") + str(msg))
 
 
-def progress(msg):
-    _s()["state"]["progress"] = msg
+def progress(msg, done=None, total=None):
+    """Fortschrittstext; optional der Gesamtstand (done von total) für einen Balken. Ohne Zahlen bleibt der letzte Stand unverändert,
+    ältere Aufrufer (nur Text) funktionieren also weiter."""
+    st = _s()["state"]
+    st["progress"] = msg
+    if total is not None:
+        st["done"], st["total"] = done, total
 
 
 def start(name, fn, *args, **kw):
@@ -38,7 +43,7 @@ def start(name, fn, *args, **kw):
     state = s["state"]
 
     def run():
-        state.update(running=name, started=time.time(), finished=None, ok=None, progress="")
+        state.update(running=name, started=time.time(), finished=None, ok=None, progress="", done=None, total=None)
         log(f"=== {name} gestartet ===")
         try:
             fn(*args, **kw)

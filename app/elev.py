@@ -147,7 +147,9 @@ def suspicious(t):
     return km > 0.5 and (t["up_m"] or 0) > 120 * km and (t["up_m"] or 0) > 400
 
 
-def fix(tid):
+def fix(tid, tile=None):
+    """Höhe EINER Tour aus dem Geländemodell neu berechnen; Original bleibt über restore() wiederherstellbar.
+    tile: optionale Kachelfunktion (x, y) -> Pixel, z. B. mit Netzobergrenze für Sammel-Läufe; ohne Angabe lädt terrain() Kacheln wie bisher."""
     tid = str(tid)
     t = db.one("SELECT * FROM tours WHERE id=?", (tid,))
     if not t:
@@ -156,7 +158,7 @@ def fix(tid):
     pts = (json.loads(orig_path(tid).read_text()) if cur and orig_path(tid).exists() else None) or routes.load(tid)
     if not pts or len(pts) < 5:
         raise RuntimeError("Keine Streckenpunkte vorhanden")
-    dem = smooth(terrain([(p[0], p[1]) for p in pts]))
+    dem = smooth(terrain([(p[0], p[1]) for p in pts], **({"tile": tile} if tile else {})))
     up, down = ascent(dem)
     if not cur:
         orig_path(tid).write_text(json.dumps(pts))

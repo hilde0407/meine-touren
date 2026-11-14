@@ -161,7 +161,7 @@ VIEWS.tour = async (id, q) => {
         showTags();
         m.remove();
       } catch (e) {
-        alert(e.message);
+        uiAlert(e.message);
       }
     };
   };
@@ -508,7 +508,7 @@ VIEWS.check = async (...a) => {
   };
   $("#rn_p").onclick = calc;
   $("#rn_go").onclick = async e => {
-    if (!confirm(`${plan.length} Touren umbenennen${$("#rn_k").checked ? " (auch bei Komoot)" : ""}?`)) return;
+    if (!await uiConfirm(`${plan.length} Touren umbenennen${$("#rn_k").checked ? " (auch bei Komoot)" : ""}?`)) return;
     e.target.disabled = true;
     let n = 0,
       bad = 0;

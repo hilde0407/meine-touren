@@ -11,6 +11,12 @@ Messgrößen je Tour
 * HÖHE      Auf-/Abstieg der Uhr (Höhen der Uhr, gleiche Glättung wie elev.zepp_fix) gegen den Auf-/Abstieg aus dem Geländemodell (gleiche
             Berechnung wie elev.fix) – beide auf denselben, auf höchstens 1500 Stück ausgedünnten Punkten.
             Geländemodell nur aus dem Kachel-Zwischenspeicher; höchstens `quality_tile_max` (Standard 60) NEUE Kacheln je Lauf.
+            Zusätzlich (3.13.0): Für Zepp-Touren OHNE eigenen Track und OHNE bereits abgerufenes Zepp-Detail wird die Höhe „einfach“ verglichen
+            (h_src='summary'): Auf-/Abstieg laut Uhr aus der Zusatzdatei <id>.uhr.json (Felder altitude_ascend/altitude_descend der Zepp-Zusammenfassung,
+            kein Abruf nötig) gegen den Auf-/Abstieg des Geländemodells entlang der gespeicherten Strecke. Das ist grob (die Uhr rechnet mit eigener Glättung,
+            nicht mit der Glättung 3/3 der Detailpunkte) und wird deshalb getrennt gezählt, mit eigenen, großzügigeren Schwellen bewertet und nie ohne Hinweis
+            mit den genauen Werten vermischt. Wo ein Detail (Track oder Zepp-Abruf) vorliegt, hat es immer Vorrang; Details werden für Zusammenfassungs-Touren
+            erst nach allen anderen abgerufen (und mit quality_detail_max = 0 gar nicht – die grobe Höhe gibt es trotzdem).
 * GPS       Sprünge (Tempo über der Sportart-Grenze), Anteil Pausen/Lücken, Punktabstand – aus dem Track, den die Uhr selbst aufgezeichnet hat
             (lokale Touren: gespeicherte GPX; Komoot-Touren: der Komoot-Track stammt NICHT von der Uhr, daher dort aus dem Zepp-Detail).
 * PULS      Anteil unplausibler Messwerte (außerhalb 30–220 bpm) und konstanter Strecken (Sensor-Aussetzer).
@@ -39,6 +45,13 @@ SPREAD_PP = 10.0                # Interquartilsabstand über 10 Prozentpunkten: 
 H_GOOD, H_OK = 10.0, 25.0       # ≤10 % gut, 10–25 % mäßig, >25 % auffällig
 H_MIN_UP = 50.0                 # Prozentwerte nur bei mindestens 50 m Aufstieg im Modell (darunter ist Prozent sinnlos)
 H_FLAG_PCT, H_FLAG_M = 25.0, 30.0   # einzelne Tour auffällig: >25 % UND mindestens 30 m Unterschied
+# Höhe nur aus der Zusammenfassung der Uhr (h_src='summary'): Die Uhr nennt ihren Aufstieg nach eigener, unbekannter Glättung; gerechnet wird gegen
+# das Geländemodell mit der Glättung der Detailpunkte. Allein dieser Methodenunterschied macht erfahrungsgemäß einige Prozent aus – darum ca. 1,5-fach
+# großzügigere Schwellen als bei den genauen Werten (willkürlich, nicht belegt).
+H_GOOD_S, H_OK_S = 15.0, 35.0          # ≤15 % gut, 15–35 % mäßig, >35 % auffällig (Median der Beträge)
+H_FLAG_PCT_S, H_FLAG_M_S = 35.0, 50.0  # einzelne Tour auffällig: >35 % UND mindestens 50 m Unterschied
+SUM_MIN_M = 1.0                        # Aufstieg UND Abstieg laut Uhr mindestens 1 m: 0 bei einem von beiden ist meist ein Platzhalter (kennzahlen() verwirft beide 0)
+SUM_MAX_PER_KM = 300.0                 # mehr als 300 Höhenmeter je Kilometer (Treppen!) gelten als unplausibel; elev.suspicious warnt ab 120 m/km erst bei Komoot-Werten über 400 m
 # GPS: Anteil der Touren mit mindestens einem Sprung.
 G_GOOD, G_OK = 5.0, 15.0        # ≤5 % gut, 5–15 % mäßig, >15 % auffällig
 GPS_FLAG_JUMPS, GPS_FLAG_GAP = 3, 25.0   # einzelne Tour: mindestens 3 Sprünge bzw. über 25 % Lücken/Pausen
@@ -181,6 +194,36 @@ def height_metrics(pts, budget):
     return "ok", {"up_dev": _r(up), "down_dev": _r(down), "up_dem": _r(dup), "down_dem": _r(ddown)}
 
 
+def summary_height(tid, budget):
+    """Einfacher Höhenvergleich aus der Zusatzdatei der Uhr (kein Zepp-Abruf): None, wenn es keine brauchbare Zusammenfassung gibt, sonst (Zustand, dict).
+    Zustand 'ok', 'no_pts' (keine gespeicherte Strecke) oder 'no_dem' (Geländekachel fehlt, Kontingent aufgebraucht)."""
+    from . import uhrtraining
+    d = uhrtraining.load(tid)
+    if not d:
+        return None
+    sm = d["summary"]
+    w = uhrtraining.kennzahlen(sm)                         # verwirft Platzhalter (-1, -274 …), Unsinn und „beides 0“
+    up, down = (w.get("aufstieg") or {}).get("wert"), (w.get("abstieg") or {}).get("wert")
+    if up is None or down is None or up < SUM_MIN_M or down < SUM_MIN_M:
+        return None
+    dis = uhrtraining._rng(sm.get("dis"), 100, 1_000_000)
+    if dis and max(up, down) > SUM_MAX_PER_KM * dis / 1000.0:
+        return None
+    try:
+        pts = routes.load(tid)
+    except (OSError, ValueError):
+        pts = None
+    pts = routes._decimate(list(pts), MAXPTS) if pts else []
+    if len(pts) < 20:
+        return "no_pts", {}
+    try:
+        dem = elev.smooth(elev.terrain([(p[0], p[1]) for p in pts], tile=_tile_factory(budget)))
+    except NoDem:
+        return "no_dem", {}
+    dup, ddown = elev.ascent(dem)
+    return "ok", {"up_dev": _r(float(up)), "down_dev": _r(float(down)), "up_dem": _r(dup), "down_dem": _r(ddown)}
+
+
 # ------------------------------------------------------------------------------------------------ Tabelle
 COLS = ("tour_id", "device_id", "berechnet_am", "day", "sport", "zepp_n", "dist_tour_m", "dist_dev_m", "dist_ratio", "dist_plausible",
         "h_src", "h_state", "up_dev", "down_dev", "up_dem", "down_dem",
@@ -192,6 +235,27 @@ def ensure_table():
                "dist_tour_m REAL, dist_dev_m REAL, dist_ratio REAL, dist_plausible INTEGER, h_src TEXT, h_state TEXT, up_dev REAL, down_dev REAL, up_dem REAL, down_dem REAL, "
                "gps_src TEXT, gps_n INTEGER, gps_jumps INTEGER, gps_gap_pct REAL, gps_med_dt REAL, gps_pts_km REAL, gps_dec INTEGER, hr_n INTEGER, hr_bad_pct REAL)")
     db.execute("CREATE INDEX IF NOT EXISTS device_quality_dev ON device_quality(device_id)")
+
+
+BATCH_DDL = ("CREATE TABLE IF NOT EXISTS quality_batch (batch_id TEXT, tour_id TEXT, device_id INTEGER, method TEXT, ts INTEGER, orig_up REAL, orig_down REAL, "
+             "new_up REAL, new_down REAL, state TEXT, PRIMARY KEY (batch_id, tour_id))")
+
+
+def ensure_batch_table():
+    """Sammel-Korrektur (3.13.0): je korrigierter Tour eine Zeile des Laufs (state 'done' bzw. 'undone'). Nur CREATE IF NOT EXISTS, nie DROP; liegt in der
+    Datenbank und damit in Sicherung und Umzug."""
+    db.execute(BATCH_DDL)
+    db.execute("CREATE INDEX IF NOT EXISTS quality_batch_dev ON quality_batch(device_id, ts)")
+
+
+def _last_batch(did):
+    """Letzter Sammel-Lauf eines Geräts (für „Alles rückgängig machen“) oder None."""
+    ensure_batch_table()
+    r = db.one("SELECT batch_id, MAX(ts) ts, MIN(method) method, COUNT(*) n, SUM(state='done') n_done, "
+               "SUM(CASE WHEN state='done' THEN new_up - orig_up ELSE 0 END) delta_up FROM quality_batch WHERE device_id=? GROUP BY batch_id ORDER BY MAX(ts) DESC LIMIT 1", (did,))
+    if not r:
+        return None
+    return {"id": r["batch_id"], "ts": r["ts"], "method": r["method"], "n": r["n"], "n_done": r["n_done"] or 0, "n_undone": r["n"] - (r["n_done"] or 0), "delta_up": _r(r["delta_up"], 0)}
 
 
 def _zepp_points(s, det):
@@ -268,10 +332,15 @@ def run(api=None, detail_max=None, tile_max=None):
         except Exception as e:  # noqa
             api = None
             log(f"Genauigkeit: Zepp nicht erreichbar ({type(e).__name__}) – nur lokale Messgrößen")
-    rows, need = {}, []
+    rows, need, sumrow = {}, [], {}
+    total = len(tours)
+
+    def report(msg):                                     # Gesamtstand für den Balken: geprüft = Zeile vorhanden und nicht „offen“
+        jobs.progress(msg, sum(1 for x in rows.values() if x["h_state"] not in ("pending", "no_dem")), total)
+    report("Genauigkeit wird berechnet …")
     for i, t in enumerate(tours, 1):
         if i % 25 == 0:
-            jobs.progress(f"Genauigkeit {i}/{len(tours)}")
+            report(f"Genauigkeit {i}/{total}")
         tid, dev = t["id"], asg[t["id"]][0]
         r = dict.fromkeys(COLS)
         r.update(tour_id=tid, device_id=dev["id"], berechnet_am=now, day=mydevices._day(t["start_ts"]), sport=t["sport"], zepp_n=0)
@@ -296,14 +365,30 @@ def run(api=None, detail_max=None, tile_max=None):
             if g:
                 r.update(g)
                 r["gps_dec"] = int(dec)
-        elif len(cands) == 1 and api is not None:
+        else:
             p = prior.get(tid)
-            if p and p["h_src"] == "zepp" and p["h_state"] in ("ok", "no_alt", "no_pts"):
-                for c in COLS[10:23]:                    # schon früher aus dem Zepp-Detail berechnet: nicht erneut abrufen
+            one = len(cands) == 1 and api is not None
+            had = dev["kind"] == "zepp" and p is not None and p["h_src"] == "zepp" and p["h_state"] in ("ok", "no_alt", "no_pts")
+            if had:
+                for c in COLS[10:23]:                    # schon früher aus dem Zepp-Detail berechnet: nicht erneut abrufen; Detail hat Vorrang vor der Zusammenfassung
                     r[c] = p[c]
             else:
-                r["h_src"], r["h_state"] = "zepp", "pending"
-                need.append((dev["id"], t["start_ts"], t, cands[0]))
+                sm = None
+                if dev["kind"] == "zepp":
+                    try:
+                        sm = summary_height(tid, budget)
+                    except Exception as e:  # noqa
+                        log(f"  {tid}: Höhe aus der Zusammenfassung nicht auswertbar ({type(e).__name__})")
+                if sm and sm[0] == "ok":
+                    r["h_src"], r["h_state"] = "summary", "ok"
+                    r.update(sm[1])
+                    sumrow[tid] = {c: r[c] for c in COLS[10:16]}
+                elif sm and sm[0] == "no_dem" and not one:
+                    r["h_src"], r["h_state"] = "summary", "no_dem"
+                if one:
+                    if tid not in sumrow:
+                        r["h_src"], r["h_state"] = "zepp", "pending"
+                    need.append((dev["id"], t["start_ts"], t, cands[0], tid in sumrow))
         try:                                             # Puls (lokal gespeichert): auch bei Komoot-Touren aus der Zusatzdatei
             hr = hr_quality(puls._series(tid)[0])
             if hr:
@@ -313,7 +398,7 @@ def run(api=None, detail_max=None, tile_max=None):
         rows[tid] = r
     # Zepp-Details: reihum über die Geräte (jeweils die neuesten zuerst), höchstens dmax
     by_dev = {}
-    for d, st, t, s in sorted(need, key=lambda x: -x[1]):
+    for d, st, t, s, hs in sorted(need, key=lambda x: (x[4], -x[1])):      # Touren ohne Höhenwert zuerst, solche mit grober Höhe aus der Zusammenfassung zuletzt
         by_dev.setdefault(d, []).append((t, s))
     order = []
     while any(by_dev.values()):
@@ -324,10 +409,13 @@ def run(api=None, detail_max=None, tile_max=None):
     if need:
         log(f"Genauigkeit: {len(need)} Komoot-/Datei-Touren brauchen das Zepp-Detail, {len(todo)} davon in diesem Lauf")
     for i, (t, s) in enumerate(todo, 1):
-        jobs.progress(f"Zepp-Details {i}/{len(todo)}")
+        report(f"Zepp-Details {i}/{len(todo)}")
         r = rows[t["id"]]
+        sv = sumrow.get(t["id"])
         try:
             pts = _zepp_points(s, api.detail(s))
+            if sv:
+                r["h_src"] = "zepp"
             if not pts:
                 r["h_state"] = "no_pts"
             else:
@@ -341,9 +429,12 @@ def run(api=None, detail_max=None, tile_max=None):
         except Exception as e:  # noqa
             r["h_state"] = "pending"
             log(f"  {t['id']}: Zepp-Detail nicht lesbar ({type(e).__name__})")
+        if sv and r["h_state"] in ("no_pts", "no_dem", "pending"):
+            r.update(sv)                                     # Detail brachte nichts Verwertbares: die grobe Höhe aus der Zusammenfassung bleibt stehen
         time.sleep(0.2)
     if rest:
         log(f"Genauigkeit: {rest} weitere Touren folgen beim nächsten Lauf (Obergrenze {dmax} Zepp-Abrufe je Lauf)")
+    report("Genauigkeit wird gespeichert …")
     nodem = sum(1 for r in rows.values() if r["h_state"] == "no_dem")
     if nodem:
         log(f"Genauigkeit: Für {nodem} Touren fehlen Geländekacheln (Obergrenze {_cfg('quality_tile_max', 60, 0, 600) if tile_max is None else tile_max} neue Kacheln je Lauf) – beim nächsten Lauf geht es weiter")
@@ -352,9 +443,10 @@ def run(api=None, detail_max=None, tile_max=None):
         c.executemany(f"INSERT OR REPLACE INTO device_quality({','.join(COLS)}) VALUES({','.join('?' * len(COLS))})", [tuple(r[k] for k in COLS) for r in rows.values()])
     res = {"tours": len(rows), "zepp_matched": sum(1 for r in rows.values() if r["zepp_n"] == 1), "zepp_ambiguous": sum(1 for r in rows.values() if r["zepp_n"] > 1),
            "dist": sum(1 for r in rows.values() if r["dist_plausible"] == 1), "dist_implausible": sum(1 for r in rows.values() if r["dist_plausible"] == 0),
-           "height": sum(1 for r in rows.values() if r["h_state"] == "ok"), "gps": sum(1 for r in rows.values() if r["gps_n"]), "hr": sum(1 for r in rows.values() if r["hr_n"]),
+           "height": sum(1 for r in rows.values() if r["h_state"] == "ok" and r["h_src"] != "summary"),
+           "height_summary": sum(1 for r in rows.values() if r["h_state"] == "ok" and r["h_src"] == "summary"), "gps": sum(1 for r in rows.values() if r["gps_n"]), "hr": sum(1 for r in rows.values() if r["hr_n"]),
            "pending": sum(1 for r in rows.values() if r["h_state"] in ("pending", "no_dem"))}
-    log(f"Genauigkeit fertig: {res['tours']} Touren, Strecke {res['dist']} (+{res['dist_implausible']} unplausibel), Höhe {res['height']}, GPS {res['gps']}, Puls {res['hr']}"
+    log(f"Genauigkeit fertig: {res['tours']} Touren, Strecke {res['dist']} (+{res['dist_implausible']} unplausibel), Höhe {res['height']} genau" + (f" + {res['height_summary']} grob aus der Zusammenfassung" if res["height_summary"] else "") + f", GPS {res['gps']}, Puls {res['hr']}"
         + (f", {res['zepp_ambiguous']} mit mehreren Zepp-Trainings übersprungen" if res["zepp_ambiguous"] else "")
         + (f", {res['pending']} noch offen" if res["pending"] else ""))
     return res
@@ -397,6 +489,23 @@ def assess_dist(rows, ref):
 
 
 def assess_height(rows):
+    """Höhe: genaue Werte (Track/Zepp-Detail) und grobe Werte (nur Zusammenfassung der Uhr, h_src='summary') werden getrennt ausgewertet und nie
+    gemittelt. Die Einschätzung kommt aus den genauen Werten; nur wenn diese für eine Einschätzung nicht reichen, aus den groben – dann mit rough=True
+    und dem Hinweis „grob“ im Text. n_detail/n_summary sagen, wie viele Touren in welche Gruppe fielen."""
+    det = [r for r in rows if r.get("h_src") != "summary"]
+    sm = [r for r in rows if r.get("h_src") == "summary"]
+    out = _height_stats(det, H_GOOD, H_OK, "")
+    s = _height_stats(sm, H_GOOD_S, H_OK_S, "Grob, nur aus der Zusammenfassung der Uhr: ")
+    out["n_detail"], out["n_summary"], out["rough"] = out["n"], s["n"], False
+    out["summary"] = {k: s[k] for k in ("n", "n_pct", "level", "points", "up_err_pct", "up_err_m")}
+    if out["level"] is None and s["level"]:
+        n_det = out["n_detail"]
+        out.update(s)
+        out.update(n_detail=n_det, n_summary=s["n"], rough=True, summary=out["summary"])
+    return out
+
+
+def _height_stats(rows, good, ok_, prefix):
     ok = [r for r in rows if r["h_state"] == "ok" and r["up_dem"] is not None and r["up_dev"] is not None]
     up = [(r["up_dev"] - r["up_dem"]) / r["up_dem"] * 100 for r in ok if r["up_dem"] >= H_MIN_UP]
     dn = [(r["down_dev"] - r["down_dem"]) / r["down_dem"] * 100 for r in ok if (r["down_dem"] or 0) >= H_MIN_UP]
@@ -405,11 +514,11 @@ def assess_height(rows):
     if len(up) < MIN_N:
         return out
     med, mad = median(up), median(abs(x) for x in up)
-    out["level"] = _lvl(mad, H_GOOD, H_OK)                 # Streuung entscheidet (typisches |Fehler|), das Vorzeichen steht im Text
+    out["level"] = _lvl(mad, good, ok_)                    # Streuung entscheidet (typisches |Fehler|), das Vorzeichen steht im Text
     if out["level"] == "gut":
-        out["text"] = f"Auf- und Abstieg passen zum Geländemodell (im Mittel {_de(mad)} % Abweichung)."
+        out["text"] = prefix + f"Auf- und Abstieg passen zum Geländemodell (im Mittel {_de(mad)} % Abweichung)."
     else:
-        out["text"] = f"Der Aufstieg liegt im Mittel {_de(abs(med))} % {'niedriger' if med < 0 else 'höher'} als im Geländemodell (typische Abweichung {_de(mad, 0)} %)."
+        out["text"] = prefix + f"Der Aufstieg liegt im Mittel {_de(abs(med))} % {'niedriger' if med < 0 else 'höher'} als im Geländemodell (typische Abweichung {_de(mad, 0)} %)."
     return out
 
 
@@ -510,8 +619,10 @@ def tour_flags(r):
         f.append({"kind": "dist", "pct": _r((r["dist_ratio"] - 1) * 100, 1), "dev_m": r["dist_dev_m"], "tour_m": r["dist_tour_m"]})
     if r["h_state"] == "ok" and r["up_dem"] is not None and r["up_dem"] >= H_MIN_UP:
         e = r["up_dev"] - r["up_dem"]
-        if abs(e) / r["up_dem"] * 100 > H_FLAG_PCT and abs(e) >= H_FLAG_M:
-            f.append({"kind": "height", "pct": _r(e / r["up_dem"] * 100, 1), "err_m": _r(e, 0), "up_dev": r["up_dev"], "up_dem": r["up_dem"]})
+        rough = r.get("h_src") == "summary"
+        lim_pct, lim_m = (H_FLAG_PCT_S, H_FLAG_M_S) if rough else (H_FLAG_PCT, H_FLAG_M)
+        if abs(e) / r["up_dem"] * 100 > lim_pct and abs(e) >= lim_m:
+            f.append({"kind": "height", "pct": _r(e / r["up_dem"] * 100, 1), "err_m": _r(e, 0), "up_dev": r["up_dev"], "up_dem": r["up_dem"], **({"rough": True} if rough else {})})
     if (r["gps_jumps"] or 0) >= GPS_FLAG_JUMPS:
         f.append({"kind": "gps_jumps", "n": r["gps_jumps"]})
     if (r["gps_gap_pct"] or 0) > GPS_FLAG_GAP:
@@ -587,7 +698,14 @@ def payload():
         ref = "komoot" if komoot and komoot * 2 >= len(dr) else "tour"      # Wortwahl: Referenz ist meist die Komoot-Strecke
         parts = {"dist": assess_dist(rows, ref), "height": assess_height(rows), "gps": assess_gps(rows), "hr": assess_hr(rows)}
         days = sorted(r["day"] for r in rows if r["day"])
-        flagged = sum(1 for r in rows if open_flags(r, r["tour_id"] in fh, r["tour_id"] in fg))
+        fl = [open_flags(r, r["tour_id"] in fh, r["tour_id"] in fg) for r in rows]
+        flagged = sum(1 for f in fl if f)
+        flagged_h = sum(1 for f in fl if any(x["kind"] == "height" for x in f))            # für „Alle auffälligen Höhen korrigieren …“
+        ids = [tid for tid in mine.get(d["id"], []) if tours[tid]["start_ts"]]       # so viele Touren wertet der Job für dieses Gerät aus
+        have = {r["tour_id"]: r for r in rows}
+        n_done = sum(1 for tid in ids if tid in have and have[tid]["h_state"] not in ("pending", "no_dem"))
+        prog = {"total": len(ids), "done": n_done, "open": len(ids) - n_done,
+                "n_detail": sum(1 for r in rows if r["h_state"] == "ok" and r["h_src"] in ("track", "zepp")), "n_summary": sum(1 for r in rows if r["h_state"] == "ok" and r["h_src"] == "summary")}
         tips = []
         if parts["height"]["level"] in ("mäßig", "auffällig"):
             tips.append({"kind": "height", "text": "Bei einzelnen Touren lässt sich die Höhe aus dem Geländemodell neu berechnen oder mit der Uhr abgleichen (Liste „Auffällige Touren“). Jede Änderung ist wiederherstellbar."})
@@ -598,13 +716,14 @@ def payload():
             who = "die Komoot-Strecke" if ref == "komoot" else "die gespeicherte Strecke"
             tips.append({"kind": "dist", "text": f"Die Uhr misst im Mittel {_de(abs(m))} % {'kürzer' if m < 0 else 'länger'} als {who}. Für Vergleiche der Strecken bitte beachten – die Strecke wird nicht geändert."})
         out.append({"id": d["id"], "name": d["name"], "kind": d["kind"], "model": d["model"] or "", "active": bool(d["active"]),
-                    "n_tours": len(mine.get(d["id"], [])), "n_eval": len(rows), "flagged": flagged,
+                    "n_tours": len(mine.get(d["id"], [])), "n_eval": len(rows), "flagged": flagged, "flagged_height": flagged_h, "progress": prog, "batch": _last_batch(d["id"]),
                     "period": {"from": days[0], "to": days[-1]} if days else None,
                     **{k: v for k, v in parts.items()}, "verdict": verdict(parts), "tips": tips, "ref": ref,
                     "channels": channels(mine.get(d["id"], []))})
     zepp_ok = bool(db.get("zepp_token") or (db.get("zepp_email") and db.get("zepp_password")))
-    return {"devices": out, "computed_at": last or None, "zepp_configured": zepp_ok, "min_n": MIN_N,
-            "thresholds": {"dist": [DIST_GOOD, DIST_OK], "height": [H_GOOD, H_OK], "gps": [G_GOOD, G_OK], "hr": [HR_GOOD, HR_OK]}}
+    tot = {k: sum(d["progress"][k] for d in out) for k in ("total", "done", "open", "n_detail", "n_summary")}
+    return {"devices": out, "progress": tot, "computed_at": last or None, "zepp_configured": zepp_ok, "min_n": MIN_N,
+            "thresholds": {"dist": [DIST_GOOD, DIST_OK], "height": [H_GOOD, H_OK], "height_summary": [H_GOOD_S, H_OK_S], "gps": [G_GOOD, G_OK], "hr": [HR_GOOD, HR_OK]}}
 
 
 @router.get("/api/devices/quality")

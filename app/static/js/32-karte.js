@@ -59,7 +59,7 @@ VIEWS.map = async () => {
   };
   $("#mloc").onclick = () => {
     if (watch != null) return stop();
-    if (!navigator.geolocation) return alert("Dieses Gerät kann keinen Standort bestimmen.");
+    if (!navigator.geolocation) return uiAlert("Dieses Gerät kann keinen Standort bestimmen.");
     $("#mloc").classList.add("on");
     first = true;
     watch = navigator.geolocation.watchPosition(
@@ -79,7 +79,7 @@ VIEWS.map = async () => {
       },
       e => {
         stop();
-        alert(e.code === 1 ? "Der Standort ist für diese Seite nicht erlaubt." : "Standort nicht verfügbar.");
+        uiAlert(e.code === 1 ? "Der Standort ist für diese Seite nicht erlaubt." : "Standort nicht verfügbar.");
       },
       {enableHighAccuracy: true, maximumAge: 10000, timeout: 20000}
     );

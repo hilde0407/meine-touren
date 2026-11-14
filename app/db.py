@@ -118,6 +118,8 @@ def _open(path):
                      "dist_tour_m REAL, dist_dev_m REAL, dist_ratio REAL, dist_plausible INTEGER, h_src TEXT, h_state TEXT, up_dev REAL, down_dev REAL, up_dem REAL, down_dem REAL, "
                      "gps_src TEXT, gps_n INTEGER, gps_jumps INTEGER, gps_gap_pct REAL, gps_med_dt REAL, gps_pts_km REAL, gps_dec INTEGER, hr_n INTEGER, hr_bad_pct REAL)")   # Genauigkeit der Uhren je Tour (app/devquality.py)
         conn.execute("CREATE INDEX IF NOT EXISTS device_quality_dev ON device_quality(device_id)")
+        conn.execute("CREATE TABLE IF NOT EXISTS quality_batch (batch_id TEXT, tour_id TEXT, device_id INTEGER, method TEXT, ts INTEGER, orig_up REAL, orig_down REAL, "
+                     "new_up REAL, new_down REAL, state TEXT, PRIMARY KEY (batch_id, tour_id))")   # Sammel-Korrektur der Höhen: Touren je Lauf (app/devquality.py, devbatch.py)
         conn.commit()
         _conns[path] = conn
         return conn

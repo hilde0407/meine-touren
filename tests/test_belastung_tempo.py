@@ -629,5 +629,6 @@ def test_viewer_can_read_new_endpoints_but_not_start_job(monkeypatch):
 
 def test_new_scripts_and_version():
     from app import config as cfg
-    assert cfg.VERSION == "3.12.0 · Meine Touren (2026-11-14)"
-    assert (Path(__file__).resolve().parent.parent / "docs" / "versionen" / "3.12.0.md").exists()
+    assert cfg.VERSION == "3.13.0 · Meine Touren (2026-11-14)"           # 3.13.0 baut auf 3.12.0 auf: beide Versionshinweise müssen vorhanden sein
+    for v in ("3.12.0", "3.13.0"):
+        assert (Path(__file__).resolve().parent.parent / "docs" / "versionen" / f"{v}.md").exists()
