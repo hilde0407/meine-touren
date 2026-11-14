@@ -275,6 +275,20 @@ def api_manual_check():
     return _manual_stats()
 
 
+def _auto_map(tids=None):
+    """{tour_id: device_id oder None} so, wie die AUTOMATISCHE Zuordnung entscheiden würde (Handzuordnungen ignoriert)."""
+    devs = db.query("SELECT * FROM devices")
+    srcs = {r["tour_id"]: r["src"] for r in db.query("SELECT tour_id, src FROM tour_source")}
+    zs = {r["tour_id"]: r["zsrc"] for r in db.query("SELECT tour_id, zsrc FROM tour_zsrc")}
+    out = {}
+    for t in db.query("SELECT id, start_ts FROM tours"):
+        if tids is not None and t["id"] not in tids:
+            continue
+        d = _auto(devs, tour_kind(t["id"], srcs.get(t["id"], "")), _day(t["start_ts"]), zs.get(t["id"], "")) if devs else None
+        out[t["id"]] = d["id"] if d else None
+    return out
+
+
 def _manual_stats():
     devs = {d["id"]: d for d in db.query("SELECT * FROM devices")}
     days = {t["id"]: _day(t["start_ts"]) for t in db.query("SELECT id, start_ts FROM tours")}
@@ -288,24 +302,33 @@ def _manual_stats():
         if (d["since"] and day < d["since"]) or (d["until"] and day > d["until"]):
             bad += 1
             per[d["name"]] = per.get(d["name"], 0) + 1
-    return {"total": total, "outside": bad, "by_device": per}
+    rows = db.query("SELECT tour_id, device_id FROM tour_device")
+    am = _auto_map({r["tour_id"] for r in rows})
+    redundant = sum(1 for r in rows if am.get(r["tour_id"]) == r["device_id"])
+    return {"total": total, "outside": bad, "by_device": per, "redundant": redundant}
 
 
 @router.post("/api/devices/reset-manual")
 def api_reset_manual(body: dict):
     """Von Hand gesetzte Zuordnungen zurücknehmen, damit die automatische Zuordnung (Art, Zepp-Kennung, Datum) wieder gilt.
-    mode='outside' (Standard): nur solche, die dem Zeitraum (seit/bis) des Geräts widersprechen; mode='all': alle."""
+    mode='outside' (Standard): nur solche, die dem Zeitraum (seit/bis) des Geräts widersprechen; mode='redundant': solche, die genau der automatischen Zuordnung entsprechen (nur das „von Hand“ entfällt); mode='all': alle."""
     mode = body.get("mode") or "outside"
-    if mode not in ("outside", "all"):
+    if mode not in ("outside", "all", "redundant"):
         raise HTTPException(400, "Unbekannter Modus")
     devs = {d["id"]: d for d in db.query("SELECT * FROM devices")}
     days = {t["id"]: _day(t["start_ts"]) for t in db.query("SELECT id, start_ts FROM tours")}
     n = 0
-    for r in db.query("SELECT tour_id, device_id FROM tour_device"):
+    rows = db.query("SELECT tour_id, device_id FROM tour_device")
+    am = _auto_map({r["tour_id"] for r in rows}) if mode == "redundant" else {}
+    for r in rows:
         d, day = devs.get(r["device_id"]), days.get(r["tour_id"])
         gone = d is None or not day
         out = d is not None and day and ((d["since"] and day < d["since"]) or (d["until"] and day > d["until"]))
-        if mode == "all" or gone or out:
+        if mode == "redundant":
+            hit = am.get(r["tour_id"]) == r["device_id"]
+        else:
+            hit = mode == "all" or gone or out
+        if hit:
             db.execute("DELETE FROM tour_device WHERE tour_id=?", (r["tour_id"],))
             n += 1
     return {"ok": True, "reset": n}

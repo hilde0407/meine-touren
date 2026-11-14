@@ -251,8 +251,10 @@ async function devPanel() {
   const empty = `<div class="dvempty"><span class="dvav">${dvIcon("zepp")}</span><h3>Noch kein Gerät angelegt</h3>
       <p>Lege deine Uhren und Handys an, damit bei jeder Tour steht, womit sie aufgezeichnet wurde.</p>
       ${viewer ? "" : `<div class="row"><button class="btn" id="dvzepp">Gerät aus Zepp ermitteln</button><button class="btn alt" id="dvnew2">Gerät von Hand anlegen</button></div>`}</div>`;
-  root.innerHTML = `<div class="dvhead"><h2>Meine Geräte</h2><span class="sp"></span>${viewer || !dv.devices.length ? "" : `<button class="btn alt sm" id="dvmatch" title="Alle Touren mit passendem Zepp-Training dem richtigen Gerät zuordnen">Touren automatisch zuordnen</button><button class="btn alt sm" id="dvzepp">Geräte aus Zepp ermitteln</button><button class="btn sm" id="dvnew">+ Gerät anlegen</button>`}</div>
+  root.innerHTML = `<div class="dvhead"><h2>Meine Geräte</h2><span class="sp"></span>${viewer || !dv.devices.length ? "" : `${mc && mc.total ? `<button class="btn ghost sm" id="dvall" title="Alle ${mc.total} von Hand gesetzten Zuordnungen zurücknehmen; danach entscheidet die Automatik (Art, Zepp-Kennung, Datum)">Alle Handzuordnungen zurücksetzen</button>` : ""}<button class="btn alt sm" id="dvmatch" title="Alle Touren mit passendem Zepp-Training dem richtigen Gerät zuordnen">Touren automatisch zuordnen</button><button class="btn alt sm" id="dvzepp">Geräte aus Zepp ermitteln</button><button class="btn sm" id="dvnew">+ Gerät anlegen</button>`}</div>
     <p class="mut dvintro">Deine Aufnahmegeräte mit eigenem Namen. Der Name erscheint bei jeder Tour als „Quelle“; welche Messwerte eine Tour zeigt, richtet sich nach dem, was das Gerät wirklich geliefert hat.</p>
+    ${mc && mc.redundant && !viewer ? `<div class="dvhint" id="dvred"><span><b>${mc.redundant} ${mc.redundant === 1 ? "Tour steht" : "Touren stehen"} als „von Hand zugeordnet“, entspr${mc.redundant === 1 ? "icht" : "echen"} aber der automatischen Zuordnung</b><span class="mut">Die Zuordnung ändert sich dabei nicht – nur der Zusatz „von Hand“ entfällt, und künftige Änderungen (z. B. neues Gerät, geänderter Zeitraum) wirken wieder automatisch.</span></span>
+      <button class="btn sm" id="dvredok">Auf automatisch umstellen</button></div>` : ""}
     ${mc && mc.outside && !viewer ? `<div class="dvhint" id="dvmc"><span><b>${mc.outside} von Hand gesetzte ${mc.outside === 1 ? "Zuordnung widerspricht" : "Zuordnungen widersprechen"} dem Zeitraum ihres Geräts</b><span class="mut">${Object.entries(mc.by_device).map(([n, k]) => `${esc(n)}: ${k}`).join(" · ")} – die Touren liegen vor „seit“ bzw. nach „bis“ des Geräts. Zurücksetzen übergibt sie wieder der automatischen Zuordnung (Zepp-Kennung und Datum); andere von Hand gesetzte Zuordnungen bleiben.</span></span>
       <button class="btn sm" id="dvmcok">Zurücksetzen</button></div>` : ""}
     ${sugs.map(s => `<div class="dvhint" data-sug="${esc(s.kind)}"><span><b>${esc(s.label)}: ${s.n} ${s.n === 1 ? "Tour" : "Touren"} ohne Gerät</b><span class="mut">Möchtest du dafür ein Gerät anlegen? Es wird nichts ohne deine Bestätigung angelegt.</span></span>
@@ -261,6 +263,24 @@ async function devPanel() {
   const again = () => devPanel().catch(() => {});
   const bz = $("#dvzepp"), bn = $("#dvnew") || $("#dvnew2");
   if (bz) bz.onclick = () => devZepp(dv, again);
+  const ab = $("#dvall");
+  if (ab) ab.onclick = async () => {
+    if (!confirm(`Alle ${mc.total} von Hand gesetzten Zuordnungen zurücksetzen? Danach entscheidet die automatische Zuordnung (Art, Zepp-Kennung, Datum). Bewusst gesetzte Geräte gehen dabei verloren.`)) return;
+    ab.disabled = true;
+    try {
+      const r = await api("/api/devices/reset-manual", METJ({mode: "all"}));
+      MET_CACHE.clear();
+      if (confirm(`${r.reset} Zuordnungen zurückgesetzt. Jetzt alle Touren automatisch den Uhren zuordnen?`) && $("#dvmatch")) { $("#dvmatch").click(); return; }
+      await loadTours().catch(() => {});
+    } catch (e) { alert(e.message); }
+    again();
+  };
+  const rb = $("#dvredok");
+  if (rb) rb.onclick = async () => {
+    rb.disabled = true;
+    try { const r = await api("/api/devices/reset-manual", METJ({mode: "redundant"})); MET_CACHE.clear(); await loadTours().catch(() => {}); alert(`${r.reset} Touren auf automatische Zuordnung umgestellt.`); } catch (e) { alert(e.message); }
+    again();
+  };
   const mcb = $("#dvmcok");
   if (mcb) mcb.onclick = async () => {
     mcb.disabled = true;

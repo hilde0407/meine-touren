@@ -295,7 +295,7 @@ def test_reset_manual_outside_range(fresh):
         db.execute("INSERT INTO tour_device(tour_id,device_id) VALUES(?,?)", (t, neu))      # t0 liegt VOR „seit“ des neuen Geräts
     c = _client()
     j = c.get("/api/devices/manual-check").json()
-    assert j == {"total": 2, "outside": 1, "by_device": {"Neu": 1}}
+    assert j["total"] == 2 and j["outside"] == 1 and j["by_device"] == {"Neu": 1}
     assert c.post("/api/devices/reset-manual", json={"mode": "outside"}).json()["reset"] == 1
     assert db.one("SELECT 1 FROM tour_device WHERE tour_id='t0'") is None and db.one("SELECT 1 FROM tour_device WHERE tour_id='t1'")
     assert c.post("/api/devices/reset-manual", json={"mode": "all"}).json()["reset"] == 1
@@ -314,3 +314,21 @@ def test_zepp_diag_lists_trainings_near_tour(monkeypatch, fresh):
     t = j["trainings"][0]
     assert t["start_diff_s"] == 600 and t["match_overlap"] is True and t["dist_ratio"] == round(15000 / 14000, 2)
     assert _client().get("/api/tours/nix/zepp-diag").status_code == 404
+
+
+def test_reset_manual_redundant(fresh):
+    """„Von Hand“, aber identisch mit der automatischen Zuordnung: nur der Zusatz entfällt, das Gerät bleibt."""
+    ts = 1_700_000_000
+    db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,status,source) VALUES('r1','r1','hike',?,?,1000,100,'t','komoot')", (ts, ts + 100))
+    db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,status,source) VALUES('r2','r2','hike',?,?,1000,100,'t','komoot')", (ts, ts + 100))
+    a = db.execute("INSERT INTO devices(name,kind,model,since,until,active,note,zsrc) VALUES('A','zepp','','','',1,'','z1')")
+    b = db.execute("INSERT INTO devices(name,kind,model,since,until,active,note,zsrc) VALUES('B','zepp','','','',1,'','z2')")
+    for t, z in (("r1", "z1"), ("r2", "z1")):
+        db.execute("INSERT INTO tour_source(tour_id,src,name) VALUES(?,'zepp','')", (t,)); db.execute("INSERT INTO tour_zsrc(tour_id,zsrc) VALUES(?,?)", (t, z))
+    db.execute("INSERT INTO tour_device(tour_id,device_id) VALUES('r1',?)", (a,))      # entspricht automatisch (Kennung z1 → A)
+    db.execute("INSERT INTO tour_device(tour_id,device_id) VALUES('r2',?)", (b,))      # bewusst anders
+    c = _client()
+    assert c.get("/api/devices/manual-check").json()["redundant"] == 1
+    assert c.post("/api/devices/reset-manual", json={"mode": "redundant"}).json()["reset"] == 1
+    assert db.one("SELECT 1 FROM tour_device WHERE tour_id='r1'") is None and db.one("SELECT 1 FROM tour_device WHERE tour_id='r2'")
+    assert mydevices.device_of("r1")["id"] == a and not mydevices.device_of("r1")["manual"]
