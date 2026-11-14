@@ -169,7 +169,8 @@ def test_dialog_roles_focus_trap_keys_inert_and_return(pw, app_url):
         assert pg.evaluate("document.activeElement.textContent") == "Abbrechen"           # vom letzten Knopf wieder zum ersten
         pg.evaluate("document.querySelector('.uibox').focus()")                             # Fokus auf dem Rahmen: Enter bestätigt
         pg.keyboard.press("Enter")
-        pg.wait_for_function("() => R.length === 1")
+        pg.wait_for_function("() => R.length === 1", timeout=15000)
+        pg.wait_for_function("() => !document.querySelector('.uidlg') && document.activeElement.id === 'trig' && [...document.body.children].every(e => !e.inert)", timeout=15000)       # Dialog weg, Fokus und Hintergrund zurück
         assert pg.evaluate("R") == [True] and pg.locator(".uidlg").count() == 0
         assert pg.evaluate("document.activeElement.id") == "trig"                          # Fokus zurück an den Auslöser
         assert pg.evaluate("[...document.body.children].every(e => !e.inert)") is True     # Hintergrund wieder frei
@@ -178,19 +179,21 @@ def test_dialog_roles_focus_trap_keys_inert_and_return(pw, app_url):
         pg.wait_for_selector(".uidlg .uibox")
         assert "Bitte bestätigen" in pg.inner_text(".uibox h2")                             # Standardtitel
         pg.keyboard.press("Escape")
-        pg.wait_for_function("() => R.length === 2")
+        pg.wait_for_function("() => R.length === 2 && document.activeElement.id === 'trig'", timeout=15000)
         assert pg.evaluate("R") == [True, False] and pg.evaluate("document.activeElement.id") == "trig"
         # Klick auf OK / Abbrechen / Hintergrund
         for action, want in (("button:last-child", True), ("button:first-child", False)):
             pg.evaluate("(() => { uiConfirm({text: 'x'}).then(v => R.push(v)); })()")
             pg.wait_for_selector(".uidlg .uibox")
             pg.locator(f".uifoot {action}").click()
-            pg.wait_for_selector(".uidlg", state="detached")
+            pg.wait_for_selector(".uidlg", state="detached", timeout=15000)
+            pg.wait_for_function("(w) => R.length > 0 && R[R.length - 1] === w", arg=want, timeout=15000)
             assert pg.evaluate("R[R.length - 1]") is want
         pg.evaluate("(() => { uiConfirm({text: 'x'}).then(v => R.push(v)); })()")
         pg.wait_for_selector(".uidlg .uibox")
         pg.mouse.click(5, 500)                                                              # neben den Dialog
-        pg.wait_for_selector(".uidlg", state="detached")
+        pg.wait_for_selector(".uidlg", state="detached", timeout=15000)
+        pg.wait_for_function("() => R.length > 0 && R[R.length - 1] === false", timeout=15000)
         assert pg.evaluate("R[R.length - 1]") is False
         assert not pg.errors, pg.errors
     finally:
@@ -218,7 +221,7 @@ def test_dialog_danger_focuses_cancel_and_enter_never_confirms_by_itself(pw, app
         pg.keyboard.press("Tab")
         assert pg.evaluate("document.activeElement.textContent") == "Löschen"
         pg.keyboard.press("Enter")                                                          # bewusst auf „Löschen“ gewandert: bestätigt
-        pg.wait_for_function("() => R.length === 2")
+        pg.wait_for_function("() => R.length === 2", timeout=15000)
         assert pg.evaluate("R") == [False, True]
         # uiAlert und Warteschlange
         pg.evaluate("(() => { (async () => { await uiAlert({title: 'Fertig', text: 'Eins'}); R.push('a1'); })(); uiAlert('Zwei').then(() => R.push('a2')); })()")
@@ -226,10 +229,11 @@ def test_dialog_danger_focuses_cancel_and_enter_never_confirms_by_itself(pw, app
         assert pg.locator(".uidlg").count() == 1 and pg.locator(".uibox").get_attribute("role") == "alertdialog" and pg.locator(".uifoot button").count() == 1
         assert "Eins" in pg.inner_text(".uibox")
         pg.keyboard.press("Enter")
-        pg.wait_for_function("() => R.includes('a1')")
-        pg.wait_for_selector(".uidlg .uibox:has-text('Zwei')")                              # zweiter Dialog erst nach dem ersten
+        pg.wait_for_function("() => R.includes('a1')", timeout=15000)
+        pg.wait_for_selector(".uidlg .uibox:has-text('Zwei')", timeout=15000)               # zweiter Dialog erst nach dem ersten
         pg.keyboard.press("Escape")
-        pg.wait_for_function("() => R.includes('a2')")
+        pg.wait_for_function("() => R.includes('a2')", timeout=15000)
+        pg.wait_for_selector(".uidlg", state="detached", timeout=15000)
         assert pg.locator(".uidlg").count() == 0 and not pg.errors
     finally:
         pg.browser_.close()
@@ -295,15 +299,16 @@ def test_sections_toggle_by_keyboard_remember_state_and_show_focus(pw, app_url):
         ring = pg.evaluate("(() => { const e = document.activeElement, c = getComputedStyle(e); return [e.tagName, c.outlineStyle, parseFloat(c.outlineWidth)]; })()")
         assert ring[0] == "SUMMARY" and ring[1] != "none" and ring[2] >= 2, ring            # sichtbarer Fokus
         pg.keyboard.press("Enter")
-        pg.wait_for_timeout(150)
+        pg.wait_for_function("() => { const d = document.querySelector('details.dvq[open] details.dvsec[data-sec=auff]'); try { return !!d && !d.open && d.querySelector('summary').getAttribute('aria-expanded') === 'false' && localStorage.getItem('mt_dvsec_auff') === '0'; } catch (e) { return false; } }", timeout=15000)
         assert sec.get_attribute("open") is None and s.get_attribute("aria-expanded") == "false"
         assert pg.evaluate("localStorage.getItem('mt_dvsec_auff')") == "0"
         pg.keyboard.press("Space")
-        pg.wait_for_timeout(150)
+        pg.wait_for_function("() => { const d = document.querySelector('details.dvq[open] details.dvsec[data-sec=auff]'); return !!d && d.open && d.querySelector('summary').getAttribute('aria-expanded') === 'true'; }", timeout=15000)
         assert sec.get_attribute("open") is not None and s.get_attribute("aria-expanded") == "true"
         pg.keyboard.press("Enter")                                                          # wieder zu und neu laden: bleibt zu
-        pg.wait_for_timeout(150)
-        pg.reload(); pg.wait_for_selector("#devsec .dvcard", timeout=10000)
+        pg.wait_for_function("() => { const d = document.querySelector('details.dvq[open] details.dvsec[data-sec=auff]'); try { return !!d && !d.open && localStorage.getItem('mt_dvsec_auff') === '0'; } catch (e) { return false; } }", timeout=15000)
+        pg.reload(); pg.wait_for_selector("#devsec .dvcard", timeout=15000)
+        pg.wait_for_selector("#devsec .dvcard details.dvq[open] details.dvsec[data-sec=auff]", timeout=15000)       # Zustand nach dem Neuladen wiederhergestellt
         c = _card(pg, "Balance 2")
         assert c.locator("details.dvq").get_attribute("open") is not None                  # auch „Genauigkeit“ selbst bleibt aufgeklappt
         sec = c.locator("details.dvsec[data-sec=auff]")
@@ -354,7 +359,7 @@ def test_progress_bar_while_the_evaluation_runs(pw, app_url):
         st["arm"]()
         pg.locator("#dvqall").click()
         bar = pg.locator("#dvqjob [role=progressbar]")
-        bar.wait_for(timeout=5000)
+        bar.wait_for(timeout=15000)
         pg.wait_for_function("() => document.querySelector('#dvqjob .dvjobt') && /142 von 700 Touren geprüft/.test(document.querySelector('#dvqjob .dvjobt').textContent)", timeout=8000)
         assert bar.get_attribute("aria-valuenow") == "142" and bar.get_attribute("aria-valuemax") == "700" and bar.get_attribute("aria-valuetext") == "142 von 700 Touren geprüft"
         assert "Genauigkeit 25/700" in pg.inner_text("#dvqjob")
@@ -363,7 +368,7 @@ def test_progress_bar_while_the_evaluation_runs(pw, app_url):
         _shot(pg, "fortschritt-auswertung-desktop-hell.png")
         pg.wait_for_function("() => document.querySelector('#dvqjob [role=progressbar]')?.getAttribute('aria-valuenow') === '300'", timeout=8000)
         pg.wait_for_selector("#dvqjob", state="detached", timeout=10000)                     # nach dem Ende wird neu gezeichnet: Stand aus der Datenbank
-        pg.wait_for_selector("#dvqstat")
+        pg.wait_for_selector("#dvqstat", timeout=15000)
         assert _posts(pg, "/api/jobs/dev-quality") and not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -402,7 +407,8 @@ def test_batch_dialog_preview_selection_confirm_job_and_undo(pw, app_url):
         assert f"{pv['total'] - 2} Touren korrigieren?" in t and "Methode: Aus dem Geländemodell berechnen." in t and "ändert den Aufstieg um insgesamt" in t and "rückgängig machen" in t
         _shot(pg, "sammel-bestaetigung-desktop-hell.png")
         pg.locator(".uidlg .uifoot button", has_text="Abbrechen").click()
-        pg.wait_for_selector(".uidlg", state="detached")
+        pg.wait_for_selector(".uidlg", state="detached", timeout=15000)
+        pg.wait_for_function("() => document.activeElement && document.activeElement.id === 'bxgo'", timeout=15000)
         assert not _posts(pg, "/quality/fix") and pg.evaluate("document.activeElement.id") == "bxgo"             # Fokus zurück an den Auslöser
         # bestätigen: Start (nachgebaut) und Fortschritt
         started = {}
@@ -431,10 +437,11 @@ def test_batch_dialog_preview_selection_confirm_job_and_undo(pw, app_url):
         _shot(pg, "sammel-ergebnis-desktop-hell.png")
         # Rückgängig: gefährliche Aktion → Fokus auf „Abbrechen“, Esc bricht ab
         pg.click("#bxundo")
-        pg.wait_for_selector(".uidlg [role=alertdialog]")
+        pg.wait_for_selector(".uidlg [role=alertdialog]", timeout=15000)
+        pg.wait_for_function("() => document.activeElement && document.activeElement.textContent === 'Abbrechen'", timeout=15000)
         assert pg.evaluate("document.activeElement.textContent") == "Abbrechen" and "Diesen Sammel-Lauf rückgängig machen?" in pg.inner_text(".uibox")
         pg.keyboard.press("Escape")
-        pg.wait_for_selector(".uidlg", state="detached")
+        pg.wait_for_selector(".uidlg", state="detached", timeout=15000)
         assert not _posts(pg, "/quality/fix-undo")
         undo = {}
 
@@ -466,11 +473,12 @@ def test_card_shows_last_batch_with_undo_and_viewer_sees_no_buttons(pw, app_url)
         assert c.locator("button.dvbatch").inner_text().strip() == "Alle auffälligen Höhen korrigieren …"
         # Betrachter: JS-Rolle simulieren – weder Sammel-Korrektur noch Auswerten noch Rückgängig
         pg.evaluate("ME.user = Object.assign({}, ME.user, {role: 'viewer'})")
+        pg.evaluate("document.querySelectorAll('#devsec .dvcard').forEach(e => e.setAttribute('data-alt', '1'))")        # alte Karten markieren: neue (ohne Marke) abwarten
         pg.evaluate("devPanel()")
-        pg.wait_for_selector("#devsec .dvcard")
+        pg.wait_for_selector("#devsec .dvcard:not([data-alt])", timeout=15000)
         pg.wait_for_timeout(300)
         c = _card(pg, "Balance 2")
-        pg.wait_for_selector("details.dvq[open] .dvqv", timeout=8000)
+        pg.wait_for_selector("details.dvq[open] .dvqv", timeout=15000)
         assert c.locator("button.dvbatch, .dvundo, .dvqrun, details.dvsec[data-sec=batch]").count() == 0 and "Zuletzt ausgewertet am" in c.inner_text()
         assert pg.locator("#dvqstat button").count() == 0
     finally:

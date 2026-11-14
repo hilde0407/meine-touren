@@ -120,15 +120,31 @@ def _page(pw, url, tour="r3", devs="one", width=1280, height=1000, scheme="light
     if sub:
         pg.wait_for_function(READY_SUB, timeout=15000)
     else:
-        pg.wait_for_selector("#tls-photos", timeout=15000)
-        if devs:
-            pg.wait_for_selector("#wpcard", timeout=15000)
+        _ready_main(pg, devs, tlsum=tour != "n0")
     pg.wait_for_timeout(settle)
     pg.browser_ = b
     return pg
 
 
 READY_SUB = "() => { const l = document.querySelector('#tlload'); return !!l && l.hidden; }"
+# Der Einstieg (#tlgb-sum) wird nach und nach aus den Kurzaussagen der Nachlade-Abschnitte aufgebaut: fertig, wenn sich seine Signatur 700 ms nicht mehr ändert
+SIG_STABLE = """() => {
+  const b = document.querySelector('#tlgb-sum');
+  if (!b || !b.dataset.sig) return false;
+  const w = window.__sigw = window.__sigw || {s: '', t: Date.now()};
+  if (w.s !== b.dataset.sig) { w.s = b.dataset.sig; w.t = Date.now(); return false; }
+  return Date.now() - w.t > 700;
+}"""
+
+
+def _ready_main(pg, devs=True, tlsum=True):
+    """Hauptseite fertig: Fotos-Abschnitt da, bei nachgestellten Uhr-Daten Wegpunkte und Puls, und der Einstieg hat alle Kurzaussagen eingesammelt."""
+    pg.wait_for_selector("#tls-photos", timeout=15000)
+    if devs:
+        pg.wait_for_selector("#wpcard", timeout=15000)
+        pg.wait_for_selector("#pulscard", timeout=15000)
+    if tlsum:
+        pg.wait_for_function(SIG_STABLE, timeout=15000)
 
 
 def _shot(pg, name, full=True):
@@ -210,6 +226,7 @@ def test_navigation_there_and_back(pw, app):
     try:
         pg.locator("#tlsgo").click()
         pg.wait_for_function("() => location.hash === '#/tour/r3/auswertung' && document.querySelector('#tlload') && document.querySelector('#tlload').hidden")
+        pg.wait_for_function("() => window.scrollY === 0", timeout=15000)
         assert pg.evaluate("window.scrollY") == 0
         assert pg.locator("h1.tlsubt").inner_text() == "Gipfelrunde heute" and pg.locator("#tlback").inner_text() == "‹ Zurück zur Tour"
         assert pg.locator("#tm, #tls-map, #tls-photos, #tls-puls, #tls-wp").count() == 0     # keine Hauptseiten-Teile
@@ -255,13 +272,14 @@ def test_entry_card_keyboard_and_whole_card_clickable(pw, app):
         pg.wait_for_selector("#tlback")
         assert pg.evaluate("location.hash") == "#/tour/r3/auswertung"
         pg.go_back()
-        pg.wait_for_selector("#tlsum")
+        pg.wait_for_selector("#tlsum", timeout=15000)
+        _ready_main(pg)
         pg.wait_for_timeout(1800)                                                      # Seite fertig aufgebaut (Karte, Fotos), dann ändert sich nichts mehr
         pg.locator("#tlsum").scroll_into_view_if_needed()
         pg.wait_for_timeout(1500)                                                      # weiches Scrollen abwarten
         box = pg.locator("#tlsum").bounding_box()
         pg.mouse.click(box["x"] + box["width"] - 30, box["y"] + 25)                     # Klick irgendwo in die Karte
-        pg.wait_for_selector("#tlback")
+        pg.wait_for_selector("#tlback", timeout=15000)
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -272,7 +290,9 @@ def test_collapsed_map_is_resized_when_opened(pw, app):
     try:
         assert not pg.evaluate(OPEN)["map"]
         pg.locator("#tls-map > summary").click()
-        pg.wait_for_function("() => document.querySelector('#tm').clientWidth > 300")
+        pg.wait_for_function("() => document.querySelector('#tm').clientWidth > 300", timeout=15000)
+        pg.wait_for_function("() => document.querySelectorAll('#tm .leaflet-tile-loaded, #tm path.leaflet-interactive').length >= 1", timeout=15000)
+        pg.wait_for_function("""() => { const p = document.querySelector('#tm path.leaflet-interactive'); if (!p) return false; const m = p.getBoundingClientRect(), c = document.querySelector('#tm').getBoundingClientRect(); return m.left >= c.left && m.right <= c.right; }""", timeout=15000)
         pg.wait_for_timeout(500)
         assert pg.locator("#tm .leaflet-tile-loaded, #tm path.leaflet-interactive").count() >= 1
         assert pg.evaluate("(() => { const m = document.querySelector('#tm path.leaflet-interactive').getBoundingClientRect(), c = document.querySelector('#tm').getBoundingClientRect(); return m.left >= c.left && m.right <= c.right; })()")
@@ -284,8 +304,8 @@ def test_main_state_is_remembered(pw, app):
     pg = _page(pw, app, devs="one")
     try:
         pg.locator("#tls-wp > summary").click()
-        pg.wait_for_function("() => localStorage.getItem('mt_trf_tl_wp') === '0'")
-        pg.reload(); pg.wait_for_selector("#tls-photos"); pg.wait_for_timeout(1500)
+        pg.wait_for_function("() => { try { return localStorage.getItem('mt_trf_tl_wp') === '0'; } catch (e) { return false; } }", timeout=15000)
+        pg.reload(); _ready_main(pg); pg.wait_for_timeout(1500)
         o = pg.evaluate(OPEN)
         assert not o["wp"] and o["map"] and o["photos"]
         assert not pg.errors, pg.errors
@@ -364,15 +384,17 @@ def test_sub_nav_chips_jump_open_and_focus(pw, app):
         assert names == ["Gerät & Messwerte", "Wetter", "Analyse", "Vergleich"]
         assert pg.locator("#tlnav .tlchip").first.evaluate("e => e.tagName") == "BUTTON" and pg.locator("#tlall").inner_text() == "Alles aufklappen"
         pg.locator("#tlnav .tlchip", has_text="Vergleich").click()
-        pg.wait_for_function("() => document.querySelector('#tls-aehn').open && document.querySelector('#tls-cmp').open")
-        pg.wait_for_timeout(1200)
+        pg.wait_for_function("() => document.querySelector('#tls-aehn').open && document.querySelector('#tls-cmp').open", timeout=15000)
+        pg.wait_for_function("() => { const t = document.querySelector('#tls-aehn').getBoundingClientRect().top; return t > 0 && t < 400; }", timeout=15000)       # weiches Scrollen abwarten
+        pg.wait_for_function("() => document.activeElement === document.querySelector('#tls-aehn > summary') && document.querySelector('#tls-aehn > summary').getAttribute('aria-expanded') === 'true'", timeout=15000)
+        pg.wait_for_function("() => { try { return localStorage.getItem('mt_trf_aehn') === '1'; } catch (e) { return false; } }", timeout=15000)
         top = pg.evaluate("document.querySelector('#tls-aehn').getBoundingClientRect().top")
         assert 0 < top < 400, top
         assert pg.locator("#tls-aehn > summary").get_attribute("aria-expanded") == "true"
         assert pg.evaluate("document.activeElement === document.querySelector('#tls-aehn > summary')")
         assert pg.evaluate("localStorage.getItem('mt_trf_aehn')") == "1"
         pg.locator("#tlnav .tlchip", has_text="Wetter").click()
-        pg.wait_for_function("() => document.querySelector('#tls-wx').open")
+        pg.wait_for_function("() => document.querySelector('#tls-wx').open", timeout=15000)
         assert pg.evaluate("location.hash") == "#/tour/r3/auswertung"                 # kein Hash-Sprung, die Routing-Adresse bleibt
         assert not pg.errors, pg.errors
     finally:
@@ -385,9 +407,11 @@ def test_jump_respects_reduced_motion(pw, app):
         pg.emulate_media(reduced_motion="reduce")
         pg.evaluate("() => { window.__b = []; window.__o = Element.prototype.scrollIntoView; Element.prototype.scrollIntoView = function (...a) { if (a[0] && a[0].behavior) window.__b.push(a[0].behavior); return window.__o.apply(this, a); }; }")
         pg.locator("#tlnav .tlchip", has_text="Analyse").click()
+        pg.wait_for_function("() => window.__b.length === 1", timeout=15000)
         assert pg.evaluate("window.__b") == ["auto"]
         pg.emulate_media(reduced_motion="no-preference")
         pg.locator("#tlnav .tlchip", has_text="Wetter").click()
+        pg.wait_for_function("() => window.__b.length === 2", timeout=15000)
         assert pg.evaluate("window.__b") == ["auto", "smooth"]
     finally:
         pg.browser_.close()
@@ -397,9 +421,11 @@ def test_sub_nav_is_sticky_on_desktop_under_the_header(pw, app):
     pg = _page(pw, app, devs="one", height=500, sub=True)
     try:
         pg.locator("#tlall").click()
+        pg.wait_for_function("() => document.querySelector('#tlall').textContent === 'Alles zuklappen' && document.documentElement.scrollHeight > 2400", timeout=15000)
         pg.wait_for_timeout(500)
         assert pg.locator("#tlnav").evaluate("e => getComputedStyle(e).position") == "sticky"
         pg.evaluate("window.scrollTo(0, 1800)")
+        pg.wait_for_function("""() => { const n = document.querySelector('#tlnav').getBoundingClientRect(), h = document.querySelector('header.top').getBoundingClientRect(); return window.scrollY > 1000 && Math.abs(n.y - (h.y + h.height)) <= 2 && n.height > 20; }""", timeout=15000)
         pg.wait_for_timeout(400)
         n = pg.locator("#tlnav").bounding_box()
         h = pg.locator("header.top").bounding_box()
@@ -412,17 +438,21 @@ def test_expand_all_collapse_all_and_state_is_remembered(pw, app):
     pg = _page(pw, app, devs="one", sub=True)
     try:
         pg.locator("#tlall").click()
-        pg.wait_for_function("() => document.querySelector('#tlall').textContent === 'Alles zuklappen'")
+        pg.wait_for_function("() => document.querySelector('#tlall').textContent === 'Alles zuklappen'", timeout=15000)
+        pg.wait_for_function("() => [...document.querySelectorAll('#tl details.tls')].every(x => x.open)", timeout=15000)
         assert all(pg.evaluate(OPEN).values())
         assert pg.evaluate("document.querySelectorAll('#tl details.tls[open]').length") == len(SUB_ORDER)
-        pg.reload(); pg.wait_for_function(READY_SUB); pg.wait_for_timeout(1500)
+        pg.reload(); pg.wait_for_function(READY_SUB, timeout=15000); pg.wait_for_timeout(1500)
+        pg.wait_for_function("() => { const d = [...document.querySelectorAll('#tl details.tls')]; return d.length > 0 && d.every(x => x.open); }", timeout=15000)
         assert all(pg.evaluate(OPEN).values())                                          # Zustand bleibt nach dem Neuladen (Direktaufruf der Unterseite)
         pg.locator("#tlall").click()
-        pg.wait_for_function("() => document.querySelector('#tlall').textContent === 'Alles aufklappen'")
+        pg.wait_for_function("() => document.querySelector('#tlall').textContent === 'Alles aufklappen'", timeout=15000)
+        pg.wait_for_function("() => [...document.querySelectorAll('#tl details.tls')].every(x => !x.open)", timeout=15000)
         assert not any(pg.evaluate(OPEN).values())
         pg.locator("#tls-ana > summary").click()
-        pg.wait_for_function("() => localStorage.getItem('mt_trf_tl_ana') === '1'")
-        pg.reload(); pg.wait_for_function(READY_SUB); pg.wait_for_timeout(1500)
+        pg.wait_for_function("() => { try { return localStorage.getItem('mt_trf_tl_ana') === '1'; } catch (e) { return false; } }", timeout=15000)
+        pg.reload(); pg.wait_for_function(READY_SUB, timeout=15000); pg.wait_for_timeout(1500)
+        pg.wait_for_function("() => { const a = document.querySelector('#tls-ana'), m = document.querySelector('#tls-met'), u = document.querySelector('#tls-uhr'); return !!a && !!m && !!u && a.open && !m.open && !u.open; }", timeout=15000)
         o = pg.evaluate(OPEN)
         assert o["ana"] and not o["met"] and not o["uhr"]
         assert not pg.errors, pg.errors
@@ -444,9 +474,10 @@ def test_sub_slope_link_opens_map_with_gradient_on_main_page(pw, app):
     pg = _page(pw, app, devs="one", sub=True)
     try:
         pg.locator("#tls-ana > summary").click()
+        pg.wait_for_selector("#gtog", timeout=15000)
         assert pg.locator("#gtog").get_attribute("href") == "#/tour/r3?karte=steigung"
         pg.locator("#gtog").click()
-        pg.wait_for_function("() => document.querySelector('#tm .smap.on') && document.querySelector('#tm .sleg')", timeout=10000)
+        pg.wait_for_function("() => document.querySelector('#tm .smap.on') && document.querySelector('#tm .sleg')", timeout=15000)
         assert pg.evaluate("location.hash").startswith("#/tour/r3")
         assert not pg.errors, pg.errors
     finally:
@@ -456,11 +487,11 @@ def test_sub_slope_link_opens_map_with_gradient_on_main_page(pw, app):
 def test_main_map_slope_button_still_works(pw, app):
     pg = _page(pw, app, devs="one")
     try:
-        pg.wait_for_selector("#tm .smap", timeout=10000)
+        pg.wait_for_selector("#tm .smap", timeout=15000)
         pg.locator("#tm .smap").click()
-        pg.wait_for_function("() => document.querySelector('#tm .smap.on') && document.querySelector('#tm .sleg')")
+        pg.wait_for_function("() => document.querySelector('#tm .smap.on') && document.querySelector('#tm .sleg')", timeout=15000)
         pg.locator("#tm .smap").click()
-        pg.wait_for_function("() => !document.querySelector('#tm .sleg')")
+        pg.wait_for_function("() => !document.querySelector('#tm .sleg')", timeout=15000)
     finally:
         pg.browser_.close()
 
@@ -528,6 +559,7 @@ def test_mobile_390_no_horizontal_scroll(pw, app, scheme, sub):
     pg = _page(pw, app, devs="two", width=390, height=844, scheme=scheme, dpr=2, sub=sub)
     try:
         pg.evaluate("tlSetAll(true)")
+        pg.wait_for_function("() => [...document.querySelectorAll('#tl details.tls')].filter(d => !d.hidden).every(d => d.open)", timeout=15000)
         pg.wait_for_timeout(1000)
         assert pg.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"), pg.evaluate("[document.documentElement.scrollWidth, innerWidth]")
         over = pg.evaluate("[...document.querySelectorAll('#tl details.tls, #tl .tlsb, #tlnav, #tl .tldev, #tlsum, .tlsubt, .tlsubfig')].filter(e => e.getBoundingClientRect().right > innerWidth + 1).map(e => e.id || e.className)")
@@ -636,11 +668,12 @@ def test_viewer_sees_both_pages_without_edit_buttons(pw, app):
     pg = _page(pw, app, devs="two", ctx_init="window.__viewer = 1")
     try:
         pg.evaluate("ME.user = {role: 'viewer', uid: 9, name: 'Oma'}; document.documentElement.classList.add('viewer')")
+        pg.evaluate("document.querySelector('#tl').dataset.alt = '1'; window.__sigw = null")          # alte Seite markieren: die neu gezeichnete (ohne Marke) abwarten
         pg.evaluate("route()")
-        pg.wait_for_selector("#tls-photos"); pg.wait_for_timeout(1800)
+        pg.wait_for_selector("#tl:not([data-alt]) #tls-photos", timeout=15000); _ready_main(pg); pg.wait_for_timeout(1800)
         assert pg.evaluate(SECS) == MAIN_ORDER and pg.locator("#tlsgo").is_visible()
         pg.locator("#tlsgo").click()
-        pg.wait_for_function(READY_SUB); pg.wait_for_timeout(800)
+        pg.wait_for_function(READY_SUB, timeout=15000); pg.wait_for_timeout(800)
         assert pg.evaluate(SECS) == SUB_ORDER
         assert pg.locator("#devedit").count() == 0 and pg.locator("#utneu").count() == 0
         assert pg.locator("#tlnav .tlchip").count() == 4

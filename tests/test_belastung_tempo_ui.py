@@ -123,6 +123,8 @@ def _page(pw, url, hash_, wait, width=1280, height=1000, scheme="light", dpr=1, 
         pg.wait_for_selector(wait, timeout=15000)
     else:
         pg.wait_for_timeout(2500)
+    if hash_.endswith("/auswertung"):                                                    # Unterseite fertig: alle Karten eingehängt (Nachlade-Abschnitte)
+        pg.wait_for_function("() => { const l = document.querySelector('#tlload'); return !!l && l.hidden; }", timeout=15000)
     pg.wait_for_timeout(400)
     pg.browser_ = b
     return pg
@@ -157,7 +159,7 @@ def test_stats_sections_content_keyboard_and_fold_state(pw, apps):
         # Tastatur: Balken per Pfeil, Tooltip in Klartext
         g = pg.locator("#blsec .blg[tabindex='0']")
         g.focus()
-        pg.wait_for_selector("#bltip:not([hidden])")
+        pg.wait_for_selector("#bltip:not([hidden])", timeout=15000)
         tip = pg.locator("#bltip").inner_text()
         assert "Belastung" in tip and "Touren mit Uhr-Daten" in tip
         first = pg.evaluate("document.activeElement.dataset.i")
@@ -168,15 +170,19 @@ def test_stats_sections_content_keyboard_and_fold_state(pw, apps):
         assert pg.locator("#bltip").is_hidden()
         # Wochen/Monate umschalten
         pg.locator("#blsec [data-m='m']").click()
-        pg.wait_for_selector("#blsec .blsvg[aria-label*='Monat']")
+        pg.wait_for_selector("#blsec .blsvg[aria-label*='Monat']", timeout=15000)
+        pg.wait_for_selector("#blsec [data-m='m'][aria-pressed='true']", timeout=15000)
         assert pg.locator("#blsec [data-m='m']").get_attribute("aria-pressed") == "true"
         pg.locator("#blsec [data-m='w']").click()
+        pg.wait_for_selector("#blsec [data-m='w'][aria-pressed='true']", timeout=15000)
+        pg.wait_for_selector("#blsec .blg[tabindex='0']", timeout=15000)
         # Einklappen merken
         sm = pg.locator("#blsec details.trsec > summary")
         assert pg.locator("#blsec details.trsec").evaluate("e => e.open")
         sm.click()
+        pg.wait_for_function("() => { try { return localStorage.getItem('mt_trf_bl_sec') === '0'; } catch (e) { return false; } }", timeout=15000)
         assert not pg.locator("#blsec details.trsec").evaluate("e => e.open") and pg.evaluate("localStorage.getItem('mt_trf_bl_sec')") == "0"
-        pg.reload(); pg.wait_for_selector("#blsec"); pg.wait_for_timeout(500)
+        pg.reload(); pg.wait_for_selector("#blsec details.trsec", timeout=15000); pg.wait_for_selector("#blsec", timeout=15000); pg.wait_for_timeout(500)
         assert not pg.locator("#blsec details.trsec").evaluate("e => e.open")
         assert pg.locator("#blsec details.trsec > summary").evaluate("e => getComputedStyle(e).cursor") == "pointer"
         assert not pg.errors, pg.errors
@@ -200,9 +206,11 @@ def test_stats_tempo_section_and_calculator(pw, apps):
         r = pg.locator("#tpres").inner_text()
         assert "Geschätzte Gehzeit" in r and "h" in r and "Reine Gehzeit ohne Pausen" in r and "Grundlage" in r
         pg.locator("#tpkm").fill("abc"); pg.locator("#tpform button").click()
+        pg.wait_for_function("() => (document.querySelector('#tpres') || {innerText: ''}).innerText.includes('als Zahlen')", timeout=15000)
         assert "als Zahlen" in pg.locator("#tpres").inner_text()
         pg.locator("#tpsec [data-s='laufen']").click()
-        pg.wait_for_selector("#tpbody p.mut")                                          # keine Läufe: ehrliche Meldung statt Nullen
+        pg.wait_for_function("() => (document.querySelector('#tpbody') || {innerText: ''}).innerText.includes('Keine Touren mit Höhendaten')", timeout=15000)       # keine Läufe: ehrliche Meldung statt Nullen
+        pg.wait_for_selector("#tpbody p.mut", timeout=15000)
         assert "Keine Touren mit Höhendaten" in pg.locator("#tpbody").inner_text() and "0,0" not in pg.locator("#tpbody").inner_text()
         _shot(pg, "stat-tempo-desktop.png", "#tpsec")
         assert not pg.errors, pg.errors
@@ -213,6 +221,7 @@ def test_stats_tempo_section_and_calculator(pw, apps):
 def test_stats_sections_absent_without_data(pw, apps):
     pg = _page(pw, apps["empty"], "stats", None)
     try:
+        pg.wait_for_selector("#main .inner", timeout=15000)
         assert pg.locator("#blsec").count() == 0 and pg.locator("#tpsec").count() == 0 and pg.locator("#main .inner").count() == 1
         assert "Belastung und Erholung" not in pg.locator("body").inner_text() and not pg.errors, pg.errors
     finally:
@@ -227,6 +236,7 @@ def test_stats_pending_zepp_tours_show_hint_and_job_button(pw, apps):
         assert "Für 3 Zepp-Touren liegen noch keine Uhr-Werte vor." in t and "Uhr-Daten aller Touren laden" in t
         assert pg.locator("#blsec .blbar, #blsec .blpart").count() == 0                  # nichts als 0 gezeichnet
         pg.locator("#blsec details[data-trf='bl_hint'] summary").click()
+        pg.wait_for_function("() => (document.querySelector('#blsec') || {innerText: ''}).innerText.includes('beim ersten Öffnen einer Tour gespeichert')", timeout=15000)
         assert "beim ersten Öffnen einer Tour gespeichert" in pg.locator("#blsec").inner_text()
         assert pg.locator("#tpsec").count() == 0
         _shot(pg, "stat-belastung-offen.png", "#blsec")
@@ -244,12 +254,14 @@ def test_tour_page_fatigue_and_slope_sections(pw, apps):
         sm = f.locator("summary").inner_text()
         assert "Zweite Hälfte" in sm and "Tempo 17 % langsamer" in sm and "Puls +15 bpm" in sm
         f.locator("summary").click()
+        pg.wait_for_function("() => { const d = document.querySelector('#uhrcard details[data-trf=uhr_erm]'); return !!d && d.open && d.innerText.includes('Deutlich langsamer in der zweiten Hälfte'); }", timeout=15000)
         assert "Deutlich langsamer in der zweiten Hälfte" in f.inner_text() and "Verglichen werden die ersten 4 und die letzten 4" in f.inner_text()
-        pg.wait_for_function("() => localStorage.getItem('mt_trf_uhr_erm') === '1'", timeout=15000)
+        pg.wait_for_function("() => { try { return localStorage.getItem('mt_trf_uhr_erm') === '1'; } catch (e) { return false; } }", timeout=15000)
         assert pg.evaluate("localStorage.getItem('mt_trf_uhr_erm')") == "1"
         s = pg.locator("#steigcard details")
         assert not s.evaluate("e => e.open") and "Bergauf" in s.locator("summary").inner_text() and "km/h" in s.locator("summary").inner_text()
         s.locator("summary").click()
+        pg.wait_for_function("() => document.querySelectorAll('#steigcard .utile').length >= 2 && document.querySelector('#steigcard').innerText.includes('Nur Bewegungszeit')", timeout=15000)
         assert pg.locator("#steigcard .utile").count() >= 2 and "Nur Bewegungszeit" in pg.locator("#steigcard").inner_text()
         ids = pg.evaluate("[...document.querySelectorAll('#metcard, #uhrcard, #steigcard')].map(e => e.id)")
         assert ids.index("steigcard") == len(ids) - 1 and ids.index("uhrcard") < ids.index("steigcard")
@@ -263,6 +275,7 @@ def test_tour_page_fatigue_and_slope_sections(pw, apps):
 def test_tour_page_without_track_has_no_slope_card_and_fold_state_survives_reload(pw, apps):
     pg = _page(pw, apps["full"], "tour/" + apps["g"] + "/auswertung", None)
     try:
+        pg.wait_for_selector("#steigcard", timeout=15000)
         assert pg.locator("#steigcard").count() == 1                                        # g1 hat eine Strecke
     finally:
         pg.browser_.close()
@@ -353,7 +366,8 @@ def test_contrast_stats_and_tour(pw, apps, scheme):
 def test_english_translation(pw, apps):
     pg = _page(pw, apps["full"], "stats", "#blsec .blbar", locale="en-GB")
     try:
-        pg.evaluate("localStorage.setItem('lang','en')"); pg.reload(); pg.wait_for_selector("#blsec .blbar", timeout=15000); pg.wait_for_timeout(800)
+        pg.evaluate("localStorage.setItem('lang','en')"); pg.reload(); pg.wait_for_selector("#blsec .blbar", timeout=15000)
+        pg.wait_for_function("() => (document.querySelector('#blsec') || {innerText: ''}).innerText.includes('Load and recovery')", timeout=15000)
         t = pg.locator("#blsec").inner_text()
         assert "Load and recovery" in t and "Current compared with usual" in t and "Belastung" not in t.replace("Belastung", "", 0) or "Load" in t
         assert "Die härtesten" not in t and "Touren mit" not in t

@@ -12,6 +12,8 @@ from pathlib import Path
 
 import pytest
 
+expect = pytest.importorskip("playwright.sync_api").expect
+
 ROOT = Path(__file__).resolve().parent.parent
 T0 = 1750000000
 
@@ -111,7 +113,9 @@ def _page(pw, url, width=1280, height=1000, scheme="light", dpr=1, path="#/admin
     pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(url) else r.continue_())
     pg.on("request", lambda r: pg.posts.append((r.method, r.url)) if r.method != "GET" else None)
     pg.goto(url + "/" + path)
-    pg.wait_for_selector(wait, timeout=10000)
+    pg.wait_for_selector(wait, timeout=15000)
+    if path.endswith("/auswertung"):                                                     # Unterseite fertig: alle Karten eingehängt (Nachlade-Abschnitte)
+        pg.wait_for_function("() => { const l = document.querySelector('#tlload'); return !!l && l.hidden; }", timeout=15000)
     pg.wait_for_timeout(300)
     pg.browser_ = b
     return pg
@@ -143,6 +147,7 @@ def _row(pg, name):
 def test_device_dialog_shows_fields_per_source_with_counts(pw, apps):
     pg = _page(pw, apps["zepp"])
     try:
+        expect(_card(pg, "Balance 2")).to_contain_text("Was liefert diese Uhr?", timeout=15000)
         assert "Was liefert diese Uhr?" in _card(pg, "Balance 2").inner_text()
         _open(pg, "Balance 2")
         box = pg.locator(".dvubox")
@@ -165,10 +170,13 @@ def test_device_dialog_shows_fields_per_source_with_counts(pw, apps):
         _shot(pg, "geraet-dialog-desktop.png")
         # Filter: nur nicht ausgewertete Felder mit Daten
         pg.check("#dvuonly")
+        expect(_row(pg, "calorie")).to_have_count(0, timeout=15000)
         assert _row(pg, "calorie").count() == 0 and _row(pg, "neues_feld").count() == 1 and _row(pg, "stress").count() == 0
         pg.uncheck("#dvuonly")
+        expect(_row(pg, "calorie")).to_have_count(1, timeout=15000)
         assert _row(pg, "calorie").count() == 1
         pg.click("#dvuclose")
+        expect(pg.locator(".dvubox")).to_have_count(0, timeout=15000)
         assert pg.locator(".dvubox").count() == 0 and not pg.locator(".dvbox").count()           # kein Bearbeiten-Dialog geöffnet
     finally:
         pg.browser_.close()
@@ -178,6 +186,7 @@ def test_menu_entry_and_save_as_file(pw, apps):
     pg = _page(pw, apps["zepp"])
     try:
         _card(pg, "Balance 2").locator(".dvmore").click()
+        pg.wait_for_selector(".dvmenu", timeout=15000)
         assert "Was liefert diese Uhr?" in pg.locator(".dvmenu").inner_text()
         pg.locator(".dvmenu button", has_text="Was liefert diese Uhr?").click()
         pg.wait_for_selector("#dvubody .dvusrc", timeout=15000)
@@ -234,6 +243,7 @@ def test_tour_page_link_opens_tour_dialog(pw, apps):
         assert pg.locator("#dvulink").inner_text() == "Alle Felder dieser Tour"
         pg.click("#dvulink")
         pg.wait_for_selector("#dvubody .dvusrc", timeout=15000)
+        pg.wait_for_function("() => { const b = document.querySelector('#dvubody'); return !!b && b.querySelectorAll('tbody tr').length > 0; }", timeout=15000)
         pg.wait_for_timeout(200)
         t = pg.locator(".dvubox").inner_text()
         assert "Alle Felder dieser Tour" in t and "Rundweg Nr. 0" in t and "nichts gespeichert oder verändert" in t
@@ -297,6 +307,7 @@ def test_mobile_390_no_horizontal_scroll(pw, apps):
         pg.wait_for_timeout(150)
         _shot(pg, "geraet-dialog-390-ende.png")
         pg.click("#dvuclose")
+        pg.wait_for_selector(".dvubox", state="detached", timeout=15000)
     finally:
         pg.browser_.close()
     tid = f"z{T0 + 10}"
@@ -324,6 +335,7 @@ def test_dialog_is_translated_in_four_languages(pw, apps):
             b = _card(pg, "Balance 2").locator(".dvuhr")
             b.evaluate("e => e.click()")
             pg.wait_for_selector("#dvubody .dvusrc", timeout=15000)
+            pg.wait_for_function("() => { const b = document.querySelector('#dvubody'); return !!b && b.querySelectorAll('tbody tr').length > 0; }", timeout=15000)
             pg.wait_for_timeout(300)
             t = pg.locator(".dvubox").inner_text()
             for x in texts:

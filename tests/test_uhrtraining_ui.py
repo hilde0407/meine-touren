@@ -133,9 +133,9 @@ def _page(pw, url, tid, width=1280, height=1000, scheme="light", dpr=1, locale="
     pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(url) else r.continue_())
     pg.goto(f"{url}/#/tour/{tid}/auswertung")
     if wait:
-        pg.wait_for_selector(wait, timeout=10000)
-    else:
-        pg.wait_for_function("() => { const l = document.querySelector('#tlload'); return !!l && l.hidden; }", timeout=10000)
+        pg.wait_for_selector(wait, timeout=15000)
+    pg.wait_for_function("() => { const l = document.querySelector('#tlload'); return !!l && l.hidden; }", timeout=15000)       # Unterseite fertig: alle Karten eingehängt
+    if not wait:
         pg.wait_for_timeout(1500)
     pg.wait_for_timeout(300)
     pg.browser_ = b
@@ -192,8 +192,10 @@ def test_offline_from_sidecar_and_reload_error_keeps_values(pw, apps):
     try:
         assert pg.locator(".utile", has_text="Kalorien").locator("b").inner_text() == "312" and pg.locator(".utc").count() == 6          # ohne Zepp-Zugang aus der Zusatzdatei
         pg.click("#utneu")
-        pg.wait_for_selector("#utmsg:not(:empty)", timeout=10000)
+        pg.wait_for_selector("#utmsg:not(:empty)", timeout=15000)
+        pg.wait_for_function("() => (document.querySelector('#utmsg') || {innerText: ''}).innerText.includes('kein Zepp-Zugang')", timeout=15000)
         assert "kein Zepp-Zugang" in pg.locator("#utmsg").inner_text() and pg.locator(".utile", has_text="Kalorien").locator("b").inner_text() == "312"
+        pg.wait_for_function("() => { const b = document.querySelector('#utneu'); return !!b && !b.disabled; }", timeout=15000)       # Knopf nach der Antwort wieder frei
         assert pg.locator("#utneu").is_enabled() and not pg.errors, pg.errors
         _shot(pg, "uhrtraining-ohne-zugang.png", "#utneu")
     finally:
@@ -206,7 +208,8 @@ def test_reload_button_updates_values(pw, apps):
         k = pg.locator(".utile", has_text="Kalorien").locator("b")
         assert k.inner_text() in ("312", "999")
         pg.click("#utneu")
-        pg.wait_for_selector("#utmsg:has-text('Neu von Zepp geladen')", timeout=10000)
+        pg.wait_for_selector("#utmsg:has-text('Neu von Zepp geladen')", timeout=15000)
+        pg.wait_for_function("() => { const b = document.querySelector('#utneu'); return !!b && !b.disabled && document.querySelectorAll('#uhrcard .utc').length === 13; }", timeout=15000)       # Karte nach dem Neuladen neu gezeichnet
         assert k.inner_text() == "999" and pg.locator(".utc").count() == 13 and pg.locator("#utneu").inner_text() == "Von Zepp neu laden"
         assert not pg.errors, pg.errors
     finally:
@@ -263,7 +266,7 @@ def test_contrast_light_and_dark(pw, apps, scheme):
 def test_translated_in_english(pw, apps):
     pg = _page(pw, apps["nozepp"], ZA, locale="en-US")
     try:
-        pg.wait_for_selector("#uhrcard h3:has-text('Training according')", timeout=5000)
+        pg.wait_for_selector("#uhrcard h3:has-text('Training according')", timeout=15000)
         t = pg.locator("#uhrcard").inner_text()
         for x in ("Training effect (aerobic)", "Heart rate zones according to the watch", "Pace per kilometre", "Weather according to the watch", "Reload from Zepp", "m ascent", "Zepp scale"):
             assert x in t, x

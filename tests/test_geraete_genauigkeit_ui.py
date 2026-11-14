@@ -108,7 +108,7 @@ def _page(pw, app_url, width=1280, height=1000, scheme="light", dpr=1):
     pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(app_url) else r.continue_())
     pg.on("request", lambda r: pg.posts.append((r.method, r.url)) if r.method != "GET" else None)
     pg.goto(app_url + "/#/admin?tab=quellen")
-    pg.wait_for_selector("#devsec .dvcard", timeout=10000)
+    pg.wait_for_selector("#devsec .dvcard", timeout=15000)
     pg.wait_for_timeout(300)
     pg.browser_ = b
     return pg
@@ -141,7 +141,7 @@ def test_open_section_kpis_chart_list_and_suggestion_dialog(pw, app_url):
     try:
         c = _card(pg, "Balance 2")
         c.locator("details.dvq > summary").click()
-        pg.wait_for_selector("details.dvq[open] .dvbadul", timeout=8000)
+        pg.wait_for_selector("details.dvq[open] .dvbadul", timeout=15000)
         assert not pg.locator(".dvbox").count()                # Klick im Abschnitt öffnet nicht das Bearbeiten
         tiles = c.locator(".dvk")
         assert tiles.count() == 4 and [x.strip() for x in c.locator(".dvkl").all_inner_texts()] == ["Strecke", "Höhe", "GPS-Spur", "Puls"]
@@ -157,15 +157,15 @@ def test_open_section_kpis_chart_list_and_suggestion_dialog(pw, app_url):
         # Korrektur vorschlagen: Dialog, nichts passiert ohne Bestätigung
         li = c.locator(".dvbadul li", has=pg.locator("text=Aufstieg")).first
         li.locator("button").click()
-        pg.wait_for_selector(".dvsug")
+        pg.wait_for_selector(".dvsug", timeout=15000)
         assert "Höhe aus Geländemodell neu berechnen" in pg.inner_text(".dvsug") and "Es passiert nichts, bevor du es bestätigst" in pg.inner_text(".dvbox")
         # Bestätigung ist jetzt der gemeinsame Dialog (kein Browser-confirm): Abbrechen ändert nichts
         pg.locator(".dvsug button", has_text="Ausführen").first.click()
-        pg.wait_for_selector(".uidlg [role=dialog], .uidlg [role=alertdialog]")
+        pg.wait_for_selector(".uidlg [role=dialog], .uidlg [role=alertdialog]", timeout=15000)
         dlg = pg.locator(".uidlg .uibox")
         assert dlg.get_attribute("aria-modal") == "true" and "Höhe aus Geländemodell neu berechnen?" in dlg.inner_text()
         pg.locator(".uidlg .uifoot button", has_text="Abbrechen").click()
-        pg.wait_for_timeout(300)
+        pg.wait_for_selector(".uidlg", state="detached", timeout=15000)
         assert not pg.locator(".uidlg").count() and not pg.posts                               # abgebrochen: kein Aufruf
         # bestätigen (Antwort nachgebaut) und rückgängig machen
         calls = []
@@ -176,12 +176,13 @@ def test_open_section_kpis_chart_list_and_suggestion_dialog(pw, app_url):
         pg.route("**/api/tours/*/elev-fix", fake)
         pg.route("**/api/tours/*/elev-restore", fake)
         pg.locator(".dvsug button", has_text="Ausführen").first.click()
-        pg.wait_for_selector(".uidlg")
+        pg.wait_for_selector(".uidlg", timeout=15000)
         pg.locator(".uidlg .uifoot button", has_text="Ausführen").click()                      # bestätigen
-        pg.wait_for_selector("#dvsundo", timeout=5000)
+        pg.wait_for_selector("#dvsundo", timeout=15000)
+        pg.wait_for_function("() => { const r = document.querySelector('.dvsres'); return !!r && r.innerText.includes('Aufstieg 420 m') && r.innerText.includes('vorher 610 m'); }", timeout=15000)
         assert calls == ["elev-fix"] and "Aufstieg 420 m" in pg.inner_text(".dvsres") and "vorher 610 m" in pg.inner_text(".dvsres")
         pg.click("#dvsundo")
-        pg.wait_for_selector(".dvsres:has-text('Zurückgenommen')", timeout=5000)
+        pg.wait_for_selector(".dvsres:has-text('Zurückgenommen')", timeout=15000)
         assert calls == ["elev-fix", "elev-restore"]
         assert not [e for e in pg.errors if "CSP" in e or "TypeError" in e], pg.errors
     finally:
@@ -193,11 +194,13 @@ def test_empty_and_too_few_tours_states(pw, app_url):
     try:
         e = _card(pg, "Forerunner")
         e.locator("details.dvq > summary").click()
+        pg.wait_for_function("() => { const d = [...document.querySelectorAll('#devsec .dvcard')].find(c => c.innerText.includes('Forerunner')); return !!d && d.querySelector('details.dvq').open && d.innerText.includes('Noch nicht ausgewertet.') && !!d.querySelector('.dvqrun'); }", timeout=15000)
         t = e.inner_text()
         assert "Noch nicht ausgewertet." in t and "verändert keine Tour" in t and e.locator(".dvqrun").count() == 1
         p = _card(pg, "Amazfit Pace")
         p.locator("details.dvq > summary").click()
-        pg.wait_for_selector("details.dvq[open] .dvk")
+        pg.wait_for_selector("details.dvq[open] .dvk", timeout=15000)
+        pg.wait_for_function("() => [...document.querySelectorAll('#devsec .dvcard')].some(c => c.innerText.includes('Pace') && c.innerText.includes('mindestens 5 verglichene Touren'))", timeout=15000)
         assert "Noch keine Einschätzung" in p.inner_text() and "mindestens 5 verglichene Touren" in p.inner_text()
         assert p.locator(".dvks.none").count() >= 1
     finally:
@@ -224,7 +227,8 @@ def test_contrast_at_least_4_5(pw, app_url, scheme):
     try:
         for n in ("Balance 2", "Pace"):
             _card(pg, n).locator("details.dvq > summary").click()
-        pg.wait_for_selector(".dvbadul")
+        pg.wait_for_selector(".dvbadul", timeout=15000)
+        pg.wait_for_function("() => document.querySelectorAll('#devsec details.dvq[open]').length >= 2 && document.querySelectorAll('#devsec details.dvq[open] .dvk').length >= 2", timeout=15000)
         res = pg.evaluate(_contrast_js())
         assert len(res) > 15
         bad = [(s, round(c, 2)) for s, c in res if c < 4.5]
@@ -238,7 +242,7 @@ def test_mobile_390_no_overflow_and_touch_targets(pw, app_url):
     try:
         c = _card(pg, "Balance 2")
         c.locator("details.dvq > summary").click()
-        pg.wait_for_selector(".dvbadul")
+        pg.wait_for_selector(".dvbadul", timeout=15000)
         assert pg.evaluate("document.documentElement.scrollWidth") <= 391
         over = pg.evaluate("[...document.querySelectorAll('#devsec .dvq *')].filter(e => e.getBoundingClientRect().right > innerWidth + 1 && !e.closest('svg')).map(e => e.className || e.tagName).slice(0, 5)")
         assert not over, over
@@ -253,13 +257,14 @@ def test_mobile_390_no_overflow_and_touch_targets(pw, app_url):
 def test_run_job_and_progress(pw, app_url):
     pg = _page(pw, app_url)
     try:
+        import json
         pg.locator("#dvqall").click()
-        pg.wait_for_timeout(500)
-        for _ in range(120):                                   # Panel wird nach dem Ende neu gezeichnet: Knopf wieder frei
-            if pg.locator("#dvqall").count() and pg.locator("#dvqall").is_enabled() and pg.locator("#devsec .dvqprog:not(:empty)").count() == 0:
+        for _ in range(240):                                   # erst wenn der Start angekommen ist und der Lauf fertig ist; das Panel wird dann neu gezeichnet: Knopf wieder frei
+            st = json.loads(urllib.request.urlopen(app_url + "/api/jobs").read())
+            if ("POST", app_url + "/api/jobs/dev-quality") in pg.posts and not st.get("running") and any("Genauigkeit fertig" in x for x in st.get("log", [])) \
+                    and pg.locator("#dvqall").count() and pg.locator("#dvqall").is_enabled() and pg.locator("#devsec .dvqprog:not(:empty)").count() == 0:
                 break
             pg.wait_for_timeout(500)
-        import json
         log = json.loads(urllib.request.urlopen(app_url + "/api/jobs").read())
         assert any("Genauigkeit fertig" in x for x in log["log"]) and log["ok"] is True
         assert ("POST", app_url + "/api/jobs/dev-quality") in pg.posts

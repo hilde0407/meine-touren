@@ -10,6 +10,8 @@ from pathlib import Path
 
 import pytest
 
+expect = pytest.importorskip("playwright.sync_api").expect
+
 ROOT = Path(__file__).resolve().parent.parent
 
 SEED = r"""
@@ -105,6 +107,8 @@ def _page(pw, url, hash_, wait, width=1280, height=1000, scheme="light", dpr=1, 
         pg.wait_for_selector(wait, timeout=15000)
     else:
         pg.wait_for_timeout(2500)
+    if hash_.endswith("/auswertung"):                                                    # Unterseite fertig: alle Karten eingehängt (Nachlade-Abschnitte)
+        pg.wait_for_function("() => { const l = document.querySelector('#tlload'); return !!l && l.hidden; }", timeout=15000)
     pg.wait_for_timeout(400)
     pg.browser_ = b
     return pg
@@ -121,8 +125,9 @@ def _shot(pg, name, sel="#aehncard"):
 def _open(pg):
     if not pg.locator("#aehncard details").evaluate("e => e.open"):
         pg.locator("#aehncard details > summary").click()
-    pg.wait_for_selector("#aehncard .aer", timeout=5000)
-    pg.wait_for_selector("#aehncard .aesvg", timeout=5000)
+    pg.wait_for_function("() => { const d = document.querySelector('#aehncard details'); return !!d && d.open; }", timeout=15000)
+    pg.wait_for_selector("#aehncard .aer", timeout=15000)
+    pg.wait_for_selector("#aehncard .aesvg", timeout=15000)
 
 
 CONTRAST = """() => {
@@ -152,13 +157,14 @@ def test_card_collapsed_by_default_with_key_statement_and_state_is_remembered(pw
         assert "Bestes Tempo bisher" in key                                              # r5 (6300 s) ist schneller als alle früheren Läufe
         assert pg.locator("#aehncard .aer").first.is_hidden()                              # zugeklappt: Zeilen nicht sichtbar
         pg.locator("#aehncard summary").click()
-        pg.wait_for_function("() => localStorage.getItem('mt_trf_aehn') === '1'")
+        pg.wait_for_function("() => { try { return localStorage.getItem('mt_trf_aehn') === '1'; } catch (e) { return false; } }", timeout=15000)
         assert d.evaluate("e => e.open")
-        pg.reload(); pg.wait_for_selector("#aehncard"); pg.wait_for_timeout(500)
-        assert pg.locator("#aehncard details").evaluate("e => e.open")                  # Zustand bleibt
-        pg.wait_for_selector("#aehncard .aesvg")
+        pg.reload(); pg.wait_for_selector("#aehncard", timeout=15000)
+        pg.wait_for_function("() => { const d = document.querySelector('#aehncard details'); return !!d && d.open; }", timeout=15000)      # Zustand bleibt (nach dem Nachladen)
+        assert pg.locator("#aehncard details").evaluate("e => e.open")
+        pg.wait_for_selector("#aehncard .aesvg", timeout=15000)
         pg.locator("#aehncard summary").click()
-        pg.wait_for_function("() => localStorage.getItem('mt_trf_aehn') === '0'")
+        pg.wait_for_function("() => { try { return localStorage.getItem('mt_trf_aehn') === '0'; } catch (e) { return false; } }", timeout=15000)
         assert pg.evaluate("localStorage.getItem('mt_trf_aehn')") == "0" and pg.locator("#aehncard summary").evaluate("e => getComputedStyle(e).cursor") == "pointer"
         assert not pg.errors, pg.errors
     finally:
@@ -192,8 +198,8 @@ def test_rows_values_deviation_chart_and_links(pw, apps):
         href = pg.locator("#aehncard .aer a").first.get_attribute("href")
         assert href.startswith("#/tour/r") and href.endswith("/auswertung")
         pg.locator("#aehncard .aer a").first.click()
-        pg.wait_for_function("() => location.hash !== '#/tour/r4/auswertung'")
-        pg.wait_for_selector("#aehncard .aer.cur")
+        pg.wait_for_function("() => location.hash !== '#/tour/r4/auswertung'", timeout=15000)
+        pg.wait_for_function("() => { const l = document.querySelector('#tlload'); const t = document.querySelector('#tl'); return !!l && l.hidden && !!t && t.dataset.tid !== 'r4' && !!document.querySelector('#aehncard .aer.cur'); }", timeout=15000)     # neue Unterseite fertig geladen
         assert pg.locator("#aehncard .aer.cur").count() == 1 and pg.locator("#aehncard .aer.cur a").count() == 0
         assert not pg.errors, pg.errors
     finally:
@@ -205,7 +211,7 @@ def test_key_statement_faster_than_some(pw, apps):
     try:
         assert "Schneller als 3 von 5 früheren Läufen" in pg.locator("#aehncard summary").inner_text()
         pg.locator("#aehncard summary").click()
-        assert pg.locator("#aehncard .aer", has_text="Schnellster Lauf").count() == 1        # (kein festes Datum: die Daten sind relativ zu „heute“)
+        expect(pg.locator("#aehncard .aer", has_text="Schnellster Lauf")).to_have_count(1, timeout=15000)        # (kein festes Datum: die Daten sind relativ zu „heute“)
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -222,6 +228,7 @@ def test_key_statement_first_run_and_missing_time_of_current(pw, apps):
     try:
         assert "6 Wiederholungen" in pg.locator("#aehncard summary").inner_text() and "Tempo" not in pg.locator("#aehncard summary").inner_text()
         pg.locator("#aehncard summary").click()
+        pg.wait_for_function("() => (document.querySelector('#aehncard')||{innerText:''}).innerText.includes('keinen Tempovergleich')", timeout=15000)
         assert "keinen Tempovergleich" in pg.locator("#aehncard").inner_text() and pg.locator("#aehncard .aedot.cur").count() == 0 and pg.locator("#aehncard .aedot").count() == 6
         assert not pg.errors, pg.errors
     finally:
@@ -232,6 +239,7 @@ def test_absent_without_repeat(pw, apps):
     pg = _page(pw, apps["single"], "tour/e0", "#profcard")
     try:
         pg.wait_for_timeout(2500)
+        pg.wait_for_function("() => { const p = document.querySelector('#profcard'); return !!p && !/Wird geladen/.test(p.textContent); }", timeout=15000)       # Höhenprofil fertig (Karten würden hier eingehängt)
         assert pg.locator("#aehncard").count() == 0 and "Ähnliche Touren" not in pg.locator("body").inner_text() and not pg.errors, pg.errors
     finally:
         pg.browser_.close()
