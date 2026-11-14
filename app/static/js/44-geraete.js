@@ -19,6 +19,8 @@ const dvPeriod = g => {
   if (!a && !b) return [`Zeitraum unbegrenzt`];
   return [a ? `seit ${a}` : "", b ? `bis ${b}` : "aktuell"].filter(Boolean);
 };
+/* „Das liefert diese Uhr“: Kanäle, die bei mindestens 20 % der Touren des Geräts vorkommen (aus den Messwert-Zusatzdateien) */
+const dvGives = q => (!q || !q.n_tours ? "" : `<span class="dvsub dvgive"><b>Das liefert diese Uhr:</b> ${q.channels.length ? q.channels.map(c => `<span class="dvch" title="bei ${c.share} % der Touren">${esc(c.label)}</span>`).join(" ") : `<span class="mut">noch keine Messwerte erkannt (Verwaltung → „Messwerte nachladen“)</span>`}</span>`);
 const dvTours = n => (n === 0 ? "Noch keine Touren" : `${n} ${n === 1 ? "Tour" : "Touren"}`);
 
 /* Aktionsmenü an einem Knopf (fest positioniert, damit nichts abgeschnitten wird) */
@@ -232,11 +234,162 @@ function devZepp(dv, done) {
 }
 const dvDay = d => (/^\d{4}-\d\d-\d\d$/.test(d || "") ? `${d.slice(8)}.${d.slice(5, 7)}.${d.slice(0, 4)}` : d || "");
 
+/* ---------- Genauigkeit der Uhren (3.10.0): Kennzahlen, Punktdiagramm, auffällige Touren, Korrekturvorschläge ---------- */
+const DVQ_OPEN = new Set();
+const DVQ_CLS = {"gut": "ok", "mäßig": "warn", "auffällig": "bad"};
+const dvPct = v => (v > 0.04 ? "+" : v < -0.04 ? "−" : "") + nf(Math.abs(v), 1) + " %";
+const dvQTime = ts => (ts ? new Date(ts * 1000).toLocaleDateString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric"}) : "");
+
+/* Punktdiagramm: jeder Punkt eine Tour, Balken = mittlere Hälfte (25.–75. Perzentil), Strich = Median; Hintergrund = Bewertungsstufen */
+function dvDots(a, lim, good, ok, label) {
+  const W = 320, H = 74, pad = 14, x = v => pad + ((Math.max(-lim, Math.min(lim, v)) + lim) / (2 * lim)) * (W - 2 * pad);
+  const band = (w, c) => `<rect class="dvb ${c}" x="${x(-w)}" y="6" width="${x(w) - x(-w)}" height="34"/>`;
+  const dots = a.points.map((v, i) => `<circle class="dvdot" cx="${x(v).toFixed(1)}" cy="${(13 + ((i * 37) % 9) * 2.6).toFixed(1)}" r="2.6"/>`).join("");
+  const box = a.p25 != null ? `<rect class="dvbox2" x="${x(a.p25).toFixed(1)}" y="45" width="${Math.max(2, x(a.p75) - x(a.p25)).toFixed(1)}" height="9" rx="2"/><line class="dvmed" x1="${x(a.median).toFixed(1)}" x2="${x(a.median).toFixed(1)}" y1="43" y2="56"/>` : "";
+  const desc = `${label}: ${a.points.length} Touren, Median ${dvPct(a.median)}, mittlere Hälfte ${dvPct(a.p25)} bis ${dvPct(a.p75)}`;
+  return `<svg class="dvdots" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(desc)}"><rect class="dvb bad" x="${pad}" y="6" width="${W - 2 * pad}" height="34"/>${band(ok, "warn")}${band(good, "ok")}
+    <line class="dvzero" x1="${x(0)}" x2="${x(0)}" y1="6" y2="40"/>${dots}${box}
+    <text class="dvax" x="${pad}" y="70" text-anchor="start">${dvPct(-lim).replace(" %", "")} %</text><text class="dvax" x="${x(0)}" y="70" text-anchor="middle">0</text><text class="dvax" x="${W - pad}" y="70" text-anchor="end">${dvPct(lim)}</text></svg>`;
+}
+
+function dvQBody(q, g, viewer) {
+  const run = viewer ? "" : `<button class="btn alt sm dvqrun" type="button">Genauigkeit auswerten</button>`;
+  const prog = `<span class="dvqprog" role="status" aria-live="polite"></span>`;
+  if (!g.n_eval) {
+    return `<div class="dvqempty"><p><b>Noch nicht ausgewertet.</b></p>
+      <p>Die App vergleicht, was die Uhr gemessen hat, mit der Strecke der Tour, dem Geländemodell und der gespeicherten GPS-Spur. Dafür braucht sie:</p>
+      <ul><li>Touren, die dieser Uhr zugeordnet sind${g.n_tours ? ` (aktuell: ${g.n_tours})` : " – siehe „Touren automatisch zuordnen“"}.</li>
+      ${g.kind === "zepp" ? `<li>${q.zepp_configured ? "Den Zepp-Zugang aus der Verwaltung (ist eingerichtet) – damit lassen sich auch Komoot-Touren mit dem Training der Uhr vergleichen." : "Einen Zepp-Zugang in der Verwaltung – ohne ihn bleiben Strecke und Höhe bei Komoot-Touren leer."}</li>` : ""}</ul>
+      <p class="mut">Die Auswertung liest nur und verändert keine Tour.</p><div class="row">${run}${prog}</div></div>`;
+  }
+  const v = g.verdict, cls = DVQ_CLS[v.level] || "none";
+  const tile = (lab, val, sub, a) => `<div class="dvk"><span class="dvkl">${lab}</span><span class="dvkv">${val}</span><span class="dvks ${a && a.level ? DVQ_CLS[a.level] : "none"}">${a && a.level ? a.level : "keine Einschätzung"}</span><span class="dvkn">${sub}</span></div>`;
+  const d = g.dist, h = g.height, p = g.gps, r = g.hr;
+  const tiles = [
+    tile("Strecke", d.n ? dvPct(d.median) : "–", d.n ? `${d.n} ${d.n === 1 ? "Tour" : "Touren"} verglichen${d.n_implausible ? `, ${d.n_implausible} unplausibel` : ""}` : d.n_implausible ? `${d.n_implausible} unplausibel` : "nicht vergleichbar", d),
+    tile("Höhe", h.n_pct ? dvPct(h.up_err_pct.median) : "–", h.n ? `${h.n} ${h.n === 1 ? "Tour" : "Touren"}, Aufstieg ${h.up_err_m.median > 0 ? "+" : h.up_err_m.median < 0 ? "−" : ""}${nf(Math.abs(h.up_err_m.median), 0)} m` : "nicht vergleichbar", h),
+    tile("GPS-Spur", p.n ? `${nf(p.jump_tours_pct, 0)} %` : "–", p.n ? `Touren mit Sprüngen (von ${p.n})` : "keine Spur", p),
+    tile("Puls", r.n ? `${nf(r.bad_tours_pct, 0)} %` : "–", r.n ? `Touren mit Aussetzern (von ${r.n})` : "kein Puls", r),
+  ].join("");
+  const th = q.thresholds;
+  const chart = (a, lim, t, title, cap) => (a.points && a.points.length >= 2 ? `<figure class="dvfig"><figcaption>${title}</figcaption>${dvDots(a, lim, t[0], t[1], title)}<small class="dvh">${cap} ${dvPct(a.p25)} bis ${dvPct(a.p75)}, Median ${dvPct(a.median)}.</small></figure>` : "");
+  const hs = h.up_err_pct;
+  return `<div class="dvqv ${cls}"><b>${esc(v.label)}</b>${g.period ? `<span class="mut"> · ${esc(dvDay(g.period.from))} bis ${esc(dvDay(g.period.to))}</span>` : ""}</div>
+    <ul class="dvfind">${v.findings.map(f => `<li>${esc(f)}</li>`).join("")}</ul>
+    <div class="dvkpi">${tiles}</div>
+    <div class="dvfigs">${chart(d, 20, th.dist, "Strecke: Abweichung der Uhr je Tour", "Mittlere Hälfte der Touren:")}${hs.n ? chart({points: h.points, p25: hs.p25, p75: hs.p75, median: hs.median}, 60, th.height, "Aufstieg: Abweichung vom Geländemodell je Tour", "Mittlere Hälfte der Touren:") : ""}</div>
+    ${g.tips.map(t => `<p class="dvtip">${esc(t.text)}</p>`).join("")}
+    <div class="row dvqfoot">${run}${prog}<span class="mut dvqwhen">Zuletzt ausgewertet am ${esc(dvQTime(q.computed_at))}.</span></div>
+    <details class="dvhow"><summary>Wie wird bewertet?</summary><p class="dvh">Strecke: gut bis ${nf(th.dist[0], 0)} %, mäßig bis ${nf(th.dist[1], 0)} % mittlere Abweichung. Höhe: gut bis ${nf(th.height[0], 0)} %, mäßig bis ${nf(th.height[1], 0)} % gegenüber dem Geländemodell (das Modell glättet Gelände und unterschätzt Aufstiege etwas). GPS-Spur: gut, wenn höchstens ${nf(th.gps[0], 0)} % der Touren Sprünge haben, mäßig bis ${nf(th.gps[1], 0)} %. Puls: gut, wenn höchstens ${nf(th.hr[0], 0)} % der Touren Aussetzer haben, mäßig bis ${nf(th.hr[1], 0)} %. Eine Einschätzung gibt es ab ${q.min_n} verglichenen Touren. Strecke und Höhe der Touren werden dabei nie verändert.</p></details>
+    <div class="dvbad" data-bad="${g.id}">${g.flagged ? `<h4>Auffällige Touren (${g.flagged})</h4><div class="dvbadl mut">Wird geladen …</div>` : `<p class="mut">Keine auffälligen Touren.</p>`}</div>`;
+}
+
+const DVQ_FLAG = f => ({
+  dist_implausible: `Strecke unplausibel: Uhr ${nf((f.dev_m || 0) / 1000, 1)} km, Tour ${nf((f.tour_m || 0) / 1000, 1)} km`,
+  dist: `Strecke ${nf(Math.abs(f.pct), 1)} % ${f.pct < 0 ? "kürzer" : "länger"}`,
+  height: `Aufstieg ${nf(f.up_dev, 0)} m laut Uhr, ${nf(f.up_dem, 0)} m laut Gelände`,
+  gps_jumps: `${f.n} ${f.n === 1 ? "GPS-Sprung" : "GPS-Sprünge"}`,
+  gps_gaps: `${nf(f.pct, 0)} % Lücken oder Pausen`,
+  hr: `${nf(f.pct, 0)} % Puls unplausibel`,
+}[f.kind] || f.kind);
+
+async function dvQBad(box, g, viewer, again) {
+  const host = box.querySelector(".dvbadl");
+  if (!host) return;
+  try {
+    const r = await api(`/api/devices/${g.id}/quality/tours?limit=60`);
+    host.className = "dvbadl";
+    host.innerHTML = r.tours.length ? `<ul class="dvbadul">${r.tours.map((t, i) => `<li><div class="dvbt"><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${esc(dvDay(t.day))}</span></div>
+        <div class="dvchips">${t.flags.map(f => `<span class="dvc fl ${f.kind === "dist_implausible" || f.kind === "gps_jumps" ? "bad" : "warn"}">${esc(DVQ_FLAG(f))}</span>`).join("")}${t.fixed ? `<span class="dvc">${t.fixed === "zepp" ? "Höhe aus Uhr übernommen" : "Höhe aus Gelände übernommen"}</span>` : ""}</div>
+        ${viewer ? "" : `<button class="btn alt sm" type="button" data-i="${i}">Korrektur vorschlagen</button>`}</li>`).join("")}</ul>${r.total > r.tours.length ? `<p class="mut">Gezeigt werden die ${r.tours.length} auffälligsten von ${r.total}.</p>` : ""}` : `<p class="mut">Keine auffälligen Touren.</p>`;
+    host.querySelectorAll("button[data-i]").forEach(b => (b.onclick = () => dvSuggest(r.tours[+b.dataset.i], g, again)));
+    const lis = [...host.querySelectorAll(".dvbadul li")];
+    if (lis.length > 8) {
+      lis.slice(8).forEach(li => (li.hidden = true));
+      const more = document.createElement("button");
+      more.type = "button"; more.className = "btn ghost sm dvmoreb"; more.textContent = `Alle ${lis.length} zeigen`;
+      more.onclick = () => { lis.forEach(li => (li.hidden = false)); more.remove(); };
+      host.appendChild(more);
+    }
+  } catch (e) {
+    host.innerHTML = `<span class="bad">${esc(e.message)}</span>`;
+  }
+}
+
+/* Korrektur vorschlagen: nur Vorschläge – jede Aktion läuft erst nach Bestätigung und ist (Höhe) rückgängig zu machen */
+function dvSuggest(t, g, again) {
+  const info = {
+    "elev-dem": "Rechnet Auf- und Abstieg aus dem Geländemodell neu (Kartendaten werden bei Bedarf aus dem Internet geladen). Das Original bleibt gespeichert.",
+    "elev-zepp": "Übernimmt den Höhenverlauf der barometrischen Uhr aus der Zepp-Cloud. Das Original bleibt gespeichert.",
+    "trackfix": "Öffnet die Track-Korrektur: Du siehst zuerst die gefundenen Sprünge und entscheidest dort, was entfernt wird. Das Original bleibt erhalten.",
+    "elev-restore": "Stellt die ursprünglichen Höhen und Höhenmeter wieder her.",
+  };
+  const m = dvBox(`<h2>Korrektur vorschlagen</h2><p class="dvlead"><b>${esc(t.name)}</b> · ${esc(dvDay(t.day))}</p>
+    <div class="dvchips">${t.flags.map(f => `<span class="dvc fl ${f.kind === "dist_implausible" || f.kind === "gps_jumps" ? "bad" : "warn"}">${esc(DVQ_FLAG(f))}</span>`).join("")}</div>
+    <p class="mut">Es passiert nichts, bevor du es bestätigst. Strecke und Zeit der Tour werden hier nicht geändert.</p>
+    <div class="dvsug">${t.suggest.map((s, i) => `<div class="dvsg"><div><b>${esc(s.label)}</b><small class="dvh">${esc(info[s.action] || s.label)}</small>${s.action === "info" ? "" : ""}</div>${s.action === "info" ? "" : `<button class="btn alt sm" data-i="${i}" type="button">${s.action === "trackfix" ? "Öffnen …" : "Ausführen …"}</button>`}</div>`).join("")}</div>
+    <div class="dvsres" role="status" aria-live="polite"></div>
+    <div class="dvfoot"><button class="btn ghost" id="dvsx">Schließen</button></div>`);
+  $("#dvsx").onclick = () => m.remove();
+  const res = m.querySelector(".dvsres");
+  m.querySelectorAll(".dvsug button[data-i]").forEach(b => (b.onclick = async () => {
+    const s = t.suggest[+b.dataset.i];
+    if (s.action === "trackfix") { m.remove(); return trackFixDialog(t.id, () => { MET_CACHE.clear(); loadTours().catch(() => {}); again(); }); }
+    if (!confirm(`${s.label}?\n\n${info[s.action] || ""}`)) return;
+    b.disabled = true;
+    res.textContent = "Wird ausgeführt …";
+    try {
+      const r = await api(s.url, {method: s.method || "POST"});
+      MET_CACHE.clear();
+      await loadTours().catch(() => {});
+      if (s.undo) {
+        res.innerHTML = `<p><b>Übernommen:</b> Aufstieg ${nf(r.up_m ?? r.up, 0)} m, Abstieg ${nf(r.down_m ?? r.down, 0)} m (vorher ${nf(r.orig_up, 0)} m / ${nf(r.orig_down, 0)} m).</p><button class="btn alt sm" id="dvsundo" type="button">Rückgängig machen</button>`;
+        $("#dvsundo").onclick = async () => {
+          try { await api(s.undo, {method: "POST"}); MET_CACHE.clear(); await loadTours().catch(() => {}); res.textContent = "Zurückgenommen: das Original ist wieder da."; } catch (e) { res.innerHTML = `<span class="bad">${esc(e.message)}</span>`; }
+        };
+      } else res.textContent = "Erledigt.";
+      res.insertAdjacentHTML("beforeend", `<p class="mut">Die Kennzahlen der Uhr ändern sich erst beim nächsten „Genauigkeit auswerten“.</p>`);
+    } catch (e) {
+      b.disabled = false;
+      res.innerHTML = `<span class="bad">${esc(e.message)}</span>`;
+    }
+  }));
+}
+
+/* Auswertung im Hintergrund starten und Fortschritt anzeigen */
+async function dvQRun(root, btn, again) {
+  const progs = [...root.querySelectorAll(".dvqprog")], btns = [...root.querySelectorAll(".dvqrun")];
+  const say = t => progs.forEach(p => (p.textContent = t));
+  btns.forEach(b => (b.disabled = true));
+  say("Wird gestartet …");
+  try {
+    await api("/api/jobs/dev-quality", {method: "POST"});
+    for (let i = 0; i < 600; i++) {
+      await new Promise(r => setTimeout(r, 1500));
+      const j = await api("/api/jobs").catch(() => null);
+      if (!j) break;
+      const last = (j.log || []).filter(x => /Genauigkeit/.test(x)).slice(-1)[0] || "";
+      say(j.running ? j.progress || last.replace(/^\d\d:\d\d:\d\d /, "") || "Läuft …" : "");
+      if (!j.running) {
+        if (j.ok === false) throw new Error("Die Auswertung ist fehlgeschlagen. Details stehen im Protokoll der Verwaltung.");
+        break;
+      }
+    }
+  } catch (e) {
+    say(e.message);
+    btns.forEach(b => (b.disabled = false));
+    return;
+  }
+  again();
+}
+
 /* ---------- Abschnitt in der Verwaltung ---------- */
 async function devPanel() {
   const root = $("#devsec");
   if (!root) return;
-  const [dv, sug, mc] = await Promise.all([api("/api/my-devices"), api("/api/devices/suggestions").catch(() => []), api("/api/devices/manual-check").catch(() => null)]);
+  const [dv, sug, mc, qa] = await Promise.all([api("/api/my-devices"), api("/api/devices/suggestions").catch(() => []), api("/api/devices/manual-check").catch(() => null), api("/api/devices/quality").catch(() => null)]);
+  const qmap = {};
+  ((qa && qa.devices) || []).forEach(x => (qmap[x.id] = x));
   const hidden = k => { try { return localStorage.getItem("mt_devsug_" + k) === "1"; } catch (e) { return false; } };
   const sugs = dv.devices.length ? sug.filter(s => !hidden(s.kind)) : [];
   const viewer = typeof isViewer === "function" && isViewer();
@@ -246,12 +399,14 @@ async function devPanel() {
       ${!g.model && g.zsrc ? `<span class="dvsub">Zepp meldet: ${esc(g.zsrc)}</span>` : ""}
       <span class="dvper">${dvPeriod(g).map(x => `<span>${esc(x)}</span>`).join("")}</span>
       ${g.note ? `<span class="dvsub">${esc(g.note)}</span>` : ""}
-      <div class="dvchips"><span class="dvc ${g.active ? "on" : ""}">${g.active ? "Aktiv" : "Deaktiviert"}</span><span class="dvc">${dvTours(g.n)}</span></div></div>
-      ${viewer ? "" : `<button class="dvmore" aria-haspopup="menu" aria-expanded="false" title="Aktionen" aria-label="Aktionen">${DV_SVG.dots}</button>`}</div>`;
+      <div class="dvchips"><span class="dvc ${g.active ? "on" : ""}">${g.active ? "Aktiv" : "Deaktiviert"}</span><span class="dvc">${dvTours(g.n)}</span></div>
+      ${dvGives(qmap[g.id])}</div>
+      ${viewer ? "" : `<button class="dvmore" aria-haspopup="menu" aria-expanded="false" title="Aktionen" aria-label="Aktionen">${DV_SVG.dots}</button>`}
+      ${qmap[g.id] ? `<details class="dvq" data-q="${g.id}" ${DVQ_OPEN.has(g.id) ? "open" : ""}><summary><span>Genauigkeit</span>${qmap[g.id].n_eval ? `<span class="dvqs ${DVQ_CLS[qmap[g.id].verdict.level] || "none"}">${esc(qmap[g.id].verdict.label)}</span>` : `<span class="dvqs none">noch nicht ausgewertet</span>`}</summary><div class="dvqb">${dvQBody(qa, qmap[g.id], viewer)}</div></details>` : ""}</div>`;
   const empty = `<div class="dvempty"><span class="dvav">${dvIcon("zepp")}</span><h3>Noch kein Gerät angelegt</h3>
       <p>Lege deine Uhren und Handys an, damit bei jeder Tour steht, womit sie aufgezeichnet wurde.</p>
       ${viewer ? "" : `<div class="row"><button class="btn" id="dvzepp">Gerät aus Zepp ermitteln</button><button class="btn alt" id="dvnew2">Gerät von Hand anlegen</button></div>`}</div>`;
-  root.innerHTML = `<div class="dvhead"><h2>Meine Geräte</h2><span class="sp"></span>${viewer || !dv.devices.length ? "" : `${mc && mc.total ? `<button class="btn ghost sm" id="dvall" title="Alle ${mc.total} von Hand gesetzten Zuordnungen zurücknehmen; danach entscheidet die Automatik (Art, Zepp-Kennung, Datum)">Alle Handzuordnungen zurücksetzen</button>` : ""}<button class="btn alt sm" id="dvmatch" title="Alle Touren mit passendem Zepp-Training dem richtigen Gerät zuordnen">Touren automatisch zuordnen</button><button class="btn alt sm" id="dvzepp">Geräte aus Zepp ermitteln</button><button class="btn sm" id="dvnew">+ Gerät anlegen</button>`}</div>
+  root.innerHTML = `<div class="dvhead"><h2>Meine Geräte</h2><span class="sp"></span>${viewer || !dv.devices.length ? "" : `${mc && mc.total ? `<button class="btn ghost sm" id="dvall" title="Alle ${mc.total} von Hand gesetzten Zuordnungen zurücknehmen; danach entscheidet die Automatik (Art, Zepp-Kennung, Datum)">Alle Handzuordnungen zurücksetzen</button>` : ""}<button class="btn alt sm" id="dvmatch" title="Alle Touren mit passendem Zepp-Training dem richtigen Gerät zuordnen">Touren automatisch zuordnen</button>${qa ? `<button class="btn alt sm dvqrun" id="dvqall" title="Vergleicht, was die Uhren gemessen haben, mit Strecke, Geländemodell und GPS-Spur. Verändert keine Tour.">Genauigkeit auswerten</button>` : ""}<button class="btn alt sm" id="dvzepp">Geräte aus Zepp ermitteln</button><button class="btn sm" id="dvnew">+ Gerät anlegen</button>`}</div>
     <p class="mut dvintro">Deine Aufnahmegeräte mit eigenem Namen. Der Name erscheint bei jeder Tour als „Quelle“; welche Messwerte eine Tour zeigt, richtet sich nach dem, was das Gerät wirklich geliefert hat.</p>
     ${mc && mc.redundant && !viewer ? `<div class="dvhint" id="dvred"><span><b>${mc.redundant} ${mc.redundant === 1 ? "Tour steht" : "Touren stehen"} als „von Hand zugeordnet“, entspr${mc.redundant === 1 ? "icht" : "echen"} aber der automatischen Zuordnung</b><span class="mut">Die Zuordnung ändert sich dabei nicht – nur der Zusatz „von Hand“ entfällt, und künftige Änderungen (z. B. neues Gerät, geänderter Zeitraum) wirken wieder automatisch.</span></span>
       <button class="btn sm" id="dvredok">Auf automatisch umstellen</button></div>` : ""}
@@ -310,7 +465,7 @@ async function devPanel() {
   root.querySelectorAll("[data-dv]").forEach(r => {
     const g = dv.devices.find(x => x.id === +r.dataset.dv);
     if (viewer) return;
-    r.onclick = e => { if (!e.target.closest(".dvmore")) devForm(dv, g, again); };
+    r.onclick = e => { if (!e.target.closest(".dvmore, .dvq")) devForm(dv, g, again); };
     const mb = r.querySelector(".dvmore");
     mb.onclick = e => {
       e.stopPropagation();
@@ -327,6 +482,13 @@ async function devPanel() {
       ]);
     };
   });
+  root.querySelectorAll("details.dvq").forEach(dt => {
+    const id = +dt.dataset.q, g = qmap[id];
+    const load = () => { if (!dt.dataset.loaded) { dt.dataset.loaded = "1"; dvQBad(dt, g, viewer, again); } };
+    dt.addEventListener("toggle", () => { if (dt.open) { DVQ_OPEN.add(id); load(); } else DVQ_OPEN.delete(id); });
+    if (dt.open) load();
+  });
+  root.querySelectorAll(".dvqrun").forEach(b => (b.onclick = e => { e.stopPropagation(); dvQRun(root, b, again); }));
   root.querySelectorAll("[data-sy]").forEach(b => (b.onclick = () => devForm(dv, {kind: b.dataset.sy, name: b.dataset.nm, active: true}, again)));
   root.querySelectorAll("[data-sn]").forEach(b => (b.onclick = () => {
     try { localStorage.setItem("mt_devsug_" + b.dataset.sn, "1"); } catch (e) {}

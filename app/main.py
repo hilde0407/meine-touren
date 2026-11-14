@@ -16,7 +16,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices
+from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -55,7 +55,7 @@ async def no_stale_static(request: Request, call_next):
 
 
 VIEWER_GET = re.compile(
-    r"^(/api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings|hr/stats|my-devices|my-devices/\d+/photo"
+    r"^(/api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings|hr/stats|my-devices|my-devices/\d+/photo|devices/quality|devices/\d+/quality/tours"
     r"|tours|tours/[^/]+|tours/[^/]+/(coords|best-photos|weather|gpx|hr|metrics)|trips/[^/]+|records/altitude|weather/stats)"
     r"|/photo/[^/]+|/pic/[^/]+|/tiles/.+)$")
 # Ohne Anmeldung nur diese Pfade – exakt verglichen (ein Präfix würde auch /api/me/2fa/… oder /api/zepp-token/test öffnen).
@@ -438,6 +438,7 @@ JOBS = {
     "hr-backfill": ("Puls für Zepp-Touren nachladen", lambda dry: puls.backfill_hr()),
     "met-backfill": ("Messwerte der Geräte nachladen", lambda dry: metrics.backfill()),
     "dev-match": ("Touren den Zepp-Uhren zuordnen", lambda dry: mydevices.match_all()),
+    "dev-quality": ("Genauigkeit der Uhren auswerten", lambda dry: devquality.run()),
     "elev-zepp": ("Höhe aus Zepp-Uhr abgleichen", lambda dry: elev.zepp_fix_all()),
     "export": ("Zepp-Import (ohne Upload)", lambda dry: sync.export_zepp()),
 }
@@ -897,6 +898,7 @@ app.include_router(gipfel.router)
 app.include_router(puls.router)
 app.include_router(metrics.router)
 app.include_router(mydevices.router)
+app.include_router(devquality.router)
 app.include_router(more.router)
 app.include_router(more2.router)
 app.include_router(gear.router)

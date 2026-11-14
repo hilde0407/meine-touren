@@ -593,8 +593,8 @@ svg.ic{display:inline-block;vertical-align:-3px;margin-right:6px;flex:none}
 .fbar,.fctl{transition:opacity .5s}.flight.idle .fbar,.flight.idle .fctl{opacity:0;pointer-events:none}
 
 /* =====================  Meine Geräte (3.9.1): Kartenliste, Dialoge, Gerätezeile der Tourseite  ===================== */
-:root{--dv-tint:color-mix(in srgb,var(--bars) 13%,var(--card));--dv-ok:#1d6b46;--dv-ok-bg:color-mix(in srgb,#2f8f5f 14%,var(--card))}
-@media (prefers-color-scheme:dark){:root{--dv-ok:#86dbb0;--dv-ok-bg:color-mix(in srgb,#2f8f5f 24%,var(--card))}}
+:root{--dv-tint:color-mix(in srgb,var(--bars) 13%,var(--card));--dv-ok:#1d6b46;--dv-ok-bg:color-mix(in srgb,#2f8f5f 14%,var(--card));--dv-warn:#6b4f00;--dv-warn-bg:color-mix(in srgb,var(--yellow) 26%,var(--card));--dv-bad:#9c322d;--dv-bad-bg:color-mix(in srgb,#b2443f 14%,var(--card))}
+@media (prefers-color-scheme:dark){:root{--dv-ok:#86dbb0;--dv-ok-bg:color-mix(in srgb,#2f8f5f 24%,var(--card));--dv-warn:#f2d27a;--dv-warn-bg:color-mix(in srgb,var(--yellow) 22%,var(--card));--dv-bad:#f4a8a3;--dv-bad-bg:color-mix(in srgb,#b2443f 30%,var(--card))}}
 .dvav{display:inline-flex;align-items:center;justify-content:center;flex:none;width:64px;height:64px;border-radius:18px;background:var(--dv-tint);color:var(--bars);overflow:hidden}
 .dvav svg{width:70%;height:70%}.dvav img{width:100%;height:100%;object-fit:cover;display:block}
 .dvav.lg{width:96px;height:96px;border-radius:24px}.dvav.xs{width:26px;height:26px;border-radius:8px}
@@ -650,3 +650,41 @@ svg.ic{display:inline-block;vertical-align:-3px;margin-right:6px;flex:none}
 html.mob .dvlist{grid-template-columns:1fr}html.mob .dvf2{grid-template-columns:1fr}html.mob .dvmenu button{min-height:44px}html.mob .dvmore{width:44px;height:44px;top:4px;right:4px}
 html.mob .dvrow{border-radius:16px}
 .mbox.dvbox .dvfoot{position:sticky;bottom:-22px;background:var(--bg);padding:12px 0 6px;margin-bottom:-6px;z-index:1}
+
+/* Genauigkeit der Uhren (3.10.0) */
+.dvcard{flex-wrap:wrap}.dvcard:has(.dvq[open]){grid-column:1/-1}
+.dvgive{margin-top:8px}.dvgive b{font-weight:600;color:var(--ink)}.dvch{display:inline-block;padding:0 9px;margin:2px 2px 0 0;border-radius:99px;background:var(--soft);color:var(--ink);font-size:14px;line-height:1.55}
+.dvq{flex:1 1 100%;min-width:0;border-top:1px solid var(--rule);margin-top:4px;padding-top:2px;cursor:default}
+.dvq>summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;padding:8px 0;font:600 16px var(--b);min-height:44px;list-style:none}
+.dvq>summary::-webkit-details-marker{display:none}
+.dvq>summary::before{content:"";width:8px;height:8px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:rotate(-45deg);transition:transform .15s;margin:0 4px 0 2px}
+.dvq[open]>summary::before{transform:rotate(45deg)}
+.dvqs,.dvks{display:inline-block;padding:1px 10px;border-radius:99px;font:600 14px/1.6 var(--b)}
+.dvqs.ok,.dvks.ok,.dvqv.ok b{background:var(--dv-ok-bg);color:var(--dv-ok)}.dvqs.warn,.dvks.warn,.dvqv.warn b{background:var(--dv-warn-bg);color:var(--dv-warn)}.dvqs.bad,.dvks.bad,.dvqv.bad b{background:var(--dv-bad-bg);color:var(--dv-bad)}
+.dvqs.none,.dvks.none{background:var(--soft);color:var(--mut);font-weight:500}
+.dvqb{padding:4px 0 10px;cursor:default}
+.dvqv{font-size:18px;margin:2px 0 6px}.dvqv b{display:inline-block;padding:1px 12px;border-radius:99px;font:700 18px/1.6 var(--b)}.dvqv.none b{background:var(--soft);color:var(--mut)}
+.dvfind{margin:4px 0 12px;padding-left:20px}.dvfind li{margin:3px 0}
+.dvkpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin:8px 0 14px}
+.dvk{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid var(--rule);border-radius:var(--r);background:var(--card);min-width:0}
+.dvkl{font:600 14px var(--b);color:var(--mut)}.dvkv{font:700 26px/1.1 var(--d);font-variant-numeric:tabular-nums;color:var(--ink)}.dvks{align-self:flex-start;margin-top:2px}.dvkn{font-size:14px;color:var(--mut);line-height:1.35;overflow-wrap:anywhere}
+.dvfigs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px;margin:6px 0}
+.dvfig{margin:0}.dvfig figcaption{font:600 15px var(--b);margin:0 0 2px}.dvdots{display:block;width:100%;max-width:420px;height:auto}
+.dvdots .dvb.ok{fill:var(--dv-ok-bg)}.dvdots .dvb.warn{fill:var(--dv-warn-bg)}.dvdots .dvb.bad{fill:var(--dv-bad-bg)}
+.dvdots .dvzero{stroke:var(--mut);stroke-width:1;stroke-dasharray:2 2}.dvdots .dvdot{fill:var(--ink);fill-opacity:.78}
+.dvdots .dvbox2{fill:var(--bars)}.dvdots .dvmed{stroke:var(--card);stroke-width:2.5}.dvdots .dvax{fill:var(--mut);font:12px var(--b)}
+.dvtip{margin:10px 0 0;padding:8px 12px;border-left:4px solid var(--yellow);background:color-mix(in srgb,var(--yellow) 10%,var(--card));border-radius:var(--r);font-size:15px}
+.dvqfoot{margin:14px 0 4px!important;align-items:center}.dvqprog{color:var(--mut);font-size:14px}
+.dvhow{margin-top:8px}.dvhow summary{cursor:pointer;font:600 14px var(--b);color:var(--mut);padding:6px 0}
+.dvbad{margin-top:12px}.dvbad h4{margin:0 0 6px;font:700 18px var(--d)}
+.dvbadul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.dvbadul li{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;padding:8px 10px;border:1px solid var(--rule);border-radius:var(--r);background:var(--card)}
+.dvbt{display:flex;flex-direction:column;min-width:0;flex:1 1 180px}.dvbt a{font-weight:600;color:var(--ink);overflow-wrap:anywhere}.dvbt .mut{font-size:14px}
+.dvbadul .dvchips{margin:0;flex:2 1 220px}
+.dvc.fl{border-radius:var(--r)}.dvc.fl.warn{background:var(--dv-warn-bg);color:var(--dv-warn)}.dvc.fl.bad{background:var(--dv-bad-bg);color:var(--dv-bad)}
+.dvqempty ul{margin:6px 0 8px;padding-left:20px}.dvqempty li{margin:3px 0}
+.dvsug{display:grid;gap:8px;margin:12px 0}.dvsg{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--rule);border-radius:var(--r);background:var(--card)}
+.dvsg>div{min-width:0}.dvsg b{display:block}.dvsres{margin-top:6px;min-height:1.4em}.dvsres p{margin:4px 0}
+@media (max-width:520px){.dvkv{font-size:24px}.dvsg{flex-direction:column;align-items:stretch}.dvbadul .btn{width:100%}}
+html.mob .dvq>summary{min-height:48px}
+.dvbadul li[hidden]{display:none}.dvmoreb{margin-top:10px}

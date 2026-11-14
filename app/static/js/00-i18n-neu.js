@@ -844,4 +844,100 @@ Technische Angaben || Technical details || Informations techniques || Datos téc
 Felder eines Zepp-Trainings: || Fields of a Zepp workout: || Champs d’un entraînement Zepp : || Campos de un entrenamiento de Zepp:
 Ausgewählte übernehmen || Apply selected || Appliquer la sélection || Aplicar selección
 Bitte mindestens eine Quelle auswählen. || Please select at least one source. || Veuillez sélectionner au moins une source. || Selecciona al menos un origen.
+Genauigkeit || Accuracy || Précision || Precisión
+noch nicht ausgewertet || not evaluated yet || pas encore évalué || aún sin evaluar
+Genauigkeit auswerten || Evaluate accuracy || Évaluer la précision || Evaluar la precisión
+Das liefert diese Uhr: || What this watch provides: || Ce que fournit cette montre : || Lo que ofrece este reloj:
+noch keine Messwerte erkannt (Verwaltung → „Messwerte nachladen“) || no measurements detected yet (Admin → “Load measurements”) || aucune mesure détectée pour l’instant (Administration → « Recharger les mesures ») || aún no se han detectado mediciones (Administración → «Cargar mediciones»)
+Noch nicht ausgewertet. || Not evaluated yet. || Pas encore évalué. || Aún sin evaluar.
+Die App vergleicht, was die Uhr gemessen hat, mit der Strecke der Tour, dem Geländemodell und der gespeicherten GPS-Spur. Dafür braucht sie: || The app compares what the watch measured with the tour’s distance, the terrain model and the stored GPS track. For this it needs: || L’application compare ce que la montre a mesuré avec la distance du parcours, le modèle de terrain et la trace GPS enregistrée. Pour cela, il lui faut : || La app compara lo que midió el reloj con la distancia de la ruta, el modelo de terreno y el track GPS guardado. Para ello necesita:
+Touren, die dieser Uhr zugeordnet sind (aktuell: {}). || Tours assigned to this watch (currently: {}). || Parcours attribués à cette montre (actuellement : {}). || Rutas asignadas a este reloj (ahora: {}).
+Touren, die dieser Uhr zugeordnet sind – siehe „Touren automatisch zuordnen“. || Tours assigned to this watch – see “Assign tours automatically”. || Parcours attribués à cette montre – voir « Attribuer automatiquement les parcours ». || Rutas asignadas a este reloj: consulta «Asignar rutas automáticamente».
+Den Zepp-Zugang aus der Verwaltung (ist eingerichtet) – damit lassen sich auch Komoot-Touren mit dem Training der Uhr vergleichen. || The Zepp access from Admin (is set up) – it also allows comparing Komoot tours with the watch’s workout. || L’accès Zepp de l’administration (configuré) – il permet aussi de comparer les parcours Komoot avec l’entraînement de la montre. || El acceso a Zepp de Administración (configurado): permite comparar también las rutas de Komoot con el entrenamiento del reloj.
+Einen Zepp-Zugang in der Verwaltung – ohne ihn bleiben Strecke und Höhe bei Komoot-Touren leer. || A Zepp access in Admin – without it, distance and elevation stay empty for Komoot tours. || Un accès Zepp dans l’administration – sans lui, distance et dénivelé restent vides pour les parcours Komoot. || Un acceso a Zepp en Administración: sin él, la distancia y el desnivel quedan vacíos en las rutas de Komoot.
+Die Auswertung liest nur und verändert keine Tour. || The evaluation only reads and does not change any tour. || L’évaluation ne fait que lire et ne modifie aucun parcours. || La evaluación solo lee y no modifica ninguna ruta.
+keine Einschätzung || no rating || pas d’évaluation || sin valoración
+Höhe || Elevation || Dénivelé || Desnivel
+GPS-Spur || GPS track || Trace GPS || Track GPS
+Puls || Heart rate || Fréquence cardiaque || Pulso
+gut || good || bon || bueno
+auffällig || conspicuous || remarquable || llamativo
+{} Touren verglichen || {} tours compared || {} parcours comparés || {} rutas comparadas
+{} Tour verglichen || {} tour compared || {} parcours comparé || {} ruta comparada
+{} Touren verglichen, {} unplausibel || {} tours compared, {} implausible || {} parcours comparés, {} invraisemblables || {} rutas comparadas, {} inverosímiles
+{} Tour verglichen, {} unplausibel || {} tour compared, {} implausible || {} parcours comparé, {} invraisemblable || {} ruta comparada, {} inverosímil
+{} unplausibel || {} implausible || {} invraisemblable(s) || {} inverosímil(es)
+nicht vergleichbar || not comparable || non comparable || no comparable
+{} Touren, Aufstieg {} m || {} tours, ascent {} m || {} parcours, montée {} m || {} rutas, subida {} m
+{} Tour, Aufstieg {} m || {} tour, ascent {} m || {} parcours, montée {} m || {} ruta, subida {} m
+Touren mit Sprüngen (von {}) || Tours with jumps (of {}) || Parcours avec sauts (sur {}) || Rutas con saltos (de {})
+keine Spur || no track || pas de trace || sin track
+Touren mit Aussetzern (von {}) || Tours with dropouts (of {}) || Parcours avec interruptions (sur {}) || Rutas con interrupciones (de {})
+kein Puls || no heart rate || pas de pouls || sin pulso
+Strecke: Abweichung der Uhr je Tour || Distance: deviation of the watch per tour || Distance : écart de la montre par parcours || Distancia: desviación del reloj por ruta
+Aufstieg: Abweichung vom Geländemodell je Tour || Ascent: deviation from the terrain model per tour || Montée : écart par rapport au modèle de terrain, par parcours || Subida: desviación del modelo de terreno por ruta
+Mittlere Hälfte der Touren: {} bis {}, Median {}. || Middle half of the tours: {} to {}, median {}. || Moitié centrale des parcours : {} à {}, médiane {}. || Mitad central de las rutas: {} a {}, mediana {}.
+Zuletzt ausgewertet am {}. || Last evaluated on {}. || Dernière évaluation le {}. || Última evaluación el {}.
+Wie wird bewertet? || How is it rated? || Comment est-ce évalué ? || ¿Cómo se valora?
+Strecke: gut bis {} %, mäßig bis {} % mittlere Abweichung. Höhe: gut bis {} %, mäßig bis {} % gegenüber dem Geländemodell (das Modell glättet Gelände und unterschätzt Aufstiege etwas). GPS-Spur: gut, wenn höchstens {} % der Touren Sprünge haben, mäßig bis {} %. Puls: gut, wenn höchstens {} % der Touren Aussetzer haben, mäßig bis {} %. Eine Einschätzung gibt es ab {} verglichenen Touren. Strecke und Höhe der Touren werden dabei nie verändert. || Distance: good up to {} %, fair up to {} % mean deviation. Elevation: good up to {} %, fair up to {} % compared with the terrain model (the model smooths terrain and slightly underestimates ascents). GPS track: good if at most {} % of tours have jumps, fair up to {} %. Heart rate: good if at most {} % of tours have dropouts, fair up to {} %. A rating is given from {} compared tours. Distance and elevation of the tours are never changed. || Distance : bon jusqu’à {} %, moyen jusqu’à {} % d’écart moyen. Dénivelé : bon jusqu’à {} %, moyen jusqu’à {} % par rapport au modèle de terrain (le modèle lisse le relief et sous-estime un peu les montées). Trace GPS : bon si au plus {} % des parcours ont des sauts, moyen jusqu’à {} %. Pouls : bon si au plus {} % des parcours ont des interruptions, moyen jusqu’à {} %. Une évaluation est donnée à partir de {} parcours comparés. La distance et le dénivelé des parcours ne sont jamais modifiés. || Distancia: buena hasta {} %, regular hasta {} % de desviación media. Desnivel: bueno hasta {} %, regular hasta {} % respecto al modelo de terreno (el modelo suaviza el terreno y subestima algo las subidas). Track GPS: bueno si como máximo el {} % de las rutas tiene saltos, regular hasta {} %. Pulso: bueno si como máximo el {} % de las rutas tiene interrupciones, regular hasta {} %. La valoración se da a partir de {} rutas comparadas. La distancia y el desnivel de las rutas nunca se modifican.
+Auffällige Touren ({}) || Conspicuous tours ({}) || Parcours remarquables ({}) || Rutas llamativas ({})
+Keine auffälligen Touren. || No conspicuous tours. || Aucun parcours remarquable. || Ninguna ruta llamativa.
+Korrektur vorschlagen || Suggest a correction || Proposer une correction || Proponer una corrección
+Alle {} zeigen || Show all {} || Tout afficher ({}) || Mostrar las {}
+Gezeigt werden die {} auffälligsten von {}. || Showing the {} most conspicuous of {}. || Les {} plus remarquables sur {} sont affichés. || Se muestran las {} más llamativas de {}.
+Strecke unplausibel: Uhr {} km, Tour {} km || Distance implausible: watch {} km, tour {} km || Distance invraisemblable : montre {} km, parcours {} km || Distancia inverosímil: reloj {} km, ruta {} km
+Strecke {} % kürzer || Distance {} % shorter || Distance {} % plus courte || Distancia {} % más corta
+Strecke {} % länger || Distance {} % longer || Distance {} % plus longue || Distancia {} % más larga
+Aufstieg {} m laut Uhr, {} m laut Gelände || Ascent {} m per watch, {} m per terrain || Montée {} m selon la montre, {} m selon le terrain || Subida {} m según el reloj, {} m según el terreno
+{} GPS-Sprung || {} GPS jump || {} saut GPS || {} salto GPS
+{} GPS-Sprünge || {} GPS jumps || {} sauts GPS || {} saltos GPS
+{} % Lücken oder Pausen || {} % gaps or pauses || {} % de trous ou de pauses || {} % de huecos o pausas
+{} % Puls unplausibel || {} % heart rate implausible || {} % de pouls invraisemblable || {} % de pulso inverosímil
+Höhe aus Uhr übernommen || Elevation taken from watch || Dénivelé repris de la montre || Desnivel tomado del reloj
+Höhe aus Gelände übernommen || Elevation taken from terrain || Dénivelé repris du terrain || Desnivel tomado del terreno
+Es passiert nichts, bevor du es bestätigst. Strecke und Zeit der Tour werden hier nicht geändert. || Nothing happens until you confirm. Distance and time of the tour are not changed here. || Rien ne se passe avant votre confirmation. La distance et la durée du parcours ne sont pas modifiées ici. || No ocurre nada hasta que lo confirmes. Aquí no se cambian la distancia ni el tiempo de la ruta.
+Rechnet Auf- und Abstieg aus dem Geländemodell neu (Kartendaten werden bei Bedarf aus dem Internet geladen). Das Original bleibt gespeichert. || Recalculates ascent and descent from the terrain model (map data is downloaded from the internet if needed). The original stays saved. || Recalcule la montée et la descente à partir du modèle de terrain (les données cartographiques sont téléchargées si nécessaire). L’original reste conservé. || Recalcula la subida y la bajada con el modelo de terreno (los datos del mapa se descargan de internet si hace falta). El original queda guardado.
+Übernimmt den Höhenverlauf der barometrischen Uhr aus der Zepp-Cloud. Das Original bleibt gespeichert. || Takes the elevation profile of the barometric watch from the Zepp cloud. The original stays saved. || Reprend le profil d’altitude de la montre barométrique depuis le cloud Zepp. L’original reste conservé. || Toma el perfil de altitud del reloj barométrico desde la nube de Zepp. El original queda guardado.
+Öffnet die Track-Korrektur: Du siehst zuerst die gefundenen Sprünge und entscheidest dort, was entfernt wird. Das Original bleibt erhalten. || Opens the track correction: you first see the jumps found and decide there what is removed. The original is kept. || Ouvre la correction de trace : vous voyez d’abord les sauts trouvés et décidez là ce qui est supprimé. L’original est conservé. || Abre la corrección del track: primero ves los saltos encontrados y decides allí qué se elimina. El original se conserva.
+Stellt die ursprünglichen Höhen und Höhenmeter wieder her. || Restores the original elevations and ascent. || Rétablit les altitudes et dénivelés d’origine. || Restaura las alturas y los desniveles originales.
+Ausführen … || Run … || Exécuter … || Ejecutar …
+Öffnen … || Open … || Ouvrir … || Abrir …
+Wird ausgeführt … || Running … || Exécution … || Ejecutando …
+Übernommen: || Applied: || Appliqué : || Aplicado:
+Aufstieg {} m, Abstieg {} m (vorher {} m / {} m). || Ascent {} m, descent {} m (before: {} m / {} m). || Montée {} m, descente {} m (avant : {} m / {} m). || Subida {} m, bajada {} m (antes: {} m / {} m).
+Rückgängig machen || Undo || Annuler || Deshacer
+Zurückgenommen: das Original ist wieder da. || Reverted: the original is back. || Annulé : l’original est de retour. || Revertido: el original está de vuelta.
+Erledigt. || Done. || Terminé. || Hecho.
+Die Kennzahlen der Uhr ändern sich erst beim nächsten „Genauigkeit auswerten“. || The watch’s figures only change at the next “Evaluate accuracy”. || Les chiffres de la montre ne changent qu’à la prochaine « Évaluation de la précision ». || Las cifras del reloj solo cambian en la próxima «Evaluar la precisión».
+Wird gestartet … || Starting … || Démarrage … || Iniciando …
+Läuft … || Running … || En cours … || En curso …
+Die Auswertung ist fehlgeschlagen. Details stehen im Protokoll der Verwaltung. || The evaluation failed. Details are in the log in Admin. || L’évaluation a échoué. Les détails figurent dans le journal de l’administration. || La evaluación ha fallado. Los detalles están en el registro de Administración.
+Zuverlässig || Reliable || Fiable || Fiable
+Mit Einschränkungen zuverlässig || Reliable with limitations || Fiable avec réserves || Fiable con limitaciones
+Auffällige Abweichungen || Conspicuous deviations || Écarts notables || Desviaciones llamativas
+Noch keine Einschätzung || No rating yet || Pas encore d’évaluation || Aún sin valoración
+Für eine Einschätzung braucht jede Messgröße mindestens {} verglichene Touren. || For a rating, each measure needs at least {} compared tours. || Pour une évaluation, chaque mesure nécessite au moins {} parcours comparés. || Para una valoración, cada medida necesita al menos {} rutas comparadas.
+Die Strecke passt zur Komoot-Strecke (im Mittel {} % Abweichung). || The distance matches the Komoot distance ({} % mean deviation). || La distance correspond à celle de Komoot ({} % d’écart moyen). || La distancia coincide con la de Komoot ({} % de desviación media).
+Die Strecke passt zur gespeicherten Strecke (im Mittel {} % Abweichung). || The distance matches the stored distance ({} % mean deviation). || La distance correspond à la distance enregistrée ({} % d’écart moyen). || La distancia coincide con la guardada ({} % de desviación media).
+Die Uhr misst im Mittel {} % kürzer als die Komoot-Strecke. || The watch measures {} % shorter than the Komoot distance on average. || La montre mesure en moyenne {} % de moins que la distance Komoot. || El reloj mide de media un {} % menos que la distancia de Komoot.
+Die Uhr misst im Mittel {} % länger als die Komoot-Strecke. || The watch measures {} % longer than the Komoot distance on average. || La montre mesure en moyenne {} % de plus que la distance Komoot. || El reloj mide de media un {} % más que la distancia de Komoot.
+Die Uhr misst im Mittel {} % kürzer als die gespeicherte Strecke. || The watch measures {} % shorter than the stored distance on average. || La montre mesure en moyenne {} % de moins que la distance enregistrée. || El reloj mide de media un {} % menos que la distancia guardada.
+Die Uhr misst im Mittel {} % länger als die gespeicherte Strecke. || The watch measures {} % longer than the stored distance on average. || La montre mesure en moyenne {} % de plus que la distance enregistrée. || El reloj mide de media un {} % más que la distancia guardada.
+Die Abweichung schwankt von Tour zu Tour stark ({} bis {} %). || The deviation varies strongly from tour to tour ({} to {} %). || L’écart varie fortement d’un parcours à l’autre ({} à {} %). || La desviación varía mucho de una ruta a otra ({} a {} %).
+Auf- und Abstieg passen zum Geländemodell (im Mittel {} % Abweichung). || Ascent and descent match the terrain model ({} % mean deviation). || Montée et descente correspondent au modèle de terrain ({} % d’écart moyen). || La subida y la bajada coinciden con el modelo de terreno ({} % de desviación media).
+Der Aufstieg liegt im Mittel {} % niedriger als im Geländemodell (typische Abweichung {} %). || The ascent is {} % lower than in the terrain model on average (typical deviation {} %). || La montée est en moyenne {} % plus basse que dans le modèle de terrain (écart typique {} %). || La subida es de media un {} % menor que en el modelo de terreno (desviación típica {} %).
+Der Aufstieg liegt im Mittel {} % höher als im Geländemodell (typische Abweichung {} %). || The ascent is {} % higher than in the terrain model on average (typical deviation {} %). || La montée est en moyenne {} % plus haute que dans le modèle de terrain (écart typique {} %). || La subida es de media un {} % mayor que en el modelo de terreno (desviación típica {} %).
+Die GPS-Spur ist sauber (nur bei {} % der Touren Sprünge). || The GPS track is clean (jumps in only {} % of tours). || La trace GPS est propre (sauts dans seulement {} % des parcours). || El track GPS es limpio (saltos solo en el {} % de las rutas).
+Bei {} % der Touren springt die GPS-Spur (unmögliches Tempo). || In {} % of tours the GPS track jumps (impossible speed). || Dans {} % des parcours, la trace GPS saute (vitesse impossible). || En el {} % de las rutas el track GPS salta (velocidad imposible).
+Der Puls ist plausibel (nur bei {} % der Touren Aussetzer). || The heart rate is plausible (dropouts in only {} % of tours). || Le pouls est plausible (interruptions dans seulement {} % des parcours). || El pulso es plausible (interrupciones solo en el {} % de las rutas).
+Bei {} % der Touren hat der Puls Aussetzer oder unmögliche Werte. || In {} % of tours the heart rate has dropouts or impossible values. || Dans {} % des parcours, le pouls présente des interruptions ou des valeurs impossibles. || En el {} % de las rutas el pulso tiene interrupciones o valores imposibles.
+Bei einzelnen Touren lässt sich die Höhe aus dem Geländemodell neu berechnen oder mit der Uhr abgleichen (Liste „Auffällige Touren“). || For individual tours the elevation can be recalculated from the terrain model or matched with the watch (list “Conspicuous tours”). || Pour certains parcours, le dénivelé peut être recalculé à partir du modèle de terrain ou rapproché de la montre (liste « Parcours remarquables »). || En rutas concretas se puede recalcular el desnivel con el modelo de terreno o ajustarlo con el reloj (lista «Rutas llamativas»).
+Jede Änderung ist wiederherstellbar. || Every change can be restored. || Chaque modification est réversible. || Cada cambio se puede restaurar.
+Bei Touren mit GPS-Sprüngen hilft „GPS-Track bereinigen“. || For tours with GPS jumps, “Clean GPS track” helps. || Pour les parcours avec des sauts GPS, « Nettoyer la trace GPS » aide. || En rutas con saltos GPS ayuda «Limpiar track GPS».
+Das Original bleibt erhalten. || The original is kept. || L’original est conservé. || El original se conserva.
+Für Vergleiche der Strecken bitte beachten – die Strecke wird nicht geändert. || Please keep this in mind when comparing distances – the distance is not changed. || À garder en tête pour comparer les distances – la distance n’est pas modifiée. || Tenlo en cuenta al comparar distancias: la distancia no se modifica.
+Höhe aus Geländemodell neu berechnen || Recalculate elevation from terrain model || Recalculer le dénivelé à partir du modèle de terrain || Recalcular el desnivel con el modelo de terreno
+Höhe aus Uhr (Zepp) abgleichen || Match elevation with watch (Zepp) || Rapprocher le dénivelé de la montre (Zepp) || Ajustar el desnivel con el reloj (Zepp)
+GPS-Track bereinigen … || Clean GPS track … || Nettoyer la trace GPS … || Limpiar track GPS …
+Nur ein Hinweis: die Strecke wird nicht verändert. || Just a note: the distance is not changed. || Simple remarque : la distance n’est pas modifiée. || Solo una nota: la distancia no se modifica.
 `;
