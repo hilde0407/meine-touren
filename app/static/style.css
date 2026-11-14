@@ -747,3 +747,72 @@ html.mob .dvq>summary{min-height:48px}
 .utline{display:flex;gap:4px 24px}
 .uz1{background:#8fb8d8}.uz2{background:#6bb38a}.uz3{background:#c9b63a}.uz4{background:#e2b13c}.uz5{background:#e0803c}.uz6{background:#c0504d}
 .utsw{display:inline-block;width:10px;height:10px}
+
+/* Belastung und Erholung, Tempo nach Steigung, Ermüdungsverlauf (3.12.0) */
+#blsec [hidden],#tpsec [hidden]{display:none!important}
+.blctl{justify-content:space-between;margin:0 0 12px}
+.blsel{display:flex;align-items:center;gap:8px;font-size:15px}
+.blsel select{width:auto}
+.blnow{font:600 22px/1.2 var(--d);margin:2px 0 4px}
+.blnowd{font-size:15px}
+.blwrap{position:relative;margin:14px 0 4px}
+.blscroll{overflow-x:auto;padding-bottom:2px}
+.blsvg{display:block;max-width:none}
+.blgrid{stroke:var(--rule);stroke-width:1}
+.blbase{stroke:var(--mut);stroke-width:1}
+.blbar{fill:var(--utbar)}
+.blpart{fill:url(#blhatch);stroke:var(--utbar);stroke-width:1.5}
+.blnone{fill:none;stroke:var(--mut);stroke-width:1.5;stroke-dasharray:3 2}
+.blhr{fill:var(--card)}
+.blhl{stroke:var(--utbar);stroke-width:2.5}
+.blhit{fill:transparent}
+.blsvg .blval{fill:var(--ink);font-weight:600}
+.blg{cursor:default;outline:none}
+.blg:focus-visible .blhit{stroke:var(--ink);stroke-width:2;stroke-dasharray:none;fill:var(--soft)}
+.blg:hover .blhit{fill:var(--soft)}
+.bltip{white-space:normal;max-width:260px;width:max-content;text-align:left;line-height:1.35;transform:translate(-50%,-100%);z-index:3}
+.bltip div{font-weight:400}
+.bllegend{gap:6px 18px}
+.bllegend i{width:14px;height:11px;border-radius:2px;vertical-align:-1px}
+.lgbar{background:var(--utbar)}
+.lgpart{background:repeating-linear-gradient(135deg,var(--utbar) 0 2px,var(--card) 2px 5px);border:1.5px solid var(--utbar)}
+.lgnone{border:1.5px dashed var(--mut)}
+.trsub table{font-size:14px}
+.tblw{overflow-x:auto}
+.tpform{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;margin:6px 0 10px}
+.tpform label{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--mut);min-width:0}
+.tpform input{width:130px;max-width:100%}
+.tpbig{font-size:18px}.tpbig b{font:600 26px var(--d);margin-left:6px;font-variant-numeric:tabular-nums}
+#blsec .uth,#tpsec .uth{font:600 16px var(--d);margin:20px 0 6px}
+#blsec .utiles,#tpsec .utiles{margin-bottom:6px}
+.utfat{margin:2px 0 6px}
+@media (max-width:520px){.tpform input{width:100%}.tpform label{flex:1 1 100px}.tpform .btn{flex:1 1 100%}.bltip{max-width:220px}}
+
+/* Einklappbare Abschnitte (3.12.0) */
+details.trf>summary:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+details.trsec>summary{flex-wrap:wrap}
+details.trsec .trfk{flex-basis:100%;order:3;font:500 16px var(--b);color:var(--ink);padding-left:34px;margin-top:-6px}
+details.trsec .trfk:empty{display:none}
+details.trsec .trfk b{font-variant-numeric:tabular-nums}
+details.trsec>.gbody>.panel{margin-top:6px}
+details.trsub{border-top:1px solid var(--rule);padding:0;margin-top:16px}
+details.trsub>summary{display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap;list-style:none;cursor:pointer;padding:10px 0;min-height:44px;font:600 16px var(--d)}
+details.trsub>summary::-webkit-details-marker{display:none}
+details.trsub>summary::before{content:"";width:8px;height:8px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:rotate(-45deg);transition:transform .15s;margin:0 4px 0 2px;flex:none}
+details.trsub[open]>summary::before{transform:rotate(45deg)}
+details.trsub .trfk{font:500 15px var(--b);color:var(--ink);flex:1 1 200px;min-width:0}
+details.trsub .trfk b{font-variant-numeric:tabular-nums}
+details.trsub .trfb{padding:2px 0 8px}
+details.trsub .uth:first-child{margin-top:4px}
+details.trmain{border-top:0;margin-top:0}
+details.trmain>summary{font-size:22px}
+.trcard{padding-top:4px;padding-bottom:4px}
+.blcore{margin:2px 0 14px}
+.blcore .uth{margin-top:4px!important}
+.blpend{margin:12px 0 4px;font-size:15px}
+#blhint details.trsub{margin-top:12px}
+@media (prefers-reduced-motion:reduce){details.trsub>summary::before,details.agrp>summary::before{transition:none}}
+details.trsec[open]>summary .trfk{display:none}
+#blsec .utiles,#tpsec .utiles{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+details.trsub .tblw{max-height:340px;overflow:auto}
+.utile small span,details.trsub .trfk span,details.trsub .trfk b{white-space:nowrap}

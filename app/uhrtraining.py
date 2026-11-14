@@ -4,6 +4,9 @@ Quelle: Trainingszusammenfassung aus dem Zepp-Verlauf (api.history()) und – ei
 Zuordnung Tour ↔ Training wie überall (devquality.match_unique = mydevices.match_summaries). Das Ergebnis liegt je Tour dauerhaft in
 tracks/<id>.uhr.json (nur ausgewählte Felder, keine Koordinaten/Kennungen): Der Abschnitt funktioniert danach ohne Zepp-Zugang, und Seitenaufrufe
 belasten Zepp nicht. Der Verlauf wird höchstens alle 10 Minuten neu geladen (Zwischenspeicher im Speicher).
+Der Job „Uhr-Daten aller Touren laden“ (load_all, 3.12.0) schreibt dieselben Zusatzdateien für alle zugeordneten Zepp-Touren aus EINEM Verlauf – ohne Detail-Abrufe.
+Solche Dateien tragen "detail": false und "detail_offen": true; die Kilometerwerte werden beim ersten Öffnen der Tour nachgeholt (danach "detail_offen": false,
+auch wenn das Detail fehlschlug – „Von Zepp neu laden“ versucht es erneut). Ein erneutes Laden überschreibt nie schon vorhandene Kilometerwerte mit „nichts“.
 
 Grundsatz: Es wird nur gezeigt, was die Uhr geliefert hat UND plausibel ist. Platzhalter (-1, -274, -361, -2 004 831 …) und Unsinn erscheinen nie.
 Deutungen, die nicht belegt sind (Skalen und Spalten), sind unten als ANNAHME gekennzeichnet und werden mit Gegenproben abgesichert:
@@ -62,6 +65,7 @@ HINT = {
     "hoehe": "Höhenmeter laut Uhr können von den Höhenmetern der Tour abweichen (andere Messung und Glättung).",
     "wetter": "Wetter laut Uhr (Temperatur und Luftfeuchte); die Deutung der Felder ist nicht von Zepp dokumentiert.",
     "detail": "Die Kilometerwerte konnten nicht geladen werden – „Von Zepp neu laden“ versucht es erneut.",
+    "detail_offen": "Die Kilometerwerte werden beim ersten Öffnen der Tour von Zepp geladen.",
 }
 
 
@@ -282,6 +286,65 @@ def splits(s, kilo_pace, freq=None):
     return out
 
 
+# ------------------------------------------------------------------------------------------------ Ermüdungsverlauf
+# Alle Schwellen sind WILLKÜRLICH gewählt (Erfahrungswerte, nicht belegt) – sie ordnen nur in Worten ein, die Zahlen selbst stehen daneben.
+ERM_MIN_KM = 6              # unter 6 vollen Kilometern ist der Unterschied der Hälften zu zufällig: keine Wertung
+ERM_TEMPO = (3, 8, 15)      # Tempoverlust in %: <3 gleichmäßig, 3–8 leicht, 8–15 spürbar, ab 15 deutlich langsamer
+ERM_PULS = 5                # Pulsänderung (bpm), ab der „Puls stieg/sank“ gesagt wird
+ERM_HOEHE_M, ERM_HOEHE_X = 40, 2.0      # Hälften „stark verschieden“ in den Höhenmetern: Unterschied mindestens 40 m UND mindestens doppelt so viel
+
+
+def _hoehe_verschieden(h):
+    """True, wenn Auf- oder Abstieg der beiden Hälften stark verschieden sind (dann ist ein Tempovergleich unfair)."""
+    for k in ("auf", "ab"):
+        a, b = h["erste"][k], h["zweite"][k]
+        if abs(a - b) >= ERM_HOEHE_M and max(a, b) >= ERM_HOEHE_X * max(min(a, b), 10):
+            return True
+    return False
+
+
+def ermuedung(sp, hoehen=None):
+    """Tempo und Puls der ersten gegen die zweite Hälfte (nach Strecke geteilt) aus den Kilometer-Splits.
+    Nur volle Kilometer zählen (Teilstück am Ende entfällt); bei ungerader Zahl bleibt der mittlere Kilometer außen vor.
+    Unter ERM_MIN_KM vollen Kilometern: None. hoehen = {"erste": {"auf","ab"}, "zweite": {…}} (m) oder None (unbekannt).
+    Unterscheiden sich die Hälften stark in den Höhenmetern, gibt es nur einen Hinweis und keine Wertung.
+    -> {"status": "ok"|"nur_hinweis", "km": Anzahl voller Kilometer, "tempo_pct": +langsamer/−schneller, "puls_diff": bpm oder None, "stufe", "puls", "hoehen_geprueft", "hoehen"}"""
+    full = [s for s in (sp or []) if s.get("strecke_m") == 1000 and s.get("sek")]
+    n = len(full)
+    if n < ERM_MIN_KM:
+        return None
+    k = n // 2
+    a, b = full[:k], full[n - k:]
+    base = {"km": n, "k": k, "hoehen_geprueft": hoehen is not None, "hoehen": hoehen}
+    if hoehen is not None and _hoehe_verschieden(hoehen):
+        return {**base, "status": "nur_hinweis", "tempo_pct": None, "puls_diff": None, "stufe": None, "puls": None}
+    ta, tb = sum(x["sek"] for x in a) / k, sum(x["sek"] for x in b) / k
+    pct = round((tb / ta - 1) * 100)
+    pa, pb = [x["puls"] for x in a if x.get("puls") is not None], [x["puls"] for x in b if x.get("puls") is not None]
+    diff = round(sum(pb) / len(pb) - sum(pa) / len(pa)) if len(pa) >= 0.6 * k and len(pb) >= 0.6 * k else None
+    lo, mid, hi = ERM_TEMPO
+    stufe = ("deutlich_langsamer" if pct >= hi else "spuerbar_langsamer" if pct >= mid else "leicht_langsamer" if pct >= lo else
+             "schneller" if pct <= -lo else "gleichmaessig")
+    puls = None if diff is None else "steigt" if diff >= ERM_PULS else "sinkt" if diff <= -ERM_PULS else "gleich"
+    return {**base, "status": "ok", "tempo_pct": pct, "puls_diff": diff, "stufe": stufe, "puls": puls}
+
+
+def ermuedung_fuer(tid, s, sp):
+    """ermuedung() für eine Tour; die Höhenmeter je Hälfte kommen aus der Strecke (fehlt sie oder hat sie keine Höhe, bleibt hoehen None)."""
+    if not sp:
+        return None
+    full = [x for x in sp if x.get("strecke_m") == 1000]
+    if len(full) < ERM_MIN_KM:
+        return None
+    h = None
+    try:
+        from . import steigung
+        h = steigung.hoehen_je_haelfte(tid, len(full) // 2, _rng(s.get("dis"), 100, 1_000_000))
+    except Exception:  # noqa
+        h = None
+    return ermuedung(sp, h)
+
+
 # ------------------------------------------------------------------------------------------------ Zepp
 def _state_msg(e):
     """Zustand und Meldung aus einer Ausnahme – ohne den Text der Ausnahme (könnte Zugangsdaten enthalten)."""
@@ -316,15 +379,19 @@ def _history(force=False):
     return "ok", hist, api
 
 
-def _pick(hist, t):
-    tol = db.get_int("dup_tolerance_s", 300)
-    c = devquality.match_unique(hist or [], [t], tol).get(t["id"]) or []
+def _choose(c, tid):
+    """Aus den zugeordneten Trainings einer Tour das eindeutige wählen: (Training oder None, Zustand)."""
     if not c:
         return None, "kein_training"
-    exact = [s for s in c if t["id"] == f"z{s.get('trackid')}"]
+    exact = [s for s in c if tid == f"z{s.get('trackid')}"]
     if len(exact) == 1:
         return exact[0], "ok"
     return (c[0], "ok") if len(c) == 1 else (None, "mehrdeutig")
+
+
+def _pick(hist, t):
+    tol = db.get_int("dup_tolerance_s", 300)
+    return _choose(devquality.match_unique(hist or [], [t], tol).get(t["id"]) or [], t["id"])
 
 
 def _tour(tid):
@@ -354,14 +421,17 @@ def fetch(tid, t):
     s, st = _pick(hist, t)
     if not s:
         return None, st
-    data = {"v": 1, "geladen": int(time.time()), "summary": {k: s[k] for k in KEEP if k in s}, "detail": False, "kilo_pace": None}
+    old = load(tid)
+    data = {"v": 1, "geladen": int(time.time()), "summary": {k: s[k] for k in KEEP if k in s}, "detail": False, "detail_offen": False, "kilo_pace": None}
     try:
         det = api.detail(s) or {}
         kp = det.get("kilo_pace")
         data["kilo_pace"] = kp if isinstance(kp, (str, list)) and len(json.dumps(kp)) <= MAX_RAW else None
         data["detail"] = True
     except Exception:  # noqa
-        pass                                          # Zusammenfassung bleibt nutzbar; „Von Zepp neu laden“ versucht das Detail erneut
+        if old and old.get("detail"):                 # Detail schlug jetzt fehl, war aber schon da: die vorhandenen Kilometerwerte bleiben
+            data["kilo_pace"], data["detail"] = old.get("kilo_pace"), True
+        # sonst: Zusammenfassung bleibt nutzbar; „Von Zepp neu laden“ versucht das Detail erneut
     store(tid, data)
     return data, "ok"
 
@@ -385,15 +455,15 @@ def aufbereiten(tid, data):
     if we:
         hin.append(HINT["wetter"])
     if not data.get("detail"):
-        hin.append(HINT["detail"])
+        hin.append(HINT["detail_offen"] if data.get("detail_offen") else HINT["detail"])
     d = _device(tid)
-    return {"werte": w, "pulszonen": z, "splits": sp, "wetter": we, "hinweise": hin,
+    return {"werte": w, "pulszonen": z, "splits": sp, "wetter": we, "hinweise": hin, "ermuedung": ermuedung_fuer(tid, s, sp),
             "device": {"id": d["id"], "name": d["name"], "kind": d["kind"], "model": d["model"], "photo": d.get("photo") or 0} if d else {"id": None, "name": "Amazfit/Zepp", "kind": "zepp", "model": ""}}
 
 
 def antwort(tid, data, status, meldung=""):
     base = {"quelle": "zepp", "status": status, "meldung": meldung or MSG.get(status, ""), "device": None, "geladen": None, "werte": {}, "pulszonen": None, "splits": None,
-            "wetter": None, "hinweise": []}
+            "wetter": None, "hinweise": [], "ermuedung": None}
     if data:
         base.update(aufbereiten(tid, data))
         base["geladen"] = data.get("geladen")
@@ -401,6 +471,55 @@ def antwort(tid, data, status, meldung=""):
             base["status"] = "leer"                   # Training gefunden, aber die Uhr hat nichts Brauchbares geliefert
             base["meldung"] = "Die Uhr hat zu diesem Training keine auswertbaren Werte geliefert."
     return base
+
+
+# ------------------------------------------------------------------------------------------------ Job: alle Touren
+def load_all(api=None, dry=False, max_new=None):
+    """Job „Uhr-Daten aller Touren laden“: den Zepp-Verlauf EINMAL laden und für alle zugeordneten Zepp-Touren, die noch keine Zusatzdatei haben, die Zusammenfassung
+    speichern (mit store(), wie beim Öffnen einer Tour) – ohne Detail-Abrufe. Vorhandene Zusatzdateien bleiben unberührt (idempotent, auch solche mit Kilometerwerten).
+    Obergrenze je Lauf: Einstellung uhr_alle_max (Standard 1000, 1–5000). Zugangsdaten und Fehlertexte aus Zepp werden nicht protokolliert."""
+    from .jobs import log, progress
+    cap = max(1, min(5000, db.get_int("uhr_alle_max", 1000))) if max_new is None else max_new
+    if api is None:
+        st, hist, _a = _history(force=True)
+        if st != "ok":
+            log("Uhr-Daten: " + MSG[st])
+            return {"status": st, "neu": 0}
+    else:
+        hist = api.history()
+    tours = db.query("SELECT id,name,start_ts,dist_m,dur_s FROM tours WHERE start_ts IS NOT NULL ORDER BY start_ts DESC")
+    asg = mydevices.assignments()
+    zt = []
+    for t in tours:
+        d = (asg.get(t["id"]) or (None, False))[0]
+        if (d["kind"] if d else mydevices.tour_kind(t["id"])) == "zepp":
+            zt.append(t)
+    have = sum(1 for t in zt if load(t["id"]))
+    todo = [t for t in zt if not load(t["id"])]
+    log(f"Uhr-Daten: {len(hist or [])} Trainings im Zepp-Verlauf, {len(zt)} Touren mit Zepp-Uhr, {have} schon gespeichert, {len(todo)} offen")
+    cand = devquality.match_unique(hist or [], todo, db.get_int("dup_tolerance_s", 300))
+    neu = unklar = ohne = 0
+    stopped = False
+    for i, t in enumerate(todo, 1):
+        if i % 25 == 0:
+            progress(f"Uhr-Daten {i}/{len(todo)}")
+        s, st = _choose(cand.get(t["id"]) or [], t["id"])
+        if not s:
+            if st == "mehrdeutig":
+                unklar += 1
+            else:
+                ohne += 1
+            continue
+        if neu >= cap:
+            stopped = True
+            break
+        if not dry:
+            store(t["id"], {"v": 1, "geladen": int(time.time()), "summary": {k: s[k] for k in KEEP if k in s}, "detail": False, "detail_offen": True, "kilo_pace": None})
+        neu += 1
+    log(f"Uhr-Daten: {neu} Touren {'würden' if dry else 'wurden'} gespeichert, {ohne} ohne passendes Training, {unklar} mehrdeutig (nichts gespeichert)"
+        + (f" – Obergrenze von {cap} je Lauf erreicht, den Job erneut starten" if stopped else ""))
+    log("Kilometerwerte (Splits) kommen weiterhin beim ersten Öffnen der Tour.")
+    return {"status": "ok", "neu": neu, "ohne_training": ohne, "mehrdeutig": unklar, "schon_da": have, "obergrenze": stopped}
 
 
 @router.get("/api/tours/{tour_id}/uhr-training")
@@ -413,10 +532,14 @@ def api_get(tour_id: str, request: Request):
     if not eligible(t["id"]):
         return antwort(t["id"], None, "nicht_zepp")
     d = load(t["id"])
+    u = getattr(request.state, "user", None)
+    viewer = bool(u and u.get("role") == "viewer")
+    if d and d.get("detail_offen") and not viewer and t["start_ts"]:     # vom Job gespeichert: Kilometerwerte jetzt (einmal) nachholen
+        d2, _st = fetch(t["id"], t)
+        d = d2 or d
     if d:
         return antwort(t["id"], d, "ok")
-    u = getattr(request.state, "user", None)
-    if u and u.get("role") == "viewer":
+    if viewer:
         return antwort(t["id"], None, "nicht_geladen")
     if not t["start_ts"]:
         return antwort(t["id"], None, "kein_training")

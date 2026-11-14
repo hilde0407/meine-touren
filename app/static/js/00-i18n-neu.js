@@ -1124,4 +1124,111 @@ Letztes Teilstück ({} km): {} min/km || Last partial section ({} km): {} min/km
 Letztes Teilstück ({} km): {} min/km, Puls {} bpm || Last partial section ({} km): {} min/km, heart rate {} bpm || Dernier tronçon ({} km) : {} min/km, FC {} bpm || Último tramo ({} km): {} min/km, FC {} lpm
 Letztes Teilstück ({} km): {} min/km, {} Schritte/min || Last partial section ({} km): {} min/km, {} steps/min || Dernier tronçon ({} km) : {} min/km, {} pas/min || Último tramo ({} km): {} min/km, {} pasos/min
 Letztes Teilstück ({} km): {} min/km, Puls {} bpm, {} Schritte/min || Last partial section ({} km): {} min/km, heart rate {} bpm, {} steps/min || Dernier tronçon ({} km) : {} min/km, FC {} bpm, {} pas/min || Último tramo ({} km): {} min/km, FC {} lpm, {} pasos/min
+Belastung und Erholung || Load and recovery || Charge et récupération || Carga y recuperación
+laut Uhr (Zepp) || according to the watch (Zepp) || selon la montre (Zepp) || según el reloj (Zepp)
+Monate || Months || Mois || Meses
+Zeitraum || Period || Période || Periodo
+Jahr || Year || Année || Año
+Alles || Everything || Tout || Todo
+Letzte 3 Monate || Last 3 months || 3 derniers mois || Últimos 3 meses
+Letzte 6 Monate || Last 6 months || 6 derniers mois || Últimos 6 meses
+Letzte 12 Monate || Last 12 months || 12 derniers mois || Últimos 12 meses
+Touren mit Uhr-Daten || Tours with watch data || Parcours avec données de la montre || Rutas con datos del reloj
+{} % aller Touren im Zeitraum || {} % of all tours in the period || {} % de tous les parcours de la période || {} % de todas las rutas del periodo
+Belastung im Zeitraum || Load in the period || Charge sur la période || Carga en el periodo
+Summe laut Uhr || Sum according to the watch || Somme selon la montre || Suma según el reloj
+Ø je Woche mit Daten || Avg. per week with data || Moy. par semaine avec données || Media por semana con datos
+Wochen ohne Uhr-Daten zählen nicht || Weeks without watch data do not count || Les semaines sans données ne comptent pas || Las semanas sin datos del reloj no cuentan
+Aktuell im Vergleich || Current compared with usual || Actuellement par rapport à d’habitude || Ahora en comparación
+Deutlich mehr Belastung als sonst || Much more load than usual || Nettement plus de charge que d’habitude || Mucha más carga que de costumbre
+Etwas mehr Belastung als sonst || Slightly more load than usual || Un peu plus de charge que d’habitude || Algo más de carga que de costumbre
+Ähnlich viel Belastung wie sonst || About the same load as usual || Charge similaire à d’habitude || Carga similar a la de costumbre
+Etwas weniger Belastung als sonst || Slightly less load than usual || Un peu moins de charge que d’habitude || Algo menos de carga que de costumbre
+Deutlich weniger Belastung als sonst || Much less load than usual || Nettement moins de charge que d’habitude || Mucha menos carga que de costumbre
+Letzte 4 Wochen: Ø {} pro Woche || Last 4 weeks: avg. {} per week || 4 dernières semaines : moy. {} par semaine || Últimas 4 semanas: media de {} por semana
+die 12 Wochen davor: Ø {} pro Woche || the 12 weeks before: avg. {} per week || les 12 semaines précédentes : moy. {} par semaine || las 12 semanas anteriores: media de {} por semana
+In den letzten 4 Wochen liegen keine Uhr-Daten vor. || There is no watch data for the last 4 weeks. || Aucune donnée de la montre pour les 4 dernières semaines. || No hay datos del reloj de las últimas 4 semanas.
+Für den Vergleich fehlen noch Daten: Es braucht mindestens {} Wochen mit Uhr-Daten in den 12 Wochen vor den letzten 4 (bisher {}). || Not enough data for the comparison yet: at least {} weeks with watch data are needed in the 12 weeks before the last 4 (so far {}). || Il manque encore des données pour la comparaison : il faut au moins {} semaines avec données de la montre parmi les 12 semaines avant les 4 dernières (jusqu’ici {}). || Aún faltan datos para la comparación: se necesitan al menos {} semanas con datos del reloj en las 12 semanas anteriores a las últimas 4 (hasta ahora {}).
+Vergleich: Wochenschnitt der letzten 4 Wochen gegen den der 12 Wochen davor. || Comparison: weekly average of the last 4 weeks against that of the 12 weeks before. || Comparaison : moyenne hebdomadaire des 4 dernières semaines par rapport à celle des 12 semaines précédentes. || Comparación: media semanal de las últimas 4 semanas frente a la de las 12 semanas anteriores.
+„Etwas“ heißt mehr als 15 %, „deutlich“ mehr als 40 % Unterschied (grobe Schwellen). || “Slightly” means more than 15 %, “much” more than 40 % difference (rough thresholds). || « Un peu » signifie plus de 15 %, « nettement » plus de 40 % d’écart (seuils approximatifs). || «Algo» significa más de un 15 %, «mucho» más de un 40 % de diferencia (umbrales aproximados).
+Wochen mit Touren, aber ohne Uhr-Daten, bleiben außen vor. || Weeks with tours but without watch data are left out. || Les semaines avec parcours mais sans données de la montre sont ignorées. || Las semanas con rutas pero sin datos del reloj se dejan fuera.
+Keine Tour || No tour || Aucun parcours || Ninguna ruta
+{} Tour ohne Uhr-Daten (keine Angabe) || {} tour without watch data (no value) || {} parcours sans données de la montre (pas de valeur) || {} ruta sin datos del reloj (sin valor)
+{} Touren ohne Uhr-Daten (keine Angabe) || {} tours without watch data (no value) || {} parcours sans données de la montre (pas de valeur) || {} rutas sin datos del reloj (sin valor)
+Belastung {} || Load {} || Charge {} || Carga {}
+{} von {} Touren mit Uhr-Daten || {} of {} tours with watch data || {} parcours sur {} avec données de la montre || {} de {} rutas con datos del reloj
+KW {} || Wk {} || sem. {} || sem. {}
+Belastung (Summe laut Uhr) || Load (sum according to the watch) || Charge (somme selon la montre) || Carga (suma según el reloj)
+Schraffiert: ein Teil der Touren ohne Uhr-Daten (Wert ist dann zu niedrig) || Hatched: some of the tours without watch data (the value is then too low) || Hachuré : une partie des parcours sans données de la montre (la valeur est alors trop basse) || Rayado: una parte de las rutas sin datos del reloj (el valor es entonces demasiado bajo)
+Gestrichelt: nur Touren ohne Uhr-Daten (keine Angabe) || Dashed: only tours without watch data (no value) || En pointillés : uniquement des parcours sans données de la montre (pas de valeur) || Discontinuo: solo rutas sin datos del reloj (sin valor)
+Balkendiagramm: Trainingsbelastung je Woche || Bar chart: training load per week || Diagramme en barres : charge d’entraînement par semaine || Gráfico de barras: carga de entrenamiento por semana
+Balkendiagramm: Trainingsbelastung je Monat || Bar chart: training load per month || Diagramme en barres : charge d’entraînement par mois || Gráfico de barras: carga de entrenamiento por mes
+Diagramm Belastung || Load chart || Diagramme de la charge || Gráfico de carga
+Zahlen als Tabelle || Numbers as a table || Chiffres sous forme de tableau || Cifras como tabla
+Belastung || Load || Charge || Carga
+mit Uhr-Daten || with watch data || avec données de la montre || con datos del reloj
+Die härtesten Wochen || The hardest weeks || Les semaines les plus dures || Las semanas más duras
+Die härtesten Touren || The hardest tours || Les parcours les plus durs || Las rutas más duras
+Noch keine Uhr-Daten im Zeitraum. || No watch data in the period yet. || Pas encore de données de la montre sur la période. || Aún no hay datos del reloj en el periodo.
+Keine Touren im gewählten Zeitraum. || No tours in the selected period. || Aucun parcours sur la période choisie. || No hay rutas en el periodo elegido.
+Zepp-Werte werden beim ersten Öffnen einer Tour gespeichert. || Zepp values are saved when a tour is opened for the first time. || Les valeurs Zepp sont enregistrées à la première ouverture d’un parcours. || Los valores de Zepp se guardan al abrir una ruta por primera vez.
+Für {} Zepp-Touren liegen noch keine Uhr-Werte vor. || There are no watch values yet for {} Zepp tours. || Il n’y a pas encore de valeurs de la montre pour {} parcours Zepp. || Aún no hay valores del reloj para {} rutas de Zepp.
+Belastung: Skala laut Zepp, nicht mit Garmin oder Suunto vergleichbar. || Load: scale according to Zepp, not comparable with Garmin or Suunto. || Charge : échelle selon Zepp, non comparable avec Garmin ou Suunto. || Carga: escala según Zepp, no comparable con Garmin o Suunto.
+Uhr-Daten aller Touren laden || Load watch data of all tours || Charger les données de la montre de tous les parcours || Cargar los datos del reloj de todas las rutas
+Dein typisches Tempo || Your typical pace || Votre allure typique || Tu ritmo habitual
+bergauf, eben, bergab || uphill, flat, downhill || en montée, à plat, en descente || cuesta arriba, llano, cuesta abajo
+Bergauf || Uphill || Montée || Cuesta arriba
+Eben || Flat || À plat || Llano
+Bergab || Downhill || Descente || Cuesta abajo
+Steigung über 5 % || Gradient above 5 % || Pente supérieure à 5 % || Pendiente superior al 5 %
+Steigung zwischen −5 % und 5 % || Gradient between −5 % and 5 % || Pente entre −5 % et 5 % || Pendiente entre −5 % y 5 %
+Gefälle über 5 % || Downhill gradient above 5 % || Dénivelé négatif supérieur à 5 % || Descenso superior al 5 %
+Aufstieg pro Stunde || Ascent per hour || Montée par heure || Subida por hora
+Median über {} Touren (mindestens 2 km, mit Höhendaten). || Median over {} tours (at least 2 km, with elevation data). || Médiane sur {} parcours (au moins 2 km, avec données d’altitude). || Mediana de {} rutas (al menos 2 km, con datos de altitud).
+Nur Bewegungszeit: Pausen unter 0,3 km/h sind herausgenommen; die Steigung ist über etwa 50 m geglättet. || Moving time only: pauses below 0.3 km/h are removed; the gradient is smoothed over about 50 m. || Temps de déplacement uniquement : les pauses sous 0,3 km/h sont retirées ; la pente est lissée sur environ 50 m. || Solo tiempo en movimiento: se excluyen las pausas por debajo de 0,3 km/h; la pendiente se suaviza en unos 50 m.
+Nur Bewegungszeit: Pausen unter 0,3 km/h sind herausgenommen; die Steigung ist über etwa 50 m geglättet (bergauf über 5 %, bergab unter −5 %). || Moving time only: pauses below 0.3 km/h are removed; the gradient is smoothed over about 50 m (uphill above 5 %, downhill below −5 %). || Temps de déplacement uniquement : les pauses sous 0,3 km/h sont retirées ; la pente est lissée sur environ 50 m (montée au-dessus de 5 %, descente sous −5 %). || Solo tiempo en movimiento: se excluyen las pausas por debajo de 0,3 km/h; la pendiente se suaviza en unos 50 m (cuesta arriba por encima del 5 %, cuesta abajo por debajo del −5 %).
+Keine Touren mit Höhendaten und mindestens 2 km. || No tours with elevation data and at least 2 km. || Aucun parcours avec données d’altitude et d’au moins 2 km. || Ninguna ruta con datos de altitud y al menos 2 km.
+{} Touren werden noch berechnet … || {} tours are still being calculated … || {} parcours sont encore en cours de calcul … || Aún se están calculando {} rutas …
+Gehzeit schätzen || Estimate walking time || Estimer la durée de marche || Estimar el tiempo de marcha
+Strecke (km) || Distance (km) || Distance (km) || Distancia (km)
+Aufstieg (m) || Ascent (m) || Montée (m) || Subida (m)
+Abstieg (m) || Descent (m) || Descente (m) || Bajada (m)
+z. B. 12,5 || e.g. 12.5 || p. ex. 12,5 || p. ej. 12,5
+Schätzen || Estimate || Estimer || Estimar
+Bitte Strecke, Aufstieg und Abstieg als Zahlen eingeben. || Please enter distance, ascent and descent as numbers. || Veuillez saisir la distance, la montée et la descente sous forme de nombres. || Introduce distancia, subida y bajada como números.
+Geschätzte Gehzeit: || Estimated walking time: || Durée de marche estimée : || Tiempo de marcha estimado:
+Reine Gehzeit ohne Pausen. || Walking time only, without breaks. || Durée de marche seule, sans pauses. || Solo tiempo de marcha, sin pausas.
+Grundlage: deine Werte aus {} Touren. || Based on your values from {} tours. || Base : vos valeurs issues de {} parcours. || Base: tus valores de {} rutas.
+Teilweise deine Werte (aus {} Touren), der Rest sind Standardwerte (Naismith). || Partly your values (from {} tours), the rest are default values (Naismith). || En partie vos valeurs (issues de {} parcours), le reste sont des valeurs par défaut (Naismith). || En parte tus valores (de {} rutas), el resto son valores estándar (Naismith).
+Noch zu wenig eigene Daten – es gelten Standardwerte (Naismith: 5 km/h, 1 Stunde je 600 m Aufstieg). || Not enough data of your own yet – default values apply (Naismith: 5 km/h, 1 hour per 600 m of ascent). || Pas encore assez de données personnelles – les valeurs par défaut s’appliquent (Naismith : 5 km/h, 1 heure par 600 m de montée). || Aún hay pocos datos propios: se aplican valores estándar (Naismith: 5 km/h, 1 hora por cada 600 m de subida).
+Bitte Zahlen im gültigen Bereich eingeben (Strecke bis 2000 km, Auf-/Abstieg bis 100 000 m) || Please enter numbers in the valid range (distance up to 2000 km, ascent/descent up to 100,000 m) || Veuillez saisir des nombres dans la plage valide (distance jusqu’à 2000 km, montée/descente jusqu’à 100 000 m) || Introduce números en el rango válido (distancia hasta 2000 km, subida/bajada hasta 100 000 m)
+Tempo nach Steigung || Pace by gradient || Allure selon la pente || Ritmo según la pendiente
+{} m/h Aufstieg || {} m/h ascent || {} m/h de montée || {} m/h de subida
+Aus Strecke, Höhe und Zeit berechnet. || Calculated from track, elevation and time. || Calculé à partir du tracé, de l’altitude et du temps. || Calculado a partir del trazado, la altitud y el tiempo.
+Ermüdungsverlauf || Fatigue over the tour || Évolution de la fatigue || Evolución de la fatiga
+Zweite Hälfte: || Second half: || Seconde moitié : || Segunda mitad:
+nicht bewertet || not rated || non évalué || sin valorar
+Tempo unverändert || Pace unchanged || Allure inchangée || Ritmo sin cambios
+Tempo {} % langsamer || Pace {} % slower || Allure {} % plus lente || Ritmo un {} % más lento
+Tempo {} % schneller || Pace {} % faster || Allure {} % plus rapide || Ritmo un {} % más rápido
+Puls {} bpm || Heart rate {} bpm || FC {} bpm || FC {} lpm
+Gleichmäßiges Tempo – kaum Ermüdung zu sehen. || Even pace – hardly any fatigue visible. || Allure régulière – presque aucune fatigue visible. || Ritmo uniforme: apenas se ve fatiga.
+Leicht langsamer in der zweiten Hälfte. || Slightly slower in the second half. || Un peu plus lent dans la seconde moitié. || Algo más lento en la segunda mitad.
+Spürbar langsamer in der zweiten Hälfte. || Noticeably slower in the second half. || Nettement plus lent dans la seconde moitié. || Claramente más lento en la segunda mitad.
+Deutlich langsamer in der zweiten Hälfte. || Much slower in the second half. || Beaucoup plus lent dans la seconde moitié. || Mucho más lento en la segunda mitad.
+Schneller in der zweiten Hälfte (negativer Split). || Faster in the second half (negative split). || Plus rapide dans la seconde moitié (negative split). || Más rápido en la segunda mitad (negative split).
+Der Puls stieg im Verlauf an. || Heart rate rose over the course. || La fréquence cardiaque a augmenté au fil du parcours. || La frecuencia cardiaca subió a lo largo del recorrido.
+Der Puls sank im Verlauf. || Heart rate fell over the course. || La fréquence cardiaque a baissé au fil du parcours. || La frecuencia cardiaca bajó a lo largo del recorrido.
+Verglichen werden der erste und der letzte volle Kilometer || The first and the last full kilometre are compared || On compare le premier et le dernier kilomètre complet || Se comparan el primer y el último kilómetro completo
+Verglichen werden die ersten {} und die letzten {} vollen Kilometer || The first {} and the last {} full kilometres are compared || On compare les {} premiers et les {} derniers kilomètres complets || Se comparan los primeros {} y los últimos {} kilómetros completos
+(der mittlere Kilometer bleibt außen vor) || (the middle kilometre is left out) || (le kilomètre du milieu est ignoré) || (el kilómetro central se deja fuera)
+Die Einordnung in Worten beruht auf groben Schwellen (3, 8 und 15 %). || The wording is based on rough thresholds (3, 8 and 15 %). || L’appréciation en mots repose sur des seuils approximatifs (3, 8 et 15 %). || La valoración en palabras se basa en umbrales aproximados (3, 8 y 15 %).
+Höhenunterschiede der Hälften konnten nicht geprüft werden (keine Höhendaten). || Elevation differences between the halves could not be checked (no elevation data). || Les écarts d’altitude entre les moitiés n’ont pas pu être vérifiés (pas de données d’altitude). || No se pudieron comprobar los desniveles de las mitades (sin datos de altitud).
+Bergauf-Anteil nicht herausgerechnet: || Uphill share not factored out: || Part en montée non déduite : || Tramo cuesta arriba no descontado:
+Die Hälften unterscheiden sich stark in den Höhenmetern. || The halves differ greatly in elevation gain. || Les moitiés diffèrent fortement en dénivelé. || Las mitades difieren mucho en desnivel.
+Erste Hälfte {} m bergauf, zweite Hälfte {} m bergauf. || First half {} m uphill, second half {} m uphill. || Première moitié {} m en montée, seconde moitié {} m en montée. || Primera mitad {} m cuesta arriba, segunda mitad {} m cuesta arriba.
+Die Kilometerwerte werden beim ersten Öffnen der Tour von Zepp geladen. || The kilometre values are loaded from Zepp when the tour is opened for the first time. || Les valeurs kilométriques sont chargées depuis Zepp à la première ouverture du parcours. || Los valores por kilómetro se cargan desde Zepp al abrir la ruta por primera vez.
+So wird verglichen || How the comparison works || Comment la comparaison est faite || Cómo se compara
+Die härtesten Wochen und Touren || The hardest weeks and tours || Les semaines et parcours les plus durs || Las semanas y rutas más duras
+Hinweise zur Quelle || Notes on the source || Remarques sur la source || Notas sobre la fuente
 `;

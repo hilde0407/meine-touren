@@ -16,6 +16,26 @@ const UHR_CACHE = new Map(),
     ["puls_min", "Puls niedrigster", "bpm", 0, ""],
     ["pause_s", "Pausenzeit", "", 0, "Pausen laut Uhr"],
   ];
+/* Einklappbare Abschnitte (3.12.0): <details> mit Kernaussage in der Zeile; offen/zu wird je Abschnitt in localStorage gemerkt (ohne Speicher gilt der Standard) */
+const trOpen = (k, def) => {
+  try {
+    const v = localStorage.getItem("mt_trf_" + k);
+    return v === null ? def : v === "1";
+  } catch (e) {
+    return def;
+  }
+};
+const trFold = (k, title, key, body, def, cls) =>
+  `<details class="trf ${cls || "trsub"}" data-trf="${k}"${trOpen(k, def) ? " open" : ""}><summary><span class="trft">${title}</span>${key ? `<span class="trfk">${key}</span>` : ""}</summary><div class="trfb">${body}</div></details>`;
+function trBind(root) {
+  root.querySelectorAll("details[data-trf]").forEach(d => {
+    d.ontoggle = () => {
+      try {
+        localStorage.setItem("mt_trf_" + d.dataset.trf, d.open ? "1" : "0");
+      } catch (e) {}
+    };
+  });
+}
 const uhrData = (id, fresh) => {
   if (fresh || !UHR_CACHE.has(id)) UHR_CACHE.set(id, api("/api/tours/" + encodeURIComponent(id) + "/uhr-training").catch(() => null));
   return UHR_CACHE.get(id);
@@ -69,6 +89,32 @@ function uhrSplits(sp) {
   return h;
 }
 
+const UHR_ERM = {
+  gleichmaessig: "Gleichmäßiges Tempo – kaum Ermüdung zu sehen.",
+  leicht_langsamer: "Leicht langsamer in der zweiten Hälfte.",
+  spuerbar_langsamer: "Spürbar langsamer in der zweiten Hälfte.",
+  deutlich_langsamer: "Deutlich langsamer in der zweiten Hälfte.",
+  schneller: "Schneller in der zweiten Hälfte (negativer Split).",
+};
+const uhrSign = n => (n > 0 ? "+" : n < 0 ? "−" : "±") + Math.abs(n);
+
+/* Ermüdungsverlauf: Tempo und Puls der ersten gegen die zweite Hälfte (Berechnung und Schwellen in app/uhrtraining.py) */
+function uhrFatigue(e) {
+  if (!e) return "";
+  const cmp = `<span>${e.k === 1 ? "Verglichen werden der erste und der letzte volle Kilometer" : `Verglichen werden die ersten ${e.k} und die letzten ${e.k} vollen Kilometer`}</span>${e.km % 2 ? " <span>(der mittlere Kilometer bleibt außen vor)</span>" : ""}`;
+  if (e.status === "nur_hinweis") {
+    const a = e.hoehen.erste, b = e.hoehen.zweite;
+    return trFold("uhr_erm", "Ermüdungsverlauf", `<b>Zweite Hälfte:</b> <span>nicht bewertet</span>`,
+      `<div class="mut hrnote utfat"><span>Bergauf-Anteil nicht herausgerechnet:</span> <span>Die Hälften unterscheiden sich stark in den Höhenmetern.</span> <span>Erste Hälfte ${nf(a.auf, 0)} m bergauf, zweite Hälfte ${nf(b.auf, 0)} m bergauf.</span></div>`, false);
+  }
+  const p = e.tempo_pct,
+    tempo = p === 0 ? "Tempo unverändert" : p > 0 ? `Tempo ${nf(p, 0)} % langsamer` : `Tempo ${nf(-p, 0)} % schneller`,
+    key = `<b>Zweite Hälfte:</b> <span>${tempo}</span>${e.puls_diff != null ? ` · <span>Puls ${uhrSign(e.puls_diff)} bpm</span>` : ""}`,
+    body = `<div class="utfat">${UHR_ERM[e.stufe]}${e.puls === "steigt" ? ` <span>Der Puls stieg im Verlauf an.</span>` : e.puls === "sinkt" ? ` <span>Der Puls sank im Verlauf.</span>` : ""}</div>` +
+      `<div class="mut hrnote utfat">${cmp}. <span>Die Einordnung in Worten beruht auf groben Schwellen (3, 8 und 15 %).</span>${e.hoehen_geprueft ? "" : " <span>Höhenunterschiede der Hälften konnten nicht geprüft werden (keine Höhendaten).</span>"}</div>`;
+  return trFold("uhr_erm", "Ermüdungsverlauf", key, body, false);
+}
+
 function uhrWeather(w) {
   if (!w) return "";
   const it = [];
@@ -95,9 +141,10 @@ async function uhrCard(t) {
     d.innerHTML = `<h2>Training laut Uhr</h2>` +
       `<div class="mut hrnote utsrc"><span class="dvsrc">${typeof dvAvatar === "function" ? dvAvatar(dv, "xs") : ""}<span>Quelle:</span> <span>${esc(dv.name)}</span></span>${ge ? ` · <span>geladen am</span> ${ge}` : ""}</div>` +
       (u.werte && Object.keys(u.werte).length ? `<div class="utiles">${uhrTiles(u.werte)}</div>` : "") +
-      uhrHeights(u.werte || {}) + uhrZones(u.pulszonen) + uhrSplits(u.splits) + uhrWeather(u.wetter) +
+      uhrHeights(u.werte || {}) + uhrZones(u.pulszonen) + uhrSplits(u.splits) + uhrFatigue(u.ermuedung) + uhrWeather(u.wetter) +
       (u.hinweise && u.hinweise.length ? `<ul class="mut hrnote utnotes">${u.hinweise.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "") +
       `<div class="utfoot">${typeof isViewer === "function" && isViewer() ? "" : `<button class="btn alt sm" id="utneu" ${busy ? "disabled" : ""}>${busy ? "Lade von Zepp …" : "Von Zepp neu laden"}</button>`}<span class="mut hrnote" id="utmsg" role="status">${esc(msg)}</span></div>`;
+    trBind(d);
     d.querySelectorAll("[data-f]").forEach(e => (e.style.flex = e.dataset.f));
     d.querySelectorAll("[data-h]").forEach(e => (e.style.height = e.dataset.h + "%"));
     d.querySelectorAll("[data-n]").forEach(e => e.style.setProperty("--n", e.dataset.n));
