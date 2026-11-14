@@ -232,3 +232,14 @@ def test_zepp_geraeteliste_modellname():
     assert z.model_for("run.9568515.huami.com") == "Amazfit Balance 2" and z.model_for("9568512") == "Amazfit Balance 2"
     assert z.model_for("run.8716545.huami.com") == "Amazfit T-Rex 3" and z.model_for("418") == "Amazfit T-Rex 2"
     assert z.model_for("run.46.huami.com") == "" and z.model_for(None) == "" and z.model_for("irgendwas") == ""
+
+
+def test_zepp_kennungen_aus_echten_antworten():
+    from app import zepp_devices as z
+    assert z.guess_for("run.64.huami.com") == ("Amazfit GTR 2", True)
+    assert z.guess_for("run.230.huami.com") == ("Amazfit GTR 3 Pro", True)
+    assert z.guess_for("run.7930113.huami.com") == ("Amazfit GTR 4", True)
+    assert z.guess_for("run.watch.everest.huami.com") == ("Amazfit Stratos", False)
+    assert z.guess_for("run.watch.qogir.huami.com") == ("Amazfit Verge", False)
+    assert z.guess_for("run.watch.huami.com") == ("Amazfit Pace", False)
+    assert z.guess_for("run.36.huami.com") == ("", False)

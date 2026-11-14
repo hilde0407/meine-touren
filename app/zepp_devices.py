@@ -24,6 +24,26 @@ _T = {
 CODES = {int(c): n for n, cs in _T.items() for c in cs.split()}
 
 
+# Ältere Huami-Uhren melden statt einer Nummer einen Codenamen („run.watch.everest.huami.com“).
+# Zuordnung nach den Reverse-Engineering-Notizen der Amazfit-Community (github.com/wiecosystem/Amazfit-RE): nur eine begründete Vermutung.
+# „watch“ allein ist die allgemeine Kennung der ersten Amazfit-Generation (Pace/Original) und deshalb besonders unsicher.
+CODENAMES = {"everest": "Amazfit Stratos", "everests": "Amazfit Stratos 2S", "qogir": "Amazfit Verge", "watch": "Amazfit Pace"}
+
+
+def guess_for(src) -> tuple:
+    """(Modellname, sicher?) zur Quellenkennung. Nummer aus der Geräteliste = sicher, Codename = Vermutung, sonst ('', False)."""
+    m = model_for(src)
+    if m:
+        return m, True
+    toks = [t for t in re.split(r"[.\-_/ ]+", str(src or "").lower()) if t]
+    for t in toks:
+        if t in CODENAMES and t != "watch":
+            return CODENAMES[t], False
+    if "watch" in toks:
+        return CODENAMES["watch"], False
+    return "", False
+
+
 def model_for(src) -> str:
     """Modellname zur Quellenkennung, sonst ''. Nur exakte Treffer einer Nummer (≥ 2 Stellen) in der Kennung."""
     for m in re.findall(r"\d{2,9}", str(src or "")):

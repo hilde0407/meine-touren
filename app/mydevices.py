@@ -389,12 +389,17 @@ def probe_summaries(summaries):
         k = known.get(g["zsrc"])
         out.append({"zsrc": g["zsrc"], "n": g["n"], "first": a, "last": b,
                     "sports": [{"sport": sp, "label": gpxtools.LABEL.get(sp, sp), "n": n} for sp, n in sorted(g["sports"].items(), key=lambda x: -x[1])],
-                    "device": {"id": k["id"], "name": k["name"]} if k else None, "model": __import__("app.zepp_devices", fromlist=["x"]).model_for(g["zsrc"])})
+                    "device": {"id": k["id"], "name": k["name"]} if k else None, "model": _zg(g["zsrc"])[0], "model_sure": _zg(g["zsrc"])[1]})
     out.sort(key=lambda x: (x["first"], x["zsrc"]))
     for x in out:
         x["overlaps"] = [y["zsrc"] for y in out if y is not x and y["first"] <= x["last"] and x["first"] <= y["last"]]
     return {"sources": out, "total": sum(x["n"] for x in out), "without_source": nokey,
             "sample_keys": sorted(sample.keys()) if sample else []}
+
+
+def _zg(src):
+    from . import zepp_devices
+    return zepp_devices.guess_for(src)
 
 
 @router.post("/api/devices/zepp-probe")
