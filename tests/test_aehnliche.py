@@ -176,7 +176,7 @@ def test_other_user_gets_404_viewer_and_anonymous():
 def test_version_notes_script_and_regex():
     from app import config as cfg, main
     root = Path(__file__).resolve().parent.parent
-    assert cfg.VERSION.startswith("3.14.0 · Meine Touren")
+    assert cfg.VERSION.startswith("3.15.0 · Meine Touren")
     notes = (root / "docs" / "versionen" / "3.14.0.md").read_text(encoding="utf-8")
     assert "Ähnliche Touren im Vergleich" in notes and "/api/tours/<id>/aehnliche" in notes
     html = (root / "app" / "static" / "index.html").read_text(encoding="utf-8")

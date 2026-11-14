@@ -1383,4 +1383,19 @@ weniger || less || moins || menos
 schneller || faster || plus rapide || más rápido
 langsamer || slower || plus lent || más lento
 gleich || the same || identique || igual
+Fotos & Notizen || Photos & notes || Photos et notes || Fotos y notas
+Abschnitte dieser Tour || Sections of this tour || Sections de ce parcours || Secciones de esta ruta
+Notizen & Ausrüstung || Notes & gear || Notes et équipement || Notas y equipo
+Gerät & Messwerte || Device & readings || Appareil et mesures || Dispositivo y mediciones
+Notizen || Notes || Notes || Notas
+Alles aufklappen || Expand all || Tout déplier || Expandir todo
+Alles zuklappen || Collapse all || Tout replier || Contraer todo
+{} Wegpunkte || {} waypoints || {} points de passage || {} puntos de ruta
+1 Wegpunkt || 1 waypoint || 1 point de passage || 1 punto de ruta
+Ø {} · max {} bpm || avg {} · max {} bpm || moy. {} · max {} bpm || media {} · máx. {} bpm
+Steigungsanteile || Gradient shares || Parts de pente || Porciones de pendiente
+Streckenverlauf || Route || Tracé || Recorrido
+Auswertung dieser Tour || Evaluation of this tour || Évaluation de ce parcours || Evaluación de esta ruta
+Vergleich || Comparison || Comparaison || Comparación
+Aufzeichnung || Recording || Enregistrement || Grabación
 `;

@@ -78,10 +78,8 @@ function pulsCard(t) {
       const mm = s => (s >= 3600 ? Math.floor(s / 3600) + " h " + Math.round((s % 3600) / 60) + " min" : Math.round(s / 60) + " min");
       const bar = h.zones.map((s, i) => `<span style="flex:${Math.max(s, 0.001)};background:${ZC[i]}" title="${ZN[i]}: ${mm(s)}"></span>`).join("");
       const leg = h.zones.map((s, i) => `<span class="nw"><i class="br2 mr5" style="display:inline-block;width:10px;height:10px;background:${ZC[i]}"></i>Z${i + 1} ${ZN[i]}: ${mm(s)} (${Math.round((s / tot) * 100)} %)</span>`).join("");
-      const d = document.createElement("div");
-      d.className = "panel prof gap";
-      d.id = "pulscard";
-      d.innerHTML = `<h2>Herzfrequenz</h2><div class="g28 fxw mb8 fx hrkpi"><div><b>${h.avg}</b> <span class="mut">Ø bpm</span></div><div><b>${h.max}</b> <span class="mut">max bpm</span></div><div><b>${h.min}</b> <span class="mut">min bpm</span></div></div>` +
+      const d = tlCard("pulscard", {sec: "puls", key: "tl_puls", icon: "heart", title: "Herzfrequenz", badge: `Ø ${h.avg} · max ${h.max} bpm`, def: true});
+      tlBody(d).innerHTML = `<div class="g28 fxw mb8 fx hrkpi"><div><b>${h.avg}</b> <span class="mut">Ø bpm</span></div><div><b>${h.max}</b> <span class="mut">max bpm</span></div><div><b>${h.min}</b> <span class="mut">min bpm</span></div></div>` +
         `<svg viewBox="0 0 ${W} ${H}" class="w100 ha">${g}${bridge}<path d="${line}" fill="none" stroke="#c0504d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>` +
         `<div class="br6 ovh m12-0-8 fx h12">${bar}</div>` +
         `<div class="mut g6-16 fxw fx hrleg">${leg}</div>` +

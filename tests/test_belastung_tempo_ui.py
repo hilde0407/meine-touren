@@ -338,7 +338,7 @@ def test_contrast_stats_and_tour(pw, apps, scheme):
     try:
         pg.locator("#uhrcard details[data-trf='uhr_erm'] summary").click()
         pg.locator("#steigcard summary").click()
-        sels = ["#uhrcard .trft", "#uhrcard .trfk", "#uhrcard .utfat", "#steigcard .trft", "#steigcard .trfk", "#steigcard .utile b", "#steigcard .utile span", "#steigcard .utile small", "#steigcard .hrnote"]
+        sels = ["#uhrcard .trft", "#uhrcard .trfk", "#uhrcard .utfat", "#steigcard .tlt", "#steigcard .tlk", "#steigcard .utile b", "#steigcard .utile span", "#steigcard .utile small", "#steigcard .hrnote"]
         res = pg.evaluate(CONTRAST.replace("SELS", repr(sels)).replace("GRAPH", "[]"))
         assert {"#uhrcard .trfk", "#steigcard .utile small"} <= {s for s, _c in res}
         bad = [(s, round(c, 2)) for s, c in res if c < 4.5]

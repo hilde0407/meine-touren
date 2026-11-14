@@ -123,23 +123,32 @@ function uhrWeather(w) {
   return it.length ? `<div class="uth">Wetter laut Uhr</div><div class="utline fxw mb8 fx hrkpi">${it.join("")}</div>` : "";
 }
 
+/* Kurzaussage für den Abschnittskopf: bis zu drei Kennwerte der Uhr */
+function uhrBadge(u) {
+  const w = (u && u.werte) || {};
+  return [["te", "Trainingseffekt", 1], ["last", "Belastung", 0], ["kcal", "Kalorien", 0], ["puls_avg", "Puls Ø", 0]]
+    .filter(k => w[k[0]] != null)
+    .slice(0, 3)
+    .map(k => `<span>${k[1]}</span> <b>${nf(w[k[0]].wert, k[2])}</b>`)
+    .join(" · ");
+}
 async function uhrCard(t) {
   const old = $("#uhrcard");
   if (old) old.remove();
   if (!t || !$("#profcard")) return;
   const u = await uhrData(t.id);
   if (!u || !uhrHas(u) || $("#uhrcard") || !$("#profcard") || !BY[t.id]) return;
-  const d = document.createElement("div");
-  d.className = "panel prof gap";
-  d.id = "uhrcard";
+  const d = tlCard("uhrcard", {sec: "uhr", key: "tl_uhr", icon: "watch", title: "Training laut Uhr", def: true, badge: uhrBadge(u)}),
+    body = tlBody(d);
+  tlDev(d, u.device, "Amazfit/Zepp");
   ($("#metcard") || $("#pulscard") || $("#profcard")).after(d);
   let busy = false,
     msg = "";
   const draw = () => {
     const dv = u.device || {name: "Amazfit/Zepp", kind: "zepp"},
       ge = u.geladen ? new Date(u.geladen * 1000).toLocaleDateString("de-DE") : "";
-    d.innerHTML = `<h2>Training laut Uhr</h2>` +
-      `<div class="mut hrnote utsrc"><span class="dvsrc">${typeof dvAvatar === "function" ? dvAvatar(dv, "xs") : ""}<span>Quelle:</span> <span>${esc(dv.name)}</span></span>${ge ? ` · <span>geladen am</span> ${ge}` : ""}</div>` +
+    tlSetBadge(d, uhrBadge(u));
+    body.innerHTML = `<div class="mut hrnote utsrc"><span class="dvsrc">${typeof dvAvatar === "function" ? dvAvatar(dv, "xs") : ""}<span>Quelle:</span> <span>${esc(dv.name)}</span></span>${ge ? ` · <span>geladen am</span> ${ge}` : ""}</div>` +
       (u.werte && Object.keys(u.werte).length ? `<div class="utiles">${uhrTiles(u.werte)}</div>` : "") +
       uhrHeights(u.werte || {}) + uhrZones(u.pulszonen) + uhrSplits(u.splits) + uhrFatigue(u.ermuedung) + uhrWeather(u.wetter) +
       (u.hinweise && u.hinweise.length ? `<ul class="mut hrnote utnotes">${u.hinweise.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "") +

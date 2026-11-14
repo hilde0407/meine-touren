@@ -30,6 +30,7 @@ VIEWS.tour = async (id, q) => {
       b.textContent = "Alle Fotos zeigen";
       const ss = $("#ss");
       if (ss) {
+        ss.hidden = false;
         ss.style.display = "";
         ss.href = `slideshow.html?tour=${encodeURIComponent(id)}&best=10`;
         ss.textContent = "Diashow der besten";

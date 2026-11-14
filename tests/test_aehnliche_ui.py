@@ -187,7 +187,7 @@ def test_rows_values_deviation_chart_and_links(pw, apps):
         assert pg.locator("#aehncard .aedot").count() == 6 and pg.locator("#aehncard .aedot.cur").count() == 1        # sechs Läufe mit Tempo, einer ohne
         assert pg.locator("#aehncard .aelegend").is_visible()
         for bad in ("NaN", "undefined", "null", "Infinity"):
-            assert bad not in t and bad not in pg.locator("#aehncard svg").inner_html(), bad
+            assert bad not in t and bad not in pg.locator("#aehncard svg.aesvg").inner_html(), bad
         href = pg.locator("#aehncard .aer a").first.get_attribute("href")
         assert href.startswith("#/tour/r")
         pg.locator("#aehncard .aer a").first.click()

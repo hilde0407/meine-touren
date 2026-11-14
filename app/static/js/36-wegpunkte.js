@@ -15,7 +15,9 @@ VIEWS.tour = async id => {
   if (!w.length || !$("#profcard")) return;
   w.forEach((p, i) => L.marker([p.lat, p.lng], {icon: wpIcon(i + 1)}).addTo(map).bindPopup(`<b>${esc(p.note || "Wegpunkt")}</b><br>${wpTime(p.ts)} Uhr`));
   const rows = () => w.map((p, i) => `<div class="row g8 m6-0 aic" data-w="${p.id}"><span class="tag" style="background:#d9534f">${i + 1}</span><span class="mut">${wpTime(p.ts)}</span><span class="wpn fx1">${esc(p.note || "Wegpunkt")}</span><button class="btn ghost sm" data-wed="${p.id}" title="Notiz ändern">✎</button><button class="btn ghost sm" data-wdel="${p.id}" title="Wegpunkt löschen">✕</button></div>`).join("");
-  $("#profcard").insertAdjacentHTML("afterend", `<div class="panel gap" id="wpcard"><h2>Wegpunkte</h2><div id="wplist">${rows()}</div></div>`);
+  const wc = tlCard("wpcard", {sec: "wp", key: "tl_wp", icon: "pin", title: "Wegpunkte", def: true, badge: w.length === 1 ? "1 Wegpunkt" : `${w.length} Wegpunkte`});
+  tlBody(wc).innerHTML = `<div id="wplist">${rows()}</div>`;
+  $("#profcard").after(wc);
   $("#wpcard").onclick = async e => {
     const ed = e.target.closest("[data-wed]"), dl = e.target.closest("[data-wdel]");
     if (ed) {

@@ -372,12 +372,8 @@ async function steigCard(t) {
   if (!tiles) return;
   const first = k.auf ? "auf" : k.eben ? "eben" : "ab",
     key = [k.auf ? `<span>Bergauf</span> <b>${nf(k.auf.kmh, 1)} km/h</b>${d.vert_mh != null ? ` · <b>${nf(d.vert_mh, 0)} m/h</b>` : ""}` : "", k.eben ? `<span>Eben</span> <b>${nf(k.eben.kmh, 1)} km/h</b>` : "", k.ab ? `<span>Bergab</span> <b>${nf(k.ab.kmh, 1)} km/h</b>` : ""].filter(Boolean).join(" · ");
-  const c = document.createElement("div");
-  c.id = "steigcard";
-  c.className = "panel prof gap trcard";
-  c.innerHTML = trFold("steig", "Tempo nach Steigung", key,
-    `<div class="utiles">${tiles}</div><div class="mut hrnote"><span>Aus Strecke, Höhe und Zeit berechnet.</span> <span>Nur Bewegungszeit: Pausen unter 0,3 km/h sind herausgenommen; die Steigung ist über etwa 50 m geglättet (bergauf über 5 %, bergab unter −5 %).</span></div>`, false, "trsub trmain");
-  trBind(c);
+  const c = tlCard("steigcard", {sec: "steig", key: "steig", icon: "trend", title: "Tempo nach Steigung", badge: key, def: false});
+  tlBody(c).innerHTML = `<div class="utiles">${tiles}</div><div class="mut hrnote"><span>Aus Strecke, Höhe und Zeit berechnet.</span> <span>Nur Bewegungszeit: Pausen unter 0,3 km/h sind herausgenommen; die Steigung ist über etwa 50 m geglättet (bergauf über 5 %, bergab unter −5 %).</span></div>`;
   ($("#uhrcard") || $("#metcard") || $("#pulscard") || $("#profcard")).after(c);
 }
 

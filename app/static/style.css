@@ -914,3 +914,58 @@ a.aedt{text-decoration:underline;text-underline-offset:3px}
 .aed{font-size:13px;color:var(--mut);font-variant-numeric:tabular-nums}
 .aed i{font-style:normal;font-weight:600;color:var(--ink);white-space:nowrap}
 @media (max-width:640px){.aem{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* =====================  3.15.0: Neue Tourseite (Gruppen, einheitliche Abschnittsköpfe, Sprung-Leiste)  ===================== */
+:root{--toph:56px;--tlnavh:0px}
+.btn[hidden]{display:none}
+.tlnav{display:flex;align-items:center;gap:8px 14px;margin:22px 0 0;padding:8px 0;background:var(--bg);border-bottom:1px solid var(--rule);position:relative;z-index:30}
+.tlnav[hidden]{display:none}
+@media (min-width:701px){html:not(.mob) .tlnav{position:sticky;top:var(--toph)}}
+.tlchips{display:flex;gap:8px;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none;padding:3px 2px}
+.tlchips::-webkit-scrollbar{display:none}
+.tlchip{flex:none;border:1.5px solid var(--rule);background:var(--card);color:var(--ink);padding:5px 14px;min-height:36px;border-radius:99px;font:500 15px var(--b);cursor:pointer;white-space:nowrap}
+.tlchip:hover,.tlall:hover{border-color:var(--ink)}
+.tlall{flex:none;border:1.5px solid var(--rule);background:transparent;color:var(--ink);padding:5px 14px;min-height:36px;border-radius:var(--r);font:600 15px var(--d);cursor:pointer;white-space:nowrap}
+.tlchip:focus-visible,.tlall:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.tlx{margin-top:8px}
+.tlg{margin-top:34px;scroll-margin-top:calc(var(--toph) + var(--tlnavh) + 12px)}
+.tlg[hidden]{display:none}
+.tlgh{display:flex;align-items:center;gap:14px;font:700 24px var(--d);letter-spacing:.2px;margin:0 0 14px;color:var(--ink)}
+.tlgh::after{content:"";flex:1;height:1px;background:var(--rule)}
+.tlgb,.tlrec,.tldev{display:flex;flex-direction:column;gap:14px;min-width:0}
+details.tls{background:var(--card);border:1px solid var(--rule);border-radius:var(--r-l);scroll-margin-top:calc(var(--toph) + var(--tlnavh) + 12px)}
+details.tls[hidden]{display:none}
+details.tls>summary{display:flex;align-items:center;gap:4px 12px;flex-wrap:wrap;min-height:52px;padding:10px 16px;cursor:pointer;list-style:none;border-radius:var(--r-l)}
+details.tls>summary::-webkit-details-marker{display:none}
+details.tls>summary::before{content:"";width:8px;height:8px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:rotate(-45deg);transition:transform .15s;margin:0 4px 0 2px;flex:none}
+details.tls[open]>summary::before{transform:rotate(45deg)}
+details.tls>summary:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+details.tls[open]>summary{border-bottom:1px solid var(--rule);border-radius:var(--r-l) var(--r-l) 0 0}
+.tli{width:22px;height:22px;flex:none;fill:none;stroke:var(--bars);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tlt{font:700 20px var(--d);margin:0;color:var(--ink)}
+.tlk{flex:1 1 220px;min-width:0;font:500 15px var(--b);color:var(--ink);text-align:right}
+.tlk:empty{display:none}
+.tlk b{font-variant-numeric:tabular-nums}
+.tlsb{padding:14px 16px 16px;min-width:0}
+.tlsb>.panel{border:0;border-radius:0;background:none;padding:0;margin:0}
+.tlmap{padding:0}
+.tlmap .tmap{margin:0;border-radius:0 0 var(--r-l) var(--r-l)}
+.tlmap>.figs.sm{padding:0 16px;margin:8px 0 12px}
+.tlmap>.panel{margin:12px 16px!important}
+.tlbar{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;margin:0 0 12px}
+.tlbar .sub{color:var(--mut);font-size:16px}
+.tlsb .wx{margin:0;padding:0;background:none}
+.tlnotes{display:flex;flex-direction:column;gap:14px}
+.tlnotes>*{margin:0!important}
+.tldev.multi{border:1px solid var(--rule);border-left:5px solid var(--bars);border-radius:var(--r-l);padding:14px;background:color-mix(in srgb,var(--soft) 35%,var(--bg))}
+.tlgb>.dvrow,.tldev>.dvrow{margin:0}
+@media (max-width:700px){
+  .tlnav{flex-wrap:wrap}.tlchips{flex-basis:100%}
+  .tlg{margin-top:26px}
+  details.tls>summary{padding:10px 12px}
+  .tlk{flex-basis:100%;text-align:left;padding-left:44px}
+  .tlsb{padding:12px}.tlmap>.figs.sm{padding:0 12px}
+  .tldev.multi{padding:10px}
+}
+@media (prefers-reduced-motion:reduce){details.tls>summary::before{transition:none}}
+@media print{.tlnav{display:none!important}}

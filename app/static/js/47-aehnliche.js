@@ -106,11 +106,8 @@ async function aeCard(t) {
     body = (later ? `<div class="aesaid">${later}</div>` : "") + note +
       `<div class="aechart" aria-live="off"></div><ul class="aelist">${rows.map(r => aeRow(r, d.mit_tempo > 1 ? d.bestes_id : null)).join("")}</ul>` +
       `<div class="mut hrnote"><span>Als Wiederholung gilt, wer weitgehend denselben Weg nimmt (dieselbe Erkennung wie das 🔁 in der Tourenliste).</span> <span>Tempo = Strecke geteilt durch die gesamte Dauer, Pausen eingeschlossen.</span> <span>Die Abweichung vergleicht jeden Lauf mit dieser Tour.</span></div>`;
-  const c = document.createElement("div");
-  c.id = "aehncard";
-  c.className = "panel prof gap trcard";
-  c.innerHTML = trFold("aehn", "Ähnliche Touren im Vergleich", key, body, false, "trsub trmain");
-  trBind(c);
+  const c = tlCard("aehncard", {sec: "aehn", key: "aehn", icon: "cmp", title: "Ähnliche Touren im Vergleich", badge: key, def: false});
+  tlBody(c).innerHTML = body;
   const det = c.querySelector("details");
   const draw = () => det.open && aeDrawChart(c, d);
   det.addEventListener("toggle", draw);

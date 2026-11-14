@@ -118,9 +118,17 @@ VIEWS.tour = async id => {
    <div class="figs"><div class="fig"><div class="v">${nf(t.km, 2)}<span class="u">km</span></div><div class="l">Strecke</div></div><div class="fig"><div class="v">${nf(t.up_m, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div></div>
    <div class="fig"><div class="v">${nf(t.down_m, 0)}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60))}<span class="u">Std.</span></div><div class="l">Dauer</div></div>
    <div class="fig"><div class="v">${t.h ? nf(t.km / t.h, 1) : "–"}<span class="u">km/h</span></div><div class="l">Tempo im Schnitt</div></div><div id="kmax" class="fig" style="display:none"><div class="v" id="kmaxv"></div><div class="l">Höchster Punkt</div></div></div>
-   <div class="tmap" id="tm"></div>
-   <div class="panel prof gap" id="profcard"><h2>Höhenprofil</h2><div id="prof" class="mut">Wird geladen …</div></div>
-   <div class="sec"><h2>Fotos</h2><span class="sub" id="pc"></span><span class="sp"></span><button class="btn sm alt" id="padd">Fotos hinzufügen …</button><button class="btn sm alt" id="pgps" title="Vergleicht den Aufnahmeort der Fotos mit der Strecke und korrigiert eine falsch gestellte Kamerauhr">Zeit per GPS prüfen</button><a class="btn sm" id="ss" style="display:none" target="_blank">Diashow</a></div><div class="thumbs" id="th"></div>
+   <nav class="tlnav" id="tlnav" aria-label="Abschnitte dieser Tour" hidden></nav>
+   <div class="tlx" id="tl" data-tid="${esc(String(t.id))}">
+   <section class="tlg" id="tlg-route" aria-labelledby="tlgh-route"><h2 class="tlgh" id="tlgh-route">Streckenverlauf</h2><div class="tlgb" id="tlgb-route">
+   ${tlSecHtml({id: "map", key: "tl_map", icon: "map", title: "Karte", badge: `${nf(t.km, 1)} km`, def: true, bodyCls: "tlmap", body: '<div class="tmap" id="tm"></div>'})}
+   ${tlSecHtml({id: "prof", key: "tl_prof", icon: "prof", title: "Höhenprofil", def: true, bodyCls: "tlprof", body: '<div class="prof" id="profcard"><div id="prof" class="mut">Wird geladen …</div></div>'})}
+   </div></section>
+   <section class="tlg" id="tlg-rec" aria-labelledby="tlgh-rec" hidden><h2 class="tlgh" id="tlgh-rec">Aufzeichnung</h2><div class="tlgb" id="tlgb-rec"></div></section>
+   <section class="tlg" id="tlg-eval" aria-labelledby="tlgh-eval" hidden><h2 class="tlgh" id="tlgh-eval">Auswertung dieser Tour</h2><div class="tlgb" id="tlgb-eval"></div></section>
+   <section class="tlg" id="tlg-more" aria-labelledby="tlgh-more"><h2 class="tlgh" id="tlgh-more">Fotos &amp; Notizen</h2><div class="tlgb" id="tlgb-more">
+   ${tlSecHtml({id: "photos", key: "tl_photos", icon: "cam", title: "Fotos", def: true, body: '<div class="tlbar"><span class="sub" id="pc"></span><span class="sp"></span><button class="btn sm alt" id="padd">Fotos hinzufügen …</button><button class="btn sm alt" id="pgps" title="Vergleicht den Aufnahmeort der Fotos mit der Strecke und korrigiert eine falsch gestellte Kamerauhr">Zeit per GPS prüfen</button><a class="btn sm" id="ss" hidden target="_blank">Diashow</a></div><div class="thumbs" id="th"></div>'})}
+   </div></section></div>
    ${t.source === "local" ? "" : `<p class="mt30"><a class="back" target="_blank" href="https://www.komoot.com/tour/${t.id}">In Komoot öffnen</a></p>`}`;
   map = mkMap("tm", {layers: true});
   map.setView([t.lat || 50, t.lng || 8], 12);
@@ -194,7 +202,9 @@ VIEWS.tour = async id => {
       }
       tcc = cleanPts(c);
       paintBy();
-      map.fitBounds(l.getBounds(), {padding: [30, 30]});
+      map._tlFit = () => map.fitBounds(l.getBounds(), {padding: [30, 30]});
+      map._tlStale = !$("#tm").clientWidth;        // Karte war beim Laden zugeklappt: beim Aufklappen neu einpassen
+      map._tlFit();
       L.circleMarker(ll[0], {radius: 7, color: "#fff", fillColor: "#2f8f5f", fillOpacity: 1, weight: 2}).addTo(map).bindTooltip("Start");
       L.circleMarker(ll[ll.length - 1], {radius: 7, color: "#fff", fillColor: "#c0504d", fillOpacity: 1, weight: 2})
         .addTo(map)
@@ -213,12 +223,14 @@ VIEWS.tour = async id => {
     })
     .catch(e => {
       if ($("#profcard")) $("#profcard").style.display = "none";
+      if (window.tlRefresh) tlRefresh();
       return null;
     });
   const ph = await api(`/api/photos?tour_id=${t.id}&limit=400`);
   $("#pc").textContent = ph.length ? `${ph.length} Fotos` : "Zu dieser Tour gibt es noch keine Fotos.";
+  tlSetBadge("photos", ph.length ? `${ph.length} Fotos` : "keine");
   if (ph.length) {
-    $("#ss").style.display = "";
+    $("#ss").hidden = false;
     $("#ss").href = `slideshow.html?tour=${t.id}`;
   }
   $("#th").innerHTML = ph
@@ -478,6 +490,7 @@ function profile(c, t) {
   const alts = c.map(p => p[2]).filter(v => v != null);
   if (alts.length < 3) {
     $("#profcard").style.display = "none";
+    if (window.tlRefresh) tlRefresh();
     return;
   }
   const R = 6371000,
@@ -518,6 +531,7 @@ function profile(c, t) {
     `<svg viewBox="0 0 ${W} ${H}" id="psvg">${g}<path d="${line}L${x(D)},${H - B}L${L0},${H - B}Z" fill="${sCol(t.sport)}" opacity=".22"/><path d="${line}" fill="none" stroke="${sCol(t.sport)}" stroke-width="2.4"/><line id="pl" y1="${T}" y2="${H - B}" stroke="var(--ink)" opacity="0" /></svg><div class="tip" id="ptip" style="display:none"></div>`;
   $("#kmax").style.display = "";
   $("#kmaxv").innerHTML = `${nf(mxA, 0)}<span class="u">m</span>`;
+  tlSetBadge("prof", `höchster Punkt ${nf(mxA, 0)} m`);
   let mkr = null;
   const svg = $("#psvg");
   svg.onmousemove = svg.ontouchmove = e => {

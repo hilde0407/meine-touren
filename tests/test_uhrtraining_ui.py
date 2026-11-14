@@ -170,7 +170,7 @@ def test_section_content_and_order(pw, apps):
             assert bad not in t, bad
         assert "title" in c.locator(".utc").first.evaluate("e => Object.keys(e.attributes).map(a => e.attributes[a].name).join()") and "Kilometer 1: 10:50 min/km, Puls 112 bpm, 112 Schritte/min" == c.locator(".utc").first.get_attribute("title")
         ids = pg.evaluate("[...document.querySelectorAll('#profcard, #pulscard, #metcard, #uhrcard')].map(e => e.id)")
-        assert ids.index("uhrcard") == len(ids) - 1 and "metcard" in ids and ids.index("metcard") < ids.index("uhrcard")        # direkt hinter den Messwerten
+        assert ids.index("metcard") < ids.index("uhrcard") < ids.index("pulscard")        # 3.15.0: Messwerte, Training laut Uhr, Puls (je Gerät ein Block)
         assert not pg.errors, pg.errors
         _shot(pg, "uhrtraining-desktop.png")
     finally:
@@ -237,7 +237,7 @@ def _contrast_js():
       const bg = el => { for (let e = el; e; e = e.parentElement) { const c = getComputedStyle(e).backgroundColor; const a = c.match(/[\\d.]+/g); if (c !== 'rgba(0, 0, 0, 0)' && !(a.length === 4 && +a[3] === 0)) return parse(c); } return [255, 255, 255]; };
       const cr = (f, b) => { const l1 = L(f), l2 = L(b); return (Math.max(l1, l2) + .05) / (Math.min(l1, l2) + .05); };
       const out = [];
-      for (const sel of ['#uhrcard h2', '.uth', '.utsrc', '.utile b', '.utile span', '.utile small', '.utv', '.utk', '.utp', '.utl', '.utnotes li', '.hrleg', '#utneu', '#utmsg']) {
+      for (const sel of ['#uhrcard h3', '.uth', '.utsrc', '.utile b', '.utile span', '.utile small', '.utv', '.utk', '.utp', '.utl', '.utnotes li', '.hrleg', '#utneu', '#utmsg']) {
         document.querySelectorAll('#uhrcard ' + sel).forEach((el, i) => { if (i > 3 || !el.innerText.trim()) return; out.push([sel, cr(parse(getComputedStyle(el).color), bg(el))]); });
       }
       const bar = document.querySelector('#uhrcard .utc i');
@@ -263,7 +263,7 @@ def test_contrast_light_and_dark(pw, apps, scheme):
 def test_translated_in_english(pw, apps):
     pg = _page(pw, apps["nozepp"], ZA, locale="en-US")
     try:
-        pg.wait_for_selector("#uhrcard h2:has-text('Training according')", timeout=5000)
+        pg.wait_for_selector("#uhrcard h3:has-text('Training according')", timeout=5000)
         t = pg.locator("#uhrcard").inner_text()
         for x in ("Training effect (aerobic)", "Heart rate zones according to the watch", "Pace per kilometre", "Weather according to the watch", "Reload from Zepp", "m ascent", "Zepp scale"):
             assert x in t, x

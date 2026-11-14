@@ -92,10 +92,9 @@ VIEWS.tour = async id => {
       .sort((a, b) => a.s - b.s)
       .slice(0, 25);
   const tot = A.dist || 1,
-    box = document.createElement("div");
-  box.className = "panel";
-  box.style.margin = "26px 0";
-  box.innerHTML = `<h2>Analyse</h2><div class="rows">
+    box = tlCard("anacard", {sec: "ana", key: "tl_ana", icon: "trend", title: "Analyse", def: false, bodyCls: "tlana",
+      badge: A.total ? `<span>Bewegungszeit</span> <b>${fmtH(A.total - A.pausedS)}</b>${A.pauses.length ? ` · ${A.pauses.length} Pause${A.pauses.length === 1 ? "" : "n"}` : ""}` : "Steigungsanteile"});
+  tlBody(box).innerHTML = `<div class="rows">
     ${
       A.total
         ? `<div class="r"><span>Bewegungszeit<small>${A.pauses.length} Pause${A.pauses.length === 1 ? "" : "n"} (ab 3 Min.) mit zusammen ${fmtH(A.pausedS)}</small></span><b>${fmtH(A.total - A.pausedS)}</b></div>

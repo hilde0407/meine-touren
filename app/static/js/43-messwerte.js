@@ -72,14 +72,15 @@ async function metCard(t) {
   if (!keys.length && !sums.length) return;
   const off = m.device && !m.device.active;                       // Gerät deaktiviert: Auswertungen eingeklappt
   let show = !off;
-  const d = document.createElement("div");
-  d.className = "panel prof gap";
-  d.id = "metcard";
+  const d = tlCard("metcard", {sec: "met", key: "tl_met", icon: "met", title: "Messwerte", def: true}),
+    body = tlBody(d);
+  tlDev(d, m.device, m.source);
   (($("#pulscard") || $("#profcard")).after(d));
   const draw = () => {
+    tlSetBadge(d, esc(keys.slice(0, 3).map(k => m.channels[k].label).join(", ") + (keys.length > 3 ? " +" + (keys.length - 3) : "")) || esc(sums.map(s => s[1]).join(", ")));
     if (!show) {
-      d.innerHTML = `<h2>Messwerte</h2><p class="mut">Das Gerät „${esc(m.device.name)}“ ist deaktiviert – die Messwerte sind ausgeblendet.</p><button class="btn alt sm" id="metshow">Trotzdem anzeigen</button>`;
-      $("#metshow").onclick = () => { show = true; draw(); };
+      body.innerHTML = `<p class="mut">Das Gerät „${esc(m.device.name)}“ ist deaktiviert – die Messwerte sind ausgeblendet.</p><button class="btn alt sm" id="metshow">Trotzdem anzeigen</button>`;
+      d.querySelector("#metshow").onclick = () => { show = true; draw(); };
       return;
     }
     const sel = metSel(keys),
@@ -92,7 +93,7 @@ async function metCard(t) {
     const sm = sums.length ? `<div class="g28 fxw mb8 fx hrkpi">${sums.map(s => `<div><b>${nf(m.sum[s[0]], s[3])}</b> <span class="mut">${s[2] || s[1]}${s[2] ? " " + s[1] : ""}</span></div>`).join("")}</div>` : "";
     const der = keys.some(k => m.channels[k].derived);
     const src = m.device ? esc(m.device.name) + (m.source && m.source !== m.device.name ? ` (${esc(m.source)})` : "") : esc(m.source || "unbekannt");
-    d.innerHTML = `<h2>Messwerte</h2>${keys.length ? `<div class="chips mb8" id="metchips">${chips}</div>` : ""}${sm}${charts}<div class="tip" id="mettip" hidden></div>` +
+    body.innerHTML = `${keys.length ? `<div class="chips mb8" id="metchips">${chips}</div>` : ""}${sm}${charts}<div class="tip" id="mettip" hidden></div>` +
       `<div class="mut mt8 hrnote"><span class="dvsrc">${m.device ? dvAvatar(m.device, "xs") : ""}<span>Quelle:</span> <span>${src}</span></span>${der ? " · * aus GPS-Strecke und Zeit berechnet (kein Messwert des Geräts)" : ""} · <button type="button" class="dvulink" id="dvulink">Alle Felder dieser Tour</button></div>`;
     const ul = $("#dvulink");
     if (ul) ul.onclick = () => dvUhrFelder("tour", t.id, t.name);
@@ -112,7 +113,7 @@ async function metCard(t) {
         if (best < 0 || px < 46) { tip.hidden = true; cur.setAttribute("display", "none"); return; }
         const cx = 46 + ((vb.width - 46 - 6) * tt[best]) / dur, mi = Math.round(tt[best] / 60);
         cur.setAttribute("x1", cx); cur.setAttribute("x2", cx); cur.removeAttribute("display");
-        const dr = d.getBoundingClientRect();
+        const dr = body.getBoundingClientRect();
         tip.textContent = `${Math.floor(mi / 60)}:${pad2(mi % 60)} h · ${metFmt(k, ch.series[best], ch)} ${ch.unit}`;
         tip.hidden = false;
         tip.style.left = Math.min(Math.max(e.clientX - dr.left, 60), dr.width - 60) + "px";
@@ -155,6 +156,7 @@ async function metDevRow(t) {
     const g = m.device,
       name = g ? g.name : m.source || "unbekannt",
       sub = g ? [g.model, !g.active ? "deaktiviert" : "", g.manual ? "von Hand zugeordnet" : ""].filter(Boolean) : [];
+    row.dataset.tlkey = g ? "d" + g.id : "";
     row.innerHTML = (g ? dvAvatar(g, "xs") : `<span class="dvav xs">${dvIcon("other")}</span>`) +
       `<span class="dvt"><small>Aufgezeichnet mit</small><b>${esc(name)}</b>${sub.length ? `<small>${sub.map(x => `<span>${esc(x)}</span>`).join(" · ")}</small>` : ""}</span>` +
       (typeof isViewer === "function" && isViewer() ? "" : `<button class="dvedit" id="devedit" title="Gerät dieser Tour ändern"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg><span>Ändern</span></button>`);
