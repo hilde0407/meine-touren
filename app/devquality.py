@@ -521,6 +521,23 @@ def tour_flags(r):
     return f
 
 
+def open_flags(r, fixed_h, fixed_gps):
+    """Noch offene Auffälligkeiten: Was der Nutzer schon korrigiert hat (Höhe aus Gelände/Uhr, GPS-Track bereinigt), gilt als erledigt und
+    verschwindet aus der Liste – ohne neue Auswertung. Nimmt er die Korrektur zurück, erscheint die Tour wieder."""
+    f = tour_flags(r)
+    if fixed_h:
+        f = [x for x in f if x["kind"] != "height"]
+    if fixed_gps:
+        f = [x for x in f if x["kind"] not in ("gps_jumps", "gps_gaps")]
+    return f
+
+
+def _fixed_sets():
+    h = {r["id"] for r in db.query("SELECT id FROM elev_fix")}
+    g = {r["id"] for r in db.query("SELECT id FROM track_fix")}
+    return h, g
+
+
 def _suggestions(tid, flags, dev_kind, fix):
     """Vorhandene Aktionen, die zu den Auffälligkeiten passen. Nur Beschreibungen – ausgeführt wird erst nach Bestätigung in der Oberfläche."""
     out = []
@@ -554,6 +571,7 @@ def _current_rows():
 
 def payload():
     per, tours, asg = _current_rows()
+    fh, fg = _fixed_sets()
     devs = db.query("SELECT * FROM devices ORDER BY active DESC, kind, COALESCE(NULLIF(since,''),'0000'), name")
     mine = {}
     for tid, (d, _m) in asg.items():
@@ -569,7 +587,7 @@ def payload():
         ref = "komoot" if komoot and komoot * 2 >= len(dr) else "tour"      # Wortwahl: Referenz ist meist die Komoot-Strecke
         parts = {"dist": assess_dist(rows, ref), "height": assess_height(rows), "gps": assess_gps(rows), "hr": assess_hr(rows)}
         days = sorted(r["day"] for r in rows if r["day"])
-        flagged = sum(1 for r in rows if tour_flags(r))
+        flagged = sum(1 for r in rows if open_flags(r, r["tour_id"] in fh, r["tour_id"] in fg))
         tips = []
         if parts["height"]["level"] in ("mäßig", "auffällig"):
             tips.append({"kind": "height", "text": "Bei einzelnen Touren lässt sich die Höhe aus dem Geländemodell neu berechnen oder mit der Uhr abgleichen (Liste „Auffällige Touren“). Jede Änderung ist wiederherstellbar."})
@@ -602,12 +620,13 @@ def api_quality_tours(did: int, limit: int = 100):
     per, tours, _asg = _current_rows()
     fx = {r["id"]: r["src"] for r in db.query("SELECT id, src FROM elev_fix")}
     names = {r["id"]: r["name"] for r in db.query("SELECT id,name FROM tours")}
+    fh, fg = _fixed_sets()
     out = []
     for r in per.get(did, []):
-        fl = tour_flags(r)
+        tid = r["tour_id"]
+        fl = open_flags(r, tid in fh, tid in fg)
         if not fl:
             continue
-        tid = r["tour_id"]
         order = {"dist_implausible": 0, "gps_jumps": 1, "height": 2, "dist": 3, "gps_gaps": 4, "hr": 5}
         out.append({"id": tid, "name": names.get(tid) or tid, "day": r["day"], "flags": fl, "fixed": ("zepp" if fx[tid] == "zepp" else "dem") if tid in fx else None,
                     "suggest": _suggestions(tid, fl, d["kind"], tid in fx), "_o": min(order[x["kind"]] for x in fl), "_n": len(fl)})

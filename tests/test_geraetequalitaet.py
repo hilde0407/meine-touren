@@ -384,12 +384,29 @@ def test_api_flagged_tours_with_suggestions_and_existing_actions(dem):
     assert db.one("SELECT dist_m FROM tours WHERE id=?", (t["tour_id"],))["dist_m"] == 3000
 
 
-def test_fixed_tour_offers_restore_and_measure_uses_original(dem):
+def test_corrected_tours_disappear_from_the_list_and_return_after_undo(dem):
     c, d = _seed_api(dem)
     tid = f"z{T0}"
+    vorher = c.get(f"/api/devices/{d}/quality/tours").json()
+    assert any(x["id"] == tid and any(f["kind"] == "height" for f in x["flags"]) for x in vorher["tours"])
+    flagged0 = [x for x in c.get("/api/devices/quality").json()["devices"] if x["id"] == d][0]["flagged"]
+    # Höhenkorrektur durchgeführt: die Höhen-Auffälligkeit gilt als erledigt, ohne neue Auswertung
     db.execute("INSERT INTO elev_fix(id,orig_up,orig_down,up_m,down_m,ts,src) VALUES(?,?,?,?,?,1,NULL)", (tid, 100, 100, 50, 50))
-    t = [x for x in c.get(f"/api/devices/{d}/quality/tours").json()["tours"] if x["id"] == tid][0]
-    assert t["fixed"] == "dem" and any(s["action"] == "elev-restore" for s in t["suggest"])
+    nach = c.get(f"/api/devices/{d}/quality/tours").json()
+    mine = [x for x in nach["tours"] if x["id"] == tid]
+    assert not mine or all(f["kind"] != "height" for f in mine[0]["flags"])
+    # GPS-Track bereinigt: Sprünge/Lücken ebenfalls erledigt -> die Tour ist (bis auf Strecke/Puls) nicht mehr aufgelistet
+    db.execute("INSERT INTO track_fix(id,orig_dist,orig_dur,dist,dur,removed,excluded,ts) VALUES(?,?,?,?,?,1,0,1)", (tid, 3000, 100, 3000, 100))
+    nach2 = c.get(f"/api/devices/{d}/quality/tours").json()
+    mine2 = [x for x in nach2["tours"] if x["id"] == tid]
+    assert not mine2 or all(f["kind"] not in ("height", "gps_jumps", "gps_gaps") for f in mine2[0]["flags"])
+    assert nach2["total"] < vorher["total"] or not mine2
+    flagged1 = [x for x in c.get("/api/devices/quality").json()["devices"] if x["id"] == d][0]["flagged"]
+    assert flagged1 < flagged0
+    # Korrektur zurückgenommen: die Tour erscheint wieder
+    db.execute("DELETE FROM elev_fix WHERE id=?", (tid,)); db.execute("DELETE FROM track_fix WHERE id=?", (tid,))
+    wieder = c.get(f"/api/devices/{d}/quality/tours").json()
+    assert any(x["id"] == tid for x in wieder["tours"]) and wieder["total"] == vorher["total"]
 
 
 def test_reassigning_tours_moves_them_to_the_new_device(dem):

@@ -331,7 +331,8 @@ function dvSuggest(t, g, again) {
     <div class="dvsug">${t.suggest.map((s, i) => `<div class="dvsg"><div><b>${esc(s.label)}</b><small class="dvh">${esc(info[s.action] || s.label)}</small>${s.action === "info" ? "" : ""}</div>${s.action === "info" ? "" : `<button class="btn alt sm" data-i="${i}" type="button">${s.action === "trackfix" ? "Öffnen …" : "Ausführen …"}</button>`}</div>`).join("")}</div>
     <div class="dvsres" role="status" aria-live="polite"></div>
     <div class="dvfoot"><button class="btn ghost" id="dvsx">Schließen</button></div>`);
-  $("#dvsx").onclick = () => m.remove();
+  let changed = false;                       // nach einer Korrektur verschwindet die Tour beim Schließen aus der Liste
+  $("#dvsx").onclick = () => { m.remove(); if (changed) again(); };
   const res = m.querySelector(".dvsres");
   m.querySelectorAll(".dvsug button[data-i]").forEach(b => (b.onclick = async () => {
     const s = t.suggest[+b.dataset.i];
@@ -341,12 +342,13 @@ function dvSuggest(t, g, again) {
     res.textContent = "Wird ausgeführt …";
     try {
       const r = await api(s.url, {method: s.method || "POST"});
+      changed = true;
       MET_CACHE.clear();
       await loadTours().catch(() => {});
       if (s.undo) {
         res.innerHTML = `<p><b>Übernommen:</b> Aufstieg ${nf(r.up_m ?? r.up, 0)} m, Abstieg ${nf(r.down_m ?? r.down, 0)} m (vorher ${nf(r.orig_up, 0)} m / ${nf(r.orig_down, 0)} m).</p><button class="btn alt sm" id="dvsundo" type="button">Rückgängig machen</button>`;
         $("#dvsundo").onclick = async () => {
-          try { await api(s.undo, {method: "POST"}); MET_CACHE.clear(); await loadTours().catch(() => {}); res.textContent = "Zurückgenommen: das Original ist wieder da."; } catch (e) { res.innerHTML = `<span class="bad">${esc(e.message)}</span>`; }
+          try { await api(s.undo, {method: "POST"}); changed = true; MET_CACHE.clear(); await loadTours().catch(() => {}); res.textContent = "Zurückgenommen: das Original ist wieder da."; } catch (e) { res.innerHTML = `<span class="bad">${esc(e.message)}</span>`; }
         };
       } else res.textContent = "Erledigt.";
       res.insertAdjacentHTML("beforeend", `<p class="mut">Die Kennzahlen der Uhr ändern sich erst beim nächsten „Genauigkeit auswerten“.</p>`);
