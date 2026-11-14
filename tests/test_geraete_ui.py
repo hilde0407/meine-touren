@@ -300,3 +300,17 @@ def test_reset_manual_outside_range(fresh):
     assert db.one("SELECT 1 FROM tour_device WHERE tour_id='t0'") is None and db.one("SELECT 1 FROM tour_device WHERE tour_id='t1'")
     assert c.post("/api/devices/reset-manual", json={"mode": "all"}).json()["reset"] == 1
     assert c.post("/api/devices/reset-manual", json={"mode": "x"}).status_code == 400
+
+
+def test_zepp_diag_lists_trainings_near_tour(monkeypatch, fresh):
+    from app import sync
+    ts = 1_700_000_000
+    db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,status,source) VALUES('d1','d1','hike',?,?,15000,18000,'t','komoot')", (ts, ts + 18000))
+    hist = [{"trackid": str(ts + 600), "dis": "14000", "run_time": "15000", "source": "run.9568513.huami.com", "type": "6"},
+            {"trackid": str(ts + 5 * 86400), "dis": "1", "run_time": "1", "source": "x"}]
+    monkeypatch.setattr(sync, "_zepp_api", lambda: type("A", (), {"history": lambda s: hist})())
+    j = _client().get("/api/tours/d1/zepp-diag").json()
+    assert len(j["trainings"]) == 1 and j["history_total"] == 2
+    t = j["trainings"][0]
+    assert t["start_diff_s"] == 600 and t["match_overlap"] is True and t["dist_ratio"] == round(15000 / 14000, 2)
+    assert _client().get("/api/tours/nix/zepp-diag").status_code == 404

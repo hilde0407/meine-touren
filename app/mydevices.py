@@ -311,6 +311,37 @@ def api_reset_manual(body: dict):
     return {"ok": True, "reset": n}
 
 
+@router.get("/api/tours/{tour_id}/zepp-diag")
+def api_zepp_diag(tour_id: str):
+    """Diagnose „Warum kein Gerät?“: Zepp-Trainings um den Starttag der Tour (±36 h) mit Abständen zu Start, Dauer und Strecke."""
+    from . import sync, zepp
+    import requests
+    t = db.one("SELECT id,name,start_ts,dist_m,dur_s FROM tours WHERE id=?", (tour_id,))
+    if not t or not t["start_ts"]:
+        raise HTTPException(404, "Tour nicht gefunden")
+    try:
+        hist = sync._zepp_api().history()
+    except (zepp.ZeppError, requests.RequestException, RuntimeError) as e:
+        raise HTTPException(422, f"Zepp ist nicht erreichbar oder die Zugangsdaten stimmen nicht: {e}")
+    tol = db.get_int("dup_tolerance_s", 300)
+    out = []
+    for s in hist:
+        try:
+            tr, dis, rt = int(s["trackid"]), float(s.get("dis") or 0), int(float(s.get("run_time") or 0))
+        except (KeyError, TypeError, ValueError):
+            continue
+        if abs(tr - t["start_ts"]) > 36 * 3600:
+            continue
+        one = [{"id": t["id"], "start_ts": t["start_ts"], "dist_m": t["dist_m"], "dur_s": t["dur_s"]}]
+        from . import sync as _s
+        out.append({"trackid": tr, "start": datetime.fromtimestamp(tr, tz=TZ).isoformat(timespec="seconds"), "start_diff_s": tr - t["start_ts"],
+                    "dis_m": dis, "run_time_s": rt, "source": s.get("source"), "type": s.get("type"),
+                    "dist_ratio": round(t["dist_m"] / dis, 2) if dis and t["dist_m"] else None,
+                    "match_exact": bool(_s.is_duplicate(tr, dis, rt, one, tol)), "match_overlap": bool(_overlap(tr, dis, rt, one))})
+    return {"tour": {"id": t["id"], "name": t["name"], "start": datetime.fromtimestamp(t["start_ts"], tz=TZ).isoformat(timespec="seconds"),
+                     "dist_m": t["dist_m"], "dur_s": t["dur_s"]}, "trainings": sorted(out, key=lambda x: x["trackid"]), "history_total": len(hist)}
+
+
 @router.get("/api/devices/suggestions")
 def api_suggestions():
     """Vorschläge aus vorhandenen Touren: Quellenarten, für die es noch kein Gerät gibt. Es wird nichts angelegt."""
