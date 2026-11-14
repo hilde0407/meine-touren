@@ -884,3 +884,33 @@ details.trsub .tblw{max-height:340px;overflow:auto}
 .dvbsum b{display:block}.dvbsum .dvh{margin-top:2px}
 .dvbdone{font-size:18px;margin:6px 0}
 @media (max-width:520px){.dvbrow{grid-template-columns:auto minmax(0,1fr)}.dvbnum{grid-column:2;justify-content:flex-start}.mbox.dvbox.dvbatchbox{padding:18px 14px}}
+
+/* =====================  3.14.0: Ähnliche Touren im Vergleich (Tourseite)  ===================== */
+.aesaid{font-size:16px;margin:2px 0 4px;color:var(--ink)}
+.aechart{margin:8px 0 4px}
+.aescroll{overflow-x:auto;padding-bottom:2px}
+.aesvg{display:block;max-width:none}
+.aesvg text{font-size:12px;fill:var(--mut);font-variant-numeric:tabular-nums}
+.aesvg text.aeval{fill:var(--ink);font-weight:600}
+.aegrid{stroke:var(--rule);stroke-width:1}
+.aeline{fill:none;stroke:var(--mut);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.aedot{fill:var(--bars);stroke:var(--card);stroke-width:2}
+.aedot.cur{fill:var(--accent2);stroke:var(--ink);stroke-width:2}
+.aelegend i.aelg{width:12px;height:12px;border-radius:50%;background:var(--bars);vertical-align:-1px}
+.aelegend i.aelg.cur{background:var(--accent2);border:2px solid var(--ink);width:14px;height:14px;box-sizing:border-box}
+.aelist{list-style:none;margin:10px 0 8px;padding:0;display:flex;flex-direction:column;gap:10px}
+.aer{border:1px solid var(--rule);border-radius:var(--r-l,10px);background:var(--card);padding:10px 12px;min-width:0}
+.aer.cur{background:var(--soft);border-color:var(--ink);border-left:5px solid var(--accent2)}
+.aeh{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
+.aedt{font:600 16px var(--d);color:var(--ink);font-variant-numeric:tabular-nums}
+a.aedt{text-decoration:underline;text-underline-offset:3px}
+.aetag{font-size:13px;font-weight:600;color:var(--ink);border:1px solid var(--mut);border-radius:999px;padding:1px 9px;line-height:18px}
+.aetag.cur{background:var(--accent2);border-color:var(--accent2);color:#1c0c02}
+.aesub{font-size:14px;color:var(--mut);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aem{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 14px;margin-top:10px}
+.aec{display:flex;flex-direction:column;gap:1px;min-width:0}
+.aecl{font-size:13px;color:var(--mut)}
+.aec b{font:600 18px/1.2 var(--d);font-variant-numeric:tabular-nums;white-space:nowrap}
+.aed{font-size:13px;color:var(--mut);font-variant-numeric:tabular-nums}
+.aed i{font-style:normal;font-weight:600;color:var(--ink);white-space:nowrap}
+@media (max-width:640px){.aem{grid-template-columns:repeat(2,minmax(0,1fr))}}

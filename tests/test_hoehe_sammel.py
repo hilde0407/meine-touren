@@ -451,7 +451,7 @@ def test_quality_batch_is_in_backup_and_umzug_and_never_dropped(dem, tmp_path):
 def test_version_and_release_notes_and_dialog_script_is_loaded_first():
     from app import config as cfg
     root = Path(__file__).resolve().parent.parent
-    assert cfg.VERSION == "3.13.0 · Meine Touren (2026-11-14)"
+    assert cfg.VERSION == "3.14.0 · Meine Touren (2026-11-14)"
     notes = (root / "docs" / "versionen" / "3.13.0.md").read_text(encoding="utf-8")
     assert "Sammel-Korrektur" in notes or "Alle auffälligen Höhen korrigieren" in notes and "Fortschritt" in notes
     html = (root / "app" / "static" / "index.html").read_text(encoding="utf-8")

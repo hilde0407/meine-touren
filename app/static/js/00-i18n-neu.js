@@ -1356,4 +1356,31 @@ Rückgängig gemacht || Undone || Annulé || Deshecho
 Auffällige Touren || Conspicuous tours || Parcours suspects || Rutas llamativas
 Höhenvergleich || Elevation comparison || Comparaison d’altitude || Comparación de altitud
 Touren || Tours || Parcours || Rutas
+Ähnliche Touren im Vergleich || Similar tours compared || Parcours similaires comparés || Rutas similares comparadas
+1 Wiederholung || 1 repeat || 1 répétition || 1 repetición
+{} Wiederholungen || {} repeats || {} répétitions || {} repeticiones
+Bestes Tempo bisher || Best pace so far || Meilleure allure jusqu’ici || Mejor ritmo hasta ahora
+Erster Lauf dieser Strecke || First time on this route || Première fois sur ce parcours || Primera vez en esta ruta
+Langsamer als der frühere Lauf || Slower than the earlier run || Plus lent que la sortie précédente || Más lento que la salida anterior
+Langsamer als alle {} früheren Läufe || Slower than all {} earlier runs || Plus lent que les {} sorties précédentes || Más lento que las {} salidas anteriores
+Schneller als {} von {} früheren Läufen || Faster than {} of {} earlier runs || Plus rapide que {} des {} sorties précédentes || Más rápido que {} de las {} salidas anteriores
+Der spätere Lauf war schneller. || The later run was faster. || La sortie suivante était plus rapide. || La salida posterior fue más rápida.
+Der spätere Lauf war nicht schneller. || The later run was not faster. || La sortie suivante n’était pas plus rapide. || La salida posterior no fue más rápida.
+Keiner der {} späteren Läufe war schneller. || None of the {} later runs was faster. || Aucune des {} sorties suivantes n’était plus rapide. || Ninguna de las {} salidas posteriores fue más rápida.
+Von {} späteren Läufen waren {} schneller. || Of {} later runs, {} were faster. || Sur {} sorties suivantes, {} étaient plus rapides. || De {} salidas posteriores, {} fueron más rápidas.
+Für diese Tour fehlen Zeit oder Strecke – deshalb gibt es keinen Tempovergleich. || This tour has no time or distance, so there is no pace comparison. || Cette sortie n’a pas de durée ou de distance : pas de comparaison d’allure. || Esta ruta no tiene tiempo o distancia, por eso no hay comparación de ritmo.
+Als Wiederholung gilt, wer weitgehend denselben Weg nimmt (dieselbe Erkennung wie das 🔁 in der Tourenliste). || A repeat is a tour that follows largely the same route (same detection as the 🔁 in the tour list). || Une répétition suit en grande partie le même itinéraire (même détection que le 🔁 dans la liste des parcours). || Una repetición sigue en gran parte el mismo camino (misma detección que el 🔁 de la lista de rutas).
+Tempo = Strecke geteilt durch die gesamte Dauer, Pausen eingeschlossen. || Pace = distance divided by total duration, pauses included. || Allure = distance divisée par la durée totale, pauses comprises. || Ritmo = distancia dividida por la duración total, pausas incluidas.
+Die Abweichung vergleicht jeden Lauf mit dieser Tour. || The difference compares each run with this tour. || L’écart compare chaque sortie à ce parcours. || La diferencia compara cada salida con esta ruta.
+Diese Tour || This tour || Ce parcours || Esta ruta
+Schnellster Lauf || Fastest run || Sortie la plus rapide || Salida más rápida
+Andere Läufe || Other runs || Autres sorties || Otras salidas
+Liniendiagramm: Durchschnittstempo der Läufe über die Zeit || Line chart: average pace of the runs over time || Courbe : allure moyenne des sorties au fil du temps || Gráfico de líneas: ritmo medio de las salidas a lo largo del tiempo
+länger || longer || plus long || más largo
+kürzer || shorter || plus court || más corto
+mehr || more || plus || más
+weniger || less || moins || menos
+schneller || faster || plus rapide || más rápido
+langsamer || slower || plus lent || más lento
+gleich || the same || identique || igual
 `;
