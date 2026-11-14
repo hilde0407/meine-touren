@@ -169,6 +169,7 @@ def test_rows_values_deviation_chart_and_links(pw, apps):
     pg = _page(pw, apps["full"], "tour/r4/auswertung", "#aehncard", dpr=2)
     try:
         _open(pg)
+        pg.wait_for_selector("#aehncard .aer.cur", timeout=15000)
         assert pg.locator("#aehncard .aer").count() == 7 and pg.locator("#aehncard .aer.cur").count() == 1
         cur = pg.locator("#aehncard .aer.cur")
         assert "Diese Tour" in cur.inner_text() and cur.locator(".aed").count() == 0 and cur.locator("a").count() == 0       # keine Abweichung zu sich selbst, kein Link

@@ -121,6 +121,8 @@ def _page(pw, url, tour="r3", devs="one", width=1280, height=1000, scheme="light
         pg.wait_for_function(READY_SUB, timeout=15000)
     else:
         pg.wait_for_selector("#tls-photos", timeout=15000)
+        if devs:
+            pg.wait_for_selector("#wpcard", timeout=15000)
     pg.wait_for_timeout(settle)
     pg.browser_ = b
     return pg

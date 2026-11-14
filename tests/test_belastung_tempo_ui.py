@@ -245,6 +245,7 @@ def test_tour_page_fatigue_and_slope_sections(pw, apps):
         assert "Zweite Hälfte" in sm and "Tempo 17 % langsamer" in sm and "Puls +15 bpm" in sm
         f.locator("summary").click()
         assert "Deutlich langsamer in der zweiten Hälfte" in f.inner_text() and "Verglichen werden die ersten 4 und die letzten 4" in f.inner_text()
+        pg.wait_for_function("() => localStorage.getItem('mt_trf_uhr_erm') === '1'", timeout=15000)
         assert pg.evaluate("localStorage.getItem('mt_trf_uhr_erm')") == "1"
         s = pg.locator("#steigcard details")
         assert not s.evaluate("e => e.open") and "Bergauf" in s.locator("summary").inner_text() and "km/h" in s.locator("summary").inner_text()
