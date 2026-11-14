@@ -397,6 +397,66 @@ def probe_summaries(summaries):
             "sample_keys": sorted(sample.keys()) if sample else []}
 
 
+def match_summaries(summaries, tours=None):
+    """Zepp-Trainings den vorhandenen Touren zuordnen (gleiche ID z<Nr> oder gleicher Start/gleiche Strecke – auch Komoot- und Datei-Touren,
+    die mit der Uhr aufgezeichnet wurden) und je Tour Art=zepp sowie die Zepp-Kennung merken. Danach findet die automatische Geräte-Zuordnung
+    das richtige Gerät. Unberührt bleiben: manuell zugeordnete Touren und Touren mit einer anderen bekannten Art (Garmin, Suunto, Polar, Handy).
+    Rückgabe: {matched, changed, skipped_manual, skipped_other, unmatched}."""
+    from . import sync
+    tours = tours if tours is not None else db.query("SELECT id,start_ts,dist_m,dur_s FROM tours")
+    byid = {t["id"]: t for t in tours}
+    tol = db.get_int("dup_tolerance_s", 300)
+    manual = {r["tour_id"] for r in db.query("SELECT tour_id FROM tour_device")}
+    srcs = {r["tour_id"]: (r["src"] or "") for r in db.query("SELECT tour_id, src FROM tour_source")}
+    zs = {r["tour_id"]: r["zsrc"] for r in db.query("SELECT tour_id, zsrc FROM tour_zsrc")}
+    res = {"matched": 0, "changed": 0, "skipped_manual": 0, "skipped_other": 0, "unmatched": 0}
+    seen = set()
+    for s in summaries:
+        if not isinstance(s, dict):
+            continue
+        try:
+            tr = int(s["trackid"])
+            t = byid.get(f"z{tr}") or sync.is_duplicate(tr, float(s.get("dis") or 0), int(float(s.get("run_time") or 0)), tours, tol)
+        except (KeyError, TypeError, ValueError):
+            continue
+        if not t:
+            res["unmatched"] += 1
+            continue
+        tid = t["id"]
+        if tid in seen:
+            continue
+        seen.add(tid)
+        res["matched"] += 1
+        if tid in manual:
+            res["skipped_manual"] += 1
+            continue
+        if srcs.get(tid, "") in KINDS and srcs[tid] != "zepp":
+            res["skipped_other"] += 1
+            continue
+        z = str(s.get("source") or "").strip()[:120]
+        ch = False
+        if srcs.get(tid) != "zepp":
+            db.execute("INSERT OR REPLACE INTO tour_source(tour_id,src,name) VALUES(?,?,COALESCE((SELECT name FROM tour_source WHERE tour_id=?),''))", (tid, "zepp", tid))
+            ch = True
+        if z and zs.get(tid) != z:
+            db.execute("INSERT OR REPLACE INTO tour_zsrc(tour_id,zsrc) VALUES(?,?)", (tid, z))
+            ch = True
+        res["changed"] += ch
+    return res
+
+
+def match_all(api=None):
+    """Job: alle Touren mit passendem Zepp-Training als „mit der Uhr aufgezeichnet“ markieren und ihrem Gerät zuordnen."""
+    from . import sync
+    from .jobs import log
+    api = api or sync._zepp_api()
+    r = match_summaries(api.history())
+    log(f"Touren den Uhren zuordnen: {r['matched']} Touren mit Zepp-Training gefunden, {r['changed']} neu zugeordnet"
+        + (f", {r['skipped_manual']} von Hand zugeordnete unverändert" if r["skipped_manual"] else "")
+        + (f", {r['skipped_other']} mit anderer Quelle unverändert" if r["skipped_other"] else ""))
+    return r
+
+
 def _zg(src):
     from . import zepp_devices
     return zepp_devices.guess_for(src)
@@ -418,6 +478,7 @@ def api_zepp_probe():
     try:
         note_zsrc(summ)
         res = probe_summaries(summ)
+        res["match"] = match_summaries(summ)
     except Exception:  # noqa
         pass
     res["suggest_from_zepp"] = True

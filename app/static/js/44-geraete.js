@@ -251,7 +251,7 @@ async function devPanel() {
   const empty = `<div class="dvempty"><span class="dvav">${dvIcon("zepp")}</span><h3>Noch kein Gerät angelegt</h3>
       <p>Lege deine Uhren und Handys an, damit bei jeder Tour steht, womit sie aufgezeichnet wurde.</p>
       ${viewer ? "" : `<div class="row"><button class="btn" id="dvzepp">Gerät aus Zepp ermitteln</button><button class="btn alt" id="dvnew2">Gerät von Hand anlegen</button></div>`}</div>`;
-  root.innerHTML = `<div class="dvhead"><h2>Meine Geräte</h2><span class="sp"></span>${viewer || !dv.devices.length ? "" : `<button class="btn alt sm" id="dvzepp">Geräte aus Zepp ermitteln</button><button class="btn sm" id="dvnew">+ Gerät anlegen</button>`}</div>
+  root.innerHTML = `<div class="dvhead"><h2>Meine Geräte</h2><span class="sp"></span>${viewer || !dv.devices.length ? "" : `<button class="btn alt sm" id="dvmatch" title="Alle Touren mit passendem Zepp-Training dem richtigen Gerät zuordnen">Touren automatisch zuordnen</button><button class="btn alt sm" id="dvzepp">Geräte aus Zepp ermitteln</button><button class="btn sm" id="dvnew">+ Gerät anlegen</button>`}</div>
     <p class="mut dvintro">Deine Aufnahmegeräte mit eigenem Namen. Der Name erscheint bei jeder Tour als „Quelle“; welche Messwerte eine Tour zeigt, richtet sich nach dem, was das Gerät wirklich geliefert hat.</p>
     ${sugs.map(s => `<div class="dvhint" data-sug="${esc(s.kind)}"><span><b>${esc(s.label)}: ${s.n} ${s.n === 1 ? "Tour" : "Touren"} ohne Gerät</b><span class="mut">Möchtest du dafür ein Gerät anlegen? Es wird nichts ohne deine Bestätigung angelegt.</span></span>
       <button class="btn sm" data-sy="${esc(s.kind)}" data-nm="${esc(s.name)}">Gerät anlegen …</button><button class="btn ghost sm" data-sn="${esc(s.kind)}">Nicht jetzt</button></div>`).join("")}
@@ -259,6 +259,20 @@ async function devPanel() {
   const again = () => devPanel().catch(() => {});
   const bz = $("#dvzepp"), bn = $("#dvnew") || $("#dvnew2");
   if (bz) bz.onclick = () => devZepp(dv, again);
+  const bm = $("#dvmatch");
+  if (bm) bm.onclick = async () => {
+    bm.disabled = true; bm.textContent = "Wird zugeordnet …";
+    try {
+      await api("/api/jobs/dev-match", {method: "POST"});
+      for (let i = 0; i < 120; i++) {
+        await new Promise(r => setTimeout(r, 2000));
+        const j = await api("/api/jobs").catch(() => null);
+        if (!j || !j.running) break;
+      }
+    } catch (e) { alert(e.message); }
+    await loadTours().catch(() => {});
+    again();
+  };
   if (bn) bn.onclick = () => devForm(dv, null, again);
   root.querySelectorAll("[data-dv]").forEach(r => {
     const g = dv.devices.find(x => x.id === +r.dataset.dv);

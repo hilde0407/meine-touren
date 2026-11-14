@@ -243,3 +243,26 @@ def test_zepp_kennungen_aus_echten_antworten():
     assert z.guess_for("run.watch.qogir.huami.com") == ("Amazfit Verge", False)
     assert z.guess_for("run.watch.huami.com") == ("Amazfit Pace", False)
     assert z.guess_for("run.36.huami.com") == ("", False)
+
+
+def test_match_all_assigns_komoot_tours_recorded_with_watch(fresh):
+    """Komoot-/Datei-Touren, zu denen es ein Zepp-Training gibt, gelten als mit der Uhr aufgezeichnet und bekommen das passende Gerät
+    (vorher: „unbekanntes Gerät“). Von Hand Zugeordnetes und Touren anderer Quellen bleiben unberührt."""
+    ts = 1_700_000_000
+    def tour(i, st, src=None):
+        db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,status,source) VALUES(?,?,?,?,?,9000,3000,'t','komoot')", (i, i, "hike", st, st + 3000))
+        if src:
+            db.execute("INSERT INTO tour_source(tour_id,src,name) VALUES(?,?,'')", (i, src))
+    tour("k1", ts); tour("k2", ts + 86400); tour("k3", ts + 2 * 86400, "garmin"); tour("k4", ts + 3 * 86400); tour("k5", ts + 9 * 86400)
+    dev = db.execute("INSERT INTO devices(name,kind,model,since,until,active,note,zsrc) VALUES('Balance 2','zepp','','','',1,'','run.9568515.huami.com')")
+    other = db.execute("INSERT INTO devices(name,kind,model,since,until,active,note,zsrc) VALUES('Alte Uhr','zepp','','','',1,'','run.36.huami.com')")
+    db.execute("INSERT INTO tour_device(tour_id,device_id) VALUES('k4',?)", (other,))
+    assert mydevices.device_of("k1") is None
+    hist = [{"trackid": str(ts + i * 86400), "type": "6", "dis": "9000", "run_time": "3000", "source": "run.9568515.huami.com"} for i in range(4)]
+    r = mydevices.match_all(type("A", (), {"history": lambda s: hist})())
+    assert r["matched"] == 4 and r["skipped_manual"] == 1 and r["skipped_other"] == 1 and r["changed"] == 2
+    assert mydevices.device_of("k1")["id"] == dev and mydevices.device_of("k2")["id"] == dev
+    assert mydevices.device_of("k4")["id"] == other and mydevices.device_of("k4")["manual"]
+    assert mydevices.device_of("k3") is None                                   # Garmin bleibt unberührt
+    assert mydevices.device_of("k5") is None                                   # ohne Zepp-Training keine Zuordnung
+    assert mydevices.match_all(type("A", (), {"history": lambda s: hist})())["changed"] == 0   # zweiter Lauf ändert nichts

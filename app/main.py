@@ -437,6 +437,7 @@ JOBS = {
     "elev-local": ("Höhenmeter lokaler Touren neu berechnen", lambda dry: elev.recompute_local()),
     "hr-backfill": ("Puls für Zepp-Touren nachladen", lambda dry: puls.backfill_hr()),
     "met-backfill": ("Messwerte der Geräte nachladen", lambda dry: metrics.backfill()),
+    "dev-match": ("Touren den Zepp-Uhren zuordnen", lambda dry: mydevices.match_all()),
     "elev-zepp": ("Höhe aus Zepp-Uhr abgleichen", lambda dry: elev.zepp_fix_all()),
     "export": ("Zepp-Import (ohne Upload)", lambda dry: sync.export_zepp()),
 }
