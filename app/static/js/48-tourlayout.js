@@ -8,7 +8,9 @@
    an tlAnc(); tlArrange() sortiert sie – auch wenn sie erst später (nach dem Laden der Daten) erscheinen – an ihren Platz.
    Auf der Hauptseite werden die Detail-Karten (Messwerte, Training laut Uhr, Analyse, Tempo, Ähnliche, Vergleich, Wetter) nicht gezeigt: tlArrange() nimmt sie sofort wieder heraus
    und merkt sich nur ihre Kurzaussage (TL_SUM) für den Einstieg. Gehört eine Karte zu einem Gerät (tlDev), bekommt auf der Unterseite jedes verschiedene Gerät einen eigenen Block;
-   ohne oder mit einem Gerät gibt es keine Zwischenüberschrift. */
+   ohne oder mit einem Gerät gibt es keine Zwischenüberschrift.
+   3.17.0 „Seite anpassen“: Dieses Modul sammelt und fasst zusammen, die Anordnung (Reihenfolge, Ausblenden, Seite, Gruppen-Überschriften) übernimmt die Layout-Engine
+   in 49-seitenlayout.js (slPlace). Ohne gespeichertes Layout ist alles wie in 3.16.x. */
 const TL_ICON = {
   map: '<path d="M3 6.5l6-2.5 6 2.5 6-2.5v13.5l-6 2.5-6-2.5-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
   prof: '<path d="M3 19h18"/><path d="M3 15l5-7 4 5 3-3 6 5"/>',
@@ -35,7 +37,7 @@ const tlState = (k, def) => {
 /* Ein Abschnitt: o = {id, key, icon, title, badge, body, def, cls, bodyCls}. id → #tls-<id>, Schlüssel des Zustands = key (sonst id) */
 function tlSecHtml(o) {
   const k = o.key || o.id,
-    open = tlState(k, !!o.def);
+    open = tlState(k, typeof slDef === "function" ? slDef(o.id, !!o.def) : !!o.def);      // 3.17.0: „Standardmäßig offen“ aus dem Layout, sonst der Standard des Abschnitts
   return (
     `<details class="tls${o.cls ? " " + o.cls : ""}" id="tls-${o.id}" data-tls="${o.id}" data-trf="${k}"${open ? " open" : ""}>` +
     `<summary aria-controls="tlsb-${o.id}" aria-expanded="${open}">${tlIcon(o.icon)}<h3 class="tlt">${o.title}</h3><span class="tlk" id="tlk-${o.id}">${o.badge || ""}</span></summary>` +
@@ -84,7 +86,7 @@ const tlRoot = () => {
   return r && r.classList.contains("tlx") ? r : null;
 };
 const tlSec = id => document.getElementById("tls-" + id);
-const tlVis = el => !!el && !el.closest("[hidden]");
+const tlVis = el => !!el && !el.closest("[hidden],.sl-off");      // .sl-off = vom Benutzer ausgeblendet (Seite anpassen)
 const tlReduced = () => {
   try {
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -117,45 +119,50 @@ function tlDevHead(key, name) {
 function tlArrange() {
   const root = tlRoot();
   if (!root) return false;
-  const gb = n => document.getElementById("tlgb-" + n);
-  if (root.classList.contains("tlsub")) tlArrangeSub(root, gb);
-  else tlArrangeMain(root, gb);
-  // ---- Gruppen ohne Inhalt ausblenden
-  root.querySelectorAll(".tlg:not(.tlsumg)").forEach(g => {
-    const any = [...g.querySelectorAll("details.tls")].some(d => !d.hidden);
-    if (g.hidden === any) g.hidden = !any;
-  });
+  if (root.classList.contains("tlsub")) tlArrangeSub(root);
+  else tlArrangeMain(root);
+  if (typeof slPlace === "function") slPlace(root);          // Reihenfolge, Ausblenden, Gruppen-Überschriften (leere Gruppen entfallen) – 49-seitenlayout.js
   tlNav();
   return true;
 }
 
 /* Hauptseite: Strecke, Einstieg, Fotos; Detail-Karten werden herausgenommen und nur als Kurzaussage gemerkt */
-function tlArrangeMain(root, gb) {
+function tlArrangeMain(root) {
   const t = BY[root.dataset.tid];
   // ---- Detail-Karten und Wetter: nicht hier, nur die Kurzaussage merken
   TL_DET.forEach(([id, sec]) => {
     const el = document.getElementById(id);
     if (!el || el.closest(".tlsub")) return;
+    if (slOn(sec, "haupt")) return;                                 // vom Benutzer auf die Hauptseite gelegt: bleibt hier, die Engine ordnet sie ein
     const ti = el.querySelector(".tlt"),
       k = el.querySelector(".tlk");
     TL_SUM[sec] = {title: ti ? ti.textContent : "", badge: k ? k.innerHTML : ""};
     el.remove();
   });
-  const wx = document.querySelector("#main .figs + .wx");
-  if (wx) {
-    TL_SUM.wx = {title: "Wetter", badge: esc(wx.textContent.split(" · ").slice(0, 2).join(" · "))};
-    wx.remove();
+  const wxs = tlSec("wx");
+  if (wxs && !slOn("wx", "haupt")) {                                 // Wetter wurde auf die Unterseite verschoben: wieder herausnehmen, Kurzaussage merken
+    const w0 = wxs.querySelector(".wx");
+    if (w0) TL_SUM.wx = {title: "Wetter", badge: esc(w0.textContent.split(" · ").slice(0, 2).join(" · "))};
+    wxs.remove();
+  }
+  const wx = document.querySelector("#main .figs + .wx, #main #tl .wx");
+  if (wx && !wx.closest("#tls-wx")) {
+    if (slOn("wx", "haupt")) {                                      // Wetter liegt auf der Hauptseite: als Abschnitt „Wetter“ zeigen
+      const s = tlLazy("wx", {key: "tl_wx", icon: "cloud", title: "Wetter", def: false}, root);
+      s.querySelector(".tlsb").appendChild(wx);
+      tlSetBadge(s, esc(wx.textContent.split(" · ").slice(0, 2).join(" · ")));
+    } else {
+      TL_SUM.wx = {title: "Wetter", badge: esc(wx.textContent.split(" · ").slice(0, 2).join(" · "))};
+      wx.remove();
+    }
   }
   const dr = document.getElementById("devrow");
   if (dr) dr.remove();
-  // ---- Strecke
-  tlPlace(gb("route"), [tlSec("map"), tlSec("prof"), document.getElementById("pulscard"), document.getElementById("wpcard")]);
   const pc = document.getElementById("profcard");
   if (tlSec("prof")) tlSec("prof").hidden = !pc || pc.style.display === "none";
   // ---- Einstieg in die Unterseite
   tlSumDraw(root, t);
-  // ---- Fotos (Bewertung, Notiz, Ausrüstung und Sicherheitsnotiz stehen wie in 3.14.0 oben im Kopf der Seite und werden hier nicht umgesetzt)
-  tlPlace(gb("more"), [tlSec("photos")]);
+  // Fotos (Bewertung, Notiz, Ausrüstung und Sicherheitsnotiz stehen wie in 3.14.0 oben im Kopf der Seite und werden hier nicht umgesetzt)
 }
 
 /* Einstieg „Detaillierte Auswertung ansehen ›“ mit zwei bis drei Kernaussagen – nur, wenn es überhaupt Auswertungsdaten gibt */
@@ -163,8 +170,9 @@ function tlSumDraw(root, t) {
   const g = document.getElementById("tlg-sum"),
     box = document.getElementById("tlgb-sum");
   if (!g || !box || !t) return;
-  const have = TL_SUMORDER.filter(k => TL_SUM[k]),
-    rows = TL_SUMPRIO.filter(k => TL_SUM[k] && TL_SUM[k].badge.trim()).slice(0, 3),
+  const on = k => slOn(k === "met" || k === "uhr" ? "geraet" : k, "auswertung") && !slHid(k === "met" || k === "uhr" ? "geraet" : k);      // nur, was auf der Unterseite liegt und nicht ausgeblendet ist
+  const have = TL_SUMORDER.filter(k => TL_SUM[k] && on(k)),
+    rows = TL_SUMPRIO.filter(k => TL_SUM[k] && on(k) && TL_SUM[k].badge.trim()).slice(0, 3),
     sig = have.join(".") + "|" + rows.map(k => k + TL_SUM[k].badge).join("|");
   if (g.hidden === !have.length && box.dataset.sig === sig) return;
   g.hidden = !have.length;
@@ -184,22 +192,26 @@ function tlSumDraw(root, t) {
 const TL_ICONOF = {met: "met", uhr: "watch", wx: "cloud", ana: "trend", steig: "trend", aehn: "cmp", cmp: "cmp"};
 
 /* Unterseite: Aufzeichnung (Blöcke je Gerät, Wetter) und Auswertung */
-function tlArrangeSub(root, gb) {
+function tlArrangeSub(root) {
   // ---- Aufzeichnung: Blöcke je Gerät
-  const rec = gb("rec"),
-    dr = document.getElementById("devrow");
+  const dr = document.getElementById("devrow");
   let host = document.getElementById("tlrec");
   if (!host) {
-    rec.insertAdjacentHTML("afterbegin", '<div id="tlrec" class="tlrec"></div>');
+    root.insertAdjacentHTML("beforeend", '<div id="tlrec" class="tlrec"></div>');
     host = document.getElementById("tlrec");
   }
+  // Karten, die der Benutzer auf die Hauptseite gelegt hat, gehören nicht hierher (die Module bauen sie auf beiden Seiten auf)
+  TL_DET.forEach(([id, sec]) => {
+    const el = document.getElementById(id);
+    if (el && el.closest(".tlsub") && ["ana", "steig", "aehn", "cmp"].includes(sec) && !slOn(sec, "auswertung")) el.remove();
+  });
   const cards = [["met", "metcard"], ["uhr", "uhrcard"]].map(([k, id]) => [k, document.getElementById(id)]).filter(x => x[1]),
     strong = [];
   cards.forEach(([, el]) => el.dataset.tlkey && !strong.includes(el.dataset.tlkey) && strong.push(el.dataset.tlkey));
   if (dr && strong.includes(dr.dataset.tlkey)) strong.splice(0, strong.length, dr.dataset.tlkey, ...strong.filter(x => x !== dr.dataset.tlkey));
   const keys = strong.length ? strong : cards.length ? [""] : [],
     multi = keys.length > 1;
-  if (dr && cards.length && !(multi && keys.includes(dr.dataset.tlkey))) tlPlace(rec, [dr]);    // Einzelgerät: die Zeile „Aufgezeichnet mit“ steht einmal oben
+  const lead = dr && cards.length && !(multi && keys.includes(dr.dataset.tlkey)) ? dr : null;       // Einzelgerät: die Zeile „Aufgezeichnet mit“ steht einmal oben
   const blocks = keys.map(key => {
     let b = host.querySelector(`.tldev[data-tlkey="${key}"]`);
     if (!b) {
@@ -224,17 +236,16 @@ function tlArrangeSub(root, gb) {
     return b;
   });
   host.querySelectorAll(":scope > .tldev").forEach(b => !blocks.includes(b) && b.remove());
-  tlPlace(host, blocks);
+  tlPlace(host, [lead, ...blocks]);
   const wx = document.querySelector("#main .wx");
-  if (wx) {
-    const s = tlLazy("wx", {key: "tl_wx", icon: "cloud", title: "Wetter", def: false}, rec);
+  if (wx && !slOn("wx", "auswertung")) {
+    if (!wx.closest("#tls-wx")) wx.remove();
+    if (tlSec("wx")) tlSec("wx").remove();
+  } else if (wx) {
+    const s = tlLazy("wx", {key: "tl_wx", icon: "cloud", title: "Wetter", def: false}, root);
     if (!s.querySelector(".tlsb .wx") || s.querySelector(".tlsb .wx") !== wx) s.querySelector(".tlsb").appendChild(wx);
     tlSetBadge(s, esc(wx.textContent.split(" · ").slice(0, 2).join(" · ")));
   }
-  tlPlace(rec, [dr && dr.parentElement === rec ? dr : null, host, tlSec("wx")]);
-  // ---- Auswertung
-  const ev = [document.getElementById("anacard"), document.getElementById("steigcard"), document.getElementById("aehncard"), document.getElementById("cmpseg")];
-  tlPlace(gb("eval"), ev);
 }
 
 /* Abschnitts-Leiste: nur Sprung-Chips für Abschnitte, die es auf dieser Tour gibt */

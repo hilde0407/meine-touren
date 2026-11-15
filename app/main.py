@@ -16,7 +16,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche
+from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche, layout
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -55,7 +55,7 @@ async def no_stale_static(request: Request, call_next):
 
 
 VIEWER_GET = re.compile(
-    r"^(/api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings|hr/stats|stats/belastung|stats/tempo|stats/gehzeit|my-devices|my-devices/\d+/photo|devices/quality|devices/\d+/quality/tours|devices/\d+/uhr-felder(?:\.json)?"
+    r"^(/api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings|layout/[a-z-]+|hr/stats|stats/belastung|stats/tempo|stats/gehzeit|my-devices|my-devices/\d+/photo|devices/quality|devices/\d+/quality/tours|devices/\d+/uhr-felder(?:\.json)?"
     r"|tours|tours/[^/]+|tours/[^/]+/(coords|best-photos|weather|gpx|hr|metrics|uhr-felder|uhr-training|tempo|aehnliche)|trips/[^/]+|records/altitude|weather/stats)"
     r"|/photo/[^/]+|/pic/[^/]+|/tiles/.+)$")
 # Ohne Anmeldung nur diese Pfade – exakt verglichen (ein Präfix würde auch /api/me/2fa/… oder /api/zepp-token/test öffnen).
@@ -690,7 +690,7 @@ def _photos_located(limit, year=0):
 
 
 @app.get("/api/photos")
-def api_photos(tour_id: str = "", year: int = 0, random: bool = False, limit: int = 500, unassigned: bool = False, gps: bool = False, est: bool = False):
+def api_photos(tour_id: str = "", year: int = 0, random: bool = False, recent: bool = False, limit: int = 500, unassigned: bool = False, gps: bool = False, est: bool = False):
     where, args = ["1=1"], []
     if gps and est:        # Fotos ohne eigenen Aufnahmeort: Position über die Uhrzeit auf der Strecke der Tour berechnen (est=1)
         return _photos_located(limit, year)
@@ -703,7 +703,7 @@ def api_photos(tour_id: str = "", year: int = 0, random: bool = False, limit: in
     if year:
         a = int(datetime(year, 1, 1, tzinfo=TZ).timestamp()); b = int(datetime(year + 1, 1, 1, tzinfo=TZ).timestamp())
         where.append("p.taken_ts>=? AND p.taken_ts<?"); args += [a, b]
-    order = "RANDOM()" if random else "p.taken_ts"
+    order = "RANDOM()" if random else "p.taken_ts DESC" if recent else "p.taken_ts"
     rows = db.query(f"SELECT p.id,p.taken_ts,p.tour_id,p.lat,p.lng,p.manual,p.offset_s,t.name AS tour_name FROM photos p LEFT JOIN tours t ON t.id=p.tour_id WHERE {' AND '.join(where)} ORDER BY {order} LIMIT ?", (*args, limit))
     return rows
 
@@ -906,6 +906,7 @@ app.include_router(uhrdiag.router)
 app.include_router(uhrtraining.router)
 app.include_router(belastung.router)
 app.include_router(aehnliche.router)
+app.include_router(layout.router)
 app.include_router(steigung.router)
 app.include_router(more.router)
 app.include_router(more2.router)

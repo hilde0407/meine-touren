@@ -131,7 +131,7 @@ VIEWS.tourauswertung = async id => {
   if (!$("#tl.tlsub")) return;                                     // inzwischen eine andere Seite
   if (window.tlRefresh) tlRefresh();
   $("#tlload").hidden = true;
-  const any = [...document.querySelectorAll("#tl details.tls")].some(d => !d.hidden);
+  const any = [...document.querySelectorAll("#tl details.tls")].some(d => !d.hidden && !d.closest(".sl-off"));
   $("#tlempty").hidden = any;
   if ($("#tlnav") && !any) $("#tlnav").hidden = true;
 };

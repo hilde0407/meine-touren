@@ -341,7 +341,7 @@ def test_sub_one_device_has_no_block_headings_and_default_state(pw, app):
     try:
         assert pg.evaluate(SECS) == SUB_ORDER
         assert pg.locator("#tlrec .tldev").count() == 1 and pg.locator("#tlrec .tldh").count() == 0 and pg.locator("#tlrec .tldev.multi").count() == 0
-        assert pg.locator("#tlgb-rec > #devrow").count() == 1                         # „Aufgezeichnet mit“ steht einmal oben
+        assert pg.locator("#tlrec > #devrow").count() == 1                         # „Aufgezeichnet mit“ steht einmal oben (seit 3.17.0 im Gerät-Block)
         o = pg.evaluate(OPEN)
         assert o["met"] and o["uhr"] and not any(o[k] for k in ("ana", "steig", "aehn", "wx", "cmp"))
         assert pg.locator("#tls-ana .tlsb").is_hidden() and pg.locator("#tls-ana .tlk").is_visible()      # Kurzaussage auch zugeklappt sichtbar

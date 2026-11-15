@@ -121,6 +121,7 @@ def _open(path):
         conn.execute("CREATE TABLE IF NOT EXISTS quality_batch (batch_id TEXT, tour_id TEXT, device_id INTEGER, method TEXT, ts INTEGER, orig_up REAL, orig_down REAL, "
                      "new_up REAL, new_down REAL, state TEXT, PRIMARY KEY (batch_id, tour_id))")   # Sammel-Korrektur der Höhen: Touren je Lauf (app/devquality.py, devbatch.py)
         conn.execute("CREATE TABLE IF NOT EXISTS quality_ack (tour_id TEXT PRIMARY KEY, kinds TEXT, ts INTEGER)")   # „Als geprüft markiert“ (3.16.1): Flag-Arten, die der Nutzer bei einer Tour bewusst akzeptiert hat (app/devquality.py)
+        conn.execute("CREATE TABLE IF NOT EXISTS user_layout (page_key TEXT PRIMARY KEY, json TEXT, ts INTEGER)")   # „Seite anpassen“ (3.17.0): Anordnung der Abschnitte und Bausteine je Seite; die Datenbank gehört einem Benutzer, daher kein Benutzerfeld
         conn.commit()
         _conns[path] = conn
         return conn

@@ -46,7 +46,7 @@ async function homeView() {
       <span class="hcf">${nf(t.km, 1)} km<i></i>${nf(t.up_m || 0, 0)} m<i></i>${homeDur(t.h)} h${t.has_hr ? `<span class="hrt" title="Mit Herzfrequenz">❤</span>` : ""}</span></div></a>`;
   main.innerHTML = `
   <section class="hlast" id="hlast"></section>
-  <section class="hyear">
+  <section class="hyear" id="hyear">
     <div class="hyh"><h2>Dein Jahr ${ys}</h2>${cmp}<span class="sp"></span><a class="hmore" href="#/stats">Zur Statistik</a></div>
     <div class="hyg">
       <div class="hyn"><b>${nf(yr.length, 0)}</b><span>Touren</span></div>
@@ -57,9 +57,9 @@ async function homeView() {
     </div>
     <div id="hgoals"></div>
   </section>
-  ${recent.length > 1 ? `<section><div class="hsh"><h2>Zuletzt unterwegs</h2><span class="sp"></span><a class="hmore" href="#/tours">Alle ${nf(TOURS.length, 0)} Touren</a></div><div class="hcards">${recent.slice(1).map(card).join("")}</div></section>` : ""}
-  <div class="hcols">
-    ${otd.length ? `<section><div class="hsh"><h2>An diesem Tag</h2><span class="sub">in früheren Jahren</span></div><div class="tl">${otd.map(tourRow).join("")}</div></section>` : ""}
+  ${recent.length > 1 ? `<section id="hrecent"><div class="hsh"><h2>Zuletzt unterwegs</h2><span class="sp"></span><a class="hmore" href="#/tours">Alle ${nf(TOURS.length, 0)} Touren</a></div><div class="hcards">${recent.slice(1).map(card).join("")}</div></section>` : ""}
+  <div class="hcols" id="hcols">
+    ${otd.length ? `<section id="htag"><div class="hsh"><h2>An diesem Tag</h2><span class="sub">in früheren Jahren</span></div><div class="tl">${otd.map(tourRow).join("")}</div></section>` : ""}
     <section id="hmemsec" hidden><div class="hsh"><h2>Erinnerungen</h2><span class="sp"></span><a class="hmore" target="_blank" href="slideshow.html?random=1">Zufalls-Diashow</a></div><div id="hmem" class="hmem"></div></section>
   </div>`;
 

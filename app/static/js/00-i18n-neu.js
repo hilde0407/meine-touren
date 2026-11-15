@@ -1412,4 +1412,123 @@ Als geprüft markieren || Mark as checked || Marquer comme vérifié || Marcar c
 Als geprüft markiert ({}) || Marked as checked ({}) || Marqués comme vérifiés ({}) || Marcadas como revisadas ({})
 Pausen und Aufzeichnungslücken sind bei Touren normal und lassen sich nicht reparieren. || Pauses and recording gaps are normal on tours and cannot be repaired. || Les pauses et les interruptions d’enregistrement sont normales lors d’un parcours et ne peuvent pas être réparées. || Las pausas y los huecos de grabación son normales en una ruta y no se pueden reparar.
 Diese Tour steht noch in der Liste „Auffällige Touren“. Als geprüft markieren? || This tour is still in the “Conspicuous tours” list. Mark it as checked? || Ce parcours figure encore dans la liste « Parcours suspects ». Le marquer comme vérifié ? || Esta ruta sigue en la lista «Rutas llamativas». ¿Marcarla como revisada?
+Seite anpassen || Customize page || Personnaliser la page || Personalizar la página
+Baustein hinzufügen || Add widget || Ajouter un bloc || Añadir un bloque
+Standard wiederherstellen || Restore default || Rétablir les réglages par défaut || Restaurar valores predeterminados
+Standard wiederherstellen? || Restore default? || Rétablir les réglages par défaut ? || ¿Restaurar los valores predeterminados?
+Standard wiederhergestellt || Default restored || Réglages par défaut rétablis || Valores predeterminados restaurados
+Reihenfolge, ausgeblendete Abschnitte, Seitenzuordnung und alle hinzugefügten Bausteine der Tourseite (Hauptseite und Auswertung) werden zurückgesetzt. || Order, hidden sections, page assignment and all added widgets of the tour page (main page and evaluation) will be reset. || L’ordre, les sections masquées, l’affectation des pages et tous les blocs ajoutés de la page du parcours (page principale et évaluation) seront réinitialisés. || Se restablecerán el orden, las secciones ocultas, la asignación de páginas y todos los bloques añadidos de la página de la ruta (página principal y evaluación).
+Reihenfolge, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Übersicht werden zurückgesetzt. || Order, hidden sections and all added widgets of the overview will be reset. || L’ordre, les sections masquées et tous les blocs ajoutés de l’aperçu seront réinitialisés. || Se restablecerán el orden, las secciones ocultas y todos los bloques añadidos de la vista general.
+Zum Verschieben ziehen oder Pfeil hoch bzw. Pfeil runter drücken. || Drag to move or press Arrow up or Arrow down. || Faites glisser pour déplacer ou appuyez sur la flèche haut ou bas. || Arrastre para mover o pulse la flecha arriba o abajo.
+Zum Verschieben ziehen, oder Pfeil hoch und Pfeil runter drücken || Drag to move, or press Arrow up and Arrow down || Faites glisser pour déplacer, ou appuyez sur la flèche haut et bas || Arrastre para mover, o pulse la flecha arriba y abajo
+Nach oben || Move up || Vers le haut || Hacia arriba
+Nach unten || Move down || Vers le bas || Hacia abajo
+Einblenden || Show || Afficher || Mostrar
+ausgeblendet || hidden || masqué || oculto
+Standardmäßig offen || Open by default || Ouvert par défaut || Abierto por defecto
+Auf Auswertungsseite || To evaluation page || Vers la page d’évaluation || A la página de evaluación
+Auf Hauptseite || To main page || Vers la page principale || A la página principal
+bleibt immer sichtbar || always visible || toujours visible || siempre visible
+Speichert … || Saving … || Enregistrement … || Guardando …
+Gespeichert || Saved || Enregistré || Guardado
+Nicht gespeichert – nur auf diesem Gerät gemerkt || Not saved – remembered on this device only || Non enregistré – mémorisé sur cet appareil uniquement || No guardado: solo recordado en este dispositivo
+{}: Position {} von {} || {}: position {} of {} || {} : position {} sur {} || {}: posición {} de {}
+{}: ganz oben || {}: at the very top || {} : tout en haut || {}: arriba del todo
+{}: ganz unten || {}: at the very bottom || {} : tout en bas || {}: abajo del todo
+{}: ausgeblendet || {}: hidden || {} : masqué || {}: oculto
+{}: eingeblendet || {}: shown || {} : affiché || {}: mostrado
+{}: standardmäßig offen || {}: open by default || {} : ouvert par défaut || {}: abierto por defecto
+{}: standardmäßig zu || {}: closed by default || {} : fermé par défaut || {}: cerrado por defecto
+{}: liegt jetzt auf der Hauptseite || {}: is now on the main page || {} : se trouve maintenant sur la page principale || {}: ahora está en la página principal
+{}: liegt jetzt auf der Auswertungsseite || {}: is now on the evaluation page || {} : se trouve maintenant sur la page d’évaluation || {}: ahora está en la página de evaluación
+Baustein „{}“ hinzugefügt || Widget “{}” added || Bloc « {} » ajouté || Bloque «{}» añadido
+Seite anpassen ist an. Abschnitte ziehen oder mit den Pfeiltasten verschieben. || Customize page is on. Drag sections or move them with the arrow keys. || La personnalisation de la page est activée. Faites glisser les sections ou déplacez-les avec les flèches. || La personalización de la página está activada. Arrastre las secciones o muévalas con las flechas.
+Baustein entfernen? || Remove widget? || Supprimer le bloc ? || ¿Quitar el bloque?
+„{}“ wird von dieser Seite entfernt. || “{}” will be removed from this page. || « {} » sera retiré de cette page. || «{}» se quitará de esta página.
+Es sind höchstens 40 Bausteine möglich. || At most 40 widgets are possible. || 40 blocs au maximum sont possibles. || Se admiten como máximo 40 bloques.
+Bausteine zeigen Auswertungen aus deinen vorhandenen Daten. Die Vorschau zeigt Beispielwerte. || Widgets show evaluations from your existing data. The preview shows sample values. || Les blocs présentent des évaluations de vos données existantes. L’aperçu montre des valeurs d’exemple. || Los bloques muestran evaluaciones de sus datos existentes. La vista previa muestra valores de ejemplo.
+Bereits hinzugefügt || Already added || Déjà ajouté || Ya añadido
+Noch einmal hinzufügen || Add again || Ajouter encore une fois || Añadir otra vez
+Einstellungen: {} || Settings: {} || Réglages : {} || Ajustes: {}
+Bitte mindestens einen Wert wählen. || Please choose at least one value. || Veuillez choisir au moins une valeur. || Elija al menos un valor.
+Angezeigte Werte || Values shown || Valeurs affichées || Valores mostrados
+Text der Notiz || Text of the note || Texte de la note || Texto de la nota
+Bausteine || Widgets || Blocs || Bloques
+Hier gibt es nichts anzuzeigen || There is nothing to show here || Il n’y a rien à afficher ici || No hay nada que mostrar aquí
+Abschnitte, die du auf die Hauptseite gelegt hast, findest du dort. Mit „Seite anpassen“ lassen sie sich zurückholen. || Sections you moved to the main page are found there. “Customize page” lets you bring them back. || Les sections que vous avez placées sur la page principale s’y trouvent. « Personnaliser la page » permet de les ramener. || Las secciones que ha movido a la página principal están allí. Con «Personalizar la página» puede devolverlas.
+Gerät: Messwerte und Training laut Uhr || Device: readings and training according to the watch || Appareil : mesures et entraînement selon la montre || Dispositivo: mediciones y entrenamiento según el reloj
+Einstieg in die Auswertung || Entry to the evaluation || Accès à l’évaluation || Acceso a la evaluación
+Zuletzt unterwegs (Aufmacher) || Last out (headline) || Dernière sortie (à la une) || Última salida (destacado)
+Dein Jahr || Your year || Votre année || Su año
+Letzte Touren || Latest tours || Derniers parcours || Últimas rutas
+Tour || Tour || Parcours || Ruta
+Kennzahlen-Kachel || Key figures tile || Tuile de chiffres clés || Mosaico de cifras clave
+Tempo-Mini || Pace mini || Mini-allure || Mini ritmo
+Vergleich in einer Zeile || Comparison in one line || Comparaison en une ligne || Comparación en una línea
+Puls-Zonen || Heart-rate zones || Zones de fréquence cardiaque || Zonas de pulso
+Wetter-Streifen || Weather strip || Bandeau météo || Banda del tiempo
+Fotostreifen || Photo strip || Bandeau de photos || Tira de fotos
+Diese Woche / dieser Monat || This week / this month || Cette semaine / ce mois || Esta semana / este mes
+Zuletzt aufgenommene Fotos || Most recently taken photos || Photos prises le plus récemment || Fotos tomadas más recientemente
+Heute vor X Jahren || Today X years ago || Aujourd’hui il y a X ans || Hoy hace X años
+Kennzahlen || Key figures || Chiffres clés || Cifras clave
+Tempo bergauf, eben, bergab || Pace uphill, flat, downhill || Allure en montée, à plat, en descente || Ritmo cuesta arriba, llano y cuesta abajo
+Vergleich auf dieser Strecke || Comparison on this route || Comparaison sur ce parcours || Comparación en esta ruta
+Wetter zur Tour || Weather for the tour || Météo du parcours || Tiempo de la ruta
+Diese Woche || This week || Cette semaine || Esta semana
+Dieser Monat || This month || Ce mois-ci || Este mes
+Jahresvergleich || Year comparison || Comparaison annuelle || Comparación anual
+Wählbare Kennzahlen dieser Tour als Kacheln: Strecke, Aufstieg, Dauer, Tempo, Puls, Kalorien. || Selectable key figures of this tour as tiles: distance, ascent, duration, pace, heart rate, calories. || Chiffres clés au choix de ce parcours sous forme de tuiles : distance, dénivelé positif, durée, allure, pouls, calories. || Cifras clave elegibles de esta ruta en mosaicos: distancia, ascenso, duración, ritmo, pulso, calorías.
+Durchschnittstempo bergauf, auf ebenem Weg und bergab, aus der Steigung der Strecke. || Average pace uphill, on flat ground and downhill, from the gradient of the route. || Allure moyenne en montée, à plat et en descente, d’après la pente du parcours. || Ritmo medio cuesta arriba, en llano y cuesta abajo, según la pendiente de la ruta.
+„Platz x von y“ unter allen Touren auf derselben Strecke, nach Tempo, mit Link zur Auswertung. || “Rank x of y” among all tours on the same route, by pace, with a link to the evaluation. || « Place x sur y » parmi tous les parcours sur le même tracé, selon l’allure, avec un lien vers l’évaluation. || «Puesto x de y» entre todas las rutas del mismo recorrido, según el ritmo, con enlace a la evaluación.
+Zeit in den fünf Pulszonen als Balken (nur bei Touren mit Herzfrequenz). || Time in the five heart-rate zones as a bar (only for tours with heart rate). || Temps dans les cinq zones de fréquence cardiaque sous forme de barre (uniquement pour les parcours avec pouls). || Tiempo en las cinco zonas de pulso como barra (solo en rutas con frecuencia cardíaca).
+Wetter am Tag der Tour in einer Zeile: Himmel, Temperatur, Niederschlag, Wind. || Weather on the day of the tour in one line: sky, temperature, precipitation, wind. || Météo le jour du parcours en une ligne : ciel, température, précipitations, vent. || Tiempo el día de la ruta en una línea: cielo, temperatura, precipitación, viento.
+Die ersten Fotos dieser Tour als Streifen zum Anklicken. || The first photos of this tour as a strip to click. || Les premières photos de ce parcours sous forme de bandeau cliquable. || Las primeras fotos de esta ruta como tira en la que se puede hacer clic.
+Ein freier Text (bis 500 Zeichen), den du selbst schreibst, zum Beispiel eine Erinnerung an die Tour. || A free text (up to 500 characters) that you write yourself, for example a memory of the tour. || Un texte libre (jusqu’à 500 caractères) que vous écrivez vous-même, par exemple un souvenir du parcours. || Un texto libre (hasta 500 caracteres) que escribe usted mismo, por ejemplo un recuerdo de la ruta.
+Touren, Kilometer und Höhenmeter der laufenden Woche oder des laufenden Monats. || Tours, kilometres and metres of ascent of the current week or month. || Parcours, kilomètres et dénivelé de la semaine ou du mois en cours. || Rutas, kilómetros y metros de ascenso de la semana o del mes en curso.
+Wie viel Belastung die letzten vier Wochen laut Uhr hatten, verglichen mit dem Schnitt davor, mit Wochenbalken. || How much load the last four weeks had according to the watch, compared with the average before, with weekly bars. || La charge des quatre dernières semaines selon la montre, comparée à la moyenne précédente, avec des barres hebdomadaires. || Cuánta carga tuvieron las últimas cuatro semanas según el reloj, comparada con el promedio anterior, con barras semanales.
+Das laufende Jahr gegen das Vorjahr bis zum selben Tag: Touren, Kilometer, Höhenmeter. || The current year against last year up to the same day: tours, kilometres, metres of ascent. || L’année en cours par rapport à l’année précédente jusqu’au même jour : parcours, kilomètres, dénivelé. || El año en curso frente al anterior hasta el mismo día: rutas, kilómetros, metros de ascenso.
+Die fünf zuletzt gemachten Touren als Liste mit Link. || The five most recent tours as a list with links. || Les cinq derniers parcours sous forme de liste avec lien. || Las cinco últimas rutas como lista con enlace.
+Die acht Fotos mit dem jüngsten Aufnahmedatum als Streifen. || The eight photos with the most recent date taken, as a strip. || Les huit photos à la date de prise de vue la plus récente, sous forme de bandeau. || Las ocho fotos con la fecha de toma más reciente, como tira.
+Wie viele Touren die Geräte-Qualität als auffällig meldet, mit Link zur Verwaltung. || How many tours the device quality check reports as conspicuous, with a link to Admin. || Le nombre de parcours signalés comme suspects par le contrôle de qualité des appareils, avec lien vers l’administration. || Cuántas rutas marca como llamativas el control de calidad de los dispositivos, con enlace a la administración.
+Längste Tour, meiste Höhenmeter und schnellstes Tempo, mit Link zur Tour. || Longest tour, most metres of ascent and fastest pace, with a link to the tour. || Parcours le plus long, plus fort dénivelé et allure la plus rapide, avec lien vers le parcours. || Ruta más larga, más metros de ascenso y ritmo más rápido, con enlace a la ruta.
+Touren, die du an genau diesem Datum in früheren Jahren gemacht hast. || Tours you did on exactly this date in earlier years. || Parcours que vous avez faits à cette même date les années précédentes. || Rutas que hizo en esta misma fecha en años anteriores.
+Keine Tour. || No tour. || Aucun parcours. || Ninguna ruta.
+Für die gewählten Werte liegen bei dieser Tour keine Daten vor. || There is no data for the selected values on this tour. || Il n’y a pas de données pour les valeurs choisies pour ce parcours. || No hay datos de los valores elegidos en esta ruta.
+Puls (Durchschnitt) || Heart rate (average) || Pouls (moyenne) || Pulso (media)
+Für diese Tour liegt keine Auswertung nach Steigung vor (Strecke mit Höhen und Zeit nötig). || There is no evaluation by gradient for this tour (a route with elevations and time is required). || Il n’y a pas d’évaluation par pente pour ce parcours (un tracé avec altitudes et durée est nécessaire). || No hay evaluación por pendiente para esta ruta (se necesita un recorrido con alturas y tiempo).
+Auf dieser Strecke gibt es noch keine Vergleichstouren. || There are no comparison tours on this route yet. || Il n’y a pas encore de parcours de comparaison sur ce tracé. || Todavía no hay rutas de comparación en este recorrido.
+Platz {} von {} auf dieser Strecke || Rank {} of {} on this route || Place {} sur {} sur ce parcours || Puesto {} de {} en esta ruta
+nach Tempo (Strecke geteilt durch Dauer) || by pace (distance divided by duration) || selon l’allure (distance divisée par la durée) || según el ritmo (distancia dividida por la duración)
+Zur Auswertung › || To the evaluation › || Vers l’évaluation › || A la evaluación ›
+Für diese Tour wurde kein Puls aufgezeichnet. || No heart rate was recorded for this tour. || Aucun pouls n’a été enregistré pour ce parcours. || No se registró pulso en esta ruta.
+Zeit in den Pulszonen || Time in the heart-rate zones || Temps dans les zones de fréquence cardiaque || Tiempo en las zonas de pulso
+Für diese Tour liegen keine Wetterdaten vor. || There is no weather data for this tour. || Il n’y a pas de données météo pour ce parcours. || No hay datos meteorológicos de esta ruta.
+Niederschlag || Precipitation || Précipitations || Precipitación
+Wind bis || Wind up to || Vent jusqu’à || Viento hasta
+Keine Fotos vorhanden. || No photos available. || Aucune photo disponible. || No hay fotos.
+Noch keine Notiz. Den Text trägst du unter „Seite anpassen“ bei „Einstellungen“ ein. || No note yet. You enter the text under “Customize page”, “Settings”. || Pas encore de note. Vous saisissez le texte sous « Personnaliser la page », « Réglages ». || Todavía no hay nota. El texto se escribe en «Personalizar la página», «Ajustes».
+Dieser Baustein konnte nicht geladen werden. || This widget could not be loaded. || Ce bloc n’a pas pu être chargé. || No se pudo cargar este bloque.
+Noch keine Tour || No tour yet || Pas encore de parcours || Todavía ninguna ruta
+Noch keine Uhr-Daten: Die Belastung stammt aus den Trainingsdaten der Uhr. || No watch data yet: the load comes from the training data of the watch. || Pas encore de données de montre : la charge provient des données d’entraînement de la montre. || Todavía no hay datos del reloj: la carga procede de los datos de entrenamiento del reloj.
+Für einen Vergleich liegen noch zu wenige Wochen mit Uhr-Daten vor || Too few weeks with watch data yet for a comparison || Pas encore assez de semaines avec données de montre pour comparer || Todavía hay muy pocas semanas con datos del reloj para comparar
+{} % gegenüber dem Schnitt der 12 Wochen davor || {} % compared with the average of the 12 weeks before || {} % par rapport à la moyenne des 12 semaines précédentes || {} % respecto al promedio de las 12 semanas anteriores
+Belastung je Woche, letzte 12 Wochen || Load per week, last 12 weeks || Charge par semaine, 12 dernières semaines || Carga por semana, últimas 12 semanas
+Mehr in der Auswertung › || More in the evaluation › || Plus dans l’évaluation › || Más en la evaluación ›
+Vorjahr bis heute: {} || Last year to date: {} || Année précédente à ce jour : {} || Año anterior hasta hoy: {}
+Noch keine Touren in diesem und im letzten Jahr. || No tours yet this year and last year. || Pas encore de parcours cette année ni l’an dernier. || Todavía no hay rutas este año ni el año pasado.
+Noch keine Touren. || No tours yet. || Pas encore de parcours. || Todavía no hay rutas.
+Noch keine Geräte mit Auswertung. || No devices with an evaluation yet. || Pas encore d’appareils avec évaluation. || Todavía no hay dispositivos con evaluación.
+1 Tour ist auffällig || 1 tour is conspicuous || 1 parcours est suspect || 1 ruta es llamativa
+{} Touren sind auffällig || {} tours are conspicuous || {} parcours sont suspects || {} rutas son llamativas
+In der Verwaltung ansehen › || View in Admin › || Voir dans l’administration › || Ver en la administración ›
+Keine auffälligen Touren || No conspicuous tours || Aucun parcours suspect || Ninguna ruta llamativa
+Geräte in der Verwaltung › || Devices in Admin › || Appareils dans l’administration › || Dispositivos en la administración ›
+Schnellstes Tempo || Fastest pace || Allure la plus rapide || Ritmo más rápido
+An diesem Tag gab es in früheren Jahren keine Tour. || There was no tour on this day in earlier years. || Il n’y a eu aucun parcours ce jour-là les années précédentes. || En este día no hubo ninguna ruta en años anteriores.
+Vor 1 Jahr || 1 year ago || Il y a 1 an || Hace 1 año
+Vor {} Jahren || {} years ago || Il y a {} ans || Hace {} años
+1 Foto || 1 photo || 1 photo || 1 foto
+1 Tour || 1 tour || 1 parcours || 1 ruta
+{} Touren || {} tours || {} parcours || {} rutas
 `;
