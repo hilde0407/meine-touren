@@ -49,9 +49,10 @@ def open_height_tours(did):
     """[(Zeile der Auswertung, Höhen-Flag)] der Touren des Geräts, deren Höhe noch offen auffällig ist (wie die Liste „Auffällige Touren“)."""
     per, _tours, _asg = devquality._current_rows()
     fh, fg = devquality._fixed_sets()
+    am = devquality.acked_map()
     out = []
     for r in per.get(did, []):
-        h = [f for f in devquality.open_flags(r, r["tour_id"] in fh, r["tour_id"] in fg) if f["kind"] == "height"]
+        h = [f for f in devquality.open_flags(r, r["tour_id"] in fh, r["tour_id"] in fg, devquality._ak(am, r["tour_id"])) if f["kind"] == "height"]
         if h:
             out.append((r, h[0]))
     return out

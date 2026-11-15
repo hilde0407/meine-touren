@@ -632,14 +632,20 @@ def tour_flags(r):
     return f
 
 
-def open_flags(r, fixed_h, fixed_gps):
+def open_flags(r, fixed_h, fixed_gps, acked=None):
     """Noch offene Auffälligkeiten: Was der Nutzer schon korrigiert hat (Höhe aus Gelände/Uhr, GPS-Track bereinigt), gilt als erledigt und
-    verschwindet aus der Liste – ohne neue Auswertung. Nimmt er die Korrektur zurück, erscheint die Tour wieder."""
+    verschwindet aus der Liste – ohne neue Auswertung. Nimmt er die Korrektur zurück, erscheint die Tour wieder.
+    `acked` (3.16.1) = Menge der Flag-Arten, die der Nutzer bei dieser Tour als geprüft markiert hat (quality_ack.kinds). Die Quittierung gilt nur für
+    die ARTEN, die zum Zeitpunkt des Markierens offen waren: Pausen und Lücken lassen sich nicht reparieren und blieben sonst für immer in der Liste;
+    tritt später eine ANDERE Art auf (z. B. ein GPS-Sprung nach neuer Auswertung), erscheint die Tour mit genau dieser wieder – eine Quittierung
+    soll nie neue, nicht gesehene Probleme verdecken. Schwankt nur der Wert derselben Art (28 % -> 31 % Lücken), bleibt sie quittiert."""
     f = tour_flags(r)
     if fixed_h:
         f = [x for x in f if x["kind"] != "height"]
     if fixed_gps:
         f = [x for x in f if x["kind"] not in ("gps_jumps", "gps_gaps")]
+    if acked:
+        f = [x for x in f if x["kind"] not in acked]
     return f
 
 
@@ -647,6 +653,15 @@ def _fixed_sets():
     h = {r["id"] for r in db.query("SELECT id FROM elev_fix")}
     g = {r["id"] for r in db.query("SELECT id FROM track_fix")}
     return h, g
+
+
+def acked_map():
+    """{tour_id: {"kinds": set, "ts": int}} der als geprüft markierten Touren."""
+    return {r["tour_id"]: {"kinds": {k for k in (r["kinds"] or "").split(",") if k}, "ts": r["ts"]} for r in db.query("SELECT tour_id, kinds, ts FROM quality_ack")}
+
+
+def _ak(am, tid):
+    return am[tid]["kinds"] if tid in am else None
 
 
 def _suggestions(tid, flags, dev_kind, fix):
@@ -683,6 +698,7 @@ def _current_rows():
 def payload():
     per, tours, asg = _current_rows()
     fh, fg = _fixed_sets()
+    am = acked_map()
     devs = db.query("SELECT * FROM devices ORDER BY active DESC, kind, COALESCE(NULLIF(since,''),'0000'), name")
     mine = {}
     for tid, (d, _m) in asg.items():
@@ -698,8 +714,9 @@ def payload():
         ref = "komoot" if komoot and komoot * 2 >= len(dr) else "tour"      # Wortwahl: Referenz ist meist die Komoot-Strecke
         parts = {"dist": assess_dist(rows, ref), "height": assess_height(rows), "gps": assess_gps(rows), "hr": assess_hr(rows)}
         days = sorted(r["day"] for r in rows if r["day"])
-        fl = [open_flags(r, r["tour_id"] in fh, r["tour_id"] in fg) for r in rows]
+        fl = [open_flags(r, r["tour_id"] in fh, r["tour_id"] in fg, _ak(am, r["tour_id"])) for r in rows]
         flagged = sum(1 for f in fl if f)
+        n_acked = sum(1 for r in rows if r["tour_id"] in am)             # „Als geprüft markiert“ (3.16.1): nicht in `flagged`, aber zum Zurücknehmen sichtbar
         flagged_h = sum(1 for f in fl if any(x["kind"] == "height" for x in f))            # für „Alle auffälligen Höhen korrigieren …“
         ids = [tid for tid in mine.get(d["id"], []) if tours[tid]["start_ts"]]       # so viele Touren wertet der Job für dieses Gerät aus
         have = {r["tour_id"]: r for r in rows}
@@ -716,7 +733,7 @@ def payload():
             who = "die Komoot-Strecke" if ref == "komoot" else "die gespeicherte Strecke"
             tips.append({"kind": "dist", "text": f"Die Uhr misst im Mittel {_de(abs(m))} % {'kürzer' if m < 0 else 'länger'} als {who}. Für Vergleiche der Strecken bitte beachten – die Strecke wird nicht geändert."})
         out.append({"id": d["id"], "name": d["name"], "kind": d["kind"], "model": d["model"] or "", "active": bool(d["active"]),
-                    "n_tours": len(mine.get(d["id"], [])), "n_eval": len(rows), "flagged": flagged, "flagged_height": flagged_h, "progress": prog, "batch": _last_batch(d["id"]),
+                    "n_tours": len(mine.get(d["id"], [])), "n_eval": len(rows), "flagged": flagged, "n_acked": n_acked, "flagged_height": flagged_h, "progress": prog, "batch": _last_batch(d["id"]),
                     "period": {"from": days[0], "to": days[-1]} if days else None,
                     **{k: v for k, v in parts.items()}, "verdict": verdict(parts), "tips": tips, "ref": ref,
                     "channels": channels(mine.get(d["id"], []))})
@@ -740,10 +757,13 @@ def api_quality_tours(did: int, limit: int = 100):
     fx = {r["id"]: r["src"] for r in db.query("SELECT id, src FROM elev_fix")}
     names = {r["id"]: r["name"] for r in db.query("SELECT id,name FROM tours")}
     fh, fg = _fixed_sets()
-    out = []
+    am = acked_map()
+    out, acked = [], []
     for r in per.get(did, []):
         tid = r["tour_id"]
-        fl = open_flags(r, tid in fh, tid in fg)
+        if tid in am:
+            acked.append({"id": tid, "name": names.get(tid) or tid, "day": r["day"], "kinds": sorted(am[tid]["kinds"]), "ts": am[tid]["ts"]})
+        fl = open_flags(r, tid in fh, tid in fg, _ak(am, tid))
         if not fl:
             continue
         order = {"dist_implausible": 0, "gps_jumps": 1, "height": 2, "dist": 3, "gps_gaps": 4, "hr": 5}
@@ -753,4 +773,52 @@ def api_quality_tours(did: int, limit: int = 100):
     out.sort(key=lambda x: (-x["_n"], x["_o"]))
     for x in out:
         x.pop("_o"); x.pop("_n")
-    return {"device": {"id": d["id"], "name": d["name"]}, "total": len(out), "tours": out[:max(1, min(limit, 500))]}
+    acked.sort(key=lambda x: x["ts"] or 0, reverse=True)
+    return {"device": {"id": d["id"], "name": d["name"]}, "total": len(out), "tours": out[:max(1, min(limit, 500))], "acked": acked}
+
+
+def _row_of(tid):
+    """Auswertungszeile einer Tour mit aktuell zugeordnetem Gerät (sonst 404): nur Touren der Genauigkeitsliste lassen sich markieren."""
+    if not db.one("SELECT 1 x FROM tours WHERE id=?", (tid,)):
+        raise HTTPException(404, "Tour nicht gefunden")
+    per, _t, _a = _current_rows()
+    for rows in per.values():
+        for r in rows:
+            if r["tour_id"] == tid:
+                return r
+    raise HTTPException(404, "Für diese Tour gibt es keine Genauigkeitsauswertung")
+
+
+@router.get("/api/tours/{tid}/quality-flags")
+def api_tour_quality_flags(tid: str):
+    """Offene Auffälligkeiten einer Tour (für „Track korrigieren“: steht die Tour noch in der Liste?). Leer, wenn unauffällig, nicht ausgewertet oder quittiert."""
+    try:
+        r = _row_of(tid)
+    except HTTPException:
+        return {"flags": [], "acked": False}
+    fh, fg = _fixed_sets()
+    am = acked_map()
+    return {"flags": open_flags(r, tid in fh, tid in fg, _ak(am, tid)), "acked": tid in am}
+
+
+@router.post("/api/tours/{tid}/quality-ack")
+def api_quality_ack(tid: str):
+    """Tour als geprüft markieren: die derzeit offenen Flag-Arten gelten als akzeptiert (siehe open_flags). Ändert nichts an Strecke, Zeit oder Höhe."""
+    r = _row_of(tid)
+    fh, fg = _fixed_sets()
+    am = acked_map()
+    fl = open_flags(r, tid in fh, tid in fg, _ak(am, tid))
+    if not fl:
+        raise HTTPException(409, "Diese Tour hat keine offenen Auffälligkeiten")
+    kinds = sorted((_ak(am, tid) or set()) | {x["kind"] for x in fl})
+    db.execute("INSERT OR REPLACE INTO quality_ack(tour_id,kinds,ts) VALUES(?,?,?)", (tid, ",".join(kinds), int(time.time())))
+    return {"ok": True, "tour": tid, "kinds": kinds}
+
+
+@router.delete("/api/tours/{tid}/quality-ack")
+def api_quality_unack(tid: str):
+    """Markierung „geprüft“ zurücknehmen: die Tour steht wieder in der Liste, wenn sie noch auffällig ist."""
+    if not db.one("SELECT 1 x FROM quality_ack WHERE tour_id=?", (tid,)):
+        raise HTTPException(404, "Diese Tour ist nicht als geprüft markiert")
+    db.execute("DELETE FROM quality_ack WHERE tour_id=?", (tid,))
+    return {"ok": True, "tour": tid}

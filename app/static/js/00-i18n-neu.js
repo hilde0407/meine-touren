@@ -1408,4 +1408,8 @@ Für diese Tour gibt es keine Auswertung || There is no evaluation for this tour
 Es liegen weder Messwerte noch Uhr-Daten oder eine Strecke mit Höhen vor. || There are no readings, no watch data and no track with elevation. || Il n’y a ni mesures, ni données de montre, ni tracé avec altitudes. || No hay mediciones, ni datos del reloj, ni un recorrido con altitudes.
 {} Std. || {} h || {} h || {} h
 Fotos zur Tour || Photos of the tour || Photos du parcours || Fotos de la ruta
+Als geprüft markieren || Mark as checked || Marquer comme vérifié || Marcar como revisado
+Als geprüft markiert ({}) || Marked as checked ({}) || Marqués comme vérifiés ({}) || Marcadas como revisadas ({})
+Pausen und Aufzeichnungslücken sind bei Touren normal und lassen sich nicht reparieren. || Pauses and recording gaps are normal on tours and cannot be repaired. || Les pauses et les interruptions d’enregistrement sont normales lors d’un parcours et ne peuvent pas être réparées. || Las pausas y los huecos de grabación son normales en una ruta y no se pueden reparar.
+Diese Tour steht noch in der Liste „Auffällige Touren“. Als geprüft markieren? || This tour is still in the “Conspicuous tours” list. Mark it as checked? || Ce parcours figure encore dans la liste « Parcours suspects ». Le marquer comme vérifié ? || Esta ruta sigue en la lista «Rutas llamativas». ¿Marcarla como revisada?
 `;

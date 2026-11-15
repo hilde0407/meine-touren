@@ -156,7 +156,7 @@ def test_open_section_kpis_chart_list_and_suggestion_dialog(pw, app_url):
         assert first.locator("a").get_attribute("href").startswith("#/tour/")
         # Korrektur vorschlagen: Dialog, nichts passiert ohne Bestätigung
         li = c.locator(".dvbadul li", has=pg.locator("text=Aufstieg")).first
-        li.locator("button").click()
+        li.locator("button", has_text="Korrektur vorschlagen").click()
         pg.wait_for_selector(".dvsug", timeout=15000)
         assert "Höhe aus Geländemodell neu berechnen" in pg.inner_text(".dvsug") and "Es passiert nichts, bevor du es bestätigst" in pg.inner_text(".dvbox")
         # Bestätigung ist jetzt der gemeinsame Dialog (kein Browser-confirm): Abbrechen ändert nichts

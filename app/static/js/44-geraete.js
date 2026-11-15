@@ -237,6 +237,7 @@ const dvDay = d => (/^\d{4}-\d\d-\d\d$/.test(d || "") ? `${d.slice(8)}.${d.slice
 
 /* ---------- Genauigkeit der Uhren (3.10.0): Kennzahlen, Punktdiagramm, auffällige Touren, Korrekturvorschläge ---------- */
 const DVQ_OPEN = new Set();
+const DVQ_ACKOPEN = new Set();                 // „Als geprüft markiert“ aufgeklappt (je Gerät, bleibt beim Neuzeichnen)
 /* Zustand „Genauigkeit aufgeklappt“ je Gerät: im Speicher und im Browser (localStorage, mit try/catch) */
 const dvqOpen = id => { if (DVQ_OPEN.has(id)) return true; try { return localStorage.getItem("mt_dvq_" + id) === "1"; } catch (e) { return false; } };
 const DVQ_CLS = {"gut": "ok", "mäßig": "warn", "auffällig": "bad"};
@@ -311,7 +312,7 @@ function dvQBody(q, g, viewer) {
     ${g.tips.map(t => `<p class="dvtip">${esc(t.text)}</p>`).join("")}
     ${dvSec("stand", "Auswertungsstand", pr.open ? `<span class="dvqs warn">noch ${pr.open} offen</span>` : `<span class="dvqs ok">vollständig</span>`, stand, true)}
     <details class="dvhow"><summary>Wie wird bewertet?</summary><p class="dvh">Strecke: gut bis ${nf(th.dist[0], 0)} %, mäßig bis ${nf(th.dist[1], 0)} % mittlere Abweichung. Höhe: gut bis ${nf(th.height[0], 0)} %, mäßig bis ${nf(th.height[1], 0)} % gegenüber dem Geländemodell (das Modell glättet Gelände und unterschätzt Aufstiege etwas). GPS-Spur: gut, wenn höchstens ${nf(th.gps[0], 0)} % der Touren Sprünge haben, mäßig bis ${nf(th.gps[1], 0)} %. Puls: gut, wenn höchstens ${nf(th.hr[0], 0)} % der Touren Aussetzer haben, mäßig bis ${nf(th.hr[1], 0)} %. Eine Einschätzung gibt es ab ${q.min_n} verglichenen Touren. Strecke und Höhe der Touren werden dabei nie verändert.</p></details>
-    ${dvSec("auff", "Auffällige Touren", g.flagged ? `<span class="dvqs warn">${g.flagged}</span>` : `<span class="dvqs ok">keine</span>`, `${batchBtn}<div class="dvbad" data-bad="${g.id}">${g.flagged ? `<div class="dvbadl mut">Wird geladen …</div>` : `<p class="mut">Keine auffälligen Touren.</p>`}</div>`, true)}
+    ${dvSec("auff", "Auffällige Touren", g.flagged ? `<span class="dvqs warn">${g.flagged}</span>` : `<span class="dvqs ok">keine</span>`, `${batchBtn}<div class="dvbad" data-bad="${g.id}">${g.flagged || g.n_acked ? `<div class="dvbadl mut">Wird geladen …</div>` : `<p class="mut">Keine auffälligen Touren.</p>`}</div>`, true)}
     ${bat}`;
 }
 
@@ -324,23 +325,42 @@ const DVQ_FLAG = f => ({
   hr: `${nf(f.pct, 0)} % Puls unplausibel`,
 }[f.kind] || f.kind);
 
+/* „Als geprüft markieren“ (3.16.1): Pausen und Lücken sind normal und nicht reparierbar. Die Markierung gilt für die Auffälligkeiten, die jetzt offen sind;
+   eine später neu auftretende andere Art erscheint wieder (siehe devquality.open_flags). Strecke, Zeit und Höhe bleiben unberührt. */
+const dvOnlyGaps = t => t.flags.length > 0 && t.flags.every(f => f.kind === "gps_gaps");
+async function dvAck(id, on) {
+  await api(`/api/tours/${encodeURIComponent(id)}/quality-ack`, {method: on ? "POST" : "DELETE"});
+}
 async function dvQBad(box, g, viewer, again) {
   const host = box.querySelector(".dvbadl");
   if (!host) return;
+  const ackRun = async (id, on) => {
+    try { await dvAck(id, on); again(); } catch (e) { uiAlert({title: "Nicht möglich", text: e.message}); }
+  };
   try {
     const r = await api(`/api/devices/${g.id}/quality/tours?limit=60`);
     host.className = "dvbadl";
-    host.innerHTML = r.tours.length ? `<ul class="dvbadul">${r.tours.map((t, i) => `<li><div class="dvbt"><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${esc(dvDay(t.day))}</span></div>
+    const act = (t, i) => viewer ? "" : dvOnlyGaps(t)
+      ? `<p class="dvh dvnote">Pausen und Aufzeichnungslücken sind bei Touren normal und lassen sich nicht reparieren.</p><button class="btn alt sm" type="button" data-ack="${esc(t.id)}">Als geprüft markieren</button>`
+      : `<button class="btn alt sm" type="button" data-i="${i}">Korrektur vorschlagen</button><button class="btn ghost sm" type="button" data-ack="${esc(t.id)}">Als geprüft markieren</button>`;
+    const ak = r.acked || [];
+    host.innerHTML = (r.tours.length ? `<ul class="dvbadul">${r.tours.map((t, i) => `<li><div class="dvbt"><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${esc(dvDay(t.day))}</span></div>
         <div class="dvchips">${t.flags.map(f => `<span class="dvc fl ${f.kind === "dist_implausible" || f.kind === "gps_jumps" ? "bad" : "warn"}">${esc(DVQ_FLAG(f))}</span>`).join("")}${t.fixed ? `<span class="dvc">${t.fixed === "zepp" ? "Höhe aus Uhr übernommen" : "Höhe aus Gelände übernommen"}</span>` : ""}</div>
-        ${viewer ? "" : `<button class="btn alt sm" type="button" data-i="${i}">Korrektur vorschlagen</button>`}</li>`).join("")}</ul>${r.total > r.tours.length ? `<p class="mut">Gezeigt werden die ${r.tours.length} auffälligsten von ${r.total}.</p>` : ""}` : `<p class="mut">Keine auffälligen Touren.</p>`;
+        ${act(t, i)}</li>`).join("")}</ul>${r.total > r.tours.length ? `<p class="mut">Gezeigt werden die ${r.tours.length} auffälligsten von ${r.total}.</p>` : ""}` : `<p class="mut">Keine auffälligen Touren.</p>`)
+      + (ak.length ? `<details class="dvack"><summary>Als geprüft markiert (${ak.length})</summary><ul class="dvbadul">${ak.map(t => `<li><div class="dvbt"><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${esc(dvDay(t.day))}</span></div>${viewer ? "" : `<button class="btn ghost sm" type="button" data-unack="${esc(t.id)}">Zurücknehmen</button>`}</li>`).join("")}</ul></details>` : "");
     host.querySelectorAll("button[data-i]").forEach(b => (b.onclick = () => dvSuggest(r.tours[+b.dataset.i], g, again)));
-    const lis = [...host.querySelectorAll(".dvbadul li")];
+    host.querySelectorAll("button[data-ack]").forEach(b => (b.onclick = () => { b.disabled = true; ackRun(b.dataset.ack, true); }));
+    host.querySelectorAll("button[data-unack]").forEach(b => (b.onclick = () => { b.disabled = true; ackRun(b.dataset.unack, false); }));
+    const dd = host.querySelector(".dvack");
+    if (dd && DVQ_ACKOPEN.has(g.id)) dd.open = true;
+    if (dd) dd.addEventListener("toggle", () => { if (dd.open) DVQ_ACKOPEN.add(g.id); else DVQ_ACKOPEN.delete(g.id); });
+    const lis = [...host.querySelectorAll(".dvbadul:not(.dvack .dvbadul) li")];
     if (lis.length > 8) {
       lis.slice(8).forEach(li => (li.hidden = true));
       const more = document.createElement("button");
       more.type = "button"; more.className = "btn ghost sm dvmoreb"; more.textContent = `Alle ${lis.length} zeigen`;
       more.onclick = () => { lis.forEach(li => (li.hidden = false)); more.remove(); };
-      host.appendChild(more);
+      host.querySelector(".dvbadul").after(more);
     }
   } catch (e) {
     host.innerHTML = `<span class="bad">${esc(e.message)}</span>`;

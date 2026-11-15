@@ -474,3 +474,94 @@ def test_table_creation_is_additive_and_never_dropped():
     db.execute("INSERT INTO device_quality(tour_id,device_id) VALUES('a',1)")
     db.close_all(); db.init()                                                                 # erneutes Öffnen (Migration) behält Zeilen
     assert db.one("SELECT COUNT(*) n FROM device_quality")["n"] == 1
+
+
+# ---------------------------------------------------------------- 3.16.1 „Als geprüft markieren“
+def _gap_tour(c, d):
+    """Die unauffällige 7. Tour fällt nur wegen Lücken/Pausen auf (28 %) – so wie bei einer Rast auf dem Betriebsausflug."""
+    tid = f"z{T0 + 6 * 10000}"
+    db.execute("UPDATE device_quality SET gps_gap_pct=28, gps_jumps=0 WHERE tour_id=?", (tid,))
+    return tid
+
+
+def _dev_row(c, d):
+    return [x for x in c.get("/api/devices/quality").json()["devices"] if x["id"] == d][0]
+
+
+def test_ack_hides_tour_from_list_and_counter_and_can_be_undone(dem):
+    c, d = _seed_api(dem)
+    tid = _gap_tour(c, d)
+    vor = c.get(f"/api/devices/{d}/quality/tours").json()
+    n0 = _dev_row(c, d)["flagged"]
+    mine = [x for x in vor["tours"] if x["id"] == tid]
+    assert [f["kind"] for f in mine[0]["flags"]] == ["gps_gaps"] and vor["acked"] == []
+    assert c.get(f"/api/tours/{tid}/quality-flags").json()["flags"][0]["kind"] == "gps_gaps"
+    r = c.post(f"/api/tours/{tid}/quality-ack")
+    assert r.status_code == 200 and r.json()["kinds"] == ["gps_gaps"]
+    nach = c.get(f"/api/devices/{d}/quality/tours").json()
+    assert all(x["id"] != tid for x in nach["tours"]) and nach["total"] == vor["total"] - 1
+    assert [a["id"] for a in nach["acked"]] == [tid] and nach["acked"][0]["kinds"] == ["gps_gaps"] and nach["acked"][0]["name"]
+    dv = _dev_row(c, d)
+    assert dv["flagged"] == n0 - 1 and dv["n_acked"] == 1                                       # Zähler und Payload stimmen mit der Liste überein
+    assert c.get(f"/api/tours/{tid}/quality-flags").json() == {"flags": [], "acked": True}
+    assert c.post(f"/api/tours/{tid}/quality-ack").status_code == 409                            # nichts Offenes mehr
+    # Strecke, Zeit und Höhe bleiben unberührt
+    t = db.one("SELECT dist_m, up_m FROM tours WHERE id=?", (tid,))
+    assert t["dist_m"] == 3000 and db.one("SELECT COUNT(*) n FROM elev_fix")["n"] == 0
+    # zurücknehmen: die Tour steht wieder in Liste und Zähler
+    assert c.delete(f"/api/tours/{tid}/quality-ack").status_code == 200
+    wieder = c.get(f"/api/devices/{d}/quality/tours").json()
+    assert any(x["id"] == tid for x in wieder["tours"]) and wieder["acked"] == [] and _dev_row(c, d)["flagged"] == n0
+    assert c.delete(f"/api/tours/{tid}/quality-ack").status_code == 404
+
+
+def test_ack_unknown_or_unevaluated_tour_is_404(dem):
+    c, d = _seed_api(dem)
+    assert c.post("/api/tours/gibtsnicht/quality-ack").status_code == 404
+    _local("z99999", _line(300), dist=3000)                                                     # existiert, aber ohne Auswertung/Gerät
+    assert c.post("/api/tours/z99999/quality-ack").status_code == 404
+    assert c.delete("/api/tours/z99999/quality-ack").status_code == 404
+    assert c.get("/api/tours/gibtsnicht/quality-flags").json() == {"flags": [], "acked": False}
+    assert db.one("SELECT COUNT(*) n FROM quality_ack")["n"] == 0
+
+
+def test_ack_covers_only_the_kinds_open_at_that_time(dem):
+    c, d = _seed_api(dem)
+    tid = _gap_tour(c, d)
+    c.post(f"/api/tours/{tid}/quality-ack")
+    db.execute("UPDATE device_quality SET gps_gap_pct=31 WHERE tour_id=?", (tid,))               # nur der Wert derselben Art ändert sich: bleibt quittiert
+    assert all(x["id"] != tid for x in c.get(f"/api/devices/{d}/quality/tours").json()["tours"])
+    db.execute("UPDATE device_quality SET gps_jumps=3 WHERE tour_id=?", (tid,))                  # neue Art: erscheint wieder, aber nur mit der neuen
+    mine = [x for x in c.get(f"/api/devices/{d}/quality/tours").json()["tours"] if x["id"] == tid]
+    assert [f["kind"] for f in mine[0]["flags"]] == ["gps_jumps"]
+    assert [a["id"] for a in c.get(f"/api/devices/{d}/quality/tours").json()["acked"]] == [tid]
+    assert c.post(f"/api/tours/{tid}/quality-ack").json()["kinds"] == ["gps_gaps", "gps_jumps"]  # erneutes Markieren ergänzt die Arten
+    assert all(x["id"] != tid for x in c.get(f"/api/devices/{d}/quality/tours").json()["tours"])
+
+
+def test_ack_is_respected_by_batch_height_list_and_cleared_on_delete(dem):
+    from app import devbatch
+    c, d = _seed_api(dem)
+    tid = f"z{T0}"
+    assert any(r["tour_id"] == tid for r, _h in devbatch.open_height_tours(d))
+    assert c.post(f"/api/tours/{tid}/quality-ack").status_code == 200
+    assert all(r["tour_id"] != tid for r, _h in devbatch.open_height_tours(d))
+    assert db.one("SELECT 1 x FROM quality_ack WHERE tour_id=?", (tid,))
+    tracks.delete_local(tid)
+    assert not db.one("SELECT 1 x FROM quality_ack WHERE tour_id=?", (tid,))
+
+
+def test_viewer_may_see_acked_but_not_change(dem):
+    from fastapi.testclient import TestClient
+    from app import main
+    with TestClient(main.app) as c:
+        c.post("/api/setup", json={"name": "Max", "email": "max@example.com", "password": "geheim1234"})
+        c.post("/api/users", json={"name": "Oma", "email": "oma@example.com", "password": "omas-pass12", "role": "viewer"})
+        did = c.post("/api/devices", json={"name": "Uhr", "kind": "zepp"}).json()["id"]
+        v = TestClient(main.app)
+        assert v.post("/api/login", json={"name": "oma", "password": "omas-pass12"}).status_code == 200
+        assert "acked" in v.get(f"/api/devices/{did}/quality/tours").json()
+        assert v.post("/api/tours/x/quality-ack").status_code == 403
+        assert v.delete("/api/tours/x/quality-ack").status_code == 403
+        assert v.get("/api/tours/x/quality-flags").status_code == 403
+        assert c.post("/api/tours/x/quality-ack").status_code == 404                          # Eigentümer darf, die Tour gibt es nur nicht

@@ -188,6 +188,7 @@ def delete_tour(tid, on_komoot=False):
         for tb in ("tours", "tour_tags", "tour_notes", "tour_geo", "tour_peak", "tour_names", "elev_fix", "weather", "tour_sport", "tour_rating", "tour_safety"):
             db.execute(f"DELETE FROM {tb} WHERE id=?", (tid,))
         db.execute("DELETE FROM tour_gear WHERE tour_id=?", (tid,))
+        db.execute("DELETE FROM quality_ack WHERE tour_id=?", (tid,))
         db.execute("DELETE FROM tour_uploads WHERE tour_id=?", (tid,))
         db.execute("UPDATE photos SET tour_id=NULL WHERE tour_id=? AND COALESCE(manual,0)=0", (tid,))
         for p in (routes.path_full(tid), routes.path_small(tid)):

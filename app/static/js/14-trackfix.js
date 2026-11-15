@@ -28,7 +28,7 @@ function trackFixDialog(id, done) {
      <p class="mut fs14 mt0">Gesucht wird nach <b>Ausreißern</b> (Punkte, die mit unmöglichem Tempo vom Weg wegspringen) und nach <b>schnellen Abschnitten</b> (dauerhaft über ${lim} km/h, z. B. Seilbahn, Bus oder Auto) sowie nach <b>GPS-Zittern</b>, das die Strecke künstlich verlängert. Das Original bleibt erhalten und lässt sich zurückholen.</p>
      <div id="tfm" class="br6 m8-0" style="height:280px"></div>
      ${a.fixed ? `<p class="ok">✓ Bereits korrigiert: ${a.applied.spikes} Ausreißer entfernt, ${a.applied.excluded} Abschnitt(e) herausgerechnet (Strecke vorher ${nf(a.dist_km, 1)} km, jetzt ${nf(a.now_km, 1)} km). Die Liste unten zeigt, was vom Original aus gefunden wird.</p>` : ""}
-     ${none && !a.timing.uniform ? `<p class="ok">✓ Im Track wurde nichts Auffälliges gefunden.</p>` : ""}
+     ${none && !a.timing.uniform ? `<p class="ok">✓ Im Track wurde nichts Auffälliges gefunden.</p><div id="tfack" class="panel p10-14 m10-0" hidden></div>` : ""}
      ${showT ? `<div class="panel p10-14 m10-0" style="border-left:4px solid var(--yellow)">${a.timing.uniform ? `<b>Die Zeitangaben stammen nicht von einer echten Aufzeichnung.</b> In jedem Abschnitt der Tour ist das Tempo exakt gleich (Ø ${nf(a.dist_km / (a.dur_s / 3600), 1)} km/h) – die Zeitpunkte sind nur gleichmäßig über die Strecke verteilt, z. B. bei einer geplanten Route. Die Dauer von ${fmtMin(a.dur_s)} ist deshalb nicht glaubwürdig.` : `<b>Das Durchschnittstempo (${nf(a.dist_km / (a.dur_s / 3600), 1)} km/h) ist für diese Sportart ungewöhnlich hoch.</b> Vielleicht stimmt die Dauer nicht.`}
        <label class="chk mt8"><input type="checkbox" id="tfd" ${a.timing.uniform ? "checked" : ""}> <b>Dauer korrigieren auf</b> <input id="tfdh" type="number" min="0" max="99" style="width:64px" value="${Math.floor(initS / 3600)}"> Std. <input id="tfdm" type="number" min="0" max="59" style="width:64px" value="${Math.round((initS % 3600) / 60) % 60}"> Min.</label>
        ${a.photos ? `<div class="row m4-0 g6 aic"><button class="btn alt sm" type="button" id="tfph">Aus den Fotos übernehmen</button><span class="mut fs13">${a.photos.n} Fotos von ${hm(a.photos.first)} bis ${hm(a.photos.last)} Uhr = ${fmtMin(a.photos.last - a.photos.first)}</span></div><label class="chk m2-0"><input type="checkbox" id="tfst"> Start der Tour auf die Zeit des ersten Fotos (${hm(a.photos.first)} Uhr) setzen</label>` : ""}
@@ -85,6 +85,28 @@ function trackFixDialog(id, done) {
     } catch (e) {}
     const close = () => m.remove();
     b.querySelector("#tfno").onclick = close;
+    // 3.16.1: Steht die Tour noch in „Auffällige Touren“ (z. B. nur wegen Pausen), kann sie hier als geprüft markiert werden.
+    const ackBox = b.querySelector("#tfack");
+    if (ackBox)
+      api(`/api/tours/${encodeURIComponent(id)}/quality-flags`)
+        .then(q => {
+          if (!q.flags || !q.flags.length) return;
+          ackBox.innerHTML = `<p class="m0">Diese Tour steht noch in der Liste „Auffällige Touren“. Als geprüft markieren?</p><div class="row mt8"><button class="btn alt sm" type="button" id="tfack1">Als geprüft markieren</button><span id="tfacke" class="bad"></span></div>`;
+          ackBox.hidden = false;
+          ackBox.querySelector("#tfack1").onclick = async ev => {
+            ev.target.disabled = true;
+            try {
+              await api(`/api/tours/${encodeURIComponent(id)}/quality-ack`, {method: "POST"});
+              await loadTours().catch(() => {});
+              close();
+              if (done) done();
+            } catch (e) {
+              ev.target.disabled = false;
+              ackBox.querySelector("#tfacke").textContent = e.message;
+            }
+          };
+        })
+        .catch(() => {});
     const run = async fn => {
       b.querySelectorAll("button").forEach(x => (x.disabled = true));
       try {
