@@ -115,6 +115,27 @@ public class MainActivity extends Activity {
                 }
                 return true;
             }
+
+            /* Vollbild aus der Seite (Diashow, Video): WebView zeigt es nur, wenn die Hülle die Ansicht selbst einblendet */
+            @Override
+            public void onShowCustomView(View v, CustomViewCallback cb) {
+                if (customView != null) { cb.onCustomViewHidden(); return; }
+                customView = v; customCb = cb;
+                ((ViewGroup) getWindow().getDecorView()).addView(v, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                web.setVisibility(View.GONE);
+                immersive(true);
+            }
+
+            @Override
+            public void onHideCustomView() {
+                if (customView == null) return;
+                ((ViewGroup) getWindow().getDecorView()).removeView(customView);
+                customView = null;
+                web.setVisibility(View.VISIBLE);
+                immersive(false);
+                if (customCb != null) customCb.onCustomViewHidden();
+                customCb = null;
+            }
         });
         web.setDownloadListener((url, ua, cd, mime, len) -> {
             try {
@@ -200,8 +221,39 @@ public class MainActivity extends Activity {
         web.evaluateJavascript("window.dispatchEvent(new Event('mtresume'))", null);
     }
 
+    private View customView;
+    private WebChromeClient.CustomViewCallback customCb;
+
+    /** Status- und Navigationsleiste für das Vollbild aus-/einblenden (neue und klassische Steuerung). */
+    @SuppressWarnings("deprecation")
+    private void immersive(boolean on) {
+        try {
+            android.view.Window w = getWindow();
+            if (Build.VERSION.SDK_INT >= 28) {
+                w.getAttributes().layoutInDisplayCutoutMode = on
+                        ? android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                        : android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+                w.setAttributes(w.getAttributes());
+            }
+            if (Build.VERSION.SDK_INT >= 30) {
+                w.setDecorFitsSystemWindows(!on);
+                android.view.WindowInsetsController c = w.getInsetsController();
+                if (c != null) {
+                    if (on) {
+                        c.setSystemBarsBehavior(android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                        c.hide(android.view.WindowInsets.Type.systemBars());
+                    } else c.show(android.view.WindowInsets.Type.systemBars());
+                }
+            }
+            int fl = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+            w.getDecorView().setSystemUiVisibility(on ? fl : 0);
+        } catch (Exception e) { /* Vollbild ist nur Komfort */ }
+    }
+
     @Override
     public void onBackPressed() {
+        if (customView != null) { web.getWebChromeClient().onHideCustomView(); return; }
         if (web.canGoBack()) web.goBack();
         else super.onBackPressed();
     }
