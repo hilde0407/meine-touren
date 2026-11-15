@@ -1,14 +1,16 @@
 /* =====================  3.17.0 Bausteine (Widgets) für „Seite anpassen“  =====================
    Jeder Baustein ist ein einklappbarer Abschnitt im Kopfformat von tlCard() (Symbol, Titel, Kurzaussage). Er liest nur vorhandene Daten (vorhandene API-Endpunkte,
    keine neuen Berechnungen) und zeigt bei fehlenden Daten einen kurzen Hinweis statt einer leeren Fläche. Die Konfiguration je Baustein (cfg) steht im Layout-Dokument.
-   Typ = {fam, icon, name, title(cfg), desc, multi, fields, defaults, cfgOnAdd, preview(), render(card, body, cfg, ctx)}. Baustein einer Tourseite: ctx.t = Tour. */
+   3.18.0: jeder Typ hat eine Kategorie (cat: zahlen, grafik, spass, rueck, plan) für den Katalog; die neuen Bausteine stehen in 51-bausteine-tour.js und 52-bausteine-uebersicht.js,
+   gemeinsame Hilfen (Balken, Ring, Spaltendiagramm) unten in dieser Datei. Grafiken sind Inline-SVG; Maße kommen als Attribute, Farben aus CSS-Variablen.
+   Typ = {fam, cat, icon, name, title(cfg), desc, multi, fields, defaults, cfgOnAdd, preview(), render(card, body, cfg, ctx)}. Baustein einer Tourseite: ctx.t = Tour. */
 const slNote = (b, text) => (b.innerHTML = `<p class="mut slnone">${text}</p>`);
 const slTiles = list => `<div class="utiles">${list.map(([v, l, s]) => `<div class="utile"><b>${v}</b><span class="mut">${l}</span>${s ? `<small class="mut">${s}</small>` : ""}</div>`).join("")}</div>`;
 const slMin = s => `${Math.floor(s / 60)}:${pad2(Math.round(s % 60))}`;
 const slBadge = (c, html) => typeof tlSetBadge === "function" && tlSetBadge(c, html);
-const slPhotos = (c, body, list, label) => {
+const slPhotos = (c, body, list, label, cls = "") => {
   if (!list.length) return slNote(body, "Keine Fotos vorhanden.");
-  body.innerHTML = `<div class="slfotos">${list.map((p, i) => `<img loading="lazy" tabindex="0" role="button" src="/pic/${p.id}?size=300" data-i="${i}" alt="${esc(p.tour_name || label)}">`).join("")}</div>`;
+  body.innerHTML = `<div class="slfotos${cls ? " " + cls : ""}">${list.map((p, i) => `<img loading="lazy" tabindex="0" role="button" src="/pic/${p.id}?size=${cls ? 600 : 300}" data-i="${i}" alt="${esc(p.tour_name || label)}">`).join("")}</div>`;
   if (typeof bindThumbs === "function") bindThumbs(body, list);
   body.querySelectorAll("img[data-i]").forEach(im => (im.onkeydown = e => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), im.click())));
 };
@@ -18,11 +20,53 @@ const slPrev = (inner) => `<div class="slpvi">${inner}</div>`;
 const slPvTiles = list => slPrev(slTiles(list));
 const slPvBars = v => slPrev(`<svg viewBox="0 0 120 40" class="slpvs" aria-hidden="true">${v.map((h, i) => `<rect x="${i * 14 + 4}" y="${38 - h}" width="10" height="${h}" rx="2"/>`).join("")}</svg>`);
 
+/* ---- 3.18.0 gemeinsame Hilfen für Grafiken: Maße als Attribute, Farben über Klassen und CSS-Variablen (style.css „Mehr Bausteine“) ---- */
+const SL_CATS = [["zahlen", "Zahlen"], ["grafik", "Grafiken"], ["spass", "Spaß und Eigenes"], ["rueck", "Rückblick"], ["plan", "Planung"]];
+const slEnc = encodeURIComponent;
+const slGet = u => api(u).catch(() => null);
+const slClamp = (x, a = 0, b = 100) => Math.max(a, Math.min(b, x));
+const slDur = s => {
+  const m = Math.round(s / 60);
+  return m >= 60 ? `${Math.floor(m / 60)}:${pad2(m % 60)} Std.` : `${m} Min.`;
+};
+const slKm = km => nf(km, km >= 100 ? 0 : 1) + " km";
+const slHm = h => nf(h, 0) + " m";
+const slBr = (pct, cls = "") => `<svg class="slbr${cls ? " " + cls : ""}" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="slbr-t" width="100" height="10"/><rect class="slbr-f" width="${slClamp(pct).toFixed(1)}" height="10"/></svg>`;
+/* Spaltendiagramm: vals = Zahlen; o = {hl: Index (hervorgehoben), dim: [Indizes] (blass), avg: Mittellinie, label: Beschreibung für Vorlesehilfen, labels: Beschriftungen unter den Spalten} */
+const slCols = (vals, o = {}) => {
+  const n = vals.length, mx = Math.max(...vals, 1e-9),
+    bars = vals.map((v, i) => {
+      const h = v > 0 ? Math.max(2.5, (v / mx) * 94) : 1;
+      return `<rect class="${i === o.hl ? "hl" : o.dim && o.dim.includes(i) ? "dim" : v > 0 ? "v" : "z"}" x="${i * 10 + 1}" y="${(100 - h).toFixed(1)}" width="8" height="${h.toFixed(1)}"/>`;
+    }).join(""),
+    avg = o.avg != null && o.avg > 0 ? `<line class="avg" x1="0" x2="${n * 10}" y1="${(100 - (o.avg / mx) * 94).toFixed(1)}" y2="${(100 - (o.avg / mx) * 94).toFixed(1)}"/>` : "";
+  return `<svg class="slcol${o.cls ? " " + o.cls : ""}" viewBox="0 0 ${n * 10} 100" preserveAspectRatio="none" role="img" aria-label="${esc(o.label || "")}">${bars}${avg}</svg>` +
+    (o.labels ? `<div class="slxl" aria-hidden="true">${o.labels.map(l => `<span>${esc(l)}</span>`).join("")}</div>` : "");
+};
+/* Positionen in Prozent (data-l) nach dem Einfügen setzen: berechnete Werte, keine Inline-Stile im Quelltext */
+const slPos = root => root.querySelectorAll("[data-l]").forEach(e => e.style.setProperty("left", e.dataset.l + "%"));
+const slPvRing = f => slPrev(`<svg viewBox="0 0 100 100" class="slpvs slpvr" aria-hidden="true"><circle class="t" cx="50" cy="50" r="40"/><circle class="f" cx="50" cy="50" r="40" stroke-dasharray="${(251.3 * f).toFixed(1)} 251.3" transform="rotate(-90 50 50)"/><circle class="t" cx="50" cy="50" r="30"/><circle class="g" cx="50" cy="50" r="30" stroke-dasharray="${(188.5 * 0.8).toFixed(1)} 188.5" transform="rotate(-90 50 50)"/></svg>`);
+const slPvHeat = () => {
+  const L = [0, 1, 0, 2, 3, 0, 1, 4, 2, 0, 1, 0, 3, 2, 0, 0, 4, 1, 2, 0, 0, 3, 1, 0, 2, 4, 0, 1];
+  return slPrev(`<svg viewBox="0 0 168 56" class="slpvs slpvh" aria-hidden="true">${L.map((l, i) => `<rect class="slh${l}" x="${(i % 14) * 12}" y="${Math.floor(i / 14) * 14 + 6}" width="10" height="10" rx="2"/>`).join("")}</svg>`);
+};
+const slPvDonut = parts => {
+  let o = 0;
+  const C = 188.5;
+  return slPrev(`<svg viewBox="0 0 100 100" class="slpvs slpvr" aria-hidden="true">${parts.map(([f, cl]) => {
+    const r = `<circle class="${cl}" cx="50" cy="50" r="30" stroke-dasharray="${Math.max(0, C * f - 3).toFixed(1)} ${C}" stroke-dashoffset="${(-o * C).toFixed(1)}" transform="rotate(-90 50 50)"/>`;
+    o += f;
+    return r;
+  }).join("")}</svg>`);
+};
+const slPvHbars = v => slPrev(`<svg viewBox="0 0 120 ${v.length * 12 + 2}" class="slpvs" aria-hidden="true">${v.map((w, i) => `<rect class="slhb" x="0" y="${i * 12 + 2}" width="${w}" height="8" rx="4"/>`).join("")}</svg>`);
+const slPvLine = pts => slPrev(`<svg viewBox="0 0 120 44" class="slpvs" aria-hidden="true"><path class="slpa" d="M0 44 ${pts.map((y, i) => `L${(i * 120) / (pts.length - 1)} ${y}`).join(" ")} L120 44Z"/><path class="slpl" d="M${pts.map((y, i) => `${(i * 120) / (pts.length - 1)} ${y}`).join(" L")}"/></svg>`);
+
 const SL_KZ = [["km", "Strecke"], ["up", "Aufstieg"], ["down", "Abstieg"], ["dur", "Dauer"], ["pace", "Tempo"], ["hr", "Puls (Durchschnitt)"], ["kcal", "Kalorien"]];
 Object.assign(window.SL_WT, {
   /* ---------------- Tourseite ---------------- */
   kennzahlen: {
-    fam: "tour", icon: "met", name: "Kennzahlen-Kachel", title: () => "Kennzahlen", multi: true, defaults: {values: ["km", "up", "dur", "pace"]},
+    fam: "tour", cat: "zahlen", icon: "met", name: "Kennzahlen-Kachel", title: () => "Kennzahlen", multi: true, defaults: {values: ["km", "up", "dur", "pace"]},
     desc: "Wählbare Kennzahlen dieser Tour als Kacheln: Strecke, Aufstieg, Dauer, Tempo, Puls, Kalorien.",
     fields: [{k: "values", kind: "checks", label: "Angezeigte Werte", min: 1, options: SL_KZ}],
     preview: () => slPvTiles([["12,4 km", "Strecke"], ["420 m", "Aufstieg"], ["3:05", "Dauer"]]),
@@ -49,7 +93,7 @@ Object.assign(window.SL_WT, {
     },
   },
   tempo: {
-    fam: "tour", icon: "trend", name: "Tempo-Mini", title: () => "Tempo bergauf, eben, bergab",
+    fam: "tour", cat: "zahlen", icon: "trend", name: "Tempo-Mini", title: () => "Tempo bergauf, eben, bergab",
     desc: "Durchschnittstempo bergauf, auf ebenem Weg und bergab, aus der Steigung der Strecke.",
     preview: () => slPvTiles([["3,1 km/h", "Bergauf"], ["4,6 km/h", "Eben"], ["4,2 km/h", "Bergab"]]),
     async render(c, b, cfg, {t}) {
@@ -62,7 +106,7 @@ Object.assign(window.SL_WT, {
     },
   },
   vergleich: {
-    fam: "tour", icon: "cmp", name: "Vergleich in einer Zeile", title: () => "Vergleich auf dieser Strecke",
+    fam: "tour", cat: "zahlen", icon: "cmp", name: "Vergleich in einer Zeile", title: () => "Vergleich auf dieser Strecke",
     desc: "„Platz x von y“ unter allen Touren auf derselben Strecke, nach Tempo, mit Link zur Auswertung.",
     preview: () => slPrev('<p class="slcmp">Platz 2 von 5 auf dieser Strecke</p>'),
     async render(c, b, cfg, {t}) {
@@ -75,7 +119,7 @@ Object.assign(window.SL_WT, {
     },
   },
   pulszonen: {
-    fam: "tour", icon: "heart", name: "Puls-Zonen", title: () => "Puls-Zonen",
+    fam: "tour", cat: "grafik", icon: "heart", name: "Puls-Zonen", title: () => "Puls-Zonen",
     desc: "Zeit in den fünf Pulszonen als Balken (nur bei Touren mit Herzfrequenz).",
     preview: () => slPrev('<svg viewBox="0 0 120 14" class="slpvs" aria-hidden="true"><rect x="0" y="0" width="14" height="14" fill="#8fb8d8"/><rect x="14" y="0" width="40" height="14" fill="#6bb38a"/><rect x="54" y="0" width="34" height="14" fill="#e2b13c"/><rect x="88" y="0" width="22" height="14" fill="#e0803c"/><rect x="110" y="0" width="10" height="14" fill="#c0504d"/></svg>'),
     async render(c, b, cfg, {t}) {
@@ -95,7 +139,7 @@ Object.assign(window.SL_WT, {
     },
   },
   wetter: {
-    fam: "tour", icon: "cloud", name: "Wetter-Streifen", title: () => "Wetter zur Tour",
+    fam: "tour", cat: "zahlen", icon: "cloud", name: "Wetter-Streifen", title: () => "Wetter zur Tour",
     desc: "Wetter am Tag der Tour in einer Zeile: Himmel, Temperatur, Niederschlag, Wind.",
     preview: () => slPvTiles([["Leicht bewölkt", "Wetter"], ["8–15 °C", "Temperatur"], ["18 km/h", "Wind bis"]]),
     async render(c, b, cfg, {t}) {
@@ -106,7 +150,7 @@ Object.assign(window.SL_WT, {
     },
   },
   fotostreifen: {
-    fam: "tour", icon: "cam", name: "Fotostreifen", title: () => "Fotostreifen",
+    fam: "tour", cat: "grafik", icon: "cam", name: "Fotostreifen", title: () => "Fotostreifen",
     desc: "Die ersten Fotos dieser Tour als Streifen zum Anklicken.",
     preview: () => slPrev('<div class="slpvf" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'),
     async render(c, b, cfg, {t}) {
@@ -116,7 +160,7 @@ Object.assign(window.SL_WT, {
     },
   },
   notiz: {
-    fam: "tour", icon: "note", name: "Eigene Notiz", title: () => "Notiz", multi: true, cfgOnAdd: true, defaults: {text: ""},
+    fam: "tour", cat: "spass", icon: "note", name: "Eigene Notiz", title: () => "Notiz", multi: true, cfgOnAdd: true, defaults: {text: ""},
     desc: "Ein freier Text (bis 500 Zeichen), den du selbst schreibst, zum Beispiel eine Erinnerung an die Tour.",
     fields: [{k: "text", kind: "text", label: "Text der Notiz", max: 500}],
     preview: () => slPrev('<p class="slnote">Einkehr im Gasthof, Rückweg über den Grat …</p>'),
@@ -129,7 +173,7 @@ Object.assign(window.SL_WT, {
   },
   /* ---------------- Übersicht ---------------- */
   periode: {
-    fam: "uebersicht", icon: "trend", name: "Diese Woche / dieser Monat", title: cfg => (cfg.period === "month" ? "Dieser Monat" : "Diese Woche"), multi: true, defaults: {period: "week"},
+    fam: "uebersicht", cat: "zahlen", icon: "trend", name: "Diese Woche / dieser Monat", title: cfg => (cfg.period === "month" ? "Dieser Monat" : "Diese Woche"), multi: true, defaults: {period: "week"},
     desc: "Touren, Kilometer und Höhenmeter der laufenden Woche oder des laufenden Monats.",
     fields: [{k: "period", kind: "radio", label: "Zeitraum", options: [["week", "Diese Woche"], ["month", "Dieser Monat"]]}],
     preview: () => slPvTiles([["3", "Touren"], ["41 km", "Kilometer"], ["1.120 m", "Höhenmeter"]]),
@@ -143,7 +187,7 @@ Object.assign(window.SL_WT, {
     },
   },
   belastung: {
-    fam: "uebersicht", icon: "heart", name: "Belastung und Erholung", title: () => "Belastung und Erholung",
+    fam: "uebersicht", cat: "grafik", icon: "heart", name: "Belastung und Erholung", title: () => "Belastung und Erholung",
     desc: "Wie viel Belastung die letzten vier Wochen laut Uhr hatten, verglichen mit dem Schnitt davor, mit Wochenbalken.",
     preview: () => slPvBars([10, 18, 14, 26, 20, 32, 24]),
     async render(c, b) {
@@ -161,7 +205,7 @@ Object.assign(window.SL_WT, {
     },
   },
   jahresvergleich: {
-    fam: "uebersicht", icon: "trend", name: "Jahresvergleich", title: () => "Jahresvergleich",
+    fam: "uebersicht", cat: "rueck", icon: "trend", name: "Jahresvergleich", title: () => "Jahresvergleich",
     desc: "Das laufende Jahr gegen das Vorjahr bis zum selben Tag: Touren, Kilometer, Höhenmeter.",
     preview: () => slPvTiles([["31 Touren", "2026"], ["+12 %", "Kilometer"], ["−4 %", "Höhenmeter"]]),
     render(c, b) {
@@ -180,7 +224,7 @@ Object.assign(window.SL_WT, {
     },
   },
   letzte: {
-    fam: "uebersicht", icon: "map", name: "Letzte Touren", title: () => "Letzte Touren",
+    fam: "uebersicht", cat: "rueck", icon: "map", name: "Letzte Touren", title: () => "Letzte Touren",
     desc: "Die fünf zuletzt gemachten Touren als Liste mit Link.",
     preview: () => slPrev('<ul class="sllist"><li><b>Gipfelrunde</b><span>12,4 km</span></li><li><b>Seeufer</b><span>8,1 km</span></li></ul>'),
     render(c, b) {
@@ -189,7 +233,7 @@ Object.assign(window.SL_WT, {
     },
   },
   neuefotos: {
-    fam: "uebersicht", icon: "cam", name: "Zuletzt aufgenommene Fotos", title: () => "Zuletzt aufgenommene Fotos",
+    fam: "uebersicht", cat: "grafik", icon: "cam", name: "Zuletzt aufgenommene Fotos", title: () => "Zuletzt aufgenommene Fotos",
     desc: "Die acht Fotos mit dem jüngsten Aufnahmedatum als Streifen.",
     preview: () => slPrev('<div class="slpvf" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'),
     async render(c, b) {
@@ -198,7 +242,7 @@ Object.assign(window.SL_WT, {
     },
   },
   auffaellig: {
-    fam: "uebersicht", icon: "watch", name: "Auffällige Touren", title: () => "Auffällige Touren",
+    fam: "uebersicht", cat: "zahlen", icon: "watch", name: "Auffällige Touren", title: () => "Auffällige Touren",
     desc: "Wie viele Touren die Geräte-Qualität als auffällig meldet, mit Link zur Verwaltung.",
     preview: () => slPvTiles([["3", "Auffällige Touren"]]),
     async render(c, b) {
@@ -213,7 +257,7 @@ Object.assign(window.SL_WT, {
     },
   },
   rekorde: {
-    fam: "uebersicht", icon: "trend", name: "Rekorde", title: () => "Rekorde",
+    fam: "uebersicht", cat: "rueck", icon: "trend", name: "Rekorde", title: () => "Rekorde",
     desc: "Längste Tour, meiste Höhenmeter und schnellstes Tempo, mit Link zur Tour.",
     preview: () => slPvTiles([["32,4 km", "Längste Tour"], ["1.480 m", "Meiste Höhenmeter"]]),
     render(c, b) {
@@ -225,7 +269,7 @@ Object.assign(window.SL_WT, {
     },
   },
   heutevor: {
-    fam: "uebersicht", icon: "cmp", name: "Heute vor X Jahren", title: () => "Heute vor X Jahren",
+    fam: "uebersicht", cat: "rueck", icon: "cmp", name: "Heute vor X Jahren", title: () => "Heute vor X Jahren",
     desc: "Touren, die du an genau diesem Datum in früheren Jahren gemacht hast.",
     preview: () => slPrev('<ul class="sllist"><li><b>Vor 3 Jahren</b><span>Seeufer, 8,1 km</span></li></ul>'),
     render(c, b) {

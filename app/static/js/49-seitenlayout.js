@@ -669,23 +669,55 @@ function slModal(title, build, cls) {
 }
 function slCatalog() {
   const list = Object.entries(window.SL_WT).filter(([, T]) => T.fam === SL.fam),
-    have = type => (slSt(SL.fam).widgets || []).filter(w => w.type === type).length;
+    have = type => (slSt(SL.fam).widgets || []).filter(w => w.type === type).length,
+    cats = SL_CATS.filter(([k]) => list.some(([, T]) => (T.cat || "zahlen") === k)),
+    card = ([type, T]) => {
+      const n = have(type),
+        dis = !T.multi && n > 0;
+      return `<article class="slcard" data-cat="${T.cat || "zahlen"}"><div class="slpv" aria-hidden="true">${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name || T.title(T.defaults || {}))}</h3><p>${esc(T.desc || "")}</p>` +
+        `<button type="button" class="btn sm${dis ? " ghost" : ""}" data-add="${type}"${dis ? " disabled" : ""}>${dis ? "Bereits hinzugefügt" : n ? "Noch einmal hinzufügen" : "Hinzufügen"}</button></div></article>`;
+    };
   slModal("Baustein hinzufügen", (body, close) => {
     body.innerHTML =
-      `<p class="mut slcatin">Bausteine zeigen Auswertungen aus deinen vorhandenen Daten. Die Vorschau zeigt Beispielwerte.</p><div class="slcats">` +
-      list
-        .map(([type, T]) => {
-          const n = have(type),
-            dis = !T.multi && n > 0;
-          return `<article class="slcard"><div class="slpv" aria-hidden="true">${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name || T.title(T.defaults || {}))}</h3><p>${esc(T.desc || "")}</p>` +
-            `<button type="button" class="btn sm${dis ? " ghost" : ""}" data-add="${type}"${dis ? " disabled" : ""}>${dis ? "Bereits hinzugefügt" : n ? "Noch einmal hinzufügen" : "Hinzufügen"}</button></div></article>`;
-        })
-        .join("") +
-      `</div><div class="uifoot"><button type="button" class="btn ghost" data-close>Schließen</button></div>`;
+      `<p class="mut slcatin">Bausteine zeigen Auswertungen aus deinen vorhandenen Daten. Die Vorschau zeigt Beispielwerte.</p>` +
+      `<div class="slfilt"><div class="slchips" role="group" aria-label="Kategorie"><button type="button" class="slchip" data-cat="" aria-pressed="true">Alle</button>` +
+      cats.map(([k, l]) => `<button type="button" class="slchip" data-cat="${k}" aria-pressed="false">${l}</button>`).join("") +
+      `</div><label class="slsr" for="slq">Bausteine suchen</label><input id="slq" type="search" class="slq" placeholder="Bausteine suchen …" autocomplete="off" enterkeyhint="search"></div>` +
+      `<p class="mut slcnt" role="status" aria-live="polite"></p><div class="slcatl">` +
+      cats.map(([k, l]) => `<section class="slsec" data-cat="${k}"><h3 class="slcath">${l}</h3><div class="slcats">${list.filter(([, T]) => (T.cat || "zahlen") === k).map(card).join("")}</div></section>`).join("") +
+      `</div><p class="slnorsl mut" hidden>Nichts gefunden. Probiere einen anderen Suchbegriff oder eine andere Kategorie.</p><div class="uifoot"><button type="button" class="btn ghost" data-close>Schließen</button></div>`;
+    let cat = "";
+    const q = body.querySelector("#slq"),
+      cnt = body.querySelector(".slcnt"),
+      none = body.querySelector(".slnorsl"),
+      apply = () => {
+        const term = q.value.trim().toLowerCase();
+        let n = 0;
+        body.querySelectorAll(".slsec").forEach(sec => {
+          let any = 0;
+          sec.querySelectorAll(".slcard").forEach(cd => {
+            const ok = (!cat || cd.dataset.cat === cat) && (!term || cd.textContent.toLowerCase().includes(term));
+            cd.hidden = !ok;
+            any += ok ? 1 : 0;
+          });
+          sec.hidden = !any;
+          n += any;
+        });
+        none.hidden = n > 0;
+        cnt.textContent = n === 1 ? "1 Baustein" : `${n} Bausteine`;
+        body.querySelectorAll(".slchip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.cat === cat)));
+      };
+    apply();
+    q.addEventListener("input", apply);
+    q.addEventListener("keydown", e => e.key === "Enter" && e.preventDefault());
     body.onclick = e => {
-      const a = e.target.closest("[data-add]");
+      const a = e.target.closest("[data-add]"),
+        ch = e.target.closest(".slchip");
       if (e.target.closest("[data-close]")) close();
-      else if (a && !a.disabled) {
+      else if (ch) {
+        cat = ch.dataset.cat;
+        apply();
+      } else if (a && !a.disabled) {
         close();
         const id = slAddWidget(a.dataset.add);
         if (id && (window.SL_WT[a.dataset.add].fields || []).length && window.SL_WT[a.dataset.add].cfgOnAdd) slCfgDialog(id);
@@ -699,16 +731,29 @@ function slCfgDialog(id) {
   if (!T) return;
   slModal(`Einstellungen: ${T.name || T.title(w.cfg)}`, (body, close) => {
     const cfg = JSON.parse(JSON.stringify(w.cfg || {}));
-    body.innerHTML = `<form class="slform">${(T.fields || []).map((f, i) => slField(f, cfg, i)).join("")}<div class="uifoot"><button type="button" class="btn ghost" data-close>Abbrechen</button><button type="submit" class="btn">Speichern</button></div></form>`;
+    body.innerHTML = `<form class="slform" novalidate>${(T.fields || []).map((f, i) => slField(f, cfg, i)).join("")}<div class="uifoot"><button type="button" class="btn ghost" data-close>Abbrechen</button><button type="submit" class="btn">Speichern</button></div></form>`;
     const form = body.querySelector("form");
     form.onsubmit = e => {
       e.preventDefault();
       const out = {...cfg};
+      let bad = null;
       (T.fields || []).forEach((f, i) => {
         if (f.kind === "checks") out[f.k] = [...form.querySelectorAll(`input[name="f${i}"]:checked`)].map(x => x.value);
         else if (f.kind === "radio") out[f.k] = (form.querySelector(`input[name="f${i}"]:checked`) || {}).value || cfg[f.k];
         else if (f.kind === "text") out[f.k] = form.querySelector(`[name="f${i}"]`).value.slice(0, f.max || 500);
+        else if (f.kind === "number") {
+          const inp = form.querySelector(`[name="f${i}"]`),
+            v = parseFloat(String(inp.value).replace(",", "."));
+          out[f.k] = v;
+          if (!(v >= f.min && v <= f.max)) bad = bad || {inp, msg: `Bitte eine Zahl von ${f.min} bis ${f.max} eingeben.`};
+        }
       });
+      if (bad) {
+        const er = bad.inp.closest(".slfs").querySelector(".slerr");
+        if (er) er.textContent = bad.msg;
+        bad.inp.focus();
+        return;
+      }
       if (T.fields.some(f => f.kind === "checks" && f.min && out[f.k].length < f.min)) {
         form.querySelector(".slerr").textContent = "Bitte mindestens einen Wert wählen.";
         return;
@@ -729,6 +774,8 @@ function slField(f, cfg, i) {
     return `<fieldset class="slfs"><legend>${esc(f.label)}</legend>${f.options.map(([v, l]) => `<label class="slck"><input type="checkbox" name="f${i}" value="${v}"${(cfg[f.k] || []).includes(v) ? " checked" : ""}><span>${esc(l)}</span></label>`).join("")}<p class="slerr" role="alert"></p></fieldset>`;
   if (f.kind === "radio")
     return `<fieldset class="slfs"><legend>${esc(f.label)}</legend>${f.options.map(([v, l]) => `<label class="slck"><input type="radio" name="f${i}" value="${v}"${cfg[f.k] === v ? " checked" : ""}><span>${esc(l)}</span></label>`).join("")}</fieldset>`;
+  if (f.kind === "number")
+    return `<div class="slfs"><label for="${id}">${esc(f.label)}</label><input id="${id}" name="f${i}" type="number" inputmode="decimal" min="${f.min}" max="${f.max}" step="${f.step || 1}" value="${esc(cfg[f.k] ?? "")}" required><p class="slerr" role="alert"></p></div>`;
   const max = f.max || 500;
   return `<div class="slfs"><label for="${id}">${esc(f.label)}</label><textarea id="${id}" name="f${i}" rows="6" maxlength="${max}" data-max="${max}">${esc(cfg[f.k] || "")}</textarea><p class="mut slcount">${(cfg[f.k] || "").length} / ${max}</p></div>`;
 }

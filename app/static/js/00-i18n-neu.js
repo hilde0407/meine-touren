@@ -1531,4 +1531,314 @@ Vor {} Jahren || {} years ago || Il y a {} ans || Hace {} años
 1 Foto || 1 photo || 1 photo || 1 foto
 1 Tour || 1 tour || 1 parcours || 1 ruta
 {} Touren || {} tours || {} parcours || {} rutas
+Zahlen || Numbers || Chiffres || Cifras
+Grafiken || Charts || Graphiques || Gráficos
+Spaß und Eigenes || Fun and your own || Plaisir et personnel || Diversión y propio
+Rückblick || Look back || Rétrospective || Retrospectiva
+Planung || Planning || Planification || Planificación
+Kategorie || Category || Catégorie || Categoría
+Bausteine suchen || Search widgets || Rechercher des blocs || Buscar bloques
+Bausteine suchen … || Search widgets … || Rechercher des blocs … || Buscar bloques …
+1 Baustein || 1 widget || 1 bloc || 1 bloque
+{} Bausteine || {} widgets || {} blocs || {} bloques
+Nichts gefunden. Probiere einen anderen Suchbegriff oder eine andere Kategorie. || Nothing found. Try another search term or another category. || Rien trouvé. Essayez un autre mot-clé ou une autre catégorie. || No se encontró nada. Prueba con otro término o con otra categoría.
+Bitte eine Zahl von {} bis {} eingeben. || Please enter a number from {} to {}. || Veuillez saisir un nombre de {} à {}. || Introduce un número de {} a {}.
+Kilometer-Splits || Kilometre splits || Temps par kilomètre || Parciales por kilómetro
+Tempo je Kilometer als Säulen, mit schnellstem und langsamstem Abschnitt und dem Durchschnitt als gestrichelter Linie. || Pace per kilometre as columns, with the fastest and slowest section and the average as a dashed line. || Allure par kilomètre en colonnes, avec la section la plus rapide et la plus lente et la moyenne en pointillés. || Ritmo por kilómetro en columnas, con el tramo más rápido y el más lento y la media como línea discontinua.
+Anzeige || Display || Affichage || Visualización
+Tempo in km/h || Pace in km/h || Allure en km/h || Ritmo en km/h
+Zeit je Kilometer || Time per kilometre || Temps par kilomètre || Tiempo por kilómetro
+Tempo je Kilometer (nur Bewegungszeit) || Pace per kilometre (moving time only) || Allure par kilomètre (temps de déplacement uniquement) || Ritmo por kilómetro (solo tiempo en movimiento)
+Tempo je {} km (nur Bewegungszeit) || Pace per {} km (moving time only) || Allure par tranche de {} km (temps de déplacement uniquement) || Ritmo por cada {} km (solo tiempo en movimiento)
+Schnellster Abschnitt || Fastest section || Section la plus rapide || Tramo más rápido
+Langsamster Abschnitt || Slowest section || Section la plus lente || Tramo más lento
+Durchschnitt (gestrichelt) || Average (dashed) || Moyenne (pointillés) || Media (discontinua)
+bis km {} || to km {} || jusqu’au km {} || hasta el km {}
+Säulendiagramm: Tempo je Abschnitt, von {} bis {} || Column chart: pace per section, from {} to {} || Diagramme en colonnes : allure par section, de {} à {} || Gráfico de columnas: ritmo por tramo, de {} a {}
+Ø {} || Avg {} || Moy. {} || Media {}
+Steigungs-Verteilung || Gradient distribution || Répartition des pentes || Distribución de pendientes
+Welcher Anteil der Strecke war steil bergab, eben oder steil bergauf: sieben Steigungsklassen als Balken. || What share of the route was steeply downhill, flat or steeply uphill: seven gradient classes as bars. || Quelle part du parcours était en forte descente, à plat ou en forte montée : sept classes de pente en barres. || Qué parte del recorrido fue de bajada pronunciada, llana o de subida pronunciada: siete clases de pendiente en barras.
+Steil bergab || Steeply downhill || Forte descente || Bajada pronunciada
+Bergab || Downhill || Descente || Bajada
+Leicht bergab || Slightly downhill || Légère descente || Bajada suave
+Eben || Flat || À plat || Llano
+Leicht bergauf || Slightly uphill || Légère montée || Subida suave
+Bergauf || Uphill || Montée || Subida
+Steil bergauf || Steeply uphill || Forte montée || Subida pronunciada
+unter −15 % || below −15 % || moins de −15 % || menos de −15 %
+−15 bis −5 % || −15 to −5 % || −15 à −5 % || −15 a −5 %
+−5 bis −2 % || −5 to −2 % || −5 à −2 % || −5 a −2 %
+−2 bis 2 % || −2 to 2 % || −2 à 2 % || −2 a 2 %
+2 bis 5 % || 2 to 5 % || 2 à 5 % || 2 a 5 %
+5 bis 15 % || 5 to 15 % || 5 à 15 % || 5 a 15 %
+über 15 % || above 15 % || plus de 15 % || más del 15 %
+unter 1 % || below 1 % || moins de 1 % || menos del 1 %
+Anteil an der Strecke von {}, Steigung über 50 m geglättet. || Share of the route of {}, gradient smoothed over 50 m. || Part du parcours de {}, pente lissée sur 50 m. || Parte del recorrido de {}, pendiente suavizada en 50 m.
+{} % bergauf || {} % uphill || {} % en montée || {} % de subida
+Bewegung und Pause || Moving and resting || Déplacement et pause || Movimiento y pausa
+Die ganze Tour als Zeitstreifen: wann du gelaufen bist und wann du Pause gemacht hast. || The whole tour as a time strip: when you were moving and when you took a break. || Tout le parcours en bande de temps : quand vous avez marché et quand vous avez fait une pause. || Toda la ruta como franja de tiempo: cuándo caminaste y cuándo hiciste una pausa.
+Zeitstreifen: {} % in Bewegung, {} % Pause || Time strip: {} % moving, {} % resting || Bande de temps : {} % en déplacement, {} % de pause || Franja de tiempo: {} % en movimiento, {} % de pausa
+In Bewegung || Moving || En déplacement || En movimiento
+Pause || Break || Pause || Pausa
+keine || none || aucune || ninguna
+Keine nennenswerten Pausen aufgezeichnet. || No significant breaks recorded. || Aucune pause notable enregistrée. || No se registraron pausas significativas.
+Pause: Tempo unter 0,3 km/h. || Break: pace below 0.3 km/h. || Pause : allure inférieure à 0,3 km/h. || Pausa: ritmo inferior a 0,3 km/h.
+{} % in Bewegung || {} % moving || {} % en déplacement || {} % en movimiento
+Diese Tour und dein Durchschnitt || This tour and your average || Ce parcours et votre moyenne || Esta ruta y tu media
+Strecke, Aufstieg, Tempo oder Dauer dieser Tour gegen den Median deiner Touren gleicher Sportart, als Balken mit Marke. || Distance, ascent, pace or duration of this tour against the median of your tours of the same sport, as bars with a marker. || Distance, montée, allure ou durée de ce parcours par rapport à la médiane de vos parcours du même sport, en barres avec repère. || Distancia, subida, ritmo o duración de esta ruta frente a la mediana de tus rutas del mismo deporte, en barras con marca.
+Angezeigte Werte || Values shown || Valeurs affichées || Valores mostrados
+Für diesen Vergleich braucht es mindestens drei andere Touren derselben Sportart. || This comparison needs at least three other tours of the same sport. || Cette comparaison nécessite au moins trois autres parcours du même sport. || Esta comparación necesita al menos tres rutas más del mismo deporte.
+Median {} || Median {} || Médiane {} || Mediana {}
+Der senkrechte Strich zeigt den Median deiner {} anderen Touren (Sportart: {}). || The vertical line shows the median of your {} other tours (sport: {}). || Le trait vertical indique la médiane de vos {} autres parcours (sport : {}). || La línea vertical muestra la mediana de tus {} otras rutas (deporte: {}).
+Tempo {} || Pace {} || Allure {} || Ritmo {}
+Strecke {} || Distance {} || Distance {} || Distancia {}
+Rang im Jahr || Rank in the year || Classement dans l’année || Puesto en el año
+Der Platz dieser Tour unter den Touren des Jahres nach Strecke, Aufstieg oder Dauer, mit allen Touren des Jahres als Säulen. || The rank of this tour among the tours of the year by distance, ascent or duration, with all tours of the year as columns. || Le classement de ce parcours parmi ceux de l’année selon la distance, la montée ou la durée, avec tous les parcours de l’année en colonnes. || El puesto de esta ruta entre las rutas del año según distancia, subida o duración, con todas las rutas del año en columnas.
+Rang nach || Rank by || Classement selon || Puesto según
+Vergleichen mit || Compare with || Comparer avec || Comparar con
+Allen Touren des Jahres || All tours of the year || Tous les parcours de l’année || Todas las rutas del año
+Touren derselben Sportart || Tours of the same sport || Parcours du même sport || Rutas del mismo deporte
+Platz {} von {} || Rank {} of {} || Place {} sur {} || Puesto {} de {}
+Platz || Rank || Place || Puesto
+von {} || of {} || sur {} || de {}
+Touren im Jahr {}, sortiert nach {} || Tours in {}, sorted by {} || Parcours en {}, triés par {} || Rutas en {}, ordenadas por {}
+Touren im Jahr {} ({}), sortiert nach {} || Tours in {} ({}), sorted by {} || Parcours en {} ({}), triés par {} || Rutas en {} ({}), ordenadas por {}
+Säulendiagramm: alle Touren {} nach {}, diese Tour liegt auf Platz {} || Column chart: all tours of {} by {}, this tour is in place {} || Diagramme en colonnes : tous les parcours de {} selon {}, ce parcours est à la place {} || Gráfico de columnas: todas las rutas de {} según {}, esta ruta está en el puesto {}
+Das ist die Spitze des Jahres. || This is the top of the year. || C’est le sommet de l’année. || Es la mejor del año.
+Die Spitze liegt bei {}. || The top is at {}. || Le sommet est à {}. || La mejor marca es {}.
+Tageslicht || Daylight || Lumière du jour || Luz diurna
+Sonnenaufgang und -untergang am Tag der Tour (aus Datum und Ort gerechnet) und wann du im Hellen unterwegs warst. || Sunrise and sunset on the day of the tour (calculated from date and place) and when you were out in daylight. || Lever et coucher du soleil le jour du parcours (calculés d’après la date et le lieu) et quand vous étiez dehors en pleine lumière. || Amanecer y atardecer el día de la ruta (calculados a partir de la fecha y el lugar) y cuándo estuviste fuera con luz.
+Nacht || Night || Nuit || Noche
+Dämmerung || Twilight || Crépuscule || Crepúsculo
+Tag || Day || Jour || Día
+Tour || Tour || Parcours || Ruta
+Sonnenaufgang || Sunrise || Lever du soleil || Amanecer
+Sonnenuntergang || Sunset || Coucher du soleil || Atardecer
+Tageslänge || Day length || Durée du jour || Duración del día
+Im Hellen unterwegs || Out in daylight || Dehors en pleine lumière || Fuera con luz
+{} im Dunkeln || {} in the dark || {} dans l’obscurité || {} a oscuras
+ganze Tour bei Tageslicht || whole tour in daylight || tout le parcours de jour || toda la ruta con luz diurna
+An diesem Ort geht die Sonne an diesem Tag nicht auf oder nicht unter. || At this place the sun does not rise or set on this day. || À cet endroit, le soleil ne se lève pas ou ne se couche pas ce jour-là. || En este lugar el sol no sale o no se pone ese día.
+Für diese Tour ist keine Position bekannt. || No position is known for this tour. || Aucune position n’est connue pour ce parcours. || No se conoce la posición de esta ruta.
+Für diese Tour liegt keine Zeit vor. || There is no time for this tour. || Aucune heure n’est disponible pour ce parcours. || No hay hora para esta ruta.
+Tageslicht: Sonnenaufgang {}, Sonnenuntergang {}, Tour ab {} || Daylight: sunrise {}, sunset {}, tour from {} || Lumière du jour : lever du soleil {}, coucher du soleil {}, parcours à partir de {} || Luz diurna: amanecer {}, atardecer {}, ruta desde las {}
+Gipfel-Tafel || Summit sign || Panneau du sommet || Cartel de la cumbre
+Höchster Punkt der Tour als Wegweiser-Tafel, wann du ihn erreicht hast und wie viel der Strecke über einer wählbaren Höhe lag. || The highest point of the tour as a signpost, when you reached it and how much of the route was above a chosen altitude. || Le point culminant du parcours sur un panneau, quand vous l’avez atteint et quelle part du parcours était au-dessus d’une altitude au choix. || El punto más alto de la ruta como cartel indicador, cuándo lo alcanzaste y qué parte del recorrido estuvo por encima de una altitud a elegir.
+Anteil der Strecke über || Share of the route above || Part du parcours au-dessus de || Parte del recorrido por encima de
+Höchster Punkt || Highest point || Point culminant || Punto más alto
+Erreicht nach || Reached after || Atteint après || Alcanzado tras
+Bei Kilometer || At kilometre || Au kilomètre || En el kilómetro
+Tiefster Punkt || Lowest point || Point le plus bas || Punto más bajo
+Höhenunterschied || Elevation difference || Dénivelé || Desnivel
+Anteil der Strecke über {} m || Share of the route above {} m || Part du parcours au-dessus de {} m || Parte del recorrido por encima de {} m
+Spaß-Vergleiche || Fun comparisons || Comparaisons amusantes || Comparaciones divertidas
+Aufstieg, Strecke und Kalorien in Bezugsgrößen: „1,2 × Kölner Dom“, „2 × Schnitzel“. Die Bezugsgrößen wählst du selbst. || Ascent, distance and calories in familiar units: “1.2 × Cologne Cathedral”, “2 × schnitzel”. You choose the units yourself. || Montée, distance et calories en grandeurs de référence : « 1,2 × cathédrale de Cologne », « 2 × schnitzel ». Vous choisissez les références. || Subida, distancia y calorías en magnitudes de referencia: «1,2 × catedral de Colonia», «2 × escalope». Tú eliges las referencias.
+Aufstieg vergleichen mit || Compare ascent with || Comparer la montée avec || Comparar la subida con
+Strecke vergleichen mit || Compare distance with || Comparer la distance avec || Comparar la distancia con
+Kalorien vergleichen mit || Compare calories with || Comparer les calories avec || Comparar las calorías con
+Kölner Dom || Cologne Cathedral || Cathédrale de Cologne || Catedral de Colonia
+Eiffelturm || Eiffel Tower || Tour Eiffel || Torre Eiffel
+Burj Khalifa || Burj Khalifa || Burj Khalifa || Burj Khalifa
+Mount Everest || Mount Everest || Mont Everest || Monte Everest
+Fußballfelder || Football pitches || Terrains de football || Campos de fútbol
+Marathon || Marathon || Marathon || Maratón
+Stadionrunden || Stadium laps || Tours de stade || Vueltas de estadio
+Schnitzel || Schnitzel || Schnitzel || Escalope
+Pizza || Pizza || Pizza || Pizza
+Kölsch (0,2 l) || Kölsch beer (0.2 l) || Bière Kölsch (0,2 l) || Cerveza Kölsch (0,2 l)
+Kugeln Eis || Scoops of ice cream || Boules de glace || Bolas de helado
+Aufstieg {} geteilt durch {} || Ascent {} divided by {} || Montée {} divisée par {} || Subida {} dividida entre {}
+Strecke {} geteilt durch {} || Distance {} divided by {} || Distance {} divisée par {} || Distancia {} dividida entre {}
+Kalorien {} geteilt durch {} || Calories {} divided by {} || Calories {} divisées par {} || Calorías {} divididas entre {}
+Kalorien wurden bei dieser Tour nicht aufgezeichnet. || Calories were not recorded for this tour. || Les calories n’ont pas été enregistrées pour ce parcours. || No se registraron las calorías de esta ruta.
+{} × {} || {} × {} || {} × {} || {} × {}
+Wetter und Tageszeit || Weather and time of day || Météo et moment de la journée || Tiempo y hora del día
+Die Stimmung der Tour in Symbolen: Tageszeit, Himmel, Temperatur, Wind und Regen. || The mood of the tour in symbols: time of day, sky, temperature, wind and rain. || L’ambiance du parcours en symboles : moment de la journée, ciel, température, vent et pluie. || El ambiente de la ruta en símbolos: hora del día, cielo, temperatura, viento y lluvia.
+Morgen || Morning || Matin || Mañana
+Vormittag || Late morning || Matinée || Media mañana
+Mittag || Noon || Midi || Mediodía
+Nachmittag || Afternoon || Après-midi || Tarde
+Abend || Evening || Soir || Noche
+{} Uhr || {} || {} h || {} h
+Frostig || Freezing || Glacial || Helado
+Kühl || Cool || Frais || Fresco
+Mild || Mild || Doux || Suave
+Warm || Warm || Chaud || Cálido
+Heiß || Hot || Très chaud || Caluroso
+Kaum Wind || Hardly any wind || Presque pas de vent || Casi sin viento
+Frischer Wind || Fresh wind || Vent frais || Viento fresco
+Stürmisch || Stormy || Orageux || Tormentoso
+bis {} km/h || up to {} km/h || jusqu’à {} km/h || hasta {} km/h
+Regen || Rain || Pluie || Lluvia
+Wolkig || Cloudy || Nuageux || Nublado
+Foto-Highlights || Photo highlights || Photos phares || Fotos destacadas
+Die drei besten Fotos der Tour groß, ausgewählt nach deiner Bewertung und der Schärfe. || The three best photos of the tour, large, chosen by your rating and sharpness. || Les trois meilleures photos du parcours en grand, choisies selon votre note et la netteté. || Las tres mejores fotos de la ruta en grande, elegidas según tu valoración y la nitidez.
+Ausgewählt nach Bewertung und Schärfe. || Chosen by rating and sharpness. || Choisies selon la note et la netteté. || Elegidas según la valoración y la nitidez.
+Mini-Höhenprofil || Mini elevation profile || Mini profil altimétrique || Mini perfil de altitud
+Das Höhenprofil kompakt, die Linie nach Steigung eingefärbt: bergab, eben, bergauf. || The elevation profile in compact form, the line coloured by gradient: downhill, flat, uphill. || Le profil altimétrique en compact, la ligne colorée selon la pente : descente, plat, montée. || El perfil de altitud compacto, con la línea coloreada según la pendiente: bajada, llano, subida.
+Höhenprofil, tiefster Punkt {}, höchster Punkt {}, Länge {} || Elevation profile, lowest point {}, highest point {}, length {} || Profil altimétrique, point le plus bas {}, point le plus haut {}, longueur {} || Perfil de altitud, punto más bajo {}, punto más alto {}, longitud {}
+bergab || downhill || descente || bajada
+eben || flat || plat || llano
+bergauf || uphill || montée || subida
+{} bis {} || {} to {} || {} à {} || {} a {}
+Strecken-Steckbrief || Route profile || Fiche du parcours || Ficha del recorrido
+Wie oft du diese Strecke gegangen bist, das erste und das letzte Mal, das beste Tempo und eine Zeitleiste der Wiederholungen. || How often you have walked this route, the first and the last time, the best pace and a timeline of the repeats. || Combien de fois vous avez fait ce parcours, la première et la dernière fois, la meilleure allure et une frise des répétitions. || Cuántas veces has hecho esta ruta, la primera y la última vez, el mejor ritmo y una línea de tiempo de las repeticiones.
+Auf dieser Strecke || On this route || Sur ce parcours || En esta ruta
+Erstes Mal || First time || Première fois || Primera vez
+Letztes Mal || Last time || Dernière fois || Última vez
+Bestes Tempo || Best pace || Meilleure allure || Mejor ritmo
+diese Tour || this tour || ce parcours || esta ruta
+Diese Strecke hast du bisher nur einmal aufgezeichnet. || You have recorded this route only once so far. || Vous n’avez enregistré ce parcours qu’une seule fois jusqu’ici. || Hasta ahora solo has grabado esta ruta una vez.
+Zeitleiste: {} Wiederholungen von {} bis {} || Timeline: {} repeats from {} to {} || Frise : {} répétitions du {} au {} || Línea de tiempo: {} repeticiones del {} al {}
+Jahresziel || Annual goal || Objectif annuel || Objetivo anual
+Ein Ring zeigt, wie weit du auf dein Jahresziel bist, dazu der Stand des Jahres und eine Prognose bis Silvester. || A ring shows how far along you are towards your annual goal, plus how far the year has progressed and a forecast to New Year’s Eve. || Un anneau montre où vous en êtes de votre objectif annuel, avec l’avancement de l’année et une prévision jusqu’à la Saint-Sylvestre. || Un anillo muestra cuánto llevas de tu objetivo anual, junto con el avance del año y una previsión hasta Nochevieja.
+Ziel in || Goal in || Objectif en || Objetivo en
+Kilometern || kilometres || kilomètres || kilómetros
+Höhenmetern || metres of ascent || mètres de dénivelé || metros de desnivel
+Ziel für das Jahr (Zahl in der gewählten Einheit) || Goal for the year (number in the chosen unit) || Objectif pour l’année (nombre dans l’unité choisie) || Objetivo para el año (número en la unidad elegida)
+{} von {} || {} of {} || {} sur {} || {} de {}
+Das sind {} über dem Ziel. || That is {} above the goal. || Soit {} de plus que l’objectif. || Son {} por encima del objetivo.
+Noch {} || {} to go || Encore {} || Faltan {}
+Prognose zum Jahresende: {} || Forecast for the end of the year: {} || Prévision pour la fin de l’année : {} || Previsión para final de año: {}
+Das Ziel ist erreicht. || The goal has been reached. || L’objectif est atteint. || El objetivo está cumplido.
+Auf Kurs: Bei diesem Tempo erreichst du dein Ziel. || On track: at this pace you will reach your goal. || Sur la bonne voie : à ce rythme, vous atteindrez votre objectif. || En camino: a este ritmo alcanzarás tu objetivo.
+Dafür brauchst du noch {} pro Woche. || You still need {} per week for that. || Il vous faut encore {} par semaine pour cela. || Para ello necesitas aún {} por semana.
+Noch keine Tour in diesem Jahr. || No tour yet this year. || Pas encore de parcours cette année. || Todavía ninguna ruta este año.
+Ziel || Goal || Objectif || Objetivo
+Das Jahr ist zu {} % vorbei || The year is {} % over || L’année est écoulée à {} % || El año ha transcurrido en un {} %
+Ring: {} % des Jahresziels erreicht, das Jahr ist zu {} % vorbei || Ring: {} % of the annual goal reached, the year is {} % over || Anneau : {} % de l’objectif annuel atteint, l’année est écoulée à {} % || Anillo: {} % del objetivo anual alcanzado, el año ha transcurrido en un {} %
+Wochen-Serie || Weekly streak || Série hebdomadaire || Racha semanal
+Wie viele Wochen in Folge du mindestens eine Tour gemacht hast, dein Rekord und die letzten 26 Wochen als Punktreihe. || How many weeks in a row you did at least one tour, your record and the last 26 weeks as a row of dots. || Combien de semaines de suite vous avez fait au moins un parcours, votre record et les 26 dernières semaines en rangée de points. || Cuántas semanas seguidas hiciste al menos una ruta, tu récord y las últimas 26 semanas como hilera de puntos.
+1 Woche || 1 week || 1 semaine || 1 semana
+{} Wochen || {} weeks || {} semaines || {} semanas
+Aktuelle Serie || Current streak || Série en cours || Racha actual
+Rekord || Record || Record || Récord
+gerade erreicht || just reached || tout juste atteint || recién alcanzado
+Wochen mit Tour || Weeks with a tour || Semaines avec parcours || Semanas con ruta
+in den letzten 26 Wochen || in the last 26 weeks || sur les 26 dernières semaines || en las últimas 26 semanas
+Letzte 26 Wochen: {} Wochen mit mindestens einer Tour || Last 26 weeks: {} weeks with at least one tour || 26 dernières semaines : {} semaines avec au moins un parcours || Últimas 26 semanas: {} semanas con al menos una ruta
+Diese Woche fehlt noch eine Tour, damit die Serie weiterläuft. || This week still needs a tour to keep the streak going. || Il manque encore un parcours cette semaine pour que la série continue. || Esta semana aún falta una ruta para que continúe la racha.
+Eine Woche zählt, wenn sie mindestens eine Tour enthält (Montag bis Sonntag). || A week counts if it contains at least one tour (Monday to Sunday). || Une semaine compte si elle contient au moins un parcours (du lundi au dimanche). || Una semana cuenta si contiene al menos una ruta (de lunes a domingo).
+Kalender-Heatmap || Calendar heatmap || Carte thermique du calendrier || Mapa de calor del calendario
+Die letzten 52 Wochen als Kalenderfläche: je dunkler ein Tag, desto mehr Kilometer (oder Touren) an diesem Tag. || The last 52 weeks as a calendar grid: the darker a day, the more kilometres (or tours) on that day. || Les 52 dernières semaines en grille de calendrier : plus un jour est foncé, plus il compte de kilomètres (ou de parcours). || Las últimas 52 semanas como cuadrícula de calendario: cuanto más oscuro el día, más kilómetros (o rutas) ese día.
+Färben nach || Colour by || Colorer selon || Colorear según
+Kalender der letzten 52 Wochen: {} Tage mit Touren || Calendar of the last 52 weeks: {} days with tours || Calendrier des 52 dernières semaines : {} jours avec parcours || Calendario de las últimas 52 semanas: {} días con rutas
+{} Tage mit Touren in den letzten 12 Monaten || {} days with tours in the last 12 months || {} jours avec parcours au cours des 12 derniers mois || {} días con rutas en los últimos 12 meses
+weniger || less || moins || menos
+mehr || more || plus || más
+{} Tage || {} days || {} jours || {} días
+Jan || Jan || janv. || ene
+Feb || Feb || févr. || feb
+Mär || Mar || mars || mar
+Apr || Apr || avr. || abr
+Mai || May || mai || may
+Jun || Jun || juin || jun
+Jul || Jul || juil. || jul
+Aug || Aug || août || ago
+Sep || Sep || sept. || sep
+Okt || Oct || oct. || oct
+Nov || Nov || nov. || nov
+Dez || Dec || déc. || dic
+Meilensteine || Milestones || Étapes || Hitos
+Wie weit es bis zum nächsten runden Kilometerstand, zur nächsten Tour-Marke und zum nächsten „Mount Everest“ an Höhenmetern ist. || How far it is to the next round distance, the next tour count and the next “Mount Everest” of ascent. || Combien il reste jusqu’au prochain kilométrage rond, au prochain nombre de parcours et au prochain « Mont Everest » de dénivelé. || Cuánto falta para el próximo kilometraje redondo, la próxima cifra de rutas y el próximo «Everest» de desnivel.
+Kilometer gesamt || Total kilometres || Kilomètres au total || Kilómetros en total
+Höhenmeter gesamt || Total ascent || Dénivelé total || Desnivel total
+Touren gesamt || Total tours || Parcours au total || Rutas en total
+Noch {} bis {} || {} to go until {} || Encore {} avant {} || Faltan {} para {}
+Alle Meilensteine erreicht: mehr als einmal um die Erde. || All milestones reached: more than once around the Earth. || Tous les jalons sont atteints : plus d’un tour de la Terre. || Todos los hitos alcanzados: más de una vuelta a la Tierra.
+Alle Meilensteine erreicht. || All milestones reached. || Tous les jalons sont atteints. || Todos los hitos alcanzados.
+Noch {} bis zum nächsten Everest || {} to go until the next Everest || Encore {} avant le prochain Everest || Faltan {} para el próximo Everest
+Lieblingstage und Tageszeiten || Favourite days and times of day || Jours et moments préférés || Días y momentos favoritos
+An welchen Wochentagen und zu welcher Tageszeit du am liebsten unterwegs bist, als zwei Säulendiagramme. || On which weekdays and at what time of day you like to be out, as two column charts. || Quels jours de la semaine et à quel moment de la journée vous préférez partir, en deux diagrammes en colonnes. || En qué días de la semana y a qué hora del día prefieres salir, en dos gráficos de columnas.
+Zählen nach || Count by || Compter selon || Contar según
+Wochentage || Weekdays || Jours de la semaine || Días de la semana
+Tageszeiten || Times of day || Moments de la journée || Momentos del día
+Morgens || Mornings || Le matin || Por la mañana
+Mittags || Midday || À midi || Al mediodía
+Nachmittags || Afternoons || L’après-midi || Por la tarde
+Abends || Evenings || Le soir || Por la noche
+morgens || in the morning || le matin || por la mañana
+mittags || at midday || à midi || al mediodía
+nachmittags || in the afternoon || l’après-midi || por la tarde
+abends || in the evening || le soir || por la noche
+Montag || Monday || lundi || lunes
+Dienstag || Tuesday || mardi || martes
+Mittwoch || Wednesday || mercredi || miércoles
+Donnerstag || Thursday || jeudi || jueves
+Freitag || Friday || vendredi || viernes
+Samstag || Saturday || samedi || sábado
+Sonntag || Sunday || dimanche || domingo
+Dein Lieblingstag ist {}. || Your favourite day is {}. || Votre jour préféré est {}. || Tu día favorito es {}.
+Am liebsten bist du {} unterwegs. || You like to be out {}. || Vous aimez partir {}. || Prefieres salir {}.
+Säulendiagramm der Wochentage, am häufigsten {} || Column chart of weekdays, most often {} || Diagramme en colonnes des jours de la semaine, le plus souvent {} || Gráfico de columnas de los días de la semana, con más frecuencia {}
+Säulendiagramm der Tageszeiten, am häufigsten {} || Column chart of times of day, most often {} || Diagramme en colonnes des moments de la journée, le plus souvent {} || Gráfico de columnas de los momentos del día, con más frecuencia {}
+Dafür braucht es mindestens drei Touren. || This needs at least three tours. || Il faut au moins trois parcours pour cela. || Para esto hacen falta al menos tres rutas.
+Sportarten-Verteilung || Sports distribution || Répartition des sports || Distribución de deportes
+Welche Sportarten du wie oft machst, als Ring mit Legende, nach Anzahl der Touren, Kilometern oder Zeit. || Which sports you do and how often, as a ring with a legend, by number of tours, kilometres or time. || Quels sports vous pratiquez et à quelle fréquence, en anneau avec légende, selon le nombre de parcours, les kilomètres ou le temps. || Qué deportes practicas y con qué frecuencia, como anillo con leyenda, según número de rutas, kilómetros o tiempo.
+Verteilung nach || Distribution by || Répartition selon || Distribución según
+Zeit unterwegs || Time on the move || Temps en déplacement || Tiempo en marcha
+E-Bike || E-bike || Vélo électrique || Bici eléctrica
+Ski || Skiing || Ski || Esquí
+Ringdiagramm der Sportarten || Ring chart of sports || Diagramme en anneau des sports || Gráfico de anillo de los deportes
+{} Std. || {} h || {} h || {} h
+Für diese Auswertung fehlen Angaben in den Touren. || The tours lack the data needed for this evaluation. || Les parcours ne contiennent pas les données nécessaires à cette analyse. || Faltan datos en las rutas para esta evaluación.
+Wiederentdecken || Rediscover || Redécouvrir || Redescubrir
+Eine zufällige ältere Tour mit Foto, zum Erinnern. Mit „Andere Tour“ würfelst du neu. || A random older tour with a photo, to remember. “Another tour” rolls the dice again. || Un ancien parcours au hasard avec photo, pour se souvenir. Avec « Autre parcours », vous relancez les dés. || Una ruta antigua al azar con foto, para recordar. Con «Otra ruta» vuelves a tirar los dados.
+Andere Tour || Another tour || Autre parcours || Otra ruta
+vor 1 Jahr || 1 year ago || il y a 1 an || hace 1 año
+vor {} Jahren || {} years ago || il y a {} ans || hace {} años
+vor 1 Monat || 1 month ago || il y a 1 mois || hace 1 mes
+vor {} Monaten || {} months ago || il y a {} mois || hace {} meses
+Sobald du ältere Touren hast, zeige ich dir hier eine zufällige. || As soon as you have older tours, a random one is shown here. || Dès que vous aurez d’anciens parcours, un parcours au hasard s’affichera ici. || En cuanto tengas rutas antiguas, aquí verás una al azar.
+Seeufer-Runde || Lakeside loop || Tour du lac || Vuelta al lago
+Meistbesuchte Orte || Most visited places || Lieux les plus visités || Lugares más visitados
+Die Orte, Landkreise, Regionen oder Länder, in denen du die meisten Touren gemacht hast, als Balken. || The places, districts, regions or countries where you did the most tours, as bars. || Les lieux, arrondissements, régions ou pays où vous avez fait le plus de parcours, en barres. || Los lugares, comarcas, regiones o países donde hiciste más rutas, en barras.
+Gliedern nach || Group by || Regrouper par || Agrupar por
+Ort || Place || Lieu || Lugar
+Landkreis || District || Arrondissement || Comarca
+Bundesland oder Region || State or region || Land ou région || Estado o región
+Land || Country || Pays || País
+1 Tour ohne Ortsangabe || 1 tour without a place || 1 parcours sans lieu || 1 ruta sin lugar
+{} Touren ohne Ortsangabe || {} tours without a place || {} parcours sans lieu || {} rutas sin lugar
+Uhren-Zeitleiste || Watch timeline || Frise des montres || Línea de tiempo de relojes
+Uhren und Geräte || Watches and devices || Montres et appareils || Relojes y dispositivos
+Deine Geräte (Uhren, Handys) auf einer Zeitleiste: wann du sie genutzt hast und wie viele Touren sie aufgezeichnet haben. || Your devices (watches, phones) on a timeline: when you used them and how many tours they recorded. || Vos appareils (montres, téléphones) sur une frise : quand vous les avez utilisés et combien de parcours ils ont enregistrés. || Tus dispositivos (relojes, móviles) en una línea de tiempo: cuándo los usaste y cuántas rutas grabaron.
+Für deine Geräte sind noch keine Zeiträume bekannt. || No periods are known for your devices yet. || Aucune période n’est encore connue pour vos appareils. || Aún no se conocen los periodos de tus dispositivos.
+{} – heute || {} – today || {} – aujourd’hui || {} – hoy
+{} – {} || {} – {} || {} – {} || {} – {}
+1 Gerät || 1 device || 1 appareil || 1 dispositivo
+{} Geräte || {} devices || {} appareils || {} dispositivos
+Ausrüstungs-Kilometerstand || Gear mileage || Kilométrage de l’équipement || Kilometraje del equipo
+Ausrüstung || Gear || Équipement || Equipo
+Kilometerstand deiner Ausrüstung (Schuhe, Rad, Ski) gegen das Limit, mit Hinweis, wann ein Wechsel ansteht. || Mileage of your gear (shoes, bike, skis) against the limit, with a hint when a replacement is due. || Kilométrage de votre équipement (chaussures, vélo, skis) par rapport à la limite, avec un avis quand un remplacement approche. || Kilometraje de tu equipo (calzado, bici, esquís) frente al límite, con aviso de cuándo toca cambiarlo.
+Noch keine Ausrüstung angelegt. || No gear added yet. || Aucun équipement ajouté. || Aún no hay equipo añadido.
+Limit erreicht || Limit reached || Limite atteinte || Límite alcanzado
+Bald fällig: noch {} || Due soon: {} to go || Bientôt à remplacer : encore {} || Pronto toca: faltan {}
+Ohne Limit || No limit || Sans limite || Sin límite
+Ausrüstung verwalten › || Manage gear › || Gérer l’équipement › || Gestionar el equipo ›
+1 bald fällig || 1 due soon || 1 bientôt à remplacer || 1 pronto toca
+{} bald fällig || {} due soon || {} bientôt à remplacer || {} pronto tocan
+Geplante Touren || Planned tours || Parcours planifiés || Rutas planificadas
+Die zuletzt geplanten Touren mit Länge, Höhenmetern und geschätzter Dauer, mit Link zur Planung. || The most recently planned tours with length, ascent and estimated duration, with a link to planning. || Les derniers parcours planifiés avec longueur, dénivelé et durée estimée, avec un lien vers la planification. || Las últimas rutas planificadas con longitud, desnivel y duración estimada, con enlace a la planificación.
+Keine geplanten Touren. || No planned tours. || Aucun parcours planifié. || Ninguna ruta planificada.
+Tour planen › || Plan a tour › || Planifier un parcours › || Planificar una ruta ›
+Ohne Namen || Unnamed || Sans nom || Sin nombre
+1 Plan || 1 plan || 1 plan || 1 plan
+{} Pläne || {} plans || {} plans || {} planes
+Gipfelweg || Summit trail || Chemin du sommet || Camino a la cumbre
+Rund um den See || Around the lake || Tour du lac || Alrededor del lago
+Jahres-Rückblick || Year in review || Rétrospective de l’année || Resumen del año
+Rückblick {} || Look back {} || Rétrospective {} || Retrospectiva {}
+Das Jahr in einer Kachel: Touren, Kilometer und Höhenmeter, die Monate als Säulen, die längste und die höchste Tour. || The year in one tile: tours, kilometres and ascent, the months as columns, the longest and the highest tour. || L’année en une tuile : parcours, kilomètres et dénivelé, les mois en colonnes, le plus long et le plus haut parcours. || El año en un mosaico: rutas, kilómetros y desnivel, los meses como columnas, la ruta más larga y la más alta.
+Jahr || Year || Année || Año
+Dieses Jahr || This year || Cette année || Este año
+Letztes Jahr || Last year || L’année dernière || El año pasado
+Im Jahr {} gab es keine Touren. || There were no tours in {}. || Il n’y a eu aucun parcours en {}. || En {} no hubo ninguna ruta.
+Kilometer je Monat || Kilometres per month || Kilomètres par mois || Kilómetros por mes
+Säulendiagramm der Kilometer je Monat, am meisten im {} || Column chart of kilometres per month, most in {} || Diagramme en colonnes des kilomètres par mois, le plus en {} || Gráfico de columnas de los kilómetros por mes, el máximo en {}
+Aktivster Monat || Most active month || Mois le plus actif || Mes más activo
+Leicht bewölkt || Partly cloudy || Peu nuageux || Poco nuboso
+Bewölkt || Overcast || Couvert || Cubierto
+Klar || Clear || Dégagé || Despejado
+Heiter || Fair || Éclairci || Despejado
 `;
