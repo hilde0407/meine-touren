@@ -1978,4 +1978,81 @@ Die Prüfung ist nicht möglich (keine Verbindung zum Server?). Es wurde nichts 
 Diese Datei gehört zur Tourseite. Öffne dort „Seite anpassen“ → „Ansichten“, um sie zu importieren. || This file belongs to the tour page. Open “Customize page” → “Views” there to import it. || Ce fichier appartient à la page du parcours. Ouvrez-y « Personnaliser la page » → « Vues » pour l’importer. || Este archivo pertenece a la página de la ruta. Abre allí «Personalizar página» → «Vistas» para importarlo.
 Diese Datei gehört zur Übersicht. Öffne dort „Seite anpassen“ → „Ansichten“, um sie zu importieren. || This file belongs to the overview. Open “Customize page” → “Views” there to import it. || Ce fichier appartient à l’aperçu. Ouvrez-y « Personnaliser la page » → « Vues » pour l’importer. || Este archivo pertenece al resumen. Abre allí «Personalizar página» → «Vistas» para importarlo.
 Alles in dieser Ansicht wird auf den Standard zurückgesetzt: Reihenfolge, ausgeblendete Abschnitte und alle hinzugefügten Bausteine. Andere Ansichten bleiben unverändert. || Everything in this view is reset to the default: order, hidden sections and all added blocks. Other views stay unchanged. || Tout dans cette vue est rétabli par défaut : ordre, sections masquées et tous les blocs ajoutés. Les autres vues restent inchangées. || Todo en esta vista vuelve al estándar: orden, secciones ocultas y todos los bloques añadidos. Las demás vistas no cambian.
+Filter der Statistik || Statistics filter || Filtre des statistiques || Filtro de las estadísticas
+Zeitraum: Jahr || Period: year || Période : année || Periodo: año
+Zeitraum: weitere || Period: more || Période : autres || Periodo: más
+Von–bis … || From–to … || Du–au … || Desde–hasta …
+Von || From || Du || Desde
+Bitte beide Daten angeben. || Please enter both dates. || Veuillez saisir les deux dates. || Introduce ambas fechas.
+„Von“ darf nicht nach „Bis“ liegen. || “From” must not be after “To”. || « Du » ne doit pas être après « au ». || «Desde» no puede ser posterior a «Hasta».
+Filter aktiv: {}. || Filter active: {}. || Filtre actif : {}. || Filtro activo: {}.
+Filter zurücksetzen || Reset filter || Réinitialiser le filtre || Restablecer filtro
+Filter gilt hier nicht || Filter does not apply here || Le filtre ne s’applique pas ici || El filtro no se aplica aquí
+Aktivität gilt hier nicht || Activity does not apply here || L’activité ne s’applique pas ici || La actividad no se aplica aquí
+Zeitraum gilt hier nicht || Period does not apply here || La période ne s’applique pas ici || El periodo no se aplica aquí
+Zeitraum gilt hier nur als Jahr || Period applies here as a year only || La période ne s’applique ici qu’en année || El periodo solo se aplica aquí como año
+Ziele || Goals || Objectifs || Objetivos
+Kilometer pro Monat oder Jahr || Kilometres per month or year || Kilomètres par mois ou par année || Kilómetros por mes o año
+Bestwerte || Best values || Meilleures valeurs || Mejores valores
+Aktivität im Jahr || Activity in the year || Activité dans l’année || Actividad en el año
+Monatsvergleich || Month comparison || Comparaison des mois || Comparación de meses
+Entwicklung || Trend over time || Évolution || Evolución
+Streckenlängen || Route lengths || Longueurs des parcours || Longitudes de las rutas
+Höhenmeter im Jahr || Ascent in the year || Dénivelé dans l’année || Desnivel en el año
+Top-Touren || Top tours || Meilleures sorties || Mejores rutas
+Entwicklung der Strecke || Trend of distance || Évolution de la distance || Evolución de la distancia
+Entwicklung des Tempos || Trend of pace || Évolution de l’allure || Evolución del ritmo
+Höhenmeter im Jahresverlauf || Ascent over the year || Dénivelé au fil de l’année || Desnivel a lo largo del año
+Globalen Filter verwenden || Use global filter || Utiliser le filtre global || Usar el filtro global
+Gilt der Filter oben auf der Seite, sind Aktivität und Zeitraum hier nicht einstellbar. || If the filter at the top of the page applies, activity and period cannot be set here. || Si le filtre en haut de la page s’applique, l’activité et la période ne se règlent pas ici. || Si se aplica el filtro de la parte superior, aquí no se pueden ajustar la actividad ni el periodo.
+Noch kein Ziel || No goal yet || Pas encore d’objectif || Aún sin objetivo
+1 Ziel || 1 goal || 1 objectif || 1 objetivo
+{} Ziele || {} goals || {} objectifs || {} objetivos
+{} Tage mit Touren || {} days with tours || {} jours avec sorties || {} días con rutas
+Stärkster Monat: {} || Strongest month: {} || Mois le plus fort : {} || Mes más fuerte: {}
+Längste Tour {} km || Longest tour {} km || Plus longue sortie {} km || Ruta más larga {} km
+Das Jahr {} || The year {} || L’année {} || El año {}
+Zeitraum davor || Previous period || Période précédente || Periodo anterior
+Dein Zeitraum || Your period || Votre période || Tu periodo
+Säulen nach || Bars by || Barres selon || Barras según
+Anzahl der Touren || Number of tours || Nombre de sorties || Número de rutas
+Linie zeigt || Line shows || La ligne montre || La línea muestra
+Tempo (km/h) || Pace (km/h) || Allure (km/h) || Ritmo (km/h)
+Strecke pro Tour (km) || Distance per tour (km) || Distance par sortie (km) || Distancia por ruta (km)
+Sortiert nach || Sorted by || Trié par || Ordenado por
+Vorjahr insgesamt {} m. || Previous year in total {} m. || Année précédente au total {} m. || Año anterior en total {} m.
+Für eine Entwicklung braucht es mindestens drei Monate mit Touren. || A trend needs at least three months with tours. || Une évolution demande au moins trois mois avec des sorties. || Una evolución necesita al menos tres meses con rutas.
+Für eine Entwicklung braucht es mindestens drei Jahre mit Touren. || A trend needs at least three years with tours. || Une évolution demande au moins trois années avec des sorties. || Una evolución necesita al menos tres años con rutas.
+Dafür fehlen Angaben in den Touren. || The tours lack the data for this. || Les sorties n’ont pas les données nécessaires. || A las rutas les faltan los datos para esto.
+Trend: steigend || Trend: rising || Tendance : à la hausse || Tendencia: al alza
+Trend: fallend || Trend: falling || Tendance : à la baisse || Tendencia: a la baja
+Trend: gleichbleibend || Trend: steady || Tendance : stable || Tendencia: estable
+Welche Monate des Jahres am stärksten sind: zwölf Säulen von Januar bis Dezember, nach Kilometern, Höhenmetern, Stunden oder Anzahl der Touren, mit dem stärksten Monat hervorgehoben. || Which months of the year are strongest: twelve bars from January to December, by kilometres, ascent, hours or number of tours, with the strongest month highlighted. || Les mois les plus forts de l’année : douze barres de janvier à décembre, selon les kilomètres, le dénivelé, les heures ou le nombre de sorties, avec le mois le plus fort mis en évidence. || Qué meses del año son los más fuertes: doce barras de enero a diciembre, según kilómetros, desnivel, horas o número de rutas, con el mes más fuerte resaltado.
+Wie sich dein Tempo (km/h) oder die Länge deiner Touren (km pro Tour) über die Zeit entwickelt, als Linie je Monat (bei langen Zeiträumen je Jahr) mit gestrichelter Trend-Linie. || How your pace (km/h) or the length of your tours (km per tour) develops over time, as a line per month (per year for long periods) with a dashed trend line. || Comment évoluent votre allure (km/h) ou la longueur de vos sorties (km par sortie) dans le temps, en ligne par mois (par année pour les longues périodes) avec une ligne de tendance en pointillés. || Cómo evolucionan tu ritmo (km/h) o la longitud de tus rutas (km por ruta) con el tiempo, como línea por mes (por año en periodos largos) con una línea de tendencia discontinua.
+Wie lang deine Touren sind: ein Histogramm der Strecken in Klassen von unter 5 bis über 50 Kilometer. || How long your tours are: a histogram of distances in classes from under 5 to over 50 kilometres. || La longueur de vos sorties : un histogramme des distances par classes, de moins de 5 à plus de 50 kilomètres. || Cuánto duran tus rutas: un histograma de distancias en clases de menos de 5 a más de 50 kilómetros.
+Wie sich deine Höhenmeter im Lauf eines Jahres aufsummieren, als Linie, dazu das Vorjahr gestrichelt. Gezeigt wird das gewählte Jahr, sonst das jüngste Jahr mit Touren. || How your ascent adds up over a year, as a line, with the previous year dashed. The chosen year is shown, otherwise the most recent year with tours. || Comment votre dénivelé s’additionne au fil d’une année, en ligne, avec l’année précédente en pointillés. L’année choisie est affichée, sinon la plus récente avec des sorties. || Cómo se acumula tu desnivel a lo largo de un año, como línea, con el año anterior discontinuo. Se muestra el año elegido; si no, el más reciente con rutas.
+Deine besten Touren als Liste mit Link: nach Strecke, Aufstieg, Dauer oder Tempo, drei bis zehn Einträge. || Your best tours as a list with links: by distance, ascent, duration or pace, three to ten entries. || Vos meilleures sorties en liste avec lien : selon la distance, le dénivelé, la durée ou l’allure, de trois à dix entrées. || Tus mejores rutas como lista con enlace: por distancia, desnivel, duración o ritmo, de tres a diez entradas.
+Für den Blick auf ein Jahr: Kennzahlen, Monate, Höhenmeter im Jahresverlauf, die besten Touren und die Kalender-Heatmap. || For looking at a year: key figures, months, ascent over the year, the best tours and the calendar heatmap. || Pour regarder une année : chiffres clés, mois, dénivelé au fil de l’année, meilleures sorties et carte thermique du calendrier. || Para ver un año: cifras clave, meses, desnivel a lo largo del año, las mejores rutas y el mapa de calor del calendario.
+Für den Blick auf Form und Entwicklung: Belastung und Erholung, dein typisches Tempo, die Entwicklung deines Tempos, der Monatsvergleich und die Streckenlängen. || For looking at form and progress: load and recovery, your typical pace, how your pace develops, the month comparison and the route lengths. || Pour regarder la forme et l’évolution : charge et récupération, votre allure typique, l’évolution de votre allure, la comparaison des mois et les longueurs de parcours. || Para ver la forma y la evolución: carga y recuperación, tu ritmo típico, la evolución de tu ritmo, la comparación de meses y las longitudes de ruta.
+Wenig auf einen Blick: Kennzahlen ganz oben, darunter vier Bausteine in halber Breite, auf dem Handy untereinander. || Little at a glance: key figures at the top, below them four blocks at half width, stacked on a phone. || Peu d’éléments en un coup d’œil : chiffres clés en haut, dessous quatre blocs en demi-largeur, empilés sur téléphone. || Poco de un vistazo: cifras clave arriba y debajo cuatro bloques a media anchura, apilados en el móvil.
+Reihenfolge, Breiten, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Statistik werden zurückgesetzt. Der Filter oben bleibt, wie er ist. || Order, widths, hidden sections and all added blocks of the statistics are reset. The filter at the top stays as it is. || L’ordre, les largeurs, les sections masquées et tous les blocs ajoutés des statistiques sont réinitialisés. Le filtre en haut reste tel quel. || Se restablecen el orden, los anchos, las secciones ocultas y todos los bloques añadidos de las estadísticas. El filtro de arriba se mantiene.
+Diese Datei gehört zur Statistik. Öffne dort „Seite anpassen“ → „Ansichten“, um sie zu importieren. || This file belongs to the statistics. Open “Customize page” → “Views” there to import it. || Ce fichier appartient aux statistiques. Ouvrez-y « Personnaliser la page » → « Vues » pour l’importer. || Este archivo pertenece a las estadísticas. Abre allí «Personalizar página» → «Vistas» para importarlo.
+Ungespeicherte Änderungen || Unsaved changes || Modifications non enregistrées || Cambios sin guardar
+Als neue Ansicht speichern … || Save as new view … || Enregistrer comme nouvelle vue … || Guardar como vista nueva …
+Als neue Ansicht speichern || Save as new view || Enregistrer comme nouvelle vue || Guardar como vista nueva
+Anordnung gespeichert || Layout saved || Disposition enregistrée || Disposición guardada
+Anordnung gespeichert (keine Änderungen) || Layout saved (no changes) || Disposition enregistrée (aucune modification) || Disposición guardada (sin cambios)
+Änderungen verwerfen? || Discard changes? || Abandonner les modifications ? || ¿Descartar los cambios?
+Die Seite wird auf den Stand von vor dem Bearbeiten zurückgesetzt. Alles, was du seitdem geändert hast, geht verloren. || The page is reset to how it was before you started editing. Everything you have changed since then is lost. || La page revient à l'état d'avant la modification. Tout ce que vous avez changé depuis est perdu. || La página vuelve al estado anterior a la edición. Se pierde todo lo que has cambiado desde entonces.
+Keine Änderungen seit Beginn des Bearbeitens || No changes since you started editing || Aucune modification depuis le début de l'édition || Sin cambios desde que empezaste a editar
+Verworfen || Discarded || Abandonné || Descartado
+Änderungen verworfen, der Stand von vor dem Bearbeiten ist wiederhergestellt || Changes discarded, the state from before editing is restored || Modifications abandonnées, l'état d'avant l'édition est rétabli || Cambios descartados, se ha restaurado el estado anterior a la edición
+Als neue Ansicht „{}“ gespeichert || Saved as new view “{}” || Enregistré comme nouvelle vue « {} » || Guardado como vista nueva «{}»
+geändert || changed || modifié || modificado
+Ansicht speichern || Save view || Enregistrer la vue || Guardar vista
+Ansicht gespeichert || View saved || Vue enregistrée || Vista guardada
+Änderung am Filter verworfen || Filter change discarded || Modification du filtre abandonnée || Cambio del filtro descartado
+In dieser Ansicht speichern || Save in this view || Enregistrer dans cette vue || Guardar en esta vista
+Der Filter (Aktivität und Zeitraum) gehört zur Ansicht „{}“. Er ist noch nicht gespeichert. || The filter (activity and period) belongs to the view “{}”. It is not saved yet. || Le filtre (activité et période) fait partie de la vue « {} ». Il n'est pas encore enregistré. || El filtro (actividad y periodo) pertenece a la vista «{}». Todavía no está guardado.
+Auf den gespeicherten Filter zurücksetzen || Reset to the saved filter || Revenir au filtre enregistré || Volver al filtro guardado
 `;

@@ -9,16 +9,19 @@ VIEWS.dash = async (_, q) => {
   }
   $("#main").className = "flush";
   loadRoutesLater();
+  /* 3.22.0: globaler Filter der Statistikseite (Aktivitäten, Zeitraum) aus der Adresse – stFilter/stRange in 56-statistik.js; ohne Angabe: alle Aktivitäten, gesamte Zeit wie bisher */
   const ys = years(),
-    Y = +(q.get("y") || 0) || 0,
-    S = q.get("s") || "";
-  const A = S ? TOURS.filter(t => t.sport === S) : TOURS,
-    yearAll = Y ? TOURS.filter(t => t.y === Y) : TOURS,
-    sel = Y ? A.filter(t => t.y === Y) : A;
-  const dh = (y, s) =>
-    "#/dash" + (y || s ? "?" + [y ? "y=" + y : "", s ? "s=" + encodeURIComponent(s) : ""].filter(Boolean).join("&") : "");
+    F = stFilter(q),
+    R = stRange(F),
+    Y = F.kind === "y" ? F.yr : 0,
+    SP = F.sports,
+    inR = R.kind === "all" ? () => true : t => flIn(t, R);
+  const A = SP.length ? TOURS.filter(t => SP.includes(t.sport)) : TOURS,
+    yearAll = TOURS.filter(inR),
+    sel = A.filter(inR);
   const last = TOURS[0],
-    prev = Y ? A.filter(t => t.y === Y - 1) : [];
+    prev = Y ? A.filter(t => t.y === Y - 1) : R.prev ? A.filter(t => flIn(t, R.prev)) : [],
+    cmpL = Y ? String(Y - 1) : R.kind === "12m" ? "den 12 Monaten davor" : "den 90 Tagen davor";
   const sum = (a, f) => a.reduce((x, t) => x + f(t), 0);
   const km = sum(sel, t => t.km),
     up = sum(sel, t => t.up_m || 0),
@@ -26,7 +29,7 @@ VIEWS.dash = async (_, q) => {
     pk = sum(prev, t => t.km);
   const delta = (a, b) =>
     b
-      ? `<div class="d ${a >= b ? "up" : "down"}">${a >= b ? "+" : "−"}${nf((Math.abs(a - b) / b) * 100, 0)} % gegenüber ${Y - 1}</div>`
+      ? `<div class="d ${a >= b ? "up" : "down"}">${a >= b ? "+" : "−"}${nf((Math.abs(a - b) / b) * 100, 0)} % gegenüber ${cmpL}</div>`
       : "";
   const longest = [...sel].sort((a, b) => b.km - a.km)[0],
     steepest = [...sel].sort((a, b) => (b.up_m || 0) - (a.up_m || 0))[0],
@@ -36,29 +39,45 @@ VIEWS.dash = async (_, q) => {
   const bestM = mm.indexOf(Math.max(...mm));
   const pm = Array(12).fill(0);
   prev.forEach(t => (pm[t.m - 1] += t.km));
-  const byYear = ys
-    .slice()
-    .reverse()
-    .map(y =>
+  /* Säulen „Kilometer pro Monat oder Jahr“: ein Jahr = 12 Monate; 12 Monate, 90 Tage, freier Zeitraum bis 24 Monate = Monate des Zeitraums; sonst je Jahr */
+  const mo0 = R.from ? +R.from.slice(0, 4) * 12 + +R.from.slice(5, 7) - 1 : 0,
+    mo1 = +R.to.slice(0, 4) * 12 + +R.to.slice(5, 7) - 1,
+    monthly = !!Y || R.kind === "12m" || R.kind === "90d" || (R.kind === "c" && mo1 - mo0 < 24),
+    mser = Y ? Array.from({length: 12}, (_, i) => Y * 12 + i) : Array.from({length: mo1 - mo0 + 1}, (_, i) => mo0 + i),
+    msum = (list, base, n) => {
+      const v = Array(n).fill(0);
+      list.forEach(t => {
+        const i = t.y * 12 + t.m - 1 - base;
+        if (i >= 0 && i < n) v[i] += t.km;
+      });
+      return v;
+    },
+    mkm = monthly ? msum(sel, mser[0], mser.length) : [],
+    mlab = mser.map(k => MON[k % 12] + (Y || mo1 - mo0 < 12 ? "" : " " + String(Math.floor(k / 12)).slice(2))),
+    mghost = Y ? pm : R.kind === "12m" && R.prev ? msum(A.filter(t => flIn(t, R.prev)), mser[0] - 12, 12) : null,
+    yrs = R.kind === "all" ? ys.slice().reverse() : Array.from({length: +R.to.slice(0, 4) - +R.from.slice(0, 4) + 1}, (_, i) => +R.from.slice(0, 4) + i),
+    byYear = yrs.map(y =>
       sum(
-        A.filter(t => t.y === y),
+        sel.filter(t => t.y === y),
         t => t.km
       )
-    );
+    ),
+    bestK = mkm.indexOf(Math.max(...mkm)),
+    bestKL = monthly && mkm[bestK] > 0 ? (Y ? MONL[bestK] : `${MONL[mser[bestK] % 12]} ${Math.floor(mser[bestK] / 12)}`) : "";
   const bySport = {};
   yearAll.forEach(t => (bySport[t.sport] = (bySport[t.sport] || 0) + t.km));
   const sports = Object.entries(bySport).sort((a, b) => b[1] - a[1]),
     tot = sum(yearAll, t => t.km) || 1;
-  const hy = Y || ys[0],
+  const hy = Y || (R.kind === "all" ? ys[0] : +R.to.slice(0, 4)),
     byDay = {};
-  A.filter(t => t.y === hy).forEach(t => {
+  sel.filter(t => t.y === hy).forEach(t => {
     const k = t.date.slice(0, 10);
     byDay[k] = (byDay[k] || 0) + t.km;
   });
-  const cum = yr => {
+  const cum = (yr, pool = A) => {
     let c = 0;
     const pts = [[0, 0]];
-    A.filter(t => t.y === yr)
+    pool.filter(t => t.y === yr)
       .slice()
       .reverse()
       .forEach(t => {
@@ -68,9 +87,10 @@ VIEWS.dash = async (_, q) => {
       });
     return pts;
   };
-  const cy = Y || ys[0],
-    cs = [{pts: cum(cy), color: cssv("--bars"), w: 3.2}];
-  if (ys.includes(cy - 1)) cs.unshift({pts: cum(cy - 1), color: cssv("--accent2"), dash: 1, w: 2});
+  const cy = Y || (R.kind === "all" ? ys[0] : +R.to.slice(0, 4)),
+    own = Y || R.kind === "all",                                              // Jahr oder gesamte Zeit: wie bisher mit Vorjahreslinie; sonst nur der gewählte Zeitraum
+    cs = [{pts: cum(cy, own ? A : sel), color: cssv("--bars"), w: 3.2}];
+  if (own && ys.includes(cy - 1)) cs.unshift({pts: cum(cy - 1), color: cssv("--accent2"), dash: 1, w: 2});
   const today = new Date(),
     md = `${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
   const otd = TOURS.filter(t => t.date.slice(5, 10) === md && t.y !== today.getFullYear());
@@ -82,10 +102,8 @@ VIEWS.dash = async (_, q) => {
     <div class="btns"><a class="btn" href="#/tour/${last.id}">Tour ansehen</a>${last.photos ? `<a class="btn alt c-white" target="_blank" href="slideshow.html?tour=${last.id}">Diashow</a>` : ""}</div></div>
     <div class="signs"><div class="sign">${nf(last.km, 1)}<small>Kilometer</small></div><div class="sign l">${nf(last.up_m, 0)}<small>Meter aufwärts</small></div><div class="sign">${nf(last.h, 1)}<small>Stunden</small></div></div></div></section>
   <div class="inner">
-  <div class="sec"><h2>${Y ? "Das Jahr " + Y : "Alle Touren"}${S ? ", " + sName(S) : ""}</h2><span class="sub">${nf(sel.length, 0)} Touren</span></div>
-  <div class="years"><button data-y="0" class="${Y ? "" : "on"}">Gesamt</button>${ys.map(y => `<button data-y="${y}" class="${Y === y ? "on" : ""}">${y}</button>`).join("")}</div>
-  <div class="chips mt14" id="sch"><button class="chip ${S ? "" : "on"}" data-s="">Alle Sportarten</button>${sports.map(([s]) => `<button class="chip ${S === s ? "on" : ""}" data-s="${esc(s)}"><i style="background:${sCol(s)}"></i>${sName(s)}</button>`).join("")}${S && !bySport[S] ? `<button class="chip on" data-s="${esc(S)}"><i style="background:${sCol(S)}"></i>${sName(S)}</button>` : ""}</div>
-  <div class="figs">
+  ${stFilterBar(F, R, sel.length, yearAll)}
+  <div class="figs" data-st="kpi" data-badge="${esc(`${nf(sel.length, 0)} Touren · ${nf(km, 0)} km`)}">
     <div class="fig"><div class="v">${nf(sel.length, 0)}</div><div class="l">Touren</div>${delta(sel.length, prev.length)}</div>
     <div class="fig"><div class="v">${nf(km, 0)}<span class="u">km</span></div><div class="l">Strecke</div>${delta(km, pk)}</div>
     <div class="fig"><div class="v">${nf(up, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div>${delta(
@@ -98,12 +116,12 @@ VIEWS.dash = async (_, q) => {
     )}</div>
     <div class="fig"><div class="v">${nf(km / (sel.length || 1), 1)}<span class="u">km</span></div><div class="l">pro Tour im Schnitt</div></div></div>
   <div class="grid g2 mt44">
-    <div class="panel"><h2>${Y ? "Kilometer pro Monat" : "Kilometer pro Jahr"}</h2>${Y ? barChart(mm, MON, {ghost: pm, ghostLabel: Y - 1}) : barChart(byYear, ys.slice().reverse().map(String), {href: ys.slice().reverse()})}
-      <div class="legend">${Y ? `<span><i style="background:var(--yellow);border:1px solid var(--ink)"></i>stärkster Monat</span>${prev.length ? `<span><i style="background:var(--accent2)"></i>${Y - 1}</span>` : ""}` : "<span>Ein Klick auf einen Balken öffnet das Jahr.</span>"}</div></div>
-    <div class="panel"><h2>Kilometer im Jahresverlauf</h2>${lineChart(cs)}<div class="legend"><span><i style="background:var(--bars)"></i>${cy}</span>${ys.includes(cy - 1) ? `<span><i style="background:var(--accent2)"></i>${cy - 1}</span>` : ""}</div></div>
-    <div class="panel"><h2>Sportarten</h2><div class="stack">${sports.map(([s, v]) => `<div style="width:${(v / tot) * 100}%;background:${sCol(s)}" title="${sName(s)}"></div>`).join("")}</div>
+    <div class="panel" data-st="kmmonat" data-badge="${esc(bestKL ? "Stärkster Monat: " + bestKL : monthly ? "" : `${nf(sum(sel, t => t.km), 0)} km`)}"><h2>${monthly ? "Kilometer pro Monat" : "Kilometer pro Jahr"}</h2>${monthly ? barChart(mkm, mlab, {ghost: mghost, ghostLabel: Y ? Y - 1 : "Vorzeitraum"}) : barChart(byYear, yrs.map(String), {href: yrs})}
+      <div class="legend">${monthly ? `<span><i style="background:var(--yellow);border:1px solid var(--ink)"></i>stärkster Monat</span>${mghost && mghost.some(v => v > 0) ? `<span><i style="background:var(--accent2)"></i>${Y ? Y - 1 : "Zeitraum davor"}</span>` : ""}` : "<span>Ein Klick auf einen Balken öffnet das Jahr.</span>"}</div></div>
+    <div class="panel" data-st="kmverlauf" data-badge="${esc(`${cy}: ${nf(cs[cs.length - 1].pts[cs[cs.length - 1].pts.length - 1][1], 0)} km`)}"><h2>Kilometer im Jahresverlauf</h2>${lineChart(cs)}<div class="legend"><span><i style="background:var(--bars)"></i>${cy}</span>${own && ys.includes(cy - 1) ? `<span><i style="background:var(--accent2)"></i>${cy - 1}</span>` : ""}</div></div>
+    <div class="panel" data-st="sportarten" data-badge="${esc(sports.length ? `${sName(sports[0][0])} ${nf((sports[0][1] / tot) * 100, 0)} %` : "")}"><h2>Sportarten</h2><div class="stack">${sports.map(([s, v]) => `<div style="width:${(v / tot) * 100}%;background:${sCol(s)}" title="${sName(s)}"></div>`).join("")}</div>
       <div class="rows mt10">${sports.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${nf(v, 0)} km, ${nf((v / tot) * 100, 0)} %</span></div>`).join("")}</div></div>
-    <div class="panel"><h2>Bestwerte ${Y || "gesamt"}</h2><div class="rows">
+    <div class="panel" data-st="bestwerte" data-badge="${esc(longest ? `Längste Tour ${nf(longest.km, 1)} km` : "")}"><h2>Bestwerte ${Y || (R.kind === "all" ? "gesamt" : R.label)}</h2><div class="rows">
       ${
         longest
           ? `<div class="r"><span><a href="#/tour/${longest.id}">Längste Tour</a><small>${esc(longest.name)}</small></span><b>${nf(longest.km, 1)} km</b></div>
@@ -112,18 +130,11 @@ VIEWS.dash = async (_, q) => {
       <div class="r"><span>Stärkster Monat<small>${MONL[bestM]}</small></span><b>${nf(mm[bestM], 0)} km</b></div>`
           : '<div class="mut">Keine Touren</div>'
       }</div></div></div>
-  <div class="panel gap"><h2>Aktivität im Jahr ${hy}</h2>${heat(hy, byDay)}</div>
-  ${otd.length ? `<div class="sec"><h2>An diesem Tag</h2><span class="sub">in früheren Jahren</span></div><div class="tl">${otd.map(tourRow).join("")}</div>` : ""}
-  <div class="sec" id="memh"><h2>Erinnerungen</h2><span class="sub" id="memsub"></span></div><div id="mem" class="thumbs"></div></div>`;
-  $(".years").onclick = e => {
-    const y = e.target.dataset.y;
-    if (y !== undefined) location.hash = dh(+y, S);
-  };
-  $("#sch").onclick = e => {
-    const b = e.target.closest("[data-s]");
-    if (b) location.hash = dh(Y, b.dataset.s);
-  };
-  document.querySelectorAll("rect[data-h]").forEach(r => (r.onclick = () => (location.hash = dh(+r.dataset.h, S))));
+  <div class="panel gap" data-st="heat" data-badge="${esc(`${Object.keys(byDay).length} Tage mit Touren`)}"><h2>Aktivität im Jahr ${hy}</h2>${heat(hy, byDay)}</div>
+  ${otd.length ? `<div data-st="tag" data-badge="${esc(otd.length === 1 ? "1 Tour" : otd.length + " Touren")}"><div class="sec"><h2>An diesem Tag</h2><span class="sub">in früheren Jahren</span></div><div class="tl">${otd.map(tourRow).join("")}</div></div>` : ""}
+  <div data-st="erinn"><div class="sec" id="memh"><h2>Erinnerungen</h2><span class="sub" id="memsub"></span></div><div id="mem" class="thumbs"></div></div></div>`;
+  stFilterBind(F);
+  document.querySelectorAll("rect[data-h]").forEach(r => (r.onclick = () => (location.hash = stHash({...F, kind: "y", yr: +r.dataset.h}))));
   bindThumbs($(".thumbrow") || document.createElement("div"), ph);
   map = mkMap("hm", {
     zoom: false,

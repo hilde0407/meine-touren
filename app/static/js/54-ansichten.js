@@ -2,7 +2,7 @@
    Daten und Auswahl-Logik stehen in 49-seitenlayout.js (Behälter SL.store, slResolve, slPack); hier: Auswahl in der Kopfzeile, Verwaltung (Dialog), Vorlagen, Export und Import.
    Tourseite: Hauptseite und Auswertung sind zwei Schlüssel; jede Änderung an den Ansichten (anlegen, umbenennen, löschen, Standard, Regeln) wird in beiden geführt
    (slAlign), der Inhalt bleibt je Schlüssel eigen. Die Vorgabe der Anzeige: von Hand gewählt (diese Sitzung) vor Regel „Sportart → Ansicht“ (beim Öffnen einer Tour) vor Standardansicht. */
-const SL_APPV = "3.21.0";
+const SL_APPV = "3.22.0";
 const SL_EXPORT_FORMAT = "meine-touren-ansicht";
 const SL_MAXFILE = 200000;
 const slVm = fam => slMaster(fam).views;
@@ -27,11 +27,12 @@ const slNewViewId = fam => {
 /* ---------- Ändern (immer in beiden Dokumenten der Tourseite) ---------- */
 function slViewsChange(fam, fn) {
   slKeys(fam).forEach(slSync);                                         // Bearbeitungen der angezeigten Ansicht zuerst in den Behälter
-  const out = fn(slKeys(fam).map(slStore));
+  const was = SL.view[fam], out = fn(slKeys(fam).map(slStore));
   slAlign(fam);
   slResolve(fam);
   slTouch(...slKeys(fam));
   slApply();
+  if (fam === "statistik" && SL.view[fam] !== was && typeof stReload === "function") stReload(SL.edit);      // andere Ansicht = anderer gespeicherter Filter
   return out;
 }
 function slViewAdd(fam, name, layouts) {
@@ -88,6 +89,7 @@ function slSwitch(fam, id) {
   slResolve(fam);
   if (SL.view[fam] === was && id) return slViewPick(document.getElementById("slopenw"));
   SL.focus = null;
+  if (fam === "statistik" && typeof stReload === "function") return stReload(SL.edit);          // der Filter gehört zur Ansicht: Seite neu aufbauen
   slApplyOpen(fam);
   slApply();
   slLive(`Ansicht „${slViewName(fam, SL.view[fam])}“`);
@@ -181,9 +183,10 @@ function slVLine(t) {
   }
   slLive(t);
 }
+const slFamName = f => ({tour: "Tourseite", uebersicht: "Übersicht", statistik: "Statistik"})[f] || f;
 const slSports = () => [...new Set([...(typeof TOURS !== "undefined" ? TOURS : []).map(t => t.sport), ...Object.keys(slMaster("tour").rules || {})])].filter(s => s && /^[A-Za-z0-9_]{1,40}$/.test(s)).sort((a, b) => sName(a).localeCompare(sName(b), "de"));
 function slViewsDialog() {
-  const fam = SL.fam, famLabel = fam === "tour" ? "Tourseite" : "Übersicht";
+  const fam = SL.fam, famLabel = slFamName(fam);
   let focus = null, closeDlg = null, redraw = null;
   slModal("Ansichten", (body, close) => {
     closeDlg = close;
@@ -323,7 +326,7 @@ function slViewExport(fam, id) {
   const doc = slExportDoc(fam, id), blob = new Blob([JSON.stringify(doc, null, 2)], {type: "application/json"}),
     a = document.createElement("a"), slug = doc.name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "ansicht";
   a.href = URL.createObjectURL(blob);
-  a.download = `ansicht-${fam === "tour" ? "tour" : "uebersicht"}-${slug}.json`;
+  a.download = `ansicht-${fam}-${slug}.json`;
   a.hidden = true;
   document.body.appendChild(a);
   a.click();
@@ -371,14 +374,14 @@ function slImportDialog(fam, done) {
       body.querySelector("#slimpf").textContent = f.name;
       res.innerHTML = `<p class="mut">Datei wird geprüft …</p>`;
       const r = await slCheckFile(f), errs = (r.errors || []).slice();
-      if (r.ok && r.page !== fam) errs.push(r.page === "tour" ? "Diese Datei gehört zur Tourseite. Öffne dort „Seite anpassen“ → „Ansichten“, um sie zu importieren." : "Diese Datei gehört zur Übersicht. Öffne dort „Seite anpassen“ → „Ansichten“, um sie zu importieren.");
+      if (r.ok && r.page !== fam) errs.push(`Diese Datei gehört zur ${slFamName(r.page)}. Öffne dort „Seite anpassen“ → „Ansichten“, um sie zu importieren.`);
       if (errs.length) {
         res.innerHTML = `<div class="slimpbad" role="alert"><h3>Die Datei kann nicht importiert werden</h3><ul>${errs.map(x => `<li>${esc(x)}</li>`).join("")}</ul><p class="mut">Es wurde nichts verändert.</p></div>`;
         return;
       }
       const L = r.layouts || {}, st = r.stats || {}, types = new Set(Object.values(st).flatMap(s => s.types || [])), unknown = [...types].filter(t => !window.SL_WT[t]),
         nWid = Object.values(st).reduce((n, s) => n + (s.widgets || 0), 0), nHid = Object.values(st).reduce((n, s) => n + (s.hidden || 0), 0);
-      res.innerHTML = `<div class="slimpok"><h3>Datei geprüft</h3><p>Ansicht „<b class="slimpn"></b>“ für die ${fam === "tour" ? "Tourseite" : "Übersicht"}: ${nWid === 1 ? "1 Baustein" : nWid + " Bausteine"}, ${nHid === 1 ? "1 ausgeblendeter Abschnitt" : nHid + " ausgeblendete Abschnitte"}.</p>` +
+      res.innerHTML = `<div class="slimpok"><h3>Datei geprüft</h3><p>Ansicht „<b class="slimpn"></b>“ für die ${slFamName(fam)}: ${nWid === 1 ? "1 Baustein" : nWid + " Bausteine"}, ${nHid === 1 ? "1 ausgeblendeter Abschnitt" : nHid + " ausgeblendete Abschnitte"}.</p>` +
         ((r.ignored || []).length ? `<p class="mut">Ignoriert:</p><ul class="mut">${r.ignored.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "") +
         (unknown.length ? `<p class="mut">${unknown.length === 1 ? "1 Baustein-Typ ist" : unknown.length + " Baustein-Typen sind"} in dieser Version nicht bekannt und werden nicht angezeigt.</p>` : "") +
         `<div class="slfs"><label for="slimpname">Name der neuen Ansicht</label><input id="slimpname" type="text" maxlength="40" autocomplete="off"><p class="mut slimphint" id="slimphint"></p></div>` +
@@ -422,3 +425,73 @@ function slImportDialog(fam, done) {
     body.querySelector('[data-a="pick"]').focus();
   }, "slimp");
 }
+
+/* ---------- 3.22.0 Anordnung und Filter sichern ---------- */
+/* Filter einer Ansicht: Seiten mit eigenem Filter (Statistik) melden sich in SLF an: {dirty(): Wahrheitswert, apply(layout): schreibt den Filter in das Layout, discard()} */
+const SLF = {};
+/* Neue Ansicht aus der aktuellen Anordnung. fromEdit: Bearbeitungsmodus, die bisherige Ansicht bleibt auf dem Stand von vor dem Bearbeiten.
+   Sonst (Filter): Kopie der angezeigten Ansicht mit dem gerade gewählten Filter; die bisherige bleibt, wie gespeichert. */
+async function slSaveNew(fam, fromEdit) {
+  if (slVm(fam).length >= SL_MAXV) return uiAlert(`Mehr als ${SL_MAXV} Ansichten sind nicht möglich. Lösche zuerst eine.`);
+  const r = await slAskName(fam, {title: "Als neue Ansicht speichern", ok: "Speichern", value: slUniq(fam, slViewName(fam, SL.view[fam]) + " (Kopie)")});
+  if (!r) return;
+  const cur = SL.view[fam], master = slKeys(fam)[0], snap = SL.snap;
+  const layouts = slLayoutsOf(fam, cur);
+  if (!fromEdit && SLF[fam]) SLF[fam].apply(layouts[master]);
+  if (fromEdit && snap && snap.fam === fam) {                          // bisherige Ansicht zurück auf den Stand des Schnappschusses
+    slKeys(fam).forEach(k => {
+      const o = (JSON.parse(snap.st[k]).views.find(x => x.id === cur) || {}).layout;
+      if (o && !slLayEmpty(o)) SL.docs[k] = slTplCopy(o);
+      else delete SL.docs[k];
+    });
+  }
+  document.querySelectorAll(".tlw[data-wid]").forEach(e => e.remove());
+  const id = slViewAdd(fam, r.name, layouts);
+  if (SLF[fam] && SLF[fam].discard) SLF[fam].discard(cur);
+  slSwitch(fam, id);
+  if (SL.edit) slSnap();
+  slChg();
+  slAnnounce(`Als neue Ansicht „${r.name}“ gespeichert`);
+}
+/* Knopf „Ansicht speichern“ neben der Auswahl, solange der Filter vom gespeicherten Stand der Ansicht abweicht */
+function slSaveBar(w) {
+  const h = SLF[SL.fam], on = !!(h && h.dirty && h.dirty()), old = w.querySelector(".slsv");
+  if (!on) {
+    if (old) old.remove();
+    return false;
+  }
+  if (!old) {
+    w.insertAdjacentHTML("beforeend", `<span class="slsv"><span class="slchg" id="slfchg">geändert</span><button type="button" class="btn sm" id="slsave" aria-haspopup="dialog">Ansicht speichern</button></span>`);
+  }
+  return true;
+}
+function slBarRefresh() {
+  const w = document.getElementById("slopenw");
+  if (w && slSaveBar(w)) w.hidden = false;
+}
+function slSaveMenu() {
+  const fam = SL.fam, h = SLF[fam];
+  if (!h) return;
+  slModal("Ansicht speichern", (body, close) => {
+    body.innerHTML = `<p class="mut">Der Filter (Aktivität und Zeitraum) gehört zur Ansicht „${esc(slViewName(fam, SL.view[fam]))}“. Er ist noch nicht gespeichert.</p>` +
+      `<div class="slmenu"><button type="button" class="btn" data-m="here">In dieser Ansicht speichern</button><button type="button" class="btn ghost" data-m="new">Als neue Ansicht speichern …</button><button type="button" class="btn ghost" data-m="drop">Verwerfen</button></div>`;
+    body.onclick = e => {
+      const b = e.target.closest("[data-m]");
+      if (!b) return;
+      const m = b.dataset.m;
+      close();
+      if (m === "here") {
+        const k = slKeys(fam)[0];
+        h.apply(SL.docs[k] || (SL.docs[k] = {v: 1}));
+        slTouch(k);
+        slBarRefresh();
+        slAnnounce("Ansicht gespeichert");
+      } else if (m === "new") slSaveNew(fam, false);
+      else {
+        h.discard();
+        slAnnounce("Änderung am Filter verworfen");
+      }
+    };
+  });
+}
+document.addEventListener("click", e => e.target.closest && e.target.closest("#slsave") && slSaveMenu());

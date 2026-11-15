@@ -19,6 +19,11 @@ GET /api/bausteine/<name> (nur lesend, je Benutzer – die Datenbank und der Zwi
                 Ungültige Werte: 400. Rechnet je Benutzer aus der eigenen Datenbank; die Oberfläche rechnet dieselbe Regel aus den geladenen Touren (53-filter.js) –
                 dieser Endpunkt ist die Referenz und die Grundlage für den Filter der Statistikseite.
 
+  3.22.0 Statistikseite (globaler Filter): derselbe Zeitraum-Filter, zusätzlich zeitraum=c (frei) mit ?von=JJJJ-MM-TT&bis=JJJJ-MM-TT (beide nötig, von <= bis, sonst 400).
+    statistik   Auswertung für die Statistik-Bausteine mit denselben Filterparametern (?sport=, ?zeitraum=, ?jahr=, ?von=, ?bis=): Summen, Kennzahlen je Monat im Zeitraum, je Wochentag,
+                Verteilung der Streckenlängen und die besten Touren (?wert=km|hm|dauer|tempo, ?n=1…20). Die Oberfläche rechnet dieselben Regeln aus den geladenen Touren
+                (56-bausteine-statistik.js); dieser Endpunkt ist die Referenz, gegen die die Tests prüfen.
+
 Fehlt etwas, kommt {"status": "<grund>"} (nie 0 als Platzhalter): keine_strecke, keine_zeit, keine_hoehe, zu_kurz, keine_position, polar.
 Der Zwischenspeicher cache/bausteine/<id>.json gilt nur, solange die Quelldatei unverändert ist (Änderungszeit + Größe) und die Rechenvorschrift (ALGO) gleich bleibt;
 er baut sich von selbst neu auf und braucht keine Sicherung.
@@ -383,7 +388,7 @@ def api_geplant():
 
 
 # ------------------------------------------------------------------------------------------------ 3.19.0 Zeitraum und Aktivität
-ZEITRAEUME = ("year", "y", "12m", "90d", "all")
+ZEITRAEUME = ("year", "y", "12m", "90d", "all", "c")
 _SPORT = re.compile(r"^[A-Za-z0-9_]{1,40}$")
 
 
@@ -392,8 +397,10 @@ def _vor_jahr(d, n=1):
     return date(y, d.month, min(d.day, calendar.monthrange(y, d.month)[1]))
 
 
-def zeitraum(art, jahr, heute):
-    """(von, bis, vorher) als Datum; von = None heißt ohne Anfang. `vorher` = (von, bis) des Vergleichszeitraums oder None."""
+def zeitraum(art, jahr, heute, frei=None):
+    """(von, bis, vorher) als Datum; von = None heißt ohne Anfang. `vorher` = (von, bis) des Vergleichszeitraums oder None. frei = (von, bis) bei art == "c"."""
+    if art == "c":
+        return frei[0], frei[1], None
     if art == "year":
         return date(heute.year, 1, 1), heute, (date(heute.year - 1, 1, 1), _vor_jahr(heute))
     if art == "y":
@@ -420,8 +427,8 @@ def _summe(rows, von, bis):
     return {"touren": int(n), "km": round(km, 3), "hm": round(hm, 1), "stunden": round(h, 3)}
 
 
-def jahr_auswertung(sport="", zeitraum_="year", jahr=0, vergleich=False, heute=None):
-    heute = heute or datetime.now(TZ).date()
+def _filter(sport, zeitraum_, jahr, von, bis, heute):
+    """Gemeinsame Prüfung der Filterparameter -> (Sportarten, Jahr, von, bis, vorher)."""
     if zeitraum_ not in ZEITRAEUME:
         raise HTTPException(400, "Unbekannter Zeitraum")
     sports = [x for x in (sport or "").split(",") if x != ""]
@@ -430,13 +437,32 @@ def jahr_auswertung(sport="", zeitraum_="year", jahr=0, vergleich=False, heute=N
     if jahr and not 1970 <= jahr <= 2100:
         raise HTTPException(400, "Ungültiges Jahr")
     jahr = jahr or heute.year
+    frei = None
+    if zeitraum_ == "c":
+        try:
+            frei = (date.fromisoformat(von or ""), date.fromisoformat(bis or ""))
+        except ValueError:
+            raise HTTPException(400, "Für einen freien Zeitraum braucht es von und bis (JJJJ-MM-TT)")
+        if frei[0] > frei[1]:
+            raise HTTPException(400, "„von“ darf nicht nach „bis“ liegen")
+    v, b, vor = zeitraum(zeitraum_, jahr, heute, frei)
+    return sports, jahr, v, b, vor
+
+
+def _rows(sports, extra=""):
     rows = []
-    for r in db.query("SELECT sport,start_ts,dist_m,dur_s,up_m FROM tours WHERE start_ts IS NOT NULL"):
+    for r in db.query("SELECT id,name,sport,start_ts,dist_m,dur_s,up_m FROM tours WHERE start_ts IS NOT NULL" + extra):
         if sports and r["sport"] not in sports:
             continue
         r["d"] = datetime.fromtimestamp(r["start_ts"], tz=TZ).date()
         rows.append(r)
-    von, bis, vor = zeitraum(zeitraum_, jahr, heute)
+    return rows
+
+
+def jahr_auswertung(sport="", zeitraum_="year", jahr=0, vergleich=False, heute=None, von_="", bis_=""):
+    heute = heute or datetime.now(TZ).date()
+    sports, jahr, von, bis, vor = _filter(sport, zeitraum_, jahr, von_, bis_, heute)
+    rows = _rows(sports)
     out = {"zeitraum": zeitraum_, "von": von.isoformat() if von else None, "bis": bis.isoformat(), "jahr": jahr if zeitraum_ == "y" else (heute.year if zeitraum_ == "year" else None),
            "sport": sports, **_summe(rows, von, bis)}
     # Verlauf: Monate (Jahr), die letzten 12 Kalendermonate, 13 Wochen, sonst je Jahr (höchstens die letzten 12)
@@ -457,7 +483,7 @@ def jahr_auswertung(sport="", zeitraum_="year", jahr=0, vergleich=False, heute=N
             if von <= r["d"] <= bis:
                 vals[min(12, (r["d"] - von).days // 7)] += (r["dist_m"] or 0) / 1000
     else:
-        pr = [r for r in rows if r["d"] <= bis]
+        pr = [r for r in rows if r["d"] <= bis and (not von or r["d"] >= von)]
         ys = sorted({r["d"].year for r in pr})[-12:]
         vals = [sum((r["dist_m"] or 0) / 1000 for r in pr if r["d"].year == y) for y in ys]
         out["jahre"] = ys
@@ -469,5 +495,62 @@ def jahr_auswertung(sport="", zeitraum_="year", jahr=0, vergleich=False, heute=N
 
 
 @router.get("/api/bausteine/jahr")
-def api_jahr(sport: str = "", zeitraum: str = "year", jahr: int = 0, vergleich: int = 0):
-    return jahr_auswertung(sport, zeitraum, jahr, bool(vergleich))
+def api_jahr(sport: str = "", zeitraum: str = "year", jahr: int = 0, vergleich: int = 0, von: str = "", bis: str = ""):
+    return jahr_auswertung(sport, zeitraum, jahr, bool(vergleich), von_=von, bis_=bis)
+
+
+# ------------------------------------------------------------------------------------------------ 3.22.0 Statistik-Bausteine
+LAENGEN = (5, 10, 15, 20, 30, 50)                    # Obergrenzen der Klassen in km; die letzte Klasse ist offen („über 50 km“)
+WERTE = {"km": lambda r: (r["dist_m"] or 0) / 1000, "hm": lambda r: r["up_m"] or 0, "dauer": lambda r: (r["dur_s"] or 0) / 3600,
+         "tempo": lambda r: ((r["dist_m"] or 0) / 1000) / ((r["dur_s"] or 0) / 3600) if (r["dur_s"] or 0) > 0 else 0.0}
+
+
+def _monate(von, bis):
+    y, m = von.year, von.month
+    while (y, m) <= (bis.year, bis.month):
+        yield f"{y:04d}-{m:02d}"
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+
+
+def statistik_auswertung(sport="", zeitraum_="all", jahr=0, von_="", bis_="", wert="km", n=5, heute=None):
+    heute = heute or datetime.now(TZ).date()
+    if wert not in WERTE:
+        raise HTTPException(400, "Unbekannter Wert (erlaubt: km, hm, dauer, tempo)")
+    if not 1 <= n <= 20:
+        raise HTTPException(400, "n muss zwischen 1 und 20 liegen")
+    sports, jahr, von, bis, _ = _filter(sport, zeitraum_, jahr, von_, bis_, heute)
+    rows = [r for r in _rows(sports) if (not von or r["d"] >= von) and r["d"] <= bis]
+    out = {"zeitraum": zeitraum_, "von": von.isoformat() if von else None, "bis": bis.isoformat(), "sport": sports, **_summe(rows, von, bis)}
+    first = von or (min(r["d"] for r in rows) if rows else bis)
+    mon = {k: {"monat": k, "touren": 0, "km": 0.0, "hm": 0.0, "stunden": 0.0} for k in _monate(first, bis)}
+    wd = {"touren": [0] * 7, "km": [0.0] * 7, "hm": [0.0] * 7, "stunden": [0.0] * 7}
+    laengen = [0] * (len(LAENGEN) + 1)
+    for r in rows:
+        km, hm, h = WERTE["km"](r), WERTE["hm"](r), WERTE["dauer"](r)
+        m = mon[r["d"].strftime("%Y-%m")]
+        m["touren"] += 1
+        m["km"] += km
+        m["hm"] += hm
+        m["stunden"] += h
+        i = r["d"].weekday()
+        wd["touren"][i] += 1
+        wd["km"][i] += km
+        wd["hm"][i] += hm
+        wd["stunden"][i] += h
+        laengen[next((j for j, g in enumerate(LAENGEN) if km < g), len(LAENGEN))] += 1
+    out["monate"] = [{**m, "km": round(m["km"], 3), "hm": round(m["hm"], 1), "stunden": round(m["stunden"], 3)} for m in mon.values()]
+    out["wochentage"] = {k: [round(x, 3) for x in v] for k, v in wd.items()}
+    out["laengen"] = {"grenzen": list(LAENGEN), "anzahl": laengen}
+    f = WERTE[wert]
+    # Tempo nur für Touren mit sinnvoller Länge und Dauer (wie „Rekorde“ der Oberfläche: mindestens 3 km und 30 Minuten)
+    pool = [r for r in rows if wert != "tempo" or ((r["dist_m"] or 0) >= 3000 and (r["dur_s"] or 0) >= 1800)]
+    pool.sort(key=lambda r: (-f(r), r["start_ts"], r["id"]))
+    out["wert"] = wert
+    out["top"] = [{"id": r["id"], "name": r["name"], "datum": r["d"].isoformat(), "sport": r["sport"], "km": round(WERTE["km"](r), 3), "hm": round(WERTE["hm"](r), 1),
+                   "stunden": round(WERTE["dauer"](r), 3), "kmh": round(WERTE["tempo"](r), 2)} for r in pool[:n] if f(r) > 0]
+    return out
+
+
+@router.get("/api/bausteine/statistik")
+def api_statistik(sport: str = "", zeitraum: str = "all", jahr: int = 0, von: str = "", bis: str = "", wert: str = "km", n: int = 5):
+    return statistik_auswertung(sport, zeitraum, jahr, von, bis, wert, n)

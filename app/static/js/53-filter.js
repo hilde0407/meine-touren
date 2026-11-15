@@ -1,16 +1,18 @@
 /* =====================  3.19.0 Konfigurierbare Bausteine: gemeinsamer Filter (Aktivität, Zeitraum)  =====================
-   Eigenständig und wiederverwendbar (geplant: Statistikseite und globaler Filter in 3.22.0). Nichts hier kennt einen bestimmten Baustein.
+   Eigenständig und wiederverwendbar (3.22.0: auch der globale Filter der Statistikseite, 56-statistik.js, rechnet mit flRange/flSelect). Nichts hier kennt einen bestimmten Baustein.
    Konfiguration (cfg, gespeichert im Layout-Dokument, geprüft in app/layout.py):
      sports   [Sportart]   leer oder fehlend = alle Aktivitäten
      range    year | y | 12m | 90d | all     (y braucht yr = Jahr)      yr    Jahreszahl
      compare  false = ohne Vorjahresvergleich (Standard: an)             title  eigener Titel
+     eigen    true = der Baustein behält seinen eigenen Filter (nur auf der Statistikseite; sonst gilt dort der globale Filter)
+   3.22.0: range "c" = frei von–bis (cfg.from, cfg.to als JJJJ-MM-TT); nur im globalen Filter der Statistikseite (Adresse), nicht im Einstellungs-Dialog und nicht im Layout.
    Rechnen (ohne Seiteneffekte, gleiche Regeln wie GET /api/bausteine/jahr in app/bausteine_daten.py):
      flRange(cfg, def, o)    -> {kind, from, to, prev: {from, to}|null, year, label}   def = Zeitraum, wenn cfg.range fehlt; o.fallback: ohne Touren im laufenden Jahr das letzte Jahr mit Touren
      flSelect(cfg, def, o)   -> {R, base (nur nach Aktivität gefiltert), list (im Zeitraum), prev (im Vorzeitraum oder null)}
      flParts / flKurz / flPlain  Kurztext der aktiven Filterung ("Wandern, 2025"), leer ohne Abweichung vom Standard des Bausteins
    Dialog (vom Einstellungs-Dialog in 49-seitenlayout.js genutzt): Feldarten sports, range, compare, title mit flField / flRead / flBind.
    Kopfzeile: flHead(card, Typ, cfg) setzt den Kurztext (auch zugeklappt sichtbar) hinter den Titel. */
-const FL_KINDS = new Set(["sports", "range", "compare", "title"]);
+const FL_KINDS = new Set(["sports", "range", "compare", "title", "global"]);
 const FL_RANGE_ALL = ["year", "y", "12m", "90d", "all"];
 const FL_RLAB = {year: "Laufendes Jahr", "12m": "Letzte 12 Monate", "90d": "Letzte 90 Tage", all: "Gesamte Zeit"};
 const FL_MET = {
@@ -34,13 +36,14 @@ const flIn = (t, r) => {
 function flRange(cfg, def = "year", o = {}) {
   cfg = cfg || {};
   const now = o.now || new Date(), cy = now.getFullYear(), today = slIso(now);
-  const kind = FL_RANGE_ALL.includes(cfg.range) ? cfg.range : def;
+  const kind = FL_RANGE_ALL.includes(cfg.range) || (cfg.range === "c" && cfg.from && cfg.to) ? cfg.range : def;
   let yr = +cfg.yr;
   if (!(yr >= 1970 && yr <= 2100)) yr = cy;
   if (kind === "year" && o.fallback && TOURS.length && !TOURS.some(t => t.y === cy)) {
     const ly = Math.max(...TOURS.map(t => t.y));
     return {kind: "y", from: `${ly}-01-01`, to: `${ly}-12-31`, prev: null, year: ly, label: String(ly)};
   }
+  if (kind === "c") return {kind, from: cfg.from, to: cfg.to, prev: null, year: null, label: `${dateS(cfg.from)} – ${dateS(cfg.to)}`};
   if (kind === "y") return {kind, from: `${yr}-01-01`, to: `${yr}-12-31`, prev: {from: `${yr - 1}-01-01`, to: `${yr - 1}-12-31`}, year: yr, label: String(yr)};
   if (kind === "12m") {
     const m = cy * 12 + now.getMonth() - 11, from = `${Math.floor(m / 12)}-${pad2((m % 12) + 1)}-01`;           // der laufende und die 11 Kalendermonate davor
@@ -78,7 +81,7 @@ function flParts(cfg, rangeDef, o = {}) {
     if (s.length <= 2) s.forEach(x => out.push(sName(x)));
     else out.push(`${s.length} Aktivitäten`);
   }
-  if (rangeDef && !o.noRange && (s.length || (cfg.range && cfg.range !== rangeDef))) out.push(flRange(cfg, rangeDef).label);
+  if (rangeDef && !o.noRange && !cfg._nr && (s.length || (cfg.range && cfg.range !== rangeDef))) out.push(flRange(cfg, rangeDef).label);
   return out;
 }
 const flKurz = (cfg, rangeDef, o) => flParts(cfg, rangeDef, o).map(p => `<span>${esc(p)}</span>`).join(", ");
@@ -117,6 +120,8 @@ function flField(f, cfg, i) {
       o2 = opts.includes("y") ? `<optgroup label="Bestimmtes Jahr">${ys.sort((a, b) => b - a).map(y => `<option value="y${y}"${cur === "y" + y ? " selected" : ""}>${y}</option>`).join("")}</optgroup>` : "";
     return `<div class="slfs"><label for="${id}">${esc(f.label || "Zeitraum")}</label><select id="${id}" name="f${i}" class="flsel">${o1}${o2}</select></div>`;
   }
+  if (f.kind === "global")
+    return `<div class="slfs"><label class="slck"><input type="checkbox" name="f${i}" data-global${cfg.eigen === true ? "" : " checked"}><span>${esc(f.label || "Globalen Filter verwenden")}</span></label><p class="mut slgh">Gilt der Filter oben auf der Seite, sind Aktivität und Zeitraum hier nicht einstellbar.</p></div>`;
   if (f.kind === "compare")
     return `<div class="slfs"><label class="slck"><input type="checkbox" name="f${i}"${cfg.compare === false ? "" : " checked"}><span>${esc(f.label || "Mit dem Vorjahr vergleichen")}</span></label></div>`;
   return `<div class="slfs"><label for="${id}">${esc(f.label || "Eigener Titel (optional)")}</label><input id="${id}" name="f${i}" type="text" maxlength="60" autocomplete="off" value="${esc(cfg.title || "")}" placeholder="${esc(f.ph || "")}"></div>`;
@@ -136,6 +141,9 @@ function flRead(f, form, i, out) {
       out.yr = +v.slice(1);
     } else if (v !== def) out.range = v;
     delete out.year;                                                          // ältere Einstellung „Dieses/Letztes Jahr“ des Jahres-Rückblicks
+  } else if (f.kind === "global") {
+    if (form.querySelector(`[name="f${i}"]`).checked) delete out.eigen;
+    else out.eigen = true;
   } else if (f.kind === "compare") {
     if (form.querySelector(`[name="f${i}"]`).checked) delete out.compare;
     else out.compare = false;
@@ -147,6 +155,15 @@ function flRead(f, form, i, out) {
 }
 /* „Alle“ und einzelne Aktivitäten schließen sich aus; ohne Auswahl gilt „Alle“ */
 function flBind(form) {
+  const gl = form.querySelector("[data-global]");
+  const sync = () => form.querySelectorAll(".flsp, .slfs:has(.flsel)").forEach(x => {
+    x.classList.toggle("sl-gdis", !!gl && gl.checked);
+    x.querySelectorAll("input,select").forEach(i => (i.disabled = !!gl && gl.checked));
+  });
+  if (gl) {
+    gl.addEventListener("change", sync);
+    sync();
+  }
   form.addEventListener("change", e => {
     const ch = e.target.closest && e.target.closest(".flchip input");
     if (!ch) return;

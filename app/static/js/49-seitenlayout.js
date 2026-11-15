@@ -1,5 +1,5 @@
 /* =====================  3.17.0 Seite anpassen: gemeinsame Layout-Engine  =====================
-   Seiten (Schlüssel wie in der API /api/layout/<Schlüssel>): „tour-haupt“ (#/tour/<id>), „tour-auswertung“ (#/tour/<id>/auswertung), „uebersicht“ (#/dash).
+   Seiten (Schlüssel wie in der API /api/layout/<Schlüssel>): „tour-haupt“ (#/tour/<id>), „tour-auswertung“ (#/tour/<id>/auswertung), „uebersicht“ (#/dash), „statistik“ (#/stats, 3.22.0).
    Layout-Dokument je Schlüssel: {order:[ids], hidden:[ids], closed:[ids], open:[ids], page:{id:"haupt"|"auswertung"}, widgets:[{id,type,cfg}]}.
      order     Reihenfolge der Abschnitte der Seite; bekannte, aber nicht aufgeführte Abschnitte werden an ihrer Standardposition ergänzt, unbekannte ignoriert
      hidden    ausgeblendete Abschnitte   closed/open  „Standardmäßig offen“ weicht vom Standard des Abschnitts ab
@@ -11,7 +11,9 @@
    3.20.0 Raster: jeder Abschnitt hat eine Breite (voll, zweidrittel, halb, drittel; Dokumentfeld w, Standard je Eintrag/Typ: Feld w der Registry), das Raster selbst ist CSS (style.css „3.20.0“),
    hier werden nur die Klassen gesetzt (.slcell .w-…) und Zeilenreste aufgefüllt (slRaster). Seiteneignung: Typ.seiten (Standard: Tour-Bausteine nur „tour“, Übersichts-Bausteine „uebersicht“ und „tour“). */
 window.SL_WT = window.SL_WT || {};
-const SL_PAGE_KEY = {haupt: "tour-haupt", auswertung: "tour-auswertung", uebersicht: "uebersicht"};
+const SL_PAGE_KEY = {haupt: "tour-haupt", auswertung: "tour-auswertung", uebersicht: "uebersicht", statistik: "statistik"};
+const slKey1 = fam => (fam === "tour" ? "tour-haupt" : fam);                                  // Schlüssel des (ersten) Dokuments einer Seitenfamilie
+const slFamOf = k => (k === "uebersicht" || k === "statistik" ? k : "tour");
 const SL_W = {d: {voll: 12, zweidrittel: 8, halb: 6, drittel: 4}, t: {voll: 12, zweidrittel: 12, halb: 6, drittel: 6}};            // Spalten je Breite: Desktop (ab 900 px) und Tablet
 const SL_WALL = ["voll", "zweidrittel", "halb", "drittel"];
 const SL_WNAME = {voll: "Ganze Breite", zweidrittel: "Zwei Drittel", halb: "Halbe Breite", drittel: "Ein Drittel"};
@@ -44,6 +46,21 @@ const SL_REG = {
     {id: "tag", w: "halb", title: "An diesem Tag", page: "uebersicht", group: "cols", plain: true},
     {id: "erinn", w: "halb", title: "Erinnerungen", page: "uebersicht", group: "cols", plain: true},
   ],
+  /* 3.22.0 Statistik: die Abschnitte der Seite #/stats in der bisherigen Reihenfolge (Kapselung in 56-statistik.js: jeder Abschnitt ist eine Karte im Format von tlCard).
+     „bl“ und „tp“ (Belastung, Tempo) sind schon einklappbare Abschnitte mit eigenem Zustand (plain). Fehlen Daten (Tage, Fotos), gibt es den Abschnitt nicht. */
+  statistik: [
+    {id: "kpi", w: "voll", title: "Kennzahlen", page: "statistik", def: true, ckeys: ["st_kpi"]},
+    {id: "ziele", w: "voll", title: "Ziele", page: "statistik", def: true, ckeys: ["st_ziele"]},
+    {id: "kmmonat", w: "halb", title: "Kilometer pro Monat oder Jahr", page: "statistik", def: true, ckeys: ["st_kmmonat"]},
+    {id: "kmverlauf", w: "halb", title: "Kilometer im Jahresverlauf", page: "statistik", def: true, ckeys: ["st_kmverlauf"]},
+    {id: "sportarten", w: "halb", title: "Sportarten", page: "statistik", def: true, ckeys: ["st_sportarten"]},
+    {id: "bestwerte", w: "halb", title: "Bestwerte", page: "statistik", def: true, ckeys: ["st_bestwerte"]},
+    {id: "heat", w: "voll", title: "Aktivität im Jahr", page: "statistik", def: true, ckeys: ["st_heat"]},
+    {id: "bl", w: "voll", title: "Belastung und Erholung", page: "statistik", plain: true},
+    {id: "tp", w: "voll", title: "Dein typisches Tempo", page: "statistik", plain: true},
+    {id: "tag", w: "voll", title: "An diesem Tag", page: "statistik", def: true, ckeys: ["st_tag"]},
+    {id: "erinn", w: "voll", title: "Erinnerungen", page: "statistik", def: true, ckeys: ["st_erinn"]},
+  ],
 };
 const SL_EL = {
   tour: {
@@ -51,10 +68,11 @@ const SL_EL = {
     geraet: () => $("#tlrec"), wx: () => tlSec("wx"), ana: () => $("#anacard"), steig: () => $("#steigcard"), aehn: () => $("#aehncard"), cmp: () => $("#cmpseg"),
   },
   uebersicht: {aufmacher: () => $("#hlast"), jahr: () => $("#hyear"), zuletzt: () => $("#hrecent"), tag: () => $("#htag"), erinn: () => $("#hmemsec")},
+  statistik: Object.fromEntries(["kpi", "ziele", "kmmonat", "kmverlauf", "sportarten", "bestwerte", "heat", "tag", "erinn"].map(id => [id, () => document.getElementById("stc-" + id)]).concat([["bl", () => $("#blsec")], ["tp", () => $("#tpsec")]])),
 };
 /* 3.21.0 Ansichten: SL.store[Schlüssel] = Behälter {views:[{id,name,layout}], active, rules} (so liegt er auf dem Server); SL.docs[Schlüssel] = Layout der gerade angezeigten Ansicht
    (damit arbeitet der ganze übrige Code unverändert); SL.view[fam] = Kennung der angezeigten Ansicht; SL.manual[fam] = in dieser Sitzung von Hand gewählte Ansicht (vor den Regeln). */
-const SL = {docs: {}, store: {}, view: {}, manual: {}, sport: {}, loaded: {}, edit: false, dirty: new Set(), fam: "tour", page: "haupt", present: [], timer: null, focus: null, drag: null};
+const SL = {docs: {}, store: {}, view: {}, manual: {}, sport: {}, loaded: {}, edit: false, dirty: new Set(), busy: new Set(), rev: {}, fam: "tour", page: "haupt", present: [], timer: null, focus: null, drag: null};
 const SL_STD = "standard";
 const SL_MAXV = 12;
 const slBlank = () => ({v: 2, views: [{id: SL_STD, name: "Standard", layout: {v: 1}}], active: SL_STD, rules: {}});
@@ -132,8 +150,8 @@ const slUid = () => {
   }
 };
 const slLsKey = k => "mt_sl_" + slUid() + "_" + k;
-const slKeys = fam => (fam === "tour" ? ["tour-haupt", "tour-auswertung"] : ["uebersicht"]);
-const slSt = fam => SL.docs[fam === "tour" ? "tour-haupt" : "uebersicht"] || {};
+const slKeys = fam => (fam === "tour" ? ["tour-haupt", "tour-auswertung"] : [fam]);
+const slSt = fam => SL.docs[slKey1(fam)] || {};
 const slAlias = id => (id === "met" || id === "uhr" ? "geraet" : id);        // Messwerte und Training laut Uhr bilden einen Block
 
 /* ---------- Abschnitte, Seiten, Reihenfolge ---------- */
@@ -155,8 +173,9 @@ function slItems(fam) {
   (st.widgets || []).forEach(w => {
     const T = window.SL_WT[w.type];
     if (!slFits(T, fam)) return;                                          // unbekannter Baustein (z. B. von einer neueren Version) oder einer, der auf dieser Seite nicht stehen darf: ignorieren
-    items.push({id: w.id, w: slTypeW(T), ws: T.ws, title: slWTitle(T, w.cfg || {}), fl: slWFl(T, w.cfg || {}), page: fam === "tour" ? "haupt" : "uebersicht", group: fam === "tour" ? "bst" : "", widget: true, plain: !!T.shell, wtype: w.type, cfg: w.cfg || {}, def: true, ckeys: ["tl_w_" + w.id]});
+    items.push({id: w.id, w: slTypeW(T), ws: T.ws, title: slWTitle(T, w.cfg || {}), fl: slWFl(T, w.cfg || {}), page: fam === "tour" ? "haupt" : fam, group: fam === "tour" ? "bst" : "", widget: true, plain: !!T.shell, wtype: w.type, cfg: w.cfg || {}, def: true, ckeys: ["tl_w_" + w.id]});
   });
+  if (fam === "statistik" && typeof stApply === "function") items.forEach(it => it.wtype && stApply(it));          // 3.22.0: globaler Filter der Statistikseite
   if (fam === "tour") items.forEach(it => !it.fixed && (pg[it.id] === "haupt" || pg[it.id] === "auswertung") && (it.page = pg[it.id]));
   items.forEach(it => {                                                   // 3.20.0: Breite = gespeicherte Abweichung, sonst Standard (immer eine der erlaubten)
     const ws = it.ws || SL_WALL, v = (st.w || {})[it.id];
@@ -235,10 +254,11 @@ async function slEnsure(fam) {
       const c = slNorm(slReadCache(k));
       if (c) SL.store[k] = c;
     });
-  const pull = Promise.all(keys.map(k => slFetch(k).then(d => [k, d]).catch(() => null))).then(rs => {
+  const rev0 = keys.map(k => (SL.dirty.has(k) || SL.busy.has(k) ? -1 : SL.rev[k] || 0));            // -1: beim Start der Abfrage war schon etwas ungespeichert, die Antwort kann veraltet sein
+  const pull = Promise.all(keys.map((k, i) => slFetch(k).then(d => ((SL.rev[k] || 0) === rev0[i] ? [k, d] : null)).catch(() => null))).then(rs => {
     let changed = false;
     rs.forEach(r => {
-      if (!r || SL.dirty.has(r[0])) return;
+      if (!r || SL.dirty.has(r[0]) || SL.busy.has(r[0])) return;                // eigene, noch nicht (vollständig) gespeicherte Änderungen nie überschreiben
       const [k, d] = r;
       if (JSON.stringify(d || slBlank()) !== JSON.stringify(SL.store[k] || slBlank())) {
         if (d) SL.store[k] = d;
@@ -262,7 +282,7 @@ function slStatus(text, bad) {
 }
 /* Layout der angezeigten Ansicht in den Behälter übernehmen (vor dem Speichern und vor jeder Änderung der Ansichten) */
 function slSync(k) {
-  const fam = k === "uebersicht" ? "uebersicht" : "tour", v = slStore(k).views.find(x => x.id === SL.view[fam]);
+  const fam = slFamOf(k), v = slStore(k).views.find(x => x.id === SL.view[fam]);
   if (v) v.layout = SL.docs[k] || {};                       // {} (ohne „v“) = nichts gespeichert (Standard wiederhergestellt): bei unveränderter Standardansicht wird das Dokument gelöscht
 }
 /* Was auf den Server geht: unveränderter Standard = wie bisher das Layout-Dokument selbst (oder löschen, wenn leer), sonst der Behälter */
@@ -275,9 +295,11 @@ function slTouch(...keys) {
   keys.forEach(k => {
     slSync(k);
     SL.dirty.add(k);
+    SL.rev[k] = (SL.rev[k] || 0) + 1;
     slWriteCache(k, slStore(k));
   });
   slStatus("Speichert …");
+  slChg();
   clearTimeout(SL.timer);
   SL.timer = setTimeout(slFlush, 500);
 }
@@ -285,8 +307,9 @@ async function slFlush() {
   clearTimeout(SL.timer);
   const keys = [...SL.dirty];
   SL.dirty.clear();
-  if (!keys.length) return;
+  if (!keys.length) return true;
   let ok = true;
+  keys.forEach(k => SL.busy.add(k));
   for (const k of keys) {
     try {
       const d = slPack(k),
@@ -295,12 +318,14 @@ async function slFlush() {
     } catch (e) {
       ok = false;
     }
+    SL.busy.delete(k);
   }
-  if (SL.dirty.size) return;                                              // inzwischen weitere Änderungen: der nächste Lauf meldet
+  if (SL.dirty.size) return ok;                                           // inzwischen weitere Änderungen: der nächste Lauf meldet
   slStatus(ok ? "Gespeichert" : "Nicht gespeichert – nur auf diesem Gerät gemerkt", !ok);
+  return ok;
 }
 const slDocOf = page => SL.docs[SL_PAGE_KEY[page]] || (SL.docs[SL_PAGE_KEY[page]] = {v: 1});
-const slStDoc = fam => slDocOf(fam === "tour" ? "haupt" : "uebersicht");
+const slStDoc = fam => slDocOf(fam === "tour" ? "haupt" : fam);
 const slSet = (st, name, id, on) => {
   const a = (st[name] || []).filter(x => x !== id);
   if (on) a.push(id);
@@ -350,7 +375,7 @@ function slToggleHidden(id) {
   const st = slStDoc(SL.fam),
     on = !(st.hidden || []).includes(id);
   slSet(st, "hidden", id, on);
-  slTouch(SL.fam === "tour" ? "tour-haupt" : "uebersicht");
+  slTouch(slKey1(SL.fam));
   slApply();
   slLive(on ? `${slTitle(id)}: ausgeblendet` : `${slTitle(id)}: eingeblendet`);
 }
@@ -360,7 +385,7 @@ function slSetOpen(id, on) {
   const st = slStDoc(SL.fam);
   slSet(st, "open", id, on && !it.def);                                     // nur Abweichungen vom Standard speichern
   slSet(st, "closed", id, !on && !!it.def);
-  slTouch(SL.fam === "tour" ? "tour-haupt" : "uebersicht");
+  slTouch(slKey1(SL.fam));
   (it.ckeys || []).forEach(k => {
     try {
       localStorage.removeItem("mt_trf_" + k);                               // sonst überstimmt der zuletzt gemerkte Zustand den neuen Standard
@@ -401,7 +426,7 @@ function slSetWidth(id, w) {
   if (w === it.w) delete st.w[id];                                        // nur Abweichungen vom Standard speichern
   else st.w[id] = w;
   if (!Object.keys(st.w).length) delete st.w;
-  slTouch(SL.fam === "tour" ? "tour-haupt" : "uebersicht");
+  slTouch(slKey1(SL.fam));
   SL.focus = {id, a: "w", q: `[data-w="${w}"]`};
   slApply();
   slLive(`${slTitle(id)}: ${SL_WNAME[w]}`);
@@ -422,7 +447,7 @@ function slAddWidget(type) {
   const ids = slOrder(SL.fam, SL.page).map(i => i.id).filter(x => x !== id);
   ids.push(id);
   slSaveOrder(ids);
-  slTouch(SL.fam === "tour" ? "tour-haupt" : "uebersicht");
+  slTouch(slKey1(SL.fam));
   SL.focus = {id, a: "grip"};
   slApply();
   slLive(`Baustein „${T.title(T.defaults || {})}“ hinzugefügt`);
@@ -465,11 +490,31 @@ function slSetCfg(id, cfg) {
     else delete st.cfg[id];                                               // leere Konfiguration = Standard: nichts speichern
     if (!Object.keys(st.cfg).length) delete st.cfg;
   } else return;
-  slTouch(SL.fam === "tour" ? "tour-haupt" : "uebersicht");
+  slTouch(slKey1(SL.fam));
   const el = document.getElementById("tlw-" + id);
   if (el) el.remove();                                                      // wird mit der neuen Konfiguration neu gebaut
   SL.focus = {id, a: "cfg"};
   slApply();
+}
+/* „Verwerfen“: stellt den Stand von vor dem Bearbeiten wieder her (Behälter, Zwischenspeicher dieses Geräts und Server) */
+async function slDiscard() {
+  const fam = SL.fam;
+  if (!SL.snap || SL.snap.fam !== fam) return;
+  if (!slIsChg()) return slLive("Keine Änderungen seit Beginn des Bearbeitens");
+  const ok = await uiConfirm({title: "Änderungen verwerfen?", text: "Die Seite wird auf den Stand von vor dem Bearbeiten zurückgesetzt. Alles, was du seitdem geändert hast, geht verloren.", ok: "Verwerfen", danger: true});
+  if (!ok || !SL.snap) return;
+  const snap = SL.snap, was = SL.view[fam];
+  slKeys(fam).forEach(k => (SL.store[k] = JSON.parse(snap.st[k])));
+  slSetManual(fam, snap.manual);
+  slResolve(fam);
+  document.querySelectorAll(".tlw[data-wid]").forEach(e => e.remove());
+  slTouch(...slKeys(fam));
+  SL.focus = null;
+  slApply();
+  slChg();
+  slStatus("Verworfen");
+  slLive("Änderungen verworfen, der Stand von vor dem Bearbeiten ist wiederhergestellt");
+  if (fam === "statistik" && SL.view[fam] !== was && typeof stReload === "function") stReload();
 }
 async function slReset() {
   const ok = await uiConfirm({
@@ -478,6 +523,8 @@ async function slReset() {
       ? "Alles in dieser Ansicht wird auf den Standard zurückgesetzt: Reihenfolge, ausgeblendete Abschnitte und alle hinzugefügten Bausteine. Andere Ansichten bleiben unverändert."
       : SL.fam === "tour"
       ? "Reihenfolge, ausgeblendete Abschnitte, Seitenzuordnung und alle hinzugefügten Bausteine der Tourseite (Hauptseite und Auswertung) werden zurückgesetzt."
+      : SL.fam === "statistik"
+      ? "Reihenfolge, Breiten, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Statistik werden zurückgesetzt. Der Filter oben bleibt, wie er ist."
       : "Reihenfolge, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Übersicht werden zurückgesetzt.",
     ok: "Standard wiederherstellen",
     danger: true,
@@ -667,15 +714,16 @@ function slStripHtml(p, idx, n) {
   if (!it.must) h += `<button type="button" class="slb" data-a="eye" aria-pressed="${p.off}">${p.off ? slIcon.eyeoff : slIcon.eye}<span>${p.off ? "Einblenden" : "Ausblenden"}</span></button>`;
   if (!it.plain) h += `<label class="slsw"><input type="checkbox" data-a="open"${open ? " checked" : ""}><span>Standardmäßig offen</span></label>`;
   if (SL.fam === "tour" && !it.fixed) h += `<button type="button" class="slb" data-a="page" >${other}</button>`;
-  if ((it.widget || it.build) && ((window.SL_WT[it.wtype] || {}).fields || []).length) h += `<button type="button" class="slb slcfgb" data-a="cfg" aria-haspopup="dialog" title="Einstellungen dieses Bausteins">${slIcon.gear}<span>Einstellungen</span></button>`;
+  if ((it.widget || it.build) && slFieldsOf(window.SL_WT[it.wtype]).length) h += `<button type="button" class="slb slcfgb" data-a="cfg" aria-haspopup="dialog" title="Einstellungen dieses Bausteins">${slIcon.gear}<span>Einstellungen</span></button>`;
   if (it.widget) h += `<button type="button" class="slb slrm" data-a="del" >Entfernen</button>`;
   if (it.must) h += `<span class="slmust">bleibt immer sichtbar</span>`;
   return h + `</span>`;
 }
 function slPlace(root) {
   const main = root.matches && root.matches("main.home"),
-    fam = main ? "uebersicht" : "tour",
-    page = main ? "uebersicht" : root.classList.contains("tlsub") ? "auswertung" : "haupt";
+    stat = root.id === "stx",
+    fam = stat ? "statistik" : main ? "uebersicht" : "tour",
+    page = stat ? "statistik" : main ? "uebersicht" : root.classList.contains("tlsub") ? "auswertung" : "haupt";
   SL.fam = fam;
   SL.page = page;
   SL.root = root;
@@ -777,6 +825,11 @@ function slOpener(root, edit) {
   b.hidden = !!edit;
   w.hidden = !!edit;
   if (typeof slViewPick === "function" && slViewPick(w)) w.hidden = false;                // 3.21.0: Ansichten-Auswahl bleibt auch im Bearbeitungsmodus stehen
+  if (typeof slSaveBar === "function" && slSaveBar(w)) w.hidden = false;
+  if (SL.msg && !edit) {
+    slShowMsg(w);
+    w.hidden = false;
+  }                  // 3.22.0: „Ansicht speichern“, solange der Filter vom gespeicherten Stand abweicht
   if (!root.matches("main.home") && w.nextElementSibling !== root) root.parentNode.insertBefore(w, root);
   return root.matches("main.home") ? w : null;
 }
@@ -800,6 +853,9 @@ function slSubNote(root, pres) {
 function slApply() {
   if (SL.fam === "tour") {
     if (typeof tlRefresh === "function") tlRefresh();
+  } else if (SL.fam === "statistik") {
+    const r = document.getElementById("stx");
+    if (r) slPlace(r);
   } else {
     const m = document.getElementById("main");
     if (m && m.classList.contains("home")) slPlace(m);
@@ -822,28 +878,78 @@ function slBar(on) {
   b.innerHTML =
     `<p class="slsr" id="slhint">Zum Verschieben ziehen oder Pfeil hoch bzw. Pfeil runter drücken.</p>` +
     `<div class="slsr" id="sllive" aria-live="polite" aria-atomic="true"></div>` +
-    `<p class="slbi"><b>Seite anpassen</b><span class="slvn" id="slvn"></span><span class="slsaved" id="slsaved" role="status" aria-live="polite"></span></p>` +
-    `<div class="slbb"><button type="button" class="btn ghost sm" data-a="views" aria-haspopup="dialog">Ansichten</button><button type="button" class="btn ghost sm" data-a="add">Baustein hinzufügen</button><button type="button" class="btn ghost sm" data-a="reset">Standard wiederherstellen</button><button type="button" class="btn sm" data-a="done">Fertig</button></div>`;
+    `<p class="slbi"><b>Seite anpassen</b><span class="slvn" id="slvn"></span><span class="slsaved" id="slsaved" role="status" aria-live="polite"></span><span class="slchg" id="slchg" hidden>Ungespeicherte Änderungen</span></p>` +
+    `<div class="slbb"><button type="button" class="btn ghost sm" data-a="views" aria-haspopup="dialog">Ansichten</button><button type="button" class="btn ghost sm" data-a="add">Baustein hinzufügen</button><button type="button" class="btn ghost sm" data-a="reset">Standard wiederherstellen</button><button type="button" class="btn ghost sm" data-a="discard">Verwerfen</button><button type="button" class="btn ghost sm" data-a="savenew" aria-haspopup="dialog">Als neue Ansicht speichern …</button><button type="button" class="btn sm" data-a="done">Fertig</button></div>`;
   document.body.appendChild(b);
 }
-function slEdit(on) {
+/* 3.22.0 Stand vor dem Bearbeiten: Grundlage für „Verwerfen“, „Als neue Ansicht speichern“ und die Markierung „Ungespeicherte Änderungen“ */
+function slSnap() {
+  const fam = SL.fam, st = {};
+  slKeys(fam).forEach(k => {
+    slSync(k);
+    st[k] = JSON.stringify(slStore(k));
+  });
+  SL.snap = {fam, st, view: SL.view[fam], manual: slManual(fam)};
+}
+function slIsChg() {
+  if (!SL.snap || SL.snap.fam !== SL.fam) return false;
+  slKeys(SL.fam).forEach(slSync);
+  return slKeys(SL.fam).some(k => JSON.stringify(slStore(k)) !== SL.snap.st[k]);
+}
+function slChg() {
+  const m = document.getElementById("slchg");
+  if (m) m.hidden = !(SL.edit && slIsChg());
+}
+/* Sichtbare Bestätigung neben „Seite anpassen“ (bleibt stehen, bis die Seite verlassen oder erneut bearbeitet wird) */
+function slAnnounce(text, bad) {
+  slLive(text);
+  SL.msg = {text, bad: !!bad, fam: SL.fam, fresh: true};
+  slShowMsg();
+}
+function slShowMsg(el) {
+  const w = el || document.getElementById("slopenw"), g = SL.msg;
+  if (!w || !g) return;
+  const text = g.text, bad = g.bad;
+  let m = w.querySelector(".slok");
+  if (!m) {
+    m = document.createElement("span");
+    m.className = "slok";
+    m.setAttribute("role", "status");
+    w.appendChild(m);
+  }
+  if (m.dataset.t === text && m.dataset.state === (bad ? "bad" : "ok")) return;               // unverändert nicht neu schreiben (Beobachter und Übersetzung würden sonst im Kreis laufen)
+  m.dataset.t = text;
+  m.dataset.state = bad ? "bad" : "ok";
+  m.textContent = text;
+}
+function slEdit(on, announce, keepMsg) {
   on = !!on && slCan();
   if (on === SL.edit) return;
   SL.edit = on;
+  if (on) {
+    slSnap();
+    if (!keepMsg) SL.msg = null;
+    const m = document.querySelector("#slopenw .slok");
+    if (m) m.remove();
+  }
   document.body.classList.toggle("sl-editing", on);
   slBar(on);
+  if (on && keepMsg && SL.msg) slStatus(SL.msg.text);
   SL.focus = on ? {id: SL.present[0] || "", a: "grip", ps: true} : null;
   slApply();
   if (on) slLive("Seite anpassen ist an. Abschnitte ziehen oder mit den Pfeiltasten verschieben.");
   else {
-    slFlush();
+    const snap = SL.snap;
+    SL.snap = null;
     const o = document.getElementById("slopen");
     if (o) o.focus();
+    slFlush().then(ok => announce && (ok ? slAnnounce(snap && snap.st && slKeys(snap.fam).some(k => JSON.stringify(slStore(k)) !== snap.st[k]) ? "Anordnung gespeichert" : "Anordnung gespeichert (keine Änderungen)") : slAnnounce("Nicht gespeichert – nur auf diesem Gerät gemerkt", true)));
   }
 }
 function slLeave() {
   if (!SL.edit) return;
   SL.edit = false;
+  SL.snap = null;
   document.body.classList.remove("sl-editing");
   slBar(false);
   slFlush();
@@ -967,7 +1073,7 @@ function slCatalog() {
       } else if (a && !a.disabled) {
         close();
         const id = slAddWidget(a.dataset.add);
-        if (id && (window.SL_WT[a.dataset.add].fields || []).length && window.SL_WT[a.dataset.add].cfgOnAdd) slCfgDialog(id);
+        if (id && slFieldsOf(window.SL_WT[a.dataset.add]).length && window.SL_WT[a.dataset.add].cfgOnAdd) slCfgDialog(id);
       }
     };
   }, "slcat");
@@ -978,13 +1084,14 @@ function slCfgDialog(id) {
   if (!T) return;
   slModal(`Einstellungen: ${T.name || T.title(w.cfg)}`, (body, close) => {
     const cfg = JSON.parse(JSON.stringify(w.cfg || {}));
-    body.innerHTML = `<form class="slform" novalidate>${(T.fields || []).map((f, i) => slField(f, cfg, i)).join("")}<div class="uifoot"><button type="button" class="btn ghost" data-close>Abbrechen</button><button type="submit" class="btn">Speichern</button></div></form>`;
+    const FS = slFieldsOf(T);
+    body.innerHTML = `<form class="slform" novalidate>${FS.map((f, i) => slField(f, cfg, i)).join("")}<div class="uifoot"><button type="button" class="btn ghost" data-close>Abbrechen</button><button type="submit" class="btn">Speichern</button></div></form>`;
     const form = body.querySelector("form");
     form.onsubmit = e => {
       e.preventDefault();
       const out = {...cfg};
       let bad = null;
-      (T.fields || []).forEach((f, i) => {
+      FS.forEach((f, i) => {
         if (FL_KINDS.has(f.kind)) flRead(f, form, i, out);
         else if (f.kind === "checks") out[f.k] = [...form.querySelectorAll(`input[name="f${i}"]:checked`)].map(x => x.value);
         else if (f.kind === "radio") {
@@ -1005,11 +1112,11 @@ function slCfgDialog(id) {
         bad.inp.focus();
         return;
       }
-      if (T.fields.some(f => f.kind === "checks" && f.min && out[f.k].length < f.min)) {
+      if (FS.some(f => f.kind === "checks" && f.min && out[f.k].length < f.min)) {
         form.querySelector(".slerr").textContent = "Bitte mindestens einen Wert wählen.";
         return;
       }
-      (T.fields || []).forEach(f => f.kind === "checks" && f.def && out[f.k].join() === f.def.join() && delete out[f.k]);          // Standardwerte nicht speichern
+      FS.forEach(f => f.kind === "checks" && f.def && out[f.k].join() === f.def.join() && delete out[f.k]);          // Standardwerte nicht speichern
       close();
       slSetCfg(id, out);
     };
@@ -1020,6 +1127,11 @@ function slCfgDialog(id) {
       if (ta) form.querySelector(".slcount").textContent = `${ta.value.length} / ${ta.dataset.max}`;
     });
   });
+}
+/* Felder im Einstellungs-Dialog: auf der Statistikseite kommt bei Bausteinen mit Aktivität oder Zeitraum der Schalter „Globalen Filter verwenden“ davor (3.22.0) */
+function slFieldsOf(T) {
+  const fs = (T && T.fields) || [];
+  return SL.fam === "statistik" && fs.some(f => f.kind === "sports" || f.kind === "range") ? [{kind: "global"}, ...fs] : fs;
 }
 function slField(f, cfg, i) {
   const id = "slf" + i;
@@ -1042,7 +1154,9 @@ document.addEventListener("click", e => {
   if (o) return slEdit(true);
   if (bar) {
     const a = bar.dataset.a;
-    if (a === "done") slEdit(false);
+    if (a === "done") slEdit(false, true);
+    else if (a === "discard") slDiscard();
+    else if (a === "savenew") slSaveNew(SL.fam, true);
     else if (a === "add") slCatalog();
     else if (a === "views" && typeof slViewsDialog === "function") slViewsDialog();
     else if (a === "reset") slReset();
@@ -1155,6 +1269,8 @@ window.addEventListener("hashchange", slLeave);
 /* ---------- Anbindung an die Ansichten ---------- */
 function slViewStart(fam) {
   slLeave();
+  if (SL.msg && SL.msg.fam === fam && SL.msg.fresh) SL.msg.fresh = false;                   // Bestätigung überlebt genau einen Neuaufbau (z. B. nach Ansichtswechsel)
+  else SL.msg = null;
   SL.fam = fam;
   SL.present = [];
   SL.focus = null;

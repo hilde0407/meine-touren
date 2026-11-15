@@ -87,7 +87,7 @@ def open_gear(pg, sel=GEAR):
 
 
 def save_dialog(pg):
-    pg.get_by_role("button", name="Speichern").click()
+    pg.get_by_role("button", name="Speichern", exact=True).click()
     try:
         pg.wait_for_function("() => !document.querySelector('.sldlg')", timeout=T)
     except Exception:
@@ -468,8 +468,8 @@ def test_phone_390px_dialog_fits_no_side_scroll_and_shots(pw, app):
         r = pg.evaluate("() => { const b = document.querySelector('.sldlg .slbox'), r = b.getBoundingClientRect(); return {l: r.left, r: r.right, t: r.top, b: r.bottom, sw: b.scrollWidth, cw: b.clientWidth, vw: window.innerWidth, vh: window.innerHeight, page: document.documentElement.scrollWidth - window.innerWidth}; }")
         assert r["l"] >= 0 and r["r"] <= r["vw"] + 0.5 and r["sw"] <= r["cw"] and r["b"] <= r["vh"] + 0.5 and r["page"] <= 0, r
         assert pg.evaluate("() => [...document.querySelectorAll('.sldlg .flchip')].every(c => c.getBoundingClientRect().height >= 40 && c.getBoundingClientRect().right <= window.innerWidth)")      # Touch-Ziele
-        pg.get_by_role("button", name="Speichern").scroll_into_view_if_needed()
-        assert pg.get_by_role("button", name="Speichern").is_visible() and pg.get_by_role("button", name="Abbrechen").is_visible()
+        pg.get_by_role("button", name="Speichern", exact=True).scroll_into_view_if_needed()
+        assert pg.get_by_role("button", name="Speichern", exact=True).is_visible() and pg.get_by_role("button", name="Abbrechen").is_visible()
         _shot(pg, "dialog-dein-jahr-390-hell.png", full=False)
         pg.get_by_role("button", name="Abbrechen").click()
         pg.wait_for_function("() => !document.querySelector('.sldlg')", timeout=T)

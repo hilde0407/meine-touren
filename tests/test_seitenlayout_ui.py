@@ -446,7 +446,7 @@ def test_catalog_add_configure_and_remove_widgets_on_the_tour_page(pw, app):
         pg.wait_for_selector(".slform", timeout=T)
         pg.locator('input[value="down"]').check()
         pg.locator('input[value="hr"]').check()
-        pg.get_by_role("button", name="Speichern").click()
+        pg.get_by_role("button", name="Speichern", exact=True).click()
         pg.wait_for_function("() => document.querySelectorAll('[data-wtype=kennzahlen]')[0].querySelectorAll('.utile').length === 6", timeout=T)
         _saved(pg)
         w = _server(app, "tour-haupt")["widgets"]
@@ -480,7 +480,7 @@ def test_note_widget_text_is_limited_and_saved(pw, app):
         pg.locator(".slform textarea").fill("x" * 700)
         assert pg.locator(".slform textarea").input_value() == "x" * 500
         pg.locator(".slform textarea").fill("Einkehr im Gasthof <b>nicht fett</b>")
-        pg.get_by_role("button", name="Speichern").click()
+        pg.get_by_role("button", name="Speichern", exact=True).click()
         pg.wait_for_function("() => { const n = document.querySelector('[data-wtype=notiz] .slnote'); return !!n && n.textContent === 'Einkehr im Gasthof <b>nicht fett</b>'; }", timeout=T)
         assert pg.locator('[data-wtype="notiz"] .slnote b').count() == 0           # als Text, nie als HTML
         _saved(pg)

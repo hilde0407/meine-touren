@@ -1374,3 +1374,48 @@ html.mob main.home{gap:26px 20px}
   .slvrl{margin-top:4px}
 }
 @media print{.slvw{display:none!important}}
+
+/* =====================  3.22.0: Statistik als Widget-Seite + globaler Filter  =====================
+   #stx = Raster der Statistikseite (wie main.home, Breiten .w-… und Zeilenreste .fd-N/.ft-N aus 3.20.0); jeder Abschnitt ist eine Karte (details.tls) mit .stb im Körper.
+   .stf = globaler Filter oben (Zeitraum, Aktivität), .stn = dezenter Hinweis „Filter gilt hier nicht“ im Kopf einer Karte. */
+.stx{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px 16px;margin-top:22px}
+.stx>*{grid-column:span 12}
+.stf .sec{margin-top:0}
+.stz{margin-top:12px}
+.stfc{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;margin:12px 0 0}
+.stfc[hidden]{display:none}
+.stfc label{display:flex;flex-direction:column;gap:4px;font:600 14px var(--b)}
+.stfc input{min-height:40px;padding:6px 10px;font:500 16px var(--b);color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:var(--r)}
+.stfe{flex:1 1 100%;margin:0;font-size:14px;color:#a3261f}
+.stfe:empty{display:none}
+.stfs{margin:12px 0 0;font-size:15px}
+.stfs a{font-weight:600}
+.stf .chip:focus-visible,.stf .years button:focus-visible,.stfs a:focus-visible,.stfc input:focus-visible,.stfc .btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.stn{flex:none;font-size:14px;font-style:italic}
+.stb>.figs{margin:0}
+.stb .sec{margin:0 0 10px}
+.stb>.tl{margin:0}
+.stx .panel.gap,.stx #goals{margin:0!important}
+.stb>.panel{padding:0}
+.stline{display:block;width:100%;height:auto;max-height:150px}
+.stl{fill:none;stroke:var(--bars);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.std{fill:var(--bars);stroke:var(--card);stroke-width:1.5}
+.stt{fill:none;stroke:var(--accent2);stroke-width:2.5;stroke-dasharray:6 4;vector-effect:non-scaling-stroke}
+.legend i.stk{background:var(--bars)}.legend i.stk2{background:var(--accent2)}
+ol.stt-l{margin:0;padding:0}
+.stt-l b{font:600 16px var(--b)}
+.slgh{margin:4px 0 0;font-size:14px}
+.sl-gdis{opacity:.6}
+html.mob .stx{gap:12px 16px}
+@media (prefers-color-scheme:dark){.stfe{color:#f08a84}}
+html.mob .stz,html.mob #sch{flex-wrap:wrap;overflow:visible}
+/* 3.22.0: Anordnung und Filter sichern (Bearbeitungsleiste, „Ansicht speichern“) */
+.slchg{display:inline-block;font:600 14px var(--b);color:var(--ink);border:1px solid var(--bars);border-radius:999px;padding:2px 10px;background:var(--card)}
+.slchg[hidden]{display:none}
+.slsv{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.slsv .btn{min-height:40px}
+.slok{font:600 15px var(--b);color:var(--ink);border-left:4px solid var(--bars);padding:2px 0 2px 10px}
+.slok[data-state=bad]{border-left-color:currentColor;font-weight:700}
+.slmenu{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.slmenu .btn{min-height:44px;justify-content:center}
+@media (max-width:600px){.slbb .btn{flex:1 1 45%}}

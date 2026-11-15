@@ -203,7 +203,7 @@ def _add_all(pg, types):
         if ty == "notiz":                                                      # die Notiz öffnet gleich die Einstellungen
             pg.wait_for_selector(".slform textarea", timeout=T)
             pg.locator(".slform textarea").fill("Einkehr im Gasthof, Rückweg über den Grat.")
-            pg.get_by_role("button", name="Speichern").click()
+            pg.get_by_role("button", name="Speichern", exact=True).click()
         pg.wait_for_function(READY, arg=[ty], timeout=T)
     pg.wait_for_function("() => !document.querySelector('.uidlg')", timeout=T)
     pg.locator("#slbar").get_by_role("button", name="Fertig").click()
@@ -412,10 +412,10 @@ def test_dash_config_number_field_goal_and_ring(pw, app):
         pg.locator('.slit[data-sl="wj"] [data-a="cfg"]').click()
         pg.wait_for_selector(".slform input[type=number]", timeout=T)
         pg.locator(".slform input[type=number]").fill("5")                                  # zu klein: Fehlermeldung, nichts gespeichert
-        pg.get_by_role("button", name="Speichern").click()
+        pg.get_by_role("button", name="Speichern", exact=True).click()
         pg.wait_for_function("() => document.querySelector('.slerr').textContent.length > 5", timeout=T)
         pg.locator(".slform input[type=number]").fill("200")
-        pg.get_by_role("button", name="Speichern").click()
+        pg.get_by_role("button", name="Speichern", exact=True).click()
         pg.wait_for_function("(b) => { const e = document.querySelector('[data-wtype=jahresziel] .slrc b'); return !!e && e.textContent !== b; }", arg=before, timeout=T)
         pg.wait_for_function("() => document.getElementById('slsaved').textContent.trim() === 'Gespeichert'", timeout=T)
         assert _api(app, "uebersicht")["layout"]["widgets"][0]["cfg"]["goal"] == 200

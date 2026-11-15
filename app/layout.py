@@ -1,6 +1,6 @@
 """Seite anpassen (3.17.0): gespeicherte Anordnung der Abschnitte und Bausteine je Seite.
 
-Schlüssel: „tour-haupt“ (Tourseite), „tour-auswertung“ (Unterseite Auswertung), „uebersicht“ (Übersicht).
+Schlüssel: „tour-haupt“ (Tourseite), „tour-auswertung“ (Unterseite Auswertung), „uebersicht“ (Übersicht), „statistik“ (Statistik, 3.22.0).
 Jeder Benutzer hat eine eigene Datenbank (app/ctx.py); die Tabelle `user_layout` ist daher je Benutzer getrennt, eine Spalte „user“ ist nicht nötig.
 Dokument (JSON-Objekt, alle Felder optional):
   order    [id]            Reihenfolge der Abschnitte dieser Seite
@@ -11,7 +11,10 @@ Dokument (JSON-Objekt, alle Felder optional):
   cfg      {id: {…}}       Konfiguration der Standard-Bausteine, die nicht als „widgets“ gespeichert sind (3.19.0: der Baustein „Dein Jahr“ der Übersicht, Kennung „jahr“)
   w        {id: Breite}    Breite im Raster (3.20.0): "voll" | "zweidrittel" | "halb" | "drittel"; gespeichert werden nur Abweichungen vom Standard des Abschnitts (den kennt die Oberfläche)
 Seiteneignung (3.20.0): Bausteine der Übersicht dürfen auch auf der Tourseite stehen (Dokument „tour-haupt“); tour-bezogene Bausteine (TOUR_ONLY) nur auf Tourseiten,
-das Dokument „uebersicht“ lehnt sie ab. Unbekannte Typen (neuere Version) bleiben überall erlaubt.
+die Dokumente „uebersicht“ und „statistik“ lehnen sie ab. 3.22.0: Bausteine der Statistik (STATISTIK_ONLY) stehen nur im Dokument „statistik“; die Bausteine der Übersicht dürfen auch dort stehen.
+Unbekannte Typen (neuere Version) bleiben überall erlaubt.
+Statistik (3.22.0): Die Standard-Abschnitte der Statistikseite kennt nur die Oberfläche (order/hidden/closed/open/w gelten wie auf der Übersicht). Der globale Filter der Seite (Aktivität, Zeitraum)
+steht in der Adresse der Seite, nicht im Layout. In der Konfiguration eines Bausteins heißt „eigen“ = true: der Baustein behält seinen eigenen Filter (sports, range, yr) statt des globalen.
 Gemeinsame Filterfelder in der Konfiguration (3.19.0, streng geprüft; unbekannte Schlüssel einer neueren Version bleiben erlaubt, wenn sie einfache Werte haben):
   sports   [Sportart]      leer = alle Aktivitäten      range  year | y | 12m | 90d | all      yr  Jahr (bei range = y)
   metrics  [count|km|up|h] angezeigte Kennzahlen         compare  Vorjahresvergleich an/aus    title  eigener Titel (höchstens 60 Zeichen)
@@ -35,12 +38,14 @@ from . import db
 
 router = APIRouter()
 
-KEYS = ("tour-haupt", "tour-auswertung", "uebersicht")
-FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg", "w"}
+KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik")
+FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg", "w", "filter"}
 WIDTHS = ("voll", "zweidrittel", "halb", "drittel")
 # Bausteine, die eine Tour brauchen (Typkennungen wie in static/js/50-bausteine.js und 51-bausteine-tour.js, fam "tour"): nicht in der Übersicht
 TOUR_ONLY = frozenset(("kennzahlen", "tempo", "vergleich", "pulszonen", "wetter", "fotostreifen", "notiz", "splits", "steigung", "bewegung", "durchschnitt", "jahresrang",
                        "tageslicht", "gipfel", "vergleiche", "stimmung", "fotohighlights", "miniprofil", "steckbrief"))
+# 3.22.0: Bausteine, die nur auf der Statistikseite stehen (Typkennungen wie in static/js/57-bausteine-statistik.js)
+STATISTIK_ONLY = frozenset(("stmonate", "stentwicklung", "stlaengen", "sthoehe", "sttop"))
 ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,40}$")
 MAX_IDS = 120
 MAX_WIDGETS = 40
@@ -73,7 +78,7 @@ def _ids(v, name):
     return out
 
 
-KNOWN = ("sports", "range", "yr", "metrics", "compare", "title", "n", "basis")
+KNOWN = ("sports", "range", "yr", "metrics", "compare", "title", "n", "basis", "eigen")
 
 
 def _known(k, x):
@@ -95,7 +100,7 @@ def _known(k, x):
         if not isinstance(x, list) or not x or not all(i in METRICS for i in x):
             raise bad
         return list(dict.fromkeys(x))
-    if k == "compare":
+    if k in ("compare", "eigen"):
         if not isinstance(x, bool):
             raise bad
         return x
@@ -112,6 +117,36 @@ def _known(k, x):
             raise bad
         return x
     return None
+
+
+FILTER_RANGES = RANGES + ("c",)
+DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def _filter(v):
+    """Gespeicherter Filter einer Ansicht (3.22.0): {sports, range, yr, from, to}; „range“ y braucht yr, c braucht from und to (von <= bis)."""
+    bad = HTTPException(400, "Ungültiger Filter der Ansicht")
+    if not isinstance(v, dict) or set(v) - {"sports", "range", "yr", "from", "to"}:
+        raise bad
+    out = {}
+    if "sports" in v:
+        out["sports"] = _known("sports", v["sports"])
+    r = v.get("range", "all")
+    if r not in FILTER_RANGES:
+        raise bad
+    out["range"] = r
+    if r == "y":
+        out["yr"] = _known("yr", v.get("yr"))
+    elif "yr" in v:
+        raise bad
+    if r == "c":
+        a, b = v.get("from"), v.get("to")
+        if not all(isinstance(x, str) and DATE_RE.match(x) for x in (a, b)) or a > b:
+            raise bad
+        out["from"], out["to"] = a, b
+    elif "from" in v or "to" in v:
+        raise bad
+    return out
 
 
 def _cfg(v):
@@ -175,11 +210,15 @@ def clean(doc, key=None):
                 raise HTTPException(400, "Ungültige Kennung eines Bausteins")
             if x["id"] in seen:
                 raise HTTPException(400, "Doppelte Kennung eines Bausteins")
-            if key == "uebersicht" and x["type"] in TOUR_ONLY:
-                raise HTTPException(400, "Dieser Baustein gehört zu einer Tour und kann nicht in der Übersicht stehen")
+            if key in ("uebersicht", "statistik") and x["type"] in TOUR_ONLY:
+                raise HTTPException(400, "Dieser Baustein gehört zu einer Tour und kann nicht in der Übersicht oder Statistik stehen")
+            if key not in (None, "statistik") and x["type"] in STATISTIK_ONLY:
+                raise HTTPException(400, "Dieser Baustein gehört zur Statistik und kann nur dort stehen")
             seen.add(x["id"])
             ws.append({"id": x["id"], "type": x["type"], "cfg": _cfg(x.get("cfg") or {})})
         out["widgets"] = ws
+    if "filter" in doc:
+        out["filter"] = _filter(doc["filter"])
     if "cfg" in doc:
         c = doc["cfg"]
         if not isinstance(c, dict) or len(c) > 10 or not all(isinstance(k, str) and ID_RE.match(k) for k in c):
@@ -223,7 +262,7 @@ def clean_container(doc, key=None):
         r = doc["rules"]
         if not isinstance(r, dict) or len(r) > MAX_RULES:
             raise HTTPException(400, "„rules“ muss ein Objekt mit höchstens %d Regeln sein" % MAX_RULES)
-        if r and key == "uebersicht":
+        if r and key in ("uebersicht", "statistik"):
             raise HTTPException(400, "Regeln nach Sportart gibt es nur auf der Tourseite")
         for k, x in r.items():
             if not isinstance(k, str) or not SPORT_RE.match(k):
@@ -274,15 +313,15 @@ def check_export(doc):
         errors.append(f"Die Datei stammt aus einer neueren Version von „Meine Touren“ (Format {fv}) und kann hier nicht gelesen werden.")
         return res
     page = doc.get("page")
-    if page not in ("tour", "uebersicht"):
-        errors.append("Die Datei nennt keine gültige Seite (erlaubt: tour, uebersicht).")
+    if page not in ("tour", "uebersicht", "statistik"):
+        errors.append("Die Datei nennt keine gültige Seite (erlaubt: tour, uebersicht, statistik).")
         return res
     res["page"] = page
     try:
         res["name"] = _name(doc.get("name"))
     except HTTPException as e:
         errors.append(e.detail)
-    keys = ("tour-haupt", "tour-auswertung") if page == "tour" else ("uebersicht",)
+    keys = ("tour-haupt", "tour-auswertung") if page == "tour" else (page,)
     lays = doc.get("layouts")
     if not isinstance(lays, dict):
         errors.append("Die Datei enthält keine Layouts.")

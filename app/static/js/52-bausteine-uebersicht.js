@@ -374,7 +374,7 @@ function slYearShell(it) {
   const cfg = it.cfg || {}, now = new Date(), {R, list, prev} = flSelect(cfg, "year", {now, fallback: true}),
     ms = (cfg.metrics && cfg.metrics.length ? cfg.metrics : SL_JM).filter(m => SL_JM.includes(m)), bm = ms.includes("km") ? "km" : ms[0],
     ser = slYearSeries(list, R, bm, now), mx = Math.max(...ser.vals, 1),
-    title = (cfg.title || "").trim() || (R.kind === "12m" ? "Deine letzten 12 Monate" : R.kind === "90d" ? "Deine letzten 90 Tage" : R.kind === "all" ? "Deine Touren insgesamt" : `Dein Jahr ${R.year}`),
+    title = (cfg.title || "").trim() || (R.kind === "12m" ? "Deine letzten 12 Monate" : R.kind === "90d" ? "Deine letzten 90 Tage" : R.kind === "all" ? "Deine Touren insgesamt" : R.kind === "c" ? "Dein Zeitraum" : `Dein Jahr ${R.year}`),
     now_ = flVal(list, bm), was = prev ? flVal(prev, bm) : 0, up = now_ >= was,
     cmpTxt = was > 0 && now_ > 0 && cfg.compare !== false && R.prev
       ? `${up ? "+" : "−"}${nf((Math.abs(now_ - was) / was) * 100, 0)} % gegenüber ` + (R.kind === "year" ? `${R.year - 1} bis heute` : R.kind === "y" ? String(R.year - 1) : R.kind === "12m" ? "den 12 Monaten davor" : "den 90 Tagen davor")
@@ -414,7 +414,7 @@ function slYearShell(it) {
     const T = window.SL_WT[k];
     if (!T) return;
     T.w = w;
-    T.seiten = T.fam === "tour" ? ["tour"] : ["uebersicht", "tour"];
+    T.seiten = T.fam === "tour" ? ["tour"] : ["uebersicht", "tour", "statistik"];
   });
   window.SL_WT.auffaellig.seiten = ["uebersicht"];                                          // Verwaltungs-Hinweis auf Geräte, gehört zur Übersicht
 }

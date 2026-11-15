@@ -12,6 +12,12 @@ const SL_TPL = [
     items: [["jahr", "voll"], ["w:rueckblick", "voll"], ["w:heutevor", "halb"], ["w:rekorde", "halb"], ["w:wiederentdecken", "voll"]]},
   {id: "ue-kompakt", fam: "uebersicht", name: "Kompakt", desc: "Wenig auf einen Blick: vier Bausteine in halber Breite, auf dem Handy untereinander.",
     items: [["jahr", "halb"], ["w:periode", "halb"], ["w:letzte", "halb"], ["w:rekorde", "halb"]]},
+  {id: "st-rueckblick", fam: "statistik", name: "Jahresrückblick", desc: "Für den Blick auf ein Jahr: Kennzahlen, Monate, Höhenmeter im Jahresverlauf, die besten Touren und die Kalender-Heatmap.",
+    items: [["kpi", "voll"], ["kmmonat", "halb"], ["w:sthoehe", "halb"], ["w:sttop", "halb"], ["bestwerte", "halb"], ["heat", "voll"]]},
+  {id: "st-training", fam: "statistik", name: "Training", desc: "Für den Blick auf Form und Entwicklung: Belastung und Erholung, dein typisches Tempo, die Entwicklung deines Tempos, der Monatsvergleich und die Streckenlängen.",
+    items: [["bl", "voll"], ["tp", "voll"], ["w:stentwicklung", "halb"], ["w:stmonate", "halb"], ["w:stlaengen", "halb"], ["w:sttop", "halb", {wert: "tempo"}]]},
+  {id: "st-kompakt", fam: "statistik", name: "Kompakt", desc: "Wenig auf einen Blick: Kennzahlen ganz oben, darunter vier Bausteine in halber Breite, auf dem Handy untereinander.",
+    items: [["kpi", "voll"], ["kmmonat", "halb"], ["sportarten", "halb"], ["bestwerte", "halb"], ["w:sttop", "halb"]]},
   {id: "to-wandern", fam: "tour", name: "Wandern", desc: "Für Wanderungen: Karte und Höhenprofil, die Gipfel-Tafel, Tageslicht, Wetter und die Fotos der Tour.",
     items: [["map", "voll"], ["prof", "voll"], ["w:gipfel", "halb"], ["w:tageslicht", "halb"], ["w:wetter", "halb"], ["sum", "voll"], ["photos", "voll"]]},
   {id: "to-rad", fam: "tour", name: "Radtour / Training", desc: "Für Rad und Training: Karte und Profil, Kilometer-Splits, Steigungs-Verteilung, Puls-Zonen, Bewegung und Pause und der Vergleich mit früheren Touren.",
@@ -34,7 +40,7 @@ function slTplItem(fam, [ref, w, cfg]) {
 function slTplDocs(t) {
   const fam = t.fam, its = t.items.map(i => slTplItem(fam, i)), keep = new Set(its.map(i => i.id)), doc = {v: 1};
   doc.order = its.map(i => i.id);
-  doc.hidden = SL_REG[fam].filter(r => r.page === (fam === "tour" ? "haupt" : "uebersicht") && !r.must && !keep.has(r.id)).map(r => r.id);
+  doc.hidden = SL_REG[fam].filter(r => r.page === (fam === "tour" ? "haupt" : fam) && !r.must && !keep.has(r.id)).map(r => r.id);
   if (!doc.hidden.length) delete doc.hidden;
   const widgets = its.filter(i => i.type).map(i => ({id: i.id, type: i.type, cfg: i.cfg})), w = {};
   if (widgets.length) doc.widgets = widgets;
@@ -43,7 +49,7 @@ function slTplDocs(t) {
     if (i.w && i.w !== dflt) w[i.id] = i.w;
   });
   if (Object.keys(w).length) doc.w = w;
-  return fam === "tour" ? {"tour-haupt": doc, "tour-auswertung": {v: 1}} : {uebersicht: doc};
+  return fam === "tour" ? {"tour-haupt": doc, "tour-auswertung": {v: 1}} : {[fam]: doc};
 }
 /* Schema der Vorlage: Zeilen aus den Breiten (ohne Lücken aufgefüllt wie auf der Seite), 120 × (8 + 12 je Zeile) */
 function slTplPreview(t) {
