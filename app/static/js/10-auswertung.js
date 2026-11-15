@@ -167,9 +167,8 @@ VIEWS.tour = async (id, q) => {
   };
   $("#eshr").onclick = async () => {
     const m =
-      modal(`<h3>Tour teilen</h3><p class="mut fs14">Erzeugt einen Link, den man <b>ohne Anmeldung</b> öffnen kann (Karte, Zahlen, optional Fotos). Er funktioniert nur, wenn dein Server von außen erreichbar ist, z. B. per VPN oder Reverse-Proxy.</p>
-      <label class="chk"><input type="checkbox" id="shp"> Fotos mitsenden</label><label class="chk"><input type="checkbox" id="sht" checked> Anfang und Ende (300 m) ausblenden – schützt deinen Wohnort</label>
-      <div class="row mt14"><button class="btn" id="shn">Link erstellen</button></div><div id="shl" class="mt14"></div><div class="row jce mt12"><button class="btn alt" id="shx">Schließen</button></div>`);
+      modal(`<h3>Tour teilen</h3><p class="mut fs14">Erzeugt einen Link, den man <b>ohne Anmeldung</b> öffnen kann – du wählst, was er zeigt (Karte, Höhenprofil, Fotos …). Er funktioniert nur, wenn dein Server von außen erreichbar ist, z. B. per VPN oder Reverse-Proxy.</p>
+      <div class="row mt14"><button class="btn" id="shn">Neuen Link erstellen …</button></div><div id="shl" class="mt14"></div><div class="row jce mt12"><button class="btn alt" id="shx">Schließen</button></div>`);
     m.querySelector("#shx").onclick = () => m.remove();
     const list = async () => {
       const s = await api(`/api/tours/${encodeURIComponent(t.id)}/shares`).catch(() => []);
@@ -177,7 +176,7 @@ VIEWS.tour = async (id, q) => {
         s
           .map(x => {
             const u = location.origin + "/s/" + x.token;
-            return `<div class="r p8-0" style="display:block;border-top:1px solid var(--rule)"><input readonly value="${esc(u)}" class="w100" data-act="select"><small class="mut">${x.photos == 2 ? "Diashow" : x.photos ? "mit Fotos" : "ohne Fotos"}${x.trim ? ", Anfang/Ende ausgeblendet" : ""}${x.best ? `, beste ${x.best} Fotos` : ""} · ${x.exp ? (x.exp * 1000 < Date.now() ? "abgelaufen" : "gültig bis " + new Date(x.exp * 1000).toLocaleDateString("de-DE")) : "unbegrenzt"}${x.photos == 2 ? ` · ${x.views || 0}× angesehen` : ""}</small> <button class="btn alt sm" data-cp="${esc(u)}">Kopieren</button> <button class="btn alt sm" data-rv="${x.token}">Widerrufen</button></div>`;
+            return `<div class="r p8-0" style="display:block;border-top:1px solid var(--rule)"><input readonly value="${esc(u)}" class="w100" data-act="select"><small class="mut">${x.photos == 2 ? "Diashow" : `<b>Zeigt:</b> ${esc(shrLabel(x.blocks))}`}${x.trim ? ", Anfang/Ende ausgeblendet" : ""}${x.best ? `, beste ${x.best} Fotos` : ""} · ${x.exp ? (x.exp * 1000 < Date.now() ? "abgelaufen" : "gültig bis " + new Date(x.exp * 1000).toLocaleDateString("de-DE")) : "unbegrenzt"}${x.photos == 2 ? ` · ${x.views || 0}× angesehen` : ""}</small> <button class="btn alt sm" data-cp="${esc(u)}">Kopieren</button> ${x.photos != 2 ? `<button class="btn alt sm" data-bl="${x.token}">Auswahl ändern</button> ` : ""}<button class="btn alt sm" data-rv="${x.token}">Widerrufen</button></div>`;
           })
           .join("") || '<span class="mut">Noch kein Link.</span>';
       m.querySelectorAll("[data-cp]").forEach(
@@ -198,13 +197,33 @@ VIEWS.tour = async (id, q) => {
             list();
           })
       );
+      m.querySelectorAll("[data-bl]").forEach(
+        b =>
+          (b.onclick = async () => {
+            const x = s.find(y => y.token === b.dataset.bl),
+              pick = await shrDialog({edit: true, blocks: x.blocks});
+            if (!pick) return;
+            try {
+              await api("/api/share/" + encodeURIComponent(x.token), {method: "PATCH", headers: {"content-type": "application/json"}, body: JSON.stringify({blocks: pick.blocks})});
+            } catch (e) {
+              uiAlert("Auswahl konnte nicht gespeichert werden: " + e.message);
+            }
+            list();
+          })
+      );
     };
     m.querySelector("#shn").onclick = async () => {
-      await api(`/api/tours/${encodeURIComponent(t.id)}/share`, {
-        method: "POST",
-        headers: {"content-type": "application/json"},
-        body: JSON.stringify({photos: m.querySelector("#shp").checked, trim: m.querySelector("#sht").checked}),
-      });
+      const pick = await shrDialog({hasPhotos: t.photos == null ? undefined : t.photos > 0});
+      if (!pick) return;
+      try {
+        await api(`/api/tours/${encodeURIComponent(t.id)}/share`, {
+          method: "POST",
+          headers: {"content-type": "application/json"},
+          body: JSON.stringify({blocks: pick.blocks, trim: pick.trim, days: pick.days}),
+        });
+      } catch (e) {
+        uiAlert("Link konnte nicht erstellt werden: " + e.message);
+      }
       list();
     };
     list();

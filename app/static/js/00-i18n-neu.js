@@ -2157,4 +2157,31 @@ Für den Alltag mit Erinnerungen: oben der Baustein „Hinweise“, der nur ersc
 Weitere Aktionen || More actions || Autres actions || Más acciones
 + Baustein || + Block || + Bloc || + Bloque
 Gerade leer: Dieser Abschnitt erscheint, sobald es etwas zu zeigen gibt. || Empty for now: this section appears as soon as there is something to show. || Vide pour le moment : cette section apparaît dès qu’il y a quelque chose à afficher. || Vacío por ahora: esta sección aparece en cuanto haya algo que mostrar.
+Voreinstellung || Preset || Préréglage || Ajuste predefinido
+Komplett || Complete || Complet || Completo
+Nur Karte und Fotos || Map and photos only || Carte et photos seulement || Solo mapa y fotos
+Alles außer Notizen || Everything except notes || Tout sauf les notes || Todo excepto notas
+Alles zeigen || Show everything || Tout afficher || Mostrar todo
+Was wird gezeigt? || What is shown? || Que montrer ? || ¿Qué se muestra?
+Notiz und Beschreibung || Note and description || Note et description || Nota y descripción
+Pulsverlauf || Heart rate curve || Courbe de fréquence cardiaque || Curva de pulso
+Dieser Link zeigt: || This link shows: || Ce lien montre : || Este enlace muestra:
+Auswertung, Uhr-Daten und Vergleiche sind nie Teil eines Links. || Analysis, watch data and comparisons are never part of a link. || L’analyse, les données de la montre et les comparaisons ne font jamais partie d’un lien. || El análisis, los datos del reloj y las comparaciones nunca forman parte de un enlace.
+Notizen können Persönliches enthalten. Bitte vor dem Teilen prüfen. || Notes can contain personal details. Please check them before sharing. || Les notes peuvent contenir des informations personnelles. Veuillez les vérifier avant de partager. || Las notas pueden contener datos personales. Compruébalas antes de compartir.
+Zu dieser Tour gibt es keine Fotos. || There are no photos for this tour. || Il n’y a pas de photos pour ce parcours. || Esta ruta no tiene fotos.
+Bitte mindestens einen Inhalt wählen. || Please choose at least one item. || Veuillez choisir au moins un contenu. || Elige al menos un contenido.
+Anfang und Ende der Strecke ausblenden (300 m) || Hide the start and end of the track (300 m) || Masquer le début et la fin du tracé (300 m) || Ocultar el inicio y el final del trazado (300 m)
+7 Tage || 7 days || 7 jours || 7 días
+30 Tage || 30 days || 30 jours || 30 días
+Wähle, was Besucher des Links sehen – ohne Benutzerkonto. Was du nicht wählst, schickt der Server gar nicht erst mit. || Choose what visitors of the link see – no account needed. Whatever you do not choose is not even sent by the server. || Choisissez ce que les visiteurs du lien voient – sans compte. Ce que vous ne choisissez pas n’est même pas envoyé par le serveur. || Elige qué ven los visitantes del enlace, sin cuenta. Lo que no elijas ni siquiera lo envía el servidor.
+Wähle neu, was Besucher dieses Links sehen. Was du nicht wählst, schickt der Server gar nicht erst mit. || Choose again what visitors of this link see. Whatever you do not choose is not even sent by the server. || Choisissez à nouveau ce que les visiteurs de ce lien voient. Ce que vous ne choisissez pas n’est même pas envoyé par le serveur. || Elige de nuevo qué ven los visitantes de este enlace. Lo que no elijas ni siquiera lo envía el servidor.
+Auswahl ändern || Change selection || Modifier la sélection || Cambiar la selección
+Zeigt: || Shows: || Affiche : || Muestra:
+Tourlink || Tour link || Lien de parcours || Enlace de ruta
+Wind || Wind || Vent || Viento
+Auswahl konnte nicht gespeichert werden: {} || Selection could not be saved: {} || La sélection n’a pas pu être enregistrée : {} || No se pudo guardar la selección: {}
+Noch keine Links freigegeben. In einer Tour findest du „Senden“ und „Diashow senden“. || No links shared yet. In a tour you will find “Send” and “Send slideshow”. || Aucun lien partagé pour l’instant. Dans un parcours, vous trouverez « Envoyer » et « Envoyer le diaporama ». || Aún no hay enlaces compartidos. En una ruta encontrarás «Enviar» y «Enviar pase de fotos».
+öffnen kann – du wählst, was er zeigt (Karte, Höhenprofil, Fotos …). Er funktioniert nur, wenn dein Server von außen erreichbar ist, z. B. per VPN oder Reverse-Proxy. || can open – you choose what it shows (map, elevation profile, photos …). It only works if your server is reachable from outside, e.g. via VPN or reverse proxy. || peut ouvrir – vous choisissez ce qu’il montre (carte, profil d’altitude, photos …). Cela ne fonctionne que si votre serveur est joignable de l’extérieur, p. ex. par VPN ou reverse proxy. || puede abrir; tú eliges qué muestra (mapa, perfil de altitud, fotos …). Solo funciona si tu servidor es accesible desde fuera, p. ej. por VPN o proxy inverso.
+Neuen Link erstellen … || Create new link … || Créer un nouveau lien … || Crear un enlace nuevo …
+Du wählst, was der Link zeigt – und sendest ihn an WhatsApp, Signal, E-Mail … || You choose what the link shows – and send it to WhatsApp, Signal, e-mail … || Vous choisissez ce que le lien montre – et l’envoyez à WhatsApp, Signal, e-mail … || Eliges qué muestra el enlace y lo envías a WhatsApp, Signal, correo …
 `;

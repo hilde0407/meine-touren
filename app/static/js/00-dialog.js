@@ -1,5 +1,5 @@
 /* Einheitliche Dialoge statt confirm()/alert() (3.13.0).
-   uiConfirm({title, text, ok, cancel, danger, html})  -> Promise<boolean>
+   uiConfirm({title, text, ok, cancel, danger, html, onOpen(box, okButton)})  -> Promise<boolean>
    uiAlert({title, text, ok})                          -> Promise<void>
    Auch mit einem einfachen Text als Argument aufrufbar. Tastatur: Tab bleibt im Dialog, Esc = Abbrechen, Enter = Bestätigen (bei „danger“ nie von selbst:
    der Fokus startet dort auf „Abbrechen“). Der Hintergrund ist inert, der Fokus geht danach an den Auslöser zurück. Mehrere Aufrufe werden nacheinander gezeigt.
@@ -77,9 +77,9 @@
     };
     const key = e => {
       if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(false); }
-      else if (e.key === "Enter" && !o.danger && !(e.target instanceof HTMLButtonElement)) { e.preventDefault(); close(true); }
+      else if (e.key === "Enter" && !o.danger && !(e.target instanceof HTMLButtonElement) && !/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) { e.preventDefault(); close(true); }
       else if (e.key === "Tab") {                         // Fokus-Falle
-        const f = [...box.querySelectorAll("button")];
+        const f = [...box.querySelectorAll("button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])")];
         const i = f.indexOf(document.activeElement);
         if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
         else if (!e.shiftKey && (i === f.length - 1 || i < 0)) { e.preventDefault(); f[0].focus(); }
@@ -89,6 +89,7 @@
     bOk.onclick = () => close(true);
     if (bCancel) bCancel.onclick = () => close(false);
     host.addEventListener("mousedown", e => { if (e.target === host) close(false); });
+    if (typeof o.onOpen === "function") o.onOpen(box, bOk);   // 3.25.0: Dialog mit eigenen Bedienelementen (Auswahl lesen: auch nach dem Schließen am abgelösten Knoten)
     (o.danger && bCancel ? bCancel : bOk).focus();
   }
 

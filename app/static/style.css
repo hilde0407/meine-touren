@@ -1485,3 +1485,23 @@ body.sl-editing .tlw[data-hn=lade],body.sl-editing .tlw[data-hn=aus]{display:fle
 .hnpv2{display:grid;gap:6px}
 @media (max-width:640px){.hnbox{padding:10px 12px;gap:10px}.hnact .btn{flex:1 1 100%}.hnphs .btn{margin:6px 0 0}}
 @media (prefers-reduced-motion:no-preference){.tlw[data-hn=an] .hnbox{animation:hnin .25s ease-out}@keyframes hnin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}}
+
+/* =====================  3.25.0: Teilen mit Ansicht (Dialog „Was wird gezeigt?“ in 31-teilen.js, Link-Liste in 42-freigaben.js)  ===================== */
+.uibox:has(.shrdlg){width:min(560px,100%)}
+.shrdlg .shrfs{border:0;margin:14px 0 0;padding:0;min-width:0}
+.shrdlg legend{font:600 15px var(--b);color:var(--mut);padding:0;margin-bottom:6px}
+.shrdlg .slchips,.shrdlg .flchips{display:flex;flex-wrap:wrap;gap:8px}
+.shrdlg .slchip,.shrdlg .flchip{min-height:44px}
+.shrdlg .flchip.off{opacity:.55;cursor:not-allowed}
+.shrdlg .flchip.off input{cursor:not-allowed}
+.shrsum{margin:16px 0 4px;padding:10px 12px;background:var(--soft);border-left:4px solid var(--yellow);border-radius:6px;overflow-wrap:anywhere}
+.shrnote{margin:4px 0 0}
+.shrwarn{margin:8px 0 0;padding:8px 12px;background:#fbefc4;color:#5c4300;border-radius:6px;overflow-wrap:anywhere}
+@media (prefers-color-scheme:dark){.shrwarn{background:#3b3210;color:#f2d27a}}
+.shrwarn[hidden]{display:none}
+.shrck{display:flex;align-items:center;gap:10px;margin-top:16px;font:500 16px var(--b);min-height:44px}
+.shrck input{width:20px;height:20px;flex:none}
+.shrsel{display:block;margin-top:10px;font:500 16px var(--b)}
+.shrsel select{display:block;width:100%;min-height:44px;margin-top:4px;font-size:16px}
+.shrdlg input:focus-visible,.shrdlg select:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.lkzeigt{color:var(--ink)}

@@ -738,7 +738,8 @@ def test_share_send_button(page):
     page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
     page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.3.0', serverUrl: () => ''}")
     page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(1200)
-    page.evaluate("document.querySelector('#esnd').click()"); page.wait_for_function("() => window._sent", timeout=8000)
+    page.evaluate("document.querySelector('#esnd').click()"); page.wait_for_selector(".uidlg .shrdlg", timeout=8000)
+    page.locator(".uifoot .btn", has_text="Link erstellen").click(); page.wait_for_function("() => window._sent", timeout=8000)
     sent = page.evaluate("window._sent")
     assert "/s/" in sent and "km" in sent
     page.set_viewport_size({"width": 1280, "height": 900})

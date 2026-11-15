@@ -13,7 +13,7 @@ const TACT = [
     key: "share", icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7h14v-7"/></svg>`, label: "Teilen & Export", title: "Teilen & Export",
     items: [
       ["-", "Senden und Links"],
-      ["esnd", "Link senden", "Karte und Zahlen an WhatsApp, Signal, E-Mail …"],
+      ["esnd", "Link senden", "Du wählst, was der Link zeigt – und sendest ihn an WhatsApp, Signal, E-Mail …"],
       ["eshow", "Diashow senden", "Fotos als Diashow – ohne Benutzerkonto ansehbar"],
       ["shr", "Diashow-Link", "Link zur Foto-Diashow dieser Tour"],
       ["eshr", "Links verwalten", "Erzeugte Links ansehen, kopieren, widerrufen"],

@@ -31,23 +31,25 @@ VIEWS.links = async () => {
           ? list
               .map(x => {
                 const u = location.origin + "/s/" + x.token;
-                const type = x.photos == 2 ? "Diashow" : x.photos ? "Tour mit Fotos" : "Tour ohne Fotos";
+                const type = x.photos == 2 ? "Diashow" : "Tourlink";
+                const zeigt = x.photos == 2 ? "" : `<b>Zeigt:</b> ${esc(shrLabel(x.blocks))}`;
                 const info = [type, x.photos == 2 && x.best ? `beste ${x.best} Fotos` : "", x.trim ? "Anfang/Ende ausgeblendet" : "", x.photos == 2 ? `${x.views || 0} Aufrufe` : "", x.photos == 2 ? (x.comments ? "Kommentare erlaubt" : "ohne Kommentare") : ""].filter(Boolean).join(" · ");
                 return `<div class="panel mb12${dead(x) ? " mut" : ""}" data-t="${esc(x.token)}">
                   <div class="row" style="justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${x.tour_id && x.name ? `<a href="#/tour/${encodeURIComponent(x.tour_id)}">${esc(x.name)}</a>` : "<i>Tour gelöscht</i>"}</b><small class="mut">erstellt ${esc(fmtD(x.ts))}</small></div>
-                  <small class="mut">${esc(info)}</small><br><small class="${dead(x) ? "bad" : "mut"}">${esc(left(x))}</small>
+                  <small class="mut">${esc(info)}</small>${zeigt ? `<br><small class="lkzeigt" data-zeigt>${zeigt}</small>` : ""}<br><small class="${dead(x) ? "bad" : "mut"}">${esc(left(x))}</small>
                   <input readonly value="${esc(u)}" class="w100 mt8" data-act="select">
                   <div class="row wrap mt8">
                     <button class="btn sm" data-cp="${esc(u)}">Kopieren</button>
                     ${shareCanNative() ? `<button class="btn alt sm" data-sh="${esc(u)}" data-n="${esc(x.name || "")}">Senden</button>` : ""}
                     <a class="btn alt sm" href="${esc(u)}" target="_blank" rel="noopener">Öffnen</a>
                     <select data-d title="Laufzeit ab jetzt ändern"><option value="">Laufzeit ändern …</option><option value="7">7 Tage</option><option value="30">30 Tage</option><option value="365">1 Jahr</option><option value="0">Unbegrenzt</option></select>
+                    ${x.photos != 2 ? `<button class="btn alt sm" data-bl="1">Auswahl ändern</button>` : ""}
                     ${x.photos == 2 ? `<button class="btn alt sm" data-c="${x.comments ? 0 : 1}">${x.comments ? "Kommentare sperren" : "Kommentare erlauben"}</button>` : ""}
                     <button class="btn alt sm" data-rv="1">Widerrufen</button>
                   </div></div>`;
               })
               .join("")
-          : `<p class="mut">${all.length ? "Keine Links in dieser Auswahl." : "Noch keine Links freigegeben. In einer Tour findest du „Teilen“ und „Diashow senden“."}</p>`
+          : `<p class="mut">${all.length ? "Keine Links in dieser Auswahl." : "Noch keine Links freigegeben. In einer Tour findest du „Senden“ und „Diashow senden“."}</p>`
       }
       <p class="mut fs13">Widerrufene und abgelaufene Links zeigen sofort „nicht mehr gültig“. Einen Link zu verlängern geht auch nachträglich.</p>`;
     el.querySelectorAll("[data-f]").forEach(b => (b.onclick = () => { flt = b.dataset.f; draw(); }));
@@ -61,6 +63,12 @@ VIEWS.links = async () => {
     }));
     el.querySelectorAll("[data-sh]").forEach(b => (b.onclick = () => shareOut(b.dataset.n || "Meine Touren", b.dataset.n || "", b.dataset.sh)));
     el.querySelectorAll("[data-d]").forEach(s => (s.onchange = () => s.value !== "" && patch(s, {days: +s.value})));
+    el.querySelectorAll("[data-bl]").forEach(b => (b.onclick = async () => {
+      const x = all.find(y => y.token === tok(b));
+      const pick = await shrDialog({edit: true, blocks: x.blocks, hasPhotos: undefined});
+      if (!pick) return;
+      try { await patch(b, {blocks: pick.blocks}); } catch (e) { uiAlert("Auswahl konnte nicht gespeichert werden: " + e.message); }
+    }));
     el.querySelectorAll("[data-c]").forEach(b => (b.onclick = () => patch(b, {comments: +b.dataset.c})));
     el.querySelectorAll("[data-rv]").forEach(b => (b.onclick = async () => {
       if (!await uiConfirm({text: "Diesen Link widerrufen? Wer ihn hat, kann die Freigabe danach nicht mehr öffnen.", danger: true, ok: "Widerrufen"})) return;

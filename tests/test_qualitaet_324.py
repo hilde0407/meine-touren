@@ -24,8 +24,8 @@ def test_alle_skripte_in_der_startseite_und_im_cache_der_app():
 
 def test_service_worker_version_und_hinweise():
     sw = (ST / "sw.js").read_text(encoding="utf-8")
-    assert 'const V = "mt-v102"' in sw
+    assert 'const V = "mt-v103"' in sw
     from app import config
-    assert config.VERSION.startswith("3.24.1 · Meine Touren")
+    assert config.VERSION.startswith("3.25.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.24.1.md").read_text(encoding="utf-8")
     assert notes.startswith("# 3.24.1") and "2:60" in notes

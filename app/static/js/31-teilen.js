@@ -17,6 +17,63 @@ const shareCanNative = () => !!(window.MTApp || navigator.share);
 
 const tourShareText = t => `${t.name} – ${nf(t.km, 1)} km, ${nf(t.up_m || 0, 0)} m aufwärts, ${nf(t.h, 1)} h (${dateL(t.date)})`;
 
+/* =====================  3.25.0 Teilen mit Ansicht: Auswahl „Was wird gezeigt?“ (Dialog für neue Links und zum nachträglichen Ändern)  ===================== */
+const SHR_BLOCKS = [["karte", "Karte"], ["hoehe", "Höhenprofil"], ["zahlen", "Kennzahlen"], ["fotos", "Fotos"], ["notiz", "Notiz und Beschreibung"], ["wege", "Wegpunkte"], ["puls", "Pulsverlauf"], ["wetter", "Wetter"]];
+const SHR_ALL = SHR_BLOCKS.map(b => b[0]);
+const SHR_PRESETS = [["komplett", "Komplett", ["karte", "zahlen", "fotos"]], ["kf", "Nur Karte und Fotos", ["karte", "fotos"]],
+  ["ohne", "Alles außer Notizen", SHR_ALL.filter(k => k !== "notiz")], ["alles", "Alles zeigen", SHR_ALL]];
+const shrTL = x => (typeof window.TL === "function" ? window.TL(x) : x);
+const shrLabel = bl => (bl && bl.length ? SHR_BLOCKS.filter(b => bl.includes(b[0])).map(b => shrTL(b[1])).join(", ") : "–");
+const shrPref = (v) => {
+  try { if (v === undefined) return JSON.parse(localStorage.getItem("mt_shr") || "null"); localStorage.setItem("mt_shr", JSON.stringify(v)); } catch (e) {}
+  return null;
+};
+
+/* Dialog: liefert {blocks, trim, days} oder null (abgebrochen). edit = nur die Auswahl (bestehender Link). */
+async function shrDialog({blocks, edit, hasPhotos}) {
+  const pf = !edit && shrPref();
+  const st = {b: new Set(blocks || (pf && pf.blocks) || ["karte", "fotos"]), trim: pf && pf.trim === false ? false : true, days: pf && pf.days != null ? pf.days : 30};
+  const on = k => st.b.has(k);
+  const html = `<div class="shrdlg">
+    <p class="mut fs14">${edit ? "Wähle neu, was Besucher dieses Links sehen." : "Wähle, was Besucher des Links sehen – ohne Benutzerkonto."} Was du nicht wählst, schickt der Server gar nicht erst mit.</p>
+    <fieldset class="shrfs"><legend>Voreinstellung</legend><div class="slchips" data-shr="pre">${SHR_PRESETS.map(p => `<button type="button" class="slchip" data-p="${p[0]}" aria-pressed="false">${p[1]}</button>`).join("")}</div></fieldset>
+    <fieldset class="shrfs"><legend>Was wird gezeigt?</legend><div class="flchips" data-shr="blk">${SHR_BLOCKS.map(b => `<label class="flchip"><input type="checkbox" data-b="${b[0]}"> ${b[1]}</label>`).join("")}</div></fieldset>
+    <p class="shrsum" role="status" aria-live="polite"><b>Dieser Link zeigt:</b> <span data-shr="sum"></span></p>
+    <p class="shrnote mut fs13">Auswertung, Uhr-Daten und Vergleiche sind nie Teil eines Links.</p>
+    <p class="shrwarn fs14" data-shr="warn" hidden>Notizen können Persönliches enthalten. Bitte vor dem Teilen prüfen.</p>
+    <p class="shrwarn fs14" data-shr="nophoto" hidden>Zu dieser Tour gibt es keine Fotos.</p>
+    <p class="shrwarn fs14" data-shr="none" hidden>Bitte mindestens einen Inhalt wählen.</p>
+    ${edit ? "" : `<label class="shrck"><input type="checkbox" data-shr="trim"> Anfang und Ende der Strecke ausblenden (300 m)</label>
+    <label class="shrsel">Link gültig<select data-shr="days"><option value="7">7 Tage</option><option value="30">30 Tage</option><option value="0">Unbegrenzt (bis ich ihn widerrufe)</option></select></label>`}
+  </div>`;
+  const ok = await uiConfirm({
+    title: edit ? "Auswahl ändern" : "Tour teilen", html, ok: edit ? "Speichern" : "Link erstellen",
+    onOpen: (box, bOk) => {
+      const q = sel => box.querySelector(sel), qa = sel => [...box.querySelectorAll(sel)];
+      const sync = () => {
+        if (!on("karte")) st.b.delete("wege");
+        qa("[data-b]").forEach(i => { i.checked = on(i.dataset.b); i.disabled = i.dataset.b === "wege" && !on("karte"); i.closest("label").classList.toggle("off", i.disabled); });
+        qa("[data-p]").forEach(b => { const p = SHR_PRESETS.find(x => x[0] === b.dataset.p)[2]; b.setAttribute("aria-pressed", String(p.length === st.b.size && p.every(k => on(k)))); });
+        q('[data-shr="sum"]').textContent = shrLabel([...st.b]);
+        q('[data-shr="warn"]').hidden = !on("notiz");
+        q('[data-shr="nophoto"]').hidden = !(on("fotos") && hasPhotos === false);
+        q('[data-shr="none"]').hidden = st.b.size > 0;
+        bOk.disabled = st.b.size === 0;
+      };
+      qa("[data-b]").forEach(i => (i.onchange = () => { i.checked ? st.b.add(i.dataset.b) : st.b.delete(i.dataset.b); sync(); }));
+      qa("[data-p]").forEach(b => (b.onclick = () => { st.b = new Set(SHR_PRESETS.find(x => x[0] === b.dataset.p)[2]); sync(); }));
+      const tr = q('[data-shr="trim"]'), dy = q('[data-shr="days"]');
+      if (tr) { tr.checked = st.trim; tr.onchange = () => (st.trim = tr.checked); }
+      if (dy) { dy.value = String(st.days); dy.onchange = () => (st.days = +dy.value); }
+      sync();
+    },
+  });
+  if (!ok) return null;
+  const blocks2 = SHR_ALL.filter(k => st.b.has(k));
+  if (!edit) shrPref({blocks: blocks2, trim: st.trim, days: st.days});
+  return {blocks: blocks2, trim: st.trim, days: st.days};
+}
+
 /* Tour: Knopf „Teilen“ → Link (ohne Anmeldung) erzeugen und sofort an eine App senden */
 const _tour31 = VIEWS.tour;
 VIEWS.tour = async id => {
@@ -64,16 +121,19 @@ VIEWS.tour = async id => {
     const b = $("#esnd");
     b.disabled = true;
     try {
+      const pick = await shrDialog({hasPhotos: t.photos == null ? undefined : t.photos > 0});
+      if (!pick) return;
       const s = await api(`/api/tours/${encodeURIComponent(t.id)}/share`, {
         method: "POST",
         headers: {"content-type": "application/json"},
-        body: JSON.stringify({photos: false, trim: true}),
+        body: JSON.stringify({blocks: pick.blocks, trim: pick.trim, days: pick.days}),
       });
       await shareOut(t.name, tourShareText(t), location.origin + s.url);
     } catch (e) {
       uiAlert("Link konnte nicht erstellt werden: " + e.message);
+    } finally {
+      b.disabled = false;
     }
-    b.disabled = false;
   };
 };
 
