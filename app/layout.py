@@ -17,6 +17,12 @@ Gemeinsame Filterfelder in der Konfiguration (3.19.0, streng geprüft; unbekannt
   metrics  [count|km|up|h] angezeigte Kennzahlen         compare  Vorjahresvergleich an/aus    title  eigener Titel (höchstens 60 Zeichen)
   n        1…10 (Anzahl Einträge)                        basis  sport | all | year (Vergleichsbasis der Tourseite)
 Der Server speichert nur, was er prüfen kann (erlaubte Felder, Kennungen, Größe); welche Abschnitte es gibt, weiß die Oberfläche.
+Ansichten (3.21.0): Ein Dokument je Seitenschlüssel kann statt des Layouts auch ein Behälter mit mehreren benannten Ansichten sein:
+  {v: 2, views: [{id, name, layout: {…Layout-Dokument…}}], active: id, rules: {Sportart: id}}   (1 bis 12 Ansichten; „active“ = Standardansicht, „rules“ nur auf Tourseiten)
+  Das alte Format (ein Layout-Dokument) bleibt gültig und wird beim Lesen als eine Ansicht „Standard“ (Kennung „standard“) geliefert (GET: Feld „container“; Feld „layout“ bleibt, wie gespeichert).
+  Tourseite: Hauptseite und Auswertung sind zwei Schlüssel; die Ansichten (Kennungen, Namen, active, rules) werden von der Oberfläche in beiden Dokumenten gleich geführt,
+  der Inhalt (layout) steht je Schlüssel für sich. Maßgeblich für Namen, Standardansicht und Regeln ist „tour-haupt“.
+  POST /api/layout/check prüft eine Export-Datei (Ansicht als JSON) mit denselben Regeln wie beim Speichern und liefert das bereinigte Ergebnis oder klare Fehler.
 Betrachter dürfen lesen, bekommen aber immer den Standard (das Layout des Besitzers wird nicht übernommen) und dürfen nichts schreiben.
 """
 import json
@@ -46,6 +52,13 @@ RANGES = ("year", "y", "12m", "90d", "all")
 METRICS = ("count", "km", "up", "h")
 BASES = ("sport", "all", "year")
 MAX_TITLE = 60
+MAX_VIEWS = 12
+MAX_NAME = 40
+MAX_RULES = 40
+MAX_TOTAL = 150000                # Gesamtgröße eines Behälters mit allen Ansichten
+STD_ID = "standard"
+STD_NAME = "Standard"
+EXPORT_FORMAT = "meine-touren-ansicht"
 
 
 def _ids(v, name):
@@ -177,6 +190,120 @@ def clean(doc, key=None):
     return out
 
 
+def _name(x):
+    if not isinstance(x, str) or re.search(r"[\x00-\x1f\x7f<>]", x) or not 1 <= len(x.strip()) <= MAX_NAME:
+        raise HTTPException(400, f"Der Name einer Ansicht muss 1 bis {MAX_NAME} Zeichen lang sein (ohne Steuer- und Spitzklammern)")
+    return " ".join(x.split())
+
+
+def clean_container(doc, key=None):
+    """Prüft einen Behälter mit Ansichten und gibt die bereinigte Fassung zurück."""
+    extra = set(doc) - {"v", "views", "active", "rules"}
+    if extra:
+        raise HTTPException(400, "Unbekannte Felder: " + ", ".join(sorted(map(str, extra))))
+    vs = doc.get("views")
+    if not isinstance(vs, list) or not 1 <= len(vs) <= MAX_VIEWS:
+        raise HTTPException(400, f"Eine Seite hat 1 bis {MAX_VIEWS} Ansichten")
+    views, ids = [], set()
+    for x in vs:
+        if not isinstance(x, dict) or set(x) - {"id", "name", "layout"}:
+            raise HTTPException(400, "Ungültige Ansicht")
+        i = x.get("id")
+        if not isinstance(i, str) or not ID_RE.match(i):
+            raise HTTPException(400, "Ungültige Kennung einer Ansicht")
+        if i in ids:
+            raise HTTPException(400, "Doppelte Kennung einer Ansicht")
+        ids.add(i)
+        views.append({"id": i, "name": _name(x.get("name")), "layout": clean(x.get("layout") if x.get("layout") is not None else {}, key)})
+    act = doc.get("active", views[0]["id"])
+    if act not in ids:
+        raise HTTPException(400, "Die Standardansicht („active“) gibt es nicht")
+    out = {"v": 2, "views": views, "active": act}
+    if "rules" in doc:
+        r = doc["rules"]
+        if not isinstance(r, dict) or len(r) > MAX_RULES:
+            raise HTTPException(400, "„rules“ muss ein Objekt mit höchstens %d Regeln sein" % MAX_RULES)
+        if r and key == "uebersicht":
+            raise HTTPException(400, "Regeln nach Sportart gibt es nur auf der Tourseite")
+        for k, x in r.items():
+            if not isinstance(k, str) or not SPORT_RE.match(k):
+                raise HTTPException(400, "Ungültige Sportart in „rules“")
+            if x not in ids:
+                raise HTTPException(400, "Eine Regel verweist auf eine Ansicht, die es nicht gibt")
+        out["rules"] = dict(r)
+    if len(json.dumps(out, ensure_ascii=False)) > MAX_TOTAL:
+        raise HTTPException(400, "Die Ansichten sind zusammen zu groß")
+    return out
+
+
+def clean_any(doc, key=None):
+    """Altes Format (ein Layout-Dokument) oder Behälter mit Ansichten."""
+    if isinstance(doc, dict) and "views" in doc:
+        return clean_container(doc, key)
+    return clean(doc, key)
+
+
+def normalize(stored):
+    """Gespeichertes Dokument (altes oder neues Format) als Behälter; None, wenn nichts gespeichert ist."""
+    if not isinstance(stored, dict):
+        return None
+    if isinstance(stored.get("views"), list):
+        return stored
+    return {"v": 2, "views": [{"id": STD_ID, "name": STD_NAME, "layout": stored}], "active": STD_ID, "rules": {}}
+
+
+def _stats(lay):
+    return {"order": len(lay.get("order", [])), "hidden": len(lay.get("hidden", [])), "widgets": len(lay.get("widgets", [])), "types": sorted({w["type"] for w in lay.get("widgets", [])})}
+
+
+def check_export(doc):
+    """Prüft die Export-Datei einer Ansicht. Rückgabe: {ok, errors, ignored, name, page, layouts, stats}; Fehler machen die Datei unbrauchbar, Unbekanntes auf oberster Ebene wird ignoriert."""
+    errors, ignored, layouts = [], [], {}
+    res = {"ok": False, "errors": errors, "ignored": ignored, "name": "", "page": "", "layouts": layouts, "stats": {}}
+    if not isinstance(doc, dict):
+        errors.append("Die Datei enthält kein JSON-Objekt.")
+        return res
+    if doc.get("format") != EXPORT_FORMAT:
+        errors.append("Das ist keine Datei mit einer exportierten Ansicht aus „Meine Touren“.")
+        return res
+    fv = doc.get("format_version")
+    if isinstance(fv, bool) or not isinstance(fv, int) or fv < 1:
+        errors.append("Die Formatversion der Datei fehlt oder ist ungültig.")
+        return res
+    if fv > 1:
+        errors.append(f"Die Datei stammt aus einer neueren Version von „Meine Touren“ (Format {fv}) und kann hier nicht gelesen werden.")
+        return res
+    page = doc.get("page")
+    if page not in ("tour", "uebersicht"):
+        errors.append("Die Datei nennt keine gültige Seite (erlaubt: tour, uebersicht).")
+        return res
+    res["page"] = page
+    try:
+        res["name"] = _name(doc.get("name"))
+    except HTTPException as e:
+        errors.append(e.detail)
+    keys = ("tour-haupt", "tour-auswertung") if page == "tour" else ("uebersicht",)
+    lays = doc.get("layouts")
+    if not isinstance(lays, dict):
+        errors.append("Die Datei enthält keine Layouts.")
+        return res
+    for k in lays:
+        if k not in keys:
+            ignored.append(f"Unbekannter Eintrag „{str(k)[:40]}“ in den Layouts wird ignoriert.")
+    for k in keys:
+        try:
+            layouts[k] = clean(lays.get(k) if lays.get(k) is not None else {}, k)
+            res["stats"][k] = _stats(layouts[k])
+        except HTTPException as e:
+            errors.append(f"{k}: {e.detail}")
+    for k in set(doc) - {"format", "format_version", "app_version", "page", "name", "exported", "layouts"}:
+        ignored.append(f"Unbekanntes Feld „{str(k)[:40]}“ wird ignoriert.")
+    res["ok"] = not errors
+    if errors:
+        res["layouts"] = {}
+    return res
+
+
 def _key(k):
     if k not in KEYS:
         raise HTTPException(404, "Unbekannte Seite")
@@ -192,15 +319,15 @@ def _viewer(request: Request):
 def get_layout(page_key: str, request: Request):
     _key(page_key)
     if _viewer(request):
-        return {"key": page_key, "layout": None, "ts": None, "default": True}
+        return {"key": page_key, "layout": None, "container": None, "ts": None, "default": True}
     r = db.one("SELECT json,ts FROM user_layout WHERE page_key=?", (page_key,))
     if not r:
-        return {"key": page_key, "layout": None, "ts": None}
+        return {"key": page_key, "layout": None, "container": None, "ts": None}
     try:
         lay = json.loads(r["json"])
     except ValueError:
         lay = None
-    return {"key": page_key, "layout": lay, "ts": r["ts"]}
+    return {"key": page_key, "layout": lay, "container": normalize(lay), "ts": r["ts"]}
 
 
 @router.put("/api/layout/{page_key}")
@@ -209,19 +336,39 @@ async def put_layout(page_key: str, request: Request):
     if _viewer(request):
         raise HTTPException(403, "Dieser Zugang darf nur ansehen")
     raw = await request.body()
-    if len(raw) > MAX_BYTES * 2:
-        raise HTTPException(413, "Das Layout ist zu groß")
     try:
         body = json.loads(raw or b"null")
     except ValueError:
+        if len(raw) > MAX_BYTES * 2:
+            raise HTTPException(413, "Das Layout ist zu groß")
         raise HTTPException(400, "Kein gültiges JSON")
     if isinstance(body, dict) and isinstance(body.get("layout"), dict) and set(body) <= {"layout", "key", "ts"}:
         body = body["layout"]                          # {"layout": {...}} wird wie das Dokument selbst angenommen
-    lay = clean(body, page_key)
+    if len(raw) > (MAX_TOTAL + 20000 if isinstance(body, dict) and "views" in body else MAX_BYTES * 2):
+        raise HTTPException(413, "Das Layout ist zu groß")
+    lay = clean_any(body, page_key)
     ts = int(time.time())
     db.execute("INSERT INTO user_layout(page_key,json,ts) VALUES(?,?,?) ON CONFLICT(page_key) DO UPDATE SET json=excluded.json, ts=excluded.ts",
                (page_key, json.dumps(lay, ensure_ascii=False, separators=(",", ":")), ts))
     return {"ok": True, "key": page_key, "layout": lay, "ts": ts}
+
+
+@router.post("/api/layout/check")
+async def post_check(request: Request):
+    if _viewer(request):
+        raise HTTPException(403, "Dieser Zugang darf nur ansehen")
+    raw = await request.body()
+    if len(raw) > 2 * MAX_BYTES * 2 + 2000:
+        r = check_export(None)
+        r["errors"] = ["Die Datei ist zu groß für eine Ansicht."]
+        return r
+    try:
+        doc = json.loads(raw or b"null")
+    except ValueError:
+        r = check_export(None)
+        r["errors"] = ["Die Datei ist kein gültiges JSON."]
+        return r
+    return check_export(doc)
 
 
 @router.delete("/api/layout/{page_key}")

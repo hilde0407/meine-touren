@@ -52,7 +52,77 @@ const SL_EL = {
   },
   uebersicht: {aufmacher: () => $("#hlast"), jahr: () => $("#hyear"), zuletzt: () => $("#hrecent"), tag: () => $("#htag"), erinn: () => $("#hmemsec")},
 };
-const SL = {docs: {}, loaded: {}, edit: false, dirty: new Set(), fam: "tour", page: "haupt", present: [], timer: null, focus: null, drag: null};
+/* 3.21.0 Ansichten: SL.store[Schlüssel] = Behälter {views:[{id,name,layout}], active, rules} (so liegt er auf dem Server); SL.docs[Schlüssel] = Layout der gerade angezeigten Ansicht
+   (damit arbeitet der ganze übrige Code unverändert); SL.view[fam] = Kennung der angezeigten Ansicht; SL.manual[fam] = in dieser Sitzung von Hand gewählte Ansicht (vor den Regeln). */
+const SL = {docs: {}, store: {}, view: {}, manual: {}, sport: {}, loaded: {}, edit: false, dirty: new Set(), fam: "tour", page: "haupt", present: [], timer: null, focus: null, drag: null};
+const SL_STD = "standard";
+const SL_MAXV = 12;
+const slBlank = () => ({v: 2, views: [{id: SL_STD, name: "Standard", layout: {v: 1}}], active: SL_STD, rules: {}});
+/* Gespeichertes (Server, Zwischenspeicher; altes Format = ein Layout-Dokument) als Behälter, unbrauchbares als null */
+function slNorm(x) {
+  if (!x || typeof x !== "object" || Array.isArray(x)) return null;
+  if (!Array.isArray(x.views)) return {v: 2, views: [{id: SL_STD, name: "Standard", layout: x}], active: SL_STD, rules: {}};
+  const ids = new Set(), views = [];
+  x.views.forEach(v => {
+    if (v && typeof v.id === "string" && !ids.has(v.id) && views.length < SL_MAXV) {
+      ids.add(v.id);
+      views.push({id: v.id, name: String(v.name || "Ansicht").slice(0, 40), layout: v.layout && typeof v.layout === "object" ? v.layout : {v: 1}});
+    }
+  });
+  if (!views.length) return null;
+  const rules = {};
+  Object.entries(x.rules || {}).forEach(([k, id]) => ids.has(id) && (rules[k] = id));
+  return {v: 2, views, active: ids.has(x.active) ? x.active : views[0].id, rules};
+}
+const slStore = k => SL.store[k] || (SL.store[k] = slBlank());
+const slMaster = fam => slStore(slKeys(fam)[0]);
+const slTrivial = st => st.views.length === 1 && st.views[0].id === SL_STD && st.views[0].name === "Standard" && !Object.keys(st.rules || {}).length;
+const slLayEmpty = l => !l || !Object.keys(l).some(x => x !== "v");
+const slSsKey = fam => "mt_slv_" + slUid() + "_" + fam;
+const slManual = fam => {
+  if (SL.manual[fam] === undefined) {
+    try {
+      SL.manual[fam] = sessionStorage.getItem(slSsKey(fam)) || "";
+    } catch (e) {
+      SL.manual[fam] = "";
+    }
+  }
+  return SL.manual[fam];
+};
+function slSetManual(fam, id) {
+  SL.manual[fam] = id || "";
+  try {
+    if (id) sessionStorage.setItem(slSsKey(fam), id);
+    else sessionStorage.removeItem(slSsKey(fam));
+  } catch (e) {}
+}
+/* Tourseite: die zweite Datei führt dieselben Ansichten wie die erste (Kennungen, Namen, Standard, Regeln); der Inhalt je Schlüssel bleibt eigen */
+function slAlign(fam) {
+  if (fam !== "tour") return;
+  const m = slMaster(fam), s = slStore("tour-auswertung");
+  s.views = m.views.map(v => {
+    const o = s.views.find(x => x.id === v.id);
+    return {id: v.id, name: v.name, layout: o ? o.layout : {v: 1}};
+  });
+  s.active = m.active;
+  s.rules = {...(m.rules || {})};
+}
+/* Wählt die anzuzeigende Ansicht: von Hand gewählt (diese Sitzung) vor Regel der Sportart vor Standardansicht, und setzt SL.docs auf ihr Layout */
+function slResolve(fam, sport) {
+  if (sport !== undefined) SL.sport[fam] = sport;
+  slAlign(fam);
+  const m = slMaster(fam), has = id => !!id && m.views.some(v => v.id === id);
+  const man = slManual(fam), rule = fam === "tour" ? (m.rules || {})[SL.sport[fam]] : "";
+  const id = has(man) ? man : has(rule) ? rule : has(m.active) ? m.active : m.views[0].id;
+  SL.view[fam] = id;
+  slKeys(fam).forEach(k => {
+    const v = slStore(k).views.find(x => x.id === id), l = v && v.layout;
+    if (l && !slLayEmpty(l)) SL.docs[k] = l;
+    else delete SL.docs[k];
+  });
+  return id;
+}
+const slViewName = (fam, id) => ((slMaster(fam).views.find(v => v.id === id) || {}).name || "");
 const slCan = () => !(typeof isViewer === "function" && isViewer());
 const slUid = () => {
   try {
@@ -147,37 +217,41 @@ async function slFetch(k) {
   const r = await fetch("/api/layout/" + k, {credentials: "same-origin"});
   if (!r.ok) throw new Error(String(r.status));
   const j = await r.json();
-  return j && j.layout && typeof j.layout === "object" ? j.layout : null;
+  return slNorm(j && j.container);
 }
 /* Beim ersten Aufruf: Zwischenspeicher dieses Geräts sofort nutzen und im Hintergrund abgleichen; ohne Zwischenspeicher höchstens 1,5 s auf den Server warten (nie blockieren) */
 async function slEnsure(fam) {
   const keys = slKeys(fam);
   if (!slCan()) {
-    keys.forEach(k => delete SL.docs[k]);
+    keys.forEach(k => {
+      delete SL.docs[k];
+      delete SL.store[k];
+    });
     return;
   }
   const first = !SL.loaded[fam];
   if (first)
     keys.forEach(k => {
-      const c = slReadCache(k);
-      if (c) SL.docs[k] = c;
+      const c = slNorm(slReadCache(k));
+      if (c) SL.store[k] = c;
     });
   const pull = Promise.all(keys.map(k => slFetch(k).then(d => [k, d]).catch(() => null))).then(rs => {
     let changed = false;
     rs.forEach(r => {
       if (!r || SL.dirty.has(r[0])) return;
       const [k, d] = r;
-      if (JSON.stringify(d) !== JSON.stringify(SL.docs[k] || null)) {
-        if (d) SL.docs[k] = d;
-        else delete SL.docs[k];
+      if (JSON.stringify(d || slBlank()) !== JSON.stringify(SL.store[k] || slBlank())) {
+        if (d) SL.store[k] = d;
+        else delete SL.store[k];
         slWriteCache(k, d);
         changed = true;
       }
     });
+    if (changed) slResolve(fam);
     return changed;
   });
   SL.loaded[fam] = true;
-  if (first && !keys.some(k => SL.docs[k])) await Promise.race([pull, new Promise(r => setTimeout(r, 1500))]);
+  if (first && !keys.some(k => SL.store[k])) await Promise.race([pull, new Promise(r => setTimeout(r, 1500))]);
   else pull.then(ch => ch && SL.fam === fam && slApply());
 }
 function slStatus(text, bad) {
@@ -186,10 +260,22 @@ function slStatus(text, bad) {
   s.textContent = text;
   s.dataset.state = bad ? "bad" : text === "Gespeichert" ? "ok" : "busy";
 }
+/* Layout der angezeigten Ansicht in den Behälter übernehmen (vor dem Speichern und vor jeder Änderung der Ansichten) */
+function slSync(k) {
+  const fam = k === "uebersicht" ? "uebersicht" : "tour", v = slStore(k).views.find(x => x.id === SL.view[fam]);
+  if (v) v.layout = SL.docs[k] || {};                       // {} (ohne „v“) = nichts gespeichert (Standard wiederhergestellt): bei unveränderter Standardansicht wird das Dokument gelöscht
+}
+/* Was auf den Server geht: unveränderter Standard = wie bisher das Layout-Dokument selbst (oder löschen, wenn leer), sonst der Behälter */
+function slPack(k) {
+  const st = slStore(k);
+  if (slTrivial(st)) return st.views[0].layout && Object.keys(st.views[0].layout).length ? st.views[0].layout : null;
+  return {v: 2, views: st.views, active: st.active, rules: st.rules || {}};
+}
 function slTouch(...keys) {
   keys.forEach(k => {
+    slSync(k);
     SL.dirty.add(k);
-    slWriteCache(k, SL.docs[k] || null);
+    slWriteCache(k, slStore(k));
   });
   slStatus("Speichert …");
   clearTimeout(SL.timer);
@@ -203,7 +289,7 @@ async function slFlush() {
   let ok = true;
   for (const k of keys) {
     try {
-      const d = SL.docs[k],
+      const d = slPack(k),
         r = await fetch("/api/layout/" + k, d ? {method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(d), credentials: "same-origin"} : {method: "DELETE", credentials: "same-origin"});
       if (!r.ok) throw new Error(String(r.status));
     } catch (e) {
@@ -388,7 +474,9 @@ function slSetCfg(id, cfg) {
 async function slReset() {
   const ok = await uiConfirm({
     title: "Standard wiederherstellen?",
-    text: SL.fam === "tour"
+    text: slMaster(SL.fam).views.length > 1
+      ? "Alles in dieser Ansicht wird auf den Standard zurückgesetzt: Reihenfolge, ausgeblendete Abschnitte und alle hinzugefügten Bausteine. Andere Ansichten bleiben unverändert."
+      : SL.fam === "tour"
       ? "Reihenfolge, ausgeblendete Abschnitte, Seitenzuordnung und alle hinzugefügten Bausteine der Tourseite (Hauptseite und Auswertung) werden zurückgesetzt."
       : "Reihenfolge, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Übersicht werden zurückgesetzt.",
     ok: "Standard wiederherstellen",
@@ -685,7 +773,10 @@ function slOpener(root, edit) {
     w.className = "slopen";
     w.innerHTML = `<button type="button" class="btn ghost sm" id="slopen" data-a="edit">${slIcon.sliders}<span>Seite anpassen</span></button>`;
   }
+  const b = w.querySelector("#slopen");
+  b.hidden = !!edit;
   w.hidden = !!edit;
+  if (typeof slViewPick === "function" && slViewPick(w)) w.hidden = false;                // 3.21.0: Ansichten-Auswahl bleibt auch im Bearbeitungsmodus stehen
   if (!root.matches("main.home") && w.nextElementSibling !== root) root.parentNode.insertBefore(w, root);
   return root.matches("main.home") ? w : null;
 }
@@ -731,8 +822,8 @@ function slBar(on) {
   b.innerHTML =
     `<p class="slsr" id="slhint">Zum Verschieben ziehen oder Pfeil hoch bzw. Pfeil runter drücken.</p>` +
     `<div class="slsr" id="sllive" aria-live="polite" aria-atomic="true"></div>` +
-    `<p class="slbi"><b>Seite anpassen</b><span class="slsaved" id="slsaved" role="status" aria-live="polite"></span></p>` +
-    `<div class="slbb"><button type="button" class="btn ghost sm" data-a="add">Baustein hinzufügen</button><button type="button" class="btn ghost sm" data-a="reset">Standard wiederherstellen</button><button type="button" class="btn sm" data-a="done">Fertig</button></div>`;
+    `<p class="slbi"><b>Seite anpassen</b><span class="slvn" id="slvn"></span><span class="slsaved" id="slsaved" role="status" aria-live="polite"></span></p>` +
+    `<div class="slbb"><button type="button" class="btn ghost sm" data-a="views" aria-haspopup="dialog">Ansichten</button><button type="button" class="btn ghost sm" data-a="add">Baustein hinzufügen</button><button type="button" class="btn ghost sm" data-a="reset">Standard wiederherstellen</button><button type="button" class="btn sm" data-a="done">Fertig</button></div>`;
   document.body.appendChild(b);
 }
 function slEdit(on) {
@@ -953,6 +1044,7 @@ document.addEventListener("click", e => {
     const a = bar.dataset.a;
     if (a === "done") slEdit(false);
     else if (a === "add") slCatalog();
+    else if (a === "views" && typeof slViewsDialog === "function") slViewsDialog();
     else if (a === "reset") slReset();
     return;
   }
@@ -1075,6 +1167,7 @@ VIEWS.tour = async (...a) => {
   const tok = window._rt;
   await slEnsure("tour");
   if (tok !== window._rt) return STALE();                            // inzwischen eine andere Seite geöffnet
+  slResolve("tour", (BY[a[0]] || {}).sport);                          // 3.21.0: Ansicht wählen (von Hand gewählt, Regel der Sportart oder Standardansicht)
   await _tour49(...a);
 };
 const _aus49 = VIEWS.tourauswertung;
@@ -1083,6 +1176,7 @@ VIEWS.tourauswertung = async (...a) => {
   const tok = window._rt;
   await slEnsure("tour");
   if (tok !== window._rt) return STALE();                            // inzwischen eine andere Seite geöffnet
+  slResolve("tour", (BY[a[0]] || {}).sport);
   await _aus49(...a);
 };
 const _dash49 = VIEWS.dash;
@@ -1091,6 +1185,7 @@ VIEWS.dash = async (...a) => {
   const tok = window._rt;
   await slEnsure("uebersicht");
   if (tok !== window._rt) return STALE();                            // inzwischen eine andere Seite geöffnet
+  slResolve("uebersicht");
   await _dash49(...a);
   const m = document.getElementById("main");
   if (m && m.classList.contains("home") && m.querySelector("#hlast")) slPlace(m);

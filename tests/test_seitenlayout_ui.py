@@ -294,7 +294,7 @@ def test_default_open_switch(pw, app):
         assert sw.is_checked()
         sw.uncheck()
         pg.wait_for_function("() => !document.querySelector('#tls-wp').open", timeout=T)
-        pg.wait_for_function("() => (JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => /^mt_sl_.*_tour-haupt$/.test(k))) || '{}').closed || []).includes('wp')", timeout=T)
+        pg.wait_for_function("() => ((JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => /^mt_sl_.*_tour-haupt$/.test(k))) || '{}').views || [{}])[0].layout || {}).closed.includes('wp')", timeout=T)
         pg.locator("#slbar").get_by_role("button", name="Fertig").click()
         pg.reload()
         pg.wait_for_selector("#wpcard", timeout=T)

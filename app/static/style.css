@@ -1324,3 +1324,53 @@ html.mob main.home{gap:26px 20px}
   .slit.slcell:not(.w-voll).sl-before::before{top:-12px;bottom:auto}
   .slit.slcell:not(.w-voll).sl-after::after{bottom:-12px;top:auto}
 }
+
+/* ===== 3.21.0 Ansichten: Auswahl in der Kopfzeile, Verwaltung, Vorlagen, Import ===== */
+.slopen{flex-wrap:wrap;align-items:center;gap:8px 12px}
+.slvw{display:inline-flex;align-items:center;gap:8px;min-width:0;max-width:100%;font:600 15px var(--b);color:var(--ink)}
+.slvs{min-height:40px;min-width:0;max-width:min(60vw,320px);padding:4px 30px 4px 12px;font:600 15px var(--b);border:1.5px solid var(--rule);background-color:var(--card);color:var(--ink);cursor:pointer;text-overflow:ellipsis}
+.slvs:hover{border-color:var(--ink)}
+.slvs:focus-visible,.slvadd .btn:focus-visible,.slimpbar .btn:focus-visible,.slvrg select:focus-visible,#slvname:focus-visible,#slimpname:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.slvn{font:500 14px var(--b);color:var(--mut)}
+.slbox.slvws,.slbox.slimp{width:min(680px,100%)}
+.slvin{margin:0 0 12px;font-size:15px}
+.slvl{display:flex;flex-direction:column;gap:10px;margin:0 0 14px;padding:0;list-style:none}
+.slvr{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:1.5px solid var(--rule);border-radius:var(--r-l);background:var(--card)}
+.slvr.cur{border-color:var(--ink)}
+.slvh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-width:0}
+.slvnm{flex:0 1 auto;min-width:0;font:700 18px var(--d);overflow-wrap:anywhere}
+.slvbd{padding:1px 10px;border:1.5px solid var(--ink);border-radius:99px;font:600 14px var(--b);white-space:nowrap}
+.slvbd.on{background:var(--ink);color:var(--card)}
+.slvbt{display:flex;flex-wrap:wrap;gap:6px 8px}
+.slvbt .slb:disabled{opacity:.55;cursor:default}
+.slvadd,.slimpgo{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 6px}
+.slvadd .btn,.slimpgo .btn,.slimpbar .btn{min-height:40px}
+.slvmax{margin:6px 0 0;font-size:15px}
+.slvru{margin:18px 0 0;padding-top:14px;border-top:1.5px solid var(--rule)}
+.slvru h3{margin:0 0 6px;font:700 20px var(--d)}
+.slvrg{display:grid;grid-template-columns:minmax(0,max-content) minmax(0,1fr);align-items:center;gap:8px 14px}
+.slvrl{font:600 16px var(--b)}
+.slvrg select{min-height:40px;width:100%;font-size:16px;cursor:pointer}
+.slvt{grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))}
+.slvpv{max-width:200px;margin:0 auto}
+.slvcont{font-size:14px}
+.slvcont span{font-weight:600}
+.slimpbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 12px}
+.slimpf{min-width:0;font-size:15px;overflow-wrap:anywhere}
+.slimpres h3{margin:0 0 6px;font:700 18px var(--d)}
+.slimpres p,.slimpres ul{margin:0 0 8px;font-size:15px}
+.slimpres ul{padding-left:20px}
+.slimpbad{padding:10px 14px;border:1.5px solid var(--ink);border-left-width:6px;border-radius:var(--r-l);background:var(--card)}
+.slimpok .slfs{margin-top:10px}
+.slimphint{margin:6px 0 0;font-size:14px}
+#slvname,#slimpname{width:100%;box-sizing:border-box}
+@media (max-width:700px){
+  .slopen{justify-content:space-between}
+  .slvw{flex:1 1 200px}
+  .slvs{flex:1 1 auto;max-width:100%}
+  .slvbt .slb{min-height:44px}
+  .slvadd .btn,.slimpgo .btn,.slimpbar .btn{min-height:44px}
+  .slvrg{grid-template-columns:minmax(0,1fr)}
+  .slvrl{margin-top:4px}
+}
+@media print{.slvw{display:none!important}}

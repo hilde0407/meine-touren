@@ -1889,4 +1889,93 @@ Woche ab {} || Week from {} || Semaine à partir du {} || Semana desde el {}
 Die zuletzt gemachten Touren (3 bis 10, wählbar, auch nur einer Aktivität) als Liste mit Link. || The most recent tours (3 to 10, selectable, optionally of one activity only) as a list with links. || Les derniers parcours (3 à 10, au choix, éventuellement d’une seule activité) sous forme de liste avec lien. || Las últimas rutas (de 3 a 10, a elegir, también de una sola actividad) como lista con enlace.
 Touren, Kilometer, Höhenmeter und Stunden mit Monatssäulen und Vorjahresvergleich, wählbar nach Aktivität und Zeitraum. In der Übersicht steht „Dein Jahr“ schon; hier kannst du weitere mit anderem Filter hinzufügen. || Tours, kilometres, elevation gain and hours with monthly columns and a comparison with the previous year, selectable by activity and period. “Your year” is already on the overview; here you can add more with a different filter. || Parcours, kilomètres, dénivelé et heures avec colonnes mensuelles et comparaison avec l’année précédente, au choix par activité et période. « Votre année » figure déjà dans l’aperçu ; vous pouvez en ajouter d’autres avec un autre filtre. || Rutas, kilómetros, desnivel y horas con columnas mensuales y comparación con el año anterior, a elegir por actividad y periodo. «Tu año» ya está en el resumen; aquí puedes añadir más con otro filtro.
 Mit diesem Filter gab es dafür zu wenige Touren. || There were too few tours for this with this filter. || Il y avait trop peu de parcours pour cela avec ce filtre. || Con este filtro hubo muy pocas rutas para esto.
+Ansicht || View || Vue || Vista
+Ansichten || Views || Vues || Vistas
+Ansicht: {} || View: {} || Vue : {} || Vista: {}
+Automatisch ({}) || Automatic ({}) || Automatique ({}) || Automática ({})
+Eine Ansicht ist eine gespeicherte Anordnung dieser Seite ({}). Die Standardansicht erscheint, wenn nichts anderes gewählt ist. || A view is a saved arrangement of this page ({}). The default view appears when nothing else is chosen. || Une vue est une disposition enregistrée de cette page ({}). La vue par défaut s’affiche quand rien d’autre n’est choisi. || Una vista es una disposición guardada de esta página ({}). La vista predeterminada aparece cuando no se elige otra.
+Tourseite || Tour page || Page du parcours || Página de la ruta
+Übersicht || Overview || Aperçu || Resumen
+Ansichten der {} || Views of the {} || Vues de la page {} || Vistas de la página {}
+Standardansicht || Default view || Vue par défaut || Vista predeterminada
+Angezeigt || Shown || Affichée || Mostrada
+Anzeigen: {} || Show: {} || Afficher : {} || Mostrar: {}
+Umbenennen: {} || Rename: {} || Renommer : {} || Renombrar: {}
+Duplizieren: {} || Duplicate: {} || Dupliquer : {} || Duplicar: {}
+Als Standard festlegen: {} || Set as default: {} || Définir par défaut : {} || Establecer como predeterminada: {}
+Exportieren: {} || Export: {} || Exporter : {} || Exportar: {}
+Löschen: {} || Delete: {} || Supprimer : {} || Eliminar: {}
+Anzeigen || Show || Afficher || Mostrar
+Duplizieren || Duplicate || Dupliquer || Duplicar
+Als Standard festlegen || Set as default || Définir par défaut || Establecer como predeterminada
+Exportieren || Export || Exporter || Exportar
+Neue Ansicht || New view || Nouvelle vue || Nueva vista
+Aus Vorlage … || From template … || À partir d’un modèle … || Desde una plantilla …
+Importieren … || Import … || Importer … || Importar …
+Mehr als {} Ansichten sind nicht möglich. Lösche zuerst eine. || No more than {} views are possible. Delete one first. || Pas plus de {} vues possibles. Supprimez-en d’abord une. || No son posibles más de {} vistas. Elimina una primero.
+Mehr als {} Ansichten sind nicht möglich. || No more than {} views are possible. || Pas plus de {} vues possibles. || No son posibles más de {} vistas.
+Mehr als {} Ansichten sind nicht möglich. Lösche zuerst eine Ansicht oder ersetze eine bestehende. || No more than {} views are possible. Delete a view first or replace an existing one. || Pas plus de {} vues possibles. Supprimez d’abord une vue ou remplacez-en une existante. || No son posibles más de {} vistas. Elimina una vista primero o sustituye una existente.
+Automatisch nach Sportart || Automatic by activity || Automatique selon l’activité || Automática según la actividad
+Beim Öffnen einer Tour wird die Ansicht der Sportart gezeigt. Ohne Zuordnung gilt die Standardansicht. Wer oben von Hand eine Ansicht wählt, behält sie für diese Sitzung. || When a tour is opened, the view assigned to its activity is shown. Without an assignment the default view applies. A view chosen by hand at the top stays for this session. || À l’ouverture d’un parcours, la vue de l’activité s’affiche. Sans attribution, la vue par défaut s’applique. Une vue choisie à la main en haut reste active pour cette session. || Al abrir una ruta se muestra la vista de su actividad. Sin asignación se aplica la vista predeterminada. Una vista elegida a mano arriba se mantiene durante esta sesión.
+Standardansicht ({}) || Default view ({}) || Vue par défaut ({}) || Vista predeterminada ({})
+Sobald es Touren gibt, kannst du hier Sportarten zuordnen. || Once there are tours, you can assign activities here. || Dès qu’il y a des parcours, vous pouvez attribuer des activités ici. || En cuanto haya rutas, podrás asignar actividades aquí.
+Ansicht „{}“ wird angezeigt || View “{}” is shown || La vue « {} » est affichée || Se muestra la vista «{}»
+Umbenannt in „{}“ || Renamed to “{}” || Renommée en « {} » || Renombrada a «{}»
+Ansicht „{}“ angelegt || View “{}” created || Vue « {} » créée || Vista «{}» creada
+„{}“ ist jetzt die Standardansicht || “{}” is now the default view || « {} » est maintenant la vue par défaut || «{}» es ahora la vista predeterminada
+Ansicht „{}“ exportiert || View “{}” exported || Vue « {} » exportée || Vista «{}» exportada
+Ansicht „{}“ gelöscht || View “{}” deleted || Vue « {} » supprimée || Vista «{}» eliminada
+Ansicht „{}“ importiert || View “{}” imported || Vue « {} » importée || Vista «{}» importada
+Ansicht „{}“ ersetzt || View “{}” replaced || Vue « {} » remplacée || Vista «{}» sustituida
+Ansicht „{}“ aus der Vorlage angelegt || View “{}” created from the template || Vue « {} » créée à partir du modèle || Vista «{}» creada desde la plantilla
+Ansicht „{}“ || View “{}” || Vue « {} » || Vista «{}»
+Ansicht löschen? || Delete view? || Supprimer la vue ? || ¿Eliminar la vista?
+Die Ansicht „{}“ wird gelöscht. Das lässt sich nicht rückgängig machen. Tipp: Mit „Exportieren“ kannst du sie vorher sichern. || The view “{}” will be deleted. This cannot be undone. Tip: use “Export” to back it up first. || La vue « {} » sera supprimée. Cette action est irréversible. Astuce : sauvegardez-la d’abord avec « Exporter ». || Se eliminará la vista «{}». No se puede deshacer. Consejo: guárdala antes con «Exportar».
+Ansicht umbenennen || Rename view || Renommer la vue || Renombrar vista
+Umbenennen || Rename || Renommer || Renombrar
+Anlegen || Create || Créer || Crear
+Name der Ansicht || Name of the view || Nom de la vue || Nombre de la vista
+Bitte einen Namen eingeben. || Please enter a name. || Veuillez saisir un nom. || Introduce un nombre.
+Spitze Klammern sind im Namen nicht erlaubt. || Angle brackets are not allowed in the name. || Les chevrons ne sont pas autorisés dans le nom. || No se permiten corchetes angulares en el nombre.
+Eine Ansicht mit diesem Namen gibt es schon. || A view with this name already exists. || Une vue portant ce nom existe déjà. || Ya existe una vista con ese nombre.
+Start mit || Start with || Commencer avec || Empezar con
+Kopie der angezeigten Ansicht || Copy of the current view || Copie de la vue affichée || Copia de la vista mostrada
+Standard-Anordnung || Default arrangement || Disposition par défaut || Disposición predeterminada
+Vorlage wählen || Choose a template || Choisir un modèle || Elegir una plantilla
+Eine Vorlage wird als neue Ansicht übernommen. Du kannst sie danach beliebig ändern; deine anderen Ansichten bleiben unberührt. || A template is adopted as a new view. You can change it freely afterwards; your other views stay untouched. || Un modèle est repris comme nouvelle vue. Vous pouvez ensuite le modifier librement ; vos autres vues restent intactes. || Una plantilla se adopta como vista nueva. Después puedes cambiarla libremente; tus otras vistas no se tocan.
+Als neue Ansicht übernehmen || Adopt as new view || Reprendre comme nouvelle vue || Adoptar como vista nueva
+{}: Als neue Ansicht übernehmen || {}: Adopt as new view || {} : Reprendre comme nouvelle vue || {}: Adoptar como vista nueva
+Wanderer || Hiker || Randonneur || Senderista
+Training || Training || Entraînement || Entrenamiento
+Kompakt || Compact || Compact || Compacto
+Wandern || Hiking || Randonnée || Senderismo
+Radtour / Training || Bike tour / training || Sortie vélo / entraînement || Ruta en bici / entrenamiento
+Für alle, die gern draußen sind: dein Jahresziel, Meilensteine, die Kalender-Heatmap, die letzten Touren und deine Rekorde. || For everyone who loves being outdoors: your yearly goal, milestones, the calendar heatmap, recent tours and your records. || Pour tous ceux qui aiment être dehors : votre objectif annuel, les jalons, la carte de chaleur du calendrier, les derniers parcours et vos records. || Para quienes disfrutan al aire libre: tu objetivo anual, hitos, el mapa de calor del calendario, las últimas rutas y tus récords.
+Für den Blick auf Form und Regelmäßigkeit: Belastung und Erholung, Wochen-Serie, diese Woche, Sportarten und der Jahresvergleich. || For a view of fitness and regularity: load and recovery, weekly streak, this week, activities and the year comparison. || Pour suivre forme et régularité : charge et récupération, série de semaines, cette semaine, activités et comparaison annuelle. || Para ver forma y regularidad: carga y recuperación, racha semanal, esta semana, actividades y comparación anual.
+Für den Blick zurück: Dein Jahr, der Jahres-Rückblick, Heute vor X Jahren, Wiederentdecken und deine Rekorde. || For looking back: Your year, the year review, X years ago today, Rediscover and your records. || Pour regarder en arrière : Votre année, la rétrospective annuelle, Il y a X ans aujourd’hui, Redécouvrir et vos records. || Para mirar atrás: Tu año, el resumen del año, Hace X años hoy, Redescubrir y tus récords.
+Wenig auf einen Blick: vier Bausteine in halber Breite, auf dem Handy untereinander. || Little at a glance: four blocks at half width, stacked on a phone. || Peu d’éléments en un coup d’œil : quatre blocs en demi-largeur, empilés sur téléphone. || Poco de un vistazo: cuatro bloques a media anchura, apilados en el móvil.
+Für Wanderungen: Karte und Höhenprofil, die Gipfel-Tafel, Tageslicht, Wetter und die Fotos der Tour. || For hikes: map and elevation profile, the summit table, daylight, weather and the photos of the tour. || Pour les randonnées : carte et profil d’altitude, tableau des sommets, lumière du jour, météo et photos du parcours. || Para excursiones: mapa y perfil de altitud, tabla de cumbres, luz diurna, tiempo y las fotos de la ruta.
+Für Rad und Training: Karte und Profil, Kilometer-Splits, Steigungs-Verteilung, Puls-Zonen, Bewegung und Pause und der Vergleich mit früheren Touren. || For cycling and training: map and profile, kilometre splits, gradient distribution, heart-rate zones, moving and resting time and the comparison with earlier tours. || Pour le vélo et l’entraînement : carte et profil, temps par kilomètre, répartition des pentes, zones de fréquence cardiaque, mouvement et pauses et comparaison avec des parcours précédents. || Para bici y entrenamiento: mapa y perfil, parciales por kilómetro, distribución de pendientes, zonas de pulso, movimiento y pausa y la comparación con rutas anteriores.
+Das Wichtigste auf einen Blick: Karte und Profil nebeneinander, darunter die Kennzahlen. || The essentials at a glance: map and profile side by side, key figures below. || L’essentiel en un coup d’œil : carte et profil côte à côte, les chiffres clés en dessous. || Lo esencial de un vistazo: mapa y perfil lado a lado, debajo las cifras clave.
+Ansicht importieren || Import view || Importer une vue || Importar vista
+Wähle eine Datei, die du mit „Exportieren“ gespeichert hast. Sie wird zuerst geprüft; erst danach entscheidest du, was übernommen wird. || Choose a file you saved with “Export”. It is checked first; only then you decide what is adopted. || Choisissez un fichier enregistré avec « Exporter ». Il est d’abord vérifié ; vous décidez ensuite de ce qui est repris. || Elige un archivo que guardaste con «Exportar». Primero se comprueba; solo después decides qué se adopta.
+Datei wählen … || Choose file … || Choisir un fichier … || Elegir archivo …
+Keine Datei gewählt || No file chosen || Aucun fichier choisi || Ningún archivo elegido
+Datei wird geprüft … || Checking file … || Vérification du fichier … || Comprobando el archivo …
+Die Datei kann nicht importiert werden || The file cannot be imported || Le fichier ne peut pas être importé || El archivo no se puede importar
+Es wurde nichts verändert. || Nothing was changed. || Rien n’a été modifié. || No se ha cambiado nada.
+Datei geprüft || File checked || Fichier vérifié || Archivo comprobado
+Name der neuen Ansicht || Name of the new view || Nom de la nouvelle vue || Nombre de la nueva vista
+Als neue Ansicht importieren || Import as new view || Importer comme nouvelle vue || Importar como vista nueva
+Bestehende Ansicht ersetzen … || Replace existing view … || Remplacer une vue existante … || Sustituir vista existente …
+Ansicht ersetzen? || Replace view? || Remplacer la vue ? || ¿Sustituir la vista?
+Die Ansicht „{}“ wird mit dem Inhalt der Datei überschrieben. Das lässt sich nicht rückgängig machen. || The view “{}” will be overwritten with the contents of the file. This cannot be undone. || La vue « {} » sera écrasée par le contenu du fichier. Cette action est irréversible. || La vista «{}» se sobrescribirá con el contenido del archivo. No se puede deshacer.
+Ersetzen || Replace || Remplacer || Sustituir
+Die Datei ist zu groß für eine Ansicht. || The file is too large for a view. || Le fichier est trop volumineux pour une vue. || El archivo es demasiado grande para una vista.
+Die Datei konnte nicht gelesen werden. || The file could not be read. || Le fichier n’a pas pu être lu. || No se pudo leer el archivo.
+Die Datei ist kein gültiges JSON. || The file is not valid JSON. || Le fichier n’est pas un JSON valide. || El archivo no es un JSON válido.
+Die Prüfung ist nicht möglich (keine Verbindung zum Server?). Es wurde nichts übernommen. || The check is not possible (no connection to the server?). Nothing was adopted. || La vérification est impossible (pas de connexion au serveur ?). Rien n’a été repris. || No se puede comprobar (¿sin conexión con el servidor?). No se ha adoptado nada.
+Diese Datei gehört zur Tourseite. Öffne dort „Seite anpassen“ → „Ansichten“, um sie zu importieren. || This file belongs to the tour page. Open “Customize page” → “Views” there to import it. || Ce fichier appartient à la page du parcours. Ouvrez-y « Personnaliser la page » → « Vues » pour l’importer. || Este archivo pertenece a la página de la ruta. Abre allí «Personalizar página» → «Vistas» para importarlo.
+Diese Datei gehört zur Übersicht. Öffne dort „Seite anpassen“ → „Ansichten“, um sie zu importieren. || This file belongs to the overview. Open “Customize page” → “Views” there to import it. || Ce fichier appartient à l’aperçu. Ouvrez-y « Personnaliser la page » → « Vues » pour l’importer. || Este archivo pertenece al resumen. Abre allí «Personalizar página» → «Vistas» para importarlo.
+Alles in dieser Ansicht wird auf den Standard zurückgesetzt: Reihenfolge, ausgeblendete Abschnitte und alle hinzugefügten Bausteine. Andere Ansichten bleiben unverändert. || Everything in this view is reset to the default: order, hidden sections and all added blocks. Other views stay unchanged. || Tout dans cette vue est rétabli par défaut : ordre, sections masquées et tous les blocs ajoutés. Les autres vues restent inchangées. || Todo en esta vista vuelve al estándar: orden, secciones ocultas y todos los bloques añadidos. Las demás vistas no cambian.
 `;
