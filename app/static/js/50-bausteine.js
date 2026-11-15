@@ -301,12 +301,14 @@ window.slWidgetBuild = (it, root) => {
   flHead(c, T, it.cfg || {});
   if (it.note && typeof stNoteAdd === "function") stNoteAdd(c, it.note);                    // 3.22.0 Statistikseite: „Filter gilt hier nicht“
   const body = tlBody(c);
+  if (T.hinweis) c.dataset.hn = "lade";                                                      // 3.23.0 Hinweis-Bausteine: bis die Daten da sind unsichtbar (58-bausteine-hinweise.js)
   body.innerHTML = '<p class="mut slnone">Wird geladen …</p>';
   const t = root && root.dataset && root.dataset.tid ? BY[root.dataset.tid] : null;
   Promise.resolve()
     .then(() => T.render(c, body, it.cfg || {}, {t}))
     .catch(() => {
       body.innerHTML = '<p class="mut slnone">Dieser Baustein konnte nicht geladen werden.</p>';
+      if (T.hinweis) c.dataset.hn = "aus";
     });
   return c;
 };

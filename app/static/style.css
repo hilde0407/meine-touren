@@ -1419,3 +1419,46 @@ html.mob .stz,html.mob #sch{flex-wrap:wrap;overflow:visible}
 .slmenu{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .slmenu .btn{min-height:44px;justify-content:center}
 @media (max-width:600px){.slbb .btn{flex:1 1 45%}}
+
+/* =====================  3.23.0: Hinweis-Bausteine („Alarm-Bausteine“, 58-bausteine-hinweise.js)  =====================
+   Zustand der Karte: data-hn = lade | aus | an. Unsichtbar (lade, aus) = display:none im normalen Modus, also kein Platz im Raster; im Bearbeitungsmodus ein gestrichelter Platzhalter.
+   Schweregrad: Symbol (Form), Wort und Farbe – nie nur Farbe. Farben als Variablen für hell und dunkel (Text mindestens 4,5:1). */
+:root{--hn-info:#17494a;--hn-info-bg:color-mix(in srgb,#17494a 9%,var(--card));--hn-hint:#6b4f00;--hn-hint-bg:color-mix(in srgb,var(--yellow) 26%,var(--card));--hn-warn:#9c322d;--hn-warn-bg:color-mix(in srgb,#b2443f 13%,var(--card))}
+@media (prefers-color-scheme:dark){:root{--hn-info:#9fd8cc;--hn-info-bg:color-mix(in srgb,#6fb5a5 15%,var(--card));--hn-hint:#f2d27a;--hn-hint-bg:color-mix(in srgb,var(--yellow) 20%,var(--card));--hn-warn:#f4a8a3;--hn-warn-bg:color-mix(in srgb,#b2443f 30%,var(--card))}}
+.tlw[data-hn=lade],.tlw[data-hn=aus]{display:none}
+body.sl-editing .tlw[data-hn=lade],body.sl-editing .tlw[data-hn=aus]{display:flex}
+.tlw[data-hn=aus]>details.tls,.tlw[data-hn=lade]>details.tls{border-style:dashed;border-width:2px;background:transparent}
+.hnphc{margin:0 0 6px;font:600 16px var(--b)}
+.hnphs{margin:0 0 6px;font-size:15px}
+.hnphs .btn{margin-left:8px;min-height:40px}
+.hnbox{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--rule);border-left:6px solid var(--hn-c,var(--hn-info));border-radius:var(--r);background:var(--hn-bg,var(--hn-info-bg));color:var(--ink);min-width:0}
+.hn-info{--hn-c:var(--hn-info);--hn-bg:var(--hn-info-bg);border-left-width:4px}
+.hn-hinweis{--hn-c:var(--hn-hint);--hn-bg:var(--hn-hint-bg);border-left-width:6px}
+.hn-warnung{--hn-c:var(--hn-warn);--hn-bg:var(--hn-warn-bg);border-left-width:9px}
+.hnsi{flex:none;width:26px;height:26px;margin-top:1px;fill:none;stroke:var(--hn-c);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hn-warnung .hnsi{fill:color-mix(in srgb,var(--hn-c) 18%,transparent)}
+.hnmain{flex:1 1 auto;min-width:0}
+.hnlbl{margin:0 0 4px;font:700 14px var(--b);letter-spacing:.04em;text-transform:uppercase;color:var(--hn-c)}
+.hnti{margin-left:6px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink)}
+.hnt{margin:0;font:600 16px/1.4 var(--b);overflow-wrap:anywhere}
+.hnsub{margin:4px 0 0;font-size:15px;overflow-wrap:anywhere}
+.hnmore{margin:6px 0 0;font-size:15px}
+.hnrows{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.hnrows li{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;font-size:16px;min-width:0;overflow-wrap:anywhere}
+.hnrows b{font:700 16px var(--b);font-variant-numeric:tabular-nums}
+.hnrows .hnt{flex:1 1 100%}
+.hnbar{margin:8px 0 0;max-width:420px}
+.hnbar .slbr{display:block;width:100%;height:10px}
+.hnbar .slbr-f.hnok,.hnbar .hnok .slbr-f{fill:var(--hn-info)}
+.hnact{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:10px 0 0;font-size:15px}
+.hnact a{font-weight:600}
+.hnact .btn,.hnbox .btn{min-height:40px}
+.hnbox a:focus-visible,.hnbox .btn:focus-visible,.hnphs .btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.hnlist{display:grid;gap:10px}
+.hnpv{padding:8px 10px;border-left-width:5px}
+.hnpv .hnsi{width:20px;height:20px}
+.hnpv .hnlbl{margin:0 0 2px;font-size:13px}
+.hnpv .hnt{font-size:14px;font-weight:500}
+.hnpv2{display:grid;gap:6px}
+@media (max-width:640px){.hnbox{padding:10px 12px;gap:10px}.hnact .btn{flex:1 1 100%}.hnphs .btn{margin:6px 0 0}}
+@media (prefers-reduced-motion:no-preference){.tlw[data-hn=an] .hnbox{animation:hnin .25s ease-out}@keyframes hnin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}}

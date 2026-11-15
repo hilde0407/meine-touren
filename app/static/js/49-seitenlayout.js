@@ -1102,7 +1102,7 @@ function slCfgDialog(id) {
         else if (f.kind === "number") {
           const inp = form.querySelector(`[name="f${i}"]`),
             v = parseFloat(String(inp.value).replace(",", "."));
-          out[f.k] = v;
+          out[f.k] = f.int ? Math.round(v) : v;
           if (!(v >= f.min && v <= f.max)) bad = bad || {inp, msg: `Bitte eine Zahl von ${f.min} bis ${f.max} eingeben.`};
         }
       });
@@ -1131,7 +1131,7 @@ function slCfgDialog(id) {
 /* Felder im Einstellungs-Dialog: auf der Statistikseite kommt bei Bausteinen mit Aktivität oder Zeitraum der Schalter „Globalen Filter verwenden“ davor (3.22.0) */
 function slFieldsOf(T) {
   const fs = (T && T.fields) || [];
-  return SL.fam === "statistik" && fs.some(f => f.kind === "sports" || f.kind === "range") ? [{kind: "global"}, ...fs] : fs;
+  return SL.fam === "statistik" && !(T && T.hinweis) && fs.some(f => f.kind === "sports" || f.kind === "range") ? [{kind: "global"}, ...fs] : fs;      // 3.23.0: Hinweis-Bausteine haben nie den globalen Filter
 }
 function slField(f, cfg, i) {
   const id = "slf" + i;
@@ -1141,7 +1141,7 @@ function slField(f, cfg, i) {
   if (f.kind === "radio")
     return `<fieldset class="slfs"><legend>${esc(f.label)}</legend><div class="flchips">${f.options.map(([v, l]) => `<label class="flchip"><input type="radio" name="f${i}" value="${v}"${String(cfg[f.k] ?? f.def) === String(v) ? " checked" : ""}><span>${esc(l)}</span></label>`).join("")}</div></fieldset>`;
   if (f.kind === "number")
-    return `<div class="slfs"><label for="${id}">${esc(f.label)}</label><input id="${id}" name="f${i}" type="number" inputmode="decimal" min="${f.min}" max="${f.max}" step="${f.step || 1}" value="${esc(cfg[f.k] ?? "")}" required><p class="slerr" role="alert"></p></div>`;
+    return `<div class="slfs"><label for="${id}">${esc(f.label)}</label><input id="${id}" name="f${i}" type="number" inputmode="decimal" min="${f.min}" max="${f.max}" step="${f.step || 1}" value="${esc(cfg[f.k] ?? f.def ?? "")}" required><p class="slerr" role="alert"></p></div>`;
   const max = f.max || 500;
   return `<div class="slfs"><label for="${id}">${esc(f.label)}</label><textarea id="${id}" name="f${i}" rows="6" maxlength="${max}" data-max="${max}">${esc(cfg[f.k] || "")}</textarea><p class="mut slcount">${(cfg[f.k] || "").length} / ${max}</p></div>`;
 }

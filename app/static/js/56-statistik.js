@@ -195,7 +195,7 @@ function stApply(it) {
     hasS = fs.some(f => f.kind === "sports"), rf = fs.find(f => f.kind === "range");
   it.raw = raw;
   it.note = "";
-  if (!T || raw.eigen === true) return;
+  if (!T || raw.eigen === true || T.hinweis) return;                                    // 3.23.0: Hinweis-Bausteine haben ihre eigene Aktivität und keinen Zeitraum
   const out = {...raw}, ok = rf ? !rf.opts || rf.opts.includes(F.kind) : false;
   if (hasS) {
     if (F.sports.length) out.sports = F.sports.slice();

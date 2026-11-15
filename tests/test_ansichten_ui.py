@@ -258,7 +258,7 @@ def test_templates_dialog_adopts_a_template_as_new_editable_view(pw, app):
         _open_views(pg)
         _btn(pg, "Aus Vorlage …").click()
         pg.wait_for_selector(".slvt .slcard", timeout=T)
-        assert pg.locator(".slvt .slcard h3").all_inner_texts() == ["Wanderer", "Training", "Rückblick", "Kompakt"]
+        assert pg.locator(".slvt .slcard h3").all_inner_texts() == ["Wanderer", "Training", "Rückblick", "Kompakt", "Mit Hinweisen"]
         pg.get_by_role("button", name="Wanderer: Als neue Ansicht übernehmen", exact=True).click()
         _view_is(pg, "Wanderer", "uebersicht")
         pg.wait_for_function("() => ['t-jahresziel','t-meilensteine','t-heatmap','t-letzte','t-rekorde'].every(i => !!document.getElementById('tlw-' + i))", timeout=T)
@@ -287,7 +287,7 @@ def test_every_template_passes_the_server_validation(pw, app):
           return out;
           function slExportDocLike(t, docs) { return {format: 'meine-touren-ansicht', format_version: 1, page: t.fam, name: t.name, layouts: docs}; }
         }""")
-        assert len(res) == 10, res
+        assert len(res) == 11, res
         for tid, name, desc, prev, bad in res:
             assert desc and prev and not bad, (tid, bad)
         assert not pg.errors, pg.errors
@@ -369,7 +369,7 @@ def test_export_file_and_import_valid_invalid_and_replace_only_after_confirmatio
         d = dl.value
         assert d.suggested_filename == "ansicht-uebersicht-training-test.json"
         doc = json.loads(open(d.path(), encoding="utf-8").read())
-        assert doc["format"] == "meine-touren-ansicht" and doc["format_version"] == 1 and doc["app_version"] == "3.22.0" and doc["page"] == "uebersicht" and doc["name"] == "Training-Test"
+        assert doc["format"] == "meine-touren-ansicht" and doc["format_version"] == 1 and doc["app_version"] == "3.23.0" and doc["page"] == "uebersicht" and doc["name"] == "Training-Test"
         assert list(doc["layouts"]) == ["uebersicht"] and doc["layouts"]["uebersicht"]["widgets"][0]["type"] == "periode" and doc["layouts"]["uebersicht"]["hidden"] == ["tag"]
         # Import gültig: Vorschau, dann als NEUE Ansicht (Name vergeben → nummeriert)
         f = _write(tmp_path, "gut.json", {**doc, "zukunft": 1})

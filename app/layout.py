@@ -13,6 +13,11 @@ Dokument (JSON-Objekt, alle Felder optional):
 Seiteneignung (3.20.0): Bausteine der Übersicht dürfen auch auf der Tourseite stehen (Dokument „tour-haupt“); tour-bezogene Bausteine (TOUR_ONLY) nur auf Tourseiten,
 die Dokumente „uebersicht“ und „statistik“ lehnen sie ab. 3.22.0: Bausteine der Statistik (STATISTIK_ONLY) stehen nur im Dokument „statistik“; die Bausteine der Übersicht dürfen auch dort stehen.
 Unbekannte Typen (neuere Version) bleiben überall erlaubt.
+Hinweis-Bausteine (3.23.0, „Alarm-Bausteine“: erscheinen nur, wenn etwas los ist; Typen hnziel, hnmeilenstein, hnauffaellig, hnpause, hnrekord, hnwoche, hnerholung, hnsicherung und die Sammel-Variante „hinweise“):
+nur in „uebersicht“ und „statistik“ (hnauffaellig, hnpause, hnwoche, hnsicherung nur in „uebersicht“). Ihre Konfiguration wird streng geprüft, andere Felder sind nicht erlaubt:
+  schwelle 1–90 (Prozent)   tage 1–365   min 1–1000   ziel / woche_ziel 0–100000   einheit / woche_einheit km|touren   stufe mehr|deutlich_mehr   ausblenden 0–90 (Tage, 0 = Knopf aus)
+  arten [ziel, meilenstein, auffaellig, pause, rekord, woche, erholung, sicherung] (Sammel-Baustein)   sports, title wie üblich
+  snoozes ["Art:Zeitstempel", …]  bis wann (Sekunden seit 1970, höchstens ein Jahr im Voraus) der Hinweis dieser Art ausgeblendet ist – je Instanz im Layout-Dokument gespeichert.
 Statistik (3.22.0): Die Standard-Abschnitte der Statistikseite kennt nur die Oberfläche (order/hidden/closed/open/w gelten wie auf der Übersicht). Der globale Filter der Seite (Aktivität, Zeitraum)
 steht in der Adresse der Seite, nicht im Layout. In der Konfiguration eines Bausteins heißt „eigen“ = true: der Baustein behält seinen eigenen Filter (sports, range, yr) statt des globalen.
 Gemeinsame Filterfelder in der Konfiguration (3.19.0, streng geprüft; unbekannte Schlüssel einer neueren Version bleiben erlaubt, wenn sie einfache Werte haben):
@@ -46,6 +51,12 @@ TOUR_ONLY = frozenset(("kennzahlen", "tempo", "vergleich", "pulszonen", "wetter"
                        "tageslicht", "gipfel", "vergleiche", "stimmung", "fotohighlights", "miniprofil", "steckbrief"))
 # 3.22.0: Bausteine, die nur auf der Statistikseite stehen (Typkennungen wie in static/js/57-bausteine-statistik.js)
 STATISTIK_ONLY = frozenset(("stmonate", "stentwicklung", "stlaengen", "sthoehe", "sttop"))
+# 3.23.0: Hinweis-Bausteine (Typkennungen wie in static/js/58-bausteine-hinweise.js): nur auf Übersicht und Statistik, einige nur auf der Übersicht
+HINWEIS_TYPEN = frozenset(("hnziel", "hnmeilenstein", "hnauffaellig", "hnpause", "hnrekord", "hnwoche", "hnerholung", "hnsicherung", "hinweise"))
+HINWEIS_NUR_UEBERSICHT = frozenset(("hnauffaellig", "hnpause", "hnwoche", "hnsicherung"))
+HINWEIS_ARTEN = ("ziel", "meilenstein", "auffaellig", "pause", "rekord", "woche", "erholung", "sicherung")
+SNOOZE_RE = re.compile(r"^([a-z]{3,12}):(\d{1,11})$")
+MAX_SNOOZE_S = 366 * 86400                  # „Ausblenden“ höchstens ein Jahr im Voraus
 ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,40}$")
 MAX_IDS = 120
 MAX_WIDGETS = 40
@@ -149,13 +160,70 @@ def _filter(v):
     return out
 
 
-def _cfg(v):
+def _num(x, lo, hi, ganz, name):
+    if isinstance(x, bool) or not isinstance(x, (int, float)) or x != x or not lo <= x <= hi or (ganz and x != int(x)):
+        raise HTTPException(400, f"Ungültiger Wert für „{name}“ in der Konfiguration")
+    return int(x) if ganz else x
+
+
+def _hinweis_cfg(k, x):
+    """Strenge Prüfung der Felder der Hinweis-Bausteine (3.23.0); Rückgabe: bereinigter Wert."""
+    bad = HTTPException(400, f"Ungültiger Wert für „{k}“ in der Konfiguration")
+    if k == "schwelle":
+        return _num(x, 1, 90, False, k)
+    if k == "tage":
+        return _num(x, 1, 365, True, k)
+    if k == "min":
+        return _num(x, 1, 1000, True, k)
+    if k in ("ziel", "woche_ziel"):
+        return _num(x, 0, 100000, False, k)
+    if k == "ausblenden":
+        return _num(x, 0, 90, True, k)
+    if k in ("einheit", "woche_einheit"):
+        if x not in ("km", "touren"):
+            raise bad
+        return x
+    if k == "stufe":
+        if x not in ("mehr", "deutlich_mehr"):
+            raise bad
+        return x
+    if k == "arten":
+        if not isinstance(x, list) or not x or not all(i in HINWEIS_ARTEN for i in x):
+            raise bad
+        return [a for a in HINWEIS_ARTEN if a in x]
+    if k == "snoozes":                                  # ["art:Zeitstempel", …]: bis wann der Hinweis dieser Art ausgeblendet ist (Sekunden seit 1970)
+        if not isinstance(x, list) or len(x) > len(HINWEIS_ARTEN):
+            raise bad
+        out, seen = [], set()
+        for i in x:
+            m = SNOOZE_RE.match(i) if isinstance(i, str) else None
+            if not m or m.group(1) not in HINWEIS_ARTEN or m.group(1) in seen or int(m.group(2)) > time.time() + MAX_SNOOZE_S:
+                raise bad
+            seen.add(m.group(1))
+            out.append(i)
+        return out
+    return None
+
+
+HINWEIS_KEYS = ("schwelle", "tage", "min", "ziel", "ausblenden", "einheit", "stufe", "arten", "snoozes", "woche_ziel", "woche_einheit")
+
+
+def _cfg(v, typ=None):
     if not isinstance(v, dict) or len(v) > 20:
         raise HTTPException(400, "Ungültige Konfiguration eines Bausteins")
     out = {}
+    hn = typ in HINWEIS_TYPEN
     for k, x in v.items():
         if not isinstance(k, str) or not ID_RE.match(k):
             raise HTTPException(400, "Ungültiger Schlüssel in der Konfiguration")
+        if hn:                                           # Hinweis-Bausteine: nur diese Felder (plus Aktivität und Titel), jedes streng geprüft
+            if k in HINWEIS_KEYS:
+                out[k] = _hinweis_cfg(k, x)
+            elif k in ("sports", "title"):
+                out[k] = _known(k, x)
+            else:
+                raise HTTPException(400, f"Unbekannte Einstellung „{k}“ für diesen Baustein")
+            continue
         if k in KNOWN:
             out[k] = _known(k, x)
             continue
@@ -214,8 +282,12 @@ def clean(doc, key=None):
                 raise HTTPException(400, "Dieser Baustein gehört zu einer Tour und kann nicht in der Übersicht oder Statistik stehen")
             if key not in (None, "statistik") and x["type"] in STATISTIK_ONLY:
                 raise HTTPException(400, "Dieser Baustein gehört zur Statistik und kann nur dort stehen")
+            if x["type"] in HINWEIS_TYPEN and key in ("tour-haupt", "tour-auswertung"):
+                raise HTTPException(400, "Hinweis-Bausteine gibt es nur auf der Übersicht und der Statistik")
+            if x["type"] in HINWEIS_NUR_UEBERSICHT and key == "statistik":
+                raise HTTPException(400, "Dieser Hinweis-Baustein gibt es nur auf der Übersicht")
             seen.add(x["id"])
-            ws.append({"id": x["id"], "type": x["type"], "cfg": _cfg(x.get("cfg") or {})})
+            ws.append({"id": x["id"], "type": x["type"], "cfg": _cfg(x.get("cfg") or {}, x["type"])})
         out["widgets"] = ws
     if "filter" in doc:
         out["filter"] = _filter(doc["filter"])

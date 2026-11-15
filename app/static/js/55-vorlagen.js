@@ -12,6 +12,8 @@ const SL_TPL = [
     items: [["jahr", "voll"], ["w:rueckblick", "voll"], ["w:heutevor", "halb"], ["w:rekorde", "halb"], ["w:wiederentdecken", "voll"]]},
   {id: "ue-kompakt", fam: "uebersicht", name: "Kompakt", desc: "Wenig auf einen Blick: vier Bausteine in halber Breite, auf dem Handy untereinander.",
     items: [["jahr", "halb"], ["w:periode", "halb"], ["w:letzte", "halb"], ["w:rekorde", "halb"]]},
+  {id: "ue-hinweise", fam: "uebersicht", name: "Mit Hinweisen", desc: "Für den Alltag mit Erinnerungen: oben der Baustein „Hinweise“, der nur erscheint, wenn etwas los ist, darunter Dein Jahr, diese Woche, die letzten Touren, Jahresziel und Meilensteine.",
+    items: [["w:hinweise", "voll"], ["jahr", "voll"], ["w:periode", "halb"], ["w:letzte", "halb"], ["w:jahresziel", "halb"], ["w:meilensteine", "halb"]]},
   {id: "st-rueckblick", fam: "statistik", name: "Jahresrückblick", desc: "Für den Blick auf ein Jahr: Kennzahlen, Monate, Höhenmeter im Jahresverlauf, die besten Touren und die Kalender-Heatmap.",
     items: [["kpi", "voll"], ["kmmonat", "halb"], ["w:sthoehe", "halb"], ["w:sttop", "halb"], ["bestwerte", "halb"], ["heat", "voll"]]},
   {id: "st-training", fam: "statistik", name: "Training", desc: "Für den Blick auf Form und Entwicklung: Belastung und Erholung, dein typisches Tempo, die Entwicklung deines Tempos, der Monatsvergleich und die Streckenlängen.",

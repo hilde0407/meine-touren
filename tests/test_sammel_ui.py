@@ -544,6 +544,8 @@ def test_mobile_390_no_horizontal_scroll_and_touch_targets(pw, app_url):
     pg = _page(pw, app_url, width=390, height=844, dpr=2)
     try:
         c = _open(pg)
+        pg.wait_for_function("document.querySelectorAll('details.dvsec > summary').length > 0 && document.fonts.status === 'loaded'", timeout=15000)      # Zustand abwarten, dann messen
+        pg.wait_for_function("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => r(true))))", timeout=15000)
         assert pg.evaluate("document.documentElement.scrollWidth") <= 391
         over = pg.evaluate("[...document.querySelectorAll('#devsec .dvq *')].filter(e => e.getBoundingClientRect().right > innerWidth + 1 && !e.closest('svg')).map(e => e.className || e.tagName).slice(0, 5)")
         assert not over, over
@@ -553,6 +555,8 @@ def test_mobile_390_no_horizontal_scroll_and_touch_targets(pw, app_url):
         _shot(pg, "karte-stand-390.png")
         c.locator("button.dvbatch").click()
         pg.wait_for_selector(".dvbatchbox .bxt")
+        pg.wait_for_function("document.querySelectorAll('.dvbrow').length > 0", timeout=15000)
+        pg.wait_for_function("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => r(true))))", timeout=15000)
         assert pg.evaluate("document.documentElement.scrollWidth") <= 391
         box = pg.locator(".dvbatchbox").bounding_box()
         assert box["x"] >= -1 and box["x"] + box["width"] <= 391
