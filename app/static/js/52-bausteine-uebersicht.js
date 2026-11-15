@@ -19,15 +19,25 @@ const SL_SPG = {                                                                
 const slGroup = s => SL_SPG[s] || ["Sonstiges", "other"];
 const slRows = list => `<ul class="slrows">${list.join("")}</ul>`;
 
+/* Jahres-Rückblick: bis 3.18.0 „Dieses/Letztes Jahr“ (cfg.year), seit 3.19.0 wie die übrigen Bausteine (range year | y + yr); die ältere Einstellung gilt weiter */
+const slRbRange = cfg => flRange(cfg.range || cfg.yr ? cfg : cfg.year === "last" ? {range: "y", yr: new Date().getFullYear() - 1} : {}, "year");
+
 Object.assign(window.SL_WT, {
+  jahr: {
+    fam: "uebersicht", cat: "zahlen", icon: "trend", name: "Dein Jahr", title: () => "Dein Jahr", multi: true, shell: it => slYearShell(it), defaults: {},
+    kurz: cfg => (cfg.title ? flParts(cfg, "year") : flParts(cfg, "year", {noRange: true})),
+    desc: "Touren, Kilometer, Höhenmeter und Stunden mit Monatssäulen und Vorjahresvergleich, wählbar nach Aktivität und Zeitraum. In der Übersicht steht „Dein Jahr“ schon; hier kannst du weitere mit anderem Filter hinzufügen.",
+    fields: [{kind: "sports"}, {kind: "range", def: "year"}, {k: "metrics", kind: "checks", def: ["count", "km", "up", "h"], label: "Angezeigte Werte", min: 1, options: [["count", "Touren"], ["km", "Kilometer"], ["up", "Höhenmeter"], ["h", "Stunden"]]}, {kind: "compare"}, {kind: "title", ph: "Dein Jahr"}],
+    preview: () => slPrev(slTiles([["31", "Touren"], ["412", "Kilometer"], ["8.400", "Höhenmeter"]]) + '<svg viewBox="0 0 120 30" class="slpvs" aria-hidden="true">' + [6, 10, 14, 22, 18, 26, 24, 16, 12, 8, 4, 2].map((h, i) => `<rect x="${i * 10 + 1}" y="${30 - h}" width="8" height="${h}" rx="1"/>`).join("") + "</svg>"),
+  },
   jahresziel: {
-    fam: "uebersicht", cat: "plan", icon: "trend", name: "Jahresziel", title: () => "Jahresziel", multi: true, defaults: {metric: "km", goal: 1000},
+    fam: "uebersicht", cat: "plan", icon: "trend", name: "Jahresziel", title: () => "Jahresziel", multi: true, defaults: {metric: "km", goal: 1000}, filter: {range: null},
     desc: "Ein Ring zeigt, wie weit du auf dein Jahresziel bist, dazu der Stand des Jahres und eine Prognose bis Silvester.",
-    fields: [{k: "metric", kind: "radio", label: "Ziel in", options: [["km", "Kilometern"], ["hm", "Höhenmetern"]]}, {k: "goal", kind: "number", label: "Ziel für das Jahr (Zahl in der gewählten Einheit)", min: 10, max: 100000, step: 10}],
+    fields: [{k: "metric", kind: "radio", label: "Ziel in", options: [["km", "Kilometern"], ["hm", "Höhenmetern"]]}, {k: "goal", kind: "number", label: "Ziel für das Jahr (Zahl in der gewählten Einheit)", min: 10, max: 100000, step: 10}, {kind: "sports"}, {kind: "title"}],
     preview: () => slPvRing(0.62),
     render(c, b, cfg) {
       const now = new Date(), cy = now.getFullYear(), hm = cfg.metric === "hm", u = hm ? "m" : "km", goal = Math.max(1, +cfg.goal || (hm ? 20000 : 1000)),
-        val = slSum(TOURS.filter(t => t.y === cy), t => (hm ? t.up_m || 0 : t.km)), frac = val / goal,
+        val = slSum(TOURS.filter(t => t.y === cy && flSport(t, cfg)), t => (hm ? t.up_m || 0 : t.km)), frac = val / goal,
         ylen = (cy % 4 === 0 && cy % 100 !== 0) || cy % 400 === 0 ? 366 : 365, doy = Math.floor((now - new Date(cy, 0, 0)) / 864e5), tf = doy / ylen,
         fc = doy >= 14 ? val / tf : null, left = Math.max(1, (ylen - doy) / 7), C1 = 263.9, C2 = 194.8,
         pct = Math.round(frac * 100), yp = Math.round(tf * 100),
@@ -42,12 +52,14 @@ Object.assign(window.SL_WT, {
     },
   },
   serie: {
-    fam: "uebersicht", cat: "zahlen", icon: "heart", name: "Wochen-Serie", title: () => "Wochen-Serie",
+    fam: "uebersicht", cat: "zahlen", icon: "heart", name: "Wochen-Serie", title: () => "Wochen-Serie", filter: {range: null}, fields: [{kind: "sports"}, {kind: "title"}],
     desc: "Wie viele Wochen in Folge du mindestens eine Tour gemacht hast, dein Rekord und die letzten 26 Wochen als Punktreihe.",
     preview: () => slPrev('<svg viewBox="0 0 156 14" class="slpvs" aria-hidden="true">' + [1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1].map((o, i) => `<rect class="${o ? "slhb" : "slhz"}" x="${i * 12}" y="2" width="10" height="10" rx="3"/>`).join("") + "</svg>"),
-    render(c, b) {
+    render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
-      const set = new Set(TOURS.map(t => slWeek(t.date))), cur = slWeek(slIso(new Date())), all = [...set].sort((x, y) => x - y);
+      const T0 = TOURS.filter(t => flSport(t, cfg));
+      if (!T0.length) return flNone(b);
+      const set = new Set(T0.map(t => slWeek(t.date))), cur = slWeek(slIso(new Date())), all = [...set].sort((x, y) => x - y);
       let s = 0, w = set.has(cur) ? cur : cur - 1, rec = 0, run = 0;
       while (set.has(w)) {
         s++;
@@ -66,20 +78,23 @@ Object.assign(window.SL_WT, {
     },
   },
   heatmap: {
-    fam: "uebersicht", cat: "grafik", icon: "met", name: "Kalender-Heatmap", title: () => "Kalender-Heatmap", defaults: {metric: "km"},
+    fam: "uebersicht", cat: "grafik", icon: "met", name: "Kalender-Heatmap", title: () => "Kalender-Heatmap", defaults: {metric: "km"}, filter: {range: null},
     desc: "Die letzten 52 Wochen als Kalenderfläche: je dunkler ein Tag, desto mehr Kilometer (oder Touren) an diesem Tag.",
-    fields: [{k: "metric", kind: "radio", label: "Färben nach", options: [["km", "Kilometern"], ["count", "Anzahl der Touren"]]}],
+    fields: [{k: "metric", kind: "radio", def: "km", label: "Färben nach", options: [["km", "Kilometern"], ["count", "Anzahl der Touren"], ["up", "Höhenmetern"], ["h", "Stunden"]]}, {kind: "sports"}, {kind: "title"}],
     preview: () => slPvHeat(),
     render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
-      const today = new Date(), t0 = slDay(slIso(today)), cur = slWeek(slIso(today)), first = (cur - 52) * 7 - 3, byDay = new Map(), cnt = cfg.metric === "count";
+      const MT = FL_MET[cfg.metric] ? cfg.metric : "km";
+      const today = new Date(), t0 = slDay(slIso(today)), cur = slWeek(slIso(today)), first = (cur - 52) * 7 - 3, byDay = new Map();
       TOURS.forEach(t => {
-        const k = slDay(t.date), e = byDay.get(k) || {n: 0, km: 0};
+        if (!flSport(t, cfg)) return;
+        const k = slDay(t.date), e = byDay.get(k) || {n: 0, km: 0, v: 0};
         e.n++;
         e.km += t.km;
+        e.v += FL_MET[MT].f(t);
         byDay.set(k, e);
       });
-      const val = e => (e ? (cnt ? e.n : e.km) : 0), pos = [];
+      const val = e => (e ? e.v : 0), pos = [];
       for (let k = first; k <= t0; k++) val(byDay.get(k)) > 0 && pos.push(val(byDay.get(k)));
       pos.sort((x, y) => x - y);
       const q = f => pos[Math.min(pos.length - 1, Math.floor(f * pos.length))], th = [q(0.25), q(0.5), q(0.75)],
@@ -104,12 +119,14 @@ Object.assign(window.SL_WT, {
     },
   },
   meilensteine: {
-    fam: "uebersicht", cat: "plan", icon: "pin", name: "Meilensteine", title: () => "Meilensteine",
+    fam: "uebersicht", cat: "plan", icon: "pin", name: "Meilensteine", title: () => "Meilensteine", filter: {range: null}, fields: [{kind: "sports"}, {kind: "title"}],
     desc: "Wie weit es bis zum nächsten runden Kilometerstand, zur nächsten Tour-Marke und zum nächsten „Mount Everest“ an Höhenmetern ist.",
     preview: () => slPvHbars([96, 58, 80]),
-    render(c, b) {
+    render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
-      const km = slSum(TOURS, t => t.km), up = slSum(TOURS, t => t.up_m || 0), n = TOURS.length, EV = 8849,
+      const TA = TOURS.filter(t => flSport(t, cfg));
+      if (!TA.length) return flNone(b);
+      const km = slSum(TA, t => t.km), up = slSum(TA, t => t.up_m || 0), n = TA.length, EV = 8849,
         step = (v, L) => {
           const nx = L.find(x => x > v), pv = nx ? [0, ...L].filter(x => x <= v).pop() : L[L.length - 1];
           return {nx, pv, p: nx ? ((v - pv) / (nx - pv)) * 100 : 100};
@@ -126,15 +143,16 @@ Object.assign(window.SL_WT, {
     },
   },
   wochentage: {
-    fam: "uebersicht", cat: "grafik", icon: "met", name: "Lieblingstage und Tageszeiten", title: () => "Lieblingstage und Tageszeiten", defaults: {metric: "count"},
+    fam: "uebersicht", cat: "grafik", icon: "met", name: "Lieblingstage und Tageszeiten", title: () => "Lieblingstage und Tageszeiten", defaults: {metric: "count"}, filter: {range: "all"},
     desc: "An welchen Wochentagen und zu welcher Tageszeit du am liebsten unterwegs bist, als zwei Säulendiagramme.",
-    fields: [{k: "metric", kind: "radio", label: "Zählen nach", options: [["count", "Anzahl der Touren"], ["km", "Kilometern"]]}],
+    fields: [{k: "metric", kind: "radio", def: "count", label: "Zählen nach", options: [["count", "Anzahl der Touren"], ["km", "Kilometern"], ["up", "Höhenmetern"], ["h", "Stunden"]]}, {kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}],
     preview: () => slPvBars([20, 12, 14, 12, 24, 36, 30]),
     render(c, b, cfg) {
-      if (TOURS.length < 3) return slNote(b, "Dafür braucht es mindestens drei Touren.");
-      const km = cfg.metric === "km", wd = Array(7).fill(0), dp = Array(4).fill(0), PART = ["Morgens", "Mittags", "Nachmittags", "Abends"], PARTS = ["morgens", "mittags", "nachmittags", "abends"];
-      TOURS.forEach(t => {
-        const h = +t.date.slice(11, 13), v = km ? t.km : 1;
+      const A = flSelect(cfg, "all").list, MT = FL_MET[cfg.metric] ? cfg.metric : "count";
+      if (A.length < 3) return slNote(b, TOURS.length < 3 || !(cfg.sports || []).length && cfg.range == null ? "Dafür braucht es mindestens drei Touren." : "Mit diesem Filter gibt es weniger als drei Touren.");
+      const wd = Array(7).fill(0), dp = Array(4).fill(0), PART = ["Morgens", "Mittags", "Nachmittags", "Abends"], PARTS = ["morgens", "mittags", "nachmittags", "abends"];
+      A.forEach(t => {
+        const h = +t.date.slice(11, 13), v = FL_MET[MT].f(t);
         wd[slWdx(t.date)] += v;
         dp[h >= 5 && h < 10 ? 0 : h >= 10 && h < 14 ? 1 : h >= 14 && h < 18 ? 2 : 3] += v;
       });
@@ -146,14 +164,16 @@ Object.assign(window.SL_WT, {
     },
   },
   sportarten: {
-    fam: "uebersicht", cat: "grafik", icon: "map", name: "Sportarten-Verteilung", title: () => "Sportarten-Verteilung", defaults: {metric: "count"},
+    fam: "uebersicht", cat: "grafik", icon: "map", name: "Sportarten-Verteilung", title: () => "Sportarten-Verteilung", defaults: {metric: "count"}, filter: {range: "all"},
     desc: "Welche Sportarten du wie oft machst, als Ring mit Legende, nach Anzahl der Touren, Kilometern oder Zeit.",
-    fields: [{k: "metric", kind: "radio", label: "Verteilung nach", options: [["count", "Anzahl der Touren"], ["km", "Kilometern"], ["time", "Zeit unterwegs"]]}],
+    fields: [{k: "metric", kind: "radio", def: "count", label: "Verteilung nach", options: [["count", "Anzahl der Touren"], ["km", "Kilometern"], ["time", "Zeit unterwegs"]]}, {kind: "range", def: "all"}, {kind: "title"}],
     preview: () => slPvDonut([[0.5, "slsg slsg-hike"], [0.28, "slsg slsg-bike"], [0.14, "slsg slsg-ski"], [0.08, "slsg slsg-other"]]),
     render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
+      const A = flSelect({...cfg, sports: []}, "all").list;
+      if (!A.length) return flNone(b);
       const m = cfg.metric === "km" ? t => t.km : cfg.metric === "time" ? t => t.h : () => 1, G = {};
-      TOURS.forEach(t => {
+      A.forEach(t => {
         const [name, cl] = slGroup(t.sport), g = (G[name] = G[name] || {name, cl, v: 0, n: 0});
         g.v += m(t);
         g.n++;
@@ -272,13 +292,13 @@ Object.assign(window.SL_WT, {
     },
   },
   rueckblick: {
-    fam: "uebersicht", cat: "rueck", icon: "trend", name: "Jahres-Rückblick", title: cfg => `Rückblick ${new Date().getFullYear() - (cfg.year === "last" ? 1 : 0)}`, multi: true, defaults: {year: "this"},
+    fam: "uebersicht", cat: "rueck", icon: "trend", name: "Jahres-Rückblick", title: cfg => `Rückblick ${slRbRange(cfg).year}`, multi: true, defaults: {}, filter: {range: "year"},
     desc: "Das Jahr in einer Kachel: Touren, Kilometer und Höhenmeter, die Monate als Säulen, die längste und die höchste Tour.",
-    fields: [{k: "year", kind: "radio", label: "Jahr", options: [["this", "Dieses Jahr"], ["last", "Letztes Jahr"]]}],
+    fields: [{kind: "range", opts: ["year", "y"], def: "year", label: "Jahr"}, {kind: "sports"}, {kind: "title"}],
     preview: () => slPvBars([8, 14, 20, 30, 26, 34, 28, 22, 14, 12, 6, 4]),
     render(c, b, cfg) {
-      const y = new Date().getFullYear() - (cfg.year === "last" ? 1 : 0), A = TOURS.filter(t => t.y === y);
-      if (!A.length) return slNote(b, `Im Jahr ${y} gab es keine Touren.`);
+      const y = slRbRange(cfg).year, A = TOURS.filter(t => t.y === y && flSport(t, cfg));
+      if (!A.length) return slNote(b, (cfg.sports || []).length ? "Mit diesem Filter gab es in diesem Jahr keine Touren." : `Im Jahr ${y} gab es keine Touren.`);
       const mk = Array(12).fill(0), mn = Array(12).fill(0);
       A.forEach(t => {
         mk[t.m - 1] += t.km;
@@ -293,3 +313,88 @@ Object.assign(window.SL_WT, {
     },
   },
 });
+
+/* =====================  3.19.0 „Dein Jahr“ als Baustein  =====================
+   Gerüst wie der frühere feste Block der Startseite (41-startseite.js): Überschrift mit Vorjahresvergleich und Link, Kennzahlen, Monatssäulen, Jahresziele.
+   Ohne Konfiguration identisch zu 3.18.x (laufendes Jahr, alle Aktivitäten, vier Kennzahlen, Vergleich mit dem Vorjahr bis heute). Die Standard-Instanz hat die Kennung „hyear“,
+   weitere Instanzen „tlw-<id>“. Zeitraum und Aktivität: flSelect() in 53-filter.js. */
+const SL_JM = ["count", "km", "up", "h"];
+/* Säulen des Verlaufs je Zeitraumart: {vals, labels, tips, cur}; Einheit je Kennzahl */
+function slYearSeries(list, R, m, now) {
+  const f = FL_MET[m].f, un = FL_MET[m].unit, fmt = v => `${nf(v, 0)} ${un}`, vals = [], labels = [], tips = [];
+  let cur = -1, step = "Monat";
+  if (R.kind === "year" || R.kind === "y") {
+    for (let i = 0; i < 12; i++) {
+      vals.push(0);
+      labels.push(MON[i].slice(0, 1));
+      tips.push(MONL[i]);
+    }
+    list.forEach(t => (vals[t.m - 1] += f(t)));
+    if (R.year === now.getFullYear()) cur = now.getMonth();
+  } else if (R.kind === "12m") {
+    const s = +R.from.slice(0, 4) * 12 + (+R.from.slice(5, 7) - 1);
+    for (let i = 0; i < 12; i++) {
+      const mo = (s + i) % 12;
+      vals.push(0);
+      labels.push(MON[mo].slice(0, 1));
+      tips.push(`${MONL[mo]} ${Math.floor((s + i) / 12)}`);
+    }
+    list.forEach(t => {
+      const i = t.y * 12 + t.m - 1 - s;
+      if (i >= 0 && i < 12) vals[i] += f(t);
+    });
+    cur = 11;
+  } else if (R.kind === "90d") {
+    step = "Woche";
+    for (let i = 0; i < 13; i++) {
+      const d = flDayAdd(R.from, i * 7);
+      vals.push(0);
+      labels.push(i % 4 === 0 ? `${+d.slice(8, 10)}.${+d.slice(5, 7)}.` : "");
+      tips.push(`Woche ab ${dateS(d)}`);
+    }
+    list.forEach(t => {
+      const i = Math.min(12, Math.floor((slDay(t.date) - slDay(R.from)) / 7));
+      if (i >= 0) vals[i] += f(t);
+    });
+    cur = 12;
+  } else {
+    step = "Jahr";
+    const ys = [...new Set(list.map(t => t.y))].sort((a, b) => a - b), y1 = ys.length ? ys[ys.length - 1] : now.getFullYear(), y0 = Math.max(ys.length ? ys[0] : y1, y1 - 11);
+    for (let y = y0; y <= y1; y++) {
+      vals.push(0);
+      labels.push(String(y).slice(2));
+      tips.push(String(y));
+    }
+    list.forEach(t => t.y >= y0 && (vals[t.y - y0] += f(t)));
+    cur = y1 === now.getFullYear() ? vals.length - 1 : -1;
+  }
+  return {vals, labels, tips: tips.map((x, i) => `${x}: ${fmt(vals[i])}`), cur, step};
+}
+function slYearShell(it) {
+  const cfg = it.cfg || {}, now = new Date(), {R, list, prev} = flSelect(cfg, "year", {now, fallback: true}),
+    ms = (cfg.metrics && cfg.metrics.length ? cfg.metrics : SL_JM).filter(m => SL_JM.includes(m)), bm = ms.includes("km") ? "km" : ms[0],
+    ser = slYearSeries(list, R, bm, now), mx = Math.max(...ser.vals, 1),
+    title = (cfg.title || "").trim() || (R.kind === "12m" ? "Deine letzten 12 Monate" : R.kind === "90d" ? "Deine letzten 90 Tage" : R.kind === "all" ? "Deine Touren insgesamt" : `Dein Jahr ${R.year}`),
+    now_ = flVal(list, bm), was = prev ? flVal(prev, bm) : 0, up = now_ >= was,
+    cmpTxt = was > 0 && now_ > 0 && cfg.compare !== false && R.prev
+      ? `${up ? "+" : "−"}${nf((Math.abs(now_ - was) / was) * 100, 0)} % gegenüber ` + (R.kind === "year" ? `${R.year - 1} bis heute` : R.kind === "y" ? String(R.year - 1) : R.kind === "12m" ? "den 12 Monaten davor" : "den 90 Tagen davor")
+      : "",
+    kz = ms.map(m => `<div class="hyn"><b>${nf(flVal(list, m), 0)}</b><span>${m === "count" ? "Touren" : FL_MET[m].name}</span></div>`).join(""),
+    sec = document.createElement("section");
+  sec.className = "hyear" + (it.widget ? " tlw" : "");
+  sec.id = it.widget ? "tlw-" + it.id : "hyear";
+  if (it.widget) {
+    sec.dataset.wid = it.id;
+    sec.dataset.wtype = it.wtype;
+  }
+  const fl = (cfg.title ? flParts(cfg, "year") : flParts(cfg, "year", {noRange: true})).map(p => `<span>${esc(p)}</span>`).join(", ");
+  sec.innerHTML = `<div class="hyh"><h2>${esc(title)}</h2>${fl ? `<span class="flk">${fl}</span>` : ""}${cmpTxt ? `<span class="hcmp ${up ? "up" : "down"}" title="${esc(FL_MET[bm].name)}">${cmpTxt}</span>` : ""}<span class="sp"></span><a class="hmore" href="#/stats">Zur Statistik</a></div>` +
+    `<div class="hyg" data-n="${ms.length}">${kz}<div class="hym" role="img" aria-label="${esc(`${FL_MET[bm].name} pro ${ser.step}`)}" title="${esc(`${FL_MET[bm].name} pro ${ser.step}`)}">${ser.vals.map((v, i) => `<div class="${i === ser.cur ? "cur" : ""}" title="${esc(ser.tips[i])}"><i data-h="${Math.max(v ? 6 : 2, (v / mx) * 100).toFixed(1)}"></i><span>${esc(ser.labels[i])}</span></div>`).join("")}</div></div>` +
+    (list.length ? "" : `<p class="mut flnone">${(cfg.sports || []).length || R.kind !== "year" ? "Keine Touren mit diesem Filter." : "Noch keine Touren in diesem Jahr."}</p>`) +
+    (it.widget ? "" : '<div id="hgoals"></div>');
+  const bars = sec.querySelector(".hym");
+  bars.style.setProperty("grid-template-columns", `repeat(${ser.vals.length},1fr)`);
+  bars.querySelectorAll("i[data-h]").forEach(e => e.style.setProperty("height", e.dataset.h + "%"));
+  if (!it.widget && typeof homeGoals === "function" && (R.kind === "year" || R.kind === "y")) homeGoals(sec.querySelector("#hgoals"), R.year, now);
+  return sec;
+}

@@ -83,13 +83,16 @@ Object.assign(window.SL_WT, {
   },
   durchschnitt: {
     fam: "tour", cat: "grafik", icon: "cmp", name: "Diese Tour und dein Durchschnitt", title: () => "Diese Tour und dein Durchschnitt", defaults: {values: ["km", "up", "pace"]},
+    kurz: cfg => (cfg.basis === "all" ? ["Alle Touren"] : cfg.basis === "year" ? ["Touren dieses Jahres"] : []),
     desc: "Strecke, Aufstieg, Tempo oder Dauer dieser Tour gegen den Median deiner Touren gleicher Sportart, als Balken mit Marke.",
-    fields: [{k: "values", kind: "checks", label: "Angezeigte Werte", min: 1, options: [["km", "Strecke"], ["up", "Aufstieg"], ["pace", "Tempo"], ["dur", "Dauer"]]}],
+    fields: [{k: "values", kind: "checks", label: "Angezeigte Werte", min: 1, options: [["km", "Strecke"], ["up", "Aufstieg"], ["pace", "Tempo"], ["dur", "Dauer"]]},
+      {k: "basis", kind: "radio", def: "sport", label: "Vergleichen mit", options: [["sport", "Gleiche Sportart"], ["all", "Allen Touren"], ["year", "Touren dieses Jahres"]]}, {kind: "title"}],
     preview: () => slPrev('<svg viewBox="0 0 120 40" class="slpvs" aria-hidden="true"><rect class="slhb" x="0" y="4" width="84" height="8" rx="4"/><rect class="slmk" x="58" y="1" width="2" height="14"/><rect class="slhb" x="0" y="24" width="40" height="8" rx="4"/><rect class="slmk" x="58" y="21" width="2" height="14"/></svg>'),
     render(c, b, cfg, {t}) {
       if (!t) return slNote(b, "Keine Tour.");
-      const others = TOURS.filter(o => o.id !== t.id && o.sport === t.sport && o.km > 0);
-      if (others.length < 3) return slNote(b, "Für diesen Vergleich braucht es mindestens drei andere Touren derselben Sportart.");
+      const basis = cfg.basis === "all" || cfg.basis === "year" ? cfg.basis : "sport",
+        others = TOURS.filter(o => o.id !== t.id && o.km > 0 && (basis === "all" || (basis === "year" ? o.y === t.y : o.sport === t.sport)));
+      if (others.length < 3) return slNote(b, basis === "sport" ? "Für diesen Vergleich braucht es mindestens drei andere Touren derselben Sportart." : basis === "year" ? "Für diesen Vergleich braucht es mindestens drei andere Touren dieses Jahres." : "Für diesen Vergleich braucht es mindestens drei andere Touren.");
       const pace = o => (o.h > 0.2 ? o.km / o.h : null),
         M = {
           km: ["Strecke", t.km, others.map(o => o.km), slKm], up: ["Aufstieg", t.up_m, others.map(o => o.up_m).filter(v => v != null), slHm],
@@ -105,7 +108,7 @@ Object.assign(window.SL_WT, {
             `<div class="slr2 mut"><span>Median ${fmt(med)}</span><span class="slpct">${slSignPct(pct)}</span></div></li>`;
         }).filter(Boolean);
       if (!rows.length) return slNote(b, "Für die gewählten Werte liegen bei dieser Tour keine Daten vor.");
-      b.innerHTML = `<ul class="slrows">${rows.join("")}</ul><p class="mut slcap">Der senkrechte Strich zeigt den Median deiner ${others.length} anderen Touren (Sportart: ${esc(sName(t.sport))}).</p>`;
+      b.innerHTML = `<ul class="slrows">${rows.join("")}</ul><p class="mut slcap">Der senkrechte Strich zeigt den Median deiner ${others.length} anderen Touren (${basis === "sport" ? `Sportart: ${esc(sName(t.sport))}` : basis === "year" ? `Jahr: ${t.y}` : "alle Sportarten"}).</p>`;
       const km = pace(t) ? M.pace : M.km;
       slBadge(c, `${km[0]} ${slSignPct(((km[1] - slMedian(km[2])) / slMedian(km[2])) * 100)}`);
     },

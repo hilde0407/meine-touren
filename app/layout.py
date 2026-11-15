@@ -8,6 +8,11 @@ Dokument (JSON-Objekt, alle Felder optional):
   closed   [id] / open [id] Abschnitte, die standardmäßig zu bzw. (abweichend vom Standard) offen sind
   page     {id: "haupt"|"auswertung"}  Abschnitte, die auf der anderen Seite der Tour liegen
   widgets  [{id, type, cfg}]  hinzugefügte Bausteine mit ihrer Konfiguration
+  cfg      {id: {…}}       Konfiguration der Standard-Bausteine, die nicht als „widgets“ gespeichert sind (3.19.0: der Baustein „Dein Jahr“ der Übersicht, Kennung „jahr“)
+Gemeinsame Filterfelder in der Konfiguration (3.19.0, streng geprüft; unbekannte Schlüssel einer neueren Version bleiben erlaubt, wenn sie einfache Werte haben):
+  sports   [Sportart]      leer = alle Aktivitäten      range  year | y | 12m | 90d | all      yr  Jahr (bei range = y)
+  metrics  [count|km|up|h] angezeigte Kennzahlen         compare  Vorjahresvergleich an/aus    title  eigener Titel (höchstens 60 Zeichen)
+  n        1…10 (Anzahl Einträge)                        basis  sport | all | year (Vergleichsbasis der Tourseite)
 Der Server speichert nur, was er prüfen kann (erlaubte Felder, Kennungen, Größe); welche Abschnitte es gibt, weiß die Oberfläche.
 Betrachter dürfen lesen, bekommen aber immer den Standard (das Layout des Besitzers wird nicht übernommen) und dürfen nichts schreiben.
 """
@@ -22,12 +27,18 @@ from . import db
 router = APIRouter()
 
 KEYS = ("tour-haupt", "tour-auswertung", "uebersicht")
-FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets"}
+FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg"}
 ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,40}$")
 MAX_IDS = 120
 MAX_WIDGETS = 40
 MAX_TEXT = 600                    # längster Text in der Konfiguration eines Bausteins (die Oberfläche begrenzt eigene Notizen auf 500)
 MAX_BYTES = 24000
+MAX_SPORTS = 20
+SPORT_RE = re.compile(r"^[A-Za-z0-9_]{1,40}$")
+RANGES = ("year", "y", "12m", "90d", "all")
+METRICS = ("count", "km", "up", "h")
+BASES = ("sport", "all", "year")
+MAX_TITLE = 60
 
 
 def _ids(v, name):
@@ -42,6 +53,47 @@ def _ids(v, name):
     return out
 
 
+KNOWN = ("sports", "range", "yr", "metrics", "compare", "title", "n", "basis")
+
+
+def _known(k, x):
+    """Strenge Prüfung der gemeinsamen Filterfelder (3.19.0); gibt den bereinigten Wert zurück."""
+    bad = HTTPException(400, f"Ungültiger Wert für „{k}“ in der Konfiguration")
+    if k == "sports":
+        if not isinstance(x, list) or len(x) > MAX_SPORTS or not all(isinstance(i, str) and SPORT_RE.match(i) for i in x):
+            raise bad
+        return list(dict.fromkeys(x))
+    if k == "range":
+        if x not in RANGES:
+            raise bad
+        return x
+    if k == "yr":
+        if isinstance(x, bool) or not isinstance(x, int) or not 1970 <= x <= 2100:
+            raise bad
+        return x
+    if k == "metrics":
+        if not isinstance(x, list) or not x or not all(i in METRICS for i in x):
+            raise bad
+        return list(dict.fromkeys(x))
+    if k == "compare":
+        if not isinstance(x, bool):
+            raise bad
+        return x
+    if k == "title":
+        if not isinstance(x, str) or len(x) > MAX_TITLE:
+            raise bad
+        return x.strip()
+    if k == "n":
+        if isinstance(x, bool) or not isinstance(x, int) or not 1 <= x <= 10:
+            raise bad
+        return x
+    if k == "basis":
+        if x not in BASES:
+            raise bad
+        return x
+    return None
+
+
 def _cfg(v):
     if not isinstance(v, dict) or len(v) > 20:
         raise HTTPException(400, "Ungültige Konfiguration eines Bausteins")
@@ -49,6 +101,9 @@ def _cfg(v):
     for k, x in v.items():
         if not isinstance(k, str) or not ID_RE.match(k):
             raise HTTPException(400, "Ungültiger Schlüssel in der Konfiguration")
+        if k in KNOWN:
+            out[k] = _known(k, x)
+            continue
         if isinstance(x, str):
             if len(x) > MAX_TEXT:
                 raise HTTPException(400, "Text zu lang")
@@ -96,6 +151,11 @@ def clean(doc):
             seen.add(x["id"])
             ws.append({"id": x["id"], "type": x["type"], "cfg": _cfg(x.get("cfg") or {})})
         out["widgets"] = ws
+    if "cfg" in doc:
+        c = doc["cfg"]
+        if not isinstance(c, dict) or len(c) > 10 or not all(isinstance(k, str) and ID_RE.match(k) for k in c):
+            raise HTTPException(400, "„cfg“ muss ein Objekt mit höchstens 10 Einträgen sein")
+        out["cfg"] = {k: _cfg(x) for k, x in c.items()}
     if len(json.dumps(out, ensure_ascii=False)) > MAX_BYTES:
         raise HTTPException(400, "Das Layout ist zu groß")
     return out

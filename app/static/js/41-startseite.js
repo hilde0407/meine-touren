@@ -20,43 +20,41 @@ const homeRoute = pts => {
 };
 const homeDur = h => `${Math.floor(h)}:${String(Math.round((h % 1) * 60) % 60).padStart(2, "0")}`;
 
+/* --- Ziele des Jahres (höchstens zwei), Verwaltung der Ziele in der Statistik; steht im Baustein „Dein Jahr“ (Standard-Instanz) --- */
+function homeGoals(box, ys, now) {
+  api("/api/goals")
+    .then(all => {
+      const gs = all.filter(g => g.year === ys).slice(0, 2),
+        cy = now.getFullYear();
+      if (!box.isConnected || !gs.length || typeof goalVal !== "function") return;
+      const frac = ys === cy ? Math.max(0, (now - new Date(cy, 0, 1)) / (new Date(cy + 1, 0, 1) - new Date(cy, 0, 1))) : 1;
+      box.innerHTML = gs
+        .map(g => {
+          const v = goalVal(g, TOURS),
+            p = Math.min(100, (v / g.target) * 100);
+          return `<a class="hgoal" href="#/stats"><span>${GM[g.metric][1]}${g.sport ? " " + goalSportName(g.sport) : ""}</span><div class="gb"><i style="width:${p}%"></i><u style="left:${frac * 100}%" title="Soll heute"></u></div><b>${nf(v, 0)} / ${nf(g.target, 0)} ${GM[g.metric][0]}</b></a>`;
+        })
+        .join("");
+    })
+    .catch(() => {});
+}
+
 async function homeView() {
   const main = $("#main");
   main.className = "home";
   loadRoutesLater();
   const now = new Date(),
     cy = now.getFullYear(),
-    sum = (a, f) => a.reduce((x, t) => x + f(t), 0),
-    doy = d => (d - new Date(d.getFullYear(), 0, 1)) / 864e5,
-    ys = TOURS.some(t => t.y === cy) ? cy : Math.max(...TOURS.map(t => t.y)),     // laufendes Jahr; ohne Touren darin das letzte Jahr mit Touren
-    yr = TOURS.filter(t => t.y === ys),
-    lyTo = ys === cy ? TOURS.filter(t => t.y === cy - 1 && doy(new Date(t.date)) <= doy(now)) : [],
-    km = sum(yr, t => t.km),
-    kmL = sum(lyTo, t => t.km),
-    mm = Array(12).fill(0);
-  yr.forEach(t => (mm[t.m - 1] += t.km));
-  const mx = Math.max(...mm, 1),
     md = `${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`,
     otd = TOURS.filter(t => t.date.slice(5, 10) === md && t.y !== cy),
-    recent = TOURS.slice(0, 9),
-    cmp = kmL > 0 && km > 0 ? `<span class="hcmp ${km >= kmL ? "up" : "down"}">${km >= kmL ? "+" : "−"}${nf((Math.abs(km - kmL) / kmL) * 100, 0)} % gegenüber ${cy - 1} bis heute</span>` : "";
+    recent = TOURS.slice(0, 9);
   const card = t => `<a class="hcard" href="#/tour/${t.id}" data-t="${t.id}">
       <div class="hcm" data-m="${t.id}">${miniRoute(t.id, t.sport)}</div>
       <div class="hcb"><b>${esc(t.name)}</b><span class="mut">${dateL(t.date)}</span>
       <span class="hcf">${nf(t.km, 1)} km<i></i>${nf(t.up_m || 0, 0)} m<i></i>${homeDur(t.h)} h${t.has_hr ? `<span class="hrt" title="Mit Herzfrequenz">❤</span>` : ""}</span></div></a>`;
+  /* „Dein Jahr“ (#hyear) setzt die Layout-Engine als Baustein ein (49-seitenlayout.js, 52-bausteine-uebersicht.js: slYearShell); ohne eigenes Layout steht er an der alten Stelle */
   main.innerHTML = `
   <section class="hlast" id="hlast"></section>
-  <section class="hyear" id="hyear">
-    <div class="hyh"><h2>Dein Jahr ${ys}</h2>${cmp}<span class="sp"></span><a class="hmore" href="#/stats">Zur Statistik</a></div>
-    <div class="hyg">
-      <div class="hyn"><b>${nf(yr.length, 0)}</b><span>Touren</span></div>
-      <div class="hyn"><b>${nf(km, 0)}</b><span>Kilometer</span></div>
-      <div class="hyn"><b>${nf(sum(yr, t => t.up_m || 0), 0)}</b><span>Höhenmeter</span></div>
-      <div class="hyn"><b>${nf(sum(yr, t => t.h), 0)}</b><span>Stunden unterwegs</span></div>
-      <div class="hym" title="Kilometer pro Monat">${mm.map((v, i) => `<div class="${ys === cy && i === now.getMonth() ? "cur" : ""}" title="${MONL[i]}: ${nf(v, 0)} km"><i style="height:${Math.max(v ? 6 : 2, (v / mx) * 100)}%"></i><span>${MON[i].slice(0, 1)}</span></div>`).join("")}</div>
-    </div>
-    <div id="hgoals"></div>
-  </section>
   ${recent.length > 1 ? `<section id="hrecent"><div class="hsh"><h2>Zuletzt unterwegs</h2><span class="sp"></span><a class="hmore" href="#/tours">Alle ${nf(TOURS.length, 0)} Touren</a></div><div class="hcards">${recent.slice(1).map(card).join("")}</div></section>` : ""}
   <div class="hcols" id="hcols">
     ${otd.length ? `<section id="htag"><div class="hsh"><h2>An diesem Tag</h2><span class="sub">in früheren Jahren</span></div><div class="tl">${otd.map(tourRow).join("")}</div></section>` : ""}
@@ -126,23 +124,6 @@ async function homeView() {
       })
       .catch(() => {});
   });
-
-  /* --- Ziele des Jahres (höchstens zwei), Verwaltung der Ziele in der Statistik --- */
-  api("/api/goals")
-    .then(all => {
-      const gs = all.filter(g => g.year === ys).slice(0, 2),
-        box = $("#hgoals");
-      if (!box || !gs.length || typeof goalVal !== "function") return;
-      const frac = ys === cy ? Math.max(0, (now - new Date(cy, 0, 1)) / (new Date(cy + 1, 0, 1) - new Date(cy, 0, 1))) : 1;
-      box.innerHTML = gs
-        .map(g => {
-          const v = goalVal(g, TOURS),
-            p = Math.min(100, (v / g.target) * 100);
-          return `<a class="hgoal" href="#/stats"><span>${GM[g.metric][1]}${g.sport ? " " + goalSportName(g.sport) : ""}</span><div class="gb"><i style="width:${p}%"></i><u style="left:${frac * 100}%" title="Soll heute"></u></div><b>${nf(v, 0)} / ${nf(g.target, 0)} ${GM[g.metric][0]}</b></a>`;
-        })
-        .join("");
-    })
-    .catch(() => {});
 
   /* --- Erinnerungen --- */
   api("/api/photos?random=true&limit=6")

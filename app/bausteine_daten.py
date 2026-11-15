@@ -13,13 +13,21 @@ GET /api/bausteine/<name> (nur lesend, je Benutzer – die Datenbank und der Zwi
     ausruestung Ausrüstung mit Kilometerstand und Limit (wie /api/gear, aber auch für Betrachter lesbar)
     geplant     geplante Touren (ohne Streckenpunkte)
 
+  3.19.0 Konfigurierbare Bausteine (Parameter wie die gemeinsamen Filterfelder des Layouts):
+    jahr        Summen und Verlauf der eigenen Touren, gefiltert nach ?sport=<a,b> (leer = alle), ?zeitraum=year|y|12m|90d|all (Standard year), ?jahr=<JJJJ> (bei zeitraum=y),
+                mit ?vergleich=1 zusätzlich der Vorzeitraum (laufendes Jahr: Vorjahr bis zum selben Tag; bestimmtes Jahr: das ganze Vorjahr; 12m/90d: die gleich lange Spanne davor; 12m = der laufende und die 11 Kalendermonate davor).
+                Ungültige Werte: 400. Rechnet je Benutzer aus der eigenen Datenbank; die Oberfläche rechnet dieselbe Regel aus den geladenen Touren (53-filter.js) –
+                dieser Endpunkt ist die Referenz und die Grundlage für den Filter der Statistikseite.
+
 Fehlt etwas, kommt {"status": "<grund>"} (nie 0 als Platzhalter): keine_strecke, keine_zeit, keine_hoehe, zu_kurz, keine_position, polar.
 Der Zwischenspeicher cache/bausteine/<id>.json gilt nur, solange die Quelldatei unverändert ist (Änderungszeit + Größe) und die Rechenvorschrift (ALGO) gleich bleibt;
 er baut sich von selbst neu auf und braucht keine Sicherung.
 """
+import calendar
 import json
 import math
-from datetime import datetime, timedelta, timezone
+import re
+from datetime import date, datetime, timedelta, timezone
 
 from fastapi import APIRouter, HTTPException
 
@@ -372,3 +380,94 @@ def api_ausruestung():
 def api_geplant():
     rows = db.query("SELECT id,name,sport,km,up,est_h,ts FROM plans ORDER BY ts DESC LIMIT 20")
     return [{"id": r["id"], "name": r["name"] or "", "sport": r["sport"], "km": r["km"], "up": r["up"], "est_h": r["est_h"], "ts": r["ts"]} for r in rows]
+
+
+# ------------------------------------------------------------------------------------------------ 3.19.0 Zeitraum und Aktivität
+ZEITRAEUME = ("year", "y", "12m", "90d", "all")
+_SPORT = re.compile(r"^[A-Za-z0-9_]{1,40}$")
+
+
+def _vor_jahr(d, n=1):
+    y = d.year - n
+    return date(y, d.month, min(d.day, calendar.monthrange(y, d.month)[1]))
+
+
+def zeitraum(art, jahr, heute):
+    """(von, bis, vorher) als Datum; von = None heißt ohne Anfang. `vorher` = (von, bis) des Vergleichszeitraums oder None."""
+    if art == "year":
+        return date(heute.year, 1, 1), heute, (date(heute.year - 1, 1, 1), _vor_jahr(heute))
+    if art == "y":
+        return date(jahr, 1, 1), date(jahr, 12, 31), (date(jahr - 1, 1, 1), date(jahr - 1, 12, 31))
+    if art == "12m":
+        m = heute.year * 12 + heute.month - 12                    # 12 Kalendermonate: der laufende und die 11 davor (passt zu den 12 Säulen)
+        von = date(m // 12, m % 12 + 1, 1)
+        return von, heute, (_vor_jahr(von), von - timedelta(days=1))
+    if art == "90d":
+        von = heute - timedelta(days=89)
+        return von, heute, (von - timedelta(days=90), von - timedelta(days=1))
+    return None, heute, None
+
+
+def _summe(rows, von, bis):
+    n = km = hm = h = 0.0
+    for r in rows:
+        if (von and r["d"] < von) or r["d"] > bis:
+            continue
+        n += 1
+        km += (r["dist_m"] or 0) / 1000
+        hm += r["up_m"] or 0
+        h += (r["dur_s"] or 0) / 3600
+    return {"touren": int(n), "km": round(km, 3), "hm": round(hm, 1), "stunden": round(h, 3)}
+
+
+def jahr_auswertung(sport="", zeitraum_="year", jahr=0, vergleich=False, heute=None):
+    heute = heute or datetime.now(TZ).date()
+    if zeitraum_ not in ZEITRAEUME:
+        raise HTTPException(400, "Unbekannter Zeitraum")
+    sports = [x for x in (sport or "").split(",") if x != ""]
+    if len(sports) > 20 or not all(_SPORT.match(x) for x in sports):
+        raise HTTPException(400, "Ungültige Aktivität")
+    if jahr and not 1970 <= jahr <= 2100:
+        raise HTTPException(400, "Ungültiges Jahr")
+    jahr = jahr or heute.year
+    rows = []
+    for r in db.query("SELECT sport,start_ts,dist_m,dur_s,up_m FROM tours WHERE start_ts IS NOT NULL"):
+        if sports and r["sport"] not in sports:
+            continue
+        r["d"] = datetime.fromtimestamp(r["start_ts"], tz=TZ).date()
+        rows.append(r)
+    von, bis, vor = zeitraum(zeitraum_, jahr, heute)
+    out = {"zeitraum": zeitraum_, "von": von.isoformat() if von else None, "bis": bis.isoformat(), "jahr": jahr if zeitraum_ == "y" else (heute.year if zeitraum_ == "year" else None),
+           "sport": sports, **_summe(rows, von, bis)}
+    # Verlauf: Monate (Jahr), die letzten 12 Kalendermonate, 13 Wochen, sonst je Jahr (höchstens die letzten 12)
+    vals = []
+    if zeitraum_ in ("year", "y"):
+        vals = [0.0] * 12
+        for r in rows:
+            if von <= r["d"] <= bis:
+                vals[r["d"].month - 1] += (r["dist_m"] or 0) / 1000
+    elif zeitraum_ == "12m":
+        vals = [0.0] * 12
+        for r in rows:
+            if von <= r["d"] <= bis:
+                vals[(r["d"].year - von.year) * 12 + r["d"].month - von.month] += (r["dist_m"] or 0) / 1000
+    elif zeitraum_ == "90d":
+        vals = [0.0] * 13
+        for r in rows:
+            if von <= r["d"] <= bis:
+                vals[min(12, (r["d"] - von).days // 7)] += (r["dist_m"] or 0) / 1000
+    else:
+        pr = [r for r in rows if r["d"] <= bis]
+        ys = sorted({r["d"].year for r in pr})[-12:]
+        vals = [sum((r["dist_m"] or 0) / 1000 for r in pr if r["d"].year == y) for y in ys]
+        out["jahre"] = ys
+    out["reihe_km"] = [round(v, 3) for v in vals]
+    out["vorher"] = None
+    if vergleich and vor:
+        out["vorher"] = {"von": vor[0].isoformat(), "bis": vor[1].isoformat(), **_summe(rows, vor[0], vor[1])}
+    return out
+
+
+@router.get("/api/bausteine/jahr")
+def api_jahr(sport: str = "", zeitraum: str = "year", jahr: int = 0, vergleich: int = 0):
+    return jahr_auswertung(sport, zeitraum, jahr, bool(vergleich))

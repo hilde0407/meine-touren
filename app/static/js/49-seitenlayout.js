@@ -30,7 +30,7 @@ const SL_REG = {
   ],
   uebersicht: [
     {id: "aufmacher", title: "Zuletzt unterwegs (Aufmacher)", page: "uebersicht", plain: true},
-    {id: "jahr", title: "Dein Jahr", page: "uebersicht", plain: true},
+    {id: "jahr", title: "Dein Jahr", page: "uebersicht", plain: true, build: "jahr"},
     {id: "zuletzt", title: "Letzte Touren", page: "uebersicht", plain: true},
     {id: "tag", title: "An diesem Tag", page: "uebersicht", group: "cols", plain: true},
     {id: "erinn", title: "Erinnerungen", page: "uebersicht", group: "cols", plain: true},
@@ -58,14 +58,25 @@ const slSt = fam => SL.docs[fam === "tour" ? "tour-haupt" : "uebersicht"] || {};
 const slAlias = id => (id === "met" || id === "uhr" ? "geraet" : id);        // Messwerte und Training laut Uhr bilden einen Block
 
 /* ---------- Abschnitte, Seiten, Reihenfolge ---------- */
+const slWTitle = (T, cfg) => ((cfg && cfg.title) || "").trim() || T.title(cfg || {});               // 3.19.0: eigener Titel überschreibt den Standard
+const slWFl = (T, cfg) => (T.kurz ? T.kurz(cfg || {}).join(", ") : T.filter ? flPlain(cfg || {}, T.filter.range) : "");
+const slSig = it => JSON.stringify(it.cfg || {});
 function slItems(fam) {
   const st = slSt(fam),
     items = SL_REG[fam].map(r => ({...r})),
     pg = st.page || {};
+  items.forEach(it => {
+    const T = it.build && window.SL_WT[it.build];                          // 3.19.0: Standard-Baustein („Dein Jahr“) mit Konfiguration unter „cfg“ im Dokument
+    if (!T) return;
+    it.wtype = it.build;
+    it.cfg = (st.cfg || {})[it.id] || {};
+    it.title = slWTitle(T, it.cfg);
+    it.fl = slWFl(T, it.cfg);
+  });
   (st.widgets || []).forEach(w => {
     const T = window.SL_WT[w.type];
     if (!T || T.fam !== fam) return;                                      // unbekannter Baustein (z. B. von einer neueren Version): ignorieren
-    items.push({id: w.id, title: T.title(w.cfg || {}), page: fam === "tour" ? "haupt" : "uebersicht", group: fam === "tour" ? "bst" : "", widget: true, wtype: w.type, cfg: w.cfg || {}, def: true, ckeys: ["tl_w_" + w.id]});
+    items.push({id: w.id, title: slWTitle(T, w.cfg || {}), fl: slWFl(T, w.cfg || {}), page: fam === "tour" ? "haupt" : "uebersicht", group: fam === "tour" ? "bst" : "", widget: true, plain: !!T.shell, wtype: w.type, cfg: w.cfg || {}, def: true, ckeys: ["tl_w_" + w.id]});
   });
   if (fam === "tour") items.forEach(it => !it.fixed && (pg[it.id] === "haupt" || pg[it.id] === "auswertung") && (it.page = pg[it.id]));
   return items;
@@ -320,11 +331,23 @@ function slRemoveWidget(id) {
   SL.focus = null;
   slApply();
 }
+/* Baustein zu einer Kennung: hinzugefügter Baustein oder Standard-Baustein mit Konfiguration (cfg[id]) */
+function slWidgetOf(id) {
+  const st = slSt(SL.fam), w = (st.widgets || []).find(x => x.id === id);
+  if (w) return {id, type: w.type, cfg: w.cfg || {}, widget: true};
+  const r = SL_REG[SL.fam].find(x => x.id === id && x.build);
+  return r ? {id, type: r.build, cfg: (st.cfg || {})[id] || {}} : null;
+}
 function slSetCfg(id, cfg) {
   const st = slStDoc(SL.fam),
     w = (st.widgets || []).find(x => x.id === id);
-  if (!w) return;
-  w.cfg = cfg;
+  if (w) w.cfg = cfg;
+  else if (SL_REG[SL.fam].some(x => x.id === id && x.build)) {
+    st.cfg = st.cfg || {};
+    if (Object.keys(cfg).length) st.cfg[id] = cfg;
+    else delete st.cfg[id];                                               // leere Konfiguration = Standard: nichts speichern
+    if (!Object.keys(st.cfg).length) delete st.cfg;
+  } else return;
   slTouch(SL.fam === "tour" ? "tour-haupt" : "uebersicht");
   const el = document.getElementById("tlw-" + id);
   if (el) el.remove();                                                      // wird mit der neuen Konfiguration neu gebaut
@@ -413,6 +436,7 @@ const slIcon = {
   grip: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="6" r="1.8"/><circle cx="15" cy="6" r="1.8"/><circle cx="9" cy="12" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="9" cy="18" r="1.8"/><circle cx="15" cy="18" r="1.8"/></svg>',
   eye: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.7-6.5 10-6.5S22 12 22 12s-3.7 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
   eyeoff: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 3l18 18M10.6 5.7A10 10 0 0 1 12 5.5c6.3 0 10 6.5 10 6.5a17 17 0 0 1-3.2 3.9M6.4 7.4A16.5 16.5 0 0 0 2 12s3.7 6.5 10 6.5c1.5 0 2.8-.3 4-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>',
+  gear: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
   sliders: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg>',
 };
 function slStripHtml(p, idx, n) {
@@ -422,7 +446,7 @@ function slStripHtml(p, idx, n) {
     dis = (c, e) => (c ? ' aria-disabled="true"' : "") + (e || ""),
     open = slDef(it.id, !!it.def);
   let h = `<button type="button" class="slgrip" data-a="grip" aria-label="Zum Verschieben ziehen, oder Pfeil hoch und Pfeil runter drücken" aria-describedby="slhint">${slIcon.grip}</button>`;
-  h += `<span class="slnm">${nm}</span>`;
+  h += `<span class="slnm">${nm}${it.fl ? ` <small class="slfl mut">${esc(it.fl)}</small>` : ""}</span>`;
   if (p.off) h += `<span class="slhid">ausgeblendet</span>`;
   h += `<span class="slbs">`;
   h += `<button type="button" class="slb" data-a="up" aria-label="Nach oben" title="Nach oben"${dis(idx === 0)}>↑</button>`;
@@ -430,7 +454,7 @@ function slStripHtml(p, idx, n) {
   if (!it.must) h += `<button type="button" class="slb" data-a="eye" aria-pressed="${p.off}">${p.off ? slIcon.eyeoff : slIcon.eye}<span>${p.off ? "Einblenden" : "Ausblenden"}</span></button>`;
   if (!it.plain) h += `<label class="slsw"><input type="checkbox" data-a="open"${open ? " checked" : ""}><span>Standardmäßig offen</span></label>`;
   if (SL.fam === "tour" && !it.fixed) h += `<button type="button" class="slb" data-a="page" >${other}</button>`;
-  if (it.widget && ((window.SL_WT[it.wtype] || {}).fields || []).length) h += `<button type="button" class="slb" data-a="cfg" >Einstellungen</button>`;
+  if ((it.widget || it.build) && ((window.SL_WT[it.wtype] || {}).fields || []).length) h += `<button type="button" class="slb slcfgb" data-a="cfg" aria-haspopup="dialog" title="Einstellungen dieses Bausteins">${slIcon.gear}<span>Einstellungen</span></button>`;
   if (it.widget) h += `<button type="button" class="slb slrm" data-a="del" >Entfernen</button>`;
   if (it.must) h += `<span class="slmust">bleibt immer sichtbar</span>`;
   return h + `</span>`;
@@ -451,7 +475,11 @@ function slPlace(root) {
   const pres = [];
   items.forEach(it => {
     let el = (SL_EL[fam][it.id] || (() => document.getElementById("tlw-" + it.id)))();
-    if (!el && it.widget && typeof window.slWidgetBuild === "function") el = window.slWidgetBuild(it, root);
+    if (el && (it.widget || it.build) && el.dataset.sig !== undefined && el.dataset.sig !== slSig(it)) {
+      el.remove();                                                            // Konfiguration hat sich geändert (auch durch Abgleich mit dem Server): neu bauen
+      el = null;
+    }
+    if (!el && (it.widget || it.build) && typeof window.slWidgetBuild === "function") el = window.slWidgetBuild(it, root);
     if (!el || slSelfHidden(it, el)) return;
     pres.push({it, el, off: hid.includes(it.id) && !it.must});
   });
@@ -492,7 +520,7 @@ function slPlace(root) {
     pres.forEach((p, i) => {
       const w = p.unit;
       if (w === p.el) return;
-      const sig = [i, pres.length, p.off, slDef(p.it.id, !!p.it.def), SL.page, p.it.title].join("|");
+      const sig = [i, pres.length, p.off, slDef(p.it.id, !!p.it.def), SL.page, p.it.title, p.it.fl || ""].join("|");
       let s = w.querySelector(":scope > .slst");
       if (!s) {
         s = document.createElement("div");
@@ -726,7 +754,7 @@ function slCatalog() {
   }, "slcat");
 }
 function slCfgDialog(id) {
-  const w = (slSt(SL.fam).widgets || []).find(x => x.id === id),
+  const w = slWidgetOf(id),
     T = w && window.SL_WT[w.type];
   if (!T) return;
   slModal(`Einstellungen: ${T.name || T.title(w.cfg)}`, (body, close) => {
@@ -738,8 +766,12 @@ function slCfgDialog(id) {
       const out = {...cfg};
       let bad = null;
       (T.fields || []).forEach((f, i) => {
-        if (f.kind === "checks") out[f.k] = [...form.querySelectorAll(`input[name="f${i}"]:checked`)].map(x => x.value);
-        else if (f.kind === "radio") out[f.k] = (form.querySelector(`input[name="f${i}"]:checked`) || {}).value || cfg[f.k];
+        if (FL_KINDS.has(f.kind)) flRead(f, form, i, out);
+        else if (f.kind === "checks") out[f.k] = [...form.querySelectorAll(`input[name="f${i}"]:checked`)].map(x => x.value);
+        else if (f.kind === "radio") {
+          const v = (form.querySelector(`input[name="f${i}"]:checked`) || {}).value || cfg[f.k] || f.def;
+          out[f.k] = f.num ? +v : v;
+        }
         else if (f.kind === "text") out[f.k] = form.querySelector(`[name="f${i}"]`).value.slice(0, f.max || 500);
         else if (f.kind === "number") {
           const inp = form.querySelector(`[name="f${i}"]`),
@@ -758,10 +790,12 @@ function slCfgDialog(id) {
         form.querySelector(".slerr").textContent = "Bitte mindestens einen Wert wählen.";
         return;
       }
+      (T.fields || []).forEach(f => f.kind === "checks" && f.def && out[f.k].join() === f.def.join() && delete out[f.k]);          // Standardwerte nicht speichern
       close();
       slSetCfg(id, out);
     };
     form.onclick = e => e.target.closest("[data-close]") && close();
+    flBind(form);
     form.addEventListener("input", e => {
       const ta = e.target.closest("textarea[data-max]");
       if (ta) form.querySelector(".slcount").textContent = `${ta.value.length} / ${ta.dataset.max}`;
@@ -770,10 +804,11 @@ function slCfgDialog(id) {
 }
 function slField(f, cfg, i) {
   const id = "slf" + i;
+  if (FL_KINDS.has(f.kind)) return flField(f, cfg, i);
   if (f.kind === "checks")
-    return `<fieldset class="slfs"><legend>${esc(f.label)}</legend>${f.options.map(([v, l]) => `<label class="slck"><input type="checkbox" name="f${i}" value="${v}"${(cfg[f.k] || []).includes(v) ? " checked" : ""}><span>${esc(l)}</span></label>`).join("")}<p class="slerr" role="alert"></p></fieldset>`;
+    return `<fieldset class="slfs"><legend>${esc(f.label)}</legend><div class="flchips">${f.options.map(([v, l]) => `<label class="flchip"><input type="checkbox" name="f${i}" value="${v}"${(cfg[f.k] || f.def || []).includes(v) ? " checked" : ""}><span>${esc(l)}</span></label>`).join("")}</div><p class="slerr" role="alert"></p></fieldset>`;
   if (f.kind === "radio")
-    return `<fieldset class="slfs"><legend>${esc(f.label)}</legend>${f.options.map(([v, l]) => `<label class="slck"><input type="radio" name="f${i}" value="${v}"${cfg[f.k] === v ? " checked" : ""}><span>${esc(l)}</span></label>`).join("")}</fieldset>`;
+    return `<fieldset class="slfs"><legend>${esc(f.label)}</legend><div class="flchips">${f.options.map(([v, l]) => `<label class="flchip"><input type="radio" name="f${i}" value="${v}"${String(cfg[f.k] ?? f.def) === String(v) ? " checked" : ""}><span>${esc(l)}</span></label>`).join("")}</div></fieldset>`;
   if (f.kind === "number")
     return `<div class="slfs"><label for="${id}">${esc(f.label)}</label><input id="${id}" name="f${i}" type="number" inputmode="decimal" min="${f.min}" max="${f.max}" step="${f.step || 1}" value="${esc(cfg[f.k] ?? "")}" required><p class="slerr" role="alert"></p></div>`;
   const max = f.max || 500;

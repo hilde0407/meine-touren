@@ -1841,4 +1841,47 @@ Leicht bewölkt || Partly cloudy || Peu nuageux || Poco nuboso
 Bewölkt || Overcast || Couvert || Cubierto
 Klar || Clear || Dégagé || Despejado
 Heiter || Fair || Éclairci || Despejado
+Laufendes Jahr || Current year || Année en cours || Año en curso
+Letzte 12 Monate || Last 12 months || 12 derniers mois || Últimos 12 meses
+Letzte 90 Tage || Last 90 days || 90 derniers jours || Últimos 90 días
+Gesamte Zeit || All time || Toute la période || Todo el tiempo
+Bestimmtes Jahr || Specific year || Année précise || Año concreto
+Mit dem Vorjahr vergleichen || Compare with the previous year || Comparer avec l’année précédente || Comparar con el año anterior
+Eigener Titel (optional) || Custom title (optional) || Titre personnalisé (facultatif) || Título propio (opcional)
+Einstellungen dieses Bausteins || Settings of this block || Réglages de ce bloc || Ajustes de este bloque
+{} Aktivitäten || {} activities || {} activités || {} actividades
+Keine Touren mit diesem Filter. || No tours match this filter. || Aucun parcours ne correspond à ce filtre. || Ninguna ruta coincide con este filtro.
+Mit diesem Filter gibt es weniger als drei Touren. || With this filter there are fewer than three tours. || Avec ce filtre, il y a moins de trois parcours. || Con este filtro hay menos de tres rutas.
+Mit diesem Filter gab es in diesem Jahr keine Touren. || With this filter there were no tours this year. || Avec ce filtre, il n’y a eu aucun parcours cette année. || Con este filtro no hubo rutas este año.
+Noch keine Touren in diesem Jahr. || No tours yet this year. || Pas encore de parcours cette année. || Aún no hay rutas este año.
+Anzahl || Number || Nombre || Cantidad
+Stunden || Hours || Heures || Horas
+Vergleichen mit || Compare with || Comparer avec || Comparar con
+Gleiche Sportart || Same sport || Même sport || Mismo deporte
+Allen Touren || All tours || Tous les parcours || Todas las rutas
+Touren dieses Jahres || Tours of this year || Parcours de cette année || Rutas de este año
+Für diesen Vergleich braucht es mindestens drei andere Touren dieses Jahres. || This comparison needs at least three other tours from this year. || Cette comparaison nécessite au moins trois autres parcours de cette année. || Esta comparación necesita al menos otras tres rutas de este año.
+Für diesen Vergleich braucht es mindestens drei andere Touren. || This comparison needs at least three other tours. || Cette comparaison nécessite au moins trois autres parcours. || Esta comparación necesita al menos otras tres rutas.
+Jahr: {} || Year: {} || Année : {} || Año: {}
+alle Sportarten || all sports || tous les sports || todos los deportes
+Deine letzten 12 Monate || Your last 12 months || Vos 12 derniers mois || Tus últimos 12 meses
+Deine letzten 90 Tage || Your last 90 days || Vos 90 derniers jours || Tus últimos 90 días
+Deine Touren insgesamt || All your tours || Tous vos parcours || Todas tus rutas
+{} % gegenüber den 12 Monaten davor || {} % compared with the 12 months before || {} % par rapport aux 12 mois précédents || {} % respecto a los 12 meses anteriores
+{} % gegenüber den 90 Tagen davor || {} % compared with the 90 days before || {} % par rapport aux 90 jours précédents || {} % respecto a los 90 días anteriores
+Touren pro Monat || Tours per month || Parcours par mois || Rutas por mes
+Höhenmeter pro Monat || Elevation gain per month || Dénivelé par mois || Desnivel por mes
+Stunden unterwegs pro Monat || Hours out per month || Heures en route par mois || Horas en ruta por mes
+Touren pro Woche || Tours per week || Parcours par semaine || Rutas por semana
+Kilometer pro Woche || Kilometres per week || Kilomètres par semaine || Kilómetros por semana
+Höhenmeter pro Woche || Elevation gain per week || Dénivelé par semaine || Desnivel por semana
+Stunden unterwegs pro Woche || Hours out per week || Heures en route par semaine || Horas en ruta por semana
+Touren pro Jahr || Tours per year || Parcours par an || Rutas por año
+Kilometer pro Jahr || Kilometres per year || Kilomètres par an || Kilómetros por año
+Höhenmeter pro Jahr || Elevation gain per year || Dénivelé par an || Desnivel por año
+Stunden unterwegs pro Jahr || Hours out per year || Heures en route par an || Horas en ruta por año
+Woche ab {} || Week from {} || Semaine à partir du {} || Semana desde el {}
+Die zuletzt gemachten Touren (3 bis 10, wählbar, auch nur einer Aktivität) als Liste mit Link. || The most recent tours (3 to 10, selectable, optionally of one activity only) as a list with links. || Les derniers parcours (3 à 10, au choix, éventuellement d’une seule activité) sous forme de liste avec lien. || Las últimas rutas (de 3 a 10, a elegir, también de una sola actividad) como lista con enlace.
+Touren, Kilometer, Höhenmeter und Stunden mit Monatssäulen und Vorjahresvergleich, wählbar nach Aktivität und Zeitraum. In der Übersicht steht „Dein Jahr“ schon; hier kannst du weitere mit anderem Filter hinzufügen. || Tours, kilometres, elevation gain and hours with monthly columns and a comparison with the previous year, selectable by activity and period. “Your year” is already on the overview; here you can add more with a different filter. || Parcours, kilomètres, dénivelé et heures avec colonnes mensuelles et comparaison avec l’année précédente, au choix par activité et période. « Votre année » figure déjà dans l’aperçu ; vous pouvez en ajouter d’autres avec un autre filtre. || Rutas, kilómetros, desnivel y horas con columnas mensuales y comparación con el año anterior, a elegir por actividad y periodo. «Tu año» ya está en el resumen; aquí puedes añadir más con otro filtro.
+Mit diesem Filter gab es dafür zu wenige Touren. || There were too few tours for this with this filter. || Il y avait trop peu de parcours pour cela avec ce filtre. || Con este filtro hubo muy pocas rutas para esto.
 `;

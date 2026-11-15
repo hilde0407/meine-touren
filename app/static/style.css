@@ -1245,3 +1245,25 @@ svg .slbn{fill:none;stroke:var(--mut);stroke-width:1.5}
 @media (prefers-reduced-motion:no-preference){.slring .f,.slring .g{transition:stroke-dasharray .6s ease}}
 @media (max-width:700px){.slhist li{grid-template-columns:minmax(96px,36%) minmax(0,1fr) 48px;gap:8px}.slring,.slring.slsd{width:132px;height:132px}.slfh img:first-child{min-height:180px}}
 .slwb>*:not(.utiles):not(.slfotos):not(.slsign){max-width:860px}
+
+/* ===== 3.19.0 Konfigurierbare Bausteine: Kurztext der Filterung, Einstellungs-Dialog (Auswahl-Chips), Dein Jahr mit weniger Kennzahlen ===== */
+.flk{flex:none;max-width:100%;padding:2px 10px;border:1.5px solid var(--rule);border-radius:99px;background:var(--soft);color:var(--ink);font:600 14px var(--b);overflow-wrap:anywhere}
+.hyh .flk{align-self:center}
+.flnone{margin:10px 0 0;font-size:15px}
+.slfl{font:500 14px var(--b);overflow-wrap:anywhere}
+.slfl::before{content:"· "}
+.flchips{display:flex;flex-wrap:wrap;gap:8px}
+.flchip{position:relative;display:inline-flex;align-items:center;min-height:40px;padding:4px 14px;border:1.5px solid var(--rule);border-radius:99px;background:var(--card);color:var(--ink);font:600 15px var(--d);cursor:pointer}
+.flchip input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.flchip:hover{border-color:var(--ink)}
+.flchip:has(input:checked){background:var(--ink);color:var(--card);border-color:var(--ink)}
+.flchip:has(input:checked)::before{content:"✓";margin-right:6px}
+.flchip:has(input:focus-visible){outline:3px solid var(--ink);outline-offset:2px}
+.slform .flsel,.slform input[type=text]{width:100%;box-sizing:border-box;min-height:44px;font-size:16px}
+.slform .slfs>label:not(.slck){padding-bottom:6px}
+.hyg[data-n="1"]{grid-template-columns:auto minmax(220px,1fr)}
+.hyg[data-n="2"]{grid-template-columns:repeat(2,auto) minmax(220px,1fr)}
+.hyg[data-n="3"]{grid-template-columns:repeat(3,auto) minmax(220px,1fr)}
+@media(max-width:1000px){.hyg[data-n]{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:700px){.flchip{min-height:44px}.slcfgb span{white-space:nowrap}}
+.slfs>label.slck{display:flex;align-items:center;gap:10px;padding:0;font:500 16px var(--b)}

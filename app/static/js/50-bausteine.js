@@ -173,15 +173,15 @@ Object.assign(window.SL_WT, {
   },
   /* ---------------- Übersicht ---------------- */
   periode: {
-    fam: "uebersicht", cat: "zahlen", icon: "trend", name: "Diese Woche / dieser Monat", title: cfg => (cfg.period === "month" ? "Dieser Monat" : "Diese Woche"), multi: true, defaults: {period: "week"},
+    fam: "uebersicht", cat: "zahlen", icon: "trend", name: "Diese Woche / dieser Monat", title: cfg => (cfg.period === "month" ? "Dieser Monat" : "Diese Woche"), multi: true, defaults: {period: "week"}, filter: {range: null},
     desc: "Touren, Kilometer und Höhenmeter der laufenden Woche oder des laufenden Monats.",
-    fields: [{k: "period", kind: "radio", label: "Zeitraum", options: [["week", "Diese Woche"], ["month", "Dieser Monat"]]}],
+    fields: [{k: "period", kind: "radio", label: "Zeitraum", def: "week", options: [["week", "Diese Woche"], ["month", "Dieser Monat"]]}, {kind: "sports"}, {kind: "title"}],
     preview: () => slPvTiles([["3", "Touren"], ["41 km", "Kilometer"], ["1.120 m", "Höhenmeter"]]),
     render(c, b, cfg) {
       const now = new Date(),
         from = cfg.period === "month" ? new Date(now.getFullYear(), now.getMonth(), 1) : new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7)),
         iso = slIso(from),
-        a = TOURS.filter(t => t.date.slice(0, 10) >= iso);
+        a = TOURS.filter(t => t.date.slice(0, 10) >= iso && flSport(t, cfg));
       b.innerHTML = slTiles([[nf(a.length, 0), a.length === 1 ? "Tour" : "Touren"], [nf(slSum(a, t => t.km), 1) + " km", "Kilometer"], [nf(slSum(a, t => t.up_m || 0), 0) + " m", "Höhenmeter"], [nf(slSum(a, t => t.h), 1) + " Std.", "Unterwegs"]]);
       slBadge(c, a.length ? `${nf(slSum(a, t => t.km), 0)} km` : "Noch keine Tour");
     },
@@ -205,31 +205,31 @@ Object.assign(window.SL_WT, {
     },
   },
   jahresvergleich: {
-    fam: "uebersicht", cat: "rueck", icon: "trend", name: "Jahresvergleich", title: () => "Jahresvergleich",
+    fam: "uebersicht", cat: "rueck", icon: "trend", name: "Jahresvergleich", title: () => "Jahresvergleich", filter: {range: null},
+    fields: [{k: "metrics", kind: "checks", def: ["count", "km", "up"], label: "Angezeigte Werte", min: 1, options: [["count", "Touren"], ["km", "Kilometer"], ["up", "Höhenmeter"], ["h", "Stunden"]]}, {kind: "sports"}, {kind: "title"}],
     desc: "Das laufende Jahr gegen das Vorjahr bis zum selben Tag: Touren, Kilometer, Höhenmeter.",
     preview: () => slPvTiles([["31 Touren", "2026"], ["+12 %", "Kilometer"], ["−4 %", "Höhenmeter"]]),
-    render(c, b) {
-      const now = new Date(),
-        cy = now.getFullYear(),
-        md = `${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`,
-        a = TOURS.filter(t => t.y === cy),
-        p = TOURS.filter(t => t.y === cy - 1 && t.date.slice(5, 10) <= md),
-        row = (lab, f, d) => {
-          const x = f(a), y = f(p), pct = y > 0 ? Math.round(((x - y) / y) * 100) : null;
-          return [`${nf(x, d)}`, lab, `Vorjahr bis heute: ${nf(y, d)}${pct == null ? "" : ` (${pct >= 0 ? "+" : "−"}${Math.abs(pct)} %)`}`];
+    render(c, b, cfg) {
+      const cy = new Date().getFullYear(), {list: a, prev: p} = flSelect(cfg, "year"),
+        row = (m, d) => {
+          const x = flVal(a, m), y = flVal(p, m), pct = y > 0 ? Math.round(((x - y) / y) * 100) : null;
+          return [`${nf(x, d)}`, m === "count" ? "Touren" : m === "h" ? "Stunden" : FL_MET[m].name, `Vorjahr bis heute: ${nf(y, d)}${pct == null ? "" : ` (${pct >= 0 ? "+" : "−"}${Math.abs(pct)} %)`}`];
         };
-      if (!a.length && !p.length) return slNote(b, "Noch keine Touren in diesem und im letzten Jahr.");
-      b.innerHTML = slTiles([row("Touren", x => x.length, 0), row("Kilometer", x => slSum(x, t => t.km), 0), row("Höhenmeter", x => slSum(x, t => t.up_m || 0), 0)]);
+      if (!a.length && !p.length) return flNone(b, (cfg.sports || []).length ? "" : "Noch keine Touren in diesem und im letzten Jahr.");
+      b.innerHTML = slTiles((cfg.metrics && cfg.metrics.length ? cfg.metrics : ["count", "km", "up"]).filter(m => FL_MET[m]).map(m => row(m, 0)));
       slBadge(c, String(cy));
     },
   },
   letzte: {
-    fam: "uebersicht", cat: "rueck", icon: "map", name: "Letzte Touren", title: () => "Letzte Touren",
-    desc: "Die fünf zuletzt gemachten Touren als Liste mit Link.",
+    fam: "uebersicht", cat: "rueck", icon: "map", name: "Letzte Touren", title: () => "Letzte Touren", filter: {range: null}, defaults: {n: 5},
+    fields: [{k: "n", kind: "radio", num: true, def: 5, label: "Anzahl", options: [[3, "3"], [5, "5"], [8, "8"], [10, "10"]]}, {kind: "sports"}, {kind: "title"}],
+    desc: "Die zuletzt gemachten Touren (3 bis 10, wählbar, auch nur einer Aktivität) als Liste mit Link.",
     preview: () => slPrev('<ul class="sllist"><li><b>Gipfelrunde</b><span>12,4 km</span></li><li><b>Seeufer</b><span>8,1 km</span></li></ul>'),
-    render(c, b) {
+    render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
-      b.innerHTML = `<ul class="sllist">${TOURS.slice(0, 5).map(t => `<li><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${dateS(t.date)} · ${nf(t.km, 1)} km · ${nf(t.up_m || 0, 0)} m</span></li>`).join("")}</ul>`;
+      const L = TOURS.filter(t => flSport(t, cfg)).slice(0, +cfg.n >= 1 && +cfg.n <= 10 ? +cfg.n : 5);
+      if (!L.length) return flNone(b);
+      b.innerHTML = `<ul class="sllist">${L.map(t => `<li><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${dateS(t.date)} · ${nf(t.km, 1)} km · ${nf(t.up_m || 0, 0)} m</span></li>`).join("")}</ul>`;
     },
   },
   neuefotos: {
@@ -257,12 +257,15 @@ Object.assign(window.SL_WT, {
     },
   },
   rekorde: {
-    fam: "uebersicht", cat: "rueck", icon: "trend", name: "Rekorde", title: () => "Rekorde",
+    fam: "uebersicht", cat: "rueck", icon: "trend", name: "Rekorde", title: () => "Rekorde", filter: {range: "all"}, defaults: {},
+    fields: [{kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}],
     desc: "Längste Tour, meiste Höhenmeter und schnellstes Tempo, mit Link zur Tour.",
     preview: () => slPvTiles([["32,4 km", "Längste Tour"], ["1.480 m", "Meiste Höhenmeter"]]),
-    render(c, b) {
+    render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
-      const best = (f, ok) => TOURS.filter(ok || (() => true)).reduce((m, t) => (!m || f(t) > f(m) ? t : m), null),
+      const A = flSelect(cfg, "all").list;
+      if (!A.length) return flNone(b);
+      const best = (f, ok) => A.filter(ok || (() => true)).reduce((m, t) => (!m || f(t) > f(m) ? t : m), null),
         L = best(t => t.km), U = best(t => t.up_m || 0), S = best(t => t.km / t.h, t => t.km >= 3 && t.h >= 0.5),
         tile = (t, v, l) => (t ? `<a class="utile slrec" href="#/tour/${encodeURIComponent(t.id)}"><b>${v}</b><span>${l}</span><small class="mut">${esc(t.name)} · ${dateS(t.date)}</small></a>` : "");
       b.innerHTML = `<div class="utiles">${tile(L, nf(L && L.km, 1) + " km", "Längste Tour")}${tile(U && U.up_m ? U : null, nf(U && U.up_m, 0) + " m", "Meiste Höhenmeter")}${tile(S, nf(S && S.km / S.h, 1) + " km/h", "Schnellstes Tempo")}</div>`;
@@ -286,9 +289,16 @@ Object.assign(window.SL_WT, {
 window.slWidgetBuild = (it, root) => {
   const T = window.SL_WT[it.wtype];
   if (!T) return null;
-  const c = tlCard("tlw-" + it.id, {sec: it.id, key: "tl_w_" + it.id, icon: T.icon, title: T.title(it.cfg || {}), def: true, bodyCls: "slwb"});
+  if (T.shell) {                                                            // 3.19.0: Baustein im Format eines Übersichtsblocks („Dein Jahr“), kein einklappbarer Abschnitt
+    const e = T.shell(it, root);
+    e.dataset.sig = slSig(it);
+    return e;
+  }
+  const c = tlCard("tlw-" + it.id, {sec: it.id, key: "tl_w_" + it.id, icon: T.icon, title: esc(slWTitle(T, it.cfg || {})), def: true, bodyCls: "slwb"});
   c.dataset.wid = it.id;
   c.dataset.wtype = it.wtype;
+  c.dataset.sig = slSig(it);
+  flHead(c, T, it.cfg || {});
   const body = tlBody(c);
   body.innerHTML = '<p class="mut slnone">Wird geladen …</p>';
   const t = root && root.dataset && root.dataset.tid ? BY[root.dataset.tid] : null;
