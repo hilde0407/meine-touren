@@ -1682,6 +1682,7 @@ Ausgewählt nach Bewertung und Schärfe. || Chosen by rating and sharpness. || C
 Mini-Höhenprofil || Mini elevation profile || Mini profil altimétrique || Mini perfil de altitud
 Das Höhenprofil kompakt, die Linie nach Steigung eingefärbt: bergab, eben, bergauf. || The elevation profile in compact form, the line coloured by gradient: downhill, flat, uphill. || Le profil altimétrique en compact, la ligne colorée selon la pente : descente, plat, montée. || El perfil de altitud compacto, con la línea coloreada según la pendiente: bajada, llano, subida.
 Höhenprofil, tiefster Punkt {}, höchster Punkt {}, Länge {} || Elevation profile, lowest point {}, highest point {}, length {} || Profil altimétrique, point le plus bas {}, point le plus haut {}, longueur {} || Perfil de altitud, punto más bajo {}, punto más alto {}, longitud {}
+höchster Punkt {} m || highest point {} m || point culminant {} m || punto más alto {} m
 bergab || downhill || descente || bajada
 eben || flat || plat || llano
 bergauf || uphill || montée || subida
@@ -2184,4 +2185,29 @@ Noch keine Links freigegeben. In einer Tour findest du „Senden“ und „Diash
 öffnen kann – du wählst, was er zeigt (Karte, Höhenprofil, Fotos …). Er funktioniert nur, wenn dein Server von außen erreichbar ist, z. B. per VPN oder Reverse-Proxy. || can open – you choose what it shows (map, elevation profile, photos …). It only works if your server is reachable from outside, e.g. via VPN or reverse proxy. || peut ouvrir – vous choisissez ce qu’il montre (carte, profil d’altitude, photos …). Cela ne fonctionne que si votre serveur est joignable de l’extérieur, p. ex. par VPN ou reverse proxy. || puede abrir; tú eliges qué muestra (mapa, perfil de altitud, fotos …). Solo funciona si tu servidor es accesible desde fuera, p. ej. por VPN o proxy inverso.
 Neuen Link erstellen … || Create new link … || Créer un nouveau lien … || Crear un enlace nuevo …
 Du wählst, was der Link zeigt – und sendest ihn an WhatsApp, Signal, E-Mail … || You choose what the link shows – and send it to WhatsApp, Signal, e-mail … || Vous choisissez ce que le lien montre – et l’envoyez à WhatsApp, Signal, e-mail … || Eliges qué muestra el enlace y lo envías a WhatsApp, Signal, correo …
+Jahresrückblick teilen || Share year in review || Partager le bilan de l’année || Compartir el resumen del año
+Erzeugt eine Seite mit deinem Tourenjahr, die man ohne Benutzerkonto öffnen und als PDF speichern kann. Was du nicht wählst, schickt der Server gar nicht erst mit. || Creates a page with your year in tours that anyone can open without an account and save as PDF. What you do not choose is never sent by the server. || Crée une page avec votre année de sorties, que l’on peut ouvrir sans compte et enregistrer en PDF. Ce que vous ne choisissez pas n’est jamais envoyé par le serveur. || Crea una página con tu año de rutas que se puede abrir sin cuenta y guardar como PDF. Lo que no elijas, el servidor ni siquiera lo envía.
+Beste Fotos || Best photos || Meilleures photos || Mejores fotos
+Rekorde nennen Tourname und Datum. Strecken, Startorte, Notizen, Wegpunkte und Uhr-Daten sind nie Teil eines Links. || Records show tour name and date. Routes, start places, notes, waypoints and watch data are never part of a link. || Les records indiquent le nom et la date du parcours. Tracés, lieux de départ, notes, points de passage et données de la montre ne font jamais partie d’un lien. || Los récords muestran el nombre y la fecha de la ruta. Los trazados, lugares de salida, notas, puntos de paso y datos del reloj nunca forman parte de un enlace.
+Als Link teilen || Share as link || Partager par lien || Compartir como enlace
+Rückblick als Link ohne Konto teilen oder als PDF speichern || Share the review as a link without an account or save it as PDF || Partager le bilan par lien sans compte ou l’enregistrer en PDF || Compartir el resumen como enlace sin cuenta o guardarlo como PDF
+Link ist bereit || Link is ready || Le lien est prêt || El enlace está listo
+{} – jeder mit diesem Link kann den Rückblick ansehen, ohne Konto. || {} – anyone with this link can view the review, no account needed. || {} – toute personne disposant de ce lien peut voir le bilan, sans compte. || {}: cualquiera con este enlace puede ver el resumen, sin cuenta.
+Senden || Send || Envoyer || Enviar
+Öffnen || Open || Ouvrir || Abrir
+Als PDF speichern || Save as PDF || Enregistrer en PDF || Guardar como PDF
+„Als PDF speichern“ öffnet die Seite und startet den Druckdialog – dort „Als PDF speichern“ wählen. || “Save as PDF” opens the page and starts the print dialog – choose “Save as PDF” there. || « Enregistrer en PDF » ouvre la page et lance la boîte d’impression – y choisir « Enregistrer en PDF ». || «Guardar como PDF» abre la página e inicia el diálogo de impresión; allí elige «Guardar como PDF».
+PDF || PDF || PDF || PDF
+Seite öffnen und den Druckdialog starten – dort als PDF speichern || Open the page and start the print dialog – save as PDF there || Ouvrir la page et lancer l’impression – y enregistrer en PDF || Abrir la página e iniciar la impresión; allí guardar como PDF
+✓ Kopiert || ✓ Copied || ✓ Copié || ✓ Copiado
+Rückblicke || Reviews || Bilans || Resúmenes
+Aktivitäten || Activities || Activités || Actividades
+Längste Serie || Longest streak || Plus longue série || Racha más larga
+Tage in Folge unterwegs || Days out in a row || Jours de sortie d’affilée || Días seguidos de salida
+Tage || Days || Jours || Días
+Foto vergrößern || Enlarge photo || Agrandir la photo || Ampliar foto
+Drucken / Als PDF speichern || Print / Save as PDF || Imprimer / Enregistrer en PDF || Imprimir / Guardar como PDF
+mehr Kilometer || more kilometres || plus de kilomètres || más kilómetros
+gegenüber {} || compared with {} || par rapport à {} || respecto a {}
+Noch keine Links freigegeben. In einer Tour findest du „Senden“ und „Diashow senden“, im Jahresrückblick „Als Link teilen“. || No links shared yet. In a tour you will find “Send” and “Send slideshow”, in the year in review “Share as link”. || Aucun lien partagé pour l’instant. Dans un parcours, vous trouverez « Envoyer » et « Envoyer le diaporama », dans le bilan de l’année « Partager par lien ». || Aún no hay enlaces compartidos. En una ruta encontrarás «Enviar» y «Enviar pase de fotos», en el resumen del año «Compartir como enlace».
 `;

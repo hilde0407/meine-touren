@@ -1505,3 +1505,9 @@ body.sl-editing .tlw[data-hn=lade],body.sl-editing .tlw[data-hn=aus]{display:fle
 .shrsel select{display:block;width:100%;min-height:44px;margin-top:4px;font-size:16px}
 .shrdlg input:focus-visible,.shrdlg select:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .lkzeigt{color:var(--ink)}
+
+/* =====================  3.26.0: Jahresrückblick teilen (Dialog in 43-rueckblick.js, öffentliche Seite rueckblick.html)  ===================== */
+.rbdlg .rbrow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.rbdlg .rbrow .shrsel{margin-top:6px}
+.rbres input{font-size:15px}
+@media (max-width:520px){.rbdlg .rbrow{grid-template-columns:1fr}}

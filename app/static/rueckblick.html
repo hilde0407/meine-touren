@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="color-scheme" content="light dark">
+<title>Jahresrückblick</title>
+<style>
+:root{--bg:#eef2ee;--ink:#10282a;--mut:#4f6361;--acc:#f2c230;--forest:#0e2a2b;--card:#fff;--rule:#c9d3cc;--bar:#17494a;--ghost:#b9c7c0;--h0:#e3e9e4;--h1:#cfe8d5;--h2:#8cc9a0;--h3:#3f9d6b;--h4:#17694a}
+@media(prefers-color-scheme:dark){:root{--bg:#0d1b1c;--ink:#e6efec;--mut:#9db3ae;--card:#142a2b;--rule:#2a4543;--bar:#6fb5a5;--ghost:#35514f;--h0:#1b3334;--h1:#24493f;--h2:#2f6b55;--h3:#3f9d6b;--h4:#8fe0b0}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+header{background:var(--forest);color:#fff;padding:26px 16px 24px}.in,main{max-width:980px;margin:0 auto;padding:0 16px}.in{padding:0}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between}.k{color:#b6c9c4;font-size:16px;letter-spacing:.02em}
+h1{margin:6px 0 0;font-size:clamp(44px,12vw,96px);line-height:1;color:var(--acc)}.sub{margin:8px 0 0;color:#d6e3df;font-size:18px}
+.pbtn{min-height:44px;padding:8px 18px;border:2px solid #ffffff88;border-radius:8px;background:transparent;color:#fff;font:600 15px system-ui,sans-serif;cursor:pointer}.pbtn:hover{background:#ffffff1f}
+.pbtn:focus-visible,.ph img:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.blk{margin:26px 0 0;break-inside:avoid}.blk h2{font-size:22px;margin:0 0 12px}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}.fig{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:14px 16px}
+.fig b{display:block;font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}.fig span{color:var(--mut);font-size:14px}
+.cmp{margin:12px 0 0;color:var(--mut);font-size:15px}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;margin:12px 0 0}.panel h3{font-size:18px;margin:0 0 8px}
+.mbars{width:100%;height:auto;display:block}.mbars rect{fill:var(--bar)}.mbars rect.g{fill:var(--ghost)}.mbars text{font:13px system-ui,sans-serif;fill:var(--mut)}
+.sp{list-style:none;margin:0;padding:0}.sp li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--rule)}.sp li:last-child{border:0}.sp b{font-variant-numeric:tabular-nums}
+.recs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.rec{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;break-inside:avoid}
+.rec .l{color:var(--mut);font-size:14px}.rec b{display:block;font-size:26px;line-height:1.2;font-variant-numeric:tabular-nums}.rec .w{margin-top:4px;overflow-wrap:anywhere;font-size:15px}.rec .w span{color:var(--mut)}
+.months{display:grid;grid-template-columns:repeat(6,1fr);gap:16px 14px}.mo{break-inside:avoid}.mo h3{font-size:14px;margin:0 0 4px;color:var(--mut);font-weight:600}
+.cal{max-width:132px;display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;grid-auto-columns:1fr;gap:3px}.cal i{aspect-ratio:1;border-radius:3px;background:var(--h0);display:block}
+.cal i.l1{background:var(--h1)}.cal i.l2{background:var(--h2)}.cal i.l3{background:var(--h3)}.cal i.l4{background:var(--h4)}
+.leg{display:flex;align-items:center;gap:6px;margin:12px 0 0;color:var(--mut);font-size:14px}.leg i{width:16px;height:16px;border-radius:3px;display:inline-block;background:var(--h0)}.leg i.l1{background:var(--h1)}.leg i.l2{background:var(--h2)}.leg i.l3{background:var(--h3)}.leg i.l4{background:var(--h4)}
+.ph{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.ph img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;cursor:zoom-in;display:block}
+#lb{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;z-index:9999}#lb img{max-width:96vw;max-height:94vh}
+footer{color:var(--mut);font-size:14px;padding:30px 16px;text-align:center}.err{padding:40px 16px;text-align:center}
+@media(max-width:700px){.months{grid-template-columns:repeat(3,1fr)}}@media(max-width:520px){.sub{font-size:16px}.recs{grid-template-columns:1fr}.months{gap:14px 10px}}
+@page{size:A4;margin:14mm}
+@media print{
+ :root,:root:not(#x){--bg:#fff;--ink:#111;--mut:#444;--card:#fff;--rule:#bbb;--bar:#17494a;--ghost:#bbb;--h0:#e3e9e4;--h1:#cfe8d5;--h2:#8cc9a0;--h3:#3f9d6b;--h4:#17694a}
+ body{background:#fff;color:#111;font-size:12pt}header{background:#fff;color:#111;padding:0 0 10px;border-bottom:4px solid var(--acc)}h1{color:#111;font-size:54pt}.k,.sub{color:#444}
+ .pbtn,#lb{display:none!important}.in,main{max-width:none;padding:0}.blk{margin-top:16pt;break-inside:avoid;page-break-inside:avoid}.blk h2{break-after:avoid;font-size:16pt}
+ .fig,.rec,.panel{break-inside:avoid;page-break-inside:avoid}.figs{grid-template-columns:repeat(5,1fr)}.fig b{font-size:20pt}.recs{grid-template-columns:repeat(2,1fr)}
+ .months{grid-template-columns:repeat(6,1fr)}.ph{grid-template-columns:repeat(4,1fr)}.ph img{break-inside:avoid}footer{padding:12pt 0 0;font-size:10pt}
+}
+</style><script src="/js/00-i18n-data.js"></script><script src="/js/00-i18n-neu.js"></script><script src="/js/00-i18n.js"></script>
+</head><body>
+<header><div class="in"><div class="top"><div class="k">Mein Tourenjahr</div><button class="pbtn" id="pr" type="button" hidden>Drucken / Als PDF speichern</button></div><h1 id="h"></h1><p class="sub" id="sb" hidden></p></div></header>
+<main><div id="b"></div></main>
+<footer>Geteilt aus „Meine Touren“</footer><div id="lb"><img alt=""></div>
+<script src="/js/seite-rueckblick.js"></script></body></html>
