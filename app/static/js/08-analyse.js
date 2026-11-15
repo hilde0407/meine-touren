@@ -46,8 +46,7 @@ function analyse(c) {
   return {cum, pauses, total, pausedS, segs, band, dist: cum[n - 1]};
 }
 const fmtH = s => {
-  const h = Math.floor(s / 3600),
-    m = Math.round((s % 3600) / 60);
+  const [h, m] = hmParts(s);
   return h ? `${h}:${pad2(m)} h` : `${m} min`;
 };
 /* Wetter und Analyse: Karten für die Unterseite „Auswertung“ (auf der Hauptseite nur, damit der Einstieg Kurzaussagen hat – 48-tourlayout.js nimmt sie wieder heraus).

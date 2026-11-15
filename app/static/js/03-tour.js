@@ -115,7 +115,7 @@ const tlOnSub = fn => TL_DETAIL.push(fn);
 VIEWS.tourauswertung = async id => {
   const t = BY[id];
   if (!t) throw new Error("Tour nicht gefunden");
-  const hm = `${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60) % 60)}`;
+  const hm = fmtHM(t.h * 3600);
   $("#main").innerHTML =
     `<div class="row"><a class="back" id="tlback" href="#/tour/${esc(String(t.id))}">‹ Zurück zur Tour</a></div>
    <div class="tlsubhead"><span class="tlsubeb">Detaillierte Auswertung</span>
@@ -149,7 +149,7 @@ VIEWS.tour = async id => {
    <h1 class="m10-0-18" style="font-size:clamp(34px,5vw,56px)"><span id="tname">${esc(t.name)}</span> <button class="btn ghost sm vam fs15" id="ren" title="Tour umbenennen">✎ Umbenennen</button></h1>
    <div class="row mn6-0-14">${t.source === "local" ? `<span class="tag" style="background:var(--yellow);color:#000" title="Diese Tour liegt nur lokal vor (Strecke als GPX im Datenordner)">lokal gespeichert</span>` : `<button class="btn ghost sm" id="ksync" title="Daten und GPS-Track neu von Komoot laden">⟳ Mit Komoot abgleichen</button>`}<button class="btn ghost sm" id="eup" title="Zu Komoot, Strava … hochladen">⬆ Hochladen</button><a class="btn ghost sm" id="egpx" href="/api/tours/${encodeURIComponent(t.id)}/gpx" title="Strecke als GPX-Datei herunterladen">⬇ GPX</a><button class="btn ghost sm" id="edel" title="Tour löschen">🗑 Löschen</button><button class="btn ghost sm" id="etag" title="Schlagworte / Alben">🏷 Tags</button><button class="btn ghost sm" id="eshr" title="Öffentlichen Link erzeugen">🔗 Teilen</button><button class="btn ghost sm" id="etc" title="Farbe und Breite der Strecke">🎨 Streckenfarbe</button><button class="btn ghost sm" id="efix" title="Höhen mit Geländemodell neu berechnen"></button><button class="btn ghost sm" id="ezepp" title="Auf-/Abstieg aus der barometrischen Höhe der Zepp-Uhr übernehmen">⌚ Höhe aus Uhr abgleichen (Zepp)</button><span id="ksm" class="mut fs14"></span></div><div id="upst" class="chips mn4-0-10"></div><div id="tagl" class="chips mn4-0-12"></div><div id="ewarn"></div>
    <div class="figs"><div class="fig"><div class="v">${nf(t.km, 2)}<span class="u">km</span></div><div class="l">Strecke</div></div><div class="fig"><div class="v">${nf(t.up_m, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div></div>
-   <div class="fig"><div class="v">${nf(t.down_m, 0)}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60))}<span class="u">Std.</span></div><div class="l">Dauer</div></div>
+   <div class="fig"><div class="v">${nf(t.down_m, 0)}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${fmtHM(t.h * 3600)}<span class="u">Std.</span></div><div class="l">Dauer</div></div>
    <div class="fig"><div class="v">${t.h ? nf(t.km / t.h, 1) : "–"}<span class="u">km/h</span></div><div class="l">Tempo im Schnitt</div></div><div id="kmax" class="fig" style="display:none"><div class="v" id="kmaxv"></div><div class="l">Höchster Punkt</div></div></div>
    <div class="tlx" id="tl" data-tid="${esc(String(t.id))}">
    <section class="tlg" id="tlg-route" aria-labelledby="tlgh-route"><h2 class="tlgh" id="tlgh-route">Streckenverlauf</h2><div class="tlgb" id="tlgb-route">

@@ -13,7 +13,7 @@ function trackFixDialog(id, done) {
       return;
     }
     const lim = a.limit_sustain;
-    const fmtMin = s => (s >= 3600 ? Math.floor(s / 3600) + " Std. " : "") + Math.round((s % 3600) / 60) + " Min.";
+    const fmtMin = s => (hmParts(s)[0] ? hmParts(s)[0] + " Std. " : "") + hmParts(s)[1] + " Min.";
     const clock = s => {
       const t = BY[id];
       return t ? new Date((t.start_ts + s) * 1000).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"}) : "";
@@ -30,7 +30,7 @@ function trackFixDialog(id, done) {
      ${a.fixed ? `<p class="ok">✓ Bereits korrigiert: ${a.applied.spikes} Ausreißer entfernt, ${a.applied.excluded} Abschnitt(e) herausgerechnet (Strecke vorher ${nf(a.dist_km, 1)} km, jetzt ${nf(a.now_km, 1)} km). Die Liste unten zeigt, was vom Original aus gefunden wird.</p>` : ""}
      ${none && !a.timing.uniform ? `<p class="ok">✓ Im Track wurde nichts Auffälliges gefunden.</p><div id="tfack" class="panel p10-14 m10-0" hidden></div>` : ""}
      ${showT ? `<div class="panel p10-14 m10-0" style="border-left:4px solid var(--yellow)">${a.timing.uniform ? `<b>Die Zeitangaben stammen nicht von einer echten Aufzeichnung.</b> In jedem Abschnitt der Tour ist das Tempo exakt gleich (Ø ${nf(a.dist_km / (a.dur_s / 3600), 1)} km/h) – die Zeitpunkte sind nur gleichmäßig über die Strecke verteilt, z. B. bei einer geplanten Route. Die Dauer von ${fmtMin(a.dur_s)} ist deshalb nicht glaubwürdig.` : `<b>Das Durchschnittstempo (${nf(a.dist_km / (a.dur_s / 3600), 1)} km/h) ist für diese Sportart ungewöhnlich hoch.</b> Vielleicht stimmt die Dauer nicht.`}
-       <label class="chk mt8"><input type="checkbox" id="tfd" ${a.timing.uniform ? "checked" : ""}> <b>Dauer korrigieren auf</b> <input id="tfdh" type="number" min="0" max="99" style="width:64px" value="${Math.floor(initS / 3600)}"> Std. <input id="tfdm" type="number" min="0" max="59" style="width:64px" value="${Math.round((initS % 3600) / 60) % 60}"> Min.</label>
+       <label class="chk mt8"><input type="checkbox" id="tfd" ${a.timing.uniform ? "checked" : ""}> <b>Dauer korrigieren auf</b> <input id="tfdh" type="number" min="0" max="99" style="width:64px" value="${hmParts(initS)[0]}"> Std. <input id="tfdm" type="number" min="0" max="59" style="width:64px" value="${hmParts(initS)[1]}"> Min.</label>
        ${a.photos ? `<div class="row m4-0 g6 aic"><button class="btn alt sm" type="button" id="tfph">Aus den Fotos übernehmen</button><span class="mut fs13">${a.photos.n} Fotos von ${hm(a.photos.first)} bis ${hm(a.photos.last)} Uhr = ${fmtMin(a.photos.last - a.photos.first)}</span></div><label class="chk m2-0"><input type="checkbox" id="tfst"> Start der Tour auf die Zeit des ersten Fotos (${hm(a.photos.first)} Uhr) setzen</label>` : ""}
        <span class="mut fs13">${a.timing.est_s ? "Vorschlag nach Strecke und Höhenmetern (Wanderzeit nach SAC-Formel, ohne Pausen); du kannst den Wert ändern. " : ""}Die Zeitpunkte im Track werden entsprechend gestreckt, schnelle Abschnitte werden bei solchen Zeiten nicht gesucht.</span></div>` : ""}
      ${a.anchors ? `<div class="panel p10-14 m10-0" style="border-left:4px solid var(--green,#2a7f62)"><label class="chk m0"><input type="checkbox" id="tfa" ${a.timing.uniform || avg > a.limit_sustain * 0.6 ? "checked" : ""}> <b>Zeit aus den Foto-Positionen ableiten</b></label>
@@ -65,8 +65,8 @@ function trackFixDialog(id, done) {
     if (ph)
       ph.onclick = () => {
         const d = a.photos.last - a.photos.first;
-        b.querySelector("#tfdh").value = Math.floor(d / 3600);
-        b.querySelector("#tfdm").value = Math.round((d % 3600) / 60) % 60;
+        b.querySelector("#tfdh").value = hmParts(d)[0];
+        b.querySelector("#tfdm").value = hmParts(d)[1];
         b.querySelector("#tfd").checked = true;
         b.querySelector("#tfst").checked = true;
         preview();

@@ -27,7 +27,7 @@ const planTime = (m, km, up) => {
   const h = m.a * km + m.b * (up || 0);
   return {h, lo: h * (1 - m.rel), hi: h * (1 + m.rel)};
 };
-const hmm = h => `${Math.floor(h)}:${pad2(Math.round((h % 1) * 60) % 60)}`;
+const hmm = h => fmtHM(h * 3600);
 
 function densify(pts, step = 50, max = 2000) {
   let tot = 0;

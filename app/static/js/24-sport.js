@@ -72,10 +72,7 @@ function sportMetrics(c) {
 /* Welche Kennzahlen passen zur Sportart? Liefert [[Wert, Einheit, Beschriftung], …] */
 function sportFigs(t, m) {
   const km = m.dist / 1000,
-    H = s => {
-      const h = Math.floor(s / 3600);
-      return `${h}:${pad2(Math.round((s % 3600) / 60))}`;
-    },
+    H = s => fmtHM(s),
     deg = g => Math.round((Math.atan(Math.abs(g) / 100) * 180) / Math.PI),
     f = [],
     g = sportGrp(t.sport),
@@ -99,7 +96,7 @@ function sportFigs(t, m) {
     f.push([`${deg(m.maxG)}`, "°", "steilster Abschnitt"]);
     if (t.sport === "snowshoe") f.push([`${Math.round(m.steep * 100)}`, "%", "der Strecke über 30°"]);
   } else if (g === "run") {
-    if (mov) f.push([`${Math.floor(m.tMove / 60 / km)}:${pad2(Math.round(((m.tMove / 60 / km) % 1) * 60) % 60)}`, "min/km", "Pace in Bewegung"]);
+    if (mov) f.push([fmtMS(m.tMove / km), "min/km", "Pace in Bewegung"]);
     pause();
   } else {
     if (mov) f.push([H(m.tMove), "Std.", "Zeit in Bewegung"]);

@@ -189,7 +189,8 @@ def test_keyboard_move_is_announced_saved_and_survives_reload(pw, app):
         assert _server(app, "tour-haupt")["order"] == ["map", "puls", "wp", "sum", "photos", "prof"]
         pg.reload()
         pg.wait_for_selector("#tls-photos", timeout=T)
-        _wait_order(pg, ["map", "puls", "wp", "sum", "photos", "prof"])
+        _wait_order(pg, ["map", "puls", "wp", "prof", "sum", "photos"])          # 3.24.1: außerhalb des Bearbeitens bleibt eine Gruppe zusammen („prof“ gehört zum Streckenverlauf, keine zweite Überschrift)
+        assert pg.locator("#tl .tlgh:visible").count() == 3
         assert pg.locator("#slbar").count() == 0                                # nach dem Neuladen wieder ohne Bearbeitungsmodus
         assert not pg.errors, pg.errors
     finally:

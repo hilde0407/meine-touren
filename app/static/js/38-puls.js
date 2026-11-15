@@ -75,7 +75,7 @@ function pulsCard(t) {
       }
       const ZC = HR_ZC, ZN = HR_ZN;
       const tot = h.zones.reduce((a, b) => a + b, 0) || 1;
-      const mm = s => (s >= 3600 ? Math.floor(s / 3600) + " h " + Math.round((s % 3600) / 60) + " min" : Math.round(s / 60) + " min");
+      const mm = s => (Math.round(s / 60) >= 60 ? hmParts(s)[0] + " h " + hmParts(s)[1] + " min" : Math.round(s / 60) + " min");
       const bar = h.zones.map((s, i) => `<span style="flex:${Math.max(s, 0.001)};background:${ZC[i]}" title="${ZN[i]}: ${mm(s)}"></span>`).join("");
       const leg = h.zones.map((s, i) => `<span class="nw"><i class="br2 mr5" style="display:inline-block;width:10px;height:10px;background:${ZC[i]}"></i>Z${i + 1} ${ZN[i]}: ${mm(s)} (${Math.round((s / tot) * 100)} %)</span>`).join("");
       const d = tlCard("pulscard", {sec: "puls", key: "tl_puls", icon: "heart", title: "Herzfrequenz", badge: `Ø ${h.avg} · max ${h.max} bpm`, def: true});

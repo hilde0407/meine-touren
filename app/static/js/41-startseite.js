@@ -18,7 +18,7 @@ const homeRoute = pts => {
     z = P(pts[pts.length - 1]);
   return `<svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d="${d}" fill="none" stroke="#0b1d1e" stroke-opacity=".35" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/><path d="${d}" fill="none" stroke="var(--yellow)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${a[0]}" cy="${a[1]}" r="8" fill="#fff" stroke="#0b1d1e" stroke-width="3"/><circle cx="${z[0]}" cy="${z[1]}" r="8" fill="var(--yellow)" stroke="#0b1d1e" stroke-width="3"/></svg>`;
 };
-const homeDur = h => `${Math.floor(h)}:${String(Math.round((h % 1) * 60) % 60).padStart(2, "0")}`;
+const homeDur = h => fmtHM(h * 3600);
 
 /* --- Ziele des Jahres (höchstens zwei), Verwaltung der Ziele in der Statistik; steht im Baustein „Dein Jahr“ (Standard-Instanz) --- */
 function homeGoals(box, ys, now) {

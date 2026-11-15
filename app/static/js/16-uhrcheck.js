@@ -19,8 +19,7 @@ VIEWS.check = async () => {
   }
   const fmt = s => {
     const a = Math.abs(s),
-      h = Math.floor(a / 3600),
-      m = Math.round((a % 3600) / 60);
+      [h, m] = hmParts(a);
     return (s > 0 ? "+" : "−") + (h ? h + " Std. " : "") + (m ? m + " Min." : "");
   };
   const draw = () => {

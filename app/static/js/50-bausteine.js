@@ -6,7 +6,7 @@
    Typ = {fam, cat, icon, name, title(cfg), desc, multi, fields, defaults, cfgOnAdd, preview(), render(card, body, cfg, ctx)}. Baustein einer Tourseite: ctx.t = Tour. */
 const slNote = (b, text) => (b.innerHTML = `<p class="mut slnone">${text}</p>`);
 const slTiles = list => `<div class="utiles">${list.map(([v, l, s]) => `<div class="utile"><b>${v}</b><span class="mut">${l}</span>${s ? `<small class="mut">${s}</small>` : ""}</div>`).join("")}</div>`;
-const slMin = s => `${Math.floor(s / 60)}:${pad2(Math.round(s % 60))}`;
+const slMin = s => fmtMS(s);
 const slBadge = (c, html) => typeof tlSetBadge === "function" && tlSetBadge(c, html);
 const slPhotos = (c, body, list, label, cls = "") => {
   if (!list.length) return slNote(body, "Keine Fotos vorhanden.");
@@ -75,7 +75,7 @@ Object.assign(window.SL_WT, {
       const want = (cfg.values && cfg.values.length ? cfg.values : ["km", "up", "dur", "pace"]).filter(v => SL_KZ.some(k => k[0] === v)),
         tiles = {
           km: [nf(t.km, 1) + " km", "Strecke"], up: [nf(t.up_m, 0) + " m", "Aufstieg"], down: [nf(t.down_m, 0) + " m", "Abstieg"],
-          dur: [`${Math.floor(t.h)}:${pad2(Math.round((t.h % 1) * 60) % 60)} Std.`, "Dauer"], pace: t.h ? [nf(t.km / t.h, 1) + " km/h", "Tempo im Schnitt"] : null,
+          dur: [`${fmtHM(t.h * 3600)} Std.`, "Dauer"], pace: t.h ? [nf(t.km / t.h, 1) + " km/h", "Tempo im Schnitt"] : null,
         };
       if (want.includes("hr")) {
         const h = await api(`/api/tours/${encodeURIComponent(t.id)}/hr`).catch(() => null);

@@ -603,7 +603,7 @@ def api_tour_pdf(tour_id: str, photos_on: int = 1, n: int = 6):
     if len(sp) >= 2:
         story += [Section("Tempo je Kilometer", W), _speed_bars(sp, W), Spacer(1, 6)]
         if len(sp) <= 40:
-            rows = [[str(k), f"{int(s // 60)}:{int(s % 60):02d} min", _nf(3600 / s, 1) if s else "-", _nf(u), _nf(dn)] for k, s, u, dn in sp]
+            rows = [[str(k), f"{round(s) // 60}:{round(s) % 60:02d} min", _nf(3600 / s, 1) if s else "-", _nf(u), _nf(dn)] for k, s, u, dn in sp]
             story.append(_table(["Kilometer", "Zeit", "km/h", "Aufstieg m", "Abstieg m"], rows, [W * x for x in (0.2, 0.25, 0.18, 0.19, 0.18)]))
     grid = _photo_grid(ids[:max(n, 1)], W) if ids else None
     if grid:

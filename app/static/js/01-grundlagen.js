@@ -42,6 +42,19 @@ if (window.L) {
   }
 }
 const pad2 = n => String(n).padStart(2, "0");
+/* Dauer zerlegen: ZUERST auf ganze Minuten runden, DANN in Stunden und Minuten teilen (sonst entsteht „2:60“ statt „3:00“) */
+const hmParts = s => {
+  const t = Math.max(0, Math.round((+s || 0) / 60));
+  return [Math.floor(t / 60), t % 60];
+};
+const fmtHM = s => {
+  const [h, m] = hmParts(s);
+  return `${h}:${pad2(m)}`;
+};
+const fmtMS = s => {
+  const t = Math.max(0, Math.round(+s || 0));
+  return `${Math.floor(t / 60)}:${pad2(t % 60)}`;
+};
 const nf = (n, d = 1) => Number(n ?? 0).toLocaleString("de-DE", {minimumFractionDigits: d, maximumFractionDigits: d});
 const MON = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
 const MONL = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];

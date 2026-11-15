@@ -41,7 +41,7 @@ const uhrData = (id, fresh) => {
   return UHR_CACHE.get(id);
 };
 const uhrHas = u => !!u && (Object.keys(u.werte || {}).length || (u.pulszonen && u.pulszonen.length) || (u.splits && u.splits.length) || u.wetter);
-const uhrMin = s => (s >= 3600 ? Math.floor(s / 3600) + " h " + pad2(Math.round((s % 3600) / 60)) + " min" : Math.max(1, Math.round(s / 60)) + " min");
+const uhrMin = s => (Math.round(s / 60) >= 60 ? hmParts(s)[0] + " h " + pad2(hmParts(s)[1]) + " min" : Math.max(1, Math.round(s / 60)) + " min");
 
 function uhrTiles(w) {
   return UHR_TILES.filter(k => w[k[0]] != null)

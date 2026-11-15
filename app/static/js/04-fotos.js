@@ -244,8 +244,7 @@ let assignDialog = function (sp, done) {
     const t = BY[$("#at").value];
     const off = Math.round(t.start_ts + (+$("#am").value || 0) * 60 - first.taken_ts);
     const a = Math.abs(off),
-      h = Math.floor(a / 3600),
-      mi = Math.round((a % 3600) / 60);
+      [h, mi] = hmParts(a);
     $("#ap").textContent = `Zeitversatz: ${off < 0 ? "−" : "+"}${h > 23 ? Math.floor(h / 24) + " Tage " + (h % 24) : h} Std. ${mi} Min.`;
   };
   ["at", "as", "am", "asc"].forEach(i => ($("#" + i).oninput = upd));

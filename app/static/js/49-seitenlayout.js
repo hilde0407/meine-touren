@@ -721,6 +721,27 @@ function slStripHtml(p, idx, n) {
   if (it.must) h += `<span class="slmust">bleibt immer sichtbar</span>`;
   return h + `</span>`;
 }
+/* Mitglieder derselben Gruppe zusammenziehen: Die Gruppe steht an der Stelle ihres ersten vorhandenen Mitglieds, die Reihenfolge der Mitglieder bleibt (stabil).
+   So entsteht nie eine zweite Überschrift „Streckenverlauf“ hinter Fotos und Einstieg, wenn Herzfrequenz oder Wegpunkte erst später eintreffen oder eine ältere Reihenfolge sie hinter die Fotos stellt. */
+function slRegroup(pres) {
+  const first = new Map(),
+    out = [];
+  pres.forEach(p => {
+    const g = p.it.own ? null : p.it.group;
+    if (g && !first.has(g)) first.set(g, []);
+    if (g) first.get(g).push(p);
+  });
+  const done = new Set();
+  pres.forEach(p => {
+    const g = p.it.own ? null : p.it.group;
+    if (!g) out.push(p);
+    else if (!done.has(g)) {
+      done.add(g);
+      out.push(...first.get(g));
+    }
+  });
+  pres.splice(0, pres.length, ...out);
+}
 function slPlace(root) {
   const main = root.matches && root.matches("main.home"),
     stat = root.id === "stx",
@@ -746,6 +767,7 @@ function slPlace(root) {
     if (!el || slSelfHidden(it, el)) return;
     pres.push({it, el, off: hid.includes(it.id) && !it.must, cw: it.cw});
   });
+  if (fam === "tour" && !edit) slRegroup(pres);                          // 3.24.1: eine Gruppe steht nur einmal da (eine Überschrift), auch wenn eine alte gespeicherte Reihenfolge ihre Mitglieder trennt
   SL.present = pres.map(p => p.it.id);
   const blocks = [];
   let cur = null;
