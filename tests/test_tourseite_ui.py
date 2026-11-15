@@ -174,7 +174,7 @@ def test_main_page_is_slim(pw, app):
         assert pg.locator("#wpcard").count() == 1 and "2 Wegpunkte" in pg.locator("#tls-wp .tlk").inner_text()
         # Reihenfolge von oben nach unten: Kopf, Karte, Höhenprofil, Puls, Wegpunkte, Einstieg, Fotos
         ys = pg.evaluate("() => ['.figs', '#tls-map', '#tls-prof', '#tls-puls', '#tls-wp', '#tlsum', '#tls-photos'].map(s => document.querySelector(s).getBoundingClientRect().top + scrollY)")
-        assert ys == sorted(ys) and len(set(ys)) == len(ys), ys
+        assert ys == sorted(ys) and len(set(ys)) == len(ys) - 1 and ys[3] == ys[4], ys          # 3.20.0: Herzfrequenz und Wegpunkte stehen im Raster nebeneinander
         o = pg.evaluate(OPEN)
         assert all(o.values())                                                        # alles Verbleibende ist standardmäßig offen
         assert not pg.errors, pg.errors

@@ -426,8 +426,8 @@ def test_catalog_add_configure_and_remove_widgets_on_the_tour_page(pw, app):
     try:
         _edit(pg)
         _catalog(pg)
-        assert pg.locator(".slcard").count() == 19
-        assert pg.locator(".slcard .slpv").count() == 19 and pg.locator(".slcard p").first.inner_text().strip()
+        assert pg.locator(".slcard").count() == 39                  # 19 Tour-Bausteine plus 20 Bausteine der Übersicht (3.20.0: ohne „Auffällige Touren“)
+        assert pg.locator(".slcard .slpv").count() == 39 and pg.locator(".slcard p").first.inner_text().strip()
         pg.locator('[data-add="kennzahlen"]').click()
         pg.wait_for_selector('[data-wtype="kennzahlen"] .utile', timeout=T)
         assert pg.locator('[data-wtype="kennzahlen"] .utile').count() == 4

@@ -1412,6 +1412,11 @@ Als geprüft markieren || Mark as checked || Marquer comme vérifié || Marcar c
 Als geprüft markiert ({}) || Marked as checked ({}) || Marqués comme vérifiés ({}) || Marcadas como revisadas ({})
 Pausen und Aufzeichnungslücken sind bei Touren normal und lassen sich nicht reparieren. || Pauses and recording gaps are normal on tours and cannot be repaired. || Les pauses et les interruptions d’enregistrement sont normales lors d’un parcours et ne peuvent pas être réparées. || Las pausas y los huecos de grabación son normales en una ruta y no se pueden reparar.
 Diese Tour steht noch in der Liste „Auffällige Touren“. Als geprüft markieren? || This tour is still in the “Conspicuous tours” list. Mark it as checked? || Ce parcours figure encore dans la liste « Parcours suspects ». Le marquer comme vérifié ? || Esta ruta sigue en la lista «Rutas llamativas». ¿Marcarla como revisada?
+Breite || Width || Largeur || Ancho
+Ganze Breite || Full width || Pleine largeur || Ancho completo
+Zwei Drittel || Two thirds || Deux tiers || Dos tercios
+Halbe Breite || Half width || Demi-largeur || Medio ancho
+Ein Drittel || One third || Un tiers || Un tercio
 Seite anpassen || Customize page || Personnaliser la page || Personalizar la página
 Baustein hinzufügen || Add widget || Ajouter un bloc || Añadir un bloque
 Standard wiederherstellen || Restore default || Rétablir les réglages par défaut || Restaurar valores predeterminados

@@ -1267,3 +1267,60 @@ svg .slbn{fill:none;stroke:var(--mut);stroke-width:1.5}
 @media(max-width:1000px){.hyg[data-n]{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:700px){.flchip{min-height:44px}.slcfgb span{white-space:nowrap}}
 .slfs>label.slck{display:flex;align-items:center;gap:10px;padding:0;font:500 16px var(--b)}
+
+/* =====================  3.20.0: Raster (12 Spalten) und seitenübergreifende Bausteine  =====================
+   Jede Gruppe der Tourseite (.tlgb) und die Übersicht (main.home) ist ein Raster. Breite je Abschnitt als Klasse: .w-voll (12) · .w-zweidrittel (8) · .w-halb (6) · .w-drittel (4).
+   Ab 900 px alle vier, 641 bis 899 px (Tablet) zwei Spalten (halb und drittel = eine Hälfte), bis 640 px eine Spalte. Zeilenreste füllt 49-seitenlayout.js (Klassen .fd-N / .ft-N).
+   Keine CSS-Anordnung (kein „order“, kein „dense“): die Tab-Reihenfolge ist die sichtbare Reihenfolge. */
+.tlgb,main.home{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px 16px}
+main.home{gap:34px 24px}
+html.mob main.home{gap:26px 20px}
+.tlgb>*,main.home>*{grid-column:span 12}
+.hcols{display:contents}
+.slcell{container:slc/inline-size;min-width:0}
+.tlw{display:flex;flex-direction:column}
+.tlw>details.tls{flex:1 1 auto}
+.slit>.tlw{flex:1 1 auto}
+.tlw:has(>details.tls:not([open])),.slit:has(>.tlw>details.tls:not([open])){align-self:start}
+@media (min-width:900px){
+  .hcols>:not(.slcell){grid-column:span 6}
+  .slcell.w-zweidrittel{grid-column:span 8}.slcell.w-halb{grid-column:span 6}.slcell.w-drittel{grid-column:span 4}
+  .slcell.fd-5{grid-column:span 5}.slcell.fd-6{grid-column:span 6}.slcell.fd-7{grid-column:span 7}.slcell.fd-8{grid-column:span 8}
+  .slcell.fd-9{grid-column:span 9}.slcell.fd-10{grid-column:span 10}.slcell.fd-11{grid-column:span 11}.slcell.fd-12{grid-column:span 12}
+}
+@media (min-width:641px) and (max-width:899px){
+  .hcols>:not(.slcell){grid-column:span 6}
+  .slcell.w-halb,.slcell.w-drittel{grid-column:span 6}
+  .slcell.ft-12{grid-column:span 12}
+}
+.hyear h2{font:700 26px/1.1 var(--d);margin:0}
+/* schmale Spalten: Bausteine passen sich der Breite ihrer Spalte an, nicht der des Fensters */
+@container slc (max-width:700px){
+  .hyg[data-n]{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 24px;padding:18px}
+  .hyg .hym{grid-column:1/-1}
+  .hcards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hyn b{font-size:34px}
+  .hsh,.hyh{gap:6px 14px}
+}
+@container slc (max-width:420px){
+  .slwb .utiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+/* Bearbeitungsmodus: Breite-Umschalter (Segment-Chips mit Symbol), Einfügemarke im Raster */
+.slwd{display:inline-flex;align-items:stretch;border:1.5px solid var(--rule);border-radius:var(--r);background:var(--card);overflow:hidden}
+.slw{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:37px;padding:4px 8px;border:0;border-right:1.5px solid var(--rule);border-radius:0;background:transparent;color:var(--ink);cursor:pointer}
+.slw:last-child{border-right:0}
+.slw:hover{background:var(--soft)}
+.slw[aria-pressed=true]{background:var(--ink);color:var(--card)}
+.slw:focus-visible{outline:3px solid var(--ink);outline-offset:-3px}
+.slw[aria-pressed=true]:focus-visible{outline-color:var(--card)}
+.slw svg{display:block;width:24px;height:14px}
+.slw .wb{fill:none;stroke:currentColor;stroke-width:1.3;opacity:.55}
+.slw .wf{fill:currentColor}
+.slit.slcell:not(.w-voll).sl-before::before,.slit.slcell:not(.w-voll).sl-after::after{top:0;bottom:0;width:5px;height:auto}
+.slit.slcell:not(.w-voll).sl-before::before{left:-14px;right:auto}
+.slit.slcell:not(.w-voll).sl-after::after{right:-14px;left:auto}
+@media (max-width:640px){
+  .slit.slcell:not(.w-voll).sl-before::before,.slit.slcell:not(.w-voll).sl-after::after{left:0;right:0;width:auto;height:5px}
+  .slit.slcell:not(.w-voll).sl-before::before{top:-12px;bottom:auto}
+  .slit.slcell:not(.w-voll).sl-after::after{bottom:-12px;top:auto}
+}

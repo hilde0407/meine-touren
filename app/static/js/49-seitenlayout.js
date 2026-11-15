@@ -7,33 +7,42 @@
    Ohne gespeichertes Layout ist alles wie in 3.16.x: die Registry (SL_REG) bildet die Standardposition ab. Betrachter bekommen immer den Standard.
    Aufgabenteilung: 48-tourlayout.js sammelt die Karten (und fasst die Unterseite zusammen), slPlace() ordnet sie ein: je Lauf gleicher Gruppen eine Überschrift,
    leere Gruppen entfallen. Im Bearbeitungsmodus steckt jeder Abschnitt in einem Rahmen „.slit“ mit Griff, Hoch/Runter, Auge, Schaltern (Pointer-Ereignisse, auch Touch).
-   Die Bausteine (Katalog, Typen) stehen in 50-bausteine.js (window.SL_WT). */
+   Die Bausteine (Katalog, Typen) stehen in 50-bausteine.js (window.SL_WT).
+   3.20.0 Raster: jeder Abschnitt hat eine Breite (voll, zweidrittel, halb, drittel; Dokumentfeld w, Standard je Eintrag/Typ: Feld w der Registry), das Raster selbst ist CSS (style.css „3.20.0“),
+   hier werden nur die Klassen gesetzt (.slcell .w-…) und Zeilenreste aufgefüllt (slRaster). Seiteneignung: Typ.seiten (Standard: Tour-Bausteine nur „tour“, Übersichts-Bausteine „uebersicht“ und „tour“). */
 window.SL_WT = window.SL_WT || {};
 const SL_PAGE_KEY = {haupt: "tour-haupt", auswertung: "tour-auswertung", uebersicht: "uebersicht"};
+const SL_W = {d: {voll: 12, zweidrittel: 8, halb: 6, drittel: 4}, t: {voll: 12, zweidrittel: 12, halb: 6, drittel: 6}};            // Spalten je Breite: Desktop (ab 900 px) und Tablet
+const SL_WALL = ["voll", "zweidrittel", "halb", "drittel"];
+const SL_WNAME = {voll: "Ganze Breite", zweidrittel: "Zwei Drittel", halb: "Halbe Breite", drittel: "Ein Drittel"};
+const SL_WCLS = SL_WALL.map(k => "w-" + k);
+const slTypeW = T => (T && SL_W.d[T.w] ? T.w : "voll");
+const slSeiten = T => (T && T.seiten) || (T && T.fam === "tour" ? ["tour"] : ["uebersicht", "tour"]);
+const slFits = (T, fam) => !!T && slSeiten(T).includes(fam);
 const SL_GROUPS = {route: "Streckenverlauf", rec: "Aufzeichnung", eval: "Auswertung dieser Tour", more: "Fotos zur Tour", bst: "Bausteine"};
 /* Registry: Standardseite, Gruppe, Standard „offen“ (def), fixed = kann nur auf dieser Seite stehen (wird von der Tourseite selbst aufgebaut),
    must = Pflicht (nicht ausblendbar), plain = kein einklappbarer Abschnitt, ckeys = Speicherschlüssel des Auf-/Zu-Zustands (localStorage „mt_trf_…“) */
 const SL_REG = {
   tour: [
-    {id: "map", title: "Karte", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_map"]},
-    {id: "prof", title: "Höhenprofil", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_prof"]},
-    {id: "puls", title: "Herzfrequenz", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_puls"]},
-    {id: "wp", title: "Wegpunkte", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_wp"]},
-    {id: "sum", title: "Einstieg in die Auswertung", page: "haupt", group: "sum", own: true, fixed: true, must: true, plain: true},
-    {id: "photos", title: "Fotos", page: "haupt", group: "more", def: true, fixed: true, ckeys: ["tl_photos"]},
-    {id: "geraet", title: "Gerät: Messwerte und Training laut Uhr", page: "auswertung", group: "rec", def: true, fixed: true, ckeys: ["tl_met", "tl_uhr"]},
-    {id: "wx", title: "Wetter", page: "auswertung", group: "rec", def: false, ckeys: ["tl_wx"]},
-    {id: "ana", title: "Analyse", page: "auswertung", group: "eval", def: false, ckeys: ["tl_ana"]},
-    {id: "steig", title: "Tempo nach Steigung", page: "auswertung", group: "eval", def: false, ckeys: ["steig"]},
-    {id: "aehn", title: "Ähnliche Touren im Vergleich", page: "auswertung", group: "eval", def: false, ckeys: ["aehn"]},
-    {id: "cmp", title: "Vergleich dieser Strecke", page: "auswertung", group: "eval", def: false, ckeys: ["tl_cmp"]},
+    {id: "map", w: "voll", title: "Karte", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_map"]},
+    {id: "prof", w: "voll", title: "Höhenprofil", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_prof"]},
+    {id: "puls", w: "halb", title: "Herzfrequenz", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_puls"]},
+    {id: "wp", w: "halb", title: "Wegpunkte", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_wp"]},
+    {id: "sum", w: "voll", title: "Einstieg in die Auswertung", page: "haupt", group: "sum", own: true, fixed: true, must: true, plain: true, ws: ["voll"]},
+    {id: "photos", w: "voll", title: "Fotos", page: "haupt", group: "more", def: true, fixed: true, ckeys: ["tl_photos"]},
+    {id: "geraet", w: "voll", title: "Gerät: Messwerte und Training laut Uhr", page: "auswertung", group: "rec", def: true, fixed: true, ckeys: ["tl_met", "tl_uhr"], ws: ["voll"]},
+    {id: "wx", w: "halb", title: "Wetter", page: "auswertung", group: "rec", def: false, ckeys: ["tl_wx"]},
+    {id: "ana", w: "voll", title: "Analyse", page: "auswertung", group: "eval", def: false, ckeys: ["tl_ana"]},
+    {id: "steig", w: "halb", title: "Tempo nach Steigung", page: "auswertung", group: "eval", def: false, ckeys: ["steig"]},
+    {id: "aehn", w: "halb", title: "Ähnliche Touren im Vergleich", page: "auswertung", group: "eval", def: false, ckeys: ["aehn"]},
+    {id: "cmp", w: "halb", title: "Vergleich dieser Strecke", page: "auswertung", group: "eval", def: false, ckeys: ["tl_cmp"]},
   ],
   uebersicht: [
-    {id: "aufmacher", title: "Zuletzt unterwegs (Aufmacher)", page: "uebersicht", plain: true},
-    {id: "jahr", title: "Dein Jahr", page: "uebersicht", plain: true, build: "jahr"},
-    {id: "zuletzt", title: "Letzte Touren", page: "uebersicht", plain: true},
-    {id: "tag", title: "An diesem Tag", page: "uebersicht", group: "cols", plain: true},
-    {id: "erinn", title: "Erinnerungen", page: "uebersicht", group: "cols", plain: true},
+    {id: "aufmacher", w: "voll", title: "Zuletzt unterwegs (Aufmacher)", page: "uebersicht", plain: true, ws: ["voll"]},
+    {id: "jahr", w: "voll", title: "Dein Jahr", page: "uebersicht", plain: true, build: "jahr"},
+    {id: "zuletzt", w: "voll", title: "Letzte Touren", page: "uebersicht", plain: true, ws: ["voll", "zweidrittel"]},
+    {id: "tag", w: "halb", title: "An diesem Tag", page: "uebersicht", group: "cols", plain: true},
+    {id: "erinn", w: "halb", title: "Erinnerungen", page: "uebersicht", group: "cols", plain: true},
   ],
 };
 const SL_EL = {
@@ -75,10 +84,15 @@ function slItems(fam) {
   });
   (st.widgets || []).forEach(w => {
     const T = window.SL_WT[w.type];
-    if (!T || T.fam !== fam) return;                                      // unbekannter Baustein (z. B. von einer neueren Version): ignorieren
-    items.push({id: w.id, title: slWTitle(T, w.cfg || {}), fl: slWFl(T, w.cfg || {}), page: fam === "tour" ? "haupt" : "uebersicht", group: fam === "tour" ? "bst" : "", widget: true, plain: !!T.shell, wtype: w.type, cfg: w.cfg || {}, def: true, ckeys: ["tl_w_" + w.id]});
+    if (!slFits(T, fam)) return;                                          // unbekannter Baustein (z. B. von einer neueren Version) oder einer, der auf dieser Seite nicht stehen darf: ignorieren
+    items.push({id: w.id, w: slTypeW(T), ws: T.ws, title: slWTitle(T, w.cfg || {}), fl: slWFl(T, w.cfg || {}), page: fam === "tour" ? "haupt" : "uebersicht", group: fam === "tour" ? "bst" : "", widget: true, plain: !!T.shell, wtype: w.type, cfg: w.cfg || {}, def: true, ckeys: ["tl_w_" + w.id]});
   });
   if (fam === "tour") items.forEach(it => !it.fixed && (pg[it.id] === "haupt" || pg[it.id] === "auswertung") && (it.page = pg[it.id]));
+  items.forEach(it => {                                                   // 3.20.0: Breite = gespeicherte Abweichung, sonst Standard (immer eine der erlaubten)
+    const ws = it.ws || SL_WALL, v = (st.w || {})[it.id];
+    it.w = it.w && ws.includes(it.w) ? it.w : ws[0];
+    it.cw = ws.includes(v) ? v : it.w;
+  });
   return items;
 }
 /* Reihenfolge einer Seite: gespeicherte Ids (bekannte), Fehlende an ihrer Standardposition (hinter dem nächsten davor liegenden, schon eingeordneten Standard-Abschnitt) */
@@ -293,9 +307,22 @@ function slSetPage(id, page) {
   slApply();
   slLive(page === "haupt" ? `${it.title}: liegt jetzt auf der Hauptseite` : `${it.title}: liegt jetzt auf der Auswertungsseite`);
 }
+function slSetWidth(id, w) {
+  const it = slItems(SL.fam).find(i => i.id === id);
+  if (!it || !(it.ws || SL_WALL).includes(w)) return;
+  const st = slStDoc(SL.fam);
+  st.w = st.w || {};
+  if (w === it.w) delete st.w[id];                                        // nur Abweichungen vom Standard speichern
+  else st.w[id] = w;
+  if (!Object.keys(st.w).length) delete st.w;
+  slTouch(SL.fam === "tour" ? "tour-haupt" : "uebersicht");
+  SL.focus = {id, a: "w", q: `[data-w="${w}"]`};
+  slApply();
+  slLive(`${slTitle(id)}: ${SL_WNAME[w]}`);
+}
 function slAddWidget(type) {
   const T = window.SL_WT[type];
-  if (!T || T.fam !== SL.fam) return null;
+  if (!slFits(T, SL.fam)) return null;
   const st = slStDoc(SL.fam);
   if ((st.widgets || []).length >= 40) {
     uiAlert("Es sind höchstens 40 Bausteine möglich.");
@@ -320,6 +347,10 @@ function slRemoveWidget(id) {
   st.widgets = (st.widgets || []).filter(w => w.id !== id);
   if (!st.widgets.length) delete st.widgets;
   ["hidden", "open", "closed"].forEach(n => slSet(st, n, id, false));
+  if (st.w) {
+    delete st.w[id];
+    if (!Object.keys(st.w).length) delete st.w;
+  }
   if (st.page) {
     delete st.page[id];
     if (!Object.keys(st.page).length) delete st.page;
@@ -439,6 +470,99 @@ const slIcon = {
   gear: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
   sliders: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg>',
 };
+/* Symbol der Breite: Rahmen = ganze Zeile, Füllung = Anteil */
+const slWIcon = k => `<svg viewBox="0 0 24 14" aria-hidden="true" focusable="false"><rect class="wb" x=".65" y=".65" width="22.7" height="12.7" rx="2.5"/><rect class="wf" x="2" y="2" width="${((SL_W.d[k] / 12) * 20).toFixed(1)}" height="10" rx="1.5"/></svg>`;
+/* Breite eines Abschnitts als Klasse am Rasterelement (Rahmen im Bearbeitungsmodus, sonst der Abschnitt selbst) */
+function slCell(p, on) {
+  const u = p.unit;
+  if (u !== p.el) p.el.classList.remove("slcell", ...SL_WCLS);
+  SL_WCLS.forEach(c => u.classList.toggle(c, on && c === "w-" + p.cw));
+  u.classList.toggle("slcell", on);
+  if (on) u.dataset.cw = p.cw;
+  else delete u.dataset.cw;
+}
+/* Zeilenreste auffüllen: Die Reihenfolge ist die des Dokuments (kein „dense“, Tab-Reihenfolge = sichtbare Reihenfolge). Passt das nächste Element nicht mehr in die Zeile, wird die Zeile
+   geschlossen; was dann frei bleibt, bekommt gleichmäßig die jeweils schmalste Kachel (Standardfall: eine einzelne halbe Kachel wird zur ganzen Zeile). Zwei Rechnungen: Desktop und Tablet. */
+function slFillRows(cws, tier) {
+  const sp = cws.map(c => SL_W[tier][c]), out = sp.slice();
+  let row = [], acc = 0;
+  const close = () => {
+    let rem = 12 - acc;
+    while (rem > 0 && row.length) {
+      let m = row[0];
+      row.forEach(i => out[i] <= out[m] && (m = i));
+      out[m]++;
+      rem--;
+    }
+    row = [];
+    acc = 0;
+  };
+  cws.forEach((c, i) => {
+    if (acc + sp[i] > 12) close();
+    row.push(i);
+    acc += sp[i];
+  });
+  close();
+  return {out, base: sp};
+}
+const slFillSet = (c, pre, n) => {
+  const want = n ? pre + "-" + n : "";
+  [...c.classList].forEach(k => k.startsWith(pre + "-") && k !== want && c.classList.remove(k));
+  if (want && !c.classList.contains(want)) c.classList.add(want);
+};
+const SL_CELLOBS = typeof MutationObserver === "function" ? new MutationObserver(() => !SL.drag && slRasterSoon()) : null;
+let SL_RAF = 0;
+function slRasterSoon() {
+  if (SL_RAF) return;
+  SL_RAF = requestAnimationFrame(() => {
+    SL_RAF = 0;
+    slRaster();
+  });
+}
+function slRaster() {
+  const grids = new Map();
+  document.querySelectorAll("#main .slcell").forEach(c => {
+    if (SL_CELLOBS) SL_CELLOBS.observe(c, {attributes: true, attributeFilter: ["hidden", "style"]});         // erscheint ein Abschnitt später (Daten geladen), wird neu aufgefüllt
+    let g = c.parentElement;
+    if (g && g.classList.contains("hcols")) g = g.parentElement;
+    if (!g) return;
+    if (getComputedStyle(c).display === "none") {
+      slFillSet(c, "fd", 0);
+      slFillSet(c, "ft", 0);
+      return;
+    }
+    if (!grids.has(g)) grids.set(g, []);
+    grids.get(g).push(c);
+  });
+  grids.forEach(list => {
+    const cws = list.map(c => c.dataset.cw || "voll");
+    [["d", "fd"], ["t", "ft"]].forEach(([tier, pre]) => {
+      const {out, base} = slFillRows(cws, tier);
+      list.forEach((c, i) => slFillSet(c, pre, out[i] > base[i] ? out[i] : 0));
+    });
+  });
+}
+/* Ändert sich die Breite der Karte (anderes Raster, Fenstergröße, Bearbeitungsmodus), muss Leaflet seine Größe neu bestimmen */
+function slWatchMap() {
+  const m = typeof tlSec === "function" && tlSec("map");
+  if (!m || m.dataset.slro || typeof ResizeObserver !== "function") return;
+  m.dataset.slro = "1";
+  let w0 = -1, raf = 0;
+  new ResizeObserver(es => {
+    const w = Math.round(es[0].contentRect.width);
+    if (w === w0) return;
+    w0 = w;
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      if (typeof map === "undefined" || !map || !map.invalidateSize) return;               // „map“ ist eine globale Variable (01-grundlagen.js), keine Eigenschaft von window
+      map.invalidateSize();
+      if (map._tlStale && map._tlFit && m.open) {
+        map._tlStale = false;
+        map._tlFit();
+      }
+    });
+  }).observe(m);
+}
 function slStripHtml(p, idx, n) {
   const it = p.it,
     nm = esc(it.title),
@@ -449,6 +573,7 @@ function slStripHtml(p, idx, n) {
   h += `<span class="slnm">${nm}${it.fl ? ` <small class="slfl mut">${esc(it.fl)}</small>` : ""}</span>`;
   if (p.off) h += `<span class="slhid">ausgeblendet</span>`;
   h += `<span class="slbs">`;
+  if ((it.ws || SL_WALL).length > 1) h += `<span class="slwd" role="group" aria-label="Breite">${(it.ws || SL_WALL).map(k => `<button type="button" class="slw" data-a="w" data-w="${k}" aria-pressed="${k === p.cw}" aria-label="${SL_WNAME[k]}" title="${SL_WNAME[k]}">${slWIcon(k)}</button>`).join("")}</span>`;
   h += `<button type="button" class="slb" data-a="up" aria-label="Nach oben" title="Nach oben"${dis(idx === 0)}>↑</button>`;
   h += `<button type="button" class="slb" data-a="down" aria-label="Nach unten" title="Nach unten"${dis(idx === n - 1)}>↓</button>`;
   if (!it.must) h += `<button type="button" class="slb" data-a="eye" aria-pressed="${p.off}">${p.off ? slIcon.eyeoff : slIcon.eye}<span>${p.off ? "Einblenden" : "Ausblenden"}</span></button>`;
@@ -481,7 +606,7 @@ function slPlace(root) {
     }
     if (!el && (it.widget || it.build) && typeof window.slWidgetBuild === "function") el = window.slWidgetBuild(it, root);
     if (!el || slSelfHidden(it, el)) return;
-    pres.push({it, el, off: hid.includes(it.id) && !it.must});
+    pres.push({it, el, off: hid.includes(it.id) && !it.must, cw: it.cw});
   });
   SL.present = pres.map(p => p.it.id);
   const blocks = [];
@@ -489,6 +614,7 @@ function slPlace(root) {
   const cnt = {};
   pres.forEach(p => {
     p.unit = slUnit(p, edit);
+    slCell(p, fam !== "tour" || (!!p.it.group && !p.it.own));
     p.el.classList.toggle("sl-off", p.off && !edit);
     p.unit.classList.toggle("sl-dim", edit && p.off && p.unit !== p.el);
     const g = p.it.own ? null : p.it.group;
@@ -520,7 +646,7 @@ function slPlace(root) {
     pres.forEach((p, i) => {
       const w = p.unit;
       if (w === p.el) return;
-      const sig = [i, pres.length, p.off, slDef(p.it.id, !!p.it.def), SL.page, p.it.title, p.it.fl || ""].join("|");
+      const sig = [i, pres.length, p.off, p.cw, slDef(p.it.id, !!p.it.def), SL.page, p.it.title, p.it.fl || ""].join("|");
       let s = w.querySelector(":scope > .slst");
       if (!s) {
         s = document.createElement("div");
@@ -539,10 +665,12 @@ function slPlace(root) {
     const f = SL.focus;
     SL.focus = null;
     const w = root.querySelector(`.slit[data-sl="${f.id}"]`),
-      b = w && (w.querySelector(`[data-a="${f.a}"]`) || w.querySelector('[data-a="grip"]'));
+      b = w && ((f.q && w.querySelector(`[data-a="${f.a}"]${f.q}`)) || w.querySelector(`[data-a="${f.a}"]`) || w.querySelector('[data-a="grip"]'));
     if (b) b.focus({preventScroll: !!f.ps});
   }
   slSubNote(root, pres);
+  if (fam === "tour") slWatchMap();
+  slRaster();
 }
 /* „Seite anpassen“ steht über dem Seiteninhalt (Tourseite: vor dem Container, Übersicht: erstes Element) */
 function slOpener(root, edit) {
@@ -696,7 +824,7 @@ function slModal(title, build, cls) {
   return {close, box};
 }
 function slCatalog() {
-  const list = Object.entries(window.SL_WT).filter(([, T]) => T.fam === SL.fam),
+  const list = Object.entries(window.SL_WT).filter(([, T]) => slFits(T, SL.fam)),
     have = type => (slSt(SL.fam).widgets || []).filter(w => w.type === type).length,
     cats = SL_CATS.filter(([k]) => list.some(([, T]) => (T.cat || "zahlen") === k)),
     card = ([type, T]) => {
@@ -836,6 +964,7 @@ document.addEventListener("click", e => {
   if (a === "up") slStep(id, -1);
   else if (a === "down") slStep(id, 1);
   else if (a === "eye") slToggleHidden(id);
+  else if (a === "w") slSetWidth(id, b.dataset.w);
   else if (a === "page") slSetPage(id, SL.page === "haupt" ? "auswertung" : "haupt");
   else if (a === "cfg") slCfgDialog(id);
   else if (a === "del")
@@ -850,10 +979,10 @@ document.addEventListener("keydown", e => {
   if (!g) return;
   const id = g.closest(".slit").dataset.sl,
     k = e.key;
-  if (k === "ArrowUp" || k === "ArrowDown") {
+  if (k === "ArrowUp" || k === "ArrowDown" || k === "ArrowLeft" || k === "ArrowRight") {          // Reihenfolge = Leserichtung: links/oben = früher, rechts/unten = später
     e.preventDefault();
     SL.focus = {id, a: "grip"};
-    slStep(id, k === "ArrowUp" ? -1 : 1);
+    slStep(id, k === "ArrowUp" || k === "ArrowLeft" ? -1 : 1);
   } else if (k === "Home" || k === "End") {
     e.preventDefault();
     SL.focus = {id, a: "grip"};
@@ -871,7 +1000,7 @@ document.addEventListener("pointerdown", e => {
   try {
     g.setPointerCapture(e.pointerId);
   } catch (x) {}
-  SL.drag = {id: w.dataset.sl, w, g, pid: e.pointerId, y0: e.clientY, s0: window.scrollY, y: e.clientY, target: null, raf: 0};
+  SL.drag = {id: w.dataset.sl, w, g, pid: e.pointerId, x0: e.clientX, y0: e.clientY, s0: window.scrollY, x: e.clientX, y: e.clientY, target: null, raf: 0};
   w.classList.add("sl-lift");
   g.focus({preventScroll: true});
 });
@@ -879,9 +1008,12 @@ function slDragTarget(d) {
   const ws = [...(SL.root || document).querySelectorAll(".slit")].filter(x => x !== d.w);
   document.querySelectorAll(".sl-before,.sl-after").forEach(x => x.classList.remove("sl-before", "sl-after"));
   let t = null;
-  for (const w of ws) {
-    const r = w.getBoundingClientRect();
-    if (d.y < r.top + r.height / 2) {
+  for (const w of ws) {                                                   // in Leserichtung: erstes Element, vor dem der Zeiger liegt
+    const r = w.getBoundingClientRect(),
+      g = w.parentElement && w.parentElement.classList.contains("hcols") ? w.parentElement.parentElement : w.parentElement,
+      full = !g || r.width > g.getBoundingClientRect().width * 0.9,
+      before = full ? d.y < r.top + r.height / 2 : d.y < r.top || (d.y <= r.bottom && d.x < r.left + r.width / 2);
+    if (before) {
       t = w;
       break;
     }
@@ -893,7 +1025,7 @@ function slDragTarget(d) {
 function slDragFrame() {
   const d = SL.drag;
   if (!d) return;
-  d.w.style.transform = `translateY(${d.y - d.y0 + (window.scrollY - d.s0)}px)`;
+  d.w.style.transform = `translate(${d.x - d.x0}px,${d.y - d.y0 + (window.scrollY - d.s0)}px)`;
   const edge = 70;
   if (d.y < edge) window.scrollBy(0, -14);
   else if (d.y > window.innerHeight - edge) window.scrollBy(0, 14);
@@ -904,6 +1036,7 @@ document.addEventListener("pointermove", e => {
   const d = SL.drag;
   if (!d || e.pointerId !== d.pid) return;
   d.y = e.clientY;
+  d.x = e.clientX;
   if (!d.raf) d.raf = requestAnimationFrame(slDragFrame);
 });
 function slDragEnd(e, cancel) {
@@ -917,7 +1050,7 @@ function slDragEnd(e, cancel) {
   try {
     d.g.releasePointerCapture(d.pid);
   } catch (x) {}
-  if (cancel || Math.abs(d.y - d.y0) < 4) return;
+  if (cancel || Math.hypot(d.y - d.y0, d.x - d.x0) < 4) return;
   slDragTarget(d);
   document.querySelectorAll(".sl-before,.sl-after").forEach(x => x.classList.remove("sl-before", "sl-after"));
   SL.focus = {id: d.id, a: "grip"};

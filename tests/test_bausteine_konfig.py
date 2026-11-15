@@ -98,7 +98,7 @@ def test_jahr_endpoint_validation_defaults_and_viewer_and_users():
 GOOD = [
     {"widgets": [{"id": "w1", "type": "jahr", "cfg": {"sports": ["hike", "mtb"], "range": "y", "yr": 2025, "metrics": ["km", "count"], "compare": False, "title": "  Mein Wandern  "}}]},
     {"cfg": {"jahr": {"sports": ["hike"], "range": "12m"}}},
-    {"widgets": [{"id": "w2", "type": "letzte", "cfg": {"n": 8, "sports": []}}, {"id": "w3", "type": "durchschnitt", "cfg": {"basis": "all"}}]},
+    {"widgets": [{"id": "w2", "type": "letzte", "cfg": {"n": 8, "sports": []}}, {"id": "w3", "type": "meilensteine", "cfg": {"basis": "all"}}]},
     {"widgets": [{"id": "w4", "type": "zukunft", "cfg": {"neu": "ok", "liste": ["a"], "zahl": 3}}]},                    # unbekannte Schlüssel einer neueren Version bleiben erlaubt
 ]
 BAD = [
@@ -109,7 +109,7 @@ BAD = [
     {"widgets": [{"id": "w1", "type": "jahr", "cfg": {"metrics": []}}]}, {"widgets": [{"id": "w1", "type": "jahr", "cfg": {"metrics": ["km", "speed"]}}]},
     {"widgets": [{"id": "w1", "type": "jahr", "cfg": {"compare": "ja"}}]}, {"widgets": [{"id": "w1", "type": "jahr", "cfg": {"title": "x" * 61}}]},
     {"widgets": [{"id": "w1", "type": "jahr", "cfg": {"title": 5}}]}, {"widgets": [{"id": "w1", "type": "letzte", "cfg": {"n": 11}}]}, {"widgets": [{"id": "w1", "type": "letzte", "cfg": {"n": 0}}]},
-    {"widgets": [{"id": "w1", "type": "durchschnitt", "cfg": {"basis": "dieses"}}]},
+    {"widgets": [{"id": "w1", "type": "meilensteine", "cfg": {"basis": "dieses"}}]},
     {"cfg": []}, {"cfg": {"a b": {}}}, {"cfg": {"jahr": {"range": "x"}}}, {"cfg": {"jahr": []}}, {"cfg": {"k%d" % i: {} for i in range(11)}},
 ]
 
@@ -152,9 +152,9 @@ def test_layout_cfg_viewer_and_users():
 def test_version_and_notes_and_script_order():
     from app import config as cfg
     root = Path(__file__).resolve().parent.parent
-    assert cfg.VERSION.startswith("3.19.0 · Meine Touren")
+    assert cfg.VERSION.startswith("3.20.0 · Meine Touren")
     notes = (root / "docs" / "versionen" / "3.19.0.md").read_text(encoding="utf-8")
     assert "Konfigurierbare Bausteine" in notes and "/api/bausteine/jahr" in notes and "53-filter.js" in notes
     html = (root / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("js/52-bausteine-uebersicht.js") < html.index("js/53-filter.js") < html.index("js/39-sw.js")
-    assert 'const V = "mt-v96"' in (root / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v97"' in (root / "app" / "static" / "sw.js").read_text(encoding="utf-8")

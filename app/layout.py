@@ -9,6 +9,9 @@ Dokument (JSON-Objekt, alle Felder optional):
   page     {id: "haupt"|"auswertung"}  Abschnitte, die auf der anderen Seite der Tour liegen
   widgets  [{id, type, cfg}]  hinzugefügte Bausteine mit ihrer Konfiguration
   cfg      {id: {…}}       Konfiguration der Standard-Bausteine, die nicht als „widgets“ gespeichert sind (3.19.0: der Baustein „Dein Jahr“ der Übersicht, Kennung „jahr“)
+  w        {id: Breite}    Breite im Raster (3.20.0): "voll" | "zweidrittel" | "halb" | "drittel"; gespeichert werden nur Abweichungen vom Standard des Abschnitts (den kennt die Oberfläche)
+Seiteneignung (3.20.0): Bausteine der Übersicht dürfen auch auf der Tourseite stehen (Dokument „tour-haupt“); tour-bezogene Bausteine (TOUR_ONLY) nur auf Tourseiten,
+das Dokument „uebersicht“ lehnt sie ab. Unbekannte Typen (neuere Version) bleiben überall erlaubt.
 Gemeinsame Filterfelder in der Konfiguration (3.19.0, streng geprüft; unbekannte Schlüssel einer neueren Version bleiben erlaubt, wenn sie einfache Werte haben):
   sports   [Sportart]      leer = alle Aktivitäten      range  year | y | 12m | 90d | all      yr  Jahr (bei range = y)
   metrics  [count|km|up|h] angezeigte Kennzahlen         compare  Vorjahresvergleich an/aus    title  eigener Titel (höchstens 60 Zeichen)
@@ -27,7 +30,11 @@ from . import db
 router = APIRouter()
 
 KEYS = ("tour-haupt", "tour-auswertung", "uebersicht")
-FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg"}
+FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg", "w"}
+WIDTHS = ("voll", "zweidrittel", "halb", "drittel")
+# Bausteine, die eine Tour brauchen (Typkennungen wie in static/js/50-bausteine.js und 51-bausteine-tour.js, fam "tour"): nicht in der Übersicht
+TOUR_ONLY = frozenset(("kennzahlen", "tempo", "vergleich", "pulszonen", "wetter", "fotostreifen", "notiz", "splits", "steigung", "bewegung", "durchschnitt", "jahresrang",
+                       "tageslicht", "gipfel", "vergleiche", "stimmung", "fotohighlights", "miniprofil", "steckbrief"))
 ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,40}$")
 MAX_IDS = 120
 MAX_WIDGETS = 40
@@ -117,7 +124,7 @@ def _cfg(v):
     return out
 
 
-def clean(doc):
+def clean(doc, key=None):
     """Prüft ein Layout-Dokument und gibt die bereinigte Fassung zurück (HTTPException 400 bei Fehlern)."""
     if not isinstance(doc, dict):
         raise HTTPException(400, "Das Layout muss ein JSON-Objekt sein")
@@ -136,6 +143,13 @@ def clean(doc):
             if not ID_RE.match(str(k)) or x not in ("haupt", "auswertung"):
                 raise HTTPException(400, "Ungültige Seite in „page“")
         out["page"] = dict(p)
+    if "w" in doc:
+        b = doc["w"]
+        if not isinstance(b, dict) or len(b) > MAX_IDS or not all(isinstance(k, str) and ID_RE.match(k) for k in b):
+            raise HTTPException(400, "„w“ muss ein Objekt mit Kennungen sein")
+        if any(x not in WIDTHS for x in b.values()):
+            raise HTTPException(400, "Ungültige Breite in „w“ (erlaubt: " + ", ".join(WIDTHS) + ")")
+        out["w"] = dict(b)
     if "widgets" in doc:
         w = doc["widgets"]
         if not isinstance(w, list) or len(w) > MAX_WIDGETS:
@@ -148,6 +162,8 @@ def clean(doc):
                 raise HTTPException(400, "Ungültige Kennung eines Bausteins")
             if x["id"] in seen:
                 raise HTTPException(400, "Doppelte Kennung eines Bausteins")
+            if key == "uebersicht" and x["type"] in TOUR_ONLY:
+                raise HTTPException(400, "Dieser Baustein gehört zu einer Tour und kann nicht in der Übersicht stehen")
             seen.add(x["id"])
             ws.append({"id": x["id"], "type": x["type"], "cfg": _cfg(x.get("cfg") or {})})
         out["widgets"] = ws
@@ -201,7 +217,7 @@ async def put_layout(page_key: str, request: Request):
         raise HTTPException(400, "Kein gültiges JSON")
     if isinstance(body, dict) and isinstance(body.get("layout"), dict) and set(body) <= {"layout", "key", "ts"}:
         body = body["layout"]                          # {"layout": {...}} wird wie das Dokument selbst angenommen
-    lay = clean(body)
+    lay = clean(body, page_key)
     ts = int(time.time())
     db.execute("INSERT INTO user_layout(page_key,json,ts) VALUES(?,?,?) ON CONFLICT(page_key) DO UPDATE SET json=excluded.json, ts=excluded.ts",
                (page_key, json.dumps(lay, ensure_ascii=False, separators=(",", ":")), ts))

@@ -398,3 +398,23 @@ function slYearShell(it) {
   if (!it.widget && typeof homeGoals === "function" && (R.kind === "year" || R.kind === "y")) homeGoals(sec.querySelector("#hgoals"), R.year, now);
   return sec;
 }
+
+/* ---- 3.20.0 Raster und Seiteneignung je Typ ----
+   w      Standardbreite im Raster (voll | zweidrittel | halb | drittel); große Grafiken und Fotos „voll“, Kacheln und Listen „halb“
+   seiten Seiten, auf denen der Baustein stehen darf: "tour" (Tourseite, Hauptseite und Auswertung) und/oder "uebersicht". Ohne Angabe: Tour-Bausteine nur Tourseite, Übersichts-Bausteine beide
+          (sie rechnen aus den geladenen Touren, ohne Tour-Kontext); Bausteine, die eine Tour brauchen (ctx.t), gehören nie in die Übersicht (app/layout.py TOUR_ONLY lehnt sie ab). */
+{
+  const META = {
+    kennzahlen: "halb", tempo: "halb", vergleich: "halb", pulszonen: "halb", wetter: "halb", fotostreifen: "voll", notiz: "halb", splits: "voll", steigung: "halb", bewegung: "halb",
+    durchschnitt: "halb", jahresrang: "halb", tageslicht: "halb", gipfel: "halb", vergleiche: "halb", stimmung: "halb", fotohighlights: "voll", miniprofil: "voll", steckbrief: "halb",
+    jahr: "voll", periode: "halb", belastung: "halb", jahresvergleich: "halb", letzte: "halb", neuefotos: "voll", auffaellig: "drittel", rekorde: "halb", heutevor: "halb", jahresziel: "halb",
+    serie: "halb", heatmap: "voll", meilensteine: "halb", wochentage: "halb", sportarten: "halb", wiederentdecken: "voll", orte: "halb", uhrenzeit: "voll", ausruestung: "halb", geplant: "halb", rueckblick: "voll",
+  };
+  Object.entries(META).forEach(([k, w]) => {
+    const T = window.SL_WT[k];
+    if (!T) return;
+    T.w = w;
+    T.seiten = T.fam === "tour" ? ["tour"] : ["uebersicht", "tour"];
+  });
+  window.SL_WT.auffaellig.seiten = ["uebersicht"];                                          // Verwaltungs-Hinweis auf Geräte, gehört zur Übersicht
+}

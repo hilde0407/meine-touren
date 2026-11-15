@@ -307,7 +307,7 @@ document.addEventListener(
     } catch (x) {}
     const sm = d.querySelector(":scope > summary");
     if (sm && d.classList.contains("tls")) sm.setAttribute("aria-expanded", d.open ? "true" : "false");
-    if (d.id === "tls-map" && d.open && window.map && map.invalidateSize) {
+    if (d.id === "tls-map" && d.open && typeof map !== "undefined" && map && map.invalidateSize) {
       map.invalidateSize();
       if (map._tlStale && map._tlFit) {
         map._tlStale = false;

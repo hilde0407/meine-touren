@@ -53,7 +53,7 @@ def test_validation():
         assert c.put("/api/layout/tour-haupt", content=b"x" * 60000, headers={"Content-Type": "application/json"}).status_code == 413
         assert c.get("/api/layout/tour-haupt").json()["layout"] is None            # nichts davon wurde gespeichert
         # Größe: viele Bausteine mit langen Texten ergeben mehr als 24 000 Zeichen
-        big = {"widgets": [{"id": "w%d" % i, "type": "notiz", "cfg": {"text": "a" * 600}} for i in range(40)]}
+        big = {"widgets": [{"id": "w%d" % i, "type": "heatmap", "cfg": {"text": "a" * 600}} for i in range(40)]}
         assert c.put("/api/layout/uebersicht", json=big).status_code == 400
         # Doppelte Kennungen in Listen werden bereinigt, unbekannte Kennungen sind erlaubt (die Oberfläche ignoriert sie)
         r = c.put("/api/layout/tour-auswertung", json={"order": ["ana", "ana", "neu"], "hidden": []})
@@ -100,7 +100,7 @@ def test_viewer_route_pattern_and_photos_recent():
 def test_table_lives_in_the_users_database_and_version():
     from app import config, db
     assert db.one("SELECT name FROM sqlite_master WHERE name='user_layout'")
-    assert config.VERSION.startswith("3.19.0 · Meine Touren")
+    assert config.VERSION.startswith("3.20.0 · Meine Touren")
     root = Path(__file__).resolve().parent.parent
     html = (root / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("js/48-tourlayout.js") < html.index("js/49-seitenlayout.js") < html.index("js/50-bausteine.js") < html.index("js/39-sw.js")
