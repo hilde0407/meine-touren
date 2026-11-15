@@ -2154,4 +2154,7 @@ nichts los || nothing going on || rien à signaler || nada que avisar
 {}: wieder sichtbar || {}: visible again || {} : de nouveau visible || {}: visible de nuevo
 Mit Hinweisen || With notices || Avec avis || Con avisos
 Für den Alltag mit Erinnerungen: oben der Baustein „Hinweise“, der nur erscheint, wenn etwas los ist, darunter Dein Jahr, diese Woche, die letzten Touren, Jahresziel und Meilensteine. || For everyday use with reminders: the “Notices” block on top, which only appears when something is going on, below it Your year, this week, the latest tours, annual goal and milestones. || Pour le quotidien avec des rappels : en haut le bloc « Remarques », qui n’apparaît que lorsqu’il y a quelque chose à signaler, puis Votre année, cette semaine, les derniers parcours, l’objectif annuel et les étapes. || Para el día a día con recordatorios: arriba el bloque «Avisos», que solo aparece cuando pasa algo, y debajo Tu año, esta semana, las últimas rutas, el objetivo anual y los hitos.
+Weitere Aktionen || More actions || Autres actions || Más acciones
++ Baustein || + Block || + Bloc || + Bloque
+Gerade leer: Dieser Abschnitt erscheint, sobald es etwas zu zeigen gibt. || Empty for now: this section appears as soon as there is something to show. || Vide pour le moment : cette section apparaît dès qu’il y a quelque chose à afficher. || Vacío por ahora: esta sección aparece en cuanto haya algo que mostrar.
 `;

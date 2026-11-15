@@ -600,9 +600,9 @@ VIEWS.flight = async id => {
   };
   ["dragstart", "rotatestart", "pitchstart", "zoomstart"].forEach(n => m.on(n, goFree));
   let terr = 0;
+  /* 3.24.0: OpenStreetMap und OpenTopoMap sperren Abrufe ohne Herkunftsangabe („Access blocked“). Die App sendet nach außen keine (Referrer-Policy same-origin), und MapLibre kann
+     je Abruf keine Referrer-Policy setzen. Darum laden diese beiden Karten im 3D-Flug nie direkt, sondern nur über den Kachel-Cache des Servers (/tiles/…); nur Esri-Satellit weicht aus. */
   const DIRECT = {
-    osm: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    topo: "https://tile.opentopomap.org/{z}/{x}/{y}.png",
     sat: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
   };
   m.on("error", e => {

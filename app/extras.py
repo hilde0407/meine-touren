@@ -5,6 +5,7 @@ import json
 import shutil
 import sqlite3
 import tempfile
+import threading
 import uuid
 import zipfile
 from datetime import datetime, timedelta, timezone
@@ -237,15 +238,43 @@ TILE_DIR = config.TILE_CACHE
 UA = {"User-Agent": "MeineTouren/1.0 (privates Selbsthosting; https://github.com/hilde0407/meine-touren)"}
 
 
+TILE_RATE = 600            # Abrufe je Minute und Benutzer bzw. Adresse (großzügig: eine große Karte lädt 30–80 Kacheln auf einmal)
+TILE_DOWN_S = 30           # nach einem Fehler beim Anbieter wird er so lange nicht erneut angefragt (kurz gehalten: nie über 60 s)
+_TILE_HITS: dict = {}
+_TILE_DOWN: dict = {}
+_TILE_LOCK = threading.Lock()
+
+
+def _tile_limit(key, now=None):
+    """Gleitendes Fenster von 60 s. Gibt die Sekunden bis zum nächsten freien Abruf zurück oder 0, wenn der Abruf erlaubt ist."""
+    now = time.time() if now is None else now
+    with _TILE_LOCK:
+        q = _TILE_HITS.setdefault(key, [])
+        while q and q[0] <= now - 60:
+            q.pop(0)
+        if len(q) >= TILE_RATE:
+            return max(1, int(q[0] + 60 - now) + 1)
+        q.append(now)
+        if len(_TILE_HITS) > 2000:                          # Aufräumen: Schlüssel ohne aktuelle Abrufe vergessen
+            for k in [k for k, v in _TILE_HITS.items() if not v or v[-1] <= now - 60]:
+                _TILE_HITS.pop(k, None)
+    return 0
+
+
 @router.get("/tiles/{style}/{z}/{x}/{y}")
-def api_tile(style: str, z: int, x: int, y: int):
+def api_tile(style: str, z: int, x: int, y: int, request: Request):
     if style not in TILE_UP or not (0 <= z <= 19) or x < 0 or y < 0 or x >= 2 ** z or y >= 2 ** z:
         raise HTTPException(404)
+    wait = _tile_limit(ctx.uid() or (request.client.host if request.client else "-"))
+    if wait:
+        return Response(status_code=429, content="Zu viele Kartenabrufe – bitte kurz warten.", media_type="text/plain; charset=utf-8", headers={"Retry-After": str(wait), "Cache-Control": "no-store"})
     f = TILE_DIR / style / str(z) / str(x) / f"{y}.png"
     fresh = f.exists() and time.time() - f.stat().st_mtime < TILE_TTL
-    if not fresh and config.TILE_FETCH:
+    if not fresh and config.TILE_FETCH and time.time() - _TILE_DOWN.get(style, 0) >= TILE_DOWN_S:
         try:
             r = requests.get(TILE_UP[style].format(z=z, x=x, y=y), headers=UA, timeout=8)
+            if r.status_code in (429, 500, 502, 503, 504):
+                _TILE_DOWN[style] = time.time()               # Anbieter überlastet oder gestört: kurz in Ruhe lassen, nicht in Dauerschleife anfragen
             if r.status_code == 200 and r.content:
                 f.parent.mkdir(parents=True, exist_ok=True)
                 # eindeutiger Temp-Name: zwei gleichzeitige Abrufe derselben Kachel dürfen sich nicht die Datei wegnehmen
@@ -259,11 +288,11 @@ def api_tile(style: str, z: int, x: int, y: int):
                     tmp.unlink(missing_ok=True)       # nach Erfolg schon weg, bei Fehler keine Reste
                 fresh = True
         except requests.RequestException:
-            pass
-    if not f.exists():   # Server kommt nicht ins Internet: Browser direkt zum Kartenanbieter weiterleiten
-        return RedirectResponse(TILE_UP[style].format(z=z, x=x, y=y), status_code=307)
+            _TILE_DOWN[style] = time.time()
+    if not f.exists():   # Server kommt nicht ins Internet: Browser direkt zum Kartenanbieter weiterleiten (nie lange zwischenspeichern, sonst bleibt der Fehler hängen)
+        return RedirectResponse(TILE_UP[style].format(z=z, x=x, y=y), status_code=307, headers={"Cache-Control": "no-store"})
     ct = "image/jpeg" if style == "sat" else "image/png"
-    return FileResponse(f, media_type=ct, headers={"Cache-Control": "public, max-age=86400"})
+    return FileResponse(f, media_type=ct, headers={"Cache-Control": "public, max-age=86400" if fresh else "public, max-age=60"})   # veraltete Kachel (Anbieter nicht erreichbar): wird trotzdem geliefert, aber nur kurz gemerkt
 
 
 def prune_tiles(max_bytes=1_500_000_000):

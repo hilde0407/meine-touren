@@ -1013,16 +1013,31 @@ details.tls[open]>summary{border-bottom:1px solid var(--rule);border-radius:var(
 .slopen[hidden]{display:none}
 main.home>.slopen{margin:0 0 -18px}
 .slopen .btn{display:inline-flex;align-items:center;gap:8px;min-height:40px}
+.slopen .btn[hidden]{display:none}
 .sli{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .slgrip .sli{width:22px;height:22px;fill:currentColor;stroke:none}
 .slb .sli{width:18px;height:18px}
 .slsr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-body.sl-editing #main{padding-bottom:120px}
+html body.sl-editing{padding-bottom:calc(var(--slbh,120px) + 16px)}
 .slbar{position:fixed;left:0;right:0;bottom:0;z-index:900;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:10px 20px calc(10px + env(safe-area-inset-bottom));background:var(--card);color:var(--ink);border-top:2px solid var(--bars);box-shadow:0 -8px 24px #0004}
 .slbi{margin:0;flex:1 1 220px;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;font:700 18px var(--d)}
 .slsaved{font:500 14px var(--b);color:var(--mut)}
 .slsaved[data-state=bad]{color:var(--ink);font-weight:700}
 .slbb{display:flex;flex-wrap:wrap;gap:8px}
+.slbmo{display:contents}
+.slsh,.slbb .slmorebtn{display:none}
+.slmorebtn{min-width:44px;justify-content:center;font-weight:700}
+.slmo{display:contents}
+.slst .slmorebtn{display:none}
+.slempty{display:none;margin:0;padding:6px 10px;font-size:14px;border:1.5px dashed var(--rule);border-radius:var(--r)}
+.slit:has(>:not(.slst,.slempty)[hidden])>.slempty{display:block}
+.slit:has(>:not(.slst,.slempty)[hidden]){align-self:start}
+.slit:not(.slcell){container-type:inline-size}
+@container (max-width:479px){
+  .slst .slmorebtn{display:inline-flex}
+  .slst .slmo{display:none}
+  .slst.mo-open .slmo{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;flex:1 0 100%}
+}
 .slbb .btn{min-height:40px}
 .slit{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0;padding:8px;border:2px dashed var(--bars);border-radius:calc(var(--r-l) + 4px);background:color-mix(in srgb,var(--soft) 30%,transparent)}
 .slit.sl-dim>:not(.slst){opacity:.5}
@@ -1092,11 +1107,18 @@ svg .slbn{fill:none;stroke:var(--mut);stroke-width:1.5}
 .slrec:hover{border-color:var(--ink)}
 @media (max-width:700px){
   .slbar{padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
-  body.sl-editing #main{padding-bottom:190px}
   .slit{padding:6px}
   .slb,.slsw,.slbb .btn{min-height:44px}
-  .slbb{width:100%}
-  .slbb .btn{flex:1 1 auto}
+  .slbb{width:100%;flex-wrap:nowrap}
+  .slbb .btn{flex:1 1 auto;padding-left:8px;padding-right:8px;white-space:nowrap}
+  .slbb .slmorebtn{display:inline-flex;flex:0 0 48px}
+  .slbi{flex-basis:100%;font-size:16px;gap:0 10px}
+  .slbi .slsaved,.slbi .slvn{font-size:13px}
+  .slfu{display:none}
+  .slsh{display:inline}
+  .slbmo{display:none}
+  .slbar.mo-open .slbmo{position:absolute;right:12px;left:12px;bottom:calc(100% + 8px);display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--card);border:2px solid var(--bars);border-radius:var(--r-l);box-shadow:0 8px 24px #0006}
+  .slbar.mo-open .slbmo .btn{width:100%;justify-content:flex-start;text-align:left}
   .slnm{flex-basis:calc(100% - 60px)}
 }
 @media print{.slopen,.slbar,.slst{display:none!important}}
@@ -1277,6 +1299,7 @@ main.home{gap:34px 24px}
 html.mob main.home{gap:26px 20px}
 .tlgb>*,main.home>*{grid-column:span 12}
 .hcols{display:contents}
+.hcols>*{grid-column:span 12}                            /* 3.24.0: bis 640 px eine Spalte (ohne das war eine Zelle der Gruppe nur eine Rasterspalte breit) */
 .slcell{container:slc/inline-size;min-width:0}
 .tlw{display:flex;flex-direction:column}
 .tlw>details.tls{flex:1 1 auto}

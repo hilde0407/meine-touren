@@ -81,8 +81,16 @@ def wait_nums(pg, sel, exp):
     pg.wait_for_function("([sel, exp]) => { const v = [...document.querySelectorAll(sel + ' .hyn b')].map(e => parseInt(e.textContent.replace(/\\./g, ''), 10)); return v.length === exp.length && v.every((x, i) => Math.abs(x - exp[i]) <= 0.5 + 1e-6); }", arg=[sel, exp], timeout=T)
 
 
-def open_gear(pg, sel=GEAR):
+def click_gear(pg, sel=GEAR):
+    """Auf schmalen Bausteinen (3.24.0) liegt „Einstellungen“ im „⋯“-Menü des Bausteinkopfs: zuerst das Menü öffnen."""
+    if not pg.locator(sel).is_visible():
+        pg.locator(sel.split(" [data-a")[0] + ' [data-a="more"]').click()
+        pg.wait_for_function("(s) => { const e = document.querySelector(s); return !!e && e.offsetParent !== null; }", arg=sel, timeout=T)
     pg.locator(sel).click()
+
+
+def open_gear(pg, sel=GEAR):
+    click_gear(pg, sel)
     pg.wait_for_selector('.sldlg [role="dialog"] form', timeout=T)
 
 
@@ -402,7 +410,7 @@ def test_tour_average_comparison_basis(pw, app):
         n = lambda i: int(re.search(r"deiner (\d+) anderen", pg.locator(f"#tlw-wd{i} .slcap").inner_text()).group(1))  # noqa: E731
         assert n(1) >= n(3) and n(1) >= n(2)
         _edit(pg)
-        pg.locator('.slit[data-sl="wd3"] [data-a="cfg"]').click()
+        click_gear(pg, '.slit[data-sl="wd3"] [data-a="cfg"]')
         pg.wait_for_selector(".slform", timeout=T)
         assert pg.locator('.sldlg .flchip input[type=radio]').count() == 3 and pg.locator(".sldlg .flchip", has_text="Gleiche Sportart").locator("input").is_checked()
         pg.locator(".sldlg .flchip", has_text="Allen Touren").click()
@@ -490,7 +498,7 @@ def test_contrast_of_blocks_and_dialog_light_and_dark(pw, app, scheme, width):
         assert r["n"] > 15 and not r["low"], f"{scheme} {width}: Kontrast unter 4,5:1 {r['low']}"
         _shot(pg, f"uebersicht-{width}-{scheme}-zwei-dein-jahr.png", full=False)
         _edit(pg)
-        pg.locator('.slit[data-sl="wj2"] [data-a="cfg"]').click()
+        click_gear(pg, '.slit[data-sl="wj2"] [data-a="cfg"]')
         pg.wait_for_selector('.sldlg [role="dialog"] form', timeout=T)
         r = pg.evaluate(TEXTCONTRAST, ".sldlg .slbox *")
         assert r["n"] > 15 and not r["low"], f"{scheme} {width}: Dialog, Kontrast unter 4,5:1 {r['low']}"
@@ -513,7 +521,7 @@ def test_english_labels_in_header_and_dialog(pw, app):
         assert pg.locator("#hyear h2").inner_text() == f"Your year {YEAR}" and pg.locator("#hyear .flk").inner_text() == "Hiking"
         assert pg.locator("#hyear a.hmore").inner_text() == "Go to statistics"
         _edit(pg)
-        pg.locator(GEAR).click()
+        click_gear(pg)
         pg.wait_for_selector('.sldlg [role="dialog"] form', timeout=T)
         pg.wait_for_function("() => /Activity/.test(document.querySelector('.sldlg legend')?.textContent || '')", timeout=T)
         txt = pg.locator(".sldlg").inner_text()

@@ -1,5 +1,6 @@
 """3.7.7: Rollback in cur(), Zepp-Token-Formular, offene API-Pfade, Kachel-Cache, Komoot-Wiederholungen, Login-Zähler."""
 import threading
+import types
 import pytest
 from fastapi.testclient import TestClient
 from tests.test_core import fresh      # noqa: F401  (Fixture)
@@ -74,7 +75,7 @@ def test_kachel_gleichzeitig_ohne_fehler(fresh, tmp_path, monkeypatch):      # n
 
     def run():
         try:
-            extras.api_tile("osm", 5, 3, 4)
+            extras.api_tile("osm", 5, 3, 4, types.SimpleNamespace(client=None))
         except Exception as e:  # noqa
             errs.append(e)
     ts = [threading.Thread(target=run) for _ in range(2)]

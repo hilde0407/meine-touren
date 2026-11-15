@@ -712,10 +712,12 @@ function slStripHtml(p, idx, n) {
   h += `<button type="button" class="slb" data-a="up" aria-label="Nach oben" title="Nach oben"${dis(idx === 0)}>↑</button>`;
   h += `<button type="button" class="slb" data-a="down" aria-label="Nach unten" title="Nach unten"${dis(idx === n - 1)}>↓</button>`;
   if (!it.must) h += `<button type="button" class="slb" data-a="eye" aria-pressed="${p.off}">${p.off ? slIcon.eyeoff : slIcon.eye}<span>${p.off ? "Einblenden" : "Ausblenden"}</span></button>`;
-  if (!it.plain) h += `<label class="slsw"><input type="checkbox" data-a="open"${open ? " checked" : ""}><span>Standardmäßig offen</span></label>`;
-  if (SL.fam === "tour" && !it.fixed) h += `<button type="button" class="slb" data-a="page" >${other}</button>`;
-  if ((it.widget || it.build) && slFieldsOf(window.SL_WT[it.wtype]).length) h += `<button type="button" class="slb slcfgb" data-a="cfg" aria-haspopup="dialog" title="Einstellungen dieses Bausteins">${slIcon.gear}<span>Einstellungen</span></button>`;
-  if (it.widget) h += `<button type="button" class="slb slrm" data-a="del" >Entfernen</button>`;
+  let mo = "";
+  if (!it.plain) mo += `<label class="slsw"><input type="checkbox" data-a="open"${open ? " checked" : ""}><span>Standardmäßig offen</span></label>`;
+  if (SL.fam === "tour" && !it.fixed) mo += `<button type="button" class="slb" data-a="page" >${other}</button>`;
+  if ((it.widget || it.build) && slFieldsOf(window.SL_WT[it.wtype]).length) mo += `<button type="button" class="slb slcfgb" data-a="cfg" aria-haspopup="dialog" title="Einstellungen dieses Bausteins">${slIcon.gear}<span>Einstellungen</span></button>`;
+  if (it.widget) mo += `<button type="button" class="slb slrm" data-a="del" >Entfernen</button>`;
+  if (mo) h += `<button type="button" class="slb slmorebtn" data-a="more" aria-haspopup="true" aria-expanded="false" aria-label="Weitere Aktionen" title="Weitere Aktionen">⋯</button><span class="slmo">${mo}</span>`;
   if (it.must) h += `<span class="slmust">bleibt immer sichtbar</span>`;
   return h + `</span>`;
 }
@@ -782,7 +784,7 @@ function slPlace(root) {
     pres.forEach((p, i) => {
       const w = p.unit;
       if (w === p.el) return;
-      const sig = [i, pres.length, p.off, p.cw, slDef(p.it.id, !!p.it.def), SL.page, p.it.title, p.it.fl || ""].join("|");
+      const sig = [i, pres.length, p.off, p.cw, slDef(p.it.id, !!p.it.def), SL.page, p.it.title, p.it.fl || "", SL.mopen === p.it.id].join("|");
       let s = w.querySelector(":scope > .slst");
       if (!s) {
         s = document.createElement("div");
@@ -794,9 +796,13 @@ function slPlace(root) {
         s.dataset.sig = sig;
         s.setAttribute("aria-label", p.it.title);
         s.innerHTML = slStripHtml(p, i, pres.length);
+        s.classList.toggle("mo-open", SL.mopen === p.it.id);
+        const mb = s.querySelector(".slmorebtn");
+        if (mb) mb.setAttribute("aria-expanded", SL.mopen === p.it.id ? "true" : "false");
       }
+      if (!w.querySelector(":scope > .slempty")) s.insertAdjacentHTML("afterend", '<p class="slempty mut">Gerade leer: Dieser Abschnitt erscheint, sobald es etwas zu zeigen gibt.</p>');
     });
-  root.querySelectorAll(".slit").forEach(w => !w.querySelector(":scope > :not(.slst)") && w.remove());
+  root.querySelectorAll(".slit").forEach(w => !w.querySelector(":scope > :not(.slst):not(.slempty)") && w.remove());
   if (edit && SL.focus) {
     const f = SL.focus;
     SL.focus = null;
@@ -819,10 +825,11 @@ function slOpener(root, edit) {
     w = document.createElement("div");
     w.id = "slopenw";
     w.className = "slopen";
-    w.innerHTML = `<button type="button" class="btn ghost sm" id="slopen" data-a="edit">${slIcon.sliders}<span>Seite anpassen</span></button>`;
+    w.innerHTML = `<button type="button" class="btn ghost sm" id="slopen" data-a="edit">${slIcon.sliders}<span>Seite anpassen</span></button><button type="button" class="btn ghost sm" id="slviews" aria-haspopup="dialog">Ansichten</button>`;
   }
-  const b = w.querySelector("#slopen");
+  const b = w.querySelector("#slopen"), vb = w.querySelector("#slviews");
   b.hidden = !!edit;
+  if (vb) vb.hidden = !!edit;                                                              // 3.24.0: der Knopf „Ansichten“ steht immer neben „Seite anpassen“ (im Bearbeitungsmodus sitzt er in der Leiste)
   w.hidden = !!edit;
   if (typeof slViewPick === "function" && slViewPick(w)) w.hidden = false;                // 3.21.0: Ansichten-Auswahl bleibt auch im Bearbeitungsmodus stehen
   if (typeof slSaveBar === "function" && slSaveBar(w)) w.hidden = false;
@@ -879,9 +886,43 @@ function slBar(on) {
     `<p class="slsr" id="slhint">Zum Verschieben ziehen oder Pfeil hoch bzw. Pfeil runter drücken.</p>` +
     `<div class="slsr" id="sllive" aria-live="polite" aria-atomic="true"></div>` +
     `<p class="slbi"><b>Seite anpassen</b><span class="slvn" id="slvn"></span><span class="slsaved" id="slsaved" role="status" aria-live="polite"></span><span class="slchg" id="slchg" hidden>Ungespeicherte Änderungen</span></p>` +
-    `<div class="slbb"><button type="button" class="btn ghost sm" data-a="views" aria-haspopup="dialog">Ansichten</button><button type="button" class="btn ghost sm" data-a="add">Baustein hinzufügen</button><button type="button" class="btn ghost sm" data-a="reset">Standard wiederherstellen</button><button type="button" class="btn ghost sm" data-a="discard">Verwerfen</button><button type="button" class="btn ghost sm" data-a="savenew" aria-haspopup="dialog">Als neue Ansicht speichern …</button><button type="button" class="btn sm" data-a="done">Fertig</button></div>`;
+    `<div class="slbb"><button type="button" class="btn ghost sm" data-a="views" aria-haspopup="dialog">Ansichten</button><button type="button" class="btn ghost sm" data-a="add" aria-label="Baustein hinzufügen"><span class="slfu">Baustein hinzufügen</span><span class="slsh" aria-hidden="true">+ Baustein</span></button>` +
+    `<button type="button" class="btn ghost sm slmorebtn" data-a="more" aria-haspopup="true" aria-expanded="false" aria-label="Weitere Aktionen" title="Weitere Aktionen">⋯</button>` +
+    `<span class="slbmo"><button type="button" class="btn ghost sm" data-a="reset">Standard wiederherstellen</button><button type="button" class="btn ghost sm" data-a="savenew" aria-haspopup="dialog">Als neue Ansicht speichern …</button><button type="button" class="btn ghost sm" data-a="discard">Verwerfen</button></span>` +
+    `<button type="button" class="btn sm" data-a="done">Fertig</button></div>`;
   document.body.appendChild(b);
+  slBarH();
 }
+/* 3.24.0 Abstand am Seitenfuß = Höhe der Leiste (die Leiste ist je nach Breite unterschiedlich hoch), damit nichts dahinter verschwindet */
+function slBarH() {
+  const b = document.getElementById("slbar");
+  if (b) document.body.style.setProperty("--slbh", b.offsetHeight + "px");
+  else document.body.style.removeProperty("--slbh");
+}
+window.addEventListener("resize", () => slBarH());
+/* 3.24.0 „⋯“-Menü: Baustein-Kopf (nur schmale Bausteine) und Leiste (nur schmale Schirme); je Baustein höchstens eines offen */
+function slMore(b) {
+  const st = b.closest(".slst"), bar = b.closest("#slbar"), host = st || bar;
+  if (!host) return;
+  const on = !host.classList.contains("mo-open");
+  document.querySelectorAll(".slst.mo-open, #slbar.mo-open").forEach(x => {
+    x.classList.remove("mo-open");
+    const k = x.querySelector(".slmorebtn");
+    if (k) k.setAttribute("aria-expanded", "false");
+  });
+  host.classList.toggle("mo-open", on);
+  b.setAttribute("aria-expanded", on ? "true" : "false");
+  SL.mopen = st && on ? st.closest(".slit").dataset.sl : null;
+  slBarH();
+}
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  const o = document.querySelector(".slst.mo-open, #slbar.mo-open");
+  if (!o) return;
+  const k = o.querySelector(".slmorebtn");
+  slMore(k);
+  k.focus();
+});
 /* 3.22.0 Stand vor dem Bearbeiten: Grundlage für „Verwerfen“, „Als neue Ansicht speichern“ und die Markierung „Ungespeicherte Änderungen“ */
 function slSnap() {
   const fam = SL.fam, st = {};
@@ -933,6 +974,7 @@ function slEdit(on, announce, keepMsg) {
     if (m) m.remove();
   }
   document.body.classList.toggle("sl-editing", on);
+  if (!on) SL.mopen = null;
   slBar(on);
   if (on && keepMsg && SL.msg) slStatus(SL.msg.text);
   SL.focus = on ? {id: SL.present[0] || "", a: "grip", ps: true} : null;
@@ -951,6 +993,7 @@ function slLeave() {
   SL.edit = false;
   SL.snap = null;
   document.body.classList.remove("sl-editing");
+  SL.mopen = null;
   slBar(false);
   slFlush();
 }
@@ -1149,9 +1192,13 @@ function slField(f, cfg, i) {
 /* ---------- Ereignisse ---------- */
 document.addEventListener("click", e => {
   const o = e.target.closest && e.target.closest("#slopen"),
+    vo = e.target.closest && e.target.closest("#slviews"),
+    mo = e.target.closest && e.target.closest(".slmorebtn"),
     bar = e.target.closest && e.target.closest("#slbar [data-a]"),
     b = e.target.closest && e.target.closest(".slst button[data-a]");
   if (o) return slEdit(true);
+  if (vo) return typeof slViewsDialog === "function" && slViewsDialog();
+  if (mo) return slMore(mo);
   if (bar) {
     const a = bar.dataset.a;
     if (a === "done") slEdit(false, true);
