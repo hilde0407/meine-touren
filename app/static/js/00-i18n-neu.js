@@ -2301,6 +2301,10 @@ Fotos aus allen Jahren || Photos from all years || Photos de toutes les années 
 beste {} Fotos || best {} photos || {} meilleures photos || las {} mejores fotos
 höchstens 300 beste Fotos || up to 300 best photos || jusqu’à 300 meilleures photos || hasta 300 mejores fotos
 ohne Orte, Notizen und Strecken || without places, notes and tracks || sans lieux, notes ni tracés || sin lugares, notas ni rutas
+mit Tourname || with tour name || avec le nom de la sortie || con nombre de la ruta
+ohne Tournamen || without tour names || sans noms de sorties || sin nombres de rutas
+Tournamen sind im Link sichtbar || Tour names are visible in the link || Les noms des sorties sont visibles dans le lien || Los nombres de las rutas son visibles en el enlace
+Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar) || Link copied (valid 24 hours, viewable without an account; tour names are visible) || Lien copié (valable 24 heures, sans compte ; les noms des sorties sont visibles) || Enlace copiado (válido 24 h, visible sin cuenta; los nombres de las rutas son visibles)
 Zu dieser Diashow gibt es keine Fotos. || There are no photos in this slideshow. || Ce diaporama ne contient aucune photo. || Este pase de fotos no tiene fotos.
 Noch kein Ziel für {}. || No goal for {} yet. || Pas encore d’objectif pour {}. || Aún no hay objetivo para {}.
 Ziel in der Statistik festlegen › || Set a goal in the statistics › || Définir un objectif dans les statistiques › || Fijar un objetivo en las estadísticas ›

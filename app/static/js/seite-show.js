@@ -1,6 +1,6 @@
 /* Skript der Seite show.html (eigene Datei, damit die Content-Security-Policy Inline-Skripte verbieten kann) */
 const tok = location.pathname.split("/").pop(), $ = id => document.getElementById(id), SPEEDS = [3000, 5000, 8000];
-let DELAY = 5000, ids = [], TS = [], i = 0, playing = true, timer = null, T = null, map = null, hideT = null;
+let DELAY = 5000, ids = [], TS = [], NM = [], i = 0, playing = true, timer = null, T = null, map = null, hideT = null;
 const url = (id, s) => `/pub/${tok}/photo/${id}?size=${s || 1600}`;
 const nf = (n, d = 1) => Number(n).toLocaleString("de-DE", {minimumFractionDigits: d, maximumFractionDigits: d});
 function show(n) {
@@ -14,7 +14,10 @@ function show(n) {
   im.src = url(ids[i]); im.alt = "";
   if (typeof cmDraw === "function" && CMON) cmDraw();
   $("cnt").textContent = (i + 1) + " / " + ids.length;
-  $("cap").textContent = TS[i] ? TS[i] + " Uhr" : "";
+  const cap = $("cap"), nm = NM[i] || "";                // Tourname (nur Links ab 3.31.1) wie in der eingeloggten Diashow fett über der Zeit; nur über textContent, nie als HTML
+  cap.textContent = "";
+  if (nm) { const b = document.createElement("b"); b.textContent = nm; cap.appendChild(b); }
+  cap.appendChild(document.createTextNode(TS[i] ? TS[i] + " Uhr" : ""));
   new Image().src = url(ids[(i + 1) % ids.length]);       // nächstes Foto vorladen
   restart();
 }
@@ -73,7 +76,7 @@ const esc = x => String(x).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", 
 let was = true;
 $("cb").onclick = e => { e.stopPropagation(); was = playing; playing = false; clearTimeout(timer); $("cm").classList.add("on"); cmDraw(); };
 fetch("/api/public/" + tok).then(r => { if (!r.ok) throw 0; return r.json(); }).then(t => {
-  T = t; ids = t.photos || []; TS = t.photo_t || [];
+  T = t; ids = t.photos || []; TS = t.photo_t || []; NM = t.photo_names || [];
   document.title = t.name; $("h").textContent = t.name;
   if (t.kind === "diashow") $("sub").textContent = ids.length + " Fotos";          // Jahres-/Gesamt-Diashow: nur Fotos, kein Tourdatum, keine Strecke
   else $("sub").textContent = new Date(t.date).toLocaleDateString("de-DE", {day: "numeric", month: "long", year: "numeric"}) + " · " + nf(t.km) + " km · " + nf(t.up_m, 0) + " m aufwärts";

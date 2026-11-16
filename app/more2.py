@@ -450,7 +450,7 @@ async def api_diashow_share(request: Request):
     diashow_link.photo_list(year, sport, best, measure=True)
     token = secrets.token_urlsafe(12)
     now = int(time.time())
-    db.execute("INSERT INTO shares(token,tour_id,photos,trim,ts,exp,views,best,comments,blocks) VALUES(?,?,2,0,?,?,0,?,0,NULL)",
+    db.execute("INSERT INTO shares(token,tour_id,photos,trim,ts,exp,views,best,comments,blocks,names) VALUES(?,?,2,0,?,?,0,?,0,NULL,1)",
                (token, diashow_link.ref(year, sport), now, now + days * 86400 if days else None, best))
     auth.q("INSERT OR REPLACE INTO share_index(token,uid) VALUES(?,?)", (token, ctx.uid() or ""))
     return {"token": token, "url": f"/s/{token}", "title": diashow_link.title(year, sport)}
@@ -493,7 +493,7 @@ def api_share_del(token: str):
 @router.get("/api/shares")
 def api_shares_all():
     """Alle freigegebenen Links (Touren und Diashows) des angemeldeten Benutzers mit Tourname, Laufzeit und Aufrufen."""
-    return _with_blocks(db.query("SELECT s.token,s.tour_id,s.photos,s.trim,s.ts,s.exp,s.views,s.best,s.comments,s.blocks,t.name,t.sport,t.start_ts "
+    return _with_blocks(db.query("SELECT s.token,s.tour_id,s.photos,s.trim,s.ts,s.exp,s.views,s.best,s.comments,s.blocks,s.names,t.name,t.sport,t.start_ts "
                                  "FROM shares s LEFT JOIN tours t ON t.id=s.tour_id ORDER BY s.ts DESC"))
 
 

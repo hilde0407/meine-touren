@@ -5,7 +5,7 @@ VIEWS.links = async () => {
   let all = [], flt = "all";
   const now = () => Date.now() / 1000;
   const kind = x => (x.kind === "rueckblick" ? "rb" : x.photos == 2 ? "show" : "tour");
-  const dsZeigt = x => [x.year ? `Fotos aus dem Jahr ${x.year}` : "Fotos aus allen Jahren", x.sport_name || "", x.best ? `beste ${x.best} Fotos` : "höchstens 300 beste Fotos", "ohne Orte, Notizen und Strecken"].filter(Boolean).join(" · ");
+  const dsZeigt = x => [x.year ? `Fotos aus dem Jahr ${x.year}` : "Fotos aus allen Jahren", x.sport_name || "", x.best ? `beste ${x.best} Fotos` : "höchstens 300 beste Fotos", x.names ? "mit Tourname" : "ohne Tournamen", "ohne Orte, Notizen und Strecken"].filter(Boolean).join(" · ");
   const dead = x => x.exp && x.exp < now();
   const fmtD = ts => (ts ? new Date(ts * 1000).toLocaleDateString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric"}) : "");
   const left = x => {

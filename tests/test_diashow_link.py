@@ -1,4 +1,4 @@
-"""3.29.0 – Diashow-Link für ein Jahr oder alle Jahre (Backend): Eingaben prüfen, 24 Stunden Standard, nur Fotos ausliefern (keine Orte, Notizen, Strecken, Tournamen),
+"""3.29.0 – Diashow-Link für ein Jahr oder alle Jahre (Backend): Eingaben prüfen, 24 Stunden Standard, nur Fotos ausliefern (keine Orte, Notizen, Strecken; seit 3.31.1 mit Tourname je Foto),
 Fotos nur aus der ausgelieferten Liste, keine Kommentare, Liste mit „Zeigt“-Angaben, Betrachter dürfen nichts anlegen, bestehende Links unverändert."""
 import math
 import sys
@@ -11,7 +11,8 @@ from tests.test_core import fresh  # noqa: F401
 from tests.test_browser import app_url  # noqa: F401
 from tests.test_rueckblick import GEHEIM, JAHR, _client, _seed, _ts
 
-SECRET_NAMES = ("Gipfelrunde", "Seetour", "Radltour", "GEHEIMNOTIZ", "GEHEIMWEG", "GEHEIMUHR")
+TOURNAMEN = ("Gipfelrunde", "Seetour", "Radltour")          # seit 3.31.1 nur im JSON neuer Links (photo_names), nie in der HTML-Seite
+SECRET_NAMES = ("GEHEIMNOTIZ", "GEHEIMWEG", "GEHEIMUHR")
 
 
 def _mk(c, **kw):
@@ -47,7 +48,8 @@ def test_standard_24_stunden_und_nur_fotos(fresh):
     assert len(d["photo_t"]) == 2 and d["photo_t"][0].startswith("02.03.2025")
     raw = c.get(f"/api/public/{tok}").text
     assert not any(w in raw for w in GEHEIM + SECRET_NAMES), raw
-    for k in ("lat", "lng", "km", "up_m", "note", "wps", "hr", "sport", "date", "tour"):
+    assert d["photo_names"] == ["Gipfelrunde", "Radltour"]                              # 3.31.1: nur der Name, sonst nichts von der Tour
+    for k in ("lat", "lng", "km", "up_m", "note", "wps", "hr", "sport", "date", "tour", "tour_id", "start_ts"):
         assert f'"{k}"' not in raw, k
     assert db.one("SELECT views FROM shares WHERE token=?", (tok,))["views"] == 2
 
@@ -59,7 +61,7 @@ def test_seite_und_vorschau(fresh):
     page = c.get(f"/s/{tok}")
     assert page.status_code == 200 and f"Diashow {JAHR}" in page.text and "og:image" in page.text and "seite-show.js" in page.text
     assert "script-src 'self'" in page.headers["content-security-policy"] and "no-store" in page.headers["cache-control"]
-    assert not any(w in page.text for w in SECRET_NAMES)
+    assert not any(w in page.text for w in SECRET_NAMES + TOURNAMEN)
 
 
 def test_fotos_nur_aus_der_liste(fresh):
@@ -195,4 +197,63 @@ def test_browser_teilen_knopf_jahr_gesamt_und_oeffentliche_seite(app_url):
         pub.wait_for_function("() => /Fotos/.test(document.getElementById('sub').textContent)", timeout=15000)
         assert pub.inner_text("#h") == f"Diashow {year}" and pub.evaluate("() => getComputedStyle(document.getElementById('mp')).display") == "none"   # keine Karte
         assert not errs, errs
+        b.close()
+
+
+def test_tourname_nur_fuer_neue_links(fresh):
+    """3.31.1: Namen nur bei Links mit names=1 (neu angelegt); ein vor 3.31.1 angelegter Link (names=0) liefert sie nie nachträglich, funktioniert aber weiter."""
+    from app import db
+    _seed()
+    c = _client()
+    neu = _mk(c)
+    assert db.one("SELECT names FROM shares WHERE token=?", (neu,))["names"] == 1
+    alt = _mk(c, sport="hike")
+    db.execute("UPDATE shares SET names=0 WHERE token=?", (alt,))
+    d = c.get(f"/api/public/{alt}").json()
+    assert d["kind"] == "diashow" and len(d["photos"]) == 1 and "photo_names" not in d and "Gipfelrunde" not in c.get(f"/api/public/{alt}").text
+    rows = {r["token"]: r for r in c.get("/api/shares").json()}
+    assert rows[neu]["names"] == 1 and rows[alt]["names"] == 0
+    raw = c.get(f"/api/public/{neu}").text
+    assert "Gipfelrunde" in raw and '"a"' not in raw and "tour_id" not in raw
+    db.execute("UPDATE tours SET name=? WHERE id='a'", ("<img src=x onerror=alert(1)>",))
+    db.query("SELECT 1")
+    from app import diashow_link
+    diashow_link._CACHE.clear()
+    assert c.get(f"/api/public/{neu}").json()["photo_names"][0] == "<img src=x onerror=alert(1)>"     # JSON liefert den Rohtext, die Seite zeigt ihn nur als Text
+
+
+def test_browser_tourname_in_geteilter_diashow_escaped(app_url):
+    """Öffentliche Seite zeigt den Tournamen fett in der Bildunterschrift; HTML im Namen wird als Text angezeigt (nicht ausgeführt)."""
+    import json
+    import urllib.request
+    from playwright.sync_api import sync_playwright, expect
+    photos = json.loads(urllib.request.urlopen(app_url + "/api/photos?limit=1500").read())
+    mit_tour = [p for p in photos if p.get("tour_id")]
+    if not mit_tour:
+        import pytest
+        pytest.skip("keine Fotos mit Tour in den Browser-Testdaten")
+    year = datetime.fromtimestamp(mit_tour[0]["taken_ts"]).year
+    req = urllib.request.Request(app_url + "/api/diashow/share", data=json.dumps({"year": year, "days": 1}).encode(), headers={"content-type": "application/json"})
+    tok = json.loads(urllib.request.urlopen(req).read())["token"]
+    echt = json.loads(urllib.request.urlopen(f"{app_url}/api/public/{tok}").read())
+    assert echt["photo_names"] and all(isinstance(n, str) for n in echt["photo_names"]) and "tour_id" not in echt
+    xss = "<img src=x onerror=alert(1)>"
+    falsch = dict(echt, photo_names=[xss] * len(echt["photos"]))
+    with sync_playwright() as pw:
+        b = pw.chromium.launch()
+        pg = b.new_context(locale="de-DE").new_page()
+        errs = []
+        pg.on("pageerror", lambda e: errs.append(str(e)))
+        pg.on("dialog", lambda d: errs.append("dialog " + d.message))
+        pg.route("**/pub/**", lambda r: r.abort())
+        pg.route(f"**/api/public/{tok}", lambda r: r.fulfill(json=falsch))
+        pg.goto(f"{app_url}/s/{tok}")
+        pg.wait_for_function("() => document.querySelector('#cap b') !== null", timeout=15000)
+        expect(pg.locator("#cap b")).to_have_text(xss, timeout=15000)
+        assert pg.locator("#cap img").count() == 0 and "Uhr" in pg.inner_text("#cap")
+        assert not errs, errs
+        pg2 = b.new_context(locale="de-DE").new_page()
+        pg2.route("**/pub/**", lambda r: r.abort())
+        pg2.goto(f"{app_url}/s/{tok}")
+        expect(pg2.locator("#cap b")).to_have_text(echt["photo_names"][0], timeout=15000)       # echte Antwort: Name fett über der Zeit
         b.close()

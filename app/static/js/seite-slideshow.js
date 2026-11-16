@@ -43,7 +43,7 @@ const q = new URLSearchParams(location.search);
   const bspd = document.getElementById("bspd"), spdTxt = () => { bspd.textContent = Math.round(sec / 1000) + " s"; };
   bspd.onclick = e => { e.stopPropagation(); const o = [3, 6, 10, 15], n = o[(o.indexOf(Math.round(sec / 1000)) + 1) % o.length]; sec = n * 1000; try { localStorage.setItem("showSec", n); } catch (err) {} spdTxt(); loop(); poke(); };
   spdTxt();
-  // Teilen (Tour, Jahr oder alle Fotos; nicht bei der Zufalls-Diashow): Link ohne Konto, 24 Stunden gültig, ohne Kommentare; Jahr/alle: nur Fotos, höchstens 300 beste
+  // Teilen (Tour, Jahr oder alle Fotos; nicht bei der Zufalls-Diashow): Link ohne Konto, 24 Stunden gültig, ohne Kommentare; Jahr/alle: Fotos mit Tourname (seit 3.31.1), höchstens 300 beste
   const bshr = document.getElementById("bshr"), fsh = document.getElementById("fsh");
   if (q.get("tour") || q.get("year") || !q.get("random")) bshr.style.display = "";
   const note = txt => { fsh.textContent = txt; fsh.style.display = "block"; setTimeout(() => { fsh.style.display = "none"; }, 4000); };
@@ -54,9 +54,9 @@ const q = new URLSearchParams(location.search);
       const r = q.get("tour") ? await fetch(`/api/tours/${encodeURIComponent(q.get("tour"))}/share`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({show: true, trim: true, days: 1, best, comments: false})})
         : await fetch("/api/diashow/share", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({year: +q.get("year") || 0, days: 1, best})});
       if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.status);
-      const j = await r.json(), url = location.origin + j.url, title = j.title || (list[0] || {}).tour_name || document.title;
-      if (navigator.share) { try { await navigator.share({title, url}); } catch (err) { /* abgebrochen */ } }
-      else { await navigator.clipboard.writeText(url); note("Link kopiert (24 Stunden gültig, ohne Konto ansehbar)"); }
+      const j = await r.json(), url = location.origin + j.url, title = j.title || (list[0] || {}).tour_name || document.title, hinweis = !q.get("tour");   // Jahr/alle: Tournamen stehen im Link (ein Name kann einen Ort verraten)
+      if (navigator.share) { try { await navigator.share({title, url}); } catch (err) { /* abgebrochen */ } if (hinweis) note("Tournamen sind im Link sichtbar"); }
+      else { await navigator.clipboard.writeText(url); note(hinweis ? "Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar)" : "Link kopiert (24 Stunden gültig, ohne Konto ansehbar)"); }
     } catch (err) { note("Link konnte nicht erstellt werden: " + err.message); }
     bshr.disabled = false;
   };
