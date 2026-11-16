@@ -147,12 +147,19 @@ def _ready_main(pg, devs=True, tlsum=True):
         pg.wait_for_function(SIG_STABLE, timeout=15000)
 
 
+def _settled(pg):
+    """Layout fertig: Schriften geladen und zwei Frames ohne Änderung der Seitenhöhe (Screenshot und Messungen nie mitten im Aufbau)."""
+    pg.evaluate("() => document.fonts.ready.then(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))))")
+    pg.wait_for_function("() => { const h = document.documentElement.scrollHeight, w = window.__hs = window.__hs || {h: 0, n: 0}; w.n = w.h === h ? w.n + 1 : 0; w.h = h; return w.n >= 3; }", timeout=15000, polling=100)
+
+
 def _shot(pg, name, full=True):
     d = os.environ.get("TS_SHOTS")
     if d:
         Path(d).mkdir(parents=True, exist_ok=True)
         pg.evaluate("window.scrollTo(0, 0)")
-        pg.screenshot(path=str(Path(d) / name), full_page=full)
+        _settled(pg)
+        pg.screenshot(path=str(Path(d) / name), full_page=full, timeout=60000)
 
 
 MAIN_ORDER = ["map", "prof", "puls", "wp", "photos"]

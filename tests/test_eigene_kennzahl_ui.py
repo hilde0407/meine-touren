@@ -5,6 +5,9 @@ Wettlauf-Regel: nach jeder Aktion auf den Zustand warten (wait_for_function/expe
 import pytest
 
 from tests.test_statistik_ui import _api, _edit, _saved, _shot, _stats, app, clean, pw, T  # noqa: F401
+from tests.test_tourseite_ui import _settled
+
+expect = pytest.importorskip("playwright.sync_api").expect
 
 
 def _open_new(pg):
@@ -154,10 +157,12 @@ def test_block_390_light_and_dark_no_overflow_and_screens(pw, app):
         pg = _stats(pw, app, width=width, height=900, scheme=scheme, dpr=2 if width == 390 else 1)
         try:
             pg.wait_for_function("() => document.querySelectorAll('#stx .tlw[data-wtype=eigenkz] .kzval').length === 3", timeout=T)
+            pg.wait_for_function("() => [...document.querySelectorAll('#stx .tlw[data-wtype=eigenkz] .kzval')].every(e => /\\d/.test(e.textContent)) && !!document.querySelector('#tlw-k1 .kzgt') && !!document.querySelector('#tlw-k2 .kzsub a')", timeout=T)
+            _settled(pg)                                                                 # Messung und Screenshot erst nach dem Layout
             vals = pg.evaluate("() => [...document.querySelectorAll('#stx .tlw[data-wtype=eigenkz]')].map(e => e.querySelector('.kzval').textContent.trim())")
             assert vals[0] == "89,0" and vals[1] == "25,0" and vals[2] != "–"
-            assert pg.locator("#tlw-k1 .kzgt").inner_text().startswith("89 % von")
-            assert pg.locator("#tlw-k2 .kzsub a").inner_text() == "Tour 5 hike"
+            expect(pg.locator("#tlw-k1 .kzgt")).to_contain_text("89 % von", timeout=T)
+            expect(pg.locator("#tlw-k2 .kzsub a")).to_have_text("Tour 5 hike", timeout=T)
             assert pg.evaluate("() => document.documentElement.scrollWidth <= window.innerWidth + 1")
             _shot(pg, f"kz-seite-{width}-{scheme}.png")
             assert not pg.errors, pg.errors

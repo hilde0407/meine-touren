@@ -139,8 +139,9 @@ async function homeView() {
 {
   const dashOld = VIEWS.dash;
   VIEWS.stats = async (n, q) => {
+    const rt = window._rt;
     await dashOld(n, q || new URLSearchParams(""));
-    if (TOURS.length) statTabs("stats");
+    if (rt === window._rt && TOURS.length) statTabs("stats");
   };
   VIEWS.dash = async (n, q) => {
     if (!TOURS.length) return dashOld(n, q);

@@ -121,8 +121,56 @@ def test_isolation_and_viewer():
 
 def test_version_and_notes():
     from app import config
-    assert config.VERSION.startswith("3.28.0 · Meine Touren")
-    assert (ROOT / "docs" / "versionen" / "3.28.0.md").exists()
-    assert 'const V = "mt-v106"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.28.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
+    assert config.VERSION.startswith("3.29.0 · Meine Touren")
+    assert (ROOT / "docs" / "versionen" / "3.29.0.md").exists()
+    assert 'const V = "mt-v107"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.29.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
     assert "59-bausteine-eigen.js" in (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
+
+
+def _hr_sidecar(tid, bpms):
+    import json
+    from app import config
+    config.TRACK_DIR.mkdir(parents=True, exist_ok=True)
+    (config.TRACK_DIR / f"{tid}.hr.json").write_text(json.dumps([[i * 10, b] for i, b in enumerate(bpms)]), encoding="utf-8")
+
+
+def test_puls_und_gehzeit_als_messgroesse():
+    """3.29.0: Durchschnitts-/Höchstpuls je Tour (Pulsdatei) und Gehzeit (Bewegungszeit aus dem Tempo-Zwischenspeicher) – nur Touren mit Angabe zählen, Summe von Puls ist nicht möglich."""
+    from app import config, routes, steigung
+    seed()                                                  # a 12 km/4 h, b 40 km/2 h, c 28 km/8 h (2026), d 5 km/1 h, e 60 km/3 h (2025)
+    _hr_sidecar("a", [100, 120, 140, 160, 180, 120])          # Ø 137 (gerundet), Max 180
+    _hr_sidecar("c", [90, 100, 110, 120, 130, 100])           # Ø 108 (gerundet), Max 130
+    p = ausw(mess="puls", agg="avg")
+    assert p["einheit"] == {"z": "bpm", "n": None} and p["wert"] == round((137 + 108) / 2, 4) and p["n"] == 5
+    assert ausw(mess="pulsmax", agg="max")["wert"] == 180 and ausw(mess="pulsmax", agg="min")["wert"] == 130 and ausw(mess="puls", agg="count")["wert"] == 2
+    r = ausw(mess="puls", agg="record")
+    assert r["rekord"]["id"] == "a" and r["rekord"]["wert"] == 137
+    assert ausw(mess="pulsmax", agg="avg", range="y", yr=2025)["wert"] is None                     # 2025: keine Pulsdaten -> kein Wert (nie 0)
+    for bad in (cfg(mess="puls", agg="sum"), cfg(mess="pulsmax", agg="monat"), cfg(mess="puls", agg="avg", durch={"mess": "puls", "agg": "sum"})):
+        try:
+            kz.clean_cfg(bad)
+        except Exception as e:  # noqa
+            assert getattr(e, "status_code", 0) == 400
+        else:
+            raise AssertionError(bad)
+    # Gehzeit: Bewegungszeit aus den Streckenpunkten (50 m je 10 s, danach 20 Minuten Pause)
+    import math
+    pts = [(48.0 + i * 0.00045, 11.0, 500 + 5 * math.sin(i / 20), (1_700_000_000 + i * 10) * 1000) for i in range(300)]       # etwa 18 km/h, 400 Punkte
+    pts += [(pts[-1][0], 11.0, 500, pts[-1][3] + 1_200_000)] + [(pts[-1][0] + (i + 1) * 0.00045, 11.0, 500, pts[-1][3] + 1_200_000 + (i + 1) * 10_000) for i in range(100)]
+    routes.store("a", pts)
+    g = ausw(mess="gehzeit", agg="sum")
+    res = steigung.tempo_of("a", allow_compute=False)
+    assert res and res["status"] == "ok"
+    assert g["einheit"] == {"z": "h", "n": None} and g["wert"] == round(res["zeit_s"] / 3600, 4) and 0 < g["wert"] < (400 * 10 + 1200) / 3600 - 0.2 and g["n"] == 5
+    assert "offen" not in g                                                                          # b–e haben keine Strecke: zählen nicht (und sind nicht „offen“)
+    assert ausw(mess="gehzeit", agg="record")["rekord"]["id"] == "a"
+    assert (config.CACHE_DIR / "tempo" / "a.json").exists()                                           # gecacht: nächster Aufruf liest nur die Datei
+    kz.GEHZEIT_BUDGET_S = 0.0                                                                       # Budget aufgebraucht: ohne Zwischenspeicher-Treffer „offen“
+    try:
+        routes.store("b", pts)
+        r2 = ausw(mess="gehzeit", agg="sum")
+        assert r2["offen"] == 1 and r2["wert"] == g["wert"]
+    finally:
+        kz.GEHZEIT_BUDGET_S = 5.0
+    assert ausw(mess="gehzeit", agg="sum")["wert"] > g["wert"] and "offen" not in ausw(mess="gehzeit", agg="sum")

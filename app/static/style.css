@@ -1033,11 +1033,6 @@ html body.sl-editing{padding-bottom:calc(var(--slbh,120px) + 16px)}
 .slit:has(>:not(.slst,.slempty)[hidden])>.slempty{display:block}
 .slit:has(>:not(.slst,.slempty)[hidden]){align-self:start}
 .slit:not(.slcell){container-type:inline-size}
-@container (max-width:479px){
-  .slst .slmorebtn{display:inline-flex}
-  .slst .slmo{display:none}
-  .slst.mo-open .slmo{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;flex:1 0 100%}
-}
 .slbb .btn{min-height:40px}
 .slit{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0;padding:8px;border:2px dashed var(--bars);border-radius:calc(var(--r-l) + 4px);background:color-mix(in srgb,var(--soft) 30%,transparent)}
 .slit.sl-dim>:not(.slst){opacity:.5}
@@ -1120,6 +1115,31 @@ svg .slbn{fill:none;stroke:var(--mut);stroke-width:1.5}
   .slbar.mo-open .slbmo{position:absolute;right:12px;left:12px;bottom:calc(100% + 8px);display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--card);border:2px solid var(--bars);border-radius:var(--r-l);box-shadow:0 8px 24px #0006}
   .slbar.mo-open .slbmo .btn{width:100%;justify-content:flex-start;text-align:left}
   .slnm{flex-basis:calc(100% - 60px)}
+}
+/* 3.29.0 – Kopf im Bearbeitungsmodus bei schmalem Baustein (halbe/drittel Breite, Handy): Symbolknöpfe, Name auf höchstens zwei Zeilen.
+   bis 719 px: Zeile 1 = Griff, Name, Breite, hoch/runter, Auge (nur Symbol); Zeile 2 = die übrigen Aktionen.
+   bis 479 px: Zeile 1 = Griff, Name, Auge, „⋯“ (Menü); Zeile 2 = Breite, hoch/runter. Alle Bedienelemente mindestens 38 px. */
+@container (max-width:719px){
+  .slst .slbs{display:contents}
+  .slst .slnm{flex:1 1 0;min-width:84px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+  .slst .slb{min-height:40px;padding:0 12px}
+  .slst .slb[data-a=up],.slst .slb[data-a=down],.slst .slb[data-a=eye],.slst .slmorebtn{min-width:40px;padding:0;justify-content:center}
+  .slst .slb[data-a=eye] span{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .slst .slw{min-width:40px;min-height:38px;padding:4px}
+  .slst .slmo{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;flex:1 0 100%}
+}
+@container (max-width:479px){
+  .slst .slmorebtn{display:inline-flex}
+  .slst .slmo{display:none}
+  .slst.mo-open .slmo{display:flex;order:8}
+  .slst .slnm{min-width:72px}
+  .slst .slhid{order:2;padding:0 8px;font-size:13px}
+  .slst .slmust{order:2}
+  .slst .slb[data-a=eye]{order:3}
+  .slst .slmorebtn{order:4}
+  .slst .slwd{order:5}
+  .slst .slb[data-a=up]{order:6}
+  .slst .slb[data-a=down]{order:7}
 }
 @media print{.slopen,.slbar,.slst{display:none!important}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
@@ -1525,7 +1545,8 @@ body.sl-editing .tlw[data-hn=lade],body.sl-editing .tlw[data-hn=aus]{display:fle
 .slcol.kzsc{height:56px}
 .kzgoal{margin-top:4px}
 .kzgoal .slbr{height:10px}
-.kzgoal .slbr.kzfull .slbr-f{fill:var(--accent2)}
+.kzgoal .slbr.kzfull .slbr-f,.goal .slbr.kzfull .slbr-f{fill:var(--accent2)}
+.goal .slbr{margin:6px 0}
 .kzgt{margin:4px 0 0;font-size:14px}
 .kzok{font-weight:700}
 .kzpvx{gap:4px}

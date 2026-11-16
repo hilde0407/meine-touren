@@ -13,7 +13,7 @@ import requests
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse
 
-from . import auth, config, ctx, db, extras, freigabe_inhalt, jobs, memo, more, photos, routes, rueckblick
+from . import auth, config, ctx, db, diashow_link, extras, freigabe_inhalt, jobs, memo, more, photos, routes, rueckblick, stats
 from .gpxtools import TZ
 
 router = APIRouter()
@@ -431,6 +431,31 @@ async def api_rueckblick_share(request: Request):
     return {"token": token, "url": f"/s/{token}", "title": rueckblick.title(year, sport)}
 
 
+@router.post("/api/diashow/share")
+async def api_diashow_share(request: Request):
+    """3.29.0: Diashow eines Jahres (year, optional sport) oder aller Jahre (year fehlt/0) als Link ohne Konto; days (Standard 1 = 24 Stunden), best = höchstens so viele beste Fotos."""
+    try:
+        d = await request.json()
+    except Exception:  # noqa
+        raise HTTPException(400, "Ungültige Daten")
+    if not isinstance(d, dict):
+        raise HTTPException(400, "Ungültige Daten")
+    year, sport, best = diashow_link.check(d.get("year"), d.get("sport") or "", d.get("best"))
+    try:
+        days = int(d.get("days") if d.get("days") is not None else 1)
+    except (TypeError, ValueError):
+        raise HTTPException(400, "Ungültige Laufzeit")
+    if days < 0 or days > 3650:
+        raise HTTPException(400, "Ungültige Laufzeit")
+    diashow_link.photo_list(year, sport, best, measure=True)
+    token = secrets.token_urlsafe(12)
+    now = int(time.time())
+    db.execute("INSERT INTO shares(token,tour_id,photos,trim,ts,exp,views,best,comments,blocks) VALUES(?,?,2,0,?,?,0,?,0,NULL)",
+               (token, diashow_link.ref(year, sport), now, now + days * 86400 if days else None, best))
+    auth.q("INSERT OR REPLACE INTO share_index(token,uid) VALUES(?,?)", (token, ctx.uid() or ""))
+    return {"token": token, "url": f"/s/{token}", "title": diashow_link.title(year, sport)}
+
+
 @router.get("/api/tours/{tour_id}/shares")
 def api_shares(tour_id: str):
     return _with_blocks(db.query("SELECT token,photos,trim,ts,exp,views,best,comments,blocks FROM shares WHERE tour_id=? ORDER BY ts DESC", (tour_id,)))
@@ -442,6 +467,11 @@ def _with_blocks(rows):
     for r in rows:
         r = dict(r)
         raw = r.pop("blocks", None)
+        if diashow_link.is_ds(r.get("tour_id")):             # 3.29.0: Diashow-Link für ein Jahr / alle Jahre
+            y, sp = diashow_link.parse(r["tour_id"])
+            r.update(kind="diashow", year=y, sport=sp, sport_name=stats.SPORT_DE.get(sp, sp) if sp else "", name=diashow_link.title(y, sp), tour_id=None, blocks=None, custom=False, comments=0)
+            out.append(r)
+            continue
         if rueckblick.is_rb(r.get("tour_id")):             # 3.26.0: Jahresrückblick-Link
             y, sp = rueckblick.parse(r["tour_id"])
             r.update(kind="rueckblick", year=y, sport=sp, name=rueckblick.title(y, sp), tour_id=None, blocks=rueckblick.effective(raw), custom=True)
@@ -485,7 +515,7 @@ async def api_share_patch(token: str, request: Request):
             raise HTTPException(400, "Ungültige Laufzeit")
         db.execute("UPDATE shares SET exp=? WHERE token=?", (int(time.time()) + days * 86400 if days else None, token))
     if "comments" in d:
-        db.execute("UPDATE shares SET comments=? WHERE token=? AND photos=2", (1 if d.get("comments") else 0, token))
+        db.execute("UPDATE shares SET comments=? WHERE token=? AND photos=2 AND tour_id NOT LIKE 'ds:%'", (1 if d.get("comments") else 0, token))
     r = db.one("SELECT token,tour_id,exp,comments,photos,blocks FROM shares WHERE token=?", (token,))
     return _with_blocks([r])[0] | {"token": token}
 
@@ -584,8 +614,13 @@ def share_page(token: str, request: Request):
     hdr = {"Cache-Control": "no-store", "Referrer-Policy": "no-referrer"}
     if s["photos"] == 2:                           # Diashow: Seite mit Vorschau-Angaben (WhatsApp zeigt Titel + erstes Foto)
         import html as _h
-        t = db.one("SELECT name,start_ts,dist_m FROM tours WHERE id=?", (s["tour_id"],)) or {}
-        ph = db.one("SELECT id FROM photos WHERE tour_id=? AND manual!=2 ORDER BY taken_ts LIMIT 1", (s["tour_id"],))
+        if diashow_link.is_ds(s["tour_id"]):                  # 3.29.0: Jahres-/Gesamt-Diashow: Titel und erstes Foto der Liste
+            y, sp = diashow_link.parse(s["tour_id"])
+            t, lst = {"name": diashow_link.title(y, sp)}, diashow_link.photo_list(y, sp, s["best"] or 0)
+            ph = {"id": lst[0]["id"]} if lst else None
+        else:
+            t = db.one("SELECT name,start_ts,dist_m FROM tours WHERE id=?", (s["tour_id"],)) or {}
+            ph = db.one("SELECT id FROM photos WHERE tour_id=? AND manual!=2 ORDER BY taken_ts LIMIT 1", (s["tour_id"],))
         title = _h.escape(t["name"] if t else "Diashow")
         meta = (f'<meta property="og:type" content="website"><meta property="og:title" content="{title}">'
                 f'<meta property="og:description" content="Diashow ansehen – ohne Anmeldung">')
@@ -602,6 +637,9 @@ def share_page(token: str, request: Request):
 @router.get("/api/public/{token}")
 def api_public(token: str):
     s = _share(token)
+    if diashow_link.is_ds(s["tour_id"]):             # 3.29.0: Jahres-/Gesamt-Diashow – nur Fotoliste und Titel
+        db.execute("UPDATE shares SET views=COALESCE(views,0)+1 WHERE token=?", (token,))
+        return diashow_link.public(s)
     if rueckblick.is_rb(s["tour_id"]):               # 3.26.0: Jahresrückblick – nur gewählte Bausteine, keine Strecken
         db.execute("UPDATE shares SET views=COALESCE(views,0)+1 WHERE token=?", (token,))
         return rueckblick.public(s)
@@ -625,6 +663,13 @@ def api_public(token: str):
 @router.get("/pub/{token}/photo/{pid}")
 def public_photo(token: str, pid: int, size: int = 1400):
     s = _share(token)
+    if diashow_link.is_ds(s["tour_id"]):             # 3.29.0: nur Fotos der ausgelieferten Liste
+        if not diashow_link.photo_allowed(s, pid):
+            raise HTTPException(404)
+        p = photos.thumb(pid, max(120, min(size, 2000)))
+        if not p:
+            raise HTTPException(404)
+        return FileResponse(p, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=3600"})
     if rueckblick.is_rb(s["tour_id"]):
         if not rueckblick.photo_allowed(s, pid):
             raise HTTPException(404)
@@ -647,7 +692,7 @@ _CMT_RATE = {}
 def api_public_comments(token: str):
     """Kommentare zu den Fotos einer Diashow (nur wenn der Besitzer sie beim Teilen erlaubt hat)."""
     s = _share(token)
-    if s["photos"] != 2 or not s["comments"]:
+    if s["photos"] != 2 or not s["comments"] or diashow_link.is_ds(s["tour_id"]):
         return {"enabled": False, "comments": {}}
     out = {}
     for r in db.query("SELECT c.photo_id,c.ts,c.author,c.text FROM photo_comments c JOIN photos p ON p.id=c.photo_id WHERE p.tour_id=? ORDER BY c.ts,c.id", (s["tour_id"],)):
@@ -659,7 +704,7 @@ def api_public_comments(token: str):
 async def api_public_comment_add(token: str, request: Request):
     """Besucher kommentiert ein Foto der geteilten Diashow (ohne Konto; begrenzt auf wenige Kommentare pro Minute)."""
     s = _share(token)
-    if s["photos"] != 2 or not s["comments"]:
+    if s["photos"] != 2 or not s["comments"] or diashow_link.is_ds(s["tour_id"]):
         raise HTTPException(403, "Kommentare sind für diesen Link nicht erlaubt")
     try:
         d = await request.json()

@@ -75,8 +75,9 @@ $("cb").onclick = e => { e.stopPropagation(); was = playing; playing = false; cl
 fetch("/api/public/" + tok).then(r => { if (!r.ok) throw 0; return r.json(); }).then(t => {
   T = t; ids = t.photos || []; TS = t.photo_t || [];
   document.title = t.name; $("h").textContent = t.name;
-  $("sub").textContent = new Date(t.date).toLocaleDateString("de-DE", {day: "numeric", month: "long", year: "numeric"}) + " · " + nf(t.km) + " km · " + nf(t.up_m, 0) + " m aufwärts";
-  if (!ids.length) { $("st").innerHTML = '<div class="err">Zu dieser Tour gibt es keine Fotos.</div>'; $("prog").style.display = "none"; return; }
+  if (t.kind === "diashow") $("sub").textContent = ids.length + " Fotos";          // Jahres-/Gesamt-Diashow: nur Fotos, kein Tourdatum, keine Strecke
+  else $("sub").textContent = new Date(t.date).toLocaleDateString("de-DE", {day: "numeric", month: "long", year: "numeric"}) + " · " + nf(t.km) + " km · " + nf(t.up_m, 0) + " m aufwärts";
+  if (!ids.length) { $("st").innerHTML = `<div class="err">${t.kind === "diashow" ? "Zu dieser Diashow gibt es keine Fotos." : "Zu dieser Tour gibt es keine Fotos."}</div>`; $("prog").style.display = "none"; return; }
   if (t.coords.length < 2) $("mp").style.display = "none";
   show(0); bars();
   fetch("/api/public/" + tok + "/comments").then(r => r.json()).then(c => { CM = c.comments || {}; CMON = !!c.enabled; if (CMON) { $("cb").style.display = "inline-block"; cmDraw(); } }).catch(() => {});

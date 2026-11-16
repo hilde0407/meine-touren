@@ -2294,4 +2294,24 @@ Verlauf je Jahr von {} bis {}, höchster Wert {} ({}) || Trend per year from {} 
 Mit dieser Einstellung lässt sich nichts berechnen. || Nothing can be calculated with this setting. || Rien ne peut être calculé avec ce réglage. || Con este ajuste no se puede calcular nada.
 Kopie || Copy || Copie || Copia
 Monat || Month || Mois || Mes
+Diashow {} || Slideshow {} || Diaporama {} || Pase de fotos {}
+Diashow alle Jahre || Slideshow of all years || Diaporama de toutes les années || Pase de fotos de todos los años
+Fotos aus dem Jahr {} || Photos from {} || Photos de {} || Fotos de {}
+Fotos aus allen Jahren || Photos from all years || Photos de toutes les années || Fotos de todos los años
+beste {} Fotos || best {} photos || {} meilleures photos || las {} mejores fotos
+höchstens 300 beste Fotos || up to 300 best photos || jusqu’à 300 meilleures photos || hasta 300 mejores fotos
+ohne Orte, Notizen und Strecken || without places, notes and tracks || sans lieux, notes ni tracés || sin lugares, notas ni rutas
+Zu dieser Diashow gibt es keine Fotos. || There are no photos in this slideshow. || Ce diaporama ne contient aucune photo. || Este pase de fotos no tiene fotos.
+Noch kein Ziel für {}. || No goal for {} yet. || Pas encore d’objectif pour {}. || Aún no hay objetivo para {}.
+Ziel in der Statistik festlegen › || Set a goal in the statistics › || Définir un objectif dans les statistiques › || Fijar un objetivo en las estadísticas ›
+Ziele in der Statistik verwalten › || Manage goals in the statistics › || Gérer les objectifs dans les statistiques › || Gestionar los objetivos en las estadísticas ›
+{} von {} erreicht || {} of {} reached || {} sur {} atteints || {} de {} alcanzados
+erreicht || reached || atteint || alcanzada
+Die Ziele konnten nicht geladen werden. || The goals could not be loaded. || Les objectifs n’ont pas pu être chargés. || No se pudieron cargar los objetivos.
+Deine Jahresziele aus der Statistik (zum Beispiel 1000 km Wandern) mit Fortschrittsbalken, Stand und Prognose. Angelegt und gelöscht werden sie in der Statistik. || Your yearly goals from the statistics (for example 1000 km of hiking) with progress bars, current status and forecast. They are created and deleted in the statistics. || Vos objectifs annuels issus des statistiques (par exemple 1000 km de randonnée) avec barres de progression, état et prévision. Ils se créent et se suppriment dans les statistiques. || Tus objetivos anuales de las estadísticas (por ejemplo 1000 km de senderismo) con barras de progreso, estado y previsión. Se crean y se borran en las estadísticas.
+Gehzeit (Bewegungszeit ohne Pausen) || Walking time (moving time without breaks) || Temps de marche (temps de déplacement sans pauses) || Tiempo de marcha (tiempo en movimiento sin pausas)
+Durchschnittspuls einer Tour || Average heart rate of a tour || Fréquence cardiaque moyenne d’un parcours || Pulso medio de una ruta
+Höchstpuls einer Tour || Peak heart rate of a tour || Fréquence cardiaque maximale d’un parcours || Pulso máximo de una ruta
+Für 1 Tour wird die Gehzeit noch berechnet. Öffne die Seite später erneut. || The walking time of 1 tour is still being calculated. Open the page again later. || Le temps de marche de 1 parcours est encore en cours de calcul. Rouvrez la page plus tard. || El tiempo de marcha de 1 ruta aún se está calculando. Vuelve a abrir la página más tarde.
+Für {} Touren wird die Gehzeit noch berechnet. Öffne die Seite später erneut. || The walking time of {} tours is still being calculated. Open the page again later. || Le temps de marche de {} parcours est encore en cours de calcul. Rouvrez la page plus tard. || El tiempo de marcha de {} rutas aún se está calculando. Vuelve a abrir la página más tarde.
 `;

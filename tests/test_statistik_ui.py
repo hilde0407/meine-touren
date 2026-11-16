@@ -10,10 +10,12 @@ import subprocess
 import sys
 
 import pytest
+expect = pytest.importorskip("playwright.sync_api").expect
 
 from tests.test_seitenlayout_ui import ROOT, T, _api, _browser, _edit, _saved, pw  # noqa: F401
-from tests.test_tourseite_ui import CONTRAST, LAUNCH, _shot, _wait
+from tests.test_tourseite_ui import CONTRAST, LAUNCH, _settled, _shot, _wait
 
+TL = 30000        # erster Seitenaufbau unter Last (parallele Läufe)
 KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik")
 # (Tage zurück, Sportart, km, Dauer in s, Aufstieg m): dieses Jahr, Vorjahr und davor; drei Sportarten
 TOURS = [(10, "touringbicycle", 40, 7200, 300), (30, "hike", 14, 14400, 500), (60, "touringbicycle", 60, 10800, 600), (120, "hike", 10, 10800, 300), (200, "jogging", 8, 3600, 80),
@@ -64,8 +66,8 @@ SECS = "() => [...document.querySelectorAll('#stx > .tlw > details.tls, #stx > #
 
 def _stats(pw, url, query="", width=1280, height=1000, scheme="light", dpr=1, locale="de-DE"):
     pg = _browser(pw, url, width=width, height=height, scheme=scheme, dpr=dpr, locale=locale, devs=None)
-    pg.goto(f"{url}/#/stats{query}")
-    pg.wait_for_selector("#stx #tls-kpi", state="attached", timeout=T)
+    pg.goto(f"{url}/#/stats{query}", timeout=TL)
+    pg.wait_for_selector("#stx #tls-kpi", state="attached", timeout=TL)             # erster Aufbau unter Last: großzügiger als T
     pg.wait_for_function("() => !!document.querySelector('#slopen') && typeof SL === 'object' && !!SL.view.statistik", timeout=T)
     return pg
 
@@ -75,7 +77,11 @@ def _vals(pg):
 
 
 def _go(pg, query):
-    pg.evaluate("q => { location.hash = '#/stats' + q; }", query)
+    """Hash-Navigation und Warten, bis der Router die Seite NEU gezeichnet hat (die alte Ansicht trägt data-old und zählt nicht)."""
+    changed = pg.evaluate("q => { const x = document.getElementById('stx'); if (location.hash === '#/stats' + q) return false; if (x) x.dataset.old = '1'; location.hash = '#/stats' + q; return true; }", query)
+    if changed:
+        pg.wait_for_selector("#stx:not([data-old]) #tls-kpi", state="attached", timeout=T)
+    pg.wait_for_function("() => !!document.querySelector('#slopen') && typeof SL === 'object' && !!SL.view.statistik", timeout=T)
 
 
 def _wait_n(pg, text):
@@ -166,9 +172,10 @@ def test_global_filter_changes_several_blocks_keeps_own_filter_and_survives_relo
         pg.locator("#stf a#stfr").click()
         _wait_n(pg, "10 Touren")
         n = {}
-        for lab, sel in (("12m", "[data-z='12m']"), ("90d", "[data-z='90d']")):
+        for lab, sel, want in (("12m", "[data-z='12m']", "6 Touren"), ("90d", "[data-z='90d']", "3 Touren")):
             pg.locator(sel).click()
             pg.wait_for_selector(f"{sel}[aria-pressed='true']", timeout=T)
+            _wait_n(pg, want)                                                              # Zahl erst lesen, wenn die Seite neu gezeichnet ist
             n[lab] = pg.locator("#stf .sub").inner_text()
         assert n["12m"] == "6 Touren" and n["90d"] == "3 Touren", n                       # 10, 30, 60, 120, 200, 260 d zurück bzw. 10, 30, 60 d
         pg.wait_for_selector("#stx #tls-kmmonat .chart", timeout=T)
@@ -354,6 +361,7 @@ def test_contrast_and_screenshots_light_and_dark(pw, app, scheme):
     try:
         pg.wait_for_selector("#tlw-wa svg, #tlw-wa .slnone", timeout=T)
         pg.wait_for_selector("#tlw-we .slnone", timeout=T)
+        _settled(pg)                                                                          # Kontrast erst messen, wenn Diagramme und Schrift fertig stehen
         c = pg.evaluate(CONTRAST, SELS)
         assert len(c) >= 8, c
         low = {k: round(v, 2) for k, v in c.items() if v < 4.5}
@@ -362,6 +370,7 @@ def test_contrast_and_screenshots_light_and_dark(pw, app, scheme):
         _edit(pg)
         pg.locator('.slit[data-sl="heat"] [data-a=up]').click()
         pg.wait_for_function("() => !document.getElementById('slchg').hidden", timeout=T)
+        _settled(pg)
         c2 = pg.evaluate(CONTRAST, ["#slchg", "#slsaved", "#slbar [data-a=discard]", "#slbar [data-a=savenew]", "#slbar [data-a=done]"])
         low2 = {k: round(v, 2) for k, v in c2.items() if v < 4.5}
         assert len(c2) >= 4 and not low2, f"{scheme}: Kontrast der Leiste: {low2} {c2}"
@@ -419,7 +428,8 @@ def test_filter_belongs_to_view_save_here_discard_and_new_view(pw, app):
         pg.locator("#sch [data-s='hike']").click()
         _wait_n(pg, "5 Touren")
         pg.wait_for_selector("#slsave", timeout=T)
-        assert pg.locator("#slfchg").inner_text() == "geändert" and _server(app) is None
+        expect(pg.locator("#slfchg")).to_have_text("geändert", timeout=T)
+        assert _server(app) is None
         pg.reload()                                                                       # ungespeichert bleibt für die Sitzung
         _wait_n(pg, "5 Touren")
         pg.wait_for_selector("#slsave", timeout=T)
@@ -431,7 +441,8 @@ def test_filter_belongs_to_view_save_here_discard_and_new_view(pw, app):
         pg.wait_for_function("() => /Ansicht gespeichert/.test((document.querySelector('.slok') || {}).textContent || '')", timeout=T)
         _go(pg, "")                                                                       # ohne Angabe gilt der gespeicherte Filter
         _wait_n(pg, "5 Touren")
-        assert pg.locator("#sch [data-s='hike'][aria-pressed='true']").count() == 1 and pg.locator("#slsave").count() == 0
+        expect(pg.locator("#sch [data-s='hike'][aria-pressed='true']")).to_have_count(1, timeout=T)
+        expect(pg.locator("#slsave")).to_have_count(0, timeout=T)
         pg.locator("#sch [data-s='']").click()                                           # ausdrücklich „alle“ weicht vom Gespeicherten ab
         _wait_n(pg, "10 Touren")
         pg.wait_for_selector("#slsave", timeout=T)
@@ -453,7 +464,8 @@ def test_filter_belongs_to_view_save_here_discard_and_new_view(pw, app):
         _wait_n(pg, "2 Touren")
         v = {x["name"]: x for x in _views(app)}
         assert v["Standard"]["layout"]["filter"] == {"sports": ["hike"], "range": "all"} and v["Laufen"]["layout"]["filter"] == {"sports": ["jogging"], "range": "all"}
-        assert pg.locator("#slsave").count() == 0 and not pg.errors, pg.errors
+        expect(pg.locator("#slsave")).to_have_count(0, timeout=T)
+        assert not pg.errors, pg.errors
         pg.locator("#slview").select_option(label="Standard")                            # Ansichtswechsel bringt den Filter der Ansicht mit
         _wait_n(pg, "5 Touren")
     finally:

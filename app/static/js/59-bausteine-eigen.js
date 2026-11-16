@@ -5,15 +5,17 @@
    Gerechnet wird NUR im Server (POST /api/bausteine/eigen); die Oberfläche formatiert Zahl, Einheit, Vergleich, Mini-Verlauf (Inline-SVG) und Zielbalken. */
 const KZ_TYPE = "eigenkz";
 const KZ_MAX = 24;
-const KZ_MESS = [["touren", "Anzahl Touren"], ["km", "Strecke"], ["hm", "Aufstieg (Höhenmeter)"], ["abstieg", "Abstieg (Höhenmeter)"], ["dauer", "Dauer"], ["tempo", "Geschwindigkeit (Tempo)"], ["steigung", "Steigung"], ["hmkm", "Höhenmeter je Kilometer"]];
+const KZ_MESS = [["touren", "Anzahl Touren"], ["km", "Strecke"], ["hm", "Aufstieg (Höhenmeter)"], ["abstieg", "Abstieg (Höhenmeter)"], ["dauer", "Dauer"], ["gehzeit", "Gehzeit (Bewegungszeit ohne Pausen)"], ["puls", "Durchschnittspuls einer Tour"], ["pulsmax", "Höchstpuls einer Tour"], ["tempo", "Geschwindigkeit (Tempo)"], ["steigung", "Steigung"], ["hmkm", "Höhenmeter je Kilometer"]];
+const KZ_PULS = ["avg", "max", "min", "count", "record"];
 const KZ_ALLE = ["sum", "avg", "max", "min", "count", "record", "monat"];
-const KZ_OK = {touren: ["sum", "count", "monat"], km: KZ_ALLE, hm: KZ_ALLE, abstieg: KZ_ALLE, dauer: KZ_ALLE, tempo: ["avg", "max", "min", "count", "record"], steigung: ["avg", "max", "min", "count", "record"], hmkm: ["avg", "max", "min", "count", "record"]};
+const KZ_OK = {touren: ["sum", "count", "monat"], km: KZ_ALLE, hm: KZ_ALLE, abstieg: KZ_ALLE, dauer: KZ_ALLE, gehzeit: KZ_ALLE, puls: KZ_PULS, pulsmax: KZ_PULS, tempo: ["avg", "max", "min", "count", "record"], steigung: ["avg", "max", "min", "count", "record"], hmkm: ["avg", "max", "min", "count", "record"]};
+const KZ_RATIO = ["tempo", "steigung", "hmkm"];
 const KZ_FORMEL = ["sum", "avg", "max", "min", "count"];
 const KZ_AGG = {sum: "Summe", avg: "Durchschnitt", max: "Maximum (größter Wert)", min: "Minimum (kleinster Wert)", count: "Anzahl (Touren mit dieser Angabe)", record: "Rekord mit Tourname", monat: "Durchschnitt pro Monat"};
 const KZ_RANGES = [["year", "Laufendes Jahr"], ["12m", "Letzte 12 Monate"], ["90d", "Letzte 90 Tage"], ["all", "Gesamte Zeit"], ["y", "Bestimmtes Jahr"], ["c", "Eigener Bereich"]];
 const KZ_SYMS = ["🥾", "🚴", "⛰️", "⏱️", "📈", "🏆", "🎯", "🔥", "🌲", "☀️"];
-const KZ_UNIT = {touren: "touren", km: "km", hm: "m", abstieg: "m", dauer: "h", tempo: "kmh", steigung: "pct", hmkm: "m_km"};
-const KZ_UL = {km: "km", m: "m", h: "Std.", kmh: "km/h", pct: "%", m_km: "m/km", monat: "Monat"};
+const KZ_UNIT = {touren: "touren", km: "km", hm: "m", abstieg: "m", dauer: "h", gehzeit: "h", puls: "bpm", pulsmax: "bpm", tempo: "kmh", steigung: "pct", hmkm: "m_km"};
+const KZ_UL = {km: "km", m: "m", h: "Std.", kmh: "km/h", pct: "%", m_km: "m/km", bpm: "bpm", monat: "Monat"};
 const kzT = s => (typeof window.TL === "function" ? window.TL(s) : s);                          // Übersetzung zur Laufzeit (nur nicht-deutsch vorhanden)
 /* Vorlagen zum Start: ein Klick übernimmt die Einstellung in den Dialog */
 const KZ_TPL = [
@@ -48,7 +50,7 @@ function kzNum(v, e) {
   else d = a >= 100 && e.z === "km" ? 0 : 1;
   return nf(v, d);
 }
-const kzAggLab = (mess, agg) => (agg === "avg" && KZ_OK[mess].length === 5 ? "Durchschnitt (gewichtet)" : agg === "sum" && mess === "touren" ? "Summe (Anzahl der Touren)" : KZ_AGG[agg]);
+const kzAggLab = (mess, agg) => (agg === "avg" && KZ_RATIO.includes(mess) ? "Durchschnitt (gewichtet)" : agg === "sum" && mess === "touren" ? "Summe (Anzahl der Touren)" : KZ_AGG[agg]);
 const kzVglLab = c => (c.range === "y" ? `gegenüber ${(+c.yr || 0) - 1}` : {year: "gegenüber dem Vorjahr bis zum selben Tag", "12m": "gegenüber den 12 Monaten davor", "90d": "gegenüber den 90 Tagen davor", c: "gegenüber dem gleich langen Zeitraum davor"}[c.range || "year"] || "");
 const kzLab = (art, l) => (art === "monat" ? `${l.slice(5, 7)}/${l.slice(0, 4)}` : l);
 /* Kurztext der Filter für den Kopf des Bausteins */
@@ -70,6 +72,7 @@ function kzHtml(cfg, d) {
   const e = d.einheit || {}, v = d.wert, un = v == null ? "" : kzUnitText(e, v), sym = cfg.symbol ? `<span class="kzsy" aria-hidden="true">${esc(cfg.symbol)}</span>` : "";
   let h = `<div class="kz"><p class="kzmain">${sym}<b class="kzval">${esc(kzNum(v, e))}</b>${un ? `<span class="kzun">${esc(un)}</span>` : ""}</p>`;
   if (v == null) h += `<p class="mut kzsub">${d.n ? "Für diese Rechenart fehlen Angaben in den Touren." : "Im Zeitraum gibt es keine passenden Touren."}</p>`;
+  if (d.offen) h += `<p class="mut kzsub">${d.offen === 1 ? "Für 1 Tour wird die Gehzeit noch berechnet. Öffne die Seite später erneut." : `Für ${d.offen} Touren wird die Gehzeit noch berechnet. Öffne die Seite später erneut.`}</p>`;
   if (d.rekord) h += `<p class="kzsub"><span class="mut">Rekord-Tour</span> <a href="#/tour/${slEnc(d.rekord.id)}">${esc(d.rekord.name || "Tour")}</a> <span class="mut">${dateS(d.rekord.datum)}</span></p>`;
   if (cfg.vgl) {
     const o = d.vorher;

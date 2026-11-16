@@ -5,6 +5,7 @@ VIEWS.links = async () => {
   let all = [], flt = "all";
   const now = () => Date.now() / 1000;
   const kind = x => (x.kind === "rueckblick" ? "rb" : x.photos == 2 ? "show" : "tour");
+  const dsZeigt = x => [x.year ? `Fotos aus dem Jahr ${x.year}` : "Fotos aus allen Jahren", x.sport_name || "", x.best ? `beste ${x.best} Fotos` : "höchstens 300 beste Fotos", "ohne Orte, Notizen und Strecken"].filter(Boolean).join(" · ");
   const dead = x => x.exp && x.exp < now();
   const fmtD = ts => (ts ? new Date(ts * 1000).toLocaleDateString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric"}) : "");
   const left = x => {
@@ -32,10 +33,10 @@ VIEWS.links = async () => {
               .map(x => {
                 const u = location.origin + "/s/" + x.token;
                 const type = x.photos == 2 ? "Diashow" : kind(x) === "rb" ? "Jahresrückblick" : "Tourlink";
-                const zeigt = x.photos == 2 ? "" : `<b>Zeigt:</b> ${esc(kind(x) === "rb" ? rbLabel(x.blocks) : shrLabel(x.blocks))}`;
-                const info = [type, x.photos == 2 && x.best ? `beste ${x.best} Fotos` : "", x.trim ? "Anfang/Ende ausgeblendet" : "", x.photos == 2 ? `${x.views || 0} Aufrufe` : "", x.photos == 2 ? (x.comments ? "Kommentare erlaubt" : "ohne Kommentare") : ""].filter(Boolean).join(" · ");
+                const zeigt = x.kind === "diashow" ? `<b>Zeigt:</b> ${esc(dsZeigt(x))}` : x.photos == 2 ? "" : `<b>Zeigt:</b> ${esc(kind(x) === "rb" ? rbLabel(x.blocks) : shrLabel(x.blocks))}`;
+                const info = [type, x.photos == 2 && x.best && x.kind !== "diashow" ? `beste ${x.best} Fotos` : "", x.trim ? "Anfang/Ende ausgeblendet" : "", x.photos == 2 ? `${x.views || 0} Aufrufe` : "", x.photos == 2 ? (x.comments && x.kind !== "diashow" ? "Kommentare erlaubt" : "ohne Kommentare") : ""].filter(Boolean).join(" · ");
                 return `<div class="panel mb12${dead(x) ? " mut" : ""}" data-t="${esc(x.token)}">
-                  <div class="row" style="justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${kind(x) === "rb" ? `<a href="#/recap/${x.year}">${esc(x.name)}</a>` : x.tour_id && x.name ? `<a href="#/tour/${encodeURIComponent(x.tour_id)}">${esc(x.name)}</a>` : "<i>Tour gelöscht</i>"}</b><small class="mut">erstellt ${esc(fmtD(x.ts))}</small></div>
+                  <div class="row" style="justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${kind(x) === "rb" ? `<a href="#/recap/${x.year}">${esc(x.name)}</a>` : x.kind === "diashow" ? esc(x.name) : x.tour_id && x.name ? `<a href="#/tour/${encodeURIComponent(x.tour_id)}">${esc(x.name)}</a>` : "<i>Tour gelöscht</i>"}</b><small class="mut">erstellt ${esc(fmtD(x.ts))}</small></div>
                   <small class="mut">${esc(info)}</small>${zeigt ? `<br><small class="lkzeigt" data-zeigt>${zeigt}</small>` : ""}<br><small class="${dead(x) ? "bad" : "mut"}">${esc(left(x))}</small>
                   <input readonly value="${esc(u)}" class="w100 mt8" data-act="select">
                   <div class="row wrap mt8">
@@ -45,7 +46,7 @@ VIEWS.links = async () => {
                     ${kind(x) === "rb" ? `<a class="btn alt sm" href="${esc(u)}?print=1" target="_blank" rel="noopener" title="Seite öffnen und den Druckdialog starten – dort als PDF speichern">PDF</a>` : ""}
                     <select data-d title="Laufzeit ab jetzt ändern"><option value="">Laufzeit ändern …</option><option value="7">7 Tage</option><option value="30">30 Tage</option><option value="365">1 Jahr</option><option value="0">Unbegrenzt</option></select>
                     ${x.photos != 2 ? `<button class="btn alt sm" data-bl="1">Auswahl ändern</button>` : ""}
-                    ${x.photos == 2 ? `<button class="btn alt sm" data-c="${x.comments ? 0 : 1}">${x.comments ? "Kommentare sperren" : "Kommentare erlauben"}</button>` : ""}
+                    ${x.photos == 2 && x.kind !== "diashow" ? `<button class="btn alt sm" data-c="${x.comments ? 0 : 1}">${x.comments ? "Kommentare sperren" : "Kommentare erlauben"}</button>` : ""}
                     <button class="btn alt sm" data-rv="1">Widerrufen</button>
                   </div></div>`;
               })

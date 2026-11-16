@@ -291,6 +291,29 @@ Object.assign(window.SL_WT, {
       slBadge(c, L.length === 1 ? "1 Plan" : `${L.length} Pläne`);
     },
   },
+  jahresziele: {
+    fam: "uebersicht", cat: "plan", icon: "pin", name: "Ziele", title: cfg => `Ziele ${new Date().getFullYear() - (cfg.year === "last" ? 1 : 0)}`, multi: true, defaults: {year: "cur"}, filter: {range: null},
+    desc: "Deine Jahresziele aus der Statistik (zum Beispiel 1000 km Wandern) mit Fortschrittsbalken, Stand und Prognose. Angelegt und gelöscht werden sie in der Statistik.",
+    fields: [{k: "year", kind: "radio", def: "cur", label: "Jahr", options: [["cur", "Dieses Jahr"], ["last", "Letztes Jahr"]]}],
+    preview: () => slPvHbars([84, 52]),
+    async render(c, b, cfg) {
+      const now = new Date(), cy = now.getFullYear(), yr = cy - (cfg.year === "last" ? 1 : 0), can = typeof isViewer === "function" ? !isViewer() : true;
+      const all = await slGet("/api/goals");
+      if (all === null) return slNote(b, "Die Ziele konnten nicht geladen werden.");
+      const gs = all.filter(g => g.year === yr), frac = yr === cy ? Math.max(0, (now - new Date(cy, 0, 1)) / (new Date(cy + 1, 0, 1) - new Date(cy, 0, 1))) : 1;
+      if (!gs.length) {
+        b.innerHTML = `<p class="mut slnone">Noch kein Ziel für ${yr}.</p>${can ? '<p><a href="#/stats">Ziel in der Statistik festlegen ›</a></p>' : ""}`;
+        return slBadge(c, "");
+      }
+      b.innerHTML = gs.map(g => {
+        const v = goalVal(g, TOURS), p = Math.min(100, (v / g.target) * 100), u = GM[g.metric][0], proj = frac > 0.02 && frac < 1 ? v / frac : null;
+        return `<div class="goal"><div class="gh"><b>${GM[g.metric][1]}${g.sport ? " " + goalSportName(g.sport) : ""}</b><span>${nf(v, 0)} / ${nf(g.target, 0)} ${u}</span></div>${slBr(p, v >= g.target ? "kzfull" : "")}` +
+          `<div class="gs">${nf(p, 0)} %${goalNote(g, v, u, frac, proj, yr, cy)}</div></div>`;
+      }).join("") + `<p><a href="#/stats">Ziele in der Statistik verwalten ›</a></p>`;
+      const done = gs.filter(g => goalVal(g, TOURS) >= g.target).length;
+      slBadge(c, gs.length === 1 ? (done ? "erreicht" : "1 Ziel") : `${done} von ${gs.length} erreicht`);
+    },
+  },
   rueckblick: {
     fam: "uebersicht", cat: "rueck", icon: "trend", name: "Jahres-Rückblick", title: cfg => `Rückblick ${slRbRange(cfg).year}`, multi: true, defaults: {}, filter: {range: "year"},
     desc: "Das Jahr in einer Kachel: Touren, Kilometer und Höhenmeter, die Monate als Säulen, die längste und die höchste Tour.",
@@ -408,7 +431,7 @@ function slYearShell(it) {
     kennzahlen: "halb", tempo: "halb", vergleich: "halb", pulszonen: "halb", wetter: "halb", fotostreifen: "voll", notiz: "halb", splits: "voll", steigung: "halb", bewegung: "halb",
     durchschnitt: "halb", jahresrang: "halb", tageslicht: "halb", gipfel: "halb", vergleiche: "halb", stimmung: "halb", fotohighlights: "voll", miniprofil: "voll", steckbrief: "halb",
     jahr: "voll", periode: "halb", belastung: "halb", jahresvergleich: "halb", letzte: "halb", neuefotos: "voll", auffaellig: "drittel", rekorde: "halb", heutevor: "halb", jahresziel: "halb",
-    serie: "halb", heatmap: "voll", meilensteine: "halb", wochentage: "halb", sportarten: "halb", wiederentdecken: "voll", orte: "halb", uhrenzeit: "voll", ausruestung: "halb", geplant: "halb", rueckblick: "voll",
+    serie: "halb", heatmap: "voll", meilensteine: "halb", wochentage: "halb", sportarten: "halb", wiederentdecken: "voll", orte: "halb", uhrenzeit: "voll", ausruestung: "halb", geplant: "halb", rueckblick: "voll", jahresziele: "halb",
   };
   Object.entries(META).forEach(([k, w]) => {
     const T = window.SL_WT[k];

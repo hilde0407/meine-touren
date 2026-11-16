@@ -10,6 +10,7 @@ import sys
 
 import pytest
 
+expect = pytest.importorskip("playwright.sync_api").expect
 from tests.test_seitenlayout_ui import (ROOT, T, _api, _browser, _dash, _edit, _saved, pw)  # noqa: F401
 from tests.test_tourseite_ui import CONTRAST, LAUNCH, SEED, _shot, _wait
 
@@ -70,6 +71,14 @@ def _tour_page(pw, url, tour="r3", **kw):
     pg.wait_for_selector("#tl #tls-photos", state="attached", timeout=T)
     pg.wait_for_function("() => typeof SL === 'object' && !!document.querySelector('#slopen') && !!SL.view.tour", timeout=T)
     return pg
+
+
+def _goto_tour(pg, url, tid):
+    """Hash-Navigation zu einer anderen Tour: erst warten, bis der Router die Seite NEU gezeichnet hat (die alte Tourseite trägt data-old und zählt nicht)."""
+    pg.evaluate("() => { const t = document.getElementById('tl'); if (t) t.dataset.old = '1'; }")
+    pg.goto(f"{url}/#/tour/{tid}")
+    pg.wait_for_selector("#tl:not([data-old]) #tls-photos", state="attached", timeout=T)
+    pg.wait_for_function("() => typeof SL === 'object' && !!document.querySelector('#slopen') && !!SL.view.tour", timeout=T)
 
 
 def _view_is(pg, name, fam="tour"):
@@ -311,19 +320,17 @@ def test_rule_sport_selects_the_view_and_manual_choice_wins_for_the_session(pw, 
         pg.keyboard.press("Escape")
         pg.wait_for_function(_dlg_open(pg), timeout=T)
         pg.locator("#slbar [data-a=done]").click()
-        assert pg.locator("#slview option").first.inner_text() == "Automatisch (Wandern)"
-        pg.goto(f"{app}/#/tour/s0")                                                      # Radtour → „Rad“
-        pg.wait_for_function("() => !!document.querySelector('#tl #tls-photos')", timeout=T)
+        expect(pg.locator("#slview option").first).to_have_text("Automatisch (Wandern)", timeout=T)
+        _goto_tour(pg, app, "s0")                                                         # Radtour → „Rad“
         _view_is(pg, "Rad")
-        assert pg.locator("#slview option").first.inner_text() == "Automatisch (Rad)" and pg.locator("#slview").input_value() == ""
-        pg.goto(f"{app}/#/tour/r3")
-        pg.wait_for_function("() => !!document.querySelector('#tl #tls-photos')", timeout=T)
+        expect(pg.locator("#slview option").first).to_have_text("Automatisch (Rad)", timeout=T)
+        expect(pg.locator("#slview")).to_have_value("", timeout=T)
+        _goto_tour(pg, app, "r3")
         _view_is(pg, "Wandern")
         # von Hand gewählt: bleibt für die Sitzung, auch bei einer anderen Tour; „Automatisch“ schaltet zurück
         pg.locator("#slview").select_option(label="Standard")
         _view_is(pg, "Standard")
-        pg.goto(f"{app}/#/tour/s0")
-        pg.wait_for_function("() => !!document.querySelector('#tl #tls-photos')", timeout=T)
+        _goto_tour(pg, app, "s0")
         pg.wait_for_function("() => document.querySelector('#slview').value === 'standard'", timeout=T)
         _view_is(pg, "Standard")
         pg.locator("#slview").select_option(index=0)
@@ -369,7 +376,7 @@ def test_export_file_and_import_valid_invalid_and_replace_only_after_confirmatio
         d = dl.value
         assert d.suggested_filename == "ansicht-uebersicht-training-test.json"
         doc = json.loads(open(d.path(), encoding="utf-8").read())
-        assert doc["format"] == "meine-touren-ansicht" and doc["format_version"] == 1 and doc["app_version"] == "3.28.0" and doc["page"] == "uebersicht" and doc["name"] == "Training-Test"
+        assert doc["format"] == "meine-touren-ansicht" and doc["format_version"] == 1 and doc["app_version"] == "3.29.0" and doc["page"] == "uebersicht" and doc["name"] == "Training-Test"
         assert list(doc["layouts"]) == ["uebersicht"] and doc["layouts"]["uebersicht"]["widgets"][0]["type"] == "periode" and doc["layouts"]["uebersicht"]["hidden"] == ["tag"]
         # Import gültig: Vorschau, dann als NEUE Ansicht (Name vergeben → nummeriert)
         f = _write(tmp_path, "gut.json", {**doc, "zukunft": 1})

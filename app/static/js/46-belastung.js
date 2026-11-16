@@ -336,12 +336,13 @@ function tpSection(host) {
 
 const _stats46 = VIEWS.stats;
 VIEWS.stats = async (...a) => {
+  const rt = window._rt;                                           // Seite inzwischen gewechselt: nichts mehr an die neue Ansicht hängen
   await _stats46(...a);
-  if (!TOURS.length || $("#blsec")) return;
+  if (rt !== window._rt || !TOURS.length || $("#blsec")) return;
   const anchor = $("#main .inner > .panel.gap") || $("#main .inner > .grid");
   if (!anchor) return;
   const [b, t] = await Promise.all([api("/api/stats/belastung?von=" + blDate(new Date(Date.now() - 86400000)) + "&bis=" + blDate(new Date())).catch(() => null), api("/api/stats/tempo").catch(() => null)]);
-  if ($("#blsec") || !$("#main .inner")) return;
+  if (rt !== window._rt || $("#blsec") || !$("#main .inner")) return;
   let host = anchor;
   const bl = b && (b.daten_insgesamt > 0 || b.offen.zepp_ohne_werte > 0),
     tp = t && Object.values(t.gruppen).some(g => g.touren > 0);

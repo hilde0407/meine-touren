@@ -22,7 +22,7 @@ KEYS = ("tour-haupt", "tour-auswertung", "uebersicht")
 TOUR_TYPES = ["kennzahlen", "tempo", "vergleich", "pulszonen", "wetter", "fotostreifen", "notiz",
               "splits", "steigung", "bewegung", "durchschnitt", "jahresrang", "tageslicht", "gipfel", "vergleiche", "stimmung", "fotohighlights", "miniprofil", "steckbrief"]
 DASH_TYPES = ["periode", "belastung", "jahresvergleich", "letzte", "neuefotos", "auffaellig", "rekorde", "heutevor",
-              "jahresziel", "serie", "heatmap", "meilensteine", "wochentage", "sportarten", "wiederentdecken", "orte", "uhrenzeit", "ausruestung", "geplant", "rueckblick"]
+              "jahresziel", "serie", "heatmap", "meilensteine", "wochentage", "sportarten", "wiederentdecken", "orte", "uhrenzeit", "ausruestung", "geplant", "rueckblick", "jahresziele"]
 NEW_TOUR = TOUR_TYPES[7:]
 NEW_DASH = DASH_TYPES[8:]
 
@@ -270,8 +270,8 @@ def test_catalog_dash_has_all_categories_and_desktop_shot(pw, app):
         assert pg.locator(".slcard").count() == len(DASH_TYPES) + 11                    # plus „Dein Jahr“ und 9 Hinweis-Bausteine (3.23.0) und „Eigene Kennzahl“ (3.28.0) (3.19.0, hat kein .tlsb und wird in test_bausteine_konfig_ui.py geprüft)
         assert pg.locator(".slchip").all_inner_texts() == ["Alle", "Zahlen", "Grafiken", "Rückblick", "Planung", "Hinweise", "Eigene Kennzahlen"]
         pg.locator(".slchip", has_text="Planung").click()
-        pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length === 4", timeout=T)
-        assert sorted(pg.locator(".slcard:visible h3").all_inner_texts()) == ["Ausrüstungs-Kilometerstand", "Geplante Touren", "Jahresziel", "Meilensteine"]
+        pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length === 5", timeout=T)
+        assert sorted(pg.locator(".slcard:visible h3").all_inner_texts()) == ["Ausrüstungs-Kilometerstand", "Geplante Touren", "Jahresziel", "Meilensteine", "Ziele"]
         pg.locator(".slchip", has_text="Alle").click()
         pg.wait_for_function("(n) => document.querySelectorAll('.slcard:not([hidden])').length === n", arg=len(DASH_TYPES) + 11, timeout=T)
         _shot(pg, "katalog-desktop-hell.png", full=False)

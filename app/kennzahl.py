@@ -7,23 +7,28 @@ kein eval und kein SQL vom Benutzer; Schlagwörter gehen ausschließlich als geb
 
 Konfiguration (cfg), alle Felder streng geprüft, unbekannte Schlüssel sind ein Fehler:
   title   Name, 1–60 Zeichen (ohne Steuer- und Spitzklammern)       symbol  Emoji/Zeichen, höchstens 8 Zeichen (optional)
-  mess    touren | km | hm | abstieg | dauer | tempo | steigung | hmkm
+  mess    touren | km | hm | abstieg | dauer | gehzeit | puls | pulsmax | tempo | steigung | hmkm
   agg     sum | avg | max | min | count | record | monat   (nicht jede Messgröße erlaubt jede Rechenart, siehe MESS)
   durch   {mess, agg}   optional: Formel A ÷ B (A = mess/agg, B = durch); op: div (A ÷ B, Standard) | pct (A in Prozent von B)
   sports  [Aktivität]   range year | y | 12m | 90d | all | c   yr (bei y)   from, to (bei c, JJJJ-MM-TT)   tag (Schlagwort)   minkm (Mindeststrecke 0–1000)
   vgl     true = Vergleich mit dem Zeitraum davor (±%)           ziel  Zielwert (> 0, höchstens 10 000 000) → Fortschrittsbalken
+Messgrößen: gehzeit = Bewegungszeit ohne Pausen (3.29.0, aus dem Zwischenspeicher cache/tempo/<id>.json von app/steigung.py: Touren ab 2 km mit Höhe und Zeit), puls = Durchschnittspuls einer Tour und
+pulsmax = Höchstpuls einer Tour (3.29.0, aus der Pulsdatei <id>.hr.json bzw. dem GPX, Zwischenspeicher in app/puls.py; nur Touren mit Pulsdaten; Summe ergibt hier keinen Sinn, deshalb nur
+avg/max/min/count/record). Die Gehzeit wird bei noch nicht berechneten Touren höchstens GEHZEIT_BUDGET_S Sekunden je Aufruf nachgerechnet, der Rest steht in der Antwort als „offen“.
 Messgrößen: tempo = Strecke ÷ Dauer je Tour (km/h), steigung = Aufstieg ÷ Strecke (%), hmkm = Höhenmeter je km. Bei diesen „Verhältnissen“ ist avg gewichtet (Summe ÷ Summe),
 max/min/record zählen nur Touren mit sinnvoller Länge (Tempo: ab 3 km und 30 Min., sonst ab 1 km); Touren ohne die nötigen Angaben zählen nicht.
-Antwort: {wert, einheit: {z, n}, n (Touren im Zeitraum), von, bis, vorher: {wert, pct, von, bis}|None, reihe: {art, werte}, rekord: {id, name, datum, wert}|None, ziel: {ziel, pct}|None}.
+Antwort: {wert, einheit: {z, n}, n (Touren im Zeitraum), offen (nur wenn > 0: Touren, deren Gehzeit noch nicht berechnet ist), von, bis, vorher: {wert, pct, von, bis}|None, reihe: {art, werte}, rekord: {id, name, datum, wert}|None, ziel: {ziel, pct}|None}.
 """
 import json
 import re
+import time
 from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, Request
+from starlette.concurrency import run_in_threadpool
 
 from . import bausteine_daten as bd
-from . import db
+from . import db, puls, steigung
 from .gpxtools import TZ
 
 router = APIRouter()
@@ -33,6 +38,7 @@ MAX_TITLE = 60
 MAX_SYMBOL = 8
 MAX_TAG = 40
 MAX_ZIEL = 10_000_000
+GEHZEIT_BUDGET_S = 5.0                   # so lange rechnet ein Aufruf höchstens an Touren, deren Gehzeit noch nicht im Zwischenspeicher steht
 RANGES = ("year", "y", "12m", "90d", "all", "c")
 KEYS = {"title", "symbol", "mess", "agg", "durch", "op", "sports", "range", "yr", "from", "to", "tag", "minkm", "vgl", "ziel"}
 OPS = ("div", "pct")
@@ -43,6 +49,9 @@ MESS = {
     "hm": {"unit": "m", "ratio": False, "aggs": ("sum", "avg", "max", "min", "count", "record", "monat")},
     "abstieg": {"unit": "m", "ratio": False, "aggs": ("sum", "avg", "max", "min", "count", "record", "monat")},
     "dauer": {"unit": "h", "ratio": False, "aggs": ("sum", "avg", "max", "min", "count", "record", "monat")},
+    "gehzeit": {"unit": "h", "ratio": False, "aggs": ("sum", "avg", "max", "min", "count", "record", "monat")},
+    "puls": {"unit": "bpm", "ratio": False, "aggs": ("avg", "max", "min", "count", "record")},
+    "pulsmax": {"unit": "bpm", "ratio": False, "aggs": ("avg", "max", "min", "count", "record")},
     "tempo": {"unit": "kmh", "ratio": True, "aggs": ("avg", "max", "min", "count", "record"), "min_km": 3.0, "min_h": 0.5},
     "steigung": {"unit": "pct", "ratio": True, "aggs": ("avg", "max", "min", "count", "record"), "min_km": 1.0, "min_h": 0.0},
     "hmkm": {"unit": "m_km", "ratio": True, "aggs": ("avg", "max", "min", "count", "record"), "min_km": 1.0, "min_h": 0.0},
@@ -189,7 +198,32 @@ def _num(r, mess):
         return r["down_m"]
     if mess == "dauer":
         return r["dur_s"] / 3600 if (r["dur_s"] or 0) > 0 else None
+    if mess == "gehzeit":
+        return r.get("_gz")                                                 # von _prep gesetzt (None = keine Angabe oder noch nicht berechnet)
+    if mess == "puls":
+        return r.get("_pa")
+    if mess == "pulsmax":
+        return r.get("_pm")
     return None
+
+
+def _prep(cfg, rows):
+    """Holt Gehzeit und Puls nur für die Touren, die die Auswertung braucht, und nur wenn die Kennzahl sie verwendet (alles aus Zwischenspeichern, nie alle Tracks bei jedem Aufruf)."""
+    used = {cfg["mess"], (cfg.get("durch") or {}).get("mess")}
+    if used & {"puls", "pulsmax"}:
+        ids = puls.tours_with_hr()
+        for r in rows:
+            c = puls._hist(r["id"]) if r["id"] in ids else None
+            if c and c[1] and c[3]:                                       # c = (Änderungszeit, Sekunden je Pulswert, Durchschnitt, Maximum)
+                r["_pa"], r["_pm"] = float(c[2]), float(c[3])
+    if "gehzeit" in used:
+        end = time.monotonic() + GEHZEIT_BUDGET_S
+        for r in rows:
+            t = steigung.tempo_of(r["id"], allow_compute=time.monotonic() < end)
+            if t is None:
+                r["_off"] = True
+            elif t.get("status") == "ok" and (t.get("zeit_s") or 0) > 0:
+                r["_gz"] = t["zeit_s"] / 3600
 
 
 def _ratio(r, mess):
@@ -315,14 +349,18 @@ def auswerten(cfg, heute=None):
     von, bis, vor = _zeitraum(cfg, heute)
     rows = _rows(cfg)
     inn = [r for r in rows if (not von or r["d"] >= von) and r["d"] <= bis]
+    vr = [r for r in rows if vor and vor[0] <= r["d"] <= vor[1]] if cfg.get("vgl") else []
+    _prep(cfg, inn + vr)
     first = von or (min((r["d"] for r in inn), default=bis))
     wert, tour = _wert(inn, cfg, _monate_zahl(first, bis))
     out = {"wert": _runde(wert), "einheit": einheit(cfg), "n": len(inn), "von": von.isoformat() if von else None, "bis": bis.isoformat(),
            "vorher": None, "reihe": _reihe(inn, cfg, von, bis), "rekord": None, "ziel": None}
     if tour is not None:
         out["rekord"] = {"id": tour["id"], "name": tour["name"] or "", "datum": tour["d"].isoformat(), "wert": _runde(wert)}
+    off = sum(1 for r in inn if r.get("_off"))
+    if off:
+        out["offen"] = off
     if cfg.get("vgl") and vor:
-        vr = [r for r in rows if vor[0] <= r["d"] <= vor[1]]
         w2, _ = _wert(vr, cfg, _monate_zahl(vor[0], vor[1]))
         pct = round((wert - w2) / w2 * 100, 1) if wert is not None and w2 else None
         out["vorher"] = {"wert": _runde(w2), "pct": pct, "von": vor[0].isoformat(), "bis": vor[1].isoformat(), "n": len(vr)}
@@ -348,4 +386,4 @@ async def api_eigen(request: Request):
         raise HTTPException(400, "Kein gültiges JSON")
     if isinstance(body, dict) and set(body) == {"cfg"}:
         body = body["cfg"]
-    return auswerten(body)
+    return await run_in_threadpool(auswerten, body)               # die Gehzeit kann einige Sekunden rechnen: nicht den Server blockieren
