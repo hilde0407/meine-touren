@@ -2,14 +2,14 @@
 const q = new URLSearchParams(location.search);
 (async () => {
   const info = await (await fetch("/api/photo-info")).json();
-  const sec = (+q.get("sec") || info.slideshow_seconds || 6) * 1000;
+  let sec = (+q.get("sec") || +(() => { try { return localStorage.getItem("showSec"); } catch (e) { return 0; } })() || info.slideshow_seconds || 6) * 1000;
   const u = new URLSearchParams({limit: 1500}); ["tour","year"].forEach(k => q.get(k) && u.set(k === "tour" ? "tour_id" : k, q.get(k))); if (q.get("random")) u.set("random", "true");
   let list = await (await fetch("/api/photos?" + u)).json();
   if (q.get("best") && q.get("tour")) { const b = await (await fetch(`/api/tours/${encodeURIComponent(q.get("tour"))}/best-photos?n=${+q.get("best") || 10}`)).json(); const nm = (list[0] || {}).tour_name; list = b.photos.map(p => ({...p, tour_name: nm})); }
   if (!list.length) { document.getElementById("msg").style.display = "flex"; return; }
   if (q.get("shuffle")) list.sort(() => Math.random() - .5);
   let i = -1, cur = "a", paused = false, timer;
-  const show = n => { i = (n + list.length) % list.length; const p = list[i], el = document.getElementById(cur === "a" ? "b" : "a"), old = document.getElementById(cur);
+  const show = n => { i = (n + list.length) % list.length; document.getElementById("prog").firstChild.style.width = ((i + 1) / list.length * 100) + "%"; const p = list[i], el = document.getElementById(cur === "a" ? "b" : "a"), old = document.getElementById(cur);
     const img = new Image(); img.onload = () => { el.style.backgroundImage = `url(${img.src})`; el.classList.add("on"); old.classList.remove("on"); cur = cur === "a" ? "b" : "a"; };
     img.src = `/pic/${p.id}?size=2000`;
     document.getElementById("cap").innerHTML = (p.tour_name ? `<b>${p.tour_name.replace(/</g, "&lt;")}</b>` : "") + new Date(p.taken_ts * 1000).toLocaleString("de-DE", {dateStyle: "long", timeStyle: "short"}) + `  (${i + 1}/${list.length})`;
@@ -37,6 +37,12 @@ const q = new URLSearchParams(location.search);
   document.getElementById("bx").onclick = e => { e.stopPropagation(); if (fsEl()) toggleFs(); if (history.length > 1 && document.referrer) history.back(); else window.close(); };
   addEventListener("keydown", e => { if (e.key === "Escape") poke(); });
   addEventListener("mousemove", poke);
+  // Zurück/Weiter und Tempo (3 · 6 · 10 · 15 s, wird gemerkt)
+  document.getElementById("bprv").onclick = e => { e.stopPropagation(); show(i - 1); loop(); poke(); };
+  document.getElementById("bnxt").onclick = e => { e.stopPropagation(); show(i + 1); loop(); poke(); };
+  const bspd = document.getElementById("bspd"), spdTxt = () => { bspd.textContent = Math.round(sec / 1000) + " s"; };
+  bspd.onclick = e => { e.stopPropagation(); const o = [3, 6, 10, 15], n = o[(o.indexOf(Math.round(sec / 1000)) + 1) % o.length]; sec = n * 1000; try { localStorage.setItem("showSec", n); } catch (err) {} spdTxt(); loop(); poke(); };
+  spdTxt();
   // Wischen: links/rechts = nächstes/vorheriges Foto; Tippen: linkes Drittel zurück, rechtes Drittel weiter, Mitte zeigt die Bedienelemente
   let tx = null, ty = null;
   addEventListener("touchstart", e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive: true});

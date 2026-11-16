@@ -1683,6 +1683,8 @@ Mini-Höhenprofil || Mini elevation profile || Mini profil altimétrique || Mini
 Das Höhenprofil kompakt, die Linie nach Steigung eingefärbt: bergab, eben, bergauf. || The elevation profile in compact form, the line coloured by gradient: downhill, flat, uphill. || Le profil altimétrique en compact, la ligne colorée selon la pente : descente, plat, montée. || El perfil de altitud compacto, con la línea coloreada según la pendiente: bajada, llano, subida.
 Höhenprofil, tiefster Punkt {}, höchster Punkt {}, Länge {} || Elevation profile, lowest point {}, highest point {}, length {} || Profil altimétrique, point le plus bas {}, point le plus haut {}, longueur {} || Perfil de altitud, punto más bajo {}, punto más alto {}, longitud {}
 höchster Punkt {} m || highest point {} m || point culminant {} m || punto más alto {} m
+Vorheriges Foto || Previous photo || Photo précédente || Foto anterior
+Nächstes Foto || Next photo || Photo suivante || Foto siguiente
 bergab || downhill || descente || bajada
 eben || flat || plat || llano
 bergauf || uphill || montée || subida
