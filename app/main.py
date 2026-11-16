@@ -17,7 +17,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche, layout, bausteine_daten, hinweise
+from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche, layout, bausteine_daten, hinweise, kennzahl
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -949,6 +949,7 @@ app.include_router(belastung.router)
 app.include_router(aehnliche.router)
 app.include_router(layout.router)
 app.include_router(bausteine_daten.router)
+app.include_router(kennzahl.router)
 app.include_router(hinweise.router)
 app.include_router(steigung.router)
 app.include_router(more.router)

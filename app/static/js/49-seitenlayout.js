@@ -431,7 +431,8 @@ function slSetWidth(id, w) {
   slApply();
   slLive(`${slTitle(id)}: ${SL_WNAME[w]}`);
 }
-function slAddWidget(type) {
+/* cfg = fertige Einstellung (3.28.0: eigene Kennzahl), after = Kennung, hinter der der neue Baustein steht (Duplizieren); T.grenze() liefert eine Meldung, wenn der Typ nicht noch einmal hinzugefügt werden darf */
+function slAddWidget(type, cfg, after) {
   const T = window.SL_WT[type];
   if (!slFits(T, SL.fam)) return null;
   const st = slStDoc(SL.fam);
@@ -439,19 +440,31 @@ function slAddWidget(type) {
     uiAlert("Es sind höchstens 40 Bausteine möglich.");
     return null;
   }
+  const lim = T.grenze && T.grenze();
+  if (lim) {
+    uiAlert(lim);
+    return null;
+  }
   let id;
   do id = "w" + Math.random().toString(36).slice(2, 7);
   while ((st.widgets || []).some(w => w.id === id));
-  st.widgets = (st.widgets || []).concat([{id, type, cfg: JSON.parse(JSON.stringify(T.defaults || {}))}]);
+  st.widgets = (st.widgets || []).concat([{id, type, cfg: JSON.parse(JSON.stringify(cfg || T.defaults || {}))}]);
   if (SL.fam === "tour" && SL.page === "auswertung") (st.page = st.page || {})[id] = "auswertung";
   const ids = slOrder(SL.fam, SL.page).map(i => i.id).filter(x => x !== id);
-  ids.push(id);
+  if (after && ids.includes(after)) ids.splice(ids.indexOf(after) + 1, 0, id);
+  else ids.push(id);
   slSaveOrder(ids);
   slTouch(slKey1(SL.fam));
   SL.focus = {id, a: "grip"};
   slApply();
-  slLive(`Baustein „${T.title(T.defaults || {})}“ hinzugefügt`);
+  slLive(`Baustein „${T.title(cfg || T.defaults || {})}“ hinzugefügt`);
   return id;
+}
+/* Baustein mit T.dup kopieren (eigene Kennzahl): gleiche Einstellung, neuer Name, direkt hinter dem Original */
+function slDupWidget(id) {
+  const w = slWidgetOf(id), T = w && w.widget && window.SL_WT[w.type];
+  if (!T || !T.dup) return;
+  slAddWidget(w.type, T.dup(JSON.parse(JSON.stringify(w.cfg || {}))), id);
 }
 function slRemoveWidget(id) {
   const st = slStDoc(SL.fam);
@@ -716,6 +729,7 @@ function slStripHtml(p, idx, n) {
   if (!it.plain) mo += `<label class="slsw"><input type="checkbox" data-a="open"${open ? " checked" : ""}><span>Standardmäßig offen</span></label>`;
   if (SL.fam === "tour" && !it.fixed) mo += `<button type="button" class="slb" data-a="page" >${other}</button>`;
   if ((it.widget || it.build) && slFieldsOf(window.SL_WT[it.wtype]).length) mo += `<button type="button" class="slb slcfgb" data-a="cfg" aria-haspopup="dialog" title="Einstellungen dieses Bausteins">${slIcon.gear}<span>Einstellungen</span></button>`;
+  if (it.widget && window.SL_WT[it.wtype] && window.SL_WT[it.wtype].dup) mo += `<button type="button" class="slb" data-a="dup">Duplizieren</button>`;
   if (it.widget) mo += `<button type="button" class="slb slrm" data-a="del" >Entfernen</button>`;
   if (mo) h += `<button type="button" class="slb slmorebtn" data-a="more" aria-haspopup="true" aria-expanded="false" aria-label="Weitere Aktionen" title="Weitere Aktionen">⋯</button><span class="slmo">${mo}</span>`;
   if (it.must) h += `<span class="slmust">bleibt immer sichtbar</span>`;
@@ -1092,6 +1106,9 @@ function slCatalog() {
     card = ([type, T]) => {
       const n = have(type),
         dis = !T.multi && n > 0;
+      if (T.neu)                                                                                         // 3.28.0: Baustein, den der Benutzer in einem eigenen Dialog zusammenstellt
+        return `<article class="slcard" data-cat="${T.cat || "zahlen"}"><div class="slpv" aria-hidden="true">${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name)}</h3><p>${esc(T.desc || "")}</p>` +
+          `<button type="button" class="btn sm" data-neu="${type}">${n ? "Noch eine erstellen" : "Erstellen"}</button></div></article>`;
       return `<article class="slcard" data-cat="${T.cat || "zahlen"}"><div class="slpv" aria-hidden="true">${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name || T.title(T.defaults || {}))}</h3><p>${esc(T.desc || "")}</p>` +
         `<button type="button" class="btn sm${dis ? " ghost" : ""}" data-add="${type}"${dis ? " disabled" : ""}>${dis ? "Bereits hinzugefügt" : n ? "Noch einmal hinzufügen" : "Hinzufügen"}</button></div></article>`;
     };
@@ -1130,8 +1147,13 @@ function slCatalog() {
     q.addEventListener("keydown", e => e.key === "Enter" && e.preventDefault());
     body.onclick = e => {
       const a = e.target.closest("[data-add]"),
+        nw = e.target.closest("[data-neu]"),
         ch = e.target.closest(".slchip");
       if (e.target.closest("[data-close]")) close();
+      else if (nw) {
+        close();
+        window.SL_WT[nw.dataset.neu].neu();
+      }
       else if (ch) {
         cat = ch.dataset.cat;
         apply();
@@ -1147,6 +1169,7 @@ function slCfgDialog(id) {
   const w = slWidgetOf(id),
     T = w && window.SL_WT[w.type];
   if (!T) return;
+  if (T.dialog) return T.dialog(id, w.cfg || {});                          // 3.28.0: eigener Dialog (eigene Kennzahl)
   slModal(`Einstellungen: ${T.name || T.title(w.cfg)}`, (body, close) => {
     const cfg = JSON.parse(JSON.stringify(w.cfg || {}));
     const FS = slFieldsOf(T);
@@ -1242,6 +1265,7 @@ document.addEventListener("click", e => {
   else if (a === "w") slSetWidth(id, b.dataset.w);
   else if (a === "page") slSetPage(id, SL.page === "haupt" ? "auswertung" : "haupt");
   else if (a === "cfg") slCfgDialog(id);
+  else if (a === "dup") slDupWidget(id);
   else if (a === "del")
     uiConfirm({title: "Baustein entfernen?", text: `„${slTitle(id)}“ wird von dieser Seite entfernt.`, ok: "Entfernen", danger: true}).then(ok => ok && slRemoveWidget(id));
 });

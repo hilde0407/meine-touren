@@ -39,7 +39,7 @@ import time
 
 from fastapi import APIRouter, HTTPException, Request
 
-from . import db
+from . import db, kennzahl
 
 router = APIRouter()
 
@@ -209,6 +209,8 @@ HINWEIS_KEYS = ("schwelle", "tage", "min", "ziel", "ausblenden", "einheit", "stu
 
 
 def _cfg(v, typ=None):
+    if typ == kennzahl.TYPE:                              # 3.28.0: eigene Kennzahl – nur Auswahlen aus festen Listen, streng geprüft (app/kennzahl.py)
+        return kennzahl.clean_cfg(v)
     if not isinstance(v, dict) or len(v) > 20:
         raise HTTPException(400, "Ungültige Konfiguration eines Bausteins")
     out = {}
@@ -286,6 +288,8 @@ def clean(doc, key=None):
                 raise HTTPException(400, "Hinweis-Bausteine gibt es nur auf der Übersicht und der Statistik")
             if x["type"] in HINWEIS_NUR_UEBERSICHT and key == "statistik":
                 raise HTTPException(400, "Dieser Hinweis-Baustein gibt es nur auf der Übersicht")
+            if x["type"] == kennzahl.TYPE and key in ("tour-haupt", "tour-auswertung"):
+                raise HTTPException(400, "Eigene Kennzahlen gibt es nur auf der Übersicht und der Statistik")
             seen.add(x["id"])
             ws.append({"id": x["id"], "type": x["type"], "cfg": _cfg(x.get("cfg") or {}, x["type"])})
         out["widgets"] = ws
@@ -458,6 +462,17 @@ async def put_layout(page_key: str, request: Request):
     if len(raw) > (MAX_TOTAL + 20000 if isinstance(body, dict) and "views" in body else MAX_BYTES * 2):
         raise HTTPException(413, "Das Layout ist zu groß")
     lay = clean_any(body, page_key)
+    mine = kennzahl.zaehle(lay)
+    if mine:                                           # 3.28.0: höchstens so viele eigene Kennzahlen je Benutzer (über alle Seiten und Ansichten, ohne die Seite, die gerade ersetzt wird)
+        for k in KEYS:
+            if k != page_key:
+                r = db.one("SELECT json FROM user_layout WHERE page_key=?", (k,))
+                try:
+                    mine |= kennzahl.zaehle(json.loads(r["json"])) if r else set()
+                except ValueError:
+                    pass
+        if len(mine) > kennzahl.MAX_PRO_NUTZER:
+            raise HTTPException(400, f"Höchstens {kennzahl.MAX_PRO_NUTZER} eigene Kennzahlen sind möglich")
     ts = int(time.time())
     db.execute("INSERT INTO user_layout(page_key,json,ts) VALUES(?,?,?) ON CONFLICT(page_key) DO UPDATE SET json=excluded.json, ts=excluded.ts",
                (page_key, json.dumps(lay, ensure_ascii=False, separators=(",", ":")), ts))

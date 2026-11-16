@@ -56,9 +56,9 @@ def test_server_list_matches_the_registry_in_the_scripts():
 
 def test_version_notes_and_service_worker():
     from app import config
-    assert config.VERSION.startswith("3.27.0 · Meine Touren")
+    assert config.VERSION.startswith("3.28.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.20.0.md").read_text(encoding="utf-8")
     assert "Raster" in notes and "Breite" in notes and "Tourseite" in notes
-    assert 'const V = "mt-v105"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v106"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
     css = (ROOT / "app" / "static" / "style.css").read_text(encoding="utf-8")
     assert "grid-auto-flow" not in css.split("3.20.0: Raster")[-1] and ".w-halb" in css            # kein grid-auto-flow: dense (Tab-Reihenfolge = sichtbare Reihenfolge)

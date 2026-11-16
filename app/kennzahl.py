@@ -1,0 +1,351 @@
+"""Eigene Kennzahl (3.28.0): ein Baustein, den der Benutzer ohne Programmieren selbst zusammenstellt (Dialog „Eigene Kennzahl“).
+
+Die Definition ist nur eine Auswahl aus festen Listen (Messgröße, Rechenart, Filter, optional eine Formel A ÷ B aus zwei solchen Auswahlen) – es gibt keinen Freitext-Ausdruck,
+kein eval und kein SQL vom Benutzer; Schlagwörter gehen ausschließlich als gebundener Parameter in die Abfrage. Sie steht als Baustein vom Typ „eigenkz“ im Layout-Dokument
+(app/layout.py; deshalb gelten Ansichten, Vorlagen, Export und „Standard wiederherstellen“ ohne Sonderweg). Der Server prüft die Definition beim Speichern (clean_cfg) und beim Auswerten
+(POST /api/bausteine/eigen) mit denselben Regeln.
+
+Konfiguration (cfg), alle Felder streng geprüft, unbekannte Schlüssel sind ein Fehler:
+  title   Name, 1–60 Zeichen (ohne Steuer- und Spitzklammern)       symbol  Emoji/Zeichen, höchstens 8 Zeichen (optional)
+  mess    touren | km | hm | abstieg | dauer | tempo | steigung | hmkm
+  agg     sum | avg | max | min | count | record | monat   (nicht jede Messgröße erlaubt jede Rechenart, siehe MESS)
+  durch   {mess, agg}   optional: Formel A ÷ B (A = mess/agg, B = durch); op: div (A ÷ B, Standard) | pct (A in Prozent von B)
+  sports  [Aktivität]   range year | y | 12m | 90d | all | c   yr (bei y)   from, to (bei c, JJJJ-MM-TT)   tag (Schlagwort)   minkm (Mindeststrecke 0–1000)
+  vgl     true = Vergleich mit dem Zeitraum davor (±%)           ziel  Zielwert (> 0, höchstens 10 000 000) → Fortschrittsbalken
+Messgrößen: tempo = Strecke ÷ Dauer je Tour (km/h), steigung = Aufstieg ÷ Strecke (%), hmkm = Höhenmeter je km. Bei diesen „Verhältnissen“ ist avg gewichtet (Summe ÷ Summe),
+max/min/record zählen nur Touren mit sinnvoller Länge (Tempo: ab 3 km und 30 Min., sonst ab 1 km); Touren ohne die nötigen Angaben zählen nicht.
+Antwort: {wert, einheit: {z, n}, n (Touren im Zeitraum), von, bis, vorher: {wert, pct, von, bis}|None, reihe: {art, werte}, rekord: {id, name, datum, wert}|None, ziel: {ziel, pct}|None}.
+"""
+import json
+import re
+from datetime import date, datetime, timedelta
+
+from fastapi import APIRouter, HTTPException, Request
+
+from . import bausteine_daten as bd
+from . import db
+from .gpxtools import TZ
+
+router = APIRouter()
+TYPE = "eigenkz"
+MAX_PRO_NUTZER = 24                      # eigene Bausteine je Benutzer (über alle Seiten und Ansichten)
+MAX_TITLE = 60
+MAX_SYMBOL = 8
+MAX_TAG = 40
+MAX_ZIEL = 10_000_000
+RANGES = ("year", "y", "12m", "90d", "all", "c")
+KEYS = {"title", "symbol", "mess", "agg", "durch", "op", "sports", "range", "yr", "from", "to", "tag", "minkm", "vgl", "ziel"}
+OPS = ("div", "pct")
+# Messgröße: Einheit, ob es ein Verhältnis ist (Summe ÷ Summe), erlaubte Rechenarten, Mindestlänge/-dauer für max/min/record
+MESS = {
+    "touren": {"unit": "touren", "ratio": False, "aggs": ("sum", "count", "monat")},
+    "km": {"unit": "km", "ratio": False, "aggs": ("sum", "avg", "max", "min", "count", "record", "monat")},
+    "hm": {"unit": "m", "ratio": False, "aggs": ("sum", "avg", "max", "min", "count", "record", "monat")},
+    "abstieg": {"unit": "m", "ratio": False, "aggs": ("sum", "avg", "max", "min", "count", "record", "monat")},
+    "dauer": {"unit": "h", "ratio": False, "aggs": ("sum", "avg", "max", "min", "count", "record", "monat")},
+    "tempo": {"unit": "kmh", "ratio": True, "aggs": ("avg", "max", "min", "count", "record"), "min_km": 3.0, "min_h": 0.5},
+    "steigung": {"unit": "pct", "ratio": True, "aggs": ("avg", "max", "min", "count", "record"), "min_km": 1.0, "min_h": 0.0},
+    "hmkm": {"unit": "m_km", "ratio": True, "aggs": ("avg", "max", "min", "count", "record"), "min_km": 1.0, "min_h": 0.0},
+}
+AGGS = ("sum", "avg", "max", "min", "count", "record", "monat")
+FORMEL_AGGS = ("sum", "avg", "max", "min", "count")          # in einer Formel: weder Rekord (hat eine Tour dabei) noch „pro Monat“
+SPORT_RE = re.compile(r"^[A-Za-z0-9_]{1,40}$")
+BAD_TEXT = re.compile(r"[\x00-\x1f\x7f<>]")
+
+
+def _bad(msg):
+    return HTTPException(400, msg)
+
+
+def _text(x, name, lo, hi):
+    if not isinstance(x, str) or BAD_TEXT.search(x) or not lo <= len(x.strip()) <= hi:
+        raise _bad(f"„{name}“ muss {lo} bis {hi} Zeichen lang sein (ohne Steuer- und Spitzklammern)" if lo else f"„{name}“ darf höchstens {hi} Zeichen lang sein (ohne Steuer- und Spitzklammern)")
+    return " ".join(x.split())
+
+
+def _zahl(x, name, lo, hi, offen=False):
+    if isinstance(x, bool) or not isinstance(x, (int, float)) or x != x or (x <= lo if offen else x < lo) or x > hi:
+        raise _bad(f"Ungültiger Wert für „{name}“")
+    return x
+
+
+def _datum(x, name):
+    try:
+        d = date.fromisoformat(x) if isinstance(x, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", x) else None
+    except ValueError:
+        d = None
+    if not d or not 1970 <= d.year <= 2100:
+        raise _bad(f"Ungültiges Datum für „{name}“ (JJJJ-MM-TT)")
+    return d
+
+
+def _operand(x, name, aggs):
+    if not isinstance(x, dict) or set(x) - {"mess", "agg"}:
+        raise _bad(f"Ungültige Angabe „{name}“")
+    m, a = x.get("mess"), x.get("agg")
+    if m not in MESS:
+        raise _bad(f"Unbekannte Messgröße in „{name}“")
+    if a not in aggs or a not in MESS[m]["aggs"]:
+        raise _bad(f"Diese Rechenart gibt es für diese Messgröße nicht („{name}“)")
+    return {"mess": m, "agg": a}
+
+
+def clean_cfg(v):
+    """Prüft die Definition einer eigenen Kennzahl; gibt die bereinigte Fassung zurück (HTTPException 400 bei Fehlern)."""
+    if not isinstance(v, dict) or set(v) - KEYS:
+        raise _bad("Ungültige Einstellung einer eigenen Kennzahl")
+    out = {"title": _text(v.get("title"), "Name", 1, MAX_TITLE)}
+    if v.get("symbol") not in (None, ""):
+        out["symbol"] = _text(v["symbol"], "Symbol", 1, MAX_SYMBOL)
+    out.update(_operand({"mess": v.get("mess"), "agg": v.get("agg")}, "Messgröße", AGGS))
+    if "durch" in v:
+        out["durch"] = _operand(v["durch"], "durch", FORMEL_AGGS)
+        if out["agg"] not in FORMEL_AGGS:
+            raise _bad("In einer Formel sind Rekord und „pro Monat“ nicht möglich")
+        op = v.get("op", "div")
+        if op not in OPS:
+            raise _bad("Unbekannte Rechenart der Formel")
+        out["op"] = op
+    elif "op" in v:
+        raise _bad("„op“ gehört nur zu einer Formel")
+    if "sports" in v:
+        s = v["sports"]
+        if not isinstance(s, list) or len(s) > 20 or not all(isinstance(i, str) and SPORT_RE.match(i) for i in s):
+            raise _bad("Ungültige Aktivität")
+        if s:
+            out["sports"] = list(dict.fromkeys(s))
+    r = v.get("range", "year")
+    if r not in RANGES:
+        raise _bad("Unbekannter Zeitraum")
+    out["range"] = r
+    if r == "y":
+        yr = v.get("yr")
+        if isinstance(yr, bool) or not isinstance(yr, int) or not 1970 <= yr <= 2100:
+            raise _bad("Ungültiges Jahr")
+        out["yr"] = yr
+    elif "yr" in v:
+        raise _bad("„yr“ gehört nur zu einem bestimmten Jahr")
+    if r == "c":
+        a, b = _datum(v.get("from"), "von"), _datum(v.get("to"), "bis")
+        if a > b:
+            raise _bad("„von“ darf nicht nach „bis“ liegen")
+        out["from"], out["to"] = a.isoformat(), b.isoformat()
+    elif "from" in v or "to" in v:
+        raise _bad("„from“ und „to“ gehören nur zu einem eigenen Bereich")
+    if v.get("tag") not in (None, ""):
+        out["tag"] = _text(v["tag"], "Schlagwort", 1, MAX_TAG)
+    if v.get("minkm") not in (None, 0):
+        out["minkm"] = _zahl(v["minkm"], "Mindeststrecke", 0, 1000)
+    if "vgl" in v:
+        if not isinstance(v["vgl"], bool):
+            raise _bad("Ungültiger Wert für „vgl“")
+        if v["vgl"]:
+            out["vgl"] = True
+    if v.get("ziel") not in (None, 0):
+        out["ziel"] = _zahl(v["ziel"], "Ziel", 0, MAX_ZIEL, offen=True)
+    return out
+
+
+def zaehle(doc):
+    """Eigene Bausteine in einem Layout-Dokument (altes Format oder Behälter mit Ansichten) als Menge {(Kennung, Definition)}; gleiche Kopien in mehreren Ansichten zählen einmal."""
+    if not isinstance(doc, dict):
+        return set()
+    lays = [x.get("layout") for x in doc["views"] if isinstance(x, dict)] if isinstance(doc.get("views"), list) else [doc]
+    out = set()
+    for lay in lays:
+        for w in (lay or {}).get("widgets", []) if isinstance(lay, dict) else []:
+            if isinstance(w, dict) and w.get("type") == TYPE:
+                out.add((w.get("id"), json.dumps(w.get("cfg"), sort_keys=True)))
+    return out
+
+
+# ------------------------------------------------------------------------------------------------ Rechnen
+def _rows(cfg):
+    sql = "SELECT t.id,t.name,t.sport,t.start_ts,t.dist_m,t.dur_s,t.up_m,t.down_m FROM tours t WHERE t.start_ts IS NOT NULL"
+    par = []
+    if cfg.get("tag"):
+        sql += " AND EXISTS (SELECT 1 FROM tour_tags x WHERE x.id=t.id AND x.tag=? COLLATE NOCASE)"
+        par.append(cfg["tag"])
+    sports, minkm, rows = cfg.get("sports") or [], cfg.get("minkm") or 0, []
+    for r in db.query(sql, tuple(par)):
+        if sports and r["sport"] not in sports:
+            continue
+        if minkm and (r["dist_m"] or 0) < minkm * 1000:
+            continue
+        r["d"] = datetime.fromtimestamp(r["start_ts"], tz=TZ).date()
+        rows.append(r)
+    return rows
+
+
+def _num(r, mess):
+    """Wert der Messgröße einer Tour oder None, wenn die Angabe fehlt. Verhältnisse: (Zähler, Nenner, Faktor) mit eigenem Aufruf _ratio."""
+    if mess == "touren":
+        return 1.0
+    if mess == "km":
+        return None if r["dist_m"] is None else r["dist_m"] / 1000
+    if mess == "hm":
+        return r["up_m"]
+    if mess == "abstieg":
+        return r["down_m"]
+    if mess == "dauer":
+        return r["dur_s"] / 3600 if (r["dur_s"] or 0) > 0 else None
+    return None
+
+
+def _ratio(r, mess):
+    """(Zähler, Nenner, Faktor) einer Tour für ein Verhältnis oder None."""
+    km, h, up = (r["dist_m"] or 0) / 1000, (r["dur_s"] or 0) / 3600, r["up_m"]
+    if mess == "tempo":
+        return (km, h, 1.0) if km > 0 and h > 0 else None
+    if mess == "steigung":
+        return (up, km, 0.1) if up is not None and km > 0 else None           # Höhenmeter ÷ (km·1000) · 100 = (hm ÷ km) / 10
+    if mess == "hmkm":
+        return (up, km, 1.0) if up is not None and km > 0 else None
+    return None
+
+
+def _monate_zahl(von, bis):
+    return max(1, (bis.year - von.year) * 12 + bis.month - von.month + 1)
+
+
+def _pick(pairs, agg):
+    """Kleinster (min) oder größter Wert; bei Gleichstand die früheste Tour."""
+    sign = 1 if agg == "min" else -1
+    return min(pairs, key=lambda x: (sign * x[1], x[0]["start_ts"], x[0]["id"]))
+
+
+def _einzel(rows, mess, agg, monate):
+    """(Wert oder None, Tour oder None) einer Messgröße mit Rechenart über `rows`."""
+    M = MESS[mess]
+    if M["ratio"]:
+        pr = [(r, _ratio(r, mess)) for r in rows]
+        pr = [(r, p) for r, p in pr if p]
+        if agg == "count":
+            return float(len(pr)), None
+        if agg == "avg":
+            den = sum(p[1] for _r, p in pr)
+            return (sum(p[0] for _r, p in pr) / den * pr[0][1][2] if pr and den > 0 else None), None
+        good = [(r, p[0] / p[1] * p[2]) for r, p in pr if (r["dist_m"] or 0) / 1000 >= M["min_km"] and (r["dur_s"] or 0) / 3600 >= M["min_h"]]
+        if not good:
+            return None, None
+        pick = _pick(good, agg)
+        return pick[1], pick[0] if agg == "record" else None
+    vs = [(r, _num(r, mess)) for r in rows]
+    vs = [(r, v) for r, v in vs if v is not None]
+    if agg == "count":
+        return float(len(vs)), None
+    if agg == "sum":
+        return float(sum(v for _r, v in vs)), None
+    if agg == "monat":
+        return float(sum(v for _r, v in vs)) / monate, None
+    if not vs:
+        return None, None
+    if agg == "avg":
+        return sum(v for _r, v in vs) / len(vs), None
+    pick = _pick(vs, agg)
+    return pick[1], pick[0] if agg == "record" else None
+
+
+def _wert(rows, cfg, monate):
+    """(Wert, Tour) der ganzen Kennzahl; mit Formel A ÷ B bzw. A in % von B."""
+    a, tour = _einzel(rows, cfg["mess"], cfg["agg"], monate)
+    if "durch" not in cfg:
+        return a, tour
+    b, _ = _einzel(rows, cfg["durch"]["mess"], cfg["durch"]["agg"], monate)
+    if a is None or not b:
+        return None, None
+    return (a / b * 100 if cfg.get("op") == "pct" else a / b), None
+
+
+def einheit(cfg):
+    """{z, n}: Einheit als Zähler und Nenner (Codes: touren, km, m, h, kmh, pct, m_km, monat); beide None = reine Zahl."""
+    def one(mess, agg):
+        return "touren" if agg == "count" else MESS[mess]["unit"]
+    z = one(cfg["mess"], cfg["agg"])
+    if "durch" not in cfg:
+        return {"z": z, "n": "monat" if cfg["agg"] == "monat" else None}
+    if cfg.get("op") == "pct":
+        return {"z": "pct", "n": None}
+    n = one(cfg["durch"]["mess"], cfg["durch"]["agg"])
+    return {"z": None, "n": None} if z == n else {"z": z, "n": n}
+
+
+def _zeitraum(cfg, heute):
+    r = cfg.get("range", "year")
+    if r == "c":
+        a, b = date.fromisoformat(cfg["from"]), date.fromisoformat(cfg["to"])
+        n = (b - a).days + 1
+        return a, b, (a - timedelta(days=n), a - timedelta(days=1))
+    von, bis, vor = bd.zeitraum(r, cfg.get("yr") or heute.year, heute)
+    return von, bis, vor
+
+
+def _runde(x):
+    return None if x is None else round(x, 4)
+
+
+def _reihe(rows, cfg, von, bis):
+    """Verlauf für das Mini-Diagramm: je Monat (Zeitraum bis 36 Monate), sonst je Jahr (höchstens die letzten 12)."""
+    first = von or (min(r["d"] for r in rows) if rows else bis)
+    n_mon = _monate_zahl(first, bis)
+    if n_mon <= 36:
+        keys, kf = [], lambda d: (d.year, d.month)
+        y, m = first.year, first.month
+        while (y, m) <= (bis.year, bis.month):
+            keys.append((y, m))
+            y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+        art, mon = "monat", lambda k: 1
+    else:
+        keys, kf = list(range(first.year, bis.year + 1))[-12:], lambda d: d.year
+        art, mon = "jahr", lambda k: _monate_zahl(max(first, date(k, 1, 1)), min(bis, date(k, 12, 31)))
+    gr = {k: [] for k in keys}
+    for r in rows:
+        k = kf(r["d"])
+        if k in gr:
+            gr[k].append(r)
+    werte = [_runde(_wert(gr[k], cfg, mon(k))[0]) if gr[k] or cfg["agg"] in ("sum", "count", "monat") else None for k in keys]
+    labels = [f"{k[0]:04d}-{k[1]:02d}" if art == "monat" else str(k) for k in keys]
+    return {"art": art, "labels": labels, "werte": werte}
+
+
+def auswerten(cfg, heute=None):
+    """Auswertung einer geprüften Definition (clean_cfg) für den angemeldeten Benutzer (seine Datenbank)."""
+    heute = heute or datetime.now(TZ).date()
+    cfg = clean_cfg(cfg)
+    von, bis, vor = _zeitraum(cfg, heute)
+    rows = _rows(cfg)
+    inn = [r for r in rows if (not von or r["d"] >= von) and r["d"] <= bis]
+    first = von or (min((r["d"] for r in inn), default=bis))
+    wert, tour = _wert(inn, cfg, _monate_zahl(first, bis))
+    out = {"wert": _runde(wert), "einheit": einheit(cfg), "n": len(inn), "von": von.isoformat() if von else None, "bis": bis.isoformat(),
+           "vorher": None, "reihe": _reihe(inn, cfg, von, bis), "rekord": None, "ziel": None}
+    if tour is not None:
+        out["rekord"] = {"id": tour["id"], "name": tour["name"] or "", "datum": tour["d"].isoformat(), "wert": _runde(wert)}
+    if cfg.get("vgl") and vor:
+        vr = [r for r in rows if vor[0] <= r["d"] <= vor[1]]
+        w2, _ = _wert(vr, cfg, _monate_zahl(vor[0], vor[1]))
+        pct = round((wert - w2) / w2 * 100, 1) if wert is not None and w2 else None
+        out["vorher"] = {"wert": _runde(w2), "pct": pct, "von": vor[0].isoformat(), "bis": vor[1].isoformat(), "n": len(vr)}
+    if cfg.get("ziel") and wert is not None:
+        out["ziel"] = {"ziel": cfg["ziel"], "pct": round(wert / cfg["ziel"] * 100, 1)}
+    elif cfg.get("ziel"):
+        out["ziel"] = {"ziel": cfg["ziel"], "pct": 0.0}
+    return out
+
+
+MAX_BODY = 4000
+
+
+@router.post("/api/bausteine/eigen")
+async def api_eigen(request: Request):
+    """Wertet die Definition einer eigenen Kennzahl aus (nur lesend; Betrachter dürfen das nicht, weil sie keine eigenen Bausteine haben und die Sperre für POST allgemein gilt)."""
+    raw = await request.body()
+    if len(raw) > MAX_BODY:
+        raise HTTPException(413, "Die Einstellung ist zu groß")
+    try:
+        body = json.loads(raw or b"null")
+    except ValueError:
+        raise HTTPException(400, "Kein gültiges JSON")
+    if isinstance(body, dict) and set(body) == {"cfg"}:
+        body = body["cfg"]
+    return auswerten(body)

@@ -1511,3 +1511,49 @@ body.sl-editing .tlw[data-hn=lade],body.sl-editing .tlw[data-hn=aus]{display:fle
 .rbdlg .rbrow .shrsel{margin-top:6px}
 .rbres input{font-size:15px}
 @media (max-width:520px){.rbdlg .rbrow{grid-template-columns:1fr}}
+/* =====================  3.28.0: Eigene Kennzahl (59-bausteine-eigen.js)  =====================
+   Große Zahl mit Einheit, Vergleich, Mini-Verlauf und Zielbalken im Baustein, dazu der Dialog zum Zusammenstellen. Farben nur über Variablen (hell und dunkel), Maße als Klassen. */
+.kz{display:flex;flex-direction:column;gap:6px;min-width:0}
+.kzmain{margin:0;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px}
+.kzsy{font-size:26px;line-height:1}
+.kzval{font:700 34px/1.05 var(--d);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kzun{font:600 18px var(--d);color:var(--mut)}
+.kzsub,.kzvgl{margin:0;font-size:14px;line-height:1.35}
+.kzvv{margin:0;font-size:13px}
+.kzd{font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+.kzsp{margin-top:4px}
+.slcol.kzsc{height:56px}
+.kzgoal{margin-top:4px}
+.kzgoal .slbr{height:10px}
+.kzgoal .slbr.kzfull .slbr-f{fill:var(--accent2)}
+.kzgt{margin:4px 0 0;font-size:14px}
+.kzok{font-weight:700}
+.kzpvx{gap:4px}
+.kzpvx .kzval{font-size:26px}
+.kzpvx .kzsy{font-size:22px}
+.slbox.slkz{width:min(760px,100%)}
+.kzform label{display:block;padding:0 0 4px;font:600 15px var(--b)}
+.kzform label.slck{display:flex}
+.kzform select,.kzform input[type=text],.kzform input[type=number],.kzform input[type=date]{width:100%;box-sizing:border-box;min-height:44px;font-size:16px}
+.kzfs{border:1px solid var(--rule);border-radius:var(--r-l);padding:10px 14px 6px;margin:0 0 14px}
+.kzfs legend{padding:0 6px;font:700 16px var(--d)}
+.kzrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:4px 12px;margin:0 0 10px}
+.kzrow3{grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr))}
+.kzrow[hidden],.kzformel[hidden],.kzyr[hidden],.kzvh[hidden]{display:none}
+.kzck{margin:6px 0 8px}
+.kzhint{margin:2px 0 8px;font-size:14px}
+.kzzu{align-self:end;margin:0 0 14px;font-size:14px}
+.kzsyl{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.kzsyb{min-width:44px;min-height:44px;padding:0;font-size:22px;line-height:1;border:1.5px solid var(--rule);border-radius:var(--r-l);background:var(--card);color:var(--ink);cursor:pointer}
+.kzsyb:hover{border-color:var(--ink)}
+.kzsyb:focus-visible,.kztpl:focus-visible,.kztplb summary:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.kztplb{margin:0 0 12px}
+.kztplb summary{display:flex;align-items:center;min-height:44px;cursor:pointer;font:700 16px var(--d)}
+.kztpls{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:8px;margin:4px 0}
+.kztpl{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:44px;padding:10px 12px;text-align:left;border:1.5px solid var(--rule);border-radius:var(--r-l);background:var(--card);color:var(--ink);font:600 15px var(--d);cursor:pointer}
+.kztpl:hover{border-color:var(--ink)}
+.kztpl small{font:500 13px/1.3 var(--b)}
+.kzpv{margin:0 0 14px;padding:10px 14px;border:1px solid var(--rule);border-radius:var(--r-l);background:var(--soft)}
+.kzpvh{margin:0 0 6px;font:700 16px var(--d)}
+.kzerr:not(:empty){margin:0 0 8px}
+@media (max-width:700px){.kzfs{padding-left:12px;padding-right:12px}.kzval{font-size:30px}.kztpls{grid-template-columns:1fr 1fr}.kztpl small{display:none}}

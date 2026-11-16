@@ -2,7 +2,7 @@
    Daten und Auswahl-Logik stehen in 49-seitenlayout.js (Behälter SL.store, slResolve, slPack); hier: Auswahl in der Kopfzeile, Verwaltung (Dialog), Vorlagen, Export und Import.
    Tourseite: Hauptseite und Auswertung sind zwei Schlüssel; jede Änderung an den Ansichten (anlegen, umbenennen, löschen, Standard, Regeln) wird in beiden geführt
    (slAlign), der Inhalt bleibt je Schlüssel eigen. Die Vorgabe der Anzeige: von Hand gewählt (diese Sitzung) vor Regel „Sportart → Ansicht“ (beim Öffnen einer Tour) vor Standardansicht. */
-const SL_APPV = "3.27.0";
+const SL_APPV = "3.28.0";
 const SL_EXPORT_FORMAT = "meine-touren-ansicht";
 const SL_MAXFILE = 200000;
 const slVm = fam => slMaster(fam).views;
