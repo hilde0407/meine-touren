@@ -483,7 +483,7 @@ JOBS = {
     "dev-quality-fix": (devbatch.LABEL, lambda dry: devbatch.run()),
     "uhr-alle": ("Uhr-Daten aller Touren laden", lambda dry: uhrtraining.load_all(dry=dry)),
     "elev-zepp": ("Höhe aus Zepp-Uhr abgleichen", lambda dry: elev.zepp_fix_all()),
-    "export": ("Zepp-Import (ohne Upload)", lambda dry: sync.export_zepp()),
+    "export": ("Zepp-Import (ohne Upload)", lambda dry: sync.export_zepp_lauf()),
 }
 
 
@@ -495,6 +495,12 @@ def api_job(name: str, dry_run: bool = False):
     if not jobs.start(label, fn, dry_run):
         raise HTTPException(409, "Es läuft bereits ein Job")
     return {"started": label}
+
+
+@app.get("/api/zepp-status")
+def api_zepp_status():
+    """Übersicht-Baustein „Zepp-Import“ (3.30.0): ist ein Zugang eingerichtet, und wie ging der letzte Lauf aus? Nur für angemeldete Benutzer, nie für Betrachter (nicht in VIEWER_GET)."""
+    return {"konfiguriert": sync.zepp_konfiguriert(), "letzter": sync.zepp_letzter_lauf()}
 
 
 @app.post("/api/zepp-upload")

@@ -128,7 +128,7 @@ def test_dein_jahr_default_block_is_the_old_block(pw, app):
     rows = tours(app)
     pg = browser(pw, app)
     try:
-        assert pg.evaluate(OV)[:3] == ["hlast", "hyear", "hrecent"]                                            # an der alten Stelle
+        assert pg.evaluate(OV)[:4] == ["hlast", "hyear", "zeppimport", "hrecent"]                                            # an der alten Stelle
         assert pg.locator("main.home .slit").count() == 0 and pg.locator("#hyear .flk").count() == 0       # ohne Anpassung kein Kurztext, kein Rahmen
         assert pg.locator("#hyear h2").inner_text() == f"Dein Jahr {YEAR}"
         assert pg.locator("#hyear a.hmore").inner_text() == "Zur Statistik" and pg.locator("#hyear a.hmore").get_attribute("href") == "#/stats"
@@ -163,7 +163,7 @@ def test_dein_jahr_can_be_hidden_and_stays_hidden(pw, app):
         pg.reload()
         pg.wait_for_selector("main.home #hlast", timeout=T)
         pg.wait_for_function("() => !!document.querySelector('#hyear.sl-off') && !!document.querySelector('#slopen')", timeout=T)
-        assert pg.evaluate(OV)[:2] == ["hlast", "hrecent"]
+        assert pg.evaluate(OV)[:3] == ["hlast", "zeppimport", "hrecent"]
     finally:
         pg.browser_.close()
 
@@ -292,7 +292,7 @@ def test_two_and_three_instances_values_ranges_titles(pw, app):
     pg = browser(pw, app, dpr=2)
     try:
         pg.wait_for_function("() => document.querySelectorAll('main.home section.hyear').length === 3", timeout=T)
-        assert pg.evaluate(OV)[:5] == ["hlast", "hyear", "jahr", "jahr", "hrecent"]
+        assert pg.evaluate(OV)[:6] == ["hlast", "hyear", "zeppimport", "jahr", "jahr", "hrecent"]
         wait_nums(pg, "#hyear", calc(rows, ["hike"], frm=f"{YEAR}-01-01"))
         # Instanz 2: zwei Kennzahlen (Kilometer, Höhenmeter), eigener Titel, Rad, letzte 12 Monate
         x = calc(rows, ["mtb", "touringbicycle"], frm=start12)

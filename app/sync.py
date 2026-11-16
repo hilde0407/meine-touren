@@ -188,10 +188,10 @@ def export_zepp(limit=None):
     if limit:
         new = new[:limit]
     log(f"Zepp: {len(new)} neue Trainings")
-    n_gps = 0
+    n_gps, n_err, n_nogps, n_ad = 0, 0, 0, 0
     for i, s in enumerate(new, 1):
         tid = int(s["trackid"])
-        jobs.progress(f"Export {i}/{len(new)}")
+        jobs.progress(f"Export {i}/{len(new)}", i - 1, len(new))
         sport = gpxtools.ZEPP_SPORT.get(int(s.get("type", 0)), "type_%s" % s.get("type"))
         sport = gpxtools.ALIAS.get(sport, sport)
         if sport not in gpxtools.LABEL:
@@ -203,8 +203,10 @@ def export_zepp(limit=None):
             pts = zepp.decode_points(s, det)
         except Exception as e:
             log(f"  {tid}: Detail-Fehler {e}")
+            n_err += 1
             continue
         if not pts:
+            n_nogps += 1
             db.execute("INSERT OR REPLACE INTO workouts VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
                        (tid, tid, end_ts, s.get("type"), sport, dist, dur, None, "no_gps", None, "ohne GPS", int(time.time())))
             continue
@@ -224,7 +226,6 @@ def export_zepp(limit=None):
                     "in_komoot" if is_duplicate(tid, dist, dur, tours_k, tol) else "new", None, "", int(time.time())))
         time.sleep(0.2)
     if db.get("zepp_auto_adopt") == "1":          # auch früher exportierte, noch nicht übernommene Trainings
-        n_ad = 0
         for r in db.query("SELECT trackid FROM workouts WHERE status='new' AND gpx_path IS NOT NULL"):
             try:
                 adopt_workout(r["trackid"]); n_ad += 1
@@ -238,6 +239,48 @@ def export_zepp(limit=None):
         puls.backfill_hr(api)                                 # passende vorhandene Touren (auch Komoot/Datei) um den Puls ergänzen
     except Exception as e:  # noqa
         log(f"Puls abgleichen fehlgeschlagen: {e}")
+    return {"gesamt": len(summaries), "neu": len(new), "gps": n_gps, "ohne_gps": n_nogps, "uebernommen": n_ad, "fehler": n_err}
+
+
+def zepp_konfiguriert():
+    """Ist ein Zepp-Zugang eingerichtet (Token oder E-Mail mit Passwort)? Nur ja/nein, nie die Zugangsdaten."""
+    return bool(db.get("zepp_token") or (db.get("zepp_email") and db.get("zepp_password")))
+
+
+def zepp_fehlercode(msg):
+    m = (msg or "").lower()
+    if "fehlen" in m:
+        return "kein_zugang"
+    if any(k in m for k in ("401", "403", "token", "anmeld", "login", "auth", "passwort", "password")):
+        return "anmeldung"
+    if any(k in m for k in ("timeout", "timed out", "connection", "resolve", "unreachable", "netz", "ssl", "max retries")):
+        return "netz"
+    return "sonst"
+
+
+def zepp_letzter_lauf():
+    try:
+        d = json.loads(db.get("zepp_last_run") or "")
+        return d if isinstance(d, dict) else None
+    except Exception:  # noqa
+        return None
+
+
+def export_zepp_lauf():
+    """Zepp-Import als Job (3.30.0): wie export_zepp(), merkt sich zusätzlich das Ergebnis des Laufs (Zeitpunkt, Zahlen oder Fehler) für die Übersicht."""
+    t0 = int(time.time())
+    try:
+        r = export_zepp() or {}
+    except Exception as e:  # noqa
+        msg = str(e)
+        for k in ("zepp_token", "zepp_password", "zepp_email"):
+            v = db.get(k)
+            if v:
+                msg = msg.replace(str(v), "…")
+        db.put("zepp_last_run", json.dumps({"ts": int(time.time()), "start": t0, "ok": False, "fehler": msg[:200], "code": zepp_fehlercode(msg)}))
+        raise
+    db.put("zepp_last_run", json.dumps({"ts": int(time.time()), "start": t0, "ok": True, **r}))
+    return r
 
 
 def _zepp_api():

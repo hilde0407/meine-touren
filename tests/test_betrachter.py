@@ -29,6 +29,7 @@ def test_viewer_and_live():
         assert v.delete(f"/api/tours/{tours[0]['id']}").status_code == 403
         assert v.get("/api/users").status_code in (401, 403)
         assert v.get("/api/jobs").status_code == 403
+        assert v.post("/api/jobs/export").status_code == 403 and v.get("/api/zepp-status").status_code == 403           # 3.30.0: Zepp-Import startet nur der Besitzer
         tid = tours[0]["id"]
         for bad in (f"/api/tours/{tid}/pdf", f"/api/tours/{tid}/trackfix", f"/api/tours/{tid}/shares", "/api/trips/x/pdf", "/api/recap/2026/pdf", "/api/photo-library"):
             assert v.get(bad).status_code == 403, bad

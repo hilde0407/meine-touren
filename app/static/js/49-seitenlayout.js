@@ -42,6 +42,7 @@ const SL_REG = {
   uebersicht: [
     {id: "aufmacher", w: "voll", title: "Zuletzt unterwegs (Aufmacher)", page: "uebersicht", plain: true, ws: ["voll"]},
     {id: "jahr", w: "voll", title: "Dein Jahr", page: "uebersicht", plain: true, build: "jahr"},
+    {id: "zepp", w: "voll", title: "Zepp-Import", page: "uebersicht", build: "zeppimport", def: true, ckeys: ["tl_w_zepp"]},                // 3.30.0: kompakte Karte mit Import-Knopf (Baustein „zeppimport“) gleich unter „Dein Jahr“
     {id: "zuletzt", w: "voll", title: "Letzte Touren", page: "uebersicht", plain: true, ws: ["voll", "zweidrittel"]},
     {id: "tag", w: "halb", title: "An diesem Tag", page: "uebersicht", group: "cols", plain: true},
     {id: "erinn", w: "halb", title: "Erinnerungen", page: "uebersicht", group: "cols", plain: true},
@@ -863,6 +864,7 @@ function slOpener(root, edit) {
     w.className = "slopen";
     w.innerHTML = `<button type="button" class="btn ghost sm" id="slopen" data-a="edit">${slIcon.sliders}<span>Seite anpassen</span></button><button type="button" class="btn ghost sm" id="slviews" aria-haspopup="dialog">Ansichten</button>`;
   }
+  if (root.matches("main.home") && typeof ziQuick === "function") ziQuick(w);                // 3.30.0: Schnell-Knopf „Zepp“ (52-bausteine-uebersicht.js), damit der Import auf dem Handy ohne Scrollen erreichbar ist
   const b = w.querySelector("#slopen"), vb = w.querySelector("#slviews");
   b.hidden = !!edit;
   if (vb) vb.hidden = !!edit;                                                              // 3.24.0: der Knopf „Ansichten“ steht immer neben „Seite anpassen“ (im Bearbeitungsmodus sitzt er in der Leiste)
@@ -1105,12 +1107,13 @@ function slCatalog() {
     cats = SL_CATS.filter(([k]) => list.some(([, T]) => (T.cat || "zahlen") === k)),
     card = ([type, T]) => {
       const n = have(type),
-        dis = !T.multi && n > 0;
+        std = !T.multi && SL_REG[SL.fam].some(r => r.build === type && !(slSt(SL.fam).hidden || []).includes(r.id)),             // 3.30.0: steht als Standard-Abschnitt schon (sichtbar) auf der Seite
+        dis = !T.multi && (n > 0 || std);
       if (T.neu)                                                                                         // 3.28.0: Baustein, den der Benutzer in einem eigenen Dialog zusammenstellt
         return `<article class="slcard" data-cat="${T.cat || "zahlen"}"><div class="slpv" aria-hidden="true">${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name)}</h3><p>${esc(T.desc || "")}</p>` +
           `<button type="button" class="btn sm" data-neu="${type}">${n ? "Noch eine erstellen" : "Erstellen"}</button></div></article>`;
       return `<article class="slcard" data-cat="${T.cat || "zahlen"}"><div class="slpv" aria-hidden="true">${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name || T.title(T.defaults || {}))}</h3><p>${esc(T.desc || "")}</p>` +
-        `<button type="button" class="btn sm${dis ? " ghost" : ""}" data-add="${type}"${dis ? " disabled" : ""}>${dis ? "Bereits hinzugefügt" : n ? "Noch einmal hinzufügen" : "Hinzufügen"}</button></div></article>`;
+        `<button type="button" class="btn sm${dis ? " ghost" : ""}" data-add="${type}"${dis ? " disabled" : ""}>${dis ? (std && !n ? "Steht schon auf der Seite" : "Bereits hinzugefügt") : n ? "Noch einmal hinzufügen" : "Hinzufügen"}</button></div></article>`;
     };
   slModal("Baustein hinzufügen", (body, close) => {
     body.innerHTML =

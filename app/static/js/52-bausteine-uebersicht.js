@@ -314,6 +314,20 @@ Object.assign(window.SL_WT, {
       slBadge(c, gs.length === 1 ? (done ? "erreicht" : "1 Ziel") : `${done} von ${gs.length} erreicht`);
     },
   },
+  zeppimport: {
+    fam: "uebersicht", cat: "quellen", icon: "watch", name: "Zepp-Import", title: () => "Zepp-Import", defaults: {}, filter: {range: null},
+    desc: "Startet den Import deiner Trainings aus Zepp mit einem Tipp, zeigt den Fortschritt und wie der letzte Lauf ausging. Fehlt der Zepp-Zugang, führt ein Knopf zur Einrichtung. Für Betrachter unsichtbar.",
+    preview: () => slPrev('<span class="zpi-pv"><b>Zepp-Import starten</b></span>'),
+    render(c, b) {
+      if (typeof isViewer === "function" && isViewer()) {                     // Betrachter dürfen nichts starten (der Server lehnt es ohnehin ab): Karte bleibt unsichtbar
+        c.dataset.hn = "aus";
+        return;
+      }
+      ZI.cards.add(c);
+      ziPaint(c);
+      return ziTick();
+    },
+  },
   rueckblick: {
     fam: "uebersicht", cat: "rueck", icon: "trend", name: "Jahres-Rückblick", title: cfg => `Rückblick ${slRbRange(cfg).year}`, multi: true, defaults: {}, filter: {range: "year"},
     desc: "Das Jahr in einer Kachel: Touren, Kilometer und Höhenmeter, die Monate als Säulen, die längste und die höchste Tour.",
@@ -336,6 +350,132 @@ Object.assign(window.SL_WT, {
     },
   },
 });
+
+/* =====================  3.30.0 Zepp-Import auf der Übersicht  =====================
+   Ein Zustand für alle Karten dieses Typs (ZI): Job-Stand aus GET /api/jobs (der bestehende Job „export“, POST /api/jobs/export), Zugang und letzter Lauf aus GET /api/zepp-status.
+   Solange ein Lauf läuft, fragt die Karte alle 1,5 s nach; danach werden die Touren neu geladen, damit neue Touren sofort erscheinen. Kein Doppelstart: Knopf gesperrt, solange irgendein Job läuft. */
+const ZI_JOB = "Zepp-Import (ohne Upload)";                    // Name des Jobs in app/main.py (JOBS["export"])
+const ZI = {cards: new Set(), quick: new Set(), job: null, st: null, tm: null, watch: false, busy: false, err: "", loaded: false};
+const ziRun = () => !!(ZI.job && ZI.job.running);
+const ziMine = () => ziRun() && ZI.job.running === ZI_JOB;
+function ziWhen(ts) {
+  const d = new Date(ts * 1000), same = d.toDateString() === new Date().toDateString();
+  return same ? d.toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"}) + " Uhr" : d.toLocaleString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"});
+}
+const ziN = (n, one, many) => (n === 1 ? one : many.replace("{}", nf(n, 0)));
+function ziPaint(c) {
+  const b = c.querySelector(".tlsb");
+  if (!b) return;
+  const st = ZI.st, conf = st ? !!st.konfiguriert : true, last = st && st.letzter, mine = ziMine(), other = ziRun() && !mine, run = mine || ZI.busy, rows = [];
+  let btn;
+  if (!conf) btn = '<a class="btn zpb" href="#/admin?tab=quellen"><span>Zepp einrichten</span></a>';
+  else btn = `<button type="button" class="btn zpb${run ? " zprun" : ""}" data-a="start"${run || other ? " disabled" : ""}${run ? ' aria-busy="true"' : ""}><i class="zpic" aria-hidden="true">⟳</i><span>${run ? "Import läuft …" : "Zepp-Import starten"}</span></button>`;
+  if (!conf) rows.push('<p class="zpm">Für den Import fehlt noch der Zepp-Zugang. Trage ihn in der Verwaltung ein.</p>');
+  else if (mine) {
+    const j = ZI.job, tot = j.total || 0, done = j.done || 0;
+    rows.push(tot ? `<p class="zpm">${esc(`Training ${Math.min(tot, done + 1)} von ${tot}`)}</p>${slBr((done / tot) * 100)}` : '<p class="zpm">Verbinde mit Zepp …</p>');
+  } else if (other) rows.push(`<p class="zpm">${esc(`Es läuft gerade ein anderer Vorgang: ${ZI.job.running}`)}</p>`);
+  else if (ZI.err) rows.push(`<p class="zpm zpbad">${esc(`Der Import konnte nicht gestartet werden: ${ZI.err}`)}</p>`);
+  else if (!st && !ZI.loaded) rows.push('<p class="zpm">Status wird geladen …</p>');
+  else if (!st) rows.push('<p class="zpm">Der Status konnte nicht geladen werden.</p>');
+  else if (!last) rows.push('<p class="zpm">Noch kein Import gestartet.</p>');
+  else if (last.ok) {
+    const l = [];
+    l.push(last.neu ? ziN(last.neu, "1 neues Training gefunden", "{} neue Trainings gefunden") : "Keine neuen Trainings.");
+    if (last.uebernommen) l.push(ziN(last.uebernommen, "1 als Tour übernommen", "{} als Tour übernommen"));
+    if (last.ohne_gps) l.push(ziN(last.ohne_gps, "1 ohne GPS-Daten vermerkt", "{} ohne GPS-Daten vermerkt"));
+    if (last.fehler) l.push(ziN(last.fehler, "1 konnte nicht geladen werden", "{} konnten nicht geladen werden"));
+    rows.push(`<p class="zpm zpok">${esc(`Letzter Lauf: ${ziWhen(last.ts)}`)}</p><ul class="zpl">${l.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`);
+    if (last.gps && !last.uebernommen) rows.push('<p class="zpm"><a href="#/admin?tab=quellen">Neue Trainings in der Verwaltung übernehmen ›</a></p>');
+  } else {
+    const why = {kein_zugang: "Der Zepp-Zugang fehlt.", anmeldung: "Zepp hat die Anmeldung abgelehnt. Hole in der Verwaltung ein neues Token.", netz: "Zepp war nicht erreichbar. Prüfe die Internetverbindung und versuche es noch einmal."}[last.code];
+    rows.push(`<p class="zpm zpbad">${esc(`Der letzte Import (${ziWhen(last.ts)}) ist fehlgeschlagen.`)}</p><p class="zpm">${why ? esc(why) : esc(`Meldung: ${last.fehler || ""}`)}</p><p class="zpm"><a href="#/admin?tab=quellen">Zugang in der Verwaltung prüfen ›</a></p>`);
+  }
+  const html = `<div class="zpi">${btn}<div class="zpt" role="status" aria-live="polite">${rows.join("")}</div></div>`;
+  if (b.dataset.zp !== html) {
+    b.dataset.zp = html;
+    b.innerHTML = html;
+    const k = b.querySelector("[data-a=start]");
+    if (k) k.onclick = ziStart;
+  }
+  slBadge(c, mine ? "läuft" : last && !last.ok && conf && !run ? "Fehler" : "");
+}
+const ziPaintAll = () => {
+  ZI.cards.forEach(c => (c.isConnected ? ziPaint(c) : ZI.cards.delete(c)));
+  ZI.quick.forEach(q => {                                                         // der Knopf wird erst nach dem Aufbau in die Seite gesetzt: erst entfernen, wenn er einmal dort stand
+    if (q.isConnected) q.dataset.seen = "1";
+    if (q.isConnected || !q.dataset.seen) ziPaintQuick(q);
+    else ZI.quick.delete(q);
+  });
+};
+/* Schnell-Knopf „⟳ Zepp“ in der Kopfzeile der Übersicht (neben „Seite anpassen“): startet dasselbe, ohne Zugang führt er zur Einrichtung */
+function ziQuick(w) {
+  if (typeof isViewer === "function" && isViewer()) return;
+  let q = w.querySelector("#slzepp");
+  if (!q) {
+    q = document.createElement("button");
+    q.type = "button";
+    q.id = "slzepp";
+    q.className = "btn ghost sm";
+    q.onclick = () => (ZI.st && !ZI.st.konfiguriert ? (location.hash = "#/admin?tab=quellen") : ziStart());
+    w.insertBefore(q, w.firstChild);
+  }
+  ZI.quick.add(q);
+  ziPaintQuick(q);
+  if (!ZI.loaded && !ZI.tm) ziTick();
+}
+function ziPaintQuick(q) {
+  const run = ziMine() || ZI.busy, conf = !ZI.st || ZI.st.konfiguriert, last = ZI.st && ZI.st.letzter, bad = conf && !run && last && !last.ok, key = `${run}|${conf}|${bad}|${ziRun()}`;
+  if (q.dataset.k === key) return;
+  q.dataset.k = key;
+  q.classList.toggle("zprun", run);
+  q.disabled = ziRun() || ZI.busy;
+  q.setAttribute("aria-busy", String(run));
+  q.innerHTML = `<i class="zpic" aria-hidden="true">⟳</i><span>${run ? "Zepp läuft …" : conf ? (bad ? "Zepp (Fehler)" : "Zepp") : "Zepp einrichten"}</span>`;
+  q.title = conf ? "Zepp-Import starten" : "Zepp einrichten";
+  q.setAttribute("aria-label", conf ? "Zepp-Import starten" : "Zepp einrichten");
+}
+/* Stand holen (erst der Job, dann der Status: der Lauf trägt sein Ergebnis ein, bevor er als beendet gilt), malen, bei Bedarf weiter fragen */
+async function ziTick() {
+  clearTimeout(ZI.tm);
+  ZI.tm = null;
+  ziPaintAll();
+  if (!ZI.cards.size && !ZI.quick.size) return;
+  const j = await slGet("/api/jobs");
+  if (j) ZI.job = j;
+  const s = await slGet("/api/zepp-status");
+  if (s) ZI.st = s;
+  ZI.loaded = true;
+  const mine = ziMine();
+  if (mine) ZI.watch = true;
+  const fin = ZI.watch && !ZI.busy && !ziRun();
+  if (fin) ZI.watch = false;
+  ziPaintAll();
+  if (fin && ZI.job && ZI.job.ok && typeof loadTours === "function") {      // fertig: neue Touren in die Übersicht (und alle Abschnitte, die sie zeigen)
+    try {
+      ROUTES = null;
+      await loadTours();
+      if (/^#?\/?(dash)?$/.test(location.hash)) await route();
+    } catch (e) {}
+  }
+  if ((ZI.cards.size || ZI.quick.size) && (ziRun() || ZI.busy || ZI.watch)) ZI.tm = setTimeout(ziTick, 1500);
+}
+async function ziStart(ev) {
+  if (ev) ev.preventDefault();
+  if (ZI.busy || ziRun()) return;
+  ZI.busy = true;
+  ZI.err = "";
+  ziPaintAll();
+  try {
+    await api("/api/jobs/export", {method: "POST"});
+    ZI.watch = true;
+    ZI.job = {...(ZI.job || {}), running: ZI_JOB, progress: "", done: null, total: null, ok: null};
+  } catch (e) {
+    ZI.err = String((e && e.message) || e);
+  }
+  ZI.busy = false;
+  await ziTick();
+}
 
 /* =====================  3.19.0 „Dein Jahr“ als Baustein  =====================
    Gerüst wie der frühere feste Block der Startseite (41-startseite.js): Überschrift mit Vorjahresvergleich und Link, Kennzahlen, Monatssäulen, Jahresziele.
@@ -431,7 +571,7 @@ function slYearShell(it) {
     kennzahlen: "halb", tempo: "halb", vergleich: "halb", pulszonen: "halb", wetter: "halb", fotostreifen: "voll", notiz: "halb", splits: "voll", steigung: "halb", bewegung: "halb",
     durchschnitt: "halb", jahresrang: "halb", tageslicht: "halb", gipfel: "halb", vergleiche: "halb", stimmung: "halb", fotohighlights: "voll", miniprofil: "voll", steckbrief: "halb",
     jahr: "voll", periode: "halb", belastung: "halb", jahresvergleich: "halb", letzte: "halb", neuefotos: "voll", auffaellig: "drittel", rekorde: "halb", heutevor: "halb", jahresziel: "halb",
-    serie: "halb", heatmap: "voll", meilensteine: "halb", wochentage: "halb", sportarten: "halb", wiederentdecken: "voll", orte: "halb", uhrenzeit: "voll", ausruestung: "halb", geplant: "halb", rueckblick: "voll", jahresziele: "halb",
+    serie: "halb", heatmap: "voll", meilensteine: "halb", wochentage: "halb", sportarten: "halb", wiederentdecken: "voll", orte: "halb", uhrenzeit: "voll", ausruestung: "halb", geplant: "halb", rueckblick: "voll", jahresziele: "halb", zeppimport: "halb",
   };
   Object.entries(META).forEach(([k, w]) => {
     const T = window.SL_WT[k];
@@ -440,4 +580,5 @@ function slYearShell(it) {
     T.seiten = T.fam === "tour" ? ["tour"] : ["uebersicht", "tour", "statistik"];
   });
   window.SL_WT.auffaellig.seiten = ["uebersicht"];                                          // Verwaltungs-Hinweis auf Geräte, gehört zur Übersicht
+  window.SL_WT.zeppimport.seiten = ["uebersicht"];                                          // ein Import-Knopf gehört nur zur Übersicht
 }

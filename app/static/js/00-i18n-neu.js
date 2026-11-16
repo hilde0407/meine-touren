@@ -2314,4 +2314,37 @@ Durchschnittspuls einer Tour || Average heart rate of a tour || Fréquence cardi
 Höchstpuls einer Tour || Peak heart rate of a tour || Fréquence cardiaque maximale d’un parcours || Pulso máximo de una ruta
 Für 1 Tour wird die Gehzeit noch berechnet. Öffne die Seite später erneut. || The walking time of 1 tour is still being calculated. Open the page again later. || Le temps de marche de 1 parcours est encore en cours de calcul. Rouvrez la page plus tard. || El tiempo de marcha de 1 ruta aún se está calculando. Vuelve a abrir la página más tarde.
 Für {} Touren wird die Gehzeit noch berechnet. Öffne die Seite später erneut. || The walking time of {} tours is still being calculated. Open the page again later. || Le temps de marche de {} parcours est encore en cours de calcul. Rouvrez la page plus tard. || El tiempo de marcha de {} rutas aún se está calculando. Vuelve a abrir la página más tarde.
+Zepp-Import || Zepp import || Import Zepp || Importación de Zepp
+Zepp einrichten || Set up Zepp || Configurer Zepp || Configurar Zepp
+Import läuft … || Import running … || Import en cours … || Importación en curso …
+läuft || running || en cours || en curso
+Verbinde mit Zepp … || Connecting to Zepp … || Connexion à Zepp … || Conectando con Zepp …
+Training {} von {} || Workout {} of {} || Entraînement {} sur {} || Entrenamiento {} de {}
+Status wird geladen … || Loading status … || Chargement de l’état … || Cargando el estado …
+Der Status konnte nicht geladen werden. || The status could not be loaded. || L’état n’a pas pu être chargé. || No se pudo cargar el estado.
+Noch kein Import gestartet. || No import started yet. || Aucun import lancé pour l’instant. || Aún no se ha iniciado ninguna importación.
+Für den Import fehlt noch der Zepp-Zugang. Trage ihn in der Verwaltung ein. || The Zepp access needed for the import is still missing. Enter it in Admin. || L’accès Zepp nécessaire à l’import manque encore. Saisissez-le dans l’administration. || Aún falta el acceso a Zepp necesario para la importación. Introdúcelo en la administración.
+Es läuft gerade ein anderer Vorgang: {} || Another task is running right now: {} || Une autre tâche est en cours : {} || Ahora mismo se está ejecutando otra tarea: {}
+Der Import konnte nicht gestartet werden: {} || The import could not be started: {} || L’import n’a pas pu être lancé : {} || No se pudo iniciar la importación: {}
+Letzter Lauf: {} || Last run: {} || Dernier passage : {} || Última ejecución: {}
+Keine neuen Trainings. || No new workouts. || Aucun nouvel entraînement. || No hay entrenamientos nuevos.
+1 neues Training gefunden || 1 new workout found || 1 nouvel entraînement trouvé || 1 entrenamiento nuevo encontrado
+{} neue Trainings gefunden || {} new workouts found || {} nouveaux entraînements trouvés || {} entrenamientos nuevos encontrados
+1 als Tour übernommen || 1 added as a tour || 1 repris comme parcours || 1 añadido como ruta
+{} als Tour übernommen || {} added as tours || {} repris comme parcours || {} añadidos como rutas
+1 ohne GPS-Daten vermerkt || 1 noted without GPS data || 1 noté sans données GPS || 1 anotado sin datos GPS
+{} ohne GPS-Daten vermerkt || {} noted without GPS data || {} notés sans données GPS || {} anotados sin datos GPS
+1 konnte nicht geladen werden || 1 could not be loaded || 1 n’a pas pu être chargé || 1 no se pudo cargar
+{} konnten nicht geladen werden || {} could not be loaded || {} n’ont pas pu être chargés || {} no se pudieron cargar
+Neue Trainings in der Verwaltung übernehmen › || Adopt new workouts in Admin › || Reprendre les nouveaux entraînements dans l’administration › || Adoptar los entrenamientos nuevos en la administración ›
+Der Zepp-Zugang fehlt. || The Zepp access is missing. || L’accès Zepp manque. || Falta el acceso a Zepp.
+Zepp hat die Anmeldung abgelehnt. Hole in der Verwaltung ein neues Token. || Zepp rejected the sign-in. Get a new token in Admin. || Zepp a refusé la connexion. Obtenez un nouveau jeton dans l’administration. || Zepp rechazó el inicio de sesión. Obtén un token nuevo en la administración.
+Zepp war nicht erreichbar. Prüfe die Internetverbindung und versuche es noch einmal. || Zepp could not be reached. Check your internet connection and try again. || Zepp était injoignable. Vérifiez la connexion Internet et réessayez. || No se pudo contactar con Zepp. Comprueba la conexión a Internet e inténtalo de nuevo.
+Der letzte Import ({}) ist fehlgeschlagen. || The last import ({}) failed. || Le dernier import ({}) a échoué. || La última importación ({}) falló.
+Meldung: {} || Message: {} || Message : {} || Mensaje: {}
+Zugang in der Verwaltung prüfen › || Check the access in Admin › || Vérifier l’accès dans l’administration › || Comprobar el acceso en la administración ›
+Startet den Import deiner Trainings aus Zepp mit einem Tipp, zeigt den Fortschritt und wie der letzte Lauf ausging. Fehlt der Zepp-Zugang, führt ein Knopf zur Einrichtung. Für Betrachter unsichtbar. || Starts the import of your workouts from Zepp with one tap, shows the progress and how the last run went. If the Zepp access is missing, a button leads to the setup. Invisible to viewers. || Lance l’import de vos entraînements depuis Zepp d’un geste, affiche la progression et le résultat du dernier passage. Si l’accès Zepp manque, un bouton mène à la configuration. Invisible pour les lecteurs. || Inicia con un toque la importación de tus entrenamientos desde Zepp, muestra el progreso y cómo fue la última ejecución. Si falta el acceso a Zepp, un botón lleva a la configuración. Invisible para los espectadores.
+Steht schon auf der Seite || Already on the page || Déjà sur la page || Ya está en la página
+Zepp läuft … || Zepp running … || Zepp en cours … || Zepp en curso …
+Zepp (Fehler) || Zepp (error) || Zepp (erreur) || Zepp (error)
 `;
