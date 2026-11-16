@@ -4,6 +4,10 @@ const q = new URLSearchParams(location.search);
   const info = await (await fetch("/api/photo-info")).json();
   let sec = (+q.get("sec") || +(() => { try { return localStorage.getItem("showSec"); } catch (e) { return 0; } })() || info.slideshow_seconds || 6) * 1000;
   const u = new URLSearchParams({limit: 1500}); ["tour","year"].forEach(k => q.get(k) && u.set(k === "tour" ? "tour_id" : k, q.get(k))); if (q.get("random")) u.set("random", "true");
+  // 3.32.0 (Kachel „Erinnerungen“): Aktivität, Zeitraum, Kalendertag, neueste und beste Fotos – der Server prüft jeden Wert (app/fotofilter.py)
+  [["sport", "sport"], ["from", "date_from"], ["to", "date_to"], ["day", "day"], ["before", "before"]].forEach(([a, b]) => q.get(a) && u.set(b, q.get(a)));
+  if (q.get("recent")) u.set("recent", "true");
+  if (q.get("best") && !q.get("tour")) { u.set("best", "true"); u.set("limit", Math.max(3, Math.min(300, +q.get("best") || 60))); }
   let list = await (await fetch("/api/photos?" + u)).json();
   if (q.get("best") && q.get("tour")) { const b = await (await fetch(`/api/tours/${encodeURIComponent(q.get("tour"))}/best-photos?n=${+q.get("best") || 10}`)).json(); const nm = (list[0] || {}).tour_name; list = b.photos.map(p => ({...p, tour_name: nm})); }
   if (!list.length) { document.getElementById("msg").style.display = "flex"; return; }
@@ -45,7 +49,8 @@ const q = new URLSearchParams(location.search);
   spdTxt();
   // Teilen (Tour, Jahr oder alle Fotos; nicht bei der Zufalls-Diashow): Link ohne Konto, 24 Stunden gültig, ohne Kommentare; Jahr/alle: Fotos mit Tourname (seit 3.31.1), höchstens 300 beste
   const bshr = document.getElementById("bshr"), fsh = document.getElementById("fsh");
-  if (q.get("tour") || q.get("year") || !q.get("random")) bshr.style.display = "";
+  const gefiltert = ["sport", "from", "to", "day", "recent"].some(k => q.get(k));          // 3.32.0: ein Link teilt nur „Tour“, „Jahr“ oder „alle“, keine gefilterte Auswahl
+  if (!gefiltert && (q.get("tour") || q.get("year") || !q.get("random"))) bshr.style.display = "";
   const note = txt => { fsh.textContent = txt; fsh.style.display = "block"; setTimeout(() => { fsh.style.display = "none"; }, 4000); };
   bshr.onclick = async e => {
     e.stopPropagation(); paused = true; clearTimeout(timer); document.getElementById("bpp").textContent = "▶"; poke(); bshr.disabled = true;

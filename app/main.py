@@ -17,7 +17,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche, layout, bausteine_daten, hinweise, kennzahl, suche
+from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche, layout, bausteine_daten, hinweise, kennzahl, suche, fotofilter
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -739,8 +739,14 @@ def _photos_located(limit, year=0):
 
 
 @app.get("/api/photos")
-def api_photos(tour_id: str = "", year: int = 0, random: bool = False, recent: bool = False, limit: int = 500, unassigned: bool = False, gps: bool = False, est: bool = False):
-    where, args = ["1=1"], []
+def api_photos(tour_id: str = "", year: int = 0, random: bool = False, recent: bool = False, limit: int = 500, unassigned: bool = False, gps: bool = False, est: bool = False,
+               sport: str = "", date_from: str = "", date_to: str = "", day: str = "", before: int = 0, best: bool = False):
+    """Fotos. 3.32.0: zusätzlich sport (kommagetrennt), date_from/date_to (JJJJ-MM-TT), day (MM-TT) mit before (Jahr) und best (die besten Fotos), alles geprüft in fotofilter.py."""
+    limit = max(1, min(limit, fotofilter.MAX_LIMIT))
+    extra = fotofilter.build(sport, date_from, date_to, day, before)
+    if extra is None:
+        return []
+    where, args = ["1=1"] + extra[0], list(extra[1])
     if gps and est:        # Fotos ohne eigenen Aufnahmeort: Position über die Uhrzeit auf der Strecke der Tour berechnen (est=1)
         return _photos_located(limit, year)
     if gps:
@@ -752,6 +758,8 @@ def api_photos(tour_id: str = "", year: int = 0, random: bool = False, recent: b
     if year:
         a = int(datetime(year, 1, 1, tzinfo=TZ).timestamp()); b = int(datetime(year + 1, 1, 1, tzinfo=TZ).timestamp())
         where.append("p.taken_ts>=? AND p.taken_ts<?"); args += [a, b]
+    if best:
+        return fotofilter.best(where, args, limit)
     order = "RANDOM()" if random else "p.taken_ts DESC" if recent else "p.taken_ts"
     rows = db.query(f"SELECT p.id,p.taken_ts,p.tour_id,p.lat,p.lng,p.manual,p.offset_s,t.name AS tour_name FROM photos p LEFT JOIN tours t ON t.id=p.tour_id WHERE {' AND '.join(where)} ORDER BY {order} LIMIT ?", (*args, limit))
     return rows

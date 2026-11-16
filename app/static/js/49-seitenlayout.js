@@ -45,7 +45,7 @@ const SL_REG = {
     {id: "zepp", w: "voll", title: "Touren holen", page: "uebersicht", build: "zeppimport", def: true, ckeys: ["tl_w_zepp"]},                // 3.30.0: kompakte Karte mit Import-Knopf (Baustein „zeppimport“) gleich unter „Dein Jahr“
     {id: "zuletzt", w: "voll", title: "Letzte Touren", page: "uebersicht", plain: true, ws: ["voll", "zweidrittel"]},
     {id: "tag", w: "halb", title: "An diesem Tag", page: "uebersicht", group: "cols", plain: true},
-    {id: "erinn", w: "halb", title: "Erinnerungen", page: "uebersicht", group: "cols", plain: true},
+    {id: "erinn", w: "halb", title: "Erinnerungen", page: "uebersicht", group: "cols", plain: true, build: "erinn"},                // 3.32.0: einstellbarer Baustein (60-bausteine-erinnerungen.js), ohne Einstellung wie bisher
   ],
   /* 3.22.0 Statistik: die Abschnitte der Seite #/stats in der bisherigen Reihenfolge (Kapselung in 56-statistik.js: jeder Abschnitt ist eine Karte im Format von tlCard).
      „bl“ und „tp“ (Belastung, Tempo) sind schon einklappbare Abschnitte mit eigenem Zustand (plain). Fehlen Daten (Tage, Fotos), gibt es den Abschnitt nicht. */

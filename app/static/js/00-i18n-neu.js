@@ -2390,4 +2390,42 @@ Letzter Import fehlgeschlagen || Last import failed || Dernier import échoué |
 Schnell-Knopf zum Touren holen in der Kopfzeile || Quick button for fetching tours in the header || Bouton rapide pour récupérer des parcours dans l’en-tête || Botón rápido para obtener rutas en la cabecera
 Schnell-Knopf zum Touren holen: an || Quick button for fetching tours: on || Bouton rapide pour récupérer des parcours : activé || Botón rápido para obtener rutas: activado
 Schnell-Knopf zum Touren holen: aus || Quick button for fetching tours: off || Bouton rapide pour récupérer des parcours : désactivé || Botón rápido para obtener rutas: desactivado
+Diashow starten || Start slideshow || Lancer le diaporama || Iniciar presentación
+Neu mischen || Shuffle again || Mélanger à nouveau || Volver a mezclar
+Zufällige Fotos || Random photos || Photos aléatoires || Fotos aleatorias
+An diesem Tag in früheren Jahren || On this day in earlier years || Ce jour-là, les années précédentes || En este día de años anteriores
+Neueste Fotos || Newest photos || Photos les plus récentes || Fotos más recientes
+Raster || Grid || Grille || Cuadrícula
+Streifen || Strip || Bandeau || Tira
+Einzelbild-Show || Single-photo show || Diaporama photo par photo || Pase de una foto
+Quadratisch || Square || Carré || Cuadrado
+Originalformat || Original format || Format d’origine || Formato original
+Klein || Small || Petit || Pequeño
+Mittel || Medium || Moyen || Mediano
+Groß || Large || Grand || Grande
+Normal || Normal || Normal || Normal
+Hoch || Tall || Haut || Alto
+Einstellungen: Erinnerungen || Settings: Memories || Réglages : Souvenirs || Ajustes: Recuerdos
+Welche Fotos || Which photos || Quelles photos || Qué fotos
+Auswahl || Selection || Sélection || Selección
+Filter: Aktivität und Zeitraum || Filter: activity and period || Filtre : activité et période || Filtro: actividad y período
+Darstellung || Display || Affichage || Presentación
+Seitenverhältnis der Kacheln || Aspect ratio of the tiles || Format des vignettes || Proporción de las miniaturas
+In der Einzelbild-Show bestimmt die Höhe die Form; „Originalformat“ zeigt das ganze Bild ohne Zuschnitt. || In the single-photo show the height sets the shape; “Original format” shows the whole photo without cropping. || Dans le diaporama photo par photo, la hauteur détermine la forme ; « Format d’origine » affiche la photo entière sans recadrage. || En el pase de una foto la altura determina la forma; «Formato original» muestra la foto entera sin recortar.
+Größe der Bilder || Size of the photos || Taille des photos || Tamaño de las fotos
+Höhe der Show || Height of the show || Hauteur du diaporama || Altura del pase
+Tempo (Sekunden je Bild) || Speed (seconds per photo) || Rythme (secondes par photo) || Ritmo (segundos por foto)
+Bildunterschrift (Tourname und Datum) || Caption (tour name and date) || Légende (nom du parcours et date) || Pie de foto (nombre de la ruta y fecha)
+Knopf „Neu mischen“ (zieht neue Zufallsfotos, sonst mischt er die Reihenfolge) || “Shuffle again” button (draws new random photos, otherwise reshuffles the order) || Bouton « Mélanger à nouveau » (tire de nouvelles photos au hasard, sinon mélange l’ordre) || Botón «Volver a mezclar» (saca nuevas fotos al azar; si no, mezcla el orden)
+Link „Diashow starten“ || “Start slideshow” link || Lien « Lancer le diaporama » || Enlace «Iniciar presentación»
+Standardwerte || Defaults || Valeurs par défaut || Valores predeterminados
+Alle Einstellungen dieser Kachel auf den Standard setzen || Reset all settings of this tile to the defaults || Remettre tous les réglages de cette vignette par défaut || Restablecer todos los ajustes de esta ficha a los valores predeterminados
+Keine Fotos mit diesen Einstellungen. || No photos with these settings. || Aucune photo avec ces réglages. || No hay fotos con estos ajustes.
+Fotos, seitlich scrollbar || Photos, scrollable sideways || Photos, défilement latéral || Fotos, desplazables hacia los lados
+Anhalten || Stop || Arrêter || Detener
+Abspielen || Play || Lecture || Reproducir
+Foto {} von {} || Photo {} of {} || Photo {} sur {} || Foto {} de {}
+Foto || Photo || Photo || Foto
+Fotos aus deinen Touren als Erinnerung: zufällig, die besten, an diesem Tag in früheren Jahren oder die neuesten, als Raster, Streifen oder Einzelbild-Show mit Link zur passenden Diashow. Anzahl, Aktivität, Zeitraum, Bildgröße und Breite sind einstellbar. In der Übersicht steht „Erinnerungen“ schon; hier kannst du weitere Kacheln mit anderen Einstellungen hinzufügen. || Photos from your tours as memories: random, the best ones, on this day in earlier years or the newest, as a grid, strip or single-photo show with a link to the matching slideshow. Number, activity, period, photo size and width are adjustable. “Memories” is already on the overview; here you can add more tiles with other settings. || Des photos de vos parcours comme souvenirs : au hasard, les meilleures, ce jour-là les années précédentes ou les plus récentes, en grille, en bandeau ou en diaporama photo par photo, avec un lien vers le diaporama correspondant. Nombre, activité, période, taille des photos et largeur sont réglables. « Souvenirs » figure déjà sur l’aperçu ; vous pouvez ici ajouter d’autres vignettes avec d’autres réglages. || Fotos de tus rutas como recuerdos: al azar, las mejores, en este día de años anteriores o las más recientes, como cuadrícula, tira o pase de una foto con un enlace a la presentación correspondiente. Se pueden ajustar el número, la actividad, el período, el tamaño de las fotos y el ancho. «Recuerdos» ya está en el resumen; aquí puedes añadir más fichas con otros ajustes.
+Art der Darstellung || Type of display || Type d’affichage || Tipo de presentación
 `;

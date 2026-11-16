@@ -1,4 +1,4 @@
-/* =====================  Startseite: zuletzt unterwegs, das laufende Jahr, letzte Touren, an diesem Tag, Erinnerungen.
+/* =====================  Startseite: zuletzt unterwegs, das laufende Jahr, letzte Touren, an diesem Tag, Erinnerungen (seit 3.32.0 ein einstellbarer Baustein: 60-bausteine-erinnerungen.js, die Layout-Engine setzt ihn ein).
    Die bisherige Übersicht (alle Zahlen, Diagramme, Ziele) ist jetzt der erste Reiter der Statistik (#/stats).  ===================== */
 const homeRoute = pts => {
   if (!pts || pts.length < 2) return "";
@@ -58,7 +58,6 @@ async function homeView() {
   ${recent.length > 1 ? `<section id="hrecent"><div class="hsh"><h2>Zuletzt unterwegs</h2><span class="sp"></span><a class="hmore" href="#/tours">Alle ${nf(TOURS.length, 0)} Touren</a></div><div class="hcards">${recent.slice(1).map(card).join("")}</div></section>` : ""}
   <div class="hcols" id="hcols">
     ${otd.length ? `<section id="htag"><div class="hsh"><h2>An diesem Tag</h2><span class="sub">in früheren Jahren</span></div><div class="tl">${otd.map(tourRow).join("")}</div></section>` : ""}
-    <section id="hmemsec" hidden><div class="hsh"><h2>Erinnerungen</h2><span class="sp"></span><a class="hmore" target="_blank" href="slideshow.html?random=1">Zufalls-Diashow</a></div><div id="hmem" class="hmem"></div></section>
   </div>`;
 
   /* --- Aufmacher: die letzten Touren zum Durchblättern --- */
@@ -124,16 +123,6 @@ async function homeView() {
       })
       .catch(() => {});
   });
-
-  /* --- Erinnerungen --- */
-  api("/api/photos?random=true&limit=6")
-    .then(r => {
-      if (!r.length || !$("#hmem")) return;
-      $("#hmemsec").hidden = false;
-      $("#hmem").innerHTML = r.map((p, i) => `<img loading="lazy" src="/pic/${p.id}?size=400" data-i="${i}" title="${esc(p.tour_name || "")}" alt="">`).join("");
-      bindThumbs($("#hmem"), r);
-    })
-    .catch(() => {});
 }
 
 {

@@ -14,6 +14,10 @@ Dokument (JSON-Objekt, alle Felder optional):
 Seiteneignung (3.20.0): Bausteine der Übersicht dürfen auch auf der Tourseite stehen (Dokument „tour-haupt“); tour-bezogene Bausteine (TOUR_ONLY) nur auf Tourseiten,
 die Dokumente „uebersicht“ und „statistik“ lehnen sie ab. 3.22.0: Bausteine der Statistik (STATISTIK_ONLY) stehen nur im Dokument „statistik“; die Bausteine der Übersicht dürfen auch dort stehen.
 Unbekannte Typen (neuere Version) bleiben überall erlaubt.
+Erinnerungen (3.32.0, Typ „erinn“, als Standard-Abschnitt der Übersicht unter cfg.erinn und als hinzugefügter Baustein): streng geprüfte Konfiguration, andere Felder sind nicht erlaubt:
+  mode random|best|day|recent (Auswahl der Fotos)   n 3|6|9|12 (Anzahl)   view grid|strip|show (Darstellung)   ratio sq|43|169|orig (Seitenverhältnis)   size s|m|l (Größe der Bilder)
+  height k|n|h (Höhe der Einzelbild-Show)   tempo 3|5|8|12 (Sekunden je Bild)   caption / shuffle / link  Ja-Nein (Bildunterschrift, Knopf „Neu mischen“, Link „Diashow starten“)
+  sports, range, yr, title wie üblich. Gespeichert werden nur Abweichungen vom Standard (ohne cfg: 6 zufällige Fotos als Raster, mit Link zur Diashow).
 Hinweis-Bausteine (3.23.0, „Alarm-Bausteine“: erscheinen nur, wenn etwas los ist; Typen hnziel, hnmeilenstein, hnauffaellig, hnpause, hnrekord, hnwoche, hnerholung, hnsicherung und die Sammel-Variante „hinweise“):
 nur in „uebersicht“ und „statistik“ (hnauffaellig, hnpause, hnwoche, hnsicherung nur in „uebersicht“). Ihre Konfiguration wird streng geprüft, andere Felder sind nicht erlaubt:
   schwelle 1–90 (Prozent)   tage 1–365   min 1–1000   ziel / woche_ziel 0–100000   einheit / woche_einheit km|touren   stufe mehr|deutlich_mehr   ausblenden 0–90 (Tage, 0 = Knopf aus)
@@ -206,10 +210,48 @@ def _hinweis_cfg(k, x):
     return None
 
 
+ERINN_TYPE = "erinn"
+ERINN_ENUM = {"mode": ("random", "best", "day", "recent"), "view": ("grid", "strip", "show"), "ratio": ("sq", "43", "169", "orig"), "size": ("s", "m", "l"), "height": ("k", "n", "h")}
+ERINN_NUM = {"n": (3, 6, 9, 12), "tempo": (3, 5, 8, 12)}
+ERINN_BOOL = ("caption", "shuffle", "link")
+
+
+def _erinn_cfg(v):
+    """Streng geprüfte Konfiguration der Kachel „Erinnerungen“ (3.32.0): feste Auswahllisten, keine fremden Felder."""
+    if not isinstance(v, dict) or len(v) > 20:
+        raise HTTPException(400, "Ungültige Konfiguration eines Bausteins")
+    out = {}
+    for k, x in v.items():
+        bad = HTTPException(400, f"Ungültiger Wert für „{k}“ in der Konfiguration")
+        if k in ("sports", "range", "yr", "title"):
+            out[k] = _known(k, x)
+        elif k in ERINN_ENUM:
+            if not isinstance(x, str) or x not in ERINN_ENUM[k]:
+                raise bad
+            out[k] = x
+        elif k in ERINN_NUM:
+            if isinstance(x, bool) or not isinstance(x, int) or x not in ERINN_NUM[k]:
+                raise bad
+            out[k] = x
+        elif k in ERINN_BOOL:
+            if not isinstance(x, bool):
+                raise bad
+            out[k] = x
+        else:
+            raise HTTPException(400, f"Unbekannte Einstellung „{k}“ für diesen Baustein")
+    if out.get("range") == "y" and "yr" not in out:
+        raise HTTPException(400, "Ungültiger Wert für „range“ in der Konfiguration")
+    if "yr" in out and out.get("range") != "y":
+        raise HTTPException(400, "Ungültiger Wert für „yr“ in der Konfiguration")
+    return out
+
+
 HINWEIS_KEYS = ("schwelle", "tage", "min", "ziel", "ausblenden", "einheit", "stufe", "arten", "snoozes", "woche_ziel", "woche_einheit")
 
 
 def _cfg(v, typ=None):
+    if typ == ERINN_TYPE:
+        return _erinn_cfg(v)
     if typ == kennzahl.TYPE:                              # 3.28.0: eigene Kennzahl – nur Auswahlen aus festen Listen, streng geprüft (app/kennzahl.py)
         return kennzahl.clean_cfg(v)
     if not isinstance(v, dict) or len(v) > 20:
@@ -306,7 +348,7 @@ def clean(doc, key=None):
         c = doc["cfg"]
         if not isinstance(c, dict) or len(c) > 10 or not all(isinstance(k, str) and ID_RE.match(k) for k in c):
             raise HTTPException(400, "„cfg“ muss ein Objekt mit höchstens 10 Einträgen sein")
-        out["cfg"] = {k: _cfg(x) for k, x in c.items()}
+        out["cfg"] = {k: _cfg(x, ERINN_TYPE if k == ERINN_TYPE else None) for k, x in c.items()}
     if len(json.dumps(out, ensure_ascii=False)) > MAX_BYTES:
         raise HTTPException(400, "Das Layout ist zu groß")
     return out

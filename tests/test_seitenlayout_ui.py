@@ -555,7 +555,7 @@ def test_overview_default_and_reorder_hide_and_widgets(pw, app):
         pg.wait_for_function("() => document.querySelector('.slit[data-sl=zuletzt]').classList.contains('sl-dim')", timeout=T)
         assert pg.locator('.slit[data-sl="jahr"] input[data-a="open"]').count() == 0        # Übersichtsabschnitte sind nicht einklappbar: kein Schalter
         _catalog(pg)
-        assert pg.locator(".slcard").count() == 34                  # 3.31.0: plus „Touren-Knopf“; 3.30.0: plus „Zepp-Import“; 20 Bausteine bis 3.18.0 plus „Ziele“ (3.29.0) plus „Dein Jahr“ (3.19.0) plus 9 Hinweis-Bausteine (3.23.0) plus „Eigene Kennzahl“ (3.28.0)
+        assert pg.locator(".slcard").count() == 35                  # 3.31.0: plus „Touren-Knopf“; 3.30.0: plus „Zepp-Import“; 20 Bausteine bis 3.18.0 plus „Ziele“ (3.29.0) plus „Dein Jahr“ (3.19.0) plus 9 Hinweis-Bausteine (3.23.0) plus „Eigene Kennzahl“ (3.28.0)
         pg.locator('[data-add="periode"]').click()
         pg.wait_for_selector('[data-wtype="periode"] .utile', timeout=T)
         pg.locator("#slbar").get_by_role("button", name="Fertig").click()
