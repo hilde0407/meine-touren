@@ -306,7 +306,7 @@ def garmin_sync(limit=None):
         chunk, entries = new[i:i + 20], []
         for a in chunk:
             aid = a["activityId"]
-            jobs.progress(f"Garmin {len(entries) + i + 1}/{len(new)}")
+            jobs.progress(f"Garmin {len(entries) + i + 1}/{len(new)}", len(entries) + i, len(new))
             try:
                 got = _garmin_download(cl, aid)
             except Exception as e:  # noqa
@@ -448,7 +448,7 @@ def suunto_sync(limit=None):
         entries = []
         for w in new[i:i + 20]:
             key = str(w.get("workoutKey") or w.get("workoutId"))
-            jobs.progress(f"Suunto {i + len(entries) + 1}/{len(new)}")
+            jobs.progress(f"Suunto {i + len(entries) + 1}/{len(new)}", i + len(entries), len(new))
             try:
                 data = _su_get(f"/v2/workout/exportFit/{urllib.parse.quote(key, safe='')}", raw=True)
             except DeviceError as e:
@@ -472,6 +472,100 @@ def suunto_sync(limit=None):
     from . import photos
     photos.assign_all()
     return tot
+
+
+# --------------------------------------------------------------------------- Läufe als Jobs mit gemerktem Ergebnis (3.31.0)
+def _geheimnisse():
+    """Alle gespeicherten Zugangswerte (auch die Einzelwerte in den JSON-Token-Feldern) zum Schwärzen in Fehlertexten."""
+    out = set()
+    for k in ("garmin_tokens", "garmin_password", "suunto_tokens", "suunto_client_secret", "suunto_key", "suunto_client_id"):
+        v = db.get(k)
+        if not v:
+            continue
+        out.add(str(v))
+        try:
+            j = json.loads(v)
+        except ValueError:
+            continue
+        for x in (j.values() if isinstance(j, dict) else []):
+            if isinstance(x, str):
+                out.add(x)
+    return {x for x in out if len(x) >= 6}
+
+
+def _lauf_fehlertext(e):
+    """Fehlertext ohne Zugangsdaten (Passwort, Tokens, Schlüssel) für die Anzeige."""
+    msg = str(e)
+    for v in sorted(_geheimnisse(), key=len, reverse=True):
+        msg = msg.replace(v, "…")
+    return msg[:200]
+
+
+def _lauf(key, fn):
+    t0 = int(time.time())
+    try:
+        r = fn() or {}
+    except Exception as e:  # noqa
+        msg = _lauf_fehlertext(e)
+        db.put(key, json.dumps({"ts": int(time.time()), "start": t0, "ok": False, "fehler": msg, "code": sync.zepp_fehlercode(msg)}))
+        raise
+    db.put(key, json.dumps({"ts": int(time.time()), "start": t0, "ok": True, **{k: int(r.get(k) or 0) for k in ("imported", "dup", "nogps", "error")}}))
+    return r
+
+
+def garmin_sync_lauf(limit=None):
+    """Garmin-Import als Job: wie garmin_sync(), merkt zusätzlich das Ergebnis (Einstellung garmin_last_run: Zeitpunkt, Zahlen oder Fehler ohne Zugangsdaten)."""
+    return _lauf("garmin_last_run", lambda: garmin_sync(limit))
+
+
+def suunto_sync_lauf(limit=None):
+    return _lauf("suunto_last_run", lambda: suunto_sync(limit))
+
+
+def letzter_lauf(key):
+    try:
+        d = json.loads(db.get(key) or "")
+        return d if isinstance(d, dict) else None
+    except Exception:  # noqa
+        return None
+
+
+# Import-Quellen mit Konto: Art -> (Anzeigename, Jobname, Schlüssel des letzten Laufs). Alles andere (Polar, Handy, Anderes) hat keinen Konto-Import, nur Dateien.
+QUELLEN = {"zepp": ("Zepp", "Zepp-Import (ohne Upload)", "zepp_last_run"), "garmin": ("Garmin", "Garmin-Import", "garmin_last_run"), "suunto": ("Suunto", "Suunto-Import", "suunto_last_run")}
+KURZ = {"polar": "Polar", "phone": "Handy-Aufzeichnung", "other": "Anderes Gerät"}
+
+
+def _letzter_norm(kind, d):
+    """Einheitliche Form des letzten Laufs: ts, ok, neu (neue Touren/Trainings), uebernommen, dup, ohne_gps, fehler (Anzahl), meldung, code."""
+    if not d:
+        return None
+    base = {"ts": d.get("ts"), "ok": bool(d.get("ok"))}
+    if not d.get("ok"):
+        return {**base, "meldung": str(d.get("fehler") or ""), "code": d.get("code") or "sonst"}
+    if kind == "zepp":
+        return {**base, "neu": d.get("neu", 0), "uebernommen": d.get("uebernommen", 0), "dup": 0, "ohne_gps": d.get("ohne_gps", 0), "fehler": d.get("fehler", 0), "gps": d.get("gps", 0)}
+    return {**base, "neu": d.get("imported", 0), "uebernommen": d.get("imported", 0), "dup": d.get("dup", 0), "ohne_gps": d.get("nogps", 0), "fehler": d.get("error", 0), "gps": d.get("imported", 0)}
+
+
+def import_quellen():
+    """Welche Konten kann der Nutzer zum Touren-Holen nutzen, wie ging der letzte Lauf aus, läuft gerade etwas? Nie Zugangsdaten.
+    quellen: je Konto-Art (zepp, garmin, suunto) verbunden ja/nein; geraete: in „Meine Geräte“ angelegte Marken ohne verbundenes Konto (konto=True: Einrichtung in der
+    Verwaltung möglich, False: nur Dateiimport)."""
+    run = jobs.get_state().get("running")
+    conn = {"zepp": sync.zepp_konfiguriert(), "garmin": garmin_connected(), "suunto": suunto_connected()}
+    q = []
+    for kind, (label, job, key) in QUELLEN.items():
+        raw = letzter_lauf(key)
+        q.append({"kind": kind, "label": label, "verbunden": bool(conn[kind]), "laeuft": bool(run) and run == job, "job": "export" if kind == "zepp" else kind + "-import",
+                  "uebernimmt": kind != "zepp", "letzter": _letzter_norm(kind, raw)})
+    seen, g = set(), []
+    for d in mydevices.list_payload()["devices"]:
+        k = d["kind"]
+        if not d["active"] or k in seen or conn.get(k):
+            continue
+        seen.add(k)
+        g.append({"kind": k, "label": QUELLEN[k][0] if k in QUELLEN else KURZ.get(k, mydevices.KIND_LABEL.get(k, k)), "konto": k in QUELLEN})
+    return {"quellen": q, "geraete": g, "laeuft": run or None}
 
 
 # --------------------------------------------------------------------------- tägliche Automatik
@@ -514,6 +608,12 @@ def api_devices(request: Request):
     }
 
 
+@router.get("/api/import-quellen")
+def api_import_quellen():
+    """Quellen zum Touren-Holen (3.31.0): verbundene Konten (Zepp, Garmin, Suunto), letzter Lauf je Quelle, laufender Job; Marken aus „Meine Geräte“ ohne Konto. Nur für angemeldete Benutzer, nie für Betrachter."""
+    return import_quellen()
+
+
 @router.post("/api/garmin/login")
 def api_garmin_login(body: dict):
     em, pw = (body.get("email") or "").strip(), body.get("password") or ""
@@ -543,7 +643,7 @@ def api_garmin_disconnect():
 def api_garmin_sync(limit: int = 0):
     if not garmin_connected():
         raise HTTPException(400, "Garmin ist nicht verbunden")
-    if not jobs.start("Garmin-Import", lambda: garmin_sync(limit or None)):
+    if not jobs.start("Garmin-Import", lambda: garmin_sync_lauf(limit or None)):
         raise HTTPException(409, "Es läuft bereits ein Job")
     return {"started": True}
 
@@ -577,7 +677,7 @@ def api_suunto_disconnect():
 def api_suunto_sync(limit: int = 0):
     if not suunto_connected():
         raise HTTPException(400, "Suunto ist nicht verbunden")
-    if not jobs.start("Suunto-Import", lambda: suunto_sync(limit or None)):
+    if not jobs.start("Suunto-Import", lambda: suunto_sync_lauf(limit or None)):
         raise HTTPException(409, "Es läuft bereits ein Job")
     return {"started": True}
 

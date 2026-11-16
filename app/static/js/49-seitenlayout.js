@@ -42,7 +42,7 @@ const SL_REG = {
   uebersicht: [
     {id: "aufmacher", w: "voll", title: "Zuletzt unterwegs (Aufmacher)", page: "uebersicht", plain: true, ws: ["voll"]},
     {id: "jahr", w: "voll", title: "Dein Jahr", page: "uebersicht", plain: true, build: "jahr"},
-    {id: "zepp", w: "voll", title: "Zepp-Import", page: "uebersicht", build: "zeppimport", def: true, ckeys: ["tl_w_zepp"]},                // 3.30.0: kompakte Karte mit Import-Knopf (Baustein „zeppimport“) gleich unter „Dein Jahr“
+    {id: "zepp", w: "voll", title: "Touren holen", page: "uebersicht", build: "zeppimport", def: true, ckeys: ["tl_w_zepp"]},                // 3.30.0: kompakte Karte mit Import-Knopf (Baustein „zeppimport“) gleich unter „Dein Jahr“
     {id: "zuletzt", w: "voll", title: "Letzte Touren", page: "uebersicht", plain: true, ws: ["voll", "zweidrittel"]},
     {id: "tag", w: "halb", title: "An diesem Tag", page: "uebersicht", group: "cols", plain: true},
     {id: "erinn", w: "halb", title: "Erinnerungen", page: "uebersicht", group: "cols", plain: true},
@@ -327,6 +327,27 @@ async function slFlush() {
 }
 const slDocOf = page => SL.docs[SL_PAGE_KEY[page]] || (SL.docs[SL_PAGE_KEY[page]] = {v: 1});
 const slStDoc = fam => slDocOf(fam === "tour" ? "haupt" : fam);
+/* 3.31.0 Schnell-Knopf „Touren holen“ in der Kopfzeile der Übersicht: Standard an; abgeschaltet steht {kopf: {holen: false}} im Layout-Dokument (gehört damit zur Ansicht) */
+const slHolenOn = () => {
+  const d = SL.docs[SL_PAGE_KEY.uebersicht];
+  return !(d && d.kopf && d.kopf.holen === false);
+};
+function slSetHolen(on) {
+  const st = slDocOf("uebersicht");
+  if (on) delete st.kopf;
+  else st.kopf = {holen: false};
+  slTouch(SL_PAGE_KEY.uebersicht);
+  slApply();
+  slLive(on ? "Schnell-Knopf zum Touren holen: an" : "Schnell-Knopf zum Touren holen: aus");
+}
+function slKopfSync() {
+  const l = document.getElementById("slkopf");
+  if (!l) return;
+  l.hidden = SL.fam !== "uebersicht";
+  const i = l.querySelector("input");
+  if (i) i.checked = slHolenOn();
+  slBarH();
+}
 const slSet = (st, name, id, on) => {
   const a = (st[name] || []).filter(x => x !== id);
   if (on) a.push(id);
@@ -864,7 +885,7 @@ function slOpener(root, edit) {
     w.className = "slopen";
     w.innerHTML = `<button type="button" class="btn ghost sm" id="slopen" data-a="edit">${slIcon.sliders}<span>Seite anpassen</span></button><button type="button" class="btn ghost sm" id="slviews" aria-haspopup="dialog">Ansichten</button>`;
   }
-  if (root.matches("main.home") && typeof ziQuick === "function") ziQuick(w);                // 3.30.0: Schnell-Knopf „Zepp“ (52-bausteine-uebersicht.js), damit der Import auf dem Handy ohne Scrollen erreichbar ist
+  if (root.matches("main.home") && typeof ziQuick === "function") ziQuick(w);                // 3.30.0: Schnell-Knopf „Touren holen“ je nach Uhr (52-bausteine-uebersicht.js), damit der Import auf dem Handy ohne Scrollen erreichbar ist
   const b = w.querySelector("#slopen"), vb = w.querySelector("#slviews");
   b.hidden = !!edit;
   if (vb) vb.hidden = !!edit;                                                              // 3.24.0: der Knopf „Ansichten“ steht immer neben „Seite anpassen“ (im Bearbeitungsmodus sitzt er in der Leiste)
@@ -924,17 +945,20 @@ function slBar(on) {
     `<p class="slsr" id="slhint">Zum Verschieben ziehen oder Pfeil hoch bzw. Pfeil runter drücken.</p>` +
     `<div class="slsr" id="sllive" aria-live="polite" aria-atomic="true"></div>` +
     `<p class="slbi"><b>Seite anpassen</b><span class="slvn" id="slvn"></span><span class="slsaved" id="slsaved" role="status" aria-live="polite"></span><span class="slchg" id="slchg" hidden>Ungespeicherte Änderungen</span></p>` +
+    `<label class="slkopf" id="slkopf" hidden><input type="checkbox" id="slkopfin" data-opt="holen"><span>Schnell-Knopf zum Touren holen in der Kopfzeile</span></label>` +
     `<div class="slbb"><button type="button" class="btn ghost sm" data-a="views" aria-haspopup="dialog">Ansichten</button><button type="button" class="btn ghost sm" data-a="add" aria-label="Baustein hinzufügen"><span class="slfu">Baustein hinzufügen</span><span class="slsh" aria-hidden="true">+ Baustein</span></button>` +
     `<button type="button" class="btn ghost sm slmorebtn" data-a="more" aria-haspopup="true" aria-expanded="false" aria-label="Weitere Aktionen" title="Weitere Aktionen">⋯</button>` +
     `<span class="slbmo"><button type="button" class="btn ghost sm" data-a="reset">Standard wiederherstellen</button><button type="button" class="btn ghost sm" data-a="savenew" aria-haspopup="dialog">Als neue Ansicht speichern …</button><button type="button" class="btn ghost sm" data-a="discard">Verwerfen</button></span>` +
     `<button type="button" class="btn sm" data-a="done">Fertig</button></div>`;
   document.body.appendChild(b);
+  slKopfSync();
   slBarH();
 }
 /* 3.24.0 Abstand am Seitenfuß = Höhe der Leiste (die Leiste ist je nach Breite unterschiedlich hoch), damit nichts dahinter verschwindet */
 function slBarH() {
   const b = document.getElementById("slbar");
-  if (b) document.body.style.setProperty("--slbh", b.offsetHeight + "px");
+  const k = document.getElementById("slkopf");                                   // 3.31.0: der Schalter schwebt über der Leiste und macht sie nicht höher; Platz am Seitenfuß aber mitrechnen
+  if (b) document.body.style.setProperty("--slbh", b.offsetHeight + (k && !k.hidden ? k.offsetHeight + 8 : 0) + "px");
   else document.body.style.removeProperty("--slbh");
 }
 window.addEventListener("resize", () => slBarH());
@@ -976,6 +1000,7 @@ function slIsChg() {
   return slKeys(SL.fam).some(k => JSON.stringify(slStore(k)) !== SL.snap.st[k]);
 }
 function slChg() {
+  slKopfSync();
   const m = document.getElementById("slchg");
   if (m) m.hidden = !(SL.edit && slIsChg());
 }
@@ -1129,12 +1154,12 @@ function slCatalog() {
       cnt = body.querySelector(".slcnt"),
       none = body.querySelector(".slnorsl"),
       apply = () => {
-        const term = q.value.trim().toLowerCase();
+        const term = q.value.trim();
         let n = 0;
         body.querySelectorAll(".slsec").forEach(sec => {
           let any = 0;
           sec.querySelectorAll(".slcard").forEach(cd => {
-            const ok = (!cat || cd.dataset.cat === cat) && (!term || cd.textContent.toLowerCase().includes(term));
+            const ok = (!cat || cd.dataset.cat === cat) && (!term || smatch(cd.textContent, term));
             cd.hidden = !ok;
             any += ok ? 1 : 0;
           });
@@ -1273,6 +1298,8 @@ document.addEventListener("click", e => {
     uiConfirm({title: "Baustein entfernen?", text: `„${slTitle(id)}“ wird von dieser Seite entfernt.`, ok: "Entfernen", danger: true}).then(ok => ok && slRemoveWidget(id));
 });
 document.addEventListener("change", e => {
+  const k = e.target.closest && e.target.closest("#slkopfin");
+  if (k) return slSetHolen(k.checked);
   const c = e.target.closest && e.target.closest(".slst input[data-a=open]");
   if (c) slSetOpen(c.closest(".slit").dataset.sl, c.checked);
 });

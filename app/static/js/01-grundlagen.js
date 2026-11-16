@@ -1,6 +1,30 @@
 /* Meine Touren – Einzelseiten-App ohne Build-Schritt */
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"})[c]);
+/* 3.31.0: Suche ohne Akzente/Sonderbuchstaben/Apostrophe (Réunion = Reunion, Lucía = Lucia, d'Azur = dazur). Gegenstück: app/suche.py – gleiche Regeln.
+   Jeder Text hat bis zu vier Formen (ä→a oder ä→ae; Apostroph = nichts oder Leerzeichen); es genügt, wenn eine Form der Eingabe in einer Form der Daten steckt. */
+const _SPEZ = {"ß": "ss", "æ": "ae", "œ": "oe", "ø": "o", "đ": "d", "ł": "l", "ı": "i"},
+  _UML = {"ä": "ae", "ö": "oe", "ü": "ue"},
+  _APO = /['’‘ʼʻ′`´]/g,
+  _sbasis = (s, e) => {
+    let t = String(s ?? "").toLowerCase().replace(/[ßæœøđłı]/g, c => _SPEZ[c]);
+    if (e) t = t.replace(/[äöü]/g, c => _UML[c]);
+    return t.normalize("NFD").replace(/\p{M}/gu, "");
+  },
+  sfold = s => _sbasis(s, false).replace(_APO, ""),
+  sforms = s => {
+    const out = [];
+    for (const e of [false, true]) {
+      const b = _sbasis(s, e);
+      for (const f of [b.replace(_APO, ""), b.replace(_APO, " ")]) if (!out.includes(f)) out.push(f);
+    }
+    return out;
+  },
+  sin = (forms, needle) => {
+    const nf = sforms(needle).map(x => x.trim());
+    return !nf.some(Boolean) || nf.some(n => forms.some(f => f.includes(n)));
+  },
+  smatch = (hay, needle) => sin(sforms(hay), needle);
 const STALE = () => new Promise(() => {}); // Antwort für eine inzwischen verlassene Seite: nie auflösen, damit die alte Ansicht nichts mehr zeichnet
 /* 3.27.0: Gleiche GET-Adresse gleichzeitig angefragt (z. B. Strecke der Tour von drei Bausteinen) = eine Anfrage; jeder Aufrufer liest die Antwort selbst (eigene Objekte).
    Nach dem Ende der Anfrage wird nichts aufgehoben, und jede schreibende Anfrage leert die Liste: so entsteht nie ein Zwischenspeicher mit veralteten Daten. */

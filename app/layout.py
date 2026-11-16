@@ -9,6 +9,7 @@ Dokument (JSON-Objekt, alle Felder optional):
   page     {id: "haupt"|"auswertung"}  Abschnitte, die auf der anderen Seite der Tour liegen
   widgets  [{id, type, cfg}]  hinzugefügte Bausteine mit ihrer Konfiguration
   cfg      {id: {…}}       Konfiguration der Standard-Bausteine, die nicht als „widgets“ gespeichert sind (3.19.0: der Baustein „Dein Jahr“ der Übersicht, Kennung „jahr“)
+  kopf     {holen: false}  Kopfzeile der Übersicht (3.31.0): „holen“ = false schaltet den Schnell-Knopf „Touren holen“ ab (Standard: an, dann steht nichts im Dokument)
   w        {id: Breite}    Breite im Raster (3.20.0): "voll" | "zweidrittel" | "halb" | "drittel"; gespeichert werden nur Abweichungen vom Standard des Abschnitts (den kennt die Oberfläche)
 Seiteneignung (3.20.0): Bausteine der Übersicht dürfen auch auf der Tourseite stehen (Dokument „tour-haupt“); tour-bezogene Bausteine (TOUR_ONLY) nur auf Tourseiten,
 die Dokumente „uebersicht“ und „statistik“ lehnen sie ab. 3.22.0: Bausteine der Statistik (STATISTIK_ONLY) stehen nur im Dokument „statistik“; die Bausteine der Übersicht dürfen auch dort stehen.
@@ -44,7 +45,7 @@ from . import db, kennzahl
 router = APIRouter()
 
 KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik")
-FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg", "w", "filter"}
+FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg", "w", "filter", "kopf"}
 WIDTHS = ("voll", "zweidrittel", "halb", "drittel")
 # Bausteine, die eine Tour brauchen (Typkennungen wie in static/js/50-bausteine.js und 51-bausteine-tour.js, fam "tour"): nicht in der Übersicht
 TOUR_ONLY = frozenset(("kennzahlen", "tempo", "vergleich", "pulszonen", "wetter", "fotostreifen", "notiz", "splits", "steigung", "bewegung", "durchschnitt", "jahresrang",
@@ -295,6 +296,12 @@ def clean(doc, key=None):
         out["widgets"] = ws
     if "filter" in doc:
         out["filter"] = _filter(doc["filter"])
+    if "kopf" in doc:
+        k = doc["kopf"]
+        if not isinstance(k, dict) or set(k) - {"holen"} or not all(isinstance(x, bool) for x in k.values()):
+            raise HTTPException(400, "„kopf“ darf nur {\"holen\": true|false} enthalten")
+        if k.get("holen") is False:                         # nur die Abweichung vom Standard (an) wird gespeichert
+            out["kopf"] = {"holen": False}
     if "cfg" in doc:
         c = doc["cfg"]
         if not isinstance(c, dict) or len(c) > 10 or not all(isinstance(k, str) and ID_RE.match(k) for k in c):

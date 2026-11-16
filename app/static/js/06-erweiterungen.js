@@ -27,14 +27,14 @@ $("#nav").innerHTML = NAV.map(([k, l]) => `<a href="#/${k}" data-k="${k}">${l}</
 
 /* ---- Suche ---- */
 VIEWS.search = async (_, q) => {
-  const term = (q.get("q") || "").toLowerCase().trim(),
+  const term = (q.get("q") || "").trim(),
     toks = term.split(/\s+/).filter(Boolean);
   const hay = t =>
-    `${t.name} ${t.note || ""} ${sName(t.sport)} ${dateS(t.date)} ${MONL[t.m - 1]} ${t.y} ${t.g_place || ""} ${t.g_county || ""} ${t.g_state || ""} ${t.g_country || ""} ${(t.tags || "").replace(/\|/g, " ")}`.toLowerCase();
+    `${t.name} ${t.note || ""} ${sName(t.sport)} ${dateS(t.date)} ${MONL[t.m - 1]} ${t.y} ${t.g_place || ""} ${t.g_county || ""} ${t.g_state || ""} ${t.g_country || ""} ${(t.tags || "").replace(/\|/g, " ")}`;
   const a = toks.length
     ? TOURS.filter(t => {
-        const h = hay(t);
-        return toks.every(k => h.includes(k));
+        const h = sforms(hay(t));
+        return toks.every(k => sin(h, k));
       })
     : [];
   if (document.activeElement !== $("#gs") && $("#gs")) $("#gs").value = q.get("q") || "";

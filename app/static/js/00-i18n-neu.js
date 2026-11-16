@@ -2347,4 +2347,43 @@ Startet den Import deiner Trainings aus Zepp mit einem Tipp, zeigt den Fortschri
 Steht schon auf der Seite || Already on the page || Déjà sur la page || Ya está en la página
 Zepp läuft … || Zepp running … || Zepp en cours … || Zepp en curso …
 Zepp (Fehler) || Zepp (error) || Zepp (erreur) || Zepp (error)
+Touren-Knopf || Tours button || Bouton parcours || Botón de rutas
+Startet den Import deiner Touren aus dem Konto deiner Uhr (Zepp, Garmin oder Suunto) mit einem Tipp, zeigt den Fortschritt und wie der letzte Lauf ausging. Bei mehreren Konten gibt es je Konto eine Zeile und „Alle holen“. Fehlt die Verbindung, führt ein Knopf zur Einrichtung. Für Betrachter unsichtbar. || Starts the import of your tours from your watch’s account (Zepp, Garmin or Suunto) with one tap, shows the progress and how the last run went. With several accounts there is one row per account and “Fetch all”. If the connection is missing, a button leads to the setup. Invisible to viewers. || Lance l’import de vos parcours depuis le compte de votre montre (Zepp, Garmin ou Suunto) d’un geste, affiche la progression et le résultat du dernier passage. Avec plusieurs comptes, il y a une ligne par compte et « Tout récupérer ». Si la connexion manque, un bouton mène à la configuration. Invisible pour les lecteurs. || Inicia con un toque la importación de tus rutas desde la cuenta de tu reloj (Zepp, Garmin o Suunto), muestra el progreso y cómo terminó la última ejecución. Con varias cuentas hay una fila por cuenta y «Obtener todo». Si falta la conexión, un botón lleva a la configuración. Invisible para los lectores.
+Ein einziger Knopf, der deine Touren aus dem Konto deiner Uhr holt: beschriftet mit der Marke (Zepp, Garmin, Suunto), bei mehreren Konten mit einem kleinen Menü. Darunter eine Statuszeile. Für alle, die den Knopf lieber im Raster haben als in der Kopfzeile. Für Betrachter unsichtbar. || A single button that fetches your tours from your watch’s account: labelled with the brand (Zepp, Garmin, Suunto), with a small menu when there are several accounts. A status line below. For anyone who prefers the button in the grid rather than in the header. Invisible to viewers. || Un seul bouton qui récupère vos parcours depuis le compte de votre montre : libellé avec la marque (Zepp, Garmin, Suunto), avec un petit menu s’il y a plusieurs comptes. Une ligne d’état en dessous. Pour ceux qui préfèrent le bouton dans la grille plutôt que dans l’en-tête. Invisible pour les lecteurs. || Un solo botón que obtiene tus rutas de la cuenta de tu reloj: con la marca como texto (Zepp, Garmin, Suunto) y un pequeño menú si hay varias cuentas. Debajo, una línea de estado. Para quien prefiera el botón en la cuadrícula en lugar de en la cabecera. Invisible para los lectores.
+Garmin-Import starten || Start Garmin import || Lancer l’import Garmin || Iniciar importación de Garmin
+Suunto-Import starten || Start Suunto import || Lancer l’import Suunto || Iniciar importación de Suunto
+Garmin einrichten || Set up Garmin || Configurer Garmin || Configurar Garmin
+Suunto einrichten || Set up Suunto || Configurer Suunto || Configurar Suunto
+Garmin läuft … || Garmin running … || Garmin en cours … || Garmin en curso …
+Suunto läuft … || Suunto running … || Suunto en cours … || Suunto en curso …
+Garmin (Fehler) || Garmin (error) || Garmin (erreur) || Garmin (error)
+Suunto (Fehler) || Suunto (error) || Suunto (erreur) || Suunto (error)
+Touren holen (Fehler) || Fetch tours (error) || Récupérer des parcours (erreur) || Obtener rutas (error)
+Touren holen einrichten || Set up fetching tours || Configurer la récupération des parcours || Configurar la obtención de rutas
+Touren per Datei importieren || Import tours from files || Importer des parcours depuis des fichiers || Importar rutas desde archivos
+{}: Touren per Datei importieren || {}: import tours from files || {} : importer des parcours depuis des fichiers || {}: importar rutas desde archivos
+{}: Touren per Datei importieren › || {}: import tours from files › || {} : importer des parcours depuis des fichiers › || {}: importar rutas desde archivos ›
+Handy-Aufzeichnung || Phone recording || Enregistrement du téléphone || Grabación del móvil
+Anderes Gerät || Other device || Autre appareil || Otro dispositivo
+Verbinde mit Garmin … || Connecting to Garmin … || Connexion à Garmin … || Conectando con Garmin …
+Verbinde mit Suunto … || Connecting to Suunto … || Connexion à Suunto … || Conectando con Suunto …
+Tour {} von {} || Tour {} of {} || Parcours {} sur {} || Ruta {} de {}
+Keine neuen Touren. || No new tours. || Aucun nouveau parcours. || No hay rutas nuevas.
+1 neue Tour übernommen || 1 new tour added || 1 nouveau parcours repris || 1 ruta nueva añadida
+{} neue Touren übernommen || {} new tours added || {} nouveaux parcours repris || {} rutas nuevas añadidas
+{} schon vorhanden || {} already present || {} déjà présents || {} ya existentes
+Für {} fehlt noch die Verbindung. Richte sie in der Verwaltung ein. || The connection for {} is still missing. Set it up in Admin. || La connexion pour {} manque encore. Configurez-la dans l’administration. || Aún falta la conexión de {}. Configúrala en Administración.
+{} hat die Anmeldung abgelehnt. Verbinde das Konto in der Verwaltung neu. || {} rejected the sign-in. Reconnect the account in Admin. || {} a refusé la connexion. Reconnectez le compte dans l’administration. || {} rechazó el inicio de sesión. Vuelve a conectar la cuenta en Administración.
+{} war nicht erreichbar. Prüfe die Internetverbindung und versuche es noch einmal. || {} could not be reached. Check your internet connection and try again. || {} était injoignable. Vérifiez la connexion Internet et réessayez. || No se pudo contactar con {}. Comprueba la conexión a internet e inténtalo de nuevo.
+Du hast mehrere Uhren angelegt, aber noch kein Konto verbunden. Verbinde in der Verwaltung: {}. || You have added several watches but not connected an account yet. Connect in Admin: {}. || Vous avez ajouté plusieurs montres, mais aucun compte n’est encore connecté. Connectez dans l’administration : {}. || Has añadido varios relojes, pero aún no hay ninguna cuenta conectada. Conecta en Administración: {}.
+Noch keine Quelle eingerichtet. Verbinde in der Verwaltung dein Zepp-, Garmin- oder Suunto-Konto oder importiere Tourendateien. || No source set up yet. Connect your Zepp, Garmin or Suunto account in Admin or import tour files. || Aucune source configurée pour l’instant. Connectez votre compte Zepp, Garmin ou Suunto dans l’administration ou importez des fichiers de parcours. || Aún no hay ninguna fuente configurada. Conecta tu cuenta de Zepp, Garmin o Suunto en Administración o importa archivos de rutas.
+Noch keine Quelle eingerichtet. || No source set up yet. || Aucune source configurée pour l’instant. || Aún no hay ninguna fuente configurada.
+Hier fehlt noch die Verbindung zum Konto deiner Uhr. || The connection to your watch’s account is still missing. || La connexion au compte de votre montre manque encore. || Aún falta la conexión con la cuenta de tu reloj.
+Eine Uhr ohne Konto-Anbindung liefert Touren als Dateien (FIT, GPX, TCX oder ZIP). || A watch without an account link provides tours as files (FIT, GPX, TCX or ZIP). || Une montre sans compte lié fournit les parcours sous forme de fichiers (FIT, GPX, TCX ou ZIP). || Un reloj sin cuenta vinculada entrega las rutas como archivos (FIT, GPX, TCX o ZIP).
+Kommt gleich dran. || Up next. || C’est bientôt son tour. || Es el siguiente.
+Alle holen || Fetch all || Tout récupérer || Obtener todo
+Letzter Import fehlgeschlagen || Last import failed || Dernier import échoué || La última importación falló
+Schnell-Knopf zum Touren holen in der Kopfzeile || Quick button for fetching tours in the header || Bouton rapide pour récupérer des parcours dans l’en-tête || Botón rápido para obtener rutas en la cabecera
+Schnell-Knopf zum Touren holen: an || Quick button for fetching tours: on || Bouton rapide pour récupérer des parcours : activé || Botón rápido para obtener rutas: activado
+Schnell-Knopf zum Touren holen: aus || Quick button for fetching tours: off || Bouton rapide pour récupérer des parcours : désactivé || Botón rápido para obtener rutas: desactivado
 `;

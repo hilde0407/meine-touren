@@ -383,7 +383,7 @@ VIEWS.tours = async () => {
   if (f0.lim) lim = f0.lim;
   const draw = () => {
     sv();
-    const q = $("#q").value.toLowerCase(),
+    const q = $("#q").value,
       y = +$("#fy").value,
       s = $("#fs").value,
       so = $("#so").value,
@@ -399,7 +399,7 @@ VIEWS.tours = async () => {
         (!s || t.sport === s) &&
         inRegion(t, rg) &&
         (!tg || (t.tags || "").split("|").includes(tg)) &&
-        (!q || t.name.toLowerCase().includes(q))
+        (!q.trim() || smatch(t.name, q))
     );
     const k = {date: t => -t.start_ts, old: t => t.start_ts, km: t => -t.km, up: t => -(t.up_m || 0), h: t => -t.h}[so];
     a.sort((x, z) => k(x) - k(z));

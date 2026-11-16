@@ -500,13 +500,13 @@ VIEWS.check = async (...a) => {
   );
   let plan = [];
   const calc = () => {
-    const q = $("#rn_q").value.toLowerCase(),
+    const q = $("#rn_q").value,
       r = $("#rn_r").value,
       s = $("#rn_s").value,
       act = $("#rn_a").value,
       x = $("#rn_x").value,
       y = $("#rn_y").value;
-    plan = TOURS.filter(t => (!q || t.name.toLowerCase().includes(q)) && (!r || inRegion(t, r)) && (!s || t.sport === s))
+    plan = TOURS.filter(t => (!q.trim() || smatch(t.name, q)) && (!r || inRegion(t, r)) && (!s || t.sport === s))
       .map(t => {
         let n = t.name;
         if (act === "pre") n = x + n;

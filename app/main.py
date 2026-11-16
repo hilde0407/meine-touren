@@ -17,7 +17,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche, layout, bausteine_daten, hinweise, kennzahl
+from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche, layout, bausteine_daten, hinweise, kennzahl, suche
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -331,7 +331,7 @@ def api_tours(year: int = 0, q: str = "", limit: int = 20000):
         d = datetime.fromtimestamp(t["start_ts"], tz=TZ)
         if year and d.year != year:
             continue
-        if q and q.lower() not in (t["name"] or "").lower():
+        if q and not suche.smatch(t["name"] or "", q):
             continue
         t["date"] = d.isoformat()
         t["sport_de"] = stats.SPORT_DE.get(t["sport"], t["sport"])
@@ -484,6 +484,8 @@ JOBS = {
     "uhr-alle": ("Uhr-Daten aller Touren laden", lambda dry: uhrtraining.load_all(dry=dry)),
     "elev-zepp": ("Höhe aus Zepp-Uhr abgleichen", lambda dry: elev.zepp_fix_all()),
     "export": ("Zepp-Import (ohne Upload)", lambda dry: sync.export_zepp_lauf()),
+    "garmin-import": ("Garmin-Import", lambda dry: devices.garmin_sync_lauf()),         # 3.31.0: Import-Knopf je nach Uhr (Übersicht); die Verwaltung nutzt weiter POST /api/garmin/sync
+    "suunto-import": ("Suunto-Import", lambda dry: devices.suunto_sync_lauf()),
 }
 
 
