@@ -1684,6 +1684,8 @@ Das Höhenprofil kompakt, die Linie nach Steigung eingefärbt: bergab, eben, ber
 Höhenprofil, tiefster Punkt {}, höchster Punkt {}, Länge {} || Elevation profile, lowest point {}, highest point {}, length {} || Profil altimétrique, point le plus bas {}, point le plus haut {}, longueur {} || Perfil de altitud, punto más bajo {}, punto más alto {}, longitud {}
 höchster Punkt {} m || highest point {} m || point culminant {} m || punto más alto {} m
 Vorheriges Foto || Previous photo || Photo précédente || Foto anterior
+Diashow als Link teilen || Share slideshow as link || Partager le diaporama par lien || Compartir pase de fotos como enlace
+Link kopiert (30 Tage gültig, ohne Konto ansehbar) || Link copied (valid 30 days, viewable without an account) || Lien copié (valable 30 jours, sans compte) || Enlace copiado (válido 30 días, sin cuenta)
 Nächstes Foto || Next photo || Photo suivante || Foto siguiente
 bergab || downhill || descente || bajada
 eben || flat || plat || llano
