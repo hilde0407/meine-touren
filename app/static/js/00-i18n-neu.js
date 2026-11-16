@@ -2214,4 +2214,84 @@ Drucken / Als PDF speichern || Print / Save as PDF || Imprimer / Enregistrer en 
 mehr Kilometer || more kilometres || plus de kilomètres || más kilómetros
 gegenüber {} || compared with {} || par rapport à {} || respecto a {}
 Noch keine Links freigegeben. In einer Tour findest du „Senden“ und „Diashow senden“, im Jahresrückblick „Als Link teilen“. || No links shared yet. In a tour you will find “Send” and “Send slideshow”, in the year in review “Share as link”. || Aucun lien partagé pour l’instant. Dans un parcours, vous trouverez « Envoyer » et « Envoyer le diaporama », dans le bilan de l’année « Partager par lien ». || Aún no hay enlaces compartidos. En una ruta encontrarás «Enviar» y «Enviar pase de fotos», en el resumen del año «Compartir como enlace».
+Eigene Kennzahl || Custom metric || Indicateur personnalisé || Indicador propio
+Eigene Kennzahlen || Custom metrics || Indicateurs personnalisés || Indicadores propios
+Eigene Kennzahl erstellen || Create custom metric || Créer un indicateur personnalisé || Crear indicador propio
+Eigene Kennzahl bearbeiten || Edit custom metric || Modifier l’indicateur personnalisé || Editar indicador propio
+Stelle selbst zusammen, was du wissen willst: Messgröße, Rechenart, Filter, Vergleich mit dem Vorjahr, Ziel mit Fortschrittsbalken oder eine Formel wie Höhenmeter je km. Ohne Programmieren, mit Vorlagen zum Start. || Put together what you want to know yourself: measure, calculation, filter, comparison with the previous year, goal with progress bar or a formula such as elevation gain per km. No programming needed, with templates to get started. || Composez vous-même ce que vous voulez savoir : grandeur, calcul, filtre, comparaison avec l’année précédente, objectif avec barre de progression ou formule comme le dénivelé par km. Sans programmer, avec des modèles pour démarrer. || Crea tú mismo lo que quieres saber: magnitud, cálculo, filtro, comparación con el año anterior, objetivo con barra de progreso o una fórmula como el desnivel por km. Sin programar, con plantillas para empezar.
+Erstellen || Create || Créer || Crear
+Noch eine erstellen || Create another || En créer un autre || Crear otro
+Anzahl Touren || Number of tours || Nombre de parcours || Número de rutas
+Aufstieg (Höhenmeter) || Ascent (metres) || Dénivelé positif (mètres) || Desnivel positivo (metros)
+Abstieg (Höhenmeter) || Descent (metres) || Dénivelé négatif (mètres) || Desnivel negativo (metros)
+Geschwindigkeit (Tempo) || Speed (pace) || Vitesse (allure) || Velocidad (ritmo)
+Höhenmeter je Kilometer || Elevation gain per kilometre || Dénivelé par kilomètre || Desnivel por kilómetro
+Summe || Sum || Somme || Suma
+Durchschnitt || Average || Moyenne || Media
+Maximum (größter Wert) || Maximum (largest value) || Maximum (valeur la plus grande) || Máximo (valor más alto)
+Minimum (kleinster Wert) || Minimum (smallest value) || Minimum (valeur la plus petite) || Mínimo (valor más bajo)
+Anzahl (Touren mit dieser Angabe) || Count (tours with this value) || Nombre (parcours avec cette donnée) || Cantidad (rutas con este dato)
+Rekord mit Tourname || Record with tour name || Record avec nom du parcours || Récord con nombre de la ruta
+Durchschnitt pro Monat || Average per month || Moyenne par mois || Media por mes
+Durchschnitt (gewichtet) || Average (weighted) || Moyenne (pondérée) || Media (ponderada)
+Summe (Anzahl der Touren) || Sum (number of tours) || Somme (nombre de parcours) || Suma (número de rutas)
+Eigener Bereich || Custom range || Période personnalisée || Intervalo propio
+Höhenmeter je km || Elevation gain per km || Dénivelé par km || Desnivel por km
+Wie steil deine Touren im Schnitt sind: Aufstieg geteilt durch Strecke. || How steep your tours are on average: ascent divided by distance. || Pente moyenne de vos parcours : dénivelé positif divisé par la distance. || Qué pendiente tienen tus rutas de media: desnivel positivo dividido por la distancia.
+Wie oft du im Schnitt pro Monat unterwegs bist. || How often you are out and about per month on average. || Combien de fois par mois vous partez en moyenne. || Cuántas veces sales de media al mes.
+Längste Wanderung || Longest hike || Plus longue randonnée || Excursión más larga
+Deine längste Wanderung mit Name und Datum der Tour. || Your longest hike with the name and date of the tour. || Votre plus longue randonnée avec le nom et la date du parcours. || Tu excursión más larga con el nombre y la fecha de la ruta.
+Ziel: 1000 km im Jahr || Goal: 1000 km a year || Objectif : 1000 km par an || Objetivo: 1000 km al año
+1000 km im Jahr || 1000 km a year || 1000 km par an || 1000 km al año
+Fortschrittsbalken für dein Jahresziel in Kilometern. || Progress bar for your yearly goal in kilometres. || Barre de progression pour votre objectif annuel en kilomètres. || Barra de progreso de tu objetivo anual en kilómetros.
+Durchschnittstempo || Average speed || Vitesse moyenne || Velocidad media
+Deine mittlere Geschwindigkeit der letzten 12 Monate. || Your average speed over the last 12 months. || Votre vitesse moyenne des 12 derniers mois. || Tu velocidad media de los últimos 12 meses.
+Größter Aufstieg || Biggest climb || Plus grande montée || Mayor ascenso
+Die Tour mit den meisten Höhenmetern. || The tour with the most elevation gain. || Le parcours avec le plus de dénivelé. || La ruta con más desnivel.
+Mit einer Vorlage starten || Start from a template || Démarrer avec un modèle || Empezar con una plantilla
+Vorschau || Preview || Aperçu || Vista previa
+Name und Symbol || Name and symbol || Nom et symbole || Nombre y símbolo
+Zum Beispiel: Höhenmeter je km || For example: Elevation gain per km || Par exemple : dénivelé par km || Por ejemplo: desnivel por km
+Symbol (Emoji, optional) || Symbol (emoji, optional) || Symbole (emoji, facultatif) || Símbolo (emoji, opcional)
+Symbol wählen || Choose symbol || Choisir un symbole || Elegir símbolo
+Symbol {} || Symbol {} || Symbole {} || Símbolo {}
+Was wird gerechnet? || What is calculated? || Que calcule-t-on ? || ¿Qué se calcula?
+Messgröße || Measure || Grandeur || Magnitud
+Rechenart || Calculation || Calcul || Cálculo
+Formel: durch eine zweite Kennzahl teilen || Formula: divide by a second metric || Formule : diviser par un second indicateur || Fórmula: dividir por un segundo indicador
+Rechnung || Operation || Opération || Operación
+A in Prozent von B || A as a percentage of B || A en pourcentage de B || A como porcentaje de B
+B: Messgröße || B: measure || B : grandeur || B: magnitud
+B: Rechenart || B: calculation || B : calcul || B: cálculo
+A ist die Messgröße und Rechenart oben, zum Beispiel Höhenmeter (Summe) ÷ Strecke (Summe) = Höhenmeter je km. || A is the measure and calculation above, for example elevation gain (sum) ÷ distance (sum) = elevation gain per km. || A est la grandeur et le calcul ci-dessus, par exemple dénivelé (somme) ÷ distance (somme) = dénivelé par km. || A es la magnitud y el cálculo de arriba, por ejemplo desnivel (suma) ÷ distancia (suma) = desnivel por km.
+Filter || Filter || Filtre || Filtro
+Schlagwort (optional) || Keyword (optional) || Mot-clé (facultatif) || Palabra clave (opcional)
+Mindeststrecke in km (optional) || Minimum distance in km (optional) || Distance minimale en km (facultatif) || Distancia mínima en km (opcional)
+Mit dem Zeitraum davor vergleichen (± %) || Compare with the previous period (± %) || Comparer avec la période précédente (± %) || Comparar con el periodo anterior (± %)
+Für „Gesamte Zeit“ gibt es keinen Vergleichszeitraum. || There is no comparison period for “All time”. || Il n’y a pas de période de comparaison pour « Toute la période ». || No hay periodo de comparación para «Todo el tiempo».
+Ziel (optional) || Goal (optional) || Objectif (facultatif) || Objetivo (opcional)
+Einheit || Unit || Unité || Unidad
+Bitte gib der Kennzahl einen Namen. || Please give the metric a name. || Donnez un nom à l’indicateur. || Dale un nombre al indicador.
+Bitte Anfang und Ende des Bereichs wählen. || Please choose the start and end of the range. || Choisissez le début et la fin de la période. || Elige el inicio y el fin del intervalo.
+Der Anfang darf nicht nach dem Ende liegen. || The start must not be after the end. || Le début ne peut pas être après la fin. || El inicio no puede ser posterior al final.
+Die Mindeststrecke liegt zwischen 0 und 1000 km. || The minimum distance must be between 0 and 1000 km. || La distance minimale doit être comprise entre 0 et 1000 km. || La distancia mínima debe estar entre 0 y 1000 km.
+Das Ziel muss größer als 0 sein. || The goal must be greater than 0. || L’objectif doit être supérieur à 0. || El objetivo debe ser mayor que 0.
+Es sind höchstens {} eigene Kennzahlen möglich. || At most {} custom metrics are possible. || {} indicateurs personnalisés au maximum sont possibles. || Se permiten como máximo {} indicadores propios.
+Diese Kennzahl konnte nicht berechnet werden. Prüfe die Einstellung im Zahnrad. || This metric could not be calculated. Check the setting under the gear icon. || Cet indicateur n’a pas pu être calculé. Vérifiez le réglage sous la roue dentée. || No se pudo calcular este indicador. Revisa el ajuste en el engranaje.
+Für diese Rechenart fehlen Angaben in den Touren. || Some data needed for this calculation is missing in the tours. || Des données nécessaires à ce calcul manquent dans les parcours. || Faltan datos en las rutas para este cálculo.
+Im Zeitraum gibt es keine passenden Touren. || There are no matching tours in this period. || Aucun parcours ne correspond sur cette période. || No hay rutas que coincidan en este periodo.
+Vorher || Before || Avant || Antes
+gegenüber dem Vorjahr bis zum selben Tag || compared with the previous year up to the same day || par rapport à l’année précédente jusqu’au même jour || respecto al año anterior hasta el mismo día
+gegenüber den 12 Monaten davor || compared with the 12 months before || par rapport aux 12 mois précédents || respecto a los 12 meses anteriores
+gegenüber den 90 Tagen davor || compared with the 90 days before || par rapport aux 90 jours précédents || respecto a los 90 días anteriores
+gegenüber dem gleich langen Zeitraum davor || compared with the period of equal length before || par rapport à la période de même durée qui précède || respecto al periodo anterior de igual duración
+Im Vergleichszeitraum gibt es keinen Wert. || There is no value in the comparison period. || Il n’y a pas de valeur sur la période de comparaison. || No hay valor en el periodo de comparación.
+Für diesen Zeitraum gibt es keinen Vergleich. || There is no comparison for this period. || Il n’y a pas de comparaison pour cette période. || No hay comparación para este periodo.
+{} % von || {} % of || {} % de || {} % de
+✓ Ziel erreicht || ✓ Goal reached || ✓ Objectif atteint || ✓ Objetivo alcanzado
+Verlauf je Monat von {} bis {}, höchster Wert {} ({}) || Trend per month from {} to {}, highest value {} ({}) || Évolution par mois de {} à {}, valeur maximale {} ({}) || Evolución por mes de {} a {}, valor máximo {} ({})
+Verlauf je Jahr von {} bis {}, höchster Wert {} ({}) || Trend per year from {} to {}, highest value {} ({}) || Évolution par an de {} à {}, valeur maximale {} ({}) || Evolución por año de {} a {}, valor máximo {} ({})
+Mit dieser Einstellung lässt sich nichts berechnen. || Nothing can be calculated with this setting. || Rien ne peut être calculé avec ce réglage. || Con este ajuste no se puede calcular nada.
+Kopie || Copy || Copie || Copia
+Monat || Month || Mois || Mes
 `;
