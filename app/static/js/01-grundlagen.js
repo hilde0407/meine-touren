@@ -2,11 +2,29 @@
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"})[c]);
 const STALE = () => new Promise(() => {}); // Antwort für eine inzwischen verlassene Seite: nie auflösen, damit die alte Ansicht nichts mehr zeichnet
+/* 3.27.0: Gleiche GET-Adresse gleichzeitig angefragt (z. B. Strecke der Tour von drei Bausteinen) = eine Anfrage; jeder Aufrufer liest die Antwort selbst (eigene Objekte).
+   Nach dem Ende der Anfrage wird nichts aufgehoben, und jede schreibende Anfrage leert die Liste: so entsteht nie ein Zwischenspeicher mit veralteten Daten. */
+const _FL = new Map();
+const _once = u => {
+  let p = _FL.get(u);
+  if (!p) {
+    p = fetch(u).then(async r => {
+      const text = await r.text();
+      return {ok: r.ok, status: r.status, text: async () => text, json: async () => JSON.parse(text)};
+    });
+    _FL.set(u, p);
+    const done = () => _FL.get(u) === p && _FL.delete(u);
+    p.then(done, done);
+  }
+  return p;
+};
 const api = async (u, o) => {
-  if (o && o.method && !/^(GET|HEAD)$/i.test(o.method) && typeof isViewer === "function" && isViewer() && !/^\/api\/(login|logout)/.test(u + ""))
-    throw new Error("Dieser Zugang darf nur ansehen");
+  if (o && o.method && !/^(GET|HEAD)$/i.test(o.method)) {
+    _FL.clear();
+    if (typeof isViewer === "function" && isViewer() && !/^\/api\/(login|logout)/.test(u + "")) throw new Error("Dieser Zugang darf nur ansehen");
+  }
   const tok = window._rt,
-    r = await fetch(u, o);
+    r = await (!o && typeof u === "string" ? _once(u) : fetch(u, o));
   if (tok && tok !== window._rt && (!o || !o.method || o.method === "GET")) return STALE();
   if (r.status === 401 && ME.users_enabled && !(u + "").startsWith("/api/login")) {
     showAuth("login", "Bitte anmelden.");
@@ -113,7 +131,9 @@ const saveTS = () => {
 async function loadPrefs() {
   // Einstellungen gelten auf allen Geräten: Server hat Vorrang, sonst lokale Werte hochladen
   try {
-    const s = await fetch("/api/settings").then(r => r.json()),
+    const ps = window._preSet;
+    window._preSet = null;
+    const s = await (ps || fetch("/api/settings")).then(r => r.json()),
       p = s.ui_prefs ? JSON.parse(s.ui_prefs) : null;
     if (p) {
       Object.assign(TS, p.ts || {});
@@ -243,7 +263,15 @@ const NAV = [
 $("#nav").innerHTML = NAV.map(([k, l]) => `<a href="#/${k}" data-k="${k}">${l}</a>`).join("");
 
 async function loadTours() {
-  TOURS = await api("/api/tours");
+  let pre = null;
+  if (window._preTours) {                    // 3.27.0: beim Start schon parallel zu „me“ und „settings“ angefragt (spart zwei Laufzeiten)
+    const p = window._preTours;
+    window._preTours = null;
+    try {
+      pre = await p;
+    } catch (e) {}
+  }
+  TOURS = pre || (await api("/api/tours"));
   TOURS.forEach(t => {
     t.y = +t.date.slice(0, 4);
     t.m = +t.date.slice(5, 7);
@@ -423,7 +451,12 @@ function mkMap(el, opt = {}) {
 }
 const okPt = p => Array.isArray(p) && p[0] != null && p[1] != null && isFinite(p[0]) && isFinite(p[1]);
 const cleanPts = a => (Array.isArray(a) ? a.filter(okPt) : []);
-const loadRoutes = async () => ROUTES || (ROUTES = await api("/api/routes"));
+let _routesP = null;                         // 3.27.0: läuft das Laden der Strecken schon (z. B. „später nachladen“ und die Karte), wird auf dasselbe gewartet
+const loadRoutes = async () => {
+  if (ROUTES) return ROUTES;
+  if (!_routesP) _routesP = api("/api/routes").then(r => (ROUTES = r)).finally(() => (_routesP = null));
+  return _routesP;
+};
 /* Mini-Strecken in den Listen nachreichen, ohne die Seite darauf warten zu lassen */
 function patchMinis() {
   document.querySelectorAll('a.tr[href^="#/tour/"]').forEach(a => {

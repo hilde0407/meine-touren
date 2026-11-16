@@ -328,25 +328,37 @@ def newground():
     key = (len(tours), files, tours[-1]["id"] if tours else None)
     if _NG["key"] == key:
         return _NG["val"]
-    seen, res = set(), {}
+    # seen_d = Rasterzellen früherer Touren samt der 8 Nachbarzellen (Treffer = „war schon in der Nähe“); Zelle (cy, cx) als eine Zahl, das ist schneller als ein Tupel
+    seen_d, res = set(), {}
+    from math import asin, sqrt, sin
+    M = 1 << 22
+    nb = (-M - 1, -M, -M + 1, -1, 0, 1, M - 1, M, M + 1)
     for t in tours:
         pts = [p for p in (routes.load(t["id"]) or []) if p and p[0] is not None]
         if len(pts) < 3:
             continue
         mine, total, new = set(), 0.0, 0.0
         for a, b in zip(pts, pts[1:]):
-            d = extras._hav((a[0], a[1]), (b[0], b[1]))
+            la0, lb0 = radians(a[0]), radians(b[0]); dl, dn = lb0 - la0, radians(b[1] - a[1])
+            c0 = cos(la0)
+            d = 2 * 6371000 * asin(sqrt(sin(dl / 2) ** 2 + c0 * cos(lb0) * sin(dn / 2) ** 2))      # wie extras._hav
             if d <= 0:
                 continue
             n = max(1, int(d / 30)); seg = d / n
             for i in range(n):
-                la, lo = a[0] + (b[0] - a[0]) * i / n, a[1] + (b[1] - a[1]) * i / n
-                cy, cx = floor(la / 0.0004), floor(lo / (0.0004 / max(0.2, cos(radians(la)))))
+                if i == 0:                                   # Anfangspunkt des Abschnitts: Breite und Kosinus sind schon bekannt
+                    cy, cx = floor(a[0] / 0.0004), floor(a[1] / (0.0004 / max(0.2, c0)))
+                else:
+                    la, lo = a[0] + (b[0] - a[0]) * i / n, a[1] + (b[1] - a[1]) * i / n
+                    cy, cx = floor(la / 0.0004), floor(lo / (0.0004 / max(0.2, cos(radians(la)))))
                 total += seg
-                if not any((cy + dy, cx + dx) in seen for dy in (-1, 0, 1) for dx in (-1, 0, 1)):
+                k = cy * M + cx
+                if k not in seen_d:
                     new += seg
-                mine.add((cy, cx))
-        seen |= mine
+                mine.add(k)
+        for k in mine:
+            for o in nb:
+                seen_d.add(k + o)
         if total > 0:
             res[t["id"]] = {"new_km": round(new / 1000, 2), "km": round(total / 1000, 2), "pct": round(100 * new / total)}
     years = {}

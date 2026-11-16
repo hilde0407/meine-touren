@@ -1,5 +1,10 @@
 /* Start */
 async function boot() {
+  /* 3.27.0: Touren und Einstellungen gleichzeitig mit „me“ anfragen statt nacheinander (bei langsamer Verbindung drei Wartezeiten weniger). Antworten ohne Anmeldung (401) werden verworfen. */
+  window._preSet = fetch("/api/settings").catch(() => null);
+  window._preTours = fetch("/api/tours")
+    .then(r => (r.ok ? r.json() : null))
+    .catch(() => null);
   try {
     ME = await fetch("/api/me").then(r => r.json());
   } catch (e) {}

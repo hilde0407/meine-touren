@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import contextvars
+import hashlib
 import html
 import os
 import re
@@ -49,9 +50,49 @@ async def no_stale_static(request: Request, call_next):
     r.headers.setdefault("Referrer-Policy", "same-origin")
     if p in ("/", "/index.html", "/share.html", "/rueckblick.html", "/show.html", "/slideshow.html", "/reset.html") or p.startswith(("/s/", "/reset/")):
         r.headers.setdefault("Content-Security-Policy", CSP_APP)
+    if "cache-control" not in r.headers and _VER_Q.match(request.url.query or "") and (p.startswith(("/js/", "/vendor/")) or p == "/style.css"):
+        r.headers["Cache-Control"] = "public, max-age=31536000, immutable"     # 3.27.0: Dateien mit Versionsstempel (?v=…) ändern ihre Adresse, sobald sich etwas ändert – kein Nachfragen bei jedem Aufruf
     if not p.startswith(("/photo/", "/pic/", "/api/")) and "cache-control" not in r.headers:
         r.headers["Cache-Control"] = "no-cache"      # Browser prüft bei jedem Aufruf auf neue Programmdateien
     return r
+
+
+_VER_Q = re.compile(r"^v=[0-9a-f]{8,40}$")
+_VER_ATTR = re.compile(r'((?:src|href)="(?:js/[^"?]+\.js|vendor/[^"?]+\.(?:js|css)|style\.css))"')
+
+
+def _static_build():
+    """Stempel für die Programmdateien: ändert sich mit der Version und mit jeder geänderten Datei (Name, Größe, Änderungszeit)."""
+    h = hashlib.sha1(config.VERSION.encode())
+    for sub in ("js", "vendor"):
+        try:
+            with os.scandir(STATIC / sub) as it:
+                for e in sorted(it, key=lambda e: e.name):
+                    if e.is_file():
+                        st = e.stat()
+                        h.update(f"{sub}/{e.name}:{st.st_size}:{st.st_mtime_ns}".encode())
+        except OSError:
+            pass
+    try:
+        st = (STATIC / "style.css").stat()
+        h.update(f"style.css:{st.st_size}:{st.st_mtime_ns}".encode())
+    except OSError:
+        pass
+    return h.hexdigest()[:16]
+
+
+@app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/index.html", methods=["GET", "HEAD"], include_in_schema=False)
+def index_page(request: Request):
+    """Startseite mit Versionsstempel an den Skript- und Stilverweisen (3.27.0): Browser holen die rund 65 Programmdateien nur noch bei einer neuen Version, nicht bei jedem Aufruf."""
+    page = (STATIC / "index.html").read_text(encoding="utf-8")
+    v = _static_build()
+    page = _VER_ATTR.sub(lambda m: m.group(1) + "?v=" + v + '"', page)
+    etag = '"' + hashlib.sha1(page.encode()).hexdigest()[:20] + '"'
+    h = {"ETag": etag, "Cache-Control": "no-cache"}
+    if etag in (request.headers.get("if-none-match") or ""):
+        return Response(status_code=304, headers=h)
+    return HTMLResponse(page, headers=h)
 
 
 VIEWER_GET = re.compile(
