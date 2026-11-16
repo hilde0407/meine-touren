@@ -1685,7 +1685,7 @@ Höhenprofil, tiefster Punkt {}, höchster Punkt {}, Länge {} || Elevation prof
 höchster Punkt {} m || highest point {} m || point culminant {} m || punto más alto {} m
 Vorheriges Foto || Previous photo || Photo précédente || Foto anterior
 Diashow als Link teilen || Share slideshow as link || Partager le diaporama par lien || Compartir pase de fotos como enlace
-Link kopiert (30 Tage gültig, ohne Konto ansehbar) || Link copied (valid 30 days, viewable without an account) || Lien copié (valable 30 jours, sans compte) || Enlace copiado (válido 30 días, sin cuenta)
+Link kopiert (24 Stunden gültig, ohne Konto ansehbar) || Link copied (valid 24 hours, viewable without an account) || Lien copié (valable 24 heures, sans compte) || Enlace copiado (válido 24 horas, sin cuenta)
 Nächstes Foto || Next photo || Photo suivante || Foto siguiente
 bergab || downhill || descente || bajada
 eben || flat || plat || llano

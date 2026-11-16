@@ -43,18 +43,18 @@ const q = new URLSearchParams(location.search);
   const bspd = document.getElementById("bspd"), spdTxt = () => { bspd.textContent = Math.round(sec / 1000) + " s"; };
   bspd.onclick = e => { e.stopPropagation(); const o = [3, 6, 10, 15], n = o[(o.indexOf(Math.round(sec / 1000)) + 1) % o.length]; sec = n * 1000; try { localStorage.setItem("showSec", n); } catch (err) {} spdTxt(); loop(); poke(); };
   spdTxt();
-  // Teilen (nur bei Diashow einer einzelnen Tour): Link ohne Konto, 30 Tage gültig, ohne Kommentare
+  // Teilen (nur bei Diashow einer einzelnen Tour): Link ohne Konto, 24 Stunden gültig, ohne Kommentare
   const bshr = document.getElementById("bshr"), fsh = document.getElementById("fsh");
   if (q.get("tour")) bshr.style.display = ""; 
   const note = txt => { fsh.textContent = txt; fsh.style.display = "block"; setTimeout(() => { fsh.style.display = "none"; }, 4000); };
   bshr.onclick = async e => {
     e.stopPropagation(); paused = true; clearTimeout(timer); document.getElementById("bpp").textContent = "▶"; poke(); bshr.disabled = true;
     try {
-      const r = await fetch(`/api/tours/${encodeURIComponent(q.get("tour"))}/share`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({show: true, trim: true, days: 30, best: q.get("best") ? +q.get("best") || 10 : 0, comments: false})});
+      const r = await fetch(`/api/tours/${encodeURIComponent(q.get("tour"))}/share`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({show: true, trim: true, days: 1, best: q.get("best") ? +q.get("best") || 10 : 0, comments: false})});
       if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.status);
       const url = location.origin + (await r.json()).url, title = (list[0] || {}).tour_name || document.title;
       if (navigator.share) { try { await navigator.share({title, url}); } catch (err) { /* abgebrochen */ } }
-      else { await navigator.clipboard.writeText(url); note("Link kopiert (30 Tage gültig, ohne Konto ansehbar)"); }
+      else { await navigator.clipboard.writeText(url); note("Link kopiert (24 Stunden gültig, ohne Konto ansehbar)"); }
     } catch (err) { note("Link konnte nicht erstellt werden: " + err.message); }
     bshr.disabled = false;
   };
