@@ -479,6 +479,8 @@ def test_mobile_390_no_overflow_touch_targets_contrast_and_shots(pw, app, scheme
     for name, cfg in shots:
         pg = show(pw, app, dict(cfg, shuffle=True) if name in ("grid", "strip") else cfg, width=390, height=900, scheme=scheme, dpr=2)
         ready(pg)
+        pg.locator("#hmemsec").scroll_into_view_if_needed()                                       # Bilder laden erst in der Nähe des Fensters (loading=lazy), im Streifen auch seitlich
+        pg.evaluate("() => document.querySelectorAll('#hmemsec .erb img').forEach(i => { i.loading = 'eager'; })")
         pg.wait_for_function("() => [...document.querySelectorAll('#hmemsec .erb img')].filter(i => i.getAttribute('src')).every(i => i.complete)", timeout=T)
         assert pg.evaluate(OVER) == {"page": 0, "tile": []}, name
         if name in ("grid", "orig"):
