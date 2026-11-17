@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.34.0](3.34.0.md) – Fotos und Karte anpassbar, Galerie mit Vorschau, Zeitraum der Seite
 - [3.33.0](3.33.0.md) – Reisen als anpassbare Seiten
 - [3.32.0](3.32.0.md) – Erinnerungen-Kachel einstellbar
 - [3.31.1](3.31.1.md) – Diashow-Link mit Tourname

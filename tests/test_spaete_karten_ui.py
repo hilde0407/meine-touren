@@ -95,7 +95,7 @@ def test_dash_late_blocks_keep_layout_order(pw, app):
     pg.wait_for_selector("main.home #hlast", timeout=T)
     pg.wait_for_function("() => !!document.querySelector('#slopen')", timeout=T)
     pg.wait_for_timeout(2500)
-    ids = pg.evaluate("() => [...document.querySelectorAll('main.home > section, main.home > .hcols > section')].filter(e => !e.hidden).map(e => e.id)")
+    ids = pg.evaluate("() => [...document.querySelectorAll('main.home > section, main.home > .hcols > section')].filter(e => !e.hidden && e.id !== 'zrbar').map(e => e.id)")
     ref = ["hrecent", "hyear", "hlast", "htag", "hmemsec"]
     assert ids == [x for x in ref if x in ids] and "hrecent" in ids, ids
     assert pg.locator("main.home .hcols").count() <= 1

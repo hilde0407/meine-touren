@@ -89,7 +89,7 @@ function rnFrame() {
     host.appendChild(c);
     return tlBody(c);
   };
-  const ser = main.querySelector("#rnser"), btn = main.querySelector("#sbbtn"), nser = ser ? ser.querySelectorAll(".otd").length : 0;
+  const alb = main.querySelector("#rnalb"), ser = main.querySelector("#rnser"), btn = main.querySelector("#sbbtn"), nser = ser ? ser.querySelectorAll(".otd").length : 0;
   let b = card("serien", "Mehrtagestouren", nser ? `${nser} erkannt` : "", true);
   b.insertAdjacentHTML("beforeend", '<p class="mut rnhint">erkannt an Namen wie „… Tag 3“ oder „… Etappe 2“</p>');
   if (btn && btn.parentElement) b.appendChild(btn.parentElement);
@@ -99,7 +99,6 @@ function rnFrame() {
   const trips = window.RS_TRIPS || [];
   b = card("reisen", "Reisen", trips.length === 1 ? "1 Reise" : trips.length ? `${trips.length} Reisen` : "", true);
   b.appendChild(document.getElementById("tr"));
-  const alb = main.querySelector("#rnalb");
   b = card("alben", "Alben und Tags", "", true);
   if (alb) {
     const h = alb.querySelector(":scope > .sec .sub");
@@ -147,4 +146,4 @@ function rnFrame() {
   };
 }
 /* Dieses Skript lädt zuletzt: Hat die Seite schon gezeichnet (boot() in 13-start.js läuft früher), bevor die Ansichten hier eingehängt waren, wird sie jetzt mit dem Layout neu gezeichnet (wie 56-statistik.js) */
-if (!window.RS_WRAPPED && /^#\/trips?(\/[^/]*)?$/.test(location.hash) && typeof route === "function") route();
+slLate(/^#\/trips?(\/[^/]*)?$/, "RS_WRAPPED", "#tr, #cm");

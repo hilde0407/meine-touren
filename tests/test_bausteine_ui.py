@@ -235,11 +235,11 @@ def test_catalog_categories_search_and_390px(pw, app):
         # Suche (innerhalb der Kategorie, dann über alle)
         pg.locator("#slq").fill("kalor")
         pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length === 1", timeout=T)
-        assert pg.locator(".slcard:visible h3").inner_text() == "Spaß-Vergleiche"
+        assert pg.locator(".slcard:visible .slci h3").inner_text() == "Spaß-Vergleiche"
         pg.locator(".slchip", has_text="Alle").click()
         pg.locator("#slq").fill("WETTER")
         pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length >= 2", timeout=T)
-        names = pg.locator(".slcard:visible h3").all_inner_texts()
+        names = pg.locator(".slcard:visible .slci h3").all_inner_texts()
         assert "Wetter-Streifen" in names and "Wetter und Tageszeit" in names, names
         pg.locator("#slq").fill("gibt es nicht")
         pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length === 0", timeout=T)
@@ -271,7 +271,7 @@ def test_catalog_dash_has_all_categories_and_desktop_shot(pw, app):
         assert pg.locator(".slchip").all_inner_texts() == ["Alle", "Zahlen", "Grafiken", "Rückblick", "Planung", "Touren holen", "Hinweise", "Eigene Kennzahlen"]
         pg.locator(".slchip", has_text="Planung").click()
         pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length === 5", timeout=T)
-        assert sorted(pg.locator(".slcard:visible h3").all_inner_texts()) == ["Ausrüstungs-Kilometerstand", "Geplante Touren", "Jahresziel", "Meilensteine", "Ziele"]
+        assert sorted(pg.locator(".slcard:visible .slci h3").all_inner_texts()) == ["Ausrüstungs-Kilometerstand", "Geplante Touren", "Jahresziel", "Meilensteine", "Ziele"]
         pg.locator(".slchip", has_text="Alle").click()
         pg.wait_for_function("(n) => document.querySelectorAll('.slcard:not([hidden])').length === n", arg=len(DASH_TYPES) + 14, timeout=T)
         _shot(pg, "katalog-desktop-hell.png", full=False)

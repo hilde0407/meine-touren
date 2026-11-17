@@ -11,9 +11,9 @@
    3.20.0 Raster: jeder Abschnitt hat eine Breite (voll, zweidrittel, halb, drittel; Dokumentfeld w, Standard je Eintrag/Typ: Feld w der Registry), das Raster selbst ist CSS (style.css „3.20.0“),
    hier werden nur die Klassen gesetzt (.slcell .w-…) und Zeilenreste aufgefüllt (slRaster). Seiteneignung: Typ.seiten (Standard: Tour-Bausteine nur „tour“, Übersichts-Bausteine „uebersicht“ und „tour“). */
 window.SL_WT = window.SL_WT || {};
-const SL_PAGE_KEY = {haupt: "tour-haupt", auswertung: "tour-auswertung", uebersicht: "uebersicht", statistik: "statistik", reise: "reise", reisen: "reisen"};
+const SL_PAGE_KEY = {haupt: "tour-haupt", auswertung: "tour-auswertung", uebersicht: "uebersicht", statistik: "statistik", reise: "reise", reisen: "reisen", fotos: "fotos", karte: "karte"};
 const slKey1 = fam => (fam === "tour" ? "tour-haupt" : fam);                                  // Schlüssel des (ersten) Dokuments einer Seitenfamilie
-const SL_ONE = ["uebersicht", "statistik", "reise", "reisen"];                                  // Seiten mit genau einem Dokument (3.33.0: Reise-Detailseite „reise“ und Reisen-Übersicht „reisen“)
+const SL_ONE = ["uebersicht", "statistik", "reise", "reisen", "fotos", "karte"];                    // Seiten mit genau einem Dokument (3.33.0: Reise-Detailseite „reise“ und Reisen-Übersicht „reisen“; 3.34.0: Fotos „fotos“ und Gesamtkarte „karte“)
 const slFamOf = k => (SL_ONE.includes(k) ? k : "tour");
 const SL_W = {d: {voll: 12, zweidrittel: 8, halb: 6, drittel: 4}, t: {voll: 12, zweidrittel: 12, halb: 6, drittel: 6}};            // Spalten je Breite: Desktop (ab 900 px) und Tablet
 const SL_WALL = ["voll", "zweidrittel", "halb", "drittel"];
@@ -22,7 +22,8 @@ const SL_WCLS = SL_WALL.map(k => "w-" + k);
 const slTypeW = T => (T && SL_W.d[T.w] ? T.w : "voll");
 const slSeiten = T => (T && T.seiten) || (T && T.fam === "tour" ? ["tour"] : ["uebersicht", "tour"]);
 const slFits = (T, fam) => !!T && slSeiten(T).includes(fam);
-const slOneRoot = fam => document.getElementById(fam === "statistik" ? "stx" : fam === "reise" ? "trx" : "rsx");          // Wurzel des Rasters einer Seite mit einem Dokument (Übersicht: main.home)
+const SL_ROOT = {statistik: "stx", reise: "trx", reisen: "rsx", fotos: "fox", karte: "kax"};
+const slOneRoot = fam => document.getElementById(SL_ROOT[fam] || "rsx");          // Wurzel des Rasters einer Seite mit einem Dokument (Übersicht: main.home)
 const SL_GROUPS = {route: "Streckenverlauf", rec: "Aufzeichnung", eval: "Auswertung dieser Tour", more: "Fotos zur Tour", bst: "Bausteine"};
 /* Registry: Standardseite, Gruppe, Standard „offen“ (def), fixed = kann nur auf dieser Seite stehen (wird von der Tourseite selbst aufgebaut),
    must = Pflicht (nicht ausblendbar), plain = kein einklappbarer Abschnitt, ckeys = Speicherschlüssel des Auf-/Zu-Zustands (localStorage „mt_trf_…“) */
@@ -198,6 +199,7 @@ function slItems(fam) {
     items.push({id: w.id, w: slTypeW(T), ws: T.ws, title: slWTitle(T, w.cfg || {}), fl: slWFl(T, w.cfg || {}), page: fam === "tour" ? "haupt" : fam, group: fam === "tour" ? "bst" : "", widget: true, plain: !!T.shell, wtype: w.type, cfg: w.cfg || {}, def: true, ckeys: ["tl_w_" + w.id]});
   });
   if (fam === "statistik" && typeof stApply === "function") items.forEach(it => it.wtype && stApply(it));          // 3.22.0: globaler Filter der Statistikseite
+  else if (fam === "uebersicht" && typeof zrApplyAll === "function") zrApplyAll(items);                         // 3.34.0: Zeitraum der Seite (65-zeitraum.js)
   if (fam === "tour") items.forEach(it => !it.fixed && (pg[it.id] === "haupt" || pg[it.id] === "auswertung") && (it.page = pg[it.id]));
   items.forEach(it => {                                                   // 3.20.0: Breite = gespeicherte Abweichung, sonst Standard (immer eine der erlaubten)
     const ws = it.ws || SL_WALL, v = (st.w || {})[it.id];
@@ -585,6 +587,10 @@ async function slReset() {
       ? "Reihenfolge, Breiten, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Reise-Seite werden zurückgesetzt. Das gilt für alle Reisen."
       : SL.fam === "reisen"
       ? "Reihenfolge, Breiten, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Reisen-Übersicht werden zurückgesetzt."
+      : SL.fam === "fotos"
+      ? "Reihenfolge, Breiten, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Fotos-Seite werden zurückgesetzt."
+      : SL.fam === "karte"
+      ? "Reihenfolge, Breite der Karte, ausgeblendete Bedienfelder und alle hinzugefügten Bausteine der Karte werden zurückgesetzt."
       : "Reihenfolge, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Übersicht werden zurückgesetzt.",
     ok: "Standard wiederherstellen",
     danger: true,
@@ -805,7 +811,7 @@ function slRegroup(pres) {
 }
 function slPlace(root) {
   const main = root.matches && root.matches("main.home"),
-    one = {stx: "statistik", trx: "reise", rsx: "reisen"}[root.id],
+    one = {stx: "statistik", trx: "reise", rsx: "reisen", fox: "fotos", kax: "karte"}[root.id],
     fam = one || (main ? "uebersicht" : "tour"),
     page = one || (main ? "uebersicht" : root.classList.contains("tlsub") ? "auswertung" : "haupt");
   SL.fam = fam;
@@ -816,6 +822,7 @@ function slPlace(root) {
     st = slSt(fam),
     hid = st.hidden || [],
     mine = new Set(items.map(i => i.id));
+  if (fam === "karte" && typeof kaBefore === "function") kaBefore(root, edit);                  // 3.34.0: Bedienfelder zurück auf die Karte (oder im Bearbeitungsmodus ins Raster)
   root.querySelectorAll(".tlw[data-wid]").forEach(e => !mine.has(e.dataset.wid) && e.remove());        // Baustein einer anderen Seite oder entfernt
   const pres = [];
   items.forEach(it => {
@@ -861,8 +868,8 @@ function slPlace(root) {
       return r.el;
     });
   if (fam === "tour") root.querySelectorAll(":scope > .tlg:not(.tlsumg)").forEach(g => !used.has(g) && (g.hidden = true));
-  const op = slOpener(root, edit);
-  slPlaceIn(root, main ? [op, ...seq] : seq);
+  const op = slOpener(root, edit), zb = typeof zrBar === "function" ? zrBar(fam, pres, root, edit) : null;          // 3.34.0: Zeitraum-Leiste der Seite (65-zeitraum.js)
+  slPlaceIn(root, main ? [op, zb, ...seq] : seq);
   if (edit)
     pres.forEach((p, i) => {
       const w = p.unit;
@@ -896,6 +903,7 @@ function slPlace(root) {
   slSubNote(root, pres);
   if (fam === "tour") slWatchMap();
   slRaster();
+  if (fam === "karte" && typeof kaAfter === "function") kaAfter(root, edit, pres);                // 3.34.0: Karte: Größe nachführen, Bedienfelder anordnen
 }
 /* „Seite anpassen“ steht über dem Seiteninhalt (Tourseite: vor dem Container, Übersicht: erstes Element) */
 function slOpener(root, edit) {
@@ -921,7 +929,14 @@ function slOpener(root, edit) {
     slShowMsg(w);
     w.hidden = false;
   }                  // 3.22.0: „Ansicht speichern“, solange der Filter vom gespeicherten Stand abweicht
-  if (!root.matches("main.home") && w.nextElementSibling !== root) root.parentNode.insertBefore(w, root);
+  if (!root.matches("main.home") && SL.fam !== "karte" && w.nextElementSibling !== root) root.parentNode.insertBefore(w, root);          // Karte: der Knopf sitzt auf der Karte (kaAfter)
+  if (SL.fam === "karte") {
+    const ui = document.querySelector(".mapui");
+    if (ui && w.parentElement !== ui) {
+      w.classList.add("kaopen");
+      ui.appendChild(w);
+    }
+  }
   return root.matches("main.home") ? w : null;
 }
 /* Auswertungsseite ohne Inhalt, weil alles auf der Hauptseite liegt: passende Erklärung statt „keine Auswertung“ */
@@ -944,7 +959,7 @@ function slSubNote(root, pres) {
 function slApply() {
   if (SL.fam === "tour") {
     if (typeof tlRefresh === "function") tlRefresh();
-  } else if (SL.fam === "statistik" || SL.fam === "reise" || SL.fam === "reisen") {
+  } else if (SL.fam !== "uebersicht") {
     const r = slOneRoot(SL.fam);
     if (r) slPlace(r);
   } else {
@@ -1151,6 +1166,98 @@ function slModal(title, build, cls) {
   (f || box).focus();
   return {close, box};
 }
+/* 3.34.0 Galerie: Live-Vorschau mit den echten Daten des Benutzers. Jede Karte baut ihren Baustein erst, wenn sie ins Bild kommt (IntersectionObserver), höchstens drei gleichzeitig;
+   die Vorschau ist nicht bedienbar (inert), ein Fehler oder eine leere Auswertung lässt die statische Beispielvorschau stehen und blockiert den Dialog nie. */
+let SL_PVN = 0;
+function slLivePreviews(body) {
+  const els = [...body.querySelectorAll(".slpv[data-live]")];
+  if (!els.length) return;
+  const queue = [];
+  let run = 0, gone = false;
+  const done = (pv, ok, why) => {
+    pv.removeAttribute("aria-busy");
+    pv.classList.remove("slpv-load");
+    pv.classList.toggle("slpv-ex", !ok);
+    pv.dataset.live = ok ? "live" : why || "ex";
+    run--;
+    next();
+  };
+  const next = () => {
+    while (!gone && run < 3 && queue.length) {
+      const pv = queue.shift();
+      if (!pv.isConnected) continue;
+      run++;
+      draw(pv);
+    }
+  };
+  const draw = pv => {
+    const type = pv.dataset.live, T = window.SL_WT[type], stat = pv.innerHTML;
+    pv.classList.add("slpv-load");
+    pv.setAttribute("aria-busy", "true");
+    let card;
+    try {
+      card = window.slWidgetBuild({id: "pv" + ++SL_PVN, wtype: type, cfg: JSON.parse(JSON.stringify(T.defaults || {}))}, SL.root);
+    } catch (e) {
+      card = null;
+    }
+    if (!card) return done(pv, false, "fehler");
+    card.inert = true;
+    card.querySelectorAll("details").forEach(d => (d.open = true));
+    card.classList.add("slpvcard");
+    const host = document.createElement("div");
+    host.className = "slpvlive" + (T.shell ? " slpvshell" : "");
+    host.appendChild(card);
+    host.hidden = true;
+    pv.appendChild(host);                                                            // unsichtbar aufbauen, die statische Vorschau bleibt bis zum Ergebnis stehen
+    let fin = false;
+    const finish = () => {
+      if (fin) return;
+      fin = true;
+      mo.disconnect();
+      clearTimeout(to);
+      const b = card.querySelector(".slwb") || card, bad = !b.isConnected || b.querySelector(".slnone") || !b.textContent.trim() || (card.dataset.hn === "aus");
+      if (bad) {
+        host.remove();
+        if (!pv.querySelector(".slpvex")) pv.insertAdjacentHTML("beforeend", '<span class="slpvex">Beispielwerte</span>');
+        return done(pv, false, "leer");
+      }
+      pv.innerHTML = "";
+      pv.appendChild(host);
+      host.hidden = false;
+      done(pv, true);
+    };
+    const settled = () => {
+      const b = card.querySelector(".slwb") || card;
+      return !!b && !/Wird geladen/.test(b.textContent) && !!b.textContent.trim();
+    };
+    const mo = new MutationObserver(() => settled() && setTimeout(finish, 60));
+    mo.observe(card, {childList: true, subtree: true, characterData: true});
+    const to = setTimeout(finish, 7000);
+    if (!pv._stat) pv._stat = stat;
+  };
+  const enqueue = pv => {
+    if (pv.dataset.live === "live" || pv.classList.contains("slpv-load") || pv.dataset.live === "leer" || pv.dataset.live === "fehler") return;
+    queue.push(pv);
+    next();
+  };
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) {
+        io.unobserve(e.target);
+        enqueue(e.target);
+      }
+    }), {root: body.closest(".slbox") || null, rootMargin: "120px"});
+    els.forEach(pv => io.observe(pv));
+    body._slio = io;
+  } else els.slice(0, 6).forEach(enqueue);
+  new MutationObserver((_, o) => {
+    if (!body.isConnected) {
+      gone = true;
+      if (body._slio) body._slio.disconnect();
+      o.disconnect();
+    }
+  }).observe(document.body, {childList: true});
+}
 function slCatalog() {
   const list = Object.entries(window.SL_WT).filter(([, T]) => slFits(T, SL.fam)),
     have = type => (slSt(SL.fam).widgets || []).filter(w => w.type === type).length,
@@ -1162,12 +1269,12 @@ function slCatalog() {
       if (T.neu)                                                                                         // 3.28.0: Baustein, den der Benutzer in einem eigenen Dialog zusammenstellt
         return `<article class="slcard" data-cat="${T.cat || "zahlen"}"><div class="slpv" aria-hidden="true">${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name)}</h3><p>${esc(T.desc || "")}</p>` +
           `<button type="button" class="btn sm" data-neu="${type}">${n ? "Noch eine erstellen" : "Erstellen"}</button></div></article>`;
-      return `<article class="slcard" data-cat="${T.cat || "zahlen"}"><div class="slpv" aria-hidden="true">${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name || T.title(T.defaults || {}))}</h3><p>${esc(T.desc || "")}</p>` +
+      return `<article class="slcard" data-cat="${T.cat || "zahlen"}"><div class="slpv" aria-hidden="true"${T.hinweis ? "" : ` data-live="${type}"`}>${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name || T.title(T.defaults || {}))}</h3>${n || std ? '<span class="slhave">Bereits auf dieser Seite</span>' : ""}<p>${esc(T.desc || "")}</p>` +
         `<button type="button" class="btn sm${dis ? " ghost" : ""}" data-add="${type}"${dis ? " disabled" : ""}>${dis ? (std && !n ? "Steht schon auf der Seite" : "Bereits hinzugefügt") : n ? "Noch einmal hinzufügen" : "Hinzufügen"}</button></div></article>`;
     };
   slModal("Baustein hinzufügen", (body, close) => {
     body.innerHTML =
-      `<p class="mut slcatin">Bausteine zeigen Auswertungen aus deinen vorhandenen Daten. Die Vorschau zeigt Beispielwerte.</p>` +
+      `<p class="mut slcatin">Bausteine zeigen Auswertungen aus deinen vorhandenen Daten. Die Vorschau zeigt deine echten Zahlen; Beispielwerte erscheinen nur, wenn noch keine Daten da sind.</p>` +
       `<div class="slfilt"><div class="slchips" role="group" aria-label="Kategorie"><button type="button" class="slchip" data-cat="" aria-pressed="true">Alle</button>` +
       cats.map(([k, l]) => `<button type="button" class="slchip" data-cat="${k}" aria-pressed="false">${l}</button>`).join("") +
       `</div><label class="slsr" for="slq">Bausteine suchen</label><input id="slq" type="search" class="slq" placeholder="Bausteine suchen …" autocomplete="off" enterkeyhint="search"></div>` +
@@ -1196,6 +1303,7 @@ function slCatalog() {
         body.querySelectorAll(".slchip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.cat === cat)));
       };
     apply();
+    slLivePreviews(body);
     q.addEventListener("input", apply);
     q.addEventListener("keydown", e => e.key === "Enter" && e.preventDefault());
     body.onclick = e => {
@@ -1272,6 +1380,8 @@ function slCfgDialog(id) {
 /* Felder im Einstellungs-Dialog: auf der Statistikseite kommt bei Bausteinen mit Aktivität oder Zeitraum der Schalter „Globalen Filter verwenden“ davor (3.22.0) */
 function slFieldsOf(T) {
   const fs = (T && T.fields) || [];
+  if (SL.fam === "uebersicht" && !(T && T.hinweis) && fs.some(f => f.kind === "range"))                       // 3.34.0: Zeitraum der Seite (65-zeitraum.js)
+    return [{kind: "global", zr: true, label: "Zeitraum der Seite verwenden"}, ...fs];
   return SL.fam === "statistik" && !(T && T.hinweis) && fs.some(f => f.kind === "sports" || f.kind === "range") ? [{kind: "global"}, ...fs] : fs;      // 3.23.0: Hinweis-Bausteine haben nie den globalen Filter
 }
 function slField(f, cfg, i) {
@@ -1414,6 +1524,19 @@ document.addEventListener("pointerup", e => slDragEnd(e, false));
 document.addEventListener("pointercancel", e => slDragEnd(e, true));
 window.addEventListener("hashchange", slLeave);
 
+/* 3.34.0 Späte Einhängung: Zeichnet boot() (13-start.js) die Seite, bevor das Skript mit der Ansicht geladen war, ist sie ohne Layout gebaut. Dann (und nur dann) wird sie einmal neu gezeichnet:
+   erst wenn die alte Ansicht fertig ist (Element drawn da) und die eingehängte Ansicht (Flag flag) nie angelaufen ist. Ein sofortiges route() ließe zwei Läufe gleichzeitig in dieselbe Seite schreiben (doppelte Bedienfelder). */
+function slLate(re, flag, drawn) {
+  if (!re.test(location.hash) || !(window._rt > 0)) return;
+  let n = 0;
+  const t = setInterval(() => {
+    if (window[flag] || ++n > 100) return clearInterval(t);
+    if (document.querySelector(drawn)) {
+      clearInterval(t);
+      route();
+    }
+  }, 100);
+}
 /* ---------- Anbindung an die Ansichten ---------- */
 function slViewStart(fam) {
   slLeave();
@@ -1450,6 +1573,7 @@ VIEWS.dash = async (...a) => {
   await slEnsure("uebersicht");
   if (tok !== window._rt) return STALE();                            // inzwischen eine andere Seite geöffnet
   slResolve("uebersicht");
+  if (typeof zrInit === "function") zrInit("uebersicht", a[1]);                                  // 3.34.0: Zeitraum der Seite (Adresse > zuletzt gewählt > Ansicht)
   await _dash49(...a);
   const m = document.getElementById("main");
   if (m && m.classList.contains("home") && m.querySelector("#hlast")) slPlace(m);

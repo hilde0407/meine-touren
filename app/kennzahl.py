@@ -40,7 +40,7 @@ MAX_TAG = 40
 MAX_ZIEL = 10_000_000
 GEHZEIT_BUDGET_S = 5.0                   # so lange rechnet ein Aufruf höchstens an Touren, deren Gehzeit noch nicht im Zwischenspeicher steht
 RANGES = ("year", "y", "12m", "90d", "all", "c")
-KEYS = {"title", "symbol", "mess", "agg", "durch", "op", "sports", "range", "yr", "from", "to", "tag", "minkm", "vgl", "ziel"}
+KEYS = {"title", "symbol", "mess", "agg", "durch", "op", "sports", "range", "yr", "from", "to", "tag", "minkm", "vgl", "ziel", "eigen"}
 OPS = ("div", "pct")
 # Messgröße: Einheit, ob es ein Verhältnis ist (Summe ÷ Summe), erlaubte Rechenarten, Mindestlänge/-dauer für max/min/record
 MESS = {
@@ -152,6 +152,11 @@ def clean_cfg(v):
             out["vgl"] = True
     if v.get("ziel") not in (None, 0):
         out["ziel"] = _zahl(v["ziel"], "Ziel", 0, MAX_ZIEL, offen=True)
+    if "eigen" in v:                                       # 3.34.0: true = eigener Zeitraum (der Zeitraum der Seite gilt hier nicht)
+        if not isinstance(v["eigen"], bool):
+            raise _bad("Ungültiger Wert für „eigen“")
+        if v["eigen"]:
+            out["eigen"] = True
     return out
 
 

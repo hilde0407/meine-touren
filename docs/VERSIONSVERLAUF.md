@@ -2,6 +2,15 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.34.0 – Fotos und Karte anpassbar, Galerie mit Vorschau, Zeitraum der Seite
+
+- Fotos-Seite und Karte bestehen aus Bausteinen (verschieben, ausblenden, einklappen, Breite); die Karte bleibt Hauptbaustein, ihre Bedienfelder sind einzeln anpassbar. Neue Bausteine: Foto-Kennzahlen, Fotos je Jahr, Karten-Kennzahlen, Touren im Kartenausschnitt, Legende; sechs neue Vorlagen.
+- „Baustein hinzufügen“ zeigt Live-Vorschauen mit den echten Daten (lazy, nicht bedienbar, mit Rückfall auf Beispielwerte), Hinweis „Bereits auf dieser Seite“.
+- Zeitraum der Seite: eine Leiste (Alle, Dieses Jahr, Letzte 12 Monate, Vorjahr, Jahr, Von–bis) für alle zeitbezogenen Bausteine der Übersicht, je Baustein überschreibbar, per Adresse teilbar; Statistik mit neuem Knopf „Vorjahr“.
+- Behoben: „Alben & Tags“ auf der Reisen-Übersicht.
+
+Einzelheiten: [docs/versionen/3.34.0.md](versionen/3.34.0.md)
+
 ## Version 3.33.0 – Reisen als anpassbare Seiten
 
 - Reise-Seite und Reisen-Übersicht bestehen aus Bausteinen: verschieben, ausblenden, einklappen, Breite wählen; ein Layout für alle Reisen, je Benutzer gespeichert.

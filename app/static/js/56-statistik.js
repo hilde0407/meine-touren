@@ -115,7 +115,7 @@ function stFilterBar(F, R, n, inRange) {
   const sports = Object.keys(km).sort((a, b) => km[b] - km[a]);
   F.sports.forEach(s => !sports.includes(s) && sports.push(s));
   const title = (F.kind === "y" ? "Das Jahr " + F.yr : F.kind === "all" ? "Alle Touren" : R.label) + (F.sports.length ? ", " + stSportsTxt(F) : ""),
-    Z = [["year", "Laufendes Jahr", F.kind === "y" && F.yr === cy], ["12m", "Letzte 12 Monate", F.kind === "12m"], ["90d", "Letzte 90 Tage", F.kind === "90d"], ["c", "Von–bis …", F.kind === "c"]],
+    Z = [["year", "Laufendes Jahr", F.kind === "y" && F.yr === cy], ["12m", "Letzte 12 Monate", F.kind === "12m"], ["90d", "Letzte 90 Tage", F.kind === "90d"], ["prev", "Vorjahr", F.kind === "y" && F.yr === cy - 1], ["c", "Von–bis …", F.kind === "c"]],
     sum = [F.sports.length ? stSportsTxt(F) : "", F.kind === "all" ? "" : R.label].filter(Boolean).join(", ");
   return `<section class="stf" id="stf" aria-label="Filter der Statistik">
   <div class="sec"><h2>${esc(title)}</h2><span class="sub">${nf(n, 0)} Touren</span></div>
@@ -151,7 +151,7 @@ function stFilterBind(F) {
           if (!j.value) j.value = slIso(new Date());
           i.focus();
         }
-      } else go(k === "year" ? {...F, kind: "y", yr: new Date().getFullYear(), von: "", bis: ""} : {...F, kind: k, yr: 0, von: "", bis: ""}, `[data-z="${k}"]`);
+      } else go(k === "year" ? {...F, kind: "y", yr: new Date().getFullYear(), von: "", bis: ""} : k === "prev" ? {...F, kind: "y", yr: new Date().getFullYear() - 1, von: "", bis: ""} : {...F, kind: k, yr: 0, von: "", bis: ""}, `[data-z="${k}"]`);
     } else if (s) {
       const v = s.dataset.s, cur = F.sports,
         next = !v ? [] : cur.includes(v) ? cur.filter(x => x !== v) : cur.concat([v]);
@@ -190,12 +190,38 @@ function stNoteAdd(root, text) {
 }
 
 /* ---------- Globaler Filter in der Konfiguration eines Bausteins: it.cfg wird zur wirksamen Konfiguration (it.raw = gespeicherte) ---------- */
-function stApply(it) {
-  const T = window.SL_WT[it.wtype], raw = it.cfg || {}, F = ST.F, fs = (T && T.fields) || [],
-    hasS = fs.some(f => f.kind === "sports"), rf = fs.find(f => f.kind === "range");
+/* 3.34.0: auch für den Zeitraum der Seite auf der Übersicht (65-zeitraum.js): o.page = Zeitraum der Seite (nur Zeitraum, keine Aktivität; Bausteine ohne Zeitbezug bleiben ohne Hinweis;
+   „eigen“ = eigener Zeitraum mit Hinweis), o.explicit = auch „Alle“ gilt. Auf der Statistik gilt der Filter für die Eigene Kennzahl (Typ-Flag „zeit“) erst, wenn ein Zeitraum gewählt ist (Standard „Gesamt“ lässt sie, wie sie ist). */
+function stApply(it, F = ST.F, o = {}) {
+  const T = window.SL_WT[it.wtype], raw = it.cfg || {}, fs = (T && T.fields) || [],
+    hasS = fs.some(f => f.kind === "sports") && !o.page, rf = fs.find(f => f.kind === "range"), zeit = !!(T && T.zeit);
   it.raw = raw;
   it.note = "";
-  if (!T || raw.eigen === true || T.hinweis) return;                                    // 3.23.0: Hinweis-Bausteine haben ihre eigene Aktivität und keinen Zeitraum
+  if (o.page && !rf && !zeit) return;                                                   // kein Zeitbezug: kein Hinweis, nichts zu tun
+  if (!T || raw.eigen === true || T.hinweis) {
+    if (o.page && T && raw.eigen === true) it.note = "eigener Zeitraum";
+    return;                                                                             // 3.23.0: Hinweis-Bausteine haben ihre eigene Aktivität und keinen Zeitraum
+  }
+  if (zeit && !rf) {                                                                    // Eigene Kennzahl: range/yr/from/to der Einstellung werden vom Zeitraum der Seite ersetzt
+    if (F.kind === "all" && !o.explicit) return void (it.note = stNote({s: 0, r: 1}, F));
+    const out = {...raw};
+    delete out.range;
+    delete out.yr;
+    out.range = F.kind;
+    if (F.kind === "y") out.yr = F.yr;
+    if (F.kind === "c") {
+      out.from = F.von;
+      out.to = F.bis;
+    } else {
+      delete out.from;
+      delete out.to;
+    }
+    if (F.kind === "all") out._nr = true;
+    it.note = o.page ? "" : stNote({s: 0, r: 1}, F);
+    it.cfg = out;
+    it.fl = slWFl(T, out);
+    return;
+  }
   const out = {...raw}, ok = rf ? !rf.opts || rf.opts.includes(F.kind) : false;
   if (hasS) {
     if (F.sports.length) out.sports = F.sports.slice();
@@ -212,7 +238,7 @@ function stApply(it) {
     }    if (F.kind === "all" && T.filter && T.filter.range === "all") delete out.range;               // Standard des Bausteins: kein Zusatz im Kopf
   }
   if (F.kind === "all") out._nr = true;                                                  // „Gesamte Zeit“ ist der Standard: nicht im Kopf wiederholen
-  it.note = stNote({s: hasS ? 1 : 0, r: rf ? (ok ? 1 : "y") : 0});
+  it.note = o.page ? (ok ? "" : "Zeitraum gilt hier nur als Jahr") : stNote({s: hasS ? 1 : 0, r: rf ? (ok ? 1 : "y") : 0}, F);
   it.cfg = out;
   it.fl = slWFl(T, out);
 }

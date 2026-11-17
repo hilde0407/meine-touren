@@ -134,7 +134,7 @@ async function homeView() {
   };
   VIEWS.dash = async (n, q) => {
     if (!TOURS.length) return dashOld(n, q);
-    if (q && [...q.keys()].length) return VIEWS.stats(n, q);        // Jahr/Sportart gewählt: das ist die Statistik-Übersicht
+    if (q && [...q.keys()].some(k => !["z", "von", "bis"].includes(k))) return VIEWS.stats(n, q);        // Jahr/Sportart gewählt: das ist die Statistik-Übersicht
     await homeView();
   };
 }

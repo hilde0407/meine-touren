@@ -537,7 +537,7 @@ def test_widget_can_move_to_the_sub_page_and_back(pw, app):
 
 # ------------------------------------------------------------------  Übersicht  ------------------------------------------------------------------
 
-OV = "() => [...document.querySelectorAll('main.home > section, main.home > .hcols > section, main.home > .tlw, main.home > .hcols > .tlw')].filter(e => !e.hidden && !e.classList.contains('sl-off')).map(e => e.dataset.wtype || e.id)"
+OV = "() => [...document.querySelectorAll('main.home > section, main.home > .hcols > section, main.home > .tlw, main.home > .hcols > .tlw')].filter(e => !e.hidden && !e.classList.contains('sl-off') && e.id !== 'zrbar').map(e => e.dataset.wtype || e.id)"
 OVU = "() => [...document.querySelectorAll('main.home .slit')].map(w => w.dataset.sl)"
 
 

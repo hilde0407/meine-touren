@@ -50,7 +50,7 @@ def app(tmp_path_factory):
         pr.kill(); pr.wait(5)
 
 
-OV = "() => [...document.querySelectorAll('main.home > section, main.home > .hcols > section, main.home > .tlw, main.home > .hcols > .tlw')].filter(e => !e.hidden && !e.classList.contains('sl-off')).map(e => e.dataset.wtype || e.id)"
+OV = "() => [...document.querySelectorAll('main.home > section, main.home > .hcols > section, main.home > .tlw, main.home > .hcols > .tlw')].filter(e => !e.hidden && !e.classList.contains('sl-off') && e.id !== 'zrbar').map(e => e.dataset.wtype || e.id)"
 GEAR = '.slit[data-sl="jahr"] [data-a="cfg"]'
 NUMS = "(sel) => [...document.querySelectorAll(sel + ' .hyn b')].map(e => e.textContent.trim())"
 SAVED = "() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Gespeichert'; }"
@@ -437,7 +437,7 @@ def test_keyboard_flow_focus_trap_space_escape(pw, app):
             assert pg.evaluate("() => !!document.activeElement.closest('[role=dialog]')")
         pg.keyboard.press("Shift+Tab")
         assert pg.evaluate("() => !!document.activeElement.closest('[role=dialog]')")
-        for _ in range(15):                                                                                       # mit Tab zum Chip „Wandern“, Leertaste wählt
+        for _ in range(40):                                                                                       # mit Tab zum Chip „Wandern“, Leertaste wählt
             if pg.evaluate("() => document.activeElement.value") == "hike":
                 break
             pg.keyboard.press("Tab")

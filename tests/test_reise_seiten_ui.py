@@ -43,6 +43,8 @@ def tour(tid, ts, name, dist, dur, up, down, lat, lng, country=None, state=None,
     routes.store(tid, loop(lat, lng))
 for i in range(6):
     tour("h%%d" %% i, base - (20 + i * 31) * day, "Heimrunde %%d" %% i, 9000, 9000, 150, 150, 48.0 + i * 0.001, 11.0)
+for tid, tag in (("h0", "Schwarzwald"), ("h1", "Schwarzwald"), ("h2", "Hüttenwanderung"), ("r1_0_0", "Gipfel")):
+    db.execute("INSERT INTO tour_tags(id,tag) VALUES(?,?)", (tid, tag))
 for k, (name, country, lat, lng, back, days, nph) in enumerate(%(trips)r):
     for d in range(days):
         for j in range(2 if d == 1 else 1):
@@ -603,7 +605,7 @@ def test_export_and_import_of_a_view(pw, app, tmp_path, page, key, widget):
         d = dl.value
         assert d.suggested_filename == f"ansicht-{key}-mein-reiselayout.json"
         doc = json.loads(open(d.path(), encoding="utf-8").read())
-        assert doc["format"] == "meine-touren-ansicht" and doc["page"] == key and doc["app_version"] == "3.33.0" and list(doc["layouts"]) == [key] and doc["layouts"][key]["widgets"][0]["type"] == widget["type"]
+        assert doc["format"] == "meine-touren-ansicht" and doc["page"] == key and doc["app_version"] == "3.34.0" and list(doc["layouts"]) == [key] and doc["layouts"][key]["widgets"][0]["type"] == widget["type"]
         f = tmp_path / "gut.json"
         f.write_text(json.dumps(doc), encoding="utf-8")
         pg.locator(".slvws").get_by_role("button", name="Importieren …", exact=True).click()
@@ -760,5 +762,18 @@ def test_english_texts(pw, app):
     try:
         assert "Removed trips" not in pg.locator("#rsx").inner_text() and "Albums and tags" in pg.locator("#rsx").inner_text() and "Mehrtagestouren" not in pg.locator("#rsx").inner_text()
         assert not pg.errors, pg.errors
+    finally:
+        pg.browser_.close()
+
+
+def test_trips_albums_card_has_the_albums(pw, app):
+    """3.34.0: „Alben und Tags“ steht in der eigenen Karte (nicht gequetscht unter den Reisen), die Karte „Reisen“ enthält nur die Reisen und keine zweite Überschrift."""
+    pg = _trips_page(pw, app)
+    try:
+        expect(pg.locator("#rnc-alben .tlsb a.otd")).to_have_count(3, timeout=15000)
+        assert pg.locator("#rnc-reisen #rnalb").count() == 0 and pg.locator("#rnc-reisen .sec").count() == 0, pg.locator("#rnc-reisen").inner_html()[:300]
+        assert pg.locator("#rnc-reisen #tr a.otd").count() == 3
+        assert pg.locator("#rnc-alben .tlsb h2").count() == 0
+        assert not pg.errors
     finally:
         pg.browser_.close()

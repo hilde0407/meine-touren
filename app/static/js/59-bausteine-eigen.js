@@ -125,6 +125,7 @@ function kzForm(cfg) {
     `<fieldset class="slfs kzfs"><legend>Filter</legend>${flField({kind: "sports", label: "Aktivität"}, cfg, 0)}` +
     `<div class="kzrow"><div><label for="kz-range">Zeitraum</label><select id="kz-range" class="flsel">${kzOpts(KZ_RANGES, "year")}</select></div>` +
     `<div class="kzyr" hidden><label for="kz-yr">Jahr</label><select id="kz-yr" class="flsel">${yrs.sort((a, b) => b - a).map(y => `<option value="${y}"${y === yr ? " selected" : ""}>${y}</option>`).join("")}</select></div></div>` +
+    (SL.fam === "uebersicht" || SL.fam === "statistik" ? `<label class="slck kzck kzpg"><input type="checkbox" id="kz-page"><span>Zeitraum der Seite verwenden</span></label><p class="mut kzhint kzph">Ist oben auf der Seite ein Zeitraum gewählt, gilt er hier statt des Zeitraums oben. Ohne Haken behält diese Kennzahl ihren eigenen Zeitraum.</p>` : "") +
     `<div class="kzrow kzrow2 kzdates" hidden><div><label for="kz-from">Von</label><input id="kz-from" type="date"></div><div><label for="kz-to">Bis</label><input id="kz-to" type="date"></div></div>` +
     `<div class="kzrow kzrow2"><div><label for="kz-tag">Schlagwort (optional)</label><input id="kz-tag" type="text" maxlength="40" autocomplete="off" list="kz-tags"><datalist id="kz-tags"></datalist></div>` +
     `<div><label for="kz-minkm">Mindeststrecke in km (optional)</label><input id="kz-minkm" type="number" inputmode="decimal" min="0" max="1000" step="any"></div></div></fieldset>` +
@@ -145,6 +146,7 @@ function kzFill(form, cfg) {
   const sp = form.querySelector(".flsp");
   sp.outerHTML = flField({kind: "sports", label: "Aktivität"}, {sports: cfg.sports || []}, 0);
   set("kz-range", cfg.range || "year");
+  if (form.querySelector("#kz-page")) form.querySelector("#kz-page").checked = cfg.eigen !== true;
   if (cfg.yr) set("kz-yr", cfg.yr);
   set("kz-from", cfg.from);
   set("kz-to", cfg.to);
@@ -194,6 +196,7 @@ function kzRead(form, soft) {
   flRead({kind: "sports"}, form, 0, out);
   const r = g("kz-range").value;
   out.range = r;
+  if (g("kz-page") && !g("kz-page").checked) out.eigen = true;                                  // 3.34.0: eigener Zeitraum (der Zeitraum der Seite gilt hier nicht)
   if (r === "y") out.yr = +g("kz-yr").value;
   if (r === "c") {
     const a = g("kz-from").value, z = g("kz-to").value;
@@ -283,7 +286,7 @@ SL_CATS.push(["eigene", "Eigene Kennzahlen"]);
 Object.assign(window.SL_WT, {
   [KZ_TYPE]: {
     fam: "uebersicht", cat: "eigene", icon: "met", name: "Eigene Kennzahl", title: cfg => (cfg && cfg.title) || "Eigene Kennzahl", multi: true, w: "drittel", seiten: ["uebersicht", "statistik"],
-    fields: [{kind: "eigen"}], kurz: kzKurz, neu: () => kzDialog(null, {}), dialog: (id, cfg) => kzDialog(id, cfg),
+    fields: [{kind: "eigen"}], zeit: true, kurz: kzKurz, neu: () => kzDialog(null, {}), dialog: (id, cfg) => kzDialog(id, cfg),
     grenze: () => (kzCount() >= KZ_MAX ? `Es sind höchstens ${KZ_MAX} eigene Kennzahlen möglich.` : ""),
     dup: cfg => ({...cfg, title: `${String(cfg.title || "").slice(0, 50)} (${kzT("Kopie")})`}),
     desc: "Stelle selbst zusammen, was du wissen willst: Messgröße, Rechenart, Filter, Vergleich mit dem Vorjahr, Ziel mit Fortschrittsbalken oder eine Formel wie Höhenmeter je km. Ohne Programmieren, mit Vorlagen zum Start.",

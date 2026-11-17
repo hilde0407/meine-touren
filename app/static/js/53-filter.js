@@ -121,7 +121,8 @@ function flField(f, cfg, i) {
     return `<div class="slfs"><label for="${id}">${esc(f.label || "Zeitraum")}</label><select id="${id}" name="f${i}" class="flsel">${o1}${o2}</select></div>`;
   }
   if (f.kind === "global")
-    return `<div class="slfs"><label class="slck"><input type="checkbox" name="f${i}" data-global${cfg.eigen === true ? "" : " checked"}><span>${esc(f.label || "Globalen Filter verwenden")}</span></label><p class="mut slgh">Gilt der Filter oben auf der Seite, sind Aktivität und Zeitraum hier nicht einstellbar.</p></div>`;
+    return `<div class="slfs"><label class="slck"><input type="checkbox" name="f${i}" data-global${f.zr ? " data-zr" : ""}${cfg.eigen === true ? "" : " checked"}><span>${esc(f.label || "Globalen Filter verwenden")}</span></label>` +
+      (f.zr ? '<p class="mut slgh">Ist oben auf der Seite ein Zeitraum gewählt, gilt er hier. Ohne Haken behält dieser Baustein seinen eigenen Zeitraum.</p></div>' : '<p class="mut slgh">Gilt der Filter oben auf der Seite, sind Aktivität und Zeitraum hier nicht einstellbar.</p></div>');
   if (f.kind === "compare")
     return `<div class="slfs"><label class="slck"><input type="checkbox" name="f${i}"${cfg.compare === false ? "" : " checked"}><span>${esc(f.label || "Mit dem Vorjahr vergleichen")}</span></label></div>`;
   return `<div class="slfs"><label for="${id}">${esc(f.label || "Eigener Titel (optional)")}</label><input id="${id}" name="f${i}" type="text" maxlength="60" autocomplete="off" value="${esc(cfg.title || "")}" placeholder="${esc(f.ph || "")}"></div>`;
@@ -156,9 +157,11 @@ function flRead(f, form, i, out) {
 /* „Alle“ und einzelne Aktivitäten schließen sich aus; ohne Auswahl gilt „Alle“ */
 function flBind(form) {
   const gl = form.querySelector("[data-global]");
-  const sync = () => form.querySelectorAll(".flsp, .slfs:has(.flsel)").forEach(x => {
-    x.classList.toggle("sl-gdis", !!gl && gl.checked);
-    x.querySelectorAll("input,select").forEach(i => (i.disabled = !!gl && gl.checked));
+  const zr = !!gl && gl.hasAttribute("data-zr");                                           // 3.34.0: „Zeitraum der Seite verwenden“ (Übersicht) betrifft nur den Zeitraum und nur, solange oben ein Zeitraum gewählt ist
+  const sync = () => form.querySelectorAll(zr ? ".slfs:has(.flsel)" : ".flsp, .slfs:has(.flsel)").forEach(x => {
+    const off = !!gl && gl.checked && (!zr || !!(window.ZR && ZR.F && ZR.F.uebersicht));
+    x.classList.toggle("sl-gdis", off);
+    x.querySelectorAll("input,select").forEach(i => (i.disabled = off));
   });
   if (gl) {
     gl.addEventListener("change", sync);

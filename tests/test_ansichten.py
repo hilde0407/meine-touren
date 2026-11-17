@@ -105,7 +105,7 @@ def test_check_export_uses_the_server_rules():
         # Fehler: gleiche Prüfung wie beim Speichern, klare Meldungen, nichts wird geliefert
         cases = [
             ([], "JSON-Objekt"), ({"format": "anders"}, "keine Datei"), ({**ok, "format_version": 2}, "neueren Version"), ({**ok, "format_version": "1"}, "Formatversion"),
-            ({**ok, "page": "karte"}, "keine gültige Seite"), ({**ok, "name": ""}, "Name"), ({**ok, "name": "x" * 41}, "Name"), ({**ok, "layouts": []}, "keine Layouts"),
+            ({**ok, "page": "gibtesnicht"}, "keine gültige Seite"), ({**ok, "name": ""}, "Name"), ({**ok, "name": "x" * 41}, "Name"), ({**ok, "layouts": []}, "keine Layouts"),
             ({**ok, "layouts": {"tour-haupt": {"evil": 1}}}, "Unbekannte Felder"), ({**ok, "layouts": {"tour-haupt": {"w": {"map": "riesig"}}}}, "Breite"),
             ({**ok, "page": "uebersicht", "layouts": {"uebersicht": {"widgets": [{"id": "w1", "type": "kennzahlen"}]}}}, "Tour"),
         ]
@@ -146,9 +146,9 @@ def test_viewer_and_users_are_separated():
 
 def test_version_notes_and_files():
     from app import config
-    assert config.VERSION.startswith("3.33.0 · Meine Touren")
+    assert config.VERSION.startswith("3.34.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.21.0.md").read_text(encoding="utf-8")
     assert "Ansichten" in notes and "Vorlagen" in notes and "Export" in notes and "/api/layout/check" in notes and "54-ansichten.js" in notes
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("js/53-filter.js") < html.index("js/54-ansichten.js") < html.index("js/55-vorlagen.js") < html.index("js/39-sw.js")
-    assert 'const V = "mt-v112"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v113"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")

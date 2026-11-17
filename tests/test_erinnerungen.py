@@ -180,11 +180,11 @@ def test_saved_layouts_without_cfg_stay_valid_and_the_registry_key_is_unchanged(
 
 def test_version_notes_service_worker_and_script_registration():
     from app import config
-    assert config.VERSION.startswith("3.33.0 · Meine Touren")
+    assert config.VERSION.startswith("3.34.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.32.0.md").read_text(encoding="utf-8")
     assert "Erinnerungen" in notes and "Diashow" in notes and "Datenschutz" in notes
-    assert 'const V = "mt-v112"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.33.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v113"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.34.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
     assert "js/60-bausteine-erinnerungen.js" in (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     show = (ROOT / "app" / "static" / "js" / "seite-slideshow.js").read_text(encoding="utf-8")
     for k in ("sport", "date_from", "date_to", "day", "before", "recent", "best"):                # die Parameter, die der Link der Kachel setzt, versteht die Diashow

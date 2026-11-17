@@ -1718,3 +1718,71 @@ html.mob #main{overflow-x:clip}
 .segtabs{max-width:100%;box-sizing:border-box}
 html.mob .segtabs{display:flex;overflow-x:auto;scrollbar-width:none}
 html.mob .segtabs a{flex:1 1 auto;text-align:center;padding:6px 10px;font-size:15px;white-space:nowrap}
+
+/* =====================  3.34.0: Fotos-Seite und Karte als anpassbare Seiten (63-fotoseiten.js, 64-kartenseite.js)  =====================
+   #fox = Raster der Fotos-Seite: ohne Anpassung ein einfacher Block (genau wie vorher, Außenabstände fließen zusammen), erst mit Baustein, anderer Breite oder im Bearbeitungsmodus ein Raster.
+   #kax = Raster der Karte: ohne Anpassung nur die Karte (wie vorher, Bedienfelder als Kästen auf der Karte); .kamulti (Baustein neben der Karte, andere Breite, Bearbeiten): die Karte ist ein Block mit fester Höhe. */
+.stx.fox{display:block;margin-top:0}
+.stx.fox:has(.slit,.w-zweidrittel,.w-halb,.w-drittel,.tlw){display:grid}
+.stx.fox:not(:has(.slit,.w-zweidrittel,.w-halb,.w-drittel,.tlw))>.slcell{container-type:normal}                 /* ohne Anpassung kein eigener Formatierungskontext: Außenabstände wie vorher */
+.stx.kax{margin-top:0}
+.kacard{min-width:0}
+.kapw{display:contents}
+.kapw.kapedit{display:block}
+.kapw[data-closed="1"]:not(.kapedit)>.box{display:none}
+.kapw[data-closed="0"]>.kapt{display:none}
+.kapw>.kapt{background:var(--forest);color:#fff;border-radius:var(--r);padding:8px 12px;box-shadow:0 2px 10px #0004;border-color:#fff4}
+.kapedit>.box{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--forest);color:#fff;border-radius:var(--r);padding:8px 12px}
+.kapedit .chip{color:#fff;border-color:#fff4;background:#ffffff14}
+.kapedit .chip.on{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}
+.kapedit select{background:#ffffff14;color:#fff;border-color:#ffffff59}.kapedit select option{color:#000}
+.kapedit .cnt{font:600 16px var(--d)}
+.kapedit>.kapt{display:none}
+.mapui>.kaopen{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:0;padding:6px 10px;background:var(--forest);color:#fff;border-radius:var(--r);box-shadow:0 2px 10px #0004}
+.kaopen .btn.ghost{background:#ffffff14;color:#fff;border-color:#ffffff59}
+.kaopen .btn.ghost:hover{background:#ffffff2e;border-color:#fff}
+.kaopen .slvl,.kaopen .slok{color:#fff}
+.kaopen .slvs{background:#ffffff14;color:#fff;border-color:#ffffff59}.kaopen .slvs option{color:#000}
+html main.kamulti.wide{max-width:1400px;margin:0 auto;padding:16px 16px 80px}
+html main.kamulti .mapbox{position:relative;left:auto;right:auto;top:auto;bottom:auto;height:clamp(340px,68vh,760px);border-radius:var(--r-l);overflow:hidden}
+.kalist{margin:0}
+.kaleg{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.kaleg li{display:grid;grid-template-columns:14px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:16px}
+.kasw{display:inline-block;width:12px;height:12px;border-radius:3px}
+.kaoff{opacity:.45}
+/* 3.34.0 Zeitraum der Seite */
+.zrbar{margin:0 0 14px;border:1px solid var(--rule);border-radius:14px;background:var(--card);padding:8px 14px}
+.zrhead{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.zrtog{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;background:none;border:0;color:var(--ink);cursor:pointer;padding:6px 0;font:600 15px var(--b);text-align:left}
+.zrtog::before{content:"\25B8";color:var(--mut);font-size:14px}
+.zrtog[aria-expanded="true"]::before{content:"\25BE"}
+.zrtog .zrl{font-weight:500;color:var(--mut);font-size:14px}
+.zrbody{padding:4px 0 8px}
+.zrbody[hidden],.zrreset[hidden]{display:none}
+.zrbody .chips{align-items:center}
+.zrjahr select{font:500 15px var(--b);border:1.5px solid var(--rule);background:var(--card);color:var(--ink);border-radius:99px;padding:3px 10px}
+.zrhint{margin:10px 0 0;font-size:13px}
+.zrbar button:focus-visible,.zrbar select:focus-visible,.zrbar input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+html.mob .zrbody .chips{flex-wrap:wrap;overflow:visible}
+/* 3.34.0 Galerie mit Live-Vorschau */
+.slpv{position:relative;flex-direction:column;align-items:stretch;justify-content:flex-start;min-height:112px;max-height:196px;overflow:hidden}
+.slpv.slpv-load::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,color-mix(in srgb,var(--card) 70%,transparent) 50%,transparent 70%);background-size:200% 100%;animation:slpvsh 1.2s linear infinite}
+@keyframes slpvsh{from{background-position:200% 0}to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.slpv.slpv-load::after{animation:none}}
+.slpv[data-live="live"]{padding:0;align-items:stretch;justify-content:flex-start;background:var(--card)}
+.slpv[data-live="live"]::before{content:"";position:absolute;left:0;right:0;bottom:0;height:34px;background:linear-gradient(transparent,var(--card));pointer-events:none;z-index:1}
+.slpvlive{width:100%;pointer-events:none;user-select:none;transform-origin:top left}
+.slpvlive>.card,.slpvlive>.tlcard,.slpvlive>*{margin:0;box-shadow:none;border:0;border-radius:0;max-width:100%}
+.slpvlive .tlhd button,.slpvlive .flh,.slpvlive .fltag,.slpvlive .tlgrip,.slpvlive .slhd-actions{pointer-events:none}
+.slpvlive .slwb{max-height:150px;overflow:hidden}
+.slpvlive a{color:inherit;text-decoration:none}
+.slpvlive .tlcol{display:none}
+.slhave{display:inline-block;align-self:flex-start;margin:0 0 4px;padding:1px 9px;border-radius:99px;background:var(--soft);color:var(--mut);font:600 13px var(--b)}
+@media (max-width:560px){.slcats{grid-template-columns:minmax(0,1fr)}}
+.slpvlive summary{display:none}
+.slpvlive .tls{border:0;background:none;box-shadow:none;margin:0;padding:0}
+.slpvlive .tlsb{padding:10px}
+.slpvlive .tls>summary{display:none}
+.slpvlive.slpvshell{width:160%;transform:scale(.625)}
+.slpvex{position:absolute;right:8px;bottom:6px;font:600 12px var(--b);color:var(--mut);background:var(--card);border-radius:99px;padding:1px 8px;z-index:2}
+.mapui>.kaopen[hidden],.mapui>.slopen[hidden]{display:none}

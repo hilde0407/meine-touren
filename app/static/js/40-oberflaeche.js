@@ -30,7 +30,8 @@ const NAV_OF = {tour: "tours", story: "tours", flight: "tours", plan: "tours", s
 function navFix() {
   const h = (location.hash || "#/dash").replace(/^#\/?/, "");
   let k = h.split(/[/?]/)[0] || "dash";
-  if (k === "dash" && h.includes("?")) k = "stats";                 // Übersicht mit gewähltem Jahr/Sport = Statistik
+  if (k === "dash" && h.includes("?") && !/\?(?:(?:z|von|bis)=[^&]*&?)+$/.test(h)) k = "stats";  // (z/von/bis = Zeitraum der Seite, bleibt Übersicht)
+                 // Übersicht mit gewähltem Jahr/Sport = Statistik
   const on = NAV_OF[k] || k;
   document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("on", a.dataset.k === on));
   $("#hadm") && $("#hadm").classList.toggle("on", k === "admin" || k === "check" || k === "apptest");

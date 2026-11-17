@@ -934,7 +934,8 @@ def photo_info():
     r = db.one("SELECT COUNT(*) n, SUM(tour_id IS NOT NULL) a, MIN(taken_ts) mi, MAX(taken_ts) ma FROM photos")
     years = db.query("SELECT DISTINCT CAST(strftime('%Y', taken_ts, 'unixepoch') AS INT) y FROM photos ORDER BY y DESC")
     undated = db.one("SELECT COUNT(*) n FROM photos WHERE dated=0")["n"]
-    return {"count": r["n"], "assigned": r["a"] or 0, "undated": undated, "years": [y["y"] for y in years],
+    ycount = db.query("SELECT CAST(strftime('%Y', taken_ts, 'unixepoch') AS INT) y, COUNT(*) n FROM photos GROUP BY y")
+    return {"count": r["n"], "assigned": r["a"] or 0, "undated": undated, "years": [y["y"] for y in years], "year_counts": {str(y["y"]): y["n"] for y in ycount},
             "folder_exists": config.PHOTOS_DIR.exists(), "heic": photos.heic_supported(), "lib_dir": str(config.LIB_DIR), "source_dir": str(config.PHOTOS_DIR), "slideshow_seconds": db.get_int("slideshow_seconds", 6), "tz": config.TZ_NAME}
 
 
