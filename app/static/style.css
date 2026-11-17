@@ -1714,3 +1714,7 @@ html.mob .rsb>.row .btn{flex:1 1 auto;justify-content:center}
 /* 3.33.0: Auf dem Handy darf nichts die Seitenbreite aufziehen oder die Seite seitlich verschieben (Android-App: nach Übersicht → Statistik war die Seite nach links versetzt) */
 html.mob,html.mob body{overflow-x:clip;max-width:100%}
 html.mob #main{overflow-x:clip}
+/* Tab-Leiste (Übersicht/Auswertung/Rekorde/Puls) darf auf dem Handy nie breiter als der Bildschirm werden */
+.segtabs{max-width:100%;box-sizing:border-box}
+html.mob .segtabs{display:flex;overflow-x:auto;scrollbar-width:none}
+html.mob .segtabs a{flex:1 1 auto;text-align:center;padding:6px 10px;font-size:15px;white-space:nowrap}
