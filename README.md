@@ -89,6 +89,8 @@ Hinweise: Ein eigener BRouter-Server (Routenplanung) und das Einbinden von SMB-F
 * **Mehrere Benutzer:** getrennte Touren, Fotos und Einstellungen je Benutzer; Fotos pro Bibliothek oder Tour für einzelne Benutzer oder alle freigeben.
 * **Smartphone-Ansicht:** automatisch ab ≤ 760 px, umschaltbar.
 
+**Ausführliches Handbuch mit Bildern:** [docs/HANDBUCH.md](docs/HANDBUCH.md) (Markdown) bzw. als [PDF](docs/Handbuch-Meine-Touren.pdf).
+
 ## Einrichten
 
 1. `http://<IP>/` öffnen → Administrator anlegen (mind. 8 Zeichen Passwort).

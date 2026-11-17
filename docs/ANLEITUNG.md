@@ -1,5 +1,7 @@
 # Meine Touren – Kurzanleitung mit Bildern
 
+> Ausführlicher: das [Handbuch](HANDBUCH.md) (auch als [PDF](Handbuch-Meine-Touren.pdf)).
+
 Meine Touren sammelt deine Wander-, Rad- und Laufaktivitäten auf deinem eigenen Server oder PC: Karte, Höhenprofil, Statistik, Rekorde, Jahresrückblick und Fotos – ohne Cloud-Zwang. Die Bilder unten zeigen Beispieldaten; die Kartenkacheln fehlen in den Aufnahmen (in der echten App siehst du OpenStreetMap bzw. OpenTopoMap).
 
 ## 1. Übersicht
