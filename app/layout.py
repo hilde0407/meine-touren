@@ -1,6 +1,7 @@
 """Seite anpassen (3.17.0): gespeicherte Anordnung der Abschnitte und Bausteine je Seite.
 
-Schlüssel: „tour-haupt“ (Tourseite), „tour-auswertung“ (Unterseite Auswertung), „uebersicht“ (Übersicht), „statistik“ (Statistik, 3.22.0).
+Schlüssel: „tour-haupt“ (Tourseite), „tour-auswertung“ (Unterseite Auswertung), „uebersicht“ (Übersicht), „statistik“ (Statistik, 3.22.0),
+„reise“ (Reise-Detailseite #/trip/<id>, 3.33.0) und „reisen“ (Reisen-Übersicht #/trips, 3.33.0). Das Layout einer Seite gilt für alle Reisen gleich (je Benutzer, nicht je Reise).
 Jeder Benutzer hat eine eigene Datenbank (app/ctx.py); die Tabelle `user_layout` ist daher je Benutzer getrennt, eine Spalte „user“ ist nicht nötig.
 Dokument (JSON-Objekt, alle Felder optional):
   order    [id]            Reihenfolge der Abschnitte dieser Seite
@@ -36,6 +37,10 @@ Ansichten (3.21.0): Ein Dokument je Seitenschlüssel kann statt des Layouts auch
   Tourseite: Hauptseite und Auswertung sind zwei Schlüssel; die Ansichten (Kennungen, Namen, active, rules) werden von der Oberfläche in beiden Dokumenten gleich geführt,
   der Inhalt (layout) steht je Schlüssel für sich. Maßgeblich für Namen, Standardansicht und Regeln ist „tour-haupt“.
   POST /api/layout/check prüft eine Export-Datei (Ansicht als JSON) mit denselben Regeln wie beim Speichern und liefert das bereinigte Ergebnis oder klare Fehler.
+Reisen (3.33.0): Bausteine der Reise-Detailseite (REISE_TYPEN: rkennzahl, rdiashow, rkmtag) stehen nur im Dokument „reise“, die der Reisen-Übersicht (REISEN_TYPEN: rnzahlen, rnjahre) nur in „reisen“.
+Alle Bausteine anderer Seiten, die dort bekannt sind (Tour-, Statistik-, Hinweis-Bausteine, eigene Kennzahl, Erinnerungen), werden dort abgelehnt; unbekannte Typen (neuere Version) bleiben erlaubt.
+Ihre Konfiguration wird streng geprüft (REISE_CFG: nur diese Felder, feste Auswahllisten). „rdiashow“ nimmt die Felder der Erinnerungen (mode, n, view, ratio, size, height, tempo, caption, shuffle, link, title), aber keine Filter:
+den Zeitraum der Reise setzt die Oberfläche. Regeln nach Sportart (rules) gibt es nur auf der Tourseite.
 Betrachter dürfen lesen, bekommen aber immer den Standard (das Layout des Besitzers wird nicht übernommen) und dürfen nichts schreiben.
 """
 import json
@@ -48,7 +53,8 @@ from . import db, kennzahl
 
 router = APIRouter()
 
-KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik")
+KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik", "reise", "reisen")
+NEUE_SEITEN = ("uebersicht", "statistik", "reise", "reisen")                 # Seiten mit genau einem Dokument (ohne Regeln nach Sportart)
 FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg", "w", "filter", "kopf"}
 WIDTHS = ("voll", "zweidrittel", "halb", "drittel")
 # Bausteine, die eine Tour brauchen (Typkennungen wie in static/js/50-bausteine.js und 51-bausteine-tour.js, fam "tour"): nicht in der Übersicht
@@ -59,6 +65,11 @@ STATISTIK_ONLY = frozenset(("stmonate", "stentwicklung", "stlaengen", "sthoehe",
 # 3.23.0: Hinweis-Bausteine (Typkennungen wie in static/js/58-bausteine-hinweise.js): nur auf Übersicht und Statistik, einige nur auf der Übersicht
 HINWEIS_TYPEN = frozenset(("hnziel", "hnmeilenstein", "hnauffaellig", "hnpause", "hnrekord", "hnwoche", "hnerholung", "hnsicherung", "hinweise"))
 HINWEIS_NUR_UEBERSICHT = frozenset(("hnauffaellig", "hnpause", "hnwoche", "hnsicherung"))
+# 3.33.0: Bausteine der Reisen-Seiten (Typkennungen wie in static/js/61-bausteine-reise.js)
+REISE_TYPEN = frozenset(("rkennzahl", "rdiashow", "rkmtag"))
+REISEN_TYPEN = frozenset(("rnzahlen", "rnjahre"))
+REISE_VALUES = {"rkennzahl": ("tage", "touren", "km", "up", "down", "h", "laender"), "rnzahlen": ("reisen", "tage", "km", "up", "laender")}
+REISE_ENUM = {"rkmtag": {"metric": ("km", "up", "h", "count")}, "rnjahre": {"metric": ("km", "count", "days")}}
 HINWEIS_ARTEN = ("ziel", "meilenstein", "auffaellig", "pause", "rekord", "woche", "erholung", "sicherung")
 SNOOZE_RE = re.compile(r"^([a-z]{3,12}):(\d{1,11})$")
 MAX_SNOOZE_S = 366 * 86400                  # „Ausblenden“ höchstens ein Jahr im Voraus
@@ -246,12 +257,43 @@ def _erinn_cfg(v):
     return out
 
 
+def _reise_cfg(typ, v):
+    """Streng geprüfte Konfiguration der Bausteine der Reisen-Seiten (3.33.0): feste Auswahllisten, nur Titel zusätzlich, keine fremden Felder."""
+    if not isinstance(v, dict) or len(v) > 20:
+        raise HTTPException(400, "Ungültige Konfiguration eines Bausteins")
+    if typ == "rdiashow":
+        if set(v) & {"sports", "range", "yr"}:
+            raise HTTPException(400, "Die Reise-Diashow zeigt immer die Fotos der Reise (kein Filter nach Aktivität oder Zeitraum)")
+        out = _erinn_cfg(v)
+        if out.get("mode") == "day":
+            raise HTTPException(400, "„An diesem Tag“ gibt es bei der Reise-Diashow nicht (es sind immer die Fotos der Reise)")
+        return out
+    out = {}
+    for k, x in v.items():
+        bad = HTTPException(400, f"Ungültiger Wert für „{k}“ in der Konfiguration")
+        if k == "title":
+            out[k] = _known(k, x)
+        elif k == "values" and typ in REISE_VALUES:
+            if not isinstance(x, list) or not x or not all(i in REISE_VALUES[typ] for i in x):
+                raise bad
+            out[k] = [a for a in REISE_VALUES[typ] if a in x]
+        elif k in REISE_ENUM.get(typ, {}):
+            if not isinstance(x, str) or x not in REISE_ENUM[typ][k]:
+                raise bad
+            out[k] = x
+        else:
+            raise HTTPException(400, f"Unbekannte Einstellung „{k}“ für diesen Baustein")
+    return out
+
+
 HINWEIS_KEYS = ("schwelle", "tage", "min", "ziel", "ausblenden", "einheit", "stufe", "arten", "snoozes", "woche_ziel", "woche_einheit")
 
 
 def _cfg(v, typ=None):
     if typ == ERINN_TYPE:
         return _erinn_cfg(v)
+    if typ in REISE_TYPEN or typ in REISEN_TYPEN:         # 3.33.0: Bausteine der Reisen-Seiten
+        return _reise_cfg(typ, v)
     if typ == kennzahl.TYPE:                              # 3.28.0: eigene Kennzahl – nur Auswahlen aus festen Listen, streng geprüft (app/kennzahl.py)
         return kennzahl.clean_cfg(v)
     if not isinstance(v, dict) or len(v) > 20:
@@ -323,6 +365,12 @@ def clean(doc, key=None):
                 raise HTTPException(400, "Ungültige Kennung eines Bausteins")
             if x["id"] in seen:
                 raise HTTPException(400, "Doppelte Kennung eines Bausteins")
+            if key in ("reise", "reisen"):                   # 3.33.0: auf den Reisen-Seiten nur deren eigene Bausteine (bekannte fremde werden abgelehnt, unbekannte bleiben erlaubt)
+                fremd = TOUR_ONLY | STATISTIK_ONLY | HINWEIS_TYPEN | {kennzahl.TYPE, ERINN_TYPE} | (REISEN_TYPEN if key == "reise" else REISE_TYPEN)
+                if x["type"] in fremd:
+                    raise HTTPException(400, "Dieser Baustein gehört nicht auf diese Reisen-Seite")
+            elif x["type"] in REISE_TYPEN | REISEN_TYPEN:
+                raise HTTPException(400, "Dieser Baustein gehört zu den Reisen und kann nur dort stehen")
             if key in ("uebersicht", "statistik") and x["type"] in TOUR_ONLY:
                 raise HTTPException(400, "Dieser Baustein gehört zu einer Tour und kann nicht in der Übersicht oder Statistik stehen")
             if key not in (None, "statistik") and x["type"] in STATISTIK_ONLY:
@@ -387,7 +435,7 @@ def clean_container(doc, key=None):
         r = doc["rules"]
         if not isinstance(r, dict) or len(r) > MAX_RULES:
             raise HTTPException(400, "„rules“ muss ein Objekt mit höchstens %d Regeln sein" % MAX_RULES)
-        if r and key in ("uebersicht", "statistik"):
+        if r and key in NEUE_SEITEN:
             raise HTTPException(400, "Regeln nach Sportart gibt es nur auf der Tourseite")
         for k, x in r.items():
             if not isinstance(k, str) or not SPORT_RE.match(k):
@@ -438,8 +486,8 @@ def check_export(doc):
         errors.append(f"Die Datei stammt aus einer neueren Version von „Meine Touren“ (Format {fv}) und kann hier nicht gelesen werden.")
         return res
     page = doc.get("page")
-    if page not in ("tour", "uebersicht", "statistik"):
-        errors.append("Die Datei nennt keine gültige Seite (erlaubt: tour, uebersicht, statistik).")
+    if page not in ("tour",) + NEUE_SEITEN:
+        errors.append("Die Datei nennt keine gültige Seite (erlaubt: tour, uebersicht, statistik, reise, reisen).")
         return res
     res["page"] = page
     try:

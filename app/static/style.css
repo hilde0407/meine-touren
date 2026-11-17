@@ -1690,3 +1690,27 @@ body.sl-editing .tlw[data-hn=lade],body.sl-editing .tlw[data-hn=aus]{display:fle
 .erck{align-items:flex-start;margin:0 0 10px}.erck input{flex:none;margin-top:2px}
 .ererr:not(:empty){margin:0 0 8px}
 @media (max-width:420px){.erform .uifoot .btn{width:100%}}
+
+/* =====================  3.33.0: Reisen als anpassbare Seiten (62-reiseseiten.js, 61-bausteine-reise.js)  =====================
+   #trx = Raster der Reise-Detailseite, #rsx = Raster der Reisen-Übersicht (beide wie #stx: 12 Spalten, Breiten .w-… und Zeilenreste .fd-N/.ft-N aus 3.20.0); jeder Abschnitt ist eine Karte (details.tls)
+   mit .rsb im Körper (die Karte „Karte“ mit .tlmap ohne Rand). Der Kopf (#rs-kopf) ist der bisherige Seitenkopf: Zurück, Titel, Zeitraum, Aktionen. */
+#trx{margin-top:0}
+#rsx{margin-top:14px}
+.rskopf{min-width:0}
+.rskopf>.row:first-child{margin-top:0}
+.rsb>.row{margin:0}
+.rsb>.thumbs,.rsb>.tblw,.rsb>#tr{margin:0}
+.rsb>.tl{border:0;border-radius:0;background:none;overflow:visible}
+.rsb .otdg{margin:0 0 14px}.rsb .otdg:last-child{margin-bottom:0}
+.rsb>.row+.otdg{margin-top:12px}
+.rsb>#tr>.otdg,.rsb>#tr>p{margin-bottom:0}
+.rnhint{margin:0 0 10px;font-size:15px}
+.rsb>.tmap{margin:0}
+.rsdh{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px 12px;margin:0 0 10px}
+.rsdh .hmore{margin-left:auto}
+.slcol.slsm.rscol{height:120px}
+html.mob .rsb>.row .btn{flex:1 1 auto;justify-content:center}
+
+/* 3.33.0: Auf dem Handy darf nichts die Seitenbreite aufziehen oder die Seite seitlich verschieben (Android-App: nach Übersicht → Statistik war die Seite nach links versetzt) */
+html.mob,html.mob body{overflow-x:clip;max-width:100%}
+html.mob #main{overflow-x:clip}

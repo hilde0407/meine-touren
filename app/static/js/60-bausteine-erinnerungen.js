@@ -41,7 +41,7 @@ const erMd = () => {
   return `${pad2(n.getMonth() + 1)}-${pad2(n.getDate())}`;
 };
 /* Abfrage der Fotos; ohne Einstellung genau die bisherige (random=true, limit=6) */
-function erUrl(cfg) {
+function erUrl(cfg, fix) {
   const c = erCfg(cfg), u = new URLSearchParams();
   if (c.mode === "random" || c.mode === "day") u.set("random", "true");
   else if (c.mode === "best") u.set("best", "true");
@@ -57,10 +57,14 @@ function erUrl(cfg) {
     if (R.from) u.set("date_from", R.from);
     if (R.to) u.set("date_to", R.to);
   }
+  if (fix) {                                                                                 // 3.33.0 Reise-Diashow: der Zeitraum der Reise (JJJJ-MM-TT) ersetzt jeden Filter
+    u.set("date_from", fix.from);
+    u.set("date_to", fix.to);
+  }
   return "/api/photos?" + u;
 }
 /* Link „Diashow starten“: nur Parameter, die slideshow.html versteht (js/seite-slideshow.js): random, best, recent, day, before, sport, from, to, year, sec */
-function erSlideUrl(cfg) {
+function erSlideUrl(cfg, fix) {
   const c = erCfg(cfg), u = new URLSearchParams();
   if (c.mode === "random") u.set("random", "1");
   else if (c.mode === "best") u.set("best", "60");
@@ -77,6 +81,11 @@ function erSlideUrl(cfg) {
       if (R.from) u.set("from", R.from);
       if (R.to) u.set("to", R.to);
     }
+  }
+  if (fix) {
+    u.delete("year");
+    u.set("from", fix.from);
+    u.set("to", fix.to);
   }
   if (c.view === "show" && cfg && cfg.tempo) u.set("sec", String(c.tempo));
   return "slideshow.html?" + u;
@@ -226,8 +235,8 @@ function erShow(box, list, c, o) {
 function erPaint(sec, cfg, list, o) {
   const c = erCfg(cfg), box = sec.querySelector(".erb");
   if (!list.length) {
-    if (o.preview) box.innerHTML = '<p class="mut slnone">Keine Fotos mit diesen Einstellungen.</p>';
-    sec.hidden = !o.preview;
+    if (o.preview || o.keep) box.innerHTML = `<p class="mut slnone">${o.preview ? "Keine Fotos mit diesen Einstellungen." : o.none || "Keine Fotos."}</p>`;       // o.keep (Reise-Diashow): die Karte bleibt stehen und sagt, warum sie leer ist
+    sec.hidden = !(o.preview || o.keep);
     return;
   }
   sec.hidden = false;
@@ -239,7 +248,7 @@ async function erLoad(sec, cfg, o = {}) {
   let list = sec._erList;
   if (!list || !o.mix) {
     try {
-      list = await api(erUrl(cfg));
+      list = await api(erUrl(cfg, o.fix));
     } catch (e) {
       list = [];
     }
@@ -261,7 +270,7 @@ function erShell(it, o = {}) {
   sec.hidden = !o.preview;
   sec.innerHTML = `<div class="hsh erh"><h2>${esc(title)}</h2>${fl.length ? `<span class="flk">${fl.map(p => `<span>${esc(p)}</span>`).join(", ")}</span>` : ""}<span class="sp"></span>` +
     (c.shuffle ? `<button type="button" class="btn ghost sm ernew">Neu mischen</button>` : "") +
-    (c.link ? `<a class="hmore erdia" target="_blank" rel="noopener" href="${esc(erSlideUrl(cfg))}">${c.mode === "random" ? "Zufalls-Diashow" : "Diashow starten"}</a>` : "") + `</div><div class="erb"></div>`;
+    (c.link ? `<a class="hmore erdia" target="_blank" rel="noopener" href="${esc(erSlideUrl(cfg, o.fix))}">${c.mode === "random" ? "Zufalls-Diashow" : "Diashow starten"}</a>` : "") + `</div><div class="erb"></div>`;
   const nb = sec.querySelector(".ernew");
   if (nb) nb.onclick = () => erLoad(sec, cfg, c.mode === "random" ? o : {...o, mix: true});
   erLoad(sec, cfg, o);
@@ -272,13 +281,13 @@ function erShell(it, o = {}) {
 const erRadio = (name, legend, opts, cur, extra = "") =>
   `<fieldset class="slfs erfs"${extra}><legend>${esc(legend)}</legend><div class="flchips" role="radiogroup">${opts.map(([v, l]) => `<label class="flchip"><input type="radio" name="${name}" value="${esc(v)}"${String(v) === String(cur) ? " checked" : ""}><span>${esc(l)}</span></label>`).join("")}</div></fieldset>`;
 const erCheck = (name, label, on) => `<label class="slck erck"><input type="checkbox" name="${name}"${on ? " checked" : ""}><span>${esc(label)}</span></label>`;
-function erForm(cfg) {
+function erForm(cfg, trip) {
   const c = erCfg(cfg), filt = !!((cfg.sports && cfg.sports.length) || (cfg.range && cfg.range !== "all"));
   return `<form class="slform erform" novalidate>` +
     `<section class="erpvs"><h3 class="erpvh">Vorschau</h3><div class="erpvb" role="status" aria-live="polite"></div></section>` +
-    flField({kind: "title", ph: "Erinnerungen"}, cfg, 2) +
-    `<details class="erdt" open><summary>Welche Fotos</summary>` + erRadio("er-mode", "Auswahl", ER_MODES, c.mode) + erRadio("er-n", "Anzahl", ER_N.map(x => [x, String(x)]), c.n) +
-    `<details class="erdt erdt2"${filt ? " open" : ""}><summary>Filter: Aktivität und Zeitraum</summary>${flField({kind: "sports"}, cfg, 0)}${flField({kind: "range", def: "all"}, cfg, 1)}</details></details>` +
+    flField({kind: "title", ph: trip ? "Fotos der Reise" : "Erinnerungen"}, cfg, 2) +
+    `<details class="erdt" open><summary>Welche Fotos</summary>` + erRadio("er-mode", "Auswahl", trip ? ER_MODES.filter(m => m[0] !== "day") : ER_MODES, c.mode) + erRadio("er-n", "Anzahl", ER_N.map(x => [x, String(x)]), c.n) +
+    (trip ? `<p class="mut erhint">Es sind immer die Fotos aus dem Zeitraum der Reise.</p>` : `<details class="erdt erdt2"${filt ? " open" : ""}><summary>Filter: Aktivität und Zeitraum</summary>${flField({kind: "sports"}, cfg, 0)}${flField({kind: "range", def: "all"}, cfg, 1)}</details>`) + `</details>` +
     `<details class="erdt" open><summary>Darstellung</summary>` + erRadio("er-view", "Art der Darstellung", ER_VIEWS, c.view) + erRadio("er-ratio", "Seitenverhältnis der Kacheln", ER_RATIOS, c.ratio) +
     `<p class="mut erhint" data-for="show">In der Einzelbild-Show bestimmt die Höhe die Form; „Originalformat“ zeigt das ganze Bild ohne Zuschnitt.</p>` +
     erRadio("er-size", "Größe der Bilder", ER_SIZES, c.size, ' data-for="grid strip"') + erRadio("er-height", "Höhe der Show", ER_HEIGHTS, c.height, ' data-for="show"') +
@@ -290,8 +299,10 @@ function erForm(cfg) {
 /* Formular → Einstellung (nur Abweichungen vom Standard; was zur gewählten Darstellung nicht gehört, wird nicht gespeichert) */
 function erRead(form) {
   const out = {}, val = n => (form.querySelector(`input[name="${n}"]:checked`) || {}).value, D = erCfg({});
-  flRead({kind: "sports"}, form, 0, out);
-  flRead({kind: "range", def: "all"}, form, 1, out);
+  if (form.querySelector('[name="f1"]')) {                                   // (die Reise-Diashow hat keinen Filter)
+    flRead({kind: "sports"}, form, 0, out);
+    flRead({kind: "range", def: "all"}, form, 1, out);
+  }
   flRead({kind: "title"}, form, 2, out);
   const mode = val("er-mode"), n = +val("er-n"), view = val("er-view"), ratio = val("er-ratio"), size = val("er-size"), height = val("er-height"), tempo = +val("er-tempo");
   if (mode && mode !== D.mode) out.mode = mode;
@@ -313,15 +324,16 @@ function erSync(form) {
   const v = (form.querySelector('input[name="er-view"]:checked') || {}).value || "grid";
   form.querySelectorAll("[data-for]").forEach(e => (e.hidden = !e.dataset.for.split(" ").includes(v)));
 }
-function erDialog(id, cfg0) {
-  slModal("Einstellungen: Erinnerungen", (body, close) => {
+function erDialog(id, cfg0, trip) {
+  const R = trip && window.RS_CUR && window.RS_CUR.tr, fix = R ? {from: R.start, to: R.end} : null;
+  slModal(trip ? "Einstellungen: Reise-Diashow" : "Einstellungen: Erinnerungen", (body, close) => {
     const mount = cfg => {
-      body.innerHTML = erForm(cfg);
+      body.innerHTML = erForm(cfg, trip);
       const form = body.querySelector("form"), pv = form.querySelector(".erpvb");
       let timer = 0;
       const preview = () => {
         pv.textContent = "";
-        pv.appendChild(erShell({cfg: erRead(form)}, {preview: true}));
+        pv.appendChild(erShell({cfg: erRead(form)}, {preview: true, fix}));
       };
       const later = () => {
         clearTimeout(timer);

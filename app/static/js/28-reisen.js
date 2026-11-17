@@ -3,7 +3,7 @@ const _trip28 = VIEWS.trip;
 VIEWS.trip = async id => {
   await _trip28(id);
   const tr = (await api("/api/trips").catch(() => [])).find(x => x.id === id),
-    bar = document.querySelector("#main .row");
+    bar = document.querySelector("#main [data-rs=kopf] .row");                // 3.33.0: die Aktionen gehören in den Kopf (er kann auf der Seite weiter unten stehen)
   if (!tr || !bar || bar.querySelector("#tredit")) return;
   bar.insertAdjacentHTML("beforeend", `<span class="sp"></span><button class="btn alt sm" id="tredit" title="Namen oder Zeitraum dieser Reise ändern">✎ Reise bearbeiten</button>`);
   $("#tredit").onclick = () => {

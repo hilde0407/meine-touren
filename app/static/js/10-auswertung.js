@@ -257,7 +257,8 @@ function collStats(ts) {
   };
   return `<div class="sec"><h2>Statistik nach Aktivität</h2></div><div class="tblw"><table class="cstat"><thead><tr><th>Aktivität</th><th>Touren</th><th>km</th><th>Aufstieg m</th><th>Abstieg m</th><th>Stunden</th><th>Ø km/h</th><th>Längste km</th></tr></thead><tbody>${keys.map(k => row(sName(k), typeof sCol === "function" ? sCol(k) : "", g[k])).join("")}</tbody>${keys.length > 1 ? `<tfoot>${row("Gesamt", "", ts).replace(/<td>/g, "<td><b>").replace(/<\/td>/g, "</b></td>")}</tfoot>` : ""}</table></div>`;
 }
-async function collView(title, sub, ids, back) {
+/* 3.33.0: Die Abschnitte tragen data-rs; bei einer Reise (opt.reise = die Reise) steckt rsFrame() (62-reiseseiten.js) sie sofort, noch vor dem Zeichnen der Karte, in Karten der anpassbaren Seite. */
+async function collView(title, sub, ids, back, opt = {}) {
   const ts = ids
       .map(i => BY[i])
       .filter(Boolean)
@@ -265,8 +266,8 @@ async function collView(title, sub, ids, back) {
     sum = f => ts.reduce((c, t) => c + f(t), 0);
   const days = [...new Set(ts.map(t => t.date.slice(0, 10)))];
   $("#main").innerHTML =
-    `<div class="row"><a class="back" href="${back}">‹ Zurück</a></div><div class="sec mt12"><h1 style="font-size:clamp(30px,5vw,52px)">${esc(title)}</h1></div><div class="mut">${esc(sub)}</div>
-   <div class="figs mt14"><div class="fig"><div class="v">${ts.length}</div><div class="l">Touren</div></div><div class="fig"><div class="v">${nf(
+    `<div data-rs="kopf"><div class="row"><a class="back" href="${back}">‹ Zurück</a></div><div class="sec mt12"><h1 style="font-size:clamp(30px,5vw,52px)">${esc(title)}</h1></div><div class="mut">${esc(sub)}</div></div>
+   <div class="figs mt14" data-rs="kennzahlen"><div class="fig"><div class="v">${ts.length}</div><div class="l">Touren</div></div><div class="fig"><div class="v">${nf(
      sum(t => t.km),
      0
    )}<span class="u">km</span></div><div class="l">Strecke</div></div>
@@ -280,9 +281,10 @@ async function collView(title, sub, ids, back) {
       sum(t => t.h),
       0
     )}<span class="u">h</span></div><div class="l">Unterwegs</div></div><div class="fig"><div class="v">${days.length}</div><div class="l">Tage</div></div></div>
-   ${collStats(ts)}
-   <div class="row m6-0-12"><a class="btn" href="#/flight/${encodeURIComponent("set:" + ts.map(t => t.id).join(","))}">3D-Flug über alles</a><button class="btn alt" id="coff" title="Kartenkacheln dieser Strecken zwischenspeichern">Karte offline speichern</button><span id="cofm" class="mut"></span></div>
-   <div class="tmap" id="cm" style="height:460px"></div><div class="sec"><h2>Fotos</h2></div><div class="thumbs" id="cph"></div><div class="sec"><h2>Touren</h2></div><div class="tl">${ts.map(tourRow).join("")}</div>`;
+   <div data-rs="stat">${collStats(ts)}</div>
+   <div class="row m6-0-12" data-rs="flug"><a class="btn" href="#/flight/${encodeURIComponent("set:" + ts.map(t => t.id).join(","))}">3D-Flug über alles</a><button class="btn alt" id="coff" title="Kartenkacheln dieser Strecken zwischenspeichern">Karte offline speichern</button><span id="cofm" class="mut"></span></div>
+   <div data-rs="karte"><div class="tmap" id="cm" style="height:460px"></div></div><div data-rs="fotos"><div class="sec"><h2>Fotos</h2></div><div class="thumbs" id="cph"></div></div><div data-rs="touren"><div class="sec"><h2>Touren</h2></div><div class="tl">${ts.map(tourRow).join("")}</div></div>`;
+  if (opt.reise && typeof rsFrame === "function") rsFrame(opt.reise, ts, days);
   map = mkMap("cm", {layers: true});
   const fg = L.featureGroup().addTo(map);
   const co = await Promise.all(ts.map(t => api(`/api/tours/${t.id}/coords`).catch(() => [])));
@@ -299,8 +301,14 @@ async function collView(title, sub, ids, back) {
       ln.on("mouseout", () => ln.setStyle({weight: 5}));
     }
   });
-  if (fg.getLayers().length) map.fitBounds(fg.getBounds(), {padding: [30, 30]});
-  else map.setView([50, 9], 6);
+  const cmap = map;
+  cmap._cvFit = () => (fg.getLayers().length ? cmap.fitBounds(fg.getBounds(), {padding: [30, 30], animate: false}) : cmap.setView([50, 9], 6, {animate: false}));
+  if (opt.reise && typeof rsMapBind === "function") rsMapBind(cmap);
+  if ($("#cm").clientWidth && !$("#cm").closest("details:not([open])")) cmap._cvFit();
+  else {
+    cmap._cvStale = true;
+    cmap.setView([50, 9], 6, {animate: false});                          // vorläufig, damit Leaflet lesbar ist
+  }                                                 // Karte steckt in einer zugeklappten oder ausgeblendeten Karte: angepasst, sobald sie sichtbar ist (62-reiseseiten.js)
   Promise.all(ts.slice(0, 14).map(t => (t.photos ? api(`/api/photos?tour_id=${t.id}&limit=6`).catch(() => []) : []))).then(a => {
     const ph = a.flat();
     if (!$("#cph")) return;
@@ -308,6 +316,7 @@ async function collView(title, sub, ids, back) {
       ph.map((p, i) => `<img loading="lazy" src="/pic/${p.id}?size=300" data-i="${i}">`).join("") ||
       '<span class="mut">Keine Fotos.</span>';
     bindThumbs($("#cph"), ph);
+    if (opt.reise && typeof rsBadge === "function") rsBadge("fotos", ph.length ? (ph.length === 1 ? "1 Foto" : `${ph.length} Fotos`) : "");
   });
   const plan = await api(`/api/tiles/plan?ids=${ts.map(t => t.id).join(",")}`).catch(() => null);
   if (plan)
@@ -333,15 +342,16 @@ VIEWS.trips = async () => {
   $("#main").innerHTML =
     `<div class="sec mt0"><h2>Reisen</h2><span class="sub">automatisch erkannt: Touren weit weg von zu Hause an mindestens 4 Tagen</span></div><div id="tr" class="mut">Wird geladen …</div>`;
   const [tr, tg] = await Promise.all([api("/api/trips"), api("/api/tags")]);
+  window.RS_TRIPS = tr;
   $("#tr").className = "";
   $("#tr").innerHTML =
     (tr.length
       ? `<div class="otdg">${tr.map(x => `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${dateS(x.start)}${x.end !== x.start ? " – " + dateS(x.end) : ""}</span><small>${x.tours.length} Touren · ${nf(x.km, 0)} km · ${nf(x.up_m, 0)} m</small></a>`).join("")}</div>`
       : '<p class="mut">Keine Reisen erkannt (es braucht Touren an mindestens 4 Tagen am Stück, über 60 km von deinem üblichen Startort entfernt – Wochenendausflüge zählen nicht). Eigene Gruppen legst du mit Tags an.</p>') +
-    `<div class="sec"><h2>Alben &amp; Tags</h2><span class="sub">in der Tour über „🏷 Tags“ vergeben</span></div>` +
+    `<div id="rnalb"><div class="sec"><h2>Alben &amp; Tags</h2><span class="sub">in der Tour über „🏷 Tags“ vergeben</span></div>` +
     (tg.length
       ? `<div class="otdg">${tg.map(x => `<a class="otd" href="#/album/${encodeURIComponent(x.tag)}"${x.photo ? ` style="background-image:linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)"` : ""}><b>🏷 ${esc(x.tag)}</b><small>${x.n} Touren · ${nf(x.km, 0)} km</small></a>`).join("")}</div>`
-      : '<p class="mut">Noch keine Tags vergeben.</p>');
+      : '<p class="mut">Noch keine Tags vergeben.</p>') + "</div>";
 };
 VIEWS.trip = async id => {
   const tr = (await api("/api/trips")).find(x => x.id === id);
@@ -350,7 +360,8 @@ VIEWS.trip = async id => {
     `${tr.region}${tr.country && tr.country !== tr.region ? ", " + tr.country : ""}`,
     `${dateL(tr.start)}${tr.end !== tr.start ? " – " + dateL(tr.end) : ""}`,
     tr.tours,
-    "#/trips"
+    "#/trips",
+    {reise: tr}
   );
 };
 VIEWS.album = async tag => {

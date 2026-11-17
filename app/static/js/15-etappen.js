@@ -27,9 +27,9 @@ VIEWS.trips = async () => {
   const ds = ts => new Date(ts * 1000).toLocaleDateString("de-DE");
   tr.insertAdjacentHTML(
     "afterbegin",
-    `<div class="sec mt0"><h2>Mehrtagestouren</h2><span class="sub">erkannt an Namen wie „… Tag 3“ oder „… Etappe 2“</span></div><div class="otdg">${L.map(
+    `<div id="rnser"><div class="sec mt0"><h2>Mehrtagestouren</h2><span class="sub">erkannt an Namen wie „… Tag 3“ oder „… Etappe 2“</span></div><div class="otdg">${L.map(
       s => `<a class="otd" href="#/series/${s.id}" style="background-image:linear-gradient(#0e2a2b99,#0e2a2bee)"><b>${esc(s.name)}</b><span>${ds(s.start)}${s.end - s.start > 86400 ? " – " + ds(s.end) : ""}</span><small>${s.n} Etappen · ${nf(s.km, 0)} km · ${nf(s.up, 0)} m</small></a>`
-    ).join("")}</div>`
+    ).join("")}</div></div>`
   );
   // Titelfoto je Mehrtagestour: ein Foto aus der Mitte der Reihe
   try {

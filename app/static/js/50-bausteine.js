@@ -21,7 +21,7 @@ const slPvTiles = list => slPrev(slTiles(list));
 const slPvBars = v => slPrev(`<svg viewBox="0 0 120 40" class="slpvs" aria-hidden="true">${v.map((h, i) => `<rect x="${i * 14 + 4}" y="${38 - h}" width="10" height="${h}" rx="2"/>`).join("")}</svg>`);
 
 /* ---- 3.18.0 gemeinsame Hilfen für Grafiken: Maße als Attribute, Farben über Klassen und CSS-Variablen (style.css „Mehr Bausteine“) ---- */
-const SL_CATS = [["statistik", "Statistik"], ["zahlen", "Zahlen"], ["grafik", "Grafiken"], ["spass", "Spaß und Eigenes"], ["rueck", "Rückblick"], ["plan", "Planung"], ["quellen", "Touren holen"]];
+const SL_CATS = [["reise", "Reisen"], ["statistik", "Statistik"], ["zahlen", "Zahlen"], ["grafik", "Grafiken"], ["spass", "Spaß und Eigenes"], ["rueck", "Rückblick"], ["plan", "Planung"], ["quellen", "Touren holen"]];
 const slEnc = encodeURIComponent;
 const slGet = u => api(u).catch(() => null);
 const slClamp = (x, a = 0, b = 100) => Math.max(a, Math.min(b, x));
@@ -305,7 +305,7 @@ window.slWidgetBuild = (it, root) => {
   body.innerHTML = '<p class="mut slnone">Wird geladen …</p>';
   const t = root && root.dataset && root.dataset.tid ? BY[root.dataset.tid] : null;
   Promise.resolve()
-    .then(() => T.render(c, body, it.cfg || {}, {t}))
+    .then(() => T.render(c, body, it.cfg || {}, {t, reise: window.RS_CUR || null}))
     .catch(() => {
       body.innerHTML = '<p class="mut slnone">Dieser Baustein konnte nicht geladen werden.</p>';
       if (T.hinweis) c.dataset.hn = "aus";
