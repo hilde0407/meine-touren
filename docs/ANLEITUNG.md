@@ -6,7 +6,7 @@ Meine Touren sammelt deine Wander-, Rad- und Laufaktivitäten auf deinem eigenen
 
 ![Übersicht](bilder/uebersicht.png)
 
-Oben die letzte Tour mit Strecke, Aufstieg und Dauer, darunter deine Gesamtstatistik. Mit den Reitern wechselst du zwischen Gesamt und einzelnen Jahren, mit den Schaltflächen filterst du nach Sportart. „Jahresrückblick“ öffnet die Zusammenfassung des Jahres.
+Oben die letzte Tour mit Strecke, Aufstieg und Dauer (zum Durchblättern), darunter „Dein Jahr“ mit Vergleich zum Vorjahr, die zuletzt gemachten Touren und Erinnerungen. Über „Seite anpassen“ stellst du die Übersicht selbst zusammen (siehe Abschnitt 9), die Statistik mit Reitern für Gesamt und einzelne Jahre und Filtern nach Sportart liegt unter „Statistik“.
 
 ## 2. Alle Touren
 
@@ -28,17 +28,21 @@ Kopfzeile mit den wichtigsten Werten, darunter Karte, **Höhenprofil** und **Ana
 
 Alle Touren auf einer Karte, filterbar nach Sportart und Jahr.
 
-## 5. Rekorde
+## 5. Statistik und Rekorde
+
+![Statistik](bilder/statistik.png)
+
+Die Statistik besteht aus Bausteinen (Kennzahlen, Ziele, Kilometer pro Jahr, Sportarten, Aktivität …) mit einem globalen Filter für Aktivität und Zeitraum. Reiter: Übersicht, Auswertung, Rekorde und Puls.
 
 ![Rekorde](bilder/rekorde.png)
 
-Längste Tour, größter Aufstieg, schnellstes Tempo und mehr – je Sportart.
+Rekorde: längste Tour, größter Aufstieg, schnellstes Tempo und mehr – je Sportart.
 
 ## 6. Jahresrückblick
 
 ![Jahresrückblick](bilder/jahresrueckblick.png)
 
-Das Jahr auf einen Blick: Kilometer, Höhenmeter, Zeit, Lieblingsmonate und Highlights.
+Das Jahr auf einen Blick: Kilometer, Höhenmeter, Zeit, Lieblingsmonate und Highlights. Der Rückblick lässt sich als PDF laden, drucken oder als Link ohne Konto teilen.
 
 ## 7. Verwaltung
 
@@ -51,6 +55,22 @@ Hier findest du **Updates** (die App prüft regelmäßig auf GitHub und bietet d
 ![Handy-Ansicht](bilder/handy.png)
 
 Die Oberfläche passt sich kleinen Bildschirmen an und lässt sich im Browser zum Home-Bildschirm hinzufügen.
+
+## 9. Seite anpassen
+
+![Seite anpassen](bilder/bausteine-bearbeiten.png)
+
+„Seite anpassen“ (auf Übersicht, Tourseite, Statistik, Reise-Seite und Reisen-Übersicht) schaltet den Bearbeitungsmodus ein: Bausteine verschieben, ausblenden, ein- oder ausklappen und in der Breite ändern, neue Bausteine aus dem Katalog hinzufügen (auch eigene Kennzahlen). „Ansichten“ speichert mehrere Anordnungen (z. B. „Wandern“, „Rad“) und bietet fertige Vorlagen sowie Export und Import als Datei. „Fertig“ übernimmt, „Verwerfen“ lässt alles wie vorher.
+
+## 10. Reisen
+
+![Reisen](bilder/reisen.png)
+
+Touren weit weg von zu Hause an mindestens vier Tagen am Stück werden als Reise erkannt, Tourenreihen wie „… Tag 3“ als Mehrtagestour.
+
+![Reise](bilder/reise.png)
+
+Die Reise-Seite zeigt Kennzahlen, Statistik nach Aktivität, Karte mit den Tagen in Farben, Fotos und Touren; auch sie ist anpassbar. Der Reisebericht lässt sich als PDF laden.
 
 ---
 

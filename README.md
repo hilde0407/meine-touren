@@ -1,20 +1,31 @@
 # Meine Touren
 
-**Dein privates Tourenarchiv zum Selbsthosten** – Wanderungen, Radtouren und Co. mit Karte, Höhenprofil, Statistik und Fotos. Die Strecken liegen **lokal** bei dir; Komoot, Zepp und Strava sind optionale Anbindungen zum Laden und Hochladen.
+**Dein privates Tourenarchiv zum Selbsthosten** – Wanderungen, Radtouren und Co. mit Karte, Höhenprofil, Statistik und Fotos. Die Strecken liegen **lokal** bei dir; Komoot, Zepp, Garmin, Suunto und Strava sind optionale Anbindungen zum Laden (Komoot und Strava auch zum Hochladen). Die Seiten lassen sich selbst zusammenstellen, die Android-App zeichnet unterwegs auf.
 
-> *English in short:* self-hosted tour archive (hikes, rides …) with maps, elevation profiles, stats and photos. Tracks are stored locally; Komoot/Zepp import and Komoot/Strava upload are optional. UI language: German. One-line install for Proxmox VE below.
+> *English in short:* self-hosted tour archive (hikes, rides …) with maps, elevation profiles, stats and photos. Tracks are stored locally; Komoot/Zepp/Garmin/Suunto import and Komoot/Strava upload are optional. Customizable pages, Android app for recording. UI language: German (EN/FR/ES translations). One-line install for Proxmox VE below.
 
-**Bebilderte Kurzanleitung: [docs/ANLEITUNG.md](docs/ANLEITUNG.md)**
+**Bebilderte Kurzanleitung: [docs/ANLEITUNG.md](docs/ANLEITUNG.md)** · **Versionsverlauf: [docs/VERSIONSVERLAUF.md](docs/VERSIONSVERLAUF.md)**
+
+## Highlights (Stand Version 3.33.0)
+
+* **Seiten selbst gestalten:** Tourseite, Übersicht, Statistik, Reise-Seite und Reisen-Übersicht bestehen aus **Bausteinen** („Seite anpassen“): verschieben, ausblenden, einklappen, Breite wählen, Bausteine aus einem Katalog hinzufügen, **Ansichten** und **Vorlagen** (z. B. „Wandern“, „Rad“, „Kompakt“), Export und Import. Ohne Anpassung sieht alles aus wie gewohnt.
+* **Eigene Kennzahlen** ohne Programmierung, Hinweis-Bausteine (nur bei Anlass), die **Erinnerungen-Kachel** und ein globaler Filter (Aktivität, Zeitraum) in der Statistik.
+* **Teilen:** Freigegebene Links an einem Ort verwalten, Tour-Links in einer **gewählten Ansicht** (z. B. nur Karte und Fotos), **Jahresrückblick als teilbare Seite**, **Diashow-Links** für Tour, Jahr oder Sammlung (Vollbild, ohne Konto, widerrufbar).
+* **Uhren und Messwerte:** Zepp-, Garmin- und Suunto-Import (der Import-Knopf auf der Übersicht passt sich den verbundenen Konten an), Messwerte, „Meine Geräte“ mit Genauigkeit, Training laut Uhr, Belastung und Tempo nach Steigung.
+* **Suche ohne Akzente:** „reunion“ findet „Réunion“, „strasse“ findet „Straße“.
+* **Android-App** mit GPS-Aufzeichnung, Sprachansagen, Offline-Speicher, Fotos während der Aufnahme und Vollbild-Diashow; als Begleit-App gibt es **Mein Tourentagebuch** ([hilde0407/mein-tourentagebuch](https://github.com/hilde0407/mein-tourentagebuch)).
 
 ## Screenshots
 
-Alle Bilder stammen aus dem **Demo-Modus** (`MT_DEMO=1 python3 -m app.demo`) und zeigen ausschließlich erfundene Beispieldaten. (Die Kartenkacheln fehlen in den Bildern – in der echten App ist die Karte sichtbar.)
+Alle Bilder stammen aus dem **Demo-Modus** (`MT_DEMO=1 python3 -m app.demo`), ergänzt um einige weitere erfundene Touren (u. a. eine Hüttenwanderung als Reise, Touren mit Pulswerten), und zeigen ausschließlich Beispieldaten. (Die Kartenkacheln fehlen in den Bildern – in der echten App ist die Karte sichtbar.)
 
 | | |
 |---|---|
-| ![Übersicht](docs/bilder/uebersicht.png) **Übersicht** – letzte Tour, Fotos, Kennzahlen | ![Touren](docs/bilder/touren.png) **Touren** – Liste mit Filtern und Streckenform |
-| ![Tourdetail](docs/bilder/tour-ganz.png) **Tourdetail** – Höhenprofil mit Foto-Punkten | ![Karte](docs/bilder/karte.png) **Karte** – alle Touren auf einen Blick |
-| ![Rekorde](docs/bilder/rekorde.png) **Rekorde** | ![Jahresrückblick](docs/bilder/jahresrueckblick.png) **Jahresrückblick** |
+| ![Übersicht](docs/bilder/uebersicht.png) **Übersicht** – letzte Tour, Dein Jahr, Erinnerungen | ![Seite anpassen](docs/bilder/bausteine-bearbeiten.png) **Seite anpassen** – Bausteine verschieben, ausblenden, Breite wählen |
+| ![Touren](docs/bilder/touren.png) **Touren** – Liste mit Filtern und Streckenform | ![Tourdetail](docs/bilder/tour-ganz.png) **Tourdetail** – Höhenprofil mit Foto-Punkten |
+| ![Karte](docs/bilder/karte.png) **Karte** – alle Touren auf einen Blick | ![Statistik](docs/bilder/statistik.png) **Statistik** – Bausteine mit globalem Filter |
+| ![Rekorde](docs/bilder/rekorde.png) **Rekorde** (Statistik → Rekorde) | ![Jahresrückblick](docs/bilder/jahresrueckblick.png) **Jahresrückblick** – auch als Link teilbar |
+| ![Reisen](docs/bilder/reisen.png) **Reisen** – automatisch erkannt, anpassbar | ![Reise](docs/bilder/reise.png) **Reise** – Kennzahlen, Karte, Fotos, Touren |
 | ![Tourblatt](docs/bilder/tourblatt.png) **Tourblatt** – druckbares Blatt einer Tour | ![Verwaltung](docs/bilder/verwaltung.png) **Verwaltung** – übersichtlich in Reitern |
 
 <p align="center"><img src="docs/bilder/handy.png" width="280" alt="Handy-Ansicht"><br><b>Handy-Ansicht</b></p>
@@ -61,13 +72,20 @@ Hinweise: Ein eigener BRouter-Server (Routenplanung) und das Einbinden von SMB-F
 
 ## Funktionen
 
-* **Übersicht, Karte, Touren:** letzte Tour mit Karte und Fotos (zum Durchzappen), Jahresstatistik, Bestwerte, Kalender, „An diesem Tag“; alle Touren auf einer Karte; Tourseite mit Höhenprofil, Fotos an der Strecke, 3D-Flug und Diashow; Streckenfarbe frei wählbar.
+* **Übersicht, Karte, Touren:** letzte Tour mit Karte und Fotos (zum Durchzappen), „Dein Jahr“ mit Vorjahresvergleich, Erinnerungen und „An diesem Tag“; alle Touren auf einer Karte; Tourseite mit Höhenprofil, Fotos an der Strecke, 3D-Flug und Diashow; Streckenfarbe frei wählbar.
+* **Anpassbare Seiten (ab 3.17):** Tourseite, Übersicht, Statistik, Reise-Seite und Reisen-Übersicht über „Seite anpassen“ gestalten: Bausteine aus einem Katalog (je Seite passende), Raster mit wählbarer Breite, mehrere benannte **Ansichten**, fertige **Vorlagen**, Export/Import als Datei. Bausteine lassen sich einstellen (Aktivität, Zeitraum, Kennzahlen, Titel); **eigene Kennzahlen** und Hinweis-Bausteine (nur bei Anlass) gibt es dazu.
+* **Statistik:** Übersicht, Auswertung (Tempo, Wetter, Neuland), Rekorde und Puls mit globalem Filter; Jahresrückblick, auch als Link teilbar und druckbar.
 * **Lokale Strecken:** Karten und Tourdetails arbeiten nur mit gespeicherten Daten. Original-GPX lokaler Touren liegen im Datenordner und sind im Backup.
-* **Import:** Zepp-Trainings (GPS als GPX), **Garmin, Suunto und andere Uhren** (FIT/GPX/TCX/ZIP, Garmin-Konto), Komoot-Touren und -Strecken, Fotos (Browser-Upload mit Verkleinerung, Eingangsordner, SMB, Mac-Skript).
+* **Import:** Zepp-Trainings (GPS als GPX), **Garmin, Suunto und andere Uhren** (FIT/GPX/TCX/ZIP, Garmin-Konto) mit einem Import-Knopf auf der Übersicht bzw. in der Kopfzeile, Komoot-Touren und -Strecken, Fotos (Browser-Upload mit Verkleinerung, Eingangsordner, SMB, Mac-Skript).
+* **Uhren und Messwerte:** Messwerte der Geräte (Puls, Frequenz, Leistung …, nur was das Gerät lieferte), „Meine Geräte“ mit Genauigkeit, Training laut Uhr, Belastung und Tempo nach Steigung, Vergleich ähnlicher Touren.
 * **Upload (nur auf ausdrücklichen Wunsch):** Komoot und Strava, einzeln oder gesammelt, mit Doppelten-Prüfung und Probelauf. GPX-Download jeder Tour.
 * **Fotos:** automatisch über die Aufnahmezeit den Touren zugeordnet, manuelle Korrektur mit Zeitversatz, Karte mit Foto-Markern; Fotos lassen sich auf der Strecke „wie eine Perlenkette“ ausrichten.
+* **Teilen:** Tour-Links (auch mit gewählter Ansicht), Jahresrückblick-Link, Diashow-Links für Tour, Jahr und Sammlung; alle Links unter „Freigegebene Links verwalten“, jederzeit widerrufbar.
+* **Reisen:** Mehrtagesreisen weit weg von zu Hause werden erkannt (mindestens 4 Tage), Reise-Seite und Reisen-Übersicht sind anpassbar; Reisebericht als PDF.
+* **Suche:** ohne Akzente und Apostrophe („reunion“ findet „Réunion“).
+* **Android-App:** GPS-Aufzeichnung mit Sprachansagen, Offline-Speicher, Fotos während der Aufnahme, Teilen-Menü, Vollbild-Diashow (Abschnitt Android-App). Begleit-App: **Mein Tourentagebuch** ([hilde0407/mein-tourentagebuch](https://github.com/hilde0407/mein-tourentagebuch)).
 * **Updates:** regelmäßige Prüfung auf GitHub, Installation per Knopfdruck (Administratoren), vorher automatische Sicherung.
-* **Komfort:** Namensvorschläge aus Kartendaten/Wanderführern (z. B. Rother-GPX), Höhenkorrektur mit Geländemodell, Regionen-Suche, Rekorde, Alben/Reisen, Auswertung (Tempo, Wetter, Neuland), öffentliche Teilen-Links (widerrufbar), Webhook-Benachrichtigung, PWA.
+* **Komfort:** Namensvorschläge aus Kartendaten/Wanderführern (z. B. Rother-GPX), Höhenkorrektur mit Geländemodell, Regionen-Suche, Alben, Tourplanung, Webhook-/ntfy-Benachrichtigung, PWA, Oberfläche auch auf Englisch, Französisch und Spanisch.
 * **Mehrere Benutzer:** getrennte Touren, Fotos und Einstellungen je Benutzer; Fotos pro Bibliothek oder Tour für einzelne Benutzer oder alle freigeben.
 * **Smartphone-Ansicht:** automatisch ab ≤ 760 px, umschaltbar.
 
@@ -92,6 +110,27 @@ Hinweise: Ein eigener BRouter-Server (Routenplanung) und das Einbinden von SMB-F
 * Die Oberfläche braucht Internet für Kartenkacheln (OpenStreetMap u. a.), Höhen-/Wetterdaten und Ortsnamen (Open-Meteo, Nominatim, Overpass). Bitte die jeweiligen Nutzungsrichtlinien beachten.
 * Läuft im Heimnetz; für Zugriff von außen ein VPN oder Reverse-Proxy mit HTTPS davorschalten.
 
+## Versionsverlauf
+
+Neueste zuerst. Alle Versionen (bis 1.3) in **[docs/VERSIONSVERLAUF.md](docs/VERSIONSVERLAUF.md)**, Einzelbeschreibungen ab 3.7.2 in [docs/versionen/](docs/versionen/README.md).
+
+* [3.33.0](docs/versionen/3.33.0.md) – Reisen als anpassbare Seiten (Bausteine, Ansichten, Vorlagen)
+* [3.32.0](docs/versionen/3.32.0.md) – Erinnerungen-Kachel einstellbar
+* [3.31.0](docs/versionen/3.31.0.md) – Import-Knopf je nach Uhr, Suche ohne Akzente (3.31.1: Tourname in Diashow-Links)
+* [3.30.0](docs/versionen/3.30.0.md) – Zepp-Import auf der Übersicht
+* [3.29.0](docs/versionen/3.29.0.md) – Diashow-Link für Jahr und Sammlung, Baustein „Ziele“
+* [3.28.0](docs/versionen/3.28.0.md) – Eigene Kennzahlen
+* [3.27.0](docs/versionen/3.27.0.md) – Geschwindigkeit bei vielen Touren, Vollbild in der Android-App
+* [3.26.0](docs/versionen/3.26.0.md) – Jahresrückblick als teilbare Seite
+* [3.25.0](docs/versionen/3.25.0.md) – Teilen mit Ansicht
+* [3.24.0](docs/versionen/3.24.0.md) – Qualität und Feinschliff (3.24.1: zwei Fehler behoben)
+* [3.23.0](docs/versionen/3.23.0.md) – Hinweis-Bausteine
+* [3.22.0](docs/versionen/3.22.0.md) – Statistik als anpassbare Seite mit globalem Filter
+* [3.21.0](docs/versionen/3.21.0.md) – Ansichten, Vorlagen, Export
+* [3.17.0](docs/versionen/3.17.0.md) bis [3.20.0](docs/versionen/3.20.0.md) – Seite anpassen, Bausteine, Raster
+* [3.9.0](docs/versionen/3.9.0.md) bis [3.16.1](docs/versionen/3.16.1.md) – Messwerte, Meine Geräte, Genauigkeit der Uhren, neue Tourseite
+* 3.0 – die App begleitet die ganze Tour (Offline, Live-Ansicht, Sprachansagen) · 2.0 – Android-App · 1.x – Grundfunktionen, PDF-Berichte, Tourplanung
+
 ## Entwicklung
 
 ```bash
@@ -106,7 +145,6 @@ Quellen/Lizenzen: Zepp-Anmeldung nach *huami-token* (MIT), Spurdekodierung nach 
 
 `mac/foto_zeit_abgleich.py` korrigiert die Aufnahmezeit exportierter JPEGs (z. B. aus Lightroom) anhand der RAW-Originale (ARW).
 Festplatten nacheinander einlesen (`index /Volumes/Platte1`), dann `check` (nur Bericht) bzw. `fix` für den JPEG-Ordner; `undo` macht den letzten Lauf rückgängig. Nur Python 3 nötig. Details: `python3 mac/foto_zeit_abgleich.py -h`.
-
 
 ## Hilfe gesucht: Garmin und Suunto testen
 
@@ -150,7 +188,7 @@ Die exportierten Fotos aus `Aktivitäten/` lassen sich über den Eingangsordner 
 
 `foto_gps.py` kennt zusätzlich `--tagesort` (Fotos ohne Tour erhalten die mittlere Position der GPS-Fotos desselben Tagesordners) und `--orte datei.csv` (Zeilen `JJJJ-MM-TT;Breite;Länge`, auch `JJJJ-MM` oder `JJJJ`).
 
-### Garmin, Suunto und andere Uhren
+## Garmin, Suunto und andere Uhren
 
 **Verwaltung → „Garmin, Suunto & andere Uhren“.** Alles landet als *lokale* Tour (mit Doppelten-Prüfung gegen vorhandene Touren); zu Komoot/Strava wird nur auf ausdrücklichen Wunsch hochgeladen.
 
@@ -165,27 +203,17 @@ Die exportierten Fotos aus `Aktivitäten/` lassen sich über den Eingangsordner 
 
 > Garmin- und Suunto-Anbindung konnten vom Autor mangels Uhren nicht gegen echte Konten getestet werden; die Tests laufen gegen nachgebaute Antworten, der FIT-Leser gegen eine unabhängig erzeugte FIT-Datei. Rückmeldungen und Beispiel-Dateien sind willkommen.
 
-### Fotos importieren und zuordnen
+## Fotos importieren und zuordnen
 
 **Fotos → „Fotos importieren …“** (auch in der Verwaltung und im Tourdetail unter „Fotos hinzufügen …“): Ordner oder einzelne Fotos auswählen oder einfach ins Fenster ziehen. Die App liest Aufnahmezeit und Aufnahmeort aus den Bildern und zeigt vorab **je Aufnahmetag**, welcher Tour die Fotos zugeordnet werden; pro Tag lässt sich die Auswahl ändern („nach Uhrzeit“, andere Tour, „ohne Tour“, „nicht importieren“). Ein Klick startet den Import, danach steht da, wie viele Fotos Touren zugeordnet wurden.
 
 Die Zuordnung nutzt Zeit **und** Ort: Überlappen sich Touren, entscheidet der Abstand des Fotos zur Strecke; ein Foto, das weit (über 10 km) von der Strecke aufgenommen wurde, wird nicht zugeordnet. Geht die Kamerauhr falsch (Zeitzone, nie gestellt), erkennt die App das an den Fotos mit Aufnahmeort und bietet beim Import eine **minutengenaue Zeitkorrektur** an; bei bereits importierten Fotos prüft **„Zeit per GPS prüfen“** im Tourdetail die Uhrzeiten und korrigiert sie nach Rückfrage.
 
-### Fotos auf der Strecke ausrichten
+## Fotos auf der Strecke ausrichten
 
 Im Tourdetail öffnet **„📍 Fotos ausrichten“** die Karte im Ausrichtungsmodus: Ein Foto wird auf die Stelle der Strecke gezogen, an der man sicher ist, dass es dort entstand; alle anderen Fotos wandern wie auf einer Perlenkette im gleichen zeitlichen Abstand mit (mit Uhrzeit-Beschriftung). „Speichern“ verschiebt die Aufnahmezeiten dauerhaft um diesen Betrag (wahlweise auch die anderen Fotos desselben Tages); „Original-Zeiten“ nimmt jede Verschiebung zurück. Voraussetzung: die Strecke enthält Zeitstempel.
 
-### Neu in Version 1.15
-
-* **PDF-Berichte neu gestaltet:** Tourblatt, Reisebericht und Jahresrückblick haben jetzt einen farbigen Kopf mit Titel (auf Wunsch mit Titelfoto), Kennzahlen-Karten, Kartenbild mit Rahmen, Höhenprofil mit höchstem Punkt, Tabellen mit Zebra-Streifen und Tageszeilen, abgerundete Fotos mit Aufnahmezeit, Notiz und Bewertung (Tourblatt), Monatsdiagramm und Sportarten-Anteile (Jahresrückblick) sowie „Seite x von y“ in der Fußzeile.
-* **Offline-Hinweis:** Ohne Verbindung zeigt die App oben einen gelben Hinweis; zuletzt gesehene Touren und Karten bleiben sichtbar (installierte App über HTTPS).
-
-### Neu in Version 1.14
-
-* **Teilen mit Meine Touren (Android):** Ist die App auf dem Handy installiert, erscheint sie im Teilen-Menü. GPX-, FIT-, TCX- und ZIP-Dateien (z. B. aus Garmin Connect oder Komoot) werden sofort als Tour übernommen, Fotos aus der Galerie landen im Eingang und werden im Hintergrund den Touren zugeordnet. Danach zeigt eine Ergebnisseite, was importiert wurde.
-* **Handy-Installation:** Verwaltung → Übersicht → „Auf dem Handy“ erklärt die Installation, bietet „App installieren“ und zeigt, ob die Verbindung gesichert ist. Neu im Manifest: Verknüpfungen (Touren, Karte, Tour planen, Reisen) per langem Druck auf das App-Symbol.
-
-#### Android-App (Version 2.0)
+## Android-App
 
 Im Ordner `android/` liegt eine kleine native Android-App („Hülle“) um die Weboberfläche. Sie bringt, was eine Webseite nicht kann:
 
@@ -193,21 +221,16 @@ Im Ordner `android/` liegt eine kleine native Android-App („Hülle“) um die 
 - **Teilen-Menü**: GPX/FIT/TCX/ZIP und Fotos aus anderen Apps direkt an Meine Touren senden (auch über HTTP, ohne HTTPS).
 - **PDF-Downloads** landen im Download-Ordner des Handys.
 - Die Serveradresse (auch `http://192.168.178.230`) wird beim ersten Start eingegeben und lässt sich in der Verwaltung ändern.
-
-**Reisen (ab 2.2.1):** Als Reise zählen nur Gruppen über mindestens zwei Kalendertage. Tagesausflüge sind keine Reise, auch mit mehreren Aufzeichnungen am selben Tag. Eine fälschlich erkannte Reise lässt sich auf ihrer Seite mit „Keine Reise“ aus der Liste entfernen. Unten in der Reisenliste steht „Entfernte Reisen“ zum Wiederherstellen. Die Touren selbst bleiben immer erhalten.
-
-**Teilen und Smartphone-Ansicht (ab 2.2):** Auf Tourseite, Reise und Jahresrückblick gibt es „Senden“. In der App öffnet es das Android-Auswahlmenü (WhatsApp, Signal, E-Mail …). Bei einer Tour wird dafür ein Link ohne Anmeldung erzeugt (Anfang und Ende ausgeblendet). Der Link funktioniert für Empfänger nur, wenn der Server von außen erreichbar ist (z. B. Tailscale Funnel). Die Übersicht und die Filterleiste der Tourenliste sind auf dem Handy deutlich kompakter.
-
-**Push-Meldungen (ab 2.1):** Trage in der Verwaltung unter „Benachrichtigung“ eine ntfy-Adresse ein (z. B. `https://ntfy.sh/mein-geheimes-thema`). Dann kommen Warnungen und neue Touren (Aufzeichnung, Teilen-Menü, Import) als Meldung. In der Android-App: Verwaltung → Android-App → „ntfy-App holen“, danach „In ntfy abonnieren“. Das Abschalten der Tour-Meldungen geht im selben Panel.
+- Weitere Funktionen seit der ersten Fassung (Foto aufnehmen während der Aufzeichnung, Sprachansagen, Offline-Speicher, Wegpunkte, Wetterwarnung, Live-Standort-Link, Betrachter-Rolle, Push-Meldungen) sind im [Versionsverlauf](docs/VERSIONSVERLAUF.md) beschrieben (Versionen 2.1 bis 3.0).
 
 **APK bauen:** Die APK entsteht auf GitHub (Actions → „Android-App“ → *Run workflow*, oder automatisch bei jeder Veröffentlichung; sie wird dann an das Release angehängt). Ohne Signierschlüssel wird eine Debug-APK gebaut – die lässt sich ebenfalls installieren („Aus unbekannten Quellen“ erlauben). Für eine signierte Release-APK unter *Settings → Secrets → Actions* hinterlegen: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`.
 
 **Wichtig:** Hersteller wie Xiaomi, Samsung oder Huawei beenden Hintergrunddienste teils aggressiv. Für zuverlässige Aufzeichnungen die Akku-Optimierung für die App ausschalten (Verwaltung → Android-App → „Akku-Einstellungen“). Die App wurde ohne echtes Gerät entwickelt; bitte zuerst eine kurze Testrunde machen.
 
-#### Handy und HTTPS
+### Handy und HTTPS
 Android installiert die App nur bei einer **gesicherten Adresse (HTTPS)** wirklich – bei `http://192.168…` entsteht nur eine Verknüpfung ohne Teilen-Menü. Der einfachste Weg ist **Tailscale** (kostenlos), siehe unten. Alternativ ein Reverse-Proxy mit eigener Domain (Caddy, Nginx Proxy Manager).
 
-### Tailscale einrichten (privater Zugriff von unterwegs)
+## Tailscale einrichten (privater Zugriff von unterwegs)
 Tailscale verbindet deine eigenen Geräte über ein privates Netz (Tailnet), ohne dass du am Router einen Port öffnest. Nur Geräte, die mit deinem Konto angemeldet sind, kommen an den Server.
 
 1. **Konto anlegen** auf https://login.tailscale.com (Anmeldung über Google, Microsoft, Apple oder GitHub; der Tarif „Personal“ ist kostenlos).
@@ -219,7 +242,7 @@ Tailscale verbindet deine eigenen Geräte über ein privates Netz (Tailnet), ohn
 
 Das ist die empfohlene Einstellung: Die Adresse ist nur für deine eigenen Geräte erreichbar. Beenden mit `tailscale serve reset`.
 
-### Tailscale Funnel (öffentlich im Internet erreichbar)
+## Tailscale Funnel (öffentlich im Internet erreichbar)
 Mit **Funnel** wird dieselbe Adresse für jeden im Internet erreichbar, auch ohne Tailscale. Das braucht man nur, wenn Empfänger ohne Konto etwas öffnen sollen: Teilen-Links einer Tour, die Diashow, der **Live-Standort-Link** oder der Link zur Erzählung.
 
 - **Einschalten:** In der Admin Console → *Access controls* muss Funnel für das Gerät erlaubt sein (Attribut `funnel` in der Richtlinie; beim ersten Aufruf von `tailscale funnel` wird der Link zur Freigabe angezeigt). Dann `tailscale funnel --bg 80`. Funnel erlaubt die Ports 443, 8443 und 10000. `tailscale funnel status` zeigt, was offen ist.
@@ -236,113 +259,7 @@ Mit **Funnel** wird dieselbe Adresse für jeden im Internet erreichbar, auch ohn
 
 Faustregel: im Alltag nur `tailscale serve` (privat). `tailscale funnel` nur einschalten, wenn jemand ohne Tailscale einen Link öffnen soll, und danach wieder ausschalten. In *Verwaltung → Standort teilen* steht „Aus“ für den Normalbetrieb.
 
-### Neu in Version 1.13.1
-
-* **Echte PDF-Berichte:** Tourblatt, Reisebericht und Jahresrückblick haben „⬇ PDF herunterladen“: Der Server erstellt eine fertige, saubere PDF-Datei (Text als Text, Karte mit Strecke, Höhenprofil als Grafik, Fotos, Statistik-Tabellen, Seitenzahlen) statt eines Bildschirmfotos. „Drucken“ bleibt als zusätzliche Möglichkeit. Fotos an/aus und Anzahl gelten auch hier. Neues Python-Paket: `reportlab` (wird beim Update automatisch installiert). Die Karte entsteht aus dem Kachel-Zwischenspeicher bzw. lädt fehlende Kacheln von OpenTopoMap; ohne Internet erscheint die Strecke auf heller Fläche.
-
-### Neu in Version 1.13
-
-* **Reisen bearbeiten:** In der Reise gibt es „✎ Reise bearbeiten“: Name und Zeitraum lassen sich ändern. Ein größerer Zeitraum nimmt alle Touren dieser Tage auf, ein kleinerer lässt Touren weg; Kilometer, Aufstieg und Statistik passen sich an. „Zurücksetzen“ stellt die automatische Erkennung wieder her.
-* **Reisebericht als PDF:** „📄 Reisebericht (PDF)“ in der Reise öffnet eine druckbare Seite mit Karte (Tage in Farben), Statistik nach Aktivität, Tag-für-Tag-Liste und den besten Fotos. Als Datei über „⬇ PDF herunterladen“ (auch am Handy).
-* **Fotos im PDF wählbar:** In Tourblatt, Reisebericht und Jahresrückblick lässt sich über „Fotos im PDF“ einstellen, ob Fotos dabei sind und wie viele (3 bis 24). Die Wahl gilt appweit und wird gespeichert.
-
-### Neu in Version 1.12.2
-
-* **Tourplanung komplett abschaltbar:** Ist „Tourplanung“ unter Verwaltung → „Touren & Quellen“ aus, sind neben den Schaltflächen und der Seite auch alle Planungs-Schnittstellen der App gesperrt.
-
-### Neu in Version 1.12.1
-
-* **Update aus der Oberfläche:** Nach dem Neustart wartet das Update-Skript bis zu 90 Sekunden auf den Dienst (vorher 2 Sekunden – bei großen Datenbanken ein falscher „fehlgeschlagen“-Alarm). Bei einem Fehler zeigt die Oberfläche jetzt die echte Ursache statt eines allgemeinen Hinweises; das vollständige Protokoll liegt unter `/var/lib/meine-touren/update.log`.
-
-### Neu in Version 1.12
-
-* **Tourplanung ein- und ausschaltbar:** Unter Verwaltung → „Touren & Quellen“ → „Tourplanung“. Ist sie aus, verschwinden alle „Tour planen“-Schaltflächen. Ist sie an, wählst du den Routing-Dienst: **brouter.de** (öffentlich), **eigener BRouter auf diesem Server** (mit Installationsbefehl direkt in der Oberfläche) oder **anderer BRouter-Server im Netz**. „Verbindung testen“ prüft die Adresse und meldet fehlende Karten-Kacheln.
-* **Statistik nach Aktivität** bei Reisen, Alben und Etappen: je Sportart Touren, Kilometer, Aufstieg, Abstieg, Stunden, Ø km/h und längste Tour, dazu eine Gesamtzeile; die Kennzahlen oben zeigen jetzt auch den Gesamtabstieg.
-
-### Neu in Version 1.11.1
-
-* **Notizfeld:** Die Box wuchs beim Tippen mit jedem Zeichen weiter. Jetzt richtet sich die Höhe nach dem Text und nie darunter nach der gemerkten/gezogenen Größe.
-
-### Neu in Version 1.11
-
-* **Planung über bekannte Wege:** Die Punkte der Tourplanung werden jetzt über Wege und Straßen aus OpenStreetMap verbunden (Dienst [BRouter](https://brouter.de), Profil je nach Sportart: Wandern/Ski/Schneeschuh „hiking-mountain“, Rennrad „fastbike“, MTB „mtb“, sonst „trekking“). Gestrichelt gezeichnet wird eine gerade Linie, wo kein Weg gefunden wurde. Ein Klick auf einen Abschnitt wählt ihn aus; **„Alternativen anzeigen“** zeigt bis zu drei weitere Routen mit Länge und Aufstieg, ein Klick auf eine Alternative übernimmt sie. „Wegen folgen“ lässt sich ausschalten (gerade Linien; geladene GPX-Strecken und Wanderführer-Touren werden nie umgeroutet). Gespeicherte Pläne merken sich Punkte und gewählte Alternativen.
-  **Datenschutz:** Zum Verbinden werden die Koordinaten der geplanten Punkte an brouter.de gesendet. Wer das nicht möchte, trägt unter Verwaltung → „Touren & Quellen“ → „Routenplanung“ die Adresse eines eigenen BRouter-Servers ein oder schaltet „Wegen folgen“ aus.
-
-### Neu in Version 1.10
-
-* **Touren planen:** Unter „Touren“ (und in der Wunschliste) führt „🗺 Tour planen“ zur Planung. Punkte in die Karte klicken (ziehen, Rechtsklick entfernt) oder eine **GPX-Datei laden** oder eine Tour aus dem **Wanderführer** übernehmen. Die App zeigt Länge, Auf- und Abstieg, höchsten Punkt und das Höhenprofil (Höhen aus dem Geländemodell) und schätzt die **Zeit nach deinem eigenen Tempo**: Aus deinen bisherigen Touren der Sportart wird gelernt, wie lange du je Kilometer und Höhenmeter brauchst (Gesamtzeit inklusive Pausen, mit Spanne). Bei zu wenig Archiv gelten Standardwerte. Pläne lassen sich mit Notiz speichern, wieder laden, löschen und als GPX herunterladen. Die Punkte werden geradlinig verbunden (kein Wege-Routing) – für Wege entlang von Pfaden also dicht klicken oder eine fertige GPX-Strecke laden.
-
-### Neu in Version 1.9
-
-* **Schneller Start der Übersicht:** Die Seite wartet nicht mehr auf die Streckenlinien und die „Wie oft gelaufen?“-Auswertung – beides wird nachgereicht (Mini-Strecken erscheinen kurz danach, 🔁 ebenso). Der Server hält die Streckenlinien fertig im Speicher (mit ETag, bei unveränderten Daten antwortet er nur noch „304“), rechnet die Wiederholungs-Auswertung nur neu, wenn sich Touren oder Strecken ändern (nicht mehr bei jeder Datenbankänderung), und erzeugt die Vorschaubilder der Übersicht nach dem Start im Hintergrund vor (gedrosselt, alle 3 Stunden nachgeholt).
-* **Wetter und Schneelage:** Zur Tour zeigt die Wetterzeile bei Schnee zusätzlich Schneehöhe, Neuschnee der 3 Tage davor und Schneefall während der Tour (Open-Meteo, grobe Modelldaten). Ältere Wetterdaten werden dafür einmal nachgeladen.
-* **Vergleich dieser Strecke:** Bei wiederholten Strecken zeigt ein Balkenvergleich alle Begehungen mit Dauer und Tempo, Bestzeit mit 🏆 und „x. schnellste von n“.
-* **Tagebuch:** Eigene Bewertung mit 1–5 Sternen je Tour (★ in der Tourliste, Filter „Alle Bewertungen / ab ★★★ …“). Die Notiz zur Tour gibt es jetzt auch bei lokalen Touren; die Notizbox **merkt sich ihre Größe** und wächst mit dem Text, sodass er ganz lesbar ist.
-* **Sicherheitsnotiz** bei Skitouren, Skifahren, Schneeschuh und Bergtouren: Lawinenwarnstufe 1–5, Gruppe, mitgeführte Notfallausrüstung (LVS, Sonde, Schaufel, Helm, Airbag …) und Notiz. Reine Dokumentation, kein Lawinenlagebericht.
-* **Ziele je Sportart-Gruppe:** Ziele können jetzt auch für „Alle Rad-Sportarten“, „Alle Ski-Sportarten“, „Zu Fuß“ oder „Laufen und Langlauf“ gelten. Ohne Ziele im neuen Jahr bietet die Übersicht „Ziele aus dem Vorjahr übernehmen“ an.
-* **Oberflächenpasswort in der Oberfläche:** Unter Verwaltung → „Sicherung & Zugang“ lässt sich das gemeinsame Passwort jetzt setzen, ändern und aufheben (nur Betrieb ohne Benutzerverwaltung; gespeichert wird nur ein Hash). Ein per `UI_PASSWORD` festgelegtes Passwort bleibt weiter möglich, ist dann aber nur dort änderbar.
-
-### Neu in Version 1.8
-
-* **Kennzahlen passend zur Sportart:** Unter den Grunddaten einer Tour steht eine zweite Zeile mit Werten, die zur Sportart passen – Wandern/Bergtour/Schneeschuh: Gehzeit, Pausen, Steigrate (m/h), steilster Abschnitt; Rad: Ø in Bewegung, Höchsttempo, Pausen, Anteil bergauf/bergab; Skitour/Skifahren: Aufstiegs- und Abfahrtszeit, Abfahrtshöhenmeter, Höchsttempo, steilster Abschnitt und Anteil der Strecke über 30°; Laufen: Pace. Die Werte werden aus den Streckenpunkten berechnet (GPS-Rauschen wird geglättet).
-* **Steigung auf der Karte:** Der Knopf „⛰ Steigung“ direkt auf der Tourkarte färbt die Strecke nach Steilheit ein (mit Legende). Bei Skitouren und Schneeschuh-Touren sind Abschnitte über 30° Hangneigung violett markiert.
-* **Jahreszeit:** In der Tourliste filtert „Sommerhalbjahr (Mai–Okt) / Winterhalbjahr (Nov–Apr)“. Touren auf der Wunschliste haben eine beste Jahreszeit (ganzjährig / Sommer / Winter); passt sie zur aktuellen Jahreszeit, steht „passt jetzt“ dabei.
-* **Ausrüstung:** Unter „Auswertung“ legst du Rad, Schuhe, Ski … an (Name, Art, Sportarten, Zeitraum, optional „Wechsel-Hinweis ab … km“). Die App zählt Kilometer, Höhenmeter und Touren automatisch mit und warnt mit „bald wechseln“ (ab 90 %) und „Wechsel fällig“. Im Tourdetail steht die zugeordnete Ausrüstung; mit ✎ lässt sie sich für diese eine Tour ändern („automatisch nach Sportart und Datum“ oder eigene Auswahl).
-
-### Version 1.7.3
-
-* **Diashow mit Vollbild auf Touchgeräten:** Oben rechts erscheinen Knöpfe für Vollbild (⛶), Pause und Schließen; sie blenden sich nach 3 Sekunden aus und kommen per Tippen in die Bildmitte zurück. Tippen links/rechts oder Wischen blättert, der Bildschirm bleibt während der Diashow an (wo der Browser das erlaubt). Am Computer weiterhin Leertaste, Pfeiltasten und F. **iPhone:** Safari erlaubt dort keinen Vollbildmodus für Webseiten – die Seite zeigt einen Hinweis; mit „Zum Home-Bildschirm“ öffnet die App ohne Browserleiste (iPad und Android unterstützen Vollbild direkt).
-
-### Version 1.7.2
-
-* **Fehlerbehebung Updates (seit 1.7.0):** Durch die neue Reiter-Verwaltung wurde der Update-Bereich verschoben und doppelt angelegt; „Jetzt prüfen“ löste einen Fehler aus. Behoben. Außerdem nennt der Update-Bereich jetzt den Grund, wenn GitHub nicht erreichbar ist (z. B. keine Verbindung, Anfragelimit).
-
-### Version 1.7.1
-
-* **Unbenutzte Fotos aufräumen:** Auf der Seite „Fotos“ gibt es „🧹 Unbenutzte Fotos aufräumen …“, solange Fotos keiner Tour zugeordnet sind. Der Dialog zeigt Anzahl, Speicherplatz und eine Stichprobe und lässt dich **Jahre auswählen**; erst danach ist „Löschen“ möglich. Gelöscht werden nur die Kopien in der Fotobibliothek der App, nie Originale; die Fotos tauchen beim nächsten Import nicht wieder auf. Zum Zeitpunkt des Löschens wird neu geprüft, welche Fotos noch ohne Tour sind.
-
-### Neu in Version 1.7
-
-* **Verwaltung neu geordnet:** Statt einer langen Seite mit Klappbereichen gibt es fünf Reiter nach Aufgaben – *Übersicht* (Zustand, Updates, Protokoll, Selbsttest), *Touren & Quellen* (Komoot, Zepp, Garmin/Suunto/Dateien, Strava, Wanderführer), *Fotos*, *Automatik* und *Sicherung & Zugang* (Backup, Zugriffsschutz, Offline). „Einstellungen speichern“ bleibt auf jedem Reiter unten sichtbar. Der zuletzt gewählte Reiter wird gemerkt; Adressen wie `#/admin?tab=fotos` führen direkt hin.
-* **Wie oft gelaufen?** Die App erkennt Touren, die dieselbe Strecke gehen (Länge ±20 %, mindestens 85 % der Strecke innerhalb von 60 m, auch in Gegenrichtung). In der Tourliste steht dann „🔁 3×“, im Tourdetail „Diese Strecke bist du schon 3-mal gegangen – das war das 2. Mal“ mit Links zu den anderen Begehungen.
-
-### Version 1.6.3
-
-* **Foto-Import, Kartenvorschau:** Aufnahmezeiten ohne Zeitzonenangabe werden in der Zeitzone des Servers gelesen, nicht in der des Browsers. Auf Reisen (Browser in anderer Zeitzone als der Server) stimmte sonst die Vorschau „x von y Fotos liegen auf der Strecke“ nicht. Der eigentliche Import war nicht betroffen.
-* Automatische Tests auf GitHub: zwei fehlerhafte Annahmen in den Tests korrigiert (Dateireihenfolge, Backup-Ordner).
-
-### Version 1.6.2
-
-* **Fehlerbehebung Reisen:** Die Titelfotos der Mehrtagestouren fehlten bei Reihen, deren Fotos nicht unter den ersten 5000 Fotos der Bibliothek lagen. Die Kachel holt sich jetzt je Tour ein Foto direkt vom Server (`/api/tour-covers`).
-
-### Version 1.6.1
-
-* **Fehlerbehebung Höhenprofil:** Die gelben Foto-Marker erschienen nicht, wenn die Fotos keine GPS-Position haben (Zuordnung über die Aufnahmezeit rechnete mit falscher Zeitbasis). Jetzt werden sie über die Zeit richtig platziert.
-
-### Neu in Version 1.6
-
-* **Beste Fotos einer Tour:** Im Tourdetail wählt „⭐ Beste Fotos“ aus allen Fotos die 10 besten. Berücksichtigt werden Sternebewertungen aus Lightroom (aus der Datei oder einer gleichnamigen `.xmp`-Begleitdatei; „abgelehnt“ fällt heraus), die Schärfe (unscharfe Fotos fallen heraus) und die Verteilung über die Tour. Dazu gibt es „Diashow der besten“; das Tourblatt nutzt dieselbe Auswahl (6 Fotos). Ohne Sternebewertung entscheidet die Schärfe. Die Schärfe wird beim ersten Mal berechnet (bei vielen Fotos ein paar Sekunden) und gespeichert.
-
-### Neu in Version 1.5
-
-* **Kamerauhr-Hinweis:** Prüfen → „Kamerauhr“ zeigt Touren der letzten 90 Tage, bei denen die Foto-Zeiten nicht zum Aufnahmeort passen (Kamerauhr/Zeitzone falsch). „Korrigieren“ verschiebt die Fotos um die erkannte Differenz, „Ignorieren“ merkt sich die Tour.
-* **Mehrtagestouren aufräumen:** Reisen → „＋ Mehrtagestour bilden …“ benennt Touren eines Zeitraums auf einen Schlag („Name – Tag N“); in der Gesamtansicht benennt „✎ Reihe umbenennen“ alle Etappen gemeinsam. Die Kacheln unter Reisen zeigen ein Foto aus der Mitte der Reihe.
-* **Tourblatt:** Im Tourdetail „📄 Tourblatt“ – eine druckbare Seite mit Kennzahlen, Karte, Höhenprofil und bis zu 6 Fotos (Drucken → als PDF speichern).
-* **Höhenprofil mit Fotos:** Gelbe Punkte im Profil markieren, wo ein Foto entstanden ist; Klick öffnet das Foto, der Mauszeiger darüber zeigt die Stelle auf der Karte.
-* **Wunschliste:** Auswertung → Wanderführer: Touren aus den hinterlegten Wanderführern vormerken, mit Länge (und Aufstieg, wenn die GPX-Datei Höhen enthält). Bereits gegangene Touren sind markiert. Für schon früher hochgeladene Führer fehlt der Aufstieg, bis die GPX-Dateien erneut hochgeladen werden.
-* **Jahresziele mit Prognose:** zusätzlich zur Hochrechnung das voraussichtliche Erreichungsdatum, bei Rückstand die nötige Wochenleistung.
-* **Touren teilen (Familie):** Freigegebene Touren anderer Benutzer lassen sich unter „Geteilte Fotos“ samt Strecke und passenden Fotos in die eigene Sammlung übernehmen (als Kopie; der Besitzer behält seine Tour unverändert).
-* **Offline-Nutzung:** Die Web-App merkt sich zuletzt geladene Daten, Karten und kleine Fotos; ohne Verbindung erscheint ein Hinweisband. Verwaltung → „Für Offline vorbereiten“ lädt die letzten 8 Touren samt Kartenkacheln vorab. Voraussetzung ist HTTPS (oder localhost). Beim Abmelden wird der Daten-Zwischenspeicher gelöscht.
-
-### Neu in Version 1.4
-
-* **Ursache statt Vermutung:** Unter Prüfen → Unplausible Touren steht bei jeder Tour, woran es liegt (nicht aufgezeichnete Zeiten, GPS-Ausreißer, Fahrt-Abschnitte, GPS-Zittern – oder „Track unauffällig, vermutlich falsche Sportart“) und der Knopf „🧹 Track korrigieren“ ist entsprechend hervorgehoben.
-* **Zeit aus Foto-Positionen:** Liegen Fotos mit GPS-Position auf dem Track (mindestens drei, im Zeitablauf passend), kann die App daraus die Zeit entlang der ganzen Strecke ableiten – Pausen eingeschlossen, genauer als eine Schätzung. Option im Dialog „Track korrigieren“.
-* **Mehrtagestouren:** Touren mit Namen wie „Alpenüberquerung E5 – Tag 6“ (auch „Etappe“, „Day“, „Stage“, „Jour“, „Día“) werden gruppiert: unter Reisen als eigene Karten, im Tourdetail als Hinweis mit Gesamtansicht (Karte, Summen, Fotos, 3D-Flug). Es braucht mindestens zwei verschiedene Tagesnummern.
-* **Übersetzungen** (EN/FR/ES) deutlich erweitert (Dashboard, Tourdetail, Prüfen, Fotos, Verwaltungsüberschriften); sehr lange Erklärtexte der Verwaltung sind weiterhin deutsch.
-* **Selbsttest** (Verwaltung → Wartung & Sicherheit) prüft zusätzlich Datenbank-Integrität, Schreibrechte der Foto-/Eingangs-/Backup-/Streckenordner, Stichproben der Foto-Dateien, HEIC-Unterstützung, auffällige Touren, Erreichbarkeit der GitHub-Update-Prüfung und den Update-Weg. Nach einem Update auf dem Server lohnt sich ein Durchlauf.
-
-### GPS-Track korrigieren (ab 1.3.1)
+## GPS-Track korrigieren
 
 Im Tourdetail öffnet **„🧹 Track korrigieren“** (und in Prüfen → Unplausible Touren der gleichnamige Knopf, bei ausgeblendeten Touren „Einblenden & Track korrigieren“) eine Karte mit den Auffälligkeiten:
 
@@ -351,37 +268,26 @@ Im Tourdetail öffnet **„🧹 Track korrigieren“** (und in Prüfen → Unpla
 
 Das Original bleibt erhalten (**„Original wiederherstellen“**). Bei Komoot-Touren gilt die Korrektur nur hier und bleibt beim Abgleich erhalten, solange Komoot die Länge nicht selbst ändert. Ohne Zeitstempel im Track lassen sich nur große Sprünge erkennen.
 
-### Neu in Version 1.3
-
-* **Zeit nachträglich verschieben:** im Fotoraster Fotos auswählen → **„Zeit verschieben …“** (Stunden/Minuten, wahlweise nur Auswahl, ganzer Aufnahmetag oder alle noch nicht zugeordneten Fotos); die Zuordnung zu Touren wird danach neu berechnet. Ist die Strecke mit Zeitstempeln vorhanden, schlägt **„Zeit per GPS prüfen“** den Versatz vor.
-* **Fehlerliste beim Import:** Fotos, die nicht gelesen oder hochgeladen werden konnten, stehen einzeln mit Grund da.
-* **HEIC/HEIF (iPhone):** werden beim Import in JPEG umgewandelt, wenn das optionale Paket `pillow-heif` installiert ist (`pip install pillow-heif`; die Startskripte und `install.sh` versuchen es selbst). Ohne das Paket nennt die Fehlerliste den Grund.
-* **Kartenvorschau** im Importfenster: pro Aufnahmetag die Strecke der Tour und die Fotostandorte.
-* **„Jetzt sichern“** direkt in der Hinweisleiste und unter Verwaltung → Zustand.
-* **Mac-Update per Doppelklick:** `mac/Meine-Touren-aktualisieren.command` lädt die neueste Version von GitHub und ersetzt die Programmdateien (Daten bleiben unberührt, die alte Fassung liegt in `.vorher/`).
-* **Englische, französische und spanische Oberfläche (Beta):** Sprachauswahl (DE/EN/FR/ES) oben rechts; Standard nach Browsersprache. Die Übersetzung läuft über Wörterbücher (`app/static/js/00-i18n.js` für Englisch, `00-i18n-data.js` für Französisch und Spanisch; Zeilen „deutsch|übersetzung“ zum Ergänzen) und ist noch nicht vollständig – nicht Übersetztes bleibt deutsch; Meldungen vom Server sind überwiegend deutsch. Datums- und Zahlenformate wechseln mit.
-* **Demo-Modus:** `mac/Meine-Touren-Demo.command` bzw. `windows/Meine-Touren-Demo.bat` (oder `python -m app.demo`) startet die App auf Port 8090 mit 14 erfundenen Touren und 15 Beispielfotos in einem eigenen Datenordner (`~/Meine-Touren-Demo`) – ohne eigene Daten, ohne Konten, ohne Netzwerk. Gut zum Ausprobieren und für Screenshots. Echte Daten werden nie angefasst.
-
-### Updates aus der Oberfläche
+## Updates aus der Oberfläche
 
 Die App prüft alle 6 Stunden auf GitHub, ob eine neuere Version veröffentlicht ist (abschaltbar), und weist Administratoren darauf hin (Hinweisleiste, Verwaltung → Updates, optional Webhook). **„Installieren“** legt zuerst eine Sicherung für jeden Benutzer an und installiert dann:
 
 * *Proxmox/Server:* Die App läuft ohne Root-Rechte und schreibt nur die gewünschte **Versionsnummer** nach `<Datenordner>/update-request`. Der kleine Systemdienst `<name>-update.path` (wird von `install.sh` eingerichtet) startet daraufhin `<name>-update auto` als root, das die Version `vX.Y.Z` selbst von GitHub lädt, prüft, dass sie neuer ist, und wie gewohnt installiert. Die App kann also keinen eigenen Programmcode einschleusen. **Einmalig** muss ein bestehender Container noch von Hand auf diese Version gebracht werden (`meine-touren-update github`); danach klappt es per Knopfdruck. Ablauf und Fehler stehen unter `journalctl -u meine-touren-update`.
 * *Mac-Testversion:* Die App ersetzt ihre Programmdateien (alte Fassung in `.vorher/`) und startet über `Meine-Touren-lokal.command` neu.
 
-### Verwaltung → Zustand
+## Verwaltung → Zustand
 
 Die Verwaltung zeigt oben eine Zustandsprüfung (Komoot-Zugang, Backup, Datenbankgröße, freier Speicher, Touren ohne Strecke, Fotos ohne Tour) und – siehe unten – auf neuere Versionen auf GitHub.
 
-### Zugangsdaten verschlüsselt
+## Zugangsdaten verschlüsselt
 
 Komoot-Passwort, Strava- und Zepp-Zugangsdaten liegen verschlüsselt (AES-256-GCM) in der Datenbank. Der Schlüssel steht in `<Datenordner>/secret.key` (wird beim ersten Start angelegt, nur für den Dienstbenutzer lesbar) oder – wenn gesetzt – in der Umgebungsvariable `MT_SECRET_KEY`. Die Schlüsseldatei ist absichtlich **nicht** Teil der Sicherungen. Wer eine Sicherung auf einem neuen Rechner einspielt, kopiert `secret.key` mit oder gibt die Zugangsdaten danach in der Verwaltung neu ein. Vorhandene Klartext-Einträge älterer Versionen werden beim ersten Lesen automatisch verschlüsselt.
 
-### Hinter einem Reverse-Proxy (`TRUST_PROXY`)
+## Hinter einem Reverse-Proxy (`TRUST_PROXY`)
 
 Die Anmeldesperre (nach sechs Fehlversuchen) und die Drosselung arbeiten je Name und Client-Adresse. Läuft die App hinter Nginx, Caddy, Traefik, Docker oder Tailscale Serve, sieht sie sonst bei allen dieselbe Adresse. Mit der Umgebungsvariable `TRUST_PROXY=1` wird der letzte Eintrag des Headers `X-Forwarded-For` verwendet. Standard ist **aus**; nur setzen, wenn die App ausschließlich über den eigenen Proxy erreichbar ist, der den Header selbst setzt.
 
-### Eigener BRouter-Server (Routenplanung ohne brouter.de)
+## Eigener BRouter-Server (Routenplanung ohne brouter.de)
 
 Auf dem Server (Debian/Ubuntu, z. B. dem Proxmox-Container) als root:
 
@@ -394,124 +300,10 @@ Das Skript installiert Java, lädt BRouter 1.7.7 und die Kartenkacheln (je ca. 1
 
 ## Für Entwickler
 
-- Oberfläche ohne Build-Schritt: `app/static/js/01-grundlagen.js` … `12-start.js` werden in dieser Reihenfolge von `index.html` geladen (gemeinsamer globaler Bereich). Formatierung mit Prettier (`.prettierrc`): `npx prettier --write app/static/js/*.js`.
+- Oberfläche ohne Build-Schritt: `app/static/js/00-…` bis `62-…` (plus `seite-*.js`) werden in der Reihenfolge der `<script>`-Einträge von `index.html` geladen (gemeinsamer globaler Bereich). Formatierung mit Prettier (`.prettierrc`): `npx prettier --write app/static/js/*.js`.
 - Aufbau des Servers: `app/main.py` hält Start, Schutz-Header und den Verteiler. Jeder Bereich liegt in einem eigenen Modul mit eigenem `APIRouter`:
   `sync.py` (Komoot/Zepp holen), `puls.py` (Herzfrequenz), `gipfel.py` (Gipfelnamen), `wiederholungen.py` (gleiche Strecke mehrfach),
   `wanderfuehrer.py` (Buchtouren erkennen), `selbsttest.py` (Prüfung ohne Änderung), `photos.py`, `pdfgen.py`, `trackfix.py`, `security.py`, `users_api.py`.
   `extras.py`, `more.py` und `more2.py` sind historisch gewachsene Sammelstellen, aus denen Stück für Stück eigene Module herausgelöst werden;
   die gewohnten Namen bleiben dort über `__getattr__` erreichbar, damit nichts bricht.
 - Tests: `python -m pytest -q tests` – darunter Browsertests mit Playwright (`pip install playwright && python -m playwright install chromium`), die jede Ansicht mit Beispieldaten öffnen und auf JavaScript-Fehler prüfen.
-
-**Betrachter und Standort (ab 2.3.0):** Unter Konto & Freigaben → „Neuer Benutzer“ gibt es die Rolle **Betrachter (nur ansehen)**. Ein Betrachter sieht die Touren, Fotos, Reisen, Auswertung und die Karte des gewählten Benutzers, kann aber nichts ändern, nichts hochladen und hat weder Verwaltung noch Einstellungen (der Server lehnt alles außer Ansehen mit „403“ ab). Unter Verwaltung → „Standort teilen“ wird festgelegt, ob die zuletzt gemeldete Position des Besitzers sichtbar ist (Aus / nur während einer Aufzeichnung / immer). Die Android-App meldet sie während einer Aufzeichnung alle 30 Sekunden (dafür die neue APK installieren); auf der Karte erscheint sie als roter Punkt mit „vor x Min.“. Der Knopf „⌖ Ich“ zeigt jedem Benutzer den eigenen Standort als blauen Punkt. Es wird nur die letzte Position gespeichert. Die mobile Karte füllt jetzt den Platz zwischen Kopfzeile und Tab-Leiste, und „Mehr“ trennt die Hauptpunkte (Reisen, Auswertung, Geteilte Fotos) von Einstellungen & Prüfung.
-
-**Betrachter strenger (ab 2.3.1):** Ein Betrachter darf nur Daten abrufen: keine PDFs (Tourblatt, Reise, Jahresrückblick), kein Umbenennen, keine Höhen- oder Zeitkorrektur, keine Foto-Änderungen, keine Notizen/Bewertungen/Tags, kein Teilen-Link. Erlaubt sind der GPX-Download einer Tour, die Diashow und die Fotos in der Tour und auf der Karte. Der Server erlaubt für diese Rolle nur eine feste Liste von Abfragen; die Oberfläche blendet die Bedienelemente zusätzlich aus.
-
-**Sicherung der Aufzeichnungen (ab Android-App 2.3.1):** Jede beendete Aufzeichnung wird vor dem Aufräumen zusätzlich auf dem Handy gesichert (die letzten 10). Unter „Aufzeichnen“ erscheinen sie als „Gesicherte Aufzeichnungen“ und lassen sich mit einem Tippen erneut auf den Server speichern. Ein Name ist nie nötig: bleibt das Feld leer, vergibt der Server einen automatischen Namen.
-
-**Fehlerkorrektur 2.3.2 (verlorene App-Aufzeichnungen):** Bis 2.3.1 landeten Aufzeichnungen aus der Android-App (und Dateien über „Teilen“) bei mehreren Benutzern im Altbestand statt im eigenen Konto: der Server meldete „gespeichert“, die Tour war aber nirgends zu sehen. Ab 2.3.2 landen sie im richtigen Konto. Bereits verlorene Aufzeichnungen der letzten 30 Tage holt Verwaltung → „Verlorene App-Aufzeichnungen suchen“ (nur Administratoren) ins eigene Konto.
-
-**Android-App 2.4.0:** Während einer Aufzeichnung gibt es den Knopf „📷 Foto aufnehmen“ (öffnet die Kamera-App; das Foto bekommt Aufnahmezeit und GPS-Position und landet zusätzlich in der Galerie unter „Meine Touren“). Vor dem Start wählst du, ob Fotos **sofort** auf den Server geladen werden (bei fehlender Verbindung wird automatisch erneut versucht) oder **gesammelt am Ende**, beim Speichern der Tour. Die Aufzeichnungsseite zeigt Zeit, Strecke, Auf- und Abstieg, aktuelle und höchste Höhe, Tempo, Durchschnitt und GPS-Genauigkeit. **Beenden** geht nur noch durch Gedrückthalten (1,5 Sekunden), versehentliches Antippen beendet nichts mehr. Auf der Karte steht beim eigenen Standort und beim Live-Standort der Benutzername. Fotos der Aufzeichnung kommen über `/api/rec-photos` in den Foto-Eingang und werden automatisch der Tour zugeordnet.
-
-**Verwaltung neu geordnet (ab 2.4.1):** Sieben Reiter, jeder Bereich ist eine gleich gestaltete Karte: Übersicht (Zustand, Updates, Selbsttest, Protokoll), Touren holen (Komoot, Zepp, Uhren und Dateien, Wanderführer), Hochladen & Planen (Strava/Komoot-Upload, Tourplanung), Fotos, Automatik & Meldungen, Handy & App (Android-App, Standort teilen, verlorene Aufzeichnungen, App auf dem Startbildschirm) und Sicherung & Zugang. Das Protokoll ist eingeklappt; „Einstellungen speichern“ bleibt unten auf jedem Reiter erreichbar.
-
-**Diashow per WhatsApp teilen (ab 2.5.0):** In der Tour gibt es neben „Senden“ den Knopf „Diashow senden“. Er erzeugt einen Link, der ohne Benutzerkonto funktioniert, und öffnet das Teilen-Menü (WhatsApp, Signal, E-Mail …). Wer den Link öffnet, sieht die Fotos der Tour als Vollbild-Diashow (automatischer Wechsel alle 5 s, Wischen, Pause, Vollbild, Karte mit dem Track). WhatsApp zeigt in der Vorschau Titel und erstes Foto. Es werden nur die Fotos dieser einen Tour freigegeben (keine Konten, keine anderen Touren); ausgeblendete Fotos fehlen. Der Link lässt sich unter „Teilen“ der Tour (Eintrag „Diashow“) widerrufen. Betrachter können keine Links erzeugen.
-
-**Diashow-Links genauer (ab 2.5.1):** „Diashow senden“ fragt vorher nach den Fotos (alle oder nur die besten 20/50) und der Gültigkeit (7 Tage, 30 Tage, unbegrenzt). Abgelaufene Links zeigen „nicht mehr gültig“, auch die Fotos sind dann gesperrt. In „Tour teilen“ steht je Link, bis wann er gilt und wie oft die Diashow angesehen wurde. Die Diashow zeigt die Uhrzeit des Fotos und hat einen Tempo-Knopf (3/5/8 s).
-
-**Fester App-Schlüssel (ab App 2.5.0):** Die APK wird jetzt immer mit demselben, im Repository liegenden Schlüssel (`android/app/mt-debug.jks`) signiert. Neue Versionen lassen sich dadurch **über die alte installieren, ohne zu deinstallieren** – die Aufzeichnungs-Backups auf dem Handy bleiben erhalten. *Einmalig* muss die bisherige App noch deinstalliert werden, weil sie mit einem anderen Schlüssel signiert war. Wer sicherer signieren will, hinterlegt wie bisher die vier GitHub-Secrets (siehe „APK bauen“); diese haben Vorrang. Hinweis: Der Schlüssel liegt öffentlich im Repository – das ist für eine privat genutzte App in Ordnung, ersetzt aber keine geheime Signatur.
-
-**Testliste Fotos und Aufzeichnung (vor einer langen Tour, ca. 10 Minuten):**
-1. Aufzeichnung starten, 2 Fotos aufnehmen (Modus „sofort“): Foto erscheint nach kurzer Zeit in der Tour, ohne Fehlermeldung.
-2. Flugmodus an, ein Foto aufnehmen: Foto bleibt in „Wartende Fotos“; Flugmodus aus → wird hochgeladen.
-3. Modus „am Ende“, Foto aufnehmen, Aufzeichnung beenden: Track und Foto kommen zusammen an.
-4. Während der Aufnahme eine andere App öffnen und zurückkehren: Aufzeichnung läuft weiter, kein Punkteverlust.
-5. „Beenden“ nur kurz antippen: nichts passiert; lange halten: Aufzeichnung stoppt.
-6. In der Galerie prüfen, ob die Kopie der Fotos vorhanden ist.
-Bei Fehlern: „Diagnose senden / kopieren“ (Verwaltung → Handy & App → Android-App) und mir schicken.
-
-
-**Aufgeräumte Tour-Ansicht am Handy (ab 2.5.2):** Statt elf Einzelknöpfen gibt es zwei große Knöpfe. „Teilen & Senden“ enthält Link senden, Diashow senden, Links verwalten, GPX-Datei und Tourblatt; „Bearbeiten“ enthält Umbenennen, Tags, Streckenfarbe, Höhen und Track korrigieren, Hochladen, Komoot-Abgleich und (abgesetzt, rot) Löschen – jeweils mit kurzer Erklärung. Am Computer bleibt alles unverändert.
-
-**E-Mail, Passwort vergessen und Zwei-Faktor-Anmeldung (ab 2.6.0):**
-- **E-Mail-Adresse:** Beim Einrichten und beim Anlegen jedes Benutzers ist jetzt eine E-Mail-Adresse Pflicht. Bestehende Benutzer tragen sie unter „Konto & Freigaben“ nach (Bestätigung mit dem Passwort); Administratoren können sie dort auch für andere ändern.
-- **E-Mail-Versand einrichten (Verwaltung → Automatik & Meldungen → „E-Mail-Versand“):** SMTP-Server, Port, Verschlüsselung, Benutzername und Passwort deines E-Mail-Anbieters (bei Yahoo, GMX, Gmail meist ein eigenes „App-Passwort“), Absenderadresse und die öffentliche Adresse der App (`https://…ts.net`), die in den Link der Mail kommt. Mit „Testmail an mich senden“ prüfen. Das Passwort liegt nur in der Systemdatenbank und wird nie wieder angezeigt.
-- **Passwort vergessen:** Auf der Anmeldeseite „Passwort vergessen?“ → E-Mail-Adresse oder Name → Link per Mail (eine Stunde gültig, nur einmal benutzbar, höchstens 3 pro Stunde und Konto). Die Antwort ist immer gleich, man erfährt also nicht, ob eine Adresse bekannt ist. Nach dem Ändern werden alle Anmeldungen beendet und eine Hinweismail geschickt. Ohne eingerichteten Mailversand erscheint ein Hinweis, den Administrator zu bitten.
-- **Zwei-Faktor-Anmeldung (Konto & Freigaben → „Zwei-Faktor-Anmeldung“):** jederzeit ein- und ausschaltbar. Einschalten: QR-Code mit einer Authenticator-App scannen (Google/Microsoft Authenticator, Aegis, 2FAS, Bitwarden …) und den Code bestätigen; danach werden 8 **Wiederherstellungscodes** einmalig angezeigt. Anmeldung: Name und Passwort, dann der 6-stellige Code (oder ein Wiederherstellungscode). Ausschalten und neue Wiederherstellungscodes brauchen Passwort **und** Code. Ein Code gilt nur einmal, nach 5 Fehlversuchen muss man neu beginnen. Geht das Handy verloren und es gibt keine Codes mehr, setzt ein Administrator die Zwei-Faktor-Anmeldung unter „Benutzer verwalten“ zurück.
-- Hinweise: Das Zurücksetzen des Passworts umgeht die Zwei-Faktor-Anmeldung nicht. Betrachter-Zugänge (nur ansehen) haben keine Zwei-Faktor-Einstellung. Der QR-Code wird mit der mitgelieferten Bibliothek *qrcode-generator* (MIT) lokal erzeugt, es wird nichts nach außen geschickt.
-
-**Reisen (ab 2.6.1):** Unter „Reisen“ stehen nur noch echte Reisen: Touren weit weg von zu Hause an mindestens **4 Tagen** am Stück. Wochenend- und Kurzausflüge (auch in Hessen) erscheinen dort nicht mehr; sie bleiben als normale Touren erhalten und lassen sich über Tags/Alben gruppieren. Eine Reise, die du selbst bearbeitet hast (Name/Zeitraum), bleibt immer sichtbar. Mehrere Reisen im selben Bundesland bekommen eindeutige Namen („Hessen – Rhön (Mai 2024)“). Die Mindestdauer steht in der Einstellung `trip_min_days` (Standard 4). **Heimatorte (ab 2.7.0):** Orte, an denen du dich allgemein aufhältst (Zuhause, Zweitwohnsitz, Stammgebiet), erkennt die App selbst – ein Gebiet von etwa 30 km, in dem sehr viele Touren (mindestens 8 und 10 % aller) über mindestens 8 verschiedene Monate gestartet wurden. Touren dort zählen nie als Reise; ein Urlaubsort, den man nur ab und zu besucht, bleibt eine Reise.
-
-**Info (ab 2.7.0):** Im Menü „Mehr“ (Handy) bzw. im Benutzermenü (Computer) zeigt „Info“ die laufende Version der Android-App und des Servers sowie die Ersteller (Volker Hildebrand und Claude).
-
-**Fotos auf der Karte (ab 2.7.1):** Der Knopf „Fotos“ zeigt jetzt auch Fotos ohne eigenen Aufnahmeort (GPS): ihre Position wird aus der Aufnahmezeit auf dem Track der Tour berechnet und als blassere Punkte gezeigt („Position aus der Uhrzeit berechnet“). Fotos mit GPS bleiben unverändert. Der Knopf zeigt die Anzahl, z. B. „Fotos (312)“.
-
-**Abgelaufene Diashow-Links (ab 2.7.3):** Wer einen abgelaufenen oder zurückgezogenen Link öffnet, sieht eine verständliche Seite statt einer Fehlermeldung: bei Ablauf mit dem Datum und dem Hinweis, einen neuen Link anzufordern, sonst mit dem Hinweis auf einen abgeschnittenen oder zurückgezogenen Link.
-
-**Fotos aus der App in einer anderen Zeitzone (ab Server 2.7.4 / App 2.5.1):** Die App schickt mit jedem Foto-Upload die Zeitzone des Telefons mit. Hat die Kamera keine Zeitzone ins Foto geschrieben, trägt der Server sie nach. Vorher wurde die Aufnahmezeit als Ortszeit des Servers gedeutet – war das Handy z. B. auf den Kanaren (UTC+0) und der Server in Deutschland, lag das Foto eine Stunde neben der Tour und wurde nicht zugeordnet.
-
-### Neu in 3.9.1 – „Meine Geräte“ überarbeitet
-- **Neue Oberfläche:** je Gerät eine Karte (Bild oder Symbol, Name, Art/Modell, Zeitraum „seit 03/2024 · aktuell“, Anzahl Touren, Status), Aktionen im Menü „⋮“, Anlegen/Bearbeiten und „Touren zuordnen“ in eigenen Dialogen mit Hilfetexten.
-- **Gerätefoto:** eigenes Foto je Gerät (wird auf 512 px verkleinert, liegt in `<Datenordner>/devices/<id>.jpg`, in Sicherung und Umzugspaket enthalten). Schnittstelle: `POST/GET/DELETE /api/my-devices/{id}/photo`. Es werden keine Produktfotos aus dem Internet geladen.
-- **Geräte aus Zepp ermitteln:** `POST /api/devices/zepp-probe` liest den Zepp-Verlauf und gruppiert nach der Quellenkennung (`source`); `POST /api/devices/zepp-apply` legt die bestätigten Geräte an. Die Kennung wird am Gerät gespeichert (Spalte `devices.zsrc`) und bevorzugt bei der Zuordnung.
-
-### Neu in 3.9 – Messwerte der Geräte und „Meine Geräte“
-- **Messwerte:** Die Tourseite zeigt – zusätzlich zu Puls und Höhe – Geschwindigkeit/Pace, Schritt- oder Trittfrequenz, Schrittlänge, Leistung, Temperatur, Atemfrequenz, Bodenkontaktzeit, vertikale Oszillation und Luftdruck, Kalorien und Trainingseffekt. **Nur, was das Gerät wirklich geliefert hat** (FIT, GPX, TCX, Zepp); die Geschwindigkeit wird sonst aus GPS und Zeit berechnet und als „berechnet“ gekennzeichnet. Ablage je Tour in `tracks/<id>.met.json` (höchstens 600 Stützstellen), enthalten in Sicherung und Umzugspaket. Bestand: Verwaltung → Zepp-Import → „Messwerte nachladen“. Schnittstelle: `GET /api/tours/{id}/metrics`.
-- **Meine Geräte** (Verwaltung → „Touren holen“): Aufnahmegeräte selbst anlegen und benennen, mit Art, Modell und Zeitraum. Die Zuordnung der Touren geschieht automatisch nach Art der Quelle und Datum (neue Uhr = altes Gerät „bis“, neues „ab“), je Tour oder für einen Zeitraum von Hand änderbar. Schnittstelle: `/api/my-devices`, `POST /api/devices`, `PATCH/DELETE /api/devices/{id}`, `POST /api/tours/{id}/device`.
-
-### Neu in 3.7 – neue Startseite
-- **Startseite:** Aufmacher „Zuletzt unterwegs“ mit Foto oder Streckenform, Wegweiser-Zahlen, Puls-Hinweis und Blättern durch die letzten Touren; „Dein Jahr“ mit Vergleich zum Vorjahr bis zum heutigen Tag, Monatsbalken und Zielen; die letzten Touren als Karten; „An diesem Tag“ und Erinnerungen.
-- **Statistik → Übersicht:** Die bisherige Übersicht (alle Zahlen, Jahre, Sportarten, Ziele, Diagramme, Bestwerte) ist jetzt der erste Reiter der Statistik.
-
-### Neu in 3.6 – neues Erscheinungsbild, aufgeräumtes Menü, Entwicklermodus
-- **Menü:** sechs Hauptpunkte (Übersicht, Karte, Touren, Reisen, Fotos, Statistik). „Statistik“ fasst Auswertung und Rekorde zusammen (oben umschaltbar). Die Verwaltung liegt hinter dem Zahnrad rechts oben; „Prüfen & Aufräumen“ ist ein Reiter der Verwaltung.
-- **Erscheinungsbild:** Abschnitte als ruhige Flächen statt Linien, einheitliche Knöpfe und Eingaben, Gelb nur noch für die Hauptaktion und die Wegweiser; gezeichnete Symbole statt Emojis in der Handy-Leiste und im Tour-Menü. Der Backup-Hinweis erscheint nur noch auf der Startseite und in der Verwaltung.
-- **Entwicklermodus:** Selbsttest, App-Test, die Suche nach verlorenen Aufzeichnungen und der Token-Test sind ausgeblendet; das Protokoll zeigt nur die letzten Zeilen. Einschalten: Verwaltung → Übersicht → „Entwickleransichten anzeigen“ (gilt pro Browser).
-
-### Neu in 3.5.1 – Pulskurve geglättet, Stile aufgeräumt
-- **Pulskurve:** geglättet (gleitender Mittelwert); Messlücken (Pausen) erscheinen als weicher, gestrichelter Übergang statt als harte Gerade. Kennzahlen und Zonen rechnen weiter mit den Rohwerten.
-- **Stile:** Rund 600 Inline-Stilangaben in den Vorlagen sind durch Hilfsklassen ersetzt (pixelgleich, per Bildvergleich über 59 Ansichten geprüft). Schriftgrößen folgen einer festen Skala (12–44 px); ein Test verhindert Abweichungen.
-
-### Neu in 3.5 – Aufräumen und Absichern
-- **Puls vollständig:** Backup enthält die Pulsdateien, Betrachter-Konten sehen die Pulskarte, die Spur-Korrektur behält den Puls, der GPX-Export enthält Zeit und Puls. Maximalpuls einstellbar (Verwaltung → „Heimatort und Puls“).
-- **Schutz-Header:** `nosniff`, Schutz vor Einbettung, Referrer-Policy für alle Antworten; für die Hauptoberfläche eine Content-Security-Policy ohne Inline-JavaScript.
-- **Einheitliche Oberfläche:** Gleiche Abstände zwischen Abschnitten, ein Einzug für Überschrift und Inhalt auf dem Handy, gleich hohe Eingaben und Knöpfe, Verwaltungs-Reiter zum Wischen, vollständige Menüleiste auch auf schmaleren Bildschirmen; die Einrichtungs- und Fehlerseite der Android-App im selben Erscheinungsbild.
-- **Test-Image:** Ein manuell gestarteter Docker-Build erzeugt nur noch den Tag `test` (`ghcr.io/hilde0407/meine-touren:test`); `latest` ändert sich erst mit einer veröffentlichten Version.
-
-### Neu in 3.4.6 – Puls aus FIT-Dateien
-Der FIT-Import (Garmin, Suunto, Wahoo u. a., auch über das Garmin-Konto) übernimmt jetzt die Herzfrequenz. Bereits importierte Touren bekommen sie nicht nachträglich; Dateien erneut zu importieren, wird als Duplikat übersprungen (die Tour vorher löschen, wenn der Puls gewünscht ist).
-
-### Neu in 3.4 – Puls und bessere 3D-Kamera
-- **Herzfrequenz direkt von der Uhr:** Der Zepp-Import (Verwaltung → Import) übernimmt jetzt auch den Puls und speichert ihn im GPX (`gpxtpx:hr`). GPX/TCX-Dateien mit Puls (z. B. aus Gadgetbridge) werden ebenfalls verstanden. Weder Komoot noch Strava werden benötigt.
-- **Pulskarte in der Tourseite:** Verlauf, Ø/Max/Min und Zeit in fünf Pulszonen. Maximalpuls standardmäßig 185 bpm (Einstellung `hr_max`) oder der höchste gemessene Wert. Bereits importierte Touren: Verwaltung → Zepp-Import → „Puls nachladen“ ergänzt den Puls nachträglich (Touren, Notizen und Fotos bleiben unverändert). Auch „Zepp-Import starten“ gleicht jetzt ab: Für jedes Zepp-Training, zu dem es schon eine Tour gibt (gleicher Start oder gleiche Strecke – auch aus Komoot oder GPX-Dateien), wird der Puls ergänzt.
-- **3D-Flug:** Im Modus „Kamera folgt“ weicht die Neigung Bergen automatisch aus (Auswahl „Neigung: automatisch“; feste Werte bleiben möglich). Der Reiseflug („3D-Flug über alles“) fliegt die Touren nacheinander ab: zwischen zwei Touren steigt die Kamera auf, überfliegt die Lücke mit sanft an- und abschwellendem Tempo und sinkt über der nächsten Tour wieder ab.
-
-### Neu in 3.3 – Heimatort
-In der **Verwaltung** gibt es das Feld **Heimatort**: Ort oder Adresse suchen (OpenStreetMap), Treffer anklicken, „Einstellungen speichern“. Touren in der Nähe (bis etwa 60 km) zählen dann nicht als Reise. Ohne Eintrag erkennt die App den Heimatort wie bisher aus deinen Touren. Die Android-App nutzt dieselbe Oberfläche; in **Mein Tourentagebuch** 1.2 ersetzt die Ortssuche die Eingabe von Koordinaten.
-
-### Neu in 3.2 – Erzählung teilen, Kommentare für Besucher, Orte im Rückblick
-- **Diashow mit Kommentaren:** Beim „Diashow senden“ gibt es die Option „Besucher dürfen Fotos kommentieren“. Die Diashow-Seite zeigt dann 💬 an jedem Foto; Gäste schreiben ohne Konto (Name optional, am Autor steht „(Gast)“, höchstens 5 Kommentare pro Minute und Link, 500 Zeichen). Der Besitzer sieht und löscht die Kommentare in der Erzählung. Ohne die Option sieht und schreibt niemand Kommentare. Schnittstellen: `GET|POST /api/public/<Token>/comments`. Bedenke: Das ist nur sinnvoll, wenn der Server von außen erreichbar ist (Funnel, siehe oben).
-- **Erzählung teilen und drucken:** Auf der Erzählungsseite erzeugt „🔗 Teilen (mit Kommentaren)“ den Diashow-Link (30 Tage, Kommentare erlaubt) und kopiert ihn; „🖨 Drucken“ druckt die Zeitleiste mit Ortsnamen, Fotos und Kommentaren oder speichert sie als PDF. Kommentare stehen jetzt auch als Text unter den Fotos der Zeitleiste.
-- **Orte im Jahresrückblick:** Seite und PDF zeigen „Orte des Jahres“ (Startorte mit Touren und Kilometern, Zahl der Regionen und Länder).
-- **3D-Flug mit Multitouch:** In der freien Kamera zoomen zwei Finger (spreizen/zusammenziehen), drehen die Ansicht (verdrehen) und kippen sie (beide Finger nach oben/unten). Jede eigene Bewegung schaltet „Kamera folgt“ automatisch auf „Kamera frei“.
-- **Fotostandorte in der Erzählung:** Jedes Foto erscheint als 📷 an seinem Aufnahmeort; ohne GPS im Foto wird die Stelle aus der Aufnahmezeit auf der Strecke berechnet. Klick zeigt das Foto, ein weiterer Klick öffnet es groß mit Kommentaren.
-- **Docker-Image** (siehe Abschnitt Docker), Tourseite ohne Aufblitzen der Einzelknöpfe.
-- **Fotos aus der App:** „Fotos hinzufügen …“ auf der Tourseite funktioniert in der Android-App bereits über die Dateiauswahl des Handys; Fotos während der Aufzeichnung gibt es über die Kamera im Aufnahme-Panel.
-
-### Neu in 3.1 – Kommentare zu Fotos
-In der **Erzählung** (Tourseite → „📖 Erzählung“) lässt sich jedes Foto anklicken: Es öffnet sich groß, darunter stehen die Kommentare (mit Name und Zeit) und ein Eingabefeld. Kommentare lassen sich löschen; die Zahl der Kommentare erscheint als 💬 am Vorschaubild. Schnittstelle: `GET /api/tours/<id>/comments`, `GET|POST /api/photos/<id>/comments`, `DELETE /api/comments/<id>`. Beim Löschen eines Fotos verschwinden seine Kommentare. Außerdem erscheint bei Komoot-Touren der Knopf „⬇ GPX“ nicht mehr doppelt. Die Knöpfe der Tourseite sind jetzt auch am Rechner nach Themen in drei Menüs sortiert: **Ansehen** (Erzählung, 3D-Flug, Tourblatt), **Teilen & Export** (Link/Diashow senden, Links verwalten, GPX) und **Bearbeiten** (alles, was die Tour verändert, gegliedert in Beschriften, Strecke und Höhen, Abgleich und Upload, Entfernen). In der Erzählung steht unter jeder Station der **Ortsname** (📌, aus OpenStreetMap, zwischengespeichert; ohne Internet bleibt die Zeile leer).
-
-### Neu in 3.0 – die App begleitet die ganze Tour
-
-Server 3.0.0 / App 3.0.0 fassen die Etappen 2.10–2.13 zusammen: **Offline-Speicher** in der App (auch ohne HTTPS), **Live-Ansicht** beim Aufzeichnen (nächste Abbiegung, Rest, Ankunft, Höhenprofil mit Standort), **Wegpunkte** mit Schnellnotiz und die **Erzählung** zur Tour, **Wetterwarnung** unterwegs und der **Live-Standort-Link** für Kontakte – alles in Deutsch, Englisch, Französisch und Spanisch. Die Einzelheiten stehen in den folgenden Abschnitten.
-
-**Offline, Live-Ansicht und Wegpunkte (ab Server 2.10–2.12 / App 2.7–2.8):** Die App speichert alles, was sie vom Server lädt (Seiten, Daten, Strecken, kleine Fotos, Kartenkacheln), auf dem Handy und zeigt es ohne Verbindung weiter an (Hinweisband „Offline“); unter *Verwaltung → Offline-Nutzung* lädt „Alle Touren offline“ Daten und Strecken aller Touren vor. Beim Aufzeichnen mit Route zeigt die Live-Ansicht die nächste Abbiegung, Rest-Kilometer, geschätzte Ankunft und das Höhenprofil mit dem eigenen Standort (das Profil wird beim Laden der Route einmal berechnet und auf dem Handy gemerkt); zusätzlich gibt es die Ansagen „Halbzeit“ und „Noch fünf Kilometer“. Mit **📍 Wegpunkt setzen** hält man unterwegs per Schnellnotiz (Rast, Aussicht, Quelle, Gabelung …) oder eigenem Text einen Ort fest; die Wegpunkte gehen als GPX-`wpt` mit der Tour auf den Server und erscheinen dort als Liste und Marker. **📖 Erzählung** (Tourseite) fügt Start, Wegpunkte, Foto-Gruppen und Ziel zu einer Zeitleiste mit Karte zusammen.
-
-**Wetterwarnung und Live-Standort-Link (ab Server 2.13 / App 2.9):** Während einer Aufzeichnung fragt die App alle 15 Minuten beim Server die Vorhersage für den Standort ab (`/api/weather/alert`, Open-Meteo, 10 Minuten Zwischenspeicher je 0,1°-Zelle) und warnt per Benachrichtigung und Sprachansage vor Gewitter (bis 4 h), Starkregen, Sturmböen ab 60 km/h, Schnee/Frost und Temperatursturz ab 8 Grad (je bis 3 h voraus); jede Warnart höchstens einmal pro Stunde, abschaltbar im Aufzeichnen-Dialog. Unter *Aufzeichnen* erstellt „📡 Live-Standort für Kontakt teilen“ einen Link (3 Stunden bis 3 Tage, ohne Konto, jederzeit widerrufbar über `DELETE /api/live/link/<Token>`), der den letzten gemeldeten Standort auf einer Karte zeigt (Seite `/pub/live/<Token>`, aktualisiert alle 20 s). Voraussetzung: *Verwaltung → Standort teilen* ist nicht „Aus“, die Serveradresse ist HTTPS und für den Kontakt erreichbar (öffentliche Adresse, z. B. Tailscale Funnel); die Basisadresse stammt aus „Öffentliche Adresse“ (E-Mail-Einstellungen) oder der aufgerufenen Adresse.
-
-**Sprachansagen auf der Strecke (ab Server 2.8.0 / App 2.6.0; mehrsprachig ab Server 2.9.0 / App 2.6.1):** Vor dem Start unter *Aufzeichnen* eine **geplante Tour** (Verwaltung der Tourplanung) oder eine **frühere Tour zum Nachgehen** als „Route mit Sprachansagen“ wählen. Die App erkennt die Abbiegestellen selbst aus der Strecke und sagt sie in der Sprache der Oberfläche an (Deutsch, Englisch, Französisch oder Spanisch) – auch bei ausgeschaltetem Bildschirm und über Kopfhörer:
-- „In 100 Metern rechts abbiegen“, kurz vorher „Jetzt rechts abbiegen“ (bei höherem Tempo früher); liegen zwei Abbiegungen dicht beieinander: „…, danach links abbiegen“. Leichte Richtungswechsel heißen „leicht links halten“, enge „scharf links abbiegen“, Spitzkehren „Kehre nach links“.
-- „Du bist vom Weg abgekommen“ (mehr als 40 m neben der Strecke, bei schlechtem GPS entsprechend mehr) mit Abstand zur Route, alle 90 s wiederholt; „Wieder auf dem Weg“, sobald du zurück bist.
-- „Noch ein Kilometer bis zum Ziel“ und „Du hast das Ziel erreicht“.
-- Ist die Route beim Start noch weit weg, sagt die App das einmal und beginnt die Führung erst, wenn du auf der Strecke bist. Rundwege (Start = Ziel) werden richtig behandelt.
-- Während der Aufnahme lassen sich die Ansagen mit einem Haken ein- und ausschalten; *Testansage* prüft Lautstärke und Stimme. Die Strecke erscheint blau auf der Karte der Aufzeichnung und wird nach dem Beenden wieder entfernt.
-- Die Ansagen nutzen die Sprachausgabe von Android (Einstellungen → Sprachausgabe; für eine gute deutsche Stimme ggf. „Sprachdaten installieren“). Es gibt keine Kartendaten-Navigation: Die Abbiegungen kommen aus der Form der Strecke, es werden keine Wegnamen genannt.

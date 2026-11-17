@@ -1,0 +1,48 @@
+# Versionsbeschreibungen
+
+Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
+
+- [3.33.0](3.33.0.md) – Reisen als anpassbare Seiten
+- [3.32.0](3.32.0.md) – Erinnerungen-Kachel einstellbar
+- [3.31.1](3.31.1.md) – Diashow-Link mit Tourname
+- [3.31.0](3.31.0.md) – Import-Knopf je nach Uhr
+- [3.30.0](3.30.0.md) – Zepp-Import auf der Übersicht
+- [3.29.0](3.29.0.md) – Diashow-Link für Jahr und Sammlung, Baustein „Ziele“
+- [3.28.0](3.28.0.md) – Eigene Kennzahlen
+- [3.27.0](3.27.0.md) – Geschwindigkeit bei vielen Touren, Vollbild in der Android-App
+- [3.26.0](3.26.0.md) – Jahresrückblick als teilbare Seite
+- [3.25.0](3.25.0.md) – Teilen mit Ansicht
+- [3.24.1](3.24.1.md) – Zwei Fehler behoben
+- [3.24.0](3.24.0.md) – Qualität und Feinschliff
+- [3.23.0](3.23.0.md) – Hinweis-Bausteine
+- [3.22.0](3.22.0.md) – Statistik als anpassbare Seite
+- [3.21.0](3.21.0.md) – Ansichten, Vorlagen, Export
+- [3.20.0](3.20.0.md) – Raster und seitenübergreifende Bausteine
+- [3.19.0](3.19.0.md) – Konfigurierbare Bausteine
+- [3.18.0](3.18.0.md) – Mehr Bausteine
+- [3.17.0](3.17.0.md) – Seite anpassen und Bausteine
+- [3.16.1](3.16.1.md) – Fehlerkorrektur Genauigkeitseinschätzung
+- [3.16.0](3.16.0.md) – Tourseite schlanker
+- [3.15.0](3.15.0.md) – Neue Tourseite
+- [3.14.0](3.14.0.md) – Ähnliche Touren im Vergleich
+- [3.13.0](3.13.0.md) – Genauigkeit der Uhren: Sammel-Korrektur
+- [3.12.0](3.12.0.md) – Belastung, Ermüdung, Tempo nach Steigung
+- [3.11.0](3.11.0.md) – „Training laut Uhr“
+- [3.10.1](3.10.1.md) – „Was liefert diese Uhr?“
+- [3.10.0](3.10.0.md) – „Genauigkeit“ je Uhr
+- [3.9.7](3.9.7.md) – Handzuordnungen aufräumen
+- [3.9.6](3.9.6.md) – Falsche Handzuordnungen erkennen
+- [3.9.5](3.9.5.md) – Zuordnung zu Uhren findet mehr Touren
+- [3.9.4](3.9.4.md) – „Unbekanntes Gerät“ behoben
+- [3.9.3](3.9.3.md) – Ältere Amazfit-Uhren
+- [3.9.2](3.9.2.md) – Zepp-Uhren automatisch erkannt
+- [3.9.1](3.9.1.md) – Überarbeitet: Meine Geräte (Verwaltung → „Touren holen“) – schöner, übersichtlicher und mit weniger Tipparbeit
+- [3.9.0](3.9.0.md) – Neu: Messwerte deiner Uhr oder deines Geräts – nicht nur Puls und Höhe
+- [3.8.0](3.8.0.md) – Freigegebene Links
+- [3.7.8](3.7.8.md) – Höhe aus der Uhr abgleichen
+- [3.7.7](3.7.7.md) – Fehlerbehebungen und Härtung
+- [3.7.6](3.7.6.md) – Tour löschen überall
+- [3.7.5](3.7.5.md) – 3D-Flug: Bedienelemente blenden aus
+- [3.7.4](3.7.4.md) – 3D-Video ohne weiße Flächen
+- [3.7.3](3.7.3.md) – 3D-Flug: Foto oben links
+- [3.7.2](3.7.2.md) – Nebenseiten geschützt, Liniensymbole
