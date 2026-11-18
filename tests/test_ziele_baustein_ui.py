@@ -7,6 +7,7 @@ from datetime import date
 import pytest
 
 from tests.test_statistik_ui import _api, _browser, _shot, app, clean, pw, T  # noqa: F401
+from tests.helpers_ui import toggle_details
 from tests.test_tourseite_ui import CONTRAST, _settled
 
 expect = pytest.importorskip("playwright.sync_api").expect
@@ -50,12 +51,9 @@ def test_zeigt_die_ziele_des_jahres_mit_balken_und_klappt_ein(pw, goals):
             expect(pg.locator("#tlw-wz .goal .gs").nth(i)).to_contain_text(v, timeout=T)
         assert pg.locator("#tlw-wz a[href='#/stats']").count() >= 1
         # einklappbar
-        d = pg.locator("#tlw-wz details").first
-        assert d.evaluate("e => e.open")
-        d.locator("> summary").click()
-        pg.wait_for_function("() => !document.querySelector('#tlw-wz details').open", timeout=T)
-        d.locator("> summary").click()
-        pg.wait_for_function("() => document.querySelector('#tlw-wz details').open", timeout=T)
+        assert pg.locator("#tlw-wz details").first.evaluate("e => e.open")
+        toggle_details(pg, "#tlw-wz details", False)
+        toggle_details(pg, "#tlw-wz details", True)
         # Jahr „letztes Jahr“ über die Einstellung
         _api(goals, "uebersicht", "PUT", {"v": 1, "widgets": [{"id": "wz", "type": "jahresziele", "cfg": {"year": "last"}}]})
         pg.reload()

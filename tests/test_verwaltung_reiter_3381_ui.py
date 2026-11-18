@@ -10,6 +10,7 @@ import urllib.request
 from pathlib import Path
 
 import pytest
+from tests.helpers_ui import quiet  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 pw_api = pytest.importorskip("playwright.sync_api")
@@ -77,7 +78,7 @@ def _admin(pw, url, lang, tab=None, width=1280, height=1000):
     alle = [k for v in ERWARTET.values() for k in v]
     pg.wait_for_function(VOLL, arg=alle, timeout=TL)
     try:
-        pg.wait_for_load_state("networkidle", timeout=8000)
+        quiet(pg, 5000)
     except Exception:
         pass
     pg.wait_for_function(VOLL, arg=alle, timeout=TL)

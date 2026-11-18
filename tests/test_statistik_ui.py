@@ -12,6 +12,7 @@ import sys
 import pytest
 expect = pytest.importorskip("playwright.sync_api").expect
 
+from tests.helpers_ui import quiet  # noqa: E402
 from tests.test_seitenlayout_ui import ROOT, T, _api, _browser, _edit, _saved, pw  # noqa: F401
 from tests.test_tourseite_ui import CONTRAST, LAUNCH, _settled, _shot, _wait
 
@@ -150,6 +151,8 @@ def test_global_filter_changes_several_blocks_keeps_own_filter_and_survives_relo
         # Aktivität: Mehrfachauswahl Wandern + Radtour
         pg.locator("#sch [data-s='hike']").click()
         _wait_n(pg, "5 Touren")
+        pg.wait_for_selector("#sch [data-s='hike'][aria-pressed='true']", timeout=T)             # Chips sind neu gezeichnet, erst dann der nächste Klick (sonst trifft er die alte Zeile)
+        quiet(pg, 3000)
         pg.locator("#sch [data-s='touringbicycle']").click()
         _wait_n(pg, "8 Touren")
         pg.wait_for_selector("#sch [data-s='hike'][aria-pressed='true']", timeout=T)
@@ -484,6 +487,7 @@ def test_edit_bar_marker_discard_restores_save_as_new_keeps_original_and_done_co
         _saved(pg)
         assert "heat" in _server(app)["order"]                                            # automatisches Zwischenspeichern bleibt
         # Verwerfen stellt den Stand von vor dem Bearbeiten wieder her (Server und Anzeige)
+        quiet(pg, 3000)                                                                  # Zwischenspeichern/Neuaufbau abwarten, dann verwerfen
         pg.locator("#slbar [data-a=discard]").click()
         pg.locator(".uibox button:has-text('Verwerfen')").last.click()
         pg.wait_for_function("() => document.getElementById('slchg').hidden", timeout=T)
@@ -527,6 +531,7 @@ def test_edit_bar_discard_and_save_as_new_work_on_overview_and_tour_page(pw, app
             first = ids[0]
             pg.locator(f'.slit[data-sl="{first}"] [data-a=down]').click()
             pg.wait_for_function("() => !document.getElementById('slchg').hidden", timeout=T)
+            quiet(pg, 3000)                                                                  # Zwischenspeichern/Neuaufbau abwarten, dann verwerfen
             pg.locator("#slbar [data-a=discard]").click()
             pg.locator(".uibox button:has-text('Verwerfen')").last.click()
             pg.wait_for_function("() => document.getElementById('slchg').hidden", timeout=T)

@@ -6,6 +6,7 @@ import pytest
 
 from tests.test_seitenlayout_ui import _api, _browser, app, clean, pw  # noqa: F401  (Fixtures)
 from tests.test_tourseite_ui import READY_SUB
+from tests.helpers_ui import quiet  # noqa: E402
 
 T = 15000
 DELAY = """(() => {
@@ -42,7 +43,7 @@ def test_main_late_puls_and_wps_stay_in_route_group(pw, app):
     pg.wait_for_selector("#wpcard", timeout=T)
     pg.wait_for_function("() => { const o = (%s)(); return o.includes('puls') && o.includes('wp'); }" % FLOW, timeout=T)
     pg.wait_for_function("() => (%s)()" % GROUPS_OK, timeout=T)
-    pg.wait_for_timeout(1200)                                               # weitere Nachlader (Wetter, Ähnliche …) abwarten, dann Zustand prüfen
+    quiet(pg, 1200)                                               # weitere Nachlader (Wetter, Ähnliche …) abwarten, dann Zustand prüfen
     order = pg.evaluate(FLOW)
     assert order[:5] == ["h:tlgh-route", "map", "prof", "puls", "wp"], order
     assert order.index("wp") < order.index("sum") < order.index("photos") or order.index("wp") < order.index("photos"), order
@@ -56,7 +57,7 @@ def test_sub_late_cards_in_registry_order(pw, app):
     pg = _delayed(pw, app, "/auswertung")
     pg.wait_for_function(READY_SUB, timeout=T)
     pg.wait_for_selector("#tl #tls-met", timeout=T)
-    pg.wait_for_timeout(2500)
+    quiet(pg, 2500)
     order = pg.evaluate(FLOW)
     ids = [x for x in order if not x.startswith("h:")]
     ref = ["met", "uhr", "wx", "ana", "steig", "aehn", "cmp"]
@@ -76,7 +77,7 @@ def test_main_old_saved_order_never_duplicates_group_heading(pw, app, order):
     pg.wait_for_selector("#wpcard", timeout=T)
     pg.wait_for_function("() => { const o = (%s)(); return o.includes('puls') && o.includes('wp') && o.includes('photos'); }" % FLOW, timeout=T)
     pg.wait_for_function("() => (%s)()" % GROUPS_OK, timeout=T)
-    pg.wait_for_timeout(1200)
+    quiet(pg, 1200)
     order_dom = pg.evaluate(FLOW)
     heads = [x for x in order_dom if x.startswith("h:")]
     assert len(heads) == len(set(heads)) and not any(h.endswith("-2") for h in heads), order_dom
@@ -94,7 +95,7 @@ def test_dash_late_blocks_keep_layout_order(pw, app):
     pg.goto(f"{app}/#/dash")
     pg.wait_for_selector("main.home #hlast", timeout=T)
     pg.wait_for_function("() => !!document.querySelector('#slopen')", timeout=T)
-    pg.wait_for_timeout(2500)
+    quiet(pg, 2500)
     ids = pg.evaluate("() => [...document.querySelectorAll('main.home > section, main.home > .hcols > section')].filter(e => !e.hidden && e.id !== 'zrbar').map(e => e.id)")
     ref = ["hrecent", "hyear", "hlast", "htag", "hmemsec"]
     assert ids == [x for x in ref if x in ids] and "hrecent" in ids, ids
@@ -110,7 +111,7 @@ def test_stats_late_blocks_keep_layout_order(pw, app):
     pg.goto(f"{app}/#/stats")
     pg.wait_for_selector("#stx", timeout=T)
     pg.wait_for_selector("#stc-kpi", timeout=T)
-    pg.wait_for_timeout(3000)
+    quiet(pg, 3000)
     ids = pg.evaluate("() => [...document.querySelectorAll('#stx [id^=stc-], #stx #blsec, #stx #tpsec')].map(e => e.id)")
     ref = ["stc-kpi", "stc-ziele", "stc-heat", "stc-sportarten", "stc-bestwerte", "stc-kmmonat", "stc-kmverlauf", "blsec", "tpsec", "stc-tag", "stc-erinn"]
     assert ids == [x for x in ref if x in ids] and len(ids) >= 4, ids

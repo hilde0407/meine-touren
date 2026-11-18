@@ -3,6 +3,7 @@ import os, socket, subprocess, sys, time, urllib.request
 from pathlib import Path
 import pytest
 
+from tests.helpers_ui import quiet
 ROOT = Path(__file__).parent.parent
 VIEWS = ["dash", "map", "tours", "records", "records?s=hike", "recap/2024", "trips", "places", "photos", "check", "admin", "account",
          "search?q=Runde", "tour/g1717225200", "compare"]
@@ -70,7 +71,7 @@ def page(app_url):
         pg.errors = []
         pg.on("pageerror", lambda e: pg.errors.append(str(e) + " @ " + (e.stack or "")[:1500]))
         pg.on("console", lambda m: pg.errors.append("CSP: " + m.text) if "Content Security Policy" in m.text else None)   # Verstöße gegen die CSP zählen als Fehler
-        pg.goto(app_url + "/#/dash"); pg.wait_for_timeout(1500)
+        pg.goto(app_url + "/#/dash"); quiet(pg, 1500)
         yield pg
         b.close()
 
@@ -109,21 +110,21 @@ def test_fresh_load_without_errors(page, app_url):
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(app_url) else r.continue_())
     for v in ["dash", "tours", "check", "admin"]:
-        pg.goto(app_url + "/#/" + v); pg.wait_for_timeout(900)
+        pg.goto(app_url + "/#/" + v); quiet(pg, 900)
     pg.close()
     assert not errs, errs
 
 
 def test_interactions(page):
     page.errors.clear()
-    page.evaluate("location.hash = '#/tour/' + TOURS.find(t => t.source === 'local').id"); page.wait_for_timeout(1200)
+    page.evaluate("location.hash = '#/tour/' + TOURS.find(t => t.source === 'local').id"); quiet(page, 1200)
     page.evaluate("document.querySelector(\"#eup\").click()"); page.wait_for_selector(".modal .pp"); page.click("#ucx")
-    page.evaluate("location.hash = '#/records'"); page.wait_for_timeout(800)
-    page.click("a.chip:has-text('Radtour')"); page.wait_for_timeout(800)
+    page.evaluate("location.hash = '#/records'"); quiet(page, 800)
+    page.click("a.chip:has-text('Radtour')"); quiet(page, 800)
     assert "Radtour" in page.inner_text("#main .sec")
     page.evaluate("location.hash = '#/check'"); page.wait_for_selector("#impl")
     page.click("#impl [data-idel]"); page.wait_for_selector("#dok"); page.click("#dx")
-    page.evaluate("location.hash = '#/admin'"); page.wait_for_timeout(1500)
+    page.evaluate("location.hash = '#/admin'"); quiet(page, 1500)
     assert "Zustand" in page.inner_text("#hlt")
     assert not page.errors, page.errors
 
@@ -152,8 +153,8 @@ def test_photo_selection_from_clicked(page):
 def test_photo_shift_dialog_moves_selected(page):
     page.errors.clear()
     tid = page.evaluate("TOURS.filter(t => t.source === 'local').sort((a, b) => a.start_ts - b.start_ts)[0].id")
-    page.evaluate("location.hash = '#/dash'"); page.wait_for_timeout(600)          # frisch aufbauen (Auswahlmodus des vorigen Tests zurücksetzen)
-    page.evaluate(f"location.hash = '#/tour/{tid}'"); page.wait_for_timeout(1500)
+    page.evaluate("location.hash = '#/dash'"); quiet(page, 600)          # frisch aufbauen (Auswahlmodus des vorigen Tests zurücksetzen)
+    page.evaluate(f"location.hash = '#/tour/{tid}'"); quiet(page, 1500)
     before = page.evaluate(f"fetch('/api/photos?tour_id={tid}&limit=50').then(r => r.json()).then(j => j.map(p => p.taken_ts).sort())")
     assert len(before) == 6
     page.click("button:has-text('Fotos bearbeiten')")
@@ -162,7 +163,7 @@ def test_photo_shift_dialog_moves_selected(page):
     page.click("[data-a=shift]"); page.wait_for_selector("#shok")
     page.click("[data-p='-3600']")
     assert "Neue Zeit" in page.inner_text("#shp")
-    page.click("#shok"); page.wait_for_timeout(1500)
+    page.click("#shok"); quiet(page, 1500)
     after = page.evaluate("fetch('/api/photos?limit=500').then(r => r.json()).then(j => j.map(p => p.taken_ts))")
     assert any(b - 3600 in after for b in before[-1:]), (before, after)
     # zurückschieben, damit die übrigen Tests unverändert laufen
@@ -196,12 +197,12 @@ def test_photo_chain_drag_moves_all_and_saves(page):
     # die anderen Fotos sind mitgewandert: Foto 5 (25 min nach Start) liegt jetzt am Streckenende (Zeit begrenzt)
     moved = page.evaluate("window._chain.items.map(i => [i.m.getLatLng().lat, i.m.getLatLng().lng])")
     assert len({tuple(round(x, 5) for x in m) for m in moved}) >= 5
-    page.click("#chok"); page.wait_for_timeout(1500)
+    page.click("#chok"); quiet(page, 1500)
     after = ts()
     diffs = {a - b for a, b in zip(after, before)}
     assert len(diffs) == 1 and abs(diffs.pop() - 1200) < 60              # alle Fotos um denselben Betrag verschoben
     page.click("#chb"); page.click("#chre")
-    page.wait_for_selector(".uidlg .uibox"); page.locator(".uidlg .uifoot button", has_text="Zurücknehmen").click(); page.wait_for_timeout(1500)
+    page.wait_for_selector(".uidlg .uibox"); page.locator(".uidlg .uifoot button", has_text="Zurücknehmen").click(); quiet(page, 1500)
     assert ts() == before                                                # Original-Zeiten wiederhergestellt
     assert not page.errors, page.errors
 
@@ -215,13 +216,13 @@ def test_english_ui(page, app_url):
         pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(app_url) else r.continue_())
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
-        pg.goto(app_url + "/#/dash"); pg.wait_for_timeout(1500)
+        pg.goto(app_url + "/#/dash"); quiet(pg, 1500)
         nav = pg.inner_text("#nav")
         assert "Overview" in nav and "Tours" in nav and "Photos" in nav and "Übersicht" not in nav
         for v in ("tours", "photos", "admin", "check", "records"):
-            pg.goto(app_url + f"/#/{v}"); pg.wait_for_timeout(600)
+            pg.goto(app_url + f"/#/{v}"); quiet(pg, 600)
         assert pg.evaluate("document.documentElement.lang") == "en"
-        pg.select_option("#langsw", "de"); pg.wait_for_timeout(1200)
+        pg.select_option("#langsw", "de"); quiet(pg, 1200)
         assert "Übersicht" in pg.inner_text("#nav")
         assert not errs, errs
         ctx.close()
@@ -230,7 +231,7 @@ def test_english_ui(page, app_url):
 def test_trackfix_dialog_opens(page):
     page.goto(page.url.split("#")[0] + "#/dash"); page.wait_for_timeout(300)
     tid = _tour_id(page)
-    page.goto(page.url.split("#")[0] + f"#/tour/{tid}"); page.wait_for_timeout(1200)
+    page.goto(page.url.split("#")[0] + f"#/tour/{tid}"); quiet(page, 1200)
     page.evaluate("document.querySelector(\"#etfix\").click()"); page.wait_for_selector("#tfb #tfno", timeout=8000)
     assert "Track" in page.inner_text(".mbox")
     page.click("#tfno")
@@ -245,7 +246,7 @@ def test_french_and_spanish_ui(page, app_url):
         pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(app_url) else r.continue_())
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
-        pg.goto(app_url + "/#/dash"); pg.wait_for_timeout(1500)
+        pg.goto(app_url + "/#/dash"); quiet(pg, 1500)
         nav = pg.inner_text("#nav")
         assert word in nav and nope not in nav, nav
         for v in ("tours", "photos", "admin", "check"):
@@ -266,12 +267,12 @@ def test_multiday_series_view(page):
       return {n: L.length, e: L[0] && L[0].n, id: L[0] && L[0].id};
     }""")
     assert r["n"] == 1 and r["e"] == 3
-    page.goto(base + "#/trips"); page.wait_for_timeout(1200)
+    page.goto(base + "#/trips"); quiet(page, 1200)
     assert "Mehrtagestouren" in page.inner_text("main") and "Alpenüberquerung E5" in page.inner_text("main")
     has = page.evaluate("async () => { const ids = new Set(window.__loc.map(t => t.id)); const cv = await api('/api/tour-covers'); return [...ids].some(i => cv[i]); }")
     bg = page.evaluate("document.querySelector('.otdg .otd').style.backgroundImage")
     assert (not has) or "/pic/" in bg, bg
-    page.goto(base + "#/series/" + r["id"]); page.wait_for_timeout(1500)
+    page.goto(base + "#/series/" + r["id"]); quiet(page, 1500)
     assert "3 Etappen" in page.inner_text("main")
     page.evaluate("() => window.__loc.forEach((t, i) => (t.name = window.__old[i]))")
     page.goto(base + "#/dash"); page.wait_for_timeout(300)
@@ -284,7 +285,7 @@ def test_profile_photo_markers(page):
     tid = page.evaluate("""async () => { const ph = await api('/api/photos?limit=500'); const p = ph.find(x => x.tour_id); return p && p.tour_id; }""")
     if not tid:
         return
-    page.goto(base + "#/tour/" + tid); page.wait_for_timeout(2500)
+    page.goto(base + "#/tour/" + tid); quiet(page, 2500)
     n = page.evaluate("document.querySelectorAll('#psvg .pph').length")
     assert n >= 1, "keine Foto-Marker im Höhenprofil"      # Testfotos haben keine GPS-Position: Zuordnung über die Zeit
     page.evaluate("document.querySelector('#psvg .pph').dispatchEvent(new MouseEvent('click', {bubbles: true}))")
@@ -298,9 +299,9 @@ def test_tourblatt(page):
     base = page.url.split("#")[0]
     page.goto(base + "#/dash"); page.wait_for_timeout(300)
     tid = page.evaluate("TOURS[0].id")
-    page.goto(base + "#/tour/" + tid); page.wait_for_timeout(1500)
+    page.goto(base + "#/tour/" + tid); quiet(page, 1500)
     assert page.locator("#esheet").count() == 1
-    page.goto(base + "#/sheet/" + tid); page.wait_for_timeout(2000)
+    page.goto(base + "#/sheet/" + tid); quiet(page, 2000)
     assert page.locator(".sheet h1").count() == 1 and page.locator("#shp").count() == 1
     assert page.locator(".sheet .leaflet-container").count() == 1
     assert not page.errors, page.errors
@@ -310,7 +311,7 @@ def test_goal_forecast_text(page):
     base = page.url.split("#")[0]
     page.goto(base + "#/dash"); page.wait_for_timeout(300)
     page.evaluate("""async () => { const y = new Date().getFullYear(); window.__g = []; for (const t of [1, 99999]) { await api('/api/goals', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({year: y, metric: 'km', sport: '', target: t})}); } }""")
-    page.goto(base + "#/dash?y=" + str(__import__("datetime").date.today().year)); page.wait_for_timeout(1500)
+    page.goto(base + "#/dash?y=" + str(__import__("datetime").date.today().year)); quiet(page, 1500)
     txt = page.inner_text("#goals")
     assert "Ziel erreicht" in txt or "Prognose" in txt, txt
     assert "verfehlt" in txt or "voraussichtlich" in txt or "Ziel erreicht" in txt, txt
@@ -323,9 +324,9 @@ def test_best_photos_button(page):
     page.goto(base + "#/dash"); page.wait_for_timeout(300)
     tid = page.evaluate("""async () => { const ph = await api('/api/photos?limit=500'); const p = ph.find(x => x.tour_id); return p && p.tour_id; }""")
     assert tid
-    page.goto(base + "#/tour/" + tid); page.wait_for_timeout(2000)
+    page.goto(base + "#/tour/" + tid); quiet(page, 2000)
     assert page.locator("#pbest").count() == 1
-    page.click("#pbest"); page.wait_for_timeout(1200)
+    page.click("#pbest"); quiet(page, 1200)
     assert "beste von" in page.inner_text("#pc"), page.inner_text("#pc")
     assert page.locator("#ss").get_attribute("href").endswith("best=10")
     assert not page.errors, page.errors
@@ -335,7 +336,7 @@ def test_admin_tabs(page):
     base = page.url.split("#")[0]
     page.goto(base + "#/dash"); page.wait_for_timeout(300)
     page.evaluate("localStorage.removeItem('admtab')")
-    page.goto(base + "#/admin"); page.wait_for_timeout(2500)
+    page.goto(base + "#/admin"); quiet(page, 2500)
     tabs = page.evaluate("[...document.querySelectorAll('#atabs button')].map(b => b.textContent)")
     assert tabs == ["Übersicht", "Touren holen", "Hochladen & Planen", "Fotos", "Automatik & Meldungen", "Handy & App", "Sicherung & Zugang"], tabs
     vis = lambda: page.evaluate("[...document.querySelectorAll('.atab')].filter(s => s.style.display !== 'none').map(s => s.dataset.t)")
@@ -345,19 +346,19 @@ def test_admin_tabs(page):
         assert vis() == [t] and word in page.inner_text(f".atab[data-t={t}]"), (t, word)
     assert "tab=sicher" in page.url
     assert page.locator("#save").is_visible()                      # Speichern-Leiste bleibt auf jedem Reiter erreichbar
-    page.goto(base + "#/admin?strava=ok"); page.wait_for_timeout(1500)
+    page.goto(base + "#/admin?strava=ok"); quiet(page, 1500)
     assert vis() == ["weitergabe"]
     assert not page.errors, page.errors
 
 
 def test_repeat_badge(page):
     base = page.url.split("#")[0]
-    page.goto(base + "#/dash"); page.wait_for_timeout(800)
+    page.goto(base + "#/dash"); quiet(page, 800)
     page.evaluate("REP = Object.fromEntries(TOURS.slice(0, 2).map((t, i) => [t.id, {n: 3, start_ts: t.start_ts, with: [{id: TOURS[2].id, start_ts: TOURS[2].start_ts}, {id: TOURS[3].id, start_ts: TOURS[3].start_ts}]}]))")
-    page.goto(base + "#/tours"); page.wait_for_timeout(1200)
+    page.goto(base + "#/tours"); quiet(page, 1200)
     assert page.locator(".tr .rep").count() >= 1
     tid = page.evaluate("TOURS[0].id")
-    page.goto(base + "#/tour/" + tid); page.wait_for_timeout(1500)
+    page.goto(base + "#/tour/" + tid); quiet(page, 1500)
     assert "3-mal" in page.inner_text("#repnote")
     assert not page.errors, page.errors
 
@@ -366,9 +367,9 @@ def test_clean_unused_dialog(page):
     base = page.url.split("#")[0]
     page.goto(base + "#/dash"); page.wait_for_timeout(300)
     ids = page.evaluate("""async () => { const ph = await api('/api/photos?limit=500'); const id = ph[0].id; await api('/api/photo-unassign', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({ids: [id], exclude: true})}); return id; }""")
-    page.goto(base + "#/photos"); page.wait_for_timeout(1800)
+    page.goto(base + "#/photos"); quiet(page, 1800)
     assert page.locator("#pclean").count() == 1
-    page.click("#pclean"); page.wait_for_timeout(800)
+    page.click("#pclean"); quiet(page, 800)
     assert page.locator("#cudo").is_disabled()                    # erst nach Auswahl eines Jahres möglich
     page.click("#cuy input"); assert "endgültig löschen" in page.inner_text("#cudo")
     page.click("#cuno")
@@ -377,19 +378,19 @@ def test_clean_unused_dialog(page):
 
 def test_update_panel_inside_tab_and_check_button(page):
     base = page.url.split("#")[0]
-    page.goto(base + "#/admin?tab=uebersicht"); page.wait_for_timeout(2500)
+    page.goto(base + "#/admin?tab=uebersicht"); quiet(page, 2500)
     assert page.evaluate("document.querySelectorAll('#ucheck').length") == 1
     assert page.evaluate("!!document.querySelector('#upd #ucheck')"), "Update-Bereich liegt nicht mehr in seinem Container"
-    page.click("#ucheck"); page.wait_for_timeout(2500)
+    page.click("#ucheck"); quiet(page, 2500)
     assert "Installiert" in page.inner_text("#upd")
     assert not page.errors, page.errors
 
 
 def test_sport_figs_and_steep_button(page):
     base = page.url.split("#")[0]
-    page.goto(base + "#/dash"); page.wait_for_timeout(600)
+    page.goto(base + "#/dash"); quiet(page, 600)
     tid = page.evaluate("TOURS.find(t => t.sport === 'hike' && t.source === 'local').id")
-    page.goto(base + "#/tour/" + tid); page.wait_for_timeout(2500)
+    page.goto(base + "#/tour/" + tid); quiet(page, 2500)
     txt = page.inner_text("#sfigs")
     assert "Gehzeit" in txt and "steilster Abschnitt" in txt
     assert page.locator("#tm .smap").count() == 1
@@ -400,7 +401,7 @@ def test_sport_figs_and_steep_button(page):
 
 def test_sport_metrics_ski_and_bike(page):
     base = page.url.split("#")[0]
-    page.goto(base + "#/dash"); page.wait_for_timeout(600)
+    page.goto(base + "#/dash"); quiet(page, 600)
     r = page.evaluate("""() => {
       // 2 km bergauf (10 %), dann 2 km bergab (-12 %) mit Pause dazwischen; alle 20 m ein Punkt, 4 km/h hoch, 30 km/h runter
       const pts = []; let t = 0, z = 1000, lat = 47;
@@ -421,13 +422,13 @@ def test_sport_metrics_ski_and_bike(page):
 
 def test_gear_row_and_season_filter(page):
     base = page.url.split("#")[0]
-    page.goto(base + "#/dash"); page.wait_for_timeout(600)
+    page.goto(base + "#/dash"); quiet(page, 600)
     tid = page.evaluate("""async () => { await api('/api/gear', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({name: 'Testschuhe', kind: 'Schuhe', sports: ['hike'], limit_km: 5})}); return TOURS.find(t => t.sport === 'hike' && t.source === 'local').id; }""")
-    page.goto(base + "#/tour/" + tid); page.wait_for_timeout(2000)
+    page.goto(base + "#/tour/" + tid); quiet(page, 2000)
     assert "Testschuhe" in page.inner_text("#gearrow")
-    page.goto(base + "#/places"); page.wait_for_timeout(2500)
+    page.goto(base + "#/places"); quiet(page, 2500)
     assert "Testschuhe" in page.inner_text("#gearsec") and "Wechsel fällig" in page.inner_text("#gearsec")
-    page.goto(base + "#/tours"); page.wait_for_timeout(1200)
+    page.goto(base + "#/tours"); quiet(page, 1200)
     n_all = page.evaluate("TOURS.length")
     page.select_option("#fz", "winter"); page.wait_for_timeout(300)
     cnt = page.evaluate("TOURS.filter(t => seasonOf(t.date) === 'winter').length")
@@ -437,7 +438,7 @@ def test_gear_row_and_season_filter(page):
 
 def test_wishlist_season_select(page):
     base = page.url.split("#")[0]
-    page.goto(base + "#/places"); page.wait_for_timeout(2500)
+    page.goto(base + "#/places"); quiet(page, 2500)
     sel = page.locator("#wlist .wseason")
     assert sel.count() == 1
     now = page.evaluate("seasonOfMonth(new Date().getMonth() + 1)")
@@ -450,7 +451,7 @@ def test_wishlist_season_select(page):
 
 def test_stars_safety_compare_and_note_size(page):
     base = page.url.split("#")[0]
-    page.goto(base + "#/dash"); page.wait_for_timeout(700)
+    page.goto(base + "#/dash"); quiet(page, 700)
     tid = page.evaluate("TOURS.find(t => t.sport === 'hike' && t.source === 'local').id")
     other = page.evaluate("TOURS.filter(t => t.source === 'local')[1].id")
     page.evaluate("""async id => { await api('/api/tours/' + id + '/sport', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({sport: 'skitour'})}); await loadTours(); }""", tid)
@@ -485,7 +486,7 @@ def test_stars_safety_compare_and_note_size(page):
     assert h <= 140, h
     # Liste: Bewertungsfilter
     page.evaluate("sessionStorage.clear()")
-    page.goto(base + "#/tours"); page.wait_for_timeout(1200)
+    page.goto(base + "#/tours"); quiet(page, 1200)
     page.select_option("#fb", "4"); page.wait_for_timeout(300)
     assert page.locator(".tr").count() == 1 and "★" in page.inner_text(".tr")
     assert not page.errors, page.errors
@@ -493,17 +494,17 @@ def test_stars_safety_compare_and_note_size(page):
 
 def test_goal_sport_groups(page):
     base = page.url.split("#")[0]
-    page.goto(base + "#/dash"); page.wait_for_timeout(700)
+    page.goto(base + "#/dash"); quiet(page, 700)
     r = page.evaluate("""() => { const y = TOURS[0].y; return ['grp:foot', 'grp:bike', 'grp:ski', 'hike', ''].map(s => goalVal({year: y, sport: s, metric: 'count'}, TOURS)); }""")
     assert r[0] + r[1] + r[2] >= 1 and r[4] >= r[3]
-    page.goto(base + "#/stats"); page.wait_for_timeout(1500)
+    page.goto(base + "#/stats"); quiet(page, 1500)
     assert page.evaluate("[...document.querySelectorAll('#gsp option')].map(o => o.textContent).join('|')").count("Alle Rad-Sportarten") == 1
     assert not page.errors, page.errors
 
 
 def test_ui_password_panel(page):
     base = page.url.split("#")[0]
-    page.goto(base + "#/admin?tab=sicher"); page.wait_for_timeout(1500)
+    page.goto(base + "#/admin?tab=sicher"); quiet(page, 1500)
     assert page.locator("#uipws").count() == 1 and "nicht passwortgeschützt" in page.inner_text("#uipw")
     page.fill("#uipw1", "abcdef"); page.fill("#uipw2", "abcdeX"); page.click("#uipws")
     assert "stimmen nicht überein" in page.inner_text("#uipwm")
@@ -524,9 +525,9 @@ def test_plan_page(page):
         pts = [[la1, lo1, 500], mid + [520], [la2, lo2, 540]]
         r.fulfill(status=200, content_type="application/json", body=_j.dumps({"pts": pts, "km": 2.0 + alt, "up": 40 + 10 * alt, "time_s": 1800, "alt": alt}))
     page.route("**/api/plan/route", route)
-    page.goto(base + "#/tours"); page.wait_for_timeout(1200)
+    page.goto(base + "#/tours"); quiet(page, 1200)
     assert page.locator("#plink").count() == 1
-    page.click("#plink"); page.wait_for_timeout(1200)
+    page.click("#plink"); quiet(page, 1200)
     page.evaluate("""() => { const m = map; [[48.0, 8.0], [48.01, 8.01], [48.02, 8.0]].forEach(p => m.fire('click', {latlng: L.latLng(p[0], p[1])})); }""")
     page.wait_for_timeout(1800)
     txt = page.inner_text("#pf")
@@ -537,18 +538,18 @@ def test_plan_page(page):
     assert page.locator("#pprof svg").count() == 1
     # Alternativen für den ausgewählten (letzten) Abschnitt
     assert "Abschnitt 2 von 2" in page.inner_text("#pseg")
-    page.click("#palts"); page.wait_for_timeout(1200)
+    page.click("#palts"); quiet(page, 1200)
     assert page.locator("#paltl .alt-c").count() == 4
-    page.click("#paltl .alt-c[data-a='2']"); page.wait_for_timeout(1800)
+    page.click("#paltl .alt-c[data-a='2']"); quiet(page, 1800)
     k1 = km()
     assert k1 > k0 + 1                                                                 # gewählte Alternative ist länger
     r = page.evaluate("""() => { const d = densify([[48, 8], [48.01, 8]], 50); return [d.length, paceModel('hike').n >= 0, parseGpxPts('<gpx><trk><trkseg><trkpt lat="1" lon="2"/><trkpt lat="3" lon="4"/></trkseg></trk></gpx>').length]; }""")
     assert 20 <= r[0] <= 25 and r[2] == 2
-    page.fill("#pn", "Meine Testplanung"); page.click("#psave"); page.wait_for_timeout(800)
+    page.fill("#pn", "Meine Testplanung"); page.click("#psave"); quiet(page, 800)
     assert "gespeichert" in page.inner_text("#pmsg") and "Meine Testplanung" in page.inner_text("#plist")
     page.click("#pclr"); page.wait_for_timeout(300)
     assert page.evaluate("document.querySelector('#pf').innerText").startswith("Setze")
-    page.click("#plist [data-p]"); page.wait_for_timeout(1800)
+    page.click("#plist [data-p]"); quiet(page, 1800)
     assert page.input_value("#pn") == "Meine Testplanung" and abs(km() - k1) < 0.05      # gewählte Alternative bleibt erhalten
     # „Wegen folgen“ aus: gerade Linien (Luftlinie ≈ 2,5 km statt 5 km)
     page.click("#prt + *") if False else page.evaluate("document.querySelector('#prt').click()")
@@ -560,9 +561,9 @@ def test_plan_page(page):
 def test_plan_switch_ui_and_album_stats(page):
     base = page.url.split("#")[0]
     page.evaluate("api('/api/settings', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({plan_enabled: '1', plan_mode: '', brouter_url: ''})})")
-    page.goto(base + "#/tours"); page.wait_for_timeout(1200)
+    page.goto(base + "#/tours"); quiet(page, 1200)
     assert page.locator("#plink").count() == 1
-    page.goto(base + "#/admin?tab=weitergabe"); page.wait_for_timeout(1500)
+    page.goto(base + "#/admin?tab=weitergabe"); quiet(page, 1500)
     assert page.locator("#brpanel").count() == 1 and page.is_visible("#brpanel")
     page.check('input[name="pm"][value="local"]')
     assert page.is_visible("#pinst") and "install-brouter.sh" in page.inner_text("#pinst")
@@ -571,17 +572,17 @@ def test_plan_switch_ui_and_album_stats(page):
     page.click("#ptest"); page.wait_for_timeout(500)
     assert "antwortet" in page.inner_text("#ptm")
     page.select_option("#pon", "0"); assert not page.is_visible("#pbox")
-    page.click("#save"); page.wait_for_timeout(600)
-    page.goto(base + "#/tours"); page.wait_for_timeout(1200)
+    page.click("#save"); quiet(page, 600)
+    page.goto(base + "#/tours"); quiet(page, 1200)
     assert page.locator("#plink").count() == 0
-    page.goto(base + "#/plan"); page.wait_for_timeout(800)
+    page.goto(base + "#/plan"); quiet(page, 800)
     assert "ausgeschaltet" in page.inner_text("main")
     page.evaluate("api('/api/settings', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({plan_enabled: '1', plan_mode: '', brouter_url: ''})})")
     # Statistik je Aktivität in Alben/Reisen
     tid = page.evaluate("TOURS.filter(t => t.sport === 'hike')[0].id")
     page.evaluate("api('/api/tours/%s/tags', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({tags: ['statstest']})})" % tid)
-    page.goto(base + "#/tours"); page.reload(); page.wait_for_timeout(800)
-    page.goto(base + "#/album/statstest"); page.wait_for_timeout(1500)
+    page.goto(base + "#/tours"); page.reload(); quiet(page, 800)
+    page.goto(base + "#/album/statstest"); quiet(page, 1500)
     txt = page.inner_text("main")
     assert "Statistik nach Aktivität" in txt and "Abstieg" in txt and "Wandern" in txt, txt[:400]
 
@@ -589,18 +590,18 @@ def test_plan_switch_ui_and_album_stats(page):
 def test_trip_edit_and_pdf_sheet(page):
     import json as _j
     base = page.url.split("#")[0]
-    page.goto(base + "#/tours"); page.wait_for_timeout(1000)
+    page.goto(base + "#/tours"); quiet(page, 1000)
     ids = page.evaluate("TOURS.slice(0, 3).map(t => t.id)")
     day = lambda i: page.evaluate("TOURS.find(t => t.id === '%s').date.slice(0, 10)" % ids[i])
     fake = [{"id": ids[0], "region": "Kanaren", "country": "Spanien", "start": day(0), "end": day(0), "days": 1, "tours": ids, "km": 10, "up_m": 100, "h": 2, "photo": None}]
     page.route("**/api/trips", lambda r: r.fulfill(status=200, content_type="application/json", body=_j.dumps(fake)))
-    page.goto(base + "#/trip/" + ids[0]); page.wait_for_timeout(1500)
+    page.goto(base + "#/trip/" + ids[0]); quiet(page, 1500)
     assert page.locator("#tredit").count() == 1 and page.locator("#trpdf").count() == 1
     assert "Statistik nach Aktivität" in page.inner_text("main")
     page.click("#tredit")
     assert page.input_value("#tn") == "Kanaren" and page.locator("#tf").count() == 1
     page.click("#tno")
-    page.click("#trpdf"); page.wait_for_timeout(1800)
+    page.click("#trpdf"); quiet(page, 1800)
     txt = page.inner_text("main")
     assert "Kanaren" in txt and "Tag für Tag" in txt and "Statistik nach Aktivität" in txt and "Drucken" in txt
     assert page.locator("#tm").count() == 1 and page.locator("#pdfdl").count() == 1
@@ -608,12 +609,12 @@ def test_trip_edit_and_pdf_sheet(page):
 
 def test_pdf_photo_choice(page):
     base = page.url.split("#")[0]
-    page.goto(base + "#/tours"); page.wait_for_timeout(1000)
+    page.goto(base + "#/tours"); quiet(page, 1000)
     tid = page.evaluate("(TOURS.find(t => t.photos) || TOURS[0]).id")
-    page.goto(base + "#/sheet/" + tid); page.wait_for_timeout(1500)
+    page.goto(base + "#/sheet/" + tid); quiet(page, 1500)
     assert page.locator("#pdfon").is_checked() and page.input_value("#pdfn") == "6"
     n_on = page.locator("#th .th").count()
-    page.select_option("#pdfn", "3"); page.wait_for_timeout(800)
+    page.select_option("#pdfn", "3"); quiet(page, 800)
     assert page.locator("#th .th").count() <= 3
     s = page.evaluate("api('/api/settings').then(s => [s.pdf_photos, s.pdf_photo_n])")
     assert s == ["1", "3"]
@@ -621,26 +622,26 @@ def test_pdf_photo_choice(page):
     assert page.locator("#th .th").count() == 0 and page.is_disabled("#pdfn")
     assert page.evaluate("api('/api/settings').then(s => s.pdf_photos)") == "0"
     # gilt appweit: auch im Jahresrückblick
-    page.goto(base + "#/recap/2024"); page.wait_for_timeout(1500)
+    page.goto(base + "#/recap/2024"); quiet(page, 1500)
     assert page.locator("#pdfon").count() == 1 and not page.locator("#pdfon").is_checked()
     page.evaluate("api('/api/settings', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({pdf_photos: '1', pdf_photo_n: '6'})})")
 
 
 def test_share_result_and_handy_panel(page):
     base = page.url.split("#")[0]
-    page.goto(base + "#/shared?t=1&d=0&a=1&p=2&x=1"); page.wait_for_timeout(1200)
+    page.goto(base + "#/shared?t=1&d=0&a=1&p=2&x=1"); quiet(page, 1200)
     txt = page.inner_text("main")
     assert "1 Tour importiert" in txt and "2 Fotos empfangen" in txt and "nicht unterstützt" in txt
-    page.goto(base + "#/shared?t=0&d=1&a=1"); page.wait_for_timeout(800)
+    page.goto(base + "#/shared?t=0&d=1&a=1"); quiet(page, 800)
     assert "schon vorhanden" in page.inner_text("main")
-    page.goto(base + "#/admin?tab=handy"); page.wait_for_timeout(1500)
+    page.goto(base + "#/admin?tab=handy"); quiet(page, 1500)
     assert page.locator("#handy").count() == 1 and page.is_visible("#handy")
     assert "Teilen-Menü" in page.inner_text("#handy")
 
 
 def test_offline_banner(page):
     base = page.url.split("#")[0]
-    page.goto(base + "#/tours"); page.wait_for_timeout(800)
+    page.goto(base + "#/tours"); quiet(page, 800)
     assert page.locator("#offbar").count() == 0
     page.context.set_offline(True)
     page.evaluate("window.dispatchEvent(new Event('offline'))"); page.wait_for_timeout(300)
@@ -663,7 +664,7 @@ def test_record_view_app(page):
         stopRecording(){window._st.state='finished'}, takeFinished:()=>window._g, markUploaded(){window._st.state='idle'}, discardRecording(){window._st.state='idle'},
         diagnose:()=>JSON.stringify({version:'2.0.0',android:'14',device:'Test',server:location.origin,loc_perm:true,gps_on:true,notif_perm:true,battery_free:false,status:window._st}), logText:()=>'Start', clearLog(){}, appLog(){}, shareText(){}};
     """)
-    page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(800)
+    page.goto(base + "#/dash"); page.reload(); quiet(page, 800)
     assert page.locator('nav a[data-k="record"]').count() == 1
     page.set_viewport_size({"width": 390, "height": 800}); page.wait_for_timeout(500)
     page.click("#tmore"); page.wait_for_timeout(300)
@@ -671,7 +672,7 @@ def test_record_view_app(page):
     assert page.locator('.moregrid a[href="#/record"]').is_visible(), 'Menüpunkt nicht sichtbar'
     page.locator('.moregrid a[href="#/record"]').dispatch_event('click'); page.wait_for_timeout(500)
     page.set_viewport_size({"width": 1280, "height": 800})
-    page.fill("#rname", "Testrunde"); page.click("#rstart"); page.wait_for_timeout(700)
+    page.fill("#rname", "Testrunde"); page.click("#rstart"); quiet(page, 700)
     assert "1,23" in page.inner_text("#rd") and page.locator("#rmap").count() == 1
     # versehentliches Antippen beendet NICHT, erst langes Halten
     page.click("#rstop"); page.wait_for_timeout(500)
@@ -683,9 +684,9 @@ def test_record_view_app(page):
     assert page.locator("#rsend").count() == 1
     page.click("#rsend"); page.wait_for_function("() => location.hash.startsWith('#/tour/')", timeout=8000)
 
-    page.goto(base + "#/apptest"); page.wait_for_timeout(800)
+    page.goto(base + "#/apptest"); quiet(page, 800)
     assert "Nur im Entwicklermodus" in page.locator("#main").inner_text()          # App-Test ist eine Entwickleransicht
-    page.evaluate("() => localStorage.setItem('mt_debug', '1')"); page.reload(); page.wait_for_timeout(800)
+    page.evaluate("() => localStorage.setItem('mt_debug', '1')"); page.reload(); quiet(page, 800)
     page.wait_for_function("() => document.querySelector('#main') && document.querySelector('#main').innerText.includes('Server erreichbar')", timeout=15000)
     t = page.inner_text("#main")
     assert "Server erreichbar" in t and "Akku-Optimierung ist aktiv" in t and "GPS ist eingeschaltet" in t
@@ -704,13 +705,13 @@ def test_record_route_guidance(page):
         setRoute(p,n){window._route=[p,n]; window._ri={on:true,has:true,name:n,km:2.2,turns:1}}, clearRoute(){window._route=null; window._ri={on:true,has:false}},
         routeInfo:()=>JSON.stringify(window._ri), setGuide(b){window._ri.on=b}, guideTest(){window._tested=true}, routePoints:()=>'[]'};
     """)
-    page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(800)
-    page.goto(base + "#/record"); page.wait_for_timeout(800)
+    page.goto(base + "#/dash"); page.reload(); quiet(page, 800)
+    page.goto(base + "#/record"); quiet(page, 800)
     assert page.locator("#rroute").count() == 1
     page.wait_for_function("() => document.querySelectorAll('#rroute option').length > 1", timeout=5000)
     opts = page.eval_on_selector_all("#rroute option", "o => o.map(x => x.textContent)")
     assert any("Gipfelrunde" in o for o in opts), opts
-    page.select_option("#rroute", label=[o for o in opts if "Gipfelrunde" in o][0]); page.wait_for_timeout(700)
+    page.select_option("#rroute", label=[o for o in opts if "Gipfelrunde" in o][0]); quiet(page, 700)
     route = page.evaluate("window._route")
     assert route and route[1] == "Gipfelrunde" and route[0].count(";") == 40 and "," in route[0], route
     assert "Abbiegungen" in page.inner_text("#rrinfo") and page.locator("#rgtest").count() == 1
@@ -723,7 +724,7 @@ def test_mobile_more_sheet_not_covered(page):
     """„Mehr“-Fenster liegt über der Tab-Leiste und ist bis ganz unten erreichbar."""
     base = page.url.split("#")[0]
     page.set_viewport_size({"width": 360, "height": 640})
-    page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(800)
+    page.goto(base + "#/dash"); page.reload(); quiet(page, 800)
     page.click("#tmore"); page.wait_for_timeout(400)
     z = page.evaluate("(()=>{const m=document.querySelector('.modal'),t=document.querySelector('#tabbar');return [+getComputedStyle(m).zIndex,+getComputedStyle(t).zIndex,getComputedStyle(m.querySelector('.mbox')).overflowY]})()")
     assert z[0] > z[1] and z[2] in ("auto", "scroll")
@@ -737,7 +738,7 @@ def test_share_send_button(page):
     page.set_viewport_size({"width": 390, "height": 844})
     page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
     page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.3.0', serverUrl: () => ''}")
-    page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(1200)
+    page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); quiet(page, 1200)
     page.evaluate("document.querySelector('#esnd').click()"); page.wait_for_selector(".uidlg .shrdlg", timeout=8000)
     page.locator(".uifoot .btn", has_text="Link erstellen").click(); page.wait_for_function("() => window._sent", timeout=8000)
     sent = page.evaluate("window._sent")
@@ -775,7 +776,7 @@ def test_share_slideshow_button(page):
     page.set_viewport_size({"width": 390, "height": 844})
     page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
     page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.5.0', serverUrl: () => ''}")
-    page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(1200)
+    page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); quiet(page, 1200)
     page.evaluate("document.querySelector('#eshow').click()")
     page.wait_for_selector("#sh_go, .uidlg .uibox")
     if page.locator(".uidlg .uibox").count():                # falls die Tour keine Fotos hat: Rückfrage im gemeinsamen Dialog bestätigen
@@ -825,7 +826,7 @@ def test_info_box(page):
     """„Info“ im Mehr-Menü: zeigt App- und Server-Version sowie die Ersteller."""
     base = page.url.split("#")[0]
     page.set_viewport_size({"width": 390, "height": 844})
-    page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(800)
+    page.goto(base + "#/dash"); page.reload(); quiet(page, 800)
     page.evaluate("window.MTApp = {version: () => '2.5.0', hasPermission: () => true, status: () => '{}', serverUrl: () => ''}")
     page.click("#tmore"); page.click("#mab"); page.wait_for_selector("#abx")
     txt = page.inner_text(".modal")
@@ -838,7 +839,7 @@ def test_mobile_map_and_more_menu(page):
     """Mobile Karte füllt den Bereich zwischen Kopfzeile und Tab-Leiste (kein Scrollen); „Mehr“ trennt Hauptpunkte von Einstellungen; Ortungsknopf vorhanden."""
     base = page.url.split("#")[0]
     page.set_viewport_size({"width": 360, "height": 640})
-    page.goto(base + "#/map"); page.reload(); page.wait_for_timeout(1500)
+    page.goto(base + "#/map"); page.reload(); quiet(page, 1500)
     r = page.evaluate("(()=>{const m=document.querySelector('.mapbox').getBoundingClientRect(),t=document.querySelector('#tabbar').getBoundingClientRect();return [m.bottom,t.top,t.bottom,innerHeight,document.documentElement.scrollHeight]})()")
     assert abs(r[0] - r[1]) <= 1 and r[2] <= r[3] + 1 and r[4] <= r[3] + 1
     assert page.query_selector("#mloc")
@@ -859,7 +860,7 @@ def test_viewer_ui(page):
     assert not page.is_visible("nav a[data-k=admin]")
     page.goto(base + "#/admin"); page.wait_for_timeout(500)
     assert page.evaluate("location.hash") == "#/dash"
-    page.goto(base + "#/map"); page.wait_for_timeout(1200)
+    page.goto(base + "#/map"); quiet(page, 1200)
     assert page.query_selector("#mloc")
 
 
@@ -868,7 +869,7 @@ def test_viewer_tour_page_readonly(page):
     base = page.url.split("#")[0]
     page.goto(base + "#/dash"); page.reload(); page.wait_for_function("() => typeof TOURS !== \"undefined\" && TOURS.length", timeout=10000)
     page.evaluate("ME.user = {name:'Oma', role:'viewer'}; applyView()")
-    page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); page.wait_for_timeout(2000)
+    page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); quiet(page, 2000)
     for sel in ("#ren", "#efix", "#etag", "#eshr", "#esheet", "#eup", "#padd", "#pgps", "#esnd"):
         assert not page.is_visible(sel), sel
     assert page.is_visible("#egpx")
@@ -880,9 +881,9 @@ def test_viewer_tour_page_readonly(page):
 def test_record_backups_listed(page):
     """Unter Aufzeichnen erscheinen die gesicherten Aufzeichnungen mit Speichern-Knopf."""
     base = page.url.split("#")[0]
-    page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(800)
+    page.goto(base + "#/dash"); page.reload(); quiet(page, 800)
     page.evaluate("window.MTApp = {hasPermission: () => true, status: () => '{\"state\":\"idle\"}', version: () => '2.3.1', serverUrl: () => '', backups: () => JSON.stringify([{file:'rec_1.gpx', size: 51200, ts: Date.now()}]), backupGpx: f => ''}")
-    page.goto(base + "#/record"); page.wait_for_timeout(800)
+    page.goto(base + "#/record"); quiet(page, 800)
     assert "Gesicherte Aufzeichnungen" in page.inner_text("#main")
     assert page.query_selector("[data-bk='rec_1.gpx']")
 
@@ -906,13 +907,15 @@ def test_record_live_values_and_photos(page):
         uploadPhotos(){window._calls.push('upload'); window._pi={...window._pi,pending:0}},
         diagnose:()=>'{}', logText:()=>'', clearLog(){}, appLog(){}, shareText(){}};
     """)
-    page.goto(base + "#/record"); page.reload(); page.wait_for_timeout(1000)
+    page.goto(base + "#/record"); page.reload(); quiet(page, 1000)
     page.select_option("#rphm", "end")
     assert "mode:end" in page.evaluate("window._calls")
-    page.fill("#rname", "Fototour"); page.click("#rstart"); page.wait_for_timeout(800)
+    page.fill("#rname", "Fototour"); page.click("#rstart"); quiet(page, 800)
     for k, v in (("#rd", "5,20"), ("#ru", "410"), ("#rdn", "120"), ("#ralt", "1.530"), ("#rmax", "1.602"), ("#rspd", "5,0"), ("#ravg", "5,2")):
+        page.wait_for_function("([k, v]) => { const e = document.querySelector(k); return !!e && e.innerText.includes(v); }", arg=[k, v], timeout=15000)
         assert v in page.inner_text(k), (k, page.inner_text(k))
-    page.click("#rphoto"); page.click("#rphoto"); page.wait_for_timeout(2300)
+    page.click("#rphoto"); page.click("#rphoto")
+    page.wait_for_function("() => { const e = document.querySelector('#rphinfo'); return !!e && e.innerText.includes('2 Foto') && e.innerText.includes('warten'); }", timeout=15000)      # Zustand statt fester Zeit
     assert "2 Foto" in page.inner_text("#rphinfo") and "warten" in page.inner_text("#rphinfo")
     box = page.locator("#rstop").bounding_box()
     page.mouse.move(box["x"] + 20, box["y"] + 10); page.mouse.down(); page.wait_for_timeout(1900); page.mouse.up(); page.wait_for_timeout(900)
@@ -924,7 +927,7 @@ def test_record_live_values_and_photos(page):
 def test_admin_tabs_uniform(page):
     """Verwaltung: sieben Reiter, jeder Bereich liegt in genau einem Reiter und ist eine gleich gestaltete Karte."""
     base = page.url.split("#")[0]
-    page.goto(base + "#/admin?tab=uebersicht"); page.reload(); page.wait_for_timeout(1800)
+    page.goto(base + "#/admin?tab=uebersicht"); page.reload(); quiet(page, 1800)
     tabs = page.evaluate("[...document.querySelectorAll('#atabs button')].map(b=>b.textContent)")
     assert tabs == ["Übersicht", "Touren holen", "Hochladen & Planen", "Fotos", "Automatik & Meldungen", "Handy & App", "Sicherung & Zugang"]
     where = page.evaluate("Object.fromEntries([...document.querySelectorAll('.atab')].map(s=>[s.dataset.t,[...s.querySelectorAll(':scope > .gbody > *')].map(c=>(c.querySelector('h2')||{}).textContent||'').map(t=>t.trim().split(' ')[0])]))")
@@ -953,7 +956,7 @@ def test_record_live_view(page, app_url):
         status:()=>JSON.stringify(window._st), points:()=>'[[47,11],[47.001,11.001]]', routeInfo:()=>JSON.stringify(window._ri), routePoints:()=>'[]',
         setRoute(){}, clearRoute(){}, setGuide(){}, guideTest(){}, backups:()=>'[]', photoInfo:()=>'{}'};
     """)
-    pg.goto(app_url + "/#/record"); pg.wait_for_timeout(1500)
+    pg.goto(app_url + "/#/record"); quiet(pg, 1500)
     t = pg.inner_text("#rlive")
     assert "230 m" in t and "Nächste Abbiegung" in t and "Ziel in 3,0 km" in t and "Ankunft ca." in t, t
     assert pg.locator("#rlive svg polyline").count() == 1 and "noch ↑" in t and "höchster Punkt 950 m" in t, t
@@ -975,7 +978,7 @@ def test_waypoints_and_story(page, app_url):
     tid = _j.load(urllib.request.urlopen(req))["id"]
     n0 = len(page.errors)
     base = page.url.split("#")[0]
-    page.goto(base + "#/dash"); page.reload(); page.wait_for_timeout(1000)
+    page.goto(base + "#/dash"); page.reload(); quiet(page, 1000)
     page.goto(base + f"#/tour/{tid}")
     page.wait_for_selector("#wpcard", timeout=20000)
     assert page.locator("#storybtn").count() == 1
@@ -1025,14 +1028,14 @@ def test_record_weather_and_live_link(page, app_url):
         backups:()=>'[]', photoInfo:()=>'{}', weatherOn:()=>window._wxon, setWeather(b){window._wxon=b}, weatherInfo:()=>window._wx, shareText(t){window._shared=t},
         startRecording(){window._st.state='recording'}};
     """)
-    pg.goto(app_url + "/#/record"); pg.wait_for_timeout(1200)
+    pg.goto(app_url + "/#/record"); quiet(pg, 1200)
     assert pg.locator("#rwxon").is_checked()
     pg.uncheck("#rwxon"); assert pg.evaluate("window._wxon") is False
-    pg.click("#rlink"); pg.wait_for_timeout(1200)
+    pg.click("#rlink"); quiet(pg, 1200)
     assert "erstellt" in pg.inner_text("#rlmsg"), pg.inner_text("#rlmsg")
     assert "/pub/live/" in pg.evaluate("window._shared")
     pg.evaluate("window._wx = JSON.stringify({level:'danger', events:[{kind:'thunder', in_h:2, val:null},{kind:'wind', in_h:1, val:70}]})")
-    pg.click("#rstart"); pg.wait_for_timeout(2600)
+    pg.click("#rstart"); quiet(pg, 2600)
     t = pg.inner_text("#rwx")
     assert "Gewittergefahr in etwa 2 Stunden" in t and "Sturmböen bis 70 km/h in der nächsten Stunde" in t, t
     assert not errs, errs
@@ -1041,23 +1044,23 @@ def test_record_weather_and_live_link(page, app_url):
 
 def test_nav_statistik_und_entwicklermodus(page, app_url):
     """Menü: sechs Hauptpunkte; Rekorde/Auswertung unter „Statistik“; Prüfen in der Verwaltung; Entwickleransichten hinter einem Schalter."""
-    page.evaluate("() => localStorage.setItem('mt_debug', '0')"); page.reload(); page.wait_for_timeout(1500)
+    page.evaluate("() => localStorage.setItem('mt_debug', '0')"); page.reload(); quiet(page, 1500)
     keys = page.evaluate("() => [...document.querySelectorAll('#nav a')].map(a => a.dataset.k)")
     assert keys[:6] == ["dash", "map", "tours", "trips", "photos", "stats"] and "check" not in keys and "admin" not in keys
-    page.evaluate("() => location.hash = '#/records'"); page.wait_for_timeout(1200)
+    page.evaluate("() => location.hash = '#/records'"); quiet(page, 1200)
     assert page.locator(".segtabs a.on").inner_text() == "Rekorde"
     assert page.locator('#nav a[data-k="stats"]').get_attribute("class") == "on"
-    page.locator(".segtabs a", has_text="Auswertung").click(); page.wait_for_timeout(1200)
+    page.locator(".segtabs a", has_text="Auswertung").click(); quiet(page, 1200)
     assert page.locator(".segtabs a.on").inner_text() == "Auswertung"
-    page.locator("#hadm").click(); page.wait_for_timeout(1800)
+    page.locator("#hadm").click(); quiet(page, 1800)
     assert page.locator("#atabs .atlink").count() == 1
     assert not page.locator("#stest").is_visible()                     # Selbsttest: nur im Entwicklermodus
     page.locator('#atabs [data-t="uebersicht"]').click()
     page.locator("#dbgsw").check(); page.wait_for_timeout(2500)        # lädt neu
-    page.evaluate("() => location.hash = '#/admin'"); page.wait_for_timeout(1800)
+    page.evaluate("() => location.hash = '#/admin'"); quiet(page, 1800)
     page.locator('#atabs [data-t="uebersicht"]').click()
     assert page.locator("#stest").is_visible()
-    page.locator("#atabs .atlink").click(); page.wait_for_timeout(1200)
+    page.locator("#atabs .atlink").click(); quiet(page, 1200)
     assert "Prüfen" in page.locator("#main h1, #main h2").first.inner_text() and page.locator(".backl").count() == 1
     page.evaluate("() => localStorage.setItem('mt_debug', '0')")
     assert not page.errors, page.errors
@@ -1065,16 +1068,16 @@ def test_nav_statistik_und_entwicklermodus(page, app_url):
 
 def test_startseite_und_statistik_uebersicht(page, app_url):
     """Neue Startseite (zuletzt unterwegs, Jahr, letzte Touren); die bisherige Übersicht liegt unter Statistik."""
-    page.evaluate("() => location.hash = '#/dash'"); page.wait_for_timeout(1800)
+    page.evaluate("() => location.hash = '#/dash'"); quiet(page, 1800)
     assert page.locator("main.home .hlast h1").count() == 1 and page.locator(".hcards .hcard").count() >= 2
     assert page.locator('#nav a[data-k="dash"]').get_attribute("class") == "on"
     first = page.locator(".hlast h1").inner_text()
-    page.locator("#hnext").click(); page.wait_for_timeout(900)
+    page.locator("#hnext").click(); quiet(page, 900)
     assert page.locator(".hlast h1").inner_text() != first                      # Blättern zur vorherigen Tour
-    page.evaluate("() => location.hash = '#/stats'"); page.wait_for_timeout(1800)
+    page.evaluate("() => location.hash = '#/stats'"); quiet(page, 1800)
     assert page.locator(".segtabs a.on").inner_text() == "Übersicht" and page.locator(".figs .fig").count() >= 4
     assert page.locator('#nav a[data-k="stats"]').get_attribute("class") == "on"
-    page.locator(".years button").nth(1).click(); page.wait_for_timeout(1500)   # Jahr wählen bleibt in der Statistik
+    page.locator(".years button").nth(1).click(); quiet(page, 1500)   # Jahr wählen bleibt in der Statistik
     assert "y=" in page.url and page.locator(".segtabs a.on").inner_text() == "Übersicht"
     assert page.locator('#nav a[data-k="stats"]').get_attribute("class") == "on"
     assert not page.errors, page.errors
@@ -1093,7 +1096,7 @@ def test_bedienelemente_lesbar(page, app_url):
       return bad; }"""
     tid = page.evaluate("() => TOURS.find(t => t.source === 'local').id")
     for v in ("map", f"flight/{tid}", "dash", "photos", f"tour/{tid}", "stats"):
-        page.evaluate(f"() => location.hash = '#/{v}'"); page.wait_for_timeout(1500)
+        page.evaluate(f"() => location.hash = '#/{v}'"); quiet(page, 1500)
         bad = [b for b in page.evaluate(js) if "BUTTON.st" not in b]            # leere Bewertungssterne sind absichtlich blass
         assert not bad, (v, bad)
 

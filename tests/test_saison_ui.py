@@ -13,6 +13,7 @@ from tests.test_seitenlayout_ui import T, _api, _browser, _edit, pw  # noqa: F40
 from tests.test_reise_seiten_ui import app  # noqa: F401
 from tests.test_tourseite_ui import _shot
 from tests.test_bausteine_konfig_ui import open_gear, save_dialog
+from tests.helpers_ui import quiet  # noqa: E402
 
 TL = 30000
 KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik", "reise", "reisen", "fotos", "karte")
@@ -37,7 +38,7 @@ def _open(pw, url, widgets, **kw):
 def _go(pg, url):
     pg.goto(f"{url}/#/dash", timeout=TL)
     pg.wait_for_function("() => typeof SL === 'object' && !!document.querySelector('#slopen')", timeout=TL)
-    pg.wait_for_load_state("networkidle")
+    quiet(pg, 5000)
 
 
 def _wx(**kw):

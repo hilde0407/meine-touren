@@ -1,6 +1,6 @@
 """3.13.0 – Oberfläche (Browser, Chromium): einheitlicher Dialog (uiConfirm/uiAlert), Fortschrittsbalken, Auswertungsstand nach dem Neuladen, einklappbare Abschnitte,
 Sammel-Korrektur (Vorschau → Bestätigung → Job → Rückgängig). Der Datenbestand ist konstruiert; Hintergrundjobs und Korrektur-Endpunkte sind im Browser nachgebaut
-(Antworten per Route), die Vorschau und die Auswertung kommen vom echten Server. Screenshots: Desktop hell/dunkel und 390 px nach MT_SHOTS (Standard: shots5 im Scratchpad)."""
+(Antworten per Route), die Vorschau und die Auswertung kommen vom echten Server. Screenshots: Desktop hell/dunkel und 390 px nach MT_SHOTS (nur wenn gesetzt)."""
 import json
 import os
 import socket
@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-SHOTS = Path(os.environ.get("MT_SHOTS", "/tmp/claude-0/-home-claude/f54b925a-8de6-50e7-aa7b-7917dc966b86/scratchpad/shots5"))
+SHOTS = Path(os.environ["MT_SHOTS"]) if os.environ.get("MT_SHOTS") else None
 
 SEED = r"""
 import sys, os, json, random, time, datetime; sys.path.insert(0, %(root)r); os.environ['DATA_DIR'] = %(data)r
@@ -112,6 +112,8 @@ def _page(pw, app_url, width=1280, height=1000, scheme="light", dpr=1, lang="de"
 
 
 def _shot(pg, name):
+    if SHOTS is None:
+        return
     try:
         SHOTS.mkdir(parents=True, exist_ok=True)
         pg.screenshot(path=str(SHOTS / name))

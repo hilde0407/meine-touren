@@ -12,6 +12,7 @@ from tests.test_seitenlayout_ui import T, _api, _browser, _edit, _saved, pw  # n
 from tests.test_reise_seiten_ui import app, _done, _saved_doc  # noqa: F401
 from tests.test_bausteine_ui import TEXTCONTRAST  # noqa: E402
 from tests.test_tourseite_ui import _shot
+from tests.helpers_ui import quiet  # noqa: E402
 
 TL = 30000
 KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik", "reise", "reisen", "fotos", "karte")
@@ -194,10 +195,12 @@ def test_map_is_refitted_after_layout_change_but_keeps_a_user_view(pw, app):
         pg.wait_for_function("() => document.getElementById('bigmap').clientWidth > 900", timeout=T)
         _mapok(pg)
         # eine selbst gewählte Ansicht geht bei einer Größenänderung nicht verloren
-        pg.wait_for_load_state("networkidle")
+        quiet(pg, 5000)
         pg.evaluate("() => { map.setView([48.005, 11.01], 15, {animate: false}); map._kaUser = true; window.__m0 = map; }")
+        quiet(pg, 3000, 700)                                                             # moveend entprellt „Details nachladen“ (350 ms) und kann Karte/Ebenen noch umbauen: erst dann ändern
         pg.locator('.slit[data-sl="karte"] [data-a="w"][data-w="halb"]').click()
         pg.wait_for_function("() => document.getElementById('bigmap').clientWidth < 760 && Math.abs(map.getSize().x - document.getElementById('bigmap').clientWidth) <= 1", timeout=T)
+        quiet(pg, 3000, 700)                                                             # Layout fertig (ResizeObserver, Nachlader), erst dann „Ansicht bleibt“ prüfen
         # dieselbe Karte, derselbe Zoom: der selbst gewählte Ausschnitt bleibt
         assert pg.evaluate("() => map === window.__m0 && map.getZoom()") == 15
         assert not pg.errors, pg.errors

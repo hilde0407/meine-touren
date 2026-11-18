@@ -10,6 +10,7 @@ import urllib.request
 from pathlib import Path
 
 import pytest
+from tests.helpers_ui import quiet  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 T0 = 1750000000
@@ -136,7 +137,7 @@ def _page(pw, url, tid, width=1280, height=1000, scheme="light", dpr=1, locale="
         pg.wait_for_selector(wait, timeout=15000)
     pg.wait_for_function("() => { const l = document.querySelector('#tlload'); return !!l && l.hidden; }", timeout=15000)       # Unterseite fertig: alle Karten eingehängt
     if not wait:
-        pg.wait_for_timeout(1500)
+        quiet(pg, 1500)
     pg.wait_for_timeout(300)
     pg.browser_ = b
     return pg

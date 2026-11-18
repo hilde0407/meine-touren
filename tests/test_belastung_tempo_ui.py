@@ -9,6 +9,7 @@ import urllib.request
 from pathlib import Path
 
 import pytest
+from tests.helpers_ui import quiet  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -122,7 +123,7 @@ def _page(pw, url, hash_, wait, width=1280, height=1000, scheme="light", dpr=1, 
     if wait:
         pg.wait_for_selector(wait, timeout=15000)
     else:
-        pg.wait_for_timeout(2500)
+        quiet(pg, 2500)
     if hash_.endswith("/auswertung"):                                                    # Unterseite fertig: alle Karten eingehängt (Nachlade-Abschnitte)
         pg.wait_for_function("() => { const l = document.querySelector('#tlload'); return !!l && l.hidden; }", timeout=15000)
     pg.wait_for_timeout(400)

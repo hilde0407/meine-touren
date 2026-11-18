@@ -15,6 +15,7 @@ from pathlib import Path
 import pytest
 
 from tests.test_tourseite_ui import (CONTRAST, DEV1, HR_JSON, LAUNCH, READY_SUB, SEED, WPS_JSON, WX_JSON, _ready_main, _shot, _wait, uhr_json)
+from tests.helpers_ui import quiet  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 T = 15000
@@ -102,7 +103,7 @@ def _tour(pw, url, sub=False, tour="r3", devs="one", **kw):
     else:
         _ready_main(pg, bool(devs), tlsum=tour != "n0")
     pg.wait_for_function("() => typeof SL === 'object' && !!document.querySelector('#slopen')", timeout=T)
-    pg.wait_for_timeout(1500)                                   # Nachlade-Abschnitte (Analyse, Ähnliche …) setzen sich; danach prüfen wir den Zustand, nicht die Zeit
+    quiet(pg, 1500)                                   # Nachlade-Abschnitte (Analyse, Ähnliche …) setzen sich; danach prüfen wir den Zustand, nicht die Zeit
     return pg
 
 
@@ -551,10 +552,12 @@ OVU = "() => [...document.querySelectorAll('main.home .slit')].map(w => w.datase
 def test_overview_default_and_reorder_hide_and_widgets(pw, app):
     pg = _dash(pw, app)
     try:
+        quiet(pg, 3000)                                                                             # Bausteine mit Nachladen (Zepp-Import, Zuletzt …) sind eingehängt, erst dann die Reihenfolge lesen
         base = pg.evaluate(OV)
         assert base[:4] == ["hlast", "hyear", "zeppimport", "hrecent"], base                       # heutiges Verhalten; 3.30.0: plus „Zepp-Import“ hinter „Dein Jahr“
         assert pg.locator("main.home .slit").count() == 0
         _edit(pg)
+        quiet(pg, 3000)
         assert pg.evaluate(OVU)[:4] == ["aufmacher", "jahr", "zepp", "zuletzt"]
         pg.locator('.slit[data-sl="jahr"] [data-a="up"]').click()
         pg.wait_for_function("() => document.querySelector('main.home .slit').dataset.sl === 'jahr'", timeout=T)
@@ -571,7 +574,7 @@ def test_overview_default_and_reorder_hide_and_widgets(pw, app):
         o = pg.evaluate(OV)
         assert "hrecent" not in o and o[-1] == "periode", o
         _saved(pg) if pg.locator("#slsaved").count() else None
-        pg.wait_for_function("() => true")
+        quiet(pg, 3000)                                                                             # Speichern (entprellt) abgeschlossen
         srv = _server(app, "uebersicht")
         assert srv["order"][:2] == ["jahr", "aufmacher"] and srv["hidden"] == ["zuletzt"] and srv["widgets"][0]["type"] == "periode"
         pg.reload()
@@ -672,7 +675,7 @@ def test_contrast_and_screenshots_light_and_dark(pw, app, scheme):
         pg.wait_for_function("() => !document.querySelector('.slit')", timeout=T)
         pg.goto(f"{app}/#/tour/r3/auswertung")
         pg.wait_for_function(READY_SUB, timeout=T)
-        pg.wait_for_timeout(1200)
+        quiet(pg, 1200)
         _shot(pg, f"auswertung-desktop-{scheme}-mit-bausteinen.png")
         assert not pg.errors, pg.errors
     finally:
@@ -681,7 +684,7 @@ def test_contrast_and_screenshots_light_and_dark(pw, app, scheme):
     pg = _dash(pw, app, scheme=scheme, dpr=2)
     try:
         pg.wait_for_function("() => [0,1,2,3].every(i => { const b = document.querySelector('#tlw-w' + i + ' .tlsb'); return b && !/Wird geladen/.test(b.textContent); })", timeout=T)
-        pg.wait_for_timeout(800)
+        quiet(pg, 800)
         _shot(pg, f"uebersicht-desktop-{scheme}.png")
         _edit(pg)
         pg.evaluate("window.scrollTo(0, 0)")
@@ -704,7 +707,7 @@ def test_viewer_gets_no_edit_mode_and_not_the_owners_layout(pw, app):
         pg.evaluate("route()")
         pg.wait_for_selector("#tl:not([data-alt]) #tls-photos", timeout=T)
         pg.wait_for_function("() => document.querySelectorAll('#tl details.tls').length >= 5", timeout=T)
-        pg.wait_for_timeout(1500)
+        quiet(pg, 1500)
         assert pg.evaluate(SECS) == MAIN_ORDER and pg.locator("#slopen").count() == 0 and pg.locator('[data-wtype="notiz"]').count() == 0
         assert pg.evaluate("typeof slEdit === 'function' && (slEdit(true), document.querySelectorAll('.slit').length + document.querySelectorAll('#slbar').length)") == 0
         assert not pg.errors, pg.errors

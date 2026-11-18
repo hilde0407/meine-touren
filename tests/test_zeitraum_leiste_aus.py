@@ -15,6 +15,7 @@ from tests.test_core import fresh  # noqa: F401,E402
 from tests.test_seitenlayout_ui import T, _api, _browser, _edit, _saved, pw  # noqa: F401,E402
 from tests.test_reise_seiten_ui import app, _done, _saved_doc  # noqa: F401,E402
 from tests.test_tourseite_ui import _shot  # noqa: E402
+from tests.helpers_ui import quiet  # noqa: E402
 
 TL = 30000
 CY = datetime.date.today().year
@@ -88,7 +89,7 @@ def _dash(pw, url, hash_="#/dash", width=1280, height=1000, scheme="light", dpr=
     pg.goto(f"{url}/{hash_}", timeout=TL)
     pg.wait_for_function("() => typeof SL === 'object' && !!document.querySelector('#slopen') && !!document.querySelector('#hlast') && !!window.ZR_READY", timeout=TL)
     try:
-        pg.wait_for_load_state("networkidle", timeout=10000)
+        quiet(pg, 5000)
     except Exception:
         pass
     return pg

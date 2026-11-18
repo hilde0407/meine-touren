@@ -14,6 +14,7 @@ import urllib.request
 from pathlib import Path
 
 import pytest
+from tests.helpers_ui import quiet  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -121,7 +122,8 @@ def _page(pw, url, tour="r3", devs="one", width=1280, height=1000, scheme="light
         pg.wait_for_function(READY_SUB, timeout=15000)
     else:
         _ready_main(pg, devs, tlsum=tour != "n0")
-    pg.wait_for_timeout(settle)
+    quiet(pg, settle)
+    _settled(pg)
     pg.browser_ = b
     return pg
 
@@ -281,9 +283,9 @@ def test_entry_card_keyboard_and_whole_card_clickable(pw, app):
         pg.go_back()
         pg.wait_for_selector("#tlsum", timeout=15000)
         _ready_main(pg)
-        pg.wait_for_timeout(1800)                                                      # Seite fertig aufgebaut (Karte, Fotos), dann ändert sich nichts mehr
+        quiet(pg, 1800)                                                      # Seite fertig aufgebaut (Karte, Fotos), dann ändert sich nichts mehr
         pg.locator("#tlsum").scroll_into_view_if_needed()
-        pg.wait_for_timeout(1500)                                                      # weiches Scrollen abwarten
+        quiet(pg, 1500)                                                      # weiches Scrollen abwarten
         box = pg.locator("#tlsum").bounding_box()
         pg.mouse.click(box["x"] + box["width"] - 30, box["y"] + 25)                     # Klick irgendwo in die Karte
         pg.wait_for_selector("#tlback", timeout=15000)
@@ -312,7 +314,7 @@ def test_main_state_is_remembered(pw, app):
     try:
         pg.locator("#tls-wp > summary").click()
         pg.wait_for_function("() => { try { return localStorage.getItem('mt_trf_tl_wp') === '0'; } catch (e) { return false; } }", timeout=15000)
-        pg.reload(); _ready_main(pg); pg.wait_for_timeout(1500)
+        pg.reload(); _ready_main(pg); quiet(pg, 1500)
         o = pg.evaluate(OPEN)
         assert not o["wp"] and o["map"] and o["photos"]
         assert not pg.errors, pg.errors
@@ -449,7 +451,7 @@ def test_expand_all_collapse_all_and_state_is_remembered(pw, app):
         pg.wait_for_function("() => [...document.querySelectorAll('#tl details.tls')].every(x => x.open)", timeout=15000)
         assert all(pg.evaluate(OPEN).values())
         assert pg.evaluate("document.querySelectorAll('#tl details.tls[open]').length") == len(SUB_ORDER)
-        pg.reload(); pg.wait_for_function(READY_SUB, timeout=15000); pg.wait_for_timeout(1500)
+        pg.reload(); pg.wait_for_function(READY_SUB, timeout=15000); quiet(pg, 1500)
         pg.wait_for_function("() => { const d = [...document.querySelectorAll('#tl details.tls')]; return d.length > 0 && d.every(x => x.open); }", timeout=15000)
         assert all(pg.evaluate(OPEN).values())                                          # Zustand bleibt nach dem Neuladen (Direktaufruf der Unterseite)
         pg.locator("#tlall").click()
@@ -458,7 +460,7 @@ def test_expand_all_collapse_all_and_state_is_remembered(pw, app):
         assert not any(pg.evaluate(OPEN).values())
         pg.locator("#tls-ana > summary").click()
         pg.wait_for_function("() => { try { return localStorage.getItem('mt_trf_tl_ana') === '1'; } catch (e) { return false; } }", timeout=15000)
-        pg.reload(); pg.wait_for_function(READY_SUB, timeout=15000); pg.wait_for_timeout(1500)
+        pg.reload(); pg.wait_for_function(READY_SUB, timeout=15000); quiet(pg, 1500)
         pg.wait_for_function("() => { const a = document.querySelector('#tls-ana'), m = document.querySelector('#tls-met'), u = document.querySelector('#tls-uhr'); return !!a && !!m && !!u && a.open && !m.open && !u.open; }", timeout=15000)
         o = pg.evaluate(OPEN)
         assert o["ana"] and not o["met"] and not o["uhr"]
@@ -567,7 +569,7 @@ def test_mobile_390_no_horizontal_scroll(pw, app, scheme, sub):
     try:
         pg.evaluate("tlSetAll(true)")
         pg.wait_for_function("() => [...document.querySelectorAll('#tl details.tls')].filter(d => !d.hidden).every(d => d.open)", timeout=15000)
-        pg.wait_for_timeout(1000)
+        quiet(pg, 1000)
         assert pg.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"), pg.evaluate("[document.documentElement.scrollWidth, innerWidth]")
         over = pg.evaluate("[...document.querySelectorAll('#tl details.tls, #tl .tlsb, #tlnav, #tl .tldev, #tlsum, .tlsubt, .tlsubfig')].filter(e => e.getBoundingClientRect().right > innerWidth + 1).map(e => e.id || e.className)")
         assert not over, over
@@ -612,12 +614,12 @@ def test_contrast_in_light_and_dark(pw, app, scheme):
         low = {k: round(v, 2) for k, v in c.items() if v < 4.5}
         assert not low, f"{scheme}: Kontrast unter 4,5:1 (Unterseite): {low}"
         _shot(pg, f"auswertung-desktop-{scheme}-zwei-geraete-standard.png")
-        pg.evaluate("tlSetAll(true)"); pg.wait_for_timeout(1200)
+        pg.evaluate("tlSetAll(true)"); quiet(pg, 1200)
         _shot(pg, f"auswertung-desktop-{scheme}-zwei-geraete-aufgeklappt.png")
         pg.close()
         pg = _page(pw, app, devs="one", scheme=scheme, dpr=2, sub=True)
         _shot(pg, f"auswertung-desktop-{scheme}-ein-geraet-standard.png")
-        pg.evaluate("tlSetAll(true)"); pg.wait_for_timeout(1200)
+        pg.evaluate("tlSetAll(true)"); quiet(pg, 1200)
         _shot(pg, f"auswertung-desktop-{scheme}-ein-geraet-aufgeklappt.png")
         pg.close()
         pg = _page(pw, app, devs="one", scheme=scheme, dpr=2)
@@ -677,10 +679,10 @@ def test_viewer_sees_both_pages_without_edit_buttons(pw, app):
         pg.evaluate("ME.user = {role: 'viewer', uid: 9, name: 'Oma'}; document.documentElement.classList.add('viewer')")
         pg.evaluate("document.querySelector('#tl').dataset.alt = '1'; window.__sigw = null")          # alte Seite markieren: die neu gezeichnete (ohne Marke) abwarten
         pg.evaluate("route()")
-        pg.wait_for_selector("#tl:not([data-alt]) #tls-photos", timeout=15000); _ready_main(pg); pg.wait_for_timeout(1800)
+        pg.wait_for_selector("#tl:not([data-alt]) #tls-photos", timeout=15000); _ready_main(pg); quiet(pg, 1800)
         assert pg.evaluate(SECS) == MAIN_ORDER and pg.locator("#tlsgo").is_visible()
         pg.locator("#tlsgo").click()
-        pg.wait_for_function(READY_SUB, timeout=15000); pg.wait_for_timeout(800)
+        pg.wait_for_function(READY_SUB, timeout=15000); quiet(pg, 800)
         assert pg.evaluate(SECS) == SUB_ORDER
         assert pg.locator("#devedit").count() == 0 and pg.locator("#utneu").count() == 0
         assert pg.locator("#tlnav .tlchip").count() == 4

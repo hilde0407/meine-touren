@@ -4,6 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from tests.test_core import fresh  # noqa: F401
+from tests.helpers_ui import quiet  # noqa: E402
 from app import db, photos, routes  # noqa
 
 T0 = 1_700_000_000 - 8 * 3600      # Mittag (Ortszeit), damit nichts über Mitternacht läuft
@@ -143,7 +144,7 @@ def test_browser_add_photos_to_tour_with_wrong_camera_clock(tour_server):
     import random
     base, tid, d = tour_server
     from datetime import datetime, timedelta
-    src = d / "fotos"; src.mkdir()
+    src = d / "fotos"; src.mkdir(exist_ok=True)           # exist_ok: --reruns wiederholt den Test im selben Modul-Ordner
     true_start = datetime(2025, 6, 14, 9, 0, 0)
     truth = []
     for i in range(6):
@@ -161,7 +162,9 @@ def test_browser_add_photos_to_tour_with_wrong_camera_clock(tour_server):
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.goto(f"{base}/#/tour/{tid}"); pg.wait_for_selector("#padd", timeout=15000)
+        quiet(pg, 3000)                                                      # Seite fertig aufgebaut, erst dann klicken (ein zu früher Klick erzeugt das Dateifeld nicht)
         pg.click("#padd")
+        pg.wait_for_selector("#pfil", state="attached", timeout=15000)
         pg.set_input_files("#pfil", [str(p) for p in sorted(src.glob("*.jpg"))])
         pg.wait_for_selector("#pigo:not([disabled])", timeout=20000)
         txt = pg.inner_text("#pib")

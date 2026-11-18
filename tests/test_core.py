@@ -2,8 +2,10 @@ import os, sys, time
 from pathlib import Path
 import pytest
 
-SAMPLE = Path("/tmp/meine_touren_test_photos")
-os.environ["DATA_DIR"] = str(Path("/tmp/komoot_hub_test"))
+_W = os.environ.get("PYTEST_XDIST_WORKER", "")          # bei pytest-xdist hat jeder Worker eigene Verzeichnisse (sonst löschen sich die Prozesse gegenseitig die Datenbank)
+_TMP = Path(__import__("tempfile").gettempdir())
+SAMPLE = _TMP / f"meine_touren_test_photos{_W}"
+os.environ["DATA_DIR"] = str(_TMP / f"komoot_hub_test{_W}" / "data")          # eigener Elternordner: test_stabil prüft, dass nichts neben DATA_DIR entsteht (früher: ganz /tmp)
 os.environ["PHOTOS_DIR"] = str(SAMPLE)
 os.environ["FAKE"] = "1"
 os.environ["MT_NO_SCHEDULER"] = "1"

@@ -12,6 +12,7 @@ expect = pytest.importorskip("playwright.sync_api").expect
 from tests.test_seitenlayout_ui import T, _api, _zr_on, pw  # noqa: F401,E402
 from tests.test_reise_seiten_ui import app  # noqa: F401,E402
 from tests.test_tourseite_ui import _shot  # noqa: E402
+from tests.helpers_ui import quiet  # noqa: E402
 
 TL = 30000
 KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik", "reise", "reisen", "fotos", "karte")
@@ -46,7 +47,7 @@ def _mob(pw, url, hash_, scheme="light", width=390, height=844, mobile=True, ini
 def _idle(pg):
     """Netzwerk-Ruhe abwarten; läuft im Hintergrund eine Abfrage im Takt (Nachladen von Strecken), reicht nach 10 s der Zustand der Seite."""
     try:
-        pg.wait_for_load_state("networkidle", timeout=10000)
+        quiet(pg, 5000)
     except Exception:
         pass
 
@@ -279,7 +280,7 @@ def test_karte_chips_ohne_hoehensprung(pw, app, scheme):
         pg.wait_for_selector(".mapui .chip", state="attached", timeout=TL)
         pg.wait_for_function("() => !!document.querySelector('#kax #bigmap') && typeof map !== 'undefined' && !!map && !!document.querySelector('.mapui #slopen') && document.getElementById('bigmap').clientWidth > 300", timeout=TL)
         _idle(pg)
-        pg.wait_for_timeout(1500)                                                      # nach Netzwerk-Ruhe noch 1,5 s: späte Skripte und Stile haben gegriffen
+        quiet(pg, 1500)                                                      # nach Netzwerk-Ruhe noch 1,5 s: späte Skripte und Stile haben gegriffen
         rec = pg.evaluate("() => window.__ka")
         assert len(rec) >= 8, rec
         jumps = {k: v for k, v in rec.items() if v["max"] - v["min"] > 1 or abs(v["last"] - v["first"]) > 1}

@@ -7,6 +7,7 @@ import time
 
 import pytest
 
+from tests.helpers_ui import quiet
 from tests.test_statistik_ui import _api, _browser, _shot, app, clean, pw, T  # noqa: F401
 from tests.test_tourseite_ui import CONTRAST, _settled
 
@@ -33,6 +34,7 @@ class Fake:
     def __init__(self, conf=True, last=None, job=None, garmin=False, suunto=False, geraete=None, glast=None, slast=None):
         self.conf, self.last, self.job, self.garmin, self.suunto, self.geraete, self.glast, self.slast = conf, last, job or _job(), garmin, suunto, geraete or [], glast, slast
         self.posts, self.tours, self.script, self.conflict, self.keys = 0, 0, [], False, []
+        self.start_script = []                 # Verlauf, der erst NACH dem Start (POST) abgespielt wird: ein Abruf von /api/jobs vor dem Klick (Hintergrundabfrage der Seite) verbraucht ihn nicht
 
     def status(self):
         run = self.job.get("running")
@@ -59,6 +61,8 @@ def _page(pw, url, fake, width=1280, height=900, scheme="light", dpr=1, layout=N
         if fake.conflict or fake.job.get("running"):                      # wie der Server: ein Lauf zur Zeit
             return r.fulfill(status=409, body=json.dumps({"detail": "Es läuft bereits ein Job"}), headers={"content-type": "application/json"})
         fake.job = _job(running=JOBL[key], started=time.time())
+        if fake.start_script:
+            fake.script, fake.start_script = list(fake.start_script), []
         r.fulfill(json={"started": JOBL[key]})
 
     def tours(r):
@@ -96,7 +100,7 @@ def test_standard_layout_zeigt_knopf_und_startet_den_import(pw, app, clean):
         expect(card.locator(".zpt")).to_contain_text("Letzter Lauf:", timeout=T)
         expect(card.locator(".zpt")).to_contain_text("Keine neuen Trainings.", timeout=T)
         before = fake.tours
-        fake.script = [_job(running=LABEL, progress="Export 1/5", done=1, total=5), _job(running=LABEL, progress="Export 3/5", done=2, total=5)]
+        fake.start_script = [_job(running=LABEL, progress="Export 1/5", done=1, total=5), _job(running=LABEL, progress="Export 3/5", done=2, total=5)]
         btn.click()
         expect(btn).to_contain_text("Import läuft", timeout=T)
         assert btn.is_disabled() and fake.posts == 1
@@ -303,7 +307,7 @@ def test_handy_schnellknopf_in_der_kopfzeile_ohne_scrollen_und_startet(pw, app, 
         b = q.bounding_box()
         assert pg.evaluate("() => scrollY") == 0 and b["y"] + b["height"] <= 400 and b["height"] >= 48 and b["width"] >= 300, b       # ganz oben, volle Breite, Touch-Ziel
         _shot(pg, "zepp-schnellknopf-390.png", full=False)
-        fake.script = [_job(running=LABEL, done=0, total=4)]
+        fake.start_script = [_job(running=LABEL, done=0, total=4)]
         q.click()
         expect(q).to_contain_text("Zepp läuft", timeout=T)
         assert q.is_disabled() and fake.posts == 1
@@ -358,7 +362,7 @@ def test_eine_quelle_garmin_beschriftung_start_und_ergebnis(pw, app, clean):
         assert "Zepp" not in pg.locator("#slzepp").inner_text() and pg.locator("#slzepp").get_attribute("aria-haspopup") is None
         expect(card.locator(".zpt")).to_contain_text("2 neue Touren übernommen", timeout=T)
         expect(card.locator(".zpt")).to_contain_text("1 schon vorhanden", timeout=T)
-        fake.script = [_job(running="Garmin-Import", done=1, total=5)]
+        fake.start_script = [_job(running="Garmin-Import", done=1, total=5)]
         btn.click()
         assert fake.keys == ["garmin-import"]                                             # der Garmin-Job, nicht der Zepp-Job
         expect(card.locator(".zpt")).to_contain_text("Tour 2 von 5", timeout=T)
@@ -421,7 +425,8 @@ def test_mehrere_quellen_schnellknopf_menue(pw, app, clean):
         _ready(pg)
         q = pg.locator("#slzepp")
         expect(q).to_contain_text("Touren holen", timeout=T)
-        assert q.get_attribute("aria-haspopup") == "menu" and q.get_attribute("aria-expanded") == "false"
+        expect(q).to_have_attribute("aria-haspopup", "menu", timeout=T)           # der Knopf wird erst mit der Antwort von /api/import-quellen zum Menü-Knopf (vorher: einfacher Knopf)
+        assert q.get_attribute("aria-expanded") == "false"
         menu = pg.locator("#slzmenu")
         assert menu.is_hidden()
         q.click()
@@ -437,11 +442,14 @@ def test_mehrere_quellen_schnellknopf_menue(pw, app, clean):
         pg.wait_for_function("() => document.activeElement && document.activeElement.id === 'slzepp'", timeout=T)
         q.click()
         expect(menu).to_be_visible(timeout=T)
+        quiet(pg, 3000)
         pg.mouse.click(5, 600)                                               # Klick außerhalb schließt
         expect(menu).to_be_hidden(timeout=T)
         q.click()
         expect(menu).to_be_visible(timeout=T)
+        pg.wait_for_function("() => document.activeElement && document.activeElement.classList.contains('zpmi')", timeout=T)       # Fokus im Menü, erst dann Tasten (sonst verpufft der Pfeil)
         pg.keyboard.press("ArrowDown")
+        pg.wait_for_function("() => document.activeElement.dataset.k === 'garmin'", timeout=T)
         pg.keyboard.press("Enter")                                           # per Tastatur: Garmin starten
         expect(menu).to_be_hidden(timeout=T)
         expect(q).to_contain_text("Garmin läuft", timeout=T)
@@ -457,6 +465,7 @@ def test_menue_alle_holen_und_handy_390(pw, app, clean):
         _ready(pg)
         q = pg.locator("#slzepp")
         expect(q).to_contain_text("Touren holen", timeout=T)
+        expect(q).to_have_attribute("aria-haspopup", "menu", timeout=T)           # erst Menü-Knopf, dann klicken (vorher startet der Klick einen Import)
         q.click()
         menu = pg.locator("#slzmenu")
         expect(menu).to_be_visible(timeout=T)
@@ -550,7 +559,7 @@ def test_baustein_touren_knopf_eine_quelle_und_katalog(pw, app, clean):
         expect(w.locator(".zpt")).to_contain_text("2 neue Touren übernommen", timeout=T)
         assert w.locator(".zpsrc, .zpall, ul").count() == 0                      # kompakt: nur Knopf und Statuszeile
         assert btn.bounding_box()["height"] >= 44
-        fake.script = [_job(running="Garmin-Import", done=0, total=3)]
+        fake.start_script = [_job(running="Garmin-Import", done=0, total=3)]
         btn.click()
         assert fake.keys == ["garmin-import"]
         expect(w.locator(".zpt")).to_contain_text("Tour 1 von 3", timeout=T)
@@ -571,7 +580,7 @@ def test_baustein_touren_knopf_mehrere_quellen_menue_und_einrichten(pw, app, cle
         w = pg.locator('[data-wtype="holenknopf"]')
         mb = w.locator("button.zpmb")
         expect(mb).to_contain_text("Touren holen", timeout=T)
-        assert mb.get_attribute("aria-haspopup") == "menu"
+        expect(mb).to_have_attribute("aria-haspopup", "menu", timeout=T)           # Menü-Knopf erst nach der Antwort von /api/import-quellen
         expect(w.locator(".zpt")).to_contain_text("Letzter Lauf:", timeout=T)
         mb.click()
         menu = w.locator(".zpmenu")
@@ -584,8 +593,10 @@ def test_baustein_touren_knopf_mehrere_quellen_menue_und_einrichten(pw, app, cle
         assert fake.keys == ["garmin-import"]
         expect(w.locator("button.zpmb")).to_contain_text("Import läuft", timeout=T)
         assert w.locator("button.zpmb").is_disabled()
+        quiet(pg, 3000)                                                      # entprelltes Speichern des Layouts abwarten, bevor die Seite verschwindet
     finally:
         pg.browser_.close()
+    _api(app, "uebersicht", "DELETE")                                        # zweiter Teil beginnt ohne den Baustein (sonst „Bereits hinzugefügt“: Zustand aus Teil 1)
     fake = Fake(conf=False, geraete=[{"kind": "garmin", "label": "Garmin", "konto": True}])
     pg = _page(pw, app, fake)
     try:

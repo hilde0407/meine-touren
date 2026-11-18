@@ -9,6 +9,7 @@ import urllib.request
 from pathlib import Path
 
 import pytest
+from tests.helpers_ui import open_details, quiet, toggle_details  # noqa: E402
 
 expect = pytest.importorskip("playwright.sync_api").expect
 
@@ -106,7 +107,7 @@ def _page(pw, url, hash_, wait, width=1280, height=1000, scheme="light", dpr=1, 
     if wait:
         pg.wait_for_selector(wait, timeout=15000)
     else:
-        pg.wait_for_timeout(2500)
+        quiet(pg, 2500)
     if hash_.endswith("/auswertung"):                                                    # Unterseite fertig: alle Karten eingehängt (Nachlade-Abschnitte)
         pg.wait_for_function("() => { const l = document.querySelector('#tlload'); return !!l && l.hidden; }", timeout=15000)
     pg.wait_for_timeout(400)
@@ -123,9 +124,7 @@ def _shot(pg, name, sel="#aehncard"):
 
 
 def _open(pg):
-    if not pg.locator("#aehncard details").evaluate("e => e.open"):
-        pg.locator("#aehncard details > summary").click()
-    pg.wait_for_function("() => { const d = document.querySelector('#aehncard details'); return !!d && d.open; }", timeout=15000)
+    open_details(pg, "#aehncard details", True)                                          # Zustand setzen statt prüfen-und-klicken (der Baustein baut sich beim Nachladen neu auf)
     pg.wait_for_selector("#aehncard .aer", timeout=15000)
     pg.wait_for_selector("#aehncard .aesvg", timeout=15000)
 
@@ -156,14 +155,14 @@ def test_card_collapsed_by_default_with_key_statement_and_state_is_remembered(pw
         assert "Ähnliche Touren im Vergleich" in key and "6 Wiederholungen" in key
         assert "Bestes Tempo bisher" in key                                              # r5 (6300 s) ist schneller als alle früheren Läufe
         assert pg.locator("#aehncard .aer").first.is_hidden()                              # zugeklappt: Zeilen nicht sichtbar
-        pg.locator("#aehncard summary").click()
+        toggle_details(pg, "#aehncard details", True)
         pg.wait_for_function("() => { try { return localStorage.getItem('mt_trf_aehn') === '1'; } catch (e) { return false; } }", timeout=15000)
         assert d.evaluate("e => e.open")
         pg.reload(); pg.wait_for_selector("#aehncard", timeout=15000)
         pg.wait_for_function("() => { const d = document.querySelector('#aehncard details'); return !!d && d.open; }", timeout=15000)      # Zustand bleibt (nach dem Nachladen)
         assert pg.locator("#aehncard details").evaluate("e => e.open")
         pg.wait_for_selector("#aehncard .aesvg", timeout=15000)
-        pg.locator("#aehncard summary").click()
+        toggle_details(pg, "#aehncard details", False)
         pg.wait_for_function("() => { try { return localStorage.getItem('mt_trf_aehn') === '0'; } catch (e) { return false; } }", timeout=15000)
         assert pg.evaluate("localStorage.getItem('mt_trf_aehn')") == "0" and pg.locator("#aehncard summary").evaluate("e => getComputedStyle(e).cursor") == "pointer"
         assert not pg.errors, pg.errors
@@ -210,7 +209,7 @@ def test_key_statement_faster_than_some(pw, apps):
     pg = _page(pw, apps["full"], "tour/r6/auswertung", "#aehncard")
     try:
         assert "Schneller als 3 von 5 früheren Läufen" in pg.locator("#aehncard summary").inner_text()
-        pg.locator("#aehncard summary").click()
+        toggle_details(pg, "#aehncard details", True)
         expect(pg.locator("#aehncard .aer", has_text="Schnellster Lauf")).to_have_count(1, timeout=15000)        # (kein festes Datum: die Daten sind relativ zu „heute“)
         assert not pg.errors, pg.errors
     finally:
@@ -239,7 +238,7 @@ def test_key_statement_first_run_and_missing_time_of_current(pw, apps):
 def test_absent_without_repeat(pw, apps):
     pg = _page(pw, apps["single"], "tour/e0", "#profcard")
     try:
-        pg.wait_for_timeout(2500)
+        quiet(pg, 2500)
         pg.wait_for_function("() => { const p = document.querySelector('#profcard'); return !!p && !/Wird geladen/.test(p.textContent); }", timeout=15000)       # Höhenprofil fertig (Karten würden hier eingehängt)
         assert pg.locator("#aehncard").count() == 0 and "Ähnliche Touren" not in pg.locator("body").inner_text() and not pg.errors, pg.errors
     finally:
@@ -299,7 +298,7 @@ def test_mobile_390_no_horizontal_scroll(pw, apps, scheme):
         assert r["x"] >= 0 and r["x"] + r["width"] <= 391
         assert pg.evaluate("[...document.querySelectorAll('#aehncard .aec b, #aehncard .aed')].every(e => e.getBoundingClientRect().right <= innerWidth)")
         _shot(pg, f"aehnliche-mobil-{scheme}.png")
-        pg.locator("#aehncard summary").click()
+        toggle_details(pg, "#aehncard details", False)
         _shot(pg, f"aehnliche-mobil-{scheme}-zu.png")
         assert not pg.errors, pg.errors
     finally:

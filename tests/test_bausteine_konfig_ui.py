@@ -18,6 +18,7 @@ from pathlib import Path
 from tests.test_bausteine_ui import EXTRA, T, TEXTCONTRAST, _api, _edit, _reset, _shot, _tour  # noqa: F401
 from tests.test_bausteine_ui import pw  # noqa: F401  (Fixture)
 from tests.test_tourseite_ui import LAUNCH, SEED, _wait
+from tests.helpers_ui import quiet  # noqa: E402
 
 # Zusätzliche Touren im laufenden Jahr, damit der Aktivitätsfilter die Zahlen wirklich verändert (Tage vor heute, Sportart, Strecke in m)
 MORE = """
@@ -158,7 +159,7 @@ def test_dein_jahr_can_be_hidden_and_stays_hidden(pw, app):
         pg.locator("#slbar").get_by_role("button", name="Fertig").click()
         pg.wait_for_function("() => !document.querySelector('.slit') && !document.querySelector('#hyear:not(.sl-off)')", timeout=T)
         pg.wait_for_function(SAVED) if pg.locator("#slsaved").count() else None
-        pg.wait_for_function("() => true")
+        quiet(pg, 3000)                                                                  # entprelltes Speichern abgeschlossen
         assert _api(app, "uebersicht")["layout"]["hidden"] == ["jahr"]
         pg.reload()
         pg.wait_for_selector("main.home #hlast", timeout=T)

@@ -13,6 +13,7 @@ import urllib.request
 from pathlib import Path
 
 import pytest
+from tests.helpers_ui import quiet  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -108,7 +109,7 @@ def _shot(pg, name):
 def _ruhe(pg):
     """Netzwerk-Ruhe abwarten (die Karte fragt gelegentlich weiter Kacheln an, die im Test abgebrochen werden): nach 8 s trotzdem weiter, die Layoutmessung folgt danach."""
     try:
-        pg.wait_for_load_state("networkidle", timeout=8000)
+        quiet(pg, 5000)
     except Exception:
         pass
     pg.wait_for_function("() => document.readyState === 'complete'", timeout=TL)

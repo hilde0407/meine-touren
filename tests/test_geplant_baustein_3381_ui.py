@@ -12,6 +12,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import pytest
+from tests.helpers_ui import quiet  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 pw_api = pytest.importorskip("playwright.sync_api")
@@ -98,7 +99,7 @@ def _shot(pg, name):
     if d:
         Path(d).mkdir(parents=True, exist_ok=True)
         try:
-            pg.wait_for_load_state("networkidle", timeout=8000)
+            quiet(pg, 5000)
         except Exception:
             pass
         pg.locator('[data-wtype="geplant"]').scroll_into_view_if_needed()
@@ -229,7 +230,7 @@ def test_handy_390_ohne_seitliches_scrollen_und_screenshot(pw, app):
     try:
         expect(pg.locator('[data-wtype="geplant"] .sllist li')).to_have_count(3, timeout=TL)
         try:
-            pg.wait_for_load_state("networkidle", timeout=8000)
+            quiet(pg, 5000)
         except Exception:
             pass
         assert pg.evaluate("() => document.documentElement.scrollWidth <= window.innerWidth + 1")
