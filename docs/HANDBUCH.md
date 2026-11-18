@@ -1,6 +1,6 @@
 # Meine Touren – Handbuch
 
-**Für Anwenderinnen und Anwender · Stand: Version 3.33.0**
+**Für Anwenderinnen und Anwender · Stand: Version 3.37.0**
 
 Dieses Handbuch erklärt Schritt für Schritt, wie du mit **Meine Touren** arbeitest: Touren holen und importieren, ansehen, auswerten, mit Fotos verbinden, die Seiten nach deinem Geschmack gestalten und Links sicher teilen. Es richtet sich an Menschen, die die App benutzen – nicht an Entwickler.
 
@@ -8,7 +8,7 @@ Dieses Handbuch erklärt Schritt für Schritt, wie du mit **Meine Touren** arbei
 * Dieses Handbuch gibt es auch als **PDF**: [Handbuch-Meine-Touren.pdf](Handbuch-Meine-Touren.pdf).
 * Alle Bilder zeigen **Beispieldaten** (Demo-Modus, erfundene Touren). Die Texte auf den Knöpfen sind so geschrieben, wie du sie in der App siehst.
 
-> **Hinweis zu den Bildern:** In den Aufnahmen fehlen die Kartenkacheln (OpenStreetMap), deshalb ist der Kartenhintergrund grau. In der echten App siehst du dort die Karte. Die Fotos der Beispieltouren sind einfache Farbverläufe mit Bergsilhouette.
+> **Hinweis zu den Bildern:** In den Aufnahmen fehlen die Kartenkacheln (OpenStreetMap), deshalb ist der Kartenhintergrund grau. In der echten App siehst du dort die Karte. Die Fotos der Beispieltouren sind einfache Farbverläufe mit Bergsilhouette. Für einige Bilder der neueren Bausteine (Jahreszeiten und Wetter, Belastung und Erholung, Ausrüstung, Eigene Kennzahlen) wurden zusätzlich erfundene Wetterwerte, Uhr-Belastungen, Ausrüstung und ein paar weitere Beispieltouren ergänzt; darum weichen dort Zahlen wie die Tourenzahl von den übrigen Bildern ab.
 
 <a id="inhalt"></a>
 
@@ -58,7 +58,7 @@ Dieses Handbuch erklärt Schritt für Schritt, wie du mit **Meine Touren** arbei
 
 ![Übersicht mit Menüleiste, letzter Tour, „Dein Jahr“ und Erinnerungen](handbuch/bilder/01-uebersicht.png)
 
-*Abbildung 1: Die Übersicht. Oben die Menüleiste, darunter „Zuletzt unterwegs“, „Dein Jahr 2026“, der Bereich „Touren holen“, die letzten Touren und „Erinnerungen“.*
+*Abbildung 1: Die Übersicht. Oben die Menüleiste, darunter die Leiste „Zeitraum der Seite“, „Zuletzt unterwegs“, „Dein Jahr 2026“, der Bereich „Touren holen“, die letzten Touren und „Erinnerungen“.*
 
 **Tipp:** Wenn du erst einmal nur schauen willst, was die App kann: Der **Demo-Modus** (siehe [Kapitel 2](#k2)) legt Beispieltouren an, ohne deine echten Daten anzufassen.
 
@@ -166,6 +166,10 @@ Die App folgt der **Einstellung deines Geräts** (hell oder dunkel). Einen eigen
 
 *Abbildung 5: Das Tourdetail im Dunkelmodus.*
 
+![Dunkle Darstellung der Übersicht mit eigenen Kennzahlen, Ausrüstung und Jahreszeiten](handbuch/bilder/61-dunkelmodus-bausteine.png)
+
+*Abbildung 6: Auch die neueren Bausteine folgen der dunklen Darstellung: Eigene Kennzahlen, Ausrüstung mit Warnzeichen und „Jahreszeiten und Wetter“ (Ausschnitt).*
+
 ### 3.6 Smartphone- oder Computer-Ansicht
 
 Bis zu einer Breite von etwa 760 Pixeln schaltet die App automatisch in die Handy-Ansicht (Menü unten am Rand). Du kannst das unter „Konto & Freigaben → Ansicht“ oder im Menü **Mehr** (Handy) festlegen. Mehr dazu in [Kapitel 18](#k18).
@@ -184,7 +188,7 @@ Alle Wege findest du unter **Verwaltung → Touren holen** („Woher deine Toure
 
 ![Verwaltung, Reiter „Touren holen“](handbuch/bilder/38-verwaltung-touren-holen.png)
 
-*Abbildung 6: Der Reiter „Touren holen“ mit „Meine Geräte“, Komoot, Zepp-Import, „Garmin, Suunto & andere Uhren“ und „Wanderführer“.*
+*Abbildung 7: Der Reiter „Touren holen“ mit „Meine Geräte“, Komoot, Zepp-Import, „Garmin, Suunto & andere Uhren“ und „Wanderführer“.*
 
 ### 4.1 Dateien importieren (funktioniert für jeden Hersteller)
 
@@ -197,7 +201,7 @@ Dateien ohne GPS (Schlaf, Alltag, Indoor) werden übersprungen und gezählt. Dop
 
 ![Bereich „Garmin, Suunto & andere Uhren“ mit Anleitung „So kommst du an die Dateien“](handbuch/bilder/40-import-dateien.png)
 
-*Abbildung 7: Der Datei-Import samt aufgeklapptem Abschnitt „So kommst du an die Dateien“. Rechts neben der Dateiauswahl stehen die Haken „Komoot“ und „Strava“ (zusätzlich dorthin hochladen) – sie sind nur auswählbar, wenn das jeweilige Konto verbunden ist.*
+*Abbildung 8: Der Datei-Import samt aufgeklapptem Abschnitt „So kommst du an die Dateien“. Rechts neben der Dateiauswahl stehen die Haken „Komoot“ und „Strava“ (zusätzlich dorthin hochladen) – sie sind nur auswählbar, wenn das jeweilige Konto verbunden ist.*
 
 **So kommst du an die Dateien** (laut Hinweis in der App):
 
@@ -281,9 +285,17 @@ Von oben nach unten (in der Standardeinstellung):
 
 Über **Seite anpassen** und **Ansichten** gestaltest du die Übersicht selbst ([Kapitel 13](#k13)).
 
+### Zeitraum der Seite
+
+Ganz oben auf der Übersicht steht die einklappbare Leiste **Zeitraum der Seite** („Jeder Baustein zeigt seinen eigenen Zeitraum“). Mit **Alle**, **Dieses Jahr**, **Letzte 12 Monate**, **Vorjahr**, einer Jahresauswahl (**Jahr …**) und **Von–bis …** legst du einen gemeinsamen Zeitraum fest, der für alle Bausteine mit Zeitbezug gilt, zum Beispiel „Dein Jahr“, Eigene Kennzahlen oder „Jahreszeiten und Wetter“. Im Kopf der Leiste steht der gewählte Zeitraum („Das Jahr 2025“), **Zurücksetzen** hebt die Wahl auf. Ein Baustein behält seinen eigenen Zeitraum, wenn du in seinen Einstellungen **Zeitraum der Seite verwenden** abschaltest. Der gewählte Zeitraum steht in der Adresse der Seite; nach einer Änderung zeigt die Übersicht „geändert“ und **Ansicht speichern**, damit du die Wahl in der Ansicht behalten kannst. Mit einem Klick auf den Titel der Leiste klappst du sie ein. Die Statistik hat dafür ihre eigene Filterleiste, die zusätzlich den Knopf **Vorjahr** bietet ([Abschnitt 11.1](#k11)).
+
+![Übersicht mit hervorgehobener Leiste „Zeitraum der Seite“, Vorjahr gewählt](handbuch/bilder/01b-uebersicht-zeitraum.png)
+
+*Abbildung 9: Die Leiste „Zeitraum der Seite“ (rot umrandet). Gewählt ist „Vorjahr“: „Dein Jahr“ zeigt jetzt 2025.*
+
 ![Übersicht](handbuch/bilder/01-uebersicht.png)
 
-*Abbildung 8: Die Übersicht (siehe auch Abbildung 1).*
+*Abbildung 10: Die Übersicht (siehe auch Abbildung 1).*
 
 **Hinweis-Bausteine:** Im Katalog gibt es Bausteine, die sich nur zeigen, wenn es einen Anlass gibt – etwa „Jahresziel in Gefahr“, „Meilenstein erreicht“, „Lange Pause“, „Rekord-Tour“, „Wochenziel“, „Erholungshinweis“ oder „Datensicherung“. Ist nichts los, sind sie unsichtbar und brauchen keinen Platz.
 
@@ -312,11 +324,11 @@ Von oben nach unten (in der Standardeinstellung):
 
 ![Touren-Liste](handbuch/bilder/02-touren-liste.png)
 
-*Abbildung 9: Die Liste aller Touren.*
+*Abbildung 11: Die Liste aller Touren.*
 
 ![Filter der Touren-Liste hervorgehoben](handbuch/bilder/03-touren-filter.png)
 
-*Abbildung 10: Die Filter (rot umrandet) – hier ist „Wandern“ gewählt, daher steht oben „24 Touren, 416 km“.*
+*Abbildung 12: Die Filter (rot umrandet) – hier ist „Wandern“ gewählt, daher steht oben „24 Touren, 416 km“.*
 
 ### Die Suche
 
@@ -326,11 +338,11 @@ Die Suche ist **akzent- und apostroph-unabhängig**: „reunion“ findet „Ré
 
 ![Suchergebnis für „munstertal“](handbuch/bilder/53-suche-ohne-akzente.png)
 
-*Abbildung 11: „munstertal“ ohne Umlaut findet „Herbstwanderung Münstertal“.*
+*Abbildung 13: „munstertal“ ohne Umlaut findet „Herbstwanderung Münstertal“.*
 
 ![Namensfilter „Dolomiten“ in der Liste](handbuch/bilder/04-touren-suche.png)
 
-*Abbildung 12: Der Namensfilter der Liste („Dolomiten“) zeigt die fünf Etappen der Hüttenwanderung.*
+*Abbildung 14: Der Namensfilter der Liste („Dolomiten“) zeigt die fünf Etappen der Hüttenwanderung.*
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -355,7 +367,7 @@ Oben stehen Sportart, Datum und Name. Rechts oben gehst du mit **Vorherige** und
 
 ![Tourdetail, oberer Teil](handbuch/bilder/05-tour-oben.png)
 
-*Abbildung 13: Der obere Teil des Tourdetails.*
+*Abbildung 15: Der obere Teil des Tourdetails.*
 
 ### 7.2 Karte
 
@@ -363,7 +375,7 @@ Der Abschnitt **Karte** zeigt die Strecke mit Start (grün) und Ziel (rot) und F
 
 ![Karte der Tour](handbuch/bilder/06-tour-karte.png)
 
-*Abbildung 14: Der Abschnitt „Karte“ (die Kartenkacheln fehlen in dieser Aufnahme).*
+*Abbildung 16: Der Abschnitt „Karte“ (die Kartenkacheln fehlen in dieser Aufnahme).*
 
 ### 7.3 Höhenprofil
 
@@ -371,7 +383,7 @@ Das **Höhenprofil** zeigt die Höhe über der Strecke. Die **gelben Punkte** si
 
 ![Höhenprofil mit Fotopunkten und Puls](handbuch/bilder/07-tour-hoehenprofil.png)
 
-*Abbildung 15: Höhenprofil mit Foto-Punkten (gelb) und Puls (rot).*
+*Abbildung 17: Höhenprofil mit Foto-Punkten (gelb) und Puls (rot).*
 
 ### 7.4 Puls
 
@@ -379,7 +391,7 @@ Der Abschnitt **Herzfrequenz** erscheint, wenn das Gerät den Puls geliefert hat
 
 ![Herzfrequenz mit Pulszonen](handbuch/bilder/08-tour-puls.png)
 
-*Abbildung 16: Herzfrequenz und Pulszonen.*
+*Abbildung 18: Herzfrequenz und Pulszonen.*
 
 ### 7.5 Geschwindigkeit und Auswertung dieser Tour
 
@@ -387,7 +399,7 @@ Unter **Auswertung dieser Tour** findest du **Analyse** (Bewegungszeit, Pausen),
 
 ![Detaillierte Auswertung einer Tour](handbuch/bilder/17-tour-auswertung.png)
 
-*Abbildung 17: Die detaillierte Auswertung mit dem Geschwindigkeitsverlauf. Mit „Ändern“ legst du fest, womit die Tour aufgezeichnet wurde.*
+*Abbildung 19: Die detaillierte Auswertung mit dem Geschwindigkeitsverlauf. Mit „Ändern“ legst du fest, womit die Tour aufgezeichnet wurde.*
 
 ### 7.6 Fotos der Tour
 
@@ -402,7 +414,7 @@ Der Abschnitt **Fotos** zeigt die der Tour zugeordneten Fotos mit Uhrzeit. Die K
 
 ![Fotos der Tour](handbuch/bilder/09-tour-fotos.png)
 
-*Abbildung 18: Fotos der Tour mit ihren Knöpfen.*
+*Abbildung 20: Fotos der Tour mit ihren Knöpfen.*
 
 ### 7.7 Die drei Menüs: Ansehen, Teilen & Export, Bearbeiten
 
@@ -414,15 +426,15 @@ Der Abschnitt **Fotos** zeigt die der Tour zugeordneten Fotos mit Uhrzeit. Die K
 
 ![Menü „Tour ansehen“](handbuch/bilder/10-menue-ansehen.png)
 
-*Abbildung 19: Das Menü „Tour ansehen“.*
+*Abbildung 21: Das Menü „Tour ansehen“.*
 
 ![Erzählung der Tour](handbuch/bilder/14-tour-erzaehlung.png)
 
-*Abbildung 20: „Erzählung“: Start, Fotos mit Uhrzeit und Puls, Ziel.*
+*Abbildung 22: „Erzählung“: Start, Fotos mit Uhrzeit und Puls, Ziel.*
 
 ![Tourblatt](handbuch/bilder/15-tourblatt.png)
 
-*Abbildung 21: Das Tourblatt – oben die Knöpfe „PDF herunterladen“ und „Drucken“.*
+*Abbildung 23: Das Tourblatt – oben die Knöpfe „PDF herunterladen“ und „Drucken“.*
 
 > **3D-Flug:** Er braucht WebGL im Browser sowie Gelände- und Kartendaten aus dem Internet. In der Umgebung, in der die Bilder dieses Handbuchs entstanden sind, gab es diese Daten nicht; deshalb ist hier kein Bild des 3D-Flugs abgebildet.
 
@@ -430,7 +442,7 @@ Der Abschnitt **Fotos** zeigt die der Tour zugeordneten Fotos mit Uhrzeit. Die K
 
 ![Menü „Teilen & Export“](handbuch/bilder/11-menue-teilen.png)
 
-*Abbildung 22: Das Menü „Teilen & Export“.*
+*Abbildung 24: Das Menü „Teilen & Export“.*
 
 **Bearbeiten** bietet:
 
@@ -443,7 +455,7 @@ Der Abschnitt **Fotos** zeigt die der Tour zugeordneten Fotos mit Uhrzeit. Die K
 
 ![Menü „Tour bearbeiten“](handbuch/bilder/12-menue-bearbeiten.png)
 
-*Abbildung 23: Das Menü „Tour bearbeiten“.*
+*Abbildung 25: Das Menü „Tour bearbeiten“.*
 
 ### 7.8 Tourseite selbst gestalten
 
@@ -469,11 +481,19 @@ Oben schwebt eine Leiste mit Bedienelementen:
 
 ![Karte mit allen Touren](handbuch/bilder/18-karte.png)
 
-*Abbildung 24: Alle Touren, nach Sportart gefärbt (Wandern grün, Radtour orange).*
+*Abbildung 26: Alle Touren, nach Sportart gefärbt (Wandern grün, Radtour orange).*
 
 ![Karte als Heatmap mit hervorgehobenen Bedienelementen](handbuch/bilder/19-karte-optionen.png)
 
-*Abbildung 25: Die Bedienelemente (rot umrandet); hier ist „Heatmap“ eingeschaltet.*
+*Abbildung 27: Die Bedienelemente (rot umrandet); hier ist „Heatmap“ eingeschaltet.*
+
+### Die Karten-Seite anpassen
+
+Auch die Karte ist eine anpassbare Seite (**Seite anpassen**, [Kapitel 13](#k13)). Die **Karte** selbst bleibt immer sichtbar; du kannst nur ihre Breite wählen und sie verschieben. Die Bedienelemente sind einzelne **Bedienfelder**: **Mein Standort**, **Jahr und Anzahl**, **Aktivitäten**, Strecken-Stil, Heatmap und Fotos sowie **Touren im Ausschnitt**. Sie lassen sich verschieben, einklappen und ausblenden; ein ausgeblendetes Bedienfeld behält seine Einstellung. Nach jeder Änderung passt sich die Karte an, ohne dass ein selbst gewählter Kartenausschnitt verloren geht. Im Katalog (Kategorie **Karte**) gibt es zusätzlich die Bausteine **Karten-Kennzahlen**, **Touren im Kartenausschnitt** und **Legende der Aktivitäten**; Vorlagen sind „Karte mit Kennzahlen“, „Karte mit Liste“ und „Nur die Karte“. Gruppen gibt es auf der Karte nicht.
+
+![Karte im Bearbeitungsmodus mit den Bedienfeldern als Bausteine](handbuch/bilder/18b-karte-anpassen.png)
+
+*Abbildung 28: Die Karte im Bearbeitungsmodus: Die Karte bleibt immer sichtbar, darunter stehen die Bedienfelder als eigene Bausteine (Kartenkacheln fehlen in der Aufnahme).*
 
 **Hinweis:** Karten und Tourdetails arbeiten mit den **lokal gespeicherten Strecken**; nur die Kartenkacheln kommen aus dem Internet. Für unterwegs ohne Netz kannst du Touren und Kacheln **offline vorbereiten** ([Kapitel 15](#k15)).
 
@@ -499,9 +519,7 @@ Menü **Reisen**. Die Seite besteht aus den Abschnitten **Mehrtagestouren**, **R
 
 ![Reisen-Übersicht](handbuch/bilder/29-reisen.png)
 
-*Abbildung 26: Die Reisen-Übersicht mit der Mehrtagestour „Dolomiten“, der Reise „Dolomiten-Hüttenweg“ und den Tags.*
-
-> **Auffälligkeit in Version 3.33.0:** Die Kacheln für „Alben & Tags“ erscheinen derzeit unterhalb der Reisen-Kachel statt in der eigenen Karte „Alben und Tags“ (diese ist leer). Das ist ein reines Darstellungsproblem; die Inhalte sind vollständig.
+*Abbildung 29: Die Reisen-Übersicht mit der Mehrtagestour „Dolomiten“, der Reise „Dolomiten-Hüttenweg“ und den Tags in der eigenen Karte „Alben und Tags“.*
 
 ### 9.3 Die Reise-Seite
 
@@ -518,7 +536,7 @@ Oben stehen **Reisebericht (PDF)**, **Senden**, **Reise bearbeiten** (Name und Z
 
 ![Reise-Seite](handbuch/bilder/30-reise-seite.png)
 
-*Abbildung 27: Die Reise-Seite „Dolomiten-Hüttenweg“ (fünf Tage, 80 km).*
+*Abbildung 30: Die Reise-Seite „Dolomiten-Hüttenweg“ (fünf Tage, 80 km).*
 
 ### 9.4 Das Reiseblatt
 
@@ -526,11 +544,15 @@ Oben stehen **Reisebericht (PDF)**, **Senden**, **Reise bearbeiten** (Name und Z
 
 ![Reiseblatt](handbuch/bilder/31-reiseblatt.png)
 
-*Abbildung 28: Das Reiseblatt (Reisebericht).*
+*Abbildung 31: Das Reiseblatt (Reisebericht).*
 
 ### 9.5 Reisen anpassen
 
-Reise-Seite und Reisen-Übersicht sind wie alle Seiten anpassbar ([Kapitel 13](#k13)). Zusätzliche Bausteine: Reise-Kennzahlen, Kilometer je Tag, Reise-Diashow, Reisen-Kennzahlen und Reisen je Jahr. Das Layout gilt für alle Reisen.
+Reise-Seite und Reisen-Übersicht sind wie alle Seiten anpassbar ([Kapitel 13](#k13)): Jeder Abschnitt ist ein Baustein, den du verschieben, ausblenden, einklappen und in der Breite ändern kannst. Der Kopf mit Titel, Zeitraum und Aktionen lässt sich verschieben, aber nicht ausblenden. In der Übersicht sind Mehrtagestouren, Reisen, Alben und Tags sowie „Entfernte Reisen“ (standardmäßig zugeklappt) Bausteine. Zusätzliche Bausteine: Reise-Kennzahlen, Kilometer je Tag, Reise-Diashow, Reisen-Kennzahlen und Reisen je Jahr; dazu gibt es fünf Vorlagen. Das Layout gilt für alle Reisen.
+
+![Reise-Seite im Bearbeitungsmodus](handbuch/bilder/30b-reise-seite-anpassen.png)
+
+*Abbildung 32: Die Reise-Seite im Bearbeitungsmodus: Kopf, Kennzahlen und „Statistik nach Aktivität“ als Bausteine mit Breitenwahl, Pfeilen und „Ausblenden“.*
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -557,7 +579,7 @@ Die Bilder werden **im Browser verkleinert**, nur die kleinen Dateien gehen übe
 
 ![Verwaltung, Reiter „Fotos“](handbuch/bilder/41-verwaltung-fotos.png)
 
-*Abbildung 29: Der Reiter „Fotos“ in der Verwaltung.*
+*Abbildung 33: Der Reiter „Fotos“ in der Verwaltung.*
 
 **Falsche Kamerauhr?** Beim Import erkennt die App Zeitverschiebungen an Fotos mit Aufnahmeort und bietet eine minutengenaue Korrektur an. Bei bereits importierten Fotos prüft **Zeit per GPS prüfen** im Tourdetail die Uhrzeiten und korrigiert sie nach Rückfrage. **Fotos zuordnen** auf der Fotos-Seite ordnet nachträglich zu.
 
@@ -565,13 +587,20 @@ Die Bilder werden **im Browser verkleinert**, nur die kleinen Dateien gehen übe
 
 Menü **Fotos**: oben **Fotos zuordnen**, **Fotos importieren …**, **Diashow 2025** (für das gewählte Jahr) und **Zufall**. Darunter Reiter je Jahr. Die Fotos sind nach Tour gruppiert; jede Gruppe hat einen eigenen Knopf **Diashow**. Ein Klick auf ein Foto öffnet die Großansicht.
 
+Auch die Fotos-Seite lässt sich anpassen ([Kapitel 13](#k13)): Der **Kopf** (Titel, Zahlen, Aktionen) bleibt immer sichtbar, die **Jahresleiste** und die **Fotos des Jahres** sind Bausteine, die du verschieben, ausblenden oder in der Breite ändern kannst. Neue Bausteine sind **Foto-Kennzahlen** (Fotos, einer Tour zugeordnet, Touren mit Fotos, Jahre, Länder – Länder nur, wenn sie bekannt sind) und **Fotos je Jahr** (Säulen je Jahr). Vorlagen: „Mit Kennzahlen“, „Nur Fotos“ und „Jahresverlauf“.
+
+![Fotos-Seite im Bearbeitungsmodus](handbuch/bilder/20b-fotos-anpassen.png)
+
+*Abbildung 34: Die Fotos-Seite im Bearbeitungsmodus mit den Bausteinen Kopf, Jahresleiste und Fotos des Jahres.*
+
+
 ![Fotos-Seite](handbuch/bilder/20-fotos.png)
 
-*Abbildung 30: Fotos nach Touren, Reiter für 2026 und 2025. Die Knöpfe „Diashow 2025“ und „Zufall“ sind hervorgehoben.*
+*Abbildung 35: Fotos nach Touren, Reiter für 2026 und 2025. Die Knöpfe „Diashow 2025“ und „Zufall“ sind hervorgehoben.*
 
 ![Foto in der Großansicht](handbuch/bilder/21-foto-grossansicht.png)
 
-*Abbildung 31: Die Großansicht. Mit ← und → blätterst du, Esc schließt.*
+*Abbildung 36: Die Großansicht. Mit ← und → blätterst du, Esc schließt.*
 
 ### 10.3 Fotos auf der Strecke ausrichten („Perlenkette“)
 
@@ -586,7 +615,7 @@ Die Diashow läuft im Vollbild: automatischer Wechsel (3, 5 oder 8 Sekunden), un
 
 ![Diashow](handbuch/bilder/22-diashow.png)
 
-*Abbildung 32: Die Diashow des Jahres 2025 (30 Fotos).*
+*Abbildung 37: Die Diashow des Jahres 2025 (30 Fotos).*
 
 **Diashow teilen:** In einer Tour über **Teilen & Export → Diashow senden** bzw. **Diashow-Link**; für ein ganzes Jahr oder alle Fotos über den Teilen-Knopf in der Diashow. Der Link braucht beim Empfänger **kein Konto**. Beim Tour-Link wählst du vorher, welche Fotos (alle oder nur die besten) und die Gültigkeit (7 Tage, 30 Tage, unbegrenzt). Der **Diashow-Link für ein Jahr oder alle Fotos gilt 24 Stunden** und enthält bis zu 300 der besten Fotos; abgelehnte und ausgeblendete Fotos fehlen. Der Link zeigt nur Fotos, ihre Aufnahmezeit und den Tournamen – keine Karte, keine Orte, keine Notizen, keine Strecken, keine Kommentare.
 
@@ -615,7 +644,7 @@ Die Kachel lässt sich mehrfach mit unterschiedlichen Einstellungen hinzufügen.
 Oben steht der **globale Filter**, der für alle Bausteine der Seite gilt:
 
 * **Gesamt** oder ein einzelnes Jahr (2026, 2025 …),
-* Zeitraum: **Laufendes Jahr**, **Letzte 12 Monate**, **Letzte 90 Tage**, **Von–bis …**,
+* Zeitraum: **Laufendes Jahr**, **Letzte 12 Monate**, **Letzte 90 Tage**, **Vorjahr**, **Von–bis …**,
 * Aktivität: **Alle Sportarten**, **Wandern**, **Radtour** …
 
 Daneben **Jahresrückblick 2026** ([Kapitel 12](#k12)). Die Bausteine:
@@ -629,7 +658,7 @@ Daneben **Jahresrückblick 2026** ([Kapitel 12](#k12)). Die Bausteine:
 
 ![Statistik, Übersicht](handbuch/bilder/23-statistik.png)
 
-*Abbildung 33: Statistik → Übersicht. Der globale Filter (rot) wirkt auf alle Bausteine.*
+*Abbildung 38: Statistik → Übersicht. Der globale Filter (rot) wirkt auf alle Bausteine.*
 
 ### 11.2 Auswertung
 
@@ -637,7 +666,7 @@ Die Auswertung zeigt Orte, Gipfel, Leistung, Wetter und Neuland: **Häufigste St
 
 ![Statistik, Auswertung](handbuch/bilder/24-statistik-auswertung.png)
 
-*Abbildung 34: Auswertung. In dieser Demo wurden Regionen, Gipfel und Wetter noch nicht bestimmt; die Abschnitte bieten deshalb die entsprechenden Knöpfe an.*
+*Abbildung 39: Auswertung. In dieser Demo wurden Regionen, Gipfel und Wetter noch nicht bestimmt; die Abschnitte bieten deshalb die entsprechenden Knöpfe an.*
 
 ### 11.3 Rekorde
 
@@ -645,7 +674,7 @@ Rekorde mit Vergleichen („um die Erde“, „Mount Everest bergauf“), **Best
 
 ![Statistik, Rekorde](handbuch/bilder/25-statistik-rekorde.png)
 
-*Abbildung 35: Rekorde.*
+*Abbildung 40: Rekorde.*
 
 ### 11.4 Puls
 
@@ -653,11 +682,11 @@ Wenn deine Touren Pulsdaten haben: **Zeit in den Pulszonen** je Jahr, **Durchsch
 
 ![Statistik, Puls](handbuch/bilder/26-statistik-puls.png)
 
-*Abbildung 36: Puls mit Pulszonen und den anstrengendsten Touren.*
+*Abbildung 41: Puls mit Pulszonen und den anstrengendsten Touren.*
 
 ### 11.5 Statistik anpassen
 
-Die Statistik besteht aus Bausteinen wie die anderen Seiten: **Seite anpassen** und **Ansichten** ([Kapitel 13](#k13)).
+Die Statistik besteht aus Bausteinen wie die anderen Seiten: **Seite anpassen** und **Ansichten** ([Kapitel 13](#k13)). Neuere Bausteine wie „Jahreszeiten und Wetter“, die Wochenansicht von „Belastung und Erholung“ und „Ausrüstung“ stehen in [Abschnitt 13.12](#k13).
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -680,7 +709,7 @@ Oben: **‹ Übersicht**, „Fotos im PDF“ (mit Anzahl), **PDF herunterladen**
 
 ![Jahresrückblick](handbuch/bilder/27-jahresrueckblick.png)
 
-*Abbildung 37: Der Jahresrückblick 2026.*
+*Abbildung 42: Der Jahresrückblick 2026.*
 
 ### Als Link teilen
 
@@ -692,7 +721,7 @@ Oben: **‹ Übersicht**, „Fotos im PDF“ (mit Anzahl), **PDF herunterladen**
 
 ![Dialog „Jahresrückblick teilen“](handbuch/bilder/28-rueckblick-teilen.png)
 
-*Abbildung 38: „Jahresrückblick teilen“. Was du nicht wählst, schickt der Server gar nicht erst mit.*
+*Abbildung 43: „Jahresrückblick teilen“. Was du nicht wählst, schickt der Server gar nicht erst mit.*
 
 **Was nie geteilt wird:** Strecken und Koordinaten (auch keine Start- oder Heimatorte, keine Ortsnamen), Notizen, Wegpunkte, Puls, Wetter, Uhr-Rohdaten, Gerät und Ausrüstung. Rekorde nennen nur Tourname und Datum – darauf weist der Dialog hin.
 
@@ -704,7 +733,7 @@ Oben: **‹ Übersicht**, „Fotos im PDF“ (mit Anzahl), **PDF herunterladen**
 
 ## 13. Seiten anpassen: Bausteine, Ansichten, Vorlagen, eigene Kennzahlen
 
-**Zweck:** Tourseite, Übersicht, Statistik, Reise-Seite und Reisen-Übersicht bestehen aus **Bausteinen**. Du bestimmst, welche es gibt, wo sie stehen und wie breit sie sind. Ohne Anpassung sieht alles aus wie gewohnt. Die Einstellung wird je Benutzer gespeichert; Betrachter sehen den Standard.
+**Zweck:** Tourseite, Übersicht, Statistik, Reise-Seite, Reisen-Übersicht, Fotos-Seite und Karte bestehen aus **Bausteinen**. Du bestimmst, welche es gibt, wo sie stehen und wie breit sie sind. Ohne Anpassung sieht alles aus wie gewohnt. Die Einstellung wird je Benutzer gespeichert; Betrachter sehen den Standard.
 
 ### 13.1 Den Bearbeitungsmodus einschalten
 
@@ -723,19 +752,23 @@ In der Kopfzeile jedes Bausteins:
 
 ![Bearbeitungsmodus der Statistikseite](handbuch/bilder/32-seite-anpassen.png)
 
-*Abbildung 39: Statistik im Bearbeitungsmodus. Die untere Leiste (rot) enthält die Hauptfunktionen.*
+*Abbildung 44: Statistik im Bearbeitungsmodus. Die untere Leiste (rot) enthält Rückgängig und Wiederholen, den Umschalter „Desktop | Handy“ und die Hauptfunktionen.*
 
 ### 13.2 Bausteine hinzufügen
 
 1. **Baustein hinzufügen** anklicken.
-2. Im Katalog nach Kategorie filtern – **Alle**, **Statistik**, **Zahlen**, **Grafiken**, **Rückblick**, **Planung**, **Touren holen**, **Hinweise**, **Eigene Kennzahlen** (je nach Seite gibt es unterschiedliche) – oder mit **Bausteine suchen …** nach einem Wort.
-3. Bei **Hinzufügen** bekommst du den Baustein ans Seitenende; verschiebe ihn dann an die richtige Stelle. Die Vorschau im Katalog zeigt Beispielwerte.
+2. Im Katalog nach Kategorie filtern – **Alle**, **Statistik**, **Zahlen**, **Grafiken**, **Rückblick**, **Planung**, **Touren holen**, **Hinweise**, **Eigene Kennzahlen** (je nach Seite gibt es unterschiedliche, etwa Reisen, Fotos und Karte nur auf der jeweiligen Seite) – oder mit **Bausteine suchen …** nach einem Wort.
+3. Bei **Hinzufügen** bekommst du den Baustein ans Seitenende; verschiebe ihn dann an die richtige Stelle. Jeder Baustein hat im Katalog eine kleine, nicht bedienbare **Vorschau mit deinen echten Zahlen**. Sie wird erst geladen, wenn die Karte sichtbar wird; solange steht dort ein Ladezustand. Hast du noch keine passenden Daten, zeigt die Vorschau Beispielwerte und kennzeichnet sie als „Beispielwerte“.
 
 Bausteine gelten nicht nur für eine Seite: „Dein Jahr“ kannst du z. B. auch auf der Tourseite einsetzen, und mehrere Exemplare mit verschiedenen Filtern (Aktivität, Zeitraum, Kennzahlen, Titel) sind möglich.
 
 ![Katalog „Baustein hinzufügen“](handbuch/bilder/33-baustein-hinzufuegen.png)
 
-*Abbildung 40: Der Katalog (hier für die Statistik): Kategorien, Suche und Vorschau mit Beispielwerten.*
+*Abbildung 45: Der Katalog (hier für die Statistik): Kategorien, Suche und Vorschau.*
+
+![Katalog Baustein hinzufügen, Kategorie Grafiken](handbuch/bilder/33b-galerie-grafiken.png)
+
+*Abbildung 46: Der Katalog der Übersicht in der Kategorie „Grafiken“ mit Vorschau aus deinen Daten (Beispielwerte, wo noch Daten fehlen).*
 
 ### 13.3 Eigene Kennzahlen
 
@@ -757,15 +790,27 @@ Es zählen nur Touren, die die jeweilige Angabe haben (z. B. Puls); fehlende Ang
 
 ![Eigene Kennzahl erstellen, Vorlagenliste](handbuch/bilder/34-eigene-kennzahl.png)
 
-*Abbildung 41: „Eigene Kennzahl erstellen“ mit den Startvorlagen.*
+*Abbildung 47: „Eigene Kennzahl erstellen“ mit den Startvorlagen.*
 
 ![Eigene Kennzahl aus der Vorlage „Höhenmeter je km“](handbuch/bilder/35-eigene-kennzahl-vorlage.png)
 
-*Abbildung 42: Die Vorlage „Höhenmeter je km“: Vorschau (36,7 m/km, Vergleich zum Vorjahr), Name, Messgröße, Formel.*
+*Abbildung 48: Die Vorlage „Höhenmeter je km“: Vorschau (36,7 m/km, Vergleich zum Vorjahr), Name, Messgröße, Formel.*
 
 ![Eigene Kennzahl, untere Hälfte des Dialogs](handbuch/bilder/35b-eigene-kennzahl-unten.png)
 
-*Abbildung 43: Der untere Teil des Dialogs: Filter, Zeitraum, Anzeige, Ziel, „Hinzufügen“.*
+*Abbildung 49: Der untere Teil des Dialogs: Filter, Zeitraum, Anzeige, Ziel, „Hinzufügen“.*
+
+![Dialog Eigene Kennzahl bearbeiten mit Vorschau](handbuch/bilder/35c-eigene-kennzahl-bearbeiten.png)
+
+*Abbildung 50: Eine bestehende Kennzahl bearbeiten („Jahresziel Kilometer“): Die Vorschau oben zeigt Wert, Trendpfeil, Sparkline, Zielbalken und „Im Plan?“ sofort.*
+
+![Bereich Anzeige mit den Gruppen Ziel, Vergleich, Verlauf und Antippen](handbuch/bilder/35d-eigene-kennzahl-anzeige.png)
+
+*Abbildung 51: Der Bereich „Anzeige“ mit den vier Gruppen Ziel (mit „Im Plan?“), Vergleich, Verlauf und Antippen.*
+
+![Übersicht mit drei eigenen Kennzahlen: Jahresziel, Wanderkilometer, Längste Wanderung](handbuch/bilder/34b-eigene-kennzahl-karten.png)
+
+*Abbildung 52: So sehen eigene Kennzahlen auf der Übersicht aus: Jahresziel mit Trend, Sparkline, Fortschrittsbalken und „Hinter dem Plan“, Wanderkilometer mit Säulen und die Rekord-Kennzahl „Längste Wanderung“.*
 
 ### 13.4 Ansichten
 
@@ -778,7 +823,7 @@ Eine **Ansicht** ist eine gespeicherte Anordnung der Seite, z. B. „Wandern“,
 
 ![Dialog „Ansichten“](handbuch/bilder/56-ansichten.png)
 
-*Abbildung 44: Der Dialog „Ansichten“ der Statistik.*
+*Abbildung 53: Der Dialog „Ansichten“ der Statistik.*
 
 ### 13.5 Vorlagen
 
@@ -786,7 +831,7 @@ Eine **Ansicht** ist eine gespeicherte Anordnung der Seite, z. B. „Wandern“,
 
 ![Dialog „Vorlage wählen“](handbuch/bilder/36-vorlagen.png)
 
-*Abbildung 45: „Vorlage wählen“ für die Statistik.*
+*Abbildung 54: „Vorlage wählen“ für die Statistik.*
 
 ### 13.6 Export und Import des Layouts
 
@@ -813,6 +858,10 @@ Eine **Gruppe** bündelt mehrere Bausteine zu einem einklappbaren Abschnitt mit 
 
 Außerhalb des Bearbeitungsmodus klappst du eine Gruppe mit einem Klick auf ihre Überschrift auf oder zu; der Zustand wird je Benutzer gemerkt, „Standardmäßig offen“ legt fest, wie die Gruppe beim ersten Öffnen aussieht. Im Bearbeitungsmodus sind alle Gruppen offen. Grenzen: höchstens 10 Gruppen je Seite und 30 Bausteine je Gruppe, keine Gruppen in Gruppen, und der Einstieg in die Auswertung sowie die Köpfe der Reise- und Fotos-Seite lassen sich nicht gruppieren. Die Karte hat keine Gruppen. Gruppen gehören zur Ansicht und werden mit Ansichten, Vorlagen (z. B. „Mit Gruppe“), Export und Import weitergegeben.
 
+![Statistik im Bearbeitungsmodus mit einer Gruppe „Jahresverlauf“](handbuch/bilder/32b-gruppe.png)
+
+*Abbildung 55: Eine Gruppe „Jahresverlauf“ mit zwei Bausteinen. Oben in der Gruppe: Umbenennen, „Standardmäßig offen“, Pfeile und „Gruppe lösen“.*
+
 ### 13.10 Eigene Handy-Anordnung
 
 Auf schmalen Bildschirmen (Ansicht „Handy“, bis 760 Pixel Breite) willst du vielleicht eine andere Reihenfolge oder weniger Bausteine als am Computer.
@@ -822,6 +871,16 @@ Auf schmalen Bildschirmen (Ansicht „Handy“, bis 760 Pixel Breite) willst du 
 3. **Desktop** schaltet zurück; **Handy-Anordnung zurücksetzen** entfernt sie, dann gilt wieder die Desktop-Reihenfolge.
 
 Ohne eigene Handy-Anordnung gilt überall die Desktop-Reihenfolge, wie bisher. Auf einem Handy startet der Umschalter bei „Handy“. Breite, Einstellungen und Gruppen sind für beide gleich; die Karte hat keine eigene Handy-Anordnung.
+
+![Bearbeitungsmodus mit Anordnung für Handy im schmalen Rahmen](handbuch/bilder/32c-handy-anordnung.png)
+
+*Abbildung 56: „Anordnung für: Handy“: Die Seite steht einspaltig in einem schmalen Rahmen; der Hinweis rechts in der Leiste sagt, dass noch keine eigene Handy-Anordnung besteht.*
+
+<p align="center">
+<img src="handbuch/bilder/63-handy-bearbeiten.png" width="260" alt="Bearbeitungsmodus auf dem Handy mit Rückgängig, Wiederholen und Desktop/Handy">
+</p>
+
+*Abbildung 57: Der Bearbeitungsmodus auf dem Handy (390 px): Die Leiste unten bietet Rückgängig, Wiederholen, den Umschalter „Desktop | Handy“, „Ansichten“, „+ Baustein“ und „Fertig“.*
 
 ### 13.11 Ansichten teilen: Layoutcode und Link
 
@@ -833,6 +892,10 @@ Eine Ansicht lässt sich auch als kurzer Text weitergeben, zum Beispiel in einer
 
 **Was steckt im Code?** Nur die Anordnung und die Einstellungen der Bausteine, auch eigene Titel und Notizen, die du dort eingegeben hast. Keine Touren, Fotos, Orte oder Zugangsdaten, und der Code gibt keinen Zugriff auf deine Daten. Der Server prüft jeden Code streng wie eine Datei (nur erlaubte Felder, Größen und Bausteine); beschädigte oder zu große Codes werden abgelehnt. Betrachter können keine Ansichten importieren.
 
+![Dialog Ansicht teilen mit Layoutcode](handbuch/bilder/32d-layoutcode.png)
+
+*Abbildung 58: Der Dialog „Ansicht teilen“ mit dem Layoutcode zum Kopieren sowie „Code kopieren“ und „Link kopieren“.*
+
 ### 13.12 Bausteine für Rhythmus, Jahreszeiten und Ausrüstung
 
 Drei Bausteine der Übersicht (und der Statistik) helfen beim Blick auf Rhythmus und Verschleiß. Alle lesen nur Daten, die schon in deiner Installation liegen; beim Anzeigen wird nichts aus dem Internet geholt. Betrachter sehen sie wie die anderen Bausteine.
@@ -840,6 +903,18 @@ Drei Bausteine der Übersicht (und der Statistik) helfen beim Blick auf Rhythmus
 * **Belastung und Erholung – Wochenansicht:** Im Einstellungsdialog des Bausteins wählst du bei **Ansicht** die **Wochenansicht mit Ruhetagen** (8 oder 12 Wochen). Je Woche siehst du die Belastung laut Uhr als Balken, die Zahl der Touren und Kilometer und die **Ruhetage** (Tage ohne Tour) als sieben Punkte von Montag bis Sonntag: gefüllt = Tour, leer = Ruhetag, gestrichelt = Tag der laufenden Woche, der noch kommt. Hat eine Woche Touren, aber keinen Uhr-Wert, steht dort **„Belastung ohne Angabe“** und es gibt keinen Balken; „ohne Angabe“ zählt nie als 0. Eine Woche ohne Tour heißt **„Ruhewoche“**. Die Ansicht **Kompakt** ist wie bisher.
 * **Jahreszeiten und Wetter:** Zeigt, wann du unterwegs bist: die vier Jahreszeiten (Frühling März bis Mai, Sommer Juni bis August, Herbst September bis November, Winter Dezember bis Februar, nach der nördlichen Halbkugel) mit Touren oder Kilometern, dazu zwölf Säulen für die Monate (alle Jahre des gewählten Zeitraums zusammen). Aktivität und Zeitraum stellst du wie bei den anderen Bausteinen ein. Liegen zu deinen Touren Wetterdaten vor (sie werden beim Öffnen einer Tour oder in der Verwaltung mit **Wetter laden** gespeichert), kommen die durchschnittliche Temperatur je Monat und Jahreszeit und die Verteilung der Touren nach Temperatur (unter 0 °C, 0 bis 10, 10 bis 20, ab 20 °C) dazu. Ohne Wetterdaten steht ein ehrlicher Hinweis statt der Temperaturen; Touren ohne Wetterdaten zählen bei den Temperaturen nie als 0 °C.
 * **Ausrüstung:** Der Baustein zeigt jetzt zusätzlich den Anteil am Limit in Prozent (zum Beispiel „412 von 600 km (69 %)“). Ab 90 % des Limits steht **„Bald fällig“** mit einem Ausrufezeichen-Symbol, ab 100 % **„Limit erreicht“** beziehungsweise „Limit überschritten um …“ mit einem Kreuz-Symbol; Farbe allein trägt die Aussage nie. Ausrüstung mit Warnung steht ganz oben.
+
+<img src="handbuch/bilder/58-saison-wetter.png" alt="Baustein Jahreszeiten und Wetter">
+
+*Abbildung 59: „Jahreszeiten und Wetter“: vier Jahreszeiten, zwölf Monatssäulen mit Durchschnittstemperatur und Touren nach Temperatur. Die Wetterwerte der Beispieltouren sind erfunden.*
+
+<img src="handbuch/bilder/59-belastung-wochenansicht.png" width="420" alt="Belastung und Erholung in der Wochenansicht">
+
+*Abbildung 60: „Belastung und Erholung“ in der Wochenansicht (8 Wochen, Ausschnitt): Belastungsbalken, Tage mit Tour (gefüllt) und Ruhetage (leer), „Ruhewoche“ und „Belastung ohne Angabe“.*
+
+<img src="handbuch/bilder/60-ausruestung-warnung.png" width="520" alt="Baustein Ausrüstung mit Warnzeichen">
+
+*Abbildung 61: „Ausrüstung“: „Limit überschritten“ (×) und „Bald fällig“ (!) stehen oben, dazu der Anteil am Limit in Prozent.*
 
 „Heute vor X Jahren“ gibt es schon als eigenen Baustein (Kategorie Rückblick): die Touren dieses Kalendertags aus früheren Jahren mit Jahr, Name und Kilometern, ein Tipp öffnet die Tour. Er folgt bewusst nicht dem Zeitraum der Seite.
 
@@ -864,13 +939,13 @@ Drei Bausteine der Übersicht (und der Statistik) helfen beim Blick auf Rhythmus
 
 ![Dialog „Tour teilen“](handbuch/bilder/13-teilen-dialog.png)
 
-*Abbildung 46: „Tour teilen“. Hier: „Nur Karte und Fotos“, Anfang und Ende ausgeblendet, 30 Tage gültig.*
+*Abbildung 62: „Tour teilen“. Hier: „Nur Karte und Fotos“, Anfang und Ende ausgeblendet, 30 Tage gültig.*
 
 **Was Empfänger sehen:** Name und Datum der Tour stehen immer im Kopf; dazu genau die gewählten Bausteine.
 
 ![Geteilte Tour im Browser des Empfängers](handbuch/bilder/54-geteilte-tour.png)
 
-*Abbildung 47: Die geteilte Seite, die ein Empfänger ohne Konto sieht: Karte und Fotos (die Kartenkacheln fehlen in dieser Aufnahme).*
+*Abbildung 63: Die geteilte Seite, die ein Empfänger ohne Konto sieht: Karte und Fotos (die Kartenkacheln fehlen in dieser Aufnahme).*
 
 ### 14.2 Was wird nie geteilt?
 
@@ -893,7 +968,7 @@ Im Benutzermenü **Freigegebene Links** (oder in der Verwaltung der Knopf **Frei
 
 ![Freigegebene Links](handbuch/bilder/42-freigegebene-links.png)
 
-*Abbildung 48: „Freigegebene Links“ mit Tourlink und Jahresrückblick. Die Adresse zeigt die Demo-Installation; bei dir steht dort die Adresse deiner Installation.*
+*Abbildung 64: „Freigegebene Links“ mit Tourlink und Jahresrückblick. Die Adresse zeigt die Demo-Installation; bei dir steht dort die Adresse deiner Installation.*
 
 ### 14.4 Wichtig für Links nach draußen
 
@@ -907,7 +982,7 @@ Damit Empfänger ohne Konto einen Link öffnen können, muss deine Installation 
 
 ## 15. Die Verwaltung
 
-**Zweck:** Einrichtung, Wartung und Sicherung. Öffne sie mit dem **Zahnrad** oben (auf dem Handy: **Mehr → Verwaltung**). Die Verwaltung hat acht Reiter und oben die Knöpfe **Freigegebene Links verwalten** und – rechts oben – die Versionsangabe („Version: 3.33.0“).
+**Zweck:** Einrichtung, Wartung und Sicherung. Öffne sie mit dem **Zahnrad** oben (auf dem Handy: **Mehr → Verwaltung**). Die Verwaltung hat acht Reiter und oben die Knöpfe **Freigegebene Links verwalten** und – rechts oben – die Versionsangabe („Version: 3.37.0“).
 
 | Reiter | Inhalt |
 |---|---|
@@ -932,7 +1007,7 @@ Die Verwaltung wird **Administratoren** angezeigt. **Einstellungen speichern** a
 
 ![Verwaltung, Reiter „Übersicht“](handbuch/bilder/37-verwaltung-uebersicht.png)
 
-*Abbildung 49: „Übersicht“: Zustand, Updates, Protokoll, Heimatort und Puls. Der gelbe Hinweis oben erscheint nur im Demo-Modus.*
+*Abbildung 65: „Übersicht“: Zustand, Updates, Protokoll, Heimatort und Puls. Der gelbe Hinweis oben erscheint nur im Demo-Modus.*
 
 ### 15.2 Hochladen & Planen
 
@@ -940,7 +1015,7 @@ Die Verwaltung wird **Administratoren** angezeigt. **Einstellungen speichern** a
 
 ![Verwaltung, Reiter „Hochladen & Planen“](handbuch/bilder/46-verwaltung-hochladen.png)
 
-*Abbildung 50: Portale und Tourplanung.*
+*Abbildung 66: Portale und Tourplanung.*
 
 ### 15.3 Fotos
 
@@ -958,7 +1033,7 @@ Siehe [Abschnitt 10.1](#k10).
 
 ![Verwaltung, Reiter „Handy & App“](handbuch/bilder/45-verwaltung-handy-app.png)
 
-*Abbildung 51: Der Reiter „Handy & App“.*
+*Abbildung 67: Der Reiter „Handy & App“.*
 
 ### 15.6 Sicherung & Zugang
 
@@ -969,7 +1044,7 @@ Siehe [Abschnitt 10.1](#k10).
 
 ![Verwaltung, Reiter „Sicherung & Zugang“](handbuch/bilder/39-verwaltung-sicherung.png)
 
-*Abbildung 52: Sicherung, Umzugspaket, Zugriffsschutz und Offline-Nutzung.*
+*Abbildung 68: Sicherung, Umzugspaket, Zugriffsschutz und Offline-Nutzung.*
 
 ### 15.7 Prüfen & Aufräumen
 
@@ -1019,14 +1094,20 @@ Auch im Handy-Browser passt sich die Oberfläche an: unten die Leiste mit **Übe
 <img src="handbuch/bilder/49-handy-tour.png" width="230" alt="Handy: Tourdetail">
 </p>
 
-*Abbildung 53: Handy-Ansicht (390 px breit): Übersicht, Touren-Liste, Tourdetail.*
+*Abbildung 69: Handy-Ansicht (390 px breit): Übersicht (mit der Leiste „Zeitraum der Seite“), Touren-Liste, Tourdetail.*
 
 <p align="center">
 <img src="handbuch/bilder/50-handy-hoehenprofil.png" width="230" alt="Handy: Höhenprofil und Herzfrequenz">
 <img src="handbuch/bilder/55-handy-mehr.png" width="230" alt="Handy: Menü Mehr">
 </p>
 
-*Abbildung 54: Höhenprofil und Herzfrequenz am Handy; rechts das Menü „Mehr“ mit Reisen, Statistik, Verwaltung und der Wahl „Automatisch / Smartphone / Computer“.*
+*Abbildung 70: Höhenprofil und Herzfrequenz am Handy; rechts das Menü „Mehr“ mit Reisen, Statistik, Verwaltung und der Wahl „Automatisch / Smartphone / Computer“.*
+
+<p align="center">
+<img src="handbuch/bilder/62-handy-kennzahl-ausruestung.png" width="230" alt="Handy: Eigene Kennzahl und Ausrüstung">
+</p>
+
+*Abbildung 71: Eigene Kennzahl und Ausrüstung am Handy (die untere Leiste ist für die Aufnahme ausgeblendet).*
 
 **Tour am Handy:** Statt vieler einzelner Knöpfe gibt es drei große: **Ansehen**, **Teilen & Export**, **Bearbeiten**.
 
@@ -1151,6 +1232,9 @@ Laut Projektbeschreibung kann sie unter anderem: Touren mit Karte und Höhenprof
 | Begriff | Bedeutung |
 |---|---|
 | **Ansicht** | Eine gespeicherte Anordnung einer anpassbaren Seite (z. B. „Wandern“). |
+| **Layoutcode** | Kurzer Text, der eine Ansicht beschreibt und sich per Nachricht weitergeben lässt (beginnt mit `MTA1.`). |
+| **Gruppe** | Mehrere Bausteine als einklappbarer Abschnitt mit eigenem Titel. |
+| **Zeitraum der Seite** | Gemeinsamer Zeitraum für alle Bausteine der Übersicht mit Zeitbezug. |
 | **Baustein** | Ein Abschnitt einer Seite, den du verschieben, ausblenden, einklappen und in der Breite ändern kannst. |
 | **BRouter** | Routing-Dienst für die Tourplanung. |
 | **Eigene Kennzahl** | Ein von dir zusammengestellter Wert (z. B. Höhenmeter je km). |
