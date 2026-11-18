@@ -333,6 +333,11 @@ In den Einstellungen eines Bausteins steht unter **Zeitraum der Seite verwenden*
    * Sortierung: **Neueste zuerst**, Älteste zuerst, Längste Strecke und weitere.
 4. **Tour planen** öffnet die Tourplanung (Voraussetzung: die Funktion ist unter *Verwaltung → Hochladen & Planen* eingeschaltet).
 
+**Planen (ab 3.38.0):**
+
+* **Machbarkeit:** Unter dem Höhenprofil vergleicht eine einklappbare Karte die geplante Strecke mit deinen Touren der letzten 12 Monate (gleiche Sportart): „✓ Im gewohnten Rahmen“, „▲ Etwas mehr als gewohnt“ oder „⚠ Deutlich mehr als bisher“, immer mit Zahlen (z. B. „Deine längste Tour der letzten 12 Monate: 19,2 km mit 1.100 m; diese: 22,0 km mit 1.400 m“). Bei weniger als 6 passenden Touren steht ehrlich „Zu wenig eigene Touren für eine persönliche Einschätzung“. Die Karte nennt die **Gesamtzeit inkl. Pausen** (dieselbe Zahl wie oben) und, für Wandern und Laufen, die **reine Gehzeit ohne Pausen** nach deinem Steigungstempo.
+* **Status und gelaufene Tour:** Jeder gespeicherte Plan hat einen Status (geplant, gegangen, verworfen). Deckt eine gelaufene Tour den Plan zu mindestens 80 % ab, schlägt die Liste „Gelaufen am … vorschlagen“ vor; erst **Bestätigen** verknüpft (nie automatisch). Verknüpfte Pläne zeigen „geplant 2:00 Std. · gelaufen 1:42 Std. (−0:18)“ sowie Strecke und Aufstieg mit Differenz; **Verknüpfung lösen** nimmt sie zurück.
+
 ![Touren-Liste](handbuch/bilder/02-touren-liste.png)
 
 *Abbildung 11: Die Liste aller Touren.*
@@ -1051,6 +1056,7 @@ Siehe [Abschnitt 10.1](#k10).
 ### 15.6 Sicherung & Zugang
 
 * **Sicherung:** Täglich um 03:40 Uhr wird die Datenbank (Touren, Notizen, Ziele, Zuordnungen) gesichert, die letzten 14 bleiben erhalten. **Backup jetzt herunterladen** und **Jetzt sichern** (oben) legen sofort eine an. Passwörter und Tokens sind im Download nicht enthalten; **Fotos und Routen sind nicht enthalten** – sichere diese Ordner zusätzlich. Wiederherstellen: `meine-touren-restore <Datei>` auf dem Server.
+* **Sicherung prüfen (ab 3.38.0):** Eine Sicherung wird erst nach dem Schreiben geprüft (freier Platz vorher, ZIP und Datenbank danach) und dann erst umbenannt; schlägt sie fehl, steht der Grund hier („Letzte Sicherung fehlgeschlagen: …“) und die bisherigen Sicherungen bleiben erhalten. **Letzte Sicherung prüfen** öffnet die neueste Sicherung in einem temporären Ordner, prüft die Datenbank und zeigt „Zuletzt geprüft: …, in Ordnung“ mit der Zahl der Touren, Tracks und Layouts. Deine Daten werden dabei nicht verändert; eine Wiederherstellung findet nicht statt. **Nicht in der Tagessicherung:** die Fotodateien und der Zwischenspeicher sowie der Schlüssel für gespeicherte Zugangsdaten (`secret.key`) – nach einer Wiederherstellung auf einem neuen Rechner müssen diese Zugangsdaten neu eingegeben werden. Das Umzugspaket enthält beides. Als überfällig gilt eine Sicherung nach 36 Stunden.
 * **Umzug auf einen neuen Server:** **Umzugspaket erstellen** enthält alles (alle Benutzer, Touren, Fotos, Strecken, Freigabelinks, gespeicherte Zugangsdaten samt Schlüssel). Das Paket enthält Passwörter und Schlüssel – gut aufbewahren; es kann groß werden.
 * **Zugriffsschutz:** Ohne Benutzerverwaltung kannst du die Oberfläche mit einem Passwort schützen („Passwort setzen“, der Browser fragt danach; Benutzername beliebig). Besser ist die Benutzerverwaltung ([Kapitel 3](#k3)).
 * **Offline-Nutzung:** **Für Offline vorbereiten** lädt die letzten 8 Touren mit Strecke, einigen Fotos und den Kartenkacheln auf dieses Gerät; **Alle Touren offline (Daten und Strecken)** lädt alle Strecken.

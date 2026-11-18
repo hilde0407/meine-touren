@@ -10,6 +10,7 @@ Zwei Wege, je nach Installation:
 * „manual“: sonst bleibt der Hinweis mit dem Befehl für die Konsole.
 """
 import json
+import logging
 import os
 import re
 import shutil
@@ -24,6 +25,8 @@ import requests
 from fastapi import APIRouter, HTTPException, Request
 
 from . import auth, config, ctx, extras, health
+
+_LOG = logging.getLogger("meine-touren")
 
 router = APIRouter()
 APP_ROOT = Path(__file__).resolve().parent.parent
@@ -77,16 +80,31 @@ def db_get(k):
     return db.get(k)
 
 
+_BACKUP_FAILS = []
+
+
+def backup_failures():
+    """Benutzer, deren Sicherung vor dem letzten Update-Anstoß nicht gelang (Liste von Texten)."""
+    return list(_BACKUP_FAILS)
+
+
 def backup_all():
-    """Vor dem Update für jeden aktiven Benutzer eine frische Sicherung anlegen."""
+    """Vor dem Update für jeden aktiven Benutzer eine frische Sicherung anlegen. Gibt die Zahl der gelungenen zurück;
+    Fehlschläge werden nicht verschluckt, sondern protokolliert und über backup_failures() gemeldet."""
     n = 0
+    _BACKUP_FAILS.clear()
     for u in auth.active_uids():
         with ctx.as_user(u):
             try:
                 if extras.auto_backup(max_age_s=0):
                     n += 1
-            except Exception:  # noqa
-                pass
+                else:
+                    from . import db
+                    _BACKUP_FAILS.append(f"{u or 'Hauptbenutzer'}: {db.get('backup_err') or 'unbekannter Fehler'}")
+            except Exception as e:  # noqa
+                _BACKUP_FAILS.append(f"{u or 'Hauptbenutzer'}: {e}")
+    for f in _BACKUP_FAILS:
+        _LOG.warning("Sicherung vor dem Update fehlgeschlagen: %s", f)
     return n
 
 
@@ -181,11 +199,11 @@ def api_update_install(body: dict, request: Request):
     if m == "service":
         _set_status("requested", ver, "Update angefordert …")
         (config.DATA_DIR / "update-request").write_text(ver, encoding="utf-8")
-        return {"ok": True, "mode": m, "backups": n}
+        return {"ok": True, "mode": m, "backups": n, "backup_fehler": backup_failures()}
     try:
         install_local(ver)
     except Exception as e:  # noqa
         _set_status("error", ver, str(e)[:300])
         raise HTTPException(502, f"Update fehlgeschlagen: {e}")
     restart_soon()
-    return {"ok": True, "mode": m, "backups": n}
+    return {"ok": True, "mode": m, "backups": n, "backup_fehler": backup_failures()}

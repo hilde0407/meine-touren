@@ -1,5 +1,6 @@
 """Zusatzfunktionen: Backup, Notizen, Ziele, GPX-Export, Rekorde."""
 import io
+import os
 import re
 import json
 import shutil
@@ -22,46 +23,111 @@ router = APIRouter()
 
 
 # ---------- Backup ----------
+BACKUP_RESERVE = 50_000_000          # Mindestreserve (Byte), die nach dem Schreiben noch frei sein muss
+
+
+class BackupError(Exception):
+    """Sicherung konnte nicht (vollständig und prüfbar) geschrieben werden; es bleibt keine halbe Datei zurück."""
+
+
+def _backup_files():
+    """Dateien, die zusätzlich zur Datenbank ins ZIP kommen: (Quelle, Name im ZIP)."""
+    out = []
+    if config.TRACK_DIR.exists():       # lokale Touren: Original-GPX gehören zum Datenbestand
+        for g in sorted(list(config.TRACK_DIR.glob("*.gpx")) + list(config.TRACK_DIR.glob("*.hr.json")) + list(config.TRACK_DIR.glob("*.met.json")) + list(config.TRACK_DIR.glob("*.uhr.json"))):
+            out.append((g, f"tracks/{g.name}"))
+    dd = config.DB_PATH.parent / "devices"
+    if dd.is_dir():                     # eigene Gerätefotos („Meine Geräte“)
+        for g in sorted(dd.glob("*.jpg")):
+            out.append((g, f"devices/{g.name}"))
+    return out
+
+
+def backup_size_estimate(strip_secrets=False):
+    """Obere Schätzung der ZIP-Größe (unkomprimierte Summe aller Teile)."""
+    n = 0
+    for f in [config.DB_PATH] + ([config.SYSTEM_DB] if not strip_secrets else []) + ([g for g, _ in _backup_files()] if not strip_secrets else []):
+        try:
+            n += f.stat().st_size
+        except OSError:
+            pass
+    return n
+
+
+def _write_zip(fileobj, td, strip_secrets):
+    tmp = Path(td) / "komoot_hub.sqlite"
+    src = sqlite3.connect(str(config.DB_PATH))
+    dst = sqlite3.connect(str(tmp))
+    with dst:
+        src.backup(dst)
+    src.close()
+    if strip_secrets:
+        for k in config.SECRET_KEYS:
+            dst.execute("UPDATE settings SET v='' WHERE k=?", (k,))
+        dst.commit()
+    dst.close()
+    with zipfile.ZipFile(fileobj, "w", zipfile.ZIP_DEFLATED) as z:
+        z.write(tmp, "komoot_hub.sqlite")
+        u = ctx.uid()
+        if u:
+            z.writestr("UID.txt", u)
+        if config.SYSTEM_DB.exists() and not strip_secrets:
+            st = Path(td) / "system.sqlite"
+            a = sqlite3.connect(str(config.SYSTEM_DB)); b = sqlite3.connect(str(st))
+            with b:
+                a.backup(b)
+            a.close(); b.close()
+            z.write(st, "system.sqlite")
+        if not strip_secrets:
+            for g, n in _backup_files():
+                z.write(g, n)
+        z.writestr("INFO.txt", f"Meine Touren Backup {datetime.now(TZ).isoformat()}\nWiederherstellen: deploy/restore.sh <datei.zip>\n")
+
+
 def make_backup(dest_dir=None, strip_secrets=False, keep=14):
-    """Konsistente Kopie der Datenbank als ZIP. Gibt Pfad (dest_dir) oder Bytes zurück."""
-    with tempfile.TemporaryDirectory() as td:
-        tmp = Path(td) / "komoot_hub.sqlite"
-        src = sqlite3.connect(str(config.DB_PATH))
-        dst = sqlite3.connect(str(tmp))
-        with dst:
-            src.backup(dst)
-        src.close()
-        if strip_secrets:
-            for k in config.SECRET_KEYS:
-                dst.execute("UPDATE settings SET v='' WHERE k=?", (k,))
-            dst.commit()
-        dst.close()
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
-            z.write(tmp, "komoot_hub.sqlite")
-            u = ctx.uid()
-            if u:
-                z.writestr("UID.txt", u)
-            if config.SYSTEM_DB.exists() and not strip_secrets:
-                st = Path(td) / "system.sqlite"
-                a = sqlite3.connect(str(config.SYSTEM_DB)); b = sqlite3.connect(str(st))
-                with b:
-                    a.backup(b)
-                a.close(); b.close()
-                z.write(st, "system.sqlite")
-            if not strip_secrets and config.TRACK_DIR.exists():       # lokale Touren: Original-GPX gehören zum Datenbestand
-                for g in sorted(list(config.TRACK_DIR.glob("*.gpx")) + list(config.TRACK_DIR.glob("*.hr.json")) + list(config.TRACK_DIR.glob("*.met.json")) + list(config.TRACK_DIR.glob("*.uhr.json"))):
-                    z.write(g, f"tracks/{g.name}")
-            dd = config.DB_PATH.parent / "devices"
-            if not strip_secrets and dd.is_dir():                      # eigene Gerätefotos („Meine Geräte“)
-                for g in sorted(dd.glob("*.jpg")):
-                    z.write(g, f"devices/{g.name}")
-            z.writestr("INFO.txt", f"Meine Touren Backup {datetime.now(TZ).isoformat()}\nWiederherstellen: deploy/restore.sh <datei.zip>\n")
+    """Konsistente Kopie der Datenbank als ZIP. Gibt Pfad (dest_dir) oder (Name, Bytes) zurück.
+    Mit Zielordner: erst Platz prüfen, in eine .part-Datei schreiben, ZIP und eingebettete Datenbank prüfen, dann atomar umbenennen.
+    Bei jedem Fehler wird die .part-Datei gelöscht und BackupError geworfen; bisherige Sicherungen bleiben unangetastet (keine Rotation)."""
     name = f"meine-touren-{datetime.now(TZ):%Y-%m-%d_%H%M}.zip"
     if dest_dir is None:
+        buf = io.BytesIO()
+        with tempfile.TemporaryDirectory() as td:
+            _write_zip(buf, td, strip_secrets)
         return name, buf.getvalue()
     d = Path(dest_dir); d.mkdir(parents=True, exist_ok=True)
-    p = d / name; p.write_bytes(buf.getvalue()); p.chmod(0o600)
+    for stale in d.glob("meine-touren-*.zip.part"):                    # Reste eines abgebrochenen Laufs (älter als 10 Minuten)
+        try:
+            if time.time() - stale.stat().st_mtime > 600:
+                stale.unlink()
+        except OSError:
+            pass
+    need = backup_size_estimate(strip_secrets) + BACKUP_RESERVE
+    try:
+        free = shutil.disk_usage(d).free
+    except OSError:
+        free = None
+    if free is not None and free < need:
+        raise BackupError(f"Zu wenig freier Speicher im Sicherungsordner: {free // 1_000_000} MB frei, mindestens {need // 1_000_000} MB nötig")
+    p = d / name
+    part = d / (name + ".part")
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            with open(part, "wb") as fh:
+                _write_zip(fh, td, strip_secrets)
+                fh.flush()
+                os.fsync(fh.fileno())
+        from . import backup_check
+        chk = backup_check.pruefe_zip(part, tief=False)
+        if not chk["ok"]:
+            raise BackupError("Die neue Sicherung hat die Prüfung nicht bestanden: " + chk["fehler"])
+        part.chmod(0o600)
+        os.replace(part, p)
+    except BackupError:
+        part.unlink(missing_ok=True)
+        raise
+    except Exception as e:  # noqa
+        part.unlink(missing_ok=True)
+        raise BackupError(f"{e.__class__.__name__}: {str(e)[:200]}") from e
     for old in sorted(list(d.glob("meine-touren-*.zip")) + list(d.glob("komoot-hub-*.zip")), key=lambda f: f.stat().st_mtime)[:-keep]:
         old.unlink()
     return p
@@ -677,7 +743,8 @@ def backup_on_update():
 
 
 def auto_backup(max_age_s=23 * 3600):
-    """Sicherung selbst erstellen, falls die letzte älter ist (unabhängig vom Cron-Eintrag)."""
+    """Sicherung selbst erstellen, falls die letzte älter ist (unabhängig vom Cron-Eintrag).
+    Schlägt jede Zielstelle fehl, wird der Grund gemerkt (backup_err, backup_err_ts) und protokolliert; die alten Sicherungen bleiben unberührt."""
     nb = newest_backup()
     if nb and time.time() - nb.stat().st_mtime < max_age_s:
         return None
@@ -687,10 +754,13 @@ def auto_backup(max_age_s=23 * 3600):
             d.mkdir(parents=True, exist_ok=True)
             p = make_backup(str(d), keep=14)
             db.put("backup_err", "")
+            db.put("backup_err_ts", "")
             return p
         except Exception as e:  # noqa
             err = f"{d}: {e}"
     db.put("backup_err", err or "unbekannt")
+    db.put("backup_err_ts", str(int(time.time())))
+    log(f"Letzte Sicherung fehlgeschlagen: {err or 'unbekannt'}")
     return None
 
 

@@ -106,6 +106,11 @@ def _open(path):
         conn.execute("CREATE TABLE IF NOT EXISTS plans (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, sport TEXT, pts TEXT, km REAL, up REAL, down REAL, max_alt REAL, est_h REAL, note TEXT, ts INTEGER)")   # geplante Touren
         if "wps" not in {r["name"] for r in conn.execute("PRAGMA table_info(plans)")}:
             conn.execute("ALTER TABLE plans ADD COLUMN wps TEXT")      # Wegpunkte, gewählte Alternativen, Wegführung (JSON)
+        pcols = {r["name"] for r in conn.execute("PRAGMA table_info(plans)")}
+        if "tour_id" not in pcols:
+            conn.execute("ALTER TABLE plans ADD COLUMN tour_id TEXT")  # 3.38.0: mit dieser gelaufenen Tour verknüpft (NULL = keine)
+        if "status" not in pcols:
+            conn.execute("ALTER TABLE plans ADD COLUMN status TEXT NOT NULL DEFAULT 'geplant'")   # 3.38.0: 'geplant' | 'gegangen' | 'verworfen'
         if "src" not in {r["name"] for r in conn.execute("PRAGMA table_info(elev_fix)")}:
             conn.execute("ALTER TABLE elev_fix ADD COLUMN src TEXT")          # 'zepp' = Höhe aus der Uhr, sonst (NULL) Geländemodell
         conn.execute("CREATE TABLE IF NOT EXISTS devices (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, kind TEXT, model TEXT, since TEXT, until TEXT, active INTEGER DEFAULT 1, note TEXT)")   # Meine Geräte (Uhr, Handy …)

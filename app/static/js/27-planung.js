@@ -86,6 +86,83 @@ function planProfile(dense, ele) {
   return `<svg viewBox="0 0 ${W} ${H}" class="w100" style="height:auto">${ticks}${kms}<path d="${line}L${x(D)},${H - B}L${L},${H - B}Z" fill="var(--green,#2f8f5f)" opacity=".22"/><path d="${line}" fill="none" stroke="var(--green,#2f8f5f)" stroke-width="2.2"/></svg>`;
 }
 
+/* Machbarkeit (3.38.0): Vergleich der Planung mit den eigenen Touren der letzten 12 Monate – Text UND Symbol, nie nur Farbe */
+const PLAN_STUFE = {
+  gewohnt: ["ok", "✓", "Im gewohnten Rahmen"],
+  etwas_mehr: ["warn", "▲", "Etwas mehr als gewohnt"],
+  deutlich_mehr: ["bad", "⚠", "Deutlich mehr als bisher"],
+  zu_wenig: ["info", "ℹ", "Zu wenig eigene Touren für eine persönliche Einschätzung"],
+};
+const PLAN_QUELLE = {eigene: "nach deinem Steigungstempo", teilweise: "teilweise nach deinem Steigungstempo", standard: "nach Standardwerten (Naismith)"};
+function planCheckHtml(r, estH) {
+  const st = PLAN_STUFE[r.stufe] || PLAN_STUFE.zu_wenig,
+    dk = r.diese,
+    kmup = (km, up) => (up != null ? `${nf(km, 1)} km mit ${nf(up, 0)} m` : `${nf(km, 1)} km (ohne Höhenangabe)`),
+    li = [];
+  if (r.stufe === "zu_wenig") li.push(`<li>Gefunden: ${r.n} Touren dieser Sportart in den letzten ${r.monate} Monaten, nötig sind mindestens ${r.min_n}.</li>`);
+  else {
+    const L = r.laengste,
+      H = r.hoechster_aufstieg;
+    li.push(`<li>Deine längste Tour der letzten ${r.monate} Monate: ${kmup(L.km, L.up)}; diese: ${kmup(dk.km, dk.up)}</li>`);
+    if (H && H.id !== L.id && dk.up != null) li.push(`<li>Dein größter Aufstieg der letzten ${r.monate} Monate: ${nf(H.up, 0)} m auf ${nf(H.km, 1)} km; diese: ${nf(dk.up, 0)} m</li>`);
+    if (r.gruende.includes("km")) li.push(`<li>Länger als deine längste Tour (+${Math.round((dk.km / L.km - 1) * 100)} %)</li>`);
+    if (r.gruende.includes("up") && H && H.up > 0) li.push(`<li>Mehr Aufstieg als deine bisher höchste Tour (+${Math.round((dk.up / H.up - 1) * 100)} %)</li>`);
+    li.push(`<li>Länger als diese Strecke: ${r.laenger} von ${r.n} Touren</li>`);
+    const a = r.aehnlich;
+    if (a) {
+      li.push(`<li>Ähnlich lange Touren (±25 % der Länge): ${a.n} in den letzten ${r.monate} Monaten</li>`);
+      if (a.dauer_h != null) li.push(`<li>Mittlere Gesamtzeit dieser Touren: ${hmm(a.dauer_h)} Std.</li>`);
+      if (a.up != null) li.push(`<li>Mittlerer Aufstieg dieser Touren: ${nf(a.up, 0)} m</li>`);
+    }
+    if (r.hoechster_punkt) li.push(`<li>Höchster Punkt dieser Strecke: ${nf(dk.max_alt, 0)} m; höchster Punkt deiner Touren der letzten ${r.monate} Monate: ${nf(r.hoechster_punkt.eigen, 0)} m</li>`);
+  }
+  if (estH != null) li.push(`<li>Geschätzte Gesamtzeit inkl. Pausen: ${hmm(estH)} Std. (wie oben)</li>`);
+  if (r.gehzeit) li.push(`<li><span>Reine Gehzeit ohne Pausen: ca. ${hmm(r.gehzeit.sekunden / 3600)} Std.</span> <span class="mut">(${PLAN_QUELLE[r.gehzeit.quelle] || PLAN_QUELLE.standard})</span></li>`);
+  const base = r.stufe === "zu_wenig" ? "" : `<p class="mut fs13">Grundlage: ${r.n} Touren dieser Sportart der letzten ${r.monate} Monate.</p>`;
+  return {
+    cls: st[0],
+    sum: `<span class="pcs ${st[0]}"><span aria-hidden="true">${st[1]}</span> <span>${st[2]}</span></span>`,
+    body: `<p class="pcst ${st[0]}"><i aria-hidden="true">${st[1]}</i><span>${st[2]}</span></p><ul class="pcl">${li.join("")}</ul>${base}`,
+  };
+}
+const hmSigned = h => (h < 0 ? "−" : "+") + fmtHM(Math.abs(h) * 3600);
+const nSigned = (v, d) => (v < 0 ? "−" : "+") + nf(Math.abs(v), d);
+/* verknüpfte Pläne: geplant ↔ gelaufen (fehlende Werte werden weggelassen, nie als 0 gerechnet) */
+function planCmpHtml(p) {
+  const t = p.tour;
+  if (!t) return "";
+  const out = [];
+  if (p.est_h && t.h) out.push(`<span>geplant ${hmm(p.est_h)} Std.</span> · <span>gelaufen ${hmm(t.h)} Std. (${hmSigned(t.h - p.est_h)})</span>`);
+  else if (t.h) out.push(`<span>gelaufen ${hmm(t.h)} Std.</span>`);
+  if (p.km && t.km) out.push(`<span>Strecke: geplant ${nf(p.km, 1)} km, gelaufen ${nf(t.km, 1)} km (${nSigned(t.km - p.km, 1)} km)</span>`);
+  if (p.up != null && t.up != null) out.push(`<span>Aufstieg: geplant ${nf(p.up, 0)} m, gelaufen ${nf(t.up, 0)} m (${nSigned(t.up - p.up, 0)} m)</span>`);
+  return `<small class="pcmp">${out.join(" · ") || ""}</small>`;
+}
+const planDate = ts => (ts ? new Date(ts * 1000).toLocaleDateString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric"}) : "");
+const planSugGone = () => {
+  try {
+    return JSON.parse(localStorage.getItem("mt-plan-sug-no") || "[]");
+  } catch (e) {
+    return [];
+  }
+};
+const planSugNo = key => {
+  try {
+    localStorage.setItem("mt-plan-sug-no", JSON.stringify([...planSugGone(), key].slice(-200)));
+  } catch (e) {}
+};
+function planRowHtml(p, sug) {
+  const key = sug ? `${p.id}:${sug.tour_id}` : "",
+    stOpt = [["geplant", "geplant"], ["gegangen", "gegangen"], ["verworfen", "verworfen"]];
+  const badge = p.status === "gegangen" ? `<span class="pst g"><span aria-hidden="true">✓</span> <span>gegangen</span></span>` : p.status === "verworfen" ? `<span class="pst v"><span aria-hidden="true">✕</span> <span>verworfen</span></span>` : "";
+  const sg = sug && !planSugGone().includes(key)
+    ? `<span class="psug"><span>Gelaufen am ${planDate(Date.parse(sug.datum) / 1000)} vorschlagen:</span> <a href="#/tour/${esc(sug.tour_id)}">${esc(sug.name || "Tour")}</a> <button class="btn sm" data-ok="${p.id}:${esc(sug.tour_id)}" type="button" aria-label="Verknüpfung bestätigen: ${esc(p.name)}">Bestätigen</button> <button class="btn ghost sm" data-no="${esc(key)}" type="button">Nicht passend</button></span>`
+    : "";
+  return `<div class="r cp prow" data-p="${p.id}" role="group" aria-label="Plan: ${esc(p.name)}"><span><a class="prn" href="#/plan/${p.id}">${esc(p.name)}</a>${badge}<small>${sName(p.sport)} · ${nf(p.km || 0, 1)} km · ↑ ${nf(p.up || 0, 0)} m${p.est_h ? " · ca. " + hmm(p.est_h) + " h" : ""}</small>${planCmpHtml(p)}${sg}</span><span class="prow-a">${
+    p.tour ? `<a class="btn ghost sm" href="#/tour/${esc(p.tour.id)}" aria-label="Zur gelaufenen Tour: ${esc(p.name)}">Tour ansehen</a><button class="btn ghost sm" data-un="${p.id}" type="button" aria-label="Verknüpfung lösen: ${esc(p.name)}">Verknüpfung lösen</button>` : ""
+  }<select class="pstat" data-s="${p.id}" aria-label="Status: ${esc(p.name)}">${stOpt.map(o => `<option value="${o[0]}" ${o[0] === (p.status || "geplant") ? "selected" : ""}>${o[1]}</option>`).join("")}</select><button class="btn ghost sm" data-d="${p.id}" title="Plan löschen" aria-label="Plan löschen: ${esc(p.name)}" type="button">✕</button></span></div>`;
+}
+
 const PLAN_PROFILE = s => ({racebike: "fastbike", mtb: "mtb"}[s] || (sportGrp(s) === "bike" ? "trekking" : "hiking-mountain"));
 const PLAN_MAXROUTED = 40; // so viele Punkte werden höchstens über Wege verbunden (jeder Abschnitt ist eine Anfrage)
 const ALT_COL = ["#e8590c", "#1c7ed6", "#9c36b5", "#2b8a3e"];
@@ -99,23 +176,25 @@ VIEWS.plan = async (pid, q) => {
   }
   const [plans, guides] = await Promise.all([api("/api/plans").catch(() => []), api("/api/guides").catch(() => [])]);
   const sports = Object.keys(SPORT);
-  const planRow = p => `<div class="r cp" data-p="${p.id}"><span>${esc(p.name)}<small>${sName(p.sport)} · ${nf(p.km || 0, 1)} km · ↑ ${nf(p.up || 0, 0)} m${p.est_h ? " · ca. " + hmm(p.est_h) + " h" : ""}</small></span><span><button class="btn ghost sm" data-d="${p.id}" title="Plan löschen">✕</button></span></div>`;
+  let SUG = {};
+  const planRow = p => planRowHtml(p, SUG[p.id]);
   $("#main").innerHTML = `<div class="row"><a class="back" href="#/tours">‹ Alle Touren</a></div>
    <div class="sec"><h2>Tour planen</h2><span class="sub">Punkte in die Karte klicken – sie werden über bekannte Wege verbunden – oder eine GPX-Datei laden</span></div>
-   <div class="row g8 fxw"><input id="pn" placeholder="Name der Planung" maxlength="120" class="mnw230"><select id="ps">${sports.map(s => `<option value="${s}" ${s === "hike" ? "selected" : ""}>${sName(s)}</option>`).join("")}</select>
+   <div class="row g8 fxw"><input id="pn" placeholder="Name der Planung" aria-label="Name der Planung" maxlength="120" class="mnw230"><select id="ps" aria-label="Sportart">${sports.map(s => `<option value="${s}" ${s === "hike" ? "selected" : ""}>${sName(s)}</option>`).join("")}</select>
     <label class="chip on cp" title="Verbindet die Punkte über Wege und Straßen aus OpenStreetMap (BRouter). Aus: gerade Linien."><input type="checkbox" id="prt" checked style="display:none">Wegen folgen</label>
     <label class="btn alt sm cp">GPX laden …<input type="file" id="pg" accept=".gpx,application/gpx+xml,text/xml" style="display:none"></label>
-    ${guides.length ? `<select id="pgd" class="mw260"><option value="">Aus Wanderführer laden …</option>${guides.map(g => `<option value="${g.id}">${esc(g.book ? g.book + " – " : "")}${esc(g.title)}</option>`).join("")}</select>` : ""}
+    ${guides.length ? `<select id="pgd" class="mw260" aria-label="Aus Wanderführer laden"><option value="">Aus Wanderführer laden …</option>${guides.map(g => `<option value="${g.id}">${esc(g.book ? g.book + " – " : "")}${esc(g.title)}</option>`).join("")}</select>` : ""}
     <button class="btn ghost sm" id="pundo">↶ Letzten Punkt entfernen</button><button class="btn ghost sm" id="pclr">Leeren</button></div>
-   <div class="tmap mt12" id="pm" style="height:min(60vh,520px)"></div>
+   <div class="tmap mt12" id="pm" role="region" aria-label="Karte zur Planung: Klick setzt einen Punkt" style="height:min(60vh,520px)"></div>
    <div id="pseg" class="wx m8-0-0" style="display:none"></div>
    <p class="mut fs13 m6-0-0">Klick auf die Karte setzt einen Punkt, Rechtsklick auf einen Punkt entfernt ihn. Ein Klick auf einen Abschnitt wählt ihn aus – dort lassen sich <b>Alternativen</b> anzeigen. Gestrichelt = gerade Linie (kein Weg gefunden oder „Wegen folgen“ aus).</p>
-   <div class="figs mt18" id="pf"></div><div class="mut m8-0-0" id="pb"></div>
-   <div class="panel prof gap" style="display:none" id="pprof"><h2>Höhenprofil</h2><div id="pprofc"></div></div>
-   <div class="field mw760 m16-0-0"><label for="pnote">Notiz zur Planung</label><textarea id="pnote" rows="2" placeholder="Anfahrt, Einkehr, beste Jahreszeit …"></textarea></div>
+   <div class="figs mt18" id="pf" role="group" aria-label="Kennzahlen der Planung"></div><div class="mut m8-0-0" id="pb"></div>
+   <div class="panel prof gap" style="display:none" id="pprof" role="region" aria-label="Höhenprofil der Planung"><h2>Höhenprofil</h2><div id="pprofc"></div></div>
+   <details class="pcheck" id="pcheck" hidden open><summary><span class="pcsh">Machbarkeit</span> <span id="pcsum"></span></summary><div id="pcb" class="pcb" role="status" aria-live="polite" aria-atomic="true"></div></details>
+   <div class="field mw760 m16-0-0"><label for="pnote">Notiz zur Planung</label><textarea id="pnote" rows="2" aria-label="Notiz zur Planung" placeholder="Anfahrt, Einkehr, beste Jahreszeit …"></textarea></div>
    <div class="row mt12"><button class="btn" id="psave">Plan speichern</button><button class="btn alt" id="pdl">⬇ Als GPX herunterladen</button><span id="pmsg" class="mut"></span></div>
    <div class="sec"><h2>Gespeicherte Pläne</h2><span class="sub">${plans.length ? plans.length + " Pläne" : "noch keine"}</span></div>
-   <div class="panel"><div class="rows" id="plist">${plans.length ? plans.map(planRow).join("") : `<p class="mut">Gespeicherte Planungen erscheinen hier.</p>`}</div></div>`;
+   <div class="panel"><div class="rows" id="plist" aria-label="Gespeicherte Pläne">${plans.length ? plans.map(planRow).join("") : `<p class="mut">Gespeicherte Planungen erscheinen hier.</p>`}</div></div>`;
   map = mkMap("pm", {layers: true});
   map.setView([47.5, 9], 6);
   const segLayer = L.layerGroup().addTo(map),
@@ -189,7 +268,7 @@ VIEWS.plan = async (pid, q) => {
     P.est = est ? est.h : null;
     const F = (v, u, l) => `<div class="fig"><div class="v">${v}<span class="u">${u}</span></div><div class="l">${l}</div></div>`;
     $("#pf").innerHTML = pth.length > 1
-      ? F(nf(km, 2), "km", "Strecke") + F(up != null ? nf(up, 0) : "…", "m", "Aufstieg") + F(P.down != null ? nf(P.down, 0) : "…", "m", "Abstieg") + F(P.max != null ? nf(P.max, 0) : "…", "m", "Höchster Punkt") + F(`${hmm(est.h)}`, "Std.", `Geschätzte Zeit (${hmm(est.lo)}–${hmm(est.hi)})`)
+      ? F(nf(km, 2), "km", "Strecke") + F(up != null ? nf(up, 0) : "…", "m", "Aufstieg") + F(P.down != null ? nf(P.down, 0) : "…", "m", "Abstieg") + F(P.max != null ? nf(P.max, 0) : "…", "m", "Höchster Punkt") + F(`${hmm(est.h)}`, "Std.", `Geschätzte Zeit inkl. Pausen (${hmm(est.lo)}–${hmm(est.hi)})`)
       : `<div class="mut">Setze mindestens zwei Punkte oder lade eine GPX-Datei.</div>`;
     $("#pb").textContent = pth.length > 1
       ? m.n
@@ -200,13 +279,48 @@ VIEWS.plan = async (pid, q) => {
       $("#pprof").style.display = "";
       $("#pprofc").innerHTML = planProfile(P.dense, P.ele);
     } else $("#pprof").style.display = "none";
+    if (P.chk) chkShow();
+  };
+  /* Machbarkeit: Server vergleicht km/Aufstieg mit den eigenen Touren; die Gesamtzeit kommt aus derselben Schätzung wie die Kennzahlen oben */
+  let chkSeq = 0;
+  const chkShow = () => {
+    const box = $("#pcheck");
+    if (!box || !P.chk) return;
+    const h = planCheckHtml(P.chk, P.est);
+    $("#pcsum").innerHTML = h.sum;
+    $("#pcb").innerHTML = h.body;
+  };
+  const chkRun = async () => {
+    const my = ++chkSeq,
+      box = $("#pcheck"),
+      pth = path();
+    if (!box) return;
+    if (pth.length < 2) {
+      P.chk = null;
+      box.hidden = true;
+      return;
+    }
+    box.hidden = false;
+    if (!P.chk) $("#pcb").innerHTML = `<p class="mut">Vergleich mit deinen Touren wird berechnet …</p>`;
+    try {
+      const r = await api("/api/plan/check", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({km: pathKm(pth), up: P.up, down: P.down, max_alt: P.max, sport: sw()})});
+      if (my !== chkSeq || !$("#pcheck")) return;
+      P.chk = r;
+      chkShow();
+    } catch (e) {
+      if (my !== chkSeq || !$("#pcheck")) return;
+      P.chk = null;
+      $("#pcsum").innerHTML = "";
+      $("#pcb").innerHTML = `<p class="mut">Der Vergleich konnte nicht berechnet werden: ${esc(e.message || e)}</p>`;
+    }
   };
   const calc = async () => {
     const my = ++seq,
       pth = path();
     if (pth.length < 2) {
       P.ele = P.dense = P.up = P.down = P.max = null;
-      return figs();
+      figs();
+      return chkRun();
     }
     const dense = densify(pth);
     try {
@@ -219,6 +333,7 @@ VIEWS.plan = async (pid, q) => {
       msg(`Höhen konnten nicht geladen werden (${e.message}) – Strecke und Zeit ohne Höhenmeter.`, true);
     }
     figs();
+    chkRun();
   };
   const later = () => {
     clearTimeout(tm);
@@ -366,15 +481,60 @@ VIEWS.plan = async (pid, q) => {
       P.id = r.id;
       history.replaceState(null, "", `#/plan/${r.id}`);
       msg("gespeichert ✓");
-      $("#plist").innerHTML = (await api("/api/plans")).map(planRow).join("");
+      await refreshList();
     } catch (e) {
       msg(e.message, true);
     }
   };
+  /* Planliste: Status, Verknüpfung mit der gelaufenen Tour, Vorschläge (nie automatisch verknüpfen) */
+  let PL = plans;
+  const drawList = () => {
+    const el = $("#plist");
+    if (!el) return;
+    el.innerHTML = PL.length ? PL.map(planRow).join("") : `<p class="mut">Gespeicherte Planungen erscheinen hier.</p>`;
+  };
+  const refreshList = async (withSug = true) => {
+    PL = await api("/api/plans");
+    drawList();
+    if (withSug) {
+      try {
+        SUG = await api("/api/plans/vorschlaege");
+      } catch (e) {
+        SUG = {};
+      }
+      drawList();
+    }
+  };
+  const post = (u, b) => api(u, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(b)});
   $("#plist").onclick = async e => {
     const d = e.target.dataset.d,
+      ok = e.target.dataset.ok,
+      no = e.target.dataset.no,
+      un = e.target.dataset.un,
       r = e.target.closest("[data-p]");
-    if (d) {
+    if (e.target.closest("a:not(.prn), select")) return;
+    if (e.target.closest("a.prn")) e.preventDefault();
+    if (ok) {
+      const [pi, ti] = ok.split(":");
+      e.target.disabled = true;
+      try {
+        await post(`/api/plans/${pi}/tour`, {tour_id: ti});
+        await refreshList();
+      } catch (er) {
+        e.target.disabled = false;
+        uiAlert(er.message || er);
+      }
+    } else if (no) {
+      planSugNo(no);
+      drawList();
+    } else if (un) {
+      try {
+        await post(`/api/plans/${un}/tour`, {tour_id: null});
+        await refreshList();
+      } catch (er) {
+        uiAlert(er.message || er);
+      }
+    } else if (d) {
       if (await uiConfirm({text: "Diesen Plan löschen?", danger: true, ok: "Löschen"})) {
         await api(`/api/plans/${d}`, {method: "DELETE"});
         route();
@@ -385,6 +545,22 @@ VIEWS.plan = async (pid, q) => {
       else location.hash = h;
     }
   };
+  $("#plist").onchange = async e => {
+    const si = e.target.dataset && e.target.dataset.s;
+    if (!si) return;
+    try {
+      await post(`/api/plans/${si}/status`, {status: e.target.value});
+    } catch (er) {
+      uiAlert(er.message || er);
+    }
+    await refreshList();
+  };
+  api("/api/plans/vorschlaege").then(v => {
+    if ($("#plist")) {
+      SUG = v;
+      drawList();
+    }
+  }).catch(() => {});
   /* Start: gespeicherten Plan oder Wanderführer-Tour laden */
   if (pid && /^\d+$/.test(pid)) {
     try {

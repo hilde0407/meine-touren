@@ -2734,4 +2734,67 @@ Bausteine ohne Zeitbezug, zum Beispiel „Heute vor X Jahren“ und die Erinneru
 Deine Auswahl merkt sich die App; „Ansicht speichern“ legt sie in der Ansicht ab. Die Adresse mit ?z=… lässt sich teilen und blendet die Leiste ein. || The app remembers your choice; “Save view” stores it in the view. The address with ?z=… can be shared and shows the bar. || L’application mémorise votre choix ; « Enregistrer la vue » le conserve dans la vue. L’adresse avec ?z=… peut être partagée et affiche la barre. || La aplicación recuerda tu elección; «Guardar vista» la guarda en la vista. La dirección con ?z=… se puede compartir y muestra la barra.
 Gerade gilt: {} von der Seite || Currently in effect: {} from the page || En vigueur actuellement : {} de la page || Ahora rige: {} de la página
 Dieser Baustein nutzt seinen eigenen Zeitraum || This block uses its own period || Ce bloc utilise sa propre période || Este bloque usa su propio período
-Die Seite hat keinen Zeitraum gewählt, dieser Baustein zeigt seinen eigenen || The page has no period selected; this block shows its own || La page n’a pas de période choisie ; ce bloc affiche la sienne || La página no tiene período elegido; este bloque muestra el suyo`;
+Die Seite hat keinen Zeitraum gewählt, dieser Baustein zeigt seinen eigenen || The page has no period selected; this block shows its own || La page n’a pas de période choisie ; ce bloc affiche la sienne || La página no tiene período elegido; este bloque muestra el suyo
+Letzte Sicherung prüfen || Check last backup || Vérifier la dernière sauvegarde || Comprobar la última copia de seguridad
+Geprüft wird nur die Sicherungsdatei in einem temporären Ordner – deine Daten werden nicht verändert. Nicht in der Tagessicherung enthalten: die Fotodateien (nur die Angaben dazu) und der Zwischenspeicher. Auch der Schlüssel für gespeicherte Zugangsdaten (secret.key) fehlt: Nach einer Wiederherstellung auf einem neuen Rechner müssen sie neu eingegeben werden. Das Umzugspaket enthält beides. || Only the backup file is checked, in a temporary folder – your data is not changed. Not in the daily backup: the photo files (only the details about them) and the cache. The key for stored credentials (secret.key) is missing as well: after a restore on a new computer they have to be entered again. The moving package contains both. || Seul le fichier de sauvegarde est vérifié, dans un dossier temporaire – vos données ne sont pas modifiées. Ne figurent pas dans la sauvegarde quotidienne : les fichiers photo (seulement les informations les concernant) et le cache. La clé des identifiants enregistrés (secret.key) manque aussi : après une restauration sur un nouvel ordinateur, il faut les saisir à nouveau. Le paquet de déménagement contient les deux. || Solo se comprueba el archivo de la copia, en una carpeta temporal: tus datos no se modifican. No están en la copia diaria: los archivos de fotos (solo los datos sobre ellas) y la caché. Tampoco está la clave de las credenciales guardadas (secret.key): tras restaurar en un ordenador nuevo hay que volver a introducirlas. El paquete de traslado contiene ambas cosas.
+Prüfe … || Checking … || Vérification … || Comprobando …
+Letzte Sicherung: {} ({}) || Last backup: {} ({}) || Dernière sauvegarde : {} ({}) || Última copia de seguridad: {} ({})
+Es gibt noch keine Sicherung. || There is no backup yet. || Il n’y a pas encore de sauvegarde. || Todavía no hay ninguna copia de seguridad.
+Letzte Sicherung fehlgeschlagen: {} || Last backup failed: {} || Échec de la dernière sauvegarde : {} || Falló la última copia de seguridad: {}
+Zuletzt geprüft: {}, in Ordnung || Last checked: {}, OK || Dernière vérification : {}, en ordre || Última comprobación: {}, correcta
+Zuletzt geprüft: {}, Fehler: {} || Last checked: {}, error: {} || Dernière vérification : {}, erreur : {} || Última comprobación: {}, error: {}
+Enthält {} Touren, {} Tracks und {} Layouts. || Contains {} tours, {} tracks and {} layouts. || Contient {} parcours, {} traces et {} mises en page. || Contiene {} rutas, {} tracks y {} diseños.
+Enthält {} Touren und {} Tracks. || Contains {} tours and {} tracks. || Contient {} parcours et {} traces. || Contiene {} rutas y {} tracks.
+Geprüft: Sicherung vom {}. || Checked: backup from {}. || Vérifié : sauvegarde du {}. || Comprobada: copia del {}.
+Die letzte Sicherung wurde noch nicht geprüft. || The last backup has not been checked yet. || La dernière sauvegarde n’a pas encore été vérifiée. || La última copia aún no se ha comprobado.
+⚠ Die Sicherung vor dem Update ist fehlgeschlagen: {} || ⚠ The backup before the update failed: {} || ⚠ La sauvegarde avant la mise à jour a échoué : {} || ⚠ Falló la copia de seguridad antes de la actualización: {}
+Machbarkeit || Feasibility || Faisabilité || Viabilidad
+Im gewohnten Rahmen || Within your usual range || Dans vos habitudes || Dentro de lo habitual
+Etwas mehr als gewohnt || A little more than usual || Un peu plus que d’habitude || Algo más de lo habitual
+Deutlich mehr als bisher || Clearly more than before || Nettement plus que jusqu’ici || Claramente más que hasta ahora
+Zu wenig eigene Touren für eine persönliche Einschätzung || Too few tours of your own for a personal assessment || Trop peu de parcours personnels pour une évaluation personnelle || Muy pocas rutas propias para una valoración personal
+Gefunden: {} Touren dieser Sportart in den letzten {} Monaten, nötig sind mindestens {}. || Found: {} tours of this sport in the last {} months, at least {} are needed. || Trouvé : {} parcours de ce sport au cours des {} derniers mois, il en faut au moins {}. || Encontradas: {} rutas de este deporte en los últimos {} meses, se necesitan al menos {}.
+Deine längste Tour der letzten {} Monate: {}; diese: {} || Your longest tour of the last {} months: {}; this one: {} || Votre plus long parcours des {} derniers mois : {} ; celui-ci : {} || Tu ruta más larga de los últimos {} meses: {}; esta: {}
+{} km mit {} m || {} km with {} m || {} km avec {} m || {} km con {} m
+{} km (ohne Höhenangabe) || {} km (no elevation given) || {} km (sans dénivelé indiqué) || {} km (sin dato de desnivel)
+Dein größter Aufstieg der letzten {} Monate: {} m auf {} km; diese: {} m || Your biggest ascent of the last {} months: {} m over {} km; this one: {} m || Votre plus grande montée des {} derniers mois : {} m sur {} km ; celui-ci : {} m || Tu mayor subida de los últimos {} meses: {} m en {} km; esta: {} m
+Länger als deine längste Tour (+{} %) || Longer than your longest tour (+{} %) || Plus long que votre plus long parcours (+{} %) || Más larga que tu ruta más larga (+{} %)
+Mehr Aufstieg als deine bisher höchste Tour (+{} %) || More ascent than your highest tour so far (+{} %) || Plus de montée que votre parcours le plus haut jusqu’ici (+{} %) || Más subida que tu ruta más alta hasta ahora (+{} %)
+Länger als diese Strecke: {} von {} Touren || Longer than this route: {} of {} tours || Plus longs que ce tracé : {} parcours sur {} || Más largas que este trazado: {} de {} rutas
+Ähnlich lange Touren (±25 % der Länge): {} in den letzten {} Monaten || Tours of similar length (±25 % of the length): {} in the last {} months || Parcours de longueur comparable (±25 % de la longueur) : {} au cours des {} derniers mois || Rutas de longitud similar (±25 % de la longitud): {} en los últimos {} meses
+Mittlere Gesamtzeit dieser Touren: {} Std. || Average total time of these tours: {} h || Durée totale moyenne de ces parcours : {} h || Tiempo total medio de estas rutas: {} h
+Mittlerer Aufstieg dieser Touren: {} m || Average ascent of these tours: {} m || Montée moyenne de ces parcours : {} m || Subida media de estas rutas: {} m
+Höchster Punkt dieser Strecke: {} m; höchster Punkt deiner Touren der letzten {} Monate: {} m || Highest point of this route: {} m; highest point of your tours of the last {} months: {} m || Point culminant de ce tracé : {} m ; point culminant de vos parcours des {} derniers mois : {} m || Punto más alto de este trazado: {} m; punto más alto de tus rutas de los últimos {} meses: {} m
+Geschätzte Gesamtzeit inkl. Pausen: {} Std. (wie oben) || Estimated total time incl. breaks: {} h (as above) || Durée totale estimée pauses comprises : {} h (comme ci-dessus) || Tiempo total estimado con pausas: {} h (como arriba)
+Reine Gehzeit ohne Pausen: ca. {} Std. || Walking time only, without breaks: approx. {} h || Temps de marche seul, sans pauses : env. {} h || Solo tiempo de marcha, sin pausas: aprox. {} h
+(nach deinem Steigungstempo) || (based on your pace by slope) || (d’après votre allure selon la pente) || (según tu ritmo por pendiente)
+(teilweise nach deinem Steigungstempo) || (partly based on your pace by slope) || (en partie d’après votre allure selon la pente) || (en parte según tu ritmo por pendiente)
+(nach Standardwerten (Naismith)) || (based on standard values (Naismith)) || (d’après les valeurs standard (Naismith)) || (según valores estándar (Naismith))
+Grundlage: {} Touren dieser Sportart der letzten {} Monate. || Basis: {} tours of this sport from the last {} months. || Base : {} parcours de ce sport des {} derniers mois. || Base: {} rutas de este deporte de los últimos {} meses.
+Vergleich mit deinen Touren wird berechnet … || Comparing with your tours … || Comparaison avec vos parcours en cours … || Comparando con tus rutas …
+Der Vergleich konnte nicht berechnet werden: {} || The comparison could not be calculated: {} || La comparaison n’a pas pu être calculée : {} || No se pudo calcular la comparación: {}
+Geschätzte Zeit inkl. Pausen ({}–{}) || Estimated time incl. breaks ({}–{}) || Durée estimée pauses comprises ({}–{}) || Tiempo estimado con pausas ({}–{})
+geplant {} Std. || planned {} h || prévu {} h || previsto {} h
+gelaufen {} Std. ({}) || walked {} h ({}) || parcouru {} h ({}) || recorrido {} h ({})
+gelaufen {} Std. || walked {} h || parcouru {} h || recorrido {} h
+Strecke: geplant {} km, gelaufen {} km ({} km) || Distance: planned {} km, walked {} km ({} km) || Distance : prévu {} km, parcouru {} km ({} km) || Distancia: prevista {} km, recorrida {} km ({} km)
+Aufstieg: geplant {} m, gelaufen {} m ({} m) || Ascent: planned {} m, walked {} m ({} m) || Montée : prévue {} m, parcourue {} m ({} m) || Subida: prevista {} m, recorrida {} m ({} m)
+geplant || planned || prévu || previsto
+gegangen || done || fait || hecho
+verworfen || discarded || abandonné || descartado
+Gelaufen am {} vorschlagen: || Suggest as walked on {}: || Proposer comme parcouru le {} : || Proponer como recorrida el {}:
+Bestätigen || Confirm || Confirmer || Confirmar
+Nicht passend || Not a match || Ne correspond pas || No coincide
+Tour ansehen || View tour || Voir le parcours || Ver la ruta
+Verknüpfung lösen || Remove link || Supprimer le lien || Quitar el vínculo
+Plan: {} || Plan: {} || Plan : {} || Plan: {}
+Status: {} || Status: {} || Statut : {} || Estado: {}
+Verknüpfung bestätigen: {} || Confirm link: {} || Confirmer le lien : {} || Confirmar el vínculo: {}
+Verknüpfung lösen: {} || Remove link: {} || Supprimer le lien : {} || Quitar el vínculo: {}
+Zur gelaufenen Tour: {} || To the walked tour: {} || Vers le parcours effectué : {} || A la ruta recorrida: {}
+Plan löschen: {} || Delete plan: {} || Supprimer le plan : {} || Eliminar plan: {}
+Karte zur Planung: Klick setzt einen Punkt || Map for planning: a click sets a point || Carte de planification : un clic place un point || Mapa de planificación: un clic fija un punto
+Kennzahlen der Planung || Figures of the plan || Chiffres clés de la planification || Cifras de la planificación
+Höhenprofil der Planung || Elevation profile of the plan || Profil altimétrique de la planification || Perfil de altitud de la planificación
+Aus Wanderführer laden || Load from guidebook || Charger depuis un guide de randonnée || Cargar desde guía de senderismo
+Sportart || Sport || Sport || Deporte`;

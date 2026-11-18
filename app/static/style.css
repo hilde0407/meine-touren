@@ -1973,3 +1973,16 @@ html.mob .zrjahr select{min-height:38px}
 html.mob .mapui>.kaopen{flex:0 0 auto;flex-wrap:nowrap;align-items:center;gap:6px;padding:4px 6px}
 html.mob .mapui>.kaopen .btn{min-height:40px;white-space:nowrap}
 html.mob .mapui>.kaopen .slok{flex:0 0 auto;white-space:nowrap}
+/* 3.38.0 Planung: Machbarkeit (Text + Symbol, nie nur Farbe), Status und Verknüpfung der Pläne; Sicherung prüfen */
+.pcheck{border-top:2px solid var(--ink);padding-top:12px;margin-top:20px}
+.pcheck>summary{cursor:pointer;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;padding:4px 0}
+.pcheck .pcsh{font:600 22px var(--d)}
+.pcs{font:600 16px var(--b);padding:2px 10px;border-radius:99px;display:inline-flex;gap:6px;align-items:baseline}
+.pcs.ok,.pcst.ok{background:var(--dv-ok-bg);color:var(--dv-ok)}.pcs.warn,.pcst.warn{background:var(--dv-warn-bg);color:var(--dv-warn)}.pcs.bad,.pcst.bad{background:var(--dv-bad-bg);color:var(--dv-bad)}.pcs.info,.pcst.info{background:var(--soft);color:var(--ink)}
+.pcst{display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:var(--r);font:600 18px var(--b);margin:12px 0 8px}.pcst i{font-style:normal;font-size:22px;line-height:1}
+.pcl{margin:6px 0 0;padding-left:20px}.pcl li{margin:5px 0}
+.prow{flex-wrap:wrap}.prow>:first-child{flex:1 1 280px;min-width:0}.prn{color:inherit;font-weight:600;text-decoration:none}.prn:hover,.prn:focus-visible{text-decoration:underline}
+.prow-a{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.pstat{font-size:14px;max-width:130px}
+.pst{display:inline-flex;gap:4px;font:600 13px var(--b);padding:1px 9px;border-radius:99px;margin-left:10px;white-space:nowrap;vertical-align:middle}.pst.g{background:var(--dv-ok-bg);color:var(--dv-ok)}.pst.v{background:var(--soft);color:var(--mut)}
+.pcmp{margin-top:4px;color:var(--ink)}.psug{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:8px;padding:8px 10px;border-radius:var(--r);background:var(--dv-warn-bg);color:var(--dv-warn);font-size:14px}.psug a{color:inherit;font-weight:600}
+.bkst p{margin:6px 0}.bkst .fs13{margin-top:0}

@@ -134,9 +134,77 @@ def api_plan_guide(gid: int):
     return {"id": g["id"], "title": g["title"], "book": g["book"] or "", "pts": _pts(json.loads(g["pts"]))}
 
 
+@router.post("/api/plan/check")
+def api_plan_check(body: dict):
+    """Machbarkeits-Check: geplante Strecke gegen die eigenen Touren der letzten 12 Monate (nur lesend)."""
+    from . import plan_check
+    try:
+        return plan_check.check(body)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+def _plan_row(r):
+    """Listenzeile eines Plans; die verknüpfte Tour (falls es sie noch gibt) mit Soll/Ist-Werten."""
+    t = None
+    if r.get("tour_id"):
+        x = db.one("SELECT id,name,start_ts,dist_m,dur_s,up_m FROM tours WHERE id=?", (r["tour_id"],))
+        if x:
+            t = {"id": x["id"], "name": x["name"] or "", "start_ts": x["start_ts"], "km": round((x["dist_m"] or 0) / 1000.0, 2) if x["dist_m"] else None,
+                 "h": round(x["dur_s"] / 3600.0, 3) if x["dur_s"] else None, "up": round(x["up_m"]) if x["up_m"] is not None else None}
+    r["tour"] = t
+    if r.get("tour_id") and not t:
+        r["tour_id"] = None                                   # Tour wurde gelöscht: Verknüpfung gilt nicht mehr
+    return r
+
+
 @router.get("/api/plans")
 def api_plans():
-    return db.query("SELECT id,name,sport,km,up,down,max_alt,est_h,note,ts FROM plans ORDER BY ts DESC")
+    return [_plan_row(r) for r in db.query("SELECT id,name,sport,km,up,down,max_alt,est_h,note,ts,tour_id,status FROM plans ORDER BY ts DESC")]
+
+
+@router.get("/api/plans/vorschlaege")
+def api_plan_vorschlaege():
+    """Gelaufene Touren, die einen noch offenen Plan zu mindestens 80 % überdecken (nur Vorschläge, nichts wird verknüpft)."""
+    from . import plan_check
+    return plan_check.vorschlaege()
+
+
+def _plan_or_404(pid):
+    if not db.one("SELECT 1 FROM plans WHERE id=?", (pid,)):
+        raise HTTPException(404, "Plan nicht gefunden")
+
+
+@router.post("/api/plans/{pid}/tour")
+def api_plan_link(pid: int, body: dict):
+    """Plan mit einer gelaufenen Tour verknüpfen (tour_id) oder lösen (tour_id leer/null). Verknüpfen setzt den Status auf „gegangen“, Lösen auf „geplant“."""
+    _plan_or_404(pid)
+    tid = body.get("tour_id")
+    if tid in (None, ""):
+        db.execute("UPDATE plans SET tour_id=NULL, status=CASE WHEN status='gegangen' THEN 'geplant' ELSE status END WHERE id=?", (pid,))
+        return {"ok": True, "tour_id": None, "status": db.one("SELECT status FROM plans WHERE id=?", (pid,))["status"]}
+    if not isinstance(tid, (str, int)) or isinstance(tid, bool) or len(str(tid)) > 64:
+        raise HTTPException(400, "Ungültige Tour")
+    tid = str(tid)
+    if not db.one("SELECT 1 FROM tours WHERE id=?", (tid,)):
+        raise HTTPException(404, "Tour nicht gefunden")
+    db.execute("UPDATE plans SET tour_id=?, status='gegangen' WHERE id=?", (tid, pid))
+    return {"ok": True, "tour_id": tid, "status": "gegangen"}
+
+
+@router.post("/api/plans/{pid}/status")
+def api_plan_status(pid: int, body: dict):
+    """Status setzen: geplant | gegangen | verworfen. Ein anderer Status als „gegangen“ löst eine bestehende Verknüpfung mit einer Tour."""
+    from .plan_check import STATUS
+    _plan_or_404(pid)
+    st = body.get("status")
+    if st not in STATUS:
+        raise HTTPException(400, "Status muss geplant, gegangen oder verworfen sein")
+    if st == "gegangen":
+        db.execute("UPDATE plans SET status=? WHERE id=?", (st, pid))
+    else:
+        db.execute("UPDATE plans SET status=?, tour_id=NULL WHERE id=?", (st, pid))
+    return {"ok": True, "status": st}
 
 
 @router.get("/api/plans/{pid}")

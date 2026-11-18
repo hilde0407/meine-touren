@@ -2,6 +2,15 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.38.0 – Sicher planen
+
+- Sicherung robust: Platzprüfung, `.part`-Datei, ZIP- und Datenbankprüfung, atomares Umbenennen; Fehler sichtbar, gute Sicherungen bleiben; eine Warnschwelle (36 h); Fehler der Sicherung vor dem Update werden gemeldet.
+- Verwaltung: Knopf „Letzte Sicherung prüfen“ (Probelauf im Temp-Ordner, Zahlen, Ergebnis gemerkt) und ehrlicher Hinweis, was nicht in der Sicherung ist.
+- Planseite: Machbarkeits-Check gegen die eigenen Touren der letzten 12 Monate (drei Stufen mit Symbol, konkrete Zahlen, Gesamtzeit und reine Gehzeit beschriftet), aria-Beschriftungen.
+- Pläne mit gelaufener Tour verknüpfen (Status, Vorschlag ab 80 % Überdeckung zum Bestätigen, Soll/Ist in der Planliste).
+
+Einzelheiten: [docs/versionen/3.38.0.md](versionen/3.38.0.md)
+
 ## Version 3.37.2 – Zeitraum der Seite standardmäßig ausgeblendet, mit Erklärung
 
 - Die Leiste „Zeitraum der Seite“ der Übersicht ist standardmäßig aus (Bausteine nutzen ihren eigenen Zeitraum); Schalter „Zeitraum der Seite anzeigen“ in „Seite anpassen“, je Ansicht gespeichert (Layout-Feld `zrbar`).

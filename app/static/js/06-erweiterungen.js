@@ -352,15 +352,21 @@ async function installUpdate(u, say) {
   )
     return;
   const before = u.current;
+  let bkWarn = "";
   say("Sicherung wird angelegt …");
   try {
-    await api("/api/update/install", {
+    const ir = await api("/api/update/install", {
       method: "POST",
       headers: {"content-type": "application/json"},
       body: JSON.stringify({version: u.latest}),
     });
+    bkWarn = ir && ir.backup_fehler && ir.backup_fehler.length ? `<span class="bad">⚠ Die Sicherung vor dem Update ist fehlgeschlagen: ${esc(ir.backup_fehler.join("; "))}</span><br>` : "";
   } catch (e) {
     return say(`<span class="bad">${esc(e.message)}</span>`);
+  }
+  if (bkWarn) {
+    const say0 = say;
+    say = h => say0(bkWarn + h);
   }
   say("Version wird installiert … (dauert etwa ein bis zwei Minuten)");
   const t0 = Date.now();
@@ -461,6 +467,9 @@ VIEWS.admin = async (...a) => {
     "beforebegin",
     `<div class="grid g2 mt40"><div class="panel"><h2>Sicherung</h2>
    <p class="mut">Täglich um 03:40 Uhr wird die Datenbank (Touren, Notizen, Ziele, Zuordnungen) automatisch nach <code>${esc(st.backup_dir || "/var/backups/meine-touren")}</code> gesichert, die letzten 14 bleiben erhalten. Wiederherstellen: <code>${esc(st.app_name || "meine-touren")}-restore &lt;Datei&gt;</code> im Container.</p>
+   <div id="bkst" class="bkst" aria-live="polite"></div>
+   <div class="row g8"><button class="btn alt" id="bkchk" type="button">Letzte Sicherung prüfen</button><span id="bkmsg" class="mut" role="status" aria-live="polite"></span></div>
+   <p class="mut fs13">Geprüft wird nur die Sicherungsdatei in einem temporären Ordner – deine Daten werden nicht verändert. Nicht in der Tagessicherung enthalten: die Fotodateien (nur die Angaben dazu) und der Zwischenspeicher. Auch der Schlüssel für gespeicherte Zugangsdaten (secret.key) fehlt: Nach einer Wiederherstellung auf einem neuen Rechner müssen sie neu eingegeben werden. Das Umzugspaket enthält beides.</p>
    <div class="row"><a class="btn alt" href="/api/backup" download>Backup jetzt herunterladen</a></div><p class="mut fs13">Passwörter und Tokens sind im Download nicht enthalten. Fotos und Routen sind nicht enthalten.</p>
    <h3 class="mt16">Umzug auf einen neuen Server</h3>
    <p class="mut">Das <b>Umzugspaket</b> enthält alles: alle Benutzer, Touren mit Notizen und Kommentaren, Freigabelinks, Fotos, Strecken samt Original-Höhen, gespeicherte Zugangsdaten samt Schlüssel. Auf dem neuen Server zuerst installieren, dann <code>${esc(st.app_name || "meine-touren")}-restore &lt;Paket&gt;</code> – danach läuft alles wie vorher. Das Paket enthält Passwörter und Schlüssel: gut aufbewahren. Es kann groß werden (Fotos).</p>
@@ -475,6 +484,7 @@ VIEWS.admin = async (...a) => {
             <p class="mut fs13">Der Browser fragt danach nach dem Passwort (Benutzername beliebig). Das Passwort wird nur als Hash im Datenordner gespeichert.</p><div id="uipwm"></div>`
    }</div></div>`
   );
+  bkInit();
   const setPw = async pw => {
     try {
       await api("/api/ui-password", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({password: pw})});
@@ -631,6 +641,44 @@ assignDialog = (sp, done) => {
     });
 };
 
+
+/* Sicherung: Zustand (neueste Datei, letzter Fehler) und Prüfung der letzten Sicherung */
+async function bkInit() {
+  const box = $("#bkst"), btn = $("#bkchk"), msg = $("#bkmsg");
+  if (!box || !btn) return;
+  const dt = ts => new Date(ts * 1000).toLocaleString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"});
+  const mb = n => (n >= 1e8 ? (n / 1e9).toFixed(2) + " GB" : (n / 1e6).toFixed(1) + " MB");
+  const render = s => {
+    if (!box.isConnected) return;
+    let h = "";
+    if (s.neueste) h += `<p class="${s.ueberfaellig ? "bad" : "ok"}"><span aria-hidden="true">${s.ueberfaellig ? "⚠" : "✓"}</span> <span>Letzte Sicherung: ${dt(s.neueste.ts)} (${mb(s.neueste.groesse)})</span></p>`;
+    else h += `<p class="bad"><span aria-hidden="true">⚠</span> <span>Es gibt noch keine Sicherung.</span></p>`;
+    if (s.fehler) h += `<p class="bad" id="bkerr"><span aria-hidden="true">⚠</span> <span>Letzte Sicherung fehlgeschlagen: ${esc(s.fehler)}</span></p>`;
+    const g = s.geprueft;
+    if (g) {
+      const von = g.name && g.alter_h != null ? `<span class="ml8">Geprüft: Sicherung vom ${dt(g.ts - g.alter_h * 3600)}.</span>` : "";
+      if (g.ok) {
+        const inh = g.layouts != null ? `Enthält ${g.touren} Touren, ${g.tracks} Tracks und ${g.layouts} Layouts` : `Enthält ${g.touren} Touren und ${g.tracks} Tracks`;
+        h += `<p class="ok" id="bkok"><span aria-hidden="true">✓</span> <span>Zuletzt geprüft: ${dt(g.ts)}, in Ordnung</span></p><p class="mut fs13"><span>${inh}.</span>${von}</p>`;
+      } else h += `<p class="bad" id="bkbad"><span aria-hidden="true">✗</span> <span>Zuletzt geprüft: ${dt(g.ts)}, Fehler: ${esc(g.fehler || "")}</span></p>`;
+    } else h += `<p class="mut">Die letzte Sicherung wurde noch nicht geprüft.</p>`;
+    box.innerHTML = h;
+  };
+  const load = () => api("/api/backup/status").then(render).catch(() => {});
+  btn.onclick = async () => {
+    btn.disabled = true;
+    msg.textContent = "Prüfe …";
+    try {
+      await api("/api/backup/check", {method: "POST"});
+      msg.textContent = "";
+      await load();
+    } catch (e) {
+      msg.innerHTML = `<span class="bad">${esc(e.message || e)}</span>`;
+    }
+    btn.disabled = false;
+  };
+  load();
+}
 
 /* Umzugspaket (komplette Sicherung): erstellen, auflisten, herunterladen */
 async function umzugInit() {

@@ -357,8 +357,8 @@ def api_health():
         w.append({"level": "warn", "text": f"Backup kann nicht geschrieben werden: {err}"})
     elif nb is None:
         w.append({"level": "warn", "text": "Es gibt noch kein Backup – das erste wird automatisch angelegt (nachts), oder jetzt sofort:", "action": "backup"})
-    elif time.time() - nb.stat().st_mtime > 2 * 86400:
-        w.append({"level": "warn", "text": "Das letzte Backup ist älter als 2 Tage.", "action": "backup"})
+    elif time.time() - nb.stat().st_mtime > config.BACKUP_WARN_S:
+        w.append({"level": "warn", "text": "Das letzte Backup ist älter als 36 Stunden.", "action": "backup"})
     try:
         free = shutil.disk_usage(config.DATA_DIR).free
         if free < 1_000_000_000:
