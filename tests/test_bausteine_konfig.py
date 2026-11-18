@@ -152,9 +152,9 @@ def test_layout_cfg_viewer_and_users():
 def test_version_and_notes_and_script_order():
     from app import config as cfg
     root = Path(__file__).resolve().parent.parent
-    assert cfg.VERSION.startswith("3.38.1 · Meine Touren")
+    assert cfg.VERSION.startswith("3.39.0 · Meine Touren")
     notes = (root / "docs" / "versionen" / "3.19.0.md").read_text(encoding="utf-8")
     assert "Konfigurierbare Bausteine" in notes and "/api/bausteine/jahr" in notes and "53-filter.js" in notes
     html = (root / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("js/52-bausteine-uebersicht.js") < html.index("js/53-filter.js") < html.index("js/39-sw.js")
-    assert 'const V = "mt-v120"' in (root / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v121"' in (root / "app" / "static" / "sw.js").read_text(encoding="utf-8")

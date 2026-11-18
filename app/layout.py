@@ -78,7 +78,7 @@ FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg", "w
 WIDTHS = ("voll", "zweidrittel", "halb", "drittel")
 # Bausteine, die eine Tour brauchen (Typkennungen wie in static/js/50-bausteine.js und 51-bausteine-tour.js, fam "tour"): nicht in der Übersicht
 TOUR_ONLY = frozenset(("kennzahlen", "tempo", "vergleich", "pulszonen", "wetter", "fotostreifen", "notiz", "splits", "steigung", "bewegung", "durchschnitt", "jahresrang",
-                       "tageslicht", "gipfel", "vergleiche", "stimmung", "fotohighlights", "miniprofil", "steckbrief"))
+                       "planergebnis", "tageslicht", "gipfel", "vergleiche", "stimmung", "fotohighlights", "miniprofil", "steckbrief"))
 # 3.22.0: Bausteine, die nur auf der Statistikseite stehen (Typkennungen wie in static/js/57-bausteine-statistik.js)
 STATISTIK_ONLY = frozenset(("stmonate", "stentwicklung", "stlaengen", "sthoehe", "sttop"))
 # 3.23.0: Hinweis-Bausteine (Typkennungen wie in static/js/58-bausteine-hinweise.js): nur auf Übersicht und Statistik, einige nur auf der Übersicht
@@ -125,7 +125,7 @@ MAX_GROUP_MEMBERS = 30
 MAX_GROUP_TITLE = 60
 GROUP_NEVER = frozenset(("sum", "kopf"))                      # Pflicht-Abschnitte (Einstieg in die Auswertung, Kopf der Reise-/Fotos-Seite) bleiben ungruppiert
 # Standard-Abschnitte je Seite (wie SL_REG in static/js/49-seitenlayout.js, 62-reiseseiten.js, 63-fotoseiten.js; tests/test_gruppen_ui.py vergleicht beide)
-_TOUR_STD = ("map", "prof", "puls", "wp", "sum", "photos", "geraet", "wx", "ana", "steig", "aehn", "cmp")
+_TOUR_STD = ("map", "prof", "puls", "wp", "planist", "sum", "photos", "geraet", "wx", "ana", "steig", "aehn", "cmp")
 STD_IDS = {
     "tour-haupt": frozenset(_TOUR_STD), "tour-auswertung": frozenset(_TOUR_STD),
     "uebersicht": frozenset(("aufmacher", "jahr", "zepp", "zuletzt", "tag", "erinn")),

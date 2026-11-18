@@ -97,7 +97,7 @@ def index_page(request: Request):
 
 VIEWER_GET = re.compile(
     r"^(/api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings|layout/[a-z-]+|bausteine/[a-z]+|hr/stats|stats/belastung|stats/tempo|stats/gehzeit|my-devices|my-devices/\d+/photo|devices/quality|devices/\d+/quality/tours|devices/\d+/uhr-felder(?:\.json)?"
-    r"|tours|tours/[^/]+|tours/[^/]+/(coords|best-photos|weather|gpx|hr|metrics|uhr-felder|uhr-training|tempo|aehnliche)|trips/[^/]+|records/altitude|weather/stats)"
+    r"|tours|tours/[^/]+|tours/[^/]+/(coords|best-photos|weather|gpx|hr|metrics|uhr-felder|uhr-training|tempo|aehnliche|plan)|trips/[^/]+|records/altitude|weather/stats)"
     r"|/photo/[^/]+|/pic/[^/]+|/tiles/.+)$")
 # Ohne Anmeldung nur diese Pfade – exakt verglichen (ein Präfix würde auch /api/me/2fa/… oder /api/zepp-token/test öffnen).
 # /api/reset/<Token> (Passwort-Link) ist der einzige offene Unterpfad.
@@ -974,6 +974,7 @@ app.include_router(more.router)
 app.include_router(more2.router)
 app.include_router(gear.router)
 app.include_router(plan.router)
+app.include_router(plan.tour_router)
 app.include_router(pdfgen.router)
 app.include_router(users_api.router)
 app.include_router(security.router)

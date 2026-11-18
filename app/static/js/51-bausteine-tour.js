@@ -265,3 +265,114 @@ Object.assign(window.SL_WT, {
     },
   },
 });
+
+/* =====================  3.39.0 Plan und Ergebnis (Soll/Ist) an der Tourseite  =====================
+   Hat eine gelaufene Tour eine verknüpfte Planung (plans.tour_id, 3.38.0), steht an der Tourseite die Karte „Plan und Ergebnis“: Kennzahlen Soll/Ist mit Unterschied (Text UND Symbol), die geplante Linie
+   (gestrichelt) über der gelaufenen (durchgezogen) und der Link zum Plan. Daten: GET /api/tours/<id>/plan (nur lesend, höchstens 400 Punkte je Linie). Ohne Verknüpfung gibt es nichts zu sehen:
+   als Standard-Abschnitt („planist“, SL_REG.tour) wird die Karte gar nicht erst gebaut (when), als eigenständiger Baustein aus dem Katalog bleibt sie unsichtbar (data-hn = aus). */
+const PLAN_OF = {};                                                                                  // Tour-Kennung → Antwort des Servers (nur mit Verknüpfung)
+const planErgHas = () => {
+  const r = typeof tlRoot === "function" ? tlRoot() : null;
+  return !!(r && PLAN_OF[r.dataset.tid]);
+};
+async function planErgData(id, fresh) {
+  if (!fresh && PLAN_OF[id]) return PLAN_OF[id];
+  const d = await slGet(`/api/tours/${slEnc(id)}/plan`);
+  if (d && d.status === "ok") PLAN_OF[id] = d;
+  else delete PLAN_OF[id];
+  return PLAN_OF[id] || null;
+}
+/* Unterschied Ist − Soll: Pfeil, Zahl mit Vorzeichen und Wort („länger als geplant“); innerhalb der Toleranz „wie geplant“ (=). Fehlt ein Wert, steht „ohne Angabe“ (nie 0). */
+const PLAN_TOL = {km: 0.05, up: 1, h: 1 / 60};
+const PLAN_WORDS = {km: ["länger als geplant", "kürzer als geplant"], up: ["mehr Aufstieg als geplant", "weniger Aufstieg als geplant"], h: ["länger als geplant", "kürzer als geplant"]};
+function planErgDiff(k, v) {
+  if (v == null) return '<span class="pld mut"><span>ohne Angabe</span></span>';
+  if (Math.abs(v) < PLAN_TOL[k]) return '<span class="pld"><span aria-hidden="true">=</span> <span>wie geplant</span></span>';
+  const num = k === "km" ? `${nSigned(v, 1)} km` : k === "up" ? `${nSigned(v, 0)} m` : null;
+  return `<span class="pld"><span aria-hidden="true">${v > 0 ? "↑" : "↓"}</span> ` +
+    (num ? `<b>${num}</b>` : `<b>${v < 0 ? "−" : "+"}${fmtHM(Math.abs(v) * 3600)}</b> <span>Std.</span>`) + ` <small class="mut">${PLAN_WORDS[k][v > 0 ? 0 : 1]}</small></span>`;
+}
+const planErgVal = (k, v) => (v == null ? '<span class="mut">ohne Angabe</span>' : k === "km" ? slKm(v) : k === "up" ? slHm(v) : `${fmtHM(v * 3600)} <span>Std.</span>`);
+/* Linien übereinander: gleichmäßige Abbildung (Längengrad mit cos(Breite) gestreckt), Strichbreite bleibt beim Skalieren gleich */
+function planErgSvg(d) {
+  const A = (d.plan_linie || []).filter(p => p.length >= 2), B = (d.tour_linie || []).filter(p => p.length >= 2), all = A.concat(B);
+  if (all.length < 2) return "";
+  const la = all.map(p => p[0]), lo = all.map(p => p[1]), k = Math.cos((((Math.min(...la) + Math.max(...la)) / 2) * Math.PI) / 180),
+    x0 = Math.min(...lo) * k, y1 = Math.max(...la), w0 = Math.max(1e-6, (Math.max(...lo) - Math.min(...lo)) * k), h0 = Math.max(1e-6, y1 - Math.min(...la)),
+    W = 600, H = Math.round(Math.max(120, Math.min(420, (W * h0) / w0))), sc = Math.min((W - 24) / w0, (H - 24) / h0), ox = (W - w0 * sc) / 2, oy = (H - h0 * sc) / 2,
+    pts = L => L.map(p => `${(ox + (p[1] * k - x0) * sc).toFixed(1)},${(oy + (y1 - p[0]) * sc).toFixed(1)}`).join(" "),
+    label = "Karte: geplante Linie gestrichelt, gelaufene Linie durchgezogen" + (A.length && B.length ? "" : A.length ? " (die gelaufene Linie liegt nicht vor)" : " (die geplante Linie liegt nicht vor)");
+  return `<svg class="plmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}" focusable="false">` +
+    (A.length ? `<polyline class="plpl" fill="none" points="${pts(A)}" vector-effect="non-scaling-stroke"/>` : "") +
+    (B.length ? `<polyline class="plis" fill="none" points="${pts(B)}" vector-effect="non-scaling-stroke"/>` : "") + "</svg>" +
+    `<ul class="plleg"><li><svg viewBox="0 0 28 8" class="plsw" aria-hidden="true" focusable="false"><line class="plpl" x1="1" y1="4" x2="27" y2="4"/></svg><span>Plan (gestrichelt)</span></li>` +
+    `<li><svg viewBox="0 0 28 8" class="plsw" aria-hidden="true" focusable="false"><line class="plis" x1="1" y1="4" x2="27" y2="4"/></svg><span>Ergebnis (durchgezogen)</span></li></ul>`;
+}
+function planErgPaint(c, b, d, t) {
+  const can = typeof isViewer === "function" ? !isViewer() : true, S = d.soll, I = d.ist, D = d.diff,
+    rows = [["km", "Strecke"], ["up", "Aufstieg"], ["h", "Zeit gesamt"]];
+  b.innerHTML = `<div role="group" aria-label="Plan und Ergebnis im Vergleich"><p class="plname">${can ? `<a href="#/plan/${d.plan.id}">${esc(d.plan.name || "Ohne Namen")}</a>` : `<b>${esc(d.plan.name || "Ohne Namen")}</b>`}</p>` +
+    `<ul class="plrows">${rows.map(([k, lab]) => `<li class="plrow"><span class="pll">${lab}</span><span class="plv"><small class="mut">Plan</small> ${planErgVal(k, S[k])}</span>` +
+      `<span class="plv"><small class="mut">Ergebnis</small> ${planErgVal(k, I[k])}</span>${planErgDiff(k, D[k])}</li>`).join("")}</ul>` +
+    `${planErgSvg(d)}` +
+    `<p class="mut slcap">Zeit gesamt: einschließlich Pausen; geplante Zeit nach deinem persönlichen Tempo.</p>` +
+    (can ? `<div class="row g8 plact"><a class="btn alt sm" href="#/plan/${d.plan.id}">Zum Plan ›</a><button type="button" class="btn ghost sm" data-a="unlink">Verknüpfung lösen</button></div>` : "") + "</div>";
+  const first = [["km", D.km], ["h", D.h]].find(([, v]) => v != null);
+  slBadge(c, !first ? "" : Math.abs(first[1]) < PLAN_TOL[first[0]] ? "wie geplant" : `${first[1] > 0 ? "↑" : "↓"} ${first[0] === "km" ? nSigned(first[1], 1) + " km" : (first[1] < 0 ? "−" : "+") + fmtHM(Math.abs(first[1]) * 3600) + " Std."}`);
+  const ub = b.querySelector('[data-a="unlink"]');
+  if (ub)
+    ub.onclick = async () => {
+      if (!(await uiConfirm({title: "Verknüpfung lösen?", text: `Der Plan „${d.plan.name || "Ohne Namen"}“ bleibt erhalten, ist aber nicht mehr mit dieser Tour verknüpft und steht wieder als „geplant“ in deiner Planliste.`, ok: "Verknüpfung lösen", cancel: "Abbrechen"}))) return;
+      ub.disabled = true;
+      try {
+        await api(`/api/plans/${d.plan.id}/tour`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({tour_id: null})});
+      } catch (e) {
+        ub.disabled = false;
+        uiAlert(e.message || e);
+        return;
+      }
+      delete PLAN_OF[t.id];
+      c.dataset.hn = "aus";
+      slNote(b, "Zu dieser Tour gibt es keine verknüpfte Planung. Der Baustein erscheint nur bei Touren mit verknüpftem Plan.");
+      slBadge(c, "");
+      if (typeof tlRefresh === "function") tlRefresh();
+    };
+}
+/* Nach dem Öffnen der Tourseite (und der Unterseite) nachsehen, ob es eine Verknüpfung gibt; erst dann wird die Karte gebaut und eingeordnet */
+function planErgLoad(t) {
+  if (!t) return Promise.resolve();
+  delete PLAN_OF[t.id];
+  return planErgData(t.id, true).then(d => {
+    const r = typeof tlRoot === "function" ? tlRoot() : null;
+    if (d && r && r.dataset.tid === String(t.id) && typeof tlRefresh === "function") tlRefresh();
+  });
+}
+
+Object.assign(window.SL_WT, {
+  planergebnis: {
+    fam: "tour", cat: "plan", icon: "map", name: "Plan und Ergebnis", title: () => "Plan und Ergebnis", defaults: {},
+    desc: "Wie die Tour im Vergleich zur verknüpften Planung ausgefallen ist: Strecke, Aufstieg und Zeit als Plan und Ergebnis mit Unterschied (↑ ↓ =), die geplante Linie gestrichelt über der gelaufenen, Link zum Plan. Erscheint nur bei Touren, die mit einem Plan verknüpft sind.",
+    preview: () => slPrev('<svg viewBox="0 0 120 40" class="slpvs" aria-hidden="true"><polyline class="plpl" fill="none" points="6,32 30,12 56,26 84,8 112,20"/><polyline class="plis" fill="none" points="6,34 32,16 58,30 86,12 112,24"/></svg><p class="slcmp">Plan 12,0 km · Ergebnis 12,6 km (↑ +0,6 km)</p>'),
+    async render(c, b, cfg, {t}) {
+      c.dataset.hn = "lade";                                                                          // unsichtbar, bis feststeht, dass es eine Verknüpfung gibt
+      const d = t && (await planErgData(t.id));
+      if (!d) {
+        c.dataset.hn = "aus";
+        return slNote(b, "Zu dieser Tour gibt es keine verknüpfte Planung. Der Baustein erscheint nur bei Touren mit verknüpftem Plan.");
+      }
+      c.dataset.hn = "an";
+      planErgPaint(c, b, d, t);
+    },
+  },
+});
+/* Die Karte steht als Standard-Abschnitt auf der Tourseite (nur mit Verknüpfung, siehe SL_REG.tour „planist“) */
+(() => {
+  const w = f => f && (async (...a) => {
+    const t = BY[a[0]],
+      pr = t ? planErgLoad(t).catch(() => {}) : null;                      // Abfrage läuft parallel zum Aufbau der Seite; ist sie früher da, wird die Karte gleich beim ersten Einordnen gebaut
+    await f(...a);
+    await pr;
+  });
+  VIEWS.tour = w(VIEWS.tour);
+  VIEWS.tourauswertung = w(VIEWS.tourauswertung);
+})();

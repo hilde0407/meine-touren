@@ -149,11 +149,12 @@ VIEWS.flight = async id => {
    <div class="fctl"><button class="btn sm" id="fp">⏸ Pause</button><input type="range" id="fs" min="0" max="1000" value="0" aria-label="Position">
     <select id="fv" title="Tempo"><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option></select>
     <select id="fc" title="Kamera"><option value="follow">Kamera folgt</option><option value="free">Kamera frei</option></select>
+    <button class="btn ghost sm" id="frot" type="button" aria-pressed="false" aria-describedby="fhelp" title="Drehen-Modus: Ziehen mit der Maus oder dem Finger dreht und kippt die Karte, statt sie zu verschieben (freie Kamera)">↻ Drehen</button>
     <select id="fz" title="Flughöhe"><option value="16">nah</option><option value="14.8" selected>mittel</option><option value="13.4">weit</option></select>
     <select id="fpi" title="Neigung"><option value="auto" selected>automatisch (weicht Bergen aus)</option><option value="55">flach</option><option value="68">schräg</option><option value="78">sehr schräg</option></select>
     <select id="fb" title="Karte"><option value="osm">Straßenkarte</option><option value="topo">Topografisch</option><option value="sat">Satellit</option></select>
     <select id="fq" title="Videoqualität"><option value="1280">Video: Standard</option><option value="1600" selected>Video: Hoch</option><option value="1920">Video: Sehr hoch</option></select>
-    <button class="btn ghost sm" id="frec" title="Flug als Video aufnehmen und speichern">⏺ Video</button><button class="btn ghost sm" id="ffs" title="Vollbild">⛶</button></div><div class="fph" id="fph"><img id="fphi" alt=""><span id="fphc"></span></div><div class="fmsg" id="fmsg">Lade Strecke …</div></div>`;
+    <button class="btn ghost sm" id="frec" title="Flug als Video aufnehmen und speichern">⏺ Video</button><button class="btn ghost sm" id="ffs" title="Vollbild">⛶</button><span class="fhelp" id="fhelp">Drehen: Modus „Drehen“ oder Umschalt+Ziehen; Zweifinger seitwärts wischen (Alt+Wischen kippt); Pfeiltasten</span></div><div class="fph" id="fph"><img id="fphi" alt=""><span id="fphc"></span></div><div class="fmsg" id="fmsg">Lade Strecke …</div></div>`;
   let raws = [];
   if (SET)
     for (const tid of id.slice(4).split(",").filter(x => BY[x]).sort((a, b) => (BY[a].start_ts || 0) - (BY[b].start_ts || 0))) {
@@ -592,6 +593,87 @@ VIEWS.flight = async id => {
     m.touchPitch.enable();
     m.dragRotate.enable();
   } catch (e) {}
+  /* 3.39.0 Touchpad und Tastatur in der freien Kamera (reine Funktionen: 07-flugsteuerung.js). Im Modus „Kamera folgt“ bleibt alles wie bisher.
+     a) Modus „Drehen“ (Knopf) oder Umschalt+Ziehen: Ziehen mit der linken Taste bzw. dem Finger dreht und kippt statt zu verschieben (Strg+Ziehen und rechte Taste bleiben Standard von MapLibre)
+     c) Zweifinger-Wischen auf dem Touchpad (wheel): seitwärts dreht, Alt/Option+Wischen kippt; senkrechtes Wischen und Pinch (Strg+wheel) zoomen wie bisher
+     d) Pfeiltasten drehen/kippen, solange die Karte den Fokus hat   e) Safari: Touchpad-Geste (gesturechange) dreht */
+  const fm = $("#fm"), rotBtn = $("#frot");
+  fm._map = m;                                                               // für Tests und Fehlersuche
+  let rmode = false, rd = null, panWas = true;
+  const turn = d => {
+    if (!d) return;
+    fm.dataset.rot = String((+fm.dataset.rot || 0) + 1);                      // Zähler der eigenen Dreh-/Kippschritte (Tests)
+    if (d.bearing) m.setBearing(flNorm(m.getBearing() + d.bearing));
+    if (d.pitch) m.setPitch(flClampPitch(m.getPitch() + d.pitch));
+  };
+  const freeNow = () => {
+    if (follow) {
+      follow = false;
+      $("#fc").value = "free";
+    }
+  };
+  const setRot = on => {
+    rmode = !!on;
+    rotBtn.setAttribute("aria-pressed", String(rmode));
+    rotBtn.classList.toggle("on", rmode);
+    fm.classList.toggle("frotmode", rmode);
+    if (rmode) freeNow();                                                    // der Modus gehört zur freien Kamera
+  };
+  rotBtn.onclick = () => setRot(!rmode);
+  try {
+    m.boxZoom.disable();                                                     // Umschalt+Ziehen ist sonst „Rahmen aufziehen“
+  } catch (e) {}
+  const rdEnd = () => {
+    if (!rd) return;
+    rd = null;
+    if (panWas) try { m.dragPan.enable(); } catch (e) {}
+  };
+  fm.addEventListener("pointerdown", e => {
+    if (rd || follow || !e.isPrimary || e.button !== 0 || !(rmode || e.shiftKey)) return;
+    if (e.target.closest && e.target.closest(".maplibregl-ctrl")) return;
+    rd = {id: e.pointerId, x: e.clientX, y: e.clientY};
+    panWas = m.dragPan.isEnabled();
+    m.dragPan.disable();
+    try { fm.setPointerCapture(e.pointerId); } catch (x) {}
+    e.preventDefault();
+  }, true);
+  fm.addEventListener("pointermove", e => {
+    if (!rd || e.pointerId !== rd.id) return;
+    turn(flDragDelta(e.clientX - rd.x, e.clientY - rd.y));
+    rd.x = e.clientX;
+    rd.y = e.clientY;
+  }, true);
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(n => fm.addEventListener(n, e => rd && e.pointerId === rd.id && rdEnd(), true));
+  fm.addEventListener("wheel", e => {
+    if (follow) return;
+    const d = flWheelDelta(e);
+    if (!d) return;
+    e.preventDefault();
+    e.stopPropagation();
+    turn(d);
+  }, {capture: true, passive: false});
+  fm.addEventListener("keydown", e => {
+    if (follow || e.ctrlKey || e.metaKey || e.altKey) return;
+    const d = flKeyDelta(e.key, e.shiftKey);
+    if (!d) return;
+    e.preventDefault();                                                      // die Seite scrollt nicht, MapLibre verschiebt nicht
+    e.stopPropagation();
+    turn(d);
+  }, true);
+  if ("GestureEvent" in window) {
+    let gr = 0;
+    fm.addEventListener("gesturestart", e => { gr = e.rotation || 0; e.preventDefault(); }, true);
+    fm.addEventListener("gesturechange", e => {
+      if (follow) return;
+      e.preventDefault();
+      const r = e.rotation || 0;
+      turn({bearing: flGestureDelta(gr, r), pitch: 0});
+      gr = r;
+    }, true);
+  }
+  $("#fc").addEventListener("change", () => {
+    if ($("#fc").value === "follow" && rmode) setRot(false);
+  });
   const goFree = ev => {                    // jede eigene Bewegung (Maus, Finger, Mausrad) beendet das automatische Folgen
     if (follow && ev && ev.originalEvent) {
       follow = false;

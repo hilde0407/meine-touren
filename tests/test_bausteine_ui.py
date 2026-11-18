@@ -218,7 +218,7 @@ def test_catalog_categories_search_and_390px(pw, app):
     try:
         _edit(pg)
         _catalog(pg)
-        n_all = len(TOUR_TYPES) + len(DASH_TYPES)                  # 3.20.0: auch die Bausteine der Übersicht (ohne „Auffällige Touren“, plus „Dein Jahr“)
+        n_all = len(TOUR_TYPES) + len(DASH_TYPES) + 1                  # 3.20.0: auch die Bausteine der Übersicht (ohne „Auffällige Touren“, plus „Dein Jahr“)
         assert pg.locator(".slcard:visible").count() == n_all and pg.locator(".slcard .slpv").count() == n_all
         assert pg.locator(".slcnt").inner_text() == f"{n_all} Bausteine"
         heads = pg.locator(".slcath:visible").all_inner_texts()

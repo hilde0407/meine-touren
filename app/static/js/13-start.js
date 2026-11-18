@@ -107,7 +107,7 @@ async function healthBanner() {
     if (!_hl.v.length && !u) return;
     m.insertAdjacentHTML(
       "afterbegin",
-      `<div class="warnbar">${_hl.v.map(w => `<div>⚠ ${esc(w.text)}${w.action === "backup" ? ` <button class="btn sm" data-act="backup">Jetzt sichern</button>` : ""}</div>`).join("")}${
+      `<div class="warnbar">${_hl.v.map(w => `<div><span aria-hidden="true">⚠</span> <span>${esc(w.text)}</span>${w.action === "backup" ? ` <button class="btn sm" data-act="backup">Jetzt sichern</button>` : ""}</div>`).join("")}${
         u
           ? `<div>⬆ Neue Version <b>${esc(u.latest)}</b> verfügbar (installiert: ${esc(u.current)}). <a href="#/admin">${u.can_install ? "Jetzt installieren" : "Details"}</a></div>`
           : ""
@@ -138,5 +138,4 @@ Object.keys(VIEWS).forEach(k => {
     healthBanner();
   };
 });
-
-boot();
+/* 3.39.0: boot() wird erst vom letzten Skript (69-start.js) aufgerufen – vorher konnte eine fetch-Antwort die Seite zeichnen, bevor spätere Skripte (49–68) ausgeführt waren. */

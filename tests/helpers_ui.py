@@ -16,13 +16,9 @@ QUIET_INIT_JS = """() => {
   const s = window.__mtq = {pend: 0, last: performance.now()};
   const touch = () => { s.last = performance.now(); };
   const f = window.fetch;
-  // Anfragen der Seite erst nach DOMContentLoaded absetzen: die App startet beim Laden der Skripte Abfragen (/api/me, /api/tours …); kommt eine Antwort, bevor alle Skripte
-  // ausgeführt sind, zeichnet sie die Seite mit unvollständigem Skriptstand („slGrpDefs is not defined“) – ein Wettlauf im App-Start, der nur auf langsamen Rechnern auftritt.
-  const ready = document.readyState === 'loading' ? new Promise(r => document.addEventListener('DOMContentLoaded', r, {once: true})) : null;
   if (f) window.fetch = function () {
     s.pend++; touch();
-    const a = arguments, t = this;
-    const p = ready ? ready.then(() => f.apply(t, a)) : f.apply(t, a);
+    const p = f.apply(this, arguments);
     const d = () => { s.pend--; touch(); };
     p.then(d, d);
     return p;

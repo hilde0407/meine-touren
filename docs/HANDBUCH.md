@@ -453,6 +453,18 @@ Der Abschnitt **Fotos** zeigt die der Tour zugeordneten Fotos mit Uhrzeit. Die K
 
 *Abbildung 23: Das Tourblatt – oben die Knöpfe „PDF herunterladen“ und „Drucken“.*
 
+**3D-Flug: Steuerung in der freien Kamera** (im Modus „Kamera folgt“ bleibt alles wie bisher; die Hinweiszeile im Bedienfeld nennt die wichtigsten Wege):
+
+| Aktion | Maus | Touchpad | Touchscreen | Tastatur |
+| --- | --- | --- | --- | --- |
+| Verschieben | Ziehen | Ziehen | Ein Finger | – |
+| Zoomen | Mausrad | Zweifinger senkrecht wischen, Pinch | Zwei Finger spreizen | – |
+| Drehen und Kippen | rechte Taste oder Strg + Ziehen | Knopf **↻ Drehen** (Ziehen dreht/kippt), Umschalt + Ziehen | Knopf **↻ Drehen**, zwei Finger drehen/kippen | Pfeil links/rechts dreht, hoch/runter kippt (Umschalt: doppelter Schritt) |
+| Drehen | – | Zweifinger seitwärts wischen; Safari: Drehgeste | Zwei Finger verdrehen | – |
+| Kippen | – | Alt/Option + Wischen | Zwei Finger gemeinsam nach oben/unten | – |
+
+Der Knopf **↻ Drehen** ist ein Umschalter (gelb = an, `aria-pressed`); beim Einschalten wechselt die Kamera auf „frei“.
+
 > **3D-Flug:** Er braucht WebGL im Browser sowie Gelände- und Kartendaten aus dem Internet. In der Umgebung, in der die Bilder dieses Handbuchs entstanden sind, gab es diese Daten nicht; deshalb ist hier kein Bild des 3D-Flugs abgebildet.
 
 **Teilen & Export** bietet **Link senden**, **Diashow senden**, **Diashow-Link**, **Links verwalten** und **GPX-Datei laden** (Strecke als GPX herunterladen). Mehr in [Kapitel 14](#k14).
@@ -474,6 +486,10 @@ Der Abschnitt **Fotos** zeigt die der Tour zugeordneten Fotos mit Uhrzeit. Die K
 
 *Abbildung 25: Das Menü „Tour bearbeiten“.*
 
+### Plan und Ergebnis (Soll/Ist)
+
+Ist eine Tour mit einer Planung verknüpft (in der Planliste, z. B. über den Vorschlag „Gelaufen am … vorschlagen“ mit **Bestätigen**), erscheint auf der Tourseite unter dem Streckenverlauf die einklappbare Karte **Plan und Ergebnis**: **Strecke**, **Aufstieg** und **Zeit gesamt** (einschließlich Pausen) als Plan und Ergebnis, dazu der Unterschied mit Vorzeichen, Pfeil und Wort (↑ länger/mehr als geplant, ↓ kürzer/weniger, = wie geplant – nie nur durch Farbe). Darunter liegt die geplante Linie (gestrichelt) über der gelaufenen (durchgezogen). **Zum Plan** öffnet die Planung, **Verknüpfung lösen** hebt die Verknüpfung auf (der Plan bleibt erhalten). Ohne Verknüpfung erscheint die Karte nicht; im Katalog (**Seite anpassen** → **Baustein hinzufügen**, Kategorie **Planung**) ist sie als „Plan und Ergebnis“ für alle Touren vorhanden. Betrachter sehen die Karte ohne Knöpfe; in geteilten Links erscheint sie nie.
+
 ### 7.8 Tourseite selbst gestalten
 
 Auch das Tourdetail besteht aus Bausteinen. Unter den Kennzahlen stehen **Seite anpassen** und **Ansichten** – siehe [Kapitel 13](#k13).
@@ -494,7 +510,9 @@ Oben schwebt eine Leiste mit Bedienelementen:
 * **Alle Jahre** – Jahr wählen, daneben die Zahl der Touren,
 * **Wandern / Radtour …** – Sportarten ein- und ausschalten (jede hat ihre Farbe),
 * **Strecken**, **Heatmap**, **Fotos** – Darstellungsarten: Strecken einzeln, Heatmap (Häufigkeit), Fotos als Marker (bei Fotos ohne eigenen Aufnahmeort wird die Position aus der Aufnahmezeit berechnet und blasser gezeigt),
-* **Touren im Ausschnitt** – listet die Touren des gerade sichtbaren Kartenausschnitts.
+* **Touren im Ausschnitt** – listet die Touren des gerade sichtbaren Kartenausschnitts in einem Fenster über allen Bedienfeldern. Es gibt immer nur ein Fenster; **Esc** oder **Schließen** schließt es und bringt den Fokus zurück auf den Knopf.
+
+Der Hinweistext am Knopf **Heatmap** erklärt den Unterschied: Die Heatmap zeichnet alle Touren in einer Farbe übereinander (häufig begangene Wege leuchten stärker) und ersetzt die farbigen Tracklinien; der Knopf **Strecken** ändert deren Farbe und Breite.
 
 ![Karte mit allen Touren](handbuch/bilder/18-karte.png)
 

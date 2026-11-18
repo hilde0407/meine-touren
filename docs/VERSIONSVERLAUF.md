@@ -2,6 +2,16 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.39.0 – App-Start ohne Wettlauf, Soll/Ist an der Tourseite, Touchpad im 3D-Flug
+
+- App-Start: `boot()` läuft erst nach dem letzten Skript (kein „… is not defined“ mehr auf langsamen Rechnern).
+- Karte: „Touren im Ausschnitt“ als ein einziges Fenster über den Bedienfeldern (Esc, Fokus); Heatmap-Hinweis erklärt den Unterschied.
+- Verwaltung: Warnmeldungen, Backup-Hinweise und „Umzug auf einen neuen Server“ übersetzt.
+- Tourseite: Karte „Plan und Ergebnis“ (Soll/Ist, gestrichelte Plan-Linie, Link, Verknüpfung lösen); `GET /api/tours/{id}/plan`.
+- 3D-Flug: Drehen/Kippen mit Touchpad (Knopf „Drehen“, Umschalt+Ziehen, Zweifinger seitwärts, Alt+Wischen, Pfeiltasten).
+
+Einzelheiten: [docs/versionen/3.39.0.md](versionen/3.39.0.md)
+
 ## Version 3.38.1 – Fehlerbehebung: Verwaltungs-Reiter in allen Sprachen, Baustein „Geplante Touren“
 
 - Verwaltung: Die Karten landeten in der englischen, französischen und spanischen Oberfläche großteils im Reiter „Übersicht“ (Zuordnung über deutsche Titel, die schon übersetzt waren). Jetzt sprachunabhängig über den deutschen Originaltitel (`data-de`); alle Karten sind in de/en/fr/es im selben Reiter.

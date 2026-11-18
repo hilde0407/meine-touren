@@ -244,7 +244,7 @@ def test_templates_dialog_adopts_a_template_as_new_editable_view(pw, app):
         pg.wait_for_function("() => !!document.querySelector('#tlw-t-kennzahlen') && !!document.querySelector('.slit[data-sl=photos].sl-dim')", timeout=T)
         c = _wait_server(pg, app, lambda c: len(c["views"]) == 2)
         lay = c["views"][1]["layout"]
-        assert [w["type"] for w in lay["widgets"]] == ["kennzahlen"] and set(lay["hidden"]) == {"puls", "wp", "photos"} and lay["w"]["map"] == "halb"
+        assert [w["type"] for w in lay["widgets"]] == ["kennzahlen"] and set(lay["hidden"]) == {"puls", "wp", "photos", "planist"} and lay["w"]["map"] == "halb"
         assert _wait_server(pg, app, lambda x: len(x["views"]) == 2, "tour-auswertung")["views"][1]["layout"] == {"v": 1}
         assert pg.locator(".slvws .slvnm").all_inner_texts() == ["Standard", "Kompakt"]
         # und danach änderbar; dieselbe Vorlage noch einmal: eindeutiger Name
@@ -376,7 +376,7 @@ def test_export_file_and_import_valid_invalid_and_replace_only_after_confirmatio
         d = dl.value
         assert d.suggested_filename == "ansicht-uebersicht-training-test.json"
         doc = json.loads(open(d.path(), encoding="utf-8").read())
-        assert doc["format"] == "meine-touren-ansicht" and doc["format_version"] == 1 and doc["app_version"] == "3.38.1" and doc["page"] == "uebersicht" and doc["name"] == "Training-Test"
+        assert doc["format"] == "meine-touren-ansicht" and doc["format_version"] == 1 and doc["app_version"] == "3.39.0" and doc["page"] == "uebersicht" and doc["name"] == "Training-Test"
         assert list(doc["layouts"]) == ["uebersicht"] and doc["layouts"]["uebersicht"]["widgets"][0]["type"] == "periode" and doc["layouts"]["uebersicht"]["hidden"] == ["tag"]
         # Import gültig: Vorschau, dann als NEUE Ansicht (Name vergeben → nummeriert)
         f = _write(tmp_path, "gut.json", {**doc, "zukunft": 1})

@@ -472,7 +472,7 @@ VIEWS.admin = async (...a) => {
    <p class="mut fs13">Geprüft wird nur die Sicherungsdatei in einem temporären Ordner – deine Daten werden nicht verändert. Nicht in der Tagessicherung enthalten: die Fotodateien (nur die Angaben dazu) und der Zwischenspeicher. Auch der Schlüssel für gespeicherte Zugangsdaten (secret.key) fehlt: Nach einer Wiederherstellung auf einem neuen Rechner müssen sie neu eingegeben werden. Das Umzugspaket enthält beides.</p>
    <div class="row"><a class="btn alt" href="/api/backup" download>Backup jetzt herunterladen</a></div><p class="mut fs13">Passwörter und Tokens sind im Download nicht enthalten. Fotos und Routen sind nicht enthalten.</p>
    <h3 class="mt16">Umzug auf einen neuen Server</h3>
-   <p class="mut">Das <b>Umzugspaket</b> enthält alles: alle Benutzer, Touren mit Notizen und Kommentaren, Freigabelinks, Fotos, Strecken samt Original-Höhen, gespeicherte Zugangsdaten samt Schlüssel. Auf dem neuen Server zuerst installieren, dann <code>${esc(st.app_name || "meine-touren")}-restore &lt;Paket&gt;</code> – danach läuft alles wie vorher. Das Paket enthält Passwörter und Schlüssel: gut aufbewahren. Es kann groß werden (Fotos).</p>
+   <p class="mut">Das Umzugspaket enthält alles: alle Benutzer, Touren mit Notizen und Kommentaren, Freigabelinks, Fotos, Strecken samt Original-Höhen, gespeicherte Zugangsdaten samt Schlüssel. Auf dem neuen Server zuerst installieren, dann <code>${esc(st.app_name || "meine-touren")}-restore &lt;Paket&gt;</code> – danach läuft alles wie vorher. Das Paket enthält Passwörter und Schlüssel: gut aufbewahren. Es kann groß werden (Fotos).</p>
    <div class="row"><button class="btn" id="umzmk">Umzugspaket erstellen</button><span id="umzst" class="mut"></span></div><div id="umzls" class="mt8"></div></div>
    <div class="panel" id="uipw"><h2>Zugriffsschutz</h2>${
      st.users
@@ -513,7 +513,7 @@ VIEWS.map = async () => {
   if (!box || !map) return;
   box.insertAdjacentHTML(
     "beforeend",
-    `<div class="box"><button class="chip" id="mht" title="Alle Strecken übereinander: häufig begangene Wege leuchten stärker">Heatmap</button><button class="chip" id="mph" title="Zeigt als rosa Punkte alle Fotos. Haben sie keinen eigenen Aufnahmeort, wird er aus der Uhrzeit auf dem Track der Tour berechnet (blassere Punkte). Antippen öffnet das Foto mit Zeit und Tour. Gilt für das gewählte Jahr.">Fotos</button></div>`
+    `<div class="box"><button class="chip" id="mht" title="Heatmap: zeichnet alle Touren in einer Farbe übereinander – häufig begangene Wege leuchten stärker. Ersetzt die farbigen Tracklinien (Knopf 'Strecken' ändert deren Farbe und Breite).">Heatmap</button><button class="chip" id="mph" title="Zeigt als rosa Punkte alle Fotos. Haben sie keinen eigenen Aufnahmeort, wird er aus der Uhrzeit auf dem Track der Tour berechnet (blassere Punkte). Antippen öffnet das Foto mit Zeit und Tour. Gilt für das gewählte Jahr.">Fotos</button></div>`
   );
   const m = map,
     hl = L.layerGroup().addTo(m),
@@ -578,14 +578,16 @@ VIEWS.map = async () => {
     "beforeend",
     `<div class="box"><button class="chip" id="mbx" title="Alle Touren auflisten, die den sichtbaren Kartenausschnitt berühren">Touren im Ausschnitt</button></div>`
   );
-  $("#mbx").onclick = () => {
+  $("#mbx").onclick = ev => {
+    const btn = ev.currentTarget;
+    document.querySelectorAll(".modal.mbxfen").forEach(x => x._close ? x._close(false) : x.remove());     // ein zweiter Klick ersetzt das Fenster, es gibt nie mehrere
     const b = m.getBounds(),
       y = yearSel(),
       o = off();
     const a = TOURS.filter(t => (!y || t.y === y) && !o.has(t.sport) && cleanPts(routes[t.id]).some(p => b.contains(p)));
     const md = document.createElement("div");
-    md.className = "modal";
-    md.innerHTML = `<div class="mbox" style="max-width:760px"><div class="sec m0-0-10"><h2>Im Kartenausschnitt</h2><span class="sub">${a.length} Touren, ${nf(
+    md.className = "modal mbxfen";
+    md.innerHTML = `<div class="mbox" role="dialog" aria-modal="true" aria-label="Im Kartenausschnitt" tabindex="-1"><div class="sec m0-0-10"><h2>Im Kartenausschnitt</h2><span class="sub">${a.length} Touren, ${nf(
       a.reduce((c, t) => c + t.km, 0),
       0
     )} km, ${nf(
@@ -594,11 +596,31 @@ VIEWS.map = async () => {
     )} m auf</span></div>
       <div class="tl">${a.slice(0, 300).map(tourRow).join("") || '<div class="empty">Keine Touren in diesem Ausschnitt. Zoome heraus oder verschiebe die Karte.</div>'}</div>
       <div class="row jce mt14"><button class="btn" id="mbc">Schließen</button></div></div>`;
-    document.body.appendChild(md);
-    md.querySelector("#mbc").onclick = () => md.remove();
-    md.onclick = e => {
-      if (e.target === md || e.target.closest("a")) md.remove();
+    const keys = e => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        md._close(true);
+      } else if (e.key === "Tab") {                                              // Fokus bleibt im Fenster
+        const f = [...md.querySelectorAll("a[href],button")];
+        if (!f.length) return;
+        const i = f.indexOf(document.activeElement);
+        if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+        else if (!e.shiftKey && (i < 0 || i === f.length - 1)) { e.preventDefault(); f[0].focus(); }
+      }
     };
+    md._close = back => {
+      document.removeEventListener("keydown", keys, true);
+      md.remove();
+      if (back && btn.isConnected) btn.focus();                                  // Fokus zurück auf den Knopf
+    };
+    document.addEventListener("keydown", keys, true);
+    document.body.appendChild(md);
+    md.querySelector("#mbc").onclick = () => md._close(true);
+    md.onclick = e => {
+      if (e.target === md) md._close(true);
+      else if (e.target.closest("a")) md._close(false);
+    };
+    md.querySelector(".mbox").focus({preventScroll: true});                       // Fokus ins Fenster (auf das Fenster selbst: die Titelzeile bleibt sichtbar)
   };
   ["#my"].forEach(s =>
     $(s).addEventListener("change", () => {

@@ -33,6 +33,7 @@ const SL_REG = {
     {id: "prof", w: "voll", title: "Höhenprofil", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_prof"]},
     {id: "puls", w: "halb", title: "Herzfrequenz", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_puls"]},
     {id: "wp", w: "halb", title: "Wegpunkte", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_wp"]},
+    {id: "planist", w: "voll", title: "Plan und Ergebnis", page: "haupt", group: "route", build: "planergebnis", def: true, when: () => typeof planErgHas === "function" && planErgHas(), ckeys: ["tl_w_planist"]},        // 3.39.0: Soll/Ist, nur mit verknüpftem Plan (when)
     {id: "sum", w: "voll", title: "Einstieg in die Auswertung", page: "haupt", group: "sum", own: true, fixed: true, must: true, plain: true, ws: ["voll"]},
     {id: "photos", w: "voll", title: "Fotos", page: "haupt", group: "more", def: true, fixed: true, ckeys: ["tl_photos"]},
     {id: "geraet", w: "voll", title: "Gerät: Messwerte und Training laut Uhr", page: "auswertung", group: "rec", def: true, fixed: true, ckeys: ["tl_met", "tl_uhr"], ws: ["voll"]},
@@ -919,6 +920,10 @@ function slPlace(root) {
     if (el && (it.widget || it.build) && el.dataset.sig !== undefined && el.dataset.sig !== slSig(it)) {
       el.remove();                                                            // Konfiguration hat sich geändert (auch durch Abgleich mit dem Server): neu bauen
       el = null;
+    }
+    if (it.when && !it.when()) {                                              // 3.39.0: Abschnitt, den es nur unter einer Bedingung gibt (Plan und Ergebnis): sonst gar nicht bauen, einen vorhandenen entfernen
+      if (el) el.remove();
+      return;
     }
     if (!el && (it.widget || it.build) && typeof window.slWidgetBuild === "function") el = window.slWidgetBuild(it, root);
     if (!el || slSelfHidden(it, el)) return;

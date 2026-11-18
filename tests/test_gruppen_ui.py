@@ -558,10 +558,8 @@ def test_link_opens_the_page_and_prepares_the_import(pw, app):
         pg.browser_.close()
 
 
-@pytest.mark.flaky(reruns=5)
 def test_link_as_first_page_load_opens_the_import_dialog(pw, app):
-    """Kaltstart über den Link (neuer Tab). Bekannte Eigenheit der App: Unter starker Last (Browser um Faktor 6 gebremst, ca. jeder 15. Lauf) landet die Seite auf der Übersicht, ohne dass sich der
-    Import-Dialog öffnet (Adresse bleibt #/layoutcode/…, SL.codePending ist schon verbraucht). Das ist ein Wettlauf im Start der App, kein Testfehler; deshalb bis zu 5 Versuche (pytest-rerunfailures)."""
+    """Kaltstart über den Link (neuer Tab): der Import-Dialog öffnet sich (seit 3.39.0 startet boot() erst nach dem letzten Skript)."""
     pg = _browser(pw, app, devs=None)
     try:
         _link_dialog(pg, app, "Per Link kalt")

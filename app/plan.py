@@ -8,7 +8,7 @@ import requests
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from . import db, elev, config
+from . import db, elev, config, routes
 
 def _gate(request: Request):
     """Ist die Tourplanung ausgeschaltet, antwortet die ganze Planungs-Schnittstelle mit 403 (außer dem Verbindungstest der Einstellungen)."""
@@ -17,7 +17,9 @@ def _gate(request: Request):
 
 
 router = APIRouter(dependencies=[Depends(_gate)])
+tour_router = APIRouter()                      # 3.39.0: nur lesend, ohne _gate (auch ein bestehendes Ergebnis bleibt sichtbar, wenn „Tour planen“ ausgeschaltet wird)
 MAXPTS = 3000
+MAXLINE = 400                                  # längste Linie in der Soll/Ist-Karte der Tourseite
 
 
 def _pts(raw):
@@ -249,3 +251,73 @@ def api_plan_save(body: dict):
 def api_plan_del(pid: int):
     db.execute("DELETE FROM plans WHERE id=?", (pid,))
     return {"ok": True}
+
+
+# ---------- 3.39.0 Soll/Ist an der Tourseite ----------
+def simplify(pts, n=MAXLINE):
+    """Linie auf höchstens `n` Punkte verkürzen (Douglas-Peucker in Prioritätsreihenfolge: die jeweils auffälligsten Punkte bleiben; Anfang und Ende immer).
+    Rechnet in einer flachen Näherung (Längengrad mit cos(Breite) gestreckt); sehr lange Linien werden vorher gleichmäßig auf 4000 Punkte gedünnt."""
+    import heapq
+    import math
+    pts = [[float(p[0]), float(p[1])] for p in pts or []]
+    if len(pts) > 4000:
+        step = len(pts) / 4000.0
+        pts = [pts[int(i * step)] for i in range(4000)] + [pts[-1]]
+    if len(pts) <= n:
+        return [[round(a, 5), round(b, 5)] for a, b in pts]
+    k = math.cos(math.radians(sum(p[0] for p in pts) / len(pts)))
+    xy = [(p[1] * k, p[0]) for p in pts]
+
+    def far(i, j):
+        (x1, y1), (x2, y2) = xy[i], xy[j]
+        dx, dy = x2 - x1, y2 - y1
+        d2 = dx * dx + dy * dy
+        best, at = -1.0, None
+        for m in range(i + 1, j):
+            x0, y0 = xy[m]
+            if d2 == 0:
+                dist = math.hypot(x0 - x1, y0 - y1)
+            else:
+                t = max(0.0, min(1.0, ((x0 - x1) * dx + (y0 - y1) * dy) / d2))
+                dist = math.hypot(x0 - (x1 + t * dx), y0 - (y1 + t * dy))
+            if dist > best:
+                best, at = dist, m
+        return best, at
+
+    keep = {0, len(pts) - 1}
+    heap = []
+    if len(pts) > 2:
+        d, m = far(0, len(pts) - 1)
+        heap.append((-d, m, 0, len(pts) - 1))
+    while heap and len(keep) < n:
+        _, m, i, j = heapq.heappop(heap)
+        keep.add(m)
+        for a, b in ((i, m), (m, j)):
+            if b - a > 1:
+                d, mm = far(a, b)
+                heapq.heappush(heap, (-d, mm, a, b))
+    return [[round(pts[i][0], 5), round(pts[i][1], 5)] for i in sorted(keep)]
+
+
+@tour_router.get("/api/tours/{tour_id}/plan")
+def api_tour_plan(tour_id: str):
+    """Verknüpfte Planung einer gelaufenen Tour (Soll/Ist): Kopf des Plans, Kennzahlen mit Differenzen und beide Linien auf höchstens 400 Punkte verkürzt.
+    Ohne Verknüpfung {"status": "kein_plan"}; fehlende Werte sind null (nie 0). Nur lesend, gehört dem angemeldeten Benutzer (Betrachter dürfen lesen); Freigabelinks liefern nichts davon."""
+    t = db.one("SELECT id,name,start_ts,dist_m,dur_s,up_m FROM tours WHERE id=?", (tour_id,))
+    if not t:
+        raise HTTPException(404, "Tour nicht gefunden")
+    p = db.one("SELECT id,name,sport,km,up,down,est_h,ts,pts FROM plans WHERE tour_id=? ORDER BY ts DESC LIMIT 1", (tour_id,))
+    if not p:
+        return {"status": "kein_plan"}
+    ist = {"km": round(t["dist_m"] / 1000.0, 2) if t["dist_m"] else None, "up": round(t["up_m"]) if t["up_m"] is not None else None, "h": round(t["dur_s"] / 3600.0, 3) if t["dur_s"] else None}
+    soll = {"km": p["km"] if p["km"] else None, "up": round(p["up"]) if p["up"] is not None else None, "h": p["est_h"] if p["est_h"] else None}
+
+    def diff(k, nd):
+        return round(ist[k] - soll[k], nd) if ist[k] is not None and soll[k] is not None else None
+    try:
+        plan_line = simplify(json.loads(p["pts"]))
+    except (TypeError, ValueError):
+        plan_line = []
+    track = routes.load(tour_id)
+    return {"status": "ok", "plan": {"id": p["id"], "name": p["name"] or "", "sport": p["sport"], "ts": p["ts"]}, "soll": soll, "ist": ist,
+            "diff": {"km": diff("km", 2), "up": diff("up", 0), "h": diff("h", 3)}, "plan_linie": plan_line, "tour_linie": simplify(track) if track else []}

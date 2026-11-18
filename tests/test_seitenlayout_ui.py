@@ -187,14 +187,14 @@ def test_keyboard_move_is_announced_saved_and_survives_reload(pw, app):
         _grip(pg, "prof").focus()
         pg.keyboard.press("ArrowUp")
         _wait_order(pg, ["prof", "map", "puls", "wp", "sum", "photos"])
-        pg.wait_for_function("() => document.getElementById('sllive').textContent.includes('Position 1 von 6')", timeout=T)
+        pg.wait_for_function("() => document.getElementById('sllive').textContent.includes('Position 1 von 7')", timeout=T)
         assert pg.evaluate("document.activeElement.classList.contains('slgrip') && document.activeElement.closest('.slit').dataset.sl") == "prof"     # Fokus bleibt am Griff
         pg.keyboard.press("ArrowDown")
         _wait_order(pg, ["map", "prof", "puls", "wp", "sum", "photos"])
         pg.keyboard.press("End")
         _wait_order(pg, ["map", "puls", "wp", "sum", "photos", "prof"], UNITS)
         _saved(pg)
-        assert _server(app, "tour-haupt")["order"] == ["map", "puls", "wp", "sum", "photos", "prof"]
+        assert _server(app, "tour-haupt")["order"] == ["map", "puls", "wp", "planist", "sum", "photos", "prof"]
         pg.reload()
         pg.wait_for_selector("#tls-photos", timeout=T)
         _wait_order(pg, ["map", "puls", "wp", "prof", "sum", "photos"])          # 3.24.1: außerhalb des Bearbeitens bleibt eine Gruppe zusammen („prof“ gehört zum Streckenverlauf, keine zweite Überschrift)
@@ -435,8 +435,8 @@ def test_catalog_add_configure_and_remove_widgets_on_the_tour_page(pw, app):
     try:
         _edit(pg)
         _catalog(pg)
-        assert pg.locator(".slcard").count() == 41                  # 19 Tour-Bausteine plus 21 Bausteine der Übersicht (3.29.0: plus „Ziele“) (3.20.0: ohne „Auffällige Touren“)
-        assert pg.locator(".slcard .slpv").count() == 41 and pg.locator(".slcard p").first.inner_text().strip()
+        assert pg.locator(".slcard").count() == 42                  # 20 Tour-Bausteine plus 21 Bausteine der Übersicht (3.29.0: plus „Ziele“) (3.20.0: ohne „Auffällige Touren“)
+        assert pg.locator(".slcard .slpv").count() == 42 and pg.locator(".slcard p").first.inner_text().strip()
         pg.locator('[data-add="kennzahlen"]').click()
         pg.wait_for_selector('[data-wtype="kennzahlen"] .utile', timeout=T)
         assert pg.locator('[data-wtype="kennzahlen"] .utile').count() == 4

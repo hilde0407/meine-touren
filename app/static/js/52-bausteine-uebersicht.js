@@ -879,7 +879,7 @@ function slYearShell(it) {
     kennzahlen: "halb", tempo: "halb", vergleich: "halb", pulszonen: "halb", wetter: "halb", fotostreifen: "voll", notiz: "halb", splits: "voll", steigung: "halb", bewegung: "halb",
     durchschnitt: "halb", jahresrang: "halb", tageslicht: "halb", gipfel: "halb", vergleiche: "halb", stimmung: "halb", fotohighlights: "voll", miniprofil: "voll", steckbrief: "halb",
     jahr: "voll", periode: "halb", belastung: "halb", jahresvergleich: "halb", letzte: "halb", neuefotos: "voll", auffaellig: "drittel", rekorde: "halb", heutevor: "halb", jahresziel: "halb",
-    serie: "halb", heatmap: "voll", meilensteine: "halb", wochentage: "halb", saison: "voll", sportarten: "halb", wiederentdecken: "voll", orte: "halb", uhrenzeit: "voll", ausruestung: "halb", geplant: "halb", rueckblick: "voll", jahresziele: "halb", zeppimport: "halb", holenknopf: "drittel",
+    serie: "halb", heatmap: "voll", meilensteine: "halb", wochentage: "halb", saison: "voll", sportarten: "halb", wiederentdecken: "voll", orte: "halb", uhrenzeit: "voll", ausruestung: "halb", geplant: "halb", rueckblick: "voll", jahresziele: "halb", zeppimport: "halb", holenknopf: "drittel", planergebnis: "voll",
   };
   Object.entries(META).forEach(([k, w]) => {
     const T = window.SL_WT[k];
