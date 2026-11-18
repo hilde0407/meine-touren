@@ -1,5 +1,10 @@
 name: Tests
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:       # manuell: Actions -> Tests -> Run workflow (läuft dann auch unter Windows)
+  schedule:
+    - cron: "17 4 * * 1"   # wöchentlich Montag früh: Windows-Gesamtlauf
 # Testlauf wie lokal: scripts/test.py (parallel mit pytest-xdist, ganze Dateien je Worker; --reruns 2 für verbleibende Flakes). Details: tests/README.md
 jobs:
   pytest:
@@ -28,6 +33,8 @@ jobs:
           MT_TEST_WORKERS: "4"
       - run: bash -n deploy/install.sh && bash -n deploy/update.sh && bash -n deploy/restore.sh && bash -n ct/meine-touren.sh && bash -n install/meine-touren-install.sh
   windows:
+    # Windows ist doppelt so teuer und findet selten etwas: nur wöchentlich, manuell, oder wenn die Commit-Nachricht "[windows]" enthält
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[windows]')
     runs-on: windows-latest
     timeout-minutes: 75
     env:
