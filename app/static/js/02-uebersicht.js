@@ -334,12 +334,43 @@ VIEWS.map = async () => {
 };
 
 /* ---------- Tourenliste ---------- */
-VIEWS.tours = async () => {
+/* 3.35.0: Filter, die eine Eigene Kennzahl beim Antippen mitgibt (#/tours?sp=hike,bike&von=…&bis=…&tag=…&minkm=…&hn=a|v&kz=Name). Alles streng geprüft, nichts davon wird als HTML eingesetzt. */
+const XF_HN = {a: "Die Liste zeigt alle Touren im Zeitraum, auch solche ohne die nötige Angabe (zum Beispiel ohne Pulsdaten).", v: "Die Liste zeigt alle Touren im Zeitraum, auch solche, die für diese Kennzahl zu kurz sind."};
+function tourXf(qp) {
+  if (!qp || !qp.has("kz")) return null;
+  const dt = x => (/^\d{4}-\d\d-\d\d$/.test(x || "") ? x : ""), mk = parseFloat(qp.get("minkm"));
+  return {
+    kz: (qp.get("kz") || "").slice(0, 60),
+    sp: (qp.get("sp") || "").split(",").filter(x => /^[A-Za-z0-9_]{1,40}$/.test(x)).slice(0, 20),
+    von: dt(qp.get("von")),
+    bis: dt(qp.get("bis")),
+    tag: (qp.get("tag") || "").slice(0, 40),
+    minkm: mk > 0 && mk <= 1000 ? mk : 0,
+    hn: XF_HN[qp.get("hn")] ? qp.get("hn") : "",
+  };
+}
+const tourXfOk = (t, x) => {
+  const d = (t.date || "").slice(0, 10);
+  return (!x.sp.length || x.sp.includes(t.sport)) && (!x.von || d >= x.von) && (!x.bis || d <= x.bis) && (!x.tag || (t.tags || "").toLowerCase().split("|").includes(x.tag.toLowerCase())) && (!x.minkm || t.km >= x.minkm);
+};
+function tourXfBar(x) {
+  const c = [];
+  x.sp.forEach(s => c.push(sName(s)));
+  if (x.von && x.bis) c.push(`${dateS(x.von)} – ${dateS(x.bis)}`);
+  else if (x.von) c.push(`ab ${dateS(x.von)}`);
+  else if (x.bis) c.push(`bis ${dateS(x.bis)}`);
+  if (x.tag) c.push(`Schlagwort „${x.tag}“`);
+  if (x.minkm) c.push(`mindestens ${nf(x.minkm, x.minkm % 1 ? 1 : 0)} km`);
+  return `<div class="kzxf" role="status"><p class="kzxt"><b>Touren der Kennzahl „${esc(x.kz)}“</b> <a href="#/tours">Filter aufheben</a></p>` +
+    `${c.length ? `<p class="kzxc">${c.map(i => `<span class="kzchip">${esc(i)}</span>`).join(" ")}</p>` : ""}${x.hn ? `<p class="mut kzxh">${XF_HN[x.hn]}</p>` : ""}</div>`;
+}
+VIEWS.tours = async (_name, qp) => {
   loadRoutesLater();
+  const xf = tourXf(qp);
   const ys = years(),
     sp = [...new Set(TOURS.map(t => t.sport))];
   $("#main").innerHTML = `<div class="sec mt0"><h2>Alle Touren</h2><span class="sub" id="cnt"></span></div>
-   <div class="filters"><input id="q" placeholder="Name suchen" class="mnw230"><select id="fy"><option value="0">Alle Jahre</option>${ys.map(y => `<option>${y}</option>`).join("")}</select>
+   ${xf ? tourXfBar(xf) : ""}<div class="filters"><input id="q" placeholder="Name suchen" class="mnw230"><select id="fy"><option value="0">Alle Jahre</option>${ys.map(y => `<option>${y}</option>`).join("")}</select>
    <select id="fs"><option value="">Alle Sportarten</option>${sp.map(s => `<option value="${s}">${sName(s)}</option>`).join("")}</select>
    <select id="fz" title="Jahreszeit"><option value="">Ganzjährig</option><option value="sommer">Sommerhalbjahr (Mai–Okt)</option><option value="winter">Winterhalbjahr (Nov–Apr)</option></select>
    <select id="fb" title="Meine Bewertung"><option value="">Alle Bewertungen</option><option value="5">★★★★★</option><option value="4">ab ★★★★</option><option value="3">ab ★★★</option></select>
@@ -376,7 +407,7 @@ VIEWS.tours = async () => {
       );
     } catch (e) {}
   };
-  const f0 = ld();
+  const f0 = xf ? {so: ld().so} : ld();                                                         // mit Kennzahl-Filter starten die übrigen Filter leer (sonst fehlen Touren ohne ersichtlichen Grund)
   ["q", "fy", "fs", "fr", "fz", "fb", "ft", "so"].forEach(i => {
     if (f0[i] !== undefined) $("#" + i).value = f0[i];
   });
@@ -399,7 +430,8 @@ VIEWS.tours = async () => {
         (!s || t.sport === s) &&
         inRegion(t, rg) &&
         (!tg || (t.tags || "").split("|").includes(tg)) &&
-        (!q.trim() || smatch(t.name, q))
+        (!q.trim() || smatch(t.name, q)) &&
+        (!xf || tourXfOk(t, xf))
     );
     const k = {date: t => -t.start_ts, old: t => t.start_ts, km: t => -t.km, up: t => -(t.up_m || 0), h: t => -t.h}[so];
     a.sort((x, z) => k(x) - k(z));

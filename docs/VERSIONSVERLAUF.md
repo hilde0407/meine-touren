@@ -2,6 +2,16 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.35.0 – Eigene Kennzahlen weiterentwickeln
+
+- Ziel mit barrierefreiem Fortschrittsbalken, Rest bis zum Ziel und „Im Plan?“ (gleichmäßiges Soll, nur als Text und Marke, ohne Warnfarbe).
+- Trendpfeil ↑ ↓ → mit Prozent und Differenz, neutral; Vergleich wählbar mit Zeitraum davor, Vorjahr oder Vormonat.
+- Sparkline als SVG-Linie (Wochen-, Monats- oder Jahreswerte vom Server, begrenzt), Säulen oder aus.
+- Antippen öffnet die zugehörigen Touren mit den Filtern der Kennzahl (bei Rekorden die Rekordtour); Hinweis, wenn ein Filter nicht genau abbildbar ist.
+- Dialog mit einklappbaren Gruppen Ziel, Vergleich, Verlauf, Antippen; Server prüft die neuen Felder streng.
+
+Einzelheiten: [docs/versionen/3.35.0.md](versionen/3.35.0.md)
+
 ## Version 3.34.0 – Fotos und Karte anpassbar, Galerie mit Vorschau, Zeitraum der Seite
 
 - Fotos-Seite und Karte bestehen aus Bausteinen (verschieben, ausblenden, einklappen, Breite); die Karte bleibt Hauptbaustein, ihre Bedienfelder sind einzeln anpassbar. Neue Bausteine: Foto-Kennzahlen, Fotos je Jahr, Karten-Kennzahlen, Touren im Kartenausschnitt, Legende; sechs neue Vorlagen.

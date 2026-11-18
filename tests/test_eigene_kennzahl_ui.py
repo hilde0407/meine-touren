@@ -95,7 +95,7 @@ def test_template_formula_goal_compare_edit_duplicate_remove(pw, app):
         pg.wait_for_selector("#stx .tlw[data-wtype='eigenkz'] .kzgoal", timeout=T)
         _saved(pg)
         card = pg.locator("#stx .tlw[data-wtype='eigenkz']").first
-        assert card.locator(".kzval").inner_text() == "287" and card.locator(".slbr").count() == 1 and card.locator(".slcol").count() == 1
+        assert card.locator(".kzval").inner_text() == "287" and card.locator(".slbr").count() == 1 and card.locator(".kzspk").count() == 1
         # Bearbeiten über das Zahnrad (im Menü „Weitere Aktionen“)
         wid = _widgets(app)[0]["id"]
         _act(pg, wid, "cfg")

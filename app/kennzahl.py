@@ -12,13 +12,18 @@ Konfiguration (cfg), alle Felder streng geprüft, unbekannte Schlüssel sind ein
   durch   {mess, agg}   optional: Formel A ÷ B (A = mess/agg, B = durch); op: div (A ÷ B, Standard) | pct (A in Prozent von B)
   sports  [Aktivität]   range year | y | 12m | 90d | all | c   yr (bei y)   from, to (bei c, JJJJ-MM-TT)   tag (Schlagwort)   minkm (Mindeststrecke 0–1000)
   vgl     true = Vergleich mit dem Zeitraum davor (±%)           ziel  Zielwert (> 0, höchstens 10 000 000) → Fortschrittsbalken
+  vglart  davor (Standard) | jahr (gleicher Zeitraum ein Jahr früher) | monat (Zeitraum einen Monat früher); nur zusammen mit vgl   (3.35.0)
+  plan    true = Ziel mit linearem Soll vergleichen („im Plan?“; nur zusammen mit ziel; gilt bei laufendem/bestimmtem Jahr und eigenem Bereich, Summe/Anzahl ohne Formel)   (3.35.0)
+  spark   saeulen (Standard, wie vor 3.35.0) | linie (Sparkline) | aus   (3.35.0)       touren  true = Antippen öffnet die zugehörigen Touren (3.35.0; nur Anzeige, der Server rechnet nichts anderes)
 Messgrößen: gehzeit = Bewegungszeit ohne Pausen (3.29.0, aus dem Zwischenspeicher cache/tempo/<id>.json von app/steigung.py: Touren ab 2 km mit Höhe und Zeit), puls = Durchschnittspuls einer Tour und
 pulsmax = Höchstpuls einer Tour (3.29.0, aus der Pulsdatei <id>.hr.json bzw. dem GPX, Zwischenspeicher in app/puls.py; nur Touren mit Pulsdaten; Summe ergibt hier keinen Sinn, deshalb nur
 avg/max/min/count/record). Die Gehzeit wird bei noch nicht berechneten Touren höchstens GEHZEIT_BUDGET_S Sekunden je Aufruf nachgerechnet, der Rest steht in der Antwort als „offen“.
 Messgrößen: tempo = Strecke ÷ Dauer je Tour (km/h), steigung = Aufstieg ÷ Strecke (%), hmkm = Höhenmeter je km. Bei diesen „Verhältnissen“ ist avg gewichtet (Summe ÷ Summe),
 max/min/record zählen nur Touren mit sinnvoller Länge (Tempo: ab 3 km und 30 Min., sonst ab 1 km); Touren ohne die nötigen Angaben zählen nicht.
-Antwort: {wert, einheit: {z, n}, n (Touren im Zeitraum), offen (nur wenn > 0: Touren, deren Gehzeit noch nicht berechnet ist), von, bis, vorher: {wert, pct, von, bis}|None, reihe: {art, werte}, rekord: {id, name, datum, wert}|None, ziel: {ziel, pct}|None}.
+Antwort: {wert, einheit: {z, n}, n (Touren im Zeitraum), offen (nur wenn > 0: Touren, deren Gehzeit noch nicht berechnet ist), von, bis, vorher: {wert, pct, von, bis}|None, reihe: {art, werte}, rekord: {id, name, datum, wert}|None, ziel: {ziel, pct, (soll, soll_pct, plan: voraus|im_plan|zurueck)}|None}.
+3.35.0: vorher enthält zusätzlich art, diff (absolute Differenz) und dir (auf | ab | gleich, unter ±0,5 % gleich); reihe.art ist woche (Zeitraum bis 98 Tage, höchstens 15 Werte), monat (bis 36 Monate) oder jahr (höchstens 12), bei spark = aus entfällt reihe.
 """
+import calendar
 import json
 import re
 import time
@@ -40,8 +45,10 @@ MAX_TAG = 40
 MAX_ZIEL = 10_000_000
 GEHZEIT_BUDGET_S = 5.0                   # so lange rechnet ein Aufruf höchstens an Touren, deren Gehzeit noch nicht im Zwischenspeicher steht
 RANGES = ("year", "y", "12m", "90d", "all", "c")
-KEYS = {"title", "symbol", "mess", "agg", "durch", "op", "sports", "range", "yr", "from", "to", "tag", "minkm", "vgl", "ziel", "eigen"}
+KEYS = {"title", "symbol", "mess", "agg", "durch", "op", "sports", "range", "yr", "from", "to", "tag", "minkm", "vgl", "ziel", "eigen", "vglart", "plan", "spark", "touren"}
 OPS = ("div", "pct")
+VGLARTEN = ("davor", "jahr", "monat")
+SPARKS = ("saeulen", "linie", "aus")
 # Messgröße: Einheit, ob es ein Verhältnis ist (Summe ÷ Summe), erlaubte Rechenarten, Mindestlänge/-dauer für max/min/record
 MESS = {
     "touren": {"unit": "touren", "ratio": False, "aggs": ("sum", "count", "monat")},
@@ -150,8 +157,32 @@ def clean_cfg(v):
             raise _bad("Ungültiger Wert für „vgl“")
         if v["vgl"]:
             out["vgl"] = True
+    if "vglart" in v:                                      # 3.35.0
+        if v["vglart"] not in VGLARTEN:
+            raise _bad("Unbekannte Art des Vergleichs")
+        if not out.get("vgl"):
+            raise _bad("„vglart“ gehört nur zu einem Vergleich")
+        if v["vglart"] != "davor":
+            out["vglart"] = v["vglart"]
     if v.get("ziel") not in (None, 0):
         out["ziel"] = _zahl(v["ziel"], "Ziel", 0, MAX_ZIEL, offen=True)
+    if "plan" in v:
+        if not isinstance(v["plan"], bool):
+            raise _bad("Ungültiger Wert für „plan“")
+        if v["plan"]:
+            if "ziel" not in out:
+                raise _bad("„plan“ gehört nur zu einem Ziel")
+            out["plan"] = True
+    if "spark" in v:
+        if v["spark"] not in SPARKS:
+            raise _bad("Unbekannte Darstellung des Verlaufs")
+        if v["spark"] != "saeulen":
+            out["spark"] = v["spark"]
+    if "touren" in v:
+        if not isinstance(v["touren"], bool):
+            raise _bad("Ungültiger Wert für „touren“")
+        if v["touren"]:
+            out["touren"] = True
     if "eigen" in v:                                       # 3.34.0: true = eigener Zeitraum (der Zeitraum der Seite gilt hier nicht)
         if not isinstance(v["eigen"], bool):
             raise _bad("Ungültiger Wert für „eigen“")
@@ -323,19 +354,27 @@ def _runde(x):
     return None if x is None else round(x, 4)
 
 
+WOCHEN_TAGE = 98                         # bis zu dieser Länge des Zeitraums zeigt der Verlauf Wochen (höchstens 15 Werte)
+
+
 def _reihe(rows, cfg, von, bis):
-    """Verlauf für das Mini-Diagramm: je Monat (Zeitraum bis 36 Monate), sonst je Jahr (höchstens die letzten 12)."""
+    """Verlauf für das Mini-Diagramm: je Woche (Zeitraum bis 98 Tage), je Monat (bis 36 Monate), sonst je Jahr (höchstens die letzten 12). Immer begrenzt und deterministisch."""
     first = von or (min(r["d"] for r in rows) if rows else bis)
     n_mon = _monate_zahl(first, bis)
-    if n_mon <= 36:
-        keys, kf = [], lambda d: (d.year, d.month)
+    if cfg["agg"] != "monat" and (bis - first).days + 1 <= WOCHEN_TAGE:
+        mo = first - timedelta(days=first.weekday())
+        keys = [mo + timedelta(days=7 * i) for i in range((bis - mo).days // 7 + 1)]
+        kf = lambda d: d - timedelta(days=d.weekday())  # noqa: E731
+        art, mon = "woche", lambda k: 1
+    elif n_mon <= 36:
+        keys, kf = [], lambda d: (d.year, d.month)  # noqa: E731
         y, m = first.year, first.month
         while (y, m) <= (bis.year, bis.month):
             keys.append((y, m))
             y, m = (y + 1, 1) if m == 12 else (y, m + 1)
         art, mon = "monat", lambda k: 1
     else:
-        keys, kf = list(range(first.year, bis.year + 1))[-12:], lambda d: d.year
+        keys, kf = list(range(first.year, bis.year + 1))[-12:], lambda d: d.year  # noqa: E731
         art, mon = "jahr", lambda k: _monate_zahl(max(first, date(k, 1, 1)), min(bis, date(k, 12, 31)))
     gr = {k: [] for k in keys}
     for r in rows:
@@ -343,8 +382,32 @@ def _reihe(rows, cfg, von, bis):
         if k in gr:
             gr[k].append(r)
     werte = [_runde(_wert(gr[k], cfg, mon(k))[0]) if gr[k] or cfg["agg"] in ("sum", "count", "monat") else None for k in keys]
-    labels = [f"{k[0]:04d}-{k[1]:02d}" if art == "monat" else str(k) for k in keys]
+    labels = [k.isoformat() if art == "woche" else f"{k[0]:04d}-{k[1]:02d}" if art == "monat" else str(k) for k in keys]
     return {"art": art, "labels": labels, "werte": werte}
+
+
+def _versch(d, jahre=0, monate=0):
+    """Datum um Jahre und Monate früher (Monatsende wird angepasst, 29.02. -> 28.02.)."""
+    y, m = divmod(d.year * 12 + d.month - 1 - jahre * 12 - monate, 12)
+    return date(y, m + 1, min(d.day, calendar.monthrange(y, m + 1)[1]))
+
+
+def _soll_anteil(cfg, heute):
+    """Anteil des Zielzeitraums, der bis heute vergangen ist (0 < x <= 1), oder None, wenn ein lineares Soll nicht sinnvoll ist (laufende Fenster, gesamte Zeit, Formeln, Höchst-/Mittelwerte)."""
+    if cfg.get("durch") or cfg["agg"] not in ("sum", "count"):
+        return None
+    r = cfg.get("range", "year")
+    if r == "year" or (r == "y" and cfg.get("yr") == heute.year):
+        a, b = date(heute.year, 1, 1), date(heute.year, 12, 31)
+    elif r == "y":
+        return 1.0 if cfg["yr"] < heute.year else None
+    elif r == "c":
+        a, b = date.fromisoformat(cfg["from"]), date.fromisoformat(cfg["to"])
+    else:
+        return None
+    if heute < a:
+        return None
+    return min(1.0, ((heute - a).days + 1) / ((b - a).days + 1))
 
 
 def auswerten(cfg, heute=None):
@@ -352,6 +415,9 @@ def auswerten(cfg, heute=None):
     heute = heute or datetime.now(TZ).date()
     cfg = clean_cfg(cfg)
     von, bis, vor = _zeitraum(cfg, heute)
+    art = cfg.get("vglart", "davor")
+    if cfg.get("vgl") and von and art != "davor":                                  # 3.35.0: gleicher Zeitraum ein Jahr bzw. einen Monat früher
+        vor = (_versch(von, jahre=1 if art == "jahr" else 0, monate=1 if art == "monat" else 0), _versch(bis, jahre=1 if art == "jahr" else 0, monate=1 if art == "monat" else 0))
     rows = _rows(cfg)
     inn = [r for r in rows if (not von or r["d"] >= von) and r["d"] <= bis]
     vr = [r for r in rows if vor and vor[0] <= r["d"] <= vor[1]] if cfg.get("vgl") else []
@@ -359,7 +425,7 @@ def auswerten(cfg, heute=None):
     first = von or (min((r["d"] for r in inn), default=bis))
     wert, tour = _wert(inn, cfg, _monate_zahl(first, bis))
     out = {"wert": _runde(wert), "einheit": einheit(cfg), "n": len(inn), "von": von.isoformat() if von else None, "bis": bis.isoformat(),
-           "vorher": None, "reihe": _reihe(inn, cfg, von, bis), "rekord": None, "ziel": None}
+           "vorher": None, "reihe": None if cfg.get("spark") == "aus" else _reihe(inn, cfg, von, bis), "rekord": None, "ziel": None}
     if tour is not None:
         out["rekord"] = {"id": tour["id"], "name": tour["name"] or "", "datum": tour["d"].isoformat(), "wert": _runde(wert)}
     off = sum(1 for r in inn if r.get("_off"))
@@ -368,11 +434,16 @@ def auswerten(cfg, heute=None):
     if cfg.get("vgl") and vor:
         w2, _ = _wert(vr, cfg, _monate_zahl(vor[0], vor[1]))
         pct = round((wert - w2) / w2 * 100, 1) if wert is not None and w2 else None
-        out["vorher"] = {"wert": _runde(w2), "pct": pct, "von": vor[0].isoformat(), "bis": vor[1].isoformat(), "n": len(vr)}
-    if cfg.get("ziel") and wert is not None:
-        out["ziel"] = {"ziel": cfg["ziel"], "pct": round(wert / cfg["ziel"] * 100, 1)}
-    elif cfg.get("ziel"):
-        out["ziel"] = {"ziel": cfg["ziel"], "pct": 0.0}
+        diff = _runde(wert - w2) if wert is not None and w2 is not None else None
+        ref = pct if pct is not None else diff
+        out["vorher"] = {"wert": _runde(w2), "pct": pct, "von": vor[0].isoformat(), "bis": vor[1].isoformat(), "n": len(vr), "art": art, "diff": diff,
+                         "dir": None if ref is None else "gleich" if (abs(pct) < 0.5 if pct is not None else diff == 0) else "auf" if ref > 0 else "ab"}
+    if cfg.get("ziel"):
+        out["ziel"] = {"ziel": cfg["ziel"], "pct": round(wert / cfg["ziel"] * 100, 1) if wert is not None else 0.0}
+        fr = _soll_anteil(cfg, heute) if cfg.get("plan") else None
+        if fr:
+            soll, w = cfg["ziel"] * fr, wert or 0.0
+            out["ziel"].update({"soll": _runde(soll), "soll_pct": round(fr * 100, 1), "plan": "voraus" if w > soll * 1.05 else "im_plan" if w >= soll * 0.95 else "zurueck"})
     return out
 
 

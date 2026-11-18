@@ -177,7 +177,7 @@ def test_viewer_reads_users_are_separated_and_anonymous_is_refused():
 def test_version_notes_and_script_order():
     from app import config as cfg
     root = Path(__file__).resolve().parent.parent
-    assert cfg.VERSION.startswith("3.34.0 · Meine Touren")
+    assert cfg.VERSION.startswith("3.35.0 · Meine Touren")
     notes = (root / "docs" / "versionen" / "3.18.0.md").read_text(encoding="utf-8")
     assert "Mehr Bausteine" in notes and "/api/bausteine/" in notes
     for name in ("Kilometer-Splits", "Jahresziel", "Kalender-Heatmap", "Tageslicht", "Wiederentdecken"):

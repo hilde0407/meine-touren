@@ -2541,4 +2541,45 @@ Zeitraum der Seite || Page period || Période de la page || Período de la pági
 Zeitraum der Seite verwenden || Use the page period || Utiliser la période de la page || Usar el período de la página
 Zeitraum der Seite: {} || Page period: {} || Période de la page : {} || Período de la página: {}
 Zählen || Count || Compter || Contar
+gegenüber dem selben Zeitraum im Vorjahr || compared with the same period last year || par rapport à la même période de l’année précédente || respecto al mismo periodo del año anterior
+gegenüber dem Zeitraum einen Monat früher || compared with the period one month earlier || par rapport à la période un mois plus tôt || respecto al periodo de un mes antes
+Verlauf je Woche von {} bis {}, höchster Wert {} ({}) || Trend per week from {} to {}, highest value {} ({}) || Évolution par semaine de {} à {}, valeur maximale {} ({}) || Evolución por semana de {} a {}, valor máximo {} ({})
+Anstieg: || Increase: || Hausse : || Aumento:
+Rückgang: || Decrease: || Baisse : || Descenso:
+Unverändert: || Unchanged: || Inchangé : || Sin cambios:
+Noch {} bis zum Ziel || {} to go to the goal || Encore {} pour atteindre l’objectif || Faltan {} para el objetivo
+Vor dem Plan || Ahead of plan || En avance sur le plan || Por delante del plan
+Im Plan || On plan || Dans le plan || Según lo previsto
+Hinter dem Plan || Behind plan || En retard sur le plan || Por detrás del plan
+Soll bis heute: {} ({} %) || Target to date: {} ({} %) || Objectif à ce jour : {} ({} %) || Previsto hasta hoy: {} ({} %)
+{} % von {} || {} % of {} || {} % de {} || {} % de {}
+Antippen öffnet die Rekordtour || Tapping opens the record tour || Appuyer ouvre le parcours record || Al tocar se abre la ruta récord
+Antippen öffnet die Touren || Tapping opens the tours || Appuyer ouvre les parcours || Al tocar se abren las rutas
+Rekordtour öffnen › || Open record tour › || Ouvrir le parcours record › || Abrir la ruta récord ›
+Touren anzeigen › || Show tours › || Afficher les parcours › || Mostrar las rutas ›
+Die Liste zeigt alle Touren im Zeitraum, auch solche ohne die nötige Angabe (zum Beispiel ohne Pulsdaten). || The list shows all tours in the period, including those without the required data (for example without heart rate data). || La liste affiche tous les parcours de la période, y compris ceux sans la donnée nécessaire (par exemple sans données de fréquence cardiaque). || La lista muestra todas las rutas del periodo, también las que no tienen el dato necesario (por ejemplo, sin datos de pulso).
+Die Liste zeigt alle Touren im Zeitraum, auch solche, die für diese Kennzahl zu kurz sind. || The list shows all tours in the period, including those that are too short for this metric. || La liste affiche tous les parcours de la période, y compris ceux qui sont trop courts pour cet indicateur. || La lista muestra todas las rutas del periodo, también las que son demasiado cortas para este indicador.
+Zeitraum davor (gleich lang) || Period before (same length) || Période précédente (même durée) || Periodo anterior (misma duración)
+Vorjahr (gleicher Zeitraum) || Previous year (same period) || Année précédente (même période) || Año anterior (mismo periodo)
+Vormonat (einen Monat früher) || Previous month (one month earlier) || Mois précédent (un mois plus tôt) || Mes anterior (un mes antes)
+Linie (Sparkline) || Line (sparkline) || Ligne (sparkline) || Línea (sparkline)
+Säulen || Columns || Colonnes || Columnas
+Aus || Off || Désactivé || Desactivado
+Verlauf || Trend || Évolution || Evolución
+Antippen || Tapping || Appui || Al tocar
+Mit einem gleichmäßigen Soll vergleichen („Im Plan?“) || Compare with an even target (“On plan?”) || Comparer avec un objectif linéaire (« Dans le plan ? ») || Comparar con un objetivo uniforme («¿Según lo previsto?»)
+Mit einem früheren Zeitraum vergleichen (Pfeil und ± %) || Compare with an earlier period (arrow and ± %) || Comparer avec une période antérieure (flèche et ± %) || Comparar con un periodo anterior (flecha y ± %)
+Verlauf in der Kachel || Trend in the tile || Évolution dans la tuile || Evolución en la tarjeta
+Zeigt Wochen-, Monats- oder Jahreswerte des Zeitraums als kleine Grafik. || Shows weekly, monthly or yearly values of the period as a small chart. || Affiche les valeurs hebdomadaires, mensuelles ou annuelles de la période sous forme de petit graphique. || Muestra los valores semanales, mensuales o anuales del periodo como un pequeño gráfico.
+Antippen öffnet die zugehörigen Touren || Tapping opens the matching tours || Appuyer ouvre les parcours correspondants || Al tocar se abren las rutas correspondientes
+Die Tourenliste wird nach Aktivität, Zeitraum, Schlagwort und Mindeststrecke gefiltert, bei einem Rekord öffnet sich die Rekordtour. Was sich in der Liste nicht abbilden lässt, steht als Hinweis dabei. || The tour list is filtered by activity, period, keyword and minimum distance; for a record, the record tour opens. Whatever cannot be reproduced in the list is noted as a hint. || La liste des parcours est filtrée par activité, période, mot-clé et distance minimale ; pour un record, le parcours record s’ouvre. Ce qui ne peut pas être reproduit dans la liste est indiqué sous forme de remarque. || La lista de rutas se filtra por actividad, periodo, palabra clave y distancia mínima; en un récord se abre la ruta récord. Lo que no se pueda reproducir en la lista aparece como aviso.
+Das Soll gibt es nur für Summe oder Anzahl ohne Formel, bei laufendem Jahr, bestimmtem Jahr oder eigenem Bereich. || The target is only available for sum or count without a formula, for the current year, a specific year or a custom range. || L’objectif linéaire n’existe que pour une somme ou un nombre sans formule, pour l’année en cours, une année précise ou une plage personnalisée. || El objetivo uniforme solo existe para suma o recuento sin fórmula, con el año actual, un año concreto o un rango propio.
+Zuerst ein Ziel eintragen. || Enter a goal first. || Saisissez d’abord un objectif. || Introduce primero un objetivo.
+Fortschrittsbalken für dein Jahresziel in Kilometern, mit Rest, Vorjahresvergleich und „Im Plan?“. || Progress bar for your yearly goal in kilometres, with remainder, comparison with last year and “On plan?”. || Barre de progression pour votre objectif annuel en kilomètres, avec le reste, la comparaison avec l’année précédente et « Dans le plan ? ». || Barra de progreso para tu objetivo anual en kilómetros, con el resto, la comparación con el año anterior y «¿Según lo previsto?».
+Stelle selbst zusammen, was du wissen willst: Messgröße, Rechenart, Filter, Vergleich mit Vorjahr oder Vormonat, Ziel mit Fortschrittsbalken und „Im Plan?“, Sparkline, Antippen zu den Touren oder eine Formel wie Höhenmeter je km. Ohne Programmieren, mit Vorlagen zum Start. || Put together what you want to know yourself: measure, calculation, filters, comparison with the previous year or month, goal with progress bar and “On plan?”, sparkline, tap through to the tours or a formula such as metres of ascent per km. No programming, with templates to start. || Composez vous-même ce que vous voulez savoir : grandeur, calcul, filtres, comparaison avec l’année ou le mois précédent, objectif avec barre de progression et « Dans le plan ? », sparkline, accès aux parcours d’un appui ou formule comme les mètres de dénivelé par km. Sans programmation, avec des modèles pour démarrer. || Elabora tú mismo lo que quieres saber: magnitud, cálculo, filtros, comparación con el año o el mes anterior, objetivo con barra de progreso y «¿Según lo previsto?», sparkline, acceso a las rutas al tocar o una fórmula como metros de subida por km. Sin programar, con plantillas para empezar.
+Touren der Kennzahl „{}“ || Tours of the metric “{}” || Parcours de l’indicateur « {} » || Rutas del indicador «{}»
+Filter aufheben || Remove filter || Supprimer le filtre || Quitar el filtro
+ab {} || from {} || à partir du {} || desde {}
+Schlagwort „{}“ || Keyword “{}” || Mot-clé « {} » || Palabra clave «{}»
+mindestens {} km || at least {} km || au moins {} km || al menos {} km
 `;
