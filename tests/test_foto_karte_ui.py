@@ -194,10 +194,12 @@ def test_map_is_refitted_after_layout_change_but_keeps_a_user_view(pw, app):
         pg.wait_for_function("() => document.getElementById('bigmap').clientWidth > 900", timeout=T)
         _mapok(pg)
         # eine selbst gewählte Ansicht geht bei einer Größenänderung nicht verloren
-        pg.evaluate("() => { map.setView([48.005, 11.01], 15, {animate: false}); map._kaUser = true; }")
+        pg.wait_for_load_state("networkidle")
+        pg.evaluate("() => { map.setView([48.005, 11.01], 15, {animate: false}); map._kaUser = true; window.__m0 = map; }")
         pg.locator('.slit[data-sl="karte"] [data-a="w"][data-w="halb"]').click()
         pg.wait_for_function("() => document.getElementById('bigmap').clientWidth < 760 && Math.abs(map.getSize().x - document.getElementById('bigmap').clientWidth) <= 1", timeout=T)
-        assert pg.evaluate("() => map.getZoom()") == 15
+        # dieselbe Karte, derselbe Zoom: der selbst gewählte Ausschnitt bleibt
+        assert pg.evaluate("() => map === window.__m0 && map.getZoom()") == 15
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
