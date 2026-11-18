@@ -199,7 +199,7 @@ function kzForm(cfg) {
     `<fieldset class="slfs kzfs"><legend>Filter</legend>${flField({kind: "sports", label: "Aktivität"}, cfg, 0)}` +
     `<div class="kzrow"><div><label for="kz-range">Zeitraum</label><select id="kz-range" class="flsel">${kzOpts(KZ_RANGES, "year")}</select></div>` +
     `<div class="kzyr" hidden><label for="kz-yr">Jahr</label><select id="kz-yr" class="flsel">${yrs.sort((a, b) => b - a).map(y => `<option value="${y}"${y === yr ? " selected" : ""}>${y}</option>`).join("")}</select></div></div>` +
-    (SL.fam === "uebersicht" || SL.fam === "statistik" ? `<label class="slck kzck kzpg"><input type="checkbox" id="kz-page"><span>Zeitraum der Seite verwenden</span></label><p class="mut kzhint kzph">Ist oben auf der Seite ein Zeitraum gewählt, gilt er hier statt des Zeitraums oben. Ohne Haken behält diese Kennzahl ihren eigenen Zeitraum.</p>` : "") +
+    (SL.fam === "uebersicht" || SL.fam === "statistik" ? `<label class="slck kzck kzpg"><input type="checkbox" id="kz-page"><span>Zeitraum der Seite verwenden</span></label><p class="mut kzhint kzph">Ist oben auf der Seite ein Zeitraum gewählt, gilt er hier statt des Zeitraums oben. Ohne Haken behält diese Kennzahl ihren eigenen Zeitraum.</p><p class="mut kzhint zrnow" id="kz-now" role="status"></p>` : "") +
     `<div class="kzrow kzrow2 kzdates" hidden><div><label for="kz-from">Von</label><input id="kz-from" type="date"></div><div><label for="kz-to">Bis</label><input id="kz-to" type="date"></div></div>` +
     `<div class="kzrow kzrow2"><div><label for="kz-tag">Schlagwort (optional)</label><input id="kz-tag" type="text" maxlength="40" autocomplete="off" list="kz-tags"><datalist id="kz-tags"></datalist></div>` +
     `<div><label for="kz-minkm">Mindeststrecke in km (optional)</label><input id="kz-minkm" type="number" inputmode="decimal" min="0" max="1000" step="any"></div></div></fieldset>` +
@@ -228,6 +228,12 @@ function kzFill(form, cfg) {
   sp.outerHTML = flField({kind: "sports", label: "Aktivität"}, {sports: cfg.sports || []}, 0);
   set("kz-range", cfg.range || "year");
   if (form.querySelector("#kz-page")) form.querySelector("#kz-page").checked = cfg.eigen !== true;
+  const kzp = form.querySelector("#kz-page"), kzn = form.querySelector("#kz-now");             // 3.37.2: Hilfstext „Gerade gilt: …“ (nur Übersicht; die Statistik hat ihren eigenen Filter)
+  if (kzn && kzp && SL.fam === "uebersicht" && typeof zrNowText === "function") {
+    const say = () => (kzn.textContent = zrNowText(!kzp.checked));
+    kzp.addEventListener("change", say);
+    say();
+  } else if (kzn) kzn.remove();
   if (cfg.yr) set("kz-yr", cfg.yr);
   set("kz-from", cfg.from);
   set("kz-to", cfg.to);

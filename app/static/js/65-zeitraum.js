@@ -7,8 +7,23 @@
    „Ansicht speichern“) · keiner.
    Baustein-Einstellung: „Zeitraum der Seite verwenden“ (Standard) oder eigener Zeitraum (Feld „eigen“ in der Konfiguration; auch bei der Eigenen Kennzahl, deren range/yr/from/to dann gelten).
    Bausteine ohne Zeitbezug (ohne Feld „Zeitraum“ und nicht „zeit“) bekommen weder eine Änderung noch einen Hinweis; die Leiste erscheint nur, wenn die Seite mindestens einen zeitbezogenen Baustein zeigt. */
-const ZR = {F: {}, focus: "", open: {}, key: {}, url: {}, mopen: {}};
+const ZR = {F: {}, focus: "", open: {}, key: {}, url: {}, mopen: {}, sess: {}, help: {}};
 const zrFams = ["uebersicht"];
+/* 3.37.2: Die Leiste ist standardmäßig ausgeblendet („Seite anpassen“ → „Zeitraum der Seite anzeigen“, Layout-Feld zrbar). Sichtbar ist sie, wenn der Schalter an ist, wenn ein Zeitraum gilt (Adresse ?z=…, zuletzt gewählt, in der Ansicht gespeichert:
+   ein wirksamer Seitenzeitraum darf nie unsichtbar sein) oder wenn in dieser Sitzung ein Zeitraum gewählt und wieder aufgehoben wurde (die Leiste verschwindet nicht unter dem Finger). „Je Baustein“ ohne Schalter: unsichtbar und ohne Wirkung. */
+/* 3.37.2: Erklärung der Funktion, gleicher Text im Bearbeitungsmodus (beim Schalter), in der Leiste und im Handbuch */
+const zrHelpHtml = () =>
+  `<ul class="zrhl"><li>Ein Zeitraum für alle Bausteine der Seite, die mit Zeit zu tun haben, statt für jeden Baustein einzeln.</li>` +
+  `<li>Ein Baustein behält seinen eigenen Zeitraum, wenn du in seinen Einstellungen „Zeitraum der Seite verwenden“ abschaltest.</li>` +
+  `<li>Bausteine ohne Zeitbezug, zum Beispiel „Heute vor X Jahren“ und die Erinnerungen, sind nicht betroffen.</li>` +
+  `<li>Deine Auswahl merkt sich die App; „Ansicht speichern“ legt sie in der Ansicht ab. Die Adresse mit ?z=… lässt sich teilen und blendet die Leiste ein.</li></ul>`;
+/* Hilfstext in den Baustein-Einstellungen: welcher Zeitraum gerade gilt (Schalter „Zeitraum der Seite verwenden“ an oder aus) */
+const zrNowText = own => {
+  const F = ZR.F.uebersicht;
+  return own ? "Dieser Baustein nutzt seinen eigenen Zeitraum" : F ? `Gerade gilt: ${zrShort(F)} von der Seite` : "Die Seite hat keinen Zeitraum gewählt, dieser Baustein zeigt seinen eigenen";
+};
+const zrSwitchOn = fam => !!((SL.docs[SL_PAGE_KEY[fam]] || {}).zrbar === true);
+const zrOn = fam => zrSwitchOn(fam) || !!ZR.F[fam] || !!ZR.sess[fam];
 const zrHashBase = fam => ({uebersicht: "#/dash"})[fam];
 const zrLsKey = fam => "mt_zr_" + slUid() + "_" + fam + "_" + (SL.view[fam] || "");
 const zrOpenKey = fam => "mt_trf_zr_" + fam;
@@ -46,6 +61,7 @@ function zrInit(fam, q) {
   window.ZR_READY = true;
   const u = zrParse(q);
   ZR.url[fam] = !!u;
+  ZR.sess[fam] = false;
   ZR.key[fam] = zrLsKey(fam);
   ZR.F[fam] = u || zrStored(fam) || zrSavedF(fam) || null;
 }
@@ -92,6 +108,7 @@ function zrSet(fam, F, focus) {
   } catch (e) {}
   slApply();
   if (typeof slBarRefresh === "function") slBarRefresh();
+  if (typeof slKopfSync === "function") slKopfSync();
   slLive(`Zeitraum der Seite: ${zrLabel(F)}`);
 }
 function zrReset(fam) {
@@ -123,20 +140,22 @@ SLF.uebersicht = {
 };
 /* ---------- Leiste ---------- */
 /* chip = Handy-Werkzeugzeile: der Kopf (Chip) steht in der Zeile „Seite anpassen“ (zrChip), hier bleibt nur die aufklappbare Auswahl */
-function zrHtml(fam, F, open, chip) {
+function zrHtml(fam, F, open, chip, help) {
   const cy = new Date().getFullYear(), ys = years(), on = {all: F && F.kind === "all", year: F && F.kind === "y" && F.yr === cy, "12m": F && F.kind === "12m", prev: F && F.kind === "y" && F.yr === cy - 1, c: F && F.kind === "c"},
     other = F && F.kind === "y" && F.yr !== cy && F.yr !== cy - 1 ? F.yr : 0, yl = [...new Set(ys.concat(other ? [other] : []))].sort((a, b) => b - a),
     chips = [["all", "Alle"], ["year", "Dieses Jahr"], ["12m", "Letzte 12 Monate"], ["prev", "Vorjahr"]];
   return (chip ? "" : `<div class="zrhead"><button type="button" class="zrtog" aria-expanded="${open}" aria-controls="zrbody"><span class="zrt">Zeitraum der Seite</span><span class="zrl">${esc(zrLabel(F))}</span></button>` +
-    `<button type="button" class="btn ghost sm zrreset" data-zr="reset"${F ? "" : " hidden"}>Zurücksetzen</button></div>`) +
+    `<button type="button" class="btn ghost sm zrreset" data-zr="reset"${F ? "" : " hidden"}>Zurücksetzen</button>` +
+    `<button type="button" class="btn ghost sm zrinfo" data-zr="help" aria-expanded="${!!help}" aria-controls="zrhelp"><span aria-hidden="true">ⓘ</span> Hilfe</button></div>` + `<div class="zrhelp" id="zrhelp"${help ? "" : " hidden"}>${zrHelpHtml()}</div>`) +
     `<div class="zrbody" id="zrbody"${open ? "" : " hidden"}><div class="chips" role="group" aria-label="Zeitraum der Seite">${chips.map(([k, l]) => `<button type="button" class="chip${on[k] ? " on" : ""}" data-zr="${k}" aria-pressed="${!!on[k]}">${l}</button>`).join("")}` +
     `<label class="zrjahr"><span class="slsr">Bestimmtes Jahr</span><select id="zrjahr" data-zr="jahr"><option value="">Jahr …</option>${yl.map(y => `<option value="${y}"${other === y ? " selected" : ""}>${y}</option>`).join("")}</select></label>` +
     `<button type="button" class="chip${on.c ? " on" : ""}" data-zr="c" aria-pressed="${!!on.c}" aria-controls="zrvon">Von–bis …</button>` +
-    (chip ? `<button type="button" class="chip zrreset" data-zr="reset"${F ? "" : " hidden"}>Zurücksetzen</button>` : "") + `</div>` +
+    (chip ? `<button type="button" class="chip zrreset" data-zr="reset"${F ? "" : " hidden"}>Zurücksetzen</button><button type="button" class="chip zrinfo" data-zr="help" aria-expanded="${!!help}" aria-controls="zrhelp"><span aria-hidden="true">ⓘ</span> Hilfe</button>` : "") + `</div>` +
+    (chip ? `<div class="zrhelp" id="zrhelp"${help ? "" : " hidden"}>${zrHelpHtml()}</div>` : "") +
     `<form class="stfc zrform" id="zrvon"${F && F.kind === "c" ? "" : " hidden"} novalidate><label>Von <input type="date" name="von" value="${F ? F.von : ""}"></label><label>Bis <input type="date" name="bis" value="${F ? F.bis : ""}"></label><button class="btn sm" type="submit">Übernehmen</button><span class="stfe" role="alert"></span></form>` +
     `<p class="mut zrhint">Gilt für alle Bausteine mit Zeitbezug. Ein Baustein behält seinen eigenen Zeitraum, wenn du in seinen Einstellungen „Zeitraum der Seite verwenden“ abschaltest.</p></div>`;
 }
-const zrSig = (F, open, chip) => JSON.stringify([F && zrDocOf(F), open, years().join(","), new Date().getFullYear(), chip]);
+const zrSig = (F, open, chip, help) => JSON.stringify([F && zrDocOf(F), open, years().join(","), new Date().getFullYear(), chip, !!help]);
 /* Handy: der Chip „Zeitraum: 2025 ▾“ in der Werkzeugzeile (#slopenw); öffnet und schließt die Auswahl in #zrbar (aria-expanded, aria-controls) */
 function zrChip(fam, F, open, w) {
   let c = document.getElementById("zrchip");
@@ -172,7 +191,7 @@ function zrMobOpen(fam, open, focus) {
     c.setAttribute("aria-expanded", String(!!open));
     c.dataset.sig = [fam, ZR.F[fam] ? zrDocOf(ZR.F[fam]) : "", !!open].join("|");
   }
-  if (bar && bar.dataset.sig) bar.dataset.sig = zrSig(ZR.F[fam] || null, !!open, bar.classList.contains("zrm"));
+  if (bar && bar.dataset.sig) bar.dataset.sig = zrSig(ZR.F[fam] || null, !!open, bar.classList.contains("zrm"), ZR.help[fam]);
   if (focus && c) c.focus({preventScroll: true});
 }
 document.addEventListener("click", e => {
@@ -203,7 +222,7 @@ document.addEventListener("keydown", e => {
 /* Wird von der Engine bei jedem Einordnen gerufen; gibt die Leiste zurück (oder null, wenn die Seite keinen zeitbezogenen Baustein zeigt) */
 function zrBar(fam, pres, root, edit, op) {
   let bar = document.getElementById("zrbar");
-  if (!zrFams.includes(fam) || !pres.some(p => (edit || !p.off) && zrAware(p.it))) {
+  if (!zrFams.includes(fam) || !zrOn(fam) || !pres.some(p => (edit || !p.off) && zrAware(p.it))) {
     if (bar) bar.remove();
     zrChip(fam, null, false, null);
     return null;
@@ -216,7 +235,7 @@ function zrBar(fam, pres, root, edit, op) {
       open = localStorage.getItem(zrOpenKey(fam)) !== "0";
     } catch (e) {}
   zrChip(fam, F, open, chip ? ow : null);
-  const sig = zrSig(F, open, chip);
+  const sig = zrSig(F, open, chip, ZR.help[fam]);
   if (!bar) {
     bar = document.createElement("section");
     bar.id = "zrbar";
@@ -225,6 +244,7 @@ function zrBar(fam, pres, root, edit, op) {
     bar.addEventListener("click", zrClick);
     bar.addEventListener("change", e => {
       const s = e.target.closest("#zrjahr");
+      if (s) ZR.sess[bar.dataset.fam] = true;
       if (s) zrSet(bar.dataset.fam, s.value ? {sports: [], kind: "y", yr: +s.value, von: "", bis: ""} : null, "#zrjahr");
     });
     bar.addEventListener("submit", e => {
@@ -232,6 +252,7 @@ function zrBar(fam, pres, root, edit, op) {
       const f = e.target, von = f.von.value, bis = f.bis.value, er = f.querySelector(".stfe");
       if (!ST_DATE.test(von) || !ST_DATE.test(bis)) return (er.textContent = "Bitte beide Daten angeben."), f.von.focus();
       if (von > bis) return (er.textContent = "„Von“ darf nicht nach „Bis“ liegen."), f.von.focus();
+      ZR.sess[bar.dataset.fam] = true;
       zrSet(bar.dataset.fam, {sports: [], kind: "c", yr: 0, von, bis}, '[data-zr="c"]');
     });
   }
@@ -240,7 +261,7 @@ function zrBar(fam, pres, root, edit, op) {
   if (bar.dataset.sig !== sig) {
     const had = bar.contains(document.activeElement) ? document.activeElement : null, foc = ZR.focus || (had && (had.id ? "#" + had.id : had.dataset && had.dataset.zr ? `[data-zr="${had.dataset.zr}"]` : ""));
     bar.dataset.sig = sig;
-    bar.innerHTML = zrHtml(fam, F, open, chip);
+    bar.innerHTML = zrHtml(fam, F, open, chip, ZR.help[fam]);
     ZR.focus = "";
     if (foc) {
       const el = foc === "#zrchip" ? document.getElementById("zrchip") : bar.querySelector(foc);
@@ -264,6 +285,13 @@ function zrClick(e) {
   }
   if (!b) return;
   const k = b.dataset.zr, cy = new Date().getFullYear(), mk = (kind, yr = 0) => ({sports: [], kind, yr, von: "", bis: ""});
+  if (k === "help") {                                                               // Hilfe auf-/zuklappen (nur für diese Sitzung)
+    ZR.help[fam] = !ZR.help[fam];
+    delete bar.dataset.sig;
+    ZR.focus = '[data-zr="help"]';
+    return slApply();
+  }
+  ZR.sess[fam] = true;
   if (k === "reset") return zrReset(fam);
   if (k === "c") {
     const f = bar.querySelector("#zrvon"), cur = ZR.F[fam];

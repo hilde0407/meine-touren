@@ -2721,4 +2721,17 @@ Je Baustein || Per widget || Par bloc || Por bloque
 Zeitraum: || Period: || Période : || Periodo:
 Ansicht wählen || Choose view || Choisir la vue || Elegir vista
 Ansicht speichern … || Save view … || Enregistrer la vue … || Guardar vista …
-Ansichten verwalten … || Manage views … || Gérer les vues … || Gestionar vistas …`;
+Ansichten verwalten … || Manage views … || Gérer les vues … || Gestionar vistas …
+Zeitraum der Seite anzeigen || Show the page period || Afficher la période de la page || Mostrar el período de la página
+Was ist das? || What is this? || Qu’est-ce que c’est ? || ¿Qué es esto?
+Ein Zeitraum ist gewählt, die Leiste bleibt sichtbar. Setze ihn auf „Je Baustein“ zurück, um sie auszublenden. || A period is selected, so the bar stays visible. Reset it to “Per widget” to hide the bar. || Une période est choisie, la barre reste donc visible. Revenez à « Par bloc » pour la masquer. || Hay un período elegido, por eso la barra sigue visible. Vuelve a «Por bloque» para ocultarla.
+Zeitraum der Seite: Leiste eingeblendet || Page period: bar shown || Période de la page : barre affichée || Período de la página: barra visible
+Zeitraum der Seite: Leiste ausgeblendet || Page period: bar hidden || Période de la page : barre masquée || Período de la página: barra oculta
+Hilfe || Help || Aide || Ayuda
+Ein Zeitraum für alle Bausteine der Seite, die mit Zeit zu tun haben, statt für jeden Baustein einzeln. || One period for all blocks on the page that deal with time, instead of setting each block separately. || Une seule période pour tous les blocs de la page liés au temps, au lieu de régler chaque bloc séparément. || Un solo período para todos los bloques de la página relacionados con el tiempo, en lugar de ajustar cada bloque por separado.
+Ein Baustein behält seinen eigenen Zeitraum, wenn du in seinen Einstellungen „Zeitraum der Seite verwenden“ abschaltest. || A block keeps its own period if you turn off “Use the page period” in its settings. || Un bloc garde sa propre période si vous désactivez « Utiliser la période de la page » dans ses réglages. || Un bloque conserva su propio período si desactivas «Usar el período de la página» en sus ajustes.
+Bausteine ohne Zeitbezug, zum Beispiel „Heute vor X Jahren“ und die Erinnerungen, sind nicht betroffen. || Blocks without a time reference, for example “On this day” and the memories, are not affected. || Les blocs sans référence de temps, par exemple « Il y a X ans aujourd’hui » et les souvenirs, ne sont pas concernés. || Los bloques sin referencia temporal, por ejemplo «Hoy hace X años» y los recuerdos, no se ven afectados.
+Deine Auswahl merkt sich die App; „Ansicht speichern“ legt sie in der Ansicht ab. Die Adresse mit ?z=… lässt sich teilen und blendet die Leiste ein. || The app remembers your choice; “Save view” stores it in the view. The address with ?z=… can be shared and shows the bar. || L’application mémorise votre choix ; « Enregistrer la vue » le conserve dans la vue. L’adresse avec ?z=… peut être partagée et affiche la barre. || La aplicación recuerda tu elección; «Guardar vista» la guarda en la vista. La dirección con ?z=… se puede compartir y muestra la barra.
+Gerade gilt: {} von der Seite || Currently in effect: {} from the page || En vigueur actuellement : {} de la page || Ahora rige: {} de la página
+Dieser Baustein nutzt seinen eigenen Zeitraum || This block uses its own period || Ce bloc utilise sa propre période || Este bloque usa su propio período
+Die Seite hat keinen Zeitraum gewählt, dieser Baustein zeigt seinen eigenen || The page has no period selected; this block shows its own || La page n’a pas de période choisie ; ce bloc affiche la sienne || La página no tiene período elegido; este bloque muestra el suyo`;

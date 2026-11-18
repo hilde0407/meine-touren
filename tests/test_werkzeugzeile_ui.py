@@ -9,7 +9,7 @@ import time  # noqa: F401
 import pytest
 expect = pytest.importorskip("playwright.sync_api").expect
 
-from tests.test_seitenlayout_ui import T, _api, pw  # noqa: F401,E402
+from tests.test_seitenlayout_ui import T, _api, _zr_on, pw  # noqa: F401,E402
 from tests.test_reise_seiten_ui import app  # noqa: F401,E402
 from tests.test_tourseite_ui import _shot  # noqa: E402
 
@@ -25,8 +25,11 @@ def clean(app):
     yield
 
 
-def _mob(pw, url, hash_, scheme="light", width=390, height=844, mobile=True, init=None):
-    """Handy-Kontext wie in der Android-App (390 x 844, dpr 2, Touch); fremde Hosts (Kartenkacheln) werden abgewiesen."""
+def _mob(pw, url, hash_, scheme="light", width=390, height=844, mobile=True, init=None, zr=True):
+    """3.37.2: Die Leiste „Zeitraum der Seite“ ist standardmäßig aus; diese Tests schalten sie über das Layout (Feld zrbar) ein (zr=False: Standard).
+    Handy-Kontext wie in der Android-App (390 x 844, dpr 2, Touch); fremde Hosts (Kartenkacheln) werden abgewiesen."""
+    if zr:
+        _zr_on(url)
     b = pw.chromium.launch()
     ctx = b.new_context(locale="de-DE", viewport={"width": width, "height": height}, device_scale_factor=2, is_mobile=mobile, has_touch=mobile, color_scheme=scheme, reduced_motion="reduce")
     pg = ctx.new_page()

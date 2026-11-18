@@ -12,6 +12,7 @@ Dokument (JSON-Objekt, alle Felder optional):
   widgets  [{id, type, cfg}]  hinzugefügte Bausteine mit ihrer Konfiguration
   cfg      {id: {…}}       Konfiguration der Standard-Bausteine, die nicht als „widgets“ gespeichert sind (3.19.0: der Baustein „Dein Jahr“ der Übersicht, Kennung „jahr“)
   kopf     {holen: false}  Kopfzeile der Übersicht (3.31.0): „holen“ = false schaltet den Schnell-Knopf „Touren holen“ ab (Standard: an, dann steht nichts im Dokument)
+  zrbar    true            Leiste „Zeitraum der Seite“ der Übersicht (3.37.2): standardmäßig ausgeblendet; true blendet sie ein (nur Dokument „uebersicht“; nur die Abweichung wird gespeichert)
   w        {id: Breite}    Breite im Raster (3.20.0): "voll" | "zweidrittel" | "halb" | "drittel"; gespeichert werden nur Abweichungen vom Standard des Abschnitts (den kennt die Oberfläche)
 Seiteneignung (3.20.0): Bausteine der Übersicht dürfen auch auf der Tourseite stehen (Dokument „tour-haupt“); tour-bezogene Bausteine (TOUR_ONLY) nur auf Tourseiten,
 die Dokumente „uebersicht“ und „statistik“ lehnen sie ab. 3.22.0: Bausteine der Statistik (STATISTIK_ONLY) stehen nur im Dokument „statistik“; die Bausteine der Übersicht dürfen auch dort stehen.
@@ -73,7 +74,7 @@ router = APIRouter()
 
 KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik", "reise", "reisen", "fotos", "karte")
 NEUE_SEITEN = ("uebersicht", "statistik", "reise", "reisen", "fotos", "karte")                 # Seiten mit genau einem Dokument (ohne Regeln nach Sportart)
-FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg", "w", "filter", "kopf", "groups", "mob"}
+FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg", "w", "filter", "kopf", "groups", "mob", "zrbar"}
 WIDTHS = ("voll", "zweidrittel", "halb", "drittel")
 # Bausteine, die eine Tour brauchen (Typkennungen wie in static/js/50-bausteine.js und 51-bausteine-tour.js, fam "tour"): nicht in der Übersicht
 TOUR_ONLY = frozenset(("kennzahlen", "tempo", "vergleich", "pulszonen", "wetter", "fotostreifen", "notiz", "splits", "steigung", "bewegung", "durchschnitt", "jahresrang",
@@ -503,6 +504,14 @@ def clean(doc, key=None):
         m = _mob(doc["mob"], key)
         if m:
             out["mob"] = m
+    if "zrbar" in doc:
+        z = doc["zrbar"]
+        if not isinstance(z, bool):
+            raise HTTPException(400, "„zrbar“ muss true oder false sein")
+        if key not in (None, "uebersicht"):
+            raise HTTPException(400, "Die Leiste „Zeitraum der Seite“ gibt es nur auf der Übersicht")
+        if z:                                               # nur die Abweichung vom Standard (aus) wird gespeichert
+            out["zrbar"] = True
     if "kopf" in doc:
         k = doc["kopf"]
         if not isinstance(k, dict) or set(k) - {"holen"} or not all(isinstance(x, bool) for x in k.values()):
@@ -583,7 +592,7 @@ def normalize(stored):
 
 def _stats(lay):
     return {"order": len(lay.get("order", [])), "hidden": len(lay.get("hidden", [])), "widgets": len(lay.get("widgets", [])), "types": sorted({w["type"] for w in lay.get("widgets", [])}),
-            "groups": len(lay.get("groups", [])), "mob": bool(lay.get("mob"))}
+            "groups": len(lay.get("groups", [])), "mob": bool(lay.get("mob")), "zrbar": bool(lay.get("zrbar"))}
 
 
 def check_export(doc):

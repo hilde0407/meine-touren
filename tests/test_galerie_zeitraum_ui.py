@@ -6,7 +6,7 @@ import datetime
 import pytest
 expect = pytest.importorskip("playwright.sync_api").expect
 
-from tests.test_seitenlayout_ui import T, _api, _browser, _edit, _saved, pw  # noqa: F401
+from tests.test_seitenlayout_ui import T, _api, _zr_on, _browser, _edit, _saved, pw  # noqa: F401
 from tests.test_reise_seiten_ui import app, _done, _saved_doc  # noqa: F401
 from tests.test_tourseite_ui import _shot
 
@@ -22,7 +22,9 @@ def clean(app):
     yield
 
 
-def _dash(pw, url, hash_="#/dash", **kw):
+def _dash(pw, url, hash_="#/dash", zr=True, **kw):
+    if zr:                                                                                           # 3.37.2: die Leiste ist standardmäßig aus; hier über das Layout (Feld zrbar) eingeschaltet
+        _zr_on(url)
     pg = _browser(pw, url, devs=None, **kw)
     pg.goto(f"{url}/{hash_}", timeout=TL)
     pg.wait_for_function("() => typeof SL === 'object' && !!document.querySelector('#slopen') && !!document.querySelector('#hlast, .home')", timeout=TL)

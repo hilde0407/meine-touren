@@ -58,7 +58,7 @@ Dieses Handbuch erklärt Schritt für Schritt, wie du mit **Meine Touren** arbei
 
 ![Übersicht mit Menüleiste, letzter Tour, „Dein Jahr“ und Erinnerungen](handbuch/bilder/01-uebersicht.png)
 
-*Abbildung 1: Die Übersicht. Oben die Menüleiste, darunter die Leiste „Zeitraum der Seite“, „Zuletzt unterwegs“, „Dein Jahr 2026“, der Bereich „Touren holen“, die letzten Touren und „Erinnerungen“.*
+*Abbildung 1: Die Übersicht. Oben die Menüleiste, darunter (hier über **Seite anpassen** eingeblendet) die Leiste „Zeitraum der Seite“, „Zuletzt unterwegs“, „Dein Jahr 2026“, der Bereich „Touren holen“, die letzten Touren und „Erinnerungen“.*
 
 **Tipp:** Wenn du erst einmal nur schauen willst, was die App kann: Der **Demo-Modus** (siehe [Kapitel 2](#k2)) legt Beispieltouren an, ohne deine echten Daten anzufassen.
 
@@ -287,11 +287,22 @@ Von oben nach unten (in der Standardeinstellung):
 
 ### Zeitraum der Seite
 
-Ganz oben auf der Übersicht steht die einklappbare Leiste **Zeitraum der Seite** („Jeder Baustein zeigt seinen eigenen Zeitraum“). Mit **Alle**, **Dieses Jahr**, **Letzte 12 Monate**, **Vorjahr**, einer Jahresauswahl (**Jahr …**) und **Von–bis …** legst du einen gemeinsamen Zeitraum fest, der für alle Bausteine mit Zeitbezug gilt, zum Beispiel „Dein Jahr“, Eigene Kennzahlen oder „Jahreszeiten und Wetter“. Im Kopf der Leiste steht der gewählte Zeitraum („Das Jahr 2025“), **Zurücksetzen** hebt die Wahl auf. Ein Baustein behält seinen eigenen Zeitraum, wenn du in seinen Einstellungen **Zeitraum der Seite verwenden** abschaltest. Der gewählte Zeitraum steht in der Adresse der Seite; nach einer Änderung zeigt die Übersicht „geändert“ und **Ansicht speichern**, damit du die Wahl in der Ansicht behalten kannst. Mit einem Klick auf den Titel der Leiste klappst du sie ein. Die Statistik hat dafür ihre eigene Filterleiste, die zusätzlich den Knopf **Vorjahr** bietet ([Abschnitt 11.1](#k11)).
+Die Leiste **Zeitraum der Seite** ist **standardmäßig ausgeblendet**: Ohne Anpassung zeigt jeder Baustein seinen eigenen Zeitraum, die Übersicht sieht aus wie gewohnt. Du blendest sie über **Seite anpassen** mit dem Schalter **Zeitraum der Seite anzeigen** ein (gespeichert je Seite und Ansicht, wieder ausschaltbar). Ein gewählter Seitenzeitraum ist nie unsichtbar: Gilt einer (aus einer Adresse mit `?z=…`, deiner letzten Wahl oder einer gespeicherten Ansicht), steht die Leiste immer da, und der Schalter ist dann gesperrt, bis du auf „Je Baustein“ zurückgesetzt hast.
+
+Eingeblendet steht ganz oben auf der Übersicht die einklappbare Leiste **Zeitraum der Seite** („Jeder Baustein zeigt seinen eigenen Zeitraum“). Mit **Alle**, **Dieses Jahr**, **Letzte 12 Monate**, **Vorjahr**, einer Jahresauswahl (**Jahr …**) und **Von–bis …** legst du einen gemeinsamen Zeitraum fest, der für alle Bausteine mit Zeitbezug gilt, zum Beispiel „Dein Jahr“, Eigene Kennzahlen oder „Jahreszeiten und Wetter“. Im Kopf der Leiste steht der gewählte Zeitraum („Das Jahr 2025“), **Zurücksetzen** hebt die Wahl auf. Ein Baustein behält seinen eigenen Zeitraum, wenn du in seinen Einstellungen **Zeitraum der Seite verwenden** abschaltest. Der gewählte Zeitraum steht in der Adresse der Seite; nach einer Änderung zeigt die Übersicht „geändert“ und **Ansicht speichern**, damit du die Wahl in der Ansicht behalten kannst. Mit einem Klick auf den Titel der Leiste klappst du sie ein. Auf dem Handy steht statt der Leiste der Chip **Zeitraum: …** in der Werkzeugzeile. Die Statistik hat dafür ihre eigene Filterleiste, die zusätzlich den Knopf **Vorjahr** bietet ([Abschnitt 11.1](#k11)).
 
 ![Übersicht mit hervorgehobener Leiste „Zeitraum der Seite“, Vorjahr gewählt](handbuch/bilder/01b-uebersicht-zeitraum.png)
 
-*Abbildung 9: Die Leiste „Zeitraum der Seite“ (rot umrandet). Gewählt ist „Vorjahr“: „Dein Jahr“ zeigt jetzt 2025.*
+*Abbildung 9: Die Leiste „Zeitraum der Seite“ (rot umrandet), eingeblendet über Seite anpassen. Gewählt ist „Vorjahr“: „Dein Jahr“ zeigt jetzt 2025.*
+
+**Was ist das? Die Erklärung in der App.** Beim Schalter in „Seite anpassen“ (**Was ist das?**) und in der Leiste selbst (**ⓘ Hilfe**, mit `aria-expanded`) klappt dieselbe kurze Erklärung auf:
+
+* Ein Zeitraum für alle Bausteine der Seite, die mit Zeit zu tun haben, statt für jeden Baustein einzeln.
+* Ein Baustein behält seinen eigenen Zeitraum, wenn du in seinen Einstellungen „Zeitraum der Seite verwenden“ abschaltest.
+* Bausteine ohne Zeitbezug, zum Beispiel „Heute vor X Jahren“ und die Erinnerungen, sind nicht betroffen.
+* Deine Auswahl merkt sich die App; „Ansicht speichern“ legt sie in der Ansicht ab. Die Adresse mit `?z=…` lässt sich teilen und blendet die Leiste ein.
+
+In den Einstellungen eines Bausteins steht unter **Zeitraum der Seite verwenden**, was gerade gilt („Gerade gilt: 2025 von der Seite“ oder „Dieser Baustein nutzt seinen eigenen Zeitraum“).
 
 ![Übersicht](handbuch/bilder/01-uebersicht.png)
 
@@ -754,6 +765,8 @@ In der Kopfzeile jedes Bausteins:
 
 *Abbildung 44: Statistik im Bearbeitungsmodus. Die untere Leiste (rot) enthält Rückgängig und Wiederholen, den Umschalter „Desktop | Handy“ und die Hauptfunktionen.*
 
+**Schalter über der Leiste (nur Übersicht):** Zwei Schalter schweben über der Leiste: **Schnell-Knopf zum Touren holen in der Kopfzeile** und **Zeitraum der Seite anzeigen** (blendet die Leiste „Zeitraum der Seite“ ein oder aus). Hinter **Was ist das?** steht eine kurze Erklärung ([Zeitraum der Seite](#k5)): ein gemeinsamer Zeitraum für alle Bausteine mit Zeitbezug; Bausteine, die „Zeitraum der Seite verwenden“ abgeschaltet haben, behalten ihren eigenen; Bausteine ohne Zeitbezug (zum Beispiel „Heute vor X Jahren“, Erinnerungen) sind nicht betroffen; die Adresse mit `?z=…` ist teilbar, „Ansicht speichern“ legt die Wahl in der Ansicht ab. Der Schalter gehört zur Ansicht (er steht im Layout, auch in Export, Layoutcode und Vorlagen) und ist Teil von Rückgängig und Wiederholen.
+
 ### 13.2 Bausteine hinzufügen
 
 1. **Baustein hinzufügen** anklicken.
@@ -1094,7 +1107,7 @@ Auch im Handy-Browser passt sich die Oberfläche an: unten die Leiste mit **Übe
 <img src="handbuch/bilder/49-handy-tour.png" width="230" alt="Handy: Tourdetail">
 </p>
 
-*Abbildung 69: Handy-Ansicht (390 px breit): Übersicht (mit der Leiste „Zeitraum der Seite“), Touren-Liste, Tourdetail.*
+*Abbildung 69: Handy-Ansicht (390 px breit): Übersicht (hier mit eingeblendeter Leiste „Zeitraum der Seite“, über Seite anpassen), Touren-Liste, Tourdetail.*
 
 <p align="center">
 <img src="handbuch/bilder/50-handy-hoehenprofil.png" width="230" alt="Handy: Höhenprofil und Herzfrequenz">
@@ -1234,7 +1247,7 @@ Laut Projektbeschreibung kann sie unter anderem: Touren mit Karte und Höhenprof
 | **Ansicht** | Eine gespeicherte Anordnung einer anpassbaren Seite (z. B. „Wandern“). |
 | **Layoutcode** | Kurzer Text, der eine Ansicht beschreibt und sich per Nachricht weitergeben lässt (beginnt mit `MTA1.`). |
 | **Gruppe** | Mehrere Bausteine als einklappbarer Abschnitt mit eigenem Titel. |
-| **Zeitraum der Seite** | Gemeinsamer Zeitraum für alle Bausteine der Übersicht mit Zeitbezug. |
+| **Zeitraum der Seite** | Gemeinsamer Zeitraum für alle Bausteine der Übersicht mit Zeitbezug; die Leiste ist standardmäßig ausgeblendet und lässt sich über Seite anpassen einblenden. |
 | **Baustein** | Ein Abschnitt einer Seite, den du verschieben, ausblenden, einklappen und in der Breite ändern kannst. |
 | **BRouter** | Routing-Dienst für die Tourplanung. |
 | **Eigene Kennzahl** | Ein von dir zusammengestellter Wert (z. B. Höhenmeter je km). |

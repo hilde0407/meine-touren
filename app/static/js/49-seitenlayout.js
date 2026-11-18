@@ -369,12 +369,33 @@ function slSetHolen(on) {
   slApply();
   slLive(on ? "Schnell-Knopf zum Touren holen: an" : "Schnell-Knopf zum Touren holen: aus");
 }
+/* 3.37.2 Schalter „Zeitraum der Seite anzeigen“ (Layout-Feld zrbar, Standard aus; nur die Abweichung steht im Dokument). Gilt ein Zeitraum (Adresse, zuletzt gewählt, Ansicht), ist die Leiste ohnehin sichtbar: der Schalter steht dann an und ist gesperrt. */
+function slSetZr(on) {
+  const st = slDocOf("uebersicht");
+  if (on) st.zrbar = true;
+  else {
+    delete st.zrbar;
+    if (typeof ZR !== "undefined") ZR.sess.uebersicht = false;
+  }
+  slTouch(SL_PAGE_KEY.uebersicht);
+  slApply();
+  slLive(on ? "Zeitraum der Seite: Leiste eingeblendet" : "Zeitraum der Seite: Leiste ausgeblendet");
+}
 function slKopfSync() {
-  const l = document.getElementById("slkopf");
+  const l = document.getElementById("slkopf"), w = document.getElementById("slsw");
   if (!l) return;
   l.hidden = SL.fam !== "uebersicht";
+  if (w) w.hidden = l.hidden;
   const i = l.querySelector("input");
   if (i) i.checked = slHolenOn();
+  const z = document.getElementById("slzrin");
+  if (z && typeof zrOn === "function") {
+    const f = !!ZR.F.uebersicht;
+    z.checked = zrOn("uebersicht");
+    z.disabled = f;
+    const n = document.getElementById("slzrnote");
+    if (n) n.hidden = !f;
+  }
   slBarH();
 }
 const slSet = (st, name, id, on) => {
@@ -1072,7 +1093,11 @@ function slBar(on) {
     `<div class="slsr" id="sllive" aria-live="polite" aria-atomic="true"></div>` +
     `<p class="slbi"><b>Seite anpassen</b><span class="slvn" id="slvn"></span><span class="slsaved" id="slsaved" role="status" aria-live="polite"></span><span class="slchg" id="slchg" hidden>Ungespeicherte Änderungen</span></p>` +
     `<div class="slbt" id="slbt">${slHistHtml()}${slDevHtml()}</div>` +
-    `<label class="slkopf" id="slkopf" hidden><input type="checkbox" id="slkopfin" data-opt="holen"><span>Schnell-Knopf zum Touren holen in der Kopfzeile</span></label>` +
+    `<div class="slsws" id="slsw" hidden><label class="slkopf" id="slkopf" hidden><input type="checkbox" id="slkopfin" data-opt="holen"><span>Schnell-Knopf zum Touren holen in der Kopfzeile</span></label>` +
+    `<div class="slzr" id="slzr"><label class="slzrl"><input type="checkbox" id="slzrin" aria-describedby="slzrnote"><span>Zeitraum der Seite anzeigen</span></label>` +
+    `<button type="button" class="slzrh" id="slzrhb" aria-expanded="false" aria-controls="slzrhelp">Was ist das?</button>` +
+    `<p class="mut slzrnote" id="slzrnote" hidden>Ein Zeitraum ist gewählt, die Leiste bleibt sichtbar. Setze ihn auf „Je Baustein“ zurück, um sie auszublenden.</p>` +
+    `<div class="slzrhelp" id="slzrhelp" role="region" aria-label="Zeitraum der Seite" hidden>${typeof zrHelpHtml === "function" ? zrHelpHtml() : ""}</div></div></div>` +
     `<div class="slbb"><button type="button" class="btn ghost sm" data-a="views" aria-haspopup="dialog">Ansichten</button><button type="button" class="btn ghost sm" data-a="add" aria-label="Baustein hinzufügen"><span class="slfu">Baustein hinzufügen</span><span class="slsh" aria-hidden="true">+ Baustein</span></button>` +
     `<button type="button" class="btn ghost sm slmorebtn" data-a="more" aria-haspopup="true" aria-expanded="false" aria-label="Weitere Aktionen" title="Weitere Aktionen">⋯</button>` +
     `<span class="slbmo"><button type="button" class="btn ghost sm" data-a="reset">Standard wiederherstellen</button><button type="button" class="btn ghost sm" data-a="savenew" aria-haspopup="dialog">Als neue Ansicht speichern …</button><button type="button" class="btn ghost sm" data-a="discard">Verwerfen</button></span>` +
@@ -1084,7 +1109,7 @@ function slBar(on) {
 /* 3.24.0 Abstand am Seitenfuß = Höhe der Leiste (die Leiste ist je nach Breite unterschiedlich hoch), damit nichts dahinter verschwindet */
 function slBarH() {
   const b = document.getElementById("slbar");
-  const k = document.getElementById("slkopf");                                   // 3.31.0: der Schalter schwebt über der Leiste und macht sie nicht höher; Platz am Seitenfuß aber mitrechnen
+  const k = document.getElementById("slsw");                                     // 3.31.0: der Schalter schwebt über der Leiste und macht sie nicht höher; Platz am Seitenfuß aber mitrechnen (3.37.2: beide Schalter)
   if (b) document.body.style.setProperty("--slbh", b.offsetHeight + (k && !k.hidden ? k.offsetHeight + 8 : 0) + "px");
   else document.body.style.removeProperty("--slbh");
 }
@@ -1535,9 +1560,19 @@ document.addEventListener("click", e => {
   else if (a === "del")
     uiConfirm({title: "Baustein entfernen?", text: `„${slTitle(id)}“ wird von dieser Seite entfernt.`, ok: "Entfernen", danger: true}).then(ok => ok && slRemoveWidget(id));
 });
+document.addEventListener("click", e => {
+  const h = e.target.closest && e.target.closest("#slzrhb");
+  if (!h) return;
+  const open = h.getAttribute("aria-expanded") !== "true", p = document.getElementById("slzrhelp");
+  h.setAttribute("aria-expanded", String(open));
+  if (p) p.hidden = !open;
+  slBarH();
+});
 document.addEventListener("change", e => {
   const k = e.target.closest && e.target.closest("#slkopfin");
   if (k) return slSetHolen(k.checked);
+  const z = e.target.closest && e.target.closest("#slzrin");
+  if (z) return slSetZr(z.checked);
   const c = e.target.closest && e.target.closest(".slst input[data-a=open]");
   if (c) slSetOpen(c.closest(".slit").dataset.sl, c.checked);
 });

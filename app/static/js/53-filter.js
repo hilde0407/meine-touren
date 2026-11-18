@@ -122,7 +122,7 @@ function flField(f, cfg, i) {
   }
   if (f.kind === "global")
     return `<div class="slfs"><label class="slck"><input type="checkbox" name="f${i}" data-global${f.zr ? " data-zr" : ""}${cfg.eigen === true ? "" : " checked"}><span>${esc(f.label || "Globalen Filter verwenden")}</span></label>` +
-      (f.zr ? '<p class="mut slgh">Ist oben auf der Seite ein Zeitraum gewählt, gilt er hier. Ohne Haken behält dieser Baustein seinen eigenen Zeitraum.</p></div>' : '<p class="mut slgh">Gilt der Filter oben auf der Seite, sind Aktivität und Zeitraum hier nicht einstellbar.</p></div>');
+      (f.zr ? '<p class="mut slgh">Ist oben auf der Seite ein Zeitraum gewählt, gilt er hier. Ohne Haken behält dieser Baustein seinen eigenen Zeitraum.</p><p class="mut slgh zrnow" data-zrnow role="status"></p></div>' : '<p class="mut slgh">Gilt der Filter oben auf der Seite, sind Aktivität und Zeitraum hier nicht einstellbar.</p></div>');
   if (f.kind === "compare")
     return `<div class="slfs"><label class="slck"><input type="checkbox" name="f${i}"${cfg.compare === false ? "" : " checked"}><span>${esc(f.label || "Mit dem Vorjahr vergleichen")}</span></label></div>`;
   return `<div class="slfs"><label for="${id}">${esc(f.label || "Eigener Titel (optional)")}</label><input id="${id}" name="f${i}" type="text" maxlength="60" autocomplete="off" value="${esc(cfg.title || "")}" placeholder="${esc(f.ph || "")}"></div>`;
@@ -163,9 +163,15 @@ function flBind(form) {
     x.classList.toggle("sl-gdis", off);
     x.querySelectorAll("input,select").forEach(i => (i.disabled = off));
   });
+  const now = form.querySelector("[data-zrnow]");                                           // 3.37.2: Hilfstext „Gerade gilt: 2025 von der Seite“
+  const say = () => {
+    if (now && gl && typeof zrNowText === "function") now.textContent = zrNowText(!gl.checked);
+  };
   if (gl) {
     gl.addEventListener("change", sync);
+    gl.addEventListener("change", say);
     sync();
+    say();
   }
   form.addEventListener("change", e => {
     const ch = e.target.closest && e.target.closest(".flchip input");

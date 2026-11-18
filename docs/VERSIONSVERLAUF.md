@@ -2,6 +2,14 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.37.2 – Zeitraum der Seite standardmäßig ausgeblendet, mit Erklärung
+
+- Die Leiste „Zeitraum der Seite“ der Übersicht ist standardmäßig aus (Bausteine nutzen ihren eigenen Zeitraum); Schalter „Zeitraum der Seite anzeigen“ in „Seite anpassen“, je Ansicht gespeichert (Layout-Feld `zrbar`).
+- Ein wirksamer Seitenzeitraum (Adresse `?z=…`, zuletzt gewählt, in der Ansicht gespeichert) blendet die Leiste immer ein.
+- Erklärung in der App: „Was ist das?“ beim Schalter, „Hilfe“ in der Leiste, „Gerade gilt: …“ in den Baustein-Einstellungen; Handbuch ergänzt.
+
+Einzelheiten: [docs/versionen/3.37.2.md](versionen/3.37.2.md)
+
 ## Version 3.37.1 – Mobilansicht: schlanke Werkzeugzeile, ruhige Karte
 
 - Karte (Handy): Die Bedienfelder wurden nach dem Laden höher (Reihe von 54 auf 110 px), weil „Seite anpassen / Ansichten“ erst spät als zweizeiliger Kasten in die Reihe kam. Jetzt ein einzeiliger Kasten, kein Höhensprung mehr.

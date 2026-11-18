@@ -62,6 +62,13 @@ def _api(url, key, method="GET", body=None):
         return json.loads(r.read() or b"{}")
 
 
+def _zr_on(url):
+    """3.37.2: Die Leiste „Zeitraum der Seite“ ist standardmäßig aus; Tests, die sie brauchen, schalten sie über das Layout (Feld zrbar) ein, ohne den übrigen Inhalt zu verändern."""
+    lay = dict(_api(url, "uebersicht").get("layout") or {})
+    lay["zrbar"] = True
+    _api(url, "uebersicht", "PUT", lay)
+
+
 @pytest.fixture(autouse=True)
 def clean(app):
     for k in KEYS:
