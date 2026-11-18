@@ -59,6 +59,8 @@ def test_zeigt_die_ziele_des_jahres_mit_balken_und_klappt_ein(pw, goals):
         # Jahr „letztes Jahr“ über die Einstellung
         _api(goals, "uebersicht", "PUT", {"v": 1, "widgets": [{"id": "wz", "type": "jahresziele", "cfg": {"year": "last"}}]})
         pg.reload()
+        pg.wait_for_selector("#tlw-wz details", state="attached", timeout=T)
+        pg.evaluate("() => { const d = document.querySelector('#tlw-wz details'); if (d) d.open = true; }")
         pg.wait_for_selector("#tlw-wz .goal", timeout=T)
         assert pg.locator("#tlw-wz summary").inner_text().startswith(f"Ziele {YEAR - 1}") and pg.locator("#tlw-wz .goal").count() == 1
         assert not pg.errors, pg.errors

@@ -227,7 +227,8 @@ def test_key_statement_first_run_and_missing_time_of_current(pw, apps):
     pg = _page(pw, apps["full"], "tour/r3/auswertung", "#aehncard")
     try:
         assert "6 Wiederholungen" in pg.locator("#aehncard summary").inner_text() and "Tempo" not in pg.locator("#aehncard summary").inner_text()
-        pg.locator("#aehncard summary").click()
+        pg.wait_for_function("() => !!document.querySelector('#aehncard details, details#aehncard')", timeout=15000)
+        pg.evaluate("() => { const d = document.querySelector('#aehncard'); const x = d.tagName === 'DETAILS' ? d : d.querySelector('details'); if (x) x.open = true; }")
         pg.wait_for_function("() => (document.querySelector('#aehncard')||{innerText:''}).innerText.includes('keinen Tempovergleich')", timeout=15000)
         assert "keinen Tempovergleich" in pg.locator("#aehncard").inner_text() and pg.locator("#aehncard .aedot.cur").count() == 0 and pg.locator("#aehncard .aedot").count() == 6
         assert not pg.errors, pg.errors
