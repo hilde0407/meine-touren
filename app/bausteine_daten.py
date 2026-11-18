@@ -390,9 +390,21 @@ def api_ausruestung():
 
 
 @router.get("/api/bausteine/geplant")
-def api_geplant():
-    rows = db.query("SELECT id,name,sport,km,up,est_h,ts FROM plans ORDER BY ts DESC LIMIT 20")
-    return [{"id": r["id"], "name": r["name"] or "", "sport": r["sport"], "km": r["km"], "up": r["up"], "est_h": r["est_h"], "ts": r["ts"]} for r in rows]
+def api_geplant(gegangen: str = "0"):
+    """Offene Pläne (Status „geplant“). Mit gegangen=1 zusätzlich gegangene Pläne samt gelaufener Tour (Datum, Soll/Ist); verworfene Pläne nie (3.38.1)."""
+    if gegangen not in ("0", "1"):
+        raise HTTPException(400, "„gegangen“ muss 0 oder 1 sein")
+    stat = ("geplant", "gegangen") if gegangen == "1" else ("geplant",)
+    rows = db.query(f"SELECT id,name,sport,km,up,est_h,ts,status,tour_id FROM plans WHERE status IN ({','.join('?' * len(stat))}) ORDER BY ts DESC LIMIT 20", stat)
+    out = []
+    for r in rows:
+        x = {"id": r["id"], "name": r["name"] or "", "sport": r["sport"], "km": r["km"], "up": r["up"], "est_h": r["est_h"], "ts": r["ts"], "status": r["status"]}
+        if r["status"] == "gegangen":                          # verknüpfte Tour nur, wenn es sie noch gibt (sonst bleibt es bei „gegangen“ ohne Datum und ohne Vergleich)
+            t = db.one("SELECT id,start_ts,dist_m,dur_s,up_m FROM tours WHERE id=?", (r["tour_id"],)) if r["tour_id"] else None
+            x["tour"] = {"id": t["id"], "start_ts": t["start_ts"], "km": round(t["dist_m"] / 1000.0, 2) if t["dist_m"] else None, "h": round(t["dur_s"] / 3600.0, 3) if t["dur_s"] else None,
+                         "up": round(t["up_m"]) if t["up_m"] is not None else None} if t else None
+        out.append(x)
+    return out
 
 
 # ------------------------------------------------------------------------------------------------ 3.19.0 Zeitraum und Aktivität

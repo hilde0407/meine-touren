@@ -768,9 +768,10 @@ Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen 
   const ATTR = ["placeholder", "title", "aria-label", "alt"];
   let busy = false;
   const doNode = n => {
-    if (n.nodeType === 3) { const v = n.nodeValue; const r = tr(v); if (r !== v) n.nodeValue = r; return; }
+    if (n.nodeType === 3) { const v = n.nodeValue; const r = tr(v); if (r !== v) { const h = n.parentNode; if (h && h.tagName === "H2" && h.childNodes.length === 1) h.dataset.de = v.trim(); n.nodeValue = r; } return; }
     if (n.nodeType !== 1) return;
     if (/^(SCRIPT|STYLE|TEXTAREA|CODE|PRE)$/.test(n.tagName)) return;
+    if (n.tagName === "H2" && !n.dataset.de) n.dataset.de = n.textContent.trim();     // deutscher Originaltitel (stabiler Schlüssel, z. B. für die Reiter der Verwaltung)
     for (const a of ATTR) if (n.hasAttribute && n.hasAttribute(a)) { const v = n.getAttribute(a), r = tr(v); if (r !== v) n.setAttribute(a, r); }
     if (n.tagName === "INPUT" && /^(button|submit)$/.test(n.type) && n.value) { const r = tr(n.value); if (r !== n.value) n.value = r; }
     n.childNodes.forEach(doNode);

@@ -487,7 +487,7 @@ def test_empty_states_dash_widgets(pw, app):
         r = pg.evaluate(EMPTY, [NEW_DASH, "r3", True])
         bad = {k: v for k, v in r.items() if not v or v.startswith("FEHLER") or "Wird geladen" in v}
         assert not bad, bad
-        assert r["uhrenzeit"].startswith("Noch kein Gerät") and r["ausruestung"] == "Noch keine Ausrüstung angelegt." and r["geplant"].startswith("Keine geplanten Touren")
+        assert r["uhrenzeit"].startswith("Noch kein Gerät") and r["ausruestung"] == "Noch keine Ausrüstung angelegt." and r["geplant"].startswith("Keine offenen Pläne")
         assert r["heatmap"] == "Noch keine Touren." and r["jahresziel"] != "" and "Noch keine Tour in diesem Jahr" in r["jahresziel"]
         assert r["orte"].startswith("Noch keine Regionen bestimmt") and r["rueckblick"].startswith("Im Jahr ")
         assert not pg.errors, pg.errors

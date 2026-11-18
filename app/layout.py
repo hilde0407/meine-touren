@@ -364,6 +364,11 @@ def _cfg(v, typ=None):
         if k in KNOWN:
             out[k] = _known(k, x)
             continue
+        if typ == "geplant" and k == "gegangen":          # 3.38.1: „Gegangene Pläne auch zeigen“ (Baustein „Geplante Touren“), nur Ja/Nein
+            if not isinstance(x, bool):
+                raise HTTPException(400, "Ungültiger Wert für „gegangen“ in der Konfiguration")
+            out[k] = x
+            continue
         if isinstance(x, str):
             if len(x) > MAX_TEXT:
                 raise HTTPException(400, "Text zu lang")

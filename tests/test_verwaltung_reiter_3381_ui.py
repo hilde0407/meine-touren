@@ -1,0 +1,128 @@
+"""3.38.1 Verwaltung: jede Karte liegt in jeder Sprache (de/en/fr/es) im erwarteten Reiter. Der erwartete Reiter steht als feste Liste im Test (Karten über id bzw. deutschen Originaltitel erkannt).
+Synchronisation nur über wait_for_function (Pfeilfunktionen) und expect(..., timeout=15000); keine festen Pausen. Mit TS_SHOTS=<Ordner> werden Screenshots abgelegt."""
+import os
+import socket
+import subprocess
+import sys
+import tempfile
+import time
+import urllib.request
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parent.parent
+pw_api = pytest.importorskip("playwright.sync_api")
+expect = pw_api.expect
+TL = 15000
+
+# Reiterkennung -> Karten (Kennung: #id oder deutscher Titel der Überschrift)
+ERWARTET = {
+    "uebersicht": ["#hlt", "#upd", "Selbsttest", "Protokoll", "#homep", "Entwicklermodus"],
+    "quellen": ["#devsec", "Komoot (optional)", "Zepp-Import (optional)", "Garmin, Suunto & andere Uhren (Import)", "Wanderführer (z. B. Rother)"],
+    "weitergabe": ["Portale (Upload)", "#brpanel"],
+    "fotos": ["Fotos", "Foto-Eingang"],
+    "auto": ["Automatik", "Benachrichtigung (optional)"],
+    "handy": ["#livebox", "#rescue", "#handy"],
+    "sicher": ["Sicherung", "#uipw", "#offprep"],
+}
+# Deutscher Originaltitel -> Überschrift in der Sprache (nur Stichproben für die Übersetzung selbst)
+TITEL = {
+    "en": {"Sicherung": "Backup", "Fotos": "Photos", "Automatik": "Automation", "Selbsttest": "Self-test", "Protokoll": "Log"},
+    "fr": {"Sicherung": "Sauvegarde", "Fotos": "Photos", "Automatik": "Automatisation", "Selbsttest": "Autotest", "Protokoll": "Journal"},
+    "es": {"Sicherung": "Copia de seguridad", "Fotos": "Fotos", "Automatik": "Automatización", "Selbsttest": "Autodiagnóstico", "Protokoll": "Registro"},
+}
+KARTEN = """() => [...document.querySelectorAll('.atab')].map(s => [s.dataset.t, [...s.querySelectorAll(':scope > .gbody > *')].map(e => e.id ? '#' + e.id : (() => { const h = e.querySelector(':scope > h2'); return h ? (h.dataset.de || h.textContent).trim() : '?'; })())])"""
+VOLL = """(erw) => { const t = document.querySelectorAll('.atab'); if (t.length !== 7) return false; const have = new Set([...document.querySelectorAll('.atab > .gbody > *')].map(e => e.id ? '#' + e.id : (((e.querySelector(':scope > h2') || {}).dataset || {}).de || ((e.querySelector(':scope > h2') || {}).textContent || '')).trim())); return erw.every(k => have.has(k)); }"""
+
+
+@pytest.fixture(scope="module")
+def app():
+    d = Path(tempfile.mkdtemp(prefix="vr3381"))
+    env = dict(os.environ, DATA_DIR=str(d / "data"), PHOTOS_DIR=str(d / "p"), BACKUP_DIR=str(d / "b"), MT_NO_SCHEDULER="1")
+    s = socket.socket(); s.bind(("127.0.0.1", 0)); port = s.getsockname()[1]; s.close()
+    pr = subprocess.Popen([sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(port)], cwd=ROOT, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    url = f"http://127.0.0.1:{port}"
+    for _ in range(100):
+        try:
+            urllib.request.urlopen(url + "/api/version", timeout=1)
+            break
+        except Exception:
+            time.sleep(0.2)
+    yield url
+    pr.terminate()
+    try:
+        pr.wait(10)
+    except subprocess.TimeoutExpired:
+        pr.kill(); pr.wait(5)
+
+
+@pytest.fixture(scope="module")
+def pw():
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as p:
+        yield p
+
+
+def _admin(pw, url, lang, tab=None, width=1280, height=1000):
+    b = pw.chromium.launch()
+    ctx = b.new_context(locale={"de": "de-DE", "en": "en-GB", "fr": "fr-FR", "es": "es-ES"}[lang], viewport={"width": width, "height": height}, reduced_motion="reduce")
+    ctx.add_init_script("try { localStorage.setItem('lang', %r); localStorage.removeItem('admtab'); } catch (e) {}" % lang)
+    pg = ctx.new_page()
+    pg.errors = []
+    pg.on("pageerror", lambda e: pg.errors.append(str(e)))
+    pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(url) else r.continue_())
+    pg.browser_ = b
+    pg.goto(f"{url}/#/admin" + (f"?tab={tab}" if tab else ""))
+    alle = [k for v in ERWARTET.values() for k in v]
+    pg.wait_for_function(VOLL, arg=alle, timeout=TL)
+    try:
+        pg.wait_for_load_state("networkidle", timeout=8000)
+    except Exception:
+        pass
+    pg.wait_for_function(VOLL, arg=alle, timeout=TL)
+    return pg
+
+
+@pytest.mark.parametrize("lang", ["de", "en", "fr", "es"])
+def test_jede_karte_im_erwarteten_reiter(pw, app, lang):
+    pg = _admin(pw, app, lang)
+    try:
+        ist = {t: sorted(k) for t, k in pg.evaluate(KARTEN)}
+        assert ist == {t: sorted(k) for t, k in ERWARTET.items()}, (lang, ist)
+        assert pg.locator("#atabs button").count() == 7 and pg.locator("#atabs button.on").count() == 1
+        assert not pg.errors, pg.errors
+    finally:
+        pg.browser_.close()
+
+
+@pytest.mark.parametrize("lang", ["en", "fr", "es"])
+def test_ueberschriften_uebersetzt_und_reiter_beschriftet(pw, app, lang):
+    pg = _admin(pw, app, lang)
+    try:
+        for de, fremd in TITEL[lang].items():
+            h = pg.locator(f'.atab h2[data-de="{de}"]')
+            expect(h).to_have_text(fremd, timeout=TL)
+        # Reiternamen sind übersetzt (nicht mehr deutsch), und Karten sind nicht unübersetzt deutsch
+        namen = pg.locator("#atabs button").all_inner_texts()
+        assert "Übersicht" not in namen and "Fotos" not in namen[:1] and len(set(namen)) == 7, namen
+        assert pg.locator('.atab[data-t="weitergabe"] h2[data-de="Portale (Upload)"]').inner_text().startswith(("Portals", "Portails", "Portales")), lang
+    finally:
+        pg.browser_.close()
+
+
+def test_sicherung_englisch_sichtbar_im_reiter_sicherung(pw, app):
+    pg = _admin(pw, app, "en", tab="sicher")
+    try:
+        tab = pg.locator('.atab[data-t="sicher"]')
+        expect(tab).to_be_visible(timeout=TL)
+        expect(tab.locator('h2[data-de="Sicherung"]')).to_have_text("Backup", timeout=TL)
+        expect(pg.locator('.atab[data-t="uebersicht"]')).to_be_hidden(timeout=TL)
+        assert pg.locator('.atab[data-t="uebersicht"] h2[data-de="Sicherung"]').count() == 0
+        d = os.environ.get("TS_SHOTS")
+        if d:
+            Path(d).mkdir(parents=True, exist_ok=True)
+            tab.scroll_into_view_if_needed()
+            pg.screenshot(path=str(Path(d) / "verwaltung-en-sicherung.png"), full_page=False, timeout=60000)
+    finally:
+        pg.browser_.close()

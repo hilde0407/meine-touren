@@ -322,15 +322,25 @@ Object.assign(window.SL_WT, {
     },
   },
   geplant: {
-    fam: "uebersicht", cat: "plan", icon: "map", name: "Geplante Touren", title: () => "Geplante Touren",
-    desc: "Die zuletzt geplanten Touren mit Länge, Höhenmetern und geschätzter Dauer, mit Link zur Planung.",
+    fam: "uebersicht", cat: "plan", icon: "map", name: "Geplante Touren", title: () => "Geplante Touren", defaults: {},
+    desc: "Die offenen Pläne (noch nicht gegangen) mit Länge, Höhenmetern und geschätzter Dauer, mit Link zur Planung. Auf Wunsch auch gegangene Pläne mit dem Vergleich von geplanter und gelaufener Zeit. Verworfene Pläne erscheinen nie.",
+    fields: [{k: "gegangen", kind: "bool", label: "Gegangene Pläne auch zeigen"}],
     preview: () => slPrev('<ul class="sllist"><li><b>Gipfelweg</b><span>8,0 km · 900 m</span></li><li><b>Rund um den See</b><span>12,5 km</span></li></ul>'),
-    async render(c, b) {
-      const L = await slGet("/api/bausteine/geplant"), can = typeof isViewer === "function" ? !isViewer() : true;
-      if (!L || !L.length) return (b.innerHTML = `<p class="mut slnone">Keine geplanten Touren.</p>${can ? '<p><a href="#/plan">Tour planen ›</a></p>' : ""}`);
-      b.innerHTML = `<ul class="sllist">${L.slice(0, 5).map(p => `<li>${can ? `<a href="#/plan/${p.id}">${esc(p.name || "Ohne Namen")}</a>` : `<b>${esc(p.name || "Ohne Namen")}</b>`}<span class="mut">${[p.km != null ? slKm(p.km) : "", p.up ? slHm(p.up) : "", p.est_h ? slDur(p.est_h * 3600) : ""].filter(Boolean).join(" · ")}</span></li>`).join("")}</ul>` +
-        (can ? '<p><a href="#/plan">Tour planen ›</a></p>' : "");
-      slBadge(c, L.length === 1 ? "1 Plan" : `${L.length} Pläne`);
+    async render(c, b, cfg) {
+      const mit = !!(cfg && cfg.gegangen === true), L = await slGet("/api/bausteine/geplant" + (mit ? "?gegangen=1" : "")), can = typeof isViewer === "function" ? !isViewer() : true;
+      if (!L || !L.length) return (b.innerHTML = `<p class="mut slnone">Keine offenen Pläne.</p>${can ? '<p><a href="#/plan">Tour planen ›</a></p>' : ""}`);
+      const row = p => {
+        const done = p.status === "gegangen", t = done ? p.tour : null,
+          nm = can ? `<a href="#/plan/${p.id}">${esc(p.name || "Ohne Namen")}</a>` : `<b>${esc(p.name || "Ohne Namen")}</b>`,
+          vals = [p.km != null ? slKm(p.km) : "", p.up ? slHm(p.up) : "", p.est_h ? slDur(p.est_h * 3600) : ""].filter(Boolean).join(" · ");
+        if (!done) return `<li>${nm}<span class="mut">${vals}</span></li>`;
+        const cmp = t && p.est_h && t.h ? `<span>geplant ${hmm(p.est_h)} Std.</span> · <span>gelaufen ${hmm(t.h)} Std. (${hmSigned(t.h - p.est_h)})</span>`
+          : t && p.km && t.km ? `<span>Strecke: geplant ${nf(p.km, 1)} km, gelaufen ${nf(t.km, 1)} km (${nSigned(t.km - p.km, 1)} km)</span>` : "";
+        return `<li class="slgone">${nm}<span class="mut"><span aria-hidden="true">✓</span> ${t && t.start_ts ? `gegangen am ${esc(planDate(t.start_ts))}` : "gegangen"}</span>${cmp ? `<small class="mut slgcmp">${cmp}</small>` : ""}</li>`;
+      };
+      b.innerHTML = `<ul class="sllist">${[...L.filter(p => p.status !== "gegangen"), ...L.filter(p => p.status === "gegangen")].slice(0, 5).map(row).join("")}</ul>` + (can ? '<p><a href="#/plan">Tour planen ›</a></p>' : "");
+      const open = L.filter(p => p.status !== "gegangen").length;
+      slBadge(c, open === 1 ? "1 Plan" : open ? `${open} Pläne` : "");
     },
   },
   jahresziele: {

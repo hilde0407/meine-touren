@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.38.1 – Fehlerbehebung: Verwaltungs-Reiter in allen Sprachen, Baustein „Geplante Touren“
+
+- Verwaltung: Die Karten landeten in der englischen, französischen und spanischen Oberfläche großteils im Reiter „Übersicht“ (Zuordnung über deutsche Titel, die schon übersetzt waren). Jetzt sprachunabhängig über den deutschen Originaltitel (`data-de`); alle Karten sind in de/en/fr/es im selben Reiter.
+- Baustein „Geplante Touren“: zeigt nur offene Pläne; neue Einstellung „Gegangene Pläne auch zeigen“ (Standard aus) mit „gegangen am …“ und Soll/Ist-Zeit; verworfene nie; Leer-Zustand „Keine offenen Pläne.“
+
+Einzelheiten: [docs/versionen/3.38.1.md](versionen/3.38.1.md)
+
 ## Version 3.38.0 – Sicher planen
 
 - Sicherung robust: Platzprüfung, `.part`-Datei, ZIP- und Datenbankprüfung, atomares Umbenennen; Fehler sichtbar, gute Sicherungen bleiben; eine Warnschwelle (36 h); Fehler der Sicherung vor dem Update werden gemeldet.

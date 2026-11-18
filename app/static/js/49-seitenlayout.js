@@ -1463,6 +1463,10 @@ function slCfgDialog(id) {
       FS.forEach((f, i) => {
         if (FL_KINDS.has(f.kind)) flRead(f, form, i, out);
         else if (f.kind === "checks") out[f.k] = [...form.querySelectorAll(`input[name="f${i}"]:checked`)].map(x => x.value);
+        else if (f.kind === "bool") {
+          if (form.querySelector(`input[name="f${i}"]`).checked) out[f.k] = true;
+          else delete out[f.k];                                            // Standard (aus) nicht speichern
+        }
         else if (f.kind === "radio") {
           const v = (form.querySelector(`input[name="f${i}"]:checked`) || {}).value || cfg[f.k] || f.def;
           out[f.k] = f.num ? +v : v;
@@ -1509,6 +1513,8 @@ function slField(f, cfg, i) {
   if (FL_KINDS.has(f.kind)) return flField(f, cfg, i);
   if (f.kind === "checks")
     return `<fieldset class="slfs"><legend>${esc(f.label)}</legend><div class="flchips">${f.options.map(([v, l]) => `<label class="flchip"><input type="checkbox" name="f${i}" value="${v}"${(cfg[f.k] || f.def || []).includes(v) ? " checked" : ""}><span>${esc(l)}</span></label>`).join("")}</div><p class="slerr" role="alert"></p></fieldset>`;
+  if (f.kind === "bool")
+    return `<fieldset class="slfs"><div class="flchips"><label class="flchip"><input type="checkbox" name="f${i}"${cfg[f.k] === true ? " checked" : ""}><span>${esc(f.label)}</span></label></div></fieldset>`;
   if (f.kind === "radio")
     return `<fieldset class="slfs"><legend>${esc(f.label)}</legend><div class="flchips">${f.options.map(([v, l]) => `<label class="flchip"><input type="radio" name="f${i}" value="${v}"${String(cfg[f.k] ?? f.def) === String(v) ? " checked" : ""}><span>${esc(l)}</span></label>`).join("")}</div></fieldset>`;
   if (f.kind === "number")

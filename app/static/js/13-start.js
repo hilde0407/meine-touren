@@ -35,7 +35,11 @@ VIEWS.admin = async (...a) => {
     save = $("#save"),
     q = a[1];
   if (!save || $("#atabs")) return;
-  const title = p => ((p.querySelector(":scope > h2") || {}).textContent || "").trim();
+  /* Reiter-Zuordnung über den deutschen Originaltitel: die Übersetzung (00-i18n.js) merkt ihn sich in data-de der Überschrift, bevor sie den Text ersetzt */
+  const title = p => {
+    const h = p.querySelector(":scope > h2");
+    return h ? (h.dataset.de || h.textContent || "").trim() : "";
+  };
   const panels = [...main.querySelectorAll(".panel")].filter(p => p.querySelector(":scope > h2"));
   const used = new Set();
   const secs = ADM_TABS.map(([id, name, intro, keys]) => {

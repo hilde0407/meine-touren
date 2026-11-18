@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.38.1](3.38.1.md) – Fehlerbehebung: Verwaltungs-Reiter in allen Sprachen, Baustein „Geplante Touren“ nur mit offenen Plänen
 - [3.38.0](3.38.0.md) – Sicher planen: Sicherung prüfen, Machbarkeits-Check, Plan mit gelaufener Tour verknüpfen
 - [3.37.2](3.37.2.md) – Zeitraum der Seite standardmäßig ausgeblendet, mit Erklärung
 - [3.37.1](3.37.1.md) – Mobilansicht: schlanke Werkzeugzeile, ruhige Karte

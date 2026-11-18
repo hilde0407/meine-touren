@@ -2797,4 +2797,13 @@ Karte zur Planung: Klick setzt einen Punkt || Map for planning: a click sets a p
 Kennzahlen der Planung || Figures of the plan || Chiffres clés de la planification || Cifras de la planificación
 Höhenprofil der Planung || Elevation profile of the plan || Profil altimétrique de la planification || Perfil de altitud de la planificación
 Aus Wanderführer laden || Load from guidebook || Charger depuis un guide de randonnée || Cargar desde guía de senderismo
-Sportart || Sport || Sport || Deporte`;
+Sportart || Sport || Sport || Deporte
+Portale || Portals || Portails || Portales
+(Upload) || (upload) || (téléversement) || (subida)
+Keine offenen Pläne. || No open plans. || Aucun plan ouvert. || No hay planes abiertos.
+Gegangene Pläne auch zeigen || Also show plans already walked || Afficher aussi les plans déjà parcourus || Mostrar también los planes ya recorridos
+gegangen am {} || walked on {} || parcouru le {} || recorrido el {}
+Die offenen Pläne (noch nicht gegangen) mit Länge, Höhenmetern und geschätzter Dauer, mit Link zur Planung. Auf Wunsch auch gegangene Pläne mit dem Vergleich von geplanter und gelaufener Zeit. Verworfene Pläne erscheinen nie. || The open plans (not yet walked) with length, ascent and estimated duration, with a link to the planner. If you like, also plans already walked, comparing planned and walked time. Discarded plans never appear. || Les plans ouverts (pas encore parcourus) avec longueur, dénivelé et durée estimée, avec un lien vers la planification. Sur demande, aussi les plans déjà parcourus, avec la comparaison entre durée prévue et durée réelle. Les plans abandonnés n'apparaissent jamais. || Los planes abiertos (aún sin recorrer) con longitud, desnivel y duración estimada, con enlace a la planificación. Si quieres, también los planes ya recorridos, con la comparación entre el tiempo previsto y el real. Los planes descartados nunca aparecen.
+Heimatort und Puls || Home location and heart rate || Lieu de résidence et fréquence cardiaque || Lugar de residencia y pulso
+Maximalpuls (bpm) für die Pulszonen || Maximum heart rate (bpm) for the heart-rate zones || Fréquence cardiaque maximale (bpm) pour les zones de fréquence cardiaque || Pulso máximo (ppm) para las zonas de pulso
+Touren den Uhren zuordnen || Assign tours to watches || Associer les parcours aux montres || Asignar rutas a los relojes`;
