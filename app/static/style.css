@@ -1991,20 +1991,22 @@ html.mob .mapui>.kaopen .slok{flex:0 0 auto;white-space:nowrap}
 /* 3.39.0 Karte: Fenster „Touren im Ausschnitt“ liegt über den Bedienfeldern (.mapui, z-index 500) und den Kartensteuerelementen; auch mobil (dort .modal 1000) */
 .modal.mbxfen,html.mob .modal.mbxfen{z-index:1100}.modal.mbxfen .mbox{max-width:760px;width:100%}.modal.mbxfen .mbox:focus{outline:none}
 
-/* 3.39.0 3D-Flug: Drehen-Modus für Touchpad und Touch (07-flug.js, 07-flugsteuerung.js); Zustand sichtbar (gelb) und über aria-pressed, Touch-Ziel mindestens 44 px */
-.fctl #frot{min-height:44px;min-width:44px}.fctl #frot[aria-pressed=true]{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}
-.frotmode,.frotmode .maplibregl-canvas{touch-action:none;cursor:grab}
-.fctl .fhelp{flex:1 1 100%;font-size:13px;line-height:1.35;color:#e3ece8}
-
-/* 3.39.0 Plan und Ergebnis (Baustein „planergebnis“, 51-bausteine-tour.js): Soll/Ist-Zeilen mit Pfeil und Wort (nie nur Farbe), gestrichelte Plan-Linie über der durchgezogenen gelaufenen Linie */
-.plname{margin:0 0 8px;font-size:16px}.plrows{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:10px}
-.plrow{display:grid;grid-template-columns:minmax(110px,1fr) repeat(2,minmax(110px,1fr)) minmax(190px,1.6fr);gap:4px 14px;align-items:baseline;padding:8px 0;border-top:1px solid var(--rule)}
-.plrow:first-child{border-top:0}.pll{font-weight:600}.plv small{display:block;font-size:12px}.pld{display:flex;flex-wrap:wrap;gap:2px 6px;align-items:baseline}.pld b{font-weight:700}.pld small{font-size:13px}
-.plmap{display:block;width:100%;height:auto;max-height:320px;background:var(--soft);border:1px solid var(--rule);border-radius:var(--r)}
-.plpl,.plis{fill:none;stroke-linecap:round;stroke-linejoin:round}.plpl{stroke:var(--ink);stroke-width:2;stroke-dasharray:7 5}.plis{stroke:var(--bars);stroke-width:3.5}
-.plleg{list-style:none;margin:6px 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:4px 18px;font-size:13px}.plleg li{display:flex;align-items:center;gap:6px}.plsw{width:28px;height:8px;overflow:visible}.plsw .plpl{stroke-width:2}.plsw .plis{stroke-width:3.5}
-.plact{margin-top:8px}.plact .btn.sm,html.mob .plact .btn.sm{min-height:44px}
-@media (max-width:640px){.plrow{grid-template-columns:1fr 1fr}.pll{grid-column:1/-1}.pld{grid-column:1/-1}}
+/* 3.40.0 3D-Flug: Bedienleiste rechts (07-flug.js) im Stil des Flug-Bedienfelds (.fbar/.fctl) – bleibt immer sichtbar, auch wenn sich das Bedienfeld beim Abspielen ausblendet.
+   Zwei Spalten, Tasten mindestens 40 px; Hinweis/Hilfe (.fhint) links daneben. Farben fest wie das übrige Flug-Bedienfeld (liegt über der Karte, in hell und dunkel gleich). */
+.flight #fm{overscroll-behavior:contain}
+.fnav{position:absolute;right:10px;top:74px;z-index:5;display:grid;grid-template-columns:44px 44px;gap:6px;padding:6px;background:#0e2a2bcc;border-radius:10px;backdrop-filter:blur(4px)}
+.fnb{min-width:40px;min-height:40px;display:flex;align-items:center;justify-content:center;padding:0;border:1px solid #ffffff59;border-radius:8px;background:#ffffff14;color:#fff;font:600 18px var(--b);cursor:pointer}
+.fnb:hover{background:#ffffff2e;border-color:#fff}.fnb:active{background:#ffffff47}
+.fnb:focus-visible,.fhint .btn:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.fnb svg{width:24px;height:24px;display:block}.fnb .fnl{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.fnb .fnf{fill:currentColor}.fnb .fnring{fill:none;stroke:#ffffff8c;stroke-width:1.2}
+#fnk{transform-origin:12px 12px;transform-box:view-box}.fnk-n{fill:#f2c230}.fnk-s{fill:#fff}
+.fnt{grid-column:1/3;font-size:13px;line-height:1.2;padding:4px 6px;text-align:center}
+.fhint{position:absolute;right:124px;top:74px;z-index:6;width:min(330px,calc(100% - 144px));background:#0e2a2bf2;color:#fff;border:1px solid #ffffff59;border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.45}
+.fhint p{margin:0 0 10px}.fhint ul{margin:0 0 10px;padding-left:18px}.fhint li{margin:3px 0}.fhint .btn{min-height:40px}
+.fctl #fin{min-height:32px}
+@media(max-width:700px){.fnav{right:6px}.fhint{right:112px;top:74px;width:calc(100% - 124px);font-size:13px}}
+/* Handy: die Flugkarte endet über der Reiterleiste (vorher lag die unterste Zeile des Bedienfelds darunter) */
+html.mob .flight{height:calc(100vh - 102px - env(safe-area-inset-bottom));height:calc(100dvh - 102px - env(safe-area-inset-bottom))}
 
 /* 3.40.0 Verwaltung: „Sicherung zurückspielen“ (68-wiederherstellen.js) – einklappbarer Bereich mit Quellenwahl, Dialog im Muster von .uibox */
 .rsd>summary{min-height:44px;display:flex;align-items:center;gap:8px}.rsd>summary::before{content:"▸";transition:transform .15s}.rsd[open]>summary::before{transform:rotate(90deg)}.rsd>summary::-webkit-details-marker{display:none}.rsd>summary{list-style:none}

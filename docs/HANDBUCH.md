@@ -453,17 +453,18 @@ Der Abschnitt **Fotos** zeigt die der Tour zugeordneten Fotos mit Uhrzeit. Die K
 
 *Abbildung 23: Das Tourblatt – oben die Knöpfe „PDF herunterladen“ und „Drucken“.*
 
-**3D-Flug: Steuerung in der freien Kamera** (im Modus „Kamera folgt“ bleibt alles wie bisher; die Hinweiszeile im Bedienfeld nennt die wichtigsten Wege):
+**3D-Flug: Steuerung in der freien Kamera (ab 3.40.0)** – im Modus „Kamera folgt“ bleibt alles wie bisher; jede eigene Bewegung wechselt in die freie Kamera.
+
+Rechts auf der Flugkarte steht immer eine **Bedienleiste**: Kompass (Nadel zeigt nach Norden und wird mit der Neigung flacher; ein Tipp stellt **Norden / Draufsicht** ein), **nach links / rechts drehen**, **flacher / steiler neigen** und die Voreinstellungen **Von oben**, **Schräg** und **Hinter der Tour**. Gedreht wird um den aktuellen Punkt der Tour, nicht um die Bildmitte. Das **?** zeigt die Hilfe mit allen Belegungen; beim ersten Wechsel in die freie Kamera erscheint einmal ein kurzer Hinweis.
 
 | Aktion | Maus | Touchpad | Touchscreen | Tastatur |
 | --- | --- | --- | --- | --- |
-| Verschieben | Ziehen | Ziehen | Ein Finger | – |
-| Zoomen | Mausrad | Zweifinger senkrecht wischen, Pinch | Zwei Finger spreizen | – |
-| Drehen und Kippen | rechte Taste oder Strg + Ziehen | Knopf **↻ Drehen** (Ziehen dreht/kippt), Umschalt + Ziehen | Knopf **↻ Drehen**, zwei Finger drehen/kippen | Pfeil links/rechts dreht, hoch/runter kippt (Umschalt: doppelter Schritt) |
-| Drehen | – | Zweifinger seitwärts wischen; Safari: Drehgeste | Zwei Finger verdrehen | – |
-| Kippen | – | Alt/Option + Wischen | Zwei Finger gemeinsam nach oben/unten | – |
+| Verschieben | Ziehen | Ziehen (Klicken und Ziehen) | Ein Finger | – |
+| Zoomen | Mausrad | Zwei Finger spreizen (Pinch) | Zwei Finger spreizen | – |
+| Drehen | rechte Taste oder Strg/Cmd + Ziehen, Umschalt + Ziehen | Zwei Finger seitwärts wischen; Safari: Drehgeste | Zwei Finger verdrehen | Pfeil links/rechts (Umschalt: doppelter Schritt) |
+| Neigen | wie Drehen (senkrecht ziehen), Alt + Mausrad | Zwei Finger senkrecht wischen | Zwei Finger gemeinsam nach oben/unten | Pfeil hoch/runter |
 
-Der Knopf **↻ Drehen** ist ein Umschalter (gelb = an, `aria-pressed`); beim Einschalten wechselt die Kamera auf „frei“.
+Ob eine Maus oder ein Touchpad benutzt wird, erkennt die App an der Art der Bewegung (je Geste neu). Passt das nicht – etwa bei einer Maus mit stufenlosem Rad –, stelle im Bedienfeld unten **Bedienung: Maus** (das Rad zoomt immer) oder **Bedienung: Touchpad** (Wischen dreht und neigt immer) ein; die Wahl merkt sich dieser Browser. Den früheren Knopf „↻ Drehen“ gibt es nicht mehr. Mit der Systemeinstellung „Bewegung reduzieren“ springen die Voreinstellungen ohne Kamerafahrt ans Ziel.
 
 > **3D-Flug:** Er braucht WebGL im Browser sowie Gelände- und Kartendaten aus dem Internet. In der Umgebung, in der die Bilder dieses Handbuchs entstanden sind, gab es diese Daten nicht; deshalb ist hier kein Bild des 3D-Flugs abgebildet.
 

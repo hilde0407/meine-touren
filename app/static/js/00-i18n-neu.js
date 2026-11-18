@@ -2854,9 +2854,6 @@ Ergebnis (durchgezogen) || Result (solid) || Résultat (trait plein) || Resultad
 Karte: geplante Linie gestrichelt, gelaufene Linie durchgezogen || Map: planned line dashed, walked line solid || Carte : ligne prévue en pointillés, ligne parcourue en trait plein || Mapa: línea planificada discontinua, línea recorrida continua
 Karte: geplante Linie gestrichelt, gelaufene Linie durchgezogen (die gelaufene Linie liegt nicht vor) || Map: planned line dashed, walked line solid (the walked line is not available) || Carte : ligne prévue en pointillés, ligne parcourue en trait plein (la ligne parcourue n’est pas disponible) || Mapa: línea planificada discontinua, línea recorrida continua (no hay línea recorrida)
 Karte: geplante Linie gestrichelt, gelaufene Linie durchgezogen (die geplante Linie liegt nicht vor) || Map: planned line dashed, walked line solid (the planned line is not available) || Carte : ligne prévue en pointillés, ligne parcourue en trait plein (la ligne prévue n’est pas disponible) || Mapa: línea planificada discontinua, línea recorrida continua (no hay línea planificada)
-↻ Drehen || ↻ Rotate || ↻ Pivoter || ↻ Girar
-Drehen-Modus: Ziehen mit der Maus oder dem Finger dreht und kippt die Karte, statt sie zu verschieben (freie Kamera) || Rotate mode: dragging with the mouse or a finger rotates and tilts the map instead of moving it (free camera) || Mode pivoter : glisser avec la souris ou le doigt fait pivoter et incliner la carte au lieu de la déplacer (caméra libre) || Modo girar: arrastrar con el ratón o el dedo gira e inclina el mapa en lugar de moverlo (cámara libre)
-Drehen: Modus „Drehen“ oder Umschalt+Ziehen; Zweifinger seitwärts wischen (Alt+Wischen kippt); Pfeiltasten || Rotate: “Rotate” mode or Shift+drag; swipe sideways with two fingers (Alt+swipe tilts); arrow keys || Pivoter : mode « Pivoter » ou Maj+glisser ; balayer latéralement à deux doigts (Alt+balayage incline) ; touches fléchées || Girar: modo «Girar» o Mayús+arrastrar; deslizar de lado con dos dedos (Alt+deslizar inclina); teclas de flecha
 Sicherung zurückspielen || Restore a backup || Restaurer une sauvegarde || Restaurar una copia de seguridad
 Setzt deine Touren, Notizen, Pläne und Einstellungen auf den Stand einer Sicherung zurück. Die Sicherung wird zuerst geprüft, und der heutige Stand wird vorher automatisch gesichert. || Puts your tours, notes, plans and settings back to the state of a backup. The backup is checked first, and today’s state is saved automatically beforehand. || Remet vos parcours, notes, plans et réglages dans l’état d’une sauvegarde. La sauvegarde est d’abord vérifiée, et l’état actuel est enregistré automatiquement au préalable. || Devuelve tus rutas, notas, planes y ajustes al estado de una copia de seguridad. Primero se comprueba la copia y antes se guarda automáticamente el estado actual.
 Sicherung auf diesem Server || Backup on this server || Sauvegarde sur ce serveur || Copia de seguridad en este servidor
@@ -2928,4 +2925,34 @@ Es läuft gerade eine andere Sicherung oder Wiederherstellung. || Another backup
 Datei || File || Fichier || Archivo
 Heute || Today || Aujourd’hui || Hoy
 Jetzt || Now || Maintenant || Ahora
-Lade … || Loading … || Chargement … || Cargando …`;
+Lade … || Loading … || Chargement … || Cargando …
+Bedienung im 3D-Flug || Controls in the 3D flight || Commandes du vol 3D || Manejo del vuelo 3D
+Bedienung: Automatisch || Controls: automatic || Commandes : automatique || Manejo: automático
+Bedienung: Maus || Controls: mouse || Commandes : souris || Manejo: ratón
+Bedienung: Touchpad || Controls: touchpad || Commandes : pavé tactile || Manejo: panel táctil
+Kamera steuern || Control the camera || Piloter la caméra || Controlar la cámara
+Norden / Draufsicht || North / top view || Nord / vue du dessus || Norte / vista cenital
+Hilfe zur Bedienung || Help with the controls || Aide sur les commandes || Ayuda sobre el manejo
+Nach links drehen || Rotate left || Pivoter vers la gauche || Girar a la izquierda
+Nach rechts drehen || Rotate right || Pivoter vers la droite || Girar a la derecha
+Flacher neigen || Tilt flatter || Incliner plus à plat || Inclinar más plano
+Steiler neigen || Tilt steeper || Incliner plus à pic || Inclinar más vertical
+Von oben || From above || Du dessus || Desde arriba
+Schräg || Angled || En biais || En diagonal
+Hinter der Tour || Behind the tour || Derrière le parcours || Detrás de la ruta
+Zwei Finger wischen: drehen und neigen · Zwei Finger spreizen: zoomen · oder die Tasten rechts || Swipe with two fingers: rotate and tilt · Spread two fingers: zoom · or use the buttons on the right || Balayer à deux doigts : pivoter et incliner · Écarter deux doigts : zoomer · ou utiliser les boutons à droite || Deslizar con dos dedos: girar e inclinar · Separar dos dedos: ampliar · o usar los botones de la derecha
+Umschalt + Ziehen: drehen und neigen || Shift + drag: rotate and tilt || Maj + glisser : pivoter et incliner || Mayús + arrastrar: girar e inclinar
+Rechte Maustaste oder Strg/Cmd + Ziehen: drehen und neigen || Right mouse button or Ctrl/Cmd + drag: rotate and tilt || Bouton droit de la souris ou Ctrl/Cmd + glisser : pivoter et incliner || Botón derecho del ratón o Ctrl/Cmd + arrastrar: girar e inclinar
+Pfeiltasten: drehen und neigen || Arrow keys: rotate and tilt || Touches fléchées : pivoter et incliner || Teclas de flecha: girar e inclinar
+Alt + Mausrad: neigen || Alt + mouse wheel: tilt || Alt + molette : incliner || Alt + rueda del ratón: inclinar
+Mausrad: zoomen || Mouse wheel: zoom || Molette : zoomer || Rueda del ratón: ampliar
+Maus oder Touchpad wird von selbst erkannt. Passt das nicht, hilft die Auswahl „Bedienung“ unten. || Mouse or touchpad is detected automatically. If that does not fit, use the “Controls” selection below. || La souris ou le pavé tactile est détecté automatiquement. Si cela ne convient pas, utilisez le choix « Commandes » en bas. || El ratón o el panel táctil se detecta automáticamente. Si no encaja, usa la selección «Manejo» de abajo.
+Blick nach Norden || Looking north || Regard vers le nord || Vista hacia el norte
+Blick nach Nordosten || Looking north-east || Regard vers le nord-est || Vista hacia el noreste
+Blick nach Osten || Looking east || Regard vers l’est || Vista hacia el este
+Blick nach Südosten || Looking south-east || Regard vers le sud-est || Vista hacia el sureste
+Blick nach Süden || Looking south || Regard vers le sud || Vista hacia el sur
+Blick nach Südwesten || Looking south-west || Regard vers le sud-ouest || Vista hacia el suroeste
+Blick nach Westen || Looking west || Regard vers l’ouest || Vista hacia el oeste
+Blick nach Nordwesten || Looking north-west || Regard vers le nord-ouest || Vista hacia el noroeste
+Neigung {} Grad || Tilt {} degrees || Inclinaison {} degrés || Inclinación {} grados`;

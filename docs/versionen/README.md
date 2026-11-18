@@ -2,7 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
-- [3.40.0](3.40.0.md) – Wiederherstellung in der Oberfläche: Sicherung prüfen, bestätigen, zurückspielen
+- [3.40.0](3.40.0.md) – Wiederherstellung in der Oberfläche: Sicherung prüfen, bestätigen, zurückspielen; 3D-Flug mit Bedienleiste und Touchpad-Gesten
 - [3.39.0](3.39.0.md) – App-Start ohne Wettlauf, Soll/Ist an der Tourseite, Touchpad im 3D-Flug
 - [3.38.1](3.38.1.md) – Fehlerbehebung: Verwaltungs-Reiter in allen Sprachen, Baustein „Geplante Touren“ nur mit offenen Plänen
 - [3.38.0](3.38.0.md) – Sicher planen: Sicherung prüfen, Machbarkeits-Check, Plan mit gelaufener Tour verknüpfen

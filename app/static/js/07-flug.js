@@ -149,12 +149,30 @@ VIEWS.flight = async id => {
    <div class="fctl"><button class="btn sm" id="fp">⏸ Pause</button><input type="range" id="fs" min="0" max="1000" value="0" aria-label="Position">
     <select id="fv" title="Tempo"><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option></select>
     <select id="fc" title="Kamera"><option value="follow">Kamera folgt</option><option value="free">Kamera frei</option></select>
-    <button class="btn ghost sm" id="frot" type="button" aria-pressed="false" aria-describedby="fhelp" title="Drehen-Modus: Ziehen mit der Maus oder dem Finger dreht und kippt die Karte, statt sie zu verschieben (freie Kamera)">↻ Drehen</button>
+    <select id="fin" title="Bedienung im 3D-Flug" aria-label="Bedienung im 3D-Flug"><option value="auto">Bedienung: Automatisch</option><option value="maus">Bedienung: Maus</option><option value="touchpad">Bedienung: Touchpad</option></select>
     <select id="fz" title="Flughöhe"><option value="16">nah</option><option value="14.8" selected>mittel</option><option value="13.4">weit</option></select>
     <select id="fpi" title="Neigung"><option value="auto" selected>automatisch (weicht Bergen aus)</option><option value="55">flach</option><option value="68">schräg</option><option value="78">sehr schräg</option></select>
     <select id="fb" title="Karte"><option value="osm">Straßenkarte</option><option value="topo">Topografisch</option><option value="sat">Satellit</option></select>
     <select id="fq" title="Videoqualität"><option value="1280">Video: Standard</option><option value="1600" selected>Video: Hoch</option><option value="1920">Video: Sehr hoch</option></select>
-    <button class="btn ghost sm" id="frec" title="Flug als Video aufnehmen und speichern">⏺ Video</button><button class="btn ghost sm" id="ffs" title="Vollbild">⛶</button><span class="fhelp" id="fhelp">Drehen: Modus „Drehen“ oder Umschalt+Ziehen; Zweifinger seitwärts wischen (Alt+Wischen kippt); Pfeiltasten</span></div><div class="fph" id="fph"><img id="fphi" alt=""><span id="fphc"></span></div><div class="fmsg" id="fmsg">Lade Strecke …</div></div>`;
+    <button class="btn ghost sm" id="frec" title="Flug als Video aufnehmen und speichern">⏺ Video</button><button class="btn ghost sm" id="ffs" title="Vollbild">⛶</button></div>
+   <div class="fnav" id="fnav" role="group" aria-label="Kamera steuern">
+    <button type="button" id="fnn" class="fnb" title="Norden / Draufsicht" aria-label="Norden / Draufsicht"><svg viewBox="0 0 24 24" aria-hidden="true"><circle class="fnring" cx="12" cy="12" r="11"/><g id="fnk"><path class="fnk-n" d="M12 2.5l3.6 9.5H8.4z"/><path class="fnk-s" d="M12 21.5l3.6-9.5H8.4z"/></g></svg></button>
+    <button type="button" id="fnh" class="fnb" title="Hilfe zur Bedienung" aria-label="Hilfe zur Bedienung" aria-expanded="false" aria-controls="fhint">?</button>
+    <button type="button" id="fnl" class="fnb" title="Nach links drehen" aria-label="Nach links drehen"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fnl" d="M5 12a7 7 0 1 1 3 5.7"/><path class="fnf" d="M2 9l3.4 4.6L9.6 10z"/></svg></button>
+    <button type="button" id="fnr" class="fnb" title="Nach rechts drehen" aria-label="Nach rechts drehen"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fnl" d="M19 12a7 7 0 1 0-3 5.7"/><path class="fnf" d="M22 9l-3.4 4.6L14.4 10z"/></svg></button>
+    <button type="button" id="fnf" class="fnb" title="Flacher neigen" aria-label="Flacher neigen"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fnl" d="M3 17h18M6 13l6-3 6 3"/></svg></button>
+    <button type="button" id="fns" class="fnb" title="Steiler neigen" aria-label="Steiler neigen"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fnl" d="M3 19h18M7 15l5-10 5 10"/></svg></button>
+    <button type="button" id="fpo" class="fnb fnt">Von oben</button>
+    <button type="button" id="fps" class="fnb fnt">Schräg</button>
+    <button type="button" id="fpt" class="fnb fnt">Hinter der Tour</button>
+    <span class="slsr" id="fsr" aria-live="polite"></span>
+   </div>
+   <div class="fhint" id="fhint" role="region" aria-label="Hilfe zur Bedienung" hidden>
+    <p id="fhk">Zwei Finger wischen: drehen und neigen · Zwei Finger spreizen: zoomen · oder die Tasten rechts</p>
+    <ul id="fhp" hidden><li>Umschalt + Ziehen: drehen und neigen</li><li>Rechte Maustaste oder Strg/Cmd + Ziehen: drehen und neigen</li><li>Pfeiltasten: drehen und neigen</li><li>Alt + Mausrad: neigen</li><li>Mausrad: zoomen</li><li>Maus oder Touchpad wird von selbst erkannt. Passt das nicht, hilft die Auswahl „Bedienung“ unten.</li></ul>
+    <button type="button" class="btn sm" id="fhx">Schließen</button>
+   </div>
+   <div class="fph" id="fph"><img id="fphi" alt=""><span id="fphc"></span></div><div class="fmsg" id="fmsg">Lade Strecke …</div></div>`;
   let raws = [];
   if (SET)
     for (const tid of id.slice(4).split(",").filter(x => BY[x]).sort((a, b) => (BY[a].start_ts || 0) - (BY[b].start_ts || 0))) {
@@ -281,7 +299,8 @@ VIEWS.flight = async id => {
     pitchAt = 0,
     pitchWant = 68,
     zBase = 14.8,
-    zoomLift = 0;
+    zoomLift = 0,
+    hier = {lng: P[0].lng, lat: P[0].lat, tgt: 0};
   const at = (A, f, key) => {
     const i = Math.min(N - 2, Math.floor(f)),
       r = f - i;
@@ -300,6 +319,7 @@ VIEWS.flight = async id => {
     }
     const look = S[Math.min(N - 1, Math.round(f) + Math.max(6, Math.round(N / 60)))],
       tgt = brg([lat, lng], [look.lat, look.lng]);
+    hier = {lng: cur.lng, lat: cur.lat, tgt};                                 // 3.40.0: aktueller Tourpunkt = Drehpunkt der freien Kamera
     return {lat, lng, tgt, f};
   };
   let flHr = null,
@@ -593,33 +613,114 @@ VIEWS.flight = async id => {
     m.touchPitch.enable();
     m.dragRotate.enable();
   } catch (e) {}
-  /* 3.39.0 Touchpad und Tastatur in der freien Kamera (reine Funktionen: 07-flugsteuerung.js). Im Modus „Kamera folgt“ bleibt alles wie bisher.
-     a) Modus „Drehen“ (Knopf) oder Umschalt+Ziehen: Ziehen mit der linken Taste bzw. dem Finger dreht und kippt statt zu verschieben (Strg+Ziehen und rechte Taste bleiben Standard von MapLibre)
-     c) Zweifinger-Wischen auf dem Touchpad (wheel): seitwärts dreht, Alt/Option+Wischen kippt; senkrechtes Wischen und Pinch (Strg+wheel) zoomen wie bisher
-     d) Pfeiltasten drehen/kippen, solange die Karte den Fokus hat   e) Safari: Touchpad-Geste (gesturechange) dreht */
-  const fm = $("#fm"), rotBtn = $("#frot");
+  /* Freie Kamera (reine Funktionen: 07-flugsteuerung.js). Im Modus „Kamera folgt“ bleibt alles wie bisher.
+     3.40.0: kein „Drehen“-Modus mehr. Stattdessen a) immer sichtbare Bedienleiste rechts (Kompass, Drehen, Neigen, Voreinstellungen, Hilfe),
+     b) Zweifinger-Wischen auf dem Touchpad dreht (seitwärts) und neigt (senkrecht) um den aktuellen Tourpunkt, Pinch (Strg+wheel) und das Mausrad zoomen;
+        Maus oder Touchpad wird je Geste geschätzt (flWheelKind) oder über die Auswahl „Bedienung“ festgelegt (je Browser gemerkt, wie der Kartenstil),
+     c) Safari-Geste (gesturechange) dreht und zoomt; die gleichzeitig gemeldeten Strg+wheel-Ereignisse werden verworfen (sonst doppelter Zoom),
+     d) für Geübte: Umschalt+Ziehen, rechte Taste bzw. Strg/Cmd+Ziehen (MapLibre), Pfeiltasten, Alt+Rad.
+     Statt MapLibres NavigationControl (visualizePitch) eine eigene Leiste: dessen Kompass kennt weder Neigen-Tasten noch Voreinstellungen und passt nicht zum dunklen Bedienfeld. */
+  const fm = $("#fm");
   fm._map = m;                                                               // für Tests und Fehlersuche
-  let rmode = false, rd = null, panWas = true;
-  const turn = d => {
-    if (!d) return;
-    fm.dataset.rot = String((+fm.dataset.rot || 0) + 1);                      // Zähler der eigenen Dreh-/Kippschritte (Tests)
-    if (d.bearing) m.setBearing(flNorm(m.getBearing() + d.bearing));
-    if (d.pitch) m.setPitch(flClampPitch(m.getPitch() + d.pitch));
+  fm._hier = () => hier;
+  const ruhig = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let rd = null, panWas = true, srT = null, hintAuto = false;
+  let pref = "auto";
+  try {
+    pref = localStorage.getItem("flug_bedienung") || "auto";
+  } catch (e) {}
+  if (!/^(auto|maus|touchpad)$/.test(pref)) pref = "auto";
+  $("#fin").value = pref;
+  $("#fin").onchange = () => {
+    pref = $("#fin").value;
+    wst.kind = null;
+    try {
+      localStorage.setItem("flug_bedienung", pref);
+    } catch (e) {}
+  };
+  const wst = {t: 0, kind: null};
+  const sagen = () => {                                                      // Richtung und Neigung für Screenreader, gedrosselt (erst wenn die Bewegung kurz ruht)
+    clearTimeout(srT);
+    srT = setTimeout(() => {
+      const el = $("#fsr");
+      if (el) el.textContent = `Blick nach ${flRichtung(m.getBearing())} · Neigung ${Math.round(m.getPitch())} Grad`;
+    }, 700);
+  };
+  const nadel = () => {                                                      // Kompass: Nadel zeigt nach Norden, wird mit der Neigung flacher
+    const k = $("#fnk");
+    if (k) k.style.transform = `scaleY(${Math.max(0.5, Math.cos((m.getPitch() * Math.PI) / 180)).toFixed(3)}) rotate(${(-m.getBearing()).toFixed(1)}deg)`;
+  };
+  m.on("rotate", nadel);
+  m.on("pitch", nadel);
+  nadel();
+  const hint = (voll, auto) => {
+    const h = $("#fhint");
+    $("#fhp").hidden = !voll;
+    h.hidden = false;
+    hintAuto = !!auto;
+    $("#fnh").setAttribute("aria-expanded", "true");
+    if (!auto) $("#fhx").focus();
+  };
+  const hintZu = () => {
+    const h = $("#fhint"), war = !h.hidden && h.contains(document.activeElement);
+    h.hidden = true;
+    $("#fnh").setAttribute("aria-expanded", "false");
+    if (war && !hintAuto) $("#fnh").focus();
+  };
+  $("#fhx").onclick = hintZu;
+  $("#fnh").onclick = () => ($("#fhint").hidden ? hint(true, false) : hintZu());
+  $("#fhint").addEventListener("keydown", e => {
+    if (e.key === "Escape") { e.stopPropagation(); hintZu(); }
+  });
+  const hintEinmal = () => {                                                 // beim ersten Wechsel in die freie Kamera, einmal je Browser
+    try {
+      if (localStorage.getItem("flug_hinweis")) return;
+      localStorage.setItem("flug_hinweis", "1");
+    } catch (e) {
+      return;
+    }
+    hint(false, true);
   };
   const freeNow = () => {
     if (follow) {
       follow = false;
       $("#fc").value = "free";
     }
+    hintEinmal();
   };
-  const setRot = on => {
-    rmode = !!on;
-    rotBtn.setAttribute("aria-pressed", String(rmode));
-    rotBtn.classList.toggle("on", rmode);
-    fm.classList.toggle("frotmode", rmode);
-    if (rmode) freeNow();                                                    // der Modus gehört zur freien Kamera
+  const turn = d => {                                                        // drehen um den aktuellen Tourpunkt (Orbit), neigen um die Bildmitte
+    if (!d) return;
+    fm.dataset.rot = String((+fm.dataset.rot || 0) + 1);                      // Zähler der eigenen Dreh-/Kippschritte (Tests)
+    const o = {};
+    if (d.bearing) {
+      const c = m.getCenter(), z = flOrbit({lng: c.lng, lat: c.lat}, hier, d.bearing);
+      o.bearing = flNorm(m.getBearing() + d.bearing);
+      o.center = [z.lng, z.lat];
+    }
+    if (d.pitch) o.pitch = flClampPitch(m.getPitch() + d.pitch);
+    m.jumpTo(o);
+    sagen();
   };
-  rotBtn.onclick = () => setRot(!rmode);
+  const preset = name => {
+    freeNow();
+    const v = flPreset(name, {bearing: m.getBearing(), pitch: m.getPitch()}, hier.tgt);
+    if (!v) return;
+    fm.dataset.rot = String((+fm.dataset.rot || 0) + 1);
+    const o = {bearing: v.bearing, pitch: v.pitch};
+    if (v.zentrieren) o.center = [hier.lng, hier.lat];
+    if (ruhig()) m.jumpTo(o);                                                // keine animierten Kamerasprünge bei „Bewegung reduzieren“
+    else m.easeTo(Object.assign(o, {duration: 500}));
+    sagen();
+  };
+  const taste = (id, fn) => ($("#" + id).onclick = () => { freeNow(); fn(); });
+  taste("fnl", () => turn({bearing: -15, pitch: 0}));
+  taste("fnr", () => turn({bearing: 15, pitch: 0}));
+  taste("fnf", () => turn({bearing: 0, pitch: 10}));
+  taste("fns", () => turn({bearing: 0, pitch: -10}));
+  $("#fnn").onclick = () => preset("nord");
+  $("#fpo").onclick = () => preset("oben");
+  $("#fps").onclick = () => preset("schraeg");
+  $("#fpt").onclick = () => preset("hinter");
   try {
     m.boxZoom.disable();                                                     // Umschalt+Ziehen ist sonst „Rahmen aufziehen“
   } catch (e) {}
@@ -629,7 +730,7 @@ VIEWS.flight = async id => {
     if (panWas) try { m.dragPan.enable(); } catch (e) {}
   };
   fm.addEventListener("pointerdown", e => {
-    if (rd || follow || !e.isPrimary || e.button !== 0 || !(rmode || e.shiftKey)) return;
+    if (rd || follow || !e.isPrimary || e.button !== 0 || !e.shiftKey) return;
     if (e.target.closest && e.target.closest(".maplibregl-ctrl")) return;
     rd = {id: e.pointerId, x: e.clientX, y: e.clientY};
     panWas = m.dragPan.isEnabled();
@@ -644,13 +745,19 @@ VIEWS.flight = async id => {
     rd.y = e.clientY;
   }, true);
   ["pointerup", "pointercancel", "lostpointercapture"].forEach(n => fm.addEventListener(n, e => rd && e.pointerId === rd.id && rdEnd(), true));
+  let geste = null;                                                          // laufende Safari-Geste {rotation, scale}
+  let folgT = -1e9;                                                          // letzte wheel-Zeit einer Geste, die im Modus „Kamera folgt“ begann
   fm.addEventListener("wheel", e => {
-    if (follow) return;
-    const d = flWheelDelta(e);
-    if (!d) return;
+    const jetzt = performance.now();
+    if (follow || jetzt - folgT < FL_GESTE_MS) {                             // „Kamera folgt“: wie bisher (MapLibre zoomt, das beendet das Folgen) – und zwar für die ganze Geste,
+      folgT = jetzt;                                                         // nicht nur für ihr erstes Ereignis (sonst würde der Rest des Wischens plötzlich neigen)
+      return;
+    }
+    const d = flWheelAction(e, e.ctrlKey || e.metaKey || e.altKey ? null : flWheelKind(e, wst, performance.now(), pref), !!geste);
+    if (!d) return;                                                          // Mausrad und Pinch: MapLibre zoomt
     e.preventDefault();
     e.stopPropagation();
-    turn(d);
+    if (!d.skip) turn(d);
   }, {capture: true, passive: false});
   fm.addEventListener("keydown", e => {
     if (follow || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -661,23 +768,28 @@ VIEWS.flight = async id => {
     turn(d);
   }, true);
   if ("GestureEvent" in window) {
-    let gr = 0;
-    fm.addEventListener("gesturestart", e => { gr = e.rotation || 0; e.preventDefault(); }, true);
-    fm.addEventListener("gesturechange", e => {
-      if (follow) return;
+    fm.addEventListener("gesturestart", e => {
+      geste = {rotation: e.rotation || 0, scale: e.scale || 1};
       e.preventDefault();
-      const r = e.rotation || 0;
-      turn({bearing: flGestureDelta(gr, r), pitch: 0});
-      gr = r;
     }, true);
+    fm.addEventListener("gesturechange", e => {
+      e.preventDefault();
+      if (follow || !geste) return;
+      const jetzt = {rotation: e.rotation || 0, scale: e.scale || 1}, d = flGestureStep(geste, jetzt);
+      geste = jetzt;
+      if (d.zoom) m.setZoom(m.getZoom() + d.zoom);
+      turn({bearing: d.bearing, pitch: 0});
+    }, true);
+    ["gestureend", "gesturecancel"].forEach(n => fm.addEventListener(n, () => (geste = null), true));
   }
   $("#fc").addEventListener("change", () => {
-    if ($("#fc").value === "follow" && rmode) setRot(false);
+    if ($("#fc").value === "free") hintEinmal();
   });
   const goFree = ev => {                    // jede eigene Bewegung (Maus, Finger, Mausrad) beendet das automatische Folgen
     if (follow && ev && ev.originalEvent) {
       follow = false;
       $("#fc").value = "free";
+      hintEinmal();
     }
   };
   ["dragstart", "rotatestart", "pitchstart", "zoomstart"].forEach(n => m.on(n, goFree));
