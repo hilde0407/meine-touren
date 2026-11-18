@@ -833,6 +833,16 @@ Eine Ansicht lässt sich auch als kurzer Text weitergeben, zum Beispiel in einer
 
 **Was steckt im Code?** Nur die Anordnung und die Einstellungen der Bausteine, auch eigene Titel und Notizen, die du dort eingegeben hast. Keine Touren, Fotos, Orte oder Zugangsdaten, und der Code gibt keinen Zugriff auf deine Daten. Der Server prüft jeden Code streng wie eine Datei (nur erlaubte Felder, Größen und Bausteine); beschädigte oder zu große Codes werden abgelehnt. Betrachter können keine Ansichten importieren.
 
+### 13.12 Bausteine für Rhythmus, Jahreszeiten und Ausrüstung
+
+Drei Bausteine der Übersicht (und der Statistik) helfen beim Blick auf Rhythmus und Verschleiß. Alle lesen nur Daten, die schon in deiner Installation liegen; beim Anzeigen wird nichts aus dem Internet geholt. Betrachter sehen sie wie die anderen Bausteine.
+
+* **Belastung und Erholung – Wochenansicht:** Im Einstellungsdialog des Bausteins wählst du bei **Ansicht** die **Wochenansicht mit Ruhetagen** (8 oder 12 Wochen). Je Woche siehst du die Belastung laut Uhr als Balken, die Zahl der Touren und Kilometer und die **Ruhetage** (Tage ohne Tour) als sieben Punkte von Montag bis Sonntag: gefüllt = Tour, leer = Ruhetag, gestrichelt = Tag der laufenden Woche, der noch kommt. Hat eine Woche Touren, aber keinen Uhr-Wert, steht dort **„Belastung ohne Angabe“** und es gibt keinen Balken; „ohne Angabe“ zählt nie als 0. Eine Woche ohne Tour heißt **„Ruhewoche“**. Die Ansicht **Kompakt** ist wie bisher.
+* **Jahreszeiten und Wetter:** Zeigt, wann du unterwegs bist: die vier Jahreszeiten (Frühling März bis Mai, Sommer Juni bis August, Herbst September bis November, Winter Dezember bis Februar, nach der nördlichen Halbkugel) mit Touren oder Kilometern, dazu zwölf Säulen für die Monate (alle Jahre des gewählten Zeitraums zusammen). Aktivität und Zeitraum stellst du wie bei den anderen Bausteinen ein. Liegen zu deinen Touren Wetterdaten vor (sie werden beim Öffnen einer Tour oder in der Verwaltung mit **Wetter laden** gespeichert), kommen die durchschnittliche Temperatur je Monat und Jahreszeit und die Verteilung der Touren nach Temperatur (unter 0 °C, 0 bis 10, 10 bis 20, ab 20 °C) dazu. Ohne Wetterdaten steht ein ehrlicher Hinweis statt der Temperaturen; Touren ohne Wetterdaten zählen bei den Temperaturen nie als 0 °C.
+* **Ausrüstung:** Der Baustein zeigt jetzt zusätzlich den Anteil am Limit in Prozent (zum Beispiel „412 von 600 km (69 %)“). Ab 90 % des Limits steht **„Bald fällig“** mit einem Ausrufezeichen-Symbol, ab 100 % **„Limit erreicht“** beziehungsweise „Limit überschritten um …“ mit einem Kreuz-Symbol; Farbe allein trägt die Aussage nie. Ausrüstung mit Warnung steht ganz oben.
+
+„Heute vor X Jahren“ gibt es schon als eigenen Baustein (Kategorie Rückblick): die Touren dieses Kalendertags aus früheren Jahren mit Jahr, Name und Kilometern, ein Tipp öffnet die Tour. Er folgt bewusst nicht dem Zeitraum der Seite.
+
 [↑ Inhaltsverzeichnis](#inhalt)
 
 ---

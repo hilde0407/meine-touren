@@ -22,7 +22,7 @@ KEYS = ("tour-haupt", "tour-auswertung", "uebersicht")
 TOUR_TYPES = ["kennzahlen", "tempo", "vergleich", "pulszonen", "wetter", "fotostreifen", "notiz",
               "splits", "steigung", "bewegung", "durchschnitt", "jahresrang", "tageslicht", "gipfel", "vergleiche", "stimmung", "fotohighlights", "miniprofil", "steckbrief"]
 DASH_TYPES = ["periode", "belastung", "jahresvergleich", "letzte", "neuefotos", "auffaellig", "rekorde", "heutevor",
-              "jahresziel", "serie", "heatmap", "meilensteine", "wochentage", "sportarten", "wiederentdecken", "orte", "uhrenzeit", "ausruestung", "geplant", "rueckblick", "jahresziele"]
+              "jahresziel", "serie", "heatmap", "meilensteine", "wochentage", "sportarten", "wiederentdecken", "orte", "uhrenzeit", "ausruestung", "geplant", "rueckblick", "jahresziele", "saison"]
 NEW_TOUR = TOUR_TYPES[7:]
 NEW_DASH = DASH_TYPES[8:]
 

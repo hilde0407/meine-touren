@@ -2677,4 +2677,43 @@ Dieser Abschnitt bleibt immer sichtbar und lässt sich nicht gruppieren || This 
 Auf der Karte gibt es keine Gruppen || The map has no groups || La carte n’a pas de groupes || El mapa no tiene grupos
 Auf der Karte gibt es keine eigene Handy-Anordnung || The map has no own phone arrangement || La carte n’a pas de disposition propre au téléphone || El mapa no tiene disposición propia para el móvil
 Eine Gruppe verweist auf einen Abschnitt oder Baustein, den es auf dieser Seite nicht gibt || A group refers to a section or widget that does not exist on this page || Un groupe renvoie à une section ou à un bloc qui n’existe pas sur cette page || Un grupo remite a una sección o bloque que no existe en esta página
-`;
+Wie viel Belastung die letzten vier Wochen laut Uhr hatten, verglichen mit dem Schnitt davor, mit Wochenbalken. Als Wochenansicht: je Woche die Belastung laut Uhr, die Touren und die Ruhetage dazu. || How much load the last four weeks had according to the watch, compared with the average before, with weekly bars. As a weekly view: the load per week according to the watch, plus the tours and rest days. || Quelle charge ont eu les quatre dernières semaines selon la montre, comparée à la moyenne précédente, avec des barres par semaine. En vue hebdomadaire : la charge de chaque semaine selon la montre, avec les sorties et les jours de repos. || Cuánta carga tuvieron las últimas cuatro semanas según el reloj, comparada con la media anterior, con barras semanales. En vista semanal: la carga de cada semana según el reloj, junto con las rutas y los días de descanso.
+Kompakt (Vergleich mit Wochenbalken) || Compact (comparison with weekly bars) || Compacte (comparaison avec barres par semaine) || Compacta (comparación con barras semanales)
+Wochenansicht mit Ruhetagen || Weekly view with rest days || Vue hebdomadaire avec jours de repos || Vista semanal con días de descanso
+Wochen in der Wochenansicht || Weeks in the weekly view || Semaines dans la vue hebdomadaire || Semanas en la vista semanal
+8 Wochen || 8 weeks || 8 semaines || 8 semanas
+12 Wochen || 12 weeks || 12 semaines || 12 semanas
+Die Belastung konnte nicht geladen werden. || The load could not be loaded. || La charge n’a pas pu être chargée. || No se pudo cargar la carga.
+In den letzten 8 Wochen gab es keine Tour. || There was no tour in the last 8 weeks. || Il n’y a eu aucun parcours ces 8 dernières semaines. || No hubo ninguna ruta en las últimas 8 semanas.
+In den letzten 12 Wochen gab es keine Tour. || There was no tour in the last 12 weeks. || Il n’y a eu aucun parcours ces 12 dernières semaines. || No hubo ninguna ruta en las últimas 12 semanas.
+Ruhewoche || Rest week || Semaine de repos || Semana de descanso
+Belastung ohne Angabe || Load not specified || Charge non indiquée || Carga sin dato
+1 Ruhetag || 1 rest day || 1 jour de repos || 1 día de descanso
+{} Ruhetage || {} rest days || {} jours de repos || {} días de descanso
+In {} Wochen: {} bei {} (im Schnitt {} Ruhetage je Woche). || In {} weeks: {} with {} (on average {} rest days per week). || Sur {} semaines : {} pour {} (en moyenne {} jours de repos par semaine). || En {} semanas: {} con {} (de media {} días de descanso por semana).
+Balken: Belastung laut Uhr. Punkte: Tage mit Tour (gefüllt) und Ruhetage (leer), Montag bis Sonntag. || Bars: load according to the watch. Dots: days with a tour (filled) and rest days (empty), Monday to Sunday. || Barres : charge selon la montre. Points : jours avec parcours (pleins) et jours de repos (vides), du lundi au dimanche. || Barras: carga según el reloj. Puntos: días con ruta (rellenos) y días de descanso (vacíos), de lunes a domingo.
+Limit überschritten um {}: Zeit für einen Wechsel || Limit exceeded by {}: time for a replacement || Limite dépassée de {} : il est temps de remplacer || Límite superado en {}: toca cambiarlo
+Limit erreicht: Zeit für einen Wechsel || Limit reached: time for a replacement || Limite atteinte : il est temps de remplacer || Límite alcanzado: toca cambiarlo
+Jahreszeiten und Wetter || Seasons and weather || Saisons et météo || Estaciones y tiempo
+Wann du unterwegs bist: Touren und Kilometer je Monat und je Jahreszeit. Wenn zu deinen Touren Wetterdaten gespeichert sind, kommen die Temperaturen dazu, sonst steht ein Hinweis da. Es wird nichts nachgeladen. || When you are out: tours and kilometres per month and per season. If weather data is stored for your tours, the temperatures are added; otherwise a note is shown. Nothing is fetched. || Quand tu es en route : parcours et kilomètres par mois et par saison. Si des données météo sont enregistrées pour tes parcours, les températures s’y ajoutent ; sinon une remarque s’affiche. Rien n’est téléchargé. || Cuándo sales: rutas y kilómetros por mes y por estación. Si hay datos meteorológicos guardados para tus rutas, se añaden las temperaturas; si no, aparece un aviso. No se descarga nada.
+Die Auswertung konnte nicht geladen werden. || The evaluation could not be loaded. || L’évaluation n’a pas pu être chargée. || No se pudo cargar la evaluación.
+Frühling || Spring || Printemps || Primavera
+Sommer || Summer || Été || Verano
+Herbst || Autumn || Automne || Otoño
+Winter || Winter || Hiver || Invierno
+März bis Mai || March to May || Mars à mai || Marzo a mayo
+Juni bis August || June to August || Juin à août || Junio a agosto
+September bis November || September to November || Septembre à novembre || Septiembre a noviembre
+Dezember bis Februar || December to February || Décembre à février || Diciembre a febrero
+im Schnitt {} °C ({} bis {} °C) || on average {} °C ({} to {} °C) || en moyenne {} °C ({} à {} °C) || de media {} °C ({} a {} °C)
+Deine stärkste Jahreszeit: {}. || Your strongest season: {}. || Ta saison la plus forte : {}. || Tu estación más fuerte: {}.
+{} im gewählten Zeitraum, Jahreszeiten nach den Monaten der nördlichen Halbkugel. || {} in the selected period, seasons by the months of the northern hemisphere. || {} sur la période choisie, saisons selon les mois de l’hémisphère nord. || {} en el periodo elegido, estaciones según los meses del hemisferio norte.
+Säulendiagramm {} je Monat, am stärksten {} mit {} || Bar chart of {} per month, strongest in {} with {} || Diagramme en barres : {} par mois, le plus fort en {} avec {} || Gráfico de barras: {} por mes, más fuerte en {} con {}
+Touren nach Temperatur || Tours by temperature || Parcours par température || Rutas por temperatura
+Zeile unter den Monaten: durchschnittliche Temperatur der Touren in °C. || Row below the months: average temperature of the tours in °C. || Ligne sous les mois : température moyenne des parcours en °C. || Fila bajo los meses: temperatura media de las rutas en °C.
+Für diese Touren liegen noch keine Wetterdaten vor, deshalb gibt es keine Temperaturen. Sie werden beim Öffnen einer Tour oder in der Verwaltung mit „Wetter laden“ gespeichert; hier wird nichts abgerufen. || No weather data is available for these tours yet, so there are no temperatures. It is saved when you open a tour or in Admin with “Load weather”; nothing is fetched here. || Aucune donnée météo n’est encore disponible pour ces parcours, donc pas de températures. Elles sont enregistrées à l’ouverture d’un parcours ou dans l’administration avec « Charger la météo » ; rien n’est récupéré ici. || Todavía no hay datos meteorológicos de estas rutas, por eso no hay temperaturas. Se guardan al abrir una ruta o en Administración con «Cargar el tiempo»; aquí no se descarga nada.
+Unter 0 °C || Below 0 °C || Moins de 0 °C || Menos de 0 °C
+0 bis 10 °C || 0 to 10 °C || 0 à 10 °C || 0 a 10 °C
+10 bis 20 °C || 10 to 20 °C || 10 à 20 °C || 10 a 20 °C
+Ab 20 °C || From 20 °C || À partir de 20 °C || Desde 20 °C
+Wetterdaten für {} von {} Touren; die übrigen fehlen und zählen nicht mit (nie als 0 °C). Gespeichertes Wetter, kein neuer Abruf. || Weather data for {} of {} tours; the rest are missing and do not count (never as 0 °C). Stored weather, no new lookup. || Données météo pour {} sur {} parcours ; les autres manquent et ne comptent pas (jamais comme 0 °C). Météo enregistrée, aucune nouvelle requête. || Datos meteorológicos de {} de {} rutas; el resto falta y no cuenta (nunca como 0 °C). Tiempo guardado, sin nueva consulta.`;

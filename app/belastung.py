@@ -99,8 +99,15 @@ def _weeks(tours, lo, hi):
         iso = d.isocalendar()
         out[d] = _bucket(d.isoformat(), f"KW {iso[1]}/{iso[0]}", d, d + timedelta(days=6))
         d += timedelta(days=7)
+    for b in out.values():
+        b["km"], b["tage"] = 0.0, ["0"] * 7                   # 3.37.0: Kilometer und aktive Tage (Mo..So, "1" = mindestens eine Tour) für die Wochenansicht
     for t in tours:
-        _add(out[_monday(t["day"])], t["v"])
+        w = out[_monday(t["day"])]
+        _add(w, t["v"])
+        w["km"] += (t["dist_m"] or 0) / 1000
+        w["tage"][t["day"].weekday()] = "1"
+    for b in out.values():
+        b["km"], b["tage"] = round(b["km"], 1), "".join(b["tage"])
     return list(out.values())
 
 

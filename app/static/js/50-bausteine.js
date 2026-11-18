@@ -23,7 +23,38 @@ const slPvBars = v => slPrev(`<svg viewBox="0 0 120 40" class="slpvs" aria-hidde
 /* ---- 3.18.0 gemeinsame Hilfen für Grafiken: Maße als Attribute, Farben über Klassen und CSS-Variablen (style.css „Mehr Bausteine“) ---- */
 const SL_CATS = [["reise", "Reisen"], ["foto", "Fotos"], ["karte", "Karte"], ["statistik", "Statistik"], ["zahlen", "Zahlen"], ["grafik", "Grafiken"], ["spass", "Spaß und Eigenes"], ["rueck", "Rückblick"], ["plan", "Planung"], ["quellen", "Touren holen"]];
 const slEnc = encodeURIComponent;
+/* Zeile aus Teilen, jedes Teil ein eigener Textknoten (die Übersetzung greift je Teil; der Punkt dazwischen kommt aus dem Stylesheet) */
+const slSegs = parts => parts.filter(Boolean).map(x => `<span>${x}</span>`).join("");
 const slGet = u => api(u).catch(() => null);
+/* 3.37.0 Wochenansicht von „Belastung und Erholung“: je Woche Belastung laut Uhr (Balken), Touren und Kilometer sowie Ruhetage (Tage ohne Tour) als sieben Punkte.
+   „Ohne Angabe“ (Touren, aber kein Uhr-Wert) ist nie 0: kein Balken, dafür der Text. Eine Woche ohne Tour ist bekannt ruhig. Der Server liefert je Woche touren, belastung, km und tage (Mo bis So, "1" = Tour). */
+function slBelWochen(c, b, d, said, nw, mon, now) {
+  const by = new Map((d.wochen || []).map(x => [x.von, x])), wd = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"], run = ((now.getDay() + 6) % 7) + 1, rows = [];
+  for (let i = nw - 1; i >= 0; i--) {
+    const m0 = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() - i * 7), m1 = new Date(m0.getFullYear(), m0.getMonth(), m0.getDate() + 6), v = by.get(slIso(m0)) || {touren: 0, belastung: null, km: 0, tage: "0000000"},
+      elapsed = i === 0 ? run : 7, act = [...v.tage].slice(0, elapsed).filter(x => x === "1").length;
+    rows.push({m0, m1, v, cur: i === 0, rest: elapsed - act, elapsed, act});
+  }
+  const mx = Math.max(1, ...rows.map(r => r.v.belastung || 0)), rest = rows.reduce((a, r) => a + r.rest, 0), days = rows.reduce((a, r) => a + r.elapsed, 0), tours = rows.reduce((a, r) => a + r.v.touren, 0);
+  if (!tours) return slNote(b, nw === 12 ? "In den letzten 12 Wochen gab es keine Tour." : "In den letzten 8 Wochen gab es keine Tour.");
+  const wkNo = dt => {                                                                      // ISO-Kalenderwoche des Montags
+    const x = new Date(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate())), dn = x.getUTCDay() || 7;
+    x.setUTCDate(x.getUTCDate() + 4 - dn);
+    return Math.ceil(((x - Date.UTC(x.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7);
+  };
+  const li = rows.slice().reverse().map(r => {
+    const v = r.v, none = v.touren === 0, noval = v.touren > 0 && v.belastung == null, lab = `KW ${wkNo(r.m0)} · ${r.m0.getDate()}.${r.m0.getMonth() + 1}.–${r.m1.getDate()}.${r.m1.getMonth() + 1}.`,
+      val = none ? "Ruhewoche" : noval ? "Belastung ohne Angabe" : `Belastung ${nf(v.belastung, 0)}`,
+      dots = [...v.tage].map((x, k) => `<i class="slwdo ${k >= r.elapsed ? "fut" : x === "1" ? "on" : "off"}"><span class="slwdl">${wd[k]}</span></i>`).join("");
+    return `<li class="slwk${r.cur ? " cur" : ""}"><div class="slr1"><span>${esc(lab)}${r.cur ? ' <small class="mut">läuft</small>' : ""}</span><b>${val}</b></div>${slBr(v.belastung == null ? 0 : (v.belastung / mx) * 100)}` +
+      `<div class="slwdd" aria-hidden="true">${dots}</div><p class="mut slr2 slsegs">${slSegs([v.touren === 1 ? "1 Tour" : `${v.touren} Touren`, `${nf(v.km || 0, 1)} km`, r.rest === 1 ? "1 Ruhetag" : `${r.rest} Ruhetage`])}</p></li>`;
+  });
+  b.innerHTML = `<p class="slcmp">${said || "Für einen Vergleich liegen noch zu wenige Wochen mit Uhr-Daten vor"}</p>` +
+    `<p class="mut slcmpn">In ${nw} Wochen: ${rest === 1 ? "1 Ruhetag" : rest + " Ruhetage"} bei ${tours === 1 ? "1 Tour" : tours + " Touren"} (im Schnitt ${nf((rest / days) * 7, 1)} Ruhetage je Woche).</p>` +
+    (d.daten_insgesamt ? "" : '<p class="mut slcmpn">Noch keine Uhr-Daten: Die Belastung stammt aus den Trainingsdaten der Uhr.</p>') +
+    `<ul class="slrows slwks">${li.join("")}</ul><p class="mut slcmpn slwleg">Balken: Belastung laut Uhr. Punkte: Tage mit Tour (gefüllt) und Ruhetage (leer), Montag bis Sonntag.</p><p><a href="#/places">Mehr in der Auswertung ›</a></p>`;
+  slBadge(c, rest === 1 ? "1 Ruhetag" : `${rest} Ruhetage`);
+}
 const slClamp = (x, a = 0, b = 100) => Math.max(a, Math.min(b, x));
 const slDur = s => {
   const m = Math.round(s / 60);
@@ -187,16 +218,22 @@ Object.assign(window.SL_WT, {
     },
   },
   belastung: {
-    fam: "uebersicht", cat: "grafik", icon: "heart", name: "Belastung und Erholung", title: () => "Belastung und Erholung",
-    desc: "Wie viel Belastung die letzten vier Wochen laut Uhr hatten, verglichen mit dem Schnitt davor, mit Wochenbalken.",
+    fam: "uebersicht", cat: "grafik", icon: "heart", name: "Belastung und Erholung", title: () => "Belastung und Erholung", defaults: {view: "kompakt", weeks: 8},
+    desc: "Wie viel Belastung die letzten vier Wochen laut Uhr hatten, verglichen mit dem Schnitt davor, mit Wochenbalken. Als Wochenansicht: je Woche die Belastung laut Uhr, die Touren und die Ruhetage dazu.",
+    fields: [{k: "view", kind: "radio", def: "kompakt", label: "Ansicht", options: [["kompakt", "Kompakt (Vergleich mit Wochenbalken)"], ["wochen", "Wochenansicht mit Ruhetagen"]]},
+      {k: "weeks", kind: "radio", num: true, def: 8, label: "Wochen in der Wochenansicht", options: [[8, "8 Wochen"], [12, "12 Wochen"]]}],
     preview: () => slPvBars([10, 18, 14, 26, 20, 32, 24]),
-    async render(c, b) {
-      const von = new Date(Date.now() - 84 * 864e5),
-        d = await api(`/api/stats/belastung?von=${slIso(von)}&bis=${slIso(new Date())}`).catch(() => null);
-      if (!d || !d.daten_insgesamt) return slNote(b, "Noch keine Uhr-Daten: Die Belastung stammt aus den Trainingsdaten der Uhr.");
-      const A = d.aktuell || {},
-        said = {deutlich_mehr: "Deutlich mehr Belastung als sonst", mehr: "Etwas mehr Belastung als sonst", aehnlich: "Ähnlich viel Belastung wie sonst", weniger: "Etwas weniger Belastung als sonst", deutlich_weniger: "Deutlich weniger Belastung als sonst"}[A.stufe],
-        w = d.wochen.slice(-12),
+    async render(c, b, cfg) {
+      const wk = (cfg || {}).view === "wochen", nw = +(cfg || {}).weeks === 12 ? 12 : 8, now = new Date(),
+        mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7)),
+        von = wk ? new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() - (nw - 1) * 7) : new Date(Date.now() - 84 * 864e5),
+        d = await api(`/api/stats/belastung?von=${slIso(von)}&bis=${slIso(now)}`).catch(() => null);
+      if (!wk && (!d || !d.daten_insgesamt)) return slNote(b, "Noch keine Uhr-Daten: Die Belastung stammt aus den Trainingsdaten der Uhr.");
+      if (wk && !d) return slNote(b, "Die Belastung konnte nicht geladen werden.");
+      const A = (d && d.aktuell) || {},
+        said = {deutlich_mehr: "Deutlich mehr Belastung als sonst", mehr: "Etwas mehr Belastung als sonst", aehnlich: "Ähnlich viel Belastung wie sonst", weniger: "Etwas weniger Belastung als sonst", deutlich_weniger: "Deutlich weniger Belastung als sonst"}[A.stufe];
+      if (wk) return slBelWochen(c, b, d, said, nw, mon, now);
+      const w = d.wochen.slice(-12),
         mx = Math.max(1, ...w.map(x => x.belastung || 0)),
         bars = w.map((x, i) => `<rect class="${x.belastung == null ? "slbn" : "slbv"}" x="${i * 20 + 2}" y="${x.belastung == null ? 38 : 40 - Math.max(2, (x.belastung / mx) * 38)}" width="14" height="${x.belastung == null ? 2 : Math.max(2, (x.belastung / mx) * 38)}" rx="2"/>`).join("");
       b.innerHTML = `<p class="slcmp">${said || "Für einen Vergleich liegen noch zu wenige Wochen mit Uhr-Daten vor"}</p>${A.abweichung_pct != null ? `<p class="mut slcmpn">${A.abweichung_pct > 0 ? "+" : ""}${A.abweichung_pct} % gegenüber dem Schnitt der 12 Wochen davor</p>` : ""}` +

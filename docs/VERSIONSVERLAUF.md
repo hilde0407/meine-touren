@@ -2,6 +2,15 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.37.0 – Neue Bausteine
+
+- Lückenprüfung zuerst: „Heute vor X Jahren“ gab es schon (Baustein „heutevor“), „Belastung und Erholung“ und „Ausrüstung“ waren großteils vorhanden; gebaut wurden nur die echten Lücken.
+- Neu: Baustein „Jahreszeiten und Wetter“ (Touren und Kilometer je Jahreszeit und Monat; Temperaturen nur aus lokal gespeicherten Wetterdaten, sonst ehrlicher Hinweis, nie ein Abruf).
+- „Belastung und Erholung“: Wochenansicht (8 oder 12 Wochen) mit Belastung laut Uhr, Touren, Kilometern und Ruhetagen; „ohne Angabe“ zählt nie als 0.
+- „Ausrüstung“: Prozent des Limits, Warnsymbole (! ab 90 %, × ab 100 %) zusätzlich zur Farbe, Warnungen zuerst.
+
+Einzelheiten: [docs/versionen/3.37.0.md](versionen/3.37.0.md)
+
 ## Version 3.36.0 – Bedienung der Seitenanpassung
 
 - Bausteine duplizieren (Kopie mit denselben Einstellungen direkt dahinter, nur bei mehrfach nutzbaren Bausteinen).

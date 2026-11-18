@@ -163,6 +163,45 @@ Object.assign(window.SL_WT, {
       slBadge(c, SL_WDL[fav]);
     },
   },
+  /* 3.37.0 Jahreszeiten und Wetter: rechnet der Server (GET /api/bausteine/saison, app/bausteine_daten.py) aus Touren und den schon lokal gespeicherten Wetterdaten; hier wird nie ein Wetterdienst gefragt */
+  saison: {
+    fam: "uebersicht", cat: "grafik", icon: "cloud", name: "Jahreszeiten und Wetter", title: () => "Jahreszeiten und Wetter", defaults: {metric: "km"}, filter: {range: "all"},
+    desc: "Wann du unterwegs bist: Touren und Kilometer je Monat und je Jahreszeit. Wenn zu deinen Touren Wetterdaten gespeichert sind, kommen die Temperaturen dazu, sonst steht ein Hinweis da. Es wird nichts nachgeladen.",
+    fields: [{k: "metric", kind: "radio", def: "km", label: "Säulen nach", options: [["km", "Kilometern"], ["count", "Anzahl der Touren"]]}, {kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}],
+    preview: () => slPvBars([8, 12, 20, 28, 34, 26, 30, 22, 16, 10, 6, 4]),
+    async render(c, b, cfg) {
+      const R = flRange(cfg, "all"), u = new URLSearchParams();
+      if ((cfg.sports || []).length) u.set("sport", cfg.sports.join(","));
+      if (R.kind === "all" || !R.from) u.set("zeitraum", "all");
+      else {
+        u.set("zeitraum", "c");
+        u.set("von", R.from);
+        u.set("bis", R.to);
+      }
+      const d = await slGet(`/api/bausteine/saison?${u}`);
+      if (!d) return slNote(b, "Die Auswertung konnte nicht geladen werden.");
+      if (!d.touren) return flNone(b, (cfg.sports || []).length || cfg.range ? "" : "Noch keine Touren.");
+      const km = cfg.metric !== "count", val = x => (km ? x.km : x.touren), un = km ? "km" : "Touren", ZN = {fruehling: "Frühling", sommer: "Sommer", herbst: "Herbst", winter: "Winter"},
+        ZM = {fruehling: "März bis Mai", sommer: "Juni bis August", herbst: "September bis November", winter: "Dezember bis Februar"}, wx = d.wetter || {}, has = wx.mit > 0,
+        tt = x => `im Schnitt ${nf(x.t_mittel, 0)} °C (${nf(x.t_min, 0)} bis ${nf(x.t_max, 0)} °C)`,
+        zmax = Math.max(...d.jahreszeiten.map(val), 1e-9), best = d.jahreszeiten.reduce((a, x) => (val(x) > val(a) ? x : a), d.jahreszeiten[0]),
+        zrows = d.jahreszeiten.map(z => `<li${z === best ? ' class="slbest"' : ""}><div class="slr1"><span>${ZN[z.key]}</span><b>${nf(val(z), 0)} ${un}</b></div>${slBr((val(z) / zmax) * 100)}` +
+          `<p class="mut slr2 slsegs">${slSegs([ZM[z.key], z.touren === 1 ? "1 Tour" : z.touren + " Touren", km ? "" : `${nf(z.km, 0)} km`, z.mit_wetter ? tt(z) : ""])}</p></li>`),
+        vals = d.monate.map(val), mb = vals.indexOf(Math.max(...vals));
+      let h = `${val(best) > 0 ? `<p class="slcmp">Deine stärkste Jahreszeit: ${ZN[best.key]}.</p>` : ""}<p class="mut slcmpn">${d.touren === 1 ? "1 Tour" : d.touren + " Touren"} im gewählten Zeitraum, Jahreszeiten nach den Monaten der nördlichen Halbkugel.</p>` + slRows(zrows) +
+        `<p class="slcmpn">Monate</p>` + slCols(vals, {hl: mb, label: `Säulendiagramm ${km ? "Kilometer" : "Touren"} je Monat, am stärksten ${MONL[mb]} mit ${nf(vals[mb], 0)} ${un}`, labels: SL_MON, cls: "slsm"});
+      if (has) h += `<div class="slxl sltmp" aria-hidden="true">${d.monate.map(m => `<span>${m.t_mittel == null ? "–" : nf(m.t_mittel, 0) + "°"}</span>`).join("")}</div><p class="mut slcmpn">Zeile unter den Monaten: durchschnittliche Temperatur der Touren in °C.</p>`;
+      if (!has) h += '<p class="mut slnone slwx">Für diese Touren liegen noch keine Wetterdaten vor, deshalb gibt es keine Temperaturen. Sie werden beim Öffnen einer Tour oder in der Verwaltung mit „Wetter laden“ gespeichert; hier wird nichts abgerufen.</p>';
+      else {
+        const KL = {kalt: "Unter 0 °C", kuehl: "0 bis 10 °C", mild: "10 bis 20 °C", warm: "Ab 20 °C"}, kmax = Math.max(...wx.klassen.map(x => x.touren), 1);
+        h += `<p class="slcmpn">Touren nach Temperatur</p>` + slRows(wx.klassen.map(k => `<li><div class="slr1"><span>${KL[k.key]}</span><b>${k.touren === 1 ? "1 Tour" : k.touren + " Touren"}</b></div>${slBr((k.touren / kmax) * 100)}<p class="mut slr2">${nf(k.km, 0)} km</p></li>`)) +
+          `<p class="mut slcmpn">${wx.ohne ? `Wetterdaten für ${wx.mit} von ${d.touren} Touren; die übrigen fehlen und zählen nicht mit (nie als 0 °C).` : `Wetterdaten für alle ${wx.mit} Touren.`} Gespeichertes Wetter, kein neuer Abruf.</p>`;
+      }
+      b.innerHTML = h;
+      slPos(b);
+      slBadge(c, ZN[best.key]);
+    },
+  },
   sportarten: {
     fam: "uebersicht", cat: "grafik", icon: "map", name: "Sportarten-Verteilung", title: () => "Sportarten-Verteilung", defaults: {metric: "count"}, filter: {range: "all"},
     desc: "Welche Sportarten du wie oft machst, als Ring mit Legende, nach Anzahl der Touren, Kilometern oder Zeit.",
@@ -269,10 +308,13 @@ Object.assign(window.SL_WT, {
     async render(c, b) {
       const L = await slGet("/api/bausteine/ausruestung");
       if (!L || !L.length) return slNote(b, "Noch keine Ausrüstung angelegt.");
-      const rows = L.slice(0, 8).map(g => {
-        const lim = g.limit_km, cls = g.status === "over" ? "bad" : g.status === "soon" ? "warn" : "";
-        return `<li><div class="slr1"><span>${esc(g.name)}</span><b>${lim ? `${nf(g.km, 0)} von ${slKm(lim)}` : slKm(g.km)}</b></div>${slBr(lim ? (g.km / lim) * 100 : 0, cls)}` +
-          `<p class="mut slr2">${lim ? (g.status === "over" ? "Limit erreicht" : g.status === "soon" ? `Bald fällig: noch ${slKm(lim - g.km)}` : `Noch ${slKm(lim - g.km)}`) : "Ohne Limit"}</p></li>`;
+      const rank = g => (g.status === "over" ? 0 : g.status === "soon" ? 1 : 2), S = L.map((g, i) => [g, i]).sort((x, y) => rank(x[0]) - rank(y[0]) || x[1] - y[1]).map(x => x[0]);   // 3.37.0: Warnungen zuerst
+      const rows = S.slice(0, 8).map(g => {
+        const lim = g.limit_km, cls = g.status === "over" ? "bad" : g.status === "soon" ? "warn" : "", pct = lim ? Math.round((g.km / lim) * 100) : null,
+          ic = g.status === "over" ? '<span class="slwi bad" aria-hidden="true">×</span>' : g.status === "soon" ? '<span class="slwi warn" aria-hidden="true">!</span>' : "",
+          line = !lim ? "Ohne Limit" : g.status === "over" ? (g.km > lim ? `Limit überschritten um ${slKm(g.km - lim)}: Zeit für einen Wechsel` : "Limit erreicht: Zeit für einen Wechsel") : g.status === "soon" ? `Bald fällig: noch ${slKm(lim - g.km)}` : `Noch ${slKm(lim - g.km)}`;
+        return `<li${cls ? ` class="slgw gw-${cls}"` : ""}><div class="slr1"><span>${ic}${esc(g.name)}</span><b>${lim ? `${nf(g.km, 0)} von ${slKm(lim)} (${pct} %)` : slKm(g.km)}</b></div>${slBr(lim ? (g.km / lim) * 100 : 0, cls)}` +
+          `<p class="mut slr2">${line}</p></li>`;
       });
       b.innerHTML = slRows(rows) + '<p><a href="#/places">Ausrüstung verwalten ›</a></p>';
       const due = L.filter(g => g.status === "over" || g.status === "soon").length;
@@ -827,7 +869,7 @@ function slYearShell(it) {
     kennzahlen: "halb", tempo: "halb", vergleich: "halb", pulszonen: "halb", wetter: "halb", fotostreifen: "voll", notiz: "halb", splits: "voll", steigung: "halb", bewegung: "halb",
     durchschnitt: "halb", jahresrang: "halb", tageslicht: "halb", gipfel: "halb", vergleiche: "halb", stimmung: "halb", fotohighlights: "voll", miniprofil: "voll", steckbrief: "halb",
     jahr: "voll", periode: "halb", belastung: "halb", jahresvergleich: "halb", letzte: "halb", neuefotos: "voll", auffaellig: "drittel", rekorde: "halb", heutevor: "halb", jahresziel: "halb",
-    serie: "halb", heatmap: "voll", meilensteine: "halb", wochentage: "halb", sportarten: "halb", wiederentdecken: "voll", orte: "halb", uhrenzeit: "voll", ausruestung: "halb", geplant: "halb", rueckblick: "voll", jahresziele: "halb", zeppimport: "halb", holenknopf: "drittel",
+    serie: "halb", heatmap: "voll", meilensteine: "halb", wochentage: "halb", saison: "voll", sportarten: "halb", wiederentdecken: "voll", orte: "halb", uhrenzeit: "voll", ausruestung: "halb", geplant: "halb", rueckblick: "voll", jahresziele: "halb", zeppimport: "halb", holenknopf: "drittel",
   };
   Object.entries(META).forEach(([k, w]) => {
     const T = window.SL_WT[k];

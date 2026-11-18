@@ -1890,3 +1890,23 @@ body.sl-dev-mob #main .slgb{display:flex;flex-direction:column}
   .slst .slmorebtn{display:inline-flex}
 }
 @media print{.slbt{display:none!important}}
+/* 3.37.0 Neue Bausteine: Wochenansicht Belastung und Erholung, Ausrüstung mit Warnzeichen, Jahreszeiten und Wetter */
+.slwk .slr1,.slgw .slr1{flex-wrap:wrap}
+.slwk .slr1 b{font-size:16px}
+.slwk.cur .slr1 span{font-weight:600}
+.slwdd{display:flex;gap:4px;margin:6px 0 0}
+.slwdo{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;box-sizing:border-box;font-style:normal;font-size:12px;letter-spacing:-.3px;line-height:1;border:1.5px solid var(--bars)}
+.slwdo.on{background:var(--bars);color:var(--card,#fff);border-color:var(--bars)}
+.slwdo.off{background:transparent;color:var(--mut)}
+.slwdo.fut{border-style:dashed;border-color:var(--soft);color:var(--mut);opacity:.7}
+.slwdl{pointer-events:none}
+.slwleg{margin-top:10px}
+.slwi{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-right:6px;border-radius:50%;font:700 13px/1 var(--d);vertical-align:-2px;color:var(--card,#fff)}
+.slwi.warn{box-sizing:border-box;border:2px solid var(--sl-c5);color:var(--ink)}
+.slwi.bad{background:var(--sl-c6)}
+.slgw.gw-warn .slr2,.slgw.gw-bad .slr2{color:var(--ink);font-weight:600}
+.slbest .slr1 span{font-weight:600}
+.sltmp{margin-top:2px}
+.slwx{margin-top:12px}
+.slr2.slsegs{display:block}
+.slsegs span+span::before{content:"·";margin:0 7px}

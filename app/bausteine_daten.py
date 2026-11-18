@@ -24,6 +24,12 @@ GET /api/bausteine/<name> (nur lesend, je Benutzer – die Datenbank und der Zwi
                 Verteilung der Streckenlängen und die besten Touren (?wert=km|hm|dauer|tempo, ?n=1…20). Die Oberfläche rechnet dieselben Regeln aus den geladenen Touren
                 (56-bausteine-statistik.js); dieser Endpunkt ist die Referenz, gegen die die Tests prüfen.
 
+  3.37.0 Jahreszeiten und Wetter:
+    saison      Touren und Kilometer je Kalendermonat (alle Jahre des Zeitraums zusammen) und je Jahreszeit (Frühling März–Mai, Sommer Juni–August, Herbst September–November,
+                Winter Dezember–Februar, nördliche Halbkugel), mit denselben Filterparametern wie „statistik“. Temperaturen nur aus den schon lokal gespeicherten Wetterdaten
+                (Tabelle weather, Mittel aus Tagesminimum und -maximum der Tour); es wird nie ein Wetterdienst gefragt. Touren ohne Wetterdaten zählen bei den Temperaturen nicht mit
+                (nie als 0 °C), die Zahl steht in wetter.ohne.
+
 Fehlt etwas, kommt {"status": "<grund>"} (nie 0 als Platzhalter): keine_strecke, keine_zeit, keine_hoehe, zu_kurz, keine_position, polar.
 Der Zwischenspeicher cache/bausteine/<id>.json gilt nur, solange die Quelldatei unverändert ist (Änderungszeit + Größe) und die Rechenvorschrift (ALGO) gleich bleibt;
 er baut sich von selbst neu auf und braucht keine Sicherung.
@@ -377,7 +383,9 @@ def api_ausruestung():
     for g in gear.api_gear():
         if g.get("until"):
             continue                                           # ausgemusterte Ausrüstung nicht zeigen
-        out.append({k: g[k] for k in ("id", "name", "kind", "km", "up", "h", "n", "limit_km", "status", "last")})
+        row = {k: g[k] for k in ("id", "name", "kind", "km", "up", "h", "n", "limit_km", "status", "last")}
+        row["anteil_pct"] = round(g["km"] / g["limit_km"] * 100) if g.get("limit_km") else None        # 3.37.0: Anteil am Limit (über 100 möglich), ohne Limit None
+        out.append(row)
     return out
 
 
@@ -554,3 +562,86 @@ def statistik_auswertung(sport="", zeitraum_="all", jahr=0, von_="", bis_="", we
 @router.get("/api/bausteine/statistik")
 def api_statistik(sport: str = "", zeitraum: str = "all", jahr: int = 0, von: str = "", bis: str = "", wert: str = "km", n: int = 5):
     return statistik_auswertung(sport, zeitraum, jahr, von, bis, wert, n)
+
+
+# ------------------------------------------------------------------------------------------------ 3.37.0 Jahreszeiten und Wetter
+JAHRESZEITEN = (("fruehling", (3, 4, 5)), ("sommer", (6, 7, 8)), ("herbst", (9, 10, 11)), ("winter", (12, 1, 2)))
+TEMP_KLASSEN = (("kalt", None, 0.0), ("kuehl", 0.0, 10.0), ("mild", 10.0, 20.0), ("warm", 20.0, None))     # Mitteltemperatur der Tour in °C: [von, bis)
+TEMP_MIN, TEMP_MAX = -60.0, 60.0                                                                           # plausibler Bereich; alles andere gilt als „ohne Angabe“
+
+
+def _tour_temp(js):
+    """Gespeicherte Wetterdaten einer Tour (JSON-Text) -> (Mittel, Tiefstwert, Höchstwert) in °C oder None, wenn Angaben fehlen oder unplausibel sind."""
+    try:
+        w = json.loads(js)
+        lo, hi = w["tmin"], w["tmax"]
+    except (TypeError, ValueError, KeyError):
+        return None
+    if isinstance(lo, bool) or isinstance(hi, bool) or not isinstance(lo, (int, float)) or not isinstance(hi, (int, float)):
+        return None
+    if not (math.isfinite(lo) and math.isfinite(hi)) or not (TEMP_MIN <= lo <= TEMP_MAX and TEMP_MIN <= hi <= TEMP_MAX) or lo > hi:
+        return None
+    return (lo + hi) / 2, float(lo), float(hi)
+
+
+def _zusammen(b):
+    """Sammler {touren, km, mit, summe, lo, hi} -> Ausgabe mit gerundeten Werten; Temperaturen nur mit mindestens einer Tour mit Wetterdaten."""
+    return {"touren": b["touren"], "km": round(b["km"], 3), "mit_wetter": b["mit"], "t_mittel": round(b["summe"] / b["mit"], 1) if b["mit"] else None,
+            "t_min": round(b["lo"], 1) if b["mit"] else None, "t_max": round(b["hi"], 1) if b["mit"] else None}
+
+
+def _sammler():
+    return {"touren": 0, "km": 0.0, "mit": 0, "summe": 0.0, "lo": math.inf, "hi": -math.inf}
+
+
+def saison_auswertung(sport="", zeitraum_="all", jahr=0, von_="", bis_="", heute=None):
+    heute = heute or datetime.now(TZ).date()
+    sports, jahr, von, bis, _ = _filter(sport, zeitraum_, jahr, von_, bis_, heute)
+    rows = [r for r in _rows(sports) if (not von or r["d"] >= von) and r["d"] <= bis]
+    temps = {r["id"]: r["js"] for r in db.query("SELECT id, js FROM weather")}                 # nur lokal Gespeichertes, kein Abruf
+    mon = {m: _sammler() for m in range(1, 13)}
+    klassen = {k: {"touren": 0, "km": 0.0} for k, _, _ in TEMP_KLASSEN}
+    alle = _sammler()
+    ohne = 0
+    for r in rows:
+        km = (r["dist_m"] or 0) / 1000
+        t = _tour_temp(temps[r["id"]]) if r["id"] in temps else None
+        for b in (mon[r["d"].month], alle):
+            b["touren"] += 1
+            b["km"] += km
+            if t:
+                b["mit"] += 1
+                b["summe"] += t[0]
+                b["lo"] = min(b["lo"], t[1])
+                b["hi"] = max(b["hi"], t[2])
+        if not t:
+            ohne += 1
+            continue
+        k = next(k for k, a, z in TEMP_KLASSEN if (a is None or t[0] >= a) and (z is None or t[0] < z))
+        klassen[k]["touren"] += 1
+        klassen[k]["km"] += km
+    out = {"zeitraum": zeitraum_, "von": von.isoformat() if von else None, "bis": bis.isoformat(), "sport": sports, "touren": len(rows),
+           "km": round(sum((r["dist_m"] or 0) for r in rows) / 1000, 3)}
+    out["monate"] = [{"monat": m, **_zusammen(mon[m])} for m in range(1, 13)]
+    zeiten = []
+    for key, ms in JAHRESZEITEN:
+        s = _sammler()
+        for m in ms:
+            b = mon[m]
+            s["touren"] += b["touren"]
+            s["km"] += b["km"]
+            s["mit"] += b["mit"]
+            s["summe"] += b["summe"]
+            s["lo"] = min(s["lo"], b["lo"])
+            s["hi"] = max(s["hi"], b["hi"])
+        zeiten.append({"key": key, "monate": list(ms), **_zusammen(s)})
+    out["jahreszeiten"] = zeiten
+    mit = len(rows) - ohne
+    out["wetter"] = {"mit": mit, "ohne": ohne, **{k: v for k, v in _zusammen(alle).items() if k in ("t_mittel", "t_min", "t_max")},
+                     "klassen": [{"key": k, "von": a, "bis": z, "touren": klassen[k]["touren"], "km": round(klassen[k]["km"], 3)} for k, a, z in TEMP_KLASSEN] if mit else []}
+    return out
+
+
+@router.get("/api/bausteine/saison")
+def api_saison(sport: str = "", zeitraum: str = "all", jahr: int = 0, von: str = "", bis: str = ""):
+    return saison_auswertung(sport, zeitraum, jahr, von, bis)
