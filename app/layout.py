@@ -47,8 +47,20 @@ Seiten, die dort bekannt sind, werden abgelehnt (unbekannte Typen bleiben erlaub
 Strecken-Stil, Heatmap und Fotos, Touren im Ausschnitt) sind Standard-Abschnitte der Seite (order/hidden/closed/open wie sonst). Betrachter und Regeln wie bei den anderen Seiten.
 Zeitraum der Seite (3.34.0): der Zeitraum steht wie auf der Statistik im Feld „filter“ des Dokuments (range year|y|12m|90d|all|c, yr, from, to), jetzt auch im Dokument „uebersicht“ (ohne sports); ein Baustein behält seinen
 eigenen Zeitraum mit „eigen“ = true (auch die Eigene Kennzahl, Feld „eigen“).
+Gruppen (3.36.0, optional, alte Layouts bleiben unverändert gültig): groups [{id, title, ids, closed}] bündeln Abschnitte und Bausteine einer Seite zu einem einklappbaren Abschnitt.
+  id = „grp“ + 2 bis 12 Kleinbuchstaben/Ziffern (eindeutig, nie zugleich die Kennung eines Abschnitts)   title höchstens 60 Zeichen (leer = „Gruppe“)   ids 1 bis 30 Kennungen
+  closed true = standardmäßig zu (nur die Abweichung wird gespeichert; den aktuellen Zustand je Benutzer merkt die Oberfläche).
+  Strenge Regeln: höchstens 10 Gruppen; ein Abschnitt steht in höchstens einer Gruppe; keine Verschachtelung (eine Gruppe ist nie Mitglied einer Gruppe); jedes Mitglied muss es geben –
+  ein Standard-Abschnitt dieser Seite (STD_IDS) oder ein Baustein aus „widgets“ (im Dokument „tour-auswertung“ liegen die Bausteine im Dokument „tour-haupt“, dort genügt eine gültige Kennung);
+  Pflicht-Abschnitte (Einstieg „sum“, Kopf „kopf“) lassen sich nicht gruppieren. Die Karte (Schlüssel „karte“) hat keine Gruppen.
+Handy (3.36.0, optional): mob {order [id], hidden [id]} = abweichende Reihenfolge und Sichtbarkeit für schmale Bildschirme (bis 760 px). Fehlt „order“ bzw. „hidden“, gilt der Desktop-Wert;
+  ohne „mob“ gilt überall die Desktop-Anordnung wie bisher. Nicht auf der Karte. Gruppen gelten auf dem Handy wie am Desktop (gleiche Mitglieder).
+Layoutcode (3.36.0): POST /api/layout/code {code} prüft einen Code (Vorsilbe „MTA1.“ + JSON der Export-Datei als base64url, höchstens CODE_MAX Zeichen) mit denselben Regeln wie die Export-Datei (check_export).
+  Der Code enthält nur Layout und Baustein-Einstellungen, nie Tourdaten; es gibt keinen Zugriff auf Daten über einen Code.
 Betrachter dürfen lesen, bekommen aber immer den Standard (das Layout des Besitzers wird nicht übernommen) und dürfen nichts schreiben.
 """
+import base64
+import binascii
 import json
 import re
 import time
@@ -61,7 +73,7 @@ router = APIRouter()
 
 KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik", "reise", "reisen", "fotos", "karte")
 NEUE_SEITEN = ("uebersicht", "statistik", "reise", "reisen", "fotos", "karte")                 # Seiten mit genau einem Dokument (ohne Regeln nach Sportart)
-FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg", "w", "filter", "kopf"}
+FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg", "w", "filter", "kopf", "groups", "mob"}
 WIDTHS = ("voll", "zweidrittel", "halb", "drittel")
 # Bausteine, die eine Tour brauchen (Typkennungen wie in static/js/50-bausteine.js und 51-bausteine-tour.js, fam "tour"): nicht in der Übersicht
 TOUR_ONLY = frozenset(("kennzahlen", "tempo", "vergleich", "pulszonen", "wetter", "fotostreifen", "notiz", "splits", "steigung", "bewegung", "durchschnitt", "jahresrang",
@@ -105,6 +117,25 @@ MAX_TOTAL = 150000                # Gesamtgröße eines Behälters mit allen Ans
 STD_ID = "standard"
 STD_NAME = "Standard"
 EXPORT_FORMAT = "meine-touren-ansicht"
+# 3.36.0: Gruppen, Handy-Anordnung, Layoutcode
+GROUP_ID_RE = re.compile(r"^grp[a-z0-9]{2,12}$")
+MAX_GROUPS = 10
+MAX_GROUP_MEMBERS = 30
+MAX_GROUP_TITLE = 60
+GROUP_NEVER = frozenset(("sum", "kopf"))                      # Pflicht-Abschnitte (Einstieg in die Auswertung, Kopf der Reise-/Fotos-Seite) bleiben ungruppiert
+# Standard-Abschnitte je Seite (wie SL_REG in static/js/49-seitenlayout.js, 62-reiseseiten.js, 63-fotoseiten.js; tests/test_gruppen_ui.py vergleicht beide)
+_TOUR_STD = ("map", "prof", "puls", "wp", "sum", "photos", "geraet", "wx", "ana", "steig", "aehn", "cmp")
+STD_IDS = {
+    "tour-haupt": frozenset(_TOUR_STD), "tour-auswertung": frozenset(_TOUR_STD),
+    "uebersicht": frozenset(("aufmacher", "jahr", "zepp", "zuletzt", "tag", "erinn")),
+    "statistik": frozenset(("kpi", "ziele", "kmmonat", "kmverlauf", "sportarten", "bestwerte", "heat", "bl", "tp", "tag", "erinn")),
+    "reise": frozenset(("kopf", "kennzahlen", "stat", "flug", "karte", "fotos", "touren")),
+    "reisen": frozenset(("serien", "reisen", "alben", "entfernt")),
+    "fotos": frozenset(("kopf", "jahre", "raster")),
+    "karte": frozenset(),
+}
+CODE_PREFIX = "MTA1."
+CODE_MAX = 100000                                             # Zeichen des Layoutcodes (entspricht höchstens rund 75000 Byte JSON; base64url wächst um ein Drittel)
 
 
 def _ids(v, name):
@@ -345,6 +376,66 @@ def _cfg(v, typ=None):
     return out
 
 
+def _groups(v, key, wids):
+    """Gruppen eines Dokuments (3.36.0): streng geprüft, gibt die bereinigte Liste zurück (leer = keine Gruppen). wids = Kennungen der Bausteine dieses Dokuments."""
+    if not isinstance(v, list) or len(v) > MAX_GROUPS:
+        raise HTTPException(400, f"„groups“ muss eine Liste mit höchstens {MAX_GROUPS} Gruppen sein")
+    if v and key == "karte":
+        raise HTTPException(400, "Auf der Karte gibt es keine Gruppen")
+    gids, used, out = set(), set(), []
+    for g in v:
+        if not isinstance(g, dict) or set(g) - {"id", "title", "ids", "closed"}:
+            raise HTTPException(400, "Ungültige Gruppe")
+        i = g.get("id")
+        if not isinstance(i, str) or not GROUP_ID_RE.match(i):
+            raise HTTPException(400, "Ungültige Kennung einer Gruppe (erlaubt: grp plus 2 bis 12 Kleinbuchstaben oder Ziffern)")
+        if i in gids:
+            raise HTTPException(400, "Doppelte Kennung einer Gruppe")
+        gids.add(i)
+    for g in v:
+        t = g.get("title", "")
+        if not isinstance(t, str) or re.search(r"[\x00-\x1f\x7f<>]", t) or len(t.strip()) > MAX_GROUP_TITLE:
+            raise HTTPException(400, f"Der Titel einer Gruppe darf höchstens {MAX_GROUP_TITLE} Zeichen lang sein (ohne Steuer- und Spitzklammern)")
+        ids = g.get("ids")
+        if not isinstance(ids, list) or not 1 <= len(ids) <= MAX_GROUP_MEMBERS:
+            raise HTTPException(400, f"Eine Gruppe enthält 1 bis {MAX_GROUP_MEMBERS} Abschnitte")
+        mem = []
+        for x in ids:
+            if not isinstance(x, str) or not ID_RE.match(x):
+                raise HTTPException(400, "Ungültige Kennung in einer Gruppe")
+            if x in gids:
+                raise HTTPException(400, "Gruppen lassen sich nicht verschachteln")
+            if x in GROUP_NEVER:
+                raise HTTPException(400, "Dieser Abschnitt bleibt immer sichtbar und lässt sich nicht gruppieren")
+            if x in used or x in mem:
+                raise HTTPException(400, "Ein Abschnitt steht in höchstens einer Gruppe")
+            if x not in STD_IDS.get(key, ()) and x not in wids and key != "tour-auswertung":
+                raise HTTPException(400, "Eine Gruppe verweist auf einen Abschnitt oder Baustein, den es auf dieser Seite nicht gibt")
+            mem.append(x)
+        used.update(mem)
+        o = {"id": g["id"], "title": " ".join(t.split()), "ids": mem}
+        if "closed" in g:
+            if not isinstance(g["closed"], bool):
+                raise HTTPException(400, "„closed“ einer Gruppe muss true oder false sein")
+            if g["closed"]:
+                o["closed"] = True
+        out.append(o)
+    return out
+
+
+def _mob(v, key):
+    """Abweichende Anordnung für schmale Bildschirme (3.36.0): {order, hidden}, beide optional; leer = nichts gespeichert."""
+    if not isinstance(v, dict) or set(v) - {"order", "hidden"}:
+        raise HTTPException(400, "„mob“ darf nur „order“ und „hidden“ enthalten")
+    if v and key == "karte":
+        raise HTTPException(400, "Auf der Karte gibt es keine eigene Handy-Anordnung")
+    out = {}
+    for k in ("order", "hidden"):
+        if k in v:
+            out[k] = _ids(v[k], "mob." + k)
+    return out
+
+
 def clean(doc, key=None):
     """Prüft ein Layout-Dokument und gibt die bereinigte Fassung zurück (HTTPException 400 bei Fehlern)."""
     if not isinstance(doc, dict):
@@ -404,6 +495,14 @@ def clean(doc, key=None):
         out["widgets"] = ws
     if "filter" in doc:
         out["filter"] = _filter(doc["filter"])
+    if "groups" in doc:
+        g = _groups(doc["groups"], key, {x["id"] for x in out.get("widgets", [])})
+        if g:
+            out["groups"] = g
+    if "mob" in doc:
+        m = _mob(doc["mob"], key)
+        if m:
+            out["mob"] = m
     if "kopf" in doc:
         k = doc["kopf"]
         if not isinstance(k, dict) or set(k) - {"holen"} or not all(isinstance(x, bool) for x in k.values()):
@@ -483,7 +582,8 @@ def normalize(stored):
 
 
 def _stats(lay):
-    return {"order": len(lay.get("order", [])), "hidden": len(lay.get("hidden", [])), "widgets": len(lay.get("widgets", [])), "types": sorted({w["type"] for w in lay.get("widgets", [])})}
+    return {"order": len(lay.get("order", [])), "hidden": len(lay.get("hidden", [])), "widgets": len(lay.get("widgets", [])), "types": sorted({w["type"] for w in lay.get("widgets", [])}),
+            "groups": len(lay.get("groups", [])), "mob": bool(lay.get("mob"))}
 
 
 def check_export(doc):
@@ -532,6 +632,30 @@ def check_export(doc):
     if errors:
         res["layouts"] = {}
     return res
+
+
+def decode_code(text):
+    """Layoutcode (oder ein Link mit Code) → JSON-Objekt der Export-Datei; Fehler als HTTPException 400. Kein Datenzugriff: es wird nur dekodiert und anschließend wie eine Datei geprüft."""
+    if not isinstance(text, str):
+        raise HTTPException(400, "Kein Layoutcode")
+    t = text.strip()
+    if "layoutcode/" in t:
+        t = t.split("layoutcode/", 1)[1]
+    t = re.sub(r"\s+", "", t)
+    if len(t) > CODE_MAX:
+        raise HTTPException(400, "Der Layoutcode ist zu lang für eine Ansicht.")
+    if t.startswith(CODE_PREFIX):
+        t = t[len(CODE_PREFIX):]
+    else:
+        raise HTTPException(400, "Das ist kein Layoutcode aus „Meine Touren“ (er beginnt mit " + CODE_PREFIX + ").")
+    if not t or not re.fullmatch(r"[A-Za-z0-9_-]+={0,2}", t):
+        raise HTTPException(400, "Der Layoutcode enthält ungültige Zeichen oder ist unvollständig.")
+    try:
+        raw = base64.urlsafe_b64decode(t.rstrip("=") + "=" * (-len(t.rstrip("=")) % 4))
+        doc = json.loads(raw.decode("utf-8"))
+    except (binascii.Error, ValueError, UnicodeDecodeError):
+        raise HTTPException(400, "Der Layoutcode ist beschädigt oder unvollständig.")
+    return doc
 
 
 def _key(k):
@@ -608,6 +732,28 @@ async def post_check(request: Request):
     except ValueError:
         r = check_export(None)
         r["errors"] = ["Die Datei ist kein gültiges JSON."]
+        return r
+    return check_export(doc)
+
+
+@router.post("/api/layout/code")
+async def post_code(request: Request):
+    """Layoutcode prüfen (3.36.0): wie /api/layout/check, aber die Eingabe ist {"code": "MTA1.…"} (oder ein Link mit dem Code)."""
+    if _viewer(request):
+        raise HTTPException(403, "Dieser Zugang darf nur ansehen")
+    raw = await request.body()
+    r = check_export(None)
+    if len(raw) > CODE_MAX + 2000:
+        r["errors"] = ["Der Layoutcode ist zu lang für eine Ansicht."]
+        return r
+    try:
+        body = json.loads(raw or b"null")
+        doc = decode_code(body.get("code") if isinstance(body, dict) else None)
+    except HTTPException as e:
+        r["errors"] = [e.detail]
+        return r
+    except ValueError:
+        r["errors"] = ["Kein gültiges JSON."]
         return r
     return check_export(doc)
 

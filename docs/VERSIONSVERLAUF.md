@@ -2,6 +2,16 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.36.0 – Bedienung der Seitenanpassung
+
+- Bausteine duplizieren (Kopie mit denselben Einstellungen direkt dahinter, nur bei mehrfach nutzbaren Bausteinen).
+- Rückgängig und Wiederholen im Bearbeitungsmodus (Knöpfe, Strg/Cmd+Z, bis 50 Schritte, mit Ansage für Vorlesehilfen).
+- Gruppen: mehrere Bausteine zu einem einklappbaren Abschnitt bündeln (Titel frei, Zustand je Benutzer gemerkt); Vorlage „Mit Gruppe“.
+- Eigene Handy-Anordnung (Umschalter „Desktop | Handy“ mit Vorschau im schmalen Rahmen); ohne sie gilt die Desktop-Reihenfolge.
+- Ansichten teilen per Layoutcode oder Link (nur Layout und Einstellungen, serverseitig geprüft); Server prüft Gruppen und Handy-Anordnung streng, alte Layouts bleiben gültig.
+
+Einzelheiten: [docs/versionen/3.36.0.md](versionen/3.36.0.md)
+
 ## Version 3.35.0 – Eigene Kennzahlen weiterentwickeln
 
 - Ziel mit barrierefreiem Fortschrittsbalken, Rest bis zum Ziel und „Im Plan?“ (gleichmäßiges Soll, nur als Text und Marke, ohne Warnfarbe).

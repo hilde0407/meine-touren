@@ -175,6 +175,11 @@ const slUid = () => {
 const slLsKey = k => "mt_sl_" + slUid() + "_" + k;
 const slKeys = fam => (fam === "tour" ? ["tour-haupt", "tour-auswertung"] : [fam]);
 const slSt = fam => SL.docs[slKey1(fam)] || {};
+/* 3.36.0 Handy: Im Bearbeitungsmodus bestimmt der Umschalter „Desktop | Handy“ (SL.dev), sonst die Klasse html.mob (schmaler Bildschirm), welche Anordnung gilt.
+   Ohne eigenes „mob“ im Dokument gilt überall die Desktop-Anordnung wie bisher; die Karte hat keine eigene Handy-Anordnung. */
+const slMobNow = () => document.documentElement.classList.contains("mob");
+const slMobEff = fam => (fam || SL.fam) !== "karte" && (SL.edit ? SL.dev === "mob" : slMobNow());
+const slHidList = st => (slMobEff() && st && st.mob && st.mob.hidden ? st.mob.hidden : (st && st.hidden) || []);
 const slAlias = id => (id === "met" || id === "uhr" ? "geraet" : id);        // Messwerte und Training laut Uhr bilden einen Block
 
 /* ---------- Abschnitte, Seiten, Reihenfolge ---------- */
@@ -209,12 +214,12 @@ function slItems(fam) {
   return items;
 }
 /* Reihenfolge einer Seite: gespeicherte Ids (bekannte), Fehlende an ihrer Standardposition (hinter dem nächsten davor liegenden, schon eingeordneten Standard-Abschnitt) */
-function slOrder(fam, page) {
+function slOrder(fam, page, desk) {
   const mine = slItems(fam).filter(i => i.page === page),
     ids = mine.map(i => i.id),
     doc = SL.docs[SL_PAGE_KEY[page]] || {},
     eff = [];
-  (doc.order || []).forEach(id => ids.includes(id) && !eff.includes(id) && eff.push(id));
+  (!desk && slMobEff(fam) && doc.mob && doc.mob.order ? doc.mob.order : doc.order || []).forEach(id => ids.includes(id) && !eff.includes(id) && eff.push(id));
   mine.forEach((it, idx) => {
     if (eff.includes(it.id)) return;
     let at = 0;
@@ -234,7 +239,7 @@ const slOn = (id, page) => {
   const it = slItems("tour").find(i => i.id === slAlias(id));
   return !it || it.page === page;
 };
-const slHid = id => (slSt("tour").hidden || []).includes(slAlias(id));
+const slHid = id => slHidList(slSt("tour")).includes(slAlias(id));
 function slDef(id, d) {
   const st = slSt(SL.fam),
     a = slAlias(id);
@@ -316,6 +321,7 @@ function slPack(k) {
   return {v: 2, views: st.views, active: st.active, rules: st.rules || {}};
 }
 function slTouch(...keys) {
+  if (SL.edit && typeof slHistPush === "function") slHistPush(keys);
   keys.forEach(k => {
     slSync(k);
     SL.dirty.add(k);
@@ -380,6 +386,7 @@ const slSet = (st, name, id, on) => {
 
 /* ---------- Änderungen (Bearbeitungsmodus) ---------- */
 const slLive = t => {
+  if (SL.hlast && !SL.hlast.l) SL.hlast.l = t;                              // 3.36.0: der Verlauf (Rückgängig/Wiederholen) benennt den Schritt mit der Ansage der Änderung
   const l = document.getElementById("sllive");
   if (l) {
     l.textContent = "";
@@ -391,38 +398,81 @@ const slTitle = id => {
   return it ? it.title : id;
 };
 function slSaveOrder(ids) {
-  slDocOf(SL.page).order = ids;
+  const d = slDocOf(SL.page);
+  if (slMobEff()) (d.mob = d.mob || {}).order = ids;                       // 3.36.0: auf dem Handy-Reiter nur die Handy-Reihenfolge ändern
+  else d.order = ids;
   slTouch(SL_PAGE_KEY[SL.page]);
 }
-function slMove(id, beforeId) {
-  const cur = slOrder(SL.fam, SL.page).map(i => i.id).filter(x => x !== id),
-    at = beforeId ? cur.indexOf(beforeId) : -1;
+/* grp: undefined = Gruppen unverändert (Tastatur), null = ohne Gruppe, sonst Kennung der Gruppe (Ziehen: Zeiger über der Gruppe); beforeId null = ans Ende (der Gruppe) */
+function slMove(id, beforeId, grp) {
+  const old = slOrder(SL.fam, SL.page).map(i => i.id),
+    cur = old.filter(x => x !== id);
+  let at = beforeId ? cur.indexOf(beforeId) : -1;
+  if (grp && !beforeId) {
+    const m = cur.map((x, i) => (slGrpHas(grp, x) ? i : -1)).filter(i => i >= 0);
+    at = m.length ? m[m.length - 1] + 1 : -1;
+    if (at >= cur.length) at = -1;
+  }
   if (at < 0) cur.push(id);
   else cur.splice(at, 0, id);
-  if (cur.join() === slOrder(SL.fam, SL.page).map(i => i.id).join()) return;          // nichts geändert
+  const gch = grp !== undefined && slGrpSet(id, grp || null);
+  if (!gch && cur.join() === old.join()) return;                           // nichts geändert
   slSaveOrder(cur);
   slApply();
-  const n = cur.length;
-  slLive(`${slTitle(id)}: Position ${cur.indexOf(id) + 1} von ${n}`);
+  const n = cur.length, g = slGrpOf(id);
+  slLive(`${slTitle(id)}: Position ${cur.indexOf(id) + 1} von ${n}` + (gch ? (g ? `, in Gruppe „${slGrpName(g)}“` : ", ohne Gruppe") : ""));
 }
 function slStep(id, d) {
   const ord = SL.present.length ? SL.present.slice() : slOrder(SL.fam, SL.page).map(i => i.id),
     i = ord.indexOf(id),
-    j = i + d;
-  if (i < 0 || j < 0 || j >= ord.length) {
+    j = i + d,
+    g = slGrpOf(id);
+  if (i < 0) return;
+  if (g && (j < 0 || j >= ord.length || !g.ids.includes(ord[j]))) {          // Rand der Gruppe: der Baustein verlässt sie an Ort und Stelle
+    slGrpSet(id, null);
+    slSaveOrder(slOrder(SL.fam, SL.page).map(x => x.id));
+    slApply();
+    slLive(`${slTitle(id)}: aus der Gruppe „${slGrpName(g)}“ gelöst`);
+    return;
+  }
+  if (j < 0 || j >= ord.length) {
     slLive(`${slTitle(id)}: ${d < 0 ? "ganz oben" : "ganz unten"}`);
     return;
   }
-  if (d < 0) slMove(id, ord[j]);
-  else slMove(id, ord[j + 1] || null);
+  const o = !g && slGrpOf(ord[j]);                                         // eine ganze Gruppe zählt als ein Schritt
+  if (o) {
+    const idx = o.ids.map(x => ord.indexOf(x)).filter(x => x >= 0);
+    if (d < 0) slMove(id, ord[Math.min(...idx)], null);
+    else slMove(id, ord[Math.max(...idx) + 1] || null, null);
+    return;
+  }
+  if (d < 0) slMove(id, ord[j], g ? g.id : undefined);
+  else slMove(id, ord[j + 1] || null, g ? g.id : undefined);
 }
 function slToggleHidden(id) {
   const st = slStDoc(SL.fam),
-    on = !(st.hidden || []).includes(id);
-  slSet(st, "hidden", id, on);
+    on = !slHidList(st).includes(id);
+  if (slMobEff()) {                                                         // 3.36.0: Handy-Reiter: eigene Liste der ausgeblendeten Abschnitte (Start: Kopie der Desktop-Liste)
+    const m = (st.mob = st.mob || {}), l = (m.hidden || st.hidden || []).filter(x => x !== id);
+    if (on) l.push(id);
+    m.hidden = l;
+  } else slSet(st, "hidden", id, on);
   slTouch(slKey1(SL.fam));
   slApply();
   slLive(on ? `${slTitle(id)}: ausgeblendet` : `${slTitle(id)}: eingeblendet`);
+}
+/* Zustand „offen/zu“ eines gebauten Abschnitts setzen (auch für Rückgängig/Wiederholen) */
+function slOpenDom(it, on) {
+  (it.ckeys || []).forEach(k => {
+    try {
+      localStorage.removeItem("mt_trf_" + k);                               // sonst überstimmt der zuletzt gemerkte Zustand den neuen Standard
+    } catch (e) {}
+  });
+  const secs = it.id === "geraet" ? ["met", "uhr"] : [it.id];
+  secs.forEach(s => {
+    const d = tlSec(s) || document.querySelector(`#tls-${s}`);
+    if (d && d.tagName === "DETAILS") d.open = on;
+  });
 }
 function slSetOpen(id, on) {
   const it = slItems(SL.fam).find(i => i.id === id);
@@ -431,16 +481,7 @@ function slSetOpen(id, on) {
   slSet(st, "open", id, on && !it.def);                                     // nur Abweichungen vom Standard speichern
   slSet(st, "closed", id, !on && !!it.def);
   slTouch(slKey1(SL.fam));
-  (it.ckeys || []).forEach(k => {
-    try {
-      localStorage.removeItem("mt_trf_" + k);                               // sonst überstimmt der zuletzt gemerkte Zustand den neuen Standard
-    } catch (e) {}
-  });
-  const secs = id === "geraet" ? ["met", "uhr"] : [id];
-  secs.forEach(s => {
-    const d = tlSec(s) || document.querySelector(`#tls-${s}`);
-    if (d && d.tagName === "DETAILS") d.open = on;
-  });
+  slOpenDom(it, on);
   slLive(`${it.title}: ${on ? "standardmäßig offen" : "standardmäßig zu"}`);
 }
 function slSetPage(id, page) {
@@ -448,16 +489,21 @@ function slSetPage(id, page) {
   const it = slItems("tour").find(i => i.id === id);
   if (!it || it.fixed) return;
   const from = SL.page,
-    fromIds = slOrder("tour", from).map(i => i.id).filter(x => x !== id),
+    fromIds = slOrder("tour", from, true).map(i => i.id).filter(x => x !== id),
     st = slStDoc("tour");
   st.page = st.page || {};
   if (!it.widget && page === SL_REG.tour.find(r => r.id === id).page) delete st.page[id];
   else st.page[id] = page;
   if (!Object.keys(st.page).length) delete st.page;
   slDocOf(from).order = fromIds;
-  const toIds = slOrder("tour", page).map(i => i.id).filter(x => x !== id);
+  const toIds = slOrder("tour", page, true).map(i => i.id).filter(x => x !== id);
   toIds.push(id);
   slDocOf(page).order = toIds;
+  slGrpSet(id, null);                                                       // 3.36.0: eine Gruppe gehört zu einer Seite
+  ["haupt", "auswertung"].forEach(pg => {
+    const d = SL.docs[SL_PAGE_KEY[pg]];
+    if (d && d.mob && d.mob.order) d.mob.order = d.mob.order.filter(x => x !== id);
+  });
   slTouch("tour-haupt", "tour-auswertung");
   SL.focus = null;
   slApply();
@@ -498,6 +544,7 @@ function slAddWidget(type, cfg, after) {
   const ids = slOrder(SL.fam, SL.page).map(i => i.id).filter(x => x !== id);
   if (after && ids.includes(after)) ids.splice(ids.indexOf(after) + 1, 0, id);
   else ids.push(id);
+  if (after) slGrpLike(id, after);                                           // 3.36.0: die Kopie steht in derselben Gruppe wie das Original
   slSaveOrder(ids);
   slTouch(slKey1(SL.fam));
   SL.focus = {id, a: "grip"};
@@ -505,14 +552,20 @@ function slAddWidget(type, cfg, after) {
   slLive(`Baustein „${T.title(cfg || T.defaults || {})}“ hinzugefügt`);
   return id;
 }
-/* Baustein mit T.dup kopieren (eigene Kennzahl): gleiche Einstellung, neuer Name, direkt hinter dem Original */
+/* 3.36.0 Baustein duplizieren: nur Bausteine, die mehrfach vorkommen dürfen (Typ-Merkmal „multi“, die Eigene Kennzahl hat ihr eigenes „dup“): gleiche Einstellung, neue Kennung,
+   Titel „… (Kopie)“, direkt hinter dem Original (und in dessen Gruppe); der Fokus springt auf die Kopie (slAddWidget). */
+const slCanDup = T => !!T && !!(T.multi || T.dup);
 function slDupWidget(id) {
   const w = slWidgetOf(id), T = w && w.widget && window.SL_WT[w.type];
-  if (!T || !T.dup) return;
-  slAddWidget(w.type, T.dup(JSON.parse(JSON.stringify(w.cfg || {}))), id);
+  if (!slCanDup(T)) return;
+  const cfg = JSON.parse(JSON.stringify(w.cfg || {}));
+  if (T.dup) return slAddWidget(w.type, T.dup(cfg), id);
+  const tl = x => (typeof window.TL === "function" ? window.TL(x) : x);
+  cfg.title = `${slWTitle(T, cfg).slice(0, 40)} (${tl("Kopie")})`.slice(0, 60);
+  return slAddWidget(w.type, cfg, id);
 }
 function slRemoveWidget(id) {
-  const st = slStDoc(SL.fam);
+  const st = slStDoc(SL.fam), nm = slTitle(id);
   st.widgets = (st.widgets || []).filter(w => w.id !== id);
   if (!st.widgets.length) delete st.widgets;
   ["hidden", "open", "closed"].forEach(n => slSet(st, n, id, false));
@@ -524,12 +577,22 @@ function slRemoveWidget(id) {
     delete st.page[id];
     if (!Object.keys(st.page).length) delete st.page;
   }
-  slKeys(SL.fam).forEach(k => SL.docs[k] && SL.docs[k].order && (SL.docs[k].order = SL.docs[k].order.filter(x => x !== id)));
+  slKeys(SL.fam).forEach(k => {
+    const d = SL.docs[k];
+    if (!d) return;
+    if (d.order) d.order = d.order.filter(x => x !== id);
+    if (d.mob) {
+      ["order", "hidden"].forEach(n => d.mob[n] && (d.mob[n] = d.mob[n].filter(x => x !== id)));
+      if (!Object.keys(d.mob).length) delete d.mob;
+    }
+  });
+  slGrpDrop(id);
   slTouch(...slKeys(SL.fam));
   const el = document.getElementById("tlw-" + id);
   if (el) el.remove();
   SL.focus = null;
   slApply();
+  slLive(`Baustein „${nm}“ entfernt`);
 }
 /* Baustein zu einer Kennung: hinzugefügter Baustein oder Standard-Baustein mit Konfiguration (cfg[id]) */
 function slWidgetOf(id) {
@@ -553,6 +616,7 @@ function slSetCfg(id, cfg) {
   if (el) el.remove();                                                      // wird mit der neuen Konfiguration neu gebaut
   SL.focus = {id, a: "cfg"};
   slApply();
+  slLive(`${slTitle(id)}: Einstellungen geändert`);
 }
 /* „Verwerfen“: stellt den Stand von vor dem Bearbeiten wieder her (Behälter, Zwischenspeicher dieses Geräts und Server) */
 async function slDiscard() {
@@ -571,6 +635,7 @@ async function slDiscard() {
   slApply();
   slChg();
   slStatus("Verworfen");
+  slHistReset();
   slLive("Änderungen verworfen, der Stand von vor dem Bearbeiten ist wiederhergestellt");
   if (fam === "statistik" && SL.view[fam] !== was && typeof stReload === "function") stReload();
 }
@@ -782,7 +847,8 @@ function slStripHtml(p, idx, n) {
   if (!it.plain) mo += `<label class="slsw"><input type="checkbox" data-a="open"${open ? " checked" : ""}><span>Standardmäßig offen</span></label>`;
   if (SL.fam === "tour" && !it.fixed) mo += `<button type="button" class="slb" data-a="page" >${other}</button>`;
   if ((it.widget || it.build) && slFieldsOf(window.SL_WT[it.wtype]).length) mo += `<button type="button" class="slb slcfgb" data-a="cfg" aria-haspopup="dialog" title="Einstellungen dieses Bausteins">${slIcon.gear}<span>Einstellungen</span></button>`;
-  if (it.widget && window.SL_WT[it.wtype] && window.SL_WT[it.wtype].dup) mo += `<button type="button" class="slb" data-a="dup">Duplizieren</button>`;
+  if (it.widget && slCanDup(window.SL_WT[it.wtype])) mo += `<button type="button" class="slb slmx" data-a="dup" aria-label="Duplizieren: ${nm}" title="Eine Kopie mit denselben Einstellungen direkt dahinter anlegen">Duplizieren</button>`;
+  if (slGrpOk(it)) mo += `<button type="button" class="slb slmx" data-a="grp" aria-haspopup="dialog">${slGrpOf(it.id) ? "Gruppe wechseln …" : "In Gruppe …"}</button>` + (slGrpOf(it.id) ? `<button type="button" class="slb slmx" data-a="ungrp">Aus Gruppe lösen</button>` : "");
   if (it.widget) mo += `<button type="button" class="slb slrm" data-a="del" >Entfernen</button>`;
   if (mo) h += `<button type="button" class="slb slmorebtn" data-a="more" aria-haspopup="true" aria-expanded="false" aria-label="Weitere Aktionen" title="Weitere Aktionen">⋯</button><span class="slmo">${mo}</span>`;
   if (it.must) h += `<span class="slmust">bleibt immer sichtbar</span>`;
@@ -820,8 +886,9 @@ function slPlace(root) {
   const items = slOrder(fam, page),
     edit = SL.edit && slCan(),
     st = slSt(fam),
-    hid = st.hidden || [],
-    mine = new Set(items.map(i => i.id));
+    hid = slHidList(st),
+    mine = new Set(items.map(i => i.id)),
+    gdefs = slGrpDefs(fam, page);
   if (fam === "karte" && typeof kaBefore === "function") kaBefore(root, edit);                  // 3.34.0: Bedienfelder zurück auf die Karte (oder im Bearbeitungsmodus ins Raster)
   root.querySelectorAll(".tlw[data-wid]").forEach(e => !mine.has(e.dataset.wid) && e.remove());        // Baustein einer anderen Seite oder entfernt
   const pres = [];
@@ -836,15 +903,25 @@ function slPlace(root) {
     pres.push({it, el, off: hid.includes(it.id) && !it.must, cw: it.cw});
   });
   if (fam === "tour" && !edit) slRegroup(pres);                          // 3.24.1: eine Gruppe steht nur einmal da (eine Überschrift), auch wenn eine alte gespeicherte Reihenfolge ihre Mitglieder trennt
+  slGrpOrder(pres, gdefs);                                               // 3.36.0: Mitglieder einer Gruppe stehen zusammen
   SL.present = pres.map(p => p.it.id);
   const blocks = [];
   let cur = null;
   const cnt = {};
   pres.forEach(p => {
     p.unit = slUnit(p, edit);
-    slCell(p, fam !== "tour" || (!!p.it.group && !p.it.own));
+    p.grp = gdefs.find(g => g.ids.includes(p.it.id)) || null;
+    slCell(p, fam !== "tour" || !!p.grp || (!!p.it.group && !p.it.own));
     p.el.classList.toggle("sl-off", p.off && !edit);
     p.unit.classList.toggle("sl-dim", edit && p.off && p.unit !== p.el);
+    if (p.grp) {
+      if (!cur || cur.grp !== p.grp) {
+        cur = {grp: p.grp, ps: []};
+        blocks.push(cur);
+      }
+      cur.ps.push(p);
+      return;
+    }
     const g = p.it.own ? null : p.it.group;
     if (!g || (fam !== "tour" && g !== "cols")) {
       cur = null;
@@ -861,6 +938,11 @@ function slPlace(root) {
   const used = new Set(),
     seq = blocks.map(b => {
       if (b.unit) return b.unit;
+      if (b.grp) {
+        const ge = slGrpBlock(root, b.grp, b.ps, edit);
+        used.add(ge);
+        return ge;
+      }
       const r = slRun(root, fam, b.g, b.n);
       used.add(r.el);
       slPlaceIn(r.body, b.ps.map(p => p.unit));
@@ -868,13 +950,14 @@ function slPlace(root) {
       return r.el;
     });
   if (fam === "tour") root.querySelectorAll(":scope > .tlg:not(.tlsumg)").forEach(g => !used.has(g) && (g.hidden = true));
+  slGrpClean(root, used);
   const op = slOpener(root, edit), zb = typeof zrBar === "function" ? zrBar(fam, pres, root, edit) : null;          // 3.34.0: Zeitraum-Leiste der Seite (65-zeitraum.js)
   slPlaceIn(root, main ? [op, zb, ...seq] : seq);
   if (edit)
     pres.forEach((p, i) => {
       const w = p.unit;
       if (w === p.el) return;
-      const sig = [i, pres.length, p.off, p.cw, slDef(p.it.id, !!p.it.def), SL.page, p.it.title, p.it.fl || "", SL.mopen === p.it.id].join("|");
+      const sig = [i, pres.length, p.off, p.cw, slDef(p.it.id, !!p.it.def), SL.page, p.it.title, p.it.fl || "", SL.mopen === p.it.id, (p.grp || {}).id || "", gdefs.length, SL.dev].join("|");
       let s = w.querySelector(":scope > .slst");
       if (!s) {
         s = document.createElement("div");
@@ -896,7 +979,7 @@ function slPlace(root) {
   if (edit && SL.focus) {
     const f = SL.focus;
     SL.focus = null;
-    const w = root.querySelector(`.slit[data-sl="${f.id}"]`),
+    const w = f.gid ? root.querySelector(`.slgrp[data-gid="${f.gid}"]`) : root.querySelector(`.slit[data-sl="${f.id}"]`),
       b = w && ((f.q && w.querySelector(`[data-a="${f.a}"]${f.q}`)) || w.querySelector(`[data-a="${f.a}"]`) || w.querySelector('[data-a="grip"]'));
     if (b) b.focus({preventScroll: !!f.ps});
   }
@@ -937,6 +1020,7 @@ function slOpener(root, edit) {
       ui.appendChild(w);
     }
   }
+  if (typeof slCodePending === "function") slCodePending();                                // 3.36.0: Link mit Layoutcode geöffnet → Import-Dialog
   return root.matches("main.home") ? w : null;
 }
 /* Auswertungsseite ohne Inhalt, weil alles auf der Hauptseite liegt: passende Erklärung statt „keine Auswertung“ */
@@ -985,6 +1069,7 @@ function slBar(on) {
     `<p class="slsr" id="slhint">Zum Verschieben ziehen oder Pfeil hoch bzw. Pfeil runter drücken.</p>` +
     `<div class="slsr" id="sllive" aria-live="polite" aria-atomic="true"></div>` +
     `<p class="slbi"><b>Seite anpassen</b><span class="slvn" id="slvn"></span><span class="slsaved" id="slsaved" role="status" aria-live="polite"></span><span class="slchg" id="slchg" hidden>Ungespeicherte Änderungen</span></p>` +
+    `<div class="slbt" id="slbt">${slHistHtml()}${slDevHtml()}</div>` +
     `<label class="slkopf" id="slkopf" hidden><input type="checkbox" id="slkopfin" data-opt="holen"><span>Schnell-Knopf zum Touren holen in der Kopfzeile</span></label>` +
     `<div class="slbb"><button type="button" class="btn ghost sm" data-a="views" aria-haspopup="dialog">Ansichten</button><button type="button" class="btn ghost sm" data-a="add" aria-label="Baustein hinzufügen"><span class="slfu">Baustein hinzufügen</span><span class="slsh" aria-hidden="true">+ Baustein</span></button>` +
     `<button type="button" class="btn ghost sm slmorebtn" data-a="more" aria-haspopup="true" aria-expanded="false" aria-label="Weitere Aktionen" title="Weitere Aktionen">⋯</button>` +
@@ -1041,6 +1126,7 @@ function slIsChg() {
 }
 function slChg() {
   slKopfSync();
+  if (typeof slBarSync === "function") slBarSync();
   const m = document.getElementById("slchg");
   if (m) m.hidden = !(SL.edit && slIsChg());
 }
@@ -1070,6 +1156,8 @@ function slEdit(on, announce, keepMsg) {
   on = !!on && slCan();
   if (on === SL.edit) return;
   SL.edit = on;
+  SL.dev = on && slMobNow() ? "mob" : "desk";                                  // 3.36.0: auf einem schmalen Bildschirm startet der Umschalter bei „Handy“
+  document.body.classList.toggle("sl-dev-mob", on && SL.dev === "mob" && SL.fam !== "karte");
   if (on) {
     slSnap();
     if (!keepMsg) SL.msg = null;
@@ -1077,8 +1165,12 @@ function slEdit(on, announce, keepMsg) {
     if (m) m.remove();
   }
   document.body.classList.toggle("sl-editing", on);
-  if (!on) SL.mopen = null;
+  if (!on) {
+    SL.mopen = null;
+    document.body.classList.remove("sl-dev-mob");
+  }
   slBar(on);
+  slHistReset();
   if (on && keepMsg && SL.msg) slStatus(SL.msg.text);
   SL.focus = on ? {id: SL.present[0] || "", a: "grip", ps: true} : null;
   slApply();
@@ -1095,7 +1187,8 @@ function slLeave() {
   if (!SL.edit) return;
   SL.edit = false;
   SL.snap = null;
-  document.body.classList.remove("sl-editing");
+  slHistReset();
+  document.body.classList.remove("sl-editing", "sl-dev-mob");
   SL.mopen = null;
   slBar(false);
   slFlush();
@@ -1415,8 +1508,14 @@ document.addEventListener("click", e => {
     else if (a === "add") slCatalog();
     else if (a === "views" && typeof slViewsDialog === "function") slViewsDialog();
     else if (a === "reset") slReset();
+    else if (a === "undo") slUndo();
+    else if (a === "redo") slRedo();
+    else if (a === "dev") slSetDev(bar.dataset.d);
+    else if (a === "mobreset") slMobReset();
     return;
   }
+  const gb = e.target.closest && e.target.closest(".slgst [data-a]");
+  if (gb) return slGrpAction(gb);
   if (!b || b.dataset.a === "grip") return;
   const id = b.closest(".slit").dataset.sl,
     a = b.dataset.a;
@@ -1429,6 +1528,8 @@ document.addEventListener("click", e => {
   else if (a === "page") slSetPage(id, SL.page === "haupt" ? "auswertung" : "haupt");
   else if (a === "cfg") slCfgDialog(id);
   else if (a === "dup") slDupWidget(id);
+  else if (a === "grp") slGrpDialog(id);
+  else if (a === "ungrp") slGrpUngroup(id);
   else if (a === "del")
     uiConfirm({title: "Baustein entfernen?", text: `„${slTitle(id)}“ wird von dieser Seite entfernt.`, ok: "Entfernen", danger: true}).then(ok => ok && slRemoveWidget(id));
 });
@@ -1469,7 +1570,13 @@ document.addEventListener("pointerdown", e => {
   g.focus({preventScroll: true});
 });
 function slDragTarget(d) {
-  const ws = [...(SL.root || document).querySelectorAll(".slit")].filter(x => x !== d.w);
+  const root = SL.root || document,
+    gr = [...root.querySelectorAll(".slgrp")].find(g => {                  // 3.36.0: Zeiger über einer Gruppe = in die Gruppe ablegen
+      const r = g.getBoundingClientRect();
+      return d.x >= r.left && d.x <= r.right && d.y >= r.top && d.y <= r.bottom;
+    }),
+    ws = [...root.querySelectorAll(".slit")].filter(x => x !== d.w && (!gr || gr.contains(x)));
+  d.grp = gr ? gr.dataset.gid : null;
   document.querySelectorAll(".sl-before,.sl-after").forEach(x => x.classList.remove("sl-before", "sl-after"));
   let t = null;
   for (const w of ws) {                                                   // in Leserichtung: erstes Element, vor dem der Zeiger liegt
@@ -1485,6 +1592,8 @@ function slDragTarget(d) {
   if (t) t.classList.add("sl-before");
   else if (ws.length) ws[ws.length - 1].classList.add("sl-after");
   d.target = t ? t.dataset.sl : null;
+  document.querySelectorAll(".slgrp.sl-into").forEach(x => x !== gr && x.classList.remove("sl-into"));
+  if (gr) gr.classList.add("sl-into");
 }
 function slDragFrame() {
   const d = SL.drag;
@@ -1511,6 +1620,7 @@ function slDragEnd(e, cancel) {
   d.w.style.transform = "";
   d.w.classList.remove("sl-lift");
   document.querySelectorAll(".sl-before,.sl-after").forEach(x => x.classList.remove("sl-before", "sl-after"));
+  document.querySelectorAll(".slgrp.sl-into").forEach(x => x.classList.remove("sl-into"));
   try {
     d.g.releasePointerCapture(d.pid);
   } catch (x) {}
@@ -1518,7 +1628,8 @@ function slDragEnd(e, cancel) {
   slDragTarget(d);
   document.querySelectorAll(".sl-before,.sl-after").forEach(x => x.classList.remove("sl-before", "sl-after"));
   SL.focus = {id: d.id, a: "grip"};
-  slMove(d.id, d.target);
+  document.querySelectorAll(".slgrp.sl-into").forEach(x => x.classList.remove("sl-into"));
+  slMove(d.id, d.target, slGrpCan(d.id) ? d.grp : undefined);
 }
 document.addEventListener("pointerup", e => slDragEnd(e, false));
 document.addEventListener("pointercancel", e => slDragEnd(e, true));

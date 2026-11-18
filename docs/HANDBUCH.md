@@ -709,7 +709,7 @@ Oben: **‹ Übersicht**, „Fotos im PDF“ (mit Anzahl), **PDF herunterladen**
 ### 13.1 Den Bearbeitungsmodus einschalten
 
 1. Auf der Seite **Seite anpassen** anklicken (rechts über den Bausteinen).
-2. Jeder Baustein bekommt einen gestrichelten Rahmen und eine Kopfzeile mit Steuerelementen. Unten erscheint eine Leiste mit **Ansichten**, **Baustein hinzufügen**, **Standard wiederherstellen**, **Als neue Ansicht speichern …**, **Verwerfen** und **Fertig**.
+2. Jeder Baustein bekommt einen gestrichelten Rahmen und eine Kopfzeile mit Steuerelementen. Unten erscheint eine Leiste mit **Rückgängig** und **Wiederholen**, dem Umschalter **Anordnung für: Desktop | Handy** sowie **Ansichten**, **Baustein hinzufügen**, **Standard wiederherstellen**, **Als neue Ansicht speichern …**, **Verwerfen** und **Fertig**.
 3. **Fertig** übernimmt alles. **Verwerfen** lässt alles wie vorher.
 
 In der Kopfzeile jedes Bausteins:
@@ -718,7 +718,8 @@ In der Kopfzeile jedes Bausteins:
 * vier **Breiten**: ganze Breite, zwei Drittel, halbe Breite, ein Drittel (auf breiten Bildschirmen stehen kleine Bausteine nebeneinander),
 * **↑ ↓** zum Verschieben, **Ausblenden** (der Baustein ist weg, aber nicht gelöscht – im Bearbeitungsmodus holst du ihn zurück),
 * **Einstellungen** (Zahnrad), falls der Baustein einstellbar ist,
-* **Standardmäßig offen:** ob der Baustein beim Öffnen der Seite aufgeklappt ist.
+* **Standardmäßig offen:** ob der Baustein beim Öffnen der Seite aufgeklappt ist,
+* **Duplizieren** (bei Bausteinen, die mehrfach vorkommen dürfen) und **In Gruppe …** (bei schmalen Bausteinen im Menü „⋯“).
 
 ![Bearbeitungsmodus der Statistikseite](handbuch/bilder/32-seite-anpassen.png)
 
@@ -771,7 +772,7 @@ Es zählen nur Touren, die die jeweilige Angabe haben (z. B. Puls); fehlende Ang
 Eine **Ansicht** ist eine gespeicherte Anordnung der Seite, z. B. „Wandern“, „Rad“ oder „Kompakt“. Es gibt immer die **Standardansicht**.
 
 * **Ansichten** (Knopf oben auf der Seite oder in der Leiste) öffnet die Liste. Die gerade **angezeigte** Ansicht ist markiert.
-* Je Ansicht: **Umbenennen**, **Duplizieren**, **Exportieren**.
+* Je Ansicht: **Umbenennen**, **Duplizieren**, **Exportieren**, **Teilen …** (Layoutcode und Link, siehe 13.11).
 * Neu: **Neue Ansicht**, **Aus Vorlage …**, **Importieren …**.
 * Im Bearbeitungsmodus speichert **Als neue Ansicht speichern …** den aktuellen Stand unter einem Namen.
 
@@ -790,11 +791,47 @@ Eine **Ansicht** ist eine gespeicherte Anordnung der Seite, z. B. „Wandern“,
 ### 13.6 Export und Import des Layouts
 
 * **Exportieren** speichert eine Ansicht als Datei – zum Sichern oder für ein anderes Gerät oder Konto.
-* **Importieren …** liest eine solche Datei wieder ein. Ungültige Dateien werden mit einer Fehlermeldung abgelehnt.
+* **Importieren …** liest eine solche Datei wieder ein (oder einen Layoutcode, siehe 13.11). Ungültige Dateien werden mit einer Fehlermeldung abgelehnt.
 
 ### 13.7 Standard wiederherstellen
 
-**Standard wiederherstellen** (untere Leiste im Bearbeitungsmodus) setzt die Seite auf die ursprüngliche Anordnung zurück. Deine gespeicherten Ansichten bleiben dabei bestehen.
+**Standard wiederherstellen** (untere Leiste im Bearbeitungsmodus) setzt die Seite auf die ursprüngliche Anordnung zurück. Deine gespeicherten Ansichten bleiben dabei bestehen. Mit **Rückgängig** (13.8) holst du den Stand zurück, wenn es zu schnell ging.
+
+### 13.8 Bausteine duplizieren, Rückgängig und Wiederholen
+
+**Duplizieren:** In der Kopfzeile eines Bausteins (bei schmalen Bausteinen im Menü „⋯“) legt **Duplizieren** eine Kopie mit denselben Einstellungen direkt dahinter an. Sie heißt „… (Kopie)“, bekommt den Fokus und steht in derselben Gruppe wie das Original. Das gibt es nur bei Bausteinen, die mehrfach vorkommen dürfen (im Katalog erkennst du sie daran, dass „Noch einmal hinzufügen“ möglich ist) und nicht für feste Abschnitte der Seite. Je Seite sind höchstens 40 Bausteine möglich; ist das Limit erreicht, sagt dir ein Hinweis, warum nichts passiert.
+
+**Rückgängig und Wiederholen:** Die Knöpfe **Rückgängig** und **Wiederholen** in der Leiste (auf dem Handy mit Text, Pfeilsymbol) nehmen die letzten Änderungen zurück bzw. stellen sie wieder her: verschieben, Breite, ausblenden, hinzufügen, entfernen, duplizieren, Einstellungen, Gruppen, Handy-Anordnung und „Standard wiederherstellen“. Mit der Tastatur: **Strg+Z** (Mac: **Cmd+Z**) und **Strg+Umschalt+Z** (auch Strg+Y). Die Kürzel gelten nur im Bearbeitungsmodus und nicht in Eingabefeldern oder Dialogen. Es werden die letzten 50 Schritte gemerkt; **Fertig**, **Verwerfen**, das Verlassen der Seite und der Wechsel der Ansicht beginnen einen neuen Verlauf. Vorlesehilfen hören jeden Schritt („Rückgängig: …“). Ein ausgegrauter Knopf bedeutet: nichts mehr da.
+
+### 13.9 Gruppen
+
+Eine **Gruppe** bündelt mehrere Bausteine zu einem einklappbaren Abschnitt mit eigenem Titel, z. B. „Rückblick“ oder „Training“.
+
+1. Im Bearbeitungsmodus im Menü eines Bausteins **In Gruppe …** wählen, dann **In eine neue Gruppe** oder eine bestehende Gruppe. Oder den Baustein am Griff **über eine Gruppe ziehen** (die Gruppe zeigt, dass er hineinkommt); aus der Gruppe heraus ziehst du ihn auf dieselbe Weise.
+2. In der Kopfzeile der Gruppe: **Umbenennen** (Titel bis 60 Zeichen; ohne Titel heißt sie „Gruppe 1“ usw.), **Standardmäßig offen**, **↑ ↓** (die Gruppe wandert als ein Block) und **Gruppe lösen** (die Bausteine bleiben auf der Seite).
+3. **Aus Gruppe lösen** im Menü eines Bausteins nimmt ihn heraus. Mit den Pfeiltasten am Griff verlässt ein Baustein am Rand die Gruppe.
+
+Außerhalb des Bearbeitungsmodus klappst du eine Gruppe mit einem Klick auf ihre Überschrift auf oder zu; der Zustand wird je Benutzer gemerkt, „Standardmäßig offen“ legt fest, wie die Gruppe beim ersten Öffnen aussieht. Im Bearbeitungsmodus sind alle Gruppen offen. Grenzen: höchstens 10 Gruppen je Seite und 30 Bausteine je Gruppe, keine Gruppen in Gruppen, und der Einstieg in die Auswertung sowie die Köpfe der Reise- und Fotos-Seite lassen sich nicht gruppieren. Die Karte hat keine Gruppen. Gruppen gehören zur Ansicht und werden mit Ansichten, Vorlagen (z. B. „Mit Gruppe“), Export und Import weitergegeben.
+
+### 13.10 Eigene Handy-Anordnung
+
+Auf schmalen Bildschirmen (Ansicht „Handy“, bis 760 Pixel Breite) willst du vielleicht eine andere Reihenfolge oder weniger Bausteine als am Computer.
+
+1. Im Bearbeitungsmodus in der Leiste **Anordnung für: Handy** wählen. Die Seite erscheint in einem schmalen Rahmen, einspaltig, so wie sie auf dem Handy aussieht.
+2. Jetzt verschiebst und blendest du aus wie gewohnt – das gilt nur für das Handy. Die erste Änderung legt die Handy-Anordnung an; der Hinweis in der Leiste sagt, ob es schon eine gibt.
+3. **Desktop** schaltet zurück; **Handy-Anordnung zurücksetzen** entfernt sie, dann gilt wieder die Desktop-Reihenfolge.
+
+Ohne eigene Handy-Anordnung gilt überall die Desktop-Reihenfolge, wie bisher. Auf einem Handy startet der Umschalter bei „Handy“. Breite, Einstellungen und Gruppen sind für beide gleich; die Karte hat keine eigene Handy-Anordnung.
+
+### 13.11 Ansichten teilen: Layoutcode und Link
+
+Eine Ansicht lässt sich auch als kurzer Text weitergeben, zum Beispiel in einer Nachricht.
+
+* **Ansichten → bei der Ansicht Teilen …** zeigt den **Layoutcode** (beginnt mit `MTA1.`). **Code kopieren** und **Link kopieren** legen ihn in die Zwischenablage; ist das nicht möglich, ist der Code markiert und du kopierst ihn mit Strg+C.
+* Wer den Code bekommt, fügt ihn bei **Ansichten → Importieren … → Layoutcode oder Link einfügen** ein und wählt **Code prüfen**. Ein geöffneter Link führt auf der anderen Installation (angemeldet) zur passenden Seite und öffnet den Import mit dem Code.
+* Dann wie beim Import einer Datei: Name wählen, **Als neue Ansicht importieren** oder eine bestehende Ansicht ersetzen. Vorher wird nichts gespeichert.
+
+**Was steckt im Code?** Nur die Anordnung und die Einstellungen der Bausteine, auch eigene Titel und Notizen, die du dort eingegeben hast. Keine Touren, Fotos, Orte oder Zugangsdaten, und der Code gibt keinen Zugriff auf deine Daten. Der Server prüft jeden Code streng wie eine Datei (nur erlaubte Felder, Größen und Bausteine); beschädigte oder zu große Codes werden abgelehnt. Betrachter können keine Ansichten importieren.
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -1014,6 +1051,7 @@ Laut Projektbeschreibung kann sie unter anderem: Touren mit Karte und Höhenprof
 | **F** | Diashow im Vollbild |
 | **Pfeiltasten** am Griff (⋮⋮) | Baustein im Bearbeitungsmodus verschieben |
 | **Home / End** am Griff | Baustein an den Anfang bzw. das Ende setzen |
+| **Strg+Z / Cmd+Z**, **Strg+Umschalt+Z** | Im Bearbeitungsmodus Änderung zurücknehmen bzw. wiederholen (nicht in Eingabefeldern) |
 | **Tab** | Durch Knöpfe und Felder gehen; Dialoge halten den Fokus bei sich |
 
 ### 18.2 Tipps

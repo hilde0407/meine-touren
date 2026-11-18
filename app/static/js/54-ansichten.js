@@ -2,7 +2,7 @@
    Daten und Auswahl-Logik stehen in 49-seitenlayout.js (Behälter SL.store, slResolve, slPack); hier: Auswahl in der Kopfzeile, Verwaltung (Dialog), Vorlagen, Export und Import.
    Tourseite: Hauptseite und Auswertung sind zwei Schlüssel; jede Änderung an den Ansichten (anlegen, umbenennen, löschen, Standard, Regeln) wird in beiden geführt
    (slAlign), der Inhalt bleibt je Schlüssel eigen. Die Vorgabe der Anzeige: von Hand gewählt (diese Sitzung) vor Regel „Sportart → Ansicht“ (beim Öffnen einer Tour) vor Standardansicht. */
-const SL_APPV = "3.35.0";
+const SL_APPV = "3.36.0";
 const SL_EXPORT_FORMAT = "meine-touren-ansicht";
 const SL_MAXFILE = 200000;
 const slVm = fam => slMaster(fam).views;
@@ -32,6 +32,7 @@ function slViewsChange(fam, fn) {
   slResolve(fam);
   slTouch(...slKeys(fam));
   slApply();
+  if (SL.edit) slHistReset();                                          // 3.36.0: der Verlauf (Rückgängig) gilt nur für die angezeigte Ansicht
   if (fam === "statistik" && SL.view[fam] !== was && typeof stReload === "function") stReload(SL.edit);      // andere Ansicht = anderer gespeicherter Filter
   return out;
 }
@@ -87,6 +88,7 @@ function slSwitch(fam, id) {
   slKeys(fam).forEach(slSync);
   const was = SL.view[fam];
   slResolve(fam);
+  if (SL.edit) slHistReset();
   if (SL.view[fam] === was && id) return slViewPick(document.getElementById("slopenw"));
   SL.focus = null;
   if (fam === "statistik" && typeof stReload === "function") return stReload(SL.edit);          // der Filter gehört zur Ansicht: Seite neu aufbauen
@@ -197,7 +199,7 @@ function slViewsDialog() {
         return `<li class="slvr${v.id === cur ? " cur" : ""}" data-id="${esc(v.id)}"><div class="slvh"><b class="slvnm">${nm}</b>` +
           (v.id === m.active ? `<span class="slvbd">Standardansicht</span>` : "") + (v.id === cur ? `<span class="slvbd on">Angezeigt</span>` : "") + `</div><div class="slvbt">` +
           (v.id === cur ? "" : b("show", "Anzeigen")) + b("rename", "Umbenennen") + b("dup", "Duplizieren", full ? " disabled" : "") +
-          (v.id === m.active ? "" : b("def", "Als Standard festlegen")) + b("exp", "Exportieren") + (m.views.length > 1 ? b("del", "Löschen") : "") + `</div></li>`;
+          (v.id === m.active ? "" : b("def", "Als Standard festlegen")) + b("exp", "Exportieren") + b("share", "Teilen …", ' aria-haspopup="dialog"') + (m.views.length > 1 ? b("del", "Löschen") : "") + `</div></li>`;
       };
       let h = `<p class="mut slvin">Eine Ansicht ist eine gespeicherte Anordnung dieser Seite (${famLabel}). Die Standardansicht erscheint, wenn nichts anderes gewählt ist.</p>` +
         `<ul class="slvl" aria-label="Ansichten der ${famLabel}">${m.views.map(row).join("")}</ul>` +
@@ -254,6 +256,10 @@ function slViewsDialog() {
       } else if (a === "exp") {
         slViewExport(fam, id);
         slVLine(`Ansicht „${v.name}“ exportiert`);
+      } else if (a === "share") {
+        focus = `[data-id="${id}"][data-a="share"]`;
+        slCodeDialog(fam, id);
+        slVLine(`Layoutcode der Ansicht „${v.name}“`);
       } else if (a === "del") {
         const ok = await uiConfirm({title: "Ansicht löschen?", text: `Die Ansicht „${v.name}“ wird gelöscht. Das lässt sich nicht rückgängig machen. Tipp: Mit „Exportieren“ kannst du sie vorher sichern.`, ok: "Löschen", danger: true});
         if (ok) {
@@ -358,30 +364,31 @@ async function slCheckFile(file) {
     return {ok: false, errors: ["Die Prüfung ist nicht möglich (keine Verbindung zum Server?). Es wurde nichts übernommen."], ignored: []};
   }
 }
-function slImportDialog(fam, done) {
+function slImportDialog(fam, done, preset) {
   slModal("Ansicht importieren", (body, close) => {
-    body.innerHTML = `<p class="mut slcatin">Wähle eine Datei, die du mit „Exportieren“ gespeichert hast. Sie wird zuerst geprüft; erst danach entscheidest du, was übernommen wird.</p>` +
+    body.innerHTML = `<p class="mut slcatin">Wähle eine Datei, die du mit „Exportieren“ gespeichert hast, oder füge einen Layoutcode ein (aus „Teilen …“). Sie wird zuerst geprüft; erst danach entscheidest du, was übernommen wird.</p>` +
       `<div class="slimpbar"><button type="button" class="btn ghost sm" data-a="pick">Datei wählen …</button><span class="mut slimpf" id="slimpf">Keine Datei gewählt</span><input type="file" id="slimpin" accept=".json,application/json" hidden></div>` +
+      `<div class="slfs slimpcode"><label for="slimpcode">Layoutcode oder Link einfügen</label><textarea id="slimpcode" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="MTA1.…" aria-describedby="slimpch"></textarea>` +
+      `<p class="mut slimphint" id="slimpch">Ein Layoutcode enthält nur die Anordnung und die Einstellungen der Bausteine, keine Touren oder Fotos.</p><button type="button" class="btn ghost sm" data-a="code">Code prüfen</button></div>` +
       `<div class="slimpres" id="slimpres" role="status" aria-live="polite"></div><div class="uifoot"><button type="button" class="btn ghost" data-close>Schließen</button></div>`;
-    const inp = body.querySelector("#slimpin"), res = body.querySelector("#slimpres");
+    const inp = body.querySelector("#slimpin"), res = body.querySelector("#slimpres"), ta = body.querySelector("#slimpcode");
     body.addEventListener("click", e => {
       if (e.target.closest("[data-close]")) close();
       else if (e.target.closest('[data-a="pick"]')) inp.click();
+      else if (e.target.closest('[data-a="code"]')) checkCode();
     });
-    inp.addEventListener("change", async () => {
-      const f = inp.files && inp.files[0];
-      if (!f) return;
-      body.querySelector("#slimpf").textContent = f.name;
-      res.innerHTML = `<p class="mut">Datei wird geprüft …</p>`;
-      const r = await slCheckFile(f), errs = (r.errors || []).slice();
+    const show = (r, isCode) => {
+      const errs = (r.errors || []).slice();
       if (r.ok && r.page !== fam) errs.push(`Diese Datei gehört zur ${slFamName(r.page)}. Öffne dort „Seite anpassen“ → „Ansichten“, um sie zu importieren.`);
       if (errs.length) {
-        res.innerHTML = `<div class="slimpbad" role="alert"><h3>Die Datei kann nicht importiert werden</h3><ul>${errs.map(x => `<li>${esc(x)}</li>`).join("")}</ul><p class="mut">Es wurde nichts verändert.</p></div>`;
+        res.innerHTML = `<div class="slimpbad" role="alert"><h3>${isCode ? "Der Code kann nicht importiert werden" : "Die Datei kann nicht importiert werden"}</h3><ul>${errs.map(x => `<li>${esc(x)}</li>`).join("")}</ul><p class="mut">Es wurde nichts verändert.</p></div>`;
         return;
       }
       const L = r.layouts || {}, st = r.stats || {}, types = new Set(Object.values(st).flatMap(s => s.types || [])), unknown = [...types].filter(t => !window.SL_WT[t]),
-        nWid = Object.values(st).reduce((n, s) => n + (s.widgets || 0), 0), nHid = Object.values(st).reduce((n, s) => n + (s.hidden || 0), 0);
-      res.innerHTML = `<div class="slimpok"><h3>Datei geprüft</h3><p>Ansicht „<b class="slimpn"></b>“ für die ${slFamName(fam)}: ${nWid === 1 ? "1 Baustein" : nWid + " Bausteine"}, ${nHid === 1 ? "1 ausgeblendeter Abschnitt" : nHid + " ausgeblendete Abschnitte"}.</p>` +
+        nWid = Object.values(st).reduce((n, s) => n + (s.widgets || 0), 0), nHid = Object.values(st).reduce((n, s) => n + (s.hidden || 0), 0),
+        nGrp = Object.values(st).reduce((n, s) => n + (s.groups || 0), 0), hasMob = Object.values(st).some(s => s.mob);
+      res.innerHTML = `<div class="slimpok"><h3>${isCode ? "Code geprüft" : "Datei geprüft"}</h3><p>Ansicht „<b class="slimpn"></b>“ für die ${slFamName(fam)}: ${nWid === 1 ? "1 Baustein" : nWid + " Bausteine"}, ${nHid === 1 ? "1 ausgeblendeter Abschnitt" : nHid + " ausgeblendete Abschnitte"}.</p>` +
+        (nGrp || hasMob ? `<ul class="slimpx">${nGrp ? `<li>${nGrp === 1 ? "1 Gruppe" : nGrp + " Gruppen"}</li>` : ""}${hasMob ? "<li>Eigene Handy-Anordnung</li>" : ""}</ul>` : "") +
         ((r.ignored || []).length ? `<p class="mut">Ignoriert:</p><ul class="mut">${r.ignored.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "") +
         (unknown.length ? `<p class="mut">${unknown.length === 1 ? "1 Baustein-Typ ist" : unknown.length + " Baustein-Typen sind"} in dieser Version nicht bekannt und werden nicht angezeigt.</p>` : "") +
         `<div class="slfs"><label for="slimpname">Name der neuen Ansicht</label><input id="slimpname" type="text" maxlength="40" autocomplete="off"><p class="mut slimphint" id="slimphint"></p></div>` +
@@ -399,7 +406,7 @@ function slImportDialog(fam, done) {
       };
       nm.addEventListener("input", upd);
       upd();
-      res.addEventListener("click", async e => {
+      res.onclick = async e => {
         const b = e.target.closest("button");
         if (!b || b.disabled) return;
         if (b.dataset.a === "new") {
@@ -419,10 +426,28 @@ function slImportDialog(fam, done) {
           slVLine(`Ansicht „${s.name}“ ersetzt`);
           done && done(s.id);
         }
-      });
-      res.querySelector("#slimpname").focus();
+      };
+      nm.focus();
+    };
+    async function checkCode() {
+      if (!ta.value.trim()) {
+        res.innerHTML = `<div class="slimpbad" role="alert"><h3>Der Code kann nicht importiert werden</h3><ul><li>Bitte zuerst einen Layoutcode oder Link einfügen.</li></ul><p class="mut">Es wurde nichts verändert.</p></div>`;
+        return ta.focus();
+      }
+      res.innerHTML = `<p class="mut">Code wird geprüft …</p>`;
+      show(await slCheckCode(ta.value), true);
+    }
+    inp.addEventListener("change", async () => {
+      const f = inp.files && inp.files[0];
+      if (!f) return;
+      body.querySelector("#slimpf").textContent = f.name;
+      res.innerHTML = `<p class="mut">Datei wird geprüft …</p>`;
+      show(await slCheckFile(f));
     });
-    body.querySelector('[data-a="pick"]').focus();
+    if (preset) {
+      ta.value = preset;
+      checkCode();
+    } else body.querySelector('[data-a="pick"]').focus();
   }, "slimp");
 }
 

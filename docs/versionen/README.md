@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.36.0](3.36.0.md) – Bedienung der Seitenanpassung
 - [3.35.0](3.35.0.md) – Eigene Kennzahlen weiterentwickeln
 - [3.34.0](3.34.0.md) – Fotos und Karte anpassbar, Galerie mit Vorschau, Zeitraum der Seite
 - [3.33.0](3.33.0.md) – Reisen als anpassbare Seiten

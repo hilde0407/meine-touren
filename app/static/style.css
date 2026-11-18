@@ -1723,8 +1723,8 @@ html.mob .segtabs a{flex:1 1 auto;text-align:center;padding:6px 10px;font-size:1
    #fox = Raster der Fotos-Seite: ohne Anpassung ein einfacher Block (genau wie vorher, Außenabstände fließen zusammen), erst mit Baustein, anderer Breite oder im Bearbeitungsmodus ein Raster.
    #kax = Raster der Karte: ohne Anpassung nur die Karte (wie vorher, Bedienfelder als Kästen auf der Karte); .kamulti (Baustein neben der Karte, andere Breite, Bearbeiten): die Karte ist ein Block mit fester Höhe. */
 .stx.fox{display:block;margin-top:0}
-.stx.fox:has(.slit,.w-zweidrittel,.w-halb,.w-drittel,.tlw){display:grid}
-.stx.fox:not(:has(.slit,.w-zweidrittel,.w-halb,.w-drittel,.tlw))>.slcell{container-type:normal}                 /* ohne Anpassung kein eigener Formatierungskontext: Außenabstände wie vorher */
+.stx.fox:has(.slit,.slgrp,.w-zweidrittel,.w-halb,.w-drittel,.tlw){display:grid}
+.stx.fox:not(:has(.slit,.slgrp,.w-zweidrittel,.w-halb,.w-drittel,.tlw))>.slcell{container-type:normal}                 /* ohne Anpassung kein eigener Formatierungskontext: Außenabstände wie vorher */
 .stx.kax{margin-top:0}
 .kacard{min-width:0}
 .kapw{display:contents}
@@ -1818,3 +1818,75 @@ html.mob .zrbody .chips{flex-wrap:wrap;overflow:visible}
 .kzvga[hidden]{display:none}
 .kzvga{margin:0 0 6px}
 @media (max-width:700px){.kzspk{height:44px}}
+
+/* =====================  3.36.0: Bedienung der Seitenanpassung  =====================
+   Rückgängig/Wiederholen und „Desktop | Handy“ in der Leiste (.slbt), Gruppen (.slgrp: einklappbarer Abschnitt mit eigenem Raster .slgb), Vorschau „Handy“ (body.sl-dev-mob = schmaler Rahmen),
+   Dialog „Ansicht teilen“ (Layoutcode). Farben nur über die Variablen der Seite (hell/dunkel); alle Bedienelemente mindestens 40 px (Handy 44 px). */
+.slbt{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;flex:0 1 auto;min-width:0}
+.slbub span,.slbdl{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (min-width:1500px){.slbub span{position:static;width:auto;height:auto;margin:0;overflow:visible;clip:auto}.slbdl{position:static;width:auto;height:auto;margin:0 8px 0 0;overflow:visible;clip:auto}}
+.slbu,.slbdv{display:inline-flex;align-items:stretch;gap:6px}
+.slbdv{gap:0;align-items:center;flex-wrap:wrap}
+.slbdl{font:600 14px var(--b);color:var(--mut)}
+.slbdb{border-radius:0;min-width:70px;justify-content:center}
+.slbdb[data-d=desk]{border-radius:var(--r) 0 0 var(--r);border-right-width:0}
+.slbdb[data-d=mob]{border-radius:0 var(--r) var(--r) 0}
+.slbdb[aria-pressed=true]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.slbdb[aria-pressed=true]:focus-visible{outline-color:var(--ink);outline-offset:3px}
+.slbub .sli{width:18px;height:18px}
+.slbub[aria-disabled=true]{opacity:.5}
+.slbn{margin:0;flex:1 1 220px;font-size:14px}
+@media (min-width:701px){.slbar .slbi{flex-basis:110px}}
+.slbn[hidden],.slbt .slb[hidden],.slbdv[hidden]{display:none}
+.slgst{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0 0 8px;color:var(--ink)}
+.slgtag{padding:1px 10px;font:600 14px var(--b);border:1.5px solid var(--ink);border-radius:99px;white-space:nowrap}
+.slgrp{display:block;min-width:0;padding:12px 14px 14px;border:1.5px solid var(--rule);border-radius:calc(var(--r-l) + 4px);background:var(--card)}
+.slgrp[hidden]{display:none}
+.slgrp.sl-into{border-color:var(--bars);outline:3px solid var(--bars);outline-offset:2px}
+html body.sl-editing .slgrp{border-style:dashed;border-color:var(--bars)}
+.slgd>summary{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 12px;min-height:44px;padding:6px 2px;list-style:none;cursor:pointer;font:700 22px var(--d);color:var(--ink)}
+.slgd>summary::-webkit-details-marker{display:none}
+.slgd>summary::before{content:"";flex:none;align-self:center;width:9px;height:9px;margin-right:4px;border:solid currentColor;border-width:0 2.5px 2.5px 0;transform:rotate(-45deg);transition:transform .15s}
+.slgd[open]>summary::before{transform:rotate(45deg)}
+.slgd>summary:focus-visible{outline:3px solid var(--ink);outline-offset:2px;border-radius:var(--r)}
+.slgd.slgd-edit>summary{cursor:default}
+.slgc{font:500 14px var(--b)}
+.slgb{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px 16px;margin-top:8px}
+.slgb>*{grid-column:span 12}
+#tl>.slgrp{margin-top:34px}
+.slgl{display:flex;flex-direction:column;gap:8px;margin:0 0 12px;padding:0;list-style:none}
+.slgl .btn{width:100%;justify-content:flex-start;text-align:left;min-height:44px}
+.slgl .btn[aria-current=true]{opacity:.7}
+.slimpcode{margin-top:16px}
+.slimpcode textarea,.slbox.slcode textarea{width:100%;box-sizing:border-box;font:500 14px/1.4 ui-monospace,Menlo,Consolas,monospace;resize:vertical;word-break:break-all}
+.slimpcode .btn{margin-top:4px}
+.slcodego{display:flex;flex-wrap:wrap;gap:8px}
+.slcodeok{min-height:1.5em;margin:8px 0 0;font-weight:600}
+.slbox.slcode{width:min(620px,100%)}
+@media (min-width:900px){.slgb .slcell.w-zweidrittel{grid-column:span 8}.slgb .slcell.w-halb{grid-column:span 6}.slgb .slcell.w-drittel{grid-column:span 4}}
+/* Vorschau „Handy“: die Seite steht in einem schmalen Rahmen, alle Abschnitte einspaltig (Bausteine passen sich über Container-Abfragen der Zellbreite an) */
+body.sl-dev-mob #main{box-sizing:border-box;width:min(100%,402px);margin-left:auto;margin-right:auto;padding-left:6px;padding-right:6px;border:2px solid var(--bars);border-radius:26px;box-shadow:0 0 0 8px color-mix(in srgb,var(--soft) 60%,transparent)}
+body.sl-dev-mob #main .slcell,body.sl-dev-mob #main .slgb>*{grid-column:span 12!important}
+body.sl-dev-mob #main .slgb{display:flex;flex-direction:column}
+@media (max-width:700px){
+  .slbt{gap:6px 10px}
+  .slbub,.slbdb{min-height:40px}
+  .slbar{row-gap:6px}
+  .slbn:not([hidden]){position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .slbt{flex:1 1 100%;flex-wrap:nowrap}
+  .slbdv{flex:1 1 0}
+  .slbdb{flex:1 1 0}
+  .slbu{flex:0 0 auto}
+  .slbub{min-width:44px;justify-content:center}
+  .slgrp{padding:8px 8px 10px}
+  .slgd>summary{font-size:20px}
+  .slgst .slnm{flex-basis:calc(100% - 100px)}
+  body.sl-dev-mob #main{border:0;box-shadow:none;border-radius:0;padding-left:0;padding-right:0}
+}
+/* schmaler Baustein: Duplizieren und Gruppen erst im Menü „⋯“ (3.36.0), damit der Kopf höchstens zwei Zeilen hat */
+@container (max-width:719px){
+  .slst .slmx{display:none}
+  .slst.mo-open .slmx{display:inline-flex}
+  .slst .slmorebtn{display:inline-flex}
+}
+@media print{.slbt{display:none!important}}

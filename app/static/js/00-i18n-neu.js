@@ -2582,4 +2582,99 @@ Filter aufheben || Remove filter || Supprimer le filtre || Quitar el filtro
 ab {} || from {} || à partir du {} || desde {}
 Schlagwort „{}“ || Keyword “{}” || Mot-clé « {} » || Palabra clave «{}»
 mindestens {} km || at least {} km || au moins {} km || al menos {} km
+Eine Kopie mit denselben Einstellungen direkt dahinter anlegen || Create a copy with the same settings right behind it || Créer une copie avec les mêmes réglages juste derrière || Crear una copia con los mismos ajustes justo detrás
+In Gruppe … || Into group … || Dans un groupe … || A un grupo …
+Gruppe wechseln … || Change group … || Changer de groupe … || Cambiar de grupo …
+Aus Gruppe lösen || Remove from group || Retirer du groupe || Quitar del grupo
+{}: Position {} von {}, in Gruppe „{}“ || {}: position {} of {}, in group “{}” || {} : position {} sur {}, dans le groupe « {} » || {}: posición {} de {}, en el grupo «{}»
+{}: Position {} von {}, ohne Gruppe || {}: position {} of {}, no group || {} : position {} sur {}, sans groupe || {}: posición {} de {}, sin grupo
+{}: aus der Gruppe „{}“ gelöst || {}: removed from group “{}” || {} : retiré du groupe « {} » || {}: quitado del grupo «{}»
+Baustein „{}“ entfernt || Widget “{}” removed || Bloc « {} » retiré || Bloque «{}» quitado
+{}: Einstellungen geändert || {}: settings changed || {} : réglages modifiés || {}: ajustes cambiados
+Anordnung für || Arrangement for || Disposition pour || Disposición para
+Desktop || Desktop || Ordinateur || Ordenador
+Handy || Phone || Téléphone || Móvil
+Handy-Anordnung zurücksetzen || Reset phone arrangement || Réinitialiser la disposition téléphone || Restablecer la disposición del móvil
+Verlauf der Änderungen || History of changes || Historique des modifications || Historial de cambios
+Rückgängig || Undo || Annuler || Deshacer
+Wiederholen || Redo || Rétablir || Rehacer
+Rückgängig: {} ({}) || Undo: {} ({}) || Annuler : {} ({}) || Deshacer: {} ({})
+Wiederholen: {} ({}) || Redo: {} ({}) || Rétablir : {} ({}) || Rehacer: {} ({})
+Rückgängig: nichts vorhanden || Undo: nothing available || Annuler : rien de disponible || Deshacer: no hay nada
+Wiederholen: nichts vorhanden || Redo: nothing available || Rétablir : rien de disponible || Rehacer: no hay nada
+Änderung || Change || Modification || Cambio
+Rückgängig: {} || Undone: {} || Annulé : {} || Deshecho: {}
+Wiederholt: {} || Redone: {} || Rétabli : {} || Rehecho: {}
+Nichts zum Rückgängigmachen || Nothing to undo || Rien à annuler || Nada que deshacer
+Nichts zum Wiederholen || Nothing to redo || Rien à rétablir || Nada que rehacer
+Gruppe || Group || Groupe || Grupo
+Gruppe {} || Group {} || Groupe {} || Grupo {}
+{} Gruppen || {} groups || {} groupes || {} grupos
+1 Gruppe || 1 group || 1 groupe || 1 grupo
+Eigene Handy-Anordnung || Own phone arrangement || Disposition propre au téléphone || Disposición propia para el móvil
+Gruppe: {} || Group: {} || Groupe : {} || Grupo: {}
+Gruppe umbenennen: {} || Rename group: {} || Renommer le groupe : {} || Renombrar grupo: {}
+Gruppe nach oben || Move group up || Monter le groupe || Subir el grupo
+Gruppe nach unten || Move group down || Descendre le groupe || Bajar el grupo
+Gruppe nach oben: {} || Move group up: {} || Monter le groupe : {} || Subir el grupo: {}
+Gruppe nach unten: {} || Move group down: {} || Descendre le groupe : {} || Bajar el grupo: {}
+Gruppe lösen || Dissolve group || Dissoudre le groupe || Disolver grupo
+Gruppe lösen: {} || Dissolve group: {} || Dissoudre le groupe : {} || Disolver grupo: {}
+Die Gruppe auflösen, die Bausteine bleiben auf der Seite || Dissolve the group, the widgets stay on the page || Dissoudre le groupe, les blocs restent sur la page || Disolver el grupo; los bloques se quedan en la página
+Es sind höchstens {} Gruppen je Seite möglich. || At most {} groups per page are possible. || {} groupes au maximum par page sont possibles. || Se admiten como máximo {} grupos por página.
+Eine Gruppe kann höchstens {} Bausteine enthalten. || A group can contain at most {} widgets. || Un groupe peut contenir {} blocs au maximum. || Un grupo puede contener como máximo {} bloques.
+{}: neue Gruppe angelegt || {}: new group created || {} : nouveau groupe créé || {}: grupo nuevo creado
+{}: jetzt in der Gruppe „{}“ || {}: now in group “{}” || {} : maintenant dans le groupe « {} » || {}: ahora en el grupo «{}»
+{}: aus der Gruppe gelöst || {}: removed from the group || {} : retiré du groupe || {}: quitado del grupo
+Gruppe wählen || Choose group || Choisir un groupe || Elegir grupo
+Eine Gruppe bündelt mehrere Bausteine zu einem einklappbaren Abschnitt. „{}“ soll: || A group bundles several widgets into one collapsible section. “{}” should go: || Un groupe réunit plusieurs blocs en une section repliable. « {} » doit être placé : || Un grupo reúne varios bloques en una sección plegable. «{}» debe ir:
+In Gruppe „{}“ || Into group “{}” || Dans le groupe « {} » || Al grupo «{}»
+In Gruppe „{}“ (aktuell) || Into group “{}” (current) || Dans le groupe « {} » (actuel) || Al grupo «{}» (actual)
+In eine neue Gruppe || Into a new group || Dans un nouveau groupe || A un grupo nuevo
+Gruppe umbenennen || Rename group || Renommer le groupe || Renombrar grupo
+Titel der Gruppe || Title of the group || Titre du groupe || Título del grupo
+Spitze Klammern sind im Titel nicht erlaubt. || Angle brackets are not allowed in the title. || Les chevrons ne sont pas autorisés dans le titre. || No se permiten corchetes angulares en el título.
+Gruppe umbenannt in „{}“ || Group renamed to “{}” || Groupe renommé en « {} » || Grupo renombrado a «{}»
+Gruppe „{}“ gelöst, die Bausteine bleiben auf der Seite || Group “{}” dissolved, the widgets stay on the page || Groupe « {} » dissous, les blocs restent sur la page || Grupo «{}» disuelto; los bloques se quedan en la página
+Handy: eigene Anordnung. Änderungen gelten nur für schmale Bildschirme. || Phone: own arrangement. Changes only apply to narrow screens. || Téléphone : disposition propre. Les modifications ne valent que pour les écrans étroits. || Móvil: disposición propia. Los cambios solo valen para pantallas estrechas.
+Handy: noch keine eigene Anordnung, es gilt die Desktop-Reihenfolge. Die erste Änderung hier legt eine Handy-Anordnung an. || Phone: no own arrangement yet, the desktop order applies. The first change here creates a phone arrangement. || Téléphone : pas encore de disposition propre, l’ordre de l’ordinateur s’applique. La première modification crée une disposition téléphone. || Móvil: aún no hay disposición propia, vale el orden del ordenador. El primer cambio aquí crea una disposición para el móvil.
+Handy-Ansicht: Reihenfolge und Sichtbarkeit gelten nur für schmale Bildschirme || Phone view: order and visibility only apply to narrow screens || Vue téléphone : l’ordre et la visibilité ne valent que pour les écrans étroits || Vista de móvil: el orden y la visibilidad solo valen para pantallas estrechas
+Desktop-Ansicht || Desktop view || Vue ordinateur || Vista de ordenador
+Handy-Anordnung zurückgesetzt, es gilt wieder die Desktop-Reihenfolge || Phone arrangement reset, the desktop order applies again || Disposition téléphone réinitialisée, l’ordre de l’ordinateur s’applique de nouveau || Disposición del móvil restablecida; vuelve a valer el orden del ordenador
+Teilen … || Share … || Partager … || Compartir …
+Teilen …: {} || Share …: {} || Partager … : {} || Compartir …: {}
+Layoutcode der Ansicht „{}“ || Layout code of view “{}” || Code de disposition de la vue « {} » || Código de disposición de la vista «{}»
+Wähle eine Datei, die du mit „Exportieren“ gespeichert hast, oder füge einen Layoutcode ein (aus „Teilen …“). Sie wird zuerst geprüft; erst danach entscheidest du, was übernommen wird. || Choose a file you saved with “Export”, or paste a layout code (from “Share …”). It is checked first; only then you decide what is imported. || Choisis un fichier enregistré avec « Exporter » ou colle un code de disposition (issu de « Partager … »). Il est d’abord vérifié ; ensuite tu décides de ce qui est repris. || Elige un archivo guardado con «Exportar» o pega un código de disposición (de «Compartir …»). Primero se comprueba; solo después decides qué se importa.
+Layoutcode oder Link einfügen || Paste layout code or link || Coller un code de disposition ou un lien || Pegar código de disposición o enlace
+Ein Layoutcode enthält nur die Anordnung und die Einstellungen der Bausteine, keine Touren oder Fotos. || A layout code only contains the arrangement and the settings of the widgets, no tours or photos. || Un code de disposition ne contient que la disposition et les réglages des blocs, ni parcours ni photos. || Un código de disposición solo contiene la disposición y los ajustes de los bloques, ni rutas ni fotos.
+Code prüfen || Check code || Vérifier le code || Comprobar código
+Code wird geprüft … || Checking code … || Vérification du code … || Comprobando código …
+Bitte zuerst einen Layoutcode oder Link einfügen. || Please paste a layout code or link first. || Colle d’abord un code de disposition ou un lien. || Pega primero un código de disposición o un enlace.
+Der Code kann nicht importiert werden || The code cannot be imported || Le code ne peut pas être importé || El código no se puede importar
+Code geprüft || Code checked || Code vérifié || Código comprobado
+Ansicht teilen || Share view || Partager la vue || Compartir vista
+Wer den Code bekommt, kann ihn bei „Ansichten“ → „Importieren …“ einfügen oder den Link öffnen. Der Code enthält nur die Anordnung und die Einstellungen der Bausteine (auch eigene Titel und Notizen), keine Touren, Fotos oder Zugangsdaten. || Whoever gets the code can paste it under “Views” → “Import …” or open the link. The code only contains the arrangement and the settings of the widgets (including your own titles and notes), no tours, photos or credentials. || Qui reçoit le code peut le coller sous « Vues » → « Importer … » ou ouvrir le lien. Le code ne contient que la disposition et les réglages des blocs (y compris tes titres et notes), ni parcours, ni photos, ni identifiants. || Quien reciba el código puede pegarlo en «Vistas» → «Importar …» o abrir el enlace. El código solo contiene la disposición y los ajustes de los bloques (también tus títulos y notas), ni rutas, ni fotos, ni credenciales.
+Layoutcode || Layout code || Code de disposition || Código de disposición
+{} Zeichen || {} characters || {} caractères || {} caracteres
+Der Link wäre sehr lang. Manche Programme kürzen so lange Links, dann den Code selbst weitergeben. || The link would be very long. Some programs shorten such long links; then pass on the code itself. || Le lien serait très long. Certains programmes raccourcissent de tels liens ; transmets alors le code lui-même. || El enlace sería muy largo. Algunos programas acortan enlaces así; entonces pasa el propio código.
+Code kopieren || Copy code || Copier le code || Copiar código
+Link kopieren || Copy link || Copier le lien || Copiar enlace
+Code kopiert || Code copied || Code copié || Código copiado
+Link kopiert || Link copied || Lien copié || Enlace copiado
+Kopieren nicht möglich: Der Code ist markiert, bitte mit Strg+C kopieren. || Copying is not possible: the code is selected, please copy it with Ctrl+C. || Copie impossible : le code est sélectionné, copie-le avec Ctrl+C. || No se puede copiar: el código está seleccionado, cópialo con Ctrl+C.
+Kopieren nicht möglich: Bitte den Code markieren und mit Strg+C kopieren. || Copying is not possible: please select the code and copy it with Ctrl+C. || Copie impossible : sélectionne le code et copie-le avec Ctrl+C. || No se puede copiar: selecciona el código y cópialo con Ctrl+C.
+Mit diesem Zugang lassen sich keine Ansichten importieren. || Views cannot be imported with this access. || Avec cet accès, il est impossible d’importer des vues. || Con este acceso no se pueden importar vistas.
+Dieser Code gehört zu einer Reise-Seite. Öffne eine Reise, der Import öffnet sich dort. || This code belongs to a trip page. Open a trip; the import opens there. || Ce code appartient à une page de voyage. Ouvre un voyage, l’import s’y ouvre. || Este código pertenece a una página de viaje. Abre un viaje; la importación se abre allí.
+Dieser Code kann nicht geöffnet werden. || This code cannot be opened. || Ce code ne peut pas être ouvert. || Este código no se puede abrir.
+Das ist kein Layoutcode aus „Meine Touren“ (er beginnt mit MTA1.). || This is not a layout code from “Meine Touren” (it starts with MTA1.). || Ce n’est pas un code de disposition de « Meine Touren » (il commence par MTA1.). || Este no es un código de disposición de «Meine Touren» (empieza por MTA1.).
+Der Layoutcode ist zu lang für eine Ansicht. || The layout code is too long for a view. || Le code de disposition est trop long pour une vue. || El código de disposición es demasiado largo para una vista.
+Der Layoutcode enthält ungültige Zeichen oder ist unvollständig. || The layout code contains invalid characters or is incomplete. || Le code de disposition contient des caractères invalides ou est incomplet. || El código de disposición contiene caracteres no válidos o está incompleto.
+Der Layoutcode ist beschädigt oder unvollständig. || The layout code is damaged or incomplete. || Le code de disposition est endommagé ou incomplet. || El código de disposición está dañado o incompleto.
+Kein Layoutcode || No layout code || Pas de code de disposition || Sin código de disposición
+Gruppen lassen sich nicht verschachteln || Groups cannot be nested || Les groupes ne peuvent pas être imbriqués || Los grupos no se pueden anidar
+Ein Abschnitt steht in höchstens einer Gruppe || A section belongs to at most one group || Une section appartient à un seul groupe au plus || Una sección pertenece como máximo a un grupo
+Dieser Abschnitt bleibt immer sichtbar und lässt sich nicht gruppieren || This section always stays visible and cannot be grouped || Cette section reste toujours visible et ne peut pas être groupée || Esta sección siempre permanece visible y no se puede agrupar
+Auf der Karte gibt es keine Gruppen || The map has no groups || La carte n’a pas de groupes || El mapa no tiene grupos
+Auf der Karte gibt es keine eigene Handy-Anordnung || The map has no own phone arrangement || La carte n’a pas de disposition propre au téléphone || El mapa no tiene disposición propia para el móvil
+Eine Gruppe verweist auf einen Abschnitt oder Baustein, den es auf dieser Seite nicht gibt || A group refers to a section or widget that does not exist on this page || Un groupe renvoie à une section ou à un bloc qui n’existe pas sur cette page || Un grupo remite a una sección o bloque que no existe en esta página
 `;

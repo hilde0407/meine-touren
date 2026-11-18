@@ -1,6 +1,7 @@
 /* =====================  3.21.0 Vorlagen für Ansichten  =====================
    Fertige Anordnungen zum Start. Eine Vorlage ist eine kurze Beschreibung, aus der das Layout-Dokument (Format wie in app/layout.py) erzeugt wird:
      items  [[Kennung, Breite, Konfiguration?]]  Reihenfolge der sichtbaren Abschnitte; „w:<Typ>“ = Baustein dieses Typs (Kennung „t-<Typ>“), sonst ein Standard-Abschnitt der Seite
+     groups [{title, items: [Kennung, …], closed?}]  (3.36.0, optional) Gruppen aus den Einträgen von „items“ (einklappbarer Abschnitt, Mitglieder in der Reihenfolge von „items“)
      Standard-Abschnitte, die nicht aufgeführt sind, werden ausgeblendet (außer den Pflicht-Abschnitten, z. B. dem Einstieg in die Auswertung).
    Die Dokumente gehen durch dieselbe Prüfung wie alles, was der Benutzer speichert (der Server prüft sie beim Speichern; tests/test_ansichten_ui.py prüft jede Vorlage dagegen). */
 const SL_TPL = [
@@ -14,6 +15,9 @@ const SL_TPL = [
     items: [["jahr", "halb"], ["w:periode", "halb"], ["w:letzte", "halb"], ["w:rekorde", "halb"]]},
   {id: "ue-hinweise", fam: "uebersicht", name: "Mit Hinweisen", desc: "Für den Alltag mit Erinnerungen: oben der Baustein „Hinweise“, der nur erscheint, wenn etwas los ist, darunter Dein Jahr, diese Woche, die letzten Touren, Jahresziel und Meilensteine.",
     items: [["w:hinweise", "voll"], ["jahr", "voll"], ["w:periode", "halb"], ["w:letzte", "halb"], ["w:jahresziel", "halb"], ["w:meilensteine", "halb"]]},
+  {id: "ue-gruppe", fam: "uebersicht", name: "Mit Gruppe", desc: "Oben Dein Jahr, diese Woche und die letzten Touren, darunter die einklappbare Gruppe „Rückblick“ mit Jahres-Rückblick, Heute vor X Jahren und deinen Rekorden.",
+    items: [["jahr", "voll"], ["w:periode", "halb"], ["w:letzte", "halb"], ["w:rueckblick", "voll"], ["w:heutevor", "halb"], ["w:rekorde", "halb"]],
+    groups: [{title: "Rückblick", items: ["w:rueckblick", "w:heutevor", "w:rekorde"]}]},
   {id: "st-rueckblick", fam: "statistik", name: "Jahresrückblick", desc: "Für den Blick auf ein Jahr: Kennzahlen, Monate, Höhenmeter im Jahresverlauf, die besten Touren und die Kalender-Heatmap.",
     items: [["kpi", "voll"], ["kmmonat", "halb"], ["w:sthoehe", "halb"], ["w:sttop", "halb"], ["bestwerte", "halb"], ["heat", "voll"]]},
   {id: "st-training", fam: "statistik", name: "Training", desc: "Für den Blick auf Form und Entwicklung: Belastung und Erholung, dein typisches Tempo, die Entwicklung deines Tempos, der Monatsvergleich und die Streckenlängen.",
@@ -51,6 +55,12 @@ function slTplDocs(t) {
     if (i.w && i.w !== dflt) w[i.id] = i.w;
   });
   if (Object.keys(w).length) doc.w = w;
+  if ((t.groups || []).length)
+    doc.groups = t.groups.map((g, i) => {
+      const o = {id: "grp" + (i + 1) + t.id.replace(/[^a-z0-9]/g, "").slice(0, 6), title: g.title, ids: g.items.map(r => slTplItem(fam, [r]).id)};
+      if (g.closed) o.closed = true;
+      return o;
+    });
   return fam === "tour" ? {"tour-haupt": doc, "tour-auswertung": {v: 1}} : {[fam]: doc};
 }
 /* Schema der Vorlage: Zeilen aus den Breiten (ohne Lücken aufgefüllt wie auf der Seite), 120 × (8 + 12 je Zeile) */
