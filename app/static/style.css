@@ -1991,6 +1991,16 @@ html.mob .mapui>.kaopen .slok{flex:0 0 auto;white-space:nowrap}
 /* 3.39.0 Karte: Fenster „Touren im Ausschnitt“ liegt über den Bedienfeldern (.mapui, z-index 500) und den Kartensteuerelementen; auch mobil (dort .modal 1000) */
 .modal.mbxfen,html.mob .modal.mbxfen{z-index:1100}.modal.mbxfen .mbox{max-width:760px;width:100%}.modal.mbxfen .mbox:focus{outline:none}
 
+/* 3.39.0 Plan und Ergebnis (Baustein „planergebnis“, 51-bausteine-tour.js): Soll/Ist-Zeilen mit Pfeil und Wort (nie nur Farbe), gestrichelte Plan-Linie über der durchgezogenen gelaufenen Linie */
+.plname{margin:0 0 8px;font-size:16px}.plrows{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:10px}
+.plrow{display:grid;grid-template-columns:minmax(110px,1fr) repeat(2,minmax(110px,1fr)) minmax(190px,1.6fr);gap:4px 14px;align-items:baseline;padding:8px 0;border-top:1px solid var(--rule)}
+.plrow:first-child{border-top:0}.pll{font-weight:600}.plv small{display:block;font-size:12px}.pld{display:flex;flex-wrap:wrap;gap:2px 6px;align-items:baseline}.pld b{font-weight:700}.pld small{font-size:13px}
+.plmap{display:block;width:100%;height:auto;max-height:320px;background:var(--soft);border:1px solid var(--rule);border-radius:var(--r)}
+.plpl,.plis{fill:none;stroke-linecap:round;stroke-linejoin:round}.plpl{stroke:var(--ink);stroke-width:2;stroke-dasharray:7 5}.plis{stroke:var(--bars);stroke-width:3.5}
+.plleg{list-style:none;margin:6px 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:4px 18px;font-size:13px}.plleg li{display:flex;align-items:center;gap:6px}.plsw{width:28px;height:8px;overflow:visible}.plsw .plpl{stroke-width:2}.plsw .plis{stroke-width:3.5}
+.plact{margin-top:8px}.plact .btn.sm,html.mob .plact .btn.sm{min-height:44px}
+@media (max-width:640px){.plrow{grid-template-columns:1fr 1fr}.pll{grid-column:1/-1}.pld{grid-column:1/-1}}
+
 /* 3.40.0 3D-Flug: Bedienleiste rechts (07-flug.js) im Stil des Flug-Bedienfelds (.fbar/.fctl) – bleibt immer sichtbar, auch wenn sich das Bedienfeld beim Abspielen ausblendet.
    Zwei Spalten, Tasten mindestens 40 px; Hinweis/Hilfe (.fhint) links daneben. Farben fest wie das übrige Flug-Bedienfeld (liegt über der Karte, in hell und dunkel gleich). */
 .flight #fm{overscroll-behavior:contain}
