@@ -2,7 +2,7 @@
    Daten und Auswahl-Logik stehen in 49-seitenlayout.js (Behälter SL.store, slResolve, slPack); hier: Auswahl in der Kopfzeile, Verwaltung (Dialog), Vorlagen, Export und Import.
    Tourseite: Hauptseite und Auswertung sind zwei Schlüssel; jede Änderung an den Ansichten (anlegen, umbenennen, löschen, Standard, Regeln) wird in beiden geführt
    (slAlign), der Inhalt bleibt je Schlüssel eigen. Die Vorgabe der Anzeige: von Hand gewählt (diese Sitzung) vor Regel „Sportart → Ansicht“ (beim Öffnen einer Tour) vor Standardansicht. */
-const SL_APPV = "3.37.0";
+const SL_APPV = "3.37.1";
 const SL_EXPORT_FORMAT = "meine-touren-ansicht";
 const SL_MAXFILE = 200000;
 const slVm = fam => slMaster(fam).views;
@@ -128,6 +128,90 @@ document.addEventListener("change", e => {
   const r = e.target && e.target.closest && e.target.closest("select[data-rule]");
   if (r) slViewRule(SL.fam, r.dataset.rule, r.value);
 });
+
+/* ---------- 3.37.1 Handy: Ansichten als Menü statt dauerhaft sichtbarer Auswahl ----------
+   Auf dem Handy (html.mob) steht in der Werkzeugzeile nur der Knopf „Ansichten“. Er öffnet ein Menü: Ansicht wählen (wie die Auswahlliste #slview, die dort ausgeblendet bleibt), „Ansicht speichern …“
+   (solange der Filter vom gespeicherten Stand abweicht; ein Punkt am Knopf zeigt das an) und „Ansichten verwalten …“ (der Dialog). Das Menü liegt fest am Bildschirm (nichts wird abgeschnitten, auch nicht auf der Karte). */
+const slvMenuOn = () => document.documentElement.classList.contains("mob") && !SL.edit;
+const slvMenuEl = () => document.getElementById("slvmenu");
+function slvMenuClose(focus) {
+  const m = slvMenuEl(), b = document.getElementById("slviews");
+  if (m) m.remove();
+  if (b) b.setAttribute("aria-expanded", "false");
+  document.removeEventListener("pointerdown", slvOutside, true);
+  document.removeEventListener("keydown", slvKey, true);
+  window.removeEventListener("resize", slvMenuClose);
+  window.removeEventListener("hashchange", slvMenuClose);
+  if (focus && b) b.focus({preventScroll: true});
+}
+const slvOutside = e => {
+  const m = slvMenuEl();
+  if (m && !m.contains(e.target) && !e.target.closest("#slviews")) slvMenuClose(false);
+};
+function slvKey(e) {
+  const m = slvMenuEl();
+  if (!m) return;
+  if (e.key === "Escape") {
+    e.preventDefault();
+    e.stopPropagation();
+    return slvMenuClose(true);
+  }
+  if (e.key === "Tab") return slvMenuClose(false);
+  const it = [...m.querySelectorAll("button")], i = it.indexOf(document.activeElement), k = {ArrowDown: 1, ArrowUp: -1}[e.key];
+  if (k) {
+    e.preventDefault();
+    it[(i + k + it.length) % it.length].focus();
+  } else if (e.key === "Home" || e.key === "End") {
+    e.preventDefault();
+    it[e.key === "Home" ? 0 : it.length - 1].focus();
+  }
+}
+function slvMenuToggle(btn) {
+  if (slvMenuEl()) return slvMenuClose(true);
+  const fam = SL.fam, h = SLF[fam], dirty = !!(h && h.dirty && h.dirty()), sel = document.getElementById("slview"), m = document.createElement("div");
+  m.id = "slvmenu";
+  m.className = "slvmenu";
+  m.setAttribute("role", "menu");
+  m.setAttribute("aria-label", "Ansichten");
+  const item = (cls, role, txt, attrs) => `<button type="button" class="${cls}" role="${role}"${attrs || ""}>${esc(txt)}</button>`;
+  let html = "";
+  if (sel && sel.options.length) {
+    html += `<div class="slvmh" role="presentation">Ansicht wählen</div>` + [...sel.options].map(o => item("slvmi", "menuitemradio", o.textContent, ` data-v="${esc(o.value)}" aria-checked="${o.value === sel.value}"`)).join("");
+    html += `<div class="slvms" role="separator"></div>`;
+  }
+  if (dirty) html += item("slvmi", "menuitem", "Ansicht speichern …", ' data-m="save"');
+  html += item("slvmi", "menuitem", "Ansichten verwalten …", ' data-m="manage"');
+  m.innerHTML = html;
+  m.addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    slvMenuClose(true);
+    if (b.dataset.m === "save") slSaveMenu();
+    else if (b.dataset.m === "manage") slViewsDialog();
+    else if (b.dataset.v !== undefined && b.getAttribute("aria-checked") !== "true") slSwitch(SL.fam, b.dataset.v);
+  });
+  document.body.appendChild(m);
+  const r = btn.getBoundingClientRect();
+  m.style.setProperty("--slvt", Math.round(r.bottom + 6) + "px");
+  btn.setAttribute("aria-expanded", "true");
+  btn.setAttribute("aria-controls", "slvmenu");
+  document.addEventListener("pointerdown", slvOutside, true);
+  document.addEventListener("keydown", slvKey, true);
+  window.addEventListener("resize", slvMenuClose);
+  window.addEventListener("hashchange", slvMenuClose);
+  (m.querySelector('[aria-checked="true"]') || m.querySelector("button")).focus({preventScroll: true});
+}
+/* Zustand des Knopfs „Ansichten“: Menü (Handy) oder Dialog */
+function slvBtnSync(w) {
+  const b = (w || document).querySelector("#slviews");
+  if (!b) return;
+  const menu = document.documentElement.classList.contains("mob");
+  b.setAttribute("aria-haspopup", menu ? "menu" : "dialog");
+  if (!menu) {
+    b.removeAttribute("aria-expanded");
+    b.removeAttribute("aria-controls");
+  } else if (!b.hasAttribute("aria-expanded")) b.setAttribute("aria-expanded", "false");
+}
 
 /* ---------- Dialoge ---------- */
 /* Kleiner Dialog mit einem Namensfeld (Neu, Umbenennen); opt = {title, value, ok, except, extra (HTML), hint}; Ergebnis {name, form} oder null */
@@ -480,7 +564,8 @@ async function slSaveNew(fam, fromEdit) {
 }
 /* Knopf „Ansicht speichern“ neben der Auswahl, solange der Filter vom gespeicherten Stand der Ansicht abweicht */
 function slSaveBar(w) {
-  const h = SLF[SL.fam], on = !!(h && h.dirty && h.dirty()), old = w.querySelector(".slsv");
+  const h = SLF[SL.fam], on = !!(h && h.dirty && h.dirty()), old = w.querySelector(".slsv"), vb = w.querySelector("#slviews");
+  if (vb) vb.classList.toggle("slvd", on);                                  // Handy: Punkt am Knopf „Ansichten“ statt der Zeile „geändert / Ansicht speichern“ (die Zeile bleibt für Desktop)
   if (!on) {
     if (old) old.remove();
     return false;

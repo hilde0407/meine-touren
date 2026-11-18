@@ -2716,4 +2716,9 @@ Unter 0 °C || Below 0 °C || Moins de 0 °C || Menos de 0 °C
 0 bis 10 °C || 0 to 10 °C || 0 à 10 °C || 0 a 10 °C
 10 bis 20 °C || 10 to 20 °C || 10 à 20 °C || 10 a 20 °C
 Ab 20 °C || From 20 °C || À partir de 20 °C || Desde 20 °C
-Wetterdaten für {} von {} Touren; die übrigen fehlen und zählen nicht mit (nie als 0 °C). Gespeichertes Wetter, kein neuer Abruf. || Weather data for {} of {} tours; the rest are missing and do not count (never as 0 °C). Stored weather, no new lookup. || Données météo pour {} sur {} parcours ; les autres manquent et ne comptent pas (jamais comme 0 °C). Météo enregistrée, aucune nouvelle requête. || Datos meteorológicos de {} de {} rutas; el resto falta y no cuenta (nunca como 0 °C). Tiempo guardado, sin nueva consulta.`;
+Wetterdaten für {} von {} Touren; die übrigen fehlen und zählen nicht mit (nie als 0 °C). Gespeichertes Wetter, kein neuer Abruf. || Weather data for {} of {} tours; the rest are missing and do not count (never as 0 °C). Stored weather, no new lookup. || Données météo pour {} sur {} parcours ; les autres manquent et ne comptent pas (jamais comme 0 °C). Météo enregistrée, aucune nouvelle requête. || Datos meteorológicos de {} de {} rutas; el resto falta y no cuenta (nunca como 0 °C). Tiempo guardado, sin nueva consulta.
+Je Baustein || Per widget || Par bloc || Por bloque
+Zeitraum: || Period: || Période : || Periodo:
+Ansicht wählen || Choose view || Choisir la vue || Elegir vista
+Ansicht speichern … || Save view … || Enregistrer la vue … || Guardar vista …
+Ansichten verwalten … || Manage views … || Gérer les vues … || Gestionar vistas …`;

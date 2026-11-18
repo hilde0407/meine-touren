@@ -376,7 +376,7 @@ def test_export_file_and_import_valid_invalid_and_replace_only_after_confirmatio
         d = dl.value
         assert d.suggested_filename == "ansicht-uebersicht-training-test.json"
         doc = json.loads(open(d.path(), encoding="utf-8").read())
-        assert doc["format"] == "meine-touren-ansicht" and doc["format_version"] == 1 and doc["app_version"] == "3.37.0" and doc["page"] == "uebersicht" and doc["name"] == "Training-Test"
+        assert doc["format"] == "meine-touren-ansicht" and doc["format_version"] == 1 and doc["app_version"] == "3.37.1" and doc["page"] == "uebersicht" and doc["name"] == "Training-Test"
         assert list(doc["layouts"]) == ["uebersicht"] and doc["layouts"]["uebersicht"]["widgets"][0]["type"] == "periode" and doc["layouts"]["uebersicht"]["hidden"] == ["tag"]
         # Import gültig: Vorschau, dann als NEUE Ansicht (Name vergeben → nummeriert)
         f = _write(tmp_path, "gut.json", {**doc, "zukunft": 1})
@@ -491,8 +491,13 @@ def test_mobile_390_selector_and_dialogs(pw, app):
     try:
         pg.wait_for_function("() => !!document.querySelector('#slview')", timeout=T)
         assert pg.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1")
-        assert pg.evaluate("document.querySelector('#slview').getBoundingClientRect().height") >= 40
+        assert pg.evaluate("document.querySelector('#slview').getBoundingClientRect().height") == 0              # 3.37.1: auf dem Handy statt der Auswahlliste der Knopf „Ansichten“ mit Menü
+        pg.locator("#slviews").click()
+        pg.wait_for_selector("#slvmenu", timeout=T)
+        assert pg.evaluate("() => { const m = document.getElementById('slvmenu'), r = m.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth && [...m.querySelectorAll('[role=menuitemradio]')].length === 2 && [...m.querySelectorAll('button')].every(b => b.getBoundingClientRect().height >= 44); }")
         _shot(pg, "ansichten-390-auswahl.png", full=False)
+        pg.keyboard.press("Escape")
+        pg.wait_for_function("() => !document.getElementById('slvmenu')", timeout=T)
         _edit(pg)
         _open_views(pg)
         assert pg.evaluate("() => { const b = document.querySelector('.slvws'); return b.scrollWidth <= b.clientWidth + 1 && b.getBoundingClientRect().right <= innerWidth + 1; }")

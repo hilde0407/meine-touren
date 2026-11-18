@@ -254,6 +254,13 @@ def test_statistics_keeps_its_filters_and_has_the_previous_year(pw, app):
 def test_period_bar_mobile_390(pw, app, scheme):
     pg = _dash(pw, app, f"#/dash?z={CY - 1}", width=390, height=844, scheme=scheme, dpr=2)
     try:
+        chip = pg.locator("#zrchip")                                                   # 3.37.1: auf dem Handy ein Chip in der Werkzeugzeile, die Auswahl klappt darunter auf (standardmäßig zu)
+        expect(chip).to_be_visible(timeout=15000)
+        expect(chip).to_contain_text(str(CY - 1), timeout=15000)
+        expect(chip).to_have_attribute("aria-expanded", "false", timeout=15000)
+        expect(pg.locator("#zrbar")).to_be_hidden(timeout=15000)
+        chip.click()
+        expect(chip).to_have_attribute("aria-expanded", "true", timeout=15000)
         expect(pg.locator("#zrbar")).to_be_visible(timeout=15000)
         assert pg.evaluate("() => Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth)") == 0
         r = pg.locator("#zrbar").bounding_box()

@@ -735,6 +735,7 @@ const slIcon = {
   eyeoff: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 3l18 18M10.6 5.7A10 10 0 0 1 12 5.5c6.3 0 10 6.5 10 6.5a17 17 0 0 1-3.2 3.9M6.4 7.4A16.5 16.5 0 0 0 2 12s3.7 6.5 10 6.5c1.5 0 2.8-.3 4-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>',
   gear: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
   sliders: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg>',
+  layers: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.5l8.5 4.5-8.5 4.5L3.5 8z"/><path d="M3.5 12.5l8.5 4.5 8.5-4.5"/></svg>',
 };
 /* Symbol der Breite: Rahmen = ganze Zeile, Füllung = Anteil */
 const slWIcon = k => `<svg viewBox="0 0 24 14" aria-hidden="true" focusable="false"><rect class="wb" x=".65" y=".65" width="22.7" height="12.7" rx="2.5"/><rect class="wf" x="2" y="2" width="${((SL_W.d[k] / 12) * 20).toFixed(1)}" height="10" rx="1.5"/></svg>`;
@@ -951,7 +952,7 @@ function slPlace(root) {
     });
   if (fam === "tour") root.querySelectorAll(":scope > .tlg:not(.tlsumg)").forEach(g => !used.has(g) && (g.hidden = true));
   slGrpClean(root, used);
-  const op = slOpener(root, edit), zb = typeof zrBar === "function" ? zrBar(fam, pres, root, edit) : null;          // 3.34.0: Zeitraum-Leiste der Seite (65-zeitraum.js)
+  const op = slOpener(root, edit), zb = typeof zrBar === "function" ? zrBar(fam, pres, root, edit, op) : null;          // 3.34.0: Zeitraum-Leiste der Seite (65-zeitraum.js)
   slPlaceIn(root, main ? [op, zb, ...seq] : seq);
   if (edit)
     pres.forEach((p, i) => {
@@ -999,10 +1000,11 @@ function slOpener(root, edit) {
     w = document.createElement("div");
     w.id = "slopenw";
     w.className = "slopen";
-    w.innerHTML = `<button type="button" class="btn ghost sm" id="slopen" data-a="edit">${slIcon.sliders}<span>Seite anpassen</span></button><button type="button" class="btn ghost sm" id="slviews" aria-haspopup="dialog">Ansichten</button>`;
+    w.innerHTML = `<button type="button" class="btn ghost sm" id="slopen" data-a="edit">${slIcon.sliders}<span class="slbt">Seite anpassen</span></button><button type="button" class="btn ghost sm" id="slviews" aria-haspopup="dialog">${slIcon.layers}<span class="slbt">Ansichten</span><i class="slvdot" aria-hidden="true"></i></button>`;
   }
   if (root.matches("main.home") && typeof ziQuick === "function") ziQuick(w);                // 3.30.0: Schnell-Knopf „Touren holen“ je nach Uhr (52-bausteine-uebersicht.js), damit der Import auf dem Handy ohne Scrollen erreichbar ist
   const b = w.querySelector("#slopen"), vb = w.querySelector("#slviews");
+  if (typeof slvBtnSync === "function") slvBtnSync(w);                                     // 3.37.1: Handy: Menü statt Dialog
   b.hidden = !!edit;
   if (vb) vb.hidden = !!edit;                                                              // 3.24.0: der Knopf „Ansichten“ steht immer neben „Seite anpassen“ (im Bearbeitungsmodus sitzt er in der Leiste)
   w.hidden = !!edit;
@@ -1498,7 +1500,7 @@ document.addEventListener("click", e => {
     bar = e.target.closest && e.target.closest("#slbar [data-a]"),
     b = e.target.closest && e.target.closest(".slst button[data-a]");
   if (o) return slEdit(true);
-  if (vo) return typeof slViewsDialog === "function" && slViewsDialog();
+  if (vo) return typeof slvMenuOn === "function" && slvMenuOn() ? slvMenuToggle(vo) : typeof slViewsDialog === "function" && slViewsDialog();          // 3.37.1: auf dem Handy ein Menü (Auswahl, Speichern, Verwalten), sonst der Dialog
   if (mo) return slMore(mo);
   if (bar) {
     const a = bar.dataset.a;

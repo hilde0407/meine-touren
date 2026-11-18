@@ -7,7 +7,7 @@
    „Ansicht speichern“) · keiner.
    Baustein-Einstellung: „Zeitraum der Seite verwenden“ (Standard) oder eigener Zeitraum (Feld „eigen“ in der Konfiguration; auch bei der Eigenen Kennzahl, deren range/yr/from/to dann gelten).
    Bausteine ohne Zeitbezug (ohne Feld „Zeitraum“ und nicht „zeit“) bekommen weder eine Änderung noch einen Hinweis; die Leiste erscheint nur, wenn die Seite mindestens einen zeitbezogenen Baustein zeigt. */
-const ZR = {F: {}, focus: "", open: {}, key: {}, url: {}};
+const ZR = {F: {}, focus: "", open: {}, key: {}, url: {}, mopen: {}};
 const zrFams = ["uebersicht"];
 const zrHashBase = fam => ({uebersicht: "#/dash"})[fam];
 const zrLsKey = fam => "mt_zr_" + slUid() + "_" + fam + "_" + (SL.view[fam] || "");
@@ -72,9 +72,16 @@ const zrAware = it => {
   const T = it.wtype && window.SL_WT[it.wtype];
   return !!T && !T.hinweis && !!(T.zeit || (T.fields || []).some(f => f.kind === "range"));
 };
+const zrMob = () => document.documentElement.classList.contains("mob");
+/* Kurzform für den Chip der Werkzeugzeile (Handy): „Zeitraum: 2025“ */
+const zrShort = F => (!F ? "Je Baustein" : F.kind === "y" ? String(F.yr) : F.kind === "all" ? "Alle" : stRange(F).label);
 const zrLabel = F => (!F ? "Jeder Baustein zeigt seinen eigenen Zeitraum" : F.kind === "y" ? `Das Jahr ${F.yr}` : F.kind === "all" ? "Alle Touren, gesamte Zeit" : stRange(F).label);
 /* Zeitraum setzen (F = null: zurück auf den gespeicherten bzw. keinen) */
 function zrSet(fam, F, focus) {
+  if (zrMob() && ZR.mopen[fam]) {                                                   // Handy: die Auswahl klappt nach der Wahl wieder zu, der Fokus geht zurück auf den Chip
+    ZR.mopen[fam] = false;
+    focus = document.getElementById("zrchip") ? "#zrchip" : ".zrtog";
+  }
   ZR.F[fam] = F;
   ZR.url[fam] = false;
   ZR.key[fam] = zrLsKey(fam);
@@ -115,31 +122,101 @@ SLF.uebersicht = {
   },
 };
 /* ---------- Leiste ---------- */
-function zrHtml(fam, F, open) {
+/* chip = Handy-Werkzeugzeile: der Kopf (Chip) steht in der Zeile „Seite anpassen“ (zrChip), hier bleibt nur die aufklappbare Auswahl */
+function zrHtml(fam, F, open, chip) {
   const cy = new Date().getFullYear(), ys = years(), on = {all: F && F.kind === "all", year: F && F.kind === "y" && F.yr === cy, "12m": F && F.kind === "12m", prev: F && F.kind === "y" && F.yr === cy - 1, c: F && F.kind === "c"},
     other = F && F.kind === "y" && F.yr !== cy && F.yr !== cy - 1 ? F.yr : 0, yl = [...new Set(ys.concat(other ? [other] : []))].sort((a, b) => b - a),
     chips = [["all", "Alle"], ["year", "Dieses Jahr"], ["12m", "Letzte 12 Monate"], ["prev", "Vorjahr"]];
-  return `<div class="zrhead"><button type="button" class="zrtog" aria-expanded="${open}" aria-controls="zrbody"><span class="zrt">Zeitraum der Seite</span><span class="zrl">${esc(zrLabel(F))}</span></button>` +
-    `<button type="button" class="btn ghost sm zrreset" data-zr="reset"${F ? "" : " hidden"}>Zurücksetzen</button></div>` +
+  return (chip ? "" : `<div class="zrhead"><button type="button" class="zrtog" aria-expanded="${open}" aria-controls="zrbody"><span class="zrt">Zeitraum der Seite</span><span class="zrl">${esc(zrLabel(F))}</span></button>` +
+    `<button type="button" class="btn ghost sm zrreset" data-zr="reset"${F ? "" : " hidden"}>Zurücksetzen</button></div>`) +
     `<div class="zrbody" id="zrbody"${open ? "" : " hidden"}><div class="chips" role="group" aria-label="Zeitraum der Seite">${chips.map(([k, l]) => `<button type="button" class="chip${on[k] ? " on" : ""}" data-zr="${k}" aria-pressed="${!!on[k]}">${l}</button>`).join("")}` +
     `<label class="zrjahr"><span class="slsr">Bestimmtes Jahr</span><select id="zrjahr" data-zr="jahr"><option value="">Jahr …</option>${yl.map(y => `<option value="${y}"${other === y ? " selected" : ""}>${y}</option>`).join("")}</select></label>` +
-    `<button type="button" class="chip${on.c ? " on" : ""}" data-zr="c" aria-pressed="${!!on.c}" aria-controls="zrvon">Von–bis …</button></div>` +
+    `<button type="button" class="chip${on.c ? " on" : ""}" data-zr="c" aria-pressed="${!!on.c}" aria-controls="zrvon">Von–bis …</button>` +
+    (chip ? `<button type="button" class="chip zrreset" data-zr="reset"${F ? "" : " hidden"}>Zurücksetzen</button>` : "") + `</div>` +
     `<form class="stfc zrform" id="zrvon"${F && F.kind === "c" ? "" : " hidden"} novalidate><label>Von <input type="date" name="von" value="${F ? F.von : ""}"></label><label>Bis <input type="date" name="bis" value="${F ? F.bis : ""}"></label><button class="btn sm" type="submit">Übernehmen</button><span class="stfe" role="alert"></span></form>` +
     `<p class="mut zrhint">Gilt für alle Bausteine mit Zeitbezug. Ein Baustein behält seinen eigenen Zeitraum, wenn du in seinen Einstellungen „Zeitraum der Seite verwenden“ abschaltest.</p></div>`;
 }
+const zrSig = (F, open, chip) => JSON.stringify([F && zrDocOf(F), open, years().join(","), new Date().getFullYear(), chip]);
+/* Handy: der Chip „Zeitraum: 2025 ▾“ in der Werkzeugzeile (#slopenw); öffnet und schließt die Auswahl in #zrbar (aria-expanded, aria-controls) */
+function zrChip(fam, F, open, w) {
+  let c = document.getElementById("zrchip");
+  if (!w) {
+    if (c) c.remove();
+    return;
+  }
+  if (!c) {
+    c = document.createElement("button");
+    c.type = "button";
+    c.id = "zrchip";
+    c.className = "btn ghost sm zrchip";
+    c.setAttribute("aria-controls", "zrbody");
+  }
+  const sig = [fam, F ? zrDocOf(F) : "", open].join("|");
+  if (c.dataset.sig !== sig) {
+    c.dataset.sig = sig;
+    c.dataset.fam = fam;
+    c.classList.toggle("zron", !!F);
+    c.setAttribute("aria-expanded", String(!!open));
+    c.title = zrLabel(F);
+    c.innerHTML = `<span class="zrcl">Zeitraum:</span> <b class="zrcv">${esc(zrShort(F))}</b><i class="zrcc" aria-hidden="true"></i>`;
+  }
+  const after = w.querySelector("#slviews");
+  if (c.parentNode !== w || (after && c.previousElementSibling !== after)) (after ? after.after(c) : w.appendChild(c));
+}
+/* Auswahl auf- und zuklappen (Handy, ohne die Seite neu zu bauen) */
+function zrMobOpen(fam, open, focus) {
+  ZR.mopen[fam] = !!open;
+  const bar = document.getElementById("zrbar"), body = document.getElementById("zrbody"), c = document.getElementById("zrchip");
+  if (body) body.hidden = !open;
+  if (c) {
+    c.setAttribute("aria-expanded", String(!!open));
+    c.dataset.sig = [fam, ZR.F[fam] ? zrDocOf(ZR.F[fam]) : "", !!open].join("|");
+  }
+  if (bar && bar.dataset.sig) bar.dataset.sig = zrSig(ZR.F[fam] || null, !!open, bar.classList.contains("zrm"));
+  if (focus && c) c.focus({preventScroll: true});
+}
+document.addEventListener("click", e => {
+  const c = e.target.closest && e.target.closest("#zrchip");
+  if (c) zrMobOpen(c.dataset.fam, c.getAttribute("aria-expanded") !== "true");
+});
+document.addEventListener("keydown", e => {
+  const c = document.getElementById("zrchip");
+  if (e.key !== "Escape" || !c || c.getAttribute("aria-expanded") !== "true") return;
+  const a = document.activeElement;
+  if (a === c || (a && a.closest && a.closest("#zrbar"))) {
+    e.preventDefault();
+    zrMobOpen(c.dataset.fam, false, true);
+  }
+});
+{
+  let was = zrMob();                                                                // Wechsel zwischen Handy- und Desktop-Ansicht: Leiste neu aufbauen
+  new MutationObserver(() => {
+    if (zrMob() === was) return;
+    was = zrMob();
+    const m = document.getElementById("main");
+    if (document.getElementById("zrbar") && m && m.classList.contains("home") && typeof slApply === "function") {
+      delete document.getElementById("zrbar").dataset.sig;
+      slApply();
+    }
+  }).observe(document.documentElement, {attributes: true, attributeFilter: ["class"]});
+}
 /* Wird von der Engine bei jedem Einordnen gerufen; gibt die Leiste zurück (oder null, wenn die Seite keinen zeitbezogenen Baustein zeigt) */
-function zrBar(fam, pres, root, edit) {
+function zrBar(fam, pres, root, edit, op) {
   let bar = document.getElementById("zrbar");
   if (!zrFams.includes(fam) || !pres.some(p => (edit || !p.off) && zrAware(p.it))) {
     if (bar) bar.remove();
+    zrChip(fam, null, false, null);
     return null;
   }
-  const F = ZR.F[fam] || null;
+  const F = ZR.F[fam] || null, ow = op || document.getElementById("slopenw"), mob = zrMob(), chip = mob && !edit && !!ow;       // Handy: Chip in der Werkzeugzeile statt eigener Leiste
   let open = true;
-  try {
-    open = localStorage.getItem(zrOpenKey(fam)) !== "0";
-  } catch (e) {}
-  const sig = JSON.stringify([F && zrDocOf(F), open, years().join(","), new Date().getFullYear()]);
+  if (mob) open = !!ZR.mopen[fam];                                                  // Handy: standardmäßig zu, nicht gemerkt
+  else
+    try {
+      open = localStorage.getItem(zrOpenKey(fam)) !== "0";
+    } catch (e) {}
+  zrChip(fam, F, open, chip ? ow : null);
+  const sig = zrSig(F, open, chip);
   if (!bar) {
     bar = document.createElement("section");
     bar.id = "zrbar";
@@ -159,13 +236,14 @@ function zrBar(fam, pres, root, edit) {
     });
   }
   bar.dataset.fam = fam;
+  bar.classList.toggle("zrm", chip);
   if (bar.dataset.sig !== sig) {
     const had = bar.contains(document.activeElement) ? document.activeElement : null, foc = ZR.focus || (had && (had.id ? "#" + had.id : had.dataset && had.dataset.zr ? `[data-zr="${had.dataset.zr}"]` : ""));
     bar.dataset.sig = sig;
-    bar.innerHTML = zrHtml(fam, F, open);
+    bar.innerHTML = zrHtml(fam, F, open, chip);
     ZR.focus = "";
     if (foc) {
-      const el = bar.querySelector(foc);
+      const el = foc === "#zrchip" ? document.getElementById("zrchip") : bar.querySelector(foc);
       if (el && !el.hidden) el.focus({preventScroll: true});
     }
   }
@@ -175,9 +253,11 @@ function zrClick(e) {
   const bar = e.currentTarget, fam = bar.dataset.fam, tog = e.target.closest(".zrtog"), b = e.target.closest("button[data-zr]");
   if (tog) {
     const open = tog.getAttribute("aria-expanded") !== "true";
-    try {
-      localStorage.setItem(zrOpenKey(fam), open ? "1" : "0");
-    } catch (x) {}
+    if (zrMob()) ZR.mopen[fam] = open;                                              // Handy (Bearbeitungsmodus): nur für diese Sitzung
+    else
+      try {
+        localStorage.setItem(zrOpenKey(fam), open ? "1" : "0");
+      } catch (x) {}
     delete bar.dataset.sig;
     ZR.focus = ".zrtog";
     return slApply();

@@ -1910,3 +1910,47 @@ body.sl-dev-mob #main .slgb{display:flex;flex-direction:column}
 .slwx{margin-top:12px}
 .slr2.slsegs{display:block}
 .slsegs span+span::before{content:"·";margin:0 7px}
+
+/* =====================  3.37.1: Werkzeugzeile auf dem Handy (49-seitenlayout.js, 54-ansichten.js, 65-zeitraum.js)  =====================
+   Statt drei hoher Zeilen („Seite anpassen / Ansichten“, Ansichten-Auswahl, Leiste „Zeitraum der Seite“) steht auf dem Handy (html.mob) EINE schlanke Zeile: Knopf „Seite anpassen“ (Symbol),
+   Knopf „Ansichten“ (öffnet ein Menü) und – auf der Übersicht – der Chip „Zeitraum: 2025“, der die Auswahl darunter auf- und zuklappt (standardmäßig zu). Alles 44 px hoch (Karte: 40 px).
+   Desktop: unverändert (das Symbol am Knopf „Ansichten“ und der Punkt sind dort ausgeblendet). */
+#slviews .sli,.slvdot{display:none}
+html.mob #slviews{position:relative}
+html.mob #slviews .sli{display:block}
+html.mob .slopen{flex-wrap:wrap;justify-content:flex-start;align-items:center;gap:8px}
+html.mob .slopen .btn{min-height:44px;box-sizing:border-box;padding:0 14px}
+html.mob body:not(.sl-editing) .slopen .slvw,html.mob body:not(.sl-editing) .slopen .slsv{display:none}
+html.mob .slopen .slok{flex:1 1 100%}
+html.mob main:not(.home) .slopen:not(.kaopen){margin-bottom:10px}
+html.mob .slopen{row-gap:4px}
+html.mob .slopen:has(.zrchip) .slbt,html.mob .kaopen .slbt{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+html.mob .slopen:has(.zrchip) #slopen,html.mob .slopen:has(.zrchip) #slviews,html.mob .kaopen #slopen,html.mob .kaopen #slviews{min-width:44px;padding:0 10px;justify-content:center}
+html.mob #slviews.slvd .slvdot{display:block;position:absolute;top:7px;right:7px;width:10px;height:10px;box-sizing:border-box;border-radius:50%;background:var(--accent2);border:2px solid var(--card)}
+.zrchip{font:600 14px var(--b)}
+html.mob .slopen .zrchip{flex:1 1 0;min-width:0;justify-content:flex-start;gap:6px;text-align:left}
+.zrchip .zrcl{flex:none;color:var(--mut);font-weight:500}
+.zrchip .zrcv{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zrchip .zrcc{flex:none;font-style:normal;font-size:14px;line-height:1}
+.zrchip .zrcc::after{content:"\25BE"}
+.zrchip[aria-expanded="true"] .zrcc::after{content:"\25B4"}
+.zrchip.zron{border-color:var(--ink)}
+.zrchip:focus-visible,#slviews:focus-visible,#slopen:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+html.mob .zrbar.zrm{margin:8px 0 0;padding:8px 12px}
+html.mob .zrbar.zrm:has(>.zrbody[hidden]){display:none}
+html.mob .zrbar.zrm .zrbody{padding:2px 0}
+html.mob .chip.zrreset[hidden],html.mob .btn.zrreset[hidden]{display:none}
+html.mob .zrjahr select{min-height:38px}
+/* Menü „Ansichten“ (Handy): fest am Bildschirm, damit nichts abgeschnitten wird (auch nicht auf der Karte) */
+.slvmenu{position:fixed;z-index:950;left:8px;right:8px;top:var(--slvt,120px);max-width:420px;max-height:calc(100vh - var(--slvt,120px) - 84px);overflow:auto;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;padding:8px;background:var(--card);color:var(--ink);border:2px solid var(--bars);border-radius:var(--r-l);box-shadow:0 8px 24px #0005}
+.slvmh{padding:4px 12px;font:600 13px var(--b);color:var(--mut)}
+.slvmi{display:flex;align-items:center;gap:10px;box-sizing:border-box;width:100%;min-height:44px;padding:8px 12px;border:0;border-radius:var(--r);background:transparent;color:var(--ink);font:600 16px var(--b);text-align:left;cursor:pointer}
+.slvmi:hover,.slvmi:focus-visible{background:var(--soft)}
+.slvmi:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.slvmi[aria-checked]::before{content:"";flex:none;width:18px;text-align:center}
+.slvmi[aria-checked="true"]::before{content:"\2713"}
+.slvms{height:1px;margin:4px 0;background:var(--rule)}
+/* Karte (Handy): die Werkzeugzeile ist ein einzeiliger Kasten in der Reihe der Bedienfelder; sie darf die Reihe nicht höher ziehen (vorher 54 → 110 px, sobald „Seite anpassen“ nach dem Laden dazukam) */
+html.mob .mapui>.kaopen{flex:0 0 auto;flex-wrap:nowrap;align-items:center;gap:6px;padding:4px 6px}
+html.mob .mapui>.kaopen .btn{min-height:40px;white-space:nowrap}
+html.mob .mapui>.kaopen .slok{flex:0 0 auto;white-space:nowrap}

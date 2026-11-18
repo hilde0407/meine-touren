@@ -2,6 +2,14 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.37.1 – Mobilansicht: schlanke Werkzeugzeile, ruhige Karte
+
+- Karte (Handy): Die Bedienfelder wurden nach dem Laden höher (Reihe von 54 auf 110 px), weil „Seite anpassen / Ansichten“ erst spät als zweizeiliger Kasten in die Reihe kam. Jetzt ein einzeiliger Kasten, kein Höhensprung mehr.
+- Übersicht (Handy): eine Werkzeugzeile (Seite anpassen, Ansichten als Menü, Zeitraum als Chip „Zeitraum: 2025“ mit aufklappender Auswahl) statt rund 440 px hoher Zeilen; Tastatur und Sprachausgabe (aria-expanded, aria-controls, Escape).
+- Andere Seiten mit Seitenanpassung: dieselbe einzeilige Werkzeugzeile. Desktop unverändert.
+
+Einzelheiten: [docs/versionen/3.37.1.md](versionen/3.37.1.md)
+
 ## Version 3.37.0 – Neue Bausteine
 
 - Lückenprüfung zuerst: „Heute vor X Jahren“ gab es schon (Baustein „heutevor“), „Belastung und Erholung“ und „Ausrüstung“ waren großteils vorhanden; gebaut wurden nur die echten Lücken.
