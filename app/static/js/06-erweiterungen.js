@@ -471,6 +471,7 @@ VIEWS.admin = async (...a) => {
    <div class="row g8"><button class="btn alt" id="bkchk" type="button">Letzte Sicherung prüfen</button><span id="bkmsg" class="mut" role="status" aria-live="polite"></span></div>
    <p class="mut fs13">Geprüft wird nur die Sicherungsdatei in einem temporären Ordner – deine Daten werden nicht verändert. Nicht in der Tagessicherung enthalten: die Fotodateien (nur die Angaben dazu) und der Zwischenspeicher. Auch der Schlüssel für gespeicherte Zugangsdaten (secret.key) fehlt: Nach einer Wiederherstellung auf einem neuen Rechner müssen sie neu eingegeben werden. Das Umzugspaket enthält beides.</p>
    <div class="row"><a class="btn alt" href="/api/backup" download>Backup jetzt herunterladen</a></div><p class="mut fs13">Passwörter und Tokens sind im Download nicht enthalten. Fotos und Routen sind nicht enthalten.</p>
+   ${isAdmin() ? `<div id="rsbox"></div>` : ""}
    <h3 class="mt16">Umzug auf einen neuen Server</h3>
    <p class="mut">Das Umzugspaket enthält alles: alle Benutzer, Touren mit Notizen und Kommentaren, Freigabelinks, Fotos, Strecken samt Original-Höhen, gespeicherte Zugangsdaten samt Schlüssel. Auf dem neuen Server zuerst installieren, dann <code>${esc(st.app_name || "meine-touren")}-restore &lt;Paket&gt;</code> – danach läuft alles wie vorher. Das Paket enthält Passwörter und Schlüssel: gut aufbewahren. Es kann groß werden (Fotos).</p>
    <div class="row"><button class="btn" id="umzmk">Umzugspaket erstellen</button><span id="umzst" class="mut"></span></div><div id="umzls" class="mt8"></div></div>
@@ -485,6 +486,7 @@ VIEWS.admin = async (...a) => {
    }</div></div>`
   );
   bkInit();
+  if (typeof rsInit === "function") rsInit();
   const setPw = async pw => {
     try {
       await api("/api/ui-password", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({password: pw})});

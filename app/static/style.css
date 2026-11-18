@@ -2005,3 +2005,23 @@ html.mob .mapui>.kaopen .slok{flex:0 0 auto;white-space:nowrap}
 .plleg{list-style:none;margin:6px 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:4px 18px;font-size:13px}.plleg li{display:flex;align-items:center;gap:6px}.plsw{width:28px;height:8px;overflow:visible}.plsw .plpl{stroke-width:2}.plsw .plis{stroke-width:3.5}
 .plact{margin-top:8px}.plact .btn.sm,html.mob .plact .btn.sm{min-height:44px}
 @media (max-width:640px){.plrow{grid-template-columns:1fr 1fr}.pll{grid-column:1/-1}.pld{grid-column:1/-1}}
+
+/* 3.40.0 Verwaltung: „Sicherung zurückspielen“ (68-wiederherstellen.js) – einklappbarer Bereich mit Quellenwahl, Dialog im Muster von .uibox */
+.rsd>summary{min-height:44px;display:flex;align-items:center;gap:8px}.rsd>summary::before{content:"▸";transition:transform .15s}.rsd[open]>summary::before{transform:rotate(90deg)}.rsd>summary::-webkit-details-marker{display:none}.rsd>summary{list-style:none}
+.rsd>summary:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+.rsb>p:first-child{margin-top:6px}
+.rsl{border:1px solid var(--rule);border-radius:var(--r);padding:6px 10px 8px;margin:12px 0;min-width:0}.rsl legend{font:600 14px var(--b);padding:0 6px}
+.rsls{display:grid;gap:2px;max-height:264px;overflow-y:auto}
+.rsd label.rsi{margin:0;font-size:inherit;display:grid;grid-template-columns:auto auto 1fr;gap:2px 10px;align-items:center;padding:6px 4px;min-height:44px;border-radius:6px;cursor:pointer}.rsi:hover,.rsi:focus-within{background:var(--soft)}
+.rsi input{width:20px;height:20px;margin:0;accent-color:var(--bars);grid-row:1/3}.rsn{font-weight:600;font-variant-numeric:tabular-nums}.rsg{font-size:14px;justify-self:end;white-space:nowrap}
+.rsx{grid-column:2/4;display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;min-width:0}.rsfn{overflow-wrap:anywhere;font-size:13px}
+.rstag{font:600 13px var(--b);padding:1px 9px;border-radius:99px;background:var(--dv-warn-bg);color:var(--dv-warn)}
+.rsup{display:grid;gap:6px;margin:12px 0}.rsd .rsup label{font:600 14px var(--b);margin:0}.rsup input{max-width:100%;min-height:44px;font:inherit;color:inherit}
+.uibox.rsbox{width:min(580px,100%)}.rsbox h3{font:600 16px var(--b);margin:16px 0 4px}.rsbox .uitext p{white-space:normal}
+.rsgut,.rshin,.rslauf{display:flex;gap:10px;align-items:baseline;padding:10px 14px;border-radius:var(--r);margin:0 0 10px}.rsgut{background:var(--dv-ok-bg);color:var(--dv-ok);font-weight:600}.rshin,.rslauf{background:var(--soft);color:var(--ink);font-size:15px}
+.rsk{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;margin:4px 0}.rsk>span:first-child{color:var(--mut);min-width:118px}.rsk b{font-variant-numeric:tabular-nums}
+.rstab{width:100%;border-collapse:collapse;margin:12px 0 4px;font-size:15px}.rstab th,.rstab td{padding:6px 8px;border-bottom:1px solid var(--rule);text-align:right;font-variant-numeric:tabular-nums}.rstab th[scope=row],.rstab td:first-child{text-align:left;font-weight:400}.rstab thead th{font:600 13px var(--b);color:var(--mut)}
+.rsul{margin:4px 0 12px;padding-left:20px}.rsul li{margin:3px 0}
+.rschk{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:2px solid var(--dv-bad);border-radius:var(--r);margin-top:14px;font-weight:600;cursor:pointer;min-height:44px}.rschk input{width:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--dv-bad)}
+.rschk:focus-within{outline:3px solid var(--ink);outline-offset:2px}
+.rsbox .uidanger:disabled{opacity:.45}

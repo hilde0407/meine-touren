@@ -24,6 +24,9 @@ router = APIRouter()
 
 # ---------- Backup ----------
 BACKUP_RESERVE = 50_000_000          # Mindestreserve (Byte), die nach dem Schreiben noch frei sein muss
+BACKUP_LOCK = threading.RLock()      # 3.40.0: Sicherungen und Wiederherstellungen laufen in diesem Prozess nie gleichzeitig (wiederherstellung.py nimmt dieselbe Sperre)
+BACKUP_LOCK_WAIT_S = 120
+VOR_RESTORE = "vor-wiederherstellung"    # Kennung im Dateinamen der Sicherheitskopie, die vor einer Wiederherstellung angelegt wird
 
 
 class BackupError(Exception):
@@ -84,11 +87,22 @@ def _write_zip(fileobj, td, strip_secrets):
         z.writestr("INFO.txt", f"Meine Touren Backup {datetime.now(TZ).isoformat()}\nWiederherstellen: deploy/restore.sh <datei.zip>\n")
 
 
-def make_backup(dest_dir=None, strip_secrets=False, keep=14):
+def make_backup(dest_dir=None, strip_secrets=False, keep=14, kennung=""):
     """Konsistente Kopie der Datenbank als ZIP. Gibt Pfad (dest_dir) oder (Name, Bytes) zurück.
     Mit Zielordner: erst Platz prüfen, in eine .part-Datei schreiben, ZIP und eingebettete Datenbank prüfen, dann atomar umbenennen.
-    Bei jedem Fehler wird die .part-Datei gelöscht und BackupError geworfen; bisherige Sicherungen bleiben unangetastet (keine Rotation)."""
-    name = f"meine-touren-{datetime.now(TZ):%Y-%m-%d_%H%M}.zip"
+    Bei jedem Fehler wird die .part-Datei gelöscht und BackupError geworfen; bisherige Sicherungen bleiben unangetastet (keine Rotation).
+    kennung (3.40.0): Zusatz im Dateinamen, z. B. „vor-wiederherstellung“; solche Dateien tragen auch die Sekunden im Namen (zwei in derselben Minute überschreiben sich nicht).
+    keep=0: nichts Altes löschen. Läuft gerade eine Wiederherstellung, wird bis zu zwei Minuten gewartet."""
+    if not BACKUP_LOCK.acquire(timeout=BACKUP_LOCK_WAIT_S):
+        raise BackupError("Es läuft gerade eine andere Sicherung oder Wiederherstellung.")
+    try:
+        return _make_backup(dest_dir, strip_secrets, keep, kennung)
+    finally:
+        BACKUP_LOCK.release()
+
+
+def _make_backup(dest_dir, strip_secrets, keep, kennung):
+    name = f"meine-touren-{kennung}-{datetime.now(TZ):%Y-%m-%d_%H%M%S}.zip" if kennung else f"meine-touren-{datetime.now(TZ):%Y-%m-%d_%H%M}.zip"
     if dest_dir is None:
         buf = io.BytesIO()
         with tempfile.TemporaryDirectory() as td:
@@ -108,7 +122,11 @@ def make_backup(dest_dir=None, strip_secrets=False, keep=14):
         free = None
     if free is not None and free < need:
         raise BackupError(f"Zu wenig freier Speicher im Sicherungsordner: {free // 1_000_000} MB frei, mindestens {need // 1_000_000} MB nötig")
-    p = d / name
+    p, n = d / name, 1
+    while kennung and p.exists():                                       # zwei Sicherheitskopien in derselben Sekunde: die frühere nie überschreiben
+        n += 1
+        p = d / f"{name[:-4]}-{n}.zip"
+    name = p.name
     part = d / (name + ".part")
     try:
         with tempfile.TemporaryDirectory() as td:
@@ -128,8 +146,9 @@ def make_backup(dest_dir=None, strip_secrets=False, keep=14):
     except Exception as e:  # noqa
         part.unlink(missing_ok=True)
         raise BackupError(f"{e.__class__.__name__}: {str(e)[:200]}") from e
-    for old in sorted(list(d.glob("meine-touren-*.zip")) + list(d.glob("komoot-hub-*.zip")), key=lambda f: f.stat().st_mtime)[:-keep]:
-        old.unlink()
+    if keep:
+        for old in sorted(list(d.glob("meine-touren-*.zip")) + list(d.glob("komoot-hub-*.zip")), key=lambda f: f.stat().st_mtime)[:-keep]:
+            old.unlink()
     return p
 
 
@@ -164,7 +183,10 @@ def api_backup_full(request: Request):
     """Umzugspaket im Hintergrund erstellen (Datenbanken, Fotos, Strecken, Schlüssel – der gesamte Datenordner)."""
     _admin_only(request)
     from . import umzug
-    if not jobs.start("Umzugspaket erstellen", lambda: log(f"Umzugspaket: {umzug.make(config.DATA_DIR, _umzug_dir(), config.VERSION)}")):
+    def machen():
+        with BACKUP_LOCK:               # nicht gleichzeitig mit einer Wiederherstellung (3.40.0)
+            log(f"Umzugspaket: {umzug.make(config.DATA_DIR, _umzug_dir(), config.VERSION)}")
+    if not jobs.start("Umzugspaket erstellen", machen):
         raise HTTPException(409, "Es läuft bereits ein Job")
     return {"started": True}
 

@@ -102,6 +102,7 @@ Hinweise: Ein eigener BRouter-Server (Routenplanung) und das Einbinden von SMB-F
 
 * Pro Benutzer: `/var/lib/meine-touren/users/<Kennung>/` (Datenbank `komoot_hub.sqlite` – historischer Dateiname, Strecken, Fotos, `tracks/`). Gemeinsam: `system.sqlite` (Benutzer, Anmeldungen, Freigaben), `tilecache/`.
 * Backups: `/var/backups/meine-touren/<Kennung>/…zip` (Datenbank + lokale GPX + System-Datenbank; Fotos nicht). Für einen Serverumzug: Verwaltung → „Umzugspaket erstellen“ (alles inkl. Fotos und Schlüssel). Wiederherstellen: `meine-touren-restore <datei.zip>`.
+* **Sicherung zurückspielen (ab 3.40.0):** Administratoren können eine Tagessicherung auch in der Oberfläche zurückspielen: Verwaltung → Sicherung & Zugang → „Sicherung zurückspielen“. Sicherung des Servers wählen oder ZIP hochladen, das Ergebnis der Prüfung ansehen (Zahlen der Sicherung gegenüber heute), bestätigen. Vorher legt die App automatisch eine Sicherheitskopie des heutigen Stands an (in derselben Liste, „vor-wiederherstellung“), mit der sich der Schritt genauso rückgängig machen lässt. Ersetzt werden nur die eigenen Daten (Datenbank); Fotodateien, Zwischenspeicher, `secret.key` und die Benutzer bleiben, wie sie sind. Umzugspakete und Sicherungen anderer Benutzer weiterhin mit `meine-touren-restore`.
 * **Bestehende Installation unter dem alten Namen „komoot-hub“** bleibt mit ihren Pfaden und Befehlen (`komoot-hub-update` …) erhalten; die Skripte erkennen das selbst.
 
 ## Hinweise

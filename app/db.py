@@ -1,12 +1,33 @@
 import sqlite3
 import threading
 from contextlib import contextmanager
+from contextvars import ContextVar
+from pathlib import Path
 
 from . import config
 
 _lock = threading.RLock()          # nur zum Öffnen/Schließen von Verbindungen
 _conns = {}
 _plocks = {}                       # je Datenbank (= je Benutzer) eigene Sperre: Benutzer bremsen sich nicht gegenseitig aus
+_datei = ContextVar("mt_db_datei", default=None)   # 3.40.0: Abfragen dieses Aufrufs an eine andere Datei richten (Vorprüfung einer Sicherung an einer Kopie)
+
+
+def pfad():
+    """Datenbankdatei, mit der der laufende Aufruf arbeitet: die des Benutzers, außer innerhalb von andere_datei()."""
+    return _datei.get() or config.DB_PATH
+
+
+@contextmanager
+def andere_datei(path):
+    """Alle db-Aufrufe innerhalb des Blocks gehen an `path` statt an die Datenbank des Benutzers (nur dieser Aufruf/Thread, andere Anfragen merken nichts davon).
+    Beim Öffnen läuft dieselbe Umstellung auf das aktuelle Schema wie bei der echten Datenbank. Danach wird die Verbindung wieder geschlossen."""
+    path = Path(path)
+    tok = _datei.set(path)
+    try:
+        yield path
+    finally:
+        _datei.reset(tok)
+        close(path)
 
 
 def _plock(path):
@@ -43,6 +64,84 @@ CREATE INDEX IF NOT EXISTS tours_start ON tours(start_ts);
 """
 
 
+def migrate(conn):
+    """Schema anlegen bzw. auf den aktuellen Stand bringen (nur ergänzend: neue Tabellen und Spalten). Läuft bei jedem ersten Öffnen einer Datenbank."""
+    conn.executescript(SCHEMA)
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(photos)")}
+    if "offset_s" not in cols:
+        conn.execute("ALTER TABLE photos ADD COLUMN offset_s INTEGER DEFAULT 0")
+    tcols = {r["name"] for r in conn.execute("PRAGMA table_info(tours)")}
+    if "source" not in tcols:
+        conn.execute("ALTER TABLE tours ADD COLUMN source TEXT DEFAULT 'komoot'")
+    if "manual" not in cols:
+        conn.execute("ALTER TABLE photos ADD COLUMN manual INTEGER DEFAULT 0")
+    if "fp" not in cols:
+        conn.execute("ALTER TABLE photos ADD COLUMN fp TEXT")            # Bild-Fingerabdruck (dHash) gegen Doppelte
+    if "dated" not in cols:
+        conn.execute("ALTER TABLE photos ADD COLUMN dated INTEGER")      # 1 = Aufnahmezeit aus EXIF, 0 = nur Dateidatum, NULL = noch nicht geprüft
+    if "rating" not in cols:
+        conn.execute("ALTER TABLE photos ADD COLUMN rating INTEGER")     # Sternebewertung (Lightroom/XMP) 0–5, -1 = abgelehnt, NULL = noch nicht gelesen
+    if "sharp" not in cols:
+        conn.execute("ALTER TABLE photos ADD COLUMN sharp REAL")         # Schärfemaß (Kantenvarianz), NULL = noch nicht berechnet
+    scols = {r["name"] for r in conn.execute("PRAGMA table_info(shares)")}
+    for c, d in (("exp", "INTEGER"), ("views", "INTEGER DEFAULT 0"), ("best", "INTEGER DEFAULT 0"), ("comments", "INTEGER DEFAULT 0"), ("blocks", "TEXT"), ("names", "INTEGER DEFAULT 0")):
+        if c not in scols:
+            conn.execute(f"ALTER TABLE shares ADD COLUMN {c} {d}")      # Ablaufzeit (NULL = unbegrenzt), Aufrufe, nur die besten N Fotos (0 = alle), blocks = gewählte Inhalte der öffentlichen Seite (NULL = bisheriger Umfang), names = 1: Diashow-Link zeigt Tournamen (ab 3.31.1, nur neu angelegte Links)
+    if "orig_end" not in {r["name"] for r in conn.execute("PRAGMA table_info(track_fix)")}:
+        conn.execute("ALTER TABLE track_fix ADD COLUMN orig_end INTEGER")        # ursprüngliches Tourende (Dauerkorrektur)
+    if "orig_start" not in {r["name"] for r in conn.execute("PRAGMA table_info(track_fix)")}:
+        conn.execute("ALTER TABLE track_fix ADD COLUMN orig_start INTEGER")
+    gcols = {r["name"] for r in conn.execute("PRAGMA table_info(guide_tours)")}
+    if "km" not in gcols:
+        conn.execute("ALTER TABLE guide_tours ADD COLUMN km REAL")
+    if "up" not in gcols:
+        conn.execute("ALTER TABLE guide_tours ADD COLUMN up REAL")
+    conn.execute("CREATE TABLE IF NOT EXISTS tour_wps (id INTEGER PRIMARY KEY AUTOINCREMENT, tour_id TEXT, ts INTEGER, lat REAL, lng REAL, note TEXT)")   # Wegpunkte mit Notiz
+    conn.execute("CREATE TABLE IF NOT EXISTS photo_comments (id INTEGER PRIMARY KEY AUTOINCREMENT, photo_id INTEGER, ts INTEGER, author TEXT, text TEXT)")   # Kommentare zu Fotos
+    conn.execute("CREATE INDEX IF NOT EXISTS photo_comments_p ON photo_comments(photo_id)")
+    conn.execute("CREATE TABLE IF NOT EXISTS live_links (token TEXT PRIMARY KEY, ts INTEGER, exp INTEGER, label TEXT)")
+    conn.execute("CREATE INDEX IF NOT EXISTS tour_wps_t ON tour_wps(tour_id)")
+    conn.execute("CREATE TABLE IF NOT EXISTS wishlist (gid INTEGER PRIMARY KEY, ts INTEGER)")   # Wunschliste: Wanderführer-Touren, die ich noch gehen möchte
+    conn.execute("CREATE TABLE IF NOT EXISTS photo_pref (path TEXT PRIMARY KEY, tour_id TEXT)")   # beim Import gewählte Tour
+    conn.execute("CREATE TABLE IF NOT EXISTS tour_sport (id TEXT PRIMARY KEY, sport TEXT)")        # eigene Sportart (bleibt beim Komoot-Abgleich)
+    conn.execute("CREATE TABLE IF NOT EXISTS tour_hidden (id TEXT PRIMARY KEY, js TEXT, ts INTEGER)")  # ausgeblendete Touren (z. B. Fehlaufzeichnungen)
+    conn.execute("CREATE TABLE IF NOT EXISTS photo_deleted (rel TEXT PRIMARY KEY, ts INTEGER)")   # gelöschte Fotos: nicht erneut importieren
+    conn.execute("CREATE TABLE IF NOT EXISTS ext_imports (src TEXT, ext_id TEXT, tour_id TEXT, status TEXT, ts INTEGER, PRIMARY KEY(src, ext_id))")  # Garmin/Suunto: schon geprüfte Aktivitäten
+    conn.execute("CREATE TABLE IF NOT EXISTS gear (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, kind TEXT, sports TEXT, since TEXT, until TEXT, limit_km REAL, note TEXT)")   # Ausrüstung
+    conn.execute("CREATE TABLE IF NOT EXISTS tour_gear (tour_id TEXT, gear_id INTEGER, PRIMARY KEY(tour_id, gear_id))")   # gear_id 0 = ausdrücklich keine
+    if "season" not in {r["name"] for r in conn.execute("PRAGMA table_info(wishlist)")}:
+        conn.execute("ALTER TABLE wishlist ADD COLUMN season TEXT")                                      # '', 'sommer', 'winter'
+    conn.execute("CREATE TABLE IF NOT EXISTS trip_hidden (id TEXT PRIMARY KEY)")      # Reisen, die der Nutzer aus der Liste entfernt hat (Schlüssel wie trip_edit)
+    conn.execute("CREATE TABLE IF NOT EXISTS trip_edit (id TEXT PRIMARY KEY, name TEXT, start TEXT, end TEXT)")   # eigener Name/Zeitraum einer erkannten Reise
+    conn.execute("CREATE TABLE IF NOT EXISTS tour_rating (id TEXT PRIMARY KEY, stars INTEGER)")   # eigene Bewertung 1–5
+    conn.execute("CREATE TABLE IF NOT EXISTS tour_safety (id TEXT PRIMARY KEY, level INTEGER, grp TEXT, gear TEXT, note TEXT)")   # Lawinenlage, Gruppe, Notfallausrüstung
+    conn.execute("CREATE TABLE IF NOT EXISTS plans (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, sport TEXT, pts TEXT, km REAL, up REAL, down REAL, max_alt REAL, est_h REAL, note TEXT, ts INTEGER)")   # geplante Touren
+    if "wps" not in {r["name"] for r in conn.execute("PRAGMA table_info(plans)")}:
+        conn.execute("ALTER TABLE plans ADD COLUMN wps TEXT")      # Wegpunkte, gewählte Alternativen, Wegführung (JSON)
+    pcols = {r["name"] for r in conn.execute("PRAGMA table_info(plans)")}
+    if "tour_id" not in pcols:
+        conn.execute("ALTER TABLE plans ADD COLUMN tour_id TEXT")  # 3.38.0: mit dieser gelaufenen Tour verknüpft (NULL = keine)
+    if "status" not in pcols:
+        conn.execute("ALTER TABLE plans ADD COLUMN status TEXT NOT NULL DEFAULT 'geplant'")   # 3.38.0: 'geplant' | 'gegangen' | 'verworfen'
+    if "src" not in {r["name"] for r in conn.execute("PRAGMA table_info(elev_fix)")}:
+        conn.execute("ALTER TABLE elev_fix ADD COLUMN src TEXT")          # 'zepp' = Höhe aus der Uhr, sonst (NULL) Geländemodell
+    conn.execute("CREATE TABLE IF NOT EXISTS devices (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, kind TEXT, model TEXT, since TEXT, until TEXT, active INTEGER DEFAULT 1, note TEXT)")   # Meine Geräte (Uhr, Handy …)
+    conn.execute("CREATE TABLE IF NOT EXISTS tour_device (tour_id TEXT PRIMARY KEY, device_id INTEGER)")   # ausdrückliche Zuordnung Tour -> Gerät (sonst automatisch nach Art und Datum)
+    conn.execute("CREATE TABLE IF NOT EXISTS tour_source (tour_id TEXT PRIMARY KEY, src TEXT, name TEXT)")   # Art/Name der Aufzeichnungsquelle je Tour (zepp, garmin, suunto, polar, phone, other)
+    if "zsrc" not in {r["name"] for r in conn.execute("PRAGMA table_info(devices)")}:
+        conn.execute("ALTER TABLE devices ADD COLUMN zsrc TEXT")            # rohe Zepp-Kennung der Quelle (z. B. „run.46.huami.com“); nur ergänzt, nie gelöscht
+    conn.execute("CREATE TABLE IF NOT EXISTS tour_zsrc (tour_id TEXT PRIMARY KEY, zsrc TEXT)")   # Zepp-Kennung der Quelle je Tour (aus dem Zepp-Verlauf)
+    conn.execute("CREATE TABLE IF NOT EXISTS device_quality (tour_id TEXT PRIMARY KEY, device_id INTEGER, berechnet_am INTEGER, day TEXT, sport TEXT, zepp_n INTEGER, "
+                 "dist_tour_m REAL, dist_dev_m REAL, dist_ratio REAL, dist_plausible INTEGER, h_src TEXT, h_state TEXT, up_dev REAL, down_dev REAL, up_dem REAL, down_dem REAL, "
+                 "gps_src TEXT, gps_n INTEGER, gps_jumps INTEGER, gps_gap_pct REAL, gps_med_dt REAL, gps_pts_km REAL, gps_dec INTEGER, hr_n INTEGER, hr_bad_pct REAL)")   # Genauigkeit der Uhren je Tour (app/devquality.py)
+    conn.execute("CREATE INDEX IF NOT EXISTS device_quality_dev ON device_quality(device_id)")
+    conn.execute("CREATE TABLE IF NOT EXISTS quality_batch (batch_id TEXT, tour_id TEXT, device_id INTEGER, method TEXT, ts INTEGER, orig_up REAL, orig_down REAL, "
+                 "new_up REAL, new_down REAL, state TEXT, PRIMARY KEY (batch_id, tour_id))")   # Sammel-Korrektur der Höhen: Touren je Lauf (app/devquality.py, devbatch.py)
+    conn.execute("CREATE TABLE IF NOT EXISTS quality_ack (tour_id TEXT PRIMARY KEY, kinds TEXT, ts INTEGER)")   # „Als geprüft markiert“ (3.16.1): Flag-Arten, die der Nutzer bei einer Tour bewusst akzeptiert hat (app/devquality.py)
+    conn.execute("CREATE TABLE IF NOT EXISTS user_layout (page_key TEXT PRIMARY KEY, json TEXT, ts INTEGER)")   # „Seite anpassen“ (3.17.0): Anordnung der Abschnitte und Bausteine je Seite; die Datenbank gehört einem Benutzer, daher kein Benutzerfeld
+    conn.commit()
+
+
 def _open(path):
     path.parent.mkdir(parents=True, exist_ok=True)
     with _lock:
@@ -54,87 +153,31 @@ def _open(path):
             conn.execute("PRAGMA journal_mode=WAL"); conn.execute("PRAGMA synchronous=NORMAL"); conn.execute("PRAGMA busy_timeout=15000")
         except sqlite3.Error:
             pass
-        conn.executescript(SCHEMA)
-        cols = {r["name"] for r in conn.execute("PRAGMA table_info(photos)")}
-        if "offset_s" not in cols:
-            conn.execute("ALTER TABLE photos ADD COLUMN offset_s INTEGER DEFAULT 0")
-        tcols = {r["name"] for r in conn.execute("PRAGMA table_info(tours)")}
-        if "source" not in tcols:
-            conn.execute("ALTER TABLE tours ADD COLUMN source TEXT DEFAULT 'komoot'")
-        if "manual" not in cols:
-            conn.execute("ALTER TABLE photos ADD COLUMN manual INTEGER DEFAULT 0")
-        if "fp" not in cols:
-            conn.execute("ALTER TABLE photos ADD COLUMN fp TEXT")            # Bild-Fingerabdruck (dHash) gegen Doppelte
-        if "dated" not in cols:
-            conn.execute("ALTER TABLE photos ADD COLUMN dated INTEGER")      # 1 = Aufnahmezeit aus EXIF, 0 = nur Dateidatum, NULL = noch nicht geprüft
-        if "rating" not in cols:
-            conn.execute("ALTER TABLE photos ADD COLUMN rating INTEGER")     # Sternebewertung (Lightroom/XMP) 0–5, -1 = abgelehnt, NULL = noch nicht gelesen
-        if "sharp" not in cols:
-            conn.execute("ALTER TABLE photos ADD COLUMN sharp REAL")         # Schärfemaß (Kantenvarianz), NULL = noch nicht berechnet
-        scols = {r["name"] for r in conn.execute("PRAGMA table_info(shares)")}
-        for c, d in (("exp", "INTEGER"), ("views", "INTEGER DEFAULT 0"), ("best", "INTEGER DEFAULT 0"), ("comments", "INTEGER DEFAULT 0"), ("blocks", "TEXT"), ("names", "INTEGER DEFAULT 0")):
-            if c not in scols:
-                conn.execute(f"ALTER TABLE shares ADD COLUMN {c} {d}")      # Ablaufzeit (NULL = unbegrenzt), Aufrufe, nur die besten N Fotos (0 = alle), blocks = gewählte Inhalte der öffentlichen Seite (NULL = bisheriger Umfang), names = 1: Diashow-Link zeigt Tournamen (ab 3.31.1, nur neu angelegte Links)
-        if "orig_end" not in {r["name"] for r in conn.execute("PRAGMA table_info(track_fix)")}:
-            conn.execute("ALTER TABLE track_fix ADD COLUMN orig_end INTEGER")        # ursprüngliches Tourende (Dauerkorrektur)
-        if "orig_start" not in {r["name"] for r in conn.execute("PRAGMA table_info(track_fix)")}:
-            conn.execute("ALTER TABLE track_fix ADD COLUMN orig_start INTEGER")
-        gcols = {r["name"] for r in conn.execute("PRAGMA table_info(guide_tours)")}
-        if "km" not in gcols:
-            conn.execute("ALTER TABLE guide_tours ADD COLUMN km REAL")
-        if "up" not in gcols:
-            conn.execute("ALTER TABLE guide_tours ADD COLUMN up REAL")
-        conn.execute("CREATE TABLE IF NOT EXISTS tour_wps (id INTEGER PRIMARY KEY AUTOINCREMENT, tour_id TEXT, ts INTEGER, lat REAL, lng REAL, note TEXT)")   # Wegpunkte mit Notiz
-        conn.execute("CREATE TABLE IF NOT EXISTS photo_comments (id INTEGER PRIMARY KEY AUTOINCREMENT, photo_id INTEGER, ts INTEGER, author TEXT, text TEXT)")   # Kommentare zu Fotos
-        conn.execute("CREATE INDEX IF NOT EXISTS photo_comments_p ON photo_comments(photo_id)")
-        conn.execute("CREATE TABLE IF NOT EXISTS live_links (token TEXT PRIMARY KEY, ts INTEGER, exp INTEGER, label TEXT)")
-        conn.execute("CREATE INDEX IF NOT EXISTS tour_wps_t ON tour_wps(tour_id)")
-        conn.execute("CREATE TABLE IF NOT EXISTS wishlist (gid INTEGER PRIMARY KEY, ts INTEGER)")   # Wunschliste: Wanderführer-Touren, die ich noch gehen möchte
-        conn.execute("CREATE TABLE IF NOT EXISTS photo_pref (path TEXT PRIMARY KEY, tour_id TEXT)")   # beim Import gewählte Tour
-        conn.execute("CREATE TABLE IF NOT EXISTS tour_sport (id TEXT PRIMARY KEY, sport TEXT)")        # eigene Sportart (bleibt beim Komoot-Abgleich)
-        conn.execute("CREATE TABLE IF NOT EXISTS tour_hidden (id TEXT PRIMARY KEY, js TEXT, ts INTEGER)")  # ausgeblendete Touren (z. B. Fehlaufzeichnungen)
-        conn.execute("CREATE TABLE IF NOT EXISTS photo_deleted (rel TEXT PRIMARY KEY, ts INTEGER)")   # gelöschte Fotos: nicht erneut importieren
-        conn.execute("CREATE TABLE IF NOT EXISTS ext_imports (src TEXT, ext_id TEXT, tour_id TEXT, status TEXT, ts INTEGER, PRIMARY KEY(src, ext_id))")  # Garmin/Suunto: schon geprüfte Aktivitäten
-        conn.execute("CREATE TABLE IF NOT EXISTS gear (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, kind TEXT, sports TEXT, since TEXT, until TEXT, limit_km REAL, note TEXT)")   # Ausrüstung
-        conn.execute("CREATE TABLE IF NOT EXISTS tour_gear (tour_id TEXT, gear_id INTEGER, PRIMARY KEY(tour_id, gear_id))")   # gear_id 0 = ausdrücklich keine
-        if "season" not in {r["name"] for r in conn.execute("PRAGMA table_info(wishlist)")}:
-            conn.execute("ALTER TABLE wishlist ADD COLUMN season TEXT")                                      # '', 'sommer', 'winter'
-        conn.execute("CREATE TABLE IF NOT EXISTS trip_hidden (id TEXT PRIMARY KEY)")      # Reisen, die der Nutzer aus der Liste entfernt hat (Schlüssel wie trip_edit)
-        conn.execute("CREATE TABLE IF NOT EXISTS trip_edit (id TEXT PRIMARY KEY, name TEXT, start TEXT, end TEXT)")   # eigener Name/Zeitraum einer erkannten Reise
-        conn.execute("CREATE TABLE IF NOT EXISTS tour_rating (id TEXT PRIMARY KEY, stars INTEGER)")   # eigene Bewertung 1–5
-        conn.execute("CREATE TABLE IF NOT EXISTS tour_safety (id TEXT PRIMARY KEY, level INTEGER, grp TEXT, gear TEXT, note TEXT)")   # Lawinenlage, Gruppe, Notfallausrüstung
-        conn.execute("CREATE TABLE IF NOT EXISTS plans (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, sport TEXT, pts TEXT, km REAL, up REAL, down REAL, max_alt REAL, est_h REAL, note TEXT, ts INTEGER)")   # geplante Touren
-        if "wps" not in {r["name"] for r in conn.execute("PRAGMA table_info(plans)")}:
-            conn.execute("ALTER TABLE plans ADD COLUMN wps TEXT")      # Wegpunkte, gewählte Alternativen, Wegführung (JSON)
-        pcols = {r["name"] for r in conn.execute("PRAGMA table_info(plans)")}
-        if "tour_id" not in pcols:
-            conn.execute("ALTER TABLE plans ADD COLUMN tour_id TEXT")  # 3.38.0: mit dieser gelaufenen Tour verknüpft (NULL = keine)
-        if "status" not in pcols:
-            conn.execute("ALTER TABLE plans ADD COLUMN status TEXT NOT NULL DEFAULT 'geplant'")   # 3.38.0: 'geplant' | 'gegangen' | 'verworfen'
-        if "src" not in {r["name"] for r in conn.execute("PRAGMA table_info(elev_fix)")}:
-            conn.execute("ALTER TABLE elev_fix ADD COLUMN src TEXT")          # 'zepp' = Höhe aus der Uhr, sonst (NULL) Geländemodell
-        conn.execute("CREATE TABLE IF NOT EXISTS devices (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, kind TEXT, model TEXT, since TEXT, until TEXT, active INTEGER DEFAULT 1, note TEXT)")   # Meine Geräte (Uhr, Handy …)
-        conn.execute("CREATE TABLE IF NOT EXISTS tour_device (tour_id TEXT PRIMARY KEY, device_id INTEGER)")   # ausdrückliche Zuordnung Tour -> Gerät (sonst automatisch nach Art und Datum)
-        conn.execute("CREATE TABLE IF NOT EXISTS tour_source (tour_id TEXT PRIMARY KEY, src TEXT, name TEXT)")   # Art/Name der Aufzeichnungsquelle je Tour (zepp, garmin, suunto, polar, phone, other)
-        if "zsrc" not in {r["name"] for r in conn.execute("PRAGMA table_info(devices)")}:
-            conn.execute("ALTER TABLE devices ADD COLUMN zsrc TEXT")            # rohe Zepp-Kennung der Quelle (z. B. „run.46.huami.com“); nur ergänzt, nie gelöscht
-        conn.execute("CREATE TABLE IF NOT EXISTS tour_zsrc (tour_id TEXT PRIMARY KEY, zsrc TEXT)")   # Zepp-Kennung der Quelle je Tour (aus dem Zepp-Verlauf)
-        conn.execute("CREATE TABLE IF NOT EXISTS device_quality (tour_id TEXT PRIMARY KEY, device_id INTEGER, berechnet_am INTEGER, day TEXT, sport TEXT, zepp_n INTEGER, "
-                     "dist_tour_m REAL, dist_dev_m REAL, dist_ratio REAL, dist_plausible INTEGER, h_src TEXT, h_state TEXT, up_dev REAL, down_dev REAL, up_dem REAL, down_dem REAL, "
-                     "gps_src TEXT, gps_n INTEGER, gps_jumps INTEGER, gps_gap_pct REAL, gps_med_dt REAL, gps_pts_km REAL, gps_dec INTEGER, hr_n INTEGER, hr_bad_pct REAL)")   # Genauigkeit der Uhren je Tour (app/devquality.py)
-        conn.execute("CREATE INDEX IF NOT EXISTS device_quality_dev ON device_quality(device_id)")
-        conn.execute("CREATE TABLE IF NOT EXISTS quality_batch (batch_id TEXT, tour_id TEXT, device_id INTEGER, method TEXT, ts INTEGER, orig_up REAL, orig_down REAL, "
-                     "new_up REAL, new_down REAL, state TEXT, PRIMARY KEY (batch_id, tour_id))")   # Sammel-Korrektur der Höhen: Touren je Lauf (app/devquality.py, devbatch.py)
-        conn.execute("CREATE TABLE IF NOT EXISTS quality_ack (tour_id TEXT PRIMARY KEY, kinds TEXT, ts INTEGER)")   # „Als geprüft markiert“ (3.16.1): Flag-Arten, die der Nutzer bei einer Tour bewusst akzeptiert hat (app/devquality.py)
-        conn.execute("CREATE TABLE IF NOT EXISTS user_layout (page_key TEXT PRIMARY KEY, json TEXT, ts INTEGER)")   # „Seite anpassen“ (3.17.0): Anordnung der Abschnitte und Bausteine je Seite; die Datenbank gehört einem Benutzer, daher kein Benutzerfeld
-        conn.commit()
+        try:
+            migrate(conn)
+        except BaseException:
+            conn.close()                # nicht halb umgestellt offen liegen lassen (z. B. eine fremde oder defekte Datei bei der Vorprüfung einer Sicherung)
+            raise
         _conns[path] = conn
         return conn
 
 
 def init(path=None):
     """Datenbank des aktuellen Benutzers (bzw. des Altbetriebs) öffnen."""
-    return _open(path or config.DB_PATH)
+    return _open(path or pfad())
+
+
+def close(path):
+    """Eine einzelne Verbindung schließen (wartet, bis kein anderer Thread sie benutzt)."""
+    path = Path(path)
+    with _plock(path):
+        with _lock:
+            c = _conns.pop(path, None)
+        if c is not None:
+            try:
+                c.close()
+            except Exception:  # noqa
+                pass
 
 
 def close_all():
@@ -152,7 +195,7 @@ def close_all():
 
 @contextmanager
 def cur():
-    path = config.DB_PATH
+    path = pfad()
     with _plock(path):
         conn = _open(path)
         c = conn.cursor()

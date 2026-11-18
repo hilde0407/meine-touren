@@ -19,7 +19,7 @@ from datetime import datetime
 from pathlib import Path
 
 MARK = "UMZUG.txt"
-TOP_SKIP = {"backups", "backups-system", "tilecache", "update-status", "update-request", ".neustart"}
+TOP_SKIP = {"backups", "backups-system", "tilecache", "update-status", "update-request", ".neustart", "restore-tmp"}
 STORED = {".jpg", ".jpeg", ".png", ".heic", ".webp", ".zip", ".gz", ".mp4"}
 
 

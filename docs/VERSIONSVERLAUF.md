@@ -2,6 +2,16 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.40.0 – Wiederherstellung in der Oberfläche
+
+- Verwaltung → Sicherung & Zugang: **Sicherung zurückspielen** für Administratoren – Sicherung des Servers wählen oder ZIP hochladen, ohne Root-Shell.
+- Vorprüfung ohne Änderung (ZIP, Datenbank, Programmversion, Umstellung an einer Kopie) mit Zahlen „in der Sicherung“ gegenüber „heute“ und klarer Aussage, was ersetzt wird und was nicht enthalten ist.
+- Ausdrückliche Bestätigung (Kontrollkästchen), serverseitig über ein kurzlebiges Token an genau die geprüfte Datei gebunden.
+- Vorher automatisch eine Sicherheitskopie („vor-wiederherstellung“, in derselben Liste); Tausch im laufenden Betrieb über die Backup-Schnittstelle von SQLite; bei einem Fehler automatisch zurück.
+- Umzugspakete, fremde, defekte und zu große Dateien werden mit verständlicher Meldung abgelehnt; `deploy/restore.sh` bleibt.
+
+Einzelheiten: [docs/versionen/3.40.0.md](versionen/3.40.0.md)
+
 ## Version 3.39.0 – App-Start ohne Wettlauf, Soll/Ist an der Tourseite, Touchpad im 3D-Flug
 
 - App-Start: `boot()` läuft erst nach dem letzten Skript (kein „… is not defined“ mehr auf langsamen Rechnern).
