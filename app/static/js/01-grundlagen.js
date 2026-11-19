@@ -61,7 +61,9 @@ const api = async (u, o) => {
     } catch (e) {}
     throw new Error(m || r.status);
   }
-  return r.json();
+  const j = await r.json();
+  if (window.noTrAdd) window.noTrAdd(u, j);      // eigene Namen nie übersetzen (00-i18n.js)
+  return j;
 };
 if (window.L) {
   // Leaflet: Zoom-Übergang, der erst nach dem Verlassen der Seite endet, nicht mehr auf die entfernte Karte anwenden
@@ -187,6 +189,15 @@ function trackPanel(anchor, onChange, withBy) {
     <label><input type="checkbox" id="tsk"> weiße Umrandung (besser sichtbar auf Satellit/Topo)</label>
     <button class="btn sm alt" type="button" id="tsx">Schließen</button>`;
   anchor.parentElement.appendChild(d);
+  const fitPanel = () => {      // nicht links aus dem Bild ragen lassen (Karte, 1280 px: Auslöser sitzt links)
+    d.classList.remove("tl");
+    if (d.getBoundingClientRect().left < 8) d.classList.add("tl");
+  };
+  fitPanel();
+  addEventListener("resize", function h() {
+    if (!d.isConnected) return removeEventListener("resize", h);
+    fitPanel();
+  });
   const sync = () => {
     d.querySelector(`[name=tsm][value=${TS.mode}]`).checked = true;
     $("#tsc").value = TS.color;
@@ -296,6 +307,7 @@ async function loadTours() {
     } catch (e) {}
   }
   TOURS = pre || (await api("/api/tours"));
+  if (pre && window.noTrAdd) window.noTrAdd("/api/tours", pre);
   TOURS.forEach(t => {
     t.y = +t.date.slice(0, 4);
     t.m = +t.date.slice(5, 7);
@@ -307,12 +319,26 @@ async function loadTours() {
 const years = () => [...new Set(TOURS.map(t => t.y))].sort((a, b) => b - a);
 
 /* ---------- Router ---------- */
+/* Schwebende Flächen, die an <body> hängen (Benutzermenü, Auswahlleiste der Fotos): schließen bei Seitenwechsel und mit Esc */
+function closeFloaters() {
+  document.querySelectorAll(".umpop, .seltb").forEach(x => x.remove());
+  document.body.classList.remove("selmode");
+}
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  const p = document.querySelector(".umpop");
+  if (!p) return;
+  p.remove();
+  const u = document.getElementById("umenu");
+  if (u) u.focus();
+});
 async function route() {
   const [path, qs] = (location.hash || "#/dash").replace(/^#\/?/, "").split("?");
   const [k0 = "dash", name, sub] = path.split("/");
   const k = k0 === "tour" && sub === "auswertung" ? "tourauswertung" : k0;      // #/tour/<id>/auswertung = Unterseite der Tour (3.16.0)
   document.querySelectorAll("nav a").forEach(a => a.classList.toggle("on", a.dataset.k === (k === "tour" || k === "tourauswertung" || k === "story" || k === "flight" || k === "plan" ? "tours" : k === "tripsheet" || k === "trip" ? "trips" : k)));
   document.querySelectorAll(".modal").forEach(m => m.remove());
+  closeFloaters();
   clearInterval(pollTimer);
   if (map) {
     try {

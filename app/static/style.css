@@ -115,7 +115,7 @@ details{border-top:1px solid var(--rule);padding:10px 0;margin-top:10px}summary{
 .panel .row:first-of-type .btn{white-space:nowrap}
 
 .seltb{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 24px);flex-wrap:wrap;justify-content:center;background:var(--forest);color:#fff;padding:10px 18px;border-radius:99px;display:flex;gap:12px;align-items:center;z-index:50;box-shadow:0 6px 24px #0006}
-.seltb .btn.alt{color:#fff;border-color:#fff8}.seltb .btn{white-space:nowrap}
+.seltb .btn.alt{background:transparent;color:#fff;border-color:#fff8}.seltb .btn.alt:hover{background:#ffffff26;border-color:#fff}.seltb .btn{white-space:nowrap}
 .selmode .thumbs img{cursor:crosshair}.thumbs img.sel{outline:4px solid var(--yellow);outline-offset:-4px;filter:brightness(.8)}
 .btn.on{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}
 .gsel{display:none}.selmode .gsel{display:inline-block}
@@ -168,6 +168,7 @@ table.cmp{width:100%;border-collapse:collapse}table.cmp td,table.cmp th{padding:
 @media(max-width:700px){.hnav{width:34px;height:48px;font-size:26px;top:30%}}
 
 .tpanel{position:absolute;z-index:1200;top:100%;right:0;margin-top:6px;width:290px;background:var(--bg);color:var(--ink);border-radius:8px;box-shadow:0 6px 24px #0006;padding:14px;display:flex;flex-direction:column;gap:9px;font-size:14px;text-align:left}
+.tpanel.tl{left:0;right:auto}
 .tpanel label{display:flex;gap:6px;align-items:center}.tpanel input[type=range]{flex:1}
 .tsw{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.tsw button{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #0007;cursor:pointer;padding:0}.tsw input{width:34px;height:28px;padding:0;border:0;background:none}
 .row:has(#etc){position:relative}

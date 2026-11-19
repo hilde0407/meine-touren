@@ -24,6 +24,24 @@
     if (top) top.appendChild(b);
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mkBtn); else mkBtn();
+  // Eigene Namen (Tour-, Reise-, Gerätenamen, Tags …) werden nie übersetzt oder verändert: api() meldet jede Antwort hier an.
+  const NT = new Set();
+  let NTL = null;
+  const NT_SKIP = /^\/api\/(settings|status|me|bausteine|zustand|selftest|update|update-check|tiles|users|grants|portals|jobs|layout|login|logout)\b/;
+  window.noTrAdd = (u, data) => {
+    if (lang === "de" || NT_SKIP.test(String(u))) return;
+    const add = v => { v = String(v).trim(); if (v.length >= 2 && v.length <= 160 && !NT.has(v)) { NT.add(v); NTL = null; } };
+    const walk = (o, d) => {
+      if (!o || d > 6 || typeof o !== "object") return;
+      if (Array.isArray(o)) { for (const x of o) walk(x, d + 1); return; }
+      for (const k in o) {
+        const v = o[k];
+        if (typeof v === "string") { if (k === "name") add(v); else if (k === "tags") v.split("|").forEach(add); }
+        else if (v && typeof v === "object") walk(v, d + 1);
+      }
+    };
+    try { walk(data, 0); } catch (e) {}
+  };
   if (lang === "de") return;
 
   const D = {};
@@ -719,7 +737,7 @@ Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen 
     [/Letzte Tour, Radtour/g, () => U.lc],
     [/Letzte Tour/g, () => U.ltour],
     [/Jahresrückblick (\d{4})/g, (m, y) => `${U.yr} ${y}`],
-    [/ Uhr\b/g, ""],
+    [/(\d) Uhr\b/g, "$1"],
     [/(\d+) Fotos in der Bibliothek, (\d+) einer Tour zugeordnet/g, (m, a2, b2) => `${a2} ${U.photo[1]} ${U.lib}, ${b2} ${U.asg}`],
     [/(\d+) von (\d+)/g, (m, a2, b2) => `${a2} ${U.of} ${b2}`],
     [/ in der Bibliothek/g, () => " " + U.lib],
@@ -751,17 +769,34 @@ Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen 
     const o = parts.map((p, i) => { if (i % 2) return p; const q = tr(p); if (q !== p) ch = true; return q; });
     return ch ? o.join("") : undefined;
   };
+  const trProt = t => {   // Text mit eigenen Namen: Namen durch Platzhalter ersetzen, übersetzen, zurücksetzen
+    if (!NT.size || t.length < 5) return undefined;
+    if (!NTL) NTL = [...NT].filter(n => n.length >= 3).sort((a, b) => b.length - a.length);
+    const hit = [];
+    let u = t;
+    for (const n of NTL) if (u.includes(n)) { hit.push(n); u = u.split(n).join("\u0002" + (hit.length - 1) + "\u0002"); }
+    if (!hit.length) return undefined;
+    const r = tr1(u);
+    if (r === undefined) return undefined;
+    return r.replace(/\u0002(\d+)\u0002/g, (m, i) => hit[+i]);
+  };
   const tr = s => {
     const t = decode(s).replace(/\u00a0/g, " ").trim();
     if (!t) return s;
+    if (NT.has(t)) return s;
+    let r = trProt(t);
+    if (r === undefined) r = tr1(t);
+    if (r === undefined) return s;
+    return s.replace(s.trim(), () => r);
+  };
+  const tr1 = t => {
     let r = D[t];
     if (r === undefined) for (const [re, f] of P) { const m = re.exec(t); if (m) { r = f(...m); break; } }
     if (r === undefined) for (const q of PAT) { if (t.startsWith(q.pre)) { const m = q.re.exec(t); if (m) { let i = 0; r = q.v.replace(/\{\}/g, () => tr(String(m[++i]).trim())); break; } } }
     if (r === undefined && t.length > 16) { let u = t; for (const k of long) if (u.includes(k)) u = u.split(k).join(D[k]); if (u !== t) r = u; }
     if (r === undefined) r = piecewise(t);
     if (r === undefined) { let u = t.replace(/Meine Touren/g, "\u0001"); for (const [re, f] of S) u = u.replace(re, f); u = u.replace(/\u0001/g, "Meine Touren"); if (u !== t) r = u; }
-    if (r === undefined) return s;
-    return s.replace(s.trim(), () => r);
+    return r;
   };
   window.TL = x => (typeof x === "string" ? tr(x) : x);
 
@@ -771,6 +806,7 @@ Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen 
     if (n.nodeType === 3) { const v = n.nodeValue; const r = tr(v); if (r !== v) { const h = n.parentNode; if (h && h.tagName === "H2" && h.childNodes.length === 1) h.dataset.de = v.trim(); n.nodeValue = r; } return; }
     if (n.nodeType !== 1) return;
     if (/^(SCRIPT|STYLE|TEXTAREA|CODE|PRE)$/.test(n.tagName)) return;
+    if (n.getAttribute && (n.getAttribute("translate") === "no" || n.hasAttribute("data-notr"))) return;
     if (n.tagName === "H2" && !n.dataset.de) n.dataset.de = n.textContent.trim();     // deutscher Originaltitel (stabiler Schlüssel, z. B. für die Reiter der Verwaltung)
     for (const a of ATTR) if (n.hasAttribute && n.hasAttribute(a)) { const v = n.getAttribute(a), r = tr(v); if (r !== v) n.setAttribute(a, r); }
     if (n.tagName === "INPUT" && /^(button|submit)$/.test(n.type) && n.value) { const r = tr(n.value); if (r !== n.value) n.value = r; }
