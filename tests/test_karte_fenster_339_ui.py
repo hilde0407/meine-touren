@@ -85,6 +85,8 @@ def test_escape_schliesst_und_fokus_kehrt_zum_knopf_zurueck(pw, app, clean):
 def test_390_fenster_vor_den_bedienfeldern(pw, app, clean, scheme):
     pg = _karte(pw, app, width=390, height=844, scheme=scheme)
     try:
+        pg.locator("#mfb").click()                                                    # 3.43.0: am Handy liegt der Knopf im Blatt „Filter & Ebenen“
+        expect(pg.locator("#mbx")).to_be_visible(timeout=T)
         _oeffnen(pg)
         assert pg.evaluate(UEBER) == [True, True, True]
         assert pg.evaluate("() => Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth)") == 0

@@ -305,11 +305,15 @@ def test_handy_schnellknopf_in_der_kopfzeile_ohne_scrollen_und_startet(pw, app, 
         expect(q).to_contain_text("Zepp", timeout=T)
         _settled(pg)
         b = q.bounding_box()
-        assert pg.evaluate("() => scrollY") == 0 and b["y"] + b["height"] <= 400 and b["height"] >= 48 and b["width"] >= 300, b       # ganz oben, volle Breite, Touch-Ziel
+        nb = pg.evaluate("() => [...document.querySelectorAll('.slopen .btn')].filter(e => e.id !== 'slzepp' && e.offsetParent !== null).map(e => { const r = e.getBoundingClientRect(); return [r.width, r.height]; })")
+        assert nb, nb
+        # ganz oben ohne Scrollen; 3.43.0: gleich hoch wie „Seite anpassen“/„Ansichten“ (Touch-Ziel ≥ 44 px), nicht breiter als der breiteste Nachbar, keine volle Breite
+        assert pg.evaluate("() => scrollY") == 0 and b["y"] + b["height"] <= 400 and b["height"] >= 44, b
+        assert all(abs(h - b["height"]) <= 1 for _, h in nb) and b["width"] <= max(w for w, _ in nb) + 1 and b["width"] < 300, (b, nb)
         _shot(pg, "zepp-schnellknopf-390.png", full=False)
         fake.start_script = [_job(running=LABEL, done=0, total=4)]
         q.click()
-        expect(q).to_contain_text("Zepp läuft", timeout=T)
+        expect(q).to_contain_text("Zepp-Abruf läuft", timeout=T)
         assert q.is_disabled() and fake.posts == 1
         expect(pg.locator("#tlw-zepp button.zpb")).to_contain_text("Import läuft", timeout=T)        # die Karte zeigt denselben Lauf
         fake.last = _last()
@@ -366,7 +370,7 @@ def test_eine_quelle_garmin_beschriftung_start_und_ergebnis(pw, app, clean):
         btn.click()
         assert fake.keys == ["garmin-import"]                                             # der Garmin-Job, nicht der Zepp-Job
         expect(card.locator(".zpt")).to_contain_text("Tour 2 von 5", timeout=T)
-        expect(pg.locator("#slzepp")).to_contain_text("Garmin läuft", timeout=T)
+        expect(pg.locator("#slzepp")).to_contain_text("Garmin-Abruf läuft", timeout=T)
         btn.click(force=True)
         assert fake.posts == 1
         fake.glast = _glast(neu=0, uebernommen=0, dup=0)
@@ -452,7 +456,7 @@ def test_mehrere_quellen_schnellknopf_menue(pw, app, clean):
         pg.wait_for_function("() => document.activeElement.dataset.k === 'garmin'", timeout=T)
         pg.keyboard.press("Enter")                                           # per Tastatur: Garmin starten
         expect(menu).to_be_hidden(timeout=T)
-        expect(q).to_contain_text("Garmin läuft", timeout=T)
+        expect(q).to_contain_text("Garmin-Abruf läuft", timeout=T)
         assert fake.keys == ["garmin-import"] and q.is_disabled()
     finally:
         pg.browser_.close()
@@ -477,7 +481,7 @@ def test_menue_alle_holen_und_handy_390(pw, app, clean):
         assert r and all(v >= 4.5 for v in r.values()), r
         _shot(pg, "touren-holen-menue-390.png", full=False)
         menu.locator('[data-k="alle"]').click()
-        expect(q).to_contain_text("Zepp läuft", timeout=T)
+        expect(q).to_contain_text("Zepp-Abruf läuft", timeout=T)
         assert fake.keys == ["export"]
     finally:
         pg.browser_.close()

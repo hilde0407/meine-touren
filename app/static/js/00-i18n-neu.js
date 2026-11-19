@@ -2348,7 +2348,7 @@ Meldung: {} || Message: {} || Message : {} || Mensaje: {}
 Zugang in der Verwaltung prüfen › || Check the access in Admin › || Vérifier l’accès dans l’administration › || Comprobar el acceso en la administración ›
 Startet den Import deiner Trainings aus Zepp mit einem Tipp, zeigt den Fortschritt und wie der letzte Lauf ausging. Fehlt der Zepp-Zugang, führt ein Knopf zur Einrichtung. Für Betrachter unsichtbar. || Starts the import of your workouts from Zepp with one tap, shows the progress and how the last run went. If the Zepp access is missing, a button leads to the setup. Invisible to viewers. || Lance l’import de vos entraînements depuis Zepp d’un geste, affiche la progression et le résultat du dernier passage. Si l’accès Zepp manque, un bouton mène à la configuration. Invisible pour les lecteurs. || Inicia con un toque la importación de tus entrenamientos desde Zepp, muestra el progreso y cómo fue la última ejecución. Si falta el acceso a Zepp, un botón lleva a la configuración. Invisible para los espectadores.
 Steht schon auf der Seite || Already on the page || Déjà sur la page || Ya está en la página
-Zepp läuft … || Zepp running … || Zepp en cours … || Zepp en curso …
+Zepp-Abruf läuft … || Zepp fetch running … || Récupération Zepp en cours … || Obteniendo datos de Zepp …
 Zepp (Fehler) || Zepp (error) || Zepp (erreur) || Zepp (error)
 Touren-Knopf || Tours button || Bouton parcours || Botón de rutas
 Startet den Import deiner Touren aus dem Konto deiner Uhr (Zepp, Garmin oder Suunto) mit einem Tipp, zeigt den Fortschritt und wie der letzte Lauf ausging. Bei mehreren Konten gibt es je Konto eine Zeile und „Alle holen“. Fehlt die Verbindung, führt ein Knopf zur Einrichtung. Für Betrachter unsichtbar. || Starts the import of your tours from your watch’s account (Zepp, Garmin or Suunto) with one tap, shows the progress and how the last run went. With several accounts there is one row per account and “Fetch all”. If the connection is missing, a button leads to the setup. Invisible to viewers. || Lance l’import de vos parcours depuis le compte de votre montre (Zepp, Garmin ou Suunto) d’un geste, affiche la progression et le résultat du dernier passage. Avec plusieurs comptes, il y a une ligne par compte et « Tout récupérer ». Si la connexion manque, un bouton mène à la configuration. Invisible pour les lecteurs. || Inicia con un toque la importación de tus rutas desde la cuenta de tu reloj (Zepp, Garmin o Suunto), muestra el progreso y cómo terminó la última ejecución. Con varias cuentas hay una fila por cuenta y «Obtener todo». Si falta la conexión, un botón lleva a la configuración. Invisible para los lectores.
@@ -2357,8 +2357,8 @@ Garmin-Import starten || Start Garmin import || Lancer l’import Garmin || Inic
 Suunto-Import starten || Start Suunto import || Lancer l’import Suunto || Iniciar importación de Suunto
 Garmin einrichten || Set up Garmin || Configurer Garmin || Configurar Garmin
 Suunto einrichten || Set up Suunto || Configurer Suunto || Configurar Suunto
-Garmin läuft … || Garmin running … || Garmin en cours … || Garmin en curso …
-Suunto läuft … || Suunto running … || Suunto en cours … || Suunto en curso …
+Garmin-Abruf läuft … || Garmin fetch running … || Récupération Garmin en cours … || Obteniendo datos de Garmin …
+Suunto-Abruf läuft … || Suunto fetch running … || Récupération Suunto en cours … || Obteniendo datos de Suunto …
 Garmin (Fehler) || Garmin (error) || Garmin (erreur) || Garmin (error)
 Suunto (Fehler) || Suunto (error) || Suunto (erreur) || Suunto (error)
 Touren holen (Fehler) || Fetch tours (error) || Récupérer des parcours (erreur) || Obtener rutas (error)

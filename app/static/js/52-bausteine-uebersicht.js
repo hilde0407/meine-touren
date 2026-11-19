@@ -692,7 +692,7 @@ function ziPaintQuick(q) {
   const ic = '<i class="zpic" aria-hidden="true">⟳</i>';
   let txt, tip, go = true;
   if (run) {
-    txt = `${ziLab(ziNext() || (m.src || {}).kind)} läuft …`;
+    txt = `${ziLab(ziNext() || (m.src || {}).kind)}-Abruf läuft …`;
     tip = txt;
   } else if (m.t === "one") {
     txt = bad ? `${m.src.label} (Fehler)` : m.src.label;

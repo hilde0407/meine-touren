@@ -1600,7 +1600,7 @@ body.sl-editing .tlw[data-hn=lade],body.sl-editing .tlw[data-hn=aus]{display:fle
 .zpi-pv{display:flex;align-items:center;justify-content:center;min-height:36px;margin:6px 8px;border-radius:var(--r);background:var(--yellow);color:var(--yellow-ink);font:700 13px var(--d)}
 @media (min-width:700px){.zpi{flex-direction:row;align-items:flex-start;gap:20px}.zpi .btn.zpb{flex:none;width:auto;min-width:260px}.zpt{flex:1 1 auto;align-self:center}}
 .slopen #slzepp .zpic{font-size:18px}
-@media (max-width:700px){.slopen #slzepp{order:-1;flex:1 1 100%;justify-content:center;min-height:48px;font-size:16px}}
+@media (max-width:700px){.slopen #slzepp{order:-1;flex:0 0 auto;justify-content:center;min-height:44px}}      /* 3.43.0: gleich groß wie „Seite anpassen“ und „Ansichten“ (vorher volle Breite, 48 px, 16 px) */
 /* 3.31.0 Touren holen je nach Uhr: mehrere Quellen (Zeile je Konto, „Alle holen“), Menü des Schnell-Knopfs, Baustein „Touren-Knopf“, Schalter in „Seite anpassen“ */
 .zpq{display:flex;flex-direction:column;gap:14px}
 .zpsrc{padding-top:12px;border-top:1px solid var(--rule)}
@@ -2074,6 +2074,7 @@ html.mob .mapui .kapw[data-kp=standort]>.box,html.mob .mapui .kapw[data-kp=stand
 html.mob .mapui>.kaopen{order:3}
 html.mob #mloc .lbl{display:none}
 html.mob #mloc{min-width:44px}
+html.mob .mapui:not(.mfo)>.box:not(.mfbw):not(#mn):not(:has(#mloc)){display:none}      /* vor dem Einordnen (kaFrame) schon zu: kein Höhensprung der Leiste */
 html.mob .mapui .mfb{white-space:nowrap}
 html.mob .mapui .mfb[aria-expanded="true"]{background:#ffffff2e;border-color:#fff}
 html.mob .mapui:not(.mfo) .kapw:not([data-kp=standort])>.box,html.mob .mapui:not(.mfo) .kapw:not([data-kp=standort])>.kapt{display:none}
