@@ -350,7 +350,7 @@ Object.assign(window.SL_WT, {
         g.v += m(t);
         g.n++;
       });
-      const L = Object.values(G).filter(g => g.v > 0).sort((x, y) => y.v - x.v), tot = slSum(L, g => g.v), C = 213.6, fmt = v => (cfg.metric === "km" ? slKm(v) : cfg.metric === "time" ? slDur(v * 3600) : nf(v, 0));
+      const L = Object.values(G).filter(g => g.v > 0).sort((x, y) => y.v - x.v), tot = slSum(L, g => g.v), C = 213.6, fmt = v => (cfg.metric === "km" ? slKm(v) : cfg.metric === "time" ? fmtDauer(v * 3600, {summe: true}) : nf(v, 0));
       if (!L.length) return slNote(b, "Für diese Auswertung fehlen Angaben in den Touren.");
       let off = 0;
       const segs = L.map(g => {
@@ -465,7 +465,7 @@ Object.assign(window.SL_WT, {
       const row = p => {
         const done = p.status === "gegangen", t = done ? p.tour : null,
           nm = can ? `<a href="#/plan/${p.id}">${esc(p.name || "Ohne Namen")}</a>` : `<b>${esc(p.name || "Ohne Namen")}</b>`,
-          vals = [p.km != null ? slKm(p.km) : "", p.up ? slHm(p.up) : "", p.est_h ? slDur(p.est_h * 3600) : ""].filter(Boolean).join(" · ");
+          vals = [p.km != null ? slKm(p.km) : "", p.up ? slHm(p.up) : "", p.est_h ? fmtDauer(p.est_h * 3600, {summe: true}) : ""].filter(Boolean).join(" · ");
         if (!done) return `<li>${nm}<span class="mut">${vals}</span></li>`;
         const cmp = t && p.est_h && t.h ? `<span>geplant ${hmm(p.est_h)}</span> · <span>gelaufen ${hmm(t.h)} (${hmSigned(t.h - p.est_h)})</span>`
           : t && p.km && t.km ? `<span>Strecke: geplant ${fmtKm(p.km)}, gelaufen ${fmtKm(t.km)} (${nSigned(t.km - p.km, 1)} km)</span>` : "";

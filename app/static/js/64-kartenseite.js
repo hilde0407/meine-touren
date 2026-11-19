@@ -62,7 +62,7 @@ Object.assign(window.SL_WT, {
           slBadge(c, "");
           return true;
         }
-        const tile = {touren: [nf(L.length, 0), L.length === 1 ? "Tour" : "Touren"], km: [slKm(slSum(L, t => t.km)), "Strecke"], up: [slHm(slSum(L, t => t.up_m || 0)), "Aufstieg"], h: [slDur(slSum(L, t => t.h) * 3600), "Unterwegs"]};
+        const tile = {touren: [nf(L.length, 0), L.length === 1 ? "Tour" : "Touren"], km: [slKm(slSum(L, t => t.km)), "Strecke"], up: [slHm(slSum(L, t => t.up_m || 0)), "Aufstieg"], h: [fmtDauer(slSum(L, t => t.h) * 3600, {summe: true}), "Unterwegs"]};
         b.innerHTML = slTiles(want.map(v => tile[v]).filter(Boolean)) + `<p class="mut slcmpn">${esc(kaTxt(st, aus))}</p>`;
         slBadge(c, L.length === 1 ? "1 Tour" : `${L.length} Touren`);
         return true;

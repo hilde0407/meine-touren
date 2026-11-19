@@ -15,7 +15,7 @@ const RK_VALUES = [["tage", "Reisetage"], ["touren", "Touren"], ["km", "Strecke"
 const RK_DEF = ["tage", "touren", "km", "up", "h", "laender"];
 const RN_VALUES = [["reisen", "Reisen"], ["tage", "Reisetage"], ["km", "Strecke"], ["up", "Aufstieg"], ["laender", "Länder"]];
 const RT_METRIC = {km: ["Strecke je Tag", "km", t => t.km, v => fmtKm(v, {summe: true})], up: ["Aufstieg je Tag", "m", t => t.up_m || 0, v => fmtHm(v)],
-  h: ["Dauer je Tag", "Std.", t => t.h, v => slDur(v * 3600)], count: ["Touren je Tag", "Touren", () => 1, v => nf(v, 0) + (v === 1 ? " Tour" : " Touren")]};
+  h: ["Dauer je Tag", "Std.", t => t.h, v => fmtDauer(v * 3600, {summe: true})], count: ["Touren je Tag", "Touren", () => 1, v => nf(v, 0) + (v === 1 ? " Tour" : " Touren")]};
 const RJ_METRIC = {km: ["Reisen: Strecke je Jahr", "km", tr => tr.km], count: ["Reisen je Jahr", "Reisen", () => 1], days: ["Reisetage je Jahr", "Tage", tr => rsSpan(tr)]};
 const rsNoTrip = b => slNote(b, "Dieser Baustein gehört auf die Seite einer Reise.");
 /* Beschriftung unter den Säulen: bei vielen Säulen nur jede n-te (die Spalten bleiben ausgerichtet) */
@@ -35,7 +35,7 @@ Object.assign(window.SL_WT, {
       const {tr, ts, days} = reise, want = (cfg.values && cfg.values.length ? cfg.values : RK_DEF).filter(v => RK_VALUES.some(k => k[0] === v)), span = rsSpan(tr), land = rsCountries(ts),
         km = slSum(ts, t => t.km), tile = {
           tage: [String(span), "Reisetage", days.length < span ? `an ${days.length} Tagen mit Touren` : ""], touren: [String(ts.length), "Touren"], km: [slKm(km), "Strecke"],
-          up: [slHm(slSum(ts, t => t.up_m || 0)), "Aufstieg"], down: [slHm(slSum(ts, t => t.down_m || 0)), "Abstieg"], h: [slDur(slSum(ts, t => t.h) * 3600), "Unterwegs"],
+          up: [slHm(slSum(ts, t => t.up_m || 0)), "Aufstieg"], down: [slHm(slSum(ts, t => t.down_m || 0)), "Abstieg"], h: [fmtDauer(slSum(ts, t => t.h) * 3600, {summe: true}), "Unterwegs"],
           laender: land.length ? [String(land.length), "Länder", land.slice(0, 3).join(", ") + (land.length > 3 ? " …" : "")] : null,
         }, list = want.map(v => tile[v]).filter(Boolean);
       if (!list.length) return slNote(b, "Für die gewählten Werte liegen bei dieser Reise keine Daten vor.");

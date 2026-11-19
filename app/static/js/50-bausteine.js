@@ -57,7 +57,6 @@ function slBelWochen(c, b, d, said, nw, mon, now) {
 }
 const slClamp = (x, a = 0, b = 100) => Math.max(a, Math.min(b, x));
 /* Bausteine: Summen über viele Touren – ab 24 Stunden bzw. 100 km ganzzahlig (zentrale Formatierer in 01-format.js) */
-const slDur = s => fmtDauer(s, {summe: true});
 const slKm = km => fmtKm(km, {summe: true});
 const slHm = m => fmtHm(m);
 const slBr = (pct, cls = "") => `<svg class="slbr${cls ? " " + cls : ""}" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="slbr-t" width="100" height="10"/><rect class="slbr-f" width="${slClamp(pct).toFixed(1)}" height="10"/></svg>`;
@@ -229,7 +228,7 @@ Object.assign(window.SL_WT, {
         from = cfg.period === "month" ? new Date(now.getFullYear(), now.getMonth(), 1) : new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7)),
         iso = slIso(from),
         a = TOURS.filter(t => t.date.slice(0, 10) >= iso && flSport(t, cfg));
-      b.innerHTML = slTiles([[nf(a.length, 0), a.length === 1 ? "Tour" : "Touren"], [slKm(slSum(a, t => t.km)), "Strecke"], [slHm(slSum(a, t => t.up_m || 0)), "Aufstieg"], [slDur(slSum(a, t => t.h) * 3600), "Unterwegs"]]);
+      b.innerHTML = slTiles([[nf(a.length, 0), a.length === 1 ? "Tour" : "Touren"], [slKm(slSum(a, t => t.km)), "Strecke"], [slHm(slSum(a, t => t.up_m || 0)), "Aufstieg"], [fmtDauer(slSum(a, t => t.h) * 3600, {summe: true}), "Unterwegs"]]);
       slBadge(c, a.length ? `${fmtKm(slSum(a, t => t.km), {d: 0})}` : "Noch keine Tour");
     },
   },

@@ -75,8 +75,8 @@ Object.assign(window.SL_WT, {
       const tot = d.gesamt_s || 1, pct = Math.round((d.bewegung_s / tot) * 100),
         rects = d.abschnitte.map(([k, a, e]) => `<rect class="${k === "p" ? "slps" : "slmv"}" x="${((a / tot) * 1000).toFixed(1)}" y="${k === "p" ? 9 : 0}" width="${Math.max(1.5, ((e - a) / tot) * 1000).toFixed(1)}" height="${k === "p" ? 10 : 28}"/>`).join("");
       b.innerHTML = `<svg class="slstrip" viewBox="0 0 1000 28" preserveAspectRatio="none" role="img" aria-label="${esc(`Zeitstreifen: ${pct} % in Bewegung, ${100 - pct} % Pause`)}">${rects}</svg>` +
-        `<div class="slxl sb" aria-hidden="true"><span>0:00</span><span>${slDur(tot)}</span></div>` +
-        slTiles([[slDur(d.bewegung_s), "In Bewegung", `${pct} %`], [d.pause_s >= 60 ? slDur(d.pause_s) : "keine", "Pause", d.pause_s >= 60 ? `${100 - pct} %` : ""]]) +
+        `<div class="slxl sb" aria-hidden="true"><span>0:00</span><span>${fmtDauer(tot, {summe: true})}</span></div>` +
+        slTiles([[fmtDauer(d.bewegung_s, {summe: true}), "In Bewegung", `${pct} %`], [d.pause_s >= 60 ? fmtDauer(d.pause_s, {summe: true}) : "keine", "Pause", d.pause_s >= 60 ? `${100 - pct} %` : ""]]) +
         (d.pause_s < 60 ? '<p class="mut slcap">Keine nennenswerten Pausen aufgezeichnet.</p>' : '<p class="mut slcap">Pause: Tempo unter 0,3 km/h.</p>');
       slBadge(c, `${pct} % in Bewegung`);
     },
@@ -96,7 +96,7 @@ Object.assign(window.SL_WT, {
       const pace = o => (o.h > 0.2 ? o.km / o.h : null),
         M = {
           km: ["Strecke", t.km, others.map(o => o.km), slKm], up: ["Aufstieg", t.up_m, others.map(o => o.up_m).filter(v => v != null), slHm],
-          pace: ["Tempo", pace(t), others.map(pace).filter(v => v != null), v => fmtTempo(v)], dur: ["Dauer", t.h > 0 ? t.h * 3600 : null, others.filter(o => o.h > 0).map(o => o.h * 3600), slDur],
+          pace: ["Tempo", pace(t), others.map(pace).filter(v => v != null), v => fmtTempo(v)], dur: ["Dauer", t.h > 0 ? t.h * 3600 : null, others.filter(o => o.h > 0).map(o => o.h * 3600), s => fmtDauer(s, {summe: true})],
         },
         want = (cfg.values && cfg.values.length ? cfg.values : ["km", "up", "pace"]).filter(k => M[k]),
         rows = want.map(k => {
@@ -128,7 +128,7 @@ Object.assign(window.SL_WT, {
         label = `Säulendiagramm: alle Touren ${t.y} nach ${what}, diese Tour liegt auf Platz ${rank}`;
       b.innerHTML = `<p class="slcmp">Platz ${rank} von ${pool.length}</p><p class="mut slcmpn">Touren im Jahr ${t.y}${cfg.scope === "sport" ? ` (${esc(sName(t.sport))})` : ""}, sortiert nach ${what}</p>` +
         slCols(shown, {hl: rank <= 60 ? rank - 1 : -1, dim: [], label, cls: "slsm"}) +
-        `<p class="mut slcap">${rank === 1 ? "Das ist die Spitze des Jahres." : `Die Spitze liegt bei ${{km: fmtKm, up: slHm, dur: x => slDur(x * 3600)}[cfg.metric || "km"](v[0])}.`}</p>`;
+        `<p class="mut slcap">${rank === 1 ? "Das ist die Spitze des Jahres." : `Die Spitze liegt bei ${{km: fmtKm, up: slHm, dur: x => fmtDauer(x * 3600, {summe: true})}[cfg.metric || "km"](v[0])}.`}</p>`;
       slBadge(c, `Platz <b>${rank}</b> von ${pool.length}`);
     },
   },
@@ -148,7 +148,7 @@ Object.assign(window.SL_WT, {
         `<rect class="slday" x="${X(d.aufgang_min)}" y="0" width="${W(d.aufgang_min, d.untergang_min)}" height="24"/>${tour}</svg>` +
         `<div class="slxl sb" aria-hidden="true"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div>` +
         `<ul class="sllg"><li><i class="slsq slnight"></i>Nacht</li><li><i class="slsq sldawn"></i>Dämmerung</li><li><i class="slsq slday"></i>Tag</li><li><i class="slsq sltour"></i>Tour</li></ul>` +
-        slTiles([[slClock(d.aufgang_min), "Sonnenaufgang"], [slClock(d.untergang_min), "Sonnenuntergang"], [slDur(d.tag_min * 60), "Tageslänge"], d.hell_min != null ? [slDur(d.hell_min * 60), "Im Hellen unterwegs", d.dunkel_min > 0 ? `${slDur(d.dunkel_min * 60)} im Dunkeln` : "ganze Tour bei Tageslicht"] : null].filter(Boolean));
+        slTiles([[slClock(d.aufgang_min), "Sonnenaufgang"], [slClock(d.untergang_min), "Sonnenuntergang"], [fmtDauer(d.tag_min * 60, {summe: true}), "Tageslänge"], d.hell_min != null ? [fmtDauer(d.hell_min * 60, {summe: true}), "Im Hellen unterwegs", d.dunkel_min > 0 ? `${fmtDauer(d.dunkel_min * 60, {summe: true})} im Dunkeln` : "ganze Tour bei Tageslicht"] : null].filter(Boolean));
       slPos(b);
       slBadge(c, `${slClock(d.aufgang_min)}–${slClock(d.untergang_min)}`);
     },
@@ -161,7 +161,7 @@ Object.assign(window.SL_WT, {
     async render(c, b, cfg, {t}) {
       const ab = +cfg.ab || 500, d = t && (await slGet(`/api/bausteine/gipfel?tour=${slEnc(t.id)}&ab=${ab}`));
       if (!d || d.status !== "ok") return slWhy(b, d);
-      const tiles = [d.nach_s != null ? [slDur(d.nach_s), "Erreicht nach"] : null, d.bei_m != null ? [fmtKm(d.bei_m / 1000), "Bei Kilometer"] : null, [slHm(d.tief_m), "Tiefster Punkt"], [slHm(d.hoch_m - d.tief_m), "Höhenunterschied"]].filter(Boolean),
+      const tiles = [d.nach_s != null ? [fmtDauer(d.nach_s, {summe: true}), "Erreicht nach"] : null, d.bei_m != null ? [fmtKm(d.bei_m / 1000), "Bei Kilometer"] : null, [slHm(d.tief_m), "Tiefster Punkt"], [slHm(d.hoch_m - d.tief_m), "Höhenunterschied"]].filter(Boolean),
         sh = d.ueber_anteil != null ? Math.round(d.ueber_anteil * 100) : null;
       b.innerHTML = `<div class="slsign"><span>Höchster Punkt</span><b>${slHm(d.hoch_m)}</b></div>${slTiles(tiles)}` +
         (sh != null ? `<div class="slr1"><span>Anteil der Strecke über ${fmtHm(ab)}</span><b>${sh} %</b></div>${slBr(sh, "slc5")}` : "");
