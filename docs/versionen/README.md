@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.48.0](3.48.0.md) – Sicherungs-Wächter, „Touren holen“ mit Darstellung, Rückblick „Wie ist es gelaufen?“, ruhigere Tourenliste am Handy
 - [3.47.1](3.47.1.md) – Fehlerkorrektur: Notizbox der Tour wird nicht mehr zu hoch
 - [3.47.0](3.47.0.md) – Planung ausbauen: Notizen, Links und Quellen am Plan; „Passt die Tour zu mir?“ (Form und Tageslicht)
 - [3.46.0](3.46.0.md) – Aufräumen im Code (ein Formatierer für Größen und Daten, ein Dialog-Baustein, Stylesheet und Begriffe bereinigt; Leiste der Statistik bündig)

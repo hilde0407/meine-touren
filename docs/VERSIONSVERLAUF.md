@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.48.0 – Wächter, Darstellungs-Paare, Rückblick
+
+- Sicherungs-Wächter: Warnleiste unter der Kopfzeile für Administratoren, wenn die letzte Sicherung zu alt, fehlerhaft oder nicht vorhanden ist (Knöpfe „Zur Sicherung“ und „Morgen erinnern“, im Fehlerfall nicht ausblendbar).
+- „Touren holen (nur Knopf)“ ist die Darstellung „Nur Knopf“ von „Touren holen“ (ein Baustein weniger, alte Ansichten laden weiter).
+- „Wie ist es gelaufen?“: Einordnung jeder Tour ohne Plan gegenüber den eigenen Touren und ähnlichen Touren (Teil von „Plan und Ergebnis“).
+- Tourenliste am Handy: ruhige Karten, Filter hinter dem Knopf „Filter“.
+
 ## Version 3.47.1 – Fehlerkorrektur Notizbox
 
 - Die Notizbox einer Tour wurde nach dem Ansehen einer langen Notiz bei allen Touren zu hoch. Der Browser hatte die automatisch vergrößerte Höhe als „gewählte Größe“ gemerkt. Jetzt werden nur noch selbst gezogene Größen gemerkt; ältere gemerkte Werte werden einmalig zurückgesetzt.
