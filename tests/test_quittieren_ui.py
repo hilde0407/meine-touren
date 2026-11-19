@@ -158,17 +158,17 @@ def test_trackfix_dialog_offers_ack_when_nothing_found(pw, app_url):
         pg.route("**/api/tours/ok0/trackfix", lambda r: r.fulfill(status=200, content_type="application/json", body=FAKE_TF))
         # unauffällige Tour: kein Angebot
         pg.evaluate("() => { trackFixDialog('ok0', () => {}); }")
-        expect(pg.locator(".mbox")).to_contain_text("nichts Auffälliges gefunden", timeout=15000)
+        expect(pg.locator(".uibox")).to_contain_text("nichts Auffälliges gefunden", timeout=15000)
         pg.wait_for_timeout(600)                                                                    # Angebot dürfte erst nach der Flag-Abfrage erscheinen
         assert pg.locator("#tfack1").count() == 0
         pg.locator("#tfno").click()
-        expect(pg.locator(".mbox")).to_have_count(0, timeout=15000)
+        expect(pg.locator(".uibox")).to_have_count(0, timeout=15000)
         # Tour mit offener Lücken-Auffälligkeit
         pg.evaluate("() => { window.__done = 0; trackFixDialog('g1', () => { window.__done++; }); }")
         expect(pg.locator("#tfack")).to_contain_text("Diese Tour steht noch in der Liste „Auffällige Touren“. Als geprüft markieren?", timeout=15000)
         _shot(pg, "trackfix_hell.png")
         pg.locator("#tfack1").click()
-        expect(pg.locator(".mbox")).to_have_count(0, timeout=15000)
+        expect(pg.locator(".uibox")).to_have_count(0, timeout=15000)
         pg.wait_for_function("() => window.__done === 1", timeout=15000)
         assert _api(app_url, "/api/tours/g1/quality-flags") == {"flags": [], "acked": True}
         _api(app_url, "/api/tours/g1/quality-ack", "DELETE")

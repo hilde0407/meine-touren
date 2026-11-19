@@ -12,11 +12,11 @@ from tests.test_tourseite_ui import _shot
 from tests.helpers_ui import press_until_gone, quiet, settled
 
 TL = 30000
-FEN = ".modal.mbxfen"
+FEN = ".uimod.mbxfen"
 OBEN = """(sel) => { const e = document.querySelector(sel); if (!e) return null; const r = e.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2, t = document.elementFromPoint(x, y); return !!t && (e === t || e.contains(t)); }"""
-UEBER = """() => { const e = document.querySelector('.modal.mbxfen .mbox h2'); if (!e) return null; const r = e.getBoundingClientRect(); const pts = [[r.left + 4, r.top + r.height / 2], [r.left + r.width / 2, r.top + r.height / 2], [r.left + 4, r.top + 2]];
-  return pts.map(([x, y]) => { const t = document.elementFromPoint(x, y); return !!t && !!t.closest('.modal.mbxfen') && !t.closest('.mapui'); }); }"""
-KNOPF_BEDECKT = """() => { const b = document.getElementById('mbx'), r = b.getBoundingClientRect(), t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!t && !!t.closest('.modal.mbxfen'); }"""
+UEBER = """() => { const e = document.querySelector('.uimod.mbxfen .uibox h2'); if (!e) return null; const r = e.getBoundingClientRect(); const pts = [[r.left + 4, r.top + r.height / 2], [r.left + r.width / 2, r.top + r.height / 2], [r.left + 4, r.top + 2]];
+  return pts.map(([x, y]) => { const t = document.elementFromPoint(x, y); return !!t && !!t.closest('.uimod.mbxfen') && !t.closest('.mapui'); }); }"""
+KNOPF_BEDECKT = """() => { const b = document.getElementById('mbx'), r = b.getBoundingClientRect(), t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!t && !!t.closest('.uimod.mbxfen'); }"""
 
 
 def _karte(pw, url, lang="de", **kw):
@@ -38,21 +38,21 @@ def test_ein_fenster_ueber_allen_bedienfeldern(pw, app, clean):
     try:
         _oeffnen(pg)
         win = pg.locator(FEN)
-        box = win.locator(".mbox")
-        assert box.get_attribute("role") == "dialog" and box.get_attribute("aria-modal") == "true" and box.get_attribute("aria-label")
+        box = win.locator(".uibox")
+        assert box.get_attribute("role") == "dialog" and box.get_attribute("aria-modal") == "true" and box.get_attribute("aria-labelledby")
         expect(pg.locator(FEN + " h2")).to_be_visible(timeout=T)
         # zweiter Aufruf (z. B. per Tastatur oder Skript) ersetzt das Fenster, es entsteht nie ein zweites
         for _ in range(3):
             pg.evaluate("() => document.getElementById('mbx').click()")
             expect(win).to_have_count(1, timeout=T)
-        assert pg.locator(".modal").count() == 1
+        assert pg.locator(".uimod").count() == 1
         # Titelzeile liegt vor allen Bedienfeldern (elementFromPoint), der Knopf dahinter ist nicht mehr erreichbar
         assert pg.evaluate(UEBER) == [True, True, True]
         assert pg.evaluate(KNOPF_BEDECKT) is True
-        z = pg.evaluate("() => [+getComputedStyle(document.querySelector('.modal.mbxfen')).zIndex, +getComputedStyle(document.querySelector('.mapui')).zIndex]")
+        z = pg.evaluate("() => [+getComputedStyle(document.querySelector('.uimod.mbxfen')).zIndex, +getComputedStyle(document.querySelector('.mapui')).zIndex]")
         assert z[0] > z[1], z
         # Fokus liegt im Fenster
-        assert pg.evaluate("() => !!document.activeElement.closest('.modal.mbxfen')")
+        assert pg.evaluate("() => !!document.activeElement.closest('.uimod.mbxfen')")
         _shot(pg, "karte-ausschnitt-fenster-1280")
         assert not pg.errors, pg.errors
     finally:
@@ -73,7 +73,7 @@ def test_escape_schliesst_und_fokus_kehrt_zum_knopf_zurueck(pw, app, clean):
         _oeffnen(pg)
         for _ in range(6):
             pg.keyboard.press("Tab")
-            assert pg.evaluate("() => !!document.activeElement.closest('.modal.mbxfen')")
+            assert pg.evaluate("() => !!document.activeElement.closest('.uimod.mbxfen')")
         pg.mouse.click(5, 5)                                                          # Hintergrund
         expect(pg.locator(FEN)).to_have_count(0, timeout=T)
         assert not pg.errors, pg.errors

@@ -118,7 +118,7 @@ def test_fresh_load_without_errors(page, app_url):
 def test_interactions(page):
     page.errors.clear()
     page.evaluate("location.hash = '#/tour/' + TOURS.find(t => t.source === 'local').id"); quiet(page, 1200)
-    page.evaluate("document.querySelector(\"#eup\").click()"); page.wait_for_selector(".modal .pp"); page.click("#ucx")
+    page.evaluate("document.querySelector(\"#eup\").click()"); page.wait_for_selector(".uimod .pp"); page.click("#ucx")
     page.evaluate("location.hash = '#/records'"); quiet(page, 800)
     page.click("a.chip:has-text('Radtour')"); quiet(page, 800)
     assert "Radtour" in page.inner_text("#main .sec")
@@ -233,7 +233,7 @@ def test_trackfix_dialog_opens(page):
     tid = _tour_id(page)
     page.goto(page.url.split("#")[0] + f"#/tour/{tid}"); quiet(page, 1200)
     page.evaluate("document.querySelector(\"#etfix\").click()"); page.wait_for_selector("#tfb #tfno", timeout=8000)
-    assert "Track" in page.inner_text(".mbox")
+    assert "Track" in page.inner_text(".uimod .uibox")
     page.click("#tfno")
     assert not page.errors, page.errors
 
@@ -571,7 +571,7 @@ def test_plan_switch_ui_and_album_stats(page):
     page.route("**/api/plan/test", lambda r: r.fulfill(status=200, content_type="application/json", body='{"ok": true, "msg": "BRouter antwortet, Routen werden berechnet ✓"}'))
     page.click("#ptest"); page.wait_for_timeout(500)
     assert "antwortet" in page.inner_text("#ptm")
-    page.select_option("#pon", "0"); assert not page.is_visible("#pbox")
+    page.uncheck("#pon"); assert not page.is_visible("#pbox")
     page.click("#save"); quiet(page, 600)
     page.goto(base + "#/tours"); quiet(page, 1200)
     assert page.locator("#plink").count() == 0
@@ -726,9 +726,9 @@ def test_mobile_more_sheet_not_covered(page):
     page.set_viewport_size({"width": 360, "height": 640})
     page.goto(base + "#/dash"); page.reload(); quiet(page, 800)
     page.click("#tmore"); page.wait_for_timeout(400)
-    z = page.evaluate("(()=>{const m=document.querySelector('.modal'),t=document.querySelector('#tabbar');return [+getComputedStyle(m).zIndex,+getComputedStyle(t).zIndex,getComputedStyle(m.querySelector('.mbox')).overflowY]})()")
+    z = page.evaluate("(()=>{const m=document.querySelector('.uimod'),t=document.querySelector('#tabbar');return [+getComputedStyle(m).zIndex,+getComputedStyle(t).zIndex,getComputedStyle(m.querySelector('.uibox')).overflowY]})()")
     assert z[0] > z[1] and z[2] in ("auto", "scroll")
-    box = page.evaluate("(()=>{const b=document.querySelector('.modal .mbox');b.scrollTop=1e5;const r=document.querySelector('.modal .mbox').getBoundingClientRect();return [r.bottom,innerHeight]})()")
+    box = page.evaluate("(()=>{const b=document.querySelector('.uimod .uibox');b.scrollTop=1e5;const r=document.querySelector('.uimod .uibox').getBoundingClientRect();return [r.bottom,innerHeight]})()")
     assert box[0] <= box[1] + 1
 
 
@@ -778,16 +778,16 @@ def test_share_slideshow_button(page):
     page.evaluate("window._sent = null; window.MTApp = {shareText: t => { window._sent = t; }, hasPermission: () => true, status: () => '{}', version: () => '2.5.0', serverUrl: () => ''}")
     page.goto(base + "#/tour/" + page.evaluate("TOURS[0].id")); quiet(page, 1200)
     page.evaluate("document.querySelector('#eshow').click()")
-    page.wait_for_selector("#sh_go, .uidlg .uibox")
-    if page.locator(".uidlg .uibox").count():                # falls die Tour keine Fotos hat: Rückfrage im gemeinsamen Dialog bestätigen
-        page.locator(".uidlg .uifoot button").last.click()
+    page.wait_for_selector("#sh_go, .uidlg:not(.uimod) .uibox")
+    if page.locator(".uidlg:not(.uimod) .uibox").count():                # falls die Tour keine Fotos hat: Rückfrage im gemeinsamen Dialog bestätigen
+        page.locator(".uidlg:not(.uimod) .uifoot button").last.click()
     page.wait_for_selector("#sh_go"); page.select_option("#sh_d", "7"); page.click("#sh_go")
     for _ in range(40):                                      # ohne Fotos fragt der Dialog erst nach „Senden“ (Link trotzdem erstellen?)
-        if page.evaluate("window._sent") or page.locator(".uidlg .uibox").count():
+        if page.evaluate("window._sent") or page.locator(".uidlg:not(.uimod) .uibox").count():
             break
         page.wait_for_timeout(200)
-    if page.locator(".uidlg .uibox").count():
-        page.locator(".uidlg .uifoot button").last.click()
+    if page.locator(".uidlg:not(.uimod) .uibox").count():
+        page.locator(".uidlg:not(.uimod) .uifoot button").last.click()
     page.wait_for_function("() => window._sent", timeout=8000)
     sent = page.evaluate("window._sent")
     assert "Diashow" in sent and "/s/" in sent
@@ -829,7 +829,7 @@ def test_info_box(page):
     page.goto(base + "#/dash"); page.reload(); quiet(page, 800)
     page.evaluate("window.MTApp = {version: () => '2.5.0', hasPermission: () => true, status: () => '{}', serverUrl: () => ''}")
     page.click("#tmore"); page.click("#mab"); page.wait_for_selector("#abx")
-    txt = page.inner_text(".modal")
+    txt = page.inner_text(".uimod")
     assert "2.5.0" in txt and "Claude" in txt and "Volker Hildebrand" in txt and "Meine Touren" in txt
     page.click("#abx")
     page.set_viewport_size({"width": 1280, "height": 900})
@@ -844,9 +844,9 @@ def test_mobile_map_and_more_menu(page):
     assert abs(r[0] - r[1]) <= 1 and r[2] <= r[3] + 1 and r[4] <= r[3] + 1
     assert page.query_selector("#mloc")
     page.click("#tmore"); page.wait_for_timeout(300)
-    heads = page.evaluate("[...document.querySelectorAll('.modal h4')].map(h=>h.textContent)")
+    heads = page.evaluate("[...document.querySelectorAll('.uimod h4')].map(h=>h.textContent)")
     assert heads[0].startswith("Einstellungen")
-    main = page.evaluate("[...document.querySelectorAll('.modal .moregrid:not(.sm) a')].map(a=>a.getAttribute('href'))")
+    main = page.evaluate("[...document.querySelectorAll('.uimod .moregrid:not(.sm) a')].map(a=>a.getAttribute('href'))")
     assert "#/trips" in main and "#/admin" not in main
     page.set_viewport_size({"width": 1280, "height": 900})
 
