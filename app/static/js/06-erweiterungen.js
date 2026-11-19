@@ -593,11 +593,10 @@ async function bkInit() {
   const box = $("#bkst"), btn = $("#bkchk"), msg = $("#bkmsg");
   if (!box || !btn) return;
   const dt = ts => fmtDatumKurz(ts, {zeit: true});
-  const mb = n => (n >= 1e8 ? nf(n / 1e9, 2) + " GB" : nf(n / 1e6, 1) + " MB");
   const render = s => {
     if (!box.isConnected) return;
     let h = "";
-    if (s.neueste) h += `<p class="${s.ueberfaellig ? "bad" : "ok"}"><span aria-hidden="true">${s.ueberfaellig ? "⚠" : "✓"}</span> <span>Letzte Sicherung: ${dt(s.neueste.ts)} (${mb(s.neueste.groesse)})</span></p>`;
+    if (s.neueste) h += `<p class="${s.ueberfaellig ? "bad" : "ok"}"><span aria-hidden="true">${s.ueberfaellig ? "⚠" : "✓"}</span> <span>Letzte Sicherung: ${dt(s.neueste.ts)} (${fmtGroesse(s.neueste.groesse)})</span></p>`;
     else h += `<p class="bad"><span aria-hidden="true">⚠</span> <span>Es gibt noch keine Sicherung.</span></p>`;
     if (s.fehler) h += `<p class="bad" id="bkerr"><span aria-hidden="true">⚠</span> <span>Letzte Sicherung fehlgeschlagen: ${esc(s.fehler)}</span></p>`;
     const g = s.geprueft;
@@ -630,10 +629,9 @@ async function bkInit() {
 async function umzugInit() {
   const mk = $("#umzmk"), ls = $("#umzls"), stx = $("#umzst");
   if (!mk) return;
-  const fmt = n => (n > 1e9 ? nf(n / 1e9, 1) + " GB" : nf(n / 1e6, 1) + " MB");
   const list = async () => {
     const l = await api("/api/backup/full").catch(() => []);
-    ls.innerHTML = l.map(x => `<div class="row g8"><a href="/api/backup/full/${encodeURIComponent(x.name)}" download>${esc(x.name)}</a><small class="mut">${fmt(x.size)} · ${fmtDatumKurz(x.ts, {zeit: true})}</small></div>`).join("") || '<small class="mut">Noch kein Umzugspaket erstellt.</small>';
+    ls.innerHTML = l.map(x => `<div class="row g8"><a href="/api/backup/full/${encodeURIComponent(x.name)}" download>${esc(x.name)}</a><small class="mut">${fmtGroesse(x.size)} · ${fmtDatumKurz(x.ts, {zeit: true})}</small></div>`).join("") || '<small class="mut">Noch kein Umzugspaket erstellt.</small>';
   };
   const poll = async () => {
     const j = await api("/api/jobs").catch(() => null);

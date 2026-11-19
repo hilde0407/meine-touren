@@ -1,11 +1,9 @@
 /* Skript der Seite rueckblick.html (öffentlicher Jahresrückblick, 3.26.0; eigene Datei, damit die Content-Security-Policy Inline-Skripte verbieten kann).
    Gezeigt wird nur, was der Server für diesen Link ausliefert (Bausteine: Kennzahlen, Rekorde, Heatmap, Fotos). Drucken: window.print() mit eigener Druckansicht (@media print). */
 const tok = location.pathname.split("/").pop();
-const LG = {de: "de-DE", en: "en-GB", fr: "fr-FR", es: "es-ES"}[document.documentElement.lang] || "de-DE";
-const nf = (n, d = 1) => Number(n).toLocaleString(LG, {minimumFractionDigits: d, maximumFractionDigits: d});
+const nf = (n, d = 1) => fmtZahl(n, d);                      // Zahlen und Daten über 01-format.js (Sprache: window.LANG)
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
-const mon = (y, m, f) => new Date(Date.UTC(y, m, 1, 12)).toLocaleDateString(LG, {month: f, timeZone: "UTC"});
-const dateL = iso => new Date(iso + "T12:00:00Z").toLocaleDateString(LG, {day: "numeric", month: "long", year: "numeric", timeZone: "UTC"});
+const mon = (y, m, f) => (f === "short" ? FMT_MON_KURZ : FMT_MONATE)[FMT_LG()][m];
 
 function monthBars(t, kz) {
   const W = 640, H = 150, B = 24, T = 10, max = Math.max(1, ...kz.months), bw = W / 12;
@@ -24,7 +22,7 @@ function heat(h) {
     const len = new Date(Date.UTC(h.year, m + 1, 0)).getUTCDate(), wd = (h.wd0 + doy - 1) % 7;
     const cells = [];
     for (let d = 1; d <= len; d++, doy++) {
-      const v = per[doy] || 0, l = lvl(v), lab = new Date(Date.UTC(h.year, m, d, 12)).toLocaleDateString(LG, {day: "numeric", month: "long", timeZone: "UTC"}) + (v ? ": " + nf(v) + " km" : "");
+      const v = per[doy] || 0, l = lvl(v), lab = fmtTagMonat(FMT_LG(), d, m + 1, h.year, true) + (v ? ": " + nf(v) + " km" : "");
       cells.push(`<i class="${l ? "l" + l : ""}" title="${esc(lab)}"${d === 1 && wd ? ` data-first style="grid-row-start:${wd + 1}"` : ""}></i>`);
     }
     months.push(`<div class="mo"><h3>${esc(mon(h.year, m, "long"))}</h3><div class="cal" role="img" aria-label="${esc(mon(h.year, m, "long"))}">${cells.join("")}</div></div>`);
@@ -38,7 +36,7 @@ function recs(t) {
     if (r.k === "monat") return `<div class="rec"><div class="l">Stärkster Monat</div><b>${esc(mon(t.year, r.month - 1, "long"))}</b><div class="w"><span>${nf(r.v)} km</span></div></div>`;
     if (r.k === "serie") return `<div class="rec"><div class="l">Längste Serie</div><b>${r.v} ${r.v === 1 ? "Tag" : "Tage"}</b><div class="w"><span>Tage in Folge unterwegs</span></div></div>`;
     const v = r.u === "km" ? nf(r.v) + " km" : r.u === "m" ? nf(r.v, 0) + " m" : nf(r.v) + " h";
-    return `<div class="rec"><div class="l">${REC[r.k]}</div><b>${v}</b><div class="w">${esc(r.name)} <span>${esc(dateL(r.date))}</span></div></div>`;
+    return `<div class="rec"><div class="l">${REC[r.k]}</div><b>${v}</b><div class="w">${esc(r.name)} <span>${esc(fmtDatum(r.date))}</span></div></div>`;
   }).join("")}</div>`;
 }
 

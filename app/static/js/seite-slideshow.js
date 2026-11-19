@@ -16,7 +16,7 @@ const q = new URLSearchParams(location.search);
   const show = n => { i = (n + list.length) % list.length; document.getElementById("prog").firstChild.style.width = ((i + 1) / list.length * 100) + "%"; const p = list[i], el = document.getElementById(cur === "a" ? "b" : "a"), old = document.getElementById(cur);
     const img = new Image(); img.onload = () => { el.style.backgroundImage = `url(${img.src})`; el.classList.add("on"); old.classList.remove("on"); cur = cur === "a" ? "b" : "a"; };
     img.src = `/pic/${p.id}?size=2000`;
-    document.getElementById("cap").innerHTML = (p.tour_name ? `<b>${p.tour_name.replace(/</g, "&lt;")}</b>` : "") + new Date(p.taken_ts * 1000).toLocaleString("de-DE", {dateStyle: "long", timeStyle: "short"}) + `  (${i + 1}/${list.length})`;
+    document.getElementById("cap").innerHTML = (p.tour_name ? `<b>${p.tour_name.replace(/</g, "&lt;")}</b>` : "") + fmtDatum(p.taken_ts, {zeit: true}) + `  (${i + 1}/${list.length})`;
     const nx = new Image(); nx.src = `/pic/${list[(i + 1) % list.length].id}?size=2000`; };
   const loop = () => { clearTimeout(timer); if (!paused) timer = setTimeout(() => { show(i + 1); loop(); }, sec); };
   addEventListener("keydown", e => { if (e.key === " ") { paused = !paused; loop(); } else if (e.key === "ArrowRight") { show(i + 1); loop(); } else if (e.key === "ArrowLeft") { show(i - 1); loop(); } else if (e.key.toLowerCase() === "f") toggleFs(); });

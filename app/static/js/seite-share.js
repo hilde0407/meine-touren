@@ -1,6 +1,6 @@
 /* Skript der Seite share.html (eigene Datei, damit die Content-Security-Policy Inline-Skripte verbieten kann).
    3.25.0: Gezeigt wird nur, was der Server für diesen Link ausliefert (Bausteine: Kennzahlen, Karte, Höhenprofil, Wegpunkte, Pulsverlauf, Wetter, Notiz, Fotos). */
-const tok = location.pathname.split("/").pop(), nf = (n, d = 1) => Number(n).toLocaleString("de-DE", {minimumFractionDigits: d, maximumFractionDigits: d});
+const tok = location.pathname.split("/").pop(), nf = (n, d = 1) => fmtZahl(n, d);
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 const has = (t, k, v) => v !== undefined && (!t.blocks || t.blocks.includes(k));
 /* Linien-/Flächendiagramm als SVG: pts = [[x, y], …] */
@@ -16,7 +16,7 @@ function chart(pts, label, fx, fy, unit) {
 }
 fetch("/api/public/" + tok).then(r => { if (!r.ok) throw 0; return r.json(); }).then(t => {
   document.title = t.name; document.getElementById("h").textContent = t.name;
-  document.getElementById("k").textContent = new Date(t.date).toLocaleDateString("de-DE", {weekday: "long", day: "numeric", month: "long", year: "numeric"});
+  document.getElementById("k").textContent = fmtDatum(t.date, {wochentag: true});
   const B = document.getElementById("b"), sec = (id, title, inner) => B.insertAdjacentHTML("beforeend", `<section class="blk" id="${id}">${title ? `<h2>${title}</h2>` : ""}${inner}</section>`);
   if (has(t, "zahlen", t.km)) sec("bz", "", `<div class="figs">${[[nf(t.km) + " km", "Strecke"], [nf(t.up_m, 0) + " m", "Aufstieg"], [nf(t.down_m, 0) + " m", "Abstieg"], [nf(t.h) + " h", "Dauer"]].map(x => `<div class="fig"><b>${x[0]}</b><span>${x[1]}</span></div>`).join("")}</div>`);
   if (has(t, "karte", t.coords)) {

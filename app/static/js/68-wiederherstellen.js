@@ -3,8 +3,6 @@
    Schritt 2 (Dialog): Ergebnis der Vorprüfung, was ersetzt wird und was nicht, Häkchen, dann erst der Knopf „Jetzt zurückspielen“.
    Der Server spielt nur zurück, was er unmittelbar vorher geprüft hat (Token aus der Vorprüfung). Kein window.confirm.
    Texte stehen deutsch im Markup und werden von der Übersetzungsschicht (00-i18n.js, Zeilen in 00-i18n-neu.js) ersetzt; Zahlen und Namen stehen in eigenen Elementen. */
-const rsMb = n => (n >= 1e8 ? nf(n / 1e9, 2) + " GB" : n >= 1e5 ? nf(n / 1e6, 1) + " MB" : Math.max(1, Math.round(n / 1e3)) + " kB");
-const rsDt = ts => fmtDatumKurz(ts, {zeit: true});
 const rsAlter = h => (h == null ? "" : h < 1 ? "(weniger als eine Stunde alt)" : h < 48 ? `(vor ${Math.round(h)} Stunden)` : `(vor ${Math.round(h / 24)} Tagen)`);
 const RS_ZEILEN = [["touren", "Touren"], ["strecken", "Strecken (GPX-Dateien)"], ["reisen", "Reisen"], ["plaene", "Geplante Touren"], ["layouts", "Seitenlayouts"]];
 const rsZahl = v => (v == null ? "–" : String(v));
@@ -36,8 +34,8 @@ function rsDialog(v, trigger, onDone) {
   <div class="uitext" id="rsdd">
    <div id="rsv">
     <p class="rsgut"><span aria-hidden="true">✓</span> <span>Geprüft: Die Sicherung ist lesbar und vollständig.</span></p>
-    <div class="rsk"><span>Sicherung vom</span><b>${v.erstellt_ts ? rsDt(v.erstellt_ts) : "–"}</b><span class="mut">${rsAlter(v.alter_h)}</span></div>
-    <div class="rsk"><span>Datei</span><code class="rsfn">${esc(v.name)}</code><span class="mut">${rsMb(v.groesse)}</span></div>
+    <div class="rsk"><span>Sicherung vom</span><b>${v.erstellt_ts ? fmtDatumKurz(v.erstellt_ts, {zeit: true}) : "–"}</b><span class="mut">${rsAlter(v.alter_h)}</span></div>
+    <div class="rsk"><span>Datei</span><code class="rsfn">${esc(v.name)}</code><span class="mut">${fmtGroesse(v.groesse)}</span></div>
     ${wem}
     ${v.sicherheitskopie ? `<p class="rshin"><span aria-hidden="true">ℹ</span> <span>Das ist eine Sicherheitskopie, die vor einem früheren Zurückspielen angelegt wurde.</span></p>` : ""}
     ${rsTabelle("In der Sicherung", z.sicherung, "Heute", z.jetzt)}
@@ -153,7 +151,7 @@ async function rsInit() {
     maxMb = d.max_mb || maxMb;
     $("#rsmax").innerHTML = `<span>Höchstens</span> <span>${maxMb} MB</span>`;
     ls.innerHTML = d.sicherungen.length
-      ? d.sicherungen.map((x, i) => `<label class="rsi"><input type="radio" name="rsq" value="${esc(x.id)}" aria-describedby="rsi${i}"><span class="rsn">${rsDt(x.ts)}</span><span class="mut rsg">${rsMb(x.groesse)}</span><span class="rsx" id="rsi${i}">${x.sicherheitskopie ? `<span class="rstag">Sicherheitskopie vor dem Zurückspielen</span>` : ""}<code class="mut rsfn">${esc(x.name)}</code></span></label>`).join("")
+      ? d.sicherungen.map((x, i) => `<label class="rsi"><input type="radio" name="rsq" value="${esc(x.id)}" aria-describedby="rsi${i}"><span class="rsn">${fmtDatumKurz(x.ts, {zeit: true})}</span><span class="mut rsg">${fmtGroesse(x.groesse)}</span><span class="rsx" id="rsi${i}">${x.sicherheitskopie ? `<span class="rstag">Sicherheitskopie vor dem Zurückspielen</span>` : ""}<code class="mut rsfn">${esc(x.name)}</code></span></label>`).join("")
       : `<span class="mut">Auf diesem Server liegt noch keine Sicherung.</span>`;
     ls.querySelectorAll("input[name=rsq]").forEach(r => {
       if (r.value === gewaehlt) r.checked = true;

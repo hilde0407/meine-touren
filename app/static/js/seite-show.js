@@ -2,7 +2,7 @@
 const tok = location.pathname.split("/").pop(), $ = id => document.getElementById(id), SPEEDS = [3000, 5000, 8000];
 let DELAY = 5000, ids = [], TS = [], NM = [], i = 0, playing = true, timer = null, T = null, map = null, hideT = null;
 const url = (id, s) => `/pub/${tok}/photo/${id}?size=${s || 1600}`;
-const nf = (n, d = 1) => Number(n).toLocaleString("de-DE", {minimumFractionDigits: d, maximumFractionDigits: d});
+const nf = (n, d = 1) => fmtZahl(n, d);
 function show(n) {
   if (!ids.length) return;
   i = (n + ids.length) % ids.length;
@@ -59,7 +59,7 @@ function cmDraw() {
   const box = $("cm");
   if (!box.classList.contains("on")) return;
   box.innerHTML = `<div class="r" style="justify-content:space-between"><b>💬 Kommentare</b><button id="cmx" style="height:36px;min-width:36px">✕</button></div>` +
-    (l.length ? l.map(c => `<div class="c"><small>${esc(c.author)} · ${new Date(c.ts * 1000).toLocaleString("de-DE")}</small>${esc(c.text)}</div>`).join("") : '<p style="color:#9db3ae">Noch keine Kommentare.</p>') +
+    (l.length ? l.map(c => `<div class="c"><small>${esc(c.author)} · ${fmtDatumKurz(c.ts, {zeit: true})}</small>${esc(c.text)}</div>`).join("") : '<p style="color:#9db3ae">Noch keine Kommentare.</p>') +
     `<input id="cma" maxlength="40" placeholder="Dein Name (optional)" value="${esc(localStorage.getItem("mt_cname") || "")}"><div class="r"><input id="cmt" maxlength="500" placeholder="Kommentar schreiben …"><button id="cms">Senden</button></div><p id="cme" style="color:#f88;font-size:13px"></p>`;
   $("cmx").onclick = e => { e.stopPropagation(); box.classList.remove("on"); playing = was; restart(); };
   const send = async () => {
@@ -79,7 +79,7 @@ fetch("/api/public/" + tok).then(r => { if (!r.ok) throw 0; return r.json(); }).
   T = t; ids = t.photos || []; TS = t.photo_t || []; NM = t.photo_names || [];
   document.title = t.name; $("h").textContent = t.name;
   if (t.kind === "diashow") $("sub").textContent = ids.length + " Fotos";          // Jahres-/Gesamt-Diashow: nur Fotos, kein Tourdatum, keine Strecke
-  else $("sub").textContent = new Date(t.date).toLocaleDateString("de-DE", {day: "numeric", month: "long", year: "numeric"}) + " · " + nf(t.km) + " km · Aufstieg " + nf(t.up_m, 0) + " m";
+  else $("sub").textContent = fmtDatum(t.date) + " · " + nf(t.km) + " km · Aufstieg " + nf(t.up_m, 0) + " m";
   if (!ids.length) { $("st").innerHTML = `<div class="err">${t.kind === "diashow" ? "Zu dieser Diashow gibt es keine Fotos." : "Zu dieser Tour gibt es keine Fotos."}</div>`; $("prog").style.display = "none"; return; }
   if (t.coords.length < 2) $("mp").style.display = "none";
   show(0); bars();

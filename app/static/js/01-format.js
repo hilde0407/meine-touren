@@ -3,7 +3,7 @@
    Keine Abhängigkeit von anderen Dateien – wird in tests/test_format_341.py einzeln geladen.
    Regeln:  Dauer „1:55 Std.“ (h:mm; en/fr/es „1:55 h“), unter einer Stunde „45 Min.“, Summen ab 24 Stunden ganzzahlig „388 Std.“
             Strecke eine Nachkommastelle, Summen ab 100 km ganzzahlig · Aufstieg/Abstieg ganze Meter „300 m“ (Liste „↑ 300 m“)
-            Dezimalkomma bzw. -punkt und Tausendertrennung je Sprache · Datum lang „18. November 2026“ (Köpfe), kurz „18.11.2026“ (Listen). */
+            Dezimalkomma bzw. -punkt und Tausendertrennung je Sprache · Datum lang „18. November 2026“ (Köpfe), kurz „18.11.2026“ (Listen) · Dateigröße „12,3 MB“. */
 const FMT_LG = () => (["de", "en", "fr", "es"].includes(window.LANG) ? window.LANG : "de");
 const FMT_NUM = {de: "de-DE", en: "en-US", fr: "fr-FR", es: "es-ES"};
 const FMT_MONATE = {
@@ -17,6 +17,12 @@ const FMT_MON_KURZ = {
   en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
   fr: ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."],
   es: ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
+};
+const FMT_WT = {   // Wochentage, Sonntag zuerst (Date.getDay)
+  de: ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"],
+  en: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+  fr: ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"],
+  es: ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"],
 };
 const FMT_E = {   // Einheiten je Sprache: Stunde, Minute
   de: {h: "Std.", min: "Min."},
@@ -63,6 +69,13 @@ const fmtKm = (km, o = {}) => {
 const fmtHm = (m, o = {}) => (o.pfeil ? o.pfeil + " " : "") + fmtZahl(m, 0) + (o.einheit === false ? "" : " m");
 const fmtAuf = m => fmtHm(m, {pfeil: "↑"});
 const fmtAb = m => fmtHm(m, {pfeil: "↓"});
+/* Dateigröße in Bytes: „12,3 MB“ (ab 1 GB „1,2 GB“, unter 100 kB ganze „kB“); französisch mit Go/Mo/ko. Eine Funktion für alle Größenangaben (3.46.0). */
+const FMT_BYTE = {de: ["kB", "MB", "GB"], en: ["kB", "MB", "GB"], fr: ["ko", "Mo", "Go"], es: ["kB", "MB", "GB"]};
+const fmtGroesse = n => {
+  const b = Math.max(0, Number(n) || 0),
+    U = FMT_BYTE[FMT_LG()];
+  return b >= 1e9 ? `${fmtZahl(b / 1e9, 1)} ${U[2]}` : b >= 1e5 ? `${fmtZahl(b / 1e6, 1)} ${U[1]}` : `${Math.max(1, Math.round(b / 1e3))} ${U[0]}`;
+};
 /* Tempo (km/h) und Pace (min/km; nur dort, wo ausdrücklich „Pace“ steht) */
 const fmtTempo = (kmh, o = {}) => fmtZahl(kmh, o.d != null ? o.d : 1) + " km/h";
 const fmtPace = minProKm => {
@@ -92,13 +105,13 @@ const fmtUhrzeit = (x, o = {}) => {
   if (!p || p.hh == null) return "";
   return `${fmtPad2(p.hh)}:${fmtPad2(p.mi)}` + (FMT_LG() === "de" && o.uhr !== false ? " Uhr" : "");
 };
-/* lang: „18. November 2026“ (Köpfe, Aufmacher, Kacheln) · kurz: „18.11.2026“ (Listen, Tabellen; en/fr/es „18/11/2026“) */
+/* o.wochentag: „Mittwoch, 18. November 2026“ · lang: „18. November 2026“ (Köpfe, Aufmacher, Kacheln) · kurz: „18.11.2026“ (Listen, Tabellen; en/fr/es „18/11/2026“) */
 const fmtDatum = (x, o = {}) => {
   const p = fmtTeile(x);
   if (!p) return "";
   const lg = FMT_LG(),
     kurz = o.kurz ? `${fmtPad2(p.d)}${lg === "de" ? "." : "/"}${fmtPad2(p.mo)}${lg === "de" ? "." : "/"}${p.y}` : null,
-    s = kurz || fmtTagMonat(lg, p.d, p.mo, p.y);
+    s = kurz || (o.wochentag ? FMT_WT[lg][new Date(p.y, p.mo - 1, p.d).getDay()] + ", " : "") + fmtTagMonat(lg, p.d, p.mo, p.y);
   return o.zeit && p.hh != null ? `${s}, ${fmtUhrzeit(x)}` : s;
 };
 const fmtDatumKurz = (x, o = {}) => fmtDatum(x, {...o, kurz: true});
