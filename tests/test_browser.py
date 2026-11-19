@@ -1110,7 +1110,7 @@ def test_messwerte_and_meine_geraete(page):
     tid, kind = tid
     page.goto(base + "#/tour/" + tid + "/auswertung"); page.wait_for_selector("#metcard .chip", timeout=10000)
     chips = page.locator("#metchips [data-k]").all_inner_texts()
-    assert any("Geschwindigkeit" in c for c in chips) and any("Pace" in c for c in chips)
+    assert any("Tempo" in c for c in chips) and any("Pace" in c for c in chips)
     assert not any("Leistung" in c or "Atem" in c or "Temperatur" in c for c in chips)          # nichts anzeigen, was nicht vorhanden ist
     assert page.locator("#metcard svg.metsvg").count() >= 1 and "Quelle:" in page.inner_text("#metcard") and "berechnet" in page.inner_text("#metcard")
     page.locator("#metcard svg.metsvg").first.scroll_into_view_if_needed()

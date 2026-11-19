@@ -157,7 +157,7 @@ VIEWS.tour = async (id, q) => {
   $("#eshr").onclick = async () => {
     const m =
       uiModal(`<h3>Links dieser Tour</h3><p class="mut fs14">Erzeugt einen Link, den man <b>ohne Anmeldung</b> öffnen kann – du wählst, was er zeigt (Karte, Höhenprofil, Fotos …). Er funktioniert nur, wenn dein Server von außen erreichbar ist, z. B. per VPN oder Reverse-Proxy.</p>
-      <div class="row mt14"><button class="btn" id="shn">Neuen Link erstellen …</button></div><div id="shl" class="mt14"></div><div class="uifoot"><button class="btn ghost" id="shx">Schließen</button></div>`);
+      <div class="row mt16"><button class="btn" id="shn">Neuen Link erstellen …</button></div><div id="shl" class="mt16"></div><div class="uifoot"><button class="btn ghost" id="shx">Schließen</button></div>`);
     m.querySelector("#shx").onclick = () => m.remove();
     const list = async () => {
       const s = await api(`/api/tours/${encodeURIComponent(t.id)}/shares`).catch(() => []);

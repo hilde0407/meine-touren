@@ -25,7 +25,7 @@ FOOT = {"hike", "jogging", "mountaineering", "nordicwalking", "snowshoe"}
 
 # Kanal -> (Beschriftung, Einheit, Nachkommastellen, kleinster gültiger Wert, größter gültiger Wert)
 CH = {
-    "speed": ("Geschwindigkeit", "km/h", 1, 0.0, 120.0),
+    "speed": ("Tempo", "km/h", 1, 0.0, 120.0),
     "cad": ("Kadenz", "1/min", 0, 0.5, 280.0),
     "pow": ("Leistung", "W", 0, 0.0, 3000.0),
     "temp": ("Temperatur", "°C", 1, -50.0, 60.0),
@@ -48,7 +48,7 @@ def label_for(key, sport):
     if key == "cad":
         return ("Schrittfrequenz", "Schritte/min") if sport in FOOT else ("Trittfrequenz", "U/min")
     if key == "pace":
-        return "Tempo (Pace)", "min/km"
+        return "Pace", "min/km"
     return CH[key][0], CH[key][1]
 
 

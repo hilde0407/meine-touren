@@ -233,7 +233,7 @@ lokal gespeichert|stored locally
 🎨 Streckenfarbe|🎨 Track colour
 🎨 Strecken|🎨 Tracks
 Dauer|Duration
-Tempo im Schnitt|Average pace
+Tempo im Schnitt|Average speed
 Höchster Punkt|Highest point
 Fotos hinzufügen …|Add photos …
 Zeit per GPS prüfen|Check time via GPS

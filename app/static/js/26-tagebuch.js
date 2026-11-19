@@ -78,7 +78,7 @@ VIEWS.tour = async (...a) => {
           `<details class="panel m0-0-18" id="safety" ${s.set ? "open" : ""}><summary><b>Sicherheit</b> <span class="mut">– Lawinenlage, Gruppe, Notfallausrüstung (nur Notiz)</span></summary>
            <div class="mut m8-0-2">Lawinenwarnstufe (laut Lagebericht des Tages)</div>
            <div class="lvl" id="slvl">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-l="${n}" style="${n <= 2 ? "color:#000;" : n > 3 ? "color:#000;" : ""}border-left:10px solid ${AVAL[n][0]}" title="${AVAL[n][1]}">${n} <small>${AVAL[n][1]}</small></button>`).join("")}</div>
-           <div class="chips m8-0" id="sgear">${SAFE_GEAR.map(([k, l]) => `<label class="chip ${s.gear.includes(k) ? "on" : ""} cp"><input type="checkbox" value="${k}" ${s.gear.includes(k) ? "checked" : ""} style="display:none">${l}</label>`).join("")}</div>
+           <div class="chips m8-0" id="sgear">${SAFE_GEAR.map(([k, l]) => `<label class="chip ${s.gear.includes(k) ? "on" : ""} cp"><input type="checkbox" value="${k}" ${s.gear.includes(k) ? "checked" : ""} hidden>${l}</label>`).join("")}</div>
            <label>Gruppe<input id="sgrp" maxlength="200" value="${esc(s.grp)}" placeholder="z. B. zu dritt: Anna, Ben, ich"></label>
            <label>Notiz<textarea id="snote" rows="2" maxlength="1000" placeholder="Schneedecke, Gefahrenstellen, Umkehrpunkt …">${esc(s.note)}</textarea></label>
            <div class="row"><button class="btn sm" id="ssave">Speichern</button><span id="smsg" class="mut"></span><span class="sp"></span><span class="mut fs13">Reine Dokumentation – ersetzt keinen Lawinenlagebericht.</span></div></details>`

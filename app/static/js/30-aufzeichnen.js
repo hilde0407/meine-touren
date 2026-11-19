@@ -198,7 +198,7 @@ VIEWS.record = async () => {
         ${typeof A.setRoute === "function" ? `<label class="mut">Route mit Sprachansagen (optional)</label><select id="rroute" class="w100 fs16 p10 m6-0-4"><option value="">Keine – frei aufzeichnen</option></select>
         <div id="rrinfo" class="mut fs13 mb12">Lädt eine geplante oder frühere Strecke; unterwegs sagt die App an, wo du abbiegen musst.</div>` : ""}
         ${typeof A.takePhoto === "function" ? `<label class="mut">Fotos während der Aufzeichnung</label><select id="rphm" class="w100 fs16 p10 m6-0-12"><option value="now">Sofort auf den Server laden</option><option value="end">Gesammelt am Ende laden</option></select>` : ""}
-        ${typeof A.setWeather === "function" ? `<label class="m0-0-10" style="display:block"><input type="checkbox" id="rwxon" ${A.weatherOn() ? "checked" : ""}> Wetterwarnung unterwegs (Gewitter, Starkregen, Sturm, Kälteeinbruch)</label>` : ""}
+        ${typeof A.setWeather === "function" ? `<label class="m0-0-10 db"><input type="checkbox" id="rwxon" ${A.weatherOn() ? "checked" : ""}> Wetterwarnung unterwegs (Gewitter, Starkregen, Sturm, Kälteeinbruch)</label>` : ""}
         <div class="row g8 m0-0-12 aic"><select id="rlh" class="p10"><option value="3">3 Stunden</option><option value="12" selected>12 Stunden</option><option value="24">24 Stunden</option><option value="72">3 Tage</option></select><button class="btn alt" id="rlink">📡 Live-Standort für Kontakt teilen</button></div>
         <div id="rlmsg" class="mut fs13 mn6-0-12"></div>
         <label class="mut">Name (optional)</label><input id="rname" class="w100 fs16 p10 m6-0-12" placeholder="wird sonst automatisch vergeben">

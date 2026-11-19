@@ -181,8 +181,8 @@ VIEWS.plan = async (pid, q) => {
   $("#main").innerHTML = `<div class="row"><a class="back" href="#/tours">‹ Alle Touren</a></div>
    <div class="sec"><h2>Tour planen</h2><span class="sub">Punkte in die Karte klicken – sie werden über bekannte Wege verbunden – oder eine GPX-Datei laden</span></div>
    <div class="row g8 fxw"><input id="pn" placeholder="Name der Planung" aria-label="Name der Planung" maxlength="120" class="mnw230"><select id="ps" aria-label="Sportart">${sports.map(s => `<option value="${s}" ${s === "hike" ? "selected" : ""}>${sName(s)}</option>`).join("")}</select>
-    <label class="chip on cp" title="Verbindet die Punkte über Wege und Straßen aus OpenStreetMap (BRouter). Aus: gerade Linien."><input type="checkbox" id="prt" checked style="display:none">Wegen folgen</label>
-    <label class="btn alt sm cp">GPX laden …<input type="file" id="pg" accept=".gpx,application/gpx+xml,text/xml" style="display:none"></label>
+    <label class="chip on cp" title="Verbindet die Punkte über Wege und Straßen aus OpenStreetMap (BRouter). Aus: gerade Linien."><input type="checkbox" id="prt" checked hidden>Wegen folgen</label>
+    <label class="btn alt sm cp">GPX laden …<input type="file" id="pg" accept=".gpx,application/gpx+xml,text/xml" hidden></label>
     ${guides.length ? `<select id="pgd" class="mw260" aria-label="Aus Wanderführer laden"><option value="">Aus Wanderführer laden …</option>${guides.map(g => `<option value="${g.id}">${esc(g.book ? g.book + " – " : "")}${esc(g.title)}</option>`).join("")}</select>` : ""}
     <button class="btn ghost sm" id="pundo">↶ Letzten Punkt entfernen</button><button class="btn ghost sm" id="pclr">Leeren</button></div>
    <div class="tmap mt12" id="pm" role="region" aria-label="Karte zur Planung: Klick setzt einen Punkt" style="height:min(60vh,520px)"></div>

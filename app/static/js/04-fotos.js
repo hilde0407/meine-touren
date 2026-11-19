@@ -577,7 +577,7 @@ function photoImportModal(o = {}) {
       <p class="mut fs14">So werden die Fotos nach Aufnahmetag zugeordnet. Pro Tag kannst du die Auswahl ändern.</p>
       ${rows
         .map(
-          (r, i) => `<div class="panel m10-0"><div class="g12 fxw aib" style="display:flex"><b>${r.d.day.split("-").reverse().join(".")}</b><span>${r.d.n} Foto${r.d.n > 1 ? "s" : ""}</span>${r.d.gps ? `<span class="mut fs13">${r.d.gps} mit Aufnahmeort</span>` : ""}${r.d.status === "ask" && r.d.reason ? `<span class="mut fs13">· ${esc(r.d.reason)}</span>` : ""}</div>
+          (r, i) => `<div class="panel m10-0"><div class="g12 fxw aib dfx"><b>${r.d.day.split("-").reverse().join(".")}</b><span>${r.d.n} Foto${r.d.n > 1 ? "s" : ""}</span>${r.d.gps ? `<span class="mut fs13">${r.d.gps} mit Aufnahmeort</span>` : ""}${r.d.status === "ask" && r.d.reason ? `<span class="mut fs13">· ${esc(r.d.reason)}</span>` : ""}</div>
           <select data-r="${i}" class="w100 mt6">${r.ch.map(c => `<option value="${c.v}" ${c.v === r.def ? "selected" : ""}>${esc(c.t)}</option>`).join("")}</select>
           <div class="mt6"><button class="btn ghost sm" data-mp="${i}">Auf der Karte ansehen</button></div><div data-map="${i}" class="mt8 br6 ovh" style="display:none;height:230px"></div></div>`
         )

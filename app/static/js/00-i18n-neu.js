@@ -281,7 +281,6 @@ Es läuft gerade eine Aufzeichnung – Test nicht möglich. || A recording is ru
 Test läuft … {} s (am besten im Freien, Bildschirm ruhig halten) || Test running … {} s (preferably outdoors, hold the screen still) || Test en cours … {} s (de préférence en extérieur, tenez l’écran immobile) || Prueba en curso … {} s (mejor al aire libre, mantén la pantalla quieta)
 Im Freien wiederholen; GPS und Berechtigung prüfen. || Repeat outdoors; check GPS and permission. || Recommencez en extérieur ; vérifiez le GPS et l’autorisation. || Repítelo al aire libre; comprueba el GPS y el permiso.
 In die Zwischenablage kopiert || Copied to the clipboard || Copié dans le presse-papiers || Copiado al portapapeles
-{} – {} km, {} m aufwärts, {} h ({}) || {} – {} km, {} m ascent, {} h ({}) || {} – {} km, {} m de montée, {} h ({}) || {}: {} km, {} m de subida, {} h ({})
 Diashow senden || Send slideshow || Envoyer le diaporama || Enviar presentación
 ohne Benutzerkonto || without a user account || sans compte utilisateur || sin cuenta de usuario
 Nur die besten 20 || Only the best 20 || Uniquement les 20 meilleures || Solo las 20 mejores
@@ -343,7 +342,6 @@ Du kannst dich jetzt mit dem neuen Passwort anmelden.{} || You can now sign in w
 Dieser Link ist abgelaufen oder wurde schon benutzt. || This link has expired or has already been used. || Ce lien a expiré ou a déjà été utilisé. || Este enlace ha caducado o ya se ha usado.
 Du kannst auf der Anmeldeseite einen neuen anfordern („Passwort vergessen?“). || You can request a new one on the sign-in page (“Forgot password?”). || Vous pouvez en demander un nouveau sur la page de connexion (« Mot de passe oublié ? »). || Puedes solicitar uno nuevo en la página de inicio de sesión («¿Olvidaste tu contraseña?»).
 Dieser Link ist nicht (mehr) gültig. || This link is no longer valid. || Ce lien n’est plus valable. || Este enlace ya no es válido.
-m aufwärts || m of ascent || m de montée || m de subida
 Dieser Link ist nicht (mehr) gültig oder abgelaufen. || This link is no longer valid or has expired. || Ce lien n’est plus valable ou a expiré. || Este enlace ya no es válido o ha caducado.
 Dieses Gerät (iPhone) erlaubt keinen Vollbildmodus im Browser. || This device (iPhone) does not allow full-screen mode in the browser. || Cet appareil (iPhone) n’autorise pas le mode plein écran dans le navigateur. || Este dispositivo (iPhone) no permite el modo de pantalla completa en el navegador.
 Tipp: Teilen ▸ „Zum Home-Bildschirm“ – dann öffnet die App ohne Leiste. || Tip: Share ▸ “Add to Home Screen” – then the app opens without the toolbar. || Astuce : Partager ▸ « Sur l’écran d’accueil » – l’application s’ouvre alors sans barre. || Consejo: Compartir ▸ «Añadir a pantalla de inicio»; así la aplicación se abre sin barra.
@@ -504,9 +502,9 @@ Zurück || Back || Retour || Atrás
 Start/Pause || Start/Pause || Lecture/Pause || Inicio/Pausa
 Weiter || Next || Suivant || Siguiente
 Tempo || Speed || Vitesse || Velocidad
+Pace || Pace || Allure || Ritmo
 Karte || Map || Carte || Mapa
 {} Uhr || {} || {} || {}
-{} m aufwärts || {} m ascent || {} m de dénivelé positif || {} m de subida
 Anmeldung nicht möglich || Sign-in not possible || Connexion impossible || No se puede iniciar sesión
 Ausrüstung nicht gefunden || Equipment not found || Équipement introuvable || Equipo no encontrado
 Bewertung von 1 bis 5 Sternen || Rating from 1 to 5 stars || Note de 1 à 5 étoiles || Valoración de 1 a 5 estrellas
@@ -529,7 +527,7 @@ Der Port muss eine Zahl sein || The port must be a number || Le port doit être 
 Die Adresse muss mit http:// oder https:// beginnen || The address must start with http:// or https:// || L’adresse doit commencer par http:// ou https:// || La dirección debe empezar por http:// o https://
 Die Anmeldung ist abgelaufen – bitte noch einmal mit Name und Passwort beginnen || The sign-in has expired – please start again with name and password || La connexion a expiré – veuillez recommencer avec le nom et le mot de passe || El inicio de sesión ha caducado: empieza de nuevo con el nombre y la contraseña
 Die Sicherung konnte nicht geschrieben werden: {} || The backup could not be written: {} || La sauvegarde n’a pas pu être écrite : {} || No se pudo escribir la copia de seguridad: {}
-Die Standort-Freigabe ist ausgeschaltet (Verwaltung → Standort teilen) || Location sharing is turned off (Administration → Share location) || Le partage de position est désactivé (Administration → Partager la position) || El uso compartido de la ubicación está desactivado (Administración → Compartir ubicación)
+Die Standort-Freigabe ist ausgeschaltet (Verwaltung → Standort teilen) || Location sharing is turned off (Admin → Share location) || Le partage de position est désactivé (Administration → Partager la position) || El uso compartido de la ubicación está desactivado (Administración → Compartir ubicación)
 Die Tour ist ausgeblendet – bitte zuerst unter Prüfen wieder einblenden. || The tour is hidden – please unhide it under Review first. || Le parcours est masqué – veuillez d’abord le réafficher sous Vérifier. || La ruta está oculta: vuelve a mostrarla primero en Revisar.
 Die Tourplanung ist in den Einstellungen ausgeschaltet || Tour planning is turned off in the settings || La planification de parcours est désactivée dans les réglages || La planificación de rutas está desactivada en los ajustes
 Die Zwei-Faktor-Anmeldung ist schon eingeschaltet || Two-factor sign-in is already turned on || L’authentification à deux facteurs est déjà activée || El inicio de sesión en dos pasos ya está activado
@@ -595,18 +593,18 @@ Update fehlgeschlagen: {} || Update failed: {} || Échec de la mise à jour : {}
 Komoot-Zugang || Komoot access || Accès Komoot || Acceso a Komoot
 gespeichert || saved || enregistré || guardado
 fehlt || missing || manquant || falta
-Verwaltung → Komoot: E-Mail und Passwort eintragen || Administration → Komoot: enter email and password || Administration → Komoot : saisir l’e-mail et le mot de passe || Administración → Komoot: introduce el correo y la contraseña
+Verwaltung → Komoot: E-Mail und Passwort eintragen || Admin → Komoot: enter email and password || Administration → Komoot : saisir l’e-mail et le mot de passe || Administración → Komoot: introduce el correo y la contraseña
 Letzte Sicherung || Last backup || Dernière sauvegarde || Última copia de seguridad
 vor {} h || {} h ago || il y a {} h || hace {} h
 noch keines || none yet || aucune pour l’instant || todavía ninguna
-Verwaltung → Sicherung: jetzt sichern || Administration → Backup: back up now || Administration → Sauvegarde : sauvegarder maintenant || Administración → Copia de seguridad: hacer copia ahora
+Verwaltung → Sicherung: jetzt sichern || Admin → Backup: back up now || Administration → Sauvegarde : sauvegarder maintenant || Administración → Copia de seguridad: hacer copia ahora
 Datenbank || Database || Base de données || Base de datos
 {} MB || {} MB || {} Mo || {} MB
 Freier Speicher || Free storage || Espace libre || Espacio libre
 Weniger als 2 GB frei – Platz schaffen || Less than 2 GB free – free up some space || Moins de 2 Go libres – libérez de l’espace || Menos de 2 GB libres: libera espacio
 Touren ohne Strecke || Tours without a track || Parcours sans tracé || Rutas sin recorrido
 {} von {} || {} of {} || {} sur {} || {} de {}
-Verwaltung → „Routen laden“ || Administration → “Load routes” || Administration → « Charger les itinéraires » || Administración → «Cargar rutas»
+Verwaltung → „Routen laden“ || Admin → “Load routes” || Administration → « Charger les itinéraires » || Administración → «Cargar rutas»
 Fotos ohne Tour || Photos without a tour || Photos sans parcours || Fotos sin ruta
 Sicherungsfehler || Backup error || Erreur de sauvegarde || Error de copia de seguridad
 Sicherungsordner prüfen || Check the backup folder || Vérifiez le dossier de sauvegarde || Comprueba la carpeta de copias
@@ -696,10 +694,10 @@ Entwicklermodus || Developer mode || Mode développeur || Modo desarrollador
 Entwickleransichten anzeigen || Show developer views || Afficher les vues développeur || Mostrar vistas de desarrollador
 Blendet Ansichten ein, die nur zur Fehlersuche gebraucht werden: Selbsttest, vollständiges Protokoll, App-Test, Suche nach verlorenen Aufzeichnungen und Token-Test. || Shows views that are only needed for troubleshooting: self-test, full log, app test, search for lost recordings and token test. || Affiche les vues utiles uniquement au dépannage : autotest, journal complet, test de l'appli, recherche d'enregistrements perdus et test du jeton. || Muestra vistas que solo se necesitan para diagnosticar fallos: autotest, registro completo, prueba de la app, búsqueda de grabaciones perdidas y prueba del token.
 Nur im Entwicklermodus || Developer mode only || Uniquement en mode développeur || Solo en modo desarrollador
-Den App-Test schaltest du in der Verwaltung unter „Übersicht → Entwicklermodus“ ein. || Enable the app test in Administration under "Overview → Developer mode". || Activez le test de l'appli dans l'administration sous « Aperçu → Mode développeur ». || Activa la prueba de la app en Administración, en «Resumen → Modo desarrollador».
+Den App-Test schaltest du in der Verwaltung unter „Übersicht → Entwicklermodus“ ein. || Enable the app test in Admin under "Overview → Developer mode". || Activez le test de l'appli dans l'administration sous « Aperçu → Mode développeur ». || Activa la prueba de la app en Administración, en «Resumen → Modo desarrollador».
 Zur Verwaltung || Go to administration || Vers l'administration || Ir a administración
 Prüfen & Aufräumen || Check & clean up || Vérifier et nettoyer || Revisar y limpiar
-‹ Verwaltung || ‹ Administration || ‹ Administration || ‹ Administración
+‹ Verwaltung || ‹ Admin || ‹ Administration || ‹ Administración
 Zuletzt unterwegs || Latest outings || Dernières sorties || Últimas salidas
 Zur Statistik || Go to statistics || Vers les statistiques || Ir a estadísticas
 Dein Jahr {} || Your year {} || Votre année {} || Tu año {}
@@ -761,7 +759,6 @@ Schrittlänge || Stride length || Longueur de foulée || Longitud de zancada
 Bodenkontaktzeit || Ground contact time || Temps de contact au sol || Tiempo de contacto con el suelo
 Vertikale Oszillation || Vertical oscillation || Oscillation verticale || Oscilación vertical
 Luftdruck || Air pressure || Pression atmosphérique || Presión atmosférica
-Tempo (Pace) || Pace || Allure || Ritmo
 Geräte aus Zepp ermitteln || Detect devices from Zepp || Détecter les appareils depuis Zepp || Detectar dispositivos desde Zepp
 Gerät aus Zepp ermitteln || Detect a device from Zepp || Détecter un appareil depuis Zepp || Detectar un dispositivo desde Zepp
 Gerät von Hand anlegen || Add a device manually || Ajouter un appareil à la main || Añadir un dispositivo a mano
@@ -1483,7 +1480,7 @@ Diese Woche || This week || Cette semaine || Esta semana
 Dieser Monat || This month || Ce mois-ci || Este mes
 Jahresvergleich || Year comparison || Comparaison annuelle || Comparación anual
 Wählbare Kennzahlen dieser Tour als Kacheln: Strecke, Aufstieg, Dauer, Tempo, Puls, Kalorien. || Selectable key figures of this tour as tiles: distance, ascent, duration, pace, heart rate, calories. || Chiffres clés au choix de ce parcours sous forme de tuiles : distance, dénivelé positif, durée, allure, pouls, calories. || Cifras clave elegibles de esta ruta en mosaicos: distancia, ascenso, duración, ritmo, pulso, calorías.
-Durchschnittstempo bergauf, auf ebenem Weg und bergab, aus der Steigung der Strecke. || Average pace uphill, on flat ground and downhill, from the gradient of the route. || Allure moyenne en montée, à plat et en descente, d’après la pente du parcours. || Ritmo medio cuesta arriba, en llano y cuesta abajo, según la pendiente de la ruta.
+Durchschnittstempo bergauf, auf ebenem Weg und bergab, aus der Steigung der Strecke. || Average speed uphill, on flat ground and downhill, from the gradient of the route. || Allure moyenne en montée, à plat et en descente, d’après la pente du parcours. || Ritmo medio cuesta arriba, en llano y cuesta abajo, según la pendiente de la ruta.
 „Platz x von y“ unter allen Touren auf derselben Strecke, nach Tempo, mit Link zur Auswertung. || “Rank x of y” among all tours on the same route, by pace, with a link to the evaluation. || « Place x sur y » parmi tous les parcours sur le même tracé, selon l’allure, avec un lien vers l’évaluation. || «Puesto x de y» entre todas las rutas del mismo recorrido, según el ritmo, con enlace a la evaluación.
 Zeit in den fünf Pulszonen als Balken (nur bei Touren mit Herzfrequenz). || Time in the five heart-rate zones as a bar (only for tours with heart rate). || Temps dans les cinq zones de fréquence cardiaque sous forme de barre (uniquement pour les parcours avec pouls). || Tiempo en las cinco zonas de pulso como barra (solo en rutas con frecuencia cardíaca).
 Wetter am Tag der Tour in einer Zeile: Himmel, Temperatur, Niederschlag, Wind. || Weather on the day of the tour in one line: sky, temperature, precipitation, wind. || Météo le jour du parcours en une ligne : ciel, température, précipitations, vent. || Tiempo el día de la ruta en una línea: cielo, temperatura, precipitación, viento.
@@ -3070,7 +3067,7 @@ Legende der Sportarten || Legend of sports || Légende des sports || Leyenda de 
 Neueste Touren || Newest tours || Parcours les plus récents || Rutas más recientes
 Belastung im Wochenvergleich || Load compared by week || Charge comparée par semaine || Carga comparada por semana
 Jahres-Rückblick {} || Year review {} || Rétrospective annuelle {} || Resumen del año {}
-Durchschnittstempo bergauf, auf ebenem Weg und bergab als drei Kacheln, aus der Steigung der Strecke. || Average pace uphill, on the flat and downhill as three tiles, from the gradient of the route. || Allure moyenne en montée, sur le plat et en descente en trois tuiles, d’après la pente du tracé. || Ritmo medio en subida, en llano y en bajada como tres fichas, a partir de la pendiente del recorrido.
+Durchschnittstempo bergauf, auf ebenem Weg und bergab als drei Kacheln, aus der Steigung der Strecke. || Average speed uphill, on the flat and downhill as three tiles, from the gradient of the route. || Allure moyenne en montée, sur le plat et en descente en trois tuiles, d’après la pente du tracé. || Ritmo medio en subida, en llano y en bajada como tres fichas, a partir de la pendiente del recorrido.
 In einer Zeile: „Platz x von y“ unter allen Touren auf derselben Strecke, nach Tempo, mit Link zur Auswertung. || In one line: “rank x of y” among all tours on the same route, by pace, with a link to the analysis. || Sur une ligne : « place x sur y » parmi tous les parcours sur le même tracé, par allure, avec lien vers l’analyse. || En una línea: «puesto x de y» entre todas las rutas del mismo recorrido, por ritmo, con enlace al análisis.
 Wetter am Tag der Tour als Kacheln in einer Zeile: Himmel, Temperatur, Niederschlag, Wind. || Weather on the day of the tour as tiles in one line: sky, temperature, precipitation, wind. || Météo du jour du parcours en tuiles sur une ligne : ciel, température, précipitations, vent. || El tiempo del día de la ruta como fichas en una línea: cielo, temperatura, precipitación, viento.
 Der höchste Punkt der Tour als Wegweiser-Tafel, wann du ihn erreicht hast und wie viel der Strecke über einer wählbaren Höhe lag. || The highest point of the tour as a signpost, when you reached it and how much of the route was above a selectable altitude. || Le point le plus haut du parcours en panneau indicateur, quand tu l’as atteint et quelle part du tracé était au-dessus d’une altitude au choix. || El punto más alto de la ruta como señal indicadora, cuándo lo alcanzaste y qué parte del recorrido estuvo por encima de una altitud elegible.

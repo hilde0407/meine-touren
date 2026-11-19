@@ -17,7 +17,7 @@ function gearForm(g, done) {
    <label>Name<input id="gn" maxlength="80" value="${esc(g.name || "")}" placeholder="z. B. Rennrad Canyon, Wanderschuhe Lowa"></label>
    <label>Art<select id="gk">${GEAR_KINDS.map(k => `<option ${k === g.kind ? "selected" : ""}>${k}</option>`).join("")}</select></label>
    <div class="m10-0-4">Wird automatisch zugeordnet bei Touren der Sportart <span class="mut">(sonst wählst du es in der Tour selbst)</span></div>
-   <div class="chips" id="gs">${sp.map(s => `<label class="chip ${g.sports.includes(s) ? "on" : ""} cp"><input type="checkbox" value="${s}" ${g.sports.includes(s) ? "checked" : ""} style="display:none"><i style="background:${sCol(s)}"></i>${sName(s)}</label>`).join("")}</div>
+   <div class="chips" id="gs">${sp.map(s => `<label class="chip ${g.sports.includes(s) ? "on" : ""} cp"><input type="checkbox" value="${s}" ${g.sports.includes(s) ? "checked" : ""} hidden><i style="background:${sCol(s)}"></i>${sName(s)}</label>`).join("")}</div>
    <div class="row mt10"><label>Im Gebrauch ab<input type="date" id="gsince" value="${esc(g.since || "")}"></label><label>bis (leer = noch aktiv)<input type="date" id="guntil" value="${esc(g.until || "")}"></label></div>
    <label>Wechsel-Hinweis ab Kilometern<input type="number" id="glim" min="0" step="50" value="${g.limit_km || ""}" placeholder="z. B. 800 für Schuhe, 3000 für eine Kette"></label>
    <label>Notiz<input id="gnote" maxlength="300" value="${esc(g.note || "")}"></label>
@@ -50,7 +50,7 @@ async function gearPanel() {
      list.length
        ? `<div class="rows">${list
            .map(
-             g => `<div class="r gr" data-g="${g.id}" style="${g.until ? "opacity:.6" : ""}"><span>${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)} ${gStatus(g)}<small>${esc(g.kind)}${g.until ? " · seit " + esc(g.until) + " nicht mehr im Gebrauch" : ""}${g.limit_km ? ` · Hinweis ab ${fmtKm(g.limit_km, {d: 0})}` : ""}${g.note ? " · " + esc(g.note) : ""}</small></span><span class="tar"><b>${fmtKm(g.km, {d: 0})}</b><small style="display:block">${fmtAuf(g.up)} · ${g.n} Touren</small></span></div>`
+             g => `<div class="r gr" data-g="${g.id}" style="${g.until ? "opacity:.6" : ""}"><span>${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)} ${gStatus(g)}<small>${esc(g.kind)}${g.until ? " · seit " + esc(g.until) + " nicht mehr im Gebrauch" : ""}${g.limit_km ? ` · Hinweis ab ${fmtKm(g.limit_km, {d: 0})}` : ""}${g.note ? " · " + esc(g.note) : ""}</small></span><span class="tar"><b>${fmtKm(g.km, {d: 0})}</b><small class="db">${fmtAuf(g.up)} · ${g.n} Touren</small></span></div>`
            )
            .join("")}</div>`
        : `<p class="mut">Noch nichts angelegt. Lege zum Beispiel dein Rad oder deine Wanderschuhe an und wähle die Sportart – dann zählt die App die Kilometer automatisch mit.</p>`
