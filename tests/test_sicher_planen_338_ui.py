@@ -249,7 +249,7 @@ def test_planliste_vorschlag_bestaetigen_loesen_und_status(pw, app):
             expect(row.locator(".pcmp")).to_contain_text("Strecke: geplant 6,7 km, gelaufen 6,9 km (+0,2 km)")
             expect(row.locator(".pcmp")).to_contain_text("Aufstieg: geplant 800 m, gelaufen 190 m (−610 m)")
             expect(row.locator(".pst.g")).to_contain_text("gegangen")
-            assert row.locator(".psug").count() == 0
+            expect(row.locator(".psug")).to_have_count(0, timeout=TL)
             assert _req(app, "/api/plans")[0]["tour_id"] == "lauf"
             _ruhe(pg)
             assert _no_hscroll(pg)
@@ -264,7 +264,7 @@ def test_planliste_vorschlag_bestaetigen_loesen_und_status(pw, app):
             # Status verworfen: Vorschlag verschwindet, Abzeichen steht da
             row.locator("select.pstat").select_option("verworfen")
             expect(row.locator(".pst.v")).to_contain_text("verworfen", timeout=TL)
-            assert row.locator(".psug").count() == 0
+            expect(row.locator(".psug")).to_have_count(0, timeout=TL)
             assert _req(app, "/api/plans")[0]["status"] == "verworfen"
             assert not pg.errors, pg.errors
         finally:
