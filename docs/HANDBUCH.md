@@ -253,6 +253,8 @@ Auf der Übersicht gibt es den Bereich **Touren holen** und oben in der Kopfzeil
 
 Ganz oben in „Touren holen“ stehen **Meine Geräte**: deine Uhren und Handys mit eigenem Namen. Der Name erscheint bei jeder Tour als „Quelle“; welche Messwerte eine Tour zeigt, richtet sich danach, was das Gerät wirklich geliefert hat. Mit **+ Gerät anlegen**, **Geräte aus Zepp ermitteln** und **Touren automatisch zuordnen** richtest du das ein; **Genauigkeit auswerten** meldet auffällige Touren.
 
+Die **Android-App** legt ihr Gerät selbst an: Beim ersten Hochladen einer Aufzeichnung erscheint das Handy hier mit dem Kennzeichen „Aufzeichnungs-App“, Modell, Android- und App-Version und dem Datum der letzten Aufzeichnung. Seine Touren werden ihm fest zugeordnet; ältere Handy-Aufzeichnungen bleiben unberührt und lassen sich über das Menü des Geräts („Bisherige Handy-Aufzeichnungen zuordnen …“) nachträglich zuordnen.
+
 ### 4.7 Wanderführer
 
 Unter **Wanderführer (z. B. Rother)** lädst du die GPX-Dateien deiner Wanderführer hoch. Folgt eine Tour einer dieser Strecken, wird der Tourtitel aus dem Buch beim Umbenennen vorgeschlagen.
@@ -1105,7 +1107,11 @@ Hier findest du auffällige Touren (zum Beispiel unplausible Tempi) und Aufräum
 
 **Was sie bietet:**
 
-* **GPS-Aufzeichnung** im Hintergrund (auch bei ausgeschaltetem Bildschirm). Menüpunkt **● Aufzeichnen** (erscheint nur in der App): Sportart wählen, Start, live Zeit, Strecke, Höhenmeter und Karte, Pause, Beenden, dann **Auf den Server speichern**. Wird der Server nicht erreicht, bleibt die Aufzeichnung auf dem Handy erhalten. **Beenden** geht nur durch Gedrückthalten (etwa 1,5 Sekunden).
+* **GPS-Aufzeichnung** im Hintergrund (auch bei ausgeschaltetem Bildschirm). Das Aufzeichnen steht in der App im Mittelpunkt: **Aufzeichnen** ist der runde Reiter in der Mitte der Tab-Leiste und die Startseite der App (umstellbar auf „Übersicht“ unter *Einstellungen der Aufzeichnung*). Der Reiter zeigt auf jeder Seite, ob eine Aufzeichnung läuft (rot, mit Zeit), pausiert ist oder auf das Hochladen wartet.
+  * **Bereit:** Sportart antippen (die zuletzt genutzte steht vorn), GPS-Zustand ablesen („GPS bereit, ±5 m“), **Aufzeichnung starten**. Route mit Sprachansagen wählst du direkt darunter; Name, Fotomodus, Wetterwarnung und Live-Standort-Link liegen unter **Einstellungen der Aufzeichnung**.
+  * **Unterwegs:** Zeit und Strecke groß, darunter Aufstieg, Höhe und Tempo, Karte mit Spur; **Foto** und **Wegpunkt** als kleinere Knöpfe, **Pausieren** und **Beenden** groß am unteren Rand. **Beenden** fragt nach („Weiter aufzeichnen“ / „Beenden“).
+  * **Fertig:** Die Tour wird von selbst hochgeladen; danach **Tour ansehen**. Ohne Netz steht dort „Wartet auf Netz – wird später gesendet“: Die Aufzeichnung bleibt auf dem Handy und wird gesendet, sobald der Server erreichbar ist. Mit **Später senden, neue Aufzeichnung** kannst du sofort weiter aufzeichnen (die App behält die letzten 10 Aufzeichnungen als Sicherung).
+* **Aufzeichnungsgerät:** Beim ersten Hochladen meldet sich das Handy von selbst unter **Meine Geräte** an („Meine Touren App · <Modell>“, mit Android- und App-Version); seine Touren gehören diesem Gerät. Du kannst es umbenennen. Übertragen werden nur Modell, Android-/App-Version und eine zufällige Kennung der Installation ([Kapitel 4.6](#k4)).
 * **Fotos aufnehmen** während der Aufzeichnung (sofort hochladen oder gesammelt am Ende).
 * **Sprachansagen** auf der Strecke, wenn du vor dem Start eine geplante Tour oder eine frühere Tour als Route wählst: Abbiegungen, Abweichung vom Weg, Restkilometer, Ziel. Sie nutzen die Sprachausgabe von Android; es gibt keine Kartennavigation mit Wegnamen.
 * **Offline-Speicher:** Was die App vom Server lädt, bleibt auf dem Handy und wird ohne Verbindung weiter angezeigt (Hinweisband „Offline“).
@@ -1119,7 +1125,7 @@ Hier findest du auffällige Touren (zum Beispiel unplausible Tempi) und Aufräum
 
 1. Die APK wird auf GitHub gebaut (Actions → „Android-App“) und bei einer Veröffentlichung an das Release angehängt. Ohne Signierschlüssel entsteht eine Debug-APK; sie lässt sich ebenfalls installieren („Aus unbekannten Quellen“ erlauben).
 2. Beim ersten Start gibst du die **Serveradresse** ein (auch `http://192.168.178.230` ist möglich). Sie lässt sich in der Verwaltung ändern.
-3. Neue Versionen lassen sich über die alte installieren; die App wird immer mit demselben Schlüssel signiert.
+3. Neue Versionen lassen sich über die alte installieren; die App wird immer mit demselben Schlüssel signiert. Die Oberfläche kommt vom Server und ist sofort aktuell; neue Funktionen der App selbst (seit 3.49.0 die Anmeldung als Aufzeichnungsgerät) brauchen die neue APK. Welche App-Version läuft, zeigt **Mehr → Info**.
 
 **Wichtig:**
 

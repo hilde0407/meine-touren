@@ -220,7 +220,8 @@ Im Tourdetail öffnet **„📍 Fotos ausrichten“** die Karte im Ausrichtungsm
 
 Im Ordner `android/` liegt eine kleine native Android-App („Hülle“) um die Weboberfläche. Sie bringt, was eine Webseite nicht kann:
 
-- **GPS-Aufzeichnung** mit Vordergrunddienst – läuft auch bei ausgeschaltetem Bildschirm. Menüpunkt „● Aufzeichnen“ (erscheint nur in der App): Sportart wählen, Start, live Zeit/Strecke/Aufstieg und Karte, Pause, Beenden, dann „Auf den Server speichern“. Wird der Server nicht erreicht, bleibt die Aufzeichnung auf dem Handy erhalten.
+- **GPS-Aufzeichnung** mit Vordergrunddienst – läuft auch bei ausgeschaltetem Bildschirm. „Aufzeichnen“ ist der mittlere Reiter und die Startseite der App: Sportart wählen, Start, live Zeit/Strecke/Aufstieg und Karte, Pausieren, Beenden (mit Rückfrage); danach wird die Tour von selbst hochgeladen. Wird der Server nicht erreicht, bleibt die Aufzeichnung auf dem Handy und wird später gesendet.
+- **Aufzeichnungsgerät:** Die App meldet sich beim ersten Hochladen unter „Meine Geräte“ an (Modell, Android- und App-Version, zufällige Installationskennung – keine Hardware-Kennung); ihre Touren gehören diesem Handy.
 - **Teilen-Menü**: GPX/FIT/TCX/ZIP und Fotos aus anderen Apps direkt an Meine Touren senden (auch über HTTP, ohne HTTPS).
 - **PDF-Downloads** landen im Download-Ordner des Handys.
 - Die Serveradresse (auch `http://192.168.178.230`) wird beim ersten Start eingegeben und lässt sich in der Verwaltung ändern.

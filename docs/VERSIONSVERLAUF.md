@@ -2,6 +2,14 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.49.0 – App: Aufzeichnen im Fokus
+
+- Android-App: „Aufzeichnen“ ist der mittlere, hervorgehobene Reiter (zeigt „Läuft“ mit Zeit, „Pausiert“, „Hochladen“) und die Startseite der App (umstellbar auf „Übersicht“).
+- Aufzeichnungsseite neu geordnet: großer Start-Knopf, Sportart als Tasten, GPS-Zustand in Worten; unterwegs Zeit und Strecke sehr groß, große Knöpfe „Pausieren“ und „Beenden“ (mit Rückfrage statt Gedrückthalten); nach dem Beenden wird von selbst hochgeladen, ohne Netz später („Später senden, neue Aufzeichnung“).
+- Die App meldet sich beim ersten Hochladen als Aufzeichnungsgerät an („Meine Geräte“: Modell, Android- und App-Version, zuletzt aufgezeichnet); die Touren gehören diesem Handy. Nur eine zufällige Installationskennung, keine Hardware-Kennung.
+- Einrichtung und „Server nicht erreichbar“ der App im aktuellen Erscheinungsbild; die Aufzeichnung lässt sich auch ohne Server starten, pausieren und beenden.
+- **Neue APK installieren**, damit die Geräteanmeldung greift; eine ältere App funktioniert weiter.
+
 ## Version 3.48.0 – Wächter, Darstellungs-Paare, Rückblick
 
 - Sicherungs-Wächter: Warnleiste unter der Kopfzeile für Administratoren, wenn die letzte Sicherung zu alt, fehlerhaft oder nicht vorhanden ist (Knöpfe „Zur Sicherung“ und „Morgen erinnern“, im Fehlerfall nicht ausblendbar).
