@@ -132,3 +132,117 @@ Object.assign(window.SL_WT, {
     },
   },
 });
+
+/* =====================  3.44.0 Fitness-Einordnung  =====================
+   Server: app/fitness.py (GET /api/fitness, PUT/DELETE /api/fitness/geburtsjahr); dort stehen Formeln, Richtwerte und Quellen. Die Oberfläche zeigt nur, was der Server liefert (Texte zu den Status-Codes,
+   Zahlen über die zentralen Formatierer). Orientierung, keine medizinische Aussage. Das Geburtsjahr bleibt privat (nur im eigenen Konto); Betrachter sehen einen Hinweis. Nur im Katalog, nicht auf den Standardseiten. */
+const FT_KLASSE = {sehr_aktiv: "Sehr aktiv für dein Alter", gut: "Gut für dein Alter", solide: "Solide für dein Alter", ausbaufaehig: "Ausbaufähig für dein Alter"};
+const FT_TREND = {up: ["↑", "Besser als in den 12 Wochen davor"], down: ["↓", "Schwächer als in den 12 Wochen davor"], flat: ["→", "Ähnlich wie in den 12 Wochen davor"]};
+const ftJahrFehler = "Bitte ein Geburtsjahr angeben (vier Ziffern).";
+function ftJahrPruefen(v) {
+  const y = new Date().getFullYear(), n = /^\d{4}$/.test(String(v).trim()) ? +v : NaN;
+  if (!Number.isFinite(n)) return ftJahrFehler;
+  return n < y - 110 || n > y - 10 ? `Das Geburtsjahr muss zwischen ${y - 110} und ${y - 10} liegen.` : "";
+}
+async function ftSpeichern(jahr) {
+  await api("/api/fitness/geburtsjahr", {method: "PUT", headers: {"content-type": "application/json"}, body: JSON.stringify({jahr: +jahr})});
+}
+function ftDialog(c, b) {
+  const y = new Date().getFullYear(), m = uiModal(`<h3>Geburtsjahr</h3><p class="mut">Nur das Jahr, nicht das Datum. Es bleibt privat: Es steht nur in deinem Konto und erscheint nie in Freigaben, Exporten oder bei anderen.</p>` +
+    `<label for="ftj">Geburtsjahr</label><input id="ftj" type="number" inputmode="numeric" min="${y - 110}" max="${y - 10}" step="1" class="w100"><p class="slerr ftfehl" id="ftfe" role="alert"></p>` +
+    `<p><button type="button" class="btn ghost sm" id="ftdel">Geburtsjahr entfernen</button></p>` +
+    `<div class="uifoot"><button type="button" class="btn ghost" id="ftx">Abbrechen</button><button type="button" class="btn" id="fts">Speichern</button></div>`);
+  const inp = m.querySelector("#ftj"), fe = m.querySelector("#ftfe"), cur = c.dataset.ftj;
+  if (cur) inp.value = cur;
+  inp.focus();
+  const go = async () => {
+    const e = ftJahrPruefen(inp.value);
+    if (e) return void (fe.textContent = e);
+    try {
+      await ftSpeichern(inp.value);
+    } catch (x) {
+      return void (fe.textContent = String(x.message || x));
+    }
+    m.remove();
+    ftMal(c, b);
+  };
+  m.querySelector("#fts").onclick = go;
+  m.querySelector("#ftx").onclick = () => m.remove();
+  m.querySelector("#ftdel").hidden = !cur;
+  m.querySelector("#ftdel").onclick = async () => {
+    try {
+      await api("/api/fitness/geburtsjahr", {method: "DELETE"});
+    } catch (x) {
+      return void (fe.textContent = String(x.message || x));
+    }
+    m.remove();
+    ftMal(c, b);
+  };
+  inp.onkeydown = e => e.key === "Enter" && (e.preventDefault(), go());
+}
+function ftTeil(name, t, detail) {
+  if (!t || t.wert == null) return `<li class="ftrow"><div class="slr1"><span>${name}</span><b class="mut">Keine Daten</b></div></li>`;
+  return `<li class="ftrow"><div class="slr1"><span>${name}</span><b>${nf(t.wert, 0)}<small class="mut"> von 100</small></b></div>${slBr(t.wert)}<p class="mut slr2 slsegs">${slSegs(detail)}</p></li>`;
+}
+const FT_INFO = [
+  "Grundlage sind deine Touren der letzten 12 Wochen (84 Tage bis heute). Der Vergleich mit dem Trend nutzt die 12 Wochen davor. Jeder Teilwert reicht von 0 bis 100 und erscheint nur, wenn die Daten dafür da sind.",
+  "Umfang: durchschnittliche Dauer deiner Touren pro Woche gegen die Empfehlung der WHO für Erwachsene (150 bis 300 Minuten Bewegung pro Woche, gilt auch ab 65 Jahren). 150 Min. entsprechen etwa 70 Punkten, 300 Min. und mehr 100 Punkten.",
+  "Regelmäßigkeit: 70 % Anteil der Wochen mit mindestens einer Tour, 30 % Gleichmäßigkeit der Touren über die Wochen.",
+  "Intensität mit Pulsdaten: Anteil der Zeit, in der dein Puls zwischen 60 und 90 % deines geschätzten Maximalpulses lag. Maximalpuls = 208 − 0,7 × Alter (Tanaka 2001). Ohne Pulsdaten: Aufstieg je Stunde gegen einen vom Alter abhängigen Richtwert (400 m pro Stunde bis 30 Jahre, je Jahr darüber 1 % weniger). Die Richtwerte sind grobe Näherungen; Gelände und Sportart beeinflussen sie stark.",
+  "Gesamtwert: Mittel der vorhandenen Teilwerte (mindestens zwei). Ab 80 sehr aktiv, ab 60 gut, ab 40 solide, darunter ausbaufähig. Der Pfeil zeigt die Änderung gegenüber den 12 Wochen davor (ab 5 Punkten Unterschied). Das Alter ergibt sich aus dem Geburtsjahr und ist auf ein Jahr genau.",
+  "Es gibt kein „Fitnessalter“ und keine Schätzung der maximalen Sauerstoffaufnahme (VO2max).",
+  "Quellen: WHO-Bewegungsempfehlung 2020 (Guidelines on physical activity and sedentary behaviour); Tanaka H., Monahan K. D., Seals D. R.: Age-predicted maximal heart rate revisited, Journal of the American College of Cardiology 2001.",
+];
+async function ftMal(c, b) {
+  if (typeof isViewer === "function" && isViewer()) return slNote(b, "Die Fitness-Einordnung gehört zum Konto des Besitzers und ist für Betrachter nicht sichtbar.");
+  const d = await slGet("/api/fitness");
+  if (!d) return slNote(b, "Die Einordnung konnte nicht geladen werden.");
+  const y = new Date().getFullYear();
+  c.dataset.ftj = d.geburtsjahr || "";
+  slBadge(c, d.status === "ok" ? `${nf(d.gesamt, 0)} von 100` : "");
+  if (d.status === "kein_geburtsjahr") {
+    b.innerHTML = `<p>Für die Einordnung deiner Aktivität brauche ich dein Geburtsjahr. Es bleibt privat: Es steht nur in deinem Konto und erscheint nie in Freigaben, Exporten oder bei anderen.</p>` +
+      `<form class="ftform" novalidate><label for="ftj0">Geburtsjahr (vier Ziffern)</label><div class="ftin"><input id="ftj0" type="number" inputmode="numeric" min="${y - 110}" max="${y - 10}" step="1"><button type="submit" class="btn">Speichern</button></div><p class="slerr ftfehl" role="alert"></p></form>` +
+      `<p class="mut">Orientierung, keine medizinische Aussage.</p>`;
+    const f = b.querySelector("form"), inp = f.querySelector("input"), fe = f.querySelector(".ftfehl");
+    f.onsubmit = async e => {
+      e.preventDefault();
+      const er = ftJahrPruefen(inp.value);
+      if (er) return void (fe.textContent = er);
+      try {
+        await ftSpeichern(inp.value);
+      } catch (x) {
+        return void (fe.textContent = String(x.message || x));
+      }
+      ftMal(c, b);
+    };
+    return;
+  }
+  const alterZ = `<p class="mut ftalter"><span>Dein Alter: ${nf(d.alter, 0)} (Jahrgang ${d.geburtsjahr})</span> <button type="button" class="ftlink" data-a="ftjahr">Geburtsjahr ändern</button></p>`,
+    info = `<details class="ftinfo"><summary>So wird gerechnet</summary>${FT_INFO.map(x => `<p class="mut">${x}</p>`).join("")}</details><p class="mut ftorient">Orientierung, keine medizinische Aussage.</p>`;
+  let kopf = "", teile = "";
+  if (d.status === "keine_touren") kopf = `<p class="slnone">Noch keine Touren: Sobald es Touren gibt, wird deine Aktivität eingeordnet.</p>`;
+  else if (d.status === "keine_aktuellen") kopf = `<p class="slnone">In den letzten 12 Wochen gab es keine Tour. Ohne aktuelle Touren lässt sich nichts einordnen.</p>`;
+  else {
+    const U = d.umfang, R = d.regel, I = d.intensitaet;
+    teile = `<ul class="slrows ftrows">${ftTeil("Umfang", U, U.wert == null ? [] : [`${fmtDauer(U.min_woche * 60)} pro Woche`, `Empfehlung der WHO: ${U.who_min}–${U.who_max} Min. pro Woche`])}` +
+      `${ftTeil("Regelmäßigkeit", R, R.wert == null ? [] : [`${nf(R.wochen_aktiv, 0)} von ${nf(R.wochen, 0)} Wochen mit Tour`])}` +
+      `${ftTeil("Intensität", I, I.wert == null ? [] : I.quelle === "puls" ? [`${nf(I.zone_pct, 0)} % der Pulszeit bei 60–90 % des Maximalpulses`, `Mittlerer Puls ${nf(I.mittel_bpm, 0)} bpm (${nf(I.mittel_pct, 0)} % des geschätzten Maximalpulses von ${nf(I.hfmax, 0)} bpm)`] : [`${nf(I.m_h, 0)} m Aufstieg je Stunde`, `Richtwert für dein Alter: ${nf(I.ref_m_h, 0)} m je Stunde`])}</ul>`;
+    if (d.status === "zu_wenig") kopf = `<p class="slnone">Zu wenig Daten für eine Einordnung: Es braucht mindestens zwei der drei Werte.</p>`;
+    else {
+      const tr = d.trend ? `<p class="mut slcmpn ftrend"><span aria-hidden="true">${FT_TREND[d.trend][0]}</span> <span>${FT_TREND[d.trend][1]}</span></p>` : `<p class="mut slcmpn ftrend">Ein Vergleich mit den 12 Wochen davor ist noch nicht möglich (zu wenig Daten).</p>`;
+      kopf = `<div class="ftkopf"><p class="ftgross"><b class="ftz">${nf(d.gesamt, 0)}</b><span class="mut"> von 100</span></p><p class="slcmp ftw">${FT_KLASSE[d.einordnung]}</p></div>${tr}`;
+    }
+  }
+  b.innerHTML = `<div class="ft">${kopf}${teile}${alterZ}${info}</div>`;
+  b.querySelector("[data-a=ftjahr]").onclick = () => ftDialog(c, b);
+}
+
+Object.assign(window.SL_WT, {
+  fitness: {
+    fam: "uebersicht", cat: "statistik", icon: "heart", name: "Fitness-Einordnung", title: () => "Fitness-Einordnung", defaults: {}, filter: {range: null}, w: "halb", seiten: ["uebersicht", "statistik"],
+    desc: "Ordnet deine Aktivität der letzten 12 Wochen in Relation zu deinem Alter ein: Umfang (Dauer pro Woche gegen die WHO-Empfehlung), Regelmäßigkeit und Intensität (Puls im Verhältnis zum geschätzten Maximalpuls, sonst Aufstieg je Stunde) mit Gesamtwert und Trend. Braucht dein Geburtsjahr, das privat bleibt. Orientierung, keine medizinische Aussage.",
+    preview: () => slPrev('<p class="slcmp">72 von 100</p><p class="slcmpn">Gut für dein Alter</p>' + slBr(72)),
+    render: ftMal,
+  },
+});

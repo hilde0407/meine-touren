@@ -2089,3 +2089,18 @@ html.mob .mapbox .tpanel{bottom:calc(53px + 86px + env(safe-area-inset-bottom))}
   .slopen:has(#slzepp:not([hidden])) #slopen,.slopen:has(#slzepp:not([hidden])) #slviews{flex:1 1 0;min-width:0;justify-content:center;white-space:nowrap}
   .slopen:has(#slzepp:not([hidden])) .slbt{overflow:hidden;text-overflow:ellipsis}
 }
+/* 3.44.0 Fitness-Einordnung */
+.ftkopf{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 16px;margin:0 0 4px}
+.ftgross{margin:0;font-size:16px}.ftz{font:700 44px/1 var(--d);font-variant-numeric:tabular-nums}
+.ftkopf .ftw{margin:0}
+.ftrows{margin:12px 0}
+.ftrow .slr1 b small{font-size:14px;font-weight:400}
+.ftalter{margin:10px 0 6px;font-size:15px}
+.ftlink{background:none;border:0;padding:0;min-height:44px;color:var(--ink);font:inherit;text-decoration:underline;cursor:pointer}
+.ftlink:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.ftinfo{margin:6px 0}.ftinfo summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
+.ftinfo p{margin:0 0 8px;font-size:14px}
+.ftorient{margin:6px 0 0;font-weight:600;font-size:15px}
+.ftform label{display:block;font-weight:600;margin:10px 0 6px}
+.ftin{display:flex;gap:10px;align-items:stretch}.ftin input{width:9em;max-width:100%}.ftin .btn{min-height:44px}
+.ftfehl{min-height:0}
