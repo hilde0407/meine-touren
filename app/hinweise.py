@@ -26,8 +26,9 @@ Regeln im Einzelnen:
   pause       Tage seit der letzten Tour (nach Sportart) mindestens so groß wie die Schwelle. Info; ab der doppelten Schwelle Hinweis.
   rekord      Längste Tour, größter Aufstieg, schnellstes Tempo (mindestens 3 km und 30 Minuten) aller Zeiten (nach Sportart, ab 5 Touren; bei Gleichstand gilt die frühere),
               die in den letzten N Tagen gefahren wurde. Info.
-  woche       Fortschritt der laufenden Woche (Montag bis Sonntag) gegen ein Wochenziel in km oder Touren. Nur mit gesetztem Ziel. Erreicht = Info; offen = Info, am Samstag und
-              Sonntag Hinweis.
+  woche       Fortschritt der laufenden Woche (Montag bis Sonntag) gegen die Wochenziele (3.45.0: Ziele mit period = week, Statistik → Ziele; „woche_ziel“ als Parameter hat
+              Vorrang). Mit „sport“ zählen nur Ziele, die eine dieser Sportarten betreffen; ein Ziel zählt die Touren seiner Sportart. Nur mit gesetztem Ziel. „daten“ = das erste
+              Ziel, „daten.ziele“ = alle. Alle erreicht = Info; offen = Info, am Samstag und Sonntag Hinweis („in Gefahr“ für die Darstellung „Nur Warnung“ des Bausteins „Ziele“).
   erholung    „Aktuell im Vergleich“ der Belastung (belastung.aktuell: 4 Wochen gegen die 12 davor) mindestens so hoch wie die Stufe UND mindestens eine Tour mit Uhr-Wert in den
               letzten 7 Tagen. Nur mit Uhr-Daten. deutlich_mehr = Warnung, mehr = Hinweis.
   sicherung   Letzte Sicherung (extras.newest_backup) älter als N Tage, oder noch keine (nur, wenn es schon Touren gibt), oder die letzte Sicherung ist fehlgeschlagen. Hinweis;
@@ -131,7 +132,7 @@ def _ziel(p, heute, rows_all):
     if doy < MIN_TAGE_ZIEL:
         return None
     gefahr = []
-    for g in db.query("SELECT id,year,sport,metric,target FROM goals WHERE year=? ORDER BY id", (jahr,)):
+    for g in db.query("SELECT id,year,sport,metric,target FROM goals WHERE year=? AND COALESCE(period,'year')='year' ORDER BY id", (jahr,)):
         if not g["target"] or g["target"] <= 0 or g["metric"] not in ("km", "up", "count", "hours"):
             continue
         sp = _ziel_sportarten(g["sport"])
@@ -218,19 +219,42 @@ def _rekord(p, heute, rows):
     return "info", {"rekorde": [best[k] for k in ("km", "hm", "tempo") if k in best], "tage": p["rekord_tage"]}
 
 
-def _woche(p, heute, rows):
-    ziel = p["woche_ziel"]
-    if not ziel or ziel <= 0:
-        return None
-    mo = heute - timedelta(days=heute.weekday())
-    inn = [r for r in rows if mo <= r["d"] <= heute]
-    ist = sum(r["km"] for r in inn) if p["woche_einheit"] == "km" else float(len(inn))
-    rest = max(0.0, ziel - ist)
+EINHEIT = {"km": "km", "count": "touren", "up": "up", "hours": "hours"}          # Messgröße eines Wochenziels → „einheit“ der Antwort
+
+
+def _woche_eins(ziel, einheit, inn, heute, mo):
+    ist = sum(r["km"] if einheit == "km" else r["hm"] if einheit == "up" else r["s"] / 3600.0 if einheit == "hours" else 1 for r in inn)
     tage_rest = 6 - heute.weekday()
     erreicht = ist >= ziel
-    stufe = "info" if erreicht or tage_rest > 1 else "hinweis"
-    return stufe, {"einheit": p["woche_einheit"], "ziel": ziel, "ist": round(ist, 2), "rest": round(rest, 2), "erreicht": erreicht, "tage_rest": tage_rest,
-                   "von": mo.isoformat(), "bis": (mo + timedelta(days=6)).isoformat()}
+    return {"einheit": einheit, "ziel": ziel, "ist": round(float(ist), 2), "rest": round(max(0.0, ziel - ist), 2), "erreicht": erreicht, "tage_rest": tage_rest,
+            "von": mo.isoformat(), "bis": (mo + timedelta(days=6)).isoformat()}
+
+
+def _woche(p, heute, rows, alle=None):
+    """3.45.0: Wochenziele stehen in den Zielen (period = week); „woche_ziel“ als Parameter gilt weiter (ältere Aufrufe) und hat Vorrang."""
+    mo = heute - timedelta(days=heute.weekday())
+    if p["woche_ziel"] and p["woche_ziel"] > 0:
+        inn = [r for r in rows if mo <= r["d"] <= heute]
+        ziele = [_woche_eins(p["woche_ziel"], p["woche_einheit"], inn, heute, mo)]
+    else:
+        ziele = []
+        for g in db.query("SELECT id,sport,metric,target FROM goals WHERE period='week' ORDER BY id"):
+            if not g["target"] or g["target"] <= 0 or g["metric"] not in EINHEIT:
+                continue
+            sp = _ziel_sportarten(g["sport"])
+            if p["sport"] and sp is not None and not sp & set(p["sport"]):
+                continue
+            inn = [r for r in (alle if alle is not None else rows) if mo <= r["d"] <= heute and (sp is None or r["sport"] in sp)]
+            z = _woche_eins(g["target"], EINHEIT[g["metric"]], inn, heute, mo)
+            z.update({"id": g["id"], "sport": g["sport"] or "", "metrik": g["metric"]})
+            ziele.append(z)
+    if not ziele:
+        return None
+    d = dict(ziele[0])
+    if not (p["woche_ziel"] and p["woche_ziel"] > 0):
+        d["ziele"] = ziele                                              # Ziele der Statistik: alle; mit Parameter (älterer Aufruf) wie bisher genau eines ohne Liste
+    stufe = "info" if all(z["erreicht"] for z in ziele) or d["tage_rest"] > 1 else "hinweis"
+    return stufe, d
 
 
 def _erholung(p, heute, _rows):
@@ -283,6 +307,8 @@ def auswertung(p, heute=None):
             continue
         if a == "ziel":
             r = _ziel(p, h, alle)                                         # ein Ziel zählt alle seine Touren, auch wenn die Sportart nur auswählt, welche Ziele gelten
+        elif a == "woche":
+            r = _woche(p, h, rows, alle)
         elif a in ("erholung", "sicherung"):
             r = _REGELN[a](p, heute, rows)
         else:

@@ -139,7 +139,14 @@ def migrate(conn):
                  "new_up REAL, new_down REAL, state TEXT, PRIMARY KEY (batch_id, tour_id))")   # Sammel-Korrektur der Höhen: Touren je Lauf (app/devquality.py, devbatch.py)
     conn.execute("CREATE TABLE IF NOT EXISTS quality_ack (tour_id TEXT PRIMARY KEY, kinds TEXT, ts INTEGER)")   # „Als geprüft markiert“ (3.16.1): Flag-Arten, die der Nutzer bei einer Tour bewusst akzeptiert hat (app/devquality.py)
     conn.execute("CREATE TABLE IF NOT EXISTS user_layout (page_key TEXT PRIMARY KEY, json TEXT, ts INTEGER)")   # „Seite anpassen“ (3.17.0): Anordnung der Abschnitte und Bausteine je Seite; die Datenbank gehört einem Benutzer, daher kein Benutzerfeld
+    if "period" not in {r["name"] for r in conn.execute("PRAGMA table_info(goals)")}:
+        conn.execute("ALTER TABLE goals ADD COLUMN period TEXT DEFAULT 'year'")     # 3.45.0: Zeitraum eines Ziels: year (Jahresziel) | week (Wochenziel, dann year = 0)
     conn.commit()
+    try:                                                                          # 3.45.0: alte Bausteine in gespeicherten Layouts umziehen, eigene Ziele in die Ziele übernehmen
+        from . import baustein_umzug
+        baustein_umzug.migrate_rows(conn)
+    except Exception:                                                             # nie das Öffnen einer Datenbank verhindern (die Oberfläche bildet alte Typen ohnehin ab)
+        conn.rollback()
 
 
 def _open(path):

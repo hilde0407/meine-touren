@@ -221,24 +221,32 @@ def api_note(tour_id: str, body: dict):
 
 
 # ---------- Ziele ----------
+# Einzige Stelle, an der Ziele gepflegt werden (Statistik → Ziele; der Baustein „Ziele“ zeigt sie überall an). 3.45.0: period = year (Jahresziel, Feld „year“) | week (Wochenziel:
+# gilt für jede Woche von Montag bis Sonntag, year = 0). Ältere Bausteine mit eigenem Ziel ziehen beim Öffnen der Datenbank hierher um (app/baustein_umzug.py).
 METRICS = {"km", "up", "count", "hours"}
 
 
 @router.get("/api/goals")
 def api_goals():
-    return db.query("SELECT * FROM goals ORDER BY year DESC, id")
+    rows = db.query("SELECT * FROM goals ORDER BY year DESC, id")
+    for r in rows:
+        r["period"] = r.get("period") or "year"
+    return rows
 
 
 @router.post("/api/goals")
 def api_goal_add(body: dict):
+    period = body.get("period") or "year"
+    if period not in ("year", "week"):
+        raise HTTPException(400, "Zeitraum des Ziels: year oder week")
     try:
-        year, target = int(body["year"]), float(body["target"])
+        year, target = (0 if period == "week" else int(body["year"])), float(body["target"])
     except (KeyError, ValueError, TypeError):
         raise HTTPException(400, "Jahr und Zielwert angeben")
     metric = body.get("metric", "km")
-    if metric not in METRICS or target <= 0:
+    if metric not in METRICS or not target > 0 or target > 1e7:
         raise HTTPException(400, "Ungültiges Ziel")
-    db.execute("INSERT INTO goals(year,sport,metric,target) VALUES(?,?,?,?)", (year, body.get("sport") or "", metric, target))
+    db.execute("INSERT INTO goals(year,sport,metric,target,period) VALUES(?,?,?,?,?)", (year, body.get("sport") or "", metric, target, period))
     return {"ok": True}
 
 

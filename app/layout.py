@@ -68,7 +68,7 @@ import time
 
 from fastapi import APIRouter, HTTPException, Request
 
-from . import db, kennzahl
+from . import baustein_umzug as umzug, db, kennzahl
 
 router = APIRouter()
 
@@ -80,10 +80,10 @@ WIDTHS = ("voll", "zweidrittel", "halb", "drittel")
 TOUR_ONLY = frozenset(("kennzahlen", "tempo", "vergleich", "pulszonen", "wetter", "fotostreifen", "notiz", "splits", "steigung", "bewegung", "durchschnitt", "jahresrang",
                        "planergebnis", "tageslicht", "gipfel", "vergleiche", "stimmung", "fotohighlights", "miniprofil", "steckbrief"))
 # 3.22.0: Bausteine, die nur auf der Statistikseite stehen (Typkennungen wie in static/js/57-bausteine-statistik.js)
-STATISTIK_ONLY = frozenset(("stmonate", "stentwicklung", "stlaengen", "sthoehe", "sttop"))
+STATISTIK_ONLY = frozenset(("stmonate", "stentwicklung", "stlaengen", "sthoehe"))                 # 3.45.0: „Top-Touren“ (sttop) ist jetzt der Baustein „Bestwerte“
 # 3.23.0: Hinweis-Bausteine (Typkennungen wie in static/js/58-bausteine-hinweise.js): nur auf Übersicht und Statistik, einige nur auf der Übersicht
-HINWEIS_TYPEN = frozenset(("hnziel", "hnmeilenstein", "hnauffaellig", "hnpause", "hnrekord", "hnwoche", "hnerholung", "hnsicherung", "hinweise"))
-HINWEIS_NUR_UEBERSICHT = frozenset(("hnauffaellig", "hnpause", "hnwoche", "hnsicherung"))
+HINWEIS_TYPEN = frozenset(("hnmeilenstein", "hnauffaellig", "hnpause", "hnrekord", "hnerholung", "hnsicherung", "hinweise"))     # 3.45.0: hnziel und hnwoche sind jetzt der Baustein „Ziele“
+HINWEIS_NUR_UEBERSICHT = frozenset(("hnauffaellig", "hnpause", "hnsicherung"))
 # 3.33.0: Bausteine der Reisen-Seiten (Typkennungen wie in static/js/61-bausteine-reise.js)
 REISE_TYPEN = frozenset(("rkennzahl", "rdiashow", "rkmtag"))
 REISEN_TYPEN = frozenset(("rnzahlen", "rnjahre"))
@@ -337,11 +337,62 @@ def _reise_cfg(typ, v):
 
 
 HINWEIS_KEYS = ("schwelle", "tage", "min", "ziel", "ausblenden", "einheit", "stufe", "arten", "snoozes", "woche_ziel", "woche_einheit")
+# 3.45.0: Bausteine „Ziele“ und „Bestwerte“ (static/js/52-bausteine-uebersicht.js), streng geprüft
+ZIELE_ENUM = {"view": ("balken", "ring", "warnung"), "zeit": ("jahr", "woche", "alle"), "year": ("cur", "last")}
+
+
+def _ziele_cfg(v):
+    """Ziele: view balken|ring|warnung, zeit jahr|woche|alle, year cur|last, schwelle 1–90, ausblenden 0–90, snoozes (Arten ziel, woche), sports, title."""
+    if not isinstance(v, dict) or len(v) > 20:
+        raise HTTPException(400, "Ungültige Konfiguration eines Bausteins")
+    out = {}
+    for k, x in v.items():
+        if k in ZIELE_ENUM:
+            if x not in ZIELE_ENUM[k]:
+                raise HTTPException(400, f"Ungültiger Wert für „{k}“ in der Konfiguration")
+            out[k] = x
+        elif k in ("schwelle", "ausblenden"):
+            out[k] = _hinweis_cfg(k, x)
+        elif k == "snoozes":
+            out[k] = _hinweis_cfg(k, x)
+            if any(not i.startswith(("ziel:", "woche:")) for i in out[k]):
+                raise HTTPException(400, "Ungültiger Wert für „snoozes“ in der Konfiguration")
+        elif k in ("sports", "title"):
+            out[k] = _known(k, x)
+        else:
+            raise HTTPException(400, f"Unbekannte Einstellung „{k}“ für diesen Baustein")
+    return out
+
+
+def _bestwerte_cfg(v):
+    """Bestwerte: n 1|3|5|10, werte [km, hm, dauer, tempo, monat] (mindestens einer), sports, range, yr, eigen, title."""
+    if not isinstance(v, dict) or len(v) > 20:
+        raise HTTPException(400, "Ungültige Konfiguration eines Bausteins")
+    out = {}
+    for k, x in v.items():
+        bad = HTTPException(400, f"Ungültiger Wert für „{k}“ in der Konfiguration")
+        if k == "n":
+            if isinstance(x, bool) or x not in umzug.BW_N:
+                raise bad
+            out[k] = x
+        elif k == "werte":
+            if not isinstance(x, list) or not x or not all(i in umzug.BW_WERTE for i in x):
+                raise bad
+            out[k] = [a for a in umzug.BW_WERTE if a in x]
+        elif k in ("sports", "range", "yr", "eigen", "title"):
+            out[k] = _known(k, x)
+        else:
+            raise HTTPException(400, f"Unbekannte Einstellung „{k}“ für diesen Baustein")
+    return out
 
 
 def _cfg(v, typ=None):
     if typ == ERINN_TYPE:
         return _erinn_cfg(v)
+    if typ == umzug.ZIELE:
+        return _ziele_cfg(v)
+    if typ == umzug.BESTWERTE:
+        return _bestwerte_cfg(v)
     if typ in ALLE_SEITEN_TYPEN:                          # 3.33.0 / 3.34.0: Bausteine der Reisen-, Fotos- und Karten-Seite (feste Auswahllisten)
         return _reise_cfg(typ, v)
     if typ == kennzahl.TYPE:                              # 3.28.0: eigene Kennzahl – nur Auswahlen aus festen Listen, streng geprüft (app/kennzahl.py)
@@ -442,8 +493,9 @@ def _mob(v, key):
     return out
 
 
-def clean(doc, key=None):
-    """Prüft ein Layout-Dokument und gibt die bereinigte Fassung zurück (HTTPException 400 bei Fehlern)."""
+def clean(doc, key=None, goals=None):
+    """Prüft ein Layout-Dokument und gibt die bereinigte Fassung zurück (HTTPException 400 bei Fehlern).
+    3.45.0: alte Bausteine werden dabei auf die neuen abgebildet (app/baustein_umzug.py); eigene Ziele alter Bausteine landen in der Liste „goals“ (falls übergeben)."""
     if not isinstance(doc, dict):
         raise HTTPException(400, "Die Anordnung muss ein JSON-Objekt sein")
     extra = set(doc) - FIELDS
@@ -480,6 +532,10 @@ def clean(doc, key=None):
                 raise HTTPException(400, "Ungültige Kennung eines Bausteins")
             if x["id"] in seen:
                 raise HTTPException(400, "Doppelte Kennung eines Bausteins")
+            typ, wcfg, g = umzug.alias(x["type"], x.get("cfg") or {})
+            if goals is not None:
+                goals.extend(g)
+            x = {"id": x["id"], "type": typ, "cfg": wcfg}
             if key in SEITEN_TYPEN:                          # 3.33.0 / 3.34.0: auf Reisen-, Fotos- und Karten-Seiten nur deren eigene Bausteine (bekannte fremde werden abgelehnt, unbekannte bleiben erlaubt)
                 fremd = TOUR_ONLY | STATISTIK_ONLY | HINWEIS_TYPEN | {kennzahl.TYPE, ERINN_TYPE} | (ALLE_SEITEN_TYPEN - SEITEN_TYPEN[key])
                 if x["type"] in fremd:
@@ -527,7 +583,8 @@ def clean(doc, key=None):
         c = doc["cfg"]
         if not isinstance(c, dict) or len(c) > 10 or not all(isinstance(k, str) and ID_RE.match(k) for k in c):
             raise HTTPException(400, "„cfg“ muss ein Objekt mit höchstens 10 Einträgen sein")
-        out["cfg"] = {k: _cfg(x, ERINN_TYPE if k == ERINN_TYPE else None) for k, x in c.items()}
+        sec = {ERINN_TYPE: ERINN_TYPE, "ziele": umzug.ZIELE, "bestwerte": umzug.BESTWERTE} if key in (None, "statistik") else {ERINN_TYPE: ERINN_TYPE}     # 3.45.0: Abschnitte „Ziele“ und „Bestwerte“ der Statistik sind Bausteine
+        out["cfg"] = {k: _cfg(x, sec.get(k)) for k, x in c.items()}
     if len(json.dumps(out, ensure_ascii=False)) > MAX_BYTES:
         raise HTTPException(400, "Die Anordnung ist zu groß")
     return out
@@ -539,7 +596,7 @@ def _name(x):
     return " ".join(x.split())
 
 
-def clean_container(doc, key=None):
+def clean_container(doc, key=None, goals=None):
     """Prüft einen Behälter mit Ansichten und gibt die bereinigte Fassung zurück."""
     extra = set(doc) - {"v", "views", "active", "rules"}
     if extra:
@@ -557,7 +614,7 @@ def clean_container(doc, key=None):
         if i in ids:
             raise HTTPException(400, "Doppelte Kennung einer Ansicht")
         ids.add(i)
-        views.append({"id": i, "name": _name(x.get("name")), "layout": clean(x.get("layout") if x.get("layout") is not None else {}, key)})
+        views.append({"id": i, "name": _name(x.get("name")), "layout": clean(x.get("layout") if x.get("layout") is not None else {}, key, goals)})
     act = doc.get("active", views[0]["id"])
     if act not in ids:
         raise HTTPException(400, "Die Standardansicht („active“) gibt es nicht")
@@ -579,11 +636,11 @@ def clean_container(doc, key=None):
     return out
 
 
-def clean_any(doc, key=None):
+def clean_any(doc, key=None, goals=None):
     """Altes Format (ein Layout-Dokument) oder Behälter mit Ansichten."""
     if isinstance(doc, dict) and "views" in doc:
-        return clean_container(doc, key)
-    return clean(doc, key)
+        return clean_container(doc, key, goals)
+    return clean(doc, key, goals)
 
 
 def normalize(stored):
@@ -634,12 +691,15 @@ def check_export(doc):
     for k in lays:
         if k not in keys:
             ignored.append(f"Unbekannter Eintrag „{str(k)[:40]}“ in den Ansichten wird ignoriert.")
+    goals = []
     for k in keys:
         try:
-            layouts[k] = clean(lays.get(k) if lays.get(k) is not None else {}, k)
+            layouts[k] = clean(lays.get(k) if lays.get(k) is not None else {}, k, goals)
             res["stats"][k] = _stats(layouts[k])
         except HTTPException as e:
             errors.append(f"{k}: {e.detail}")
+    for g in goals:                                   # 3.45.0: eigene Ziele alter Bausteine gehören dem, der exportiert hat – sie werden nicht übernommen
+        ignored.append(f"Das eigene Ziel eines älteren Bausteins ({umzug.goal_text(g)}) wird nicht übernommen. Ziele legst du in der Statistik unter „Ziele“ fest.")
     for k in set(doc) - {"format", "format_version", "app_version", "page", "name", "exported", "layouts"}:
         ignored.append(f"Unbekanntes Feld „{str(k)[:40]}“ wird ignoriert.")
     res["ok"] = not errors
@@ -714,7 +774,8 @@ async def put_layout(page_key: str, request: Request):
         body = body["layout"]                          # {"layout": {...}} wird wie das Dokument selbst angenommen
     if len(raw) > (MAX_TOTAL + 20000 if isinstance(body, dict) and "views" in body else MAX_BYTES * 2):
         raise HTTPException(413, "Die Anordnung ist zu groß")
-    lay = clean_any(body, page_key)
+    goals = []
+    lay = clean_any(body, page_key, goals)
     mine = kennzahl.zaehle(lay)
     if mine:                                           # 3.28.0: höchstens so viele eigene Kennzahlen je Benutzer (über alle Seiten und Ansichten, ohne die Seite, die gerade ersetzt wird)
         for k in KEYS:
@@ -729,6 +790,8 @@ async def put_layout(page_key: str, request: Request):
     ts = int(time.time())
     db.execute("INSERT INTO user_layout(page_key,json,ts) VALUES(?,?,?) ON CONFLICT(page_key) DO UPDATE SET json=excluded.json, ts=excluded.ts",
                (page_key, json.dumps(lay, ensure_ascii=False, separators=(",", ":")), ts))
+    if goals:                                          # 3.45.0: eigenes Ziel eines alten Bausteins (z. B. aus einem älteren Zwischenspeicher) in die Ziele übernehmen
+        umzug.add_goals(goals, db.execute, db.one)
     return {"ok": True, "key": page_key, "layout": lay, "ts": ts}
 
 
