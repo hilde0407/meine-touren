@@ -255,7 +255,7 @@ function collStats(ts) {
       h = sm(t => t.h);
     return `<tr><td>${col ? `<i class="dot" style="background:${col}"></i>` : ""}${esc(name)}</td><td>${a.length}</td><td>${fmtKm(km, {summe: true, einheit: false})}</td><td>${nf(sm(t => t.up_m), 0)}</td><td>${nf(sm(t => t.down_m), 0)}</td><td>${fmtDauer(h * 3600, {summe: true})}</td><td>${h > 0 ? nf(km / h, 1) : "–"}</td><td>${fmtKm(Math.max(...a.map(t => t.km || 0)), {einheit: false})}</td></tr>`;
   };
-  return `<div class="sec"><h2>Statistik nach Sportart</h2></div><div class="tblw"><table class="cstat"><thead><tr><th>Sportart</th><th>Touren</th><th>km</th><th>Aufstieg m</th><th>Abstieg m</th><th>Stunden</th><th>Ø km/h</th><th>Längste km</th></tr></thead><tbody>${keys.map(k => row(sName(k), typeof sCol === "function" ? sCol(k) : "", g[k])).join("")}</tbody>${keys.length > 1 ? `<tfoot>${row("Gesamt", "", ts).replace(/<td>/g, "<td><b>").replace(/<\/td>/g, "</b></td>")}</tfoot>` : ""}</table></div>`;
+  return `<div class="sec"><h2>Statistik nach Sportart</h2></div><div class="tblw"><table class="cstat"><thead><tr><th>Sportart</th><th>Touren</th><th>Strecke (km)</th><th>Aufstieg (m)</th><th>Abstieg (m)</th><th>Dauer</th><th>Ø km/h</th><th>Längste (km)</th></tr></thead><tbody>${keys.map(k => row(sName(k), typeof sCol === "function" ? sCol(k) : "", g[k])).join("")}</tbody>${keys.length > 1 ? `<tfoot>${row("Gesamt", "", ts).replace(/<td>/g, "<td><b>").replace(/<\/td>/g, "</b></td>")}</tfoot>` : ""}</table></div>`;
 }
 /* 3.33.0: Die Abschnitte tragen data-rs; bei einer Reise (opt.reise = die Reise) steckt rsFrame() (62-reiseseiten.js) sie sofort, noch vor dem Zeichnen der Karte, in Karten der anpassbaren Seite. */
 async function collView(title, sub, ids, back, opt = {}) {

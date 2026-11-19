@@ -294,7 +294,7 @@ Object.assign(window.SL_WT, {
   rekorde: {
     fam: "uebersicht", cat: "rueck", icon: "trend", name: "Rekorde", title: () => "Rekorde", filter: {range: "all"}, defaults: {},
     fields: [{kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}],
-    desc: "Längste Tour, meiste Aufstieg und schnellstes Tempo, mit Link zur Tour.",
+    desc: "Längste Tour, größter Aufstieg und schnellstes Tempo, mit Link zur Tour.",
     preview: () => slPvTiles([["32,4 km", "Längste Tour"], ["1.480 m", "Größter Aufstieg"]]),
     render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");

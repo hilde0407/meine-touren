@@ -92,7 +92,7 @@ Object.assign(window.SL_WT, {
   },
   sthoehe: {
     fam: "statistik", cat: "statistik", icon: "prof", name: "Aufstieg im Jahr", title: () => "Aufstieg im Jahresverlauf", multi: true, filter: {range: "year"}, w: "halb", seiten: ["statistik"],
-    desc: "Wie sich deine Aufstieg im Lauf eines Jahres aufsummieren, als Linie, dazu das Vorjahr gestrichelt. Gezeigt wird das gewählte Jahr, sonst das jüngste Jahr mit Touren.",
+    desc: "Wie sich dein Aufstieg im Lauf eines Jahres aufsummiert, als Linie, dazu das Vorjahr gestrichelt. Gezeigt wird das gewählte Jahr, sonst das jüngste Jahr mit Touren.",
     fields: [{kind: "sports"}, {kind: "range", def: "year", opts: ["year", "y"], label: "Jahr"}, {kind: "title"}],
     preview: () => slPvLine([40, 38, 34, 30, 24, 20, 12, 6]),
     render(c, b, cfg) {

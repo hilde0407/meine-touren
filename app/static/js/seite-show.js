@@ -79,7 +79,7 @@ fetch("/api/public/" + tok).then(r => { if (!r.ok) throw 0; return r.json(); }).
   T = t; ids = t.photos || []; TS = t.photo_t || []; NM = t.photo_names || [];
   document.title = t.name; $("h").textContent = t.name;
   if (t.kind === "diashow") $("sub").textContent = ids.length + " Fotos";          // Jahres-/Gesamt-Diashow: nur Fotos, kein Tourdatum, keine Strecke
-  else $("sub").textContent = new Date(t.date).toLocaleDateString("de-DE", {day: "numeric", month: "long", year: "numeric"}) + " · " + nf(t.km) + " km · " + nf(t.up_m, 0) + " m aufwärts";
+  else $("sub").textContent = new Date(t.date).toLocaleDateString("de-DE", {day: "numeric", month: "long", year: "numeric"}) + " · " + nf(t.km) + " km · Aufstieg " + nf(t.up_m, 0) + " m";
   if (!ids.length) { $("st").innerHTML = `<div class="err">${t.kind === "diashow" ? "Zu dieser Diashow gibt es keine Fotos." : "Zu dieser Tour gibt es keine Fotos."}</div>`; $("prog").style.display = "none"; return; }
   if (t.coords.length < 2) $("mp").style.display = "none";
   show(0); bars();

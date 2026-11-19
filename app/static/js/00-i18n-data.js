@@ -14,8 +14,8 @@ Mount Everest bergauf|en montée du mont Everest
 unterwegs|en route
 längste Serie|plus longue série
 Längste:|Plus long :
-· Meiste Höhenmeter:|· Plus fort dénivelé :
-Meiste Höhenmeter:|Plus fort dénivelé :
+· Größter Aufstieg:|· Plus grand dénivelé positif :
+Größter Aufstieg:|Plus grand dénivelé positif :
 gegenüber|par rapport à
 Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Gruppen legst du mit Tags an.|Aucun voyage détecté (il faut au moins deux parcours consécutifs à plus de 60 km de votre point de départ habituel). Créez vos propres groupes avec des tags.
 in der Tour über „🏷 Tags“ vergeben|à attribuer dans le parcours via « 🏷 Tags »
@@ -119,7 +119,7 @@ Kilometer|Kilomètres
 Meter aufwärts|Mètres de montée
 Unterwegs|En chemin
 Sportarten|Sports
-Meiste Höhenmeter|Plus fort dénivelé
+Größter Aufstieg|Plus grand dénivelé positif
 Längste Dauer|Durée la plus longue
 Alle Jahre|Toutes les années
 Alle Regionen|Toutes les régions
@@ -138,7 +138,7 @@ Tage|Jours
 Jetzt sichern|Sauvegarder maintenant
 Entfernen|Retirer
 Mögliche Duplikate|Doublons possibles
-Auffällige Höhenmeter|Dénivelé suspect
+Auffälliger Aufstieg|Dénivelé positif suspect
 lokal löschen|supprimer localement
 Unplausible Touren|Parcours invraisemblables
 Mehr|Plus
@@ -159,7 +159,7 @@ pro Tour im Schnitt|par parcours en moyenne
 Stärkster Monat|Meilleur mois
 stärkster Monat|meilleur mois
 Ein Klick auf einen Balken öffnet das Jahr.|Un clic sur une barre ouvre l’année.
-Kilometer im Jahresverlauf|Kilomètres au fil des années
+Strecke im Jahresverlauf|Distance au fil des années
 Längste Tour|Plus long parcours
 Keine Touren|Aucun parcours
 An diesem Tag|Ce jour-là
@@ -233,7 +233,7 @@ Fotos importieren …|Importer des photos …
 Bildeinstellungen|Réglages des images
 Code einlösen|Valider le code
 Zepp-Import starten|Lancer l’import Zepp
-Höhenmeter neu berechnen|Recalculer le dénivelé
+Aufstieg neu berechnen|Recalculer le dénivelé
 Token testen|Tester le jeton
 Datum|Date
 Sport|Sport
@@ -250,20 +250,20 @@ Einstellungen speichern|Enregistrer les réglages
 Token funktioniert ✓|Le jeton fonctionne ✓
 Ziel hinzufügen|Ajouter un objectif
 alle Sportarten|tous les sports
-Alle Aktivitäten|Toutes les activités
+Alle Sportarten|Tous les sports
 Rekorde|Records
 Tage mit Touren|Jours avec parcours
 Wochen|Semaines
-Bestwerte gesamt|Records globaux
+Rekorde gesamt|Records globaux
 Höchste Punkte|Points les plus hauts
 Nach Wochentag|Par jour de la semaine
 Je Sportart|Par sport
 ‹ Übersicht|‹ Aperçu
 Drucken / als PDF speichern|Imprimer / enregistrer en PDF
 Mein Tourenjahr|Mon année en parcours
-Höhenmeter|Dénivelé
+Aufstieg|Dénivelé positif
 Tage unterwegs|Jours en route
-Kilometer pro Monat|Kilomètres par mois
+Strecke pro Monat|Distance par mois
 Die fünf längsten Touren|Les cinq plus longs parcours
 Fotos des Jahres|Photos de l’année
 🛰 3D-Flug|🛰 Vol 3D
@@ -275,7 +275,7 @@ Was ist neu?|Nouveautés
 Jetzt prüfen|Vérifier maintenant
 Auf GitHub ansehen|Voir sur GitHub
 Sicherung|Sauvegarde
-Backup jetzt herunterladen|Télécharger la sauvegarde maintenant
+Sicherung jetzt herunterladen|Télécharger la sauvegarde maintenant
 Zugriffsschutz|Protection d’accès
 ✓ Passwortschutz ist aktiv.|✓ La protection par mot de passe est active.
 Heatmap|Carte de chaleur
@@ -343,7 +343,7 @@ Keine Fotos.|Aucune photo.
 Alben & Tags|Albums et tags
 Noch keine Tags vergeben.|Aucun tag attribué pour l’instant.
 Leistung über die Jahre|Performance au fil des ans
-Höhenmeter pro Stunde|Dénivelé par heure
+Aufstieg pro Stunde|Dénivelé positif par heure
 Wetter|Météo
 Extreme & Regen|Extrêmes et pluie
 Wärmste Tour|Parcours le plus chaud
@@ -428,7 +428,7 @@ Letzte Tour|Dernier parcours
 Uhr|
 Wandern, Radfahren|Randonnée, cyclisme
 Komoot-Zugang|Accès Komoot
-Letztes Backup|Dernière sauvegarde
+Letzte Sicherung|Dernière sauvegarde
 Datenbank|Base de données
 Freier Speicher|Espace libre
 Touren ohne Strecke|Parcours sans tracé
@@ -491,7 +491,7 @@ Zustand der App, Updates, Protokoll und Selbsttest.|État de l’application, mi
 Woher deine Touren kommen: Komoot, Zepp, Garmin, Suunto, Dateien – und wohin sie hochgeladen werden dürfen (Strava). Dazu Wanderführer.|D’où viennent vos parcours : Komoot, Zepp, Garmin, Suunto, fichiers – et où ils peuvent être téléversés (Strava). Plus les guides de randonnée.
 Fotobibliothek, Import und Eingangsordner.|Photothèque, import et dossier d’entrée.
 Tägliche Aktualisierung und Benachrichtigungen.|Mise à jour quotidienne et notifications.
-Backups, Zugriffsschutz und Offline-Nutzung.|Sauvegardes, protection d’accès et utilisation hors ligne.
+Sicherungen, Zugriffsschutz und Offline-Nutzung.|Sauvegardes, protection d’accès et utilisation hors ligne.
 🧹 Unbenutzte Fotos aufräumen …|🧹 Nettoyer les photos inutilisées …
 Fotos löschen, die keiner Tour zugeordnet sind|Supprimer les photos non rattachées à un parcours
 Unbenutzte Fotos aufräumen|Nettoyer les photos inutilisées
@@ -504,7 +504,7 @@ Höchstes Tempo|Vitesse maximale
 Pausen|Pauses
 bergauf / bergab|montée / descente
 Abfahrt|Descente
-Abfahrtshöhenmeter|Dénivelé négatif
+Abstieg|Dénivelé négatif
 steilster Abschnitt|passage le plus raide
 der Strecke über 30°|du parcours à plus de 30°
 Gehzeit|Temps de marche
@@ -589,7 +589,7 @@ Das Passwort braucht mindestens 6 Zeichen.|Le mot de passe doit comporter au moi
 Tour planen|Planifier une sortie
 🗺 Tour planen|🗺 Planifier une sortie
 🗺 Planen|🗺 Planifier
-Punkte in die Karte klicken oder eine GPX-Datei laden – Länge, Höhenmeter und Zeit nach deinem Tempo|Cliquez des points sur la carte ou chargez un fichier GPX – longueur, dénivelé et durée selon votre rythme
+Punkte in die Karte klicken oder eine GPX-Datei laden – Länge, Aufstieg und Zeit nach deinem Tempo|Cliquez des points sur la carte ou chargez un fichier GPX – longueur, dénivelé positif et durée selon votre rythme
 Name der Planung|Nom de la planification
 GPX laden …|Charger un GPX …
 Aus Wanderführer laden …|Charger depuis un guide …
@@ -619,15 +619,15 @@ Eigener BRouter auf diesem Server|BRouter personnel sur ce serveur
 Anderer BRouter-Server im Netz|Autre serveur BRouter du réseau
 BRouter-Adresse|Adresse BRouter
 Verbindung testen|Tester la connexion
-Statistik nach Aktivität|Statistiques par activité
-Aktivität|Activité
-Aufstieg m|Montée m
-Abstieg m|Descente m
+Statistik nach Sportart|Statistiques par sport
+Sportart|Sport
+Aufstieg m|Dénivelé positif m
+Abstieg m|Dénivelé négatif m
 Stunden|Heures
 Ø km/h|Ø km/h
 Längste km|Plus longue km
 Gesamt|Total
-Abstieg|Descente
+Abstieg|Dénivelé négatif
 ✎ Reise bearbeiten|✎ Modifier le voyage
 Reise bearbeiten|Modifier le voyage
 Name und Zeitraum der automatisch erkannten Reise. Ein anderer Zeitraum nimmt alle Touren dieser Tage auf (auch solche, die nicht weit von zu Hause waren) bzw. lässt Touren außerhalb weg.|Nom et période du voyage détecté automatiquement. Une autre période inclut toutes les sorties de ces jours (même proches de chez vous) et exclut les autres.
@@ -659,8 +659,8 @@ Mount Everest bergauf|subiendo el Everest
 unterwegs|de ruta
 längste Serie|racha más larga
 Längste:|Más larga:
-· Meiste Höhenmeter:|· Mayor desnivel:
-Meiste Höhenmeter:|Mayor desnivel:
+· Größter Aufstieg:|· Mayor desnivel positivo:
+Größter Aufstieg:|Mayor desnivel positivo:
 gegenüber|respecto a
 Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Gruppen legst du mit Tags an.|No se detectó ningún viaje (hacen falta al menos dos rutas seguidas a más de 60 km de tu punto de salida habitual). Crea tus propios grupos con etiquetas.
 in der Tour über „🏷 Tags“ vergeben|se asignan en la ruta con «🏷 Etiquetas»
@@ -764,7 +764,7 @@ Kilometer|Kilómetros
 Meter aufwärts|Metros de subida
 Unterwegs|De camino
 Sportarten|Deportes
-Meiste Höhenmeter|Mayor desnivel
+Größter Aufstieg|Mayor desnivel positivo
 Längste Dauer|Mayor duración
 Alle Jahre|Todos los años
 Alle Regionen|Todas las regiones
@@ -783,7 +783,7 @@ Tage|Días
 Jetzt sichern|Hacer copia ahora
 Entfernen|Quitar
 Mögliche Duplikate|Posibles duplicados
-Auffällige Höhenmeter|Desnivel sospechoso
+Auffälliger Aufstieg|Desnivel positivo sospechoso
 lokal löschen|eliminar localmente
 Unplausible Touren|Rutas inverosímiles
 Mehr|Más
@@ -804,7 +804,7 @@ pro Tour im Schnitt|por ruta de media
 Stärkster Monat|Mejor mes
 stärkster Monat|mejor mes
 Ein Klick auf einen Balken öffnet das Jahr.|Un clic en una barra abre el año.
-Kilometer im Jahresverlauf|Kilómetros a lo largo de los años
+Strecke im Jahresverlauf|Distancia a lo largo de los años
 Längste Tour|Ruta más larga
 Keine Touren|Sin rutas
 An diesem Tag|Un día como hoy
@@ -878,7 +878,7 @@ Fotos importieren …|Importar fotos …
 Bildeinstellungen|Ajustes de imagen
 Code einlösen|Canjear código
 Zepp-Import starten|Iniciar importación de Zepp
-Höhenmeter neu berechnen|Recalcular desnivel
+Aufstieg neu berechnen|Recalcular desnivel
 Token testen|Probar token
 Datum|Fecha
 Sport|Deporte
@@ -895,20 +895,20 @@ Einstellungen speichern|Guardar ajustes
 Token funktioniert ✓|El token funciona ✓
 Ziel hinzufügen|Añadir objetivo
 alle Sportarten|todos los deportes
-Alle Aktivitäten|Todas las actividades
+Alle Sportarten|Todos los deportes
 Rekorde|Récords
 Tage mit Touren|Días con rutas
 Wochen|Semanas
-Bestwerte gesamt|Mejores marcas totales
+Rekorde gesamt|Récords totales
 Höchste Punkte|Puntos más altos
 Nach Wochentag|Por día de la semana
 Je Sportart|Por deporte
 ‹ Übersicht|‹ Resumen
 Drucken / als PDF speichern|Imprimir / guardar como PDF
 Mein Tourenjahr|Mi año en rutas
-Höhenmeter|Desnivel
+Aufstieg|Desnivel positivo
 Tage unterwegs|Días de ruta
-Kilometer pro Monat|Kilómetros por mes
+Strecke pro Monat|Distancia por mes
 Die fünf längsten Touren|Las cinco rutas más largas
 Fotos des Jahres|Fotos del año
 🛰 3D-Flug|🛰 Vuelo 3D
@@ -920,7 +920,7 @@ Was ist neu?|¿Qué hay de nuevo?
 Jetzt prüfen|Comprobar ahora
 Auf GitHub ansehen|Ver en GitHub
 Sicherung|Copia de seguridad
-Backup jetzt herunterladen|Descargar copia de seguridad ahora
+Sicherung jetzt herunterladen|Descargar copia de seguridad ahora
 Zugriffsschutz|Protección de acceso
 ✓ Passwortschutz ist aktiv.|✓ La protección con contraseña está activa.
 Heatmap|Mapa de calor
@@ -988,7 +988,7 @@ Keine Fotos.|Sin fotos.
 Alben & Tags|Álbumes y etiquetas
 Noch keine Tags vergeben.|Aún no se han asignado etiquetas.
 Leistung über die Jahre|Rendimiento a lo largo de los años
-Höhenmeter pro Stunde|Desnivel por hora
+Aufstieg pro Stunde|Desnivel positivo por hora
 Wetter|Tiempo
 Extreme & Regen|Extremos y lluvia
 Wärmste Tour|Ruta más cálida
@@ -1073,7 +1073,7 @@ Letzte Tour|Última ruta
 Uhr|
 Wandern, Radfahren|Senderismo, ciclismo
 Komoot-Zugang|Acceso a Komoot
-Letztes Backup|Última copia de seguridad
+Letzte Sicherung|Última copia de seguridad
 Datenbank|Base de datos
 Freier Speicher|Espacio libre
 Touren ohne Strecke|Rutas sin trazado
@@ -1136,7 +1136,7 @@ Zustand der App, Updates, Protokoll und Selbsttest.|Estado de la aplicación, ac
 Woher deine Touren kommen: Komoot, Zepp, Garmin, Suunto, Dateien – und wohin sie hochgeladen werden dürfen (Strava). Dazu Wanderführer.|De dónde vienen tus rutas: Komoot, Zepp, Garmin, Suunto, archivos – y adónde pueden subirse (Strava). Además, guías de senderismo.
 Fotobibliothek, Import und Eingangsordner.|Biblioteca de fotos, importación y carpeta de entrada.
 Tägliche Aktualisierung und Benachrichtigungen.|Actualización diaria y notificaciones.
-Backups, Zugriffsschutz und Offline-Nutzung.|Copias de seguridad, protección de acceso y uso sin conexión.
+Sicherungen, Zugriffsschutz und Offline-Nutzung.|Copias de seguridad, protección de acceso y uso sin conexión.
 🧹 Unbenutzte Fotos aufräumen …|🧹 Limpiar fotos sin usar …
 Fotos löschen, die keiner Tour zugeordnet sind|Eliminar fotos no asignadas a ninguna ruta
 Unbenutzte Fotos aufräumen|Limpiar fotos sin usar
@@ -1149,7 +1149,7 @@ Höchstes Tempo|Velocidad máxima
 Pausen|Pausas
 bergauf / bergab|subida / bajada
 Abfahrt|Bajada
-Abfahrtshöhenmeter|Desnivel de bajada
+Abstieg|Desnivel negativo
 steilster Abschnitt|tramo más empinado
 der Strecke über 30°|del recorrido a más de 30°
 Gehzeit|Tiempo de marcha
@@ -1234,7 +1234,7 @@ Das Passwort braucht mindestens 6 Zeichen.|La contraseña necesita al menos 6 ca
 Tour planen|Planificar una ruta
 🗺 Tour planen|🗺 Planificar una ruta
 🗺 Planen|🗺 Planificar
-Punkte in die Karte klicken oder eine GPX-Datei laden – Länge, Höhenmeter und Zeit nach deinem Tempo|Haz clic en el mapa o carga un GPX: longitud, desnivel y tiempo según tu ritmo
+Punkte in die Karte klicken oder eine GPX-Datei laden – Länge, Aufstieg und Zeit nach deinem Tempo|Haz clic en el mapa o carga un GPX: longitud, desnivel positivo y tiempo según tu ritmo
 Name der Planung|Nombre de la planificación
 GPX laden …|Cargar GPX …
 Aus Wanderführer laden …|Cargar desde una guía …
@@ -1264,15 +1264,15 @@ Eigener BRouter auf diesem Server|BRouter propio en este servidor
 Anderer BRouter-Server im Netz|Otro servidor BRouter en la red
 BRouter-Adresse|Dirección de BRouter
 Verbindung testen|Probar conexión
-Statistik nach Aktivität|Estadísticas por actividad
-Aktivität|Actividad
-Aufstieg m|Ascenso m
-Abstieg m|Descenso m
+Statistik nach Sportart|Estadísticas por deporte
+Sportart|Deporte
+Aufstieg m|Desnivel positivo m
+Abstieg m|Desnivel negativo m
 Stunden|Horas
 Ø km/h|Ø km/h
 Längste km|Más larga km
 Gesamt|Total
-Abstieg|Descenso
+Abstieg|Desnivel negativo
 ✎ Reise bearbeiten|✎ Editar viaje
 Reise bearbeiten|Editar viaje
 Name und Zeitraum der automatisch erkannten Reise. Ein anderer Zeitraum nimmt alle Touren dieser Tage auf (auch solche, die nicht weit von zu Hause waren) bzw. lässt Touren außerhalb weg.|Nombre y período del viaje detectado automáticamente. Otro período incluye todas las rutas de esos días (también las cercanas a casa) y excluye las demás.

@@ -653,7 +653,8 @@ async def api_record_upload(request: Request):
             jobs.start("Fotos der Aufzeichnung", sync.import_inbox)        # Fotos aus der App, die noch im Eingang liegen
     except Exception:  # noqa
         pass
-    more2.notify_event(f"Neue Tour gespeichert: {t['name']} ({(t['dist_m'] or 0) / 1000:.1f} km, {round(t['up_m'] or 0)} m aufwärts)", "Neue Tour")
+    km_txt = f"{(t['dist_m'] or 0) / 1000:.1f}".replace(".", ",")
+    more2.notify_event(f"Neue Tour gespeichert: {t['name']} ({km_txt} km, Aufstieg {round(t['up_m'] or 0)} m)", "Neue Tour")
     return {"id": t["id"], "dup": False}
 
 

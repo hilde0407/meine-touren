@@ -589,13 +589,7 @@ VIEWS.map = async () => {
     const a = TOURS.filter(t => (!y || t.y === y) && !o.has(t.sport) && cleanPts(routes[t.id]).some(p => b.contains(p)));
     const md = document.createElement("div");
     md.className = "modal mbxfen";
-    md.innerHTML = `<div class="mbox" role="dialog" aria-modal="true" aria-label="Im Kartenausschnitt" tabindex="-1"><div class="sec m0-0-10"><h2>Im Kartenausschnitt</h2><span class="sub">${a.length} Touren, ${nf(
-      a.reduce((c, t) => c + t.km, 0),
-      0
-    )} km, ${nf(
-      a.reduce((c, t) => c + (t.up_m || 0), 0),
-      0
-    )} m auf</span></div>
+    md.innerHTML = `<div class="mbox" role="dialog" aria-modal="true" aria-label="Im Kartenausschnitt" tabindex="-1"><div class="sec m0-0-10"><h2>Im Kartenausschnitt</h2><span class="sub">${a.length} Touren, ${fmtKm(a.reduce((c, t) => c + t.km, 0), {summe: true})} · ${fmtAuf(a.reduce((c, t) => c + (t.up_m || 0), 0))}</span></div>
       <div class="tl">${a.slice(0, 300).map(tourRow).join("") || '<div class="empty">Keine Touren in diesem Ausschnitt. Zoome heraus oder verschiebe die Karte.</div>'}</div>
       <div class="row jce mt14"><button class="btn" id="mbc">Schließen</button></div></div>`;
     const keys = e => {

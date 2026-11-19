@@ -59,8 +59,8 @@ Mount Everest bergauf|up Mount Everest
 unterwegs|on the road
 längste Serie|longest streak
 Längste:|Longest:
-· Meiste Höhenmeter:|· Most elevation:
-Meiste Höhenmeter:|Most elevation:
+· Größter Aufstieg:|· Greatest ascent:
+Größter Aufstieg:|Greatest ascent:
 gegenüber|compared with
 Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Gruppen legst du mit Tags an.|No trips detected (at least two tours in a row, more than 60 km from your usual starting point, are needed). Create your own groups with tags.
 in der Tour über „🏷 Tags“ vergeben|assign in the tour via “🏷 Tags”
@@ -164,7 +164,7 @@ Kilometer|Kilometres
 Meter aufwärts|Metres up
 Unterwegs|On the road
 Sportarten|Sports
-Meiste Höhenmeter|Most elevation
+Größter Aufstieg|Greatest ascent
 Längste Dauer|Longest duration
 Alle Jahre|All years
 Alle Regionen|All regions
@@ -183,7 +183,7 @@ Tage|Days
 Jetzt sichern|Back up now
 Entfernen|Remove
 Mögliche Duplikate|Possible duplicates
-Auffällige Höhenmeter|Unusual elevation
+Auffälliger Aufstieg|Unusual ascent
 lokal löschen|delete locally
 Unplausible Touren|Implausible tours
 Mehr|More
@@ -204,7 +204,7 @@ pro Tour im Schnitt|per tour on average
 Stärkster Monat|Strongest month
 stärkster Monat|strongest month
 Ein Klick auf einen Balken öffnet das Jahr.|Click a bar to open that year.
-Kilometer im Jahresverlauf|Kilometres over the years
+Strecke im Jahresverlauf|Distance over the years
 Längste Tour|Longest tour
 Keine Touren|No tours
 An diesem Tag|On this day
@@ -278,7 +278,7 @@ Fotos importieren …|Import photos …
 Bildeinstellungen|Image settings
 Code einlösen|Redeem code
 Zepp-Import starten|Start Zepp import
-Höhenmeter neu berechnen|Recalculate elevation
+Aufstieg neu berechnen|Recalculate ascent
 Token testen|Test token
 Datum|Date
 Sport|Sport
@@ -304,20 +304,20 @@ Einstellungen speichern|Save settings
 Token funktioniert ✓|Token works ✓
 Ziel hinzufügen|Add goal
 alle Sportarten|all sports
-Alle Aktivitäten|All activities
+Alle Sportarten|All sports
 Rekorde|Records
 Tage mit Touren|Days with tours
 Wochen|Weeks
-Bestwerte gesamt|Overall bests
+Rekorde gesamt|Overall records
 Höchste Punkte|Highest points
 Nach Wochentag|By weekday
 Je Sportart|By sport
 ‹ Übersicht|‹ Overview
 Drucken / als PDF speichern|Print / save as PDF
 Mein Tourenjahr|My year in tours
-Höhenmeter|Elevation gain
+Aufstieg|Ascent
 Tage unterwegs|Days out
-Kilometer pro Monat|Kilometres per month
+Strecke pro Monat|Distance per month
 Die fünf längsten Touren|The five longest tours
 Fotos des Jahres|Photos of the year
 🛰 3D-Flug|🛰 3D flight
@@ -329,7 +329,7 @@ Was ist neu?|What's new?
 Jetzt prüfen|Check now
 Auf GitHub ansehen|View on GitHub
 Sicherung|Backup
-Backup jetzt herunterladen|Download backup now
+Sicherung jetzt herunterladen|Download backup now
 Zugriffsschutz|Access protection
 ✓ Passwortschutz ist aktiv.|✓ Password protection is active.
 Heatmap|Heatmap
@@ -397,7 +397,7 @@ Keine Fotos.|No photos.
 Alben & Tags|Albums & tags
 Noch keine Tags vergeben.|No tags assigned yet.
 Leistung über die Jahre|Performance over the years
-Höhenmeter pro Stunde|Elevation gain per hour
+Aufstieg pro Stunde|Ascent per hour
 Wetter|Weather
 Extreme & Regen|Extremes & rain
 Wärmste Tour|Warmest tour
@@ -478,7 +478,7 @@ Letzte Tour|Latest tour
 Uhr|
 Wandern, Radfahren|Hiking, cycling
 Komoot-Zugang|Komoot access
-Letztes Backup|Last backup
+Letzte Sicherung|Last backup
 Datenbank|Database
 Freier Speicher|Free space
 Tours ohne Strecke|Tours without track
@@ -543,7 +543,7 @@ Zustand der App, Updates, Protokoll und Selbsttest.|App status, updates, log and
 Woher deine Touren kommen: Komoot, Zepp, Garmin, Suunto, Dateien – und wohin sie hochgeladen werden dürfen (Strava). Dazu Wanderführer.|Where your tours come from: Komoot, Zepp, Garmin, Suunto, files – and where they may be uploaded (Strava). Plus hiking guides.
 Fotobibliothek, Import und Eingangsordner.|Photo library, import and inbox folder.
 Tägliche Aktualisierung und Benachrichtigungen.|Daily update and notifications.
-Backups, Zugriffsschutz und Offline-Nutzung.|Backups, access protection and offline use.
+Sicherungen, Zugriffsschutz und Offline-Nutzung.|Backups, access protection and offline use.
 🧹 Unbenutzte Fotos aufräumen …|🧹 Clean up unused photos …
 Fotos löschen, die keiner Tour zugeordnet sind|Delete photos that are not assigned to any tour
 Unbenutzte Fotos aufräumen|Clean up unused photos
@@ -556,7 +556,7 @@ Höchstes Tempo|Top speed
 Pausen|Breaks
 bergauf / bergab|uphill / downhill
 Abfahrt|Descent
-Abfahrtshöhenmeter|Descent (metres)
+Abstieg|Descent
 steilster Abschnitt|steepest section
 der Strecke über 30°|of the route over 30°
 Gehzeit|Walking time
@@ -641,7 +641,7 @@ Das Passwort braucht mindestens 6 Zeichen.|The password needs at least 6 charact
 Tour planen|Plan a tour
 🗺 Tour planen|🗺 Plan a tour
 🗺 Planen|🗺 Plan
-Punkte in die Karte klicken oder eine GPX-Datei laden – Länge, Höhenmeter und Zeit nach deinem Tempo|Click points on the map or load a GPX file – length, ascent and time based on your own pace
+Punkte in die Karte klicken oder eine GPX-Datei laden – Länge, Aufstieg und Zeit nach deinem Tempo|Click points on the map or load a GPX file – length, ascent and time based on your own pace
 Name der Planung|Name of the plan
 GPX laden …|Load GPX …
 Aus Wanderführer laden …|Load from hiking guide …
@@ -671,8 +671,8 @@ Eigener BRouter auf diesem Server|Own BRouter on this server
 Anderer BRouter-Server im Netz|Other BRouter server on the network
 BRouter-Adresse|BRouter address
 Verbindung testen|Test connection
-Statistik nach Aktivität|Statistics by activity
-Aktivität|Activity
+Statistik nach Sportart|Statistics by sport
+Sportart|Sport
 Aufstieg m|Ascent m
 Abstieg m|Descent m
 Ø km/h|Ø km/h

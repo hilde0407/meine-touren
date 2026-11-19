@@ -24,7 +24,7 @@ Regeln im Einzelnen:
               Aktiv, wenn eine Marke von einer Tour der letzten N Tage überschritten wurde (je Art die höchste). Info.
   auffaellig  Touren in der Genauigkeitsliste der Geräte, noch nicht als geprüft markiert (devquality, „flagged“). Aktiv ab der Mindestanzahl. Hinweis.
   pause       Tage seit der letzten Tour (nach Sportart) mindestens so groß wie die Schwelle. Info; ab der doppelten Schwelle Hinweis.
-  rekord      Längste Tour, meiste Aufstieg, schnellstes Tempo (mindestens 3 km und 30 Minuten) aller Zeiten (nach Sportart, ab 5 Touren; bei Gleichstand gilt die frühere),
+  rekord      Längste Tour, größter Aufstieg, schnellstes Tempo (mindestens 3 km und 30 Minuten) aller Zeiten (nach Sportart, ab 5 Touren; bei Gleichstand gilt die frühere),
               die in den letzten N Tagen gefahren wurde. Info.
   woche       Fortschritt der laufenden Woche (Montag bis Sonntag) gegen ein Wochenziel in km oder Touren. Nur mit gesetztem Ziel. Erreicht = Info; offen = Info, am Samstag und
               Sonntag Hinweis.
