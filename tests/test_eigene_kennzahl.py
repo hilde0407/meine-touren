@@ -123,7 +123,7 @@ def test_version_and_notes():
     from app import config
     assert config.VERSION.startswith("3.41.0 · Meine Touren")
     assert (ROOT / "docs" / "versionen" / "3.31.0.md").exists()
-    assert 'const V = "mt-v122"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v123"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
     assert 'SL_APPV = "3.41.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
     assert "59-bausteine-eigen.js" in (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
 

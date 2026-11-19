@@ -23,7 +23,7 @@ def test_health_reports_missing_komoot_and_backup(monkeypatch):
     monkeypatch.setattr(extras, "newest_backup", lambda: None)
     h = health.health()
     names = {c["name"]: c for c in h["checks"]}
-    assert not names["Komoot-Zugang"]["ok"] and not names["Letztes Backup"]["ok"]
+    assert not names["Komoot-Zugang"]["ok"] and not names["Letzte Sicherung"]["ok"]
     assert not h["ok"]
 
 

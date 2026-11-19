@@ -526,7 +526,7 @@ def test_sperre_gegen_gleichzeitige_sicherung_und_wiederherstellung(bak, monkeyp
             err = []
             t = threading.Thread(target=lambda: err.append(pytest.raises(extras.BackupError, extras.make_backup, str(bak)).value))
             t.start(); t.join(20)
-            assert err and "andere Sicherung oder Wiederherstellung" in str(err[0])
+            assert err and "andere Sicherung oder ein Zurückspielen" in str(err[0])
         assert _stand() == vor and len(list(bak.glob("*.zip"))) == 1
         # das Token ist nach der Ablehnung noch gültig; ein laufender Hintergrundjob blockiert ebenfalls
         start, ende = threading.Event(), threading.Event()
@@ -716,7 +716,7 @@ def test_temporaerer_bereich_ist_nicht_im_umzugspaket(bak, tmp_path):
 # ------------------------------------------------------------------------------------------------ Buchhaltung
 def test_version_und_skript_bleiben():
     root = Path(__file__).resolve().parent.parent
-    assert config.VERSION.startswith("3.40.0")
+    assert config.VERSION.startswith("3.41.0")
     assert "komoot_hub.sqlite.vor-restore" in (root / "deploy" / "restore.sh").read_text(encoding="utf-8")      # das Skript gibt es weiterhin
     html = (root / "app/static/index.html").read_text(encoding="utf-8")
     assert html.index("js/68-wiederherstellen.js") < html.index("js/69-start.js")

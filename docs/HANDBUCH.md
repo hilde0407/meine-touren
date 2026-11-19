@@ -220,7 +220,7 @@ Unter **Zepp-Import (optional)** holst du GPS-Trainings aus deinem Zepp-Konto (a
 2. Trage E-Mail und Passwort ein (nur wenn dein Konto ein Zepp-Passwort hat) oder ein **Token** (für Mi-, Google- und Apple-Konten). Für das Token gibt es dort eine Anleitung mit einem Lesezeichen, das du in die Lesezeichenleiste ziehst.
 3. Speichere die Einstellungen und klicke auf **Zepp-Import starten**.
 
-Weitere Knöpfe im selben Bereich: **Höhenmeter neu berechnen**, **Puls nachladen**, **Touren den Uhren zuordnen**, **Messwerte nachladen**, **Höhe aus Uhr abgleichen**. Der Zepp-Token wird täglich mitgeprüft.
+Weitere Knöpfe im selben Bereich: **Aufstieg neu berechnen**, **Puls nachladen**, **Touren den Uhren zuordnen**, **Messwerte nachladen**, **Höhe aus Uhr abgleichen**. Der Zepp-Token wird täglich mitgeprüft.
 
 ### 4.3 Garmin- und Suunto-Konto (experimentell)
 
@@ -277,7 +277,7 @@ Fotos kommen separat – siehe [Kapitel 10](#k10).
 
 Von oben nach unten (in der Standardeinstellung):
 
-1. **Zuletzt unterwegs:** die letzte Tour mit Strecke, Kilometern, Höhenmetern, Dauer und – wenn vorhanden – dem Puls. Mit den Pfeilen blätterst du durch die jüngsten Touren. **Tour ansehen** öffnet das Tourdetail, **3D-Flug** fliegt die Strecke im Gelände ab.
+1. **Zuletzt unterwegs:** die letzte Tour mit Strecke, Aufstieg, Dauer und – wenn vorhanden – dem Puls. Mit den Pfeilen blätterst du durch die jüngsten Touren. **Tour ansehen** öffnet das Tourdetail, **3D-Flug** fliegt die Strecke im Gelände ab.
 2. **Dein Jahr 2026:** Touren, Kilometer, Höhenmeter und Stunden mit Monatssäulen und Vergleich zum Vorjahr bis zum selben Tag („–17 % gegenüber 2025 bis heute“). Darunter stehen deine Jahresziele mit Fortschritt (z. B. „243 / 400 km“). **Zur Statistik** führt weiter.
 3. **Touren holen:** der Import-Bereich ([Abschnitt 4.5](#k4)).
 4. **Zuletzt unterwegs:** Kacheln der letzten Touren; **Alle 27 Touren** öffnet die Liste.

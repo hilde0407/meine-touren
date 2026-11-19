@@ -183,7 +183,7 @@ def test_version_notes_service_worker_and_script_registration():
     assert config.VERSION.startswith("3.41.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.32.0.md").read_text(encoding="utf-8")
     assert "Erinnerungen" in notes and "Diashow" in notes and "Datenschutz" in notes
-    assert 'const V = "mt-v122"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v123"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
     assert 'SL_APPV = "3.41.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
     assert "js/60-bausteine-erinnerungen.js" in (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     show = (ROOT / "app" / "static" / "js" / "seite-slideshow.js").read_text(encoding="utf-8")

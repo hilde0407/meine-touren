@@ -154,7 +154,7 @@ Festplatten nacheinander einlesen (`index /Volumes/Platte1`), dann `check` (nur 
 Der Import von **Garmin-** und **Suunto-Aktivitäten** (FIT/GPX/TCX-Dateien und die Suunto-Anbindung) ist bisher nur mit selbst erzeugten Testdateien geprüft, nicht mit echten Geräten. Wer eine Garmin- oder Suunto-Uhr hat und die App ausprobiert, würde sehr helfen:
 
 1. Eine echte Aktivität importieren (Verwaltung → Touren & Quellen → Garmin, Suunto & andere Uhren).
-2. Prüfen, ob Strecke, Dauer, Höhenmeter und Sportart stimmen.
+2. Prüfen, ob Strecke, Dauer, Aufstieg und Sportart stimmen.
 3. Rückmeldung als [GitHub-Issue](https://github.com/hilde0407/meine-touren/issues) geben – auch „hat gut funktioniert“ ist hilfreich. Bitte Gerätemodell, Dateiformat und App-Version nennen. Falls möglich, eine (anonymisierte) Beispieldatei anhängen.
 
 ## Lokal auf Windows
@@ -220,7 +220,7 @@ Im Tourdetail öffnet **„📍 Fotos ausrichten“** die Karte im Ausrichtungsm
 
 Im Ordner `android/` liegt eine kleine native Android-App („Hülle“) um die Weboberfläche. Sie bringt, was eine Webseite nicht kann:
 
-- **GPS-Aufzeichnung** mit Vordergrunddienst – läuft auch bei ausgeschaltetem Bildschirm. Menüpunkt „● Aufzeichnen“ (erscheint nur in der App): Sportart wählen, Start, live Zeit/Strecke/Höhenmeter und Karte, Pause, Beenden, dann „Auf den Server speichern“. Wird der Server nicht erreicht, bleibt die Aufzeichnung auf dem Handy erhalten.
+- **GPS-Aufzeichnung** mit Vordergrunddienst – läuft auch bei ausgeschaltetem Bildschirm. Menüpunkt „● Aufzeichnen“ (erscheint nur in der App): Sportart wählen, Start, live Zeit/Strecke/Aufstieg und Karte, Pause, Beenden, dann „Auf den Server speichern“. Wird der Server nicht erreicht, bleibt die Aufzeichnung auf dem Handy erhalten.
 - **Teilen-Menü**: GPX/FIT/TCX/ZIP und Fotos aus anderen Apps direkt an Meine Touren senden (auch über HTTP, ohne HTTPS).
 - **PDF-Downloads** landen im Download-Ordner des Handys.
 - Die Serveradresse (auch `http://192.168.178.230`) wird beim ersten Start eingegeben und lässt sich in der Verwaltung ändern.

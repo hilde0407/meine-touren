@@ -65,7 +65,7 @@ def test_recap_pdf_rich(monkeypatch, tmp_path):
     monkeypatch.setattr(pdfgen, "_table", spy)
     r = pdfgen.api_recap_pdf(2026, 0, 0)
     assert r.body[:5] == b"%PDF-"
-    top = cap[("Datum", "Tour", "Aktivität", "km", "Auf m", "Zeit", "Punkte")]
+    top = cap[("Datum", "Tour", "Sportart", "km", "Auf m", "Zeit", "Punkte")]
     assert all("Skitag" not in row[1] for row in top)                # Liftabfahrt nicht unter den stärksten Touren
     best = cap[("", "Datum", "Tour", "Wert")]
     assert not any("Skitag" in row[2] for row in best[:3]) and best[-1][3] == "3.100 m"

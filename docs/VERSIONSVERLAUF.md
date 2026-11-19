@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.41.0 – Eine Sprache, ein Zahlenformat
+
+- Fehlerbehebungen: Fotoauswahl-Leiste lesbar und beim Seitenwechsel weg (H1), Benutzermenü schließt mit Esc und Seitenwechsel (C3), Tournamen werden nicht mehr übersetzt (A7), Panel „Streckenfarbe“ bei 1280 px im Bild (E1).
+- Einheitliche Begriffe in de/en/fr/es inkl. Servertexte: Aufstieg/Abstieg, Strecke, Sicherung, Sportart, Darstellung (Automatisch/Handy/Computer), „Ansicht“ nur für gespeicherte Layouts, Orte & Ausrüstung, Rekorde.
+- Zentrale Formatierer (`01-format.js`) für Dauer („1:55 Std.“ / „h“), Strecke, Höhe, Tempo, Pace und Datum mit Zahlenformat je Sprache.
+- Kontrast: `--bad` im Dunkelmodus, deaktivierte Knöpfe.
+
 ## Version 3.40.0 – Wiederherstellung in der Oberfläche, 3D-Flug mit Bedienleiste
 
 - Verwaltung → Sicherung & Zugang: **Sicherung zurückspielen** für Administratoren – Sicherung des Servers wählen oder ZIP hochladen, ohne Root-Shell.

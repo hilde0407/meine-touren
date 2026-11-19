@@ -44,7 +44,7 @@ Rekorde: längste Tour, größter Aufstieg, schnellstes Tempo und mehr – je Sp
 
 ![Jahresrückblick](bilder/jahresrueckblick.png)
 
-Das Jahr auf einen Blick: Kilometer, Höhenmeter, Zeit, Lieblingsmonate und Highlights. Der Rückblick lässt sich als PDF laden, drucken oder als Link ohne Konto teilen.
+Das Jahr auf einen Blick: Strecke, Aufstieg, Zeit, Lieblingsmonate und Highlights. Der Rückblick lässt sich als PDF laden, drucken oder als Link ohne Konto teilen.
 
 ## 7. Verwaltung
 

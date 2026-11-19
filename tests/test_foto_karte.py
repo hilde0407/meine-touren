@@ -124,7 +124,7 @@ def test_version_notes_and_assets():
     assert config.VERSION.startswith("3.41.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.34.0.md").read_text(encoding="utf-8")
     assert "Fotos-Seite" in notes and "Zeitraum der Seite" in notes and "Live-Vorschau" in notes and "Alben" in notes
-    assert 'const V = "mt-v122"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v123"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
     js = ROOT / "app" / "static" / "js"
     assert 'SL_APPV = "3.41.0"' in (js / "54-ansichten.js").read_text(encoding="utf-8")
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
