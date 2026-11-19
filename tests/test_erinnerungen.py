@@ -180,7 +180,7 @@ def test_saved_layouts_without_cfg_stay_valid_and_the_registry_key_is_unchanged(
 
 def test_version_notes_service_worker_and_script_registration():
     from app import config
-    assert config.VERSION.startswith("3.45.0 · Meine Touren")
+    assert config.VERSION.startswith("3.46.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.32.0.md").read_text(encoding="utf-8")
     assert "Erinnerungen" in notes and "Diashow" in notes and "Datenschutz" in notes
     assert 'const V = "mt-v127"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")

@@ -116,7 +116,7 @@ def test_layout_speichert_neue_felder_und_betrachter():
 
 def test_version_and_notes():
     from app import config
-    assert config.VERSION.startswith("3.45.0 · Meine Touren")
+    assert config.VERSION.startswith("3.46.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.35.0.md").read_text(encoding="utf-8")
     assert "Fortschrittsbalken" in notes and "Sparkline" in notes and "Trend" in notes and "Antippen" in notes
     assert 'const V = "mt-v127"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")

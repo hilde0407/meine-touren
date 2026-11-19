@@ -112,7 +112,7 @@ def test_viewer_sees_default_and_cannot_write():
 
 def test_version_notes_and_assets():
     from app import config
-    assert config.VERSION.startswith("3.45.0 · Meine Touren")
+    assert config.VERSION.startswith("3.46.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.33.0.md").read_text(encoding="utf-8")
     assert "Reisen als anpassbare Seiten" in notes and "reise" in notes and "reisen" in notes
     assert 'const V = "mt-v127"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")

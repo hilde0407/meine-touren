@@ -192,7 +192,7 @@ def test_standard_sections_match_the_user_interface():
 
 def test_version_and_files_360():
     from app import config
-    assert config.VERSION.startswith("3.45.0 · Meine Touren")
+    assert config.VERSION.startswith("3.46.0 · Meine Touren")
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("js/65-zeitraum.js") < html.index("js/66-gruppen.js") < html.index("js/67-verlauf.js") < html.index("js/68-layoutcode.js") < html.index("js/39-sw.js")
     assert 'const V = "mt-v127"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")

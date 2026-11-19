@@ -56,7 +56,7 @@ def test_server_list_matches_the_registry_in_the_scripts():
 
 def test_version_notes_and_service_worker():
     from app import config
-    assert config.VERSION.startswith("3.45.0 · Meine Touren")
+    assert config.VERSION.startswith("3.46.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.20.0.md").read_text(encoding="utf-8")
     assert "Raster" in notes and "Breite" in notes and "Tourseite" in notes
     assert 'const V = "mt-v127"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")

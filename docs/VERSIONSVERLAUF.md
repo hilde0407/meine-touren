@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.46.0 – Aufräumen im Code
+
+- Dateigrößen (MB/GB, französisch Mo/Go) kommen aus einem Formatierer (`fmtGroesse`); die Einzel-Helfer für Dauer, Datum und Größe sind weg, die öffentlichen Seiten (Rückblick, Teilen, Ansicht, Diashow) nutzen dieselben Formatierer und die gewählte Sprache statt festem „de-DE“.
+- Fenster: „Sicherung zurückspielen“ und alle Fenster der Seiten-Bausteine laufen über denselben Baustein wie die übrigen Fenster (`uiModal`); `modal()` ist entfernt. Abstände der Knopfzeilen in Fenstern sind einheitlich.
+- Aufgeräumt: Knöpfe und Chips sind im Stylesheet an einer Stelle definiert, weniger Inline-Stile, Begriffe („Tempo“ = km/h, „Pace“ = min/km; im Englischen überall „Admin“, „Average speed“), veraltete Wörterbuchzeilen entfernt.
+- Behoben: Auf der Statistik-Seite sitzen „Seite anpassen“ und „Ansichten“ auf dem Desktop bündig mit der Inhaltsspalte statt am rechten Fensterrand.
+
 ## Version 3.45.0 – Weniger Bausteine, klarere Namen
 
 - Ein Baustein „Ziele“ statt vier („Jahresziel“, „Ziele“, „Jahresziel in Gefahr“, „Wochenziel“): Darstellung Balken, Ring oder „Nur Warnung“, Jahres- und/oder Wochenziele. Ziele (jetzt auch Wochenziele) werden nur noch in der Statistik unter „Ziele“ gepflegt; eigene Ziele der alten Bausteine wurden dorthin übernommen.

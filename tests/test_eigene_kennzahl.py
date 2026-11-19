@@ -121,7 +121,7 @@ def test_isolation_and_viewer():
 
 def test_version_and_notes():
     from app import config
-    assert config.VERSION.startswith("3.45.0 · Meine Touren")
+    assert config.VERSION.startswith("3.46.0 · Meine Touren")
     assert (ROOT / "docs" / "versionen" / "3.31.0.md").exists()
     assert 'const V = "mt-v127"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
     assert 'SL_APPV = "3.45.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
