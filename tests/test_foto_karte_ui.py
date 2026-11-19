@@ -146,7 +146,7 @@ def test_photos_blocks_via_catalog_and_template(pw, app):
 def test_map_default_is_unchanged(pw, app):
     pg = _karte(pw, app)
     try:
-        assert pg.evaluate("() => [...document.querySelectorAll('.mapui > .kapw')].map(e => e.dataset.kp)") == ["standort", "jahr", "sport", "stil", "ebenen", "ausschnitt"] or pg.locator(".mapui > .kapw").count() >= 4
+        assert pg.evaluate("() => [...document.querySelectorAll('.mapui > .kapw')].map(e => e.dataset.kp)") == ["jahr", "sport", "stil", "ebenen", "standort", "ausschnitt"]      # 3.43.0: Filter | Ebenen | Aktionen
         for sel in ("#bigmap", "#my", "#ms", "#mloc", ".mapui .box"):
             assert pg.locator(sel).count() >= 1, sel
         assert pg.locator(".slit").count() == 0 and pg.locator(".kapedit").count() == 0 and pg.locator("#kax .kapt:visible").count() == 0
