@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.43.0](3.43.0.md) – Karten-Paket: feste Reihenfolge der Bedienkästen, Panels schließen einheitlich, mobil „Filter & Ebenen“, „Touren im Ausschnitt“ nur einmal
 - [3.42.0](3.42.0.md) – Ein Dialog, ein Schalter, ein Knopf: alle Fenster über `uiModal`, ein Schalter für An/Aus, Abbrechen links
 - [3.41.0](3.41.0.md) – Eine Sprache, ein Zahlenformat: einheitliche Begriffe, zentrale Formatierer, vier Fehlerbehebungen
 - [3.40.0](3.40.0.md) – Wiederherstellung in der Oberfläche: Sicherung prüfen, bestätigen, zurückspielen; 3D-Flug mit Bedienleiste und Touchpad-Gesten

@@ -2,6 +2,12 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.43.0 – Karten-Paket
+
+- Bedienkästen der Karte in fester Reihenfolge (Jahr, Sportarten | Strecken, Heatmap, Fotos | Standort, Touren im Ausschnitt | Seite anpassen); Standort-Knopf heißt „Mein Standort“; Schalter melden ihren Zustand.
+- Panels der Karte (Streckenfarbe, Ebenenwahl, Blatt „Filter & Ebenen“) schließen gleich – Esc, Klick daneben, Auslöser, Seitenwechsel, Fenster, Bearbeiten – und sind nie zugleich offen; feste Stapelordnung.
+- Handy: eine Zeile mit Standort, „Filter & Ebenen“ und „Seite anpassen“ statt Wischstreifen; „Touren im Ausschnitt“ nur noch einmal (Baustein oder Knopf).
+
 ## Version 3.42.0 – Ein Dialog, ein Schalter, ein Knopf
 
 - Alle früheren `.modal`-Fenster laufen über die zentrale Funktion `uiModal` (Rahmen wie `uiConfirm`): Esc schließt, Fokusfalle, Fokus zurück zum Auslöser, Klick daneben, Räumen beim Seitenwechsel; gleiche Titelgröße, am Handy dieselbe Karte.
