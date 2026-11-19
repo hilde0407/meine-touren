@@ -22,9 +22,23 @@ POS = """(sel) => { const b = document.querySelector(sel); const r = b.getBoundi
 def _tour(pw, url, **kw):
     pg = _browser(pw, url, devs=None, **kw)
     pg.goto(f"{url}/#/tour/r3", timeout=TL)
-    pg.wait_for_function("() => !!document.querySelector('#ren') && !!document.querySelector('#etag')", timeout=TL)
+    pg.wait_for_function("() => !!document.querySelector('#ren') && !!document.querySelector('#etag') && !!document.querySelector('.tact-bar .tk')", timeout=TL)
     quiet(pg, 3000, 500)
     return pg
+
+
+def _oeffne(pg, eid):
+    """Dialog wie ein Nutzer öffnen: Menüknopf der Tourseite → Eintrag (die Einzelknöpfe sind versteckt)."""
+    for i in range(pg.locator(".tact-bar .tk").count()):
+        pg.locator(".tact-bar .tk").nth(i).click()
+        expect(pg.locator(".uimod")).to_have_count(1, timeout=T)
+        if pg.locator(f".uimod [data-e={eid}]").count():
+            pg.locator(f".uimod [data-e={eid}]").click()
+            expect(pg.locator(".uimod [data-e]")).to_have_count(0, timeout=T)
+            expect(pg.locator(".uimod")).to_have_count(1, timeout=T)
+            return
+        press_until_gone(pg, "Escape", ".uimod")
+    raise AssertionError(eid)
 
 
 # ---------- Quelltext-Regeln ----------
@@ -48,9 +62,7 @@ def test_abbrechen_steht_links_vom_hauptknopf():
 def test_umbenennen_esc_fokusfalle_und_fokus_zurueck(pw, app, clean):
     pg = _tour(pw, app)
     try:
-        pg.locator("#ren").focus()
-        pg.locator("#ren").click()
-        expect(pg.locator(".uimod")).to_have_count(1, timeout=T)
+        _oeffne(pg, "ren")
         box = pg.locator(".uimod .uibox")
         assert box.get_attribute("role") == "dialog" and box.get_attribute("aria-modal") == "true" and box.get_attribute("aria-labelledby")
         assert pg.evaluate("() => document.querySelector('.uimod .uibox > h2') !== null")             # Titel ist immer eine H2, auch bei früheren H3
@@ -64,7 +76,7 @@ def test_umbenennen_esc_fokusfalle_und_fokus_zurueck(pw, app, clean):
             pg.keyboard.press("Shift+Tab")
             assert pg.evaluate("() => !!document.activeElement.closest('.uimod')")
         press_until_gone(pg, "Escape", ".uimod")
-        assert pg.evaluate("() => document.activeElement && document.activeElement.id") == "ren"      # Fokus zurück an den Auslöser
+        assert pg.evaluate("() => document.activeElement.classList.contains('tk')")                   # Fokus zurück an den Auslöser (Menüknopf)
         assert pg.evaluate("() => !document.querySelector('[inert]')")                               # Hintergrund wieder bedienbar
         assert not pg.errors, pg.errors
     finally:
@@ -74,16 +86,13 @@ def test_umbenennen_esc_fokusfalle_und_fokus_zurueck(pw, app, clean):
 def test_klick_daneben_und_abbrechen_schliessen(pw, app, clean):
     pg = _tour(pw, app)
     try:
-        pg.locator("#etag").click()
-        expect(pg.locator(".uimod")).to_have_count(1, timeout=T)
+        _oeffne(pg, "etag")
         pg.locator("#tgx").click()
         expect(pg.locator(".uimod")).to_have_count(0, timeout=T)
-        pg.locator("#etag").click()
-        expect(pg.locator(".uimod")).to_have_count(1, timeout=T)
+        _oeffne(pg, "etag")
         pg.mouse.click(4, 4)                                                                          # auf den Hintergrund
         expect(pg.locator(".uimod")).to_have_count(0, timeout=T)
-        pg.locator("#ren").click()
-        expect(pg.locator(".uimod")).to_have_count(1, timeout=T)
+        _oeffne(pg, "ren")
         pg.evaluate("() => location.hash = '#/tours'")                                                # Seitenwechsel räumt das Fenster weg und gibt den Hintergrund frei
         expect(pg.locator(".uimod")).to_have_count(0, timeout=T)
         assert pg.evaluate("() => !document.querySelector('[inert]')")
@@ -95,9 +104,8 @@ def test_klick_daneben_und_abbrechen_schliessen(pw, app, clean):
 def test_hauptknopf_rechts_abbrechen_links(pw, app, clean):
     pg = _tour(pw, app)
     try:
-        for opener, cancel, ok in (("#ren", "#rcx", "#rok"), ("#etag", "#tgx", "#tgs")):
-            pg.locator(opener).click()
-            expect(pg.locator(".uimod")).to_have_count(1, timeout=T)
+        for opener, cancel, ok in (("ren", "#rcx", "#rok"), ("etag", "#tgx", "#tgs")):
+            _oeffne(pg, opener)
             a, b = pg.evaluate(POS, cancel), pg.evaluate(POS, ok)
             assert a[2] <= b[0] + 1 and abs(a[1] - b[1]) < 6, (opener, a, b)                         # Abbrechen links, gleiche Zeile
             press_until_gone(pg, "Escape", ".uimod")
@@ -114,8 +122,7 @@ def test_hauptknopf_rechts_abbrechen_links(pw, app, clean):
 def test_handy_dialog_scrollt_und_bleibt_im_bild(pw, app, clean):
     pg = _tour(pw, app, width=390, height=700)
     try:
-        pg.evaluate("() => document.querySelector('#ren').click()")
-        expect(pg.locator(".uimod")).to_have_count(1, timeout=T)
+        _oeffne(pg, "ren")
         r = pg.evaluate("() => { const b = document.querySelector('.uimod .uibox').getBoundingClientRect(); return [b.left, b.right, b.top, b.bottom, innerWidth, innerHeight]; }")
         assert r[0] >= 0 and r[1] <= r[4] + 1 and r[2] >= 0 and r[3] <= r[5] + 1, r
         assert pg.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")

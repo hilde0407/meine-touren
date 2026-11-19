@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.42.0 – Ein Dialog, ein Schalter, ein Knopf
+
+- Alle früheren `.modal`-Fenster laufen über die zentrale Funktion `uiModal` (Rahmen wie `uiConfirm`): Esc schließt, Fokusfalle, Fokus zurück zum Auslöser, Klick daneben, Räumen beim Seitenwechsel; gleiche Titelgröße, am Handy dieselbe Karte.
+- Knopfreihenfolge überall gleich (Abbrechen links, Hauptknopf rechts), „Schließen“ immer sekundär, Löschen rot gefüllt.
+- Ein Schalter für jede An/Aus-Einstellung (statt Auswahlfeld „an/aus“, „ja/nein“ und gemischter Häkchen), „an“ ist überall gelb (auch Filter-Chips im Dialog).
+- „Seite anpassen / Ansichten“ steht auf jeder anpassbaren Seite ganz oben rechts; „Links verwalten“ heißt „Links dieser Tour“.
+
 ## Version 3.41.0 – Eine Sprache, ein Zahlenformat
 
 - Fehlerbehebungen: Fotoauswahl-Leiste lesbar und beim Seitenwechsel weg (H1), Benutzermenü schließt mit Esc und Seitenwechsel (C3), Tournamen werden nicht mehr übersetzt (A7), Panel „Streckenfarbe“ bei 1280 px im Bild (E1).

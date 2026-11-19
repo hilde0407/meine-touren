@@ -69,7 +69,6 @@ const setup34 = () => {
       const m = modal(`<h3>${g.title}</h3><div class="tactl">${its
         .map(([eid, l, h, cls]) => eid === "-" ? `<h4 class="tactg">${l}</h4>` : `<button class="btn alt tl ${cls || ""}" data-e="${eid}"><b>${l}</b>${h ? `<small>${h}</small>` : ""}</button>`)
         .join("")}</div><div class="uifoot"><button class="btn ghost" id="tactx">Schließen</button></div>`);
-      m.classList.add("sheet");
       m.querySelector("#tactx").onclick = () => m.remove();
       m.querySelectorAll("[data-e]").forEach(
         x =>
