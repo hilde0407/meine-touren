@@ -366,7 +366,7 @@ def test_sub_head_has_name_figures_and_back_link(pw, app):
         assert pg.locator("h1").inner_text() == "Gipfelrunde heute"
         assert pg.locator(".tlsubeb").text_content() == "Detaillierte Auswertung"
         f = pg.locator(".tlsubfig").inner_text()
-        assert "6,0 km" in f and "325 m aufwärts" in f and "1:45 Std." in f and "3,4 km/h" in f, f
+        assert "6,0 km" in f and "↑ 325 m" in f and "1:45 Std." in f and "3,4 km/h" in f, f
         assert pg.locator("#tlback").get_attribute("href") == "#/tour/r3"
         assert pg.evaluate("document.querySelector('h1').getBoundingClientRect().height") < 90
         assert pg.locator(".tlsubfig .tag").is_visible()

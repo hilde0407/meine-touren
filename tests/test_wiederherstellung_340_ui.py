@@ -229,11 +229,11 @@ def test_kompletter_ablauf_mit_rueckweg_ueber_die_sicherheitskopie(pw, app, clea
         _bereich(pg, app)
         zeilen = pg.locator("#rsls .rsi")
         expect(zeilen).to_have_count(2, timeout=TL)
-        expect(zeilen.first).to_contain_text("Sicherheitskopie vor einer Wiederherstellung")
+        expect(zeilen.first).to_contain_text("Sicherheitskopie vor dem Zurückspielen")
         expect(zeilen.first).to_contain_text(kopie[0])
         zeilen.first.locator("input").check()
         _pruefen(pg)
-        expect(pg.locator(".rsbox")).to_contain_text("Das ist eine Sicherheitskopie, die vor einer früheren Wiederherstellung angelegt wurde.")
+        expect(pg.locator(".rsbox")).to_contain_text("Das ist eine Sicherheitskopie, die vor einem früheren Zurückspielen angelegt wurde.")
         assert _zeile(pg, 3) == ["2", "0"]
         pg.locator("#rsok").check()
         pg.click("#rsyes")

@@ -164,8 +164,8 @@ def test_global_filter_changes_several_blocks_keeps_own_filter_and_survives_relo
         assert pg.locator("#tlw-wb .sllist li").count() == 2 and pg.locator("#tlw-wb .flk").inner_text().startswith("Laufen")      # eigener Filter bleibt
         assert pg.locator("#tlw-wb .stn").count() == 0
         # Hinweis bei Abschnitten, die den Filter nicht kennen
-        assert pg.locator("#tls-sportarten .stn").inner_text() == "Aktivität gilt hier nicht"
-        assert pg.locator("#tlw-wd .stn").inner_text() == "Filter gilt hier nicht" or pg.locator("#tlw-wd .stn").inner_text() == "Aktivität gilt hier nicht"
+        assert pg.locator("#tls-sportarten .stn").inner_text() == "Sportart gilt hier nicht"
+        assert pg.locator("#tlw-wd .stn").inner_text() == "Filter gilt hier nicht" or pg.locator("#tlw-wd .stn").inner_text() == "Sportart gilt hier nicht"
         assert pg.locator("#tls-kpi .stn").count() == 0
         # Neuladen behält den Filter
         pg.reload()
@@ -399,7 +399,7 @@ def test_keyboard_filter_focus_and_english(pw, app):
         txt = pg.locator("#stf").inner_text()
         assert "All sports" in txt and "Last 12 months" in txt and "Reset to the saved filter" in txt, txt
         assert "Alle Sportarten" not in txt and "Filter zurücksetzen" not in txt
-        assert "Activity does not apply here" in pg.locator("#tls-sportarten .stn").inner_text()
+        assert "Sport does not apply here" in pg.locator("#tls-sportarten .stn").inner_text()
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()

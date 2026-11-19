@@ -526,7 +526,7 @@ def test_english_labels_in_header_and_dialog(pw, app):
         pg.wait_for_selector('.sldlg [role="dialog"] form', timeout=T)
         pg.wait_for_function("() => /Sport/.test(document.querySelector('.sldlg legend')?.textContent || '')", timeout=T)
         txt = pg.locator(".sldlg").inner_text()
-        for w in ("Activity", "Current year", "Last 12 months", "Last 90 days", "All time", "Compare with the previous year", "Custom title (optional)", "Save", "Cancel"):
+        for w in ("Sport", "Current year", "Last 12 months", "Last 90 days", "All time", "Compare with the previous year", "Custom title (optional)", "Save", "Cancel"):
             assert w in txt, (w, txt)
         assert "Laufendes" not in txt and "Aktivität" not in txt and "Letzte" not in txt
         assert not pg.errors, pg.errors

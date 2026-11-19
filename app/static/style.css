@@ -2042,3 +2042,6 @@ html.mob .flight{height:calc(100vh - 102px - env(safe-area-inset-bottom));height
 /* 3.41.0 Kontrast: --bad (Löschen) im Dunkelmodus heller, mit dunkler Schrift; Rotton auch für Hell definiert */
 :root{--bad:#b3261e}
 @media (prefers-color-scheme:dark){:root{--bad:#f08a84}.btn.c-white[style*="--bad"]{color:#2a0a08!important}}
+/* 3.41.0 Fotoauswahl: Schalter „Fotos zuordnen“ im aktiven Zustand lesbar (ghost überschrieb das Gelb); Leiste über der Tableiste des Handys */
+.btn.ghost.on{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}
+html.mob .seltb{bottom:calc(66px + env(safe-area-inset-bottom));z-index:901;border-radius:18px;padding:10px 14px}

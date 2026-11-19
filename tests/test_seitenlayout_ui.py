@@ -600,7 +600,7 @@ def test_overview_widgets_render(pw, app):
         assert "Gipfelrunde" in t(3) and pg.locator("#tlw-w3 a").count() == 5
         assert "Keine Fotos" in t(4)
         assert "Noch keine Geräte" in t(5) or "Keine auffälligen" in t(5) or "auffällig" in t(5)
-        assert "Längste Tour" in t(6) and "Meiste Höhenmeter" in t(6)
+        assert "Längste Tour" in t(6) and "Größter Aufstieg" in t(6)
         assert "keine Tour" in t(7) or "Vor " in t(7)
         assert not pg.errors, pg.errors
     finally:

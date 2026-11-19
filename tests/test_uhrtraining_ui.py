@@ -159,9 +159,9 @@ def test_section_content_and_order(pw, apps):
         assert t.startswith("Training laut Uhr") and "Amazfit Cheetah Pro" in t and "Quelle:" in t
         tiles = {x.locator("span").first.inner_text(): x.locator("b").inner_text() for x in c.locator(".utile").all()}
         assert tiles["Trainingseffekt (aerob)"] == "3,2" and tiles["Trainingseffekt (anaerob)"] == "1,4" and tiles["Trainingsbelastung"] == "96"
-        assert tiles["Anstrengung (deine Angabe)"] == "5" and tiles["Kalorien"] == "312" and tiles["Pausenzeit"] == "4 min"
+        assert tiles["Anstrengung (deine Angabe)"] == "5" and tiles["Kalorien"] == "312" and tiles["Pausenzeit"] == "4 Min."
         assert tiles["Puls Ø"] == "118" and tiles["Puls höchster"] == "152" and tiles["Schrittfrequenz Ø"] == "112"
-        assert "310" in t and "m Aufstieg" in t and "m höchster Punkt" in t and "Höhenmeter laut Uhr" in t
+        assert "310" in t and "m Aufstieg" in t and "m höchster Punkt" in t and "Aufstieg laut Uhr" in t
         assert c.locator(".br6 span").count() == 6 and "Pulszonen laut Uhr" in t and "bis 168 bpm" in t
         assert c.locator(".utc").count() == 6 and c.locator(".utc.part").count() == 1 and "Tempo je Kilometer" in t
         assert "10:50" in c.locator(".utv").first.inner_text() and "0,4 km" in t and "Puls (bpm)" in t and "Schritte/min" in t
