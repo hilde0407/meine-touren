@@ -68,7 +68,7 @@ async function seriesRename(items, name, word) {
 function seriesBuildDialog() {
   const iso = ts => new Date(ts * 1000).toISOString().slice(0, 10);
   const newest = TOURS.reduce((a, t) => Math.max(a, t.start_ts), 0);
-  const m = modal(`<h2>Mehrtagestour bilden</h2>
+  const m = uiModal(`<h2>Mehrtagestour bilden</h2>
    <p class="mut fs14">Wähle den Zeitraum der Etappen. Die Touren dieser Tage werden „Name – Tag N“ genannt (N = Tag seit Beginn), danach erscheinen sie als Mehrtagestour unter Reisen.</p>
    <div class="row g8 aic"><label>Von <input id="sbf" type="date" value="${iso(newest - 6 * 86400)}"></label><label>bis <input id="sbt" type="date" value="${iso(newest)}"></label></div>
    <div class="row g8 aic mt8"><input id="sbn" placeholder="Name, z. B. Alpenüberquerung E5" class="fx1 mnw200"><select id="sbw" style="width:auto"><option>Tag</option><option>Etappe</option></select></div>
@@ -119,7 +119,7 @@ VIEWS.series = async id => {
   if (!s || !row || $("#serren")) return;
   row.parentElement.insertAdjacentHTML("beforeend", `<button class="btn alt" id="serren">✎ Reihe umbenennen</button>`);
   $("#serren").onclick = () => {
-    const m = modal(`<h2>Mehrtagestour umbenennen</h2><p class="mut fs14">Alle ${s.n} Etappen heißen danach „Neuer Name – Tag N“ (die Nummern bleiben).</p><input id="srn" value="${esc(s.name)}" class="w100"><div id="srer" class="bad"></div><div class="uifoot"><button class="btn ghost" id="srno">Abbrechen</button><button class="btn" id="srok">Umbenennen</button></div>`);
+    const m = uiModal(`<h2>Mehrtagestour umbenennen</h2><p class="mut fs14">Alle ${s.n} Etappen heißen danach „Neuer Name – Tag N“ (die Nummern bleiben).</p><input id="srn" value="${esc(s.name)}" class="w100"><div id="srer" class="bad"></div><div class="uifoot"><button class="btn ghost" id="srno">Abbrechen</button><button class="btn" id="srok">Umbenennen</button></div>`);
     m.querySelector("#srno").onclick = () => m.remove();
     m.querySelector("#srok").onclick = async () => {
       const name = m.querySelector("#srn").value.trim();

@@ -164,7 +164,7 @@ async function metDevRow(t) {
     if (be) be.onclick = () => {
       const cur = m.device && m.device.manual ? m.device.id : 0;
       const pick = (val, av, title, small, on) => `<label class="dvpickrow"><input type="radio" name="dvm" value="${val}" ${on ? "checked" : ""}>${av}<span><b>${title}</b><small>${small}</small></span></label>`;
-      const mo = modal(`<h2>Gerät dieser Tour</h2><p class="dvlead">Welches Gerät hat diese Tour aufgezeichnet?</p>
+      const mo = uiModal(`<h2>Gerät dieser Tour</h2><p class="dvlead">Welches Gerät hat diese Tour aufgezeichnet?</p>
         ${pick("", `<span class="dvav xs">${dvIcon("other")}</span>`, "Automatisch", "nach Art der Quelle und Datum", !cur)}
         ${dv.devices.map(x => pick(x.id, dvAvatar(x, "xs"), esc(x.name) + (x.active ? "" : " (deaktiviert)"), esc([devKindLabel(dv, x.kind), x.model].filter(Boolean).join(" · ")), cur === x.id)).join("")}
         ${dv.devices.length ? "" : `<p class="mut">Noch kein Gerät angelegt – in der Verwaltung unter „Meine Geräte“.</p>`}

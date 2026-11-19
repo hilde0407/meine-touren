@@ -1260,65 +1260,15 @@ function slLeave() {
 }
 
 /* ---------- Dialoge (Katalog, Einstellungen) ---------- */
-function slModal(title, build, cls) {
-  const trigger = document.activeElement,
-    host = document.createElement("div"),
-    box = document.createElement("div"),
-    id = "sld" + Math.random().toString(36).slice(2, 7);
-  host.className = "uidlg sldlg";
-  box.className = "uibox slbox" + (cls ? " " + cls : "");
-  box.setAttribute("role", "dialog");
-  box.setAttribute("aria-modal", "true");
-  box.setAttribute("aria-labelledby", id);
-  box.tabIndex = -1;
-  const h = document.createElement("h2");
-  h.id = id;
-  h.textContent = title;
-  const body = document.createElement("div");
-  body.className = "slmb";
-  box.append(h, body);
-  host.appendChild(box);
-  const inerted = [];
-  [...document.body.children].forEach(el => {
-    if (!el.inert) {
-      el.inert = true;
-      inerted.push(el);
-    }
-  });
-  document.body.appendChild(host);
-  let closed = false;
-  const close = () => {
-    if (closed) return;
-    closed = true;
-    host.removeEventListener("keydown", key, true);
-    host.remove();
-    inerted.forEach(el => (el.inert = false));
-    if (trigger && trigger.isConnected && trigger.focus) {
-      try {
-        trigger.focus();
-      } catch (e) {}
-    }
-  };
-  const key = e => {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      e.stopPropagation();
-      close();
-    } else if (e.key === "Tab") {
-      const f = [...box.querySelectorAll("button:not([disabled]),input:not([disabled]),textarea,select,a[href]")].filter(x => x.offsetParent !== null);
-      if (!f.length) return;
-      const i = f.indexOf(document.activeElement);
-      if (e.shiftKey && i <= 0) {
-        e.preventDefault();
-        f[f.length - 1].focus();
-      } else if (!e.shiftKey && (i === f.length - 1 || i < 0)) {
-        e.preventDefault();
-        f[0].focus();
-      }
-    }
-  };
-  host.addEventListener("keydown", key, true);
-  host.addEventListener("mousedown", e => e.target === host && close());
+function slModal(title, build, cls) {                  // 3.46.0: Rahmen, Fokusfalle, Esc, Klick daneben, inert und Fokus-Rückgabe kommen aus uiModal (00-dialog.js)
+  const host = uiModal(`<h2></h2><div class="slmb"></div>`),
+    box = host.querySelector(".uibox"),
+    body = host.querySelector(".slmb");
+  host.classList.add("sldlg");
+  box.classList.add("slbox");
+  if (cls) box.classList.add(...cls.split(/\s+/).filter(Boolean));
+  host.querySelector("h2").textContent = title;
+  const close = () => host.remove();
   build(body, close);
   const f = body.querySelector("button, input, textarea, select");
   (f || box).focus();

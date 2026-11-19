@@ -13,7 +13,7 @@ async function cleanUnusedDialog() {
     uiAlert("Alle Fotos sind einer Tour zugeordnet – es gibt nichts aufzuräumen.");
     return;
   }
-  const m = modal(`<h2>Unbenutzte Fotos aufräumen</h2>
+  const m = uiModal(`<h2>Unbenutzte Fotos aufräumen</h2>
    <p>${nf(u.count, 0)} Fotos (${fmtGroesse(u.bytes)}) sind keiner Tour zugeordnet. Du kannst sie löschen, um Platz zu schaffen.</p>
    <div class="thumbs m8-0" style="grid-template-columns:repeat(6,1fr)">${u.sample.map(i => `<img loading="lazy" src="/pic/${i}?size=200">`).join("")}</div>
    <p class="mut fs14">Stichprobe. Bitte zuerst prüfen, ob die Fotos wirklich nicht zu einer Tour gehören – oft liegt es an einer falsch gestellten Kamerauhr (Prüfen → „Kamerauhr“) oder an einer Tour, die noch nicht in der App ist.</p>

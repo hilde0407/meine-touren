@@ -13,24 +13,16 @@ function rsTabelle(kopfA, a, kopfB, b) {
   ).join("")}</tbody></table>`;
 }
 
-/* Dialog im Muster von uiConfirm (gleiche Klassen): Hintergrund inert, Tab bleibt im Dialog, Esc schließt (außer während des Zurückspielens), Fokus danach zurück zum Auslöser. */
+/* Dialog über uiModal (00-dialog.js, 3.46.0; vorher eine Kopie von uiConfirm): Hintergrund inert, Tab bleibt im Dialog, Esc schließt (außer während des Zurückspielens: host.noClose), Fokus danach zurück zum Auslöser. */
 function rsDialog(v, trigger, onDone) {
-  const host = document.createElement("div");
-  host.className = "uidlg";
-  const box = document.createElement("div");
-  box.className = "uibox danger rsbox";
-  box.setAttribute("role", "dialog");
-  box.setAttribute("aria-modal", "true");
-  box.setAttribute("aria-labelledby", "rsdt");
-  box.setAttribute("aria-describedby", "rsdd");
-  box.tabIndex = -1;
+  let busy = false, fertig = false;
   const z = v.zahlen, b = v.benutzer || {};
   const wem = b.ohne_angabe
     ? `<p class="rshin"><span aria-hidden="true">ℹ</span> <span>Die Sicherung nennt keinen Benutzer. Sie wird in dein Konto zurückgespielt.</span></p>`
     : b.name
       ? `<div class="rsk"><span>Gehört zu</span><b>${esc(b.name)}</b></div>`
       : "";
-  box.innerHTML = `<h2 id="rsdt">Sicherung zurückspielen</h2>
+  const host = uiModal(`<h2 id="rsdt">Sicherung zurückspielen</h2>
   <div class="uitext" id="rsdd">
    <div id="rsv">
     <p class="rsgut"><span aria-hidden="true">✓</span> <span>Geprüft: Die Sicherung ist lesbar und vollständig.</span></p>
@@ -49,40 +41,20 @@ function rsDialog(v, trigger, onDone) {
    </div>
    <div id="rsr" role="status" aria-live="polite"></div>
   </div>
-  <div class="uifoot"><button type="button" class="btn ghost" id="rsno">Abbrechen</button><button type="button" class="btn alt uidanger" id="rsyes" data-danger disabled>Jetzt zurückspielen</button></div>`;
-  host.appendChild(box);
-  const inerted = [];
-  [...document.body.children].forEach(el => {
-    if (!el.inert) { el.inert = true; inerted.push(el); }
-  });
-  document.body.appendChild(host);
+  <div class="uifoot"><button type="button" class="btn ghost" id="rsno">Abbrechen</button><button type="button" class="btn alt uidanger" id="rsyes" data-danger disabled>Jetzt zurückspielen</button></div>`);
+  const box = host.querySelector(".uibox");
+  box.classList.add("danger", "rsbox");
+  box.setAttribute("aria-describedby", "rsdd");
   const q = s => box.querySelector(s);
   const ok = q("#rsok"), yes = q("#rsyes"), no = q("#rsno"), res = q("#rsr");
-  let busy = false, fertig = false, closed = false;
-  const close = () => {
-    if (closed || busy) return;
-    closed = true;
-    host.removeEventListener("keydown", key, true);
-    host.remove();
-    inerted.forEach(el => (el.inert = false));
+  host.noClose = () => busy;
+  host.onClose = () => {                                       // nach dem Schließen (Esc, Klick daneben, „Abbrechen“)
     if (fertig) { location.reload(); return; }
-    onDone();                                                // gibt den Auslöser wieder frei (er war während der Prüfung gesperrt) – erst danach kann er den Fokus bekommen
+    onDone();                                                  // gibt den Auslöser wieder frei (er war während der Prüfung gesperrt) – der Fokus geht danach an den Auslöser zurück
     if (trigger && trigger.isConnected && typeof trigger.focus === "function") { try { trigger.focus(); } catch (e) {} }
   };
-  const key = e => {
-    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(); }
-    else if (e.key === "Tab") {
-      const f = [...box.querySelectorAll("button:not([disabled]), input:not([disabled])")].filter(el => el.offsetParent !== null);
-      if (!f.length) { e.preventDefault(); box.focus(); return; }
-      const i = f.indexOf(document.activeElement);
-      if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
-      else if (!e.shiftKey && (i === f.length - 1 || i < 0)) { e.preventDefault(); f[0].focus(); }
-    }
-  };
-  host.addEventListener("keydown", key, true);
-  host.addEventListener("mousedown", e => { if (e.target === host) close(); });
   ok.onchange = () => (yes.disabled = !ok.checked);
-  no.onclick = close;
+  no.onclick = () => { if (!busy) host.remove(); };
   yes.onclick = async () => {
     if (!ok.checked || busy) return;
     busy = true;

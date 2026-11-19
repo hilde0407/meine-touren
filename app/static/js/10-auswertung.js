@@ -88,7 +88,6 @@ VIEWS.dash = async (...a) => {
 };
 
 /* =====================  Tags, Teilen, Neuland (Tourdetail)  ===================== */
-const modal = html => uiModal(html);   // 3.42.0: ein Dialog für alle Formular-Fenster (00-dialog.js)
 const _tourT = VIEWS.tour;
 VIEWS.tour = async (id, q) => {
   await _tourT(id, q);
@@ -105,7 +104,7 @@ VIEWS.tour = async (id, q) => {
   $("#etag").onclick = () => {
     let cur = (t.tags || "").split("|").filter(Boolean);
     const m =
-      modal(`<h3>Tags &amp; Alben</h3><p class="mut fs14">Mit Schlagworten wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).</p>
+      uiModal(`<h3>Tags &amp; Alben</h3><p class="mut fs14">Mit Schlagworten wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).</p>
       <div id="tgc" class="chips"></div><input id="tgi" list="tgl" placeholder="Neuer Tag + Enter" class="w100 mt10"><datalist id="tgl">${allTags()
         .map(x => `<option value="${esc(x)}">`)
         .join("")}</datalist>
@@ -157,7 +156,7 @@ VIEWS.tour = async (id, q) => {
   };
   $("#eshr").onclick = async () => {
     const m =
-      modal(`<h3>Links dieser Tour</h3><p class="mut fs14">Erzeugt einen Link, den man <b>ohne Anmeldung</b> öffnen kann – du wählst, was er zeigt (Karte, Höhenprofil, Fotos …). Er funktioniert nur, wenn dein Server von außen erreichbar ist, z. B. per VPN oder Reverse-Proxy.</p>
+      uiModal(`<h3>Links dieser Tour</h3><p class="mut fs14">Erzeugt einen Link, den man <b>ohne Anmeldung</b> öffnen kann – du wählst, was er zeigt (Karte, Höhenprofil, Fotos …). Er funktioniert nur, wenn dein Server von außen erreichbar ist, z. B. per VPN oder Reverse-Proxy.</p>
       <div class="row mt14"><button class="btn" id="shn">Neuen Link erstellen …</button></div><div id="shl" class="mt14"></div><div class="uifoot"><button class="btn ghost" id="shx">Schließen</button></div>`);
     m.querySelector("#shx").onclick = () => m.remove();
     const list = async () => {

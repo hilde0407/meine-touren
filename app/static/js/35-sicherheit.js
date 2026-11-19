@@ -4,7 +4,7 @@ const post35 = (u, d) => api(u, {method: "POST", headers: J35, body: JSON.string
 
 function codesBox(codes) {
   const txt = codes.join("\n"),
-    m = modal(`<h3>Wiederherstellungscodes</h3><p class="mut fs14">Bewahre diese Codes sicher auf (z. B. ausgedruckt oder im Passwort-Manager). Jeder Code funktioniert <b>einmal</b> und ersetzt den Authenticator-Code, falls dein Handy weg ist. <b>Sie werden nur jetzt angezeigt.</b></p>
+    m = uiModal(`<h3>Wiederherstellungscodes</h3><p class="mut fs14">Bewahre diese Codes sicher auf (z. B. ausgedruckt oder im Passwort-Manager). Jeder Code funktioniert <b>einmal</b> und ersetzt den Authenticator-Code, falls dein Handy weg ist. <b>Sie werden nur jetzt angezeigt.</b></p>
       <pre class="fs18 lh1_6 p10-14 br8" style="background:var(--paper,#0001);user-select:all">${esc(txt)}</pre>
       <div class="uifoot"><button class="btn alt" id="cdc">Kopieren</button><button class="btn" id="cdx">Ich habe sie gespeichert</button></div>`);
   m.querySelector("#cdc").onclick = async e => {
@@ -40,7 +40,7 @@ async function setup2fa(done) {
     qr = q.createSvgTag(5, 3).replace("<svg ", '<svg style="width:100%;height:auto;display:block" ');
   } catch (e) {}
   const spaced = s.secret.replace(/(.{4})/g, "$1 ").trim(),
-    m = modal(`<h3>Zwei-Faktor-Anmeldung einrichten</h3>
+    m = uiModal(`<h3>Zwei-Faktor-Anmeldung einrichten</h3>
       <ol class="pl20 lh1_5"><li>Installiere eine Authenticator-App (z. B. Google Authenticator, Microsoft Authenticator, Aegis, 2FAS oder Bitwarden).</li>
       <li>Scanne den QR-Code – oder tippe auf „In der App öffnen“, falls die App auf diesem Handy ist.</li>
       <li>Gib den angezeigten 6-stelligen Code ein.</li></ol>

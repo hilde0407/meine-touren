@@ -1,6 +1,6 @@
 /* =====================  GPS-Track korrigieren  ===================== */
 function trackFixDialog(id, done) {
-  const m = modal(`<h2>GPS-Track korrigieren</h2><div id="tfb" class="mut">Track wird untersucht …</div>`);
+  const m = uiModal(`<h2>GPS-Track korrigieren</h2><div id="tfb" class="mut">Track wird untersucht …</div>`);
   m.querySelector(".uibox").classList.add("tfbox");
   (async () => {
     const b = m.querySelector("#tfb");

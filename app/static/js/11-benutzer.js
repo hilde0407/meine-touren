@@ -17,7 +17,7 @@ async function aboutBox() {
   try {
     if (window.MTApp && MTApp.version) app = MTApp.version();
   } catch (e) {}
-  const m = modal(`<h3>Meine Touren</h3>
+  const m = uiModal(`<h3>Meine Touren</h3>
     <div class="rows"><div class="r"><span>Android-App<small>${app ? "läuft auf diesem Gerät" : "du nutzt gerade den Browser"}</small></span><b>${app ? esc(app) : "–"}</b></div>
     <div class="r"><span>Server<small>dein Meine-Touren-Server</small></span><b>${esc((sv.split(" ·")[0] || "?").trim())}</b></div></div>
     <p class="mut fs13 m6-0-0">${esc(sv)}</p>
@@ -152,7 +152,7 @@ function applyView() {
       lnk = ([k, l]) => `<a class="btn alt" href="#/${k}">${l}</a>`,
       main = items.filter(x => !MORE_SET.includes(x[0])),
       sett = items.filter(x => MORE_SET.includes(x[0]));
-    const m2 = modal(`<h3>Mehr</h3><div class="moregrid">${main.map(lnk).join("")}</div>
+    const m2 = uiModal(`<h3>Mehr</h3><div class="moregrid">${main.map(lnk).join("")}</div>
       ${sett.length ? `<h4 class="m16-0-6">Einstellungen & Prüfung</h4><div class="moregrid sm">${sett.map(lnk).join("")}</div>` : ""}
       <h4 class="m16-0-6">Darstellung</h4><div class="row">${[
         ["auto", "Automatisch"],
@@ -485,7 +485,7 @@ VIEWS.tour = async (id, q) => {
     $("#efsh").onclick = async () => {
       const us = (await api("/api/users").catch(() => [])).filter(u => u.uid !== ME.user.uid && (u.active === undefined || u.active));
       const m =
-        modal(`<h3>Fotos dieser Tour freigeben</h3><p class="mut fs14">Die Freigabe gilt für alle Fotos, die dieser Tour zugeordnet sind.</p><div class="field"><label>Für</label><select id="fg"><option value="*">Alle Benutzer</option>${us.map(u => `<option value="${esc(u.uid)}">${esc(u.name)}</option>`).join("")}</select></div>
+        uiModal(`<h3>Fotos dieser Tour freigeben</h3><p class="mut fs14">Die Freigabe gilt für alle Fotos, die dieser Tour zugeordnet sind.</p><div class="field"><label>Für</label><select id="fg"><option value="*">Alle Benutzer</option>${us.map(u => `<option value="${esc(u.uid)}">${esc(u.name)}</option>`).join("")}</select></div>
       <div class="uifoot"><button class="btn ghost" id="fgx">Abbrechen</button><button class="btn" id="fgo">Freigeben</button></div>`);
       m.querySelector("#fgx").onclick = () => m.remove();
       m.querySelector("#fgo").onclick = async () => {

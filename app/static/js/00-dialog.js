@@ -139,6 +139,7 @@
       host.removeEventListener("keydown", key, true);
       realRemove.call(host);
       inerted.forEach(el => (el.inert = false));
+      if (typeof host.onClose === "function") host.onClose();    // 3.46.0: Aufräumen des Aufrufers (vor der Rückgabe des Fokus)
       if (trigger && trigger.isConnected && typeof trigger.focus === "function") { try { trigger.focus(); } catch (e) {} }
     };
     const key = e => {

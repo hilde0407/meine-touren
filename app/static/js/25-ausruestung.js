@@ -13,7 +13,7 @@ const gStatus = g =>
 function gearForm(g, done) {
   g = g || {sports: [], kind: "Rad"};
   const sp = Object.keys(SPORT);
-  const m = modal(`<h2>${g.id ? "Ausrüstung bearbeiten" : "Neue Ausrüstung"}</h2>
+  const m = uiModal(`<h2>${g.id ? "Ausrüstung bearbeiten" : "Neue Ausrüstung"}</h2>
    <label>Name<input id="gn" maxlength="80" value="${esc(g.name || "")}" placeholder="z. B. Rennrad Canyon, Wanderschuhe Lowa"></label>
    <label>Art<select id="gk">${GEAR_KINDS.map(k => `<option ${k === g.kind ? "selected" : ""}>${k}</option>`).join("")}</select></label>
    <div class="m10-0-4">Wird automatisch zugeordnet bei Touren der Sportart <span class="mut">(sonst wählst du es in der Tour selbst)</span></div>
@@ -85,7 +85,7 @@ VIEWS.tour = async (...a) => {
     const mine = r.all.filter(g => r.ids.includes(g.id));
     row.innerHTML = `<span class="mut">Ausrüstung:</span>${mine.length ? mine.map(g => `<span class="chip on">${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)}</span>`).join("") : `<span class="mut">keine</span>`}<button class="btn ghost sm" id="gedit" title="Ausrüstung dieser Tour ändern">✎</button>`;
     $("#gedit").onclick = () => {
-      const m = modal(`<h2>Ausrüstung dieser Tour</h2><label class="row g8"><input type="checkbox" id="gauto" ${r.auto ? "checked" : ""}> automatisch nach Sportart und Datum</label>
+      const m = uiModal(`<h2>Ausrüstung dieser Tour</h2><label class="row g8"><input type="checkbox" id="gauto" ${r.auto ? "checked" : ""}> automatisch nach Sportart und Datum</label>
         <div id="glist" class="m10-0">${r.all.map(g => `<label class="row g8 m4-0"><input type="checkbox" class="cb" value="${g.id}" ${r.ids.includes(g.id) ? "checked" : ""}> ${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)}</label>`).join("")}</div>
         <div class="uifoot"><button class="btn ghost" id="gno">Abbrechen</button><button class="btn" id="gok">Speichern</button></div>`);
       const sync = () => m.querySelectorAll("#glist input").forEach(i => (i.disabled = $("#gauto").checked));

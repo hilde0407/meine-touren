@@ -11,7 +11,7 @@ const DV_SVG = {
 };
 const dvJson = (m, o) => ({method: m, headers: {"content-type": "application/json"}, body: JSON.stringify(o)});
 const dvBox = html => {
-  const m = modal(html);
+  const m = uiModal(html);
   m.querySelector(".uibox").classList.add("dvbox");
   return m;
 };

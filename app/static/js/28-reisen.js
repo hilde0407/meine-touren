@@ -7,7 +7,7 @@ VIEWS.trip = async id => {
   if (!tr || !bar || bar.querySelector("#tredit")) return;
   bar.insertAdjacentHTML("beforeend", `<span class="sp"></span><button class="btn alt sm" id="tredit" title="Namen oder Zeitraum dieser Reise ändern">✎ Reise bearbeiten</button>`);
   $("#tredit").onclick = () => {
-    const m = modal(`<h2>Reise bearbeiten</h2>
+    const m = uiModal(`<h2>Reise bearbeiten</h2>
      <p class="mut fs14">Name und Zeitraum der automatisch erkannten Reise. Ein anderer Zeitraum nimmt alle Touren dieser Tage auf (auch solche, die nicht weit von zu Hause waren) bzw. lässt Touren außerhalb weg.</p>
      <div class="field"><label>Name</label><input id="tn" maxlength="120" value="${esc(tr.region)}" class="w100"></div>
      <div class="row g8 aic mt8"><label>Von <input id="tf" type="date" value="${tr.start}"></label><label>bis <input id="tt" type="date" value="${tr.end}"></label></div>

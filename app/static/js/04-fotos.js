@@ -193,7 +193,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
 }
 function shiftDialog(sp, done) {
   const first = sp.slice().sort((a, b) => a.taken_ts - b.taken_ts)[0];
-  const m = modal(`<h2>Zeit von ${sp.length} Foto${sp.length > 1 ? "s" : ""} verschieben</h2>
+  const m = uiModal(`<h2>Zeit von ${sp.length} Foto${sp.length > 1 ? "s" : ""} verschieben</h2>
    <p class="mut fs14">Alle gewählten Fotos wandern um denselben Betrag, ihre Abstände bleiben gleich. Typischer Fall: Kamera stand auf deutscher Zeit, die Reise lag in einer anderen Zeitzone (z. B. Kanaren: 1 Stunde früher).<br>Das erste gewählte Foto hat jetzt: <b>${fmtDatumKurz(first.taken_ts, {zeit: true})}</b></p>
    <div class="row m8-0"><button class="btn alt sm" data-p="-3600">−1 Std.</button><button class="btn alt sm" data-p="3600">+1 Std.</button><button class="btn alt sm" data-p="-7200">−2 Std.</button><button class="btn alt sm" data-p="7200">+2 Std.</button></div>
    <div class="row aic g8"><select id="shs"><option value="1">später (+)</option><option value="-1">früher (−)</option></select><input id="shh" type="number" min="0" value="0" style="width:70px"> Std. <input id="shm" type="number" min="0" max="59" value="0" style="width:70px"> Min.</div>
@@ -418,7 +418,7 @@ const shiftTxt = s => {
   return `${s < 0 ? "−" : "+"}${h ? h + " Std. " : ""}${mi ? mi + " Min." : h ? "" : "0 Min."}`.trim();
 };
 function photoImportModal(o = {}) {
-  const m = modal(`<h2 id="pih"></h2><div id="pib"></div>`);
+  const m = uiModal(`<h2 id="pih"></h2><div id="pib"></div>`);
   const q = s => m.querySelector(s);
   let busy = false,
     stop = false;
