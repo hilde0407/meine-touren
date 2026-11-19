@@ -2083,3 +2083,9 @@ html.mob .mapui.mfo .kapw:not([data-kp=standort]):not(.kapedit)>.box{flex:1 1 10
 html.mob .mapui.mfo .kapw:not([data-kp=standort])>.kapt:not([hidden]){flex:1 1 100%;order:5}
 html.mob .mapui.mfo .kapw[data-kp=stil]>.box{position:static}
 html.mob .mapbox .tpanel{bottom:calc(53px + 86px + env(safe-area-inset-bottom))}
+/* 3.44.0 Übersicht am Handy: Zepp-Schnellknopf allein in der ersten Zeile, „Seite anpassen“ und „Ansichten“ gleich breit nebeneinander in der zweiten (ohne Zepp-Knopf bleiben die zwei wie gehabt) */
+@media (max-width:700px){
+  .slopen:has(#slzepp:not([hidden])) #slzepp{margin-right:100%}
+  .slopen:has(#slzepp:not([hidden])) #slopen,.slopen:has(#slzepp:not([hidden])) #slviews{flex:1 1 0;min-width:0;justify-content:center;white-space:nowrap}
+  .slopen:has(#slzepp:not([hidden])) .slbt{overflow:hidden;text-overflow:ellipsis}
+}

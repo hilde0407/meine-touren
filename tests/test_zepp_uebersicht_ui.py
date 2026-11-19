@@ -305,8 +305,12 @@ def test_handy_schnellknopf_in_der_kopfzeile_ohne_scrollen_und_startet(pw, app, 
         expect(q).to_contain_text("Zepp", timeout=T)
         _settled(pg)
         b = q.bounding_box()
-        nb = pg.evaluate("() => [...document.querySelectorAll('.slopen .btn')].filter(e => e.id !== 'slzepp' && e.offsetParent !== null).map(e => { const r = e.getBoundingClientRect(); return [r.width, r.height]; })")
-        assert nb, nb
+        nb = pg.evaluate("() => [...document.querySelectorAll('.slopen .btn')].filter(e => e.id !== 'slzepp' && e.offsetParent !== null).map(e => { const r = e.getBoundingClientRect(); return [r.width, r.height, r.y, r.right]; })")
+        assert len(nb) == 2, nb
+        # 3.44.0: Zepp-Knopf allein in der ersten Zeile, „Seite anpassen“ und „Ansichten“ darunter in EINER Zeile (gleiche y, kein Umbruch), Desktop unverändert
+        assert nb[0][2] == nb[1][2] and nb[0][2] >= b["y"] + b["height"] - 1 and nb[1][3] <= 390, (b, nb)
+        assert b["x"] < nb[0][3] and abs(nb[0][0] - nb[1][0]) <= 2, (b, nb)
+        nb = [(w, h) for w, h, _, _ in nb]
         # ganz oben ohne Scrollen; 3.43.0: gleich hoch wie „Seite anpassen“/„Ansichten“ (Touch-Ziel ≥ 44 px), nicht breiter als der breiteste Nachbar, keine volle Breite
         assert pg.evaluate("() => scrollY") == 0 and b["y"] + b["height"] <= 400 and b["height"] >= 44, b
         assert all(abs(h - b["height"]) <= 1 for _, h in nb) and b["width"] <= max(w for w, _ in nb) + 1 and b["width"] < 300, (b, nb)
