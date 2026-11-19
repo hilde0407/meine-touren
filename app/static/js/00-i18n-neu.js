@@ -3167,4 +3167,5 @@ Es gibt noch keine Sicherung deiner Touren. || There is no backup of your tours 
 Die letzte Sicherung ist nicht lesbar oder beschädigt. || The latest backup is unreadable or damaged. || La dernière sauvegarde est illisible ou endommagée. || La última copia de seguridad es ilegible o está dañada.
 Morgen erinnern || Remind me tomorrow || Me le rappeler demain || Recordármelo mañana
 Zur Sicherung || Go to backup || Vers la sauvegarde || Ir a la copia de seguridad
+Filter ({} aktiv) || Filter ({} active) || Filtre ({} actif) || Filtro ({} activo)
 `;

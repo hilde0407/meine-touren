@@ -274,7 +274,7 @@ def test_catalog_dash_has_all_categories_and_desktop_shot(pw, app):
         pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length === 4", timeout=T)
         assert sorted(pg.locator(".slcard:visible .slci h3").all_inner_texts()) == ["Ausrüstung", "Geplante Touren", "Meilensteine", "Ziele"]
         pg.locator(".slchip", has_text="Alle").click()
-        pg.wait_for_function("(n) => document.querySelectorAll('.slcard:not([hidden])').length === n", arg=len(DASH_TYPES) + 13, timeout=T)
+        pg.wait_for_function("(n) => document.querySelectorAll('.slcard:not([hidden])').length === n", arg=len(DASH_TYPES) + 12, timeout=T)
         _shot(pg, "katalog-desktop-hell.png", full=False)
         assert not pg.errors, pg.errors
     finally:

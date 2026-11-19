@@ -357,15 +357,17 @@ VIEWS.tours = async (_name, qp) => {
   const ys = years(),
     sp = [...new Set(TOURS.map(t => t.sport))];
   $("#main").innerHTML = `<div class="sec mt0"><h2>Alle Touren</h2><span class="sub" id="cnt"></span></div>
-   ${xf ? tourXfBar(xf) : ""}<div class="filters"><input id="q" placeholder="Name suchen" class="mnw230"><select id="fy"><option value="0">Alle Jahre</option>${ys.map(y => `<option>${y}</option>`).join("")}</select>
+   ${xf ? tourXfBar(xf) : ""}<div class="filters" id="flt"><input id="q" placeholder="Name suchen" class="mnw230"><span class="fxtra"><select id="fy"><option value="0">Alle Jahre</option>${ys.map(y => `<option>${y}</option>`).join("")}</select></span>
    <select id="fs"><option value="">Alle Sportarten</option>${sp.map(s => `<option value="${s}">${sName(s)}</option>`).join("")}</select>
-   <select id="fz" title="Jahreszeit"><option value="">Ganzjährig</option><option value="sommer">Sommerhalbjahr (Mai–Okt)</option><option value="winter">Winterhalbjahr (Nov–Apr)</option></select>
+   <span class="fxtra"><select id="fz" title="Jahreszeit"><option value="">Ganzjährig</option><option value="sommer">Sommerhalbjahr (Mai–Okt)</option><option value="winter">Winterhalbjahr (Nov–Apr)</option></select>
    <select id="fb" title="Meine Bewertung"><option value="">Alle Bewertungen</option><option value="5">★★★★★</option><option value="4">ab ★★★★</option><option value="3">ab ★★★</option></select>
    <select id="fr" title="Region"><option value="">Alle Regionen</option>${regionOpts()}</select>
    <select id="ft" title="Tag / Album"><option value="">Alle Tags</option>${allTags()
      .map(x => `<option value="${esc(x)}">${esc(x)}</option>`)
-     .join("")}</select>
-   <select id="so"><option value="date">Neueste zuerst</option><option value="old">Älteste zuerst</option><option value="km">Längste Strecke</option><option value="up">Größter Aufstieg</option><option value="h">Längste Dauer</option></select></div>
+     .join("")}</select></span>
+   <select id="so"><option value="date">Neueste zuerst</option><option value="old">Älteste zuerst</option><option value="km">Längste Strecke</option><option value="up">Größter Aufstieg</option><option value="h">Längste Dauer</option></select>
+   <button type="button" class="btn alt fmore" id="fmore" aria-expanded="false"><span>Filter</span><b class="fcnt" id="fcnt" hidden></b></button>
+   <button type="button" class="btn ghost fclear" id="fclear" hidden>Filter zurücksetzen</button></div>
    <div class="tl" id="tl"></div><div class="row jcc mt20"><button class="btn ghost" id="more">Mehr anzeigen</button></div>`;
   let lim = 80;
   const KEY = "tf",
@@ -399,8 +401,32 @@ VIEWS.tours = async (_name, qp) => {
     if (f0[i] !== undefined) $("#" + i).value = f0[i];
   });
   if (f0.lim) lim = f0.lim;
+  const XF = ["fy", "fz", "fb", "fr", "ft"],                                                     // 3.48.0 (Handy): diese Filter stehen hinter dem Knopf „Filter“
+    xCount = () => XF.filter(i => $("#" + i).value && $("#" + i).value !== "0").length,
+    xPaint = () => {
+      const n = xCount(),
+        b = $("#fcnt");
+      b.hidden = !n;
+      b.textContent = n || "";
+      $("#fmore").setAttribute("aria-label", (t => (typeof window.TL === "function" ? window.TL(t) : t))(n ? `Filter (${n} aktiv)` : "Filter"));
+      $("#fclear").hidden = !n;
+    };
+  $("#fmore").onclick = () => {
+    const o = $("#flt").classList.toggle("fxo");
+    $("#fmore").setAttribute("aria-expanded", o ? "true" : "false");
+  };
+  $("#fclear").onclick = () => {
+    XF.forEach(i => ($("#" + i).value = i === "fy" ? "0" : ""));
+    lim = 80;
+    draw();
+  };
+  if (xCount()) {
+    $("#flt").classList.add("fxo");                                                              // gemerkte Filter sind sichtbar, nie unsichtbar aktiv
+    $("#fmore").setAttribute("aria-expanded", "true");
+  }
   const draw = () => {
     sv();
+    xPaint();
     const q = $("#q").value,
       y = +$("#fy").value,
       s = $("#fs").value,
