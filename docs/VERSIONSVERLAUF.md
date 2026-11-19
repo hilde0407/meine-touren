@@ -2,6 +2,10 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.47.1 – Fehlerkorrektur Notizbox
+
+- Die Notizbox einer Tour wurde nach dem Ansehen einer langen Notiz bei allen Touren zu hoch. Der Browser hatte die automatisch vergrößerte Höhe als „gewählte Größe“ gemerkt. Jetzt werden nur noch selbst gezogene Größen gemerkt; ältere gemerkte Werte werden einmalig zurückgesetzt.
+
 ## Version 3.47.0 – Planung ausbauen
 
 - Notizen & Quellen am Plan: mehrzeilige Notiz, Herkunft (eigene Planung, Komoot, Outdooractive, Wanderführer, Sonstiges) und bis zu 20 Links mit Art; nur http/https, serverseitig geprüft, nie automatisch abgerufen. Die Planliste zeigt „Notiz“ und „n Links“.

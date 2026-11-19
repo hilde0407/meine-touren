@@ -472,12 +472,15 @@ def test_stars_safety_compare_and_note_size(page):
     page.goto(base + "#/tour/" + tid); page.wait_for_selector("#starrow", timeout=20000)
     # Größe der Notizbox wird gemerkt
     page.evaluate("document.querySelector('#note').style.height = '210px'"); page.wait_for_timeout(900)
-    assert "210" in page.evaluate("localStorage.getItem('size:note')")
+    assert "210" in page.evaluate("localStorage.getItem('size2:note')")
     page.goto(base + "#/tour/" + other); page.wait_for_selector("#starrow", timeout=20000)
     assert 200 <= page.evaluate("document.querySelector('#note').offsetHeight") <= 220
     # lange Notiz: Box wächst mit, damit der ganze Text lesbar ist
     page.fill("#note", "\n".join(f"Zeile {i}" for i in range(30)))
     assert page.evaluate("document.querySelector('#note').offsetHeight >= document.querySelector('#note').scrollHeight")
+    # 3.47.1: die automatisch vergrößerte Höhe einer langen Notiz wird NICHT als gewählte Größe gemerkt
+    page.wait_for_timeout(900)
+    assert page.evaluate("JSON.parse(localStorage.getItem('size2:note')).h") == 210
     # Regression: Tippen darf die Box nicht Zeichen für Zeichen aufblähen
     page.fill("#note", "")
     page.evaluate("document.querySelector('#note').style.height = '120px'"); page.wait_for_timeout(500)

@@ -8,7 +8,7 @@ const post26 = o => ({method: "POST", headers: {"content-type": "application/jso
 function rememberSize(el, key) {
   if (!el || el.dataset.rs) return;
   el.dataset.rs = "1";
-  const K = "size:" + key;
+  const K = "size2:" + key;   // 3.47.1: neuer Schlüssel, alte Werte enthielten automatisch vergrößerte Höhen
   try {
     const v = JSON.parse(localStorage.getItem(K) || "null");
     if (v && v.h >= 40) el.style.height = v.h + "px";
@@ -36,10 +36,13 @@ function rememberSize(el, key) {
     tm = setTimeout(() => {
       const cur = el.offsetHeight + "x" + el.offsetWidth;
       if (cur === last || !el.offsetHeight) return;
+      const wChanged = el.offsetWidth !== +last.split("x")[1];
       last = cur;
-      if (el.offsetHeight !== lastFit) floor = el.offsetHeight;
+      const hUser = el.offsetHeight !== lastFit;   // nur vom Nutzer gezogene Größen merken, nie die automatisch angepasste Höhe
+      if (hUser) floor = el.offsetHeight;
+      else if (!wChanged) return;
       try {
-        localStorage.setItem(K, JSON.stringify({h: el.offsetHeight, w: el.offsetWidth}));
+        localStorage.setItem(K, JSON.stringify({h: floor, w: el.offsetWidth}));
       } catch (e) {}
     }, 400);
   }).observe(el);
