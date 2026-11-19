@@ -476,33 +476,25 @@ Object.assign(window.SL_WT, {
       slBadge(c, open === 1 ? "1 Plan" : open ? `${open} Pläne` : "");
     },
   },
-  /* Schlüssel bleibt „zeppimport“ (gespeicherte Layouts und Ansichten); seit 3.31.0 der Baustein „Touren holen“ */
+  /* Schlüssel bleibt „zeppimport“ (gespeicherte Layouts und Ansichten); seit 3.31.0 der Baustein „Touren holen“. 3.48.0: Einstellung „Darstellung“ Karte oder Nur Knopf
+     (der frühere Baustein „Touren holen (nur Knopf)“, Kennung holenknopf, wird über SL_ALIAS / app/baustein_umzug.py darauf abgebildet). */
   zeppimport: {
     fam: "uebersicht", cat: "quellen", icon: "watch", name: "Touren holen", title: () => "Touren holen", defaults: {}, filter: {range: null},
-    desc: "Startet den Import deiner Touren aus dem Konto deiner Uhr (Zepp, Garmin oder Suunto) mit einem Tipp, zeigt den Fortschritt und wie der letzte Lauf ausging. Bei mehreren Konten gibt es je Konto eine Zeile und „Alle holen“. Fehlt die Verbindung, führt ein Knopf zur Einrichtung. Für Betrachter unsichtbar.",
+    desc: "Startet den Import deiner Touren aus dem Konto deiner Uhr (Zepp, Garmin oder Suunto) mit einem Tipp, zeigt den Fortschritt und wie der letzte Lauf ausging. Bei mehreren Konten gibt es je Konto eine Zeile und „Alle holen“. Fehlt die Verbindung, führt ein Knopf zur Einrichtung. Als „Nur Knopf“ bleibt ein einziger Knopf (bei mehreren Konten mit kleinem Menü) mit Statuszeile, für alle, die ihn lieber im Raster haben als in der Kopfzeile. Für Betrachter unsichtbar.",
+    fields: [{k: "view", kind: "radio", def: "karte", label: "Darstellung", options: [["karte", "Karte mit Fortschritt"], ["knopf", "Nur Knopf"]]}],
     preview: () => slPrev('<span class="zpi-pv"><b>Touren holen</b></span>'),
-    render(c, b) {
+    render(c, b, cfg) {
       if (typeof isViewer === "function" && isViewer()) {                     // Betrachter dürfen nichts starten (der Server lehnt es ohnehin ab): Karte bleibt unsichtbar
         c.dataset.hn = "aus";
         return;
       }
-      ZI.cards.add(c);
-      ziHook();
-      ziPaint(c);
-      return ziTick();
-    },
-  },
-  holenknopf: {
-    fam: "uebersicht", cat: "quellen", icon: "watch", name: "Touren holen (nur Knopf)", title: () => "Touren holen (nur Knopf)", defaults: {}, filter: {range: null}, ws: ["drittel", "halb"],
-    desc: "Ein einziger Knopf, der deine Touren aus dem Konto deiner Uhr holt: beschriftet mit der Marke (Zepp, Garmin, Suunto), bei mehreren Konten mit einem kleinen Menü. Darunter eine Statuszeile. Für alle, die den Knopf lieber im Raster haben als in der Kopfzeile. Für Betrachter unsichtbar.",
-    preview: () => slPrev('<span class="zpi-pv"><b>Touren-Knopf</b></span>'),
-    render(c, b) {
-      if (typeof isViewer === "function" && isViewer()) {
-        c.dataset.hn = "aus";
-        return;
+      if (cfg && cfg.view === "knopf") {
+        c.dataset.zk = "1";
+        c.classList.add("zpk");
+      } else {
+        delete c.dataset.zk;
+        c.classList.remove("zpk");
       }
-      c.dataset.zk = "1";
-      c.classList.add("zpk");
       ZI.cards.add(c);
       ziHook();
       ziPaint(c);
@@ -989,7 +981,7 @@ function slYearShell(it) {
     kennzahlen: "halb", tempo: "halb", vergleich: "halb", pulszonen: "halb", wetter: "halb", fotostreifen: "voll", notiz: "halb", splits: "voll", steigung: "halb", bewegung: "halb",
     durchschnitt: "halb", jahresrang: "halb", tageslicht: "halb", gipfel: "halb", vergleiche: "halb", stimmung: "halb", fotohighlights: "voll", miniprofil: "voll", steckbrief: "halb",
     jahr: "voll", periode: "halb", belastung: "halb", jahresvergleich: "halb", letzte: "halb", neuefotos: "voll", auffaellig: "drittel", bestwerte: "halb", heutevor: "halb",
-    serie: "halb", heatmap: "voll", meilensteine: "halb", wochentage: "halb", saison: "voll", sportarten: "halb", wiederentdecken: "voll", orte: "halb", uhrenzeit: "voll", ausruestung: "halb", geplant: "halb", rueckblick: "voll", zeppimport: "halb", holenknopf: "drittel", planergebnis: "voll",
+    serie: "halb", heatmap: "voll", meilensteine: "halb", wochentage: "halb", saison: "voll", sportarten: "halb", wiederentdecken: "voll", orte: "halb", uhrenzeit: "voll", ausruestung: "halb", geplant: "halb", rueckblick: "voll", zeppimport: "halb", planergebnis: "voll",
   };
   Object.entries(META).forEach(([k, w]) => {
     const T = window.SL_WT[k];
@@ -998,6 +990,5 @@ function slYearShell(it) {
     T.seiten = T.fam === "tour" ? ["tour"] : ["uebersicht", "tour", "statistik"];
   });
   window.SL_WT.auffaellig.seiten = ["uebersicht"];                                          // Verwaltungs-Hinweis auf Geräte, gehört zur Übersicht
-  window.SL_WT.holenknopf.seiten = ["uebersicht"];
   window.SL_WT.zeppimport.seiten = ["uebersicht"];                                          // ein Import-Knopf gehört nur zur Übersicht
 }

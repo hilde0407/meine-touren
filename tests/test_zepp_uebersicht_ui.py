@@ -539,28 +539,43 @@ def test_polar_ohne_konto_hinweis_dateiimport_kein_knopf(pw, app, clean):
 
 
 # ----------------------------------------------------------------------------------------------------------------- Baustein „Touren-Knopf“
+def _darstellung_knopf(pg):
+    wid = pg.evaluate("() => SL.docs.uebersicht.widgets.find(w => w.type === 'zeppimport').id")
+    pg.locator(f'.slit[data-sl="{wid}"] [data-a=cfg]').click()
+    pg.wait_for_selector(".slform", timeout=T)
+    pg.locator(".slform label.flchip", has_text="Nur Knopf").click()
+    pg.locator(".slform button[type=submit]").click()
+    pg.wait_for_function("() => SL.docs.uebersicht.widgets.some(w => w.type === 'zeppimport' && w.cfg.view === 'knopf')", timeout=T)
+
+
 def _add_knopf(pg):
     from tests.test_bausteine_ui import _catalog, _edit
     pg.wait_for_selector("#slopen", state="visible", timeout=30000)
     _edit(pg)
     _catalog(pg)
-    pg.locator('[data-add="holenknopf"]').click()
-    pg.wait_for_selector('[data-wtype="holenknopf"] .zpi', timeout=T)
+    pg.locator('[data-add="zeppimport"]').click()
+    pg.wait_for_selector('[data-wtype="zeppimport"] .zpi', timeout=T)
+    _darstellung_knopf(pg)                                                       # 3.48.0: „Touren holen (nur Knopf)“ ist die Darstellung „Nur Knopf“
+    pg.wait_for_selector('[data-wtype="zeppimport"].zpk .zpi', timeout=T)
 
 
 def test_baustein_touren_knopf_eine_quelle_und_katalog(pw, app, clean):
     fake = Fake(conf=False, garmin=True, glast=_glast())
+    _api(app, "uebersicht", "PUT", {"hidden": ["zepp"]})                          # der Standard-Abschnitt „Touren holen“ blockiert sonst den Katalogeintrag
     pg = _page(pw, app, fake)
     try:
         from tests.test_bausteine_ui import _catalog, _edit
         pg.wait_for_selector("#slopen", state="visible", timeout=30000)
         _edit(pg)
         _catalog(pg)
-        card = pg.locator('.slcard:has([data-add="holenknopf"])')
-        assert card.get_attribute("data-cat") == "quellen" and card.locator("h3").inner_text() == "Touren holen (nur Knopf)" and card.locator(".slpv").inner_html().strip()
+        card = pg.locator('.slcard:has([data-add="zeppimport"])')
+        assert card.get_attribute("data-cat") == "quellen" and card.locator("h3").inner_text() == "Touren holen" and card.locator(".slpv").inner_html().strip()
+        assert pg.locator('[data-add="holenknopf"]').count() == 0                  # nur noch ein Baustein im Katalog
         assert card.locator("[data-add]").is_enabled()
-        pg.locator('[data-add="holenknopf"]').click()
-        w = pg.locator('[data-wtype="holenknopf"]')
+        pg.locator('[data-add="zeppimport"]').click()
+        pg.wait_for_selector('[data-wtype="zeppimport"] .zpi', timeout=T)
+        _darstellung_knopf(pg)
+        w = pg.locator('[data-wtype="zeppimport"].zpk')
         btn = w.locator("button.zpb")
         expect(btn).to_contain_text("Garmin-Import starten", timeout=T)
         expect(w.locator(".zpt")).to_contain_text("Letzter Lauf:", timeout=T)
@@ -574,18 +589,19 @@ def test_baustein_touren_knopf_eine_quelle_und_katalog(pw, app, clean):
         btn.click(force=True)
         assert fake.posts == 1
         _gespeichert(pg)
-        assert [x["type"] for x in _api(app, "uebersicht")["layout"]["widgets"]] == ["holenknopf"]
-        assert pg.evaluate("() => SL_WT.holenknopf.w") == "drittel" and pg.evaluate("() => SL_WT.holenknopf.ws.join()") == "drittel,halb" and pg.evaluate("() => SL_WT.holenknopf.seiten.join()") == "uebersicht"
+        assert [(x["type"], x["cfg"].get("view")) for x in _api(app, "uebersicht")["layout"]["widgets"]] == [("zeppimport", "knopf")]
+        assert pg.evaluate("() => SL_WT.holenknopf === undefined && SL_WT.zeppimport.seiten.join()") == "uebersicht"
     finally:
         pg.browser_.close()
 
 
 def test_baustein_touren_knopf_mehrere_quellen_menue_und_einrichten(pw, app, clean):
     fake = Fake(garmin=True, last=_last())
+    _api(app, "uebersicht", "PUT", {"hidden": ["zepp"]})                          # der Standard-Abschnitt „Touren holen“ blockiert sonst den Katalogeintrag
     pg = _page(pw, app, fake)
     try:
         _add_knopf(pg)
-        w = pg.locator('[data-wtype="holenknopf"]')
+        w = pg.locator('[data-wtype="zeppimport"].zpk')
         mb = w.locator("button.zpmb")
         expect(mb).to_contain_text("Touren holen", timeout=T)
         expect(mb).to_have_attribute("aria-haspopup", "menu", timeout=T)           # Menü-Knopf erst nach der Antwort von /api/import-quellen
@@ -604,12 +620,13 @@ def test_baustein_touren_knopf_mehrere_quellen_menue_und_einrichten(pw, app, cle
         quiet(pg, 3000)                                                      # entprelltes Speichern des Layouts abwarten, bevor die Seite verschwindet
     finally:
         pg.browser_.close()
-    _api(app, "uebersicht", "DELETE")                                        # zweiter Teil beginnt ohne den Baustein (sonst „Bereits hinzugefügt“: Zustand aus Teil 1)
+    _api(app, "uebersicht", "PUT", {"hidden": ["zepp"]})                     # zweiter Teil beginnt ohne den Baustein (sonst „Bereits hinzugefügt“: Zustand aus Teil 1)
     fake = Fake(conf=False, geraete=[{"kind": "garmin", "label": "Garmin", "konto": True}])
+    _api(app, "uebersicht", "PUT", {"hidden": ["zepp"]})                          # der Standard-Abschnitt „Touren holen“ blockiert sonst den Katalogeintrag
     pg = _page(pw, app, fake)
     try:
         _add_knopf(pg)
-        expect(pg.locator('[data-wtype="holenknopf"] a.zpb')).to_have_text("Garmin einrichten", timeout=T)
+        expect(pg.locator('[data-wtype="zeppimport"].zpk a.zpb')).to_have_text("Garmin einrichten", timeout=T)
     finally:
         pg.browser_.close()
 
@@ -619,9 +636,9 @@ def test_baustein_touren_knopf_betrachter_unsichtbar(pw, app, clean):
     pg = _page(pw, app, fake, viewer=True)                              # Betrachter bekommen immer das Standard-Layout (ohne den Baustein) – und selbst gebaut bleibt er leer
     try:
         pg.wait_for_selector("main.home", timeout=30000)
-        pg.wait_for_function("() => typeof SL_WT === 'object' && !!SL_WT.holenknopf && typeof isViewer === 'function' && isViewer()", timeout=T)
-        assert pg.locator('[data-wtype="holenknopf"]').count() == 0
-        r = pg.evaluate("() => { const c = document.createElement('section'); c.innerHTML = '<div class=\"tlsb\"></div>'; SL_WT.holenknopf.render(c, c.firstChild, {}); return [c.dataset.hn || '', c.querySelector('button') ? 1 : 0, c.dataset.zk || '']; }")
+        pg.wait_for_function("() => typeof SL_WT === 'object' && !!SL_WT.zeppimport && typeof isViewer === 'function' && isViewer()", timeout=T)
+        assert pg.locator('[data-wtype="zeppimport"] .zpi, [data-wtype="zeppimport"] button').count() == 0
+        r = pg.evaluate("() => { const c = document.createElement('section'); c.innerHTML = '<div class=\"tlsb\"></div>'; SL_WT.zeppimport.render(c, c.firstChild, {view: 'knopf'}); return [c.dataset.hn || '', c.querySelector('button') ? 1 : 0, c.dataset.zk || '']; }")
         assert r == ["aus", 0, ""] and fake.posts == 0
     finally:
         pg.browser_.close()
@@ -629,20 +646,20 @@ def test_baustein_touren_knopf_betrachter_unsichtbar(pw, app, clean):
 
 @pytest.mark.parametrize("width,scheme", [(1280, "light"), (390, "light"), (390, "dark")])
 def test_baustein_touren_knopf_390_kontrast(pw, app, clean, width, scheme):
-    _api(app, "uebersicht", "PUT", {"v": 1, "widgets": [{"id": "hk1", "type": "holenknopf", "cfg": {}}], "w": {"hk1": "halb"}})
+    _api(app, "uebersicht", "PUT", {"v": 1, "hidden": ["zepp"], "widgets": [{"id": "hk1", "type": "holenknopf", "cfg": {}}], "w": {"hk1": "halb"}})
     fake = Fake(garmin=True, last=_last(), glast=_glast())
     pg = _page(pw, app, fake, width=width, height=844 if width == 390 else 900, scheme=scheme, dpr=2 if width == 390 else 1)
     try:
-        pg.wait_for_selector('[data-wtype="holenknopf"] .zpi', timeout=30000)
-        expect(pg.locator('[data-wtype="holenknopf"] .zpt')).to_contain_text("Garmin", timeout=T)
+        pg.wait_for_selector('[data-wtype="zeppimport"].zpk .zpi', timeout=30000)
+        expect(pg.locator('[data-wtype="zeppimport"].zpk .zpt')).to_contain_text("Garmin", timeout=T)
         _settled(pg)
         assert pg.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
-        assert pg.evaluate("() => { const w = document.querySelector('[data-wtype=holenknopf]'); return w.scrollWidth <= w.clientWidth + 1; }")
-        r = pg.evaluate(CONTRAST, ['[data-wtype="holenknopf"] .zpb', '[data-wtype="holenknopf"] .zpm'])
+        assert pg.evaluate("() => { const w = document.querySelector('[data-wtype=zeppimport].zpk'); return w.scrollWidth <= w.clientWidth + 1; }")
+        r = pg.evaluate(CONTRAST, ['[data-wtype="zeppimport"].zpk .zpb', '[data-wtype="zeppimport"].zpk .zpm'])
         assert len(r) == 2 and all(v >= 4.5 for v in r.values()), r
-        pg.locator('[data-wtype="holenknopf"] button.zpmb').click()
-        expect(pg.locator('[data-wtype="holenknopf"] .zpmenu')).to_be_visible(timeout=T)
-        r = pg.evaluate(CONTRAST, ['[data-wtype="holenknopf"] .zpmi'])
+        pg.locator('[data-wtype="zeppimport"].zpk button.zpmb').click()
+        expect(pg.locator('[data-wtype="zeppimport"].zpk .zpmenu')).to_be_visible(timeout=T)
+        r = pg.evaluate(CONTRAST, ['[data-wtype="zeppimport"].zpk .zpmi'])
         assert r and all(v >= 4.5 for v in r.values()), r
         _shot(pg, f"touren-knopf-{width}-{scheme}.png", full=False)
     finally:

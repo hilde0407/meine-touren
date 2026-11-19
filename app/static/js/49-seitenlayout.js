@@ -111,6 +111,7 @@ const SL_ALIAS = {
     return ["ziele", {view: "warnung", zeit: "jahr", ...slPick(c, ["sports", "title", "schwelle", "ausblenden"]), ...(sn.length ? {snoozes: sn} : {})}];
   },
   hnwoche: c => ["ziele", {view: "balken", zeit: "woche", ...slPick(c, ["sports", "title"])}],
+  holenknopf: c => ["zeppimport", {view: "knopf", ...slPick(c, ["title"])}],                      // 3.48.0: „Touren holen (nur Knopf)“ ist die Darstellung „Nur Knopf“ von „Touren holen“
   rekorde: c => ["bestwerte", {n: 1, werte: ["km", "hm", "tempo"], ...slPick(c, ["sports", "range", "yr", "eigen", "title"])}],
   sttop: c => ["bestwerte", {n: c.n === 8 ? 10 : [1, 3, 5, 10].includes(c.n) ? c.n : 5, werte: [["km", "hm", "dauer", "tempo"].includes(c.wert) ? c.wert : "km"], ...slPick(c, ["sports", "range", "yr", "eigen", "title"])}],
 };

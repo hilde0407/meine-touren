@@ -268,7 +268,7 @@ def test_catalog_dash_has_all_categories_and_desktop_shot(pw, app):
     try:
         _edit(pg)
         _catalog(pg)
-        assert pg.locator(".slcard").count() == len(DASH_TYPES) + 13                    # 3.45.0: 7 statt 9 Hinweis-Bausteine; plus „Fitness-Einordnung“ (3.44.0), plus „Erinnerungen“ (3.32.0, mehrfach), plus „Touren-Knopf“ (3.31.0), plus „Zepp-Import“ (3.30.0), plus „Dein Jahr“ und 9 Hinweis-Bausteine (3.23.0) und „Eigene Kennzahl“ (3.28.0) (3.19.0, hat kein .tlsb und wird in test_bausteine_konfig_ui.py geprüft)
+        assert pg.locator(".slcard").count() == len(DASH_TYPES) + 12                    # 3.48.0: „Touren-Knopf“ ist die Darstellung von „Touren holen“ (12 statt 13); 3.45.0: 7 statt 9 Hinweis-Bausteine; plus „Fitness-Einordnung“ (3.44.0), plus „Erinnerungen“ (3.32.0, mehrfach), plus „Zepp-Import“ (3.30.0), plus „Dein Jahr“ und 9 Hinweis-Bausteine (3.23.0) und „Eigene Kennzahl“ (3.28.0) (3.19.0, hat kein .tlsb und wird in test_bausteine_konfig_ui.py geprüft)
         assert pg.locator(".slchip").all_inner_texts() == ["Alle", "Zahlen", "Grafiken", "Rückblick", "Planung", "Touren holen", "Hinweise", "Eigene Kennzahlen"]
         pg.locator(".slchip", has_text="Planung").click()
         pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length === 4", timeout=T)

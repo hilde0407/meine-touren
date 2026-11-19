@@ -11,6 +11,7 @@ Oberfläche (static/js/49-seitenlayout.js, SL_ALIAS), damit auch Zwischenspeiche
   hnwoche       ziele       view balken,  zeit woche  (eigenes Wochenziel → Wochenziel der Statistik)
   rekorde       bestwerte   n 1, werte [km, hm, tempo]     (sports, range, yr, eigen, title bleiben)
   sttop         bestwerte   n wie bisher (8 → 10), werte [wert]
+  holenknopf    zeppimport  view knopf   (3.48.0: „Touren holen (nur Knopf)“ ist die Darstellung „Nur Knopf“ von „Touren holen“; title bleibt)
 
 Ziele werden nur noch an einer Stelle gepflegt (Tabelle „goals“, Statistik → Ziele). Hatte ein alter Baustein ein eigenes Ziel (Jahresziel: goal/metric, Wochenziel: ziel/einheit,
 Sammel-Baustein „Hinweise“: woche_ziel/woche_einheit), wird es beim Umzug als Ziel der Statistik übernommen – aber nur, wenn es für denselben Zeitraum, dieselbe Sportart und
@@ -24,7 +25,8 @@ from datetime import date
 
 ZIELE = "ziele"
 BESTWERTE = "bestwerte"
-ALT = ("jahresziel", "jahresziele", "hnziel", "hnwoche", "rekorde", "sttop")
+HOLEN = "zeppimport"
+ALT = ("jahresziel", "jahresziele", "hnziel", "hnwoche", "rekorde", "sttop", "holenknopf")
 GOAL_METRICS = ("km", "up", "count", "hours")
 PERIODS = ("year", "week")
 BW_WERTE = ("km", "hm", "dauer", "tempo", "monat")
@@ -83,6 +85,8 @@ def alias(typ, cfg):
         if z and z > 0:
             goals.append({"period": "week", "year": 0, "sport": _sport1(cfg), "metric": "count" if cfg.get("einheit") == "touren" else "km", "target": float(z), "quelle": typ})
         return ZIELE, {"view": "balken", "zeit": "woche", **_pick(cfg, _KEEP)}, goals
+    if typ == "holenknopf":                                              # 3.48.0
+        return HOLEN, {"view": "knopf", **_pick(cfg, ("title",))}, goals
     if typ == "rekorde":
         return BESTWERTE, {"n": 1, "werte": ["km", "hm", "tempo"], **_pick(cfg, _KEEP_FILTER)}, goals
     # sttop
