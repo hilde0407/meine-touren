@@ -164,7 +164,7 @@ def test_view_filter_field_is_validated_stored_per_view_and_in_exports():
 
 def test_version_and_notes():
     from app import config
-    assert config.VERSION.startswith("3.40.0 · Meine Touren")
+    assert config.VERSION.startswith("3.41.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.22.0.md").read_text(encoding="utf-8")
     assert "Statistik" in notes and "globale" in notes.lower() and "Bewusst nicht enthalten" in notes
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")

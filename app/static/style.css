@@ -41,7 +41,7 @@ clip-path:polygon(0 0,calc(100% - 22px) 0,100% 50%,calc(100% - 22px) 100%,0 100%
 .thumbrow{display:flex;gap:6px;margin-top:18px}.thumbrow img{height:70px;width:92px;object-fit:cover;border-radius:3px;cursor:pointer;opacity:.95}
 /* Buttons */
 .btn{background:var(--yellow);color:var(--yellow-ink);border:2px solid var(--yellow);border-radius:var(--r);padding:8px 18px;font:600 16px var(--d);letter-spacing:.3px;cursor:pointer;text-decoration:none;display:inline-block}
-.btn:hover{filter:brightness(1.06)}.btn.alt{background:transparent;color:inherit;border-color:currentColor;opacity:.92}.btn:disabled{opacity:.45;cursor:default}.btn.sm{padding:3px 12px;font-size:14px}
+.btn:hover{filter:brightness(1.06)}.btn.alt{background:transparent;color:inherit;border-color:currentColor;opacity:.92}.btn:disabled{opacity:.62;cursor:default}.btn.sm{padding:3px 12px;font-size:14px}
 .btn.ghost{background:transparent;border-color:var(--rule);color:var(--ink)}
 /* Überschriften & Abschnitte */
 .sec{display:flex;align-items:baseline;gap:16px;margin:46px 0 16px;flex-wrap:wrap}.sec h2{font-size:30px}.sec .sub{color:var(--mut);font-size:16px}.sp{flex:1}
@@ -2038,3 +2038,7 @@ html.mob .flight{height:calc(100vh - 102px - env(safe-area-inset-bottom));height
 .rschk{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:2px solid var(--dv-bad);border-radius:var(--r);margin-top:14px;font-weight:600;cursor:pointer;min-height:44px}.rschk input{width:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--dv-bad)}
 .rschk:focus-within{outline:3px solid var(--ink);outline-offset:2px}
 .rsbox .uidanger:disabled{opacity:.45}
+
+/* 3.41.0 Kontrast: --bad (Löschen) im Dunkelmodus heller, mit dunkler Schrift; Rotton auch für Hell definiert */
+:root{--bad:#b3261e}
+@media (prefers-color-scheme:dark){:root{--bad:#f08a84}.btn.c-white[style*="--bad"]{color:#2a0a08!important}}
