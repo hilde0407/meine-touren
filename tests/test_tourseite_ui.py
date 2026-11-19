@@ -216,14 +216,14 @@ def test_entry_card_only_when_there_is_something(pw, app):
         assert pg.locator("#tlsum").is_visible()
         t = pg.locator("#tlsum").inner_text()
         assert "Analyse" in t and "Training laut Uhr" not in t and "Messwerte" not in t and "Wetter" not in t
-        assert pg.evaluate(SECS) == ["map", "prof", "photos"]
+        assert pg.evaluate(SECS) == ["map", "prof", "planist", "photos"]                         # 3.48.0: „Wie ist es gelaufen?“ (Rückblick ohne Plan, genug Vergleichstouren)
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
     pg = _page(pw, app, tour="n0", devs=None)                                          # Tour ohne Strecke und ohne Daten: kein Einstieg
     try:
         assert pg.locator("#tlsum, #tlsgo").count() == 0 and pg.locator("#tlg-sum").is_hidden()
-        assert pg.evaluate(SECS) == ["map", "prof", "photos"]
+        assert pg.evaluate(SECS) == ["map", "planist", "prof", "photos"]
         assert pg.locator("#tls-prof").is_hidden()
         assert not pg.errors, pg.errors
     finally:

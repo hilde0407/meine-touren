@@ -54,7 +54,9 @@ def test_ohne_verknuepfung_nichts_zu_sehen(pw, app):
     _plan(app, None)                                            # Plan ohne Tour
     pg = _tour(pw, app)
     try:
-        assert pg.locator(CARD).count() == 0 and pg.locator("#tls-planist").count() == 0
+        if pg.locator(CARD).count():                                    # 3.48.0: ohne Plan höchstens „Wie ist es gelaufen?“ (genug Vergleichstouren), nie Plan und Ergebnis
+            expect(pg.locator(CARD + " summary h3")).to_have_text("Wie ist es gelaufen?", timeout=T)
+            assert pg.locator(CARD + " .plname, " + CARD + " [data-a=unlink]").count() == 0
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -103,7 +105,7 @@ def test_verknuepfung_loesen(pw, app):
         dlg = pg.locator(".uidlg")
         expect(dlg).to_be_visible(timeout=T)
         dlg.get_by_role("button", name="Verknüpfung lösen").click()
-        expect(pg.locator(CARD)).to_have_count(0, timeout=T)
+        expect(pg.locator(CARD + ' [data-a="unlink"], ' + CARD + " .plname")).to_have_count(0, timeout=T)      # 3.48.0: danach höchstens „Wie ist es gelaufen?“ (ohne Plan)
         assert _req(app, f"/api/plans/{pid}")["tour_id"] is None
         assert _req(app, "/api/tours/h0/plan") == {"status": "kein_plan"}
         assert not pg.errors, pg.errors

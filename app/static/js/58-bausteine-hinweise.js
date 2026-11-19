@@ -298,7 +298,12 @@ window.SL_WT.ziele = zlType();
    Daten: GET /api/backup/waechter (nutzt die Hinweis-Regel „Sicherung“ und den Sicherungszustand; keine zweite Berechnung im Browser).
    Abfrage einmal beim Laden und beim Seitenwechsel höchstens alle 5 Minuten, sonst aus dem Speicher. „Morgen erinnern“ merkt sich den Tag je Browser und Konto (nicht im Fehlerfall). */
 const WB_TTL = 5 * 60 * 1000;
-let wbData = null, wbAt = 0, wbLoad = null, wbMem = "";
+let wbData = null, wbAt = 0, wbLoad = null, wbMem = "", wbRO = null;
+/* Höhe der Leiste als --wbh: Seiten, die die ganze Fensterhöhe füllen (Karte, 3D-Flug), ziehen sie ab und scrollen dadurch nicht */
+const wbHoehe = () => {
+  const b = document.getElementById("wbar");
+  document.documentElement.style.setProperty("--wbh", (b ? Math.round(b.getBoundingClientRect().height) : 0) + "px");
+};
 const wbTag = () => {
   const d = new Date();
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
@@ -318,6 +323,7 @@ function wbZeichnen(d) {
   const top = document.querySelector("header.top");
   if (!d || !d.zeige || !top || !isAdmin() || isViewer() || (d.ausblendbar && wbVerborgen())) {
     if (bar) bar.remove();
+    wbHoehe();
     return;
   }
   if (!bar) {
@@ -335,7 +341,13 @@ function wbZeichnen(d) {
     try { localStorage.setItem(wbKey(), wbTag()); } catch (e) {}
     wbMem = wbTag();
     bar.remove();
+    wbHoehe();
   };
+  wbHoehe();
+  if (typeof ResizeObserver === "function" && !wbRO) {
+    wbRO = new ResizeObserver(wbHoehe);
+    wbRO.observe(bar);
+  }
 }
 function wbAktualisieren(erzwingen) {
   if (typeof isAdmin !== "function" || !isAdmin() || isViewer()) return wbZeichnen(null);

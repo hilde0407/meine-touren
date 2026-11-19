@@ -290,7 +290,7 @@ def test_add_all_tour_widgets_render_and_look_right(pw, app):
         _add_all(pg, TOUR_TYPES)
         w = _api(app, "tour-haupt")["layout"]["widgets"]
         assert [x["type"] for x in w] == TOUR_TYPES
-        assert pg.evaluate("() => document.querySelectorAll('[data-wtype]').length") == len(TOUR_TYPES)
+        assert pg.evaluate("() => document.querySelectorAll('[data-wtype]').length") == len(TOUR_TYPES) + 1             # plus „Wie ist es gelaufen?“ (3.48.0, Abschnitt planist)
         assert not pg.errors, pg.errors
         # Inhalte der neuen Bausteine (die Daten kommen aus den konstruierten Touren)
         assert pg.locator('[data-wtype="splits"] svg.slcol').count() == 1 and pg.locator('[data-wtype="splits"] .slfacts li').count() == 3

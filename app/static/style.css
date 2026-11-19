@@ -89,7 +89,7 @@ input:focus,select:focus{border-color:var(--ink);outline:0}
 .thumbs{display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}.thumbs img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:3px;cursor:pointer;background:var(--soft);display:block}
 .pm{width:36px;height:36px;border-radius:50%;border:3px solid var(--yellow);box-shadow:0 1px 6px #0007;background:center/cover;cursor:pointer}
 /* Kartenseite */
-.mapbox{position:relative;height:calc(100vh - 58px)}#bigmap{position:absolute;inset:0}
+.mapbox{position:relative;height:calc(100vh - 58px - var(--wbh,0px))}#bigmap{position:absolute;inset:0}
 .mapui{position:absolute;z-index:500;left:60px;top:12px;right:12px;display:flex;gap:8px;flex-wrap:wrap;pointer-events:none}
 .mapui>*{pointer-events:auto}.mapui .box{background:var(--forest);color:#fff;border-radius:var(--r);padding:8px 12px;display:flex;gap:10px;align-items:center;box-shadow:0 2px 10px #0004}
 .mapui select{background:#fff1;color:#fff;border-color:#fff4}.mapui select option{color:#000}.mapui .chip{color:#fff;border-color:#fff4}.mapui .chip.on{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}
@@ -108,7 +108,7 @@ details{border-top:1px solid var(--rule);padding:10px 0;margin-top:10px}summary{
 .leaflet-container{font:inherit;background:var(--soft)}
 .leaflet-popup-content-wrapper{border-radius:var(--r)}.leaflet-popup-content{font:15px/1.4 var(--b);margin:12px 14px}
 @media(max-width:700px){.top{height:auto;flex-wrap:wrap;gap:0 12px;padding:8px 14px 0}.brand{white-space:nowrap;font-size:22px}nav{width:100%;height:44px;margin-top:4px}nav a{margin-top:0;padding:0 11px}
-.hero{min-height:520px}.hero::after{background:linear-gradient(0deg,#071314f5 0%,#071314b0 55%,#07131433 100%)}.hero .in{padding-bottom:26px}.signs{min-width:0;width:100%}.mapbox{height:calc(100vh - 100px)}main{padding:22px 16px 60px}.inner{padding:0 16px}}
+.hero{min-height:520px}.hero::after{background:linear-gradient(0deg,#071314f5 0%,#071314b0 55%,#07131433 100%)}.hero .in{padding-bottom:26px}.signs{min-width:0;width:100%}.mapbox{height:calc(100vh - 100px - var(--wbh,0px))}main{padding:22px 16px 60px}.inner{padding:0 16px}}
 .field .row label{display:inline-flex;align-items:center;gap:6px;margin:0;font-size:14px}
 .field .row input[type=file]{width:auto;flex:1;min-width:220px}
 .panel .row:first-of-type .btn{white-space:nowrap}
@@ -141,7 +141,7 @@ textarea{width:100%;font:inherit;background:var(--surface);color:var(--ink);bord
 @media print{.top,.noprint,#lb,.seltb{display:none!important}body{background:#fff!important;color:#000}.recap{max-width:none}.rhero{-webkit-print-color-adjust:exact;print-color-adjust:exact}.panel,.rhero{break-inside:avoid}}
 @media(max-width:700px){#gs{order:3;width:100%;margin:6px 0 8px;flex:1 0 100%}.rhero{padding:22px 20px}}
 
-.flight{position:relative;height:calc(100vh - 58px);min-height:420px;background:#cfd8d3;overflow:hidden}.flight #fm{position:absolute;inset:0}
+.flight{position:relative;height:calc(100vh - 58px - var(--wbh,0px));min-height:420px;background:#cfd8d3;overflow:hidden}.flight #fm{position:absolute;inset:0}
 .fbar{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:10px;align-items:center;background:#0e2a2bcc;color:#fff;border-radius:10px;padding:8px 12px;z-index:5;backdrop-filter:blur(4px)}
 .fbar .btn.ghost{color:#fff;border-color:#fff6}.fbar .ft{font:600 20px var(--d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fh{font-variant-numeric:tabular-nums;white-space:nowrap}.fh b{color:var(--yellow)}
 .fctl{position:absolute;left:10px;right:10px;bottom:18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#0e2a2bcc;color:#fff;border-radius:10px;padding:10px 12px;z-index:5;backdrop-filter:blur(4px)}
@@ -212,7 +212,7 @@ html.mob .grid.g2,html.mob .grid{grid-template-columns:1fr!important}
 html.mob .hero{min-height:440px}html.mob .hero h1{font-size:34px}html.mob .hero .in{padding:0 16px 22px;gap:18px}html.mob .signs{width:100%}
 html.mob .hnav{top:24%}html.mob .hdots{top:10px;right:10px}
 html.mob .tmap{height:300px;margin-top:16px}
-html.mob .mapbox{height:calc(100vh - 50px - 66px - env(safe-area-inset-bottom))}html.mob .mapui{left:8px;right:8px;top:8px;gap:6px}html.mob .mapui .box{padding:6px 8px;gap:6px}
+html.mob .mapbox{height:calc(100vh - 50px - 66px - var(--wbh,0px) - env(safe-area-inset-bottom))}html.mob .mapui{left:8px;right:8px;top:8px;gap:6px}html.mob .mapui .box{padding:6px 8px;gap:6px}
 html.mob .leaflet-control-zoom{display:none}
 html.mob .thumbs{grid-template-columns:repeat(3,1fr);gap:3px}
 html.mob .tr{grid-template-columns:62px 1fr;gap:4px 12px;padding:12px 0}html.mob .tr .n{grid-column:1/-1;justify-content:flex-start}
@@ -2028,7 +2028,7 @@ html.mob .mapui>.kaopen .slok{flex:0 0 auto;white-space:nowrap}
 .fctl #fin{min-height:32px}
 @media(max-width:700px){.fnav{right:6px}.fhint{right:112px;top:74px;width:calc(100% - 124px);font-size:13px}}
 /* Handy: die Flugkarte endet über der Reiterleiste (vorher lag die unterste Zeile des Bedienfelds darunter) */
-html.mob .flight{height:calc(100vh - 102px - env(safe-area-inset-bottom));height:calc(100dvh - 102px - env(safe-area-inset-bottom))}
+html.mob .flight{height:calc(100vh - 102px - var(--wbh,0px) - env(safe-area-inset-bottom));height:calc(100dvh - 102px - var(--wbh,0px) - env(safe-area-inset-bottom))}
 
 /* 3.40.0 Verwaltung: „Sicherung zurückspielen“ (68-wiederherstellen.js) – einklappbarer Bereich mit Quellenwahl, Dialog im Muster von .uibox */
 .rsd>summary{min-height:44px;display:flex;align-items:center;gap:8px}.rsd>summary::before{content:"▸";transition:transform .15s}.rsd[open]>summary::before{transform:rotate(90deg)}.rsd>summary::-webkit-details-marker{display:none}.rsd>summary{list-style:none}
