@@ -158,9 +158,166 @@ function planRowHtml(p, sug) {
   const sg = sug && !planSugGone().includes(key)
     ? `<span class="psug"><span>Gelaufen am ${planDate(Date.parse(sug.datum) / 1000)} vorschlagen:</span> <a href="#/tour/${esc(sug.tour_id)}">${esc(sug.name || "Tour")}</a> <button class="btn sm" data-ok="${p.id}:${esc(sug.tour_id)}" type="button" aria-label="Verknüpfung bestätigen: ${esc(p.name)}">Bestätigen</button> <button class="btn ghost sm" data-no="${esc(key)}" type="button">Nicht passend</button></span>`
     : "";
-  return `<div class="r cp prow" data-p="${p.id}" role="group" aria-label="Plan: ${esc(p.name)}"><span><a class="prn" href="#/plan/${p.id}">${esc(p.name)}</a>${badge}<small>${sName(p.sport)} · ${fmtKm(p.km || 0)} · ${fmtAuf(p.up || 0)}${p.est_h ? " · ca. " + hmm(p.est_h) : ""}</small>${planCmpHtml(p)}${sg}</span><span class="prow-a">${
+  return `<div class="r cp prow" data-p="${p.id}" role="group" aria-label="Plan: ${esc(p.name)}"><span><a class="prn" href="#/plan/${p.id}">${esc(p.name)}</a>${badge}<small>${sName(p.sport)} · ${fmtKm(p.km || 0)} · ${fmtAuf(p.up || 0)}${p.est_h ? " · ca. " + hmm(p.est_h) : ""}</small>${planMarks(p)}${planCmpHtml(p)}${sg}</span><span class="prow-a">${
     p.tour ? `<a class="btn ghost sm" href="#/tour/${esc(p.tour.id)}" aria-label="Zur gelaufenen Tour: ${esc(p.name)}">Tour ansehen</a><button class="btn ghost sm" data-un="${p.id}" type="button" aria-label="Verknüpfung lösen: ${esc(p.name)}">Verknüpfung lösen</button>` : ""
   }<select class="pstat" data-s="${p.id}" aria-label="Status: ${esc(p.name)}">${stOpt.map(o => `<option value="${o[0]}" ${o[0] === (p.status || "geplant") ? "selected" : ""}>${o[1]}</option>`).join("")}</select><button class="btn ghost sm" data-d="${p.id}" title="Plan löschen" aria-label="Plan löschen: ${esc(p.name)}" type="button">✕</button></span></div>`;
+}
+
+/* ---- 3.47.0 Notizen & Quellen: Links (nur http/https, nie automatisch abgerufen), Herkunft; Entscheidungshilfe „Passt die Tour zu mir?“ ---- */
+const PLAN_LINK_ARTEN = [["fuehrer", "Wanderführer"], ["karte", "Karte/Route"], ["wetter", "Wetter/Lawinenbericht"], ["huette", "Hütte/Unterkunft"], ["sonstiges", "Sonstiges"]];
+const PLAN_QUELLEN = [["", "Nicht angegeben"], ["eigen", "Eigene Planung"], ["komoot", "Komoot"], ["outdooractive", "Outdooractive"], ["fuehrer", "Wanderführer"], ["sonstiges", "Sonstiges"]];
+const PLAN_MAXLINKS = 20;
+const planLinkArt = k => (PLAN_LINK_ARTEN.find(a => a[0] === k) || PLAN_LINK_ARTEN[4])[1];
+const planHost = u => {
+  try {
+    return new URL(u).hostname;
+  } catch (e) {
+    return "";
+  }
+};
+/* gleiche Regeln wie der Server (der Server entscheidet); gibt null oder den Hinweistext zurück */
+const planUrlFehler = u => {
+  if (!u) return "Bitte eine Adresse mit http:// oder https:// eingeben.";
+  if (u.length > 500 || /\s/.test(u)) return "Die Adresse ist ungültig oder zu lang.";
+  try {
+    const x = new URL(u);
+    if (!/^https?:$/.test(x.protocol) || !x.hostname || x.username || x.password) return "Bitte eine Adresse mit http:// oder https:// eingeben.";
+  } catch (e) {
+    return "Bitte eine Adresse mit http:// oder https:// eingeben.";
+  }
+  return null;
+};
+const planLinkLi = (l, i, ro) =>
+  `<li class="plkr"><span class="plka">${esc(planLinkArt(l.art))}</span><a class="plkt" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" title="Öffnet in einem neuen Tab">${esc(l.titel)}</a><small class="plkh">${esc(planHost(l.url))}</small>` + (ro ? "</li>" :
+  `<span class="plkb"><button class="btn ghost sm" data-le="${i}" type="button" aria-label="Link bearbeiten: ${esc(l.titel)}">Bearbeiten</button><button class="btn ghost sm" data-lx="${i}" type="button" aria-label="Link löschen: ${esc(l.titel)}">Löschen</button></span></li>`);
+const planNLinks = n => (n === 1 ? "1 Link" : `${n} Links`);
+const planMarks = p => {
+  const m = [];
+  if (p.has_note) m.push(`<span class="pmk">Notiz</span>`);
+  if (p.n_links) m.push(`<span class="pmk">${planNLinks(p.n_links)}</span>`);
+  return m.join("");
+};
+/* Dialog für einen Link (Abbrechen links, Übernehmen rechts); liefert {titel,url,art} oder null */
+const planLinkDialog = cur =>
+  new Promise(res => {
+    const m = uiModal(`<h3>${cur ? "Link bearbeiten" : "Link hinzufügen"}</h3>
+      <div class="field"><label for="plt">Titel</label><input id="plt" type="text" class="w100" maxlength="120" autocomplete="off"></div>
+      <div class="field"><label for="plu">Adresse (http:// oder https://)</label><input id="plu" type="url" class="w100" maxlength="500" inputmode="url" autocomplete="off" spellcheck="false"></div>
+      <div class="field"><label for="pla">Art</label><select id="pla" class="w100">${PLAN_LINK_ARTEN.map(a => `<option value="${a[0]}">${a[1]}</option>`).join("")}</select></div>
+      <p id="plerr" class="bad m8-0-0" role="alert"></p>
+      <div class="uifoot"><button class="btn ghost" id="plx" type="button">Abbrechen</button><button class="btn" id="plok" type="button">Speichern</button></div>`);
+    let done = false;
+    const fin = v => {
+      if (done) return;
+      done = true;
+      res(v);
+      m.remove();
+    };
+    m.onClose = () => {
+      if (!done) {
+        done = true;
+        res(null);
+      }
+    };
+    $("#plt", m).value = cur ? cur.titel : "";
+    $("#plu", m).value = cur ? cur.url : "";
+    $("#pla", m).value = cur ? cur.art : "sonstiges";
+    $("#plu", m).focus();
+    $("#plx", m).onclick = () => fin(null);
+    $("#plok", m).onclick = () => {
+      const u = $("#plu", m).value.trim(),
+        f = planUrlFehler(u);
+      if (f) {
+        $("#plerr", m).textContent = f;
+        return;
+      }
+      fin({titel: $("#plt", m).value.trim().replace(/\s+/g, " ").slice(0, 120) || planHost(u), url: u, art: $("#pla", m).value});
+    };
+  });
+
+const planClock = m => {
+  const r = Math.round(m) % 1440;
+  return fmtUhrzeit(`2000-01-01T${fmtPad2(Math.floor(r / 60))}:${fmtPad2(r % 60)}`);
+};
+const planSgn = p => `${p < 0 ? "−" : "+"}${Math.abs(p)} %`;
+const PLAN_FORM = {
+  km: {
+    unter: "Strecke {}: kürzer als deine üblichen Touren (Median {})", aehnlich: "Strecke {}: ähnlich wie deine üblichen Touren (Median {})", ueber: "Strecke {}: länger als deine üblichen Touren (Median {})",
+    perz: "Länger als {} % deiner Touren dieser Sportart", etwa: "Etwa so lang wie deine längste Tour ({})", ueber_max: "Länger als deine längste Tour ({}): {}", warn: "Strecke deutlich über deinem bisherigen Maximum (mehr als 120 %)",
+  },
+  up: {
+    unter: "Aufstieg {}: weniger als bei deinen üblichen Touren (Median {})", aehnlich: "Aufstieg {}: ähnlich wie bei deinen üblichen Touren (Median {})", ueber: "Aufstieg {}: mehr als bei deinen üblichen Touren (Median {})",
+    perz: "Mehr Aufstieg als {} % deiner Touren dieser Sportart", etwa: "Etwa so viel Aufstieg wie bei deiner höchsten Tour ({})", ueber_max: "Mehr Aufstieg als bei deiner höchsten Tour ({}): {}", warn: "Aufstieg deutlich über deinem bisherigen Maximum (mehr als 120 %)",
+  },
+  dauer: {
+    unter: "Geschätzte Gesamtzeit {}: kürzer als bei deinen üblichen Touren (Median {})", aehnlich: "Geschätzte Gesamtzeit {}: ähnlich wie bei deinen üblichen Touren (Median {})", ueber: "Geschätzte Gesamtzeit {}: länger als bei deinen üblichen Touren (Median {})",
+    perz: "Länger als {} % deiner Touren dieser Sportart (Gesamtzeit)", etwa: "Etwa so lange wie deine längste Tour ({})", ueber_max: "Länger als deine längste Tour ({}): {}", warn: "Geschätzte Gesamtzeit deutlich über deinem bisherigen Maximum (mehr als 120 %)",
+  },
+};
+const PLAN_BEL = {
+  deutlich_mehr: "Trainingsbelastung der letzten 4 Wochen: deutlich höher als davor ({})", mehr: "Trainingsbelastung der letzten 4 Wochen: höher als davor ({})", aehnlich: "Trainingsbelastung der letzten 4 Wochen: ähnlich wie davor ({})",
+  weniger: "Trainingsbelastung der letzten 4 Wochen: niedriger als davor ({})", deutlich_weniger: "Trainingsbelastung der letzten 4 Wochen: deutlich niedriger als davor ({})",
+};
+const PLAN_AMPEL = {reserve: ["ok", "✓"], knapp: ["warn", "▲"], nach_untergang: ["bad", "⚠"], info: ["info", "ℹ"]};
+const planPill = (k, t) => `<span class="pcs ${PLAN_AMPEL[k][0]}"><span aria-hidden="true">${PLAN_AMPEL[k][1]}</span> <span>${t}</span></span>`;
+const planStat = (k, t) => `<p class="pcst ${PLAN_AMPEL[k][0]}"><i aria-hidden="true">${PLAN_AMPEL[k][1]}</i><span>${t}</span></p>`;
+function planHilfeHtml(h) {
+  const f = h.form,
+    t = h.tageslicht,
+    sum = [],
+    body = [`<h3 class="phh">Form</h3>`];
+  if (f.status === "zu_wenig") {
+    sum.push(planPill("info", "Form: zu wenig Vergleichstouren"));
+    body.push(`<p class="mut">Zu wenig Vergleichstouren: ${f.n} Touren dieser Sportart in den letzten ${f.monate} Monaten, nötig sind mindestens ${f.min_n}.</p>`);
+  } else {
+    const li = [],
+      fm = {km: x => fmtKm(x), up: x => fmtHm(x), dauer: x => hmm(x)};
+    let mehr = false;
+    for (const k of ["km", "up", "dauer"]) {
+      const m = f[k],
+        T = PLAN_FORM[k];
+      if (!m) continue;
+      li.push(`<li>${T[m.einordnung].replace("{}", fm[k](m.wert)).replace("{}", fm[k](m.median))}</li>`);
+      li.push(`<li>${T.perz.replace("{}", m.perzentil)}</li>`);
+      if (m.max_stufe === "etwa") li.push(`<li>${T.etwa.replace("{}", fm[k](m.max))}</li>`);
+      else if (m.max_stufe !== "unter") li.push(`<li>${T.ueber_max.replace("{}", fm[k](m.max)).replace("{}", planSgn(m.vs_max_pct - 100))}</li>`);
+      if (m.max_stufe === "deutlich_ueber") li.push(`<li class="bad"><b><span aria-hidden="true">⚠</span> <span>${T.warn}</span></b></li>`);
+      if (m.einordnung === "ueber" || m.max_stufe === "ueber" || m.max_stufe === "deutlich_ueber") mehr = true;
+    }
+    if (f.belastung) li.push(`<li>${PLAN_BEL[f.belastung.stufe].replace("{}", planSgn(f.belastung.abweichung_pct))}</li>`);
+    sum.push(f.deutlich_ueber.length ? planPill("nach_untergang", "Form: deutlich über deinem Maximum") : mehr ? planPill("knapp", "Form: mehr als üblich") : planPill("reserve", "Form: im üblichen Rahmen"));
+    body.push(`<ul class="pcl">${li.join("")}</ul><p class="mut fs13">Grundlage: ${f.n} Touren dieser Sportart der letzten ${f.monate} Monate.</p>`);
+  }
+  body.push(`<h3 class="phh">Tageslicht</h3>`);
+  if (t.status === "keine_position") body.push(`<p class="mut">Ohne Startpunkt keine Tageslicht-Angabe.</p>`);
+  else if (t.status === "keine_dauer") body.push(`<p class="mut">Ohne geschätzte Dauer keine Tageslicht-Angabe.</p>`);
+  else {
+    const rk = planClock(t.rueckkehr_min),
+      line = t.rueckkehr_tag_plus > 0 ? "Start {}, geschätzte Dauer {}, Puffer {} ({} %): Rückkehr gegen {} am Folgetag" : "Start {}, geschätzte Dauer {}, Puffer {} ({} %): Rückkehr gegen {}";
+    if (t.status === "ok") {
+      const R = t.reserve_min;
+      if (t.ampel === "reserve") sum.push(planPill("reserve", "Tageslicht: Rückkehr vor Sonnenuntergang"));
+      else if (t.ampel === "knapp") sum.push(planPill("knapp", "Tageslicht: knapp"));
+      else sum.push(planPill("nach_untergang", "Tageslicht: nach Sonnenuntergang"));
+      body.push(planStat(t.ampel, t.ampel === "reserve" ? `Rückkehr vor Sonnenuntergang mit ${fmtDauer(R * 60)} Reserve` : t.ampel === "knapp" ? `Knapp: Rückkehr ${fmtDauer(R * 60)} vor Sonnenuntergang` : `Rückkehr ${fmtDauer(-R * 60)} nach Sonnenuntergang`));
+      const li = [`<li>Sonnenaufgang ${planClock(t.aufgang_min)}, Sonnenuntergang ${planClock(t.untergang_min)} (am Startpunkt)</li>`];
+      if (t.daemm_bis_min != null) li.push(`<li>Ende der bürgerlichen Dämmerung ${planClock(t.daemm_bis_min)}</li>`);
+      if (t.start_vor_aufgang) li.push(`<li>Der Start liegt vor Sonnenaufgang.</li>`);
+      if (t.start_nach_untergang) li.push(`<li>Der Start liegt nach Sonnenuntergang.</li>`);
+      body.push(`<ul class="pcl">${li.join("")}</ul>`);
+    } else {
+      body.push(planStat("info", t.status === "polar_tag" ? "Die Sonne geht an diesem Tag am Startpunkt nicht unter (Polartag)." : "Die Sonne geht an diesem Tag am Startpunkt nicht auf (Polarnacht)."));
+    }
+    body.push(`<ul class="pcl"><li>${line.replace("{}", planClock(t.start_min)).replace("{}", fmtDauer(t.dauer_min * 60)).replace("{}", fmtDauer(t.puffer_min * 60)).replace("{}", t.puffer_pct).replace("{}", rk)}</li>${
+      t.dauer_quelle === "gehzeit" ? `<li>Die Dauer ist die reine Gehzeit ohne Pausen (für diesen Plan ist keine Gesamtzeit gespeichert).</li>` : ""}</ul>`);
+    body.push(`<p class="mut fs13">Uhrzeiten in der Zeitzone ${esc(t.zeitzone)}; der Sonnenstand ist auf etwa 2 Minuten genau gerechnet. Dämmerung ist keine Sicherheitsaussage.</p>`);
+  }
+  body.push(`<p class="phw"><b>Orientierung, keine Sicherheitsgarantie.</b> Wetter, Lawinenlage und Gelände selbst prüfen.</p>`);
+  const w = h.wetter_links || [];
+  body.push(w.length
+    ? `<p class="m8-0-0">Deine Quellen für Wetter und Lawinenbericht:</p><ul class="plk">${w.map(l => planLinkLi(l, 0, true)).join("")}</ul>`
+    : `<p class="mut fs13">Noch keine Quelle für Wetter oder Lawinenbericht gespeichert – unter „Notizen & Quellen“ kannst du Links dazu ablegen.</p>`);
+  return {sum: sum.join(" "), body: body.join("")};
 }
 
 const PLAN_PROFILE = s => ({racebike: "fastbike", mtb: "mtb"}[s] || (sportGrp(s) === "bike" ? "trekking" : "hiking-mountain"));
@@ -168,7 +325,7 @@ const PLAN_MAXROUTED = 40; // so viele Punkte werden höchstens über Wege verbu
 const ALT_COL = ["#e8590c", "#1c7ed6", "#9c36b5", "#2b8a3e"];
 
 VIEWS.plan = async (pid, q) => {
-  const P = {id: null, wp: [], rt: true, alt: {}, segs: {}, pend: {}, sel: null, stored: null, ele: null, dense: null, up: null, down: null, max: null, warned: false};
+  const P = {id: null, links: [], wp: [], rt: true, alt: {}, segs: {}, pend: {}, sel: null, stored: null, ele: null, dense: null, up: null, down: null, max: null, warned: false};
   $("#main").className = "";
   if (!(await planOn())) {
     $("#main").innerHTML = `<div class="row"><a class="back" href="#/tours">‹ Alle Touren</a></div><div class="sec"><h2>Tour planen</h2></div><p class="mut">Die Tourplanung ist ausgeschaltet. Du kannst sie unter Verwaltung → „Tourplanung“ wieder einschalten.</p>`;
@@ -191,7 +348,16 @@ VIEWS.plan = async (pid, q) => {
    <div class="figs mt18" id="pf" role="group" aria-label="Kennzahlen der Planung"></div><div class="mut m8-0-0" id="pb"></div>
    <div class="panel prof gap" style="display:none" id="pprof" role="region" aria-label="Höhenprofil der Planung"><h2>Höhenprofil</h2><div id="pprofc"></div></div>
    <details class="pcheck" id="pcheck" hidden open><summary><span class="pcsh">Machbarkeit</span> <span id="pcsum"></span></summary><div id="pcb" class="pcb" role="status" aria-live="polite" aria-atomic="true"></div></details>
-   <div class="field mw760 m16-0-0"><label for="pnote">Notiz zur Planung</label><textarea id="pnote" rows="2" aria-label="Notiz zur Planung" placeholder="Anfahrt, Einkehr, beste Jahreszeit …"></textarea></div>
+   <details class="pcheck" id="philfe" hidden open><summary><span class="pcsh">Passt die Tour zu mir?</span> <span id="phsum"></span></summary><div class="phb">
+    <div class="phin"><div><label for="phd">Datum</label><input type="date" id="phd"></div><div><label for="phs">Startzeit</label><input type="time" id="phs"></div><div><label for="php">Puffer in %</label><input type="number" id="php" class="pp" min="0" max="100" step="1" inputmode="numeric" placeholder="20"></div></div>
+    <p class="mut fs13 m0">Leer lassen = Standard: heute, Start 09:00, Puffer 20 %. Datum, Startzeit und Puffer werden mit „Plan speichern“ gesichert; Grundlage ist der gespeicherte Plan.</p>
+    <div id="phb" role="status" aria-live="polite" aria-atomic="true"></div></div></details>
+   <details class="pcheck" id="pnq" open><summary><span class="pcsh">Notizen &amp; Quellen</span> <span id="pnqsum"></span></summary><div class="pnqb">
+    <div class="field mw760"><label for="pnote">Notiz zur Planung</label><textarea id="pnote" rows="4" maxlength="4000" aria-label="Notiz zur Planung" placeholder="Anfahrt, Einkehr, beste Jahreszeit …"></textarea></div>
+    <div class="field mw760"><label for="pquelle">Herkunft des Plans</label><div class="row g8 fxw m0"><select id="pquelle" aria-label="Herkunft des Plans">${PLAN_QUELLEN.map(q => `<option value="${q[0]}">${q[1]}</option>`).join("")}</select><input id="pqtext" type="text" maxlength="200" class="mnw230" aria-label="Details zur Herkunft" placeholder="Details zur Herkunft (z. B. Buchtitel, Seite)" autocomplete="off"></div></div>
+    <div class="m16-0-4"><b>Links</b></div><ul class="plk" id="plinks" aria-label="Links"></ul>
+    <div class="row g8 m0"><button class="btn alt sm" id="pladd" type="button">Link hinzufügen</button></div>
+    <p class="mut fs13 m6-0-0">Links werden mit „Plan speichern“ gesichert und nie automatisch aufgerufen oder als Vorschau geladen. Erlaubt sind nur Adressen mit http:// oder https://.</p></div></details>
    <div class="row mt12"><button class="btn" id="psave">Plan speichern</button><button class="btn alt" id="pdl">⬇ Als GPX herunterladen</button><span id="pmsg" class="mut"></span></div>
    <div class="sec"><h2>Gespeicherte Pläne</h2><span class="sub">${plans.length ? plans.length + " Pläne" : "noch keine"}</span></div>
    <div class="panel"><div class="rows" id="plist" aria-label="Gespeicherte Pläne">${plans.length ? plans.map(planRow).join("") : `<p class="mut">Gespeicherte Planungen erscheinen hier.</p>`}</div></div>`;
@@ -280,6 +446,7 @@ VIEWS.plan = async (pid, q) => {
       $("#pprofc").innerHTML = planProfile(P.dense, P.ele);
     } else $("#pprof").style.display = "none";
     if (P.chk) chkShow();
+    hSync();
   };
   /* Machbarkeit: Server vergleicht km/Aufstieg mit den eigenen Touren; die Gesamtzeit kommt aus derselben Schätzung wie die Kennzahlen oben */
   let chkSeq = 0;
@@ -314,6 +481,79 @@ VIEWS.plan = async (pid, q) => {
       $("#pcb").innerHTML = `<p class="mut">Der Vergleich konnte nicht berechnet werden: ${esc(e.message || e)}</p>`;
     }
   };
+  /* Notizen & Quellen */
+  const nqSum = () => {
+    const n = P.links.length,
+      has = $("#pnote").value.trim() !== "";
+    $("#pnqsum").innerHTML = [has ? `<span class="pmk">Notiz</span>` : "", n ? `<span class="pmk">${planNLinks(n)}</span>` : ""].join(" ");
+    $("#pladd").disabled = n >= PLAN_MAXLINKS;
+  };
+  const linksDraw = () => {
+    $("#plinks").innerHTML = P.links.map((l, i) => planLinkLi(l, i)).join("");
+    nqSum();
+  };
+  $("#pnote").oninput = nqSum;
+  $("#pladd").onclick = async () => {
+    if (P.links.length >= PLAN_MAXLINKS) return;
+    const l = await planLinkDialog(null);
+    if (l) {
+      P.links.push(l);
+      linksDraw();
+    }
+  };
+  $("#plinks").onclick = async e => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    if (b.dataset.le != null) {
+      const i = +b.dataset.le,
+        l = await planLinkDialog(P.links[i]);
+      if (l) {
+        P.links[i] = l;
+        linksDraw();
+      }
+    } else if (b.dataset.lx != null && (await uiConfirm({text: "Diesen Link löschen?", danger: true, ok: "Löschen"}))) {
+      P.links.splice(+b.dataset.lx, 1);
+      linksDraw();
+    }
+  };
+  /* Entscheidungshilfe: Server rechnet (Form gegen eigene Touren, Tageslicht am Startpunkt); Datum, Startzeit und Puffer wirken sofort, gespeichert wird mit „Plan speichern“ */
+  let hSeq = 0,
+    hKey = "";
+  const hRun = async () => {
+    const box = $("#philfe"),
+      my = ++hSeq;
+    if (!box) return;
+    if (path().length < 2) {
+      box.hidden = true;
+      return;
+    }
+    box.hidden = false;
+    if (!P.id) {
+      $("#phsum").innerHTML = "";
+      $("#phb").innerHTML = `<p class="mut">Speichere die Planung, dann erscheint hier die Entscheidungshilfe.</p>`;
+      return;
+    }
+    const q = new URLSearchParams({datum: $("#phd").value, start: $("#phs").value, puffer: $("#php").value});
+    try {
+      const r = await api(`/api/plans/${P.id}/hilfe?${q}`);
+      if (my !== hSeq || !$("#philfe")) return;
+      const h = planHilfeHtml(r);
+      $("#phsum").innerHTML = h.sum;
+      $("#phb").innerHTML = h.body;
+    } catch (e) {
+      if (my !== hSeq || !$("#philfe")) return;
+      $("#phsum").innerHTML = "";
+      $("#phb").innerHTML = `<p class="mut">Die Entscheidungshilfe konnte nicht berechnet werden: ${esc(e.message || e)}</p>`;
+    }
+  };
+  const hSync = () => {
+    const k = `${P.id}|${path().length > 1}`;
+    if (k !== hKey) {
+      hKey = k;
+      hRun();
+    }
+  };
+  ["#phd", "#phs", "#php"].forEach(id => ($(id).onchange = hRun));
   const calc = async () => {
     const my = ++seq,
       pth = path();
@@ -476,11 +716,13 @@ VIEWS.plan = async (pid, q) => {
       const r = await api("/api/plans", {
         method: "POST",
         headers: {"content-type": "application/json"},
-        body: JSON.stringify({id: P.id, name: $("#pn").value, sport: sw(), pts: pth, wps: {wp: P.wp, alt: P.alt, rt: P.rt}, km: P.km, up: P.up, down: P.down, max_alt: P.max, est_h: P.est, note: $("#pnote").value}),
+        body: JSON.stringify({id: P.id, name: $("#pn").value, sport: sw(), pts: pth, wps: {wp: P.wp, alt: P.alt, rt: P.rt}, km: P.km, up: P.up, down: P.down, max_alt: P.max, est_h: P.est, note: $("#pnote").value, links: P.links, quelle: $("#pquelle").value, quelle_text: $("#pqtext").value, plan_datum: $("#phd").value, plan_start: $("#phs").value, puffer_pct: $("#php").value}),
       });
       P.id = r.id;
       history.replaceState(null, "", `#/plan/${r.id}`);
       msg("gespeichert ✓");
+      hKey = `${P.id}|true`;
+      hRun();
       await refreshList();
     } catch (e) {
       msg(e.message, true);
@@ -569,6 +811,13 @@ VIEWS.plan = async (pid, q) => {
       $("#pn").value = p.name;
       $("#ps").value = p.sport;
       $("#pnote").value = p.note || "";
+      P.links = p.links || [];
+      $("#pquelle").value = p.quelle || "";
+      $("#pqtext").value = p.quelle_text || "";
+      $("#phd").value = p.plan_datum || "";
+      $("#phs").value = p.plan_start || "";
+      $("#php").value = p.puffer_pct != null ? p.puffer_pct : "";
+      linksDraw();
       const w = p.wps;
       if (w && w.wp && w.wp.length > 1) {
         P.wp = w.wp;
@@ -594,6 +843,7 @@ VIEWS.plan = async (pid, q) => {
       msg(e.message, true);
     }
   } else figs();
+  linksDraw();
 };
 
 /* Einstiegspunkte: Tourenliste und Wunschliste */

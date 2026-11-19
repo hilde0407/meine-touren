@@ -238,13 +238,26 @@ def analyse(pts):
 
 
 # ------------------------------------------------------------------------------------------------ Tageslicht
-def _sonne(day, lat, lng, zenit):
-    """(Aufgang, Untergang) als UTC-Zeitpunkt für das Datum `day` (NOAA-Näherung, auf etwa 2 Minuten genau); None bei Polartag/-nacht."""
+def _eqt_dec(day):
+    """Zeitgleichung (Minuten) und Deklination der Sonne (Bogenmaß) für ein Datum (NOAA-Näherung)."""
     n = day.timetuple().tm_yday
     g = 2 * math.pi / 365 * (n - 1)
     eqt = 229.18 * (0.000075 + 0.001868 * math.cos(g) - 0.032077 * math.sin(g) - 0.014615 * math.cos(2 * g) - 0.040849 * math.sin(2 * g))
     dec = (0.006918 - 0.399912 * math.cos(g) + 0.070257 * math.sin(g) - 0.006758 * math.cos(2 * g) + 0.000907 * math.sin(2 * g)
            - 0.002697 * math.cos(3 * g) + 0.00148 * math.sin(3 * g))
+    return eqt, dec
+
+
+def polar_art(day, lat):
+    """„tag“ (Sonne geht nicht unter) oder „nacht“ (geht nicht auf), wenn _sonne() für diesen Tag None liefert; sonst None."""
+    if _sonne(day, lat, 0.0, 90.833) is not None:
+        return None
+    return "tag" if lat * _eqt_dec(day)[1] > 0 else "nacht"
+
+
+def _sonne(day, lat, lng, zenit):
+    """(Aufgang, Untergang) als UTC-Zeitpunkt für das Datum `day` (NOAA-Näherung, auf etwa 2 Minuten genau); None bei Polartag/-nacht."""
+    eqt, dec = _eqt_dec(day)
     la = math.radians(lat)
     c = (math.cos(math.radians(zenit)) - math.sin(la) * math.sin(dec)) / (math.cos(la) * math.cos(dec))
     if c >= 1 or c <= -1:

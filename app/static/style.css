@@ -1990,6 +1990,16 @@ html.mob .mapui>.kaopen .slok{flex:0 0 auto;white-space:nowrap}
 .pcmp{margin-top:4px;color:var(--ink)}.psug{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:8px;padding:8px 10px;border-radius:var(--r);background:var(--dv-warn-bg);color:var(--dv-warn);font-size:14px}.psug a{color:inherit;font-weight:600}
 .bkst p{margin:6px 0}.bkst .fs13{margin-top:0}
 
+/* 3.47.0 Planung ausbauen: „Notizen & Quellen“ und „Passt die Tour zu mir?“ auf der Planseite (Text neben Farbe, einspaltig, kein Seitwärtsscrollen) */
+.pnqb,.phb{padding-top:4px}.phh{font:600 16px var(--b);margin:16px 0 4px}
+.phin{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:flex-end;margin:6px 0 4px}.phin label{display:block;font-size:14px;color:var(--mut);margin:0 0 4px}.phin input{width:auto;max-width:100%}.phin .pp{width:88px}
+.plk{list-style:none;margin:6px 0 10px;padding:0;display:flex;flex-direction:column;gap:6px;max-width:760px}
+.plkr{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;padding:8px 10px;border:1px solid var(--rule);border-radius:var(--r);background:var(--surface)}
+.plkr .plkt{flex:1 1 200px;min-width:0;font-weight:600;color:var(--ink);overflow-wrap:anywhere}.plkr .plkh{flex:0 1 auto;font-size:13px;color:var(--mut);overflow-wrap:anywhere}
+.plka{font:600 13px var(--b);padding:1px 9px;border-radius:99px;background:var(--soft);color:var(--ink);white-space:nowrap}.plkb{display:flex;gap:6px;margin-left:auto}
+.pmk{display:inline-flex;gap:4px;font:600 13px var(--b);padding:1px 9px;border-radius:99px;margin-left:8px;background:var(--soft);color:var(--ink);white-space:nowrap;vertical-align:middle}
+.phw{margin:10px 0 0;padding:10px 12px;border-radius:var(--r);background:var(--soft);color:var(--ink);font-size:14px}
+
 /* 3.39.0 Karte: Fenster „Touren im Ausschnitt“ liegt über den Bedienfeldern (.mapui, z-index 500) und den Kartensteuerelementen; auch mobil */
 .uimod.mbxfen .uibox{width:min(760px,100%)}
 

@@ -8,7 +8,7 @@ import requests
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from . import db, elev, config, routes
+from . import db, elev, config, routes, planhilfe
 
 def _gate(request: Request):
     """Ist die Tourplanung ausgeschaltet, antwortet die ganze Planungs-Schnittstelle mit 403 (außer dem Verbindungstest der Einstellungen)."""
@@ -162,7 +162,12 @@ def _plan_row(r):
 
 @router.get("/api/plans")
 def api_plans():
-    return [_plan_row(r) for r in db.query("SELECT id,name,sport,km,up,down,max_alt,est_h,note,ts,tour_id,status FROM plans ORDER BY ts DESC")]
+    out = []
+    for r in db.query("SELECT id,name,sport,km,up,down,max_alt,est_h,note,ts,tour_id,status,links,quelle FROM plans ORDER BY ts DESC"):
+        r["n_links"] = len(planhilfe.lade_links(r.pop("links", None)))          # nur die Anzahl; die Links selbst liefert GET /api/plans/{id}
+        r["has_note"] = bool((r.get("note") or "").strip())
+        out.append(_plan_row(r))
+    return out
 
 
 @router.get("/api/plans/vorschlaege")
@@ -219,7 +224,29 @@ def api_plan_get(pid: int):
         r["wps"] = json.loads(r["wps"]) if r.get("wps") else None
     except ValueError:
         r["wps"] = None
+    r["links"] = planhilfe.lade_links(r.get("links"))
+    r["puffer_standard"] = planhilfe.PUFFER_STANDARD
     return r
+
+
+@router.get("/api/plans/{pid}/hilfe")
+def api_plan_hilfe(pid: int, datum: str = None, start: str = None, puffer: str = None):
+    """Entscheidungshilfe „Passt die Tour zu mir?“: Form gegen die eigenen Touren, Tageslicht am Startpunkt, Quellen vom Typ Wetter/Lawinenbericht.
+    datum/start/puffer (auch leer = Standard) überschreiben nur für diese Antwort die gespeicherten Werte. Nur lesend; gespeicherte Links werden nie abgerufen."""
+    r = db.one("SELECT * FROM plans WHERE id=?", (pid,))
+    if not r:
+        raise HTTPException(404, "Plan nicht gefunden")
+    kw = {}
+    try:
+        if datum is not None:
+            kw["datum"] = planhilfe.pruefe_datum(datum)
+        if start is not None:
+            kw["start"] = planhilfe.pruefe_start(start)
+        if puffer is not None:
+            kw["puffer"] = planhilfe.pruefe_puffer(puffer)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return planhilfe.hilfe(r, **kw)
 
 
 @router.post("/api/plans")
@@ -239,12 +266,24 @@ def api_plan_save(body: dict):
             return None
     wps = body.get("wps")
     wps = json.dumps(wps)[:60000] if isinstance(wps, dict) else None
-    vals = (name, str(body.get("sport") or "hike")[:30], json.dumps(pts), num("km"), num("up"), num("down"), num("max_alt"), num("est_h"), str(body.get("note") or "")[:1000], int(time.time()), wps)
     pid = body.get("id")
-    if pid and db.one("SELECT 1 FROM plans WHERE id=?", (int(pid),)):
-        db.execute("UPDATE plans SET name=?,sport=?,pts=?,km=?,up=?,down=?,max_alt=?,est_h=?,note=?,ts=?,wps=? WHERE id=?", vals + (int(pid),))
+    old = db.one("SELECT 1 FROM plans WHERE id=?", (int(pid),)) if pid else None
+    try:
+        note = planhilfe.pruefe_notiz(body.get("note"))
+        qa, qt = planhilfe.pruefe_quelle(body.get("quelle"), body.get("quelle_text"))
+        extra = (json.dumps(planhilfe.pruefe_links(body.get("links")), ensure_ascii=False), qa, qt, planhilfe.pruefe_datum(body.get("plan_datum")),
+                 planhilfe.pruefe_start(body.get("plan_start")), planhilfe.pruefe_puffer(body.get("puffer_pct")))
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    vals = (name, str(body.get("sport") or "hike")[:30], json.dumps(pts), num("km"), num("up"), num("down"), num("max_alt"), num("est_h"), note, int(time.time()), wps) + extra
+    if old:
+        cols = ["name", "sport", "pts", "km", "up", "down", "max_alt", "est_h", "note", "ts", "wps"]
+        for k, c in (("links", ["links"]), ("quelle", ["quelle"]), ("quelle_text", ["quelle_text"]), ("plan_datum", ["plan_datum"]), ("plan_start", ["plan_start"]), ("puffer_pct", ["puffer_pct"])):
+            cols += c if k in body else []                    # ein Aufruf ohne diese Felder (ältere Programme) lässt Links, Herkunft und Termin unverändert
+        vv = list(vals[:11]) + [v for k, v in zip(("links", "quelle", "quelle_text", "plan_datum", "plan_start", "puffer_pct"), extra) if k in body]
+        db.execute("UPDATE plans SET " + ",".join(f"{c}=?" for c in cols) + " WHERE id=?", tuple(vv) + (int(pid),))
         return {"id": int(pid)}
-    return {"id": db.execute("INSERT INTO plans(name,sport,pts,km,up,down,max_alt,est_h,note,ts,wps) VALUES(?,?,?,?,?,?,?,?,?,?,?)", vals)}
+    return {"id": db.execute("INSERT INTO plans(name,sport,pts,km,up,down,max_alt,est_h,note,ts,wps,links,quelle,quelle_text,plan_datum,plan_start,puffer_pct) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", vals)}
 
 
 @router.delete("/api/plans/{pid}")

@@ -2,6 +2,12 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.47.0 – Planung ausbauen
+
+- Notizen & Quellen am Plan: mehrzeilige Notiz, Herkunft (eigene Planung, Komoot, Outdooractive, Wanderführer, Sonstiges) und bis zu 20 Links mit Art; nur http/https, serverseitig geprüft, nie automatisch abgerufen. Die Planliste zeigt „Notiz“ und „n Links“.
+- „Passt die Tour zu mir?“ als Abschnitt der Planseite (Teil von „Sicher planen“): Form gegen die eigenen Touren der letzten 12 Monate (Median, Perzentil, Vergleich mit der längsten/höchsten Tour, Hinweis über 120 %) und Tageslicht am Startpunkt mit geschätzter Rückkehr (Datum, Startzeit, Pausenpuffer einstellbar). Orientierung, keine Sicherheitsgarantie.
+- Neue Plan-Spalten per Migration, bestehende Pläne unverändert; neuer Endpunkt `GET /api/plans/{id}/hilfe`.
+
 ## Version 3.46.0 – Aufräumen im Code
 
 - Dateigrößen (MB/GB, französisch Mo/Go) kommen aus einem Formatierer (`fmtGroesse`); die Einzel-Helfer für Dauer, Datum und Größe sind weg, die öffentlichen Seiten (Rückblick, Teilen, Ansicht, Diashow) nutzen dieselben Formatierer und die gewählte Sprache statt festem „de-DE“.

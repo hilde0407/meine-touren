@@ -123,6 +123,9 @@ def migrate(conn):
         conn.execute("ALTER TABLE plans ADD COLUMN tour_id TEXT")  # 3.38.0: mit dieser gelaufenen Tour verknüpft (NULL = keine)
     if "status" not in pcols:
         conn.execute("ALTER TABLE plans ADD COLUMN status TEXT NOT NULL DEFAULT 'geplant'")   # 3.38.0: 'geplant' | 'gegangen' | 'verworfen'
+    for col, typ in (("links", "TEXT"), ("quelle", "TEXT"), ("quelle_text", "TEXT"), ("plan_datum", "TEXT"), ("plan_start", "TEXT"), ("puffer_pct", "INTEGER")):
+        if col not in pcols:                                       # 3.47.0: Links (JSON), Herkunft, geplantes Datum/Startzeit/Pausenpuffer; NULL = nicht angegeben, alte Pläne bleiben unverändert
+            conn.execute(f"ALTER TABLE plans ADD COLUMN {col} {typ}")
     if "src" not in {r["name"] for r in conn.execute("PRAGMA table_info(elev_fix)")}:
         conn.execute("ALTER TABLE elev_fix ADD COLUMN src TEXT")          # 'zepp' = Höhe aus der Uhr, sonst (NULL) Geländemodell
     conn.execute("CREATE TABLE IF NOT EXISTS devices (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, kind TEXT, model TEXT, since TEXT, until TEXT, active INTEGER DEFAULT 1, note TEXT)")   # Meine Geräte (Uhr, Handy …)
