@@ -134,6 +134,11 @@ def migrate(conn):
     if "zsrc" not in {r["name"] for r in conn.execute("PRAGMA table_info(devices)")}:
         conn.execute("ALTER TABLE devices ADD COLUMN zsrc TEXT")            # rohe Zepp-Kennung der Quelle (z. B. „run.46.huami.com“); nur ergänzt, nie gelöscht
     conn.execute("CREATE TABLE IF NOT EXISTS tour_zsrc (tour_id TEXT PRIMARY KEY, zsrc TEXT)")   # Zepp-Kennung der Quelle je Tour (aus dem Zepp-Verlauf)
+    dcols = {r["name"] for r in conn.execute("PRAGMA table_info(devices)")}
+    for col, typ in (("app_id", "TEXT"), ("app_version", "TEXT"), ("app_android", "TEXT"), ("app_since", "INTEGER"), ("last_seen", "INTEGER")):
+        if col not in dcols:                                       # 3.49.0: Android-App als Aufzeichnungsgerät – zufällige Installationskennung (keine Hardware-Kennung), App-/Android-Version,
+            conn.execute(f"ALTER TABLE devices ADD COLUMN {col} {typ}")   # erste Anmeldung und letzter Upload (Unixzeit); NULL = von Hand angelegtes Gerät, bestehende Geräte bleiben unverändert
+    conn.execute("CREATE TABLE IF NOT EXISTS tour_app (tour_id TEXT PRIMARY KEY, app_id TEXT)")   # 3.49.0: Installationskennung der App, mit der die Tour aufgezeichnet wurde (ordnet sie dem App-Gerät zu)
     conn.execute("CREATE TABLE IF NOT EXISTS device_quality (tour_id TEXT PRIMARY KEY, device_id INTEGER, berechnet_am INTEGER, day TEXT, sport TEXT, zepp_n INTEGER, "
                  "dist_tour_m REAL, dist_dev_m REAL, dist_ratio REAL, dist_plausible INTEGER, h_src TEXT, h_state TEXT, up_dev REAL, down_dev REAL, up_dem REAL, down_dem REAL, "
                  "gps_src TEXT, gps_n INTEGER, gps_jumps INTEGER, gps_gap_pct REAL, gps_med_dt REAL, gps_pts_km REAL, gps_dec INTEGER, hr_n INTEGER, hr_bad_pct REAL)")   # Genauigkeit der Uhren je Tour (app/devquality.py)

@@ -622,7 +622,9 @@ async def api_rec_photos(request: Request, files: list[UploadFile] = File(defaul
 
 @app.post("/api/record/upload")
 async def api_record_upload(request: Request):
-    """Aufzeichnung aus der Android-App: JSON {gpx, name, sport}. Legt eine lokale Tour an (doppelte werden erkannt)."""
+    """Aufzeichnung aus der Android-App: JSON {gpx, name, sport, device}. Legt eine lokale Tour an (doppelte werden erkannt).
+    device (ab App 3.49.0, optional): {install_id, hersteller, modell, android, app_version} – meldet das Handy beim ersten Upload als Aufzeichnungsgerät an
+    (mydevices.register_app) und ordnet ihm die Tour zu. Fehlende oder ungültige Angaben stören den Upload nie (dann wie bisher ohne Gerät)."""
     try:
         d = await request.json()
     except Exception:  # noqa
@@ -646,6 +648,12 @@ async def api_record_upload(request: Request):
         wps.save(t["id"], wps.from_gpx(gpx))
     except Exception:  # noqa
         pass
+    dev, dev_new = None, False
+    try:
+        dev, dev_new = mydevices.register_app(d.get("device"))
+        mydevices.note_app_tour(t["id"], dev)
+    except Exception:  # noqa
+        dev = None                                                     # die Aufzeichnung ist gespeichert; das Gerät ist nur Beiwerk
     try:
         photos.assign_all()
         wait = config.INBOX_DIR / "teilen"
@@ -655,7 +663,7 @@ async def api_record_upload(request: Request):
         pass
     km_txt = f"{(t['dist_m'] or 0) / 1000:.1f}".replace(".", ",")
     more2.notify_event(f"Neue Tour gespeichert: {t['name']} ({km_txt} km, Aufstieg {round(t['up_m'] or 0)} m)", "Neue Tour")
-    return {"id": t["id"], "dup": False}
+    return {"id": t["id"], "dup": False, "device": {"id": dev["id"], "name": dev["name"], "new": dev_new} if dev else None}
 
 
 @app.post("/api/record/rescue")

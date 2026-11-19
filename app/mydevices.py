@@ -5,9 +5,18 @@ polar, phone, other – siehe Tabelle tour_source bzw. metrics.py) wird mit der 
 entscheidet das Tourdatum anhand „seit/bis“ (bei mehreren Treffern das Gerät mit dem späteren „seit“). Passt keines zum Datum, aber es gibt nur ein
 Gerät dieser Art, bekommt dieses die Tour. Hat ein Gerät eine Zepp-Kennung (zsrc, z. B. „run.46.huami.com“) und kennt die Tour dieselbe Kennung
 (Tabelle tour_zsrc), wird dieses Gerät bevorzugt. Geräte werden nie ungefragt angelegt und nie gelöscht, solange Touren daran hängen.
+
+Ausnahme seit 3.49.0 – die Android-App als Aufzeichnungsgerät: Schickt die App beim Hochladen einer Aufzeichnung ihre Geräteangaben mit (zufällige
+Installationskennung, Hersteller/Modell, Android- und App-Version – keine Hardware-Kennung), legt `register_app` beim ersten Upload ein Gerät der Art
+„phone“ an (devices.app_id) bzw. findet es wieder; die Tour merkt sich die Kennung (Tabelle tour_app). Zuordnung: ausdrückliche Wahl (tour_device) >
+App-Kennung der Tour (tour_app -> devices.app_id) > Automatik nach Art/Datum. App-Geräte nehmen an der Automatik nach Art/Datum NICHT teil: ältere
+Handy-Aufzeichnungen ohne Geräteangaben bleiben, wie sie sind, und eine Uhr-Tour vom selben Tag landet nie beim Handy. Die Installationskennung
+verlässt den Server nicht (weder in /api/my-devices noch in Freigaben).
 Gerätefotos liegen als <Datenordner des Benutzers>/devices/<id>.jpg (höchstens 512 px, JPEG)."""
 import io
 import re
+import threading
+import time
 from datetime import datetime
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
@@ -57,9 +66,16 @@ def _photo_v(did):
         return 0
 
 
+def _app(d):
+    """Angaben der Android-App zu einem Gerät für die Oberfläche (None = von Hand angelegt). Die Installationskennung selbst wird nie ausgegeben."""
+    if not d.get("app_id"):
+        return None
+    return {"version": d.get("app_version") or "", "android": d.get("app_android") or "", "since": d.get("app_since") or None, "last_seen": d.get("last_seen") or None}
+
+
 def _row(d):
     return {"id": d["id"], "name": d["name"], "kind": d["kind"], "model": d["model"] or "", "since": d["since"] or "", "until": d["until"] or "",
-            "active": bool(d["active"]), "note": d["note"] or "", "zsrc": d.get("zsrc") or "", "photo": _photo_v(d["id"])}
+            "active": bool(d["active"]), "note": d["note"] or "", "zsrc": d.get("zsrc") or "", "photo": _photo_v(d["id"]), "app": _app(d)}
 
 
 def note_zsrc(summaries):
@@ -80,7 +96,7 @@ def note_zsrc(summaries):
 
 
 def _auto(devs, kind, day, zsrc=""):
-    cand = [d for d in devs if d["kind"] == kind]
+    cand = [d for d in devs if d["kind"] == kind and not d.get("app_id")]      # App-Geräte bekommen Touren nur über die Kennung der Tour (tour_app), nie nach Art/Datum
     if not cand:
         return None
     if zsrc:                                              # gleiche Art UND gleiche Zepp-Kennung: bevorzugen
@@ -97,6 +113,19 @@ def _auto(devs, kind, day, zsrc=""):
     return cand[0] if len(cand) == 1 else None
 
 
+def _app_devs(devs):
+    """{Installationskennung: Gerät} – bei (nie vorgesehenen) Dubletten gewinnt das zuerst angelegte."""
+    out = {}
+    for d in sorted(devs, key=lambda d: d["id"]):
+        if d.get("app_id"):
+            out.setdefault(d["app_id"], d)
+    return out
+
+
+def _tour_apps():
+    return {r["tour_id"]: r["app_id"] for r in db.query("SELECT tour_id, app_id FROM tour_app")}
+
+
 def assignments():
     """{tour_id: (device_dict_oder_None, manuell)} für alle Touren."""
     devs = db.query("SELECT * FROM devices")
@@ -104,11 +133,14 @@ def assignments():
     manual = {r["tour_id"]: r["device_id"] for r in db.query("SELECT tour_id, device_id FROM tour_device")}
     srcs = {r["tour_id"]: r["src"] for r in db.query("SELECT tour_id, src FROM tour_source")}
     zs = {r["tour_id"]: r["zsrc"] for r in db.query("SELECT tour_id, zsrc FROM tour_zsrc")}
+    apps, tapp = _app_devs(devs), _tour_apps()
     out = {}
     for t in db.query("SELECT id, start_ts FROM tours"):
         tid = t["id"]
         if tid in manual and manual[tid] in byid:
             out[tid] = (byid[manual[tid]], True)
+        elif tapp.get(tid) in apps:                       # mit der App aufgezeichnet: genau dieses Handy
+            out[tid] = (apps[tapp[tid]], False)
         elif devs:
             out[tid] = (_auto(devs, tour_kind(tid, srcs.get(tid, "")), _day(t["start_ts"]), zs.get(tid, "")), False)
         else:
@@ -128,10 +160,13 @@ def device_of(tid):
         d = next((x for x in devs if x["id"] == man["device_id"]), None)
         manual = d is not None
     if d is None:
+        a = db.one("SELECT app_id FROM tour_app WHERE tour_id=?", (str(tid),))
+        d = _app_devs(devs).get(a["app_id"]) if a else None
+    if d is None:
         z = db.one("SELECT zsrc FROM tour_zsrc WHERE tour_id=?", (str(tid),))
         d = _auto(devs, tour_kind(tid), _day(t["start_ts"]), z["zsrc"] if z else "")
     return {"id": d["id"], "name": d["name"], "kind": d["kind"], "model": d["model"] or "", "active": bool(d["active"]), "manual": manual,
-            "photo": _photo_v(d["id"])} if d else None
+            "photo": _photo_v(d["id"]), "app": bool(d.get("app_id"))} if d else None
 
 
 def _clean(body, partial=False):
@@ -165,14 +200,126 @@ def _clean(body, partial=False):
     return out
 
 
+def _phone_orphans(asg=None):
+    """Handy-Aufzeichnungen ohne Gerät (Art „phone“, keine Zuordnung): Kandidaten für „Bisherige Handy-Aufzeichnungen diesem Gerät zuordnen“."""
+    asg = asg if asg is not None else assignments()
+    srcs = {r["tour_id"]: r["src"] for r in db.query("SELECT tour_id, src FROM tour_source")}
+    return [tid for tid, (d, _m) in asg.items() if d is None and tour_kind(tid, srcs.get(tid, "")) == "phone"]
+
+
 def list_payload():
     devs = db.query("SELECT * FROM devices ORDER BY active DESC, kind, COALESCE(NULLIF(since,''),'0000'), name")
-    cnt = {}
-    for d, _m in assignments().values():
+    cnt, last = {}, {}
+    asg = assignments()
+    starts = {t["id"]: t["start_ts"] for t in db.query("SELECT id, start_ts FROM tours")} if any(d.get("app_id") for d in devs) else {}
+    for tid, (d, _m) in asg.items():
         if d:
             cnt[d["id"]] = cnt.get(d["id"], 0) + 1
-    out = [dict(_row(d), n=cnt.get(d["id"], 0)) for d in devs]
+            if d.get("app_id") and starts.get(tid):
+                last[d["id"]] = max(last.get(d["id"], 0), starts[tid])
+    orphans = len(_phone_orphans(asg)) if any(d.get("app_id") for d in devs) else 0
+    out = []
+    for d in devs:
+        r = dict(_row(d), n=cnt.get(d["id"], 0))
+        if r["app"]:
+            r["app"].update(last_rec=last.get(d["id"]) or None, orphans=orphans)      # letzte aufgezeichnete Tour; Handy-Aufzeichnungen ohne Gerät
+        out.append(r)
     return {"devices": out, "kinds": [{"kind": k, "label": KIND_LABEL[k]} for k in KINDS]}
+
+
+# ---------------------------------------------------------------------------------------------- Android-App als Aufzeichnungsgerät (3.49.0)
+APP_NAME = "Meine Touren App"
+_UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+_APPVER = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}$")
+_app_lock = threading.Lock()
+
+
+def _txt(v, n):
+    """Freitext vom Handy: nur Buchstaben, Ziffern und wenige Satzzeichen, Leerraum zusammengezogen, höchstens n Zeichen."""
+    if not isinstance(v, (str, int, float)) or isinstance(v, bool):
+        return ""
+    v = re.sub(r"[^\w .,+()/-]", " ", str(v)[:200], flags=re.UNICODE).replace("_", " ")
+    return re.sub(r"\s+", " ", v).strip()[:n].strip()
+
+
+def clean_app_info(info):
+    """Geräteangaben der App prüfen und bereinigen. -> dict(app_id, model, android, version) oder None (fehlend/ungültig: dann wie ein alter Client ohne Angaben)."""
+    if not isinstance(info, dict):
+        return None
+    iid = info.get("install_id")
+    iid = iid.strip().lower() if isinstance(iid, str) else ""
+    if not _UUID.match(iid) or iid.replace("-", "").strip("0") == "":
+        return None
+    maker, model = _txt(info.get("hersteller"), 40), _txt(info.get("modell"), 40)
+    if maker and maker.islower():
+        maker = maker[:1].upper() + maker[1:]
+    full = model if not maker or model.lower().startswith(maker.lower()) else f"{maker} {model}".strip()
+    ver = info.get("app_version")
+    ver = ver.strip() if isinstance(ver, str) else ""
+    return {"app_id": iid, "model": full[:80], "short": (model or maker)[:40], "android": _txt(info.get("android"), 20), "version": ver if _APPVER.match(ver) else ""}
+
+
+def app_device(info):
+    """Vorhandenes App-Gerät zu den Geräteangaben (ohne etwas anzulegen) oder None."""
+    c = clean_app_info(info)
+    return db.one("SELECT * FROM devices WHERE app_id=? ORDER BY id LIMIT 1", (c["app_id"],)) if c else None
+
+
+def register_app(info, ts=None):
+    """App-Gerät zu den Geräteangaben finden oder beim ersten Mal anlegen (Art „phone“, Name „Meine Touren App · <Modell>“); App-/Android-Version und
+    „zuletzt gesehen“ aktualisieren. Ein vom Nutzer geänderter Name (und Modell, Notiz, Zeitraum, aktiv) bleibt erhalten. -> (Gerät, neu) oder (None, False)."""
+    c = clean_app_info(info)
+    if not c:
+        return None, False
+    ts = int(ts or time.time())
+    with _app_lock:                                        # zwei Uploads desselben Handys gleichzeitig: nur ein Gerät
+        d = db.one("SELECT * FROM devices WHERE app_id=? ORDER BY id LIMIT 1", (c["app_id"],))
+        if d:
+            db.execute("UPDATE devices SET app_version=CASE WHEN ?!='' THEN ? ELSE app_version END, app_android=CASE WHEN ?!='' THEN ? ELSE app_android END, last_seen=? WHERE id=?",
+                       (c["version"], c["version"], c["android"], c["android"], ts, d["id"]))
+            return db.one("SELECT * FROM devices WHERE id=?", (d["id"],)), False
+        base = f"{APP_NAME} · {c['short']}" if c["short"] else APP_NAME
+        have = {r["name"] for r in db.query("SELECT name FROM devices")}
+        name, i = base, 2
+        while name in have:                                # zweites Handy desselben Modells
+            name, i = f"{base} ({i})", i + 1
+        did = db.execute("INSERT INTO devices(name,kind,model,since,until,active,note,zsrc,app_id,app_version,app_android,app_since,last_seen) VALUES(?,?,?,?,?,1,'','',?,?,?,?,?)",
+                         (name[:80], "phone", c["model"], "", "", c["app_id"], c["version"], c["android"], ts, ts))
+        return db.one("SELECT * FROM devices WHERE id=?", (did,)), True
+
+
+def note_app_tour(tid, dev):
+    """Eine eben hochgeladene Aufzeichnung ihrem App-Gerät zuordnen: Kennung je Tour merken und Quelle (Art phone, Name = Gerätename) eintragen."""
+    if not dev or not dev.get("app_id"):
+        return
+    db.execute("INSERT OR REPLACE INTO tour_app(tour_id,app_id) VALUES(?,?)", (str(tid), dev["app_id"]))
+    db.execute("INSERT OR REPLACE INTO tour_source(tour_id,src,name) VALUES(?,?,?)", (str(tid), "phone", dev["name"] or ""))
+
+
+@router.post("/api/my-devices/app")
+def api_app_lookup(body: dict):
+    """Für die Aufzeichnungsseite der App: Ist dieses Handy (Geräteangaben im Feld „device“) dem Server schon bekannt? Legt nichts an.
+    POST statt GET, damit die Installationskennung in keiner Adresse/keinem Protokoll steht."""
+    d = app_device(body.get("device") if isinstance(body, dict) else None)
+    if not d:
+        return {"known": False}
+    return {"known": True, "id": d["id"], "name": d["name"], "since": d.get("app_since") or None, "last_seen": d.get("last_seen") or None}
+
+
+@router.post("/api/devices/{did}/adopt-phone")
+def api_adopt_phone(did: int, body: dict = None):
+    """Bisherige Handy-Aufzeichnungen ohne Gerät (Art „phone“, keine Zuordnung) diesem App-Gerät zuordnen. dry=true zählt nur.
+    Touren mit einem anderen Gerät oder einer ausdrücklichen Wahl bleiben unberührt; je Tour lässt es sich auf der Tourseite wieder ändern."""
+    d = db.one("SELECT * FROM devices WHERE id=?", (did,))
+    if not d:
+        raise HTTPException(404, "Gerät nicht gefunden")
+    if not d.get("app_id"):
+        raise HTTPException(400, "Das geht nur bei einem Gerät, das die Android-App angemeldet hat")
+    tids = _phone_orphans()
+    if not (body or {}).get("dry"):
+        for tid in tids:
+            db.execute("INSERT OR REPLACE INTO tour_app(tour_id,app_id) VALUES(?,?)", (tid, d["app_id"]))
+    return {"ok": True, "n": len(tids)}
 
 
 @router.get("/api/my-devices")
@@ -280,11 +427,12 @@ def _auto_map(tids=None):
     devs = db.query("SELECT * FROM devices")
     srcs = {r["tour_id"]: r["src"] for r in db.query("SELECT tour_id, src FROM tour_source")}
     zs = {r["tour_id"]: r["zsrc"] for r in db.query("SELECT tour_id, zsrc FROM tour_zsrc")}
+    apps, tapp = _app_devs(devs), _tour_apps()
     out = {}
     for t in db.query("SELECT id, start_ts FROM tours"):
         if tids is not None and t["id"] not in tids:
             continue
-        d = _auto(devs, tour_kind(t["id"], srcs.get(t["id"], "")), _day(t["start_ts"]), zs.get(t["id"], "")) if devs else None
+        d = apps.get(tapp.get(t["id"])) or (_auto(devs, tour_kind(t["id"], srcs.get(t["id"], "")), _day(t["start_ts"]), zs.get(t["id"], "")) if devs else None)
         out[t["id"]] = d["id"] if d else None
     return out
 
@@ -368,10 +516,13 @@ def api_zepp_diag(tour_id: str):
 @router.get("/api/devices/suggestions")
 def api_suggestions():
     """Vorschläge aus vorhandenen Touren: Quellenarten, für die es noch kein Gerät gibt. Es wird nichts angelegt."""
-    have = {d["kind"] for d in db.query("SELECT kind FROM devices")}
+    have = {d["kind"] for d in db.query("SELECT kind FROM devices WHERE COALESCE(app_id,'')=''")}      # App-Geräte nehmen keine Touren nach Art auf – sie decken die Art nicht ab
     cnt = {}
     srcs = {r["tour_id"]: r["src"] for r in db.query("SELECT tour_id, src FROM tour_source")}
+    tapp = _tour_apps()
     for t in db.query("SELECT id FROM tours"):
+        if t["id"] in tapp:
+            continue
         k = tour_kind(t["id"], srcs.get(t["id"], ""))
         if k and k not in have:
             cnt[k] = cnt.get(k, 0) + 1
