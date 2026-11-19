@@ -3,7 +3,7 @@ import os, socket, subprocess, sys, time, urllib.request
 from pathlib import Path
 import pytest
 
-from tests.helpers_ui import quiet
+from tests.helpers_ui import open_details, quiet
 ROOT = Path(__file__).parent.parent
 VIEWS = ["dash", "map", "tours", "records", "records?s=hike", "recap/2024", "trips", "places", "photos", "check", "admin", "account",
          "search?q=Runde", "tour/g1717225200", "compare"]
@@ -669,23 +669,28 @@ def test_record_view_app(page):
     """)
     page.goto(base + "#/dash"); page.reload(); quiet(page, 800)
     assert page.locator('nav a[data-k="record"]').count() == 1
-    page.set_viewport_size({"width": 390, "height": 800}); page.wait_for_timeout(500)
-    page.click("#tmore"); page.wait_for_timeout(300)
-    assert page.locator('.moregrid a[href="#/record"]').count() == 1
-    assert page.locator('.moregrid a[href="#/record"]').is_visible(), 'Menüpunkt nicht sichtbar'
-    page.locator('.moregrid a[href="#/record"]').dispatch_event('click'); page.wait_for_timeout(500)
+    page.set_viewport_size({"width": 390, "height": 800})
+    page.wait_for_selector("#tabbar a.trec", timeout=15000)              # 3.49.0: in der App der mittlere Reiter der Tab-Leiste (nicht mehr unter „Mehr“)
+    page.click("#tmore"); page.wait_for_selector(".uimod .moregrid a", timeout=15000)
+    assert page.locator('.moregrid a[href="#/record"]').count() == 0 and page.locator('.moregrid a[href="#/photos"]').count() == 1
+    page.keyboard.press("Escape")
+    page.evaluate("() => document.querySelectorAll('.uimod').forEach(m => m.remove())")
+    page.locator("#tabbar a.trec").click(); page.wait_for_function("() => location.hash === '#/record'", timeout=15000)
     page.set_viewport_size({"width": 1280, "height": 800})
-    page.fill("#rname", "Testrunde"); page.click("#rstart"); quiet(page, 700)
+    page.wait_for_selector("#rstart", timeout=15000)
+    open_details(page, "#rset")
+    page.fill("#rname", "Testrunde"); page.click("#rstart"); page.wait_for_selector("#rstop", timeout=15000)
     assert "1,23" in page.inner_text("#rd") and page.locator("#rmap").count() == 1
-    # versehentliches Antippen beendet NICHT, erst langes Halten
-    page.click("#rstop"); page.wait_for_timeout(500)
-    assert page.locator("#rsend").count() == 0 and page.locator("#rstop").count() == 1
-    box = page.locator("#rstop").bounding_box()
-    page.mouse.move(box["x"] + 20, box["y"] + 10); page.mouse.down(); page.wait_for_timeout(600); page.mouse.up(); page.wait_for_timeout(2500)
-    assert page.locator("#rsend").count() == 0, "zu kurz gehalten darf nicht beenden"
-    page.mouse.move(box["x"] + 20, box["y"] + 10); page.mouse.down(); page.wait_for_timeout(1900); page.mouse.up(); page.wait_for_timeout(900)
-    assert page.locator("#rsend").count() == 1
-    page.click("#rsend"); page.wait_for_function("() => location.hash.startsWith('#/tour/')", timeout=8000)
+    # 3.49.0: versehentliches Antippen beendet NICHT – erst die Rückfrage (früher: gedrückt halten)
+    page.click("#rstop"); page.wait_for_selector(".uidlg .uibox", timeout=15000)
+    assert page.evaluate("() => window._st.state") == "recording" and page.locator("#rstop").count() == 1
+    page.locator(".uidlg .uifoot button", has_text="Weiter aufzeichnen").click()
+    page.wait_for_function("() => !document.querySelector('.uidlg')", timeout=15000)
+    assert page.evaluate("() => window._st.state") == "recording", "Abbrechen darf nicht beenden"
+    page.click("#rstop"); page.wait_for_selector(".uidlg .uibox", timeout=15000)
+    page.locator(".uidlg .uifoot button", has_text="Beenden").click()
+    page.wait_for_selector('#rup[data-p="saved"]', timeout=15000)          # das Hochladen beginnt von selbst
+    page.click("#rview"); page.wait_for_function("() => location.hash.startsWith('#/tour/')", timeout=15000)
 
     page.goto(base + "#/apptest"); quiet(page, 800)
     assert "Nur im Entwicklermodus" in page.locator("#main").inner_text()          # App-Test ist eine Entwickleransicht
@@ -886,9 +891,12 @@ def test_record_backups_listed(page):
     base = page.url.split("#")[0]
     page.goto(base + "#/dash"); page.reload(); quiet(page, 800)
     page.evaluate("window.MTApp = {hasPermission: () => true, status: () => '{\"state\":\"idle\"}', version: () => '2.3.1', serverUrl: () => '', backups: () => JSON.stringify([{file:'rec_1.gpx', size: 51200, ts: Date.now()}]), backupGpx: f => ''}")
-    page.goto(base + "#/record"); quiet(page, 800)
-    assert "Gesicherte Aufzeichnungen" in page.inner_text("#main")
+    page.evaluate("() => localStorage.setItem('mt_rec_bk_done', JSON.stringify(['rec_1.gpx']))")      # 3.49.0: schon gesendete Sicherungen stehen unter den Einstellungen
+    page.goto(base + "#/record"); page.wait_for_selector("#rset", timeout=15000)
+    open_details(page, "#rset")
+    assert "Gesicherte Aufzeichnungen" in page.inner_text("#rset")
     assert page.query_selector("[data-bk='rec_1.gpx']")
+    page.evaluate("() => localStorage.removeItem('mt_rec_bk_done')")
 
 
 def test_record_live_values_and_photos(page):
@@ -910,21 +918,23 @@ def test_record_live_values_and_photos(page):
         uploadPhotos(){window._calls.push('upload'); window._pi={...window._pi,pending:0}},
         diagnose:()=>'{}', logText:()=>'', clearLog(){}, appLog(){}, shareText(){}};
     """)
-    page.goto(base + "#/record"); page.reload(); quiet(page, 1000)
+    page.goto(base + "#/record"); page.reload(); page.wait_for_selector("#rset", timeout=15000)
+    open_details(page, "#rset")                                          # 3.49.0: Fotomodus und Name liegen unter „Einstellungen der Aufzeichnung“
     page.select_option("#rphm", "end")
     assert "mode:end" in page.evaluate("window._calls")
-    page.fill("#rname", "Fototour"); page.click("#rstart"); quiet(page, 800)
+    page.fill("#rname", "Fototour"); page.click("#rstart"); page.wait_for_selector("#rstop", timeout=15000)
+    open_details(page, "#rmore")                                         # Abstieg, höchster Punkt, Ø: unter „Weitere Werte“
     for k, v in (("#rd", "5,20"), ("#ru", "410"), ("#rdn", "120"), ("#ralt", "1.530"), ("#rmax", "1.602"), ("#rspd", "5,0"), ("#ravg", "5,2")):
         page.wait_for_function("([k, v]) => { const e = document.querySelector(k); return !!e && e.innerText.includes(v); }", arg=[k, v], timeout=15000)
         assert v in page.inner_text(k), (k, page.inner_text(k))
     page.click("#rphoto"); page.click("#rphoto")
     page.wait_for_function("() => { const e = document.querySelector('#rphinfo'); return !!e && e.innerText.includes('2 Foto') && e.innerText.includes('warten'); }", timeout=15000)      # Zustand statt fester Zeit
     assert "2 Foto" in page.inner_text("#rphinfo") and "warten" in page.inner_text("#rphinfo")
-    box = page.locator("#rstop").bounding_box()
-    page.mouse.move(box["x"] + 20, box["y"] + 10); page.mouse.down(); page.wait_for_timeout(1900); page.mouse.up(); page.wait_for_timeout(900)
-    assert "2 Foto" in page.inner_text("#main")
-    page.click("#rsend"); page.wait_for_function("() => location.hash.startsWith('#/tour/')", timeout=15000)
+    page.click("#rstop"); page.wait_for_selector(".uidlg .uibox", timeout=15000)          # 3.49.0: Rückfrage statt gedrückt halten
+    page.locator(".uidlg .uifoot button", has_text="Beenden").click()
+    page.wait_for_selector('#rup[data-p="saved"]', timeout=15000)                          # Fotos und Tour werden von selbst hochgeladen
     assert "upload" in page.evaluate("window._calls")
+    page.click("#rview"); page.wait_for_function("() => location.hash.startsWith('#/tour/')", timeout=15000)
 
 
 def test_admin_tabs_uniform(page):
@@ -1031,7 +1041,8 @@ def test_record_weather_and_live_link(page, app_url):
         backups:()=>'[]', photoInfo:()=>'{}', weatherOn:()=>window._wxon, setWeather(b){window._wxon=b}, weatherInfo:()=>window._wx, shareText(t){window._shared=t},
         startRecording(){window._st.state='recording'}};
     """)
-    pg.goto(app_url + "/#/record"); quiet(pg, 1200)
+    pg.goto(app_url + "/#/record"); pg.wait_for_selector("#rset", timeout=15000)
+    open_details(pg, "#rset")                                            # 3.49.0: Wetterwarnung und Live-Link liegen unter „Einstellungen der Aufzeichnung“
     assert pg.locator("#rwxon").is_checked()
     pg.uncheck("#rwxon"); assert pg.evaluate("window._wxon") is False
     pg.click("#rlink"); quiet(pg, 1200)
@@ -1048,7 +1059,7 @@ def test_record_weather_and_live_link(page, app_url):
 def test_nav_statistik_und_entwicklermodus(page, app_url):
     """Menü: sechs Hauptpunkte; Rekorde/Auswertung unter „Statistik“; Prüfen in der Verwaltung; Entwickleransichten hinter einem Schalter."""
     page.evaluate("() => localStorage.setItem('mt_debug', '0')"); page.reload(); quiet(page, 1500)
-    keys = page.evaluate("() => [...document.querySelectorAll('#nav a')].map(a => a.dataset.k)")
+    keys = page.evaluate("() => [...document.querySelectorAll('#nav a')].map(a => a.dataset.k).filter(k => k !== 'record')")      # (die gemeinsame Seite trägt aus früheren Tests die App-Attrappe: „Aufzeichnen“ steht dann vorn)
     assert keys[:6] == ["dash", "map", "tours", "trips", "photos", "stats"] and "check" not in keys and "admin" not in keys
     page.evaluate("() => location.hash = '#/records'"); quiet(page, 1200)
     assert page.locator(".segtabs a.on").inner_text() == "Rekorde"

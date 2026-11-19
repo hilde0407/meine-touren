@@ -177,8 +177,9 @@ def test_tableiste_aufzeichnen_in_der_mitte(pw, app):
         keys = pg.evaluate("() => [...document.querySelectorAll('#tabbar > *')].map(e => e.dataset.k || e.id)")
         assert keys == ["dash", "tours", "record", "map", "tmore"], keys                 # höchstens fünf, Aufzeichnen in der Mitte
         r = pg.evaluate("""() => { const c = document.querySelector('#tabbar .trc').getBoundingClientRect(), t = document.querySelector('#tabbar').getBoundingClientRect(),
-          o = document.querySelector('#tabbar a[data-k=tours] .ti').getBoundingClientRect(); return {w: c.width, h: c.height, above: t.top - c.top, mid: Math.abs((c.left + c.right) / 2 - innerWidth / 2), other: o.height}; }""")
+          o = document.querySelector('#tabbar a[data-k=tours] .ti').getBoundingClientRect(); return {w: c.width, h: c.height, above: t.top - c.top, mid: Math.abs((c.left + c.right) / 2 - innerWidth / 2), other: o.height, bar: t.height}; }""")
         assert r["w"] >= 52 and r["h"] >= 52 and r["above"] >= 10 and r["mid"] <= 2 and r["w"] > 2 * r["other"], r     # rund, groß, ragt heraus, mittig
+        assert abs(r["bar"] - 53) <= 1, r                                                   # die Leiste selbst ist so hoch wie ohne App (Karte und Flug rechnen mit dieser Höhe)
         expect(pg.locator("#tabbar .trl")).to_have_text("Aufzeichnen", timeout=T)
         idle_bg = pg.evaluate("() => getComputedStyle(document.querySelector('#tabbar .trc')).backgroundColor")
         _no_hscroll(pg)
@@ -687,3 +688,116 @@ def test_sprachen(pw, app, lang, words):
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
+
+
+# ---------------------------------------------------------------------------------------------- Seiten der App selbst (assets): Einrichtung und „Server nicht erreichbar“
+ASSETS = ROOT / "android/app/src/main/assets"
+ASSET_MOCK = """(() => { window._calls = []; window._st = %(state)s;
+  window.MTApp = {lang: () => '%(lang)s', version: () => '3.49.0', setServer(u) { window._calls.push('server:' + u); }, changeServer() { window._calls.push('change'); },
+    hasPermission: () => %(perm)s, requestPermission() { window._calls.push('perm'); }, status: () => JSON.stringify(window._st),
+    startRecording(s, n) { window._calls.push('start:' + s); window._st = {state: 'recording', active_s: 0, dist_m: 0}; }, pauseRecording() { window._st.state = 'paused'; }, resumeRecording() { window._st.state = 'recording'; },
+    stopRecording() { window._calls.push('stop'); window._st.state = 'finished'; }}; })()"""
+
+
+def _asset(pw, name, query="", lang="de", scheme="light", width=390, state=None, perm="true", mock=True):
+    b = pw.chromium.launch()
+    ctx = b.new_context(viewport={"width": width, "height": 800}, color_scheme=scheme, device_scale_factor=2, reduced_motion="reduce", locale="de-DE")
+    if mock:
+        ctx.add_init_script(ASSET_MOCK % {"lang": lang, "state": json.dumps(state or {"state": "idle"}), "perm": perm})
+    pg = ctx.new_page()
+    pg.errors = []
+    pg.on("pageerror", lambda e: pg.errors.append(str(e)))
+    pg.browser_ = b
+    pg.goto((ASSETS / name).as_uri() + query)
+    pg.wait_for_selector("h1", timeout=T)
+    return pg
+
+
+@pytest.mark.parametrize("lang,scheme,title,btn", [("de", "light", "Mit dem Server verbinden", "Verbinden"), ("en", "dark", "Connect to the server", "Connect"),
+                                                   ("fr", "light", "Se connecter au serveur", "Se connecter"), ("es", "dark", "Conectar con el servidor", "Conectar")])
+def test_app_einrichtung(pw, lang, scheme, title, btn):
+    pg = _asset(pw, "setup.html", lang=lang, scheme=scheme, width=360)
+    try:
+        expect(pg.locator("h1")).to_have_text(title, timeout=T)
+        expect(pg.locator("button")).to_have_text(btn, timeout=T)
+        assert pg.evaluate("() => document.documentElement.lang") == lang and pg.inner_text("#ver") == "App 3.49.0"
+        _no_hscroll(pg)
+        assert pg.evaluate("() => [...document.querySelectorAll('input, button')].every(e => e.getBoundingClientRect().height >= 48)")
+        c = pg.evaluate(CONTRAST, ["h1", "main p", "button", "label", "small"])
+        assert len(c) == 5 and all(v >= 4.5 for v in c.values()), c
+        pg.locator("button").click()                                    # leer: Hinweis statt stiller Untätigkeit
+        assert pg.inner_text("#e") != "" and pg.evaluate("() => window._calls") == []
+        pg.fill("#u", "  192.168.178.230  ")
+        pg.locator("#u").press("Enter")
+        assert pg.evaluate("() => window._calls") == ["server:192.168.178.230"] and pg.inner_text("#e") == ""
+        _shot(pg, f"app-einrichtung-360-{scheme}-{lang}.png", full=True)
+        assert not pg.errors, pg.errors
+    finally:
+        pg.browser_.close()
+
+
+def test_app_fehlerseite_mit_aufzeichnung(pw):
+    """Server nicht erreichbar: Die Seite nennt die Adresse; eine laufende Aufzeichnung lässt sich auch hier pausieren und (nur mit Rückfrage) beenden."""
+    pg = _asset(pw, "error.html", "?u=http%3A%2F%2F192.168.1.5", state={"state": "recording", "active_s": 9252, "dist_m": 8460})
+    try:
+        expect(pg.locator("h1")).to_have_text("Server nicht erreichbar", timeout=T)
+        assert pg.inner_text("#adr") == "http://192.168.1.5" and pg.inner_text("#ver") == "App 3.49.0"
+        expect(pg.locator("#rh")).to_have_text("Aufzeichnung läuft", timeout=T)
+        assert pg.inner_text("#rt") == "2:34:12" and pg.inner_text("#rd") == "8,46 km"
+        assert pg.locator("#rstartbox").is_hidden() and pg.locator("#rrun").is_visible()
+        assert pg.evaluate("() => [...document.querySelectorAll('button')].filter(b => b.getBoundingClientRect().width > 0).every(b => b.getBoundingClientRect().height >= 48)")
+        _no_hscroll(pg)
+        _shot(pg, "app-fehler-laeuft-390-light.png", full=True)
+        pg.locator("#rtog").click()
+        expect(pg.locator("#rh")).to_have_text("Aufzeichnung pausiert", timeout=T)
+        expect(pg.locator("#rtog")).to_have_text("Fortsetzen", timeout=T)
+        pg.locator("#rtog").click()
+        expect(pg.locator("#rh")).to_have_text("Aufzeichnung läuft", timeout=T)
+        pg.locator("#rstop").click()                                    # ein Tipp beendet nicht
+        expect(pg.locator("#rask")).to_be_visible(timeout=T)
+        assert pg.evaluate("() => [window._st.state, window._calls.length, document.activeElement.id]") == ["recording", 0, "rno"]
+        pg.locator("#rno").click()
+        expect(pg.locator("#rrun")).to_be_visible(timeout=T)
+        pg.locator("#rstop").click()
+        pg.locator("#ryes").click()
+        expect(pg.locator("#rh")).to_have_text("Aufzeichnung beendet", timeout=T)
+        assert pg.evaluate("() => window._calls") == ["stop"] and pg.locator("#rrun").is_hidden() and pg.locator("#rstartbox").is_hidden()
+        pg.locator("#chg").click()
+        assert pg.evaluate("() => window._calls") == ["stop", "change"] and not pg.errors, pg.errors
+    finally:
+        pg.browser_.close()
+
+
+@pytest.mark.parametrize("lang,head,start", [("de", "Aufzeichnen geht auch ohne Server", "Aufzeichnung starten"), ("en", "Recording works without the server too", "Start recording"),
+                                             ("fr", "L’enregistrement fonctionne aussi sans serveur", "Démarrer l’enregistrement"), ("es", "También se puede grabar sin servidor", "Iniciar grabación")])
+def test_app_fehlerseite_starten_und_sprachen(pw, lang, head, start):
+    pg = _asset(pw, "error.html", "?u=https%3A%2F%2Ftouren.example", lang=lang, scheme="dark", width=360, perm="false")
+    try:
+        expect(pg.locator("#rh")).to_have_text(head, timeout=T)
+        expect(pg.locator("#rstart")).to_have_text(start, timeout=T)
+        assert pg.locator("#rsport option").count() == 9 and pg.evaluate("() => document.documentElement.lang") == lang
+        c = pg.evaluate(CONTRAST, ["h1", "main p", "#retry", "#chg", "#rh", "#rp", "#rstart"])
+        assert len(c) == 7 and all(v >= 4.5 for v in c.values()), c
+        _no_hscroll(pg)
+        pg.locator("#rstart").click()                                   # ohne Berechtigung: erst danach fragen, nichts starten
+        assert pg.evaluate("() => [window._calls, window._st.state]") == [["perm"], "idle"] and pg.inner_text("#rp") != ""
+        pg.evaluate("() => { MTApp.hasPermission = () => true; window.dispatchEvent(new CustomEvent('mtperm', {detail: true})); }")
+        pg.select_option("#rsport", "skitour")
+        pg.locator("#rstart").click()
+        pg.wait_for_function("() => window._st.state === 'recording' && !document.querySelector('#rrun').hidden", timeout=T)
+        assert pg.evaluate("() => window._calls") == ["perm", "start:skitour"]
+        _shot(pg, f"app-fehler-360-dark-{lang}.png", full=True)
+        assert not pg.errors, pg.errors
+    finally:
+        pg.browser_.close()
+
+
+def test_app_seiten_ohne_bruecke_und_inhalt():
+    """Die Seiten kommen ohne Brücke nicht ins Stolpern (kein Skriptfehler in den Texttabellen) und tragen keine fest eingetragene Version."""
+    import re
+    for name in ("setup.html", "error.html"):
+        src = (ASSETS / name).read_text(encoding="utf8")
+        assert 'name="color-scheme"' in src and "prefers-color-scheme:dark" in src and not re.search(r"\d+\.\d+\.\d+(?!\.)", src.replace("192.168.178.230", "")), name
+        for lang in ("de:{", "en:{", "fr:{", "es:{"):
+            assert lang in src, (name, lang)
+        assert ' onclick="' not in src and "eval(" not in src, name          # keine Inline-Handler im Markup

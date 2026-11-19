@@ -2155,8 +2155,8 @@ html.mob #flt [hidden]{display:none!important}
 @keyframes recpulse{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.35);opacity:0}}
 @keyframes recblink{50%{opacity:.25}}
 /* Tab-Leiste: runder, angehobener Knopf in der Mitte; Zustand als Farbe, Zeichen/Zeit im Knopf und Wort darunter */
-html.mob #tabbar.app a.trec{flex:0 1 96px;position:relative;border-top-color:transparent;color:#fff;gap:2px;justify-content:flex-end;padding-bottom:4px}
-#tabbar .trc{position:relative;display:flex;align-items:center;justify-content:center;width:56px;height:56px;margin-top:-24px;border-radius:50%;box-sizing:border-box;background:var(--yellow);color:var(--yellow-ink);border:4px solid var(--forest);font:700 15px/1 var(--d);font-variant-numeric:tabular-nums}
+html.mob #tabbar.app a.trec{flex:0 1 96px;position:relative;border-top-color:transparent;color:#fff;gap:1px;justify-content:flex-end;padding-bottom:2px;line-height:1.2}
+#tabbar .trc{position:relative;display:flex;align-items:center;justify-content:center;width:56px;height:56px;margin-top:-28px;border-radius:50%;box-sizing:border-box;background:var(--yellow);color:var(--yellow-ink);border:4px solid var(--forest);font:700 15px/1 var(--d);font-variant-numeric:tabular-nums}
 #tabbar a.trec[data-s=idle] .trc{color:var(--rec)}
 #tabbar a.trec.on .trc{box-shadow:0 0 0 2px #fff}
 #tabbar a.trec[data-s=recording] .trc{background:var(--rec);color:#fff}
