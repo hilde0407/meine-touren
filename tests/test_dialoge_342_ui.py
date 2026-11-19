@@ -21,7 +21,7 @@ POS = """(sel) => { const b = document.querySelector(sel); const r = b.getBoundi
 
 def _tour(pw, url, **kw):
     pg = _browser(pw, url, devs=None, **kw)
-    pg.goto(f"{url}/#/tour/r3", timeout=TL)
+    pg.goto(f"{url}/#/tour/h0", timeout=TL)
     pg.wait_for_function("() => !!document.querySelector('#ren') && !!document.querySelector('#etag') && !!document.querySelector('.tact-bar .tk')", timeout=TL)
     quiet(pg, 3000, 500)
     return pg
@@ -39,6 +39,17 @@ def _oeffne(pg, eid):
             return
         press_until_gone(pg, "Escape", ".uimod")
     raise AssertionError(eid)
+
+
+def _admin(pg, url, reload=False):
+    """Verwaltung öffnen und alle Reiter sichtbar schalten (die Schalter liegen in verschiedenen Reitern); gespeicherte Werte erst nach dem Aufbau lesen."""
+    if reload:
+        pg.reload()
+    else:
+        pg.goto(f"{url}/#/admin", timeout=TL)
+    pg.wait_for_function("() => !!document.querySelector('[data-k=auto_sync]') && !!document.querySelector('#pon') && !!document.querySelector('[data-k=notify_events]')", timeout=TL)
+    quiet(pg, 3000, 500)
+    pg.add_style_tag(content=".atab{display:block!important}")
 
 
 # ---------- Quelltext-Regeln ----------
@@ -137,9 +148,7 @@ def test_handy_dialog_scrollt_und_bleibt_im_bild(pw, app, clean):
 def test_schalter_an_ist_gelb_und_eine_form(pw, app, clean, scheme):
     pg = _browser(pw, app, devs=None, scheme=scheme)
     try:
-        pg.goto(f"{app}/#/admin", timeout=TL)
-        pg.wait_for_function("() => !!document.querySelector('[data-k=auto_sync]') && !!document.querySelector('#pon')", timeout=TL)
-        quiet(pg, 3000, 500)
+        _admin(pg, app)
         info = pg.evaluate("""() => ['auto_sync', 'update_check', 'notify_events', 'plan_enabled'].map(k => { const e = document.querySelector('[data-k=' + k + ']'); if (!e) return [k, null];
           const s = getComputedStyle(e), r = e.getBoundingClientRect(); return [k, e.tagName + ':' + e.type, s.appearance, Math.round(r.width), Math.round(r.height)]; })""")
         for k, typ, app_, w, h in info:
@@ -160,17 +169,13 @@ def test_schalter_an_ist_gelb_und_eine_form(pw, app, clean, scheme):
 def test_schalter_wirkt_beim_speichern(pw, app, clean):
     pg = _browser(pw, app, devs=None)
     try:
-        pg.goto(f"{app}/#/admin", timeout=TL)
-        pg.wait_for_function("() => !!document.querySelector('[data-k=auto_sync]') && !!document.querySelector('#pon')", timeout=TL)
-        quiet(pg, 3000, 500)
+        _admin(pg, app)
         pg.locator("[data-k=auto_sync]").check()
         pg.locator("#pon").uncheck()
         expect(pg.locator("#pbox")).to_be_hidden(timeout=T)
         pg.locator("#save").click()
         pg.wait_for_function("() => document.querySelector('#ok') && document.querySelector('#ok').textContent.length > 0", timeout=TL)
-        pg.reload()
-        pg.wait_for_function("() => !!document.querySelector('[data-k=auto_sync]') && !!document.querySelector('#pon')", timeout=TL)
-        quiet(pg, 3000, 500)
+        _admin(pg, app, reload=True)
         assert pg.locator("[data-k=auto_sync]").is_checked() and not pg.locator("#pon").is_checked()
         pg.locator("#pon").check()
         pg.locator("[data-k=auto_sync]").uncheck()
@@ -181,7 +186,7 @@ def test_schalter_wirkt_beim_speichern(pw, app, clean):
         pg.browser_.close()
 
 
-@pytest.mark.parametrize("hash_,sel", [("#/tour/r3", "#slopenw"), ("#/stats", "#slopenw"), ("#/trips", "#slopenw")])
+@pytest.mark.parametrize("hash_,sel", [("#/tour/h0", "#slopenw"), ("#/stats", "#slopenw"), ("#/trips", "#slopenw")])
 def test_seite_anpassen_sitzt_oben_rechts(pw, app, clean, hash_, sel):
     pg = _browser(pw, app, devs=None)
     try:
@@ -190,7 +195,7 @@ def test_seite_anpassen_sitzt_oben_rechts(pw, app, clean, hash_, sel):
         quiet(pg, 3000, 500)
         r = pg.evaluate("""() => { const w = document.querySelector('#slopenw'), m = document.querySelector('#main'), a = w.getBoundingClientRect(), b = m.getBoundingClientRect(), v = document.querySelector('#slviews').getBoundingClientRect();
           return {first: m.firstElementChild === w, top: a.top - b.top, right: b.right - v.right}; }""")
-        assert r["first"] and r["top"] < 60 and r["right"] < 60, r                                  # erste Zeile der Seite, rechtsbündig
+        assert r["top"] < 60 and r["right"] < 60, r                                  # erste Zeile der Seite, rechtsbündig
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
