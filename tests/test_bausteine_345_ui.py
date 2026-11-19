@@ -284,6 +284,7 @@ def test_katalog_der_uebersicht_und_der_statistik(pw, app, width, scheme):
         _catalog(pg)
         names = pg.locator(".slcard .slci h3").all_inner_texts()
         assert names.count("Ziele") == 1 and names.count("Bestwerte") == 1 and "Top-Touren" not in names
+        assert len(names) == 31                                                                    # vorher 34: „Ziele“ und „Bestwerte“ statt Jahresziel, Ziele, Jahresziel in Gefahr, Rekorde, Top-Touren
         pg.fill("#slq", "Ziele")
         pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length >= 1", timeout=T)
         assert pg.evaluate("() => document.querySelector('.slcat').scrollWidth <= document.querySelector('.slcat').clientWidth + 1")
