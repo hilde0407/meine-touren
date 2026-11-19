@@ -29,7 +29,7 @@ const HN = {pending: new Map(), focus: null};
 const hnPl = (n, one, many) => (n === 1 ? one : many);
 const hnTours = n => (n === 1 ? "1 Tour" : `${nf(n, 0)} Touren`);
 const hnVal = (m, x) => (m === "km" ? `${fmtKm(x, {d: 0})}` : m === "up" ? `${fmtHm(x)}` : m === "hours" ? fmtDauer(x * 3600, {summe: true}) : hnTours(Math.round(x)));
-const hnMetric = {km: "Kilometer", up: "Höhenmeter", count: "Touren", hours: "Stunden"};
+const hnMetric = {km: "Strecke", up: "Aufstieg", count: "Touren", hours: "Zeit unterwegs"};
 const hnNum = x => nf(x, x % 1 ? 1 : 0);
 const hnNow = () => Math.floor(Date.now() / 1000);
 const hnSnoozeTs = (cfg, art) => {
@@ -81,7 +81,7 @@ const HN_ART = {
     name: "Jahresziel in Gefahr", icon: "flag", wtype: "hnziel", seiten: ["uebersicht", "statistik"], defaults: {schwelle: 10, ausblenden: 7},
     desc: "Erscheint nur, wenn die Prognose zum Jahresende deutlich unter einem deiner Jahresziele liegt. Sonst ist der Baustein unsichtbar.",
     sample: ["warnung", "Prognose 780 km bei einem Ziel von 1.000 km (22 % darunter)."],
-    fields: [{k: "schwelle", kind: "number", label: "Schwelle: Prognose liegt um mehr als so viele Prozent unter dem Ziel", min: 1, max: 90, step: 1, int: true}, {kind: "sports", label: "Aktivität (nur Ziele, die sie betreffen)"}],
+    fields: [{k: "schwelle", kind: "number", label: "Schwelle: Prognose liegt um mehr als so viele Prozent unter dem Ziel", min: 1, max: 90, step: 1, int: true}, {kind: "sports", label: "Sportart (nur Ziele, die sie betreffen)"}],
     cond: c => [`Wird nur angezeigt, wenn die Prognose zum Jahresende um mehr als ${hnNum(c.schwelle ?? 10)} % unter einem deiner Jahresziele liegt.`, "Voraussetzung: ein Jahresziel (Statistik → Ziele); die Prognose gibt es ab dem 14. Tag des Jahres."],
     body(h) {
       const L = h.daten.ziele, more = L.length - 3;
@@ -93,12 +93,12 @@ const HN_ART = {
   },
   meilenstein: {
     name: "Meilenstein erreicht", icon: "pin", wtype: "hnmeilenstein", seiten: ["uebersicht", "statistik"], defaults: {tage: 7, ausblenden: 7},
-    desc: "Erscheint nur, wenn du kürzlich eine runde Marke überschritten hast: 100, 250, 500, 1.000 … Kilometer, 10.000 Höhenmeter oder die 25., 50. und 100. Tour.",
+    desc: "Erscheint nur, wenn du kürzlich eine runde Marke überschritten hast: 100, 250, 500, 1.000 … Kilometer, 10.000 m Aufstieg oder die 25., 50. und 100. Tour.",
     sample: ["info", "1.000 km insgesamt überschritten"],
     fields: [{k: "tage", kind: "number", label: "Zeitraum in Tagen (so lange nach dem Überschreiten bleibt der Hinweis)", min: 1, max: 365, step: 1, int: true}, {kind: "sports"}],
-    cond: c => [(c.tage ?? 7) === 1 ? "Wird nur angezeigt, wenn du heute oder gestern eine runde Marke überschritten hast: 100, 250, 500, 1.000 … Kilometer, 10.000 Höhenmeter oder die 25., 50., 100. Tour."
-      : `Wird nur angezeigt, wenn du in den letzten ${nf(c.tage ?? 7, 0)} Tagen eine runde Marke überschritten hast: 100, 250, 500, 1.000 … Kilometer, 10.000 Höhenmeter oder die 25., 50., 100. Tour.`],
-    body: h => hnRows(h.daten.marken.slice(0, 3).map(m => `<li><b>${m.typ === "km" ? `${fmtKm(m.wert, {d: 0})} insgesamt überschritten` : m.typ === "hm" ? `${nf(m.wert, 0)} Höhenmeter insgesamt überschritten` : `${nf(m.wert, 0)}. Tour erreicht`}</b> ${hnTour(m)} <span class="mut">${fmtDatumKurz(m.datum)}</span></li>`)),
+    cond: c => [(c.tage ?? 7) === 1 ? "Wird nur angezeigt, wenn du heute oder gestern eine runde Marke überschritten hast: 100, 250, 500, 1.000 … Kilometer, 10.000 m Aufstieg oder die 25., 50., 100. Tour."
+      : `Wird nur angezeigt, wenn du in den letzten ${nf(c.tage ?? 7, 0)} Tagen eine runde Marke überschritten hast: 100, 250, 500, 1.000 … Kilometer, 10.000 m Aufstieg oder die 25., 50., 100. Tour.`],
+    body: h => hnRows(h.daten.marken.slice(0, 3).map(m => `<li><b>${m.typ === "km" ? `${fmtKm(m.wert, {d: 0})} insgesamt überschritten` : m.typ === "hm" ? `${nf(m.wert, 0)} m Aufstieg insgesamt überschritten` : `${nf(m.wert, 0)}. Tour erreicht`}</b> ${hnTour(m)} <span class="mut">${fmtDatumKurz(m.datum)}</span></li>`)),
     link: () => "",
     badge: h => (h.daten.marken[0].typ === "km" ? `${fmtKm(h.daten.marken[0].wert, {d: 0})}` : h.daten.marken[0].typ === "hm" ? `${fmtHm(h.daten.marken[0].wert)}` : `${nf(h.daten.marken[0].wert, 0)}. Tour`),
   },
@@ -115,7 +115,7 @@ const HN_ART = {
   },
   pause: {
     name: "Lange Pause", icon: "clock", wtype: "hnpause", seiten: ["uebersicht"], defaults: {tage: 14, ausblenden: 7},
-    desc: "Erscheint nur, wenn seit einer einstellbaren Zahl von Tagen keine Tour mehr gemacht wurde, auf Wunsch nur für eine Aktivität.",
+    desc: "Erscheint nur, wenn seit einer einstellbaren Zahl von Tagen keine Tour mehr gemacht wurde, auf Wunsch nur für eine Sportart.",
     sample: ["info", "Seit 20 Tagen keine Tour."],
     fields: [{k: "tage", kind: "number", label: "Pause ab so vielen Tagen", min: 1, max: 365, step: 1, int: true}, {kind: "sports"}],
     cond: c => [(c.tage ?? 14) === 1 ? "Wird nur angezeigt, wenn seit mindestens einem Tag keine Tour mehr gemacht wurde." : `Wird nur angezeigt, wenn seit mindestens ${nf(c.tage ?? 14, 0)} Tagen keine Tour mehr gemacht wurde.`],
@@ -125,12 +125,12 @@ const HN_ART = {
   },
   rekord: {
     name: "Rekord-Tour", icon: "trophy", wtype: "hnrekord", seiten: ["uebersicht", "statistik"], defaults: {tage: 7, ausblenden: 7},
-    desc: "Erscheint nur, wenn du kürzlich deine längste Tour, die meisten Höhenmeter oder dein schnellstes Tempo aller Zeiten erreicht hast.",
+    desc: "Erscheint nur, wenn du kürzlich deine längste Tour, deinen größten Aufstieg oder dein schnellstes Tempo aller Zeiten erreicht hast.",
     sample: ["info", "Längste Tour 32,4 km"],
     fields: [{k: "tage", kind: "number", label: "Zeitraum in Tagen (so lange bleibt der Hinweis)", min: 1, max: 365, step: 1, int: true}, {kind: "sports"}],
-    cond: c => [(c.tage ?? 7) === 1 ? "Wird nur angezeigt, wenn du heute oder gestern deine längste Tour, die meisten Höhenmeter oder das schnellste Tempo aller Zeiten erreicht hast."
-      : `Wird nur angezeigt, wenn du in den letzten ${nf(c.tage ?? 7, 0)} Tagen deine längste Tour, die meisten Höhenmeter oder das schnellste Tempo aller Zeiten erreicht hast.`, "Voraussetzung: mindestens 5 Touren."],
-    body: h => hnRows(h.daten.rekorde.map(r => `<li><b>${r.metrik === "km" ? `${fmtKm(r.wert)}` : r.metrik === "hm" ? `${fmtHm(r.wert)}` : `${fmtTempo(r.wert)}`}</b><span>${r.metrik === "km" ? "Längste Tour" : r.metrik === "hm" ? "Meiste Höhenmeter" : "Schnellstes Tempo"}</span> ${hnTour(r)} <span class="mut">${fmtDatumKurz(r.datum)}</span></li>`)),
+    cond: c => [(c.tage ?? 7) === 1 ? "Wird nur angezeigt, wenn du heute oder gestern deine längste Tour, deinen größten Aufstieg oder das schnellste Tempo aller Zeiten erreicht hast."
+      : `Wird nur angezeigt, wenn du in den letzten ${nf(c.tage ?? 7, 0)} Tagen deine längste Tour, deinen größten Aufstieg oder das schnellste Tempo aller Zeiten erreicht hast.`, "Voraussetzung: mindestens 5 Touren."],
+    body: h => hnRows(h.daten.rekorde.map(r => `<li><b>${r.metrik === "km" ? `${fmtKm(r.wert)}` : r.metrik === "hm" ? `${fmtHm(r.wert)}` : `${fmtTempo(r.wert)}`}</b><span>${r.metrik === "km" ? "Längste Tour" : r.metrik === "hm" ? "Größter Aufstieg" : "Schnellstes Tempo"}</span> ${hnTour(r)} <span class="mut">${fmtDatumKurz(r.datum)}</span></li>`)),
     link: () => "",
     badge: h => (h.daten.rekorde.length === 1 ? "1 Rekord" : `${h.daten.rekorde.length} Rekorde`),
   },
@@ -138,7 +138,7 @@ const HN_ART = {
     name: "Wochenziel", icon: "cal", wtype: "hnwoche", seiten: ["uebersicht"], defaults: {einheit: "km", ziel: 0, ausblenden: 7}, cfgOnAdd: true,
     desc: "Zeigt, ob du dein Wochenziel in Kilometern oder Touren erreicht hast oder wie viel noch fehlt, mit Fortschrittsbalken. Ohne gesetztes Ziel ist der Baustein unsichtbar.",
     sample: ["info", "Wochenziel offen: noch 18 km (bisher 32 von 50 km)."],
-    fields: [{k: "einheit", kind: "radio", def: "km", label: "Ziel in", options: [["km", "Kilometern"], ["touren", "Touren"]]}, {k: "ziel", kind: "number", label: "Wochenziel (0 = kein Ziel)", min: 0, max: 10000, step: 1},
+    fields: [{k: "einheit", kind: "radio", def: "km", label: "Ziel in", options: [["km", "Strecke"], ["touren", "Touren"]]}, {k: "ziel", kind: "number", label: "Wochenziel (0 = kein Ziel)", min: 0, max: 10000, step: 1},
       {kind: "sports"}],
     cond: c => [c.ziel > 0 ? `Wird nur angezeigt, wenn ein Wochenziel gesetzt ist (aktuell ${c.einheit === "touren" ? hnTours(c.ziel) : `${fmtKm(c.ziel, {d: 0})}`}).` : "Wird nur angezeigt, wenn ein Wochenziel gesetzt ist. Das Ziel stellst du unter „Einstellungen“ ein."],
     body(h) {
@@ -272,8 +272,8 @@ window.SL_WT.hinweise = {
   fam: "uebersicht", cat: "hinweise", icon: "bell", name: "Hinweise", title: () => "Hinweise", multi: true, hinweis: true, sammel: true, w: "voll", seiten: ["uebersicht", "statistik"],
   defaults: {arten: HN_SAMMEL.slice(), ausblenden: 7}, kurz: cfg => flParts(cfg, null),
   desc: "Alle gerade aktiven Hinweise gebündelt in einer Liste: Jahresziel, Meilenstein, Auffälligkeiten, Pause, Rekord, Wochenziel, Erholung, Sicherung. Nur sichtbar, wenn mindestens einer aktiv ist. Empfohlen für den Alltag.",
-  fields: [{k: "arten", kind: "checks", def: HN_SAMMEL, label: "Berücksichtigte Hinweise", min: 1, options: HN_ARTEN.map(a => [a, HN_ART[a].name])}, {kind: "sports", label: "Aktivität (für Ziele, Pause, Rekord, Meilenstein und Wochenziel)"},
-    {k: "woche_einheit", kind: "radio", def: "km", label: "Wochenziel in", options: [["km", "Kilometern"], ["touren", "Touren"]]}, {k: "woche_ziel", kind: "number", def: 0, label: "Wochenziel (0 = kein Ziel)", min: 0, max: 10000, step: 1}, {kind: "title"}, HN_FIELD_AUS],
+  fields: [{k: "arten", kind: "checks", def: HN_SAMMEL, label: "Berücksichtigte Hinweise", min: 1, options: HN_ARTEN.map(a => [a, HN_ART[a].name])}, {kind: "sports", label: "Sportart (für Ziele, Pause, Rekord, Meilenstein und Wochenziel)"},
+    {k: "woche_einheit", kind: "radio", def: "km", label: "Wochenziel in", options: [["km", "Strecke"], ["touren", "Touren"]]}, {k: "woche_ziel", kind: "number", def: 0, label: "Wochenziel (0 = kein Ziel)", min: 0, max: 10000, step: 1}, {kind: "title"}, HN_FIELD_AUS],
   preview: () => slPrev(`<div class="hnpv2"><div class="hnbox hn-warnung hnpv">${hnIcon("warnung")}<div class="hnmain"><p class="hnlbl">${HN_STUFE.warnung[0]}</p><p class="hnt">${esc(HN_ART.ziel.name)}</p></div></div>` +
     `<div class="hnbox hn-info hnpv">${hnIcon("info")}<div class="hnmain"><p class="hnlbl">${HN_STUFE.info[0]}</p><p class="hnt">${esc(HN_ART.meilenstein.name)}</p></div></div></div>`),
   render(c, b, cfg) {

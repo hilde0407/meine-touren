@@ -26,7 +26,7 @@ const ADM_TABS = [
   ["fotos", "Fotos", "Fotobibliothek, Import und Eingangsordner.", ["Fotos", "Foto-Eingang"]],
   ["auto", "Automatik & Meldungen", "Tägliche Aktualisierung und Benachrichtigungen.", ["Automatik", "Benachrichtigung", "E-Mail-Versand"]],
   ["handy", "Handy & App", "Android-App, Standort teilen und die App auf dem Startbildschirm.", ["Android-App", "Standort teilen", "Verlorene", "Auf dem Handy"]],
-  ["sicher", "Sicherung & Zugang", "Backups, Zugriffsschutz und Offline-Nutzung.", ["Sicherung", "Zugriffsschutz", "Offline-Nutzung"]],
+  ["sicher", "Sicherung & Zugang", "Sicherungen, Zugriffsschutz und Offline-Nutzung.", ["Sicherung", "Zugriffsschutz", "Offline-Nutzung"]],
 ];
 const _admG = VIEWS.admin;
 VIEWS.admin = async (...a) => {

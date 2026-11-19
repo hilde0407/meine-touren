@@ -48,7 +48,7 @@ def health():
     add("Komoot-Zugang", bool(em), "gespeichert" if em else "fehlt", "" if em else "Verwaltung → Komoot: E-Mail und Passwort eintragen")
     nb = extras.newest_backup()
     age = (time.time() - nb.stat().st_mtime) / 3600 if nb else None
-    add("Letztes Backup", age is not None and age < config.BACKUP_WARN_S / 3600, f"vor {age:.0f} h" if age is not None else "noch keines",
+    add("Letzte Sicherung", age is not None and age < config.BACKUP_WARN_S / 3600, f"vor {age:.0f} h" if age is not None else "noch keines",
         "" if age is not None and age < config.BACKUP_WARN_S / 3600 else "Verwaltung → Sicherung: jetzt sichern")
     p = config.DB_PATH
     size = p.stat().st_size / 1e6 if p.exists() else 0
@@ -67,7 +67,7 @@ def health():
     add("Fotos ohne Tour", True, f"{o} von {r['n'] or 0}", "")
     err = db.get("backup_err")
     if err:
-        add("Backup-Fehler", False, err[:120], "Sicherungsordner prüfen")
+        add("Sicherungsfehler", False, err[:120], "Sicherungsordner prüfen")
     return {"checks": checks, "ok": all(c["ok"] for c in checks), "duplicates": [], "version": config.VERSION}
 
 

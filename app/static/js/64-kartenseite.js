@@ -1,20 +1,20 @@
 /* =====================  3.34.0 Gesamtkarte als anpassbare Seite (Layout-Schlüssel „karte“)  =====================
    Die Karte (#/map; Aufbau in 02-uebersicht.js, Heatmap und Fotos in 06-erweiterungen.js, Standort in 32-karte.js) ist wie die anderen Seiten anpassbar (Engine 49-seitenlayout.js).
    Aufbau: #kax ist das Raster der Seite. Hauptbaustein „karte“ (Pflicht, nicht ausblendbar; ganze, zwei Drittel oder halbe Breite) enthält die Karte mit ihren Bedienfeldern.
-   Bedienfelder (Standort, Jahr und Anzahl, Aktivitäten, Strecken-Stil, Heatmap und Fotos, Touren im Ausschnitt) sind Abschnitte der Seite: kapw-Hüllen um die bisherigen Kästen (Kennungen, Knöpfe und Ereignisse
+   Bedienfelder (Standort, Jahr und Anzahl, Sportarten, Strecken-Stil, Heatmap und Fotos, Touren im Ausschnitt) sind Abschnitte der Seite: kapw-Hüllen um die bisherigen Kästen (Kennungen, Knöpfe und Ereignisse
    bleiben dieselben Knoten). Ohne Anpassung liegen sie wie bisher in dieser Reihenfolge als Kästen auf der Karte. Mit dem Layout lassen sie sich ausblenden (der Kasten bleibt in der Seite, nur unsichtbar),
    zuklappen („Standardmäßig offen“ aus: nur ein kleiner Knopf mit dem Namen bleibt) und umordnen. Im Bearbeitungsmodus stehen sie als Blöcke im Raster (wie die anderen Abschnitte) und gehen danach zurück auf die Karte.
-   Bausteine (Katalog „Karte“): kzahlen (Karten-Kennzahlen), kliste (Touren im Kartenausschnitt), klegende (Legende der Aktivitäten). Sie lesen den Stand der Karte (Jahr, Aktivitäten, Ausschnitt) und
+   Bausteine (Katalog „Karte“): kzahlen (Karten-Kennzahlen), kliste (Touren im Kartenausschnitt), klegende (Legende der Sportarten). Sie lesen den Stand der Karte (Jahr, Sportarten, Ausschnitt) und
    aktualisieren sich bei jeder Änderung (KA.subs).
    Größe: Ändert sich das Layout (Bearbeitungsmodus, Baustein neben der Karte, andere Breite), passt ein ResizeObserver die Karte an (invalidateSize) und rahmt den bisherigen Ausschnitt neu ein,
    solange der Benutzer die Karte nicht selbst bewegt hat (map._kaUser); ein selbst gewählter Ausschnitt bleibt. Ohne Layout-Änderung verhält sich die Karte wie bisher (nur Leaflets eigene Größenanpassung). */
 const KA_PANELS = ["standort", "jahr", "sport", "stil", "ebenen", "ausschnitt"];
-const KA_NAME = {standort: "Standort", jahr: "Jahr", sport: "Aktivitäten", stil: "Strecken", ebenen: "Ebenen", ausschnitt: "Ausschnitt"};
+const KA_NAME = {standort: "Standort", jahr: "Jahr", sport: "Sportarten", stil: "Strecken", ebenen: "Ebenen", ausschnitt: "Ausschnitt"};
 SL_REG.karte = [
   {id: "karte", w: "voll", title: "Karte", page: "karte", plain: true, must: true, ws: ["voll", "zweidrittel", "halb"]},
   {id: "standort", w: "voll", title: "Bedienfeld: Mein Standort", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_standort"]},
   {id: "jahr", w: "voll", title: "Bedienfeld: Jahr und Anzahl", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_jahr"]},
-  {id: "sport", w: "voll", title: "Bedienfeld: Aktivitäten", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_sport"]},
+  {id: "sport", w: "voll", title: "Bedienfeld: Sportarten", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_sport"]},
   {id: "stil", w: "voll", title: "Bedienfeld: Strecken-Stil", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_stil"]},
   {id: "ebenen", w: "voll", title: "Bedienfeld: Heatmap und Fotos", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_ebenen"]},
   {id: "ausschnitt", w: "voll", title: "Bedienfeld: Touren im Ausschnitt", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_ausschnitt"]},
@@ -49,7 +49,7 @@ const kaTxt = (st, aus) => [st.y ? String(st.y) : "alle Jahre", aus ? "im Karten
 Object.assign(window.SL_WT, {
   kzahlen: {
     fam: "karte", cat: "karte", icon: "met", name: "Karten-Kennzahlen", title: () => "Karten-Kennzahlen", multi: true, w: "halb", seiten: ["karte"], defaults: {values: KA_DEF, basis: "filter"},
-    desc: "Touren, Strecke, Aufstieg und Zeit der Touren, die die Karte gerade zeigt (Jahr und Aktivitäten oben auf der Karte) oder die den sichtbaren Ausschnitt berühren. Die Zahlen folgen jeder Änderung der Karte.",
+    desc: "Touren, Strecke, Aufstieg und Zeit der Touren, die die Karte gerade zeigt (Jahr und Sportarten oben auf der Karte) oder die den sichtbaren Ausschnitt berühren. Die Zahlen folgen jeder Änderung der Karte.",
     fields: [{k: "values", kind: "checks", label: "Angezeigte Werte", min: 1, def: KA_DEF, options: KA_VALUES}, {k: "basis", kind: "radio", def: "filter", label: "Zählen", options: [["filter", "Gefilterte Touren"], ["ausschnitt", "Im Kartenausschnitt"]]}, {kind: "title"}],
     preview: () => slPvTiles([["42", "Touren"], ["512 km", "Strecke"], ["14 300 m", "Aufstieg"]]),
     render(c, b, cfg) {
@@ -71,7 +71,7 @@ Object.assign(window.SL_WT, {
   },
   kliste: {
     fam: "karte", cat: "karte", icon: "map", name: "Touren im Kartenausschnitt", title: () => "Touren im Kartenausschnitt", multi: true, w: "drittel", seiten: ["karte"], defaults: {n: 10, sort: "date"},
-    desc: "Eine Liste der Touren, die den sichtbaren Kartenausschnitt berühren, neueste, längste oder mit den meisten Höhenmetern zuerst. Beim Verschieben und Zoomen der Karte ändert sich die Liste.",
+    desc: "Eine Liste der Touren, die den sichtbaren Kartenausschnitt berühren, neueste, längste oder mit dem größten Aufstieg zuerst. Beim Verschieben und Zoomen der Karte ändert sich die Liste.",
     fields: [{k: "n", kind: "radio", num: true, def: 10, label: "Anzahl", options: [[5, "5"], [10, "10"], [20, "20"]]}, {k: "sort", kind: "radio", def: "date", label: "Sortieren nach", options: [["date", "Datum"], ["km", "Strecke"], ["up", "Aufstieg"]]}, {kind: "title"}],
     preview: () => slPrev('<ul class="sllist"><li><b>Gipfelrunde</b><span>12,4 km</span></li><li><b>Seeufer</b><span>8,1 km</span></li></ul>'),
     render(c, b, cfg) {
@@ -92,9 +92,9 @@ Object.assign(window.SL_WT, {
     },
   },
   klegende: {
-    fam: "karte", cat: "karte", icon: "pin", name: "Legende der Aktivitäten", title: () => "Legende", multi: true, w: "drittel", seiten: ["karte"], defaults: {metric: "count"},
-    desc: "Welche Farbe zu welcher Aktivität gehört, mit der Zahl der Touren (oder den Kilometern) im gewählten Jahr. Aktivitäten, die du oben auf der Karte abwählst, erscheinen blass.",
-    fields: [{k: "metric", kind: "radio", def: "count", label: "Zahl je Aktivität", options: [["count", "Anzahl der Touren"], ["km", "Kilometer"]]}, {kind: "title"}],
+    fam: "karte", cat: "karte", icon: "pin", name: "Legende der Sportarten", title: () => "Legende", multi: true, w: "drittel", seiten: ["karte"], defaults: {metric: "count"},
+    desc: "Welche Farbe zu welcher Sportart gehört, mit der Zahl der Touren (oder den Kilometern) im gewählten Jahr. Sportarten, die du oben auf der Karte abwählst, erscheinen blass.",
+    fields: [{k: "metric", kind: "radio", def: "count", label: "Zahl je Sportart", options: [["count", "Anzahl der Touren"], ["km", "Strecke"]]}, {kind: "title"}],
     preview: () => slPvHbars([90, 62, 40, 22]),
     render(c, b, cfg) {
       const km = cfg.metric === "km";
@@ -109,16 +109,16 @@ Object.assign(window.SL_WT, {
         }
         b.innerHTML = `<ul class="sllist kaleg">${keys.map(s => `<li class="${st.off.has(s) ? "kaoff" : ""}"><i class="kasw" data-c="${esc(s)}"></i><span>${esc(sName(s))}</span><b>${km ? fmtKm(by[s], {d: 0}) : nf(by[s], 0)}</b></li>`).join("")}</ul>`;
         b.querySelectorAll(".kasw").forEach(e => e.style.setProperty("background", sCol(e.dataset.c)));
-        slBadge(c, `${keys.length} Aktivitäten`);
+        slBadge(c, `${keys.length} Sportarten`);
         return true;
       });
     },
   },
 });
 SL_TPL.push(
-  {id: "ka-liste", fam: "karte", name: "Karte mit Liste", desc: "Die Karte in zwei Dritteln, daneben die Touren im Kartenausschnitt als Liste. Von den Bedienfeldern bleiben Jahr und Aktivitäten.",
+  {id: "ka-liste", fam: "karte", name: "Karte mit Liste", desc: "Die Karte in zwei Dritteln, daneben die Touren im Kartenausschnitt als Liste. Von den Bedienfeldern bleiben Jahr und Sportarten.",
     items: [["karte", "zweidrittel"], ["w:kliste", "drittel"], ["jahr", "voll"], ["sport", "voll"]]},
-  {id: "ka-zahlen", fam: "karte", name: "Karte mit Kennzahlen", desc: "Oben die Kennzahlen der Auswahl und die Legende der Aktivitäten, darunter die Karte mit allen Bedienfeldern.",
+  {id: "ka-zahlen", fam: "karte", name: "Karte mit Kennzahlen", desc: "Oben die Kennzahlen der Auswahl und die Legende der Sportarten, darunter die Karte mit allen Bedienfeldern.",
     items: [["w:kzahlen", "halb"], ["w:klegende", "halb"], ["karte", "voll"], ["standort", "voll"], ["jahr", "voll"], ["sport", "voll"], ["stil", "voll"], ["ebenen", "voll"], ["ausschnitt", "voll"]]},
   {id: "ka-pur", fam: "karte", name: "Nur die Karte", desc: "Ruhig und übersichtlich: nur die Karte, alle Bedienfelder sind ausgeblendet.",
     items: [["karte", "voll"]]},
@@ -206,7 +206,7 @@ function kaBefore(root, edit) {
     last = id === "sport" ? w : last;
   });
   const mnb = mn && mn.closest(".box");
-  if (mnb && last) last.after(mnb);                                                    // der Hinweis „Strecken werden geladen“ bleibt hinter den Aktivitäten
+  if (mnb && last) last.after(mnb);                                                    // der Hinweis „Strecken werden geladen“ bleibt hinter den Sportarten
 }
 /* Nach dem Einordnen: Raster-Zustand, Knopf „Seite anpassen“ auf der Karte, Größe */
 function kaAfter(root, edit, pres) {

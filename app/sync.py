@@ -151,7 +151,7 @@ def is_duplicate(start_ts, dist_m, dur_s, tours, tol=300):
             return t
         if (dist_m and t["dist_m"] and abs(t["dist_m"] - dist_m) <= 0.01 * dist_m and dur_s and t["dur_s"] and abs(t["dur_s"] - dur_s) <= 60
                 and t["start_ts"] and any(abs(abs(t["start_ts"] - start_ts) - h * 3600) <= tol for h in (1, 2))):
-            return t                                     # gleiche Aktivität, Startzeit um ganze Stunden verschoben (Zeitzone/Sommerzeit)
+            return t                                     # gleiche Sportart, Startzeit um ganze Stunden verschoben (Zeitzone/Sommerzeit)
     return None
 
 
@@ -306,7 +306,7 @@ def adopt_workout(trackid):
     p = Path(r["gpx_path"])
     tid = f"z{int(trackid)}"
     if not db.one("SELECT 1 x FROM tours WHERE id=?", (tid,)):
-        try:                                             # dieselbe Aktivität schon vorhanden (z. B. doppelt von der Uhr gemeldet)?
+        try:                                             # dieselbe Sportart schon vorhanden (z. B. doppelt von der Uhr gemeldet)?
             c = gpxtools.convert(p.read_text(encoding="utf-8"), p.name, db.get("default_sport") or "hike")
             dup = is_duplicate(c["start_ts"], c["dist_m"], c["end_ts"] - c["start_ts"], db.query("SELECT id,start_ts,dist_m,dur_s FROM tours"), db.get_int("dup_tolerance_s", 300))
         except Exception:  # noqa

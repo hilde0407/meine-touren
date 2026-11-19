@@ -3,7 +3,7 @@
    ohne Konfiguration sieht und verhält sie sich wie bisher (6 zufällige Fotos, Link zur Zufalls-Diashow). Sie lässt sich außerdem als weitere Kachel mit anderen Einstellungen hinzufügen.
    Konfiguration (cfg, geprüft in app/layout.py „_erinn_cfg“; gespeichert werden nur Abweichungen vom Standard):
      mode    random | best | day | recent      Auswahl der Fotos: zufällig, beste Fotos, an diesem Tag in früheren Jahren, neueste
-     n       3 | 6 | 9 | 12                    Anzahl             sports, range, yr  Aktivität und Zeitraum wie im Filtersystem (53-filter.js)
+     n       3 | 6 | 9 | 12                    Anzahl             sports, range, yr  Sportart und Zeitraum wie im Filtersystem (53-filter.js)
      view    grid | strip | show               Raster, Streifen (seitlich wischen) oder Einzelbild-Show (blättert selbst)
      ratio   sq | 43 | 169 | orig               Seitenverhältnis der Kacheln (orig = Originalformat, in der Show: ganzes Bild)
      size    s | m | l                          Größe der Bilder (Raster, Streifen)      height  k | n | h   Höhe der Einzelbild-Show      tempo  3 | 5 | 8 | 12  Sekunden je Bild
@@ -31,7 +31,7 @@ function erCfg(cfg) {
   };
 }
 const erModeName = m => (ER_MODES.find(x => x[0] === m) || ER_MODES[0])[1];
-/* Kurztext der Einstellung (Kopf der Kachel, Zeile im Bearbeitungsmodus): Auswahl, Aktivität, Zeitraum */
+/* Kurztext der Einstellung (Kopf der Kachel, Zeile im Bearbeitungsmodus): Auswahl, Sportart, Zeitraum */
 function erKurz(cfg) {
   const m = erCfg(cfg).mode;
   return [...(m === "random" ? [] : [erModeName(m)]), ...flParts(cfg || {}, "all")];
@@ -287,7 +287,7 @@ function erForm(cfg, trip) {
     `<section class="erpvs"><h3 class="erpvh">Vorschau</h3><div class="erpvb" role="status" aria-live="polite"></div></section>` +
     flField({kind: "title", ph: trip ? "Fotos der Reise" : "Erinnerungen"}, cfg, 2) +
     `<details class="erdt" open><summary>Welche Fotos</summary>` + erRadio("er-mode", "Auswahl", trip ? ER_MODES.filter(m => m[0] !== "day") : ER_MODES, c.mode) + erRadio("er-n", "Anzahl", ER_N.map(x => [x, String(x)]), c.n) +
-    (trip ? `<p class="mut erhint">Es sind immer die Fotos aus dem Zeitraum der Reise.</p>` : `<details class="erdt erdt2"${filt ? " open" : ""}><summary>Filter: Aktivität und Zeitraum</summary>${flField({kind: "sports"}, cfg, 0)}${flField({kind: "range", def: "all"}, cfg, 1)}</details>`) + `</details>` +
+    (trip ? `<p class="mut erhint">Es sind immer die Fotos aus dem Zeitraum der Reise.</p>` : `<details class="erdt erdt2"${filt ? " open" : ""}><summary>Filter: Sportart und Zeitraum</summary>${flField({kind: "sports"}, cfg, 0)}${flField({kind: "range", def: "all"}, cfg, 1)}</details>`) + `</details>` +
     `<details class="erdt" open><summary>Darstellung</summary>` + erRadio("er-view", "Art der Darstellung", ER_VIEWS, c.view) + erRadio("er-ratio", "Seitenverhältnis der Kacheln", ER_RATIOS, c.ratio) +
     `<p class="mut erhint" data-for="show">In der Einzelbild-Show bestimmt die Höhe die Form; „Originalformat“ zeigt das ganze Bild ohne Zuschnitt.</p>` +
     erRadio("er-size", "Größe der Bilder", ER_SIZES, c.size, ' data-for="grid strip"') + erRadio("er-height", "Höhe der Show", ER_HEIGHTS, c.height, ' data-for="show"') +
@@ -371,7 +371,7 @@ Object.assign(window.SL_WT, {
   erinn: {
     fam: "uebersicht", cat: "rueck", icon: "cam", name: "Erinnerungen", title: () => "Erinnerungen", multi: true, w: "halb", seiten: ["uebersicht"], defaults: {},
     shell: it => erShell(it), kurz: erKurz, dialog: (id, cfg) => erDialog(id, cfg), fields: [{kind: "erinn"}],
-    desc: "Fotos aus deinen Touren als Erinnerung: zufällig, die besten, an diesem Tag in früheren Jahren oder die neuesten, als Raster, Streifen oder Einzelbild-Show mit Link zur passenden Diashow. Anzahl, Aktivität, Zeitraum, Bildgröße und Breite sind einstellbar. In der Übersicht steht „Erinnerungen“ schon; hier kannst du weitere Kacheln mit anderen Einstellungen hinzufügen.",
+    desc: "Fotos aus deinen Touren als Erinnerung: zufällig, die besten, an diesem Tag in früheren Jahren oder die neuesten, als Raster, Streifen oder Einzelbild-Show mit Link zur passenden Diashow. Anzahl, Sportart, Zeitraum, Bildgröße und Breite sind einstellbar. In der Übersicht steht „Erinnerungen“ schon; hier kannst du weitere Kacheln mit anderen Einstellungen hinzufügen.",
     preview: () => slPrev('<div class="slpvf" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'),
   },
 });

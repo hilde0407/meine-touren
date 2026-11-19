@@ -12,7 +12,7 @@ Das Ergebnis je Tour liegt als Zwischenspeicher in cache/tempo/<id>.json und gil
 unverändert ist (Änderungszeit + Größe): Wird der Track oder die Höhe korrigiert, wird neu gerechnet. Der Zwischenspeicher baut sich von selbst neu auf
 und steht deshalb nicht in der Sicherung (er ist im Umzugspaket als Teil des Datenordners enthalten).
 
-Zeitschätzung: estimate_duration() – Naismith-ähnlich: Zeit = Strecke / Tempo eben + Aufstieg × Mehrzeit je Höhenmeter + Abstieg × Mehrzeit je Höhenmeter.
+Zeitschätzung: estimate_duration() – Naismith-ähnlich: Zeit = Strecke / Tempo eben + Aufstieg × Mehrzeit je Aufstieg + Abstieg × Mehrzeit je Aufstieg.
 Die Mehrzeiten werden aus deinen Touren abgeleitet (Median über alle Touren); ohne eigene Werte gelten Naismith-Werte (5 km/h, 1 h je 600 m Aufstieg).
 """
 import json
@@ -38,7 +38,7 @@ PAUSE_KMH = 0.3                           # unterhalb dieses Tempos zwischen zwe
 SLOPE = 0.05                              # ±5 % trennt bergauf/eben/bergab
 MIN_TOUR_M = 2000                         # kürzere Touren werden nicht ausgewertet
 MIN_CLASS_M, MIN_CLASS_S = 300.0, 120.0   # kleinste Klasse, die gezeigt wird
-MIN_CLIMB_M = 30.0                        # für die Mehrzeit je Höhenmeter mindestens so viele Höhenmeter in der Klasse
+MIN_CLIMB_M = 30.0                        # für die Mehrzeit je Aufstieg mindestens so viele Aufstieg in der Klasse
 MIN_COVER = 0.8                           # Anteil der Punkte mit Höhe und Zeit, ab dem eine Tour auswertbar ist
 MIN_TOURS = 3                             # so viele Touren braucht ein eigener Wert für die Zeitschätzung
 SPORTS = {"wandern": ("hike", "nordicwalking"), "laufen": ("jogging",)}
@@ -161,7 +161,7 @@ def compute(pts):
         for k, key in (("auf", "e_up"), ("ab", "e_down")):
             c = out[k]
             if c and c["hm"] >= MIN_CLIMB_M:
-                res[key] = round((c["zeit_s"] - c["dist_m"] / v) / c["hm"], 3)          # Mehr-/Minderzeit je Höhenmeter gegenüber ebenem Gehen
+                res[key] = round((c["zeit_s"] - c["dist_m"] / v) / c["hm"], 3)          # Mehr-/Minderzeit je Aufstieg gegenüber ebenem Gehen
     return res
 
 
@@ -258,7 +258,7 @@ def _profile(profile):
 
 def estimate_duration(dist_m, up_m, down_m, profile=None):
     """Geschätzte reine Gehzeit (Sekunden, ohne Pausen) – Naismith-ähnlich auf Basis der eigenen Werte:
-       Zeit = Strecke / Tempo eben + Aufstieg × e_up + Abstieg × e_down  (e_* = Mehrzeit je Höhenmeter in s/m).
+       Zeit = Strecke / Tempo eben + Aufstieg × e_up + Abstieg × e_down  (e_* = Mehrzeit je Aufstieg in s/m).
     profile: {"eben_kmh", "e_up", "e_down"}; fehlende/ungültige Einträge nehmen den Naismith-Standard, Werte werden auf sinnvolle Grenzen gekappt.
     Nie fallend in Strecke, Aufstieg und Abstieg. Ungültige Eingaben (negativ, keine Zahl, absurd groß) -> ValueError."""
     vals = []

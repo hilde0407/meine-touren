@@ -373,7 +373,7 @@ function dvSuggest(t, g, again) {
     "elev-dem": "Rechnet Auf- und Abstieg aus dem Geländemodell neu (Kartendaten werden bei Bedarf aus dem Internet geladen). Das Original bleibt gespeichert.",
     "elev-zepp": "Übernimmt den Höhenverlauf der barometrischen Uhr aus der Zepp-Cloud. Das Original bleibt gespeichert.",
     "trackfix": "Öffnet die Track-Korrektur: Du siehst zuerst die gefundenen Sprünge und entscheidest dort, was entfernt wird. Das Original bleibt erhalten.",
-    "elev-restore": "Stellt die ursprünglichen Höhen und Höhenmeter wieder her.",
+    "elev-restore": "Stellt die ursprünglichen Höhen und Aufstieg wieder her.",
   };
   const m = dvBox(`<h2>Korrektur vorschlagen</h2><p class="dvlead"><b>${esc(t.name)}</b> · ${esc(dvDay(t.day))}</p>
     <div class="dvchips">${t.flags.map(f => `<span class="dvc fl ${f.kind === "dist_implausible" || f.kind === "gps_jumps" ? "bad" : "warn"}">${esc(DVQ_FLAG(f))}</span>`).join("")}</div>
@@ -575,7 +575,7 @@ async function dvBatch(g, again) {
 /* Alles rückgängig machen – nur dieser Sammel-Lauf */
 async function dvUndo(g, batch, after) {
   const ok = await uiConfirm({title: "Diesen Sammel-Lauf rückgängig machen?", ok: "Rückgängig machen", danger: true,
-    text: "Alle Touren dieses Laufs bekommen ihre ursprünglichen Höhen und Höhenmeter zurück. Touren, die du inzwischen selbst geändert oder zurückgenommen hast, bleiben unberührt."});
+    text: "Alle Touren dieses Laufs bekommen ihre ursprünglichen Höhen und Aufstieg zurück. Touren, die du inzwischen selbst geändert oder zurückgenommen hast, bleiben unberührt."});
   if (!ok) return;
   try {
     const r = await api(`/api/devices/${g.id}/quality/fix-undo`, METJ({batch}));

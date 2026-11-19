@@ -17,7 +17,7 @@ async function rbDialog({year, sport, blocks, edit}) {
   const html = `<div class="shrdlg rbdlg">
     <p class="mut fs14">${edit ? "Wähle neu, was Besucher dieses Links sehen." : "Erzeugt eine Seite mit deinem Tourenjahr, die man ohne Benutzerkonto öffnen und als PDF speichern kann."} Was du nicht wählst, schickt der Server gar nicht erst mit.</p>
     ${edit ? "" : `<div class="rbrow"><label class="shrsel">Jahr<select data-rb="year">${ys.map(y => `<option value="${y}">${y}</option>`).join("")}</select></label>
-    <label class="shrsel">Aktivität<select data-rb="sport"></select></label></div>`}
+    <label class="shrsel">Sportart<select data-rb="sport"></select></label></div>`}
     <fieldset class="shrfs"><legend>Was wird gezeigt?</legend><div class="flchips">${RB_BLOCKS.map(b => `<label class="flchip"><input type="checkbox" data-b="${b[0]}"> ${b[1]}</label>`).join("")}</div></fieldset>
     <p class="shrsum" role="status" aria-live="polite"><b>Dieser Link zeigt:</b> <span data-rb="sum"></span></p>
     <p class="shrnote mut fs13">Rekorde nennen Tourname und Datum. Strecken, Startorte, Notizen, Wegpunkte und Uhr-Daten sind nie Teil eines Links.</p>
@@ -39,7 +39,7 @@ async function rbDialog({year, sport, blocks, edit}) {
         if (!sel) return;
         const l = sports(st.y);
         if (!l.includes(st.sp)) st.sp = "";
-        sel.innerHTML = `<option value="">${rbTL("Alle Aktivitäten")}</option>` + l.map(s => `<option value="${esc(s)}">${esc(sName(s))}</option>`).join("");
+        sel.innerHTML = `<option value="">${rbTL("Alle Sportarten")}</option>` + l.map(s => `<option value="${esc(s)}">${esc(sName(s))}</option>`).join("");
         sel.value = st.sp;
       };
       qa("[data-b]").forEach(i => (i.onchange = () => { i.checked ? st.b.add(i.dataset.b) : st.b.delete(i.dataset.b); sync(); }));

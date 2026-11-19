@@ -4,7 +4,7 @@ const q = new URLSearchParams(location.search);
   const info = await (await fetch("/api/photo-info")).json();
   let sec = (+q.get("sec") || +(() => { try { return localStorage.getItem("showSec"); } catch (e) { return 0; } })() || info.slideshow_seconds || 6) * 1000;
   const u = new URLSearchParams({limit: 1500}); ["tour","year"].forEach(k => q.get(k) && u.set(k === "tour" ? "tour_id" : k, q.get(k))); if (q.get("random")) u.set("random", "true");
-  // 3.32.0 (Kachel „Erinnerungen“): Aktivität, Zeitraum, Kalendertag, neueste und beste Fotos – der Server prüft jeden Wert (app/fotofilter.py)
+  // 3.32.0 (Kachel „Erinnerungen“): Sportart, Zeitraum, Kalendertag, neueste und beste Fotos – der Server prüft jeden Wert (app/fotofilter.py)
   [["sport", "sport"], ["from", "date_from"], ["to", "date_to"], ["day", "day"], ["before", "before"]].forEach(([a, b]) => q.get(a) && u.set(b, q.get(a)));
   if (q.get("recent")) u.set("recent", "true");
   if (q.get("best") && !q.get("tour")) { u.set("best", "true"); u.set("limit", Math.max(3, Math.min(300, +q.get("best") || 60))); }

@@ -89,7 +89,7 @@ _GUESS = [
     (r"heart|(?:^|_)hr(?:$|_)", "Puls"),
     (r"pace", "Tempo (Minuten je km)"),
     (r"cadence|freq", "Kadenz/Schrittfrequenz"),
-    (r"altitude|ascend|descend|elev", "Höhe bzw. Höhenmeter"),
+    (r"altitude|ascend|descend|elev", "Höhe bzw. Aufstieg"),
     (r"speed", "Geschwindigkeit"),
     (r"power|watt", "Leistung"),
     (r"temp", "Temperatur"),

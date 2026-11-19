@@ -1,4 +1,4 @@
-"""Ausrüstung (Rad, Schuhe, Ski …) mit Kilometer-/Höhenmeter-Summen und Verschleiß-Hinweis."""
+"""Ausrüstung (Rad, Schuhe, Ski …) mit Kilometer-/Aufstieg-Summen und Verschleiß-Hinweis."""
 import time
 from datetime import datetime
 

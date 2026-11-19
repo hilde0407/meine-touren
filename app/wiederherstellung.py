@@ -274,7 +274,7 @@ def vorbereiten(pfad, name, upload, work):
     # Wem gehört die Sicherung? Administratoren verwalten Benutzer, sehen aber deren Daten nicht – also nur die eigene Datenbank.
     ich = ctx.uid() or ""
     if uid_txt and uid_txt != ich:
-        raise Abgelehnt("Diese Sicherung gehört zu einem anderen Benutzer und kann hier nicht zurückgespielt werden. Jeder Administrator kann nur seine eigenen Daten wiederherstellen; "
+        raise Abgelehnt("Diese Sicherung gehört zu einem anderen Benutzer und kann hier nicht zurückgespielt werden. Jeder Administrator kann nur seine eigenen Daten zurückspielen; "
                         "für andere Benutzer bitte das Skript auf dem Server verwenden.", 403)
     eigner = auth.q1("SELECT name FROM users WHERE uid=?", (ich,)) if ich else None
 
@@ -463,8 +463,8 @@ def wiederherstellen(pfad, name, upload, sha):
             caches_leeren()
             jobs.log(f"Wiederherstellung aus {name} fehlgeschlagen ({fehler}); Rückfall auf {kopie.name}: {'gelungen' if ok else 'FEHLGESCHLAGEN'}")
             if ok:
-                raise Abgelehnt(f"Die Wiederherstellung ist fehlgeschlagen. Der vorherige Stand wurde automatisch zurückgeholt, es ist nichts verloren. Grund: {fehler}", 500)
-            raise Abgelehnt(f"Die Wiederherstellung ist fehlgeschlagen und der vorherige Stand konnte nicht automatisch zurückgeholt werden. "
+                raise Abgelehnt(f"Das Zurückspielen ist fehlgeschlagen. Der vorherige Stand wurde automatisch zurückgeholt, es ist nichts verloren. Grund: {fehler}", 500)
+            raise Abgelehnt(f"Das Zurückspielen ist fehlgeschlagen und der vorherige Stand konnte nicht automatisch zurückgeholt werden. "
                             f"Er liegt als Sicherheitskopie vor: {kopie.name}. Bitte diese Datei mit dem Skript auf dem Server zurückspielen. Grund: {fehler}", 500)
         hinweise = []
         behalten = 0
@@ -586,7 +586,7 @@ def api_run(request: Request, body: dict):
         raise HTTPException(409, "Die Vorprüfung ist abgelaufen. Bitte die Sicherung noch einmal prüfen.")
     if e["wer"] != _wer(request) or e["id"] != str(body.get("id") or ""):
         raise HTTPException(409, "Die Bestätigung gehört nicht zu dieser Sicherung. Bitte die Sicherung noch einmal prüfen.")
-    belegt = HTTPException(409, "Es läuft gerade eine Sicherung oder eine andere Wiederherstellung. Bitte gleich noch einmal versuchen.")
+    belegt = HTTPException(409, "Es läuft gerade eine Sicherung oder ein anderes Zurückspielen. Bitte gleich noch einmal versuchen.")
     if not extras.BACKUP_LOCK.acquire(blocking=False):
         raise belegt
     try:

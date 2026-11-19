@@ -9,7 +9,7 @@ VIEWS.dash = async (_, q) => {
   }
   $("#main").className = "flush";
   loadRoutesLater();
-  /* 3.22.0: globaler Filter der Statistikseite (Aktivitäten, Zeitraum) aus der Adresse – stFilter/stRange in 56-statistik.js; ohne Angabe: alle Aktivitäten, gesamte Zeit wie bisher */
+  /* 3.22.0: globaler Filter der Statistikseite (Sportarten, Zeitraum) aus der Adresse – stFilter/stRange in 56-statistik.js; ohne Angabe: alle Sportarten, gesamte Zeit wie bisher */
   const ys = years(),
     F = stFilter(q),
     R = stRange(F),
@@ -39,7 +39,7 @@ VIEWS.dash = async (_, q) => {
   const bestM = mm.indexOf(Math.max(...mm));
   const pm = Array(12).fill(0);
   prev.forEach(t => (pm[t.m - 1] += t.km));
-  /* Säulen „Kilometer pro Monat oder Jahr“: ein Jahr = 12 Monate; 12 Monate, 90 Tage, freier Zeitraum bis 24 Monate = Monate des Zeitraums; sonst je Jahr */
+  /* Säulen „Strecke pro Monat oder Jahr“: ein Jahr = 12 Monate; 12 Monate, 90 Tage, freier Zeitraum bis 24 Monate = Monate des Zeitraums; sonst je Jahr */
   const mo0 = R.from ? +R.from.slice(0, 4) * 12 + +R.from.slice(5, 7) - 1 : 0,
     mo1 = +R.to.slice(0, 4) * 12 + +R.to.slice(5, 7) - 1,
     monthly = !!Y || R.kind === "12m" || R.kind === "90d" || (R.kind === "c" && mo1 - mo0 < 24),
@@ -116,16 +116,16 @@ VIEWS.dash = async (_, q) => {
     )}</div>
     <div class="fig"><div class="v">${nf(km / (sel.length || 1), 1)}<span class="u">km</span></div><div class="l">pro Tour im Schnitt</div></div></div>
   <div class="grid g2 mt44">
-    <div class="panel" data-st="kmmonat" data-badge="${esc(bestKL ? "Stärkster Monat: " + bestKL : monthly ? "" : `${fmtKm(sum(sel, t => t.km), {d: 0})}`)}"><h2>${monthly ? "Kilometer pro Monat" : "Kilometer pro Jahr"}</h2>${monthly ? barChart(mkm, mlab, {ghost: mghost, ghostLabel: Y ? Y - 1 : "Vorzeitraum"}) : barChart(byYear, yrs.map(String), {href: yrs})}
+    <div class="panel" data-st="kmmonat" data-badge="${esc(bestKL ? "Stärkster Monat: " + bestKL : monthly ? "" : `${fmtKm(sum(sel, t => t.km), {d: 0})}`)}"><h2>${monthly ? "Strecke pro Monat" : "Strecke pro Jahr"}</h2>${monthly ? barChart(mkm, mlab, {ghost: mghost, ghostLabel: Y ? Y - 1 : "Vorzeitraum"}) : barChart(byYear, yrs.map(String), {href: yrs})}
       <div class="legend">${monthly ? `<span><i style="background:var(--yellow);border:1px solid var(--ink)"></i>stärkster Monat</span>${mghost && mghost.some(v => v > 0) ? `<span><i style="background:var(--accent2)"></i>${Y ? Y - 1 : "Zeitraum davor"}</span>` : ""}` : "<span>Ein Klick auf einen Balken öffnet das Jahr.</span>"}</div></div>
-    <div class="panel" data-st="kmverlauf" data-badge="${esc(`${cy}: ${fmtKm(cs[cs.length - 1].pts[cs[cs.length - 1].pts.length - 1][1], {d: 0})}`)}"><h2>Kilometer im Jahresverlauf</h2>${lineChart(cs)}<div class="legend"><span><i style="background:var(--bars)"></i>${cy}</span>${own && ys.includes(cy - 1) ? `<span><i style="background:var(--accent2)"></i>${cy - 1}</span>` : ""}</div></div>
+    <div class="panel" data-st="kmverlauf" data-badge="${esc(`${cy}: ${fmtKm(cs[cs.length - 1].pts[cs[cs.length - 1].pts.length - 1][1], {d: 0})}`)}"><h2>Strecke im Jahresverlauf</h2>${lineChart(cs)}<div class="legend"><span><i style="background:var(--bars)"></i>${cy}</span>${own && ys.includes(cy - 1) ? `<span><i style="background:var(--accent2)"></i>${cy - 1}</span>` : ""}</div></div>
     <div class="panel" data-st="sportarten" data-badge="${esc(sports.length ? `${sName(sports[0][0])} ${nf((sports[0][1] / tot) * 100, 0)} %` : "")}"><h2>Sportarten</h2><div class="stack">${sports.map(([s, v]) => `<div style="width:${(v / tot) * 100}%;background:${sCol(s)}" title="${sName(s)}"></div>`).join("")}</div>
       <div class="rows mt10">${sports.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${fmtKm(v, {d: 0})}, ${nf((v / tot) * 100, 0)} %</span></div>`).join("")}</div></div>
-    <div class="panel" data-st="bestwerte" data-badge="${esc(longest ? `Längste Tour ${fmtKm(longest.km)}` : "")}"><h2>Bestwerte ${Y || (R.kind === "all" ? "gesamt" : R.label)}</h2><div class="rows">
+    <div class="panel" data-st="bestwerte" data-badge="${esc(longest ? `Längste Tour ${fmtKm(longest.km)}` : "")}"><h2>Rekorde ${Y || (R.kind === "all" ? "gesamt" : R.label)}</h2><div class="rows">
       ${
         longest
           ? `<div class="r"><span><a href="#/tour/${longest.id}">Längste Tour</a><small>${esc(longest.name)}</small></span><b>${fmtKm(longest.km)}</b></div>
-      <div class="r"><span><a href="#/tour/${steepest.id}">Meiste Höhenmeter</a><small>${esc(steepest.name)}</small></span><b>${fmtHm(steepest.up_m)}</b></div>
+      <div class="r"><span><a href="#/tour/${steepest.id}">Größter Aufstieg</a><small>${esc(steepest.name)}</small></span><b>${fmtHm(steepest.up_m)}</b></div>
       <div class="r"><span><a href="#/tour/${longT.id}">Längste Dauer</a><small>${esc(longT.name)}</small></span><b>${fmtDauer(longT.h * 3600)}</b></div>
       <div class="r"><span>Stärkster Monat<small>${MONL[bestM]}</small></span><b>${fmtKm(mm[bestM], {d: 0})}</b></div>`
           : '<div class="mut">Keine Touren</div>'
@@ -378,7 +378,7 @@ VIEWS.tours = async (_name, qp) => {
    <select id="ft" title="Tag / Album"><option value="">Alle Tags</option>${allTags()
      .map(x => `<option value="${esc(x)}">${esc(x)}</option>`)
      .join("")}</select>
-   <select id="so"><option value="date">Neueste zuerst</option><option value="old">Älteste zuerst</option><option value="km">Längste Strecke</option><option value="up">Meiste Höhenmeter</option><option value="h">Längste Dauer</option></select></div>
+   <select id="so"><option value="date">Neueste zuerst</option><option value="old">Älteste zuerst</option><option value="km">Längste Strecke</option><option value="up">Größter Aufstieg</option><option value="h">Längste Dauer</option></select></div>
    <div class="tl" id="tl"></div><div class="row jcc mt20"><button class="btn ghost" id="more">Mehr anzeigen</button></div>`;
   let lim = 80;
   const KEY = "tf",

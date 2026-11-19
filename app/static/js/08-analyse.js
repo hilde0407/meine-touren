@@ -295,7 +295,7 @@ VIEWS.admin = async (...a) => {
    <div class="panel"><h2>Wanderführer (z. B. Rother)</h2><p class="mut">Lade die GPX-Dateien deiner Wanderführer hoch (bei Rother im Download-Bereich zum Buch). Folgt eine Tour einer dieser Strecken, wird der Tourtitel aus dem Buch beim Umbenennen vorgeschlagen.</p>
     <div class="field"><label>Buch (z. B. „Rother Taunus“)</label><input id="gbook"></div>
     <div class="row"><button class="btn" id="gup">GPX-Dateien auswählen …</button><input type="file" id="gfile" accept=".gpx" multiple hidden><span id="gres" class="mut"></span></div><div id="glist" class="mt10"></div></div>
-   <div class="panel"><h2>Selbsttest</h2><p class="mut">Prüft Komoot-Zugang, Strecken, Zepp-Token, Internet-Dienste (Karten, Wetter, Höhendaten), Speicherplatz und Backup.</p>
+   <div class="panel"><h2>Selbsttest</h2><p class="mut">Prüft Komoot-Zugang, Strecken, Zepp-Token, Internet-Dienste (Karten, Wetter, Höhendaten), Speicherplatz und Sicherung.</p>
     <div class="row"><button class="btn alt" id="stest">Selbsttest starten</button></div><div id="stres" class="mt10"></div></div></div>`
   );
   const gl = async () => {

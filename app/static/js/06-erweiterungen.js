@@ -47,7 +47,7 @@ VIEWS.search = async (_, q) => {
 };
 
 /* ---- Ziele (Übersicht) ---- */
-const GM = {km: ["km", "Kilometer"], up: ["m", "Höhenmeter"], count: ["", "Touren"], hours: ["h", "Stunden"]};
+const GM = {km: ["km", "Strecke"], up: ["m", "Aufstieg"], count: ["", "Touren"], hours: [FMT_E[FMT_LG()].h, "Zeit unterwegs"]};
 const GOAL_GRP = {"grp:bike": ["Alle Rad-Sportarten", "bike"], "grp:ski": ["Alle Ski-Sportarten", "ski"], "grp:foot": ["Zu Fuß (Wandern, Bergtour, Schneeschuh)", "foot"], "grp:run": ["Laufen und Langlauf", "run"]};
 const goalSport = (g, t) => !g.sport || (GOAL_GRP[g.sport] ? SPORT_GRP[GOAL_GRP[g.sport][1]].includes(t.sport) : t.sport === g.sport);
 const goalSportName = s => (GOAL_GRP[s] ? GOAL_GRP[s][0] : sName(s));
@@ -158,7 +158,7 @@ VIEWS.records = async (_, q) => {
   );
   if (fs && !allSp.includes(fs)) fs = "";
   const T = fs ? TOURS.filter(t => t.sport === fs) : TOURS;
-  const chips = `<div class="row g6 mn4-0-18 fxw"><a class="chip${fs ? "" : " on"}" href="#/records?s=">Alle Aktivitäten</a>${allSp.map(x => `<a class="chip${fs === x ? " on" : ""}" href="#/records?s=${x}"><i class="sw" style="background:${sCol(x)}"></i>${sName(x)}</a>`).join("")}</div>`;
+  const chips = `<div class="row g6 mn4-0-18 fxw"><a class="chip${fs ? "" : " on"}" href="#/records?s=">Alle Sportarten</a>${allSp.map(x => `<a class="chip${fs === x ? " on" : ""}" href="#/records?s=${x}"><i class="sw" style="background:${sCol(x)}"></i>${sName(x)}</a>`).join("")}</div>`;
   const sum = (a, f) => a.reduce((c, t) => c + f(t), 0),
     km = sum(T, t => t.km),
     up = sum(T, t => t.up_m || 0),
@@ -204,7 +204,7 @@ VIEWS.records = async (_, q) => {
     <div class="fig"><div class="v">${nf(dayN, 0)}</div><div class="l">Tage mit Touren</div></div>
     <div class="fig"><div class="v">${longest}<span class="u">Wochen</span></div><div class="l">längste Serie · aktuell ${cur}</div></div></div>
    <div class="grid g2 mt36">
-    <div class="panel"><h2>Bestwerte gesamt</h2><div class="rows">${lnk(
+    <div class="panel"><h2>Rekorde gesamt</h2><div class="rows">${lnk(
       best(T, t => t.km),
       ["Längste Strecke", fmtKm(best(T, t => t.km).km)]
     )}${lnk(
@@ -232,7 +232,7 @@ VIEWS.records = async (_, q) => {
           sum(a, t => t.up_m || 0),
           0
         )} m</span></div>
-       <small>Längste: <a href="#/tour/${l.id}">${fmtKm(l.km)}</a> · Meiste Höhenmeter: <a href="#/tour/${u.id}">${fmtHm(u.up_m)}</a>${f ? ` · Schnellste: <a href="#/tour/${f.id}">${fmtTempo(f.km / f.h)}</a>` : ""}</small></div>`;
+       <small>Längste: <a href="#/tour/${l.id}">${fmtKm(l.km)}</a> · Größter Aufstieg: <a href="#/tour/${u.id}">${fmtHm(u.up_m)}</a>${f ? ` · Schnellste: <a href="#/tour/${f.id}">${fmtTempo(f.km / f.h)}</a>` : ""}</small></div>`;
       })
       .join("")}</div></div></div>`;
 };
@@ -285,9 +285,9 @@ VIEWS.recap = async name => {
    ]
      .filter(Boolean)
      .join("")}</div></div>
-   <div class="grid g2 mt34"><div class="panel"><h2>Kilometer pro Monat</h2>${barChart(mm, MON, {ghost: pm, ghostLabel: Y - 1})}<div class="mut fs14">Stärkster Monat: ${MONL[bm]} mit ${fmtKm(mm[bm], {d: 0})}</div></div>
+   <div class="grid g2 mt34"><div class="panel"><h2>Strecke pro Monat</h2>${barChart(mm, MON, {ghost: pm, ghostLabel: Y - 1})}<div class="mut fs14">Stärkster Monat: ${MONL[bm]} mit ${fmtKm(mm[bm], {d: 0})}</div></div>
     <div class="panel"><h2>Sportarten</h2><div class="stack">${sp.map(([s, v]) => `<div style="width:${(v / km) * 100}%;background:${sCol(s)}"></div>`).join("")}</div><div class="rows mt10">${sp.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${fmtKm(v, {d: 0})}, ${nf((v / km) * 100, 0)} %</span></div>`).join("")}</div></div></div>
-   <div class="panel gap"><h2>Die fünf stärksten Touren</h2><div class="tl">${top.map(tourRow).join("")}</div><div class="mut mt10">Meiste Höhenmeter: <a href="#/tour/${steep.id}">${esc(steep.name)}</a> (${fmtHm(steep.up_m)})</div></div>
+   <div class="panel gap"><h2>Die fünf stärksten Touren</h2><div class="tl">${top.map(tourRow).join("")}</div><div class="mut mt10">Größter Aufstieg: <a href="#/tour/${steep.id}">${esc(steep.name)}</a> (${fmtHm(steep.up_m)})</div></div>
    ${placePanel}
    ${ph.length ? `<div class="panel gap"><div class="row"><h2>Fotos des Jahres</h2><span class="sp"></span><a class="btn sm noprint" target="_blank" href="slideshow.html?year=${Y}">Diashow</a></div><div class="thumbs" id="rph">${ph.map((p, i) => `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=400" data-i="${i}"></div>`).join("")}</div></div>` : ""}</div>`;
   if (ph.length) bindThumbs($("#rph"), ph);
@@ -440,7 +440,7 @@ VIEWS.admin = async (...a) => {
       const b = $("#hlt");
       if (!b) return;
       b.innerHTML =
-        `<h2>Zustand <span class="mut" style="font:400 16px var(--b)">${h.ok ? "– alles in Ordnung" : "– bitte prüfen"}</span></h2><div class="rows">${h.checks.map(c => `<div class="r"><span><i style="font-style:normal">${c.ok ? "✓" : "⚠"}</i> <span>${esc(c.name)}</span></span><span class="${c.ok ? "mut" : "bad"}"><span>${esc(c.detail)}</span>${c.hint ? ` – <span>${esc(c.hint)}</span>` : ""}${c.name === "Letztes Backup" && !c.ok ? ` <button class="btn sm" data-act="backup">Jetzt sichern</button>` : ""}</span></div>`).join("")}</div>` +
+        `<h2>Zustand <span class="mut" style="font:400 16px var(--b)">${h.ok ? "– alles in Ordnung" : "– bitte prüfen"}</span></h2><div class="rows">${h.checks.map(c => `<div class="r"><span><i style="font-style:normal">${c.ok ? "✓" : "⚠"}</i> <span>${esc(c.name)}</span></span><span class="${c.ok ? "mut" : "bad"}"><span>${esc(c.detail)}</span>${c.hint ? ` – <span>${esc(c.hint)}</span>` : ""}${c.name === "Letzte Sicherung" && !c.ok ? ` <button class="btn sm" data-act="backup">Jetzt sichern</button>` : ""}</span></div>`).join("")}</div>` +
         (h.duplicates.length
           ? `<p class="mut mt8">Doppelte Namen: ${h.duplicates.map(d => esc(d.name) + " (" + d.tours.map(t => `<a href="#/tour/${t.id}">${t.date}</a>`).join(", ") + ")").join(" · ")}</p>`
           : "");
@@ -466,11 +466,11 @@ VIEWS.admin = async (...a) => {
   sv.closest(".row").insertAdjacentHTML(
     "beforebegin",
     `<div class="grid g2 mt40"><div class="panel"><h2>Sicherung</h2>
-   <p class="mut">Täglich um 03:40 Uhr wird die Datenbank (Touren, Notizen, Ziele, Zuordnungen) automatisch nach <code>${esc(st.backup_dir || "/var/backups/meine-touren")}</code> gesichert, die letzten 14 bleiben erhalten. Wiederherstellen: <code>${esc(st.app_name || "meine-touren")}-restore &lt;Datei&gt;</code> im Container.</p>
+   <p class="mut">Täglich um 03:40 Uhr wird die Datenbank (Touren, Notizen, Ziele, Zuordnungen) automatisch nach <code>${esc(st.backup_dir || "/var/backups/meine-touren")}</code> gesichert, die letzten 14 bleiben erhalten. Zurückspielen: <code>${esc(st.app_name || "meine-touren")}-restore &lt;Datei&gt;</code> im Container.</p>
    <div id="bkst" class="bkst" aria-live="polite"></div>
    <div class="row g8"><button class="btn alt" id="bkchk" type="button">Letzte Sicherung prüfen</button><span id="bkmsg" class="mut" role="status" aria-live="polite"></span></div>
-   <p class="mut fs13">Geprüft wird nur die Sicherungsdatei in einem temporären Ordner – deine Daten werden nicht verändert. Nicht in der Tagessicherung enthalten: die Fotodateien (nur die Angaben dazu) und der Zwischenspeicher. Auch der Schlüssel für gespeicherte Zugangsdaten (secret.key) fehlt: Nach einer Wiederherstellung auf einem neuen Rechner müssen sie neu eingegeben werden. Das Umzugspaket enthält beides.</p>
-   <div class="row"><a class="btn alt" href="/api/backup" download>Backup jetzt herunterladen</a></div><p class="mut fs13">Passwörter und Tokens sind im Download nicht enthalten. Fotos und Routen sind nicht enthalten.</p>
+   <p class="mut fs13">Geprüft wird nur die Sicherungsdatei in einem temporären Ordner – deine Daten werden nicht verändert. Nicht in der Tagessicherung enthalten: die Fotodateien (nur die Angaben dazu) und der Zwischenspeicher. Auch der Schlüssel für gespeicherte Zugangsdaten (secret.key) fehlt: Nach dem Zurückspielen auf einem neuen Rechner müssen sie neu eingegeben werden. Das Umzugspaket enthält beides.</p>
+   <div class="row"><a class="btn alt" href="/api/backup" download>Sicherung jetzt herunterladen</a></div><p class="mut fs13">Passwörter und Tokens sind im Download nicht enthalten. Fotos und Routen sind nicht enthalten.</p>
    ${isAdmin() ? `<div id="rsbox"></div>` : ""}
    <h3 class="mt16">Umzug auf einen neuen Server</h3>
    <p class="mut">Das Umzugspaket enthält alles: alle Benutzer, Touren mit Notizen und Kommentaren, Freigabelinks, Fotos, Strecken samt Original-Höhen, gespeicherte Zugangsdaten samt Schlüssel. Auf dem neuen Server zuerst installieren, dann <code>${esc(st.app_name || "meine-touren")}-restore &lt;Paket&gt;</code> – danach läuft alles wie vorher. Das Paket enthält Passwörter und Schlüssel: gut aufbewahren. Es kann groß werden (Fotos).</p>
@@ -682,7 +682,7 @@ async function bkInit() {
     if (g) {
       const von = g.name && g.alter_h != null ? `<span class="ml8">Geprüft: Sicherung vom ${dt(g.ts - g.alter_h * 3600)}.</span>` : "";
       if (g.ok) {
-        const inh = g.layouts != null ? `Enthält ${g.touren} Touren, ${g.tracks} Tracks und ${g.layouts} Layouts` : `Enthält ${g.touren} Touren und ${g.tracks} Tracks`;
+        const inh = g.layouts != null ? `Enthält ${g.touren} Touren, ${g.tracks} Tracks und ${g.layouts} Ansichten` : `Enthält ${g.touren} Touren und ${g.tracks} Tracks`;
         h += `<p class="ok" id="bkok"><span aria-hidden="true">✓</span> <span>Zuletzt geprüft: ${dt(g.ts)}, in Ordnung</span></p><p class="mut fs13"><span>${inh}.</span>${von}</p>`;
       } else h += `<p class="bad" id="bkbad"><span aria-hidden="true">✗</span> <span>Zuletzt geprüft: ${dt(g.ts)}, Fehler: ${esc(g.fehler || "")}</span></p>`;
     } else h += `<p class="mut">Die letzte Sicherung wurde noch nicht geprüft.</p>`;

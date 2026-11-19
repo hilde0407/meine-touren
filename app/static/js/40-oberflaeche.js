@@ -56,7 +56,7 @@ function statTabs(cur) {
   if (!main || main.querySelector(".segtabs") || main.querySelector(".empty")) return;
   const inner = cur === "stats" ? main.querySelector(".inner") : null,
     wb = inner ? null : main.querySelector(":scope > .warnbar");
-  (wb || inner || main).insertAdjacentHTML(wb ? "afterend" : "afterbegin", `<div class="segtabs" role="tablist"><a role="tab" href="#/stats" class="${cur === "stats" ? "on" : ""}">Übersicht</a><a role="tab" href="#/places" class="${cur === "places" ? "on" : ""}">Auswertung</a><a role="tab" href="#/records" class="${cur === "records" ? "on" : ""}">Rekorde</a>${TOURS.some(t => t.has_hr) ? `<a role="tab" href="#/pulse" class="${cur === "pulse" ? "on" : ""}">Puls</a>` : ""}</div>`);
+  (wb || inner || main).insertAdjacentHTML(wb ? "afterend" : "afterbegin", `<div class="segtabs" role="tablist"><a role="tab" href="#/stats" class="${cur === "stats" ? "on" : ""}">Übersicht</a><a role="tab" href="#/places" class="${cur === "places" ? "on" : ""}">Orte & Ausrüstung</a><a role="tab" href="#/records" class="${cur === "records" ? "on" : ""}">Rekorde</a>${TOURS.some(t => t.has_hr) ? `<a role="tab" href="#/pulse" class="${cur === "pulse" ? "on" : ""}">Puls</a>` : ""}</div>`);
 }
 {
   const p0 = VIEWS.places,

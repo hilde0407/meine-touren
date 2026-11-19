@@ -1,7 +1,7 @@
 """3.26.0 „Jahresrückblick als teilbare Seite“: Was ein Rückblick-Link (Freigabe ohne Konto) zeigt – und wie der Server das durchsetzt.
 
 Ein Rückblick-Link steht in derselben Tabelle wie Tourlinks (shares): tour_id = „rb:<Jahr>“ oder „rb:<Jahr>:<Sportart>“, blocks = gewählte Bausteine.
-Bausteine: kennzahlen (Touren, Strecke, Aufstieg, Stunden, Tage, Monatssäulen), rekorde (Tourname, Datum, Wert), heatmap (Kilometer je Kalendertag), fotos (die besten Fotos des Jahres).
+Bausteine: kennzahlen (Touren, Strecke, Aufstieg, Stunden, Tage, Monatssäulen), rekorde (Tourname, Datum, Wert), heatmap (Strecke je Kalendertag), fotos (die besten Fotos des Jahres).
 Der Server liefert nur Gewähltes aus; Fotos sind nur abrufbar, wenn „fotos“ gewählt ist und das Foto zur ausgewählten Bestenliste gehört.
 
 Datenschutz: Nie Teil des Links sind Notizen, Wegpunkte, Strecken und Koordinaten (auch keine Start- oder Heimatorte), Ortsnamen aus der Geokodierung, Uhr-Rohdaten, Puls, Gerät, Ausrüstung.
@@ -75,7 +75,7 @@ def check(year, sport):
         raise HTTPException(400, "Ungültiges Jahr")
     sport = sport if isinstance(sport, str) else ""
     if len(sport) > 40 or ":" in sport:
-        raise HTTPException(400, "Ungültige Aktivität")
+        raise HTTPException(400, "Ungültige Sportart")
     if not tours(year, sport):
         raise HTTPException(400, "Keine Touren in diesem Zeitraum")
     return year, sport
@@ -86,7 +86,7 @@ def title(year, sport=""):
 
 
 def _photo_rows(year, sport=""):
-    """Kandidaten: nur Fotos von Touren des Jahres (und der Aktivität)."""
+    """Kandidaten: nur Fotos von Touren des Jahres (und der Sportart)."""
     lo, hi = _range(year)
     sql = ("SELECT p.id,p.taken_ts,p.rating,p.sharp,p.path FROM photos p JOIN tours t ON t.id=p.tour_id "
            "WHERE t.start_ts>=? AND t.start_ts<? AND COALESCE(p.manual,0)!=2 AND p.taken_ts IS NOT NULL")

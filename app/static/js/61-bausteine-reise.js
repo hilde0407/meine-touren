@@ -2,7 +2,7 @@
    Gleiches Muster wie 50-bausteine.js, 57-bausteine-statistik.js und 60-bausteine-erinnerungen.js (Katalog-Kategorie „Reisen“). Die Seiten selbst (Karten der Reise, Reisen-Übersicht) baut 62-reiseseiten.js.
    Reise-Detailseite (Layout-Schlüssel „reise“, gilt für alle Reisen gleich; die Reise liefert ctx.reise = {tr, ts, days}: die Reise, ihre Touren nach Startzeit und ihre Tage mit Touren):
      rkennzahl  Reise-Kennzahlen: Reisetage, Touren, Strecke, Aufstieg, Abstieg, Unterwegs, Länder (Auswahl, geprüft in app/layout.py „REISE_VALUES“)
-     rkmtag     Kilometer je Tag: Säulendiagramm (Inline-SVG) über die Tage der Reise, auch Höhenmeter, Stunden oder Anzahl der Touren (Feld „metric“)
+     rkmtag     Strecke je Tag: Säulendiagramm (Inline-SVG) über die Tage der Reise, auch Aufstieg, Dauer oder Anzahl der Touren (Feld „metric“)
      rdiashow   Reise-Diashow: der Baustein „Erinnerungen“ (60-bausteine-erinnerungen.js), eingeschränkt auf die Fotos aus dem Zeitraum der Reise (GET /api/photos?date_from=…&date_to=…, seit 3.32.0)
    Reisen-Übersicht (Schlüssel „reisen“, ctx.reise = {trips}):
      rnzahlen   Reisen-Kennzahlen: Reisen, Reisetage, Strecke, Aufstieg, Länder        rnjahre   Reisen je Jahr: Säulen je Jahr (Strecke, Anzahl der Reisen oder Reisetage)
@@ -16,7 +16,7 @@ const RK_DEF = ["tage", "touren", "km", "up", "h", "laender"];
 const RN_VALUES = [["reisen", "Reisen"], ["tage", "Reisetage"], ["km", "Strecke"], ["up", "Aufstieg"], ["laender", "Länder"]];
 const RT_METRIC = {km: ["Strecke je Tag", "km", t => t.km, v => fmtKm(v, {summe: true})], up: ["Aufstieg je Tag", "m", t => t.up_m || 0, v => fmtHm(v)],
   h: ["Dauer je Tag", "Std.", t => t.h, v => slDur(v * 3600)], count: ["Touren je Tag", "Touren", () => 1, v => nf(v, 0) + (v === 1 ? " Tour" : " Touren")]};
-const RJ_METRIC = {km: ["Reisen: Kilometer je Jahr", "km", tr => tr.km], count: ["Reisen je Jahr", "Reisen", () => 1], days: ["Reisetage je Jahr", "Tage", tr => rsSpan(tr)]};
+const RJ_METRIC = {km: ["Reisen: Strecke je Jahr", "km", tr => tr.km], count: ["Reisen je Jahr", "Reisen", () => 1], days: ["Reisetage je Jahr", "Tage", tr => rsSpan(tr)]};
 const rsNoTrip = b => slNote(b, "Dieser Baustein gehört auf die Seite einer Reise.");
 /* Beschriftung unter den Säulen: bei vielen Säulen nur jede n-te (die Spalten bleiben ausgerichtet) */
 const rsLabels = (labels, max = 10) => {
@@ -44,9 +44,9 @@ Object.assign(window.SL_WT, {
     },
   },
   rkmtag: {
-    fam: "reise", cat: "reise", icon: "trend", name: "Kilometer je Tag", title: cfg => (RT_METRIC[cfg.metric] || RT_METRIC.km)[0], multi: true, w: "halb", seiten: ["reise"], defaults: {metric: "km"},
-    desc: "Ein Säulendiagramm über die Tage der Reise: wie viele Kilometer (oder Höhenmeter, Stunden, Touren) an jedem Tag zusammenkamen, mit dem stärksten Tag hervorgehoben und der gestrichelten Durchschnittslinie.",
-    fields: [{k: "metric", kind: "radio", def: "km", label: "Säulen nach", options: [["km", "Kilometern"], ["up", "Höhenmetern"], ["h", "Stunden"], ["count", "Anzahl der Touren"]]}, {kind: "title"}],
+    fam: "reise", cat: "reise", icon: "trend", name: "Strecke je Tag", title: cfg => (RT_METRIC[cfg.metric] || RT_METRIC.km)[0], multi: true, w: "halb", seiten: ["reise"], defaults: {metric: "km"},
+    desc: "Ein Säulendiagramm über die Tage der Reise: wie viele Kilometer (oder Aufstieg, Stunden, Touren) an jedem Tag zusammenkamen, mit dem stärksten Tag hervorgehoben und der gestrichelten Durchschnittslinie.",
+    fields: [{k: "metric", kind: "radio", def: "km", label: "Säulen nach", options: [["km", "Strecke"], ["up", "Aufstieg"], ["h", "Dauer"], ["count", "Anzahl der Touren"]]}, {kind: "title"}],
     preview: () => slPvBars([14, 22, 30, 18, 34, 10, 26]),
     render(c, b, cfg, {reise}) {
       if (!reise || !reise.tr) return rsNoTrip(b);
@@ -82,7 +82,7 @@ Object.assign(window.SL_WT, {
   },
   rnzahlen: {
     fam: "reisen", cat: "reise", icon: "met", name: "Reisen-Kennzahlen", title: () => "Reisen-Kennzahlen", w: "halb", seiten: ["reisen"], defaults: {values: ["reisen", "tage", "km", "up", "laender"]},
-    desc: "Alle Reisen auf einen Blick: wie viele Reisen, Reisetage, Kilometer, Höhenmeter und Länder zusammenkommen.",
+    desc: "Alle Reisen auf einen Blick: wie viele Reisen, Reisetage, Strecke, Aufstieg und Länder zusammenkommen.",
     fields: [{k: "values", kind: "checks", label: "Angezeigte Werte", min: 1, def: ["reisen", "tage", "km", "up", "laender"], options: RN_VALUES}, {kind: "title"}],
     preview: () => slPvTiles([["7", "Reisen"], ["46", "Reisetage"], ["1 480 km", "Strecke"]]),
     render(c, b, cfg, {reise}) {
@@ -102,7 +102,7 @@ Object.assign(window.SL_WT, {
   rnjahre: {
     fam: "reisen", cat: "reise", icon: "trend", name: "Reisen je Jahr", title: cfg => (RJ_METRIC[cfg.metric] || RJ_METRIC.km)[0], w: "halb", seiten: ["reisen"], defaults: {metric: "km"},
     desc: "Ein Säulendiagramm über die Jahre: wie viele Reise-Kilometer, Reisen oder Reisetage auf jedes Jahr entfallen.",
-    fields: [{k: "metric", kind: "radio", def: "km", label: "Säulen nach", options: [["km", "Kilometern"], ["count", "Anzahl der Reisen"], ["days", "Reisetagen"]]}, {kind: "title"}],
+    fields: [{k: "metric", kind: "radio", def: "km", label: "Säulen nach", options: [["km", "Strecke"], ["count", "Anzahl der Reisen"], ["days", "Reisetagen"]]}, {kind: "title"}],
     preview: () => slPvBars([10, 18, 8, 30, 22, 34]),
     render(c, b, cfg, {reise}) {
       const L = (reise && reise.trips) || [];
@@ -119,11 +119,11 @@ Object.assign(window.SL_WT, {
 
 /* Vorlagen für die Ansichten der Reisen-Seiten (55-vorlagen.js: Format der Einträge dort beschrieben) */
 SL_TPL.push(
-  {id: "re-kompakt", fam: "reise", name: "Kompakt", desc: "Wenig auf einen Blick: Kopf und Karte oben, daneben die Kilometer je Tag, darunter die Touren. Statistik, Flug und Fotos sind ausgeblendet.",
+  {id: "re-kompakt", fam: "reise", name: "Kompakt", desc: "Wenig auf einen Blick: Kopf und Karte oben, daneben die Strecke je Tag, darunter die Touren. Statistik, Flug und Fotos sind ausgeblendet.",
     items: [["kopf", "voll"], ["karte", "halb"], ["w:rkmtag", "halb"], ["touren", "voll"]]},
   {id: "re-fotos", fam: "reise", name: "Fotoreise", desc: "Für die Erinnerung: oben die Foto-Show der Reise, dann Karte und Kennzahlen, darunter alle Fotos und die Touren.",
     items: [["kopf", "voll"], ["w:rdiashow", "voll"], ["karte", "voll"], ["w:rkennzahl", "voll"], ["fotos", "voll"], ["touren", "voll"]]},
-  {id: "re-tage", fam: "reise", name: "Tag für Tag", desc: "Für den Verlauf: Reise-Kennzahlen und Kilometer je Tag nebeneinander, darunter Karte, Statistik nach Aktivität und die Touren.",
+  {id: "re-tage", fam: "reise", name: "Tag für Tag", desc: "Für den Verlauf: Reise-Kennzahlen und Strecke je Tag nebeneinander, darunter Karte, Statistik nach Sportart und die Touren.",
     items: [["kopf", "voll"], ["w:rkennzahl", "halb"], ["w:rkmtag", "halb"], ["karte", "voll"], ["stat", "voll"], ["touren", "voll"]]},
   {id: "rn-kompakt", fam: "reisen", name: "Nur Reisen", desc: "Ruhig und kurz: die Reisen mit ihren Kennzahlen, ohne Mehrtagestouren und Alben.",
     items: [["w:rnzahlen", "voll"], ["reisen", "voll"]]},

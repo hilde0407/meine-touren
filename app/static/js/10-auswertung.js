@@ -1,7 +1,7 @@
 /* =====================  Orte & Gipfel, Wanderführer  ===================== */
 VIEWS.places = async () => {
   $("#main").innerHTML =
-    `<div class="sec mt0"><h2>Auswertung</h2><span class="sub">Orte, Gipfel, Leistung, Wetter, Neuland</span></div><div id="plb" class="mut">Wird geladen …</div>`;
+    `<div class="sec mt0"><h2>Orte & Ausrüstung</h2><span class="sub">Orte, Gipfel, Leistung, Wetter, Neuland</span></div><div id="plb" class="mut">Wird geladen …</div>`;
   const [p, gp] = await Promise.all([api("/api/places"), api("/api/guides/progress").catch(() => [])]),
     box = $("#plb");
   box.className = "";
@@ -243,7 +243,7 @@ VIEWS.tour = async (id, q) => {
 
 /* =====================  Sammlungen: Reisen & Alben  ===================== */
 const DAYC = ["#e11d74", "#f2c230", "#00a6d6", "#7cc43a", "#ff6a1a", "#8e5bd6", "#16a085", "#c0392b"];
-/* Statistik je Aktivität (Sportart) für Reisen, Alben und Etappen */
+/* Statistik je Sportart (Sportart) für Reisen, Alben und Etappen */
 function collStats(ts) {
   const g = {};
   ts.forEach(t => (g[t.sport || "other"] = g[t.sport || "other"] || []).push(t));
@@ -255,7 +255,7 @@ function collStats(ts) {
       h = sm(t => t.h);
     return `<tr><td>${col ? `<i class="dot" style="background:${col}"></i>` : ""}${esc(name)}</td><td>${a.length}</td><td>${fmtKm(km, {summe: true, einheit: false})}</td><td>${nf(sm(t => t.up_m), 0)}</td><td>${nf(sm(t => t.down_m), 0)}</td><td>${fmtDauer(h * 3600, {summe: true})}</td><td>${h > 0 ? nf(km / h, 1) : "–"}</td><td>${fmtKm(Math.max(...a.map(t => t.km || 0)), {einheit: false})}</td></tr>`;
   };
-  return `<div class="sec"><h2>Statistik nach Aktivität</h2></div><div class="tblw"><table class="cstat"><thead><tr><th>Aktivität</th><th>Touren</th><th>km</th><th>Aufstieg m</th><th>Abstieg m</th><th>Stunden</th><th>Ø km/h</th><th>Längste km</th></tr></thead><tbody>${keys.map(k => row(sName(k), typeof sCol === "function" ? sCol(k) : "", g[k])).join("")}</tbody>${keys.length > 1 ? `<tfoot>${row("Gesamt", "", ts).replace(/<td>/g, "<td><b>").replace(/<\/td>/g, "</b></td>")}</tfoot>` : ""}</table></div>`;
+  return `<div class="sec"><h2>Statistik nach Sportart</h2></div><div class="tblw"><table class="cstat"><thead><tr><th>Sportart</th><th>Touren</th><th>km</th><th>Aufstieg m</th><th>Abstieg m</th><th>Stunden</th><th>Ø km/h</th><th>Längste km</th></tr></thead><tbody>${keys.map(k => row(sName(k), typeof sCol === "function" ? sCol(k) : "", g[k])).join("")}</tbody>${keys.length > 1 ? `<tfoot>${row("Gesamt", "", ts).replace(/<td>/g, "<td><b>").replace(/<\/td>/g, "</b></td>")}</tfoot>` : ""}</table></div>`;
 }
 /* 3.33.0: Die Abschnitte tragen data-rs; bei einer Reise (opt.reise = die Reise) steckt rsFrame() (62-reiseseiten.js) sie sofort, noch vor dem Zeichnen der Karte, in Karten der anpassbaren Seite. */
 async function collView(title, sub, ids, back, opt = {}) {
@@ -426,7 +426,7 @@ VIEWS.places = async (...a) => {
     perf(a => sm(a, t => t.km) / sm(a, t => t.h)),
     ys,
     "km/h im Schnitt"
-  )}</div><div class="panel"><h2>Höhenmeter pro Stunde</h2>${yearChart(
+  )}</div><div class="panel"><h2>Aufstieg pro Stunde</h2>${yearChart(
     perf(a => sm(a, t => t.up_m || 0) / sm(a, t => t.h)),
     ys,
     "m Aufstieg pro Stunde"
@@ -565,7 +565,7 @@ VIEWS.admin = async (...a) => {
   const s = await api("/api/settings").catch(() => ({}));
   sv.closest(".row").insertAdjacentHTML(
     "beforebegin",
-    `<div class="panel gap"><h2>Benachrichtigung (optional)</h2><p class="mut">Trage eine Webhook-Adresse ein (z. B. ntfy, Gotify oder ein eigener Dienst). Bei einer neuen Warnung (Zepp-Token, Backup, Job-Fehler, Speicher) wird dort eine Textnachricht abgeliefert, höchstens stündlich geprüft. Leer = aus. Die App stellt keine Verbindung zu Home Assistant her.</p>
+    `<div class="panel gap"><h2>Benachrichtigung (optional)</h2><p class="mut">Trage eine Webhook-Adresse ein (z. B. ntfy, Gotify oder ein eigener Dienst). Bei einer neuen Warnung (Zepp-Token, Sicherung, Job-Fehler, Speicher) wird dort eine Textnachricht abgeliefert, höchstens stündlich geprüft. Leer = aus. Die App stellt keine Verbindung zu Home Assistant her.</p>
    <div class="field"><label>Webhook-Adresse</label><input data-k="notify_url" value="${esc(s.notify_url || "")}" placeholder="https://ntfy.sh/mein-thema"></div><div class="field"><label>Auch bei neuen Touren melden</label><select data-k="notify_events"><option value="1"${s.notify_events !== "0" ? " selected" : ""}>Ja (Aufzeichnung, Teilen-Menü, Import)</option><option value="0"${s.notify_events === "0" ? " selected" : ""}>Nein, nur Warnungen</option></select></div><div class="row"><button class="btn alt" id="ntest">Testnachricht senden (nach „Speichern“)</button><span id="ntm" class="mut"></span></div></div>`
   );
   $("#ntest").onclick = async () => {

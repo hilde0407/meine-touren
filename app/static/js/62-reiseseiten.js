@@ -64,7 +64,7 @@ function rsFrame(tr, ts, days) {
     if (!e.children.length) return e.remove();                                          // z. B. keine Statistik ohne Touren
     const badge = {
       kennzahlen: `${ts.length} Touren · ${fmtKm(km, {d: 0})}`,
-      stat: (n => (n === 1 ? "1 Aktivität" : `${n} Aktivitäten`))(e.querySelectorAll("tbody tr").length),
+      stat: (n => (n === 1 ? "1 Sportart" : `${n} Sportarten`))(e.querySelectorAll("tbody tr").length),
       touren: `${ts.length} Touren`,
     }[reg.id] || "";
     const c = tlCard("rsc-" + reg.id, {sec: reg.id, key: "rs_" + reg.id, icon: RS_ICON[reg.id], title: esc(reg.title), badge: esc(badge), def: true, bodyCls: reg.id === "karte" ? "tlmap" : "stb rsb"});

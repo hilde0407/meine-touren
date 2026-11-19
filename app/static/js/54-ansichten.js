@@ -343,7 +343,7 @@ function slViewsDialog() {
       } else if (a === "share") {
         focus = `[data-id="${id}"][data-a="share"]`;
         slCodeDialog(fam, id);
-        slVLine(`Layoutcode der Ansicht „${v.name}“`);
+        slVLine(`Ansichtscode der Ansicht „${v.name}“`);
       } else if (a === "del") {
         const ok = await uiConfirm({title: "Ansicht löschen?", text: `Die Ansicht „${v.name}“ wird gelöscht. Das lässt sich nicht rückgängig machen. Tipp: Mit „Exportieren“ kannst du sie vorher sichern.`, ok: "Löschen", danger: true});
         if (ok) {
@@ -450,10 +450,10 @@ async function slCheckFile(file) {
 }
 function slImportDialog(fam, done, preset) {
   slModal("Ansicht importieren", (body, close) => {
-    body.innerHTML = `<p class="mut slcatin">Wähle eine Datei, die du mit „Exportieren“ gespeichert hast, oder füge einen Layoutcode ein (aus „Teilen …“). Sie wird zuerst geprüft; erst danach entscheidest du, was übernommen wird.</p>` +
+    body.innerHTML = `<p class="mut slcatin">Wähle eine Datei, die du mit „Exportieren“ gespeichert hast, oder füge einen Ansichtscode ein (aus „Teilen …“). Sie wird zuerst geprüft; erst danach entscheidest du, was übernommen wird.</p>` +
       `<div class="slimpbar"><button type="button" class="btn ghost sm" data-a="pick">Datei wählen …</button><span class="mut slimpf" id="slimpf">Keine Datei gewählt</span><input type="file" id="slimpin" accept=".json,application/json" hidden></div>` +
-      `<div class="slfs slimpcode"><label for="slimpcode">Layoutcode oder Link einfügen</label><textarea id="slimpcode" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="MTA1.…" aria-describedby="slimpch"></textarea>` +
-      `<p class="mut slimphint" id="slimpch">Ein Layoutcode enthält nur die Anordnung und die Einstellungen der Bausteine, keine Touren oder Fotos.</p><button type="button" class="btn ghost sm" data-a="code">Code prüfen</button></div>` +
+      `<div class="slfs slimpcode"><label for="slimpcode">Ansichtscode oder Link einfügen</label><textarea id="slimpcode" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="MTA1.…" aria-describedby="slimpch"></textarea>` +
+      `<p class="mut slimphint" id="slimpch">Ein Ansichtscode enthält nur die Anordnung und die Einstellungen der Bausteine, keine Touren oder Fotos.</p><button type="button" class="btn ghost sm" data-a="code">Code prüfen</button></div>` +
       `<div class="slimpres" id="slimpres" role="status" aria-live="polite"></div><div class="uifoot"><button type="button" class="btn ghost" data-close>Schließen</button></div>`;
     const inp = body.querySelector("#slimpin"), res = body.querySelector("#slimpres"), ta = body.querySelector("#slimpcode");
     body.addEventListener("click", e => {
@@ -515,7 +515,7 @@ function slImportDialog(fam, done, preset) {
     };
     async function checkCode() {
       if (!ta.value.trim()) {
-        res.innerHTML = `<div class="slimpbad" role="alert"><h3>Der Code kann nicht importiert werden</h3><ul><li>Bitte zuerst einen Layoutcode oder Link einfügen.</li></ul><p class="mut">Es wurde nichts verändert.</p></div>`;
+        res.innerHTML = `<div class="slimpbad" role="alert"><h3>Der Code kann nicht importiert werden</h3><ul><li>Bitte zuerst einen Ansichtscode oder Link einfügen.</li></ul><p class="mut">Es wurde nichts verändert.</p></div>`;
         return ta.focus();
       }
       res.innerHTML = `<p class="mut">Code wird geprüft …</p>`;
@@ -583,7 +583,7 @@ function slSaveMenu() {
   const fam = SL.fam, h = SLF[fam];
   if (!h) return;
   slModal("Ansicht speichern", (body, close) => {
-    body.innerHTML = `<p class="mut">Der Filter (Aktivität und Zeitraum) gehört zur Ansicht „${esc(slViewName(fam, SL.view[fam]))}“. Er ist noch nicht gespeichert.</p>` +
+    body.innerHTML = `<p class="mut">Der Filter (Sportart und Zeitraum) gehört zur Ansicht „${esc(slViewName(fam, SL.view[fam]))}“. Er ist noch nicht gespeichert.</p>` +
       `<div class="slmenu"><button type="button" class="btn" data-m="here">In dieser Ansicht speichern</button><button type="button" class="btn ghost" data-m="new">Als neue Ansicht speichern …</button><button type="button" class="btn ghost" data-m="drop">Verwerfen</button></div>`;
     body.onclick = e => {
       const b = e.target.closest("[data-m]");

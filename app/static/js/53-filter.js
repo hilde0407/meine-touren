@@ -1,14 +1,14 @@
-/* =====================  3.19.0 Konfigurierbare Bausteine: gemeinsamer Filter (Aktivität, Zeitraum)  =====================
+/* =====================  3.19.0 Konfigurierbare Bausteine: gemeinsamer Filter (Sportart, Zeitraum)  =====================
    Eigenständig und wiederverwendbar (3.22.0: auch der globale Filter der Statistikseite, 56-statistik.js, rechnet mit flRange/flSelect). Nichts hier kennt einen bestimmten Baustein.
    Konfiguration (cfg, gespeichert im Layout-Dokument, geprüft in app/layout.py):
-     sports   [Sportart]   leer oder fehlend = alle Aktivitäten
+     sports   [Sportart]   leer oder fehlend = alle Sportarten
      range    year | y | 12m | 90d | all     (y braucht yr = Jahr)      yr    Jahreszahl
      compare  false = ohne Vorjahresvergleich (Standard: an)             title  eigener Titel
      eigen    true = der Baustein behält seinen eigenen Filter (nur auf der Statistikseite; sonst gilt dort der globale Filter)
    3.22.0: range "c" = frei von–bis (cfg.from, cfg.to als JJJJ-MM-TT); nur im globalen Filter der Statistikseite (Adresse), nicht im Einstellungs-Dialog und nicht im Layout.
    Rechnen (ohne Seiteneffekte, gleiche Regeln wie GET /api/bausteine/jahr in app/bausteine_daten.py):
      flRange(cfg, def, o)    -> {kind, from, to, prev: {from, to}|null, year, label}   def = Zeitraum, wenn cfg.range fehlt; o.fallback: ohne Touren im laufenden Jahr das letzte Jahr mit Touren
-     flSelect(cfg, def, o)   -> {R, base (nur nach Aktivität gefiltert), list (im Zeitraum), prev (im Vorzeitraum oder null)}
+     flSelect(cfg, def, o)   -> {R, base (nur nach Sportart gefiltert), list (im Zeitraum), prev (im Vorzeitraum oder null)}
      flParts / flKurz / flPlain  Kurztext der aktiven Filterung ("Wandern, 2025"), leer ohne Abweichung vom Standard des Bausteins
    Dialog (vom Einstellungs-Dialog in 49-seitenlayout.js genutzt): Feldarten sports, range, compare, title mit flField / flRead / flBind.
    Kopfzeile: flHead(card, Typ, cfg) setzt den Kurztext (auch zugeklappt sichtbar) hinter den Titel. */
@@ -79,7 +79,7 @@ function flParts(cfg, rangeDef, o = {}) {
   const s = cfg.sports || [], out = [];
   if (s.length) {
     if (s.length <= 2) s.forEach(x => out.push(sName(x)));
-    else out.push(`${s.length} Aktivitäten`);
+    else out.push(`${s.length} Sportarten`);
   }
   if (rangeDef && !o.noRange && !cfg._nr && (s.length || (cfg.range && cfg.range !== rangeDef))) out.push(flRange(cfg, rangeDef).label);
   return out;
@@ -106,7 +106,7 @@ function flField(f, cfg, i) {
   const id = "slf" + i;
   if (f.kind === "sports") {
     const sel = cfg.sports || [];
-    return `<fieldset class="slfs flsp"><legend>${esc(f.label || "Aktivität")}</legend><div class="flchips">` +
+    return `<fieldset class="slfs flsp"><legend>${esc(f.label || "Sportart")}</legend><div class="flchips">` +
       `<label class="flchip"><input type="checkbox" data-all${sel.length ? "" : " checked"}><span>Alle</span></label>` +
       flSportOptions(sel).map(([v, l]) => `<label class="flchip"><input type="checkbox" name="f${i}" value="${esc(v)}"${sel.includes(v) ? " checked" : ""}><span>${esc(l)}</span></label>`).join("") +
       `</div></fieldset>`;
@@ -122,7 +122,7 @@ function flField(f, cfg, i) {
   }
   if (f.kind === "global")
     return `<div class="slfs"><label class="slck"><input type="checkbox" name="f${i}" data-global${f.zr ? " data-zr" : ""}${cfg.eigen === true ? "" : " checked"}><span>${esc(f.label || "Globalen Filter verwenden")}</span></label>` +
-      (f.zr ? '<p class="mut slgh">Ist oben auf der Seite ein Zeitraum gewählt, gilt er hier. Ohne Haken behält dieser Baustein seinen eigenen Zeitraum.</p><p class="mut slgh zrnow" data-zrnow role="status"></p></div>' : '<p class="mut slgh">Gilt der Filter oben auf der Seite, sind Aktivität und Zeitraum hier nicht einstellbar.</p></div>');
+      (f.zr ? '<p class="mut slgh">Ist oben auf der Seite ein Zeitraum gewählt, gilt er hier. Ohne Haken behält dieser Baustein seinen eigenen Zeitraum.</p><p class="mut slgh zrnow" data-zrnow role="status"></p></div>' : '<p class="mut slgh">Gilt der Filter oben auf der Seite, sind Sportart und Zeitraum hier nicht einstellbar.</p></div>');
   if (f.kind === "compare")
     return `<div class="slfs"><label class="slck"><input type="checkbox" name="f${i}"${cfg.compare === false ? "" : " checked"}><span>${esc(f.label || "Mit dem Vorjahr vergleichen")}</span></label></div>`;
   return `<div class="slfs"><label for="${id}">${esc(f.label || "Eigener Titel (optional)")}</label><input id="${id}" name="f${i}" type="text" maxlength="60" autocomplete="off" value="${esc(cfg.title || "")}" placeholder="${esc(f.ph || "")}"></div>`;

@@ -208,7 +208,7 @@ document.addEventListener("keydown", e => {
   }
 });
 {
-  let was = zrMob();                                                                // Wechsel zwischen Handy- und Desktop-Ansicht: Leiste neu aufbauen
+  let was = zrMob();                                                                // Wechsel zwischen Handy- und Computer-Darstellung: Leiste neu aufbauen
   new MutationObserver(() => {
     if (zrMob() === was) return;
     was = zrMob();

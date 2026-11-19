@@ -484,7 +484,7 @@ def _activity_rows(ts):
     return rows, foot
 
 
-ACT_HEAD = ["Aktivität", "Touren", "km", "Aufstieg m", "Abstieg m", "Stunden", "Ø km/h", "Längste km"]
+ACT_HEAD = ["Sportart", "Touren", "km", "Aufstieg m", "Abstieg m", "Stunden", "Ø km/h", "Längste km"]
 ACT_W = (0.22, 0.09, 0.10, 0.13, 0.13, 0.11, 0.10, 0.12)
 
 
@@ -556,7 +556,7 @@ def api_tour_pdf(tour_id: str, photos_on: int = 1, n: int = 6):
     # --- Kennzahlen im Detail
     det = [["Datum und Start", f"{st.strftime('%d.%m.%Y, %H:%M')} Uhr"], ["Ende", datetime.fromtimestamp(t["end_ts"], tz=TZ).strftime("%H:%M Uhr") if t["end_ts"] else "-"],
            ["Strecke", f"{_nf(km, 2)} km"], ["Zeit", _hm(h)], ["Ø Tempo", f"{_nf(km / h, 1)} km/h" if h else "-"],
-           ["Aufstieg / Abstieg", f"{_nf(t['up_m'])} m / {_nf(t['down_m'])} m"], ["Höhenmeter je km", f"{_nf((t['up_m'] or 0) / km, 0)} m" if km else "-"]]
+           ["Aufstieg / Abstieg", f"{_nf(t['up_m'])} m / {_nf(t['down_m'])} m"], ["Aufstieg je km", f"{_nf((t['up_m'] or 0) / km, 0)} m" if km else "-"]]
     if prof:
         det.append(["Höchster / tiefster Punkt", f"{_nf(hl[1])} m / {_nf(hl[0])} m"])
     try:                                                   # Puls, falls zur Tour aufgezeichnet
@@ -650,7 +650,7 @@ def api_trip_pdf(trip_id: str, photos_on: int = 1, n: int = 12):
         leg = "&nbsp;&nbsp;&nbsp;".join(f'<font color="{DAYC[i % len(DAYC)]}">&#9632;</font> {_date(d)[:5]}' for i, d in enumerate(days))
         story += [Spacer(1, 3), Paragraph(leg, S["small"])]
     rows, foot = _activity_rows(ts)
-    story += [Section("Statistik nach Aktivität", W), _table(ACT_HEAD, rows, [W * x for x in ACT_W], foot=foot)]
+    story += [Section("Statistik nach Sportart", W), _table(ACT_HEAD, rows, [W * x for x in ACT_W], foot=foot)]
     body, groups = [], []
     for d in days:
         a = [t for t in ts if day(t) == d]
@@ -658,7 +658,7 @@ def api_trip_pdf(trip_id: str, photos_on: int = 1, n: int = 12):
         body.append([f"{_date(d)}   -   {_nf(sum((t['dist_m'] or 0) for t in a) / 1000, 1)} km  ·  Aufstieg {_nf(sum(t['up_m'] or 0 for t in a))} m  ·  Abstieg {_nf(sum(t['down_m'] or 0 for t in a))} m", "", "", "", "", ""])
         for t in a:
             body.append([datetime.fromtimestamp(t["start_ts"], tz=TZ).strftime("%H:%M"), t["name"], _sport(t["sport"]), _nf((t["dist_m"] or 0) / 1000, 1), _nf(t["up_m"] or 0), _nf(t["down_m"] or 0)])
-    story += [Section("Tag für Tag", W), _table(["Zeit", "Tour", "Aktivität", "km", "Auf m", "Ab m"], body, [W * x for x in (0.09, 0.43, 0.16, 0.1, 0.11, 0.11)], align_left=(0, 1, 2), group_rows=groups)]
+    story += [Section("Tag für Tag", W), _table(["Zeit", "Tour", "Sportart", "km", "Auf m", "Ab m"], body, [W * x for x in (0.09, 0.43, 0.16, 0.1, 0.11, 0.11)], align_left=(0, 1, 2), group_rows=groups)]
     grid = _photo_grid(ids[:max(n, 1)], W) if ids else None
     if grid:
         story += [Section("Fotos", W), grid]
@@ -740,11 +740,11 @@ def api_recap_pdf(year: int, photos_on: int = 1, n: int = 6):
     for t in prev:
         pm[dt(t).month - 1] += (t["dist_m"] or 0) / 1000
     bm = mk.index(max(mk))
-    story += [Section("Kilometer pro Monat", W), _bars(mk, MONTHS, W, 140, prev=pm if prev else None),
+    story += [Section("Strecke pro Monat", W), _bars(mk, MONTHS, W, 140, prev=pm if prev else None),
               Paragraph_small(f"Stärkster Monat: {MONTHS[bm]} mit {_nf(mk[bm])} km" + (f"  ·  grau: {year - 1}" if prev else ""), S)]
     mrows = [[MONTHS[i], mc[i] or "-", _nf(mk[i], 1) if mc[i] else "-", _nf(mu[i]) if mc[i] else "-", _hm(mh[i]) if mc[i] else "-"] for i in range(12) if mc[i]]
     story += [Spacer(1, 6), _table(["Monat", "Touren", "km", "Aufstieg m", "Zeit"], mrows, [W * x for x in (0.2, 0.15, 0.2, 0.22, 0.23)], foot=["Gesamt", len(ts), _nf(km, 1), _nf(up), _hm(hrs)])]
-    # --- Aktivitäten
+    # --- Sportarten
     rows, foot = _activity_rows(ts)
     share = {}
     for t in ts:
@@ -757,14 +757,14 @@ def api_recap_pdf(year: int, photos_on: int = 1, n: int = 6):
         bar.add(Rect(x, 6, max(w - 1, 0.5), 12, fillColor=_c(SPORT_COL.get(k, "#78857f")), strokeColor=None))
         x += w
     leg = "&nbsp;&nbsp;&nbsp;".join(f'<font color="{SPORT_COL.get(k, "#78857f")}">&#9632;</font> {_esc(_sport(k))} {_nf(v / (km or 1) * 100)} %' for k, v in sorted(share.items(), key=lambda kv: -kv[1]))
-    story += [Section("Statistik nach Aktivität", W), bar, Paragraph(leg, S["small"]), Spacer(1, 8), _table(ACT_HEAD, rows, [W * x for x in ACT_W], foot=foot)]
+    story += [Section("Statistik nach Sportart", W), bar, Paragraph(leg, S["small"]), Spacer(1, 8), _table(ACT_HEAD, rows, [W * x for x in ACT_W], foot=foot)]
     # --- Bestleistungen (ohne Liftabfahrten)
     eff = [t for t in ts if (t["sport"] or "") not in LIFT_SPORTS]
     pk = {r["id"]: r for r in db.query("SELECT id,name,alt FROM tour_peak")}
     if eff:
         best = []
         for lab, key, fmt in (("Längste Strecke", lambda t: t["dist_m"] or 0, lambda t: _nf((t["dist_m"] or 0) / 1000, 1) + " km"),
-                              ("Meiste Höhenmeter", lambda t: t["up_m"] or 0, lambda t: _nf(t["up_m"] or 0) + " m"),
+                              ("Größter Aufstieg", lambda t: t["up_m"] or 0, lambda t: _nf(t["up_m"] or 0) + " m"),
                               ("Längste Dauer", lambda t: t["dur_s"] or 0, lambda t: _hm((t["dur_s"] or 0) / 3600))):
             t = max(eff, key=key)
             best.append([lab, _date(t["start_ts"]), t["name"], fmt(t)])
@@ -777,7 +777,7 @@ def api_recap_pdf(year: int, photos_on: int = 1, n: int = 6):
         top = sorted(eff, key=lambda t: -score(t))[:8]
         story += [Section("Die stärksten Touren", W),
                   Paragraph("Bewertet nach Leistungskilometern (km + Aufstieg in m / 100). Pistenabfahrten mit Lift zählen nicht mit, weil sie nichts über die eigene Leistung sagen.", S["small"]), Spacer(1, 6),
-                  _table(["Datum", "Tour", "Aktivität", "km", "Auf m", "Zeit", "Punkte"],
+                  _table(["Datum", "Tour", "Sportart", "km", "Auf m", "Zeit", "Punkte"],
                          [[_date(t["start_ts"]), t["name"], _sport(t["sport"]), _nf((t["dist_m"] or 0) / 1000, 1), _nf(t["up_m"] or 0), _hm((t["dur_s"] or 0) / 3600), _nf(score(t), 1)] for t in top],
                          [W * x for x in (0.13, 0.33, 0.15, 0.09, 0.09, 0.11, 0.10)], align_left=(0, 1, 2))]
     # --- Skitage (Lift)
@@ -785,7 +785,7 @@ def api_recap_pdf(year: int, photos_on: int = 1, n: int = 6):
     if lift:
         ld = len({dt(t).date() for t in lift})
         story += [Section("Skitage", W), Paragraph(
-            f"<b>{ld}</b> Skitage mit <b>{len(lift)}</b> Aufzeichnungen &nbsp;·&nbsp; <b>{_nf(tot(lift, 'dist_m') / 1000, 1)}</b> km Abfahrt &nbsp;·&nbsp; <b>{_nf(tot(lift, 'down_m'))}</b> m Abfahrtshöhenmeter &nbsp;·&nbsp; <b>{_hm(tot(lift, 'dur_s') / 3600)}</b> auf Ski", S["p"])]
+            f"<b>{ld}</b> Skitage mit <b>{len(lift)}</b> Aufzeichnungen &nbsp;·&nbsp; <b>{_nf(tot(lift, 'dist_m') / 1000, 1)}</b> km Abfahrt &nbsp;·&nbsp; <b>{_nf(tot(lift, 'down_m'))}</b> m Abstieg &nbsp;·&nbsp; <b>{_hm(tot(lift, 'dur_s') / 3600)}</b> auf Ski", S["p"])]
     # --- Wochentage und Regionen
     wd = [0] * 7
     for d in {dt(t).date() for t in ts}:
@@ -826,5 +826,5 @@ def api_recap_pdf(year: int, photos_on: int = 1, n: int = 6):
     grid = _photo_grid(ids, W) if ids else None
     if grid:
         story += [Section("Fotos des Jahres", W), grid]
-    hero = {"kicker": "Mein Tourenjahr", "title": str(year), "meta": f"{len(ts)} Touren  ·  {_nf(km)} km  ·  {_nf(up)} Höhenmeter  ·  {days} Tage", "photo": ids[len(ids) // 2] if ids else None}
+    hero = {"kicker": "Mein Tourenjahr", "title": str(year), "meta": f"{len(ts)} Touren  ·  {_nf(km)} km  ·  {_nf(up)} m Aufstieg  ·  {days} Tage", "photo": ids[len(ids) // 2] if ids else None}
     return _pdf_response(_build(story, f"Tourenjahr {year}", hero), f"Tourenjahr_{year}")

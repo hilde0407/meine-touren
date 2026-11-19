@@ -2,15 +2,15 @@
    Die Statistikseite (#/stats, Reiter „Übersicht“; Aufbau in 02-uebersicht.js, 06-erweiterungen.js „Ziele“, 46-belastung.js „Belastung“ und „Tempo“) ist jetzt wie die Übersicht anpassbar
    (Layout-Schlüssel „statistik“, Engine 49-seitenlayout.js). Kapselung statt Neuschreibung: Die bisherigen Abschnitte bauen sich wie vorher selbst auf; nach dem Aufbau steckt stBuild() jeden
    Abschnitt unverändert (samt seiner Steuerung und seinen Ereignissen) in eine Karte im Format von tlCard (einklappbar, Kopf mit Kurzaussage) und übergibt sie der Engine (slPlace).
-   Globaler Filter (Aktivität, Zeitraum): steht in der Adresse (#/stats?y=2025&s=hike,mtb | z=12m | z=90d | z=c&von=…&bis=…), bleibt also beim Neuladen erhalten und ist teilbar.
-     s    Aktivitäten (Mehrfachauswahl, leer = alle)     y   Jahr     z   12m | 90d | c (frei: von, bis als JJJJ-MM-TT)     ohne Angabe: alle Aktivitäten, gesamte Zeit (wie bisher)
+   Globaler Filter (Sportart, Zeitraum): steht in der Adresse (#/stats?y=2025&s=hike,mtb | z=12m | z=90d | z=c&von=…&bis=…), bleibt also beim Neuladen erhalten und ist teilbar.
+     s    Sportarten (Mehrfachauswahl, leer = alle)     y   Jahr     z   12m | 90d | c (frei: von, bis als JJJJ-MM-TT)     ohne Angabe: alle Sportarten, gesamte Zeit (wie bisher)
    Wer den Filter übernimmt, entscheidet die Fähigkeit des Abschnitts (ST_CAP) bzw. das Schema des Bausteins (Felder „sports“ und „range“): übernommen wird, was der Baustein kennt;
-   was er nicht kennt, zeigt ein dezenter Hinweis im Kopf („Filter gilt hier nicht“, „Aktivität gilt hier nicht“, „Zeitraum gilt hier nicht“). Das ist ehrlicher als ein stilles Ignorieren
-   und lässt die Abschnitte unverändert, deren Daten nicht nach Aktivität oder Zeitraum zu trennen sind (Uhr-Belastung, Tempo-Rechner, Erinnerungen). Ein Baustein mit eigenem Filter
+   was er nicht kennt, zeigt ein dezenter Hinweis im Kopf („Filter gilt hier nicht“, „Sportart gilt hier nicht“, „Zeitraum gilt hier nicht“). Das ist ehrlicher als ein stilles Ignorieren
+   und lässt die Abschnitte unverändert, deren Daten nicht nach Sportart oder Zeitraum zu trennen sind (Uhr-Belastung, Tempo-Rechner, Erinnerungen). Ein Baustein mit eigenem Filter
    (Einstellungen → „Globalen Filter verwenden“ aus, Feld „eigen“) behält seine Einstellung. */
 const ST = {F: {sports: [], kind: "all", yr: 0, von: "", bis: ""}, focus: "", base: null};
 const ST_SPORT = /^[A-Za-z0-9_]{1,40}$/, ST_DATE = /^\d{4}-\d{2}-\d{2}$/;
-/* Fähigkeit der festen Abschnitte: s = Aktivität, r = Zeitraum (1 = ja, "y" = nur als Jahr, 0 = nein) */
+/* Fähigkeit der festen Abschnitte: s = Sportart, r = Zeitraum (1 = ja, "y" = nur als Jahr, 0 = nein) */
 const ST_CAP = {
   kpi: {s: 1, r: 1}, ziele: {s: 0, r: "y"}, kmmonat: {s: 1, r: 1}, kmverlauf: {s: 1, r: 1}, sportarten: {s: 0, r: 1}, bestwerte: {s: 1, r: 1}, heat: {s: 1, r: 1},
   bl: {s: 0, r: 0}, tp: {s: 0, r: 0}, tag: {s: 0, r: 0}, erinn: {s: 0, r: 0},
@@ -18,7 +18,7 @@ const ST_CAP = {
 const ST_ICON = {kpi: "met", ziele: "pin", kmmonat: "met", kmverlauf: "trend", sportarten: "map", bestwerte: "trend", heat: "met", tag: "cmp", erinn: "cam"};
 
 /* 3.22.0 Der Filter gehört zur Ansicht: gespeichert im Layout der Ansicht (Feld „filter“: {sports, range, yr, from, to}). Ohne Angabe in der Adresse gilt der Stand dieser Sitzung (sessionStorage,
-   solange nicht gespeichert oder verworfen), sonst der gespeicherte Filter der Ansicht, sonst der alte Standard (alle Aktivitäten, gesamte Zeit). „z=all“ in der Adresse = ausdrücklich alles. */
+   solange nicht gespeichert oder verworfen), sonst der gespeicherte Filter der Ansicht, sonst der alte Standard (alle Sportarten, gesamte Zeit). „z=all“ in der Adresse = ausdrücklich alles. */
 const ST_DEF = () => ({sports: [], kind: "all", yr: 0, von: "", bis: ""});
 function stFromDoc(d) {
   if (!d || typeof d !== "object") return ST_DEF();
@@ -106,7 +106,7 @@ function stHash(F) {
   if (F.sports.length) p.push("s=" + F.sports.map(encodeURIComponent).join(","));
   return "#/stats" + (p.length ? "?" + p.join("&") : "");
 }
-const stSportsTxt = F => (F.sports.length <= 2 ? F.sports.map(sName).join(" und ") : `${F.sports.length} Aktivitäten`);
+const stSportsTxt = F => (F.sports.length <= 2 ? F.sports.map(sName).join(" und ") : `${F.sports.length} Sportarten`);
 
 /* ---------- Filterleiste (oben auf der Seite; nutzt flRange/flIn aus 53-filter.js) ---------- */
 function stFilterBar(F, R, n, inRange) {
@@ -122,7 +122,7 @@ function stFilterBar(F, R, n, inRange) {
   <div class="years" role="group" aria-label="Zeitraum: Jahr"><button type="button" data-y="0" aria-pressed="${F.kind === "all"}" class="${F.kind === "all" ? "on" : ""}">Gesamt</button>${ys.map(y => `<button type="button" data-y="${y}" aria-pressed="${F.kind === "y" && F.yr === y}" class="${F.kind === "y" && F.yr === y ? "on" : ""}">${y}</button>`).join("")}</div>
   <div class="chips mt14 stz" role="group" aria-label="Zeitraum: weitere">${Z.map(([k, l, on]) => `<button type="button" class="chip${on ? " on" : ""}" data-z="${k}" aria-pressed="${on}"${k === "c" ? ' aria-controls="stfc"' : ""}>${l}</button>`).join("")}</div>
   <form class="stfc" id="stfc"${F.kind === "c" ? "" : " hidden"} novalidate><label>Von <input type="date" name="von" value="${F.von}"></label><label>Bis <input type="date" name="bis" value="${F.bis}"></label><button class="btn sm" type="submit">Übernehmen</button><span class="stfe" role="alert"></span></form>
-  <div class="chips mt14" id="sch" role="group" aria-label="Aktivität"><button type="button" class="chip ${F.sports.length ? "" : "on"}" data-s="" aria-pressed="${!F.sports.length}">Alle Sportarten</button>${sports.map(s => `<button type="button" class="chip ${F.sports.includes(s) ? "on" : ""}" data-s="${esc(s)}" aria-pressed="${F.sports.includes(s)}"><i style="background:${sCol(s)}"></i>${sName(s)}</button>`).join("")}</div>
+  <div class="chips mt14" id="sch" role="group" aria-label="Sportart"><button type="button" class="chip ${F.sports.length ? "" : "on"}" data-s="" aria-pressed="${!F.sports.length}">Alle Sportarten</button>${sports.map(s => `<button type="button" class="chip ${F.sports.includes(s) ? "on" : ""}" data-s="${esc(s)}" aria-pressed="${F.sports.includes(s)}"><i style="background:${sCol(s)}"></i>${sName(s)}</button>`).join("")}</div>
   ${stDefault(F) || (!stDirty() && !stDefault(stSaved())) ? "" : `<p class="stfs mut"><span>Filter aktiv: ${esc(sum)}.</span> <a href="#/stats" id="stfr">${stDirty() ? "Auf den gespeicherten Filter zurücksetzen" : "Filter zurücksetzen"}</a></p>`}</section>`;
 }
 function stFilterBind(F) {
@@ -176,7 +176,7 @@ function stFilterBind(F) {
 function stNote(cap, F = ST.F) {
   const sNo = F.sports.length && !cap.s, rNo = F.kind !== "all" && !cap.r, rYear = F.kind !== "all" && cap.r === "y" && F.kind !== "y";
   if (sNo && (rNo || rYear)) return "Filter gilt hier nicht";
-  if (sNo) return "Aktivität gilt hier nicht";
+  if (sNo) return "Sportart gilt hier nicht";
   if (rYear) return "Zeitraum gilt hier nur als Jahr";
   if (rNo) return "Zeitraum gilt hier nicht";
   return "";
@@ -190,7 +190,7 @@ function stNoteAdd(root, text) {
 }
 
 /* ---------- Globaler Filter in der Konfiguration eines Bausteins: it.cfg wird zur wirksamen Konfiguration (it.raw = gespeicherte) ---------- */
-/* 3.34.0: auch für den Zeitraum der Seite auf der Übersicht (65-zeitraum.js): o.page = Zeitraum der Seite (nur Zeitraum, keine Aktivität; Bausteine ohne Zeitbezug bleiben ohne Hinweis;
+/* 3.34.0: auch für den Zeitraum der Seite auf der Übersicht (65-zeitraum.js): o.page = Zeitraum der Seite (nur Zeitraum, keine Sportart; Bausteine ohne Zeitbezug bleiben ohne Hinweis;
    „eigen“ = eigener Zeitraum mit Hinweis), o.explicit = auch „Alle“ gilt. Auf der Statistik gilt der Filter für die Eigene Kennzahl (Typ-Flag „zeit“) erst, wenn ein Zeitraum gewählt ist (Standard „Gesamt“ lässt sie, wie sie ist). */
 function stApply(it, F = ST.F, o = {}) {
   const T = window.SL_WT[it.wtype], raw = it.cfg || {}, fs = (T && T.fields) || [],
@@ -200,7 +200,7 @@ function stApply(it, F = ST.F, o = {}) {
   if (o.page && !rf && !zeit) return;                                                   // kein Zeitbezug: kein Hinweis, nichts zu tun
   if (!T || raw.eigen === true || T.hinweis) {
     if (o.page && T && raw.eigen === true) it.note = "eigener Zeitraum";
-    return;                                                                             // 3.23.0: Hinweis-Bausteine haben ihre eigene Aktivität und keinen Zeitraum
+    return;                                                                             // 3.23.0: Hinweis-Bausteine haben ihre eigene Sportart und keinen Zeitraum
   }
   if (zeit && !rf) {                                                                    // Eigene Kennzahl: range/yr/from/to der Einstellung werden vom Zeitraum der Seite ersetzt
     if (F.kind === "all" && !o.explicit) return void (it.note = stNote({s: 0, r: 1}, F));

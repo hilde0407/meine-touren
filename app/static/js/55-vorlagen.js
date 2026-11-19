@@ -18,7 +18,7 @@ const SL_TPL = [
   {id: "ue-gruppe", fam: "uebersicht", name: "Mit Gruppe", desc: "Oben Dein Jahr, diese Woche und die letzten Touren, darunter die einklappbare Gruppe „Rückblick“ mit Jahres-Rückblick, Heute vor X Jahren und deinen Rekorden.",
     items: [["jahr", "voll"], ["w:periode", "halb"], ["w:letzte", "halb"], ["w:rueckblick", "voll"], ["w:heutevor", "halb"], ["w:rekorde", "halb"]],
     groups: [{title: "Rückblick", items: ["w:rueckblick", "w:heutevor", "w:rekorde"]}]},
-  {id: "st-rueckblick", fam: "statistik", name: "Jahresrückblick", desc: "Für den Blick auf ein Jahr: Kennzahlen, Monate, Höhenmeter im Jahresverlauf, die besten Touren und die Kalender-Heatmap.",
+  {id: "st-rueckblick", fam: "statistik", name: "Jahresrückblick", desc: "Für den Blick auf ein Jahr: Kennzahlen, Monate, Aufstieg im Jahresverlauf, die besten Touren und die Kalender-Heatmap.",
     items: [["kpi", "voll"], ["kmmonat", "halb"], ["w:sthoehe", "halb"], ["w:sttop", "halb"], ["bestwerte", "halb"], ["heat", "voll"]]},
   {id: "st-training", fam: "statistik", name: "Training", desc: "Für den Blick auf Form und Entwicklung: Belastung und Erholung, dein typisches Tempo, die Entwicklung deines Tempos, der Monatsvergleich und die Streckenlängen.",
     items: [["bl", "voll"], ["tp", "voll"], ["w:stentwicklung", "halb"], ["w:stmonate", "halb"], ["w:stlaengen", "halb"], ["w:sttop", "halb", {wert: "tempo"}]]},

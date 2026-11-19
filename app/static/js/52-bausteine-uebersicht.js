@@ -26,14 +26,14 @@ Object.assign(window.SL_WT, {
   jahr: {
     fam: "uebersicht", cat: "zahlen", icon: "trend", name: "Dein Jahr", title: () => "Dein Jahr", multi: true, shell: it => slYearShell(it), defaults: {},
     kurz: cfg => (cfg.title ? flParts(cfg, "year") : flParts(cfg, "year", {noRange: true})),
-    desc: "Touren, Kilometer, Höhenmeter und Stunden mit Monatssäulen und Vorjahresvergleich, wählbar nach Aktivität und Zeitraum. In der Übersicht steht „Dein Jahr“ schon; hier kannst du weitere mit anderem Filter hinzufügen.",
-    fields: [{kind: "sports"}, {kind: "range", def: "year"}, {k: "metrics", kind: "checks", def: ["count", "km", "up", "h"], label: "Angezeigte Werte", min: 1, options: [["count", "Touren"], ["km", "Kilometer"], ["up", "Höhenmeter"], ["h", "Stunden"]]}, {kind: "compare"}, {kind: "title", ph: "Dein Jahr"}],
-    preview: () => slPrev(slTiles([["31", "Touren"], ["412", "Kilometer"], ["8.400", "Höhenmeter"]]) + '<svg viewBox="0 0 120 30" class="slpvs" aria-hidden="true">' + [6, 10, 14, 22, 18, 26, 24, 16, 12, 8, 4, 2].map((h, i) => `<rect x="${i * 10 + 1}" y="${30 - h}" width="8" height="${h}" rx="1"/>`).join("") + "</svg>"),
+    desc: "Touren, Strecke, Aufstieg und Stunden mit Monatssäulen und Vorjahresvergleich, wählbar nach Sportart und Zeitraum. In der Übersicht steht „Dein Jahr“ schon; hier kannst du weitere mit anderem Filter hinzufügen.",
+    fields: [{kind: "sports"}, {kind: "range", def: "year"}, {k: "metrics", kind: "checks", def: ["count", "km", "up", "h"], label: "Angezeigte Werte", min: 1, options: [["count", "Touren"], ["km", "Strecke"], ["up", "Aufstieg"], ["h", "Dauer"]]}, {kind: "compare"}, {kind: "title", ph: "Dein Jahr"}],
+    preview: () => slPrev(slTiles([["31", "Touren"], ["412", "Strecke"], ["8.400", "Aufstieg"]]) + '<svg viewBox="0 0 120 30" class="slpvs" aria-hidden="true">' + [6, 10, 14, 22, 18, 26, 24, 16, 12, 8, 4, 2].map((h, i) => `<rect x="${i * 10 + 1}" y="${30 - h}" width="8" height="${h}" rx="1"/>`).join("") + "</svg>"),
   },
   jahresziel: {
     fam: "uebersicht", cat: "plan", icon: "trend", name: "Jahresziel", title: () => "Jahresziel", multi: true, defaults: {metric: "km", goal: 1000}, filter: {range: null},
     desc: "Ein Ring zeigt, wie weit du auf dein Jahresziel bist, dazu der Stand des Jahres und eine Prognose bis Silvester.",
-    fields: [{k: "metric", kind: "radio", label: "Ziel in", options: [["km", "Kilometern"], ["hm", "Höhenmetern"]]}, {k: "goal", kind: "number", label: "Ziel für das Jahr (Zahl in der gewählten Einheit)", min: 10, max: 100000, step: 10}, {kind: "sports"}, {kind: "title"}],
+    fields: [{k: "metric", kind: "radio", label: "Ziel in", options: [["km", "Strecke"], ["hm", "Aufstieg"]]}, {k: "goal", kind: "number", label: "Ziel für das Jahr (Zahl in der gewählten Einheit)", min: 10, max: 100000, step: 10}, {kind: "sports"}, {kind: "title"}],
     preview: () => slPvRing(0.62),
     render(c, b, cfg) {
       const now = new Date(), cy = now.getFullYear(), hm = cfg.metric === "hm", u = hm ? "m" : "km", goal = Math.max(1, +cfg.goal || (hm ? 20000 : 1000)),
@@ -80,7 +80,7 @@ Object.assign(window.SL_WT, {
   heatmap: {
     fam: "uebersicht", cat: "grafik", icon: "met", name: "Kalender-Heatmap", title: () => "Kalender-Heatmap", defaults: {metric: "km"}, filter: {range: null},
     desc: "Die letzten 52 Wochen als Kalenderfläche: je dunkler ein Tag, desto mehr Kilometer (oder Touren) an diesem Tag.",
-    fields: [{k: "metric", kind: "radio", def: "km", label: "Färben nach", options: [["km", "Kilometern"], ["count", "Anzahl der Touren"], ["up", "Höhenmetern"], ["h", "Stunden"]]}, {kind: "sports"}, {kind: "title"}],
+    fields: [{k: "metric", kind: "radio", def: "km", label: "Färben nach", options: [["km", "Strecke"], ["count", "Anzahl der Touren"], ["up", "Aufstieg"], ["h", "Dauer"]]}, {kind: "sports"}, {kind: "title"}],
     preview: () => slPvHeat(),
     render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
@@ -120,7 +120,7 @@ Object.assign(window.SL_WT, {
   },
   meilensteine: {
     fam: "uebersicht", cat: "plan", icon: "pin", name: "Meilensteine", title: () => "Meilensteine", filter: {range: null}, fields: [{kind: "sports"}, {kind: "title"}],
-    desc: "Wie weit es bis zum nächsten runden Kilometerstand, zur nächsten Tour-Marke und zum nächsten „Mount Everest“ an Höhenmetern ist.",
+    desc: "Wie weit es bis zum nächsten runden Kilometerstand, zur nächsten Tour-Marke und zum nächsten „Mount Everest“ beim Aufstieg ist.",
     preview: () => slPvHbars([96, 58, 80]),
     render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
@@ -135,8 +135,8 @@ Object.assign(window.SL_WT, {
         ev = up / EV, evn = Math.floor(ev) + 1,
         row = (lab, val, p, line) => `<li><div class="slr1"><span>${lab}</span><b>${val}</b></div>${slBr(p)}<p class="mut slr2">${line}</p></li>`;
       b.innerHTML = slRows([
-        row("Kilometer gesamt", slKm(km), K.p, K.nx ? `Noch ${slKm(K.nx - km)} bis ${fmtKm(K.nx, {d: 0})}` : "Alle Meilensteine erreicht: mehr als einmal um die Erde."),
-        row("Höhenmeter gesamt", `${nf(ev, ev >= 10 ? 0 : 1)} × Mount Everest`, (ev % 1) * 100, `Noch ${slHm(evn * EV - up)} bis zum nächsten Everest`),
+        row("Strecke gesamt", slKm(km), K.p, K.nx ? `Noch ${slKm(K.nx - km)} bis ${fmtKm(K.nx, {d: 0})}` : "Alle Meilensteine erreicht: mehr als einmal um die Erde."),
+        row("Aufstieg gesamt", `${nf(ev, ev >= 10 ? 0 : 1)} × Mount Everest`, (ev % 1) * 100, `Noch ${slHm(evn * EV - up)} bis zum nächsten Everest`),
         row("Touren gesamt", nf(n, 0), N.p, N.nx ? `Noch ${N.nx - n} bis ${N.nx} Touren` : "Alle Meilensteine erreicht."),
       ]);
       slBadge(c, K.nx ? `Noch ${slKm(K.nx - km)}` : "");
@@ -145,7 +145,7 @@ Object.assign(window.SL_WT, {
   wochentage: {
     fam: "uebersicht", cat: "grafik", icon: "met", name: "Lieblingstage und Tageszeiten", title: () => "Lieblingstage und Tageszeiten", defaults: {metric: "count"}, filter: {range: "all"},
     desc: "An welchen Wochentagen und zu welcher Tageszeit du am liebsten unterwegs bist, als zwei Säulendiagramme.",
-    fields: [{k: "metric", kind: "radio", def: "count", label: "Zählen nach", options: [["count", "Anzahl der Touren"], ["km", "Kilometern"], ["up", "Höhenmetern"], ["h", "Stunden"]]}, {kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}],
+    fields: [{k: "metric", kind: "radio", def: "count", label: "Zählen nach", options: [["count", "Anzahl der Touren"], ["km", "Strecke"], ["up", "Aufstieg"], ["h", "Dauer"]]}, {kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}],
     preview: () => slPvBars([20, 12, 14, 12, 24, 36, 30]),
     render(c, b, cfg) {
       const A = flSelect(cfg, "all").list, MT = FL_MET[cfg.metric] ? cfg.metric : "count";
@@ -166,8 +166,8 @@ Object.assign(window.SL_WT, {
   /* 3.37.0 Jahreszeiten und Wetter: rechnet der Server (GET /api/bausteine/saison, app/bausteine_daten.py) aus Touren und den schon lokal gespeicherten Wetterdaten; hier wird nie ein Wetterdienst gefragt */
   saison: {
     fam: "uebersicht", cat: "grafik", icon: "cloud", name: "Jahreszeiten und Wetter", title: () => "Jahreszeiten und Wetter", defaults: {metric: "km"}, filter: {range: "all"},
-    desc: "Wann du unterwegs bist: Touren und Kilometer je Monat und je Jahreszeit. Wenn zu deinen Touren Wetterdaten gespeichert sind, kommen die Temperaturen dazu, sonst steht ein Hinweis da. Es wird nichts nachgeladen.",
-    fields: [{k: "metric", kind: "radio", def: "km", label: "Säulen nach", options: [["km", "Kilometern"], ["count", "Anzahl der Touren"]]}, {kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}],
+    desc: "Wann du unterwegs bist: Touren und Strecke je Monat und je Jahreszeit. Wenn zu deinen Touren Wetterdaten gespeichert sind, kommen die Temperaturen dazu, sonst steht ein Hinweis da. Es wird nichts nachgeladen.",
+    fields: [{k: "metric", kind: "radio", def: "km", label: "Säulen nach", options: [["km", "Strecke"], ["count", "Anzahl der Touren"]]}, {kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}],
     preview: () => slPvBars([8, 12, 20, 28, 34, 26, 30, 22, 16, 10, 6, 4]),
     async render(c, b, cfg) {
       const R = flRange(cfg, "all"), u = new URLSearchParams();
@@ -189,7 +189,7 @@ Object.assign(window.SL_WT, {
           `<p class="mut slr2 slsegs">${slSegs([ZM[z.key], z.touren === 1 ? "1 Tour" : z.touren + " Touren", km ? "" : `${fmtKm(z.km, {d: 0})}`, z.mit_wetter ? tt(z) : ""])}</p></li>`),
         vals = d.monate.map(val), mb = vals.indexOf(Math.max(...vals));
       let h = `${val(best) > 0 ? `<p class="slcmp">Deine stärkste Jahreszeit: ${ZN[best.key]}.</p>` : ""}<p class="mut slcmpn">${d.touren === 1 ? "1 Tour" : d.touren + " Touren"} im gewählten Zeitraum, Jahreszeiten nach den Monaten der nördlichen Halbkugel.</p>` + slRows(zrows) +
-        `<p class="slcmpn">Monate</p>` + slCols(vals, {hl: mb, label: `Säulendiagramm ${km ? "Kilometer" : "Touren"} je Monat, am stärksten ${MONL[mb]} mit ${nf(vals[mb], 0)} ${un}`, labels: SL_MON, cls: "slsm"});
+        `<p class="slcmpn">Monate</p>` + slCols(vals, {hl: mb, label: `Säulendiagramm ${km ? "Strecke" : "Touren"} je Monat, am stärksten ${MONL[mb]} mit ${nf(vals[mb], 0)} ${un}`, labels: SL_MON, cls: "slsm"});
       if (has) h += `<div class="slxl sltmp" aria-hidden="true">${d.monate.map(m => `<span>${m.t_mittel == null ? "–" : nf(m.t_mittel, 0) + "°"}</span>`).join("")}</div><p class="mut slcmpn">Zeile unter den Monaten: durchschnittliche Temperatur der Touren in °C.</p>`;
       if (!has) h += '<p class="mut slnone slwx">Für diese Touren liegen noch keine Wetterdaten vor, deshalb gibt es keine Temperaturen. Sie werden beim Öffnen einer Tour oder in der Verwaltung mit „Wetter laden“ gespeichert; hier wird nichts abgerufen.</p>';
       else {
@@ -205,7 +205,7 @@ Object.assign(window.SL_WT, {
   sportarten: {
     fam: "uebersicht", cat: "grafik", icon: "map", name: "Sportarten-Verteilung", title: () => "Sportarten-Verteilung", defaults: {metric: "count"}, filter: {range: "all"},
     desc: "Welche Sportarten du wie oft machst, als Ring mit Legende, nach Anzahl der Touren, Kilometern oder Zeit.",
-    fields: [{k: "metric", kind: "radio", def: "count", label: "Verteilung nach", options: [["count", "Anzahl der Touren"], ["km", "Kilometern"], ["time", "Zeit unterwegs"]]}, {kind: "range", def: "all"}, {kind: "title"}],
+    fields: [{k: "metric", kind: "radio", def: "count", label: "Verteilung nach", options: [["count", "Anzahl der Touren"], ["km", "Strecke"], ["time", "Zeit unterwegs"]]}, {kind: "range", def: "all"}, {kind: "title"}],
     preview: () => slPvDonut([[0.5, "slsg slsg-hike"], [0.28, "slsg slsg-bike"], [0.14, "slsg slsg-ski"], [0.08, "slsg slsg-other"]]),
     render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
@@ -323,7 +323,7 @@ Object.assign(window.SL_WT, {
   },
   geplant: {
     fam: "uebersicht", cat: "plan", icon: "map", name: "Geplante Touren", title: () => "Geplante Touren", defaults: {},
-    desc: "Die offenen Pläne (noch nicht gegangen) mit Länge, Höhenmetern und geschätzter Dauer, mit Link zur Planung. Auf Wunsch auch gegangene Pläne mit dem Vergleich von geplanter und gelaufener Zeit. Verworfene Pläne erscheinen nie.",
+    desc: "Die offenen Pläne (noch nicht gegangen) mit Länge, Aufstieg und geschätzter Dauer, mit Link zur Planung. Auf Wunsch auch gegangene Pläne mit dem Vergleich von geplanter und gelaufener Zeit. Verworfene Pläne erscheinen nie.",
     fields: [{k: "gegangen", kind: "bool", label: "Gegangene Pläne auch zeigen"}],
     preview: () => slPrev('<ul class="sllist"><li><b>Gipfelweg</b><span>8,0 km · 900 m</span></li><li><b>Rund um den See</b><span>12,5 km</span></li></ul>'),
     async render(c, b, cfg) {
@@ -401,7 +401,7 @@ Object.assign(window.SL_WT, {
   },
   rueckblick: {
     fam: "uebersicht", cat: "rueck", icon: "trend", name: "Jahres-Rückblick", title: cfg => `Rückblick ${slRbRange(cfg).year}`, multi: true, defaults: {}, filter: {range: "year"},
-    desc: "Das Jahr in einer Kachel: Touren, Kilometer und Höhenmeter, die Monate als Säulen, die längste und die höchste Tour.",
+    desc: "Das Jahr in einer Kachel: Touren, Strecke und Aufstieg, die Monate als Säulen, die längste und die höchste Tour.",
     fields: [{kind: "range", opts: ["year", "y"], def: "year", label: "Jahr"}, {kind: "sports"}, {kind: "title"}],
     preview: () => slPvBars([8, 14, 20, 30, 26, 34, 28, 22, 14, 12, 6, 4]),
     render(c, b, cfg) {
@@ -414,9 +414,9 @@ Object.assign(window.SL_WT, {
       });
       const best = mk.indexOf(Math.max(...mk)), L = A.reduce((m, t) => (t.km > m.km ? t : m)), U = A.reduce((m, t) => ((t.up_m || 0) > (m.up_m || 0) ? t : m)),
         tile = (t, v, l) => `<a class="utile slrec" href="#/tour/${slEnc(t.id)}"><b>${v}</b><span>${l}</span><small class="mut">${esc(t.name)} · ${fmtDatumKurz(t.date)}</small></a>`;
-      b.innerHTML = slTiles([[nf(A.length, 0), A.length === 1 ? "Tour" : "Touren"], [slKm(slSum(A, t => t.km)), "Kilometer"], [slHm(slSum(A, t => t.up_m || 0)), "Höhenmeter"]]) +
-        `<p class="slcmpn">Kilometer je Monat</p>${slCols(mk, {hl: best, label: `Säulendiagramm der Kilometer je Monat, am meisten im ${SL_MON[best]}`, labels: SL_MON, cls: "slsm"})}` +
-        `<div class="utiles">${tile(L, fmtKm(L.km), "Längste Tour")}${U.up_m ? tile(U, slHm(U.up_m), "Meiste Höhenmeter") : ""}<div class="utile"><b>${SL_MON[best]}</b><span>Aktivster Monat</span><small class="mut">${slKm(mk[best])} · ${mn[best] === 1 ? "1 Tour" : mn[best] + " Touren"}</small></div></div>`;
+      b.innerHTML = slTiles([[nf(A.length, 0), A.length === 1 ? "Tour" : "Touren"], [slKm(slSum(A, t => t.km)), "Strecke"], [slHm(slSum(A, t => t.up_m || 0)), "Aufstieg"]]) +
+        `<p class="slcmpn">Strecke je Monat</p>${slCols(mk, {hl: best, label: `Säulendiagramm der Strecke je Monat, am meisten im ${SL_MON[best]}`, labels: SL_MON, cls: "slsm"})}` +
+        `<div class="utiles">${tile(L, fmtKm(L.km), "Längste Tour")}${U.up_m ? tile(U, slHm(U.up_m), "Größter Aufstieg") : ""}<div class="utile"><b>${SL_MON[best]}</b><span>Aktivster Monat</span><small class="mut">${slKm(mk[best])} · ${mn[best] === 1 ? "1 Tour" : mn[best] + " Touren"}</small></div></div>`;
       slBadge(c, `${fmtKm(slSum(A, t => t.km), {d: 0})}`);
     },
   },
@@ -787,8 +787,8 @@ function ziAll() {
 
 /* =====================  3.19.0 „Dein Jahr“ als Baustein  =====================
    Gerüst wie der frühere feste Block der Startseite (41-startseite.js): Überschrift mit Vorjahresvergleich und Link, Kennzahlen, Monatssäulen, Jahresziele.
-   Ohne Konfiguration identisch zu 3.18.x (laufendes Jahr, alle Aktivitäten, vier Kennzahlen, Vergleich mit dem Vorjahr bis heute). Die Standard-Instanz hat die Kennung „hyear“,
-   weitere Instanzen „tlw-<id>“. Zeitraum und Aktivität: flSelect() in 53-filter.js. */
+   Ohne Konfiguration identisch zu 3.18.x (laufendes Jahr, alle Sportarten, vier Kennzahlen, Vergleich mit dem Vorjahr bis heute). Die Standard-Instanz hat die Kennung „hyear“,
+   weitere Instanzen „tlw-<id>“. Zeitraum und Sportart: flSelect() in 53-filter.js. */
 const SL_JM = ["count", "km", "up", "h"];
 /* Säulen des Verlaufs je Zeitraumart: {vals, labels, tips, cur}; Einheit je Kennzahl */
 function slYearSeries(list, R, m, now) {

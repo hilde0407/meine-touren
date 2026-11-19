@@ -25,7 +25,7 @@ GET /api/bausteine/<name> (nur lesend, je Benutzer – die Datenbank und der Zwi
                 (56-bausteine-statistik.js); dieser Endpunkt ist die Referenz, gegen die die Tests prüfen.
 
   3.37.0 Jahreszeiten und Wetter:
-    saison      Touren und Kilometer je Kalendermonat (alle Jahre des Zeitraums zusammen) und je Jahreszeit (Frühling März–Mai, Sommer Juni–August, Herbst September–November,
+    saison      Touren und Strecke je Kalendermonat (alle Jahre des Zeitraums zusammen) und je Jahreszeit (Frühling März–Mai, Sommer Juni–August, Herbst September–November,
                 Winter Dezember–Februar, nördliche Halbkugel), mit denselben Filterparametern wie „statistik“. Temperaturen nur aus den schon lokal gespeicherten Wetterdaten
                 (Tabelle weather, Mittel aus Tagesminimum und -maximum der Tour); es wird nie ein Wetterdienst gefragt. Touren ohne Wetterdaten zählen bei den Temperaturen nicht mit
                 (nie als 0 °C), die Zahl steht in wetter.ohne.
@@ -407,7 +407,7 @@ def api_geplant(gegangen: str = "0"):
     return out
 
 
-# ------------------------------------------------------------------------------------------------ 3.19.0 Zeitraum und Aktivität
+# ------------------------------------------------------------------------------------------------ 3.19.0 Zeitraum und Sportart
 ZEITRAEUME = ("year", "y", "12m", "90d", "all", "c")
 _SPORT = re.compile(r"^[A-Za-z0-9_]{1,40}$")
 
@@ -453,7 +453,7 @@ def _filter(sport, zeitraum_, jahr, von, bis, heute):
         raise HTTPException(400, "Unbekannter Zeitraum")
     sports = [x for x in (sport or "").split(",") if x != ""]
     if len(sports) > 20 or not all(_SPORT.match(x) for x in sports):
-        raise HTTPException(400, "Ungültige Aktivität")
+        raise HTTPException(400, "Ungültige Sportart")
     if jahr and not 1970 <= jahr <= 2100:
         raise HTTPException(400, "Ungültiges Jahr")
     jahr = jahr or heute.year

@@ -1,5 +1,5 @@
-/* =====================  3.36.0 Ansichten teilen: Layoutcode und Link  =====================
-   Ein Layoutcode ist die Export-Datei einer Ansicht (54-ansichten.js, slExportDoc) als kompakter Text: „MTA1.“ + JSON (UTF-8) als base64url. Er enthält nur das Layout und die Einstellungen der Bausteine
+/* =====================  3.36.0 Ansichten teilen: Ansichtscode und Link  =====================
+   Ein Ansichtscode ist die Export-Datei einer Ansicht (54-ansichten.js, slExportDoc) als kompakter Text: „MTA1.“ + JSON (UTF-8) als base64url. Er enthält nur das Layout und die Einstellungen der Bausteine
    (auch eigene Titel und Notiztexte), nie Tourdaten, Fotos oder Zugangsdaten, und gibt keinen Zugriff auf Daten. Der Server prüft jeden Code beim Einfügen mit denselben Regeln wie eine Datei
    (POST /api/layout/code → app/layout.py check_export): erlaubte Felder, Kennungen, Größen, Whitelist der Bausteine.
    „Link kopieren“ erzeugt <Adresse der App>#/layoutcode/<Code>; öffnet jemand den Link, wird die passende Seite aufgerufen und der Import-Dialog mit dem Code geöffnet (angemeldet, nie ohne Rückfrage). */
@@ -35,7 +35,7 @@ function slCodePage(code) {
 }
 async function slCheckCode(text) {
   const bad = m => ({ok: false, errors: [m], ignored: []});
-  if (String(text).length > SL_CODE_MAX + 2000) return bad("Der Layoutcode ist zu lang für eine Ansicht.");
+  if (String(text).length > SL_CODE_MAX + 2000) return bad("Der Ansichtscode ist zu lang für eine Ansicht.");
   try {
     const r = await fetch("/api/layout/code", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({code: String(text)}), credentials: "same-origin"});
     if (!r.ok) throw new Error(String(r.status));
@@ -72,7 +72,7 @@ function slCodeDialog(fam, id) {
     const code = slCodeMake(fam, id), n = code.length, link = slCodeLink(code);
     body.innerHTML = `<p class="slcatin"><b class="slcn"></b></p><p class="mut slcatin">Wer den Code bekommt, kann ihn bei „Ansichten“ → „Importieren …“ einfügen oder den Link öffnen. Der Code enthält nur die Anordnung und die Einstellungen der Bausteine ` +
       `(auch eigene Titel und Notizen), keine Touren, Fotos oder Zugangsdaten.</p>` +
-      `<div class="slfs"><label for="slcode">Layoutcode</label><textarea id="slcode" rows="5" readonly spellcheck="false" aria-describedby="slcodeh"></textarea>` +
+      `<div class="slfs"><label for="slcode">Ansichtscode</label><textarea id="slcode" rows="5" readonly spellcheck="false" aria-describedby="slcodeh"></textarea>` +
       `<p class="mut slimphint" id="slcodeh">${nf(n, 0)} Zeichen</p>${n > SL_LINK_WARN ? `<p class="mut slimphint">Der Link wäre sehr lang. Manche Programme kürzen so lange Links, dann den Code selbst weitergeben.</p>` : ""}</div>` +
       `<div class="slcodego"><button type="button" class="btn sm" data-a="copy">Code kopieren</button><button type="button" class="btn ghost sm" data-a="link">Link kopieren</button></div>` +
       `<p class="slcodeok" id="slcodeok" role="status" aria-live="polite"></p>` +
@@ -106,7 +106,7 @@ VIEWS.layoutcode = async name => {
   let hash = SL_CODE_PAGES[page] || "";
   if (page === "tour" && TOURS.length) hash = "#/tour/" + encodeURIComponent(TOURS[0].id);
   if (!slCan() || !hash) {
-    main.innerHTML = `<div class="card"><h2>Layoutcode</h2><p>${!slCan() ? "Mit diesem Zugang lassen sich keine Ansichten importieren." : page === "reise" ? "Dieser Code gehört zu einer Reise-Seite. Öffne eine Reise, der Import öffnet sich dort." : "Dieser Code kann nicht geöffnet werden."}</p></div>`;
+    main.innerHTML = `<div class="card"><h2>Ansichtscode</h2><p>${!slCan() ? "Mit diesem Zugang lassen sich keine Ansichten importieren." : page === "reise" ? "Dieser Code gehört zu einer Reise-Seite. Öffne eine Reise, der Import öffnet sich dort." : "Dieser Code kann nicht geöffnet werden."}</p></div>`;
     if (slCan() && page === "reise") SL.codePending = {code, page, fam: "reise"};
     return;
   }

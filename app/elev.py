@@ -126,7 +126,7 @@ def recompute_local():
             db.execute("UPDATE tours SET up_m=?,down_m=? WHERE id=?", (up, down, t["id"])); ch += 1
             if ch <= 5:
                 jobs.log(f"  {t['id']}: Aufstieg {round(t['up_m'] or 0)} m → {round(up)} m")
-    jobs.log(f"Höhenmeter: {n} lokale Touren geprüft, {ch} korrigiert")
+    jobs.log(f"Aufstieg: {n} lokale Touren geprüft, {ch} korrigiert")
     return ch
 
 

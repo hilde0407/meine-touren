@@ -94,7 +94,7 @@ def make_backup(dest_dir=None, strip_secrets=False, keep=14, kennung=""):
     kennung (3.40.0): Zusatz im Dateinamen, z. B. „vor-wiederherstellung“; solche Dateien tragen auch die Sekunden im Namen (zwei in derselben Minute überschreiben sich nicht).
     keep=0: nichts Altes löschen. Läuft gerade eine Wiederherstellung, wird bis zu zwei Minuten gewartet."""
     if not BACKUP_LOCK.acquire(timeout=BACKUP_LOCK_WAIT_S):
-        raise BackupError("Es läuft gerade eine andere Sicherung oder Wiederherstellung.")
+        raise BackupError("Es läuft gerade eine andere Sicherung oder ein Zurückspielen.")
     try:
         return _make_backup(dest_dir, strip_secrets, keep, kennung)
     finally:
@@ -154,7 +154,7 @@ def _make_backup(dest_dir, strip_secrets, keep, kennung):
 
 @router.post("/api/backup/now")
 def api_backup_now():
-    """Sofort eine Sicherung in den Sicherungsordner schreiben (für den Hinweis „noch kein Backup“)."""
+    """Sofort eine Sicherung in den Sicherungsordner schreiben (für den Hinweis „noch keine Sicherung“)."""
     p = auto_backup(max_age_s=0)
     if not p:
         raise HTTPException(500, "Die Sicherung konnte nicht geschrieben werden: " + (db.get("backup_err") or "unbekannter Fehler"))

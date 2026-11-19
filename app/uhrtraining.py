@@ -62,7 +62,7 @@ HINT = {
     "last": "Belastung und Anstrengung: Skalen laut Zepp, nicht mit Garmin oder Suunto vergleichbar.",
     "zonen": "Pulszonen: Zeiten und Obergrenzen laut Uhr, so gedeutet – die Summe der Zonenzeiten passt zur Dauer.",
     "splits": "Kilometerwerte: Kilometer-Nr., Zeit und Puls je Kilometer laut Uhr; die Spalten sind von Zepp nicht dokumentiert und wurden gegen Dauer und Strecke geprüft.",
-    "hoehe": "Höhenmeter laut Uhr können von den Höhenmetern der Tour abweichen (andere Messung und Glättung).",
+    "hoehe": "Der Aufstieg laut Uhr kann vom Aufstieg der Tour abweichen (andere Messung und Glättung).",
     "wetter": "Wetter laut Uhr (Temperatur und Luftfeuchte); die Deutung der Felder ist nicht von Zepp dokumentiert.",
     "detail": "Die Kilometerwerte konnten nicht geladen werden – „Von Zepp neu laden“ versucht es erneut.",
     "detail_offen": "Die Kilometerwerte werden beim ersten Öffnen der Tour von Zepp geladen.",
@@ -291,7 +291,7 @@ def splits(s, kilo_pace, freq=None):
 ERM_MIN_KM = 6              # unter 6 vollen Kilometern ist der Unterschied der Hälften zu zufällig: keine Wertung
 ERM_TEMPO = (3, 8, 15)      # Tempoverlust in %: <3 gleichmäßig, 3–8 leicht, 8–15 spürbar, ab 15 deutlich langsamer
 ERM_PULS = 5                # Pulsänderung (bpm), ab der „Puls stieg/sank“ gesagt wird
-ERM_HOEHE_M, ERM_HOEHE_X = 40, 2.0      # Hälften „stark verschieden“ in den Höhenmetern: Unterschied mindestens 40 m UND mindestens doppelt so viel
+ERM_HOEHE_M, ERM_HOEHE_X = 40, 2.0      # Hälften „stark verschieden“ im Aufstieg: Unterschied mindestens 40 m UND mindestens doppelt so viel
 
 
 def _hoehe_verschieden(h):
@@ -307,7 +307,7 @@ def ermuedung(sp, hoehen=None):
     """Tempo und Puls der ersten gegen die zweite Hälfte (nach Strecke geteilt) aus den Kilometer-Splits.
     Nur volle Kilometer zählen (Teilstück am Ende entfällt); bei ungerader Zahl bleibt der mittlere Kilometer außen vor.
     Unter ERM_MIN_KM vollen Kilometern: None. hoehen = {"erste": {"auf","ab"}, "zweite": {…}} (m) oder None (unbekannt).
-    Unterscheiden sich die Hälften stark in den Höhenmetern, gibt es nur einen Hinweis und keine Wertung.
+    Unterscheiden sich die Hälften stark im Aufstieg, gibt es nur einen Hinweis und keine Wertung.
     -> {"status": "ok"|"nur_hinweis", "km": Anzahl voller Kilometer, "tempo_pct": +langsamer/−schneller, "puls_diff": bpm oder None, "stufe", "puls", "hoehen_geprueft", "hoehen"}"""
     full = [s for s in (sp or []) if s.get("strecke_m") == 1000 and s.get("sek")]
     n = len(full)
@@ -330,7 +330,7 @@ def ermuedung(sp, hoehen=None):
 
 
 def ermuedung_fuer(tid, s, sp):
-    """ermuedung() für eine Tour; die Höhenmeter je Hälfte kommen aus der Strecke (fehlt sie oder hat sie keine Höhe, bleibt hoehen None)."""
+    """ermuedung() für eine Tour; die Aufstieg je Hälfte kommen aus der Strecke (fehlt sie oder hat sie keine Höhe, bleibt hoehen None)."""
     if not sp:
         return None
     full = [x for x in sp if x.get("strecke_m") == 1000]

@@ -1,6 +1,6 @@
 /* =====================  3.22.0 Bausteine der Statistikseite  =====================
    Gleiches Muster wie 50-bausteine.js und 52-bausteine-uebersicht.js (Katalog-Kategorie „Statistik“, nur auf der Statistikseite). Sie rechnen aus den geladenen Touren (TOURS) mit denselben Regeln
-   wie der Server (GET /api/bausteine/statistik in app/bausteine_daten.py, dort die Referenz): Aktivität und Zeitraum über flSelect() (53-filter.js), Zeitraum standardmäßig „Gesamte Zeit“.
+   wie der Server (GET /api/bausteine/statistik in app/bausteine_daten.py, dort die Referenz): Sportart und Zeitraum über flSelect() (53-filter.js), Zeitraum standardmäßig „Gesamte Zeit“.
    Auf der Statistikseite übernehmen sie den globalen Filter (56-statistik.js), außer ihr Eigentümer schaltet im Zahnrad „Globalen Filter verwenden“ aus.
    Wochentage gibt es schon als „Lieblingstage und Tageszeiten“ (Übersichts-Baustein, auch auf der Statistikseite einfügbar). */
 const ST_FIELDS = [{kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}];
@@ -25,8 +25,8 @@ const stFit = pts => {                                                          
 Object.assign(window.SL_WT, {
   stmonate: {
     fam: "statistik", cat: "statistik", icon: "met", name: "Monatsvergleich", title: () => "Monatsvergleich", multi: true, defaults: {metric: "km"}, filter: {range: "all"}, w: "halb", seiten: ["statistik"],
-    desc: "Welche Monate des Jahres am stärksten sind: zwölf Säulen von Januar bis Dezember, nach Kilometern, Höhenmetern, Stunden oder Anzahl der Touren, mit dem stärksten Monat hervorgehoben.",
-    fields: [{k: "metric", kind: "radio", def: "km", label: "Säulen nach", options: [["km", "Kilometern"], ["up", "Höhenmetern"], ["h", "Stunden"], ["count", "Anzahl der Touren"]]}, ...ST_FIELDS],
+    desc: "Welche Monate des Jahres am stärksten sind: zwölf Säulen von Januar bis Dezember, nach Strecke, Aufstieg, Dauer oder Anzahl der Touren, mit dem stärksten Monat hervorgehoben.",
+    fields: [{k: "metric", kind: "radio", def: "km", label: "Säulen nach", options: [["km", "Strecke"], ["up", "Aufstieg"], ["h", "Dauer"], ["count", "Anzahl der Touren"]]}, ...ST_FIELDS],
     preview: () => slPvBars([8, 12, 20, 28, 34, 26, 30, 22, 16, 10, 6, 4]),
     render(c, b, cfg) {
       const A = flSelect(cfg, "all").list, MT = FL_MET[cfg.metric] ? cfg.metric : "km";
@@ -91,8 +91,8 @@ Object.assign(window.SL_WT, {
     },
   },
   sthoehe: {
-    fam: "statistik", cat: "statistik", icon: "prof", name: "Höhenmeter im Jahr", title: () => "Höhenmeter im Jahresverlauf", multi: true, filter: {range: "year"}, w: "halb", seiten: ["statistik"],
-    desc: "Wie sich deine Höhenmeter im Lauf eines Jahres aufsummieren, als Linie, dazu das Vorjahr gestrichelt. Gezeigt wird das gewählte Jahr, sonst das jüngste Jahr mit Touren.",
+    fam: "statistik", cat: "statistik", icon: "prof", name: "Aufstieg im Jahr", title: () => "Aufstieg im Jahresverlauf", multi: true, filter: {range: "year"}, w: "halb", seiten: ["statistik"],
+    desc: "Wie sich deine Aufstieg im Lauf eines Jahres aufsummieren, als Linie, dazu das Vorjahr gestrichelt. Gezeigt wird das gewählte Jahr, sonst das jüngste Jahr mit Touren.",
     fields: [{kind: "sports"}, {kind: "range", def: "year", opts: ["year", "y"], label: "Jahr"}, {kind: "title"}],
     preview: () => slPvLine([40, 38, 34, 30, 24, 20, 12, 6]),
     render(c, b, cfg) {
@@ -111,7 +111,7 @@ Object.assign(window.SL_WT, {
         cur = cum(yr), tot = cur[cur.length - 1][1], ser = [{pts: cur, color: cssv("--bars"), w: 3.2}];
       if (base.some(t => t.y === yr - 1)) ser.unshift({pts: cum(yr - 1), color: cssv("--accent2"), dash: 1, w: 2});
       const vj = ser.length > 1 ? ser[0].pts[ser[0].pts.length - 1][1] : 0;
-      b.innerHTML = lineChart(ser).replace('<svg class="chart"', `<svg class="chart" role="img" aria-label="${esc(`Höhenmeter im Jahr ${yr} kumuliert, insgesamt ${fmtHm(tot)}`)}"`) +
+      b.innerHTML = lineChart(ser).replace('<svg class="chart"', `<svg class="chart" role="img" aria-label="${esc(`Aufstieg im Jahr ${yr} kumuliert, insgesamt ${fmtHm(tot)}`)}"`) +
         `<div class="legend"><span><i class="stk"></i>${yr}</span>${vj ? `<span><i class="stk stk2"></i>${yr - 1}</span>` : ""}</div><p class="slcmp">${fmtHm(tot)} in ${yr}</p>` +
         (vj ? `<p class="mut slcmpn">Vorjahr insgesamt ${fmtHm(vj)}.</p>` : "");
       slBadge(c, `${yr}: ${fmtHm(tot)}`);

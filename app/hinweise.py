@@ -6,7 +6,7 @@ Die Oberfläche (58-bausteine-hinweise.js) baut aus den Zahlen die Texte (vier S
 
 Parameter (alle optional; ungültige Werte: 400):
   arten                 kommagetrennt: ziel, meilenstein, auffaellig, pause, rekord, woche, erholung, sicherung (Standard: alle)
-  sport                 kommagetrennt, Aktivitäten (leer = alle); gilt für ziel (welche Ziele), meilenstein, pause, rekord und woche
+  sport                 kommagetrennt, Sportarten (leer = alle); gilt für ziel (welche Ziele), meilenstein, pause, rekord und woche
   ziel_schwelle         1–90 (Prozent, Standard 10): Prognose liegt um MEHR als so viel unter dem Ziel
   meilenstein_tage      1–365 (Standard 7)         auffaellig_min  1–1000 (Standard 1)
   pause_tage            1–365 (Standard 14)        rekord_tage     1–365 (Standard 7)
@@ -19,12 +19,12 @@ Antwort: {"stand", "heute", "hinweise": [{"art", "stufe": "info"|"hinweis"|"warn
 Regeln im Einzelnen:
   ziel        Ziele (Tabelle „goals“, wie „Ziele“ der Statistik) des laufenden Jahres. Prognose zum Jahresende = Stand ÷ Anteil des vergangenen Jahres, erst ab dem 14. Tag des Jahres
               (wie der Baustein „Jahresziel“). Aktiv, wenn das Ziel noch nicht erreicht ist und die Prognose um mehr als die Schwelle darunter liegt. Mit „sport“ zählen nur Ziele,
-              die mindestens eine dieser Aktivitäten betreffen (ein Ziel ohne Aktivität betrifft alle). Warnung ab der doppelten Schwelle, sonst Hinweis.
-  meilenstein Rundmarken der Summe über alle Touren (nach Aktivität): Kilometer 100, 250, 500, 1000 und danach alle 1000; Höhenmeter alle 10 000; Touren 25, 50 und alle 100.
+              die mindestens eine dieser Sportarten betreffen (ein Ziel ohne Sportart betrifft alle). Warnung ab der doppelten Schwelle, sonst Hinweis.
+  meilenstein Rundmarken der Summe über alle Touren (nach Sportart): Kilometer 100, 250, 500, 1000 und danach alle 1000; Aufstieg alle 10 000; Touren 25, 50 und alle 100.
               Aktiv, wenn eine Marke von einer Tour der letzten N Tage überschritten wurde (je Art die höchste). Info.
   auffaellig  Touren in der Genauigkeitsliste der Geräte, noch nicht als geprüft markiert (devquality, „flagged“). Aktiv ab der Mindestanzahl. Hinweis.
-  pause       Tage seit der letzten Tour (nach Aktivität) mindestens so groß wie die Schwelle. Info; ab der doppelten Schwelle Hinweis.
-  rekord      Längste Tour, meiste Höhenmeter, schnellstes Tempo (mindestens 3 km und 30 Minuten) aller Zeiten (nach Aktivität, ab 5 Touren; bei Gleichstand gilt die frühere),
+  pause       Tage seit der letzten Tour (nach Sportart) mindestens so groß wie die Schwelle. Info; ab der doppelten Schwelle Hinweis.
+  rekord      Längste Tour, meiste Aufstieg, schnellstes Tempo (mindestens 3 km und 30 Minuten) aller Zeiten (nach Sportart, ab 5 Touren; bei Gleichstand gilt die frühere),
               die in den letzten N Tagen gefahren wurde. Info.
   woche       Fortschritt der laufenden Woche (Montag bis Sonntag) gegen ein Wochenziel in km oder Touren. Nur mit gesetztem Ziel. Erreicht = Info; offen = Info, am Samstag und
               Sonntag Hinweis.
@@ -84,7 +84,7 @@ def check(arten="", sport="", ziel_schwelle=None, meilenstein_tage=None, auffael
         raise HTTPException(400, "Unbekannte Hinweisart (erlaubt: " + ", ".join(ARTEN) + ")")
     sp = [x for x in (sport or "").split(",") if x != ""]
     if len(sp) > 20 or not all(SPORT_RE.match(x) for x in sp):
-        raise HTTPException(400, "Ungültige Aktivität")
+        raise HTTPException(400, "Ungültige Sportart")
     if woche_einheit not in ("", "km", "touren"):
         raise HTTPException(400, "„woche_einheit“ muss km oder touren sein")
     if erholung_stufe not in ("", "mehr", "deutlich_mehr"):
@@ -110,7 +110,7 @@ def _touren(sport):
 
 
 def _ziel_sportarten(s):
-    """Aktivitäten, die ein Ziel betrifft: None = alle."""
+    """Sportarten, die ein Ziel betrifft: None = alle."""
     if not s:
         return None
     return set(SPORT_GRP[GOAL_GRP[s]]) if s in GOAL_GRP else {s}
@@ -282,7 +282,7 @@ def auswertung(p, heute=None):
         if a not in arten:
             continue
         if a == "ziel":
-            r = _ziel(p, h, alle)                                         # ein Ziel zählt alle seine Touren, auch wenn die Aktivität nur auswählt, welche Ziele gelten
+            r = _ziel(p, h, alle)                                         # ein Ziel zählt alle seine Touren, auch wenn die Sportart nur auswählt, welche Ziele gelten
         elif a in ("erholung", "sicherung"):
             r = _REGELN[a](p, heute, rows)
         else:

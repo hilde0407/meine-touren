@@ -69,10 +69,10 @@ def api_selftest():
     def bk():
         d = config.backup_dirs(ctx.uid())[0]; fs = sorted(list(d.glob("meine-touren-*.zip")) + list(d.glob("komoot-hub-*.zip")), key=lambda f: f.stat().st_mtime) if d.exists() else []
         if not fs:
-            raise RuntimeError("noch kein automatisches Backup vorhanden (läuft nachts um 03:40)")
+            raise RuntimeError("noch keine automatische Sicherung vorhanden (läuft nachts um 03:40)")
         age = (time.time() - fs[-1].stat().st_mtime) / 3600
-        return f"{len(fs)} Backups, letztes vor {age:.0f} Std."
-    chk("Automatisches Backup", bk)
+        return f"{len(fs)} Sicherungen, letzte vor {age:.0f} Std."
+    chk("Automatische Sicherung", bk)
     def integ():
         r = db.one("PRAGMA integrity_check")
         v = list(r.values())[0] if r else "?"
@@ -83,7 +83,7 @@ def api_selftest():
 
     def dirs():
         bad = []
-        for n, d in (("Fotobibliothek", config.LIB_DIR), ("Eingang", config.INBOX_DIR), ("Backup", config.backup_dirs(ctx.uid())[0]), ("Strecken", config.TRACK_DIR)):
+        for n, d in (("Fotobibliothek", config.LIB_DIR), ("Eingang", config.INBOX_DIR), ("Sicherung", config.backup_dirs(ctx.uid())[0]), ("Strecken", config.TRACK_DIR)):
             try:
                 d.mkdir(parents=True, exist_ok=True)
                 probe = d / ".schreibtest"
@@ -92,7 +92,7 @@ def api_selftest():
                 bad.append(f"{n}: {str(e)[:60]}")
         if bad:
             raise RuntimeError("; ".join(bad))
-        return "Foto-, Eingangs-, Backup- und Streckenordner beschreibbar"
+        return "Foto-, Eingangs-, Sicherungs- und Streckenordner beschreibbar"
     chk("Schreibrechte der Ordner", dirs)
 
     def phfiles():

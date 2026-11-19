@@ -280,7 +280,7 @@ const NAV = [
   ["map", "Karte"],
   ["tours", "Touren"],
   ["trips", "Reisen"],
-  ["places", "Auswertung"],
+  ["places", "Orte & Ausrüstung"],
   ["photos", "Fotos"],
   ["check", "Prüfen"],
   ["admin", "Verwaltung"],

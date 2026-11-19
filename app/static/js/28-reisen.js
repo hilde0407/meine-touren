@@ -50,7 +50,7 @@ VIEWS.tripsheet = async id => {
    <div class="tmap mt14" id="tm" style="height:380px"></div>
    <div id="tleg" class="mut fs13 m6-0-0"></div>
    ${collStats(ts)}
-   <div class="sec"><h2>Tag für Tag</h2></div><div class="tblw"><table class="cstat"><thead><tr><th>Zeit</th><th class="tal">Tour</th><th>Aktivität</th><th>km</th><th>↑ m</th><th>↓ m</th></tr></thead><tbody>${perDay}</tbody></table></div>
+   <div class="sec"><h2>Tag für Tag</h2></div><div class="tblw"><table class="cstat"><thead><tr><th>Zeit</th><th class="tal">Tour</th><th>Sportart</th><th>km</th><th>↑ m</th><th>↓ m</th></tr></thead><tbody>${perDay}</tbody></table></div>
    <div class="thumbs sheetph" id="th"></div></div>`;
   map = mkMap("tm", {layers: false});
   map.setView([tr.lat || 50, tr.lng || 8], 8);

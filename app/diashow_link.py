@@ -3,10 +3,10 @@
 Ein solcher Link steht in derselben Tabelle wie Tour- und Rückblick-Links (shares): tour_id = „ds:<Jahr>“, „ds:<Jahr>:<Sportart>“ oder „ds:all“ (alle Jahre), photos = 2 (Diashow),
 best = Höchstzahl der Fotos (0 = Standard, höchstens MAX_PHOTOS). Standard-Laufzeit 24 Stunden; Kommentare gibt es hier nicht.
 
-Datenschutz: Ausgeliefert werden nur Foto-Nummern, eine Aufnahmezeit je Foto, ein Titel (Jahr, Aktivität) und seit 3.31.1 der Tourname je Foto (photo_names; ein Name kann einen Ort verraten, darum weist der Teilen-Knopf darauf hin).
+Datenschutz: Ausgeliefert werden nur Foto-Nummern, eine Aufnahmezeit je Foto, ein Titel (Jahr, Sportart) und seit 3.31.1 der Tourname je Foto (photo_names; ein Name kann einen Ort verraten, darum weist der Teilen-Knopf darauf hin).
 Nie Teil des Links: Tour-Nummern, Koordinaten, Orte, Notizen, Tourdatum, Strecken, Uhr-Daten.
 Bestehende Links (shares.names = 0) bekommen die Namen NICHT nachträglich: wer sie vor 3.31.1 verschickt hat, hat ohne Namen geteilt. Nur ab 3.31.1 angelegte Links (names = 1) liefern sie.
-Ein Foto ist nur abrufbar, wenn es zur ausgelieferten Liste gehört (wie beim Rückblick); verborgene und abgelehnte Fotos gehören nie dazu. Die Liste wird immer serverseitig aus Jahr, Aktivität und Höchstzahl berechnet.
+Ein Foto ist nur abrufbar, wenn es zur ausgelieferten Liste gehört (wie beim Rückblick); verborgene und abgelehnte Fotos gehören nie dazu. Die Liste wird immer serverseitig aus Jahr, Sportart und Höchstzahl berechnet.
 """
 import time
 from datetime import datetime
@@ -66,7 +66,7 @@ def check(year, sport, best):
             raise HTTPException(400, "Ungültiges Jahr")
     sport = sport if isinstance(sport, str) else ""
     if len(sport) > 40 or ":" in sport:
-        raise HTTPException(400, "Ungültige Aktivität")
+        raise HTTPException(400, "Ungültige Sportart")
     try:
         best = int(best or 0)
     except (TypeError, ValueError):

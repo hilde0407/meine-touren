@@ -476,7 +476,7 @@ JOBS = {
     "weather": ("Wetter laden", lambda dry: more2.weather_fill()),
     "photos": ("Fotos indizieren", lambda dry: photos.scan()),
     "photo-import": ("Fotos übernehmen", lambda dry: (photos.import_from(), photos.scan())),
-    "elev-local": ("Höhenmeter lokaler Touren neu berechnen", lambda dry: elev.recompute_local()),
+    "elev-local": ("Aufstieg lokaler Touren neu berechnen", lambda dry: elev.recompute_local()),
     "hr-backfill": ("Puls für Zepp-Touren nachladen", lambda dry: puls.backfill_hr()),
     "met-backfill": ("Messwerte der Geräte nachladen", lambda dry: metrics.backfill()),
     "dev-match": ("Touren den Zepp-Uhren zuordnen", lambda dry: mydevices.match_all()),

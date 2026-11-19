@@ -26,10 +26,10 @@ nur in „uebersicht“ und „statistik“ (hnauffaellig, hnpause, hnwoche, hns
   schwelle 1–90 (Prozent)   tage 1–365   min 1–1000   ziel / woche_ziel 0–100000   einheit / woche_einheit km|touren   stufe mehr|deutlich_mehr   ausblenden 0–90 (Tage, 0 = Knopf aus)
   arten [ziel, meilenstein, auffaellig, pause, rekord, woche, erholung, sicherung] (Sammel-Baustein)   sports, title wie üblich
   snoozes ["Art:Zeitstempel", …]  bis wann (Sekunden seit 1970, höchstens ein Jahr im Voraus) der Hinweis dieser Art ausgeblendet ist – je Instanz im Layout-Dokument gespeichert.
-Statistik (3.22.0): Die Standard-Abschnitte der Statistikseite kennt nur die Oberfläche (order/hidden/closed/open/w gelten wie auf der Übersicht). Der globale Filter der Seite (Aktivität, Zeitraum)
+Statistik (3.22.0): Die Standard-Abschnitte der Statistikseite kennt nur die Oberfläche (order/hidden/closed/open/w gelten wie auf der Übersicht). Der globale Filter der Seite (Sportart, Zeitraum)
 steht in der Adresse der Seite, nicht im Layout. In der Konfiguration eines Bausteins heißt „eigen“ = true: der Baustein behält seinen eigenen Filter (sports, range, yr) statt des globalen.
 Gemeinsame Filterfelder in der Konfiguration (3.19.0, streng geprüft; unbekannte Schlüssel einer neueren Version bleiben erlaubt, wenn sie einfache Werte haben):
-  sports   [Sportart]      leer = alle Aktivitäten      range  year | y | 12m | 90d | all      yr  Jahr (bei range = y)
+  sports   [Sportart]      leer = alle Sportarten      range  year | y | 12m | 90d | all      yr  Jahr (bei range = y)
   metrics  [count|km|up|h] angezeigte Kennzahlen         compare  Vorjahresvergleich an/aus    title  eigener Titel (höchstens 60 Zeichen)
   n        1…10 (Anzahl Einträge)                        basis  sport | all | year (Vergleichsbasis der Tourseite)
 Der Server speichert nur, was er prüfen kann (erlaubte Felder, Kennungen, Größe); welche Abschnitte es gibt, weiß die Oberfläche.
@@ -44,7 +44,7 @@ Alle Bausteine anderer Seiten, die dort bekannt sind (Tour-, Statistik-, Hinweis
 Ihre Konfiguration wird streng geprüft (REISE_CFG: nur diese Felder, feste Auswahllisten). „rdiashow“ nimmt die Felder der Erinnerungen (mode, n, view, ratio, size, height, tempo, caption, shuffle, link, title), aber keine Filter:
 den Zeitraum der Reise setzt die Oberfläche. Regeln nach Sportart (rules) gibt es nur auf der Tourseite.
 Fotos und Karte (3.34.0): Bausteine der Fotos-Seite (FOTO_TYPEN: fkennzahl, fjahre) stehen nur im Dokument „fotos“, die der Karte (KARTE_TYPEN: kzahlen, kliste, klegende) nur in „karte“; alle Bausteine anderer
-Seiten, die dort bekannt sind, werden abgelehnt (unbekannte Typen bleiben erlaubt). Konfiguration streng geprüft (nur feste Auswahllisten, plus Titel). Die Bedienfelder auf der Karte (Standort, Jahr, Aktivitäten,
+Seiten, die dort bekannt sind, werden abgelehnt (unbekannte Typen bleiben erlaubt). Konfiguration streng geprüft (nur feste Auswahllisten, plus Titel). Die Bedienfelder auf der Karte (Standort, Jahr, Sportarten,
 Strecken-Stil, Heatmap und Fotos, Touren im Ausschnitt) sind Standard-Abschnitte der Seite (order/hidden/closed/open wie sonst). Betrachter und Regeln wie bei den anderen Seiten.
 Zeitraum der Seite (3.34.0): der Zeitraum steht wie auf der Statistik im Feld „filter“ des Dokuments (range year|y|12m|90d|all|c, yr, from, to), jetzt auch im Dokument „uebersicht“ (ohne sports); ein Baustein behält seinen
 eigenen Zeitraum mit „eigen“ = true (auch die Eigene Kennzahl, Feld „eigen“).
@@ -56,7 +56,7 @@ Gruppen (3.36.0, optional, alte Layouts bleiben unverändert gültig): groups [{
   Pflicht-Abschnitte (Einstieg „sum“, Kopf „kopf“) lassen sich nicht gruppieren. Die Karte (Schlüssel „karte“) hat keine Gruppen.
 Handy (3.36.0, optional): mob {order [id], hidden [id]} = abweichende Reihenfolge und Sichtbarkeit für schmale Bildschirme (bis 760 px). Fehlt „order“ bzw. „hidden“, gilt der Desktop-Wert;
   ohne „mob“ gilt überall die Desktop-Anordnung wie bisher. Nicht auf der Karte. Gruppen gelten auf dem Handy wie am Desktop (gleiche Mitglieder).
-Layoutcode (3.36.0): POST /api/layout/code {code} prüft einen Code (Vorsilbe „MTA1.“ + JSON der Export-Datei als base64url, höchstens CODE_MAX Zeichen) mit denselben Regeln wie die Export-Datei (check_export).
+Ansichtscode (3.36.0): POST /api/layout/code {code} prüft einen Code (Vorsilbe „MTA1.“ + JSON der Export-Datei als base64url, höchstens CODE_MAX Zeichen) mit denselben Regeln wie die Export-Datei (check_export).
   Der Code enthält nur Layout und Baustein-Einstellungen, nie Tourdaten; es gibt keinen Zugriff auf Daten über einen Code.
 Betrachter dürfen lesen, bekommen aber immer den Standard (das Layout des Besitzers wird nicht übernommen) und dürfen nichts schreiben.
 """
@@ -118,7 +118,7 @@ MAX_TOTAL = 150000                # Gesamtgröße eines Behälters mit allen Ans
 STD_ID = "standard"
 STD_NAME = "Standard"
 EXPORT_FORMAT = "meine-touren-ansicht"
-# 3.36.0: Gruppen, Handy-Anordnung, Layoutcode
+# 3.36.0: Gruppen, Handy-Anordnung, Ansichtscode
 GROUP_ID_RE = re.compile(r"^grp[a-z0-9]{2,12}$")
 MAX_GROUPS = 10
 MAX_GROUP_MEMBERS = 30
@@ -136,7 +136,7 @@ STD_IDS = {
     "karte": frozenset(),
 }
 CODE_PREFIX = "MTA1."
-CODE_MAX = 100000                                             # Zeichen des Layoutcodes (entspricht höchstens rund 75000 Byte JSON; base64url wächst um ein Drittel)
+CODE_MAX = 100000                                             # Zeichen des Ansichtscodes (entspricht höchstens rund 75000 Byte JSON; base64url wächst um ein Drittel)
 
 
 def _ids(v, name):
@@ -309,7 +309,7 @@ def _reise_cfg(typ, v):
         raise HTTPException(400, "Ungültige Konfiguration eines Bausteins")
     if typ == "rdiashow":
         if set(v) & {"sports", "range", "yr"}:
-            raise HTTPException(400, "Die Reise-Diashow zeigt immer die Fotos der Reise (kein Filter nach Aktivität oder Zeitraum)")
+            raise HTTPException(400, "Die Reise-Diashow zeigt immer die Fotos der Reise (kein Filter nach Sportart oder Zeitraum)")
         out = _erinn_cfg(v)
         if out.get("mode") == "day":
             raise HTTPException(400, "„An diesem Tag“ gibt es bei der Reise-Diashow nicht (es sind immer die Fotos der Reise)")
@@ -353,7 +353,7 @@ def _cfg(v, typ=None):
     for k, x in v.items():
         if not isinstance(k, str) or not ID_RE.match(k):
             raise HTTPException(400, "Ungültiger Schlüssel in der Konfiguration")
-        if hn:                                           # Hinweis-Bausteine: nur diese Felder (plus Aktivität und Titel), jedes streng geprüft
+        if hn:                                           # Hinweis-Bausteine: nur diese Felder (plus Sportart und Titel), jedes streng geprüft
             if k in HINWEIS_KEYS:
                 out[k] = _hinweis_cfg(k, x)
             elif k in ("sports", "title"):
@@ -445,7 +445,7 @@ def _mob(v, key):
 def clean(doc, key=None):
     """Prüft ein Layout-Dokument und gibt die bereinigte Fassung zurück (HTTPException 400 bei Fehlern)."""
     if not isinstance(doc, dict):
-        raise HTTPException(400, "Das Layout muss ein JSON-Objekt sein")
+        raise HTTPException(400, "Die Anordnung muss ein JSON-Objekt sein")
     extra = set(doc) - FIELDS
     if extra:
         raise HTTPException(400, "Unbekannte Felder: " + ", ".join(sorted(map(str, extra))))
@@ -529,7 +529,7 @@ def clean(doc, key=None):
             raise HTTPException(400, "„cfg“ muss ein Objekt mit höchstens 10 Einträgen sein")
         out["cfg"] = {k: _cfg(x, ERINN_TYPE if k == ERINN_TYPE else None) for k, x in c.items()}
     if len(json.dumps(out, ensure_ascii=False)) > MAX_BYTES:
-        raise HTTPException(400, "Das Layout ist zu groß")
+        raise HTTPException(400, "Die Anordnung ist zu groß")
     return out
 
 
@@ -629,11 +629,11 @@ def check_export(doc):
     keys = ("tour-haupt", "tour-auswertung") if page == "tour" else (page,)
     lays = doc.get("layouts")
     if not isinstance(lays, dict):
-        errors.append("Die Datei enthält keine Layouts.")
+        errors.append("Die Datei enthält keine Ansichten.")
         return res
     for k in lays:
         if k not in keys:
-            ignored.append(f"Unbekannter Eintrag „{str(k)[:40]}“ in den Layouts wird ignoriert.")
+            ignored.append(f"Unbekannter Eintrag „{str(k)[:40]}“ in den Ansichten wird ignoriert.")
     for k in keys:
         try:
             layouts[k] = clean(lays.get(k) if lays.get(k) is not None else {}, k)
@@ -649,26 +649,26 @@ def check_export(doc):
 
 
 def decode_code(text):
-    """Layoutcode (oder ein Link mit Code) → JSON-Objekt der Export-Datei; Fehler als HTTPException 400. Kein Datenzugriff: es wird nur dekodiert und anschließend wie eine Datei geprüft."""
+    """Ansichtscode (oder ein Link mit Code) → JSON-Objekt der Export-Datei; Fehler als HTTPException 400. Kein Datenzugriff: es wird nur dekodiert und anschließend wie eine Datei geprüft."""
     if not isinstance(text, str):
-        raise HTTPException(400, "Kein Layoutcode")
+        raise HTTPException(400, "Kein Ansichtscode")
     t = text.strip()
     if "layoutcode/" in t:
         t = t.split("layoutcode/", 1)[1]
     t = re.sub(r"\s+", "", t)
     if len(t) > CODE_MAX:
-        raise HTTPException(400, "Der Layoutcode ist zu lang für eine Ansicht.")
+        raise HTTPException(400, "Der Ansichtscode ist zu lang für eine Ansicht.")
     if t.startswith(CODE_PREFIX):
         t = t[len(CODE_PREFIX):]
     else:
-        raise HTTPException(400, "Das ist kein Layoutcode aus „Meine Touren“ (er beginnt mit " + CODE_PREFIX + ").")
+        raise HTTPException(400, "Das ist kein Ansichtscode aus „Meine Touren“ (er beginnt mit " + CODE_PREFIX + ").")
     if not t or not re.fullmatch(r"[A-Za-z0-9_-]+={0,2}", t):
-        raise HTTPException(400, "Der Layoutcode enthält ungültige Zeichen oder ist unvollständig.")
+        raise HTTPException(400, "Der Ansichtscode enthält ungültige Zeichen oder ist unvollständig.")
     try:
         raw = base64.urlsafe_b64decode(t.rstrip("=") + "=" * (-len(t.rstrip("=")) % 4))
         doc = json.loads(raw.decode("utf-8"))
     except (binascii.Error, ValueError, UnicodeDecodeError):
-        raise HTTPException(400, "Der Layoutcode ist beschädigt oder unvollständig.")
+        raise HTTPException(400, "Der Ansichtscode ist beschädigt oder unvollständig.")
     return doc
 
 
@@ -708,12 +708,12 @@ async def put_layout(page_key: str, request: Request):
         body = json.loads(raw or b"null")
     except ValueError:
         if len(raw) > MAX_BYTES * 2:
-            raise HTTPException(413, "Das Layout ist zu groß")
+            raise HTTPException(413, "Die Anordnung ist zu groß")
         raise HTTPException(400, "Kein gültiges JSON")
     if isinstance(body, dict) and isinstance(body.get("layout"), dict) and set(body) <= {"layout", "key", "ts"}:
         body = body["layout"]                          # {"layout": {...}} wird wie das Dokument selbst angenommen
     if len(raw) > (MAX_TOTAL + 20000 if isinstance(body, dict) and "views" in body else MAX_BYTES * 2):
-        raise HTTPException(413, "Das Layout ist zu groß")
+        raise HTTPException(413, "Die Anordnung ist zu groß")
     lay = clean_any(body, page_key)
     mine = kennzahl.zaehle(lay)
     if mine:                                           # 3.28.0: höchstens so viele eigene Kennzahlen je Benutzer (über alle Seiten und Ansichten, ohne die Seite, die gerade ersetzt wird)
@@ -752,13 +752,13 @@ async def post_check(request: Request):
 
 @router.post("/api/layout/code")
 async def post_code(request: Request):
-    """Layoutcode prüfen (3.36.0): wie /api/layout/check, aber die Eingabe ist {"code": "MTA1.…"} (oder ein Link mit dem Code)."""
+    """Ansichtscode prüfen (3.36.0): wie /api/layout/check, aber die Eingabe ist {"code": "MTA1.…"} (oder ein Link mit dem Code)."""
     if _viewer(request):
         raise HTTPException(403, "Dieser Zugang darf nur ansehen")
     raw = await request.body()
     r = check_export(None)
     if len(raw) > CODE_MAX + 2000:
-        r["errors"] = ["Der Layoutcode ist zu lang für eine Ansicht."]
+        r["errors"] = ["Der Ansichtscode ist zu lang für eine Ansicht."]
         return r
     try:
         body = json.loads(raw or b"null")

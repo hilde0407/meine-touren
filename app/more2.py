@@ -411,7 +411,7 @@ async def api_share(tour_id: str, request: Request):
 
 @router.post("/api/rueckblick/share")
 async def api_rueckblick_share(request: Request):
-    """3.26.0: Jahresrückblick (optional nur eine Aktivität) als Link ohne Konto teilen; blocks = kennzahlen, rekorde, heatmap, fotos."""
+    """3.26.0: Jahresrückblick (optional nur eine Sportart) als Link ohne Konto teilen; blocks = kennzahlen, rekorde, heatmap, fotos."""
     d = await request.json()
     year, sport = rueckblick.check(d.get("year"), d.get("sport") or "")
     blocks = rueckblick.normalize(d.get("blocks"))

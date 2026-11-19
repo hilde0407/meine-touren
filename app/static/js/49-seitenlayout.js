@@ -56,10 +56,10 @@ const SL_REG = {
   statistik: [
     {id: "kpi", w: "voll", title: "Kennzahlen", page: "statistik", def: true, ckeys: ["st_kpi"]},
     {id: "ziele", w: "voll", title: "Ziele", page: "statistik", def: true, ckeys: ["st_ziele"]},
-    {id: "kmmonat", w: "halb", title: "Kilometer pro Monat oder Jahr", page: "statistik", def: true, ckeys: ["st_kmmonat"]},
-    {id: "kmverlauf", w: "halb", title: "Kilometer im Jahresverlauf", page: "statistik", def: true, ckeys: ["st_kmverlauf"]},
+    {id: "kmmonat", w: "halb", title: "Strecke pro Monat oder Jahr", page: "statistik", def: true, ckeys: ["st_kmmonat"]},
+    {id: "kmverlauf", w: "halb", title: "Strecke im Jahresverlauf", page: "statistik", def: true, ckeys: ["st_kmverlauf"]},
     {id: "sportarten", w: "halb", title: "Sportarten", page: "statistik", def: true, ckeys: ["st_sportarten"]},
-    {id: "bestwerte", w: "halb", title: "Bestwerte", page: "statistik", def: true, ckeys: ["st_bestwerte"]},
+    {id: "bestwerte", w: "halb", title: "Rekorde", page: "statistik", def: true, ckeys: ["st_bestwerte"]},
     {id: "heat", w: "voll", title: "Aktivität im Jahr", page: "statistik", def: true, ckeys: ["st_heat"]},
     {id: "bl", w: "voll", title: "Belastung und Erholung", page: "statistik", plain: true},
     {id: "tp", w: "voll", title: "Dein typisches Tempo", page: "statistik", plain: true},
@@ -72,7 +72,7 @@ const SL_REG = {
 SL_REG.reise = [
   {id: "kopf", w: "voll", title: "Kopf: Titel, Zeitraum und Aktionen", page: "reise", plain: true, must: true, ws: ["voll"]},
   {id: "kennzahlen", w: "voll", title: "Kennzahlen", page: "reise", def: true, ckeys: ["rs_kennzahlen"]},
-  {id: "stat", w: "voll", title: "Statistik nach Aktivität", page: "reise", def: true, ckeys: ["rs_stat"]},
+  {id: "stat", w: "voll", title: "Statistik nach Sportart", page: "reise", def: true, ckeys: ["rs_stat"]},
   {id: "flug", w: "voll", title: "3D-Flug und Offline-Karte", page: "reise", def: true, ckeys: ["rs_flug"]},
   {id: "karte", w: "voll", title: "Karte", page: "reise", def: true, ckeys: ["rs_karte"]},
   {id: "fotos", w: "voll", title: "Fotos", page: "reise", def: true, ckeys: ["rs_fotos"]},
@@ -1048,7 +1048,7 @@ function slOpener(root, edit) {
       ui.appendChild(w);
     }
   }
-  if (typeof slCodePending === "function") slCodePending();                                // 3.36.0: Link mit Layoutcode geöffnet → Import-Dialog
+  if (typeof slCodePending === "function") slCodePending();                                // 3.36.0: Link mit Ansichtscode geöffnet → Import-Dialog
   return root.matches("main.home") ? w : null;
 }
 /* Auswertungsseite ohne Inhalt, weil alles auf der Hauptseite liegt: passende Erklärung statt „keine Auswertung“ */
@@ -1506,7 +1506,7 @@ function slCfgDialog(id) {
     });
   });
 }
-/* Felder im Einstellungs-Dialog: auf der Statistikseite kommt bei Bausteinen mit Aktivität oder Zeitraum der Schalter „Globalen Filter verwenden“ davor (3.22.0) */
+/* Felder im Einstellungs-Dialog: auf der Statistikseite kommt bei Bausteinen mit Sportart oder Zeitraum der Schalter „Globalen Filter verwenden“ davor (3.22.0) */
 function slFieldsOf(T) {
   const fs = (T && T.fields) || [];
   if (SL.fam === "uebersicht" && !(T && T.hinweis) && fs.some(f => f.kind === "range"))                       // 3.34.0: Zeitraum der Seite (65-zeitraum.js)

@@ -299,7 +299,7 @@ document.addEventListener("change", e => {
 /* ---------- Handy: Umschalter und Vorschau ---------- */
 const slDevHtml = () =>
   `<span class="slbdv" id="slbdv" role="group" aria-label="Anordnung für"><span class="slbdl">Anordnung für</span>` +
-  `<button type="button" class="slb slbdb" data-a="dev" data-d="desk" aria-pressed="true">Desktop</button><button type="button" class="slb slbdb" data-a="dev" data-d="mob" aria-pressed="false">Handy</button></span>` +
+  `<button type="button" class="slb slbdb" data-a="dev" data-d="desk" aria-pressed="true">Computer</button><button type="button" class="slb slbdb" data-a="dev" data-d="mob" aria-pressed="false">Handy</button></span>` +
   `<button type="button" class="slb" data-a="mobreset" hidden>Handy-Anordnung zurücksetzen</button>` +
   `<span class="slsr" id="slmobinfo" role="status" aria-live="polite"></span><p class="mut slbn" id="slbn" hidden></p>`;
 const slHasMob = () => slKeys(SL.fam).some(k => SL.docs[k] && SL.docs[k].mob && Object.keys(SL.docs[k].mob).length);
@@ -313,7 +313,7 @@ function slDevSync() {
   if (r) r.hidden = none || SL.dev !== "mob" || !slHasMob();
   if (n) {
     n.hidden = none || SL.dev !== "mob";
-    n.textContent = slHasMob() ? "Handy: eigene Anordnung. Änderungen gelten nur für schmale Bildschirme." : "Handy: noch keine eigene Anordnung, es gilt die Desktop-Reihenfolge. Die erste Änderung hier legt eine Handy-Anordnung an.";
+    n.textContent = slHasMob() ? "Handy: eigene Anordnung. Änderungen gelten nur für schmale Bildschirme." : "Handy: noch keine eigene Anordnung, es gilt die Computer-Reihenfolge. Die erste Änderung hier legt eine Handy-Anordnung an.";
   }
 }
 function slSetDev(d) {
@@ -323,14 +323,14 @@ function slSetDev(d) {
   SL.focus = null;
   slApply();
   slBarSync();
-  slLive(d === "mob" ? "Handy-Ansicht: Reihenfolge und Sichtbarkeit gelten nur für schmale Bildschirme" : "Desktop-Ansicht");
+  slLive(d === "mob" ? "Handy-Darstellung: Reihenfolge und Sichtbarkeit gelten nur für schmale Bildschirme" : "Computer-Darstellung");
 }
 function slMobReset() {
   if (!slHasMob()) return;
   slKeys(SL.fam).forEach(k => SL.docs[k] && delete SL.docs[k].mob);
   slTouch(...slKeys(SL.fam));
   slApply();
-  slLive("Handy-Anordnung zurückgesetzt, es gilt wieder die Desktop-Reihenfolge");
+  slLive("Handy-Anordnung zurückgesetzt, es gilt wieder die Computer-Reihenfolge");
 }
 /* Wechselt der Bildschirm zwischen Desktop und Handy (Fenstergröße, Einstellung „Ansicht“), wird die Seite neu eingeordnet */
 if (typeof MutationObserver === "function") {

@@ -85,7 +85,7 @@ function sportFigs(t, m) {
     f.push([`${Math.round((m.dUp / m.dist) * 100)} / ${Math.round((m.dDown / m.dist) * 100)}`, "%", "bergauf / bergab"]);
   } else if (g === "ski") {
     if (m.hasT) f.push(H(m.tUp, "Aufstieg"), H(m.tDown, "Abfahrt"));
-    f.push([nf(m.down, 0), "m", "Abfahrtshöhenmeter"]);
+    f.push([nf(m.down, 0), "m", "Abstieg"]);
     if (m.maxV) f.push([nf(m.maxV, 0), "km/h", "Höchstes Tempo"]);
     f.push([`${deg(m.maxG)}`, "°", "steilster Abschnitt"]);
     f.push([`${Math.round(m.steep * 100)}`, "%", "der Strecke über 30°"]);

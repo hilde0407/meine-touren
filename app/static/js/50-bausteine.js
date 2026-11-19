@@ -203,9 +203,9 @@ Object.assign(window.SL_WT, {
   /* ---------------- Übersicht ---------------- */
   periode: {
     fam: "uebersicht", cat: "zahlen", icon: "trend", name: "Diese Woche / dieser Monat", title: cfg => (cfg.period === "month" ? "Dieser Monat" : "Diese Woche"), multi: true, defaults: {period: "week"}, filter: {range: null},
-    desc: "Touren, Kilometer und Höhenmeter der laufenden Woche oder des laufenden Monats.",
+    desc: "Touren, Strecke und Aufstieg der laufenden Woche oder des laufenden Monats.",
     fields: [{k: "period", kind: "radio", label: "Zeitraum", def: "week", options: [["week", "Diese Woche"], ["month", "Dieser Monat"]]}, {kind: "sports"}, {kind: "title"}],
-    preview: () => slPvTiles([["3", "Touren"], ["41 km", "Kilometer"], ["1.120 m", "Höhenmeter"]]),
+    preview: () => slPvTiles([["3", "Touren"], ["41 km", "Strecke"], ["1.120 m", "Aufstieg"]]),
     render(c, b, cfg) {
       const now = new Date(),
         from = cfg.period === "month" ? new Date(now.getFullYear(), now.getMonth(), 1) : new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7)),
@@ -241,9 +241,9 @@ Object.assign(window.SL_WT, {
   },
   jahresvergleich: {
     fam: "uebersicht", cat: "rueck", icon: "trend", name: "Jahresvergleich", title: () => "Jahresvergleich", filter: {range: null},
-    fields: [{k: "metrics", kind: "checks", def: ["count", "km", "up"], label: "Angezeigte Werte", min: 1, options: [["count", "Touren"], ["km", "Kilometer"], ["up", "Höhenmeter"], ["h", "Stunden"]]}, {kind: "sports"}, {kind: "title"}],
-    desc: "Das laufende Jahr gegen das Vorjahr bis zum selben Tag: Touren, Kilometer, Höhenmeter.",
-    preview: () => slPvTiles([["31 Touren", "2026"], ["+12 %", "Kilometer"], ["−4 %", "Höhenmeter"]]),
+    fields: [{k: "metrics", kind: "checks", def: ["count", "km", "up"], label: "Angezeigte Werte", min: 1, options: [["count", "Touren"], ["km", "Strecke"], ["up", "Aufstieg"], ["h", "Dauer"]]}, {kind: "sports"}, {kind: "title"}],
+    desc: "Das laufende Jahr gegen das Vorjahr bis zum selben Tag: Touren, Strecke, Aufstieg.",
+    preview: () => slPvTiles([["31 Touren", "2026"], ["+12 %", "Strecke"], ["−4 %", "Aufstieg"]]),
     render(c, b, cfg) {
       const cy = new Date().getFullYear(), {list: a, prev: p} = flSelect(cfg, "year"),
         row = (m, d) => {
@@ -258,7 +258,7 @@ Object.assign(window.SL_WT, {
   letzte: {
     fam: "uebersicht", cat: "rueck", icon: "map", name: "Letzte Touren", title: () => "Letzte Touren", filter: {range: null}, defaults: {n: 5},
     fields: [{k: "n", kind: "radio", num: true, def: 5, label: "Anzahl", options: [[3, "3"], [5, "5"], [8, "8"], [10, "10"]]}, {kind: "sports"}, {kind: "title"}],
-    desc: "Die zuletzt gemachten Touren (3 bis 10, wählbar, auch nur einer Aktivität) als Liste mit Link.",
+    desc: "Die zuletzt gemachten Touren (3 bis 10, wählbar, auch nur einer Sportart) als Liste mit Link.",
     preview: () => slPrev('<ul class="sllist"><li><b>Gipfelrunde</b><span>12,4 km</span></li><li><b>Seeufer</b><span>8,1 km</span></li></ul>'),
     render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
@@ -294,8 +294,8 @@ Object.assign(window.SL_WT, {
   rekorde: {
     fam: "uebersicht", cat: "rueck", icon: "trend", name: "Rekorde", title: () => "Rekorde", filter: {range: "all"}, defaults: {},
     fields: [{kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}],
-    desc: "Längste Tour, meiste Höhenmeter und schnellstes Tempo, mit Link zur Tour.",
-    preview: () => slPvTiles([["32,4 km", "Längste Tour"], ["1.480 m", "Meiste Höhenmeter"]]),
+    desc: "Längste Tour, meiste Aufstieg und schnellstes Tempo, mit Link zur Tour.",
+    preview: () => slPvTiles([["32,4 km", "Längste Tour"], ["1.480 m", "Größter Aufstieg"]]),
     render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
       const A = flSelect(cfg, "all").list;
@@ -303,7 +303,7 @@ Object.assign(window.SL_WT, {
       const best = (f, ok) => A.filter(ok || (() => true)).reduce((m, t) => (!m || f(t) > f(m) ? t : m), null),
         L = best(t => t.km), U = best(t => t.up_m || 0), S = best(t => t.km / t.h, t => t.km >= 3 && t.h >= 0.5),
         tile = (t, v, l) => (t ? `<a class="utile slrec" href="#/tour/${encodeURIComponent(t.id)}"><b>${v}</b><span>${l}</span><small class="mut">${esc(t.name)} · ${fmtDatumKurz(t.date)}</small></a>` : "");
-      b.innerHTML = `<div class="utiles">${tile(L, fmtKm(L && L.km), "Längste Tour")}${tile(U && U.up_m ? U : null, fmtHm(U && U.up_m), "Meiste Höhenmeter")}${tile(S, fmtTempo(S && S.km / S.h), "Schnellstes Tempo")}</div>`;
+      b.innerHTML = `<div class="utiles">${tile(L, fmtKm(L && L.km), "Längste Tour")}${tile(U && U.up_m ? U : null, fmtHm(U && U.up_m), "Größter Aufstieg")}${tile(S, fmtTempo(S && S.km / S.h), "Schnellstes Tempo")}</div>`;
     },
   },
   heutevor: {

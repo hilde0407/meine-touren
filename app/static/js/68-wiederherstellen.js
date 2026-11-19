@@ -39,7 +39,7 @@ function rsDialog(v, trigger, onDone) {
     <div class="rsk"><span>Sicherung vom</span><b>${v.erstellt_ts ? rsDt(v.erstellt_ts) : "–"}</b><span class="mut">${rsAlter(v.alter_h)}</span></div>
     <div class="rsk"><span>Datei</span><code class="rsfn">${esc(v.name)}</code><span class="mut">${rsMb(v.groesse)}</span></div>
     ${wem}
-    ${v.sicherheitskopie ? `<p class="rshin"><span aria-hidden="true">ℹ</span> <span>Das ist eine Sicherheitskopie, die vor einer früheren Wiederherstellung angelegt wurde.</span></p>` : ""}
+    ${v.sicherheitskopie ? `<p class="rshin"><span aria-hidden="true">ℹ</span> <span>Das ist eine Sicherheitskopie, die vor einem früheren Zurückspielen angelegt wurde.</span></p>` : ""}
     ${rsTabelle("In der Sicherung", z.sicherung, "Heute", z.jetzt)}
     <h3>Das wird ersetzt</h3>
     <p>Touren, Notizen, Ziele, geplante Touren, Seitenlayouts und Einstellungen. Alles, was seit dieser Sicherung dazugekommen ist oder geändert wurde, geht verloren.</p>
@@ -153,7 +153,7 @@ async function rsInit() {
     maxMb = d.max_mb || maxMb;
     $("#rsmax").innerHTML = `<span>Höchstens</span> <span>${maxMb} MB</span>`;
     ls.innerHTML = d.sicherungen.length
-      ? d.sicherungen.map((x, i) => `<label class="rsi"><input type="radio" name="rsq" value="${esc(x.id)}" aria-describedby="rsi${i}"><span class="rsn">${rsDt(x.ts)}</span><span class="mut rsg">${rsMb(x.groesse)}</span><span class="rsx" id="rsi${i}">${x.sicherheitskopie ? `<span class="rstag">Sicherheitskopie vor einer Wiederherstellung</span>` : ""}<code class="mut rsfn">${esc(x.name)}</code></span></label>`).join("")
+      ? d.sicherungen.map((x, i) => `<label class="rsi"><input type="radio" name="rsq" value="${esc(x.id)}" aria-describedby="rsi${i}"><span class="rsn">${rsDt(x.ts)}</span><span class="mut rsg">${rsMb(x.groesse)}</span><span class="rsx" id="rsi${i}">${x.sicherheitskopie ? `<span class="rstag">Sicherheitskopie vor dem Zurückspielen</span>` : ""}<code class="mut rsfn">${esc(x.name)}</code></span></label>`).join("")
       : `<span class="mut">Auf diesem Server liegt noch keine Sicherung.</span>`;
     ls.querySelectorAll("input[name=rsq]").forEach(r => {
       if (r.value === gewaehlt) r.checked = true;

@@ -51,7 +51,7 @@ H_FLAG_PCT, H_FLAG_M = 25.0, 30.0   # einzelne Tour auffällig: >25 % UND mindes
 H_GOOD_S, H_OK_S = 15.0, 35.0          # ≤15 % gut, 15–35 % mäßig, >35 % auffällig (Median der Beträge)
 H_FLAG_PCT_S, H_FLAG_M_S = 35.0, 50.0  # einzelne Tour auffällig: >35 % UND mindestens 50 m Unterschied
 SUM_MIN_M = 1.0                        # Aufstieg UND Abstieg laut Uhr mindestens 1 m: 0 bei einem von beiden ist meist ein Platzhalter (kennzahlen() verwirft beide 0)
-SUM_MAX_PER_KM = 300.0                 # mehr als 300 Höhenmeter je Kilometer (Treppen!) gelten als unplausibel; elev.suspicious warnt ab 120 m/km erst bei Komoot-Werten über 400 m
+SUM_MAX_PER_KM = 300.0                 # mehr als 300 m Aufstieg je Kilometer (Treppen!) gelten als unplausibel; elev.suspicious warnt ab 120 m/km erst bei Komoot-Werten über 400 m
 # GPS: Anteil der Touren mit mindestens einem Sprung.
 G_GOOD, G_OK = 5.0, 15.0        # ≤5 % gut, 5–15 % mäßig, >15 % auffällig
 GPS_FLAG_JUMPS, GPS_FLAG_GAP = 3, 25.0   # einzelne Tour: mindestens 3 Sprünge bzw. über 25 % Lücken/Pausen

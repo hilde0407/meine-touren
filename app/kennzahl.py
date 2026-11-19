@@ -10,7 +10,7 @@ Konfiguration (cfg), alle Felder streng geprüft, unbekannte Schlüssel sind ein
   mess    touren | km | hm | abstieg | dauer | gehzeit | puls | pulsmax | tempo | steigung | hmkm
   agg     sum | avg | max | min | count | record | monat   (nicht jede Messgröße erlaubt jede Rechenart, siehe MESS)
   durch   {mess, agg}   optional: Formel A ÷ B (A = mess/agg, B = durch); op: div (A ÷ B, Standard) | pct (A in Prozent von B)
-  sports  [Aktivität]   range year | y | 12m | 90d | all | c   yr (bei y)   from, to (bei c, JJJJ-MM-TT)   tag (Schlagwort)   minkm (Mindeststrecke 0–1000)
+  sports  [Sportart]   range year | y | 12m | 90d | all | c   yr (bei y)   from, to (bei c, JJJJ-MM-TT)   tag (Schlagwort)   minkm (Mindeststrecke 0–1000)
   vgl     true = Vergleich mit dem Zeitraum davor (±%)           ziel  Zielwert (> 0, höchstens 10 000 000) → Fortschrittsbalken
   vglart  davor (Standard) | jahr (gleicher Zeitraum ein Jahr früher) | monat (Zeitraum einen Monat früher); nur zusammen mit vgl   (3.35.0)
   plan    true = Ziel mit linearem Soll vergleichen („im Plan?“; nur zusammen mit ziel; gilt bei laufendem/bestimmtem Jahr und eigenem Bereich, Summe/Anzahl ohne Formel)   (3.35.0)
@@ -18,7 +18,7 @@ Konfiguration (cfg), alle Felder streng geprüft, unbekannte Schlüssel sind ein
 Messgrößen: gehzeit = Bewegungszeit ohne Pausen (3.29.0, aus dem Zwischenspeicher cache/tempo/<id>.json von app/steigung.py: Touren ab 2 km mit Höhe und Zeit), puls = Durchschnittspuls einer Tour und
 pulsmax = Höchstpuls einer Tour (3.29.0, aus der Pulsdatei <id>.hr.json bzw. dem GPX, Zwischenspeicher in app/puls.py; nur Touren mit Pulsdaten; Summe ergibt hier keinen Sinn, deshalb nur
 avg/max/min/count/record). Die Gehzeit wird bei noch nicht berechneten Touren höchstens GEHZEIT_BUDGET_S Sekunden je Aufruf nachgerechnet, der Rest steht in der Antwort als „offen“.
-Messgrößen: tempo = Strecke ÷ Dauer je Tour (km/h), steigung = Aufstieg ÷ Strecke (%), hmkm = Höhenmeter je km. Bei diesen „Verhältnissen“ ist avg gewichtet (Summe ÷ Summe),
+Messgrößen: tempo = Strecke ÷ Dauer je Tour (km/h), steigung = Aufstieg ÷ Strecke (%), hmkm = Aufstieg je km. Bei diesen „Verhältnissen“ ist avg gewichtet (Summe ÷ Summe),
 max/min/record zählen nur Touren mit sinnvoller Länge (Tempo: ab 3 km und 30 Min., sonst ab 1 km); Touren ohne die nötigen Angaben zählen nicht.
 Antwort: {wert, einheit: {z, n}, n (Touren im Zeitraum), offen (nur wenn > 0: Touren, deren Gehzeit noch nicht berechnet ist), von, bis, vorher: {wert, pct, von, bis}|None, reihe: {art, werte}, rekord: {id, name, datum, wert}|None, ziel: {ziel, pct, (soll, soll_pct, plan: voraus|im_plan|zurueck)}|None}.
 3.35.0: vorher enthält zusätzlich art, diff (absolute Differenz) und dir (auf | ab | gleich, unter ±0,5 % gleich); reihe.art ist woche (Zeitraum bis 98 Tage, höchstens 15 Werte), monat (bis 36 Monate) oder jahr (höchstens 12), bei spark = aus entfällt reihe.
@@ -127,7 +127,7 @@ def clean_cfg(v):
     if "sports" in v:
         s = v["sports"]
         if not isinstance(s, list) or len(s) > 20 or not all(isinstance(i, str) and SPORT_RE.match(i) for i in s):
-            raise _bad("Ungültige Aktivität")
+            raise _bad("Ungültige Sportart")
         if s:
             out["sports"] = list(dict.fromkeys(s))
     r = v.get("range", "year")
@@ -268,7 +268,7 @@ def _ratio(r, mess):
     if mess == "tempo":
         return (km, h, 1.0) if km > 0 and h > 0 else None
     if mess == "steigung":
-        return (up, km, 0.1) if up is not None and km > 0 else None           # Höhenmeter ÷ (km·1000) · 100 = (hm ÷ km) / 10
+        return (up, km, 0.1) if up is not None and km > 0 else None           # Aufstieg ÷ (km·1000) · 100 = (hm ÷ km) / 10
     if mess == "hmkm":
         return (up, km, 1.0) if up is not None and km > 0 else None
     return None

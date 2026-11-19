@@ -59,7 +59,7 @@ function uhrHeights(w) {
   if (w.abstieg) it.push(`<div><b>${nf(w.abstieg.wert, 0)}</b> <span class="mut">m Abstieg</span></div>`);
   if (w.hoehe_max) it.push(`<div><b>${nf(w.hoehe_max.wert, 0)}</b> <span class="mut">m höchster Punkt</span></div>`);
   if (w.hoehe_min) it.push(`<div><b>${nf(w.hoehe_min.wert, 0)}</b> <span class="mut">m tiefster Punkt</span></div>`);
-  return it.length ? `<div class="uth">Höhenmeter laut Uhr</div><div class="utline fxw mb8 fx hrkpi">${it.join("")}</div>` : "";
+  return it.length ? `<div class="uth">Aufstieg laut Uhr</div><div class="utline fxw mb8 fx hrkpi">${it.join("")}</div>` : "";
 }
 
 function uhrZones(z) {
@@ -105,7 +105,7 @@ function uhrFatigue(e) {
   if (e.status === "nur_hinweis") {
     const a = e.hoehen.erste, b = e.hoehen.zweite;
     return trFold("uhr_erm", "Ermüdungsverlauf", `<b>Zweite Hälfte:</b> <span>nicht bewertet</span>`,
-      `<div class="mut hrnote utfat"><span>Bergauf-Anteil nicht herausgerechnet:</span> <span>Die Hälften unterscheiden sich stark in den Höhenmetern.</span> <span>Erste Hälfte ${fmtHm(a.auf)} bergauf, zweite Hälfte ${fmtHm(b.auf)} bergauf.</span></div>`, false);
+      `<div class="mut hrnote utfat"><span>Bergauf-Anteil nicht herausgerechnet:</span> <span>Die Hälften unterscheiden sich stark im Aufstieg.</span> <span>Erste Hälfte ${fmtHm(a.auf)} bergauf, zweite Hälfte ${fmtHm(b.auf)} bergauf.</span></div>`, false);
   }
   const p = e.tempo_pct,
     tempo = p === 0 ? "Tempo unverändert" : p > 0 ? `Tempo ${nf(p, 0)} % langsamer` : `Tempo ${nf(-p, 0)} % schneller`,

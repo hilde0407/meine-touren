@@ -1,7 +1,7 @@
-"""3.32.0 Filter für GET /api/photos (Kachel „Erinnerungen“ und Diashow): Aktivität, Zeitraum, Kalendertag, „beste Fotos“.
+"""3.32.0 Filter für GET /api/photos (Kachel „Erinnerungen“ und Diashow): Sportart, Zeitraum, Kalendertag, „beste Fotos“.
 
 Alle Parameter sind Whitelist-geprüft (Fehler = 400), nichts davon landet ungeprüft im SQL (nur Platzhalter ?):
-  sport      kommagetrennte Aktivitäten (Buchstaben, Ziffern, Unterstrich; höchstens 20)  -> nur Fotos von Touren dieser Aktivitäten
+  sport      kommagetrennte Sportarten (Buchstaben, Ziffern, Unterstrich; höchstens 20)  -> nur Fotos von Touren dieser Sportarten
   date_from / date_to   JJJJ-MM-TT (echtes Datum, von <= bis)  -> Aufnahmezeit in der Zeitzone der App
   day        MM-TT (echter Kalendertag, 02-29 erlaubt) und before (Jahr 1970–2100, optional) -> Fotos von Touren, die an diesem Kalendertag in einem Jahr < before gestartet sind
   best       true -> die besten Fotos (Sterne, Schärfe, über die Zeit verteilt wie „beste Fotos“ einer Tour, photos.pick_best); abgelehnte Fotos (manual = 2) nie
@@ -31,7 +31,7 @@ def clean_sports(s):
         return []
     parts = [x for x in s.split(",") if x != ""]
     if len(parts) > MAX_SPORTS or not all(SPORT_RE.match(x) for x in parts):
-        _bad("Ungültige Aktivität")
+        _bad("Ungültige Sportart")
     return list(dict.fromkeys(parts))
 
 

@@ -1,4 +1,4 @@
-"""Touren planen: Strecke zeichnen oder laden, Höhenmeter aus dem Geländemodell, gespeicherte Pläne."""
+"""Touren planen: Strecke zeichnen oder laden, Aufstieg aus dem Geländemodell, gespeicherte Pläne."""
 import json
 import re
 import threading

@@ -119,7 +119,7 @@ const viewPref = () => {
 };
 const MORE = [
   ["trips", "Reisen"],
-  ["places", "Auswertung"],
+  ["places", "Orte & Ausrüstung"],
   ["check", "Prüfen"],
   ["shared", "Geteilte Fotos"],
   ["account", "Konto & Freigaben"],
@@ -155,9 +155,9 @@ function applyView() {
       sett = items.filter(x => MORE_SET.includes(x[0]));
     const m2 = modal(`<h3>Mehr</h3><div class="moregrid">${main.map(lnk).join("")}</div>
       ${sett.length ? `<h4 class="m16-0-6">Einstellungen & Prüfung</h4><div class="moregrid sm">${sett.map(lnk).join("")}</div>` : ""}
-      <h4 class="m16-0-6">Ansicht</h4><div class="row">${[
+      <h4 class="m16-0-6">Darstellung</h4><div class="row">${[
         ["auto", "Automatisch"],
-        ["mobile", "Smartphone"],
+        ["mobile", "Handy"],
         ["desktop", "Computer"],
       ]
         .map(([k, l]) => `<button class="btn ${viewPref() === k ? "" : "alt"} sm" data-vm="${k}">${l}</button>`)
@@ -254,10 +254,10 @@ VIEWS.account = async () => {
     `<div class="sec mt0"><h2>Konto &amp; Freigaben</h2><span class="sub">${esc(me.name)} · ${adm ? "Administrator" : "Benutzer"}</span></div>
    <div class="grid g2"><div class="panel"><h2>Passwort ändern</h2><div class="field"><label>Altes Passwort</label><input id="pw0" type="password" autocomplete="current-password"></div><div class="field"><label>Neues Passwort (mind. 8 Zeichen)</label><input id="pw1" type="password" autocomplete="new-password"></div>
      <div class="row"><button class="btn" id="pwb">Ändern</button><span id="pwm" class="mut"></span></div></div>
-    <div class="panel"><h2>Ansicht</h2><p class="mut">Gilt nur auf diesem Gerät.</p><div class="row">${[
+    <div class="panel"><h2>Darstellung</h2><p class="mut">Gilt nur auf diesem Gerät.</p><div class="row">${[
       ["auto", "Automatisch"],
-      ["mobile", "Smartphone-Ansicht"],
-      ["desktop", "Computer-Ansicht"],
+      ["mobile", "Handy"],
+      ["desktop", "Computer"],
     ]
       .map(([k, l]) => `<button class="btn ${viewPref() === k ? "" : "alt"} sm" data-vm="${k}">${l}</button>`)
       .join("")}</div></div></div>

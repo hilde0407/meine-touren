@@ -1,7 +1,7 @@
-/* =====================  Touren planen: zeichnen oder GPX laden, Höhenmeter und Zeit nach eigenem Tempo  ===================== */
-const PLAN_DEF = {foot: [0.22, 0.0018], bike: [0.055, 0.0015], ski: [0.2, 0.0035], run: [0.1, 0.001], other: [0.22, 0.0018]}; // h je km, h je Höhenmeter (Gesamtzeit inkl. Pausen)
+/* =====================  Touren planen: zeichnen oder GPX laden, Aufstieg und Zeit nach eigenem Tempo  ===================== */
+const PLAN_DEF = {foot: [0.22, 0.0018], bike: [0.055, 0.0015], ski: [0.2, 0.0035], run: [0.1, 0.001], other: [0.22, 0.0018]}; // h je km, h je Aufstieg (Gesamtzeit inkl. Pausen)
 
-/* Eigenes Tempo aus dem Archiv: Gesamtzeit ≈ a·km + b·Höhenmeter (kleinste Quadrate); sonst Standardwerte */
+/* Eigenes Tempo aus dem Archiv: Gesamtzeit ≈ a·km + b·Aufstieg (kleinste Quadrate); sonst Standardwerte */
 function paceModel(sport) {
   const g = sportGrp(sport),
     T = TOURS.filter(t => sportGrp(t.sport) === g && t.km >= 3 && t.h >= 0.4 && t.h < 14 && t.up_m != null && t.km / t.h < 60);
@@ -330,7 +330,7 @@ VIEWS.plan = async (pid, q) => {
     } catch (e) {
       if (my !== seq) return;
       Object.assign(P, {dense: null, ele: null, up: null, down: null, max: null});
-      msg(`Höhen konnten nicht geladen werden (${e.message}) – Strecke und Zeit ohne Höhenmeter.`, true);
+      msg(`Höhen konnten nicht geladen werden (${e.message}) – Strecke und Zeit ohne Aufstieg.`, true);
     }
     figs();
     chkRun();
@@ -614,7 +614,7 @@ VIEWS.places = async (...a) => {
     if (h && !h.querySelector(".plan-l")) h.insertAdjacentHTML("beforeend", `<span class="sp"></span><a class="btn alt sm plan-l" href="#/plan">🗺 Tour planen</a>`);
     w.querySelectorAll("[data-w]").forEach(b => {
       const row = b.closest(".r");
-      if (row && !row.querySelector(".plan-g")) b.insertAdjacentHTML("beforebegin", `<a class="btn ghost sm plan-g" href="#/plan?g=${b.dataset.w}" title="Diese Tour planen: Länge, Höhenmeter und Zeit nach deinem Tempo">🗺 Planen</a> `);
+      if (row && !row.querySelector(".plan-g")) b.insertAdjacentHTML("beforebegin", `<a class="btn ghost sm plan-g" href="#/plan?g=${b.dataset.w}" title="Diese Tour planen: Länge, Aufstieg und Zeit nach deinem Tempo">🗺 Planen</a> `);
     });
   };
   mark();
