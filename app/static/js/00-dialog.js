@@ -20,6 +20,7 @@
 
   function show(o, done) {
     const trigger = document.activeElement;
+    if (typeof window.closePanels === "function") window.closePanels();                // Karten-Panels schließen, nie ein Panel unter oder über einem Dialog
     const id = "uidlg" + ++seq;
     const host = document.createElement("div");
     host.className = "uidlg";
@@ -108,6 +109,7 @@
   let mseq = 0;
   window.uiModal = html => {
     const trigger = document.activeElement, id = "uimd" + ++mseq;
+    if (typeof window.closePanels === "function") window.closePanels();
     const host = document.createElement("div");
     host.className = "uidlg uimod";
     const box = document.createElement("div");

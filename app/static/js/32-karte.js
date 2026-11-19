@@ -49,18 +49,19 @@ VIEWS.map = async () => {
   if (!viewer) api("/api/settings").then(c => (liveMode = c.live_mode || "off")).catch(() => {});
   box.insertAdjacentHTML(
     "afterbegin",
-    `<div class="box"><button class="chip" id="mloc" title="Meinen Standort auf der Karte zeigen">⌖ ${esc(myName)}</button><button class="chip" id="mlive" style="display:none" title="Zuletzt gemeldeten Standort zeigen">📍 Live</button></div>`
+    `<div class="box"><button class="chip" id="mloc" aria-pressed="false" aria-label="Mein Standort" title="Meinen Standort auf der Karte zeigen"><span aria-hidden="true">⌖</span><span class="lbl"> Mein Standort</span></button><button class="chip" id="mlive" style="display:none" title="Zuletzt gemeldeten Standort zeigen">📍 Live</button></div>`
   );
   const stop = () => {
     if (watch != null) navigator.geolocation.clearWatch(watch);
     watch = null;
     meL.clearLayers();
-    $("#mloc") && $("#mloc").classList.remove("on");
+    $("#mloc") && ($("#mloc").classList.remove("on"), $("#mloc").setAttribute("aria-pressed", "false"));
   };
   $("#mloc").onclick = () => {
     if (watch != null) return stop();
     if (!navigator.geolocation) return uiAlert("Dieses Gerät kann keinen Standort bestimmen.");
     $("#mloc").classList.add("on");
+    $("#mloc").setAttribute("aria-pressed", "true");
     first = true;
     watch = navigator.geolocation.watchPosition(
       p => {

@@ -181,7 +181,7 @@ VIEWS.map = async () => {
   $("#main").className = "wide";
   $("#main").innerHTML = `<div class="mapbox"><div id="bigmap"></div><div class="mapui">
     <div class="box"><select id="my"><option value="0">Alle Jahre</option>${ys.map(y => `<option>${y}</option>`).join("")}</select><span id="mc" class="cnt"></span></div>
-    <div class="box" id="ms">${sp.map(s => `<button class="chip on" data-s="${s}"><i style="background:${sCol(s)}"></i>${sName(s)}</button>`).join("")}</div><div class="box" id="mn" style="display:none"></div></div></div>`;
+    <div class="box" id="ms">${sp.map(s => `<button class="chip on" data-s="${s}" aria-pressed="true"><i style="background:${sCol(s)}"></i>${sName(s)}</button>`).join("")}</div><div class="box" id="mn" style="display:none"></div></div></div>`;
   map = mkMap("bigmap", {layers: true, leaflet: {preferCanvas: true}});
   const grp = L.layerGroup().addTo(map),
     off = new Set(),
@@ -293,7 +293,7 @@ VIEWS.map = async () => {
     .querySelector(".mapui")
     .insertAdjacentHTML(
       "beforeend",
-      `<div class="box" style="position:relative"><button class="chip" id="mtc" title="Farbe und Breite der Strecken ändern">🎨 Strecken</button></div>`
+      `<div class="box" style="position:relative"><button class="chip mact" id="mtc" aria-haspopup="true" aria-expanded="false" title="Farbe und Breite der Strecken ändern">🎨 Strecken</button></div>`
     );
   $("#mtc").onclick = e => {
     if (document.querySelector(".tpanel")) {
@@ -322,7 +322,7 @@ VIEWS.map = async () => {
   $("#ms").onclick = e => {
     const s = e.target.closest("[data-s]");
     if (!s) return;
-    s.classList.toggle("on");
+    s.setAttribute("aria-pressed", String(s.classList.toggle("on")));
     off.has(s.dataset.s) ? off.delete(s.dataset.s) : off.add(s.dataset.s);
     const b = draw();
     if (b) map.fitBounds(b, {padding: [40, 40]});

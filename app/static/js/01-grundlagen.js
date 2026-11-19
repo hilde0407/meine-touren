@@ -166,11 +166,44 @@ const trackStyle = (t, w) => ({
   opacity: 0.92,
   ...(TS.casing ? {} : {}),
 });
+/* 3.43.0 Bedienpanels der Karte (Streckenfarbe, Ebenenwahl von Leaflet, mobil das Blatt „Filter & Ebenen“): höchstens eines ist offen. Jedes schließt gleich – Esc (Fokus zurück an den Auslöser),
+   Tippen/Klicken daneben, erneuter Klick auf den Auslöser, Seitenwechsel, Öffnen eines Fensters (uiModal/uiConfirm) und Bearbeitungsmodus der Seite. closePanels(except) schließt alle außer `except`. */
+function closePanels(except) {
+  let was = null;
+  document.querySelectorAll(".tpanel").forEach(t => { if (t !== except) { was = t._anchor || was; t.remove(); } });
+  if (typeof map !== "undefined" && map && map._lc && !map._lc._container.contains(except || null) && map._lc._container.classList.contains("leaflet-control-layers-expanded")) map._lc.collapse();
+  const ui = document.querySelector(".mapui.mfo");
+  if (ui && !(except && ui.contains(except))) { ui.classList.remove("mfo"); const b = document.getElementById("mfb"); if (b) { b.setAttribute("aria-expanded", "false"); was = was || b; } }
+  return was;
+}
+window.closePanels = closePanels;
+function panelOpen() {
+  return !!(document.querySelector(".tpanel, .mapui.mfo") || (typeof map !== "undefined" && map && map._lc && map._lc._container.classList.contains("leaflet-control-layers-expanded")));
+}
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape" || e.defaultPrevented || !panelOpen()) return;
+  const a = closePanels();
+  if (a && a.isConnected && a.focus) a.focus();
+});
+document.addEventListener("pointerdown", e => {
+  if (!panelOpen()) return;
+  const t = e.target, tp = document.querySelector(".tpanel");
+  if (t.closest && (t.closest(".tpanel, .leaflet-control-layers, .mfb") || (tp && tp._anchor && tp._anchor.contains(t)))) return;
+  const ui = document.querySelector(".mapui.mfo");
+  if (ui && t.closest && t.closest(".mapui")) return;                              // Tippen innerhalb des Blattes bedient es
+  closePanels();
+}, true);
 function trackPanel(anchor, onChange, withBy) {
-  document.querySelector(".tpanel")?.remove();
+  closePanels();
   const sw = ["#ff2d95", "#ff4d12", "#f2c230", "#00e5ff", "#7cff3a", "#ffffff", "#111111"];
   const d = document.createElement("div");
   d.className = "tpanel";
+  d.setAttribute("role", "group");
+  d.setAttribute("aria-label", "Streckenfarbe");
+  d._anchor = anchor;
+  anchor.setAttribute("aria-expanded", "true");
+  const realRemove = Element.prototype.remove;
+  d.remove = () => { anchor.setAttribute("aria-expanded", "false"); realRemove.call(d); };
   d.innerHTML = `<b>Streckenfarbe</b>
     <label><input type="radio" name="tsm" value="sport"> je Sportart</label><label><input type="radio" name="tsm" value="one"> einheitlich</label>
     <div class="tsw">${sw.map(c => `<button type="button" data-c="${c}" style="background:${c}" aria-label="${c}"></button>`).join("")}<input type="color" id="tsc" aria-label="Eigene Farbe"></div>
@@ -312,6 +345,7 @@ const years = () => [...new Set(TOURS.map(t => t.y))].sort((a, b) => b - a);
 /* Schwebende Flächen, die an <body> hängen (Benutzermenü, Auswahlleiste der Fotos): schließen bei Seitenwechsel und mit Esc */
 function closeFloaters() {
   document.querySelectorAll(".umpop, .seltb").forEach(x => x.remove());
+  closePanels();
   document.body.classList.remove("selmode");
 }
 document.addEventListener("keydown", e => {
@@ -479,7 +513,8 @@ function mkMap(el, opt = {}) {
   } catch (e) {}
   (sv === "topo" ? topo : osm).addTo(m);
   if (opt.layers) {
-    L.control.layers({Straßenkarte: osm, Topografisch: topo}, null, {position: "bottomright"}).addTo(m);
+    m._lc = L.control.layers({Straßenkarte: osm, Topografisch: topo}, null, {position: "bottomright"}).addTo(m);
+    ["click", "focusin"].forEach(ev => m._lc._container.addEventListener(ev, () => closePanels(m._lc._container)));      // Ebenenwahl öffnet: andere Panels zu
     m.on("baselayerchange", e => {
       try {
         localStorage.setItem("mapstyle", e.layer === topo ? "topo" : "osm");

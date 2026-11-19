@@ -2,21 +2,21 @@
    Die Karte (#/map; Aufbau in 02-uebersicht.js, Heatmap und Fotos in 06-erweiterungen.js, Standort in 32-karte.js) ist wie die anderen Seiten anpassbar (Engine 49-seitenlayout.js).
    Aufbau: #kax ist das Raster der Seite. Hauptbaustein „karte“ (Pflicht, nicht ausblendbar; ganze, zwei Drittel oder halbe Breite) enthält die Karte mit ihren Bedienfeldern.
    Bedienfelder (Standort, Jahr und Anzahl, Sportarten, Strecken-Stil, Heatmap und Fotos, Touren im Ausschnitt) sind Abschnitte der Seite: kapw-Hüllen um die bisherigen Kästen (Kennungen, Knöpfe und Ereignisse
-   bleiben dieselben Knoten). Ohne Anpassung liegen sie wie bisher in dieser Reihenfolge als Kästen auf der Karte. Mit dem Layout lassen sie sich ausblenden (der Kasten bleibt in der Seite, nur unsichtbar),
+   bleiben dieselben Knoten). Ohne Anpassung liegen sie in dieser Reihenfolge als Kästen auf der Karte (ab 3.43.0 nach Aufgabe geordnet: Filter = Jahr, Sportarten | Ebenen = Strecken, Heatmap, Fotos | Aktionen = Standort, Touren im Ausschnitt; vorher Standort zuerst). Mit dem Layout lassen sie sich ausblenden (der Kasten bleibt in der Seite, nur unsichtbar),
    zuklappen („Standardmäßig offen“ aus: nur ein kleiner Knopf mit dem Namen bleibt) und umordnen. Im Bearbeitungsmodus stehen sie als Blöcke im Raster (wie die anderen Abschnitte) und gehen danach zurück auf die Karte.
    Bausteine (Katalog „Karte“): kzahlen (Karten-Kennzahlen), kliste (Touren im Kartenausschnitt), klegende (Legende der Sportarten). Sie lesen den Stand der Karte (Jahr, Sportarten, Ausschnitt) und
    aktualisieren sich bei jeder Änderung (KA.subs).
    Größe: Ändert sich das Layout (Bearbeitungsmodus, Baustein neben der Karte, andere Breite), passt ein ResizeObserver die Karte an (invalidateSize) und rahmt den bisherigen Ausschnitt neu ein,
    solange der Benutzer die Karte nicht selbst bewegt hat (map._kaUser); ein selbst gewählter Ausschnitt bleibt. Ohne Layout-Änderung verhält sich die Karte wie bisher (nur Leaflets eigene Größenanpassung). */
-const KA_PANELS = ["standort", "jahr", "sport", "stil", "ebenen", "ausschnitt"];
+const KA_PANELS = ["jahr", "sport", "stil", "ebenen", "standort", "ausschnitt"];
 const KA_NAME = {standort: "Standort", jahr: "Jahr", sport: "Sportarten", stil: "Strecken", ebenen: "Ebenen", ausschnitt: "Ausschnitt"};
 SL_REG.karte = [
   {id: "karte", w: "voll", title: "Karte", page: "karte", plain: true, must: true, ws: ["voll", "zweidrittel", "halb"]},
-  {id: "standort", w: "voll", title: "Bedienfeld: Mein Standort", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_standort"]},
   {id: "jahr", w: "voll", title: "Bedienfeld: Jahr und Anzahl", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_jahr"]},
   {id: "sport", w: "voll", title: "Bedienfeld: Sportarten", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_sport"]},
   {id: "stil", w: "voll", title: "Bedienfeld: Strecken-Stil", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_stil"]},
   {id: "ebenen", w: "voll", title: "Bedienfeld: Heatmap und Fotos", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_ebenen"]},
+  {id: "standort", w: "voll", title: "Bedienfeld: Mein Standort", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_standort"]},
   {id: "ausschnitt", w: "voll", title: "Bedienfeld: Touren im Ausschnitt", page: "karte", def: true, ws: ["voll"], panel: true, ckeys: ["ka_ausschnitt"]},
 ];
 const KA = {subs: [], edit: false, sig: "", relayout: false, timer: 0};
@@ -119,7 +119,7 @@ SL_TPL.push(
   {id: "ka-liste", fam: "karte", name: "Karte mit Liste", desc: "Die Karte in zwei Dritteln, daneben die Touren im Kartenausschnitt als Liste. Von den Bedienfeldern bleiben Jahr und Sportarten.",
     items: [["karte", "zweidrittel"], ["w:kliste", "drittel"], ["jahr", "voll"], ["sport", "voll"]]},
   {id: "ka-zahlen", fam: "karte", name: "Karte mit Kennzahlen", desc: "Oben die Kennzahlen der Auswahl und die Legende der Sportarten, darunter die Karte mit allen Bedienfeldern.",
-    items: [["w:kzahlen", "halb"], ["w:klegende", "halb"], ["karte", "voll"], ["standort", "voll"], ["jahr", "voll"], ["sport", "voll"], ["stil", "voll"], ["ebenen", "voll"], ["ausschnitt", "voll"]]},
+    items: [["w:kzahlen", "halb"], ["w:klegende", "halb"], ["karte", "voll"], ["jahr", "voll"], ["sport", "voll"], ["stil", "voll"], ["ebenen", "voll"], ["standort", "voll"], ["ausschnitt", "voll"]]},
   {id: "ka-pur", fam: "karte", name: "Nur die Karte", desc: "Ruhig und übersichtlich: nur die Karte, alle Bedienfelder sind ausgeblendet.",
     items: [["karte", "voll"]]},
 );
@@ -141,6 +141,19 @@ function kaFrame() {
       w.innerHTML = `<button type="button" class="chip kapt" aria-expanded="false" hidden><span>${esc(KA_NAME[id])}</span> ▸</button>`;
       w.appendChild(bx);
     });
+  if (ui) {                                                                           // 3.43.0 Handy: ein Knopf „Filter & Ebenen“ öffnet das Blatt mit Jahr, Sportarten, Strecken, Heatmap/Fotos und Ausschnitt (am Desktop unsichtbar)
+    const fw = document.createElement("div");
+    fw.className = "box mfbw";
+    fw.innerHTML = `<button type="button" class="chip mfb" id="mfb" aria-expanded="false" aria-controls="mapui">Filter & Ebenen</button>`;
+    ui.appendChild(fw);
+    ui.id = "mapui";
+    fw.firstChild.onclick = () => {
+      const open = !ui.classList.contains("mfo");
+      closePanels();
+      ui.classList.toggle("mfo", open);
+      fw.firstChild.setAttribute("aria-expanded", String(open));
+    };
+  }
   const host = document.createElement("div"), card = document.createElement("div");
   host.id = "kax";
   host.className = "stx kax";
@@ -214,6 +227,11 @@ function kaAfter(root, edit, pres) {
     multi = edit || vis.length > 0 || (mp && mp.cw !== "voll");
   root.classList.toggle("kamulti", !!multi);
   if (main) main.classList.toggle("kamulti", !!multi);
+  const dup = !edit && vis.some(p => p.it.wtype === "kliste"), fb = document.getElementById("mfb");   // „Touren im Ausschnitt“ nur einmal: steht der Baustein auf der Seite, entfällt der Knopf
+  if (edit) closePanels();
+  const ap = document.getElementById("kap-ausschnitt");
+  if (ap) ap.classList.toggle("sl-dup", dup);
+  if (fb) fb.parentElement.hidden = edit || !root.querySelector(".kapw:not([data-kp=standort]):not(.sl-off):not(.sl-dup)");
   root.querySelectorAll(".kapw").forEach(w => {
     w.classList.toggle("kapedit", edit);
     const t = w.querySelector(".kapt"), closed = !edit && w.dataset.closed === "1";

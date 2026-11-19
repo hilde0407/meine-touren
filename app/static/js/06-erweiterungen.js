@@ -515,7 +515,7 @@ VIEWS.map = async () => {
   if (!box || !map) return;
   box.insertAdjacentHTML(
     "beforeend",
-    `<div class="box"><button class="chip" id="mht" title="Heatmap: zeichnet alle Touren in einer Farbe übereinander – häufig begangene Wege leuchten stärker. Ersetzt die farbigen Tracklinien (Knopf 'Strecken' ändert deren Farbe und Breite).">Heatmap</button><button class="chip" id="mph" title="Zeigt als rosa Punkte alle Fotos. Haben sie keinen eigenen Aufnahmeort, wird er aus der Uhrzeit auf dem Track der Tour berechnet (blassere Punkte). Antippen öffnet das Foto mit Zeit und Tour. Gilt für das gewählte Jahr.">Fotos</button></div>`
+    `<div class="box"><button class="chip" id="mht" aria-pressed="false" title="Heatmap: zeichnet alle Touren in einer Farbe übereinander – häufig begangene Wege leuchten stärker. Ersetzt die farbigen Tracklinien (Knopf 'Strecken' ändert deren Farbe und Breite).">Heatmap</button><button class="chip" id="mph" aria-pressed="false" title="Zeigt als rosa Punkte alle Fotos. Haben sie keinen eigenen Aufnahmeort, wird er aus der Uhrzeit auf dem Track der Tour berechnet (blassere Punkte). Antippen öffnet das Foto mit Zeit und Tour. Gilt für das gewählte Jahr.">Fotos</button></div>`
   );
   const m = map,
     hl = L.layerGroup().addTo(m),
@@ -560,12 +560,14 @@ VIEWS.map = async () => {
   $("#mht").onclick = e => {
     heat = !heat;
     e.target.classList.toggle("on", heat);
+    e.target.setAttribute("aria-pressed", String(heat));
     mainGrp.forEach(g => (heat ? m.removeLayer(g) : m.addLayer(g)));
     drawHeat();
   };
   $("#mph").onclick = async e => {
     phOn = !phOn;
     e.target.classList.toggle("on", phOn);
+    e.target.setAttribute("aria-pressed", String(phOn));
     if (phOn && !phs) {
       try {
         phs = await api("/api/photos?gps=true&est=true&limit=60000");
@@ -578,7 +580,7 @@ VIEWS.map = async () => {
   };
   box.insertAdjacentHTML(
     "beforeend",
-    `<div class="box"><button class="chip" id="mbx" title="Alle Touren auflisten, die den sichtbaren Kartenausschnitt berühren">Touren im Ausschnitt</button></div>`
+    `<div class="box"><button class="chip mact" id="mbx" aria-haspopup="dialog" title="Alle Touren auflisten, die den sichtbaren Kartenausschnitt berühren">Touren im Ausschnitt</button></div>`
   );
   $("#mbx").onclick = () => {
     document.querySelectorAll(".uimod.mbxfen").forEach(x => x.remove());     // ein zweiter Klick ersetzt das Fenster, es gibt nie mehrere

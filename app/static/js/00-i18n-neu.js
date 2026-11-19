@@ -2971,4 +2971,6 @@ Reisebericht (PDF) || Trip report (PDF) || Rapport de voyage (PDF) || Informe de
 zum Übernehmen unten „Einstellungen speichern“ || press “Save settings” below to apply || pour appliquer, utilisez « Enregistrer les réglages » en bas || para aplicarlo, usa «Guardar ajustes» abajo
 3D-Flug || 3D flight || Vol 3D || Vuelo 3D
 3D-Flug über alles || 3D flight over everything || Vol 3D au-dessus de tout || Vuelo 3D sobre todo
-Links dieser Tour || Links of this tour || Liens de cette tour || Enlaces de esta tour`;
+Links dieser Tour || Links of this tour || Liens de cette tour || Enlaces de esta tour
+Mein Standort || My location || Ma position || Mi ubicación
+Filter & Ebenen || Filters & layers || Filtres et couches || Filtros y capas`;
