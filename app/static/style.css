@@ -316,16 +316,7 @@ html.mob #tabbar a,html.mob #tabbar button{flex:0 1 84px;min-height:52px}
 html.mob #tabbar .ti{font-size:20px}
 html.viewer [hidden]{display:none!important}
 
-/* ---- 2.4: Aufzeichnung – Kennzahlen, Halten-zum-Beenden ---- */
-.recgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
-.recgrid .rc{background:var(--card2,#00000014);border-radius:10px;padding:8px 2px}
-.recgrid .rc b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
-.recgrid .rc span{display:block;font-size:12px;opacity:.7;line-height:1.2;margin-top:2px}
-@media (max-width:380px){.recgrid{grid-template-columns:repeat(2,1fr)}}
-.holdstop{position:relative;overflow:hidden;background:#b3402d;color:#fff;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.holdstop .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:#00000055;transition:width .15s ease-out}
-.holdstop.holding .fill{width:100%;transition:width 1.5s linear}
-.holdstop .lbl{position:relative}
+/* (2.4: Kennzahlen-Raster und Halten-zum-Beenden der Aufzeichnung – seit 3.49.0 ersetzt, siehe „Aufzeichnen im Mittelpunkt“ am Ende der Datei) */
 .livetip.me{background:#1a73e8}
 
 /* ---- 2.4.1: Verwaltung – einheitliche Karten ---- */
@@ -2158,3 +2149,109 @@ html.mob #flt .fclear:not([hidden]){grid-column:1/-1;order:5;display:inline-flex
 html.mob #flt select{font-size:15px;padding:6px 8px}
 html.mob #flt [hidden]{display:none!important}
 .rbh{font:600 16px var(--d);margin:14px 0 2px}.rbv{margin:0 0 6px}
+
+/* ---- 3.49.0: Android-App – Aufzeichnen im Mittelpunkt (Tab-Leiste, Menüpunkt, Aufzeichnungsseite). Gilt nur, wo die App-Brücke (window.MTApp) die Elemente anlegt. ---- */
+:root{--rec:#b3402d;--rec-ok:#2f8f5f}
+@keyframes recpulse{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.35);opacity:0}}
+@keyframes recblink{50%{opacity:.25}}
+/* Tab-Leiste: runder, angehobener Knopf in der Mitte; Zustand als Farbe, Zeichen/Zeit im Knopf und Wort darunter */
+html.mob #tabbar.app a.trec{flex:0 1 96px;position:relative;border-top-color:transparent;color:#fff;gap:2px;justify-content:flex-end;padding-bottom:4px}
+#tabbar .trc{position:relative;display:flex;align-items:center;justify-content:center;width:56px;height:56px;margin-top:-24px;border-radius:50%;box-sizing:border-box;background:var(--yellow);color:var(--yellow-ink);border:4px solid var(--forest);font:700 15px/1 var(--d);font-variant-numeric:tabular-nums}
+#tabbar a.trec[data-s=idle] .trc{color:var(--rec)}
+#tabbar a.trec.on .trc{box-shadow:0 0 0 2px #fff}
+#tabbar a.trec[data-s=recording] .trc{background:var(--rec);color:#fff}
+#tabbar a.trec[data-s=recording] .trc::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid #ff8f7d;animation:recpulse 1.8s ease-out infinite;pointer-events:none}
+#tabbar a.trec[data-s=recording] .trl{color:#ffb4a6;font-weight:700}
+#tabbar a.trec[data-s=paused] .trl,#tabbar a.trec[data-s=finished] .trl{color:var(--yellow);font-weight:700}
+/* Menüleiste (Ansicht „Computer“ in der App): Aufzeichnen als gelbe Pille, läuft = rot mit Zeit */
+nav a[data-k=record]{flex:none;align-self:center;height:36px;margin:0 10px 0 3px;padding:0 16px 0 14px;gap:8px;border:0;border-radius:99px;background:var(--yellow);color:var(--yellow-ink);white-space:nowrap}
+nav a[data-k=record]:hover{color:var(--yellow-ink);filter:brightness(1.06)}
+nav a[data-k=record]::before{content:"";flex:none;width:11px;height:11px;border-radius:50%;background:var(--rec)}
+nav a[data-k=record].on{color:var(--yellow-ink);box-shadow:0 0 0 2px #fff}
+nav a[data-k=record] .nrt{font-variant-numeric:tabular-nums}nav a[data-k=record] .nrt:empty{display:none}
+nav a[data-k=record][data-s=recording]{background:var(--rec);color:#fff}
+nav a[data-k=record][data-s=recording]::before{background:#fff;animation:recblink 1.6s ease-in-out infinite}
+nav a[data-k=record][data-s=recording].on,nav a[data-k=record][data-s=recording]:hover{color:#fff}
+/* Aufzeichnungsseite */
+.rec{max-width:560px;margin:0 auto}
+.rec .recsr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.rec .sec{margin-bottom:10px}
+.recgps{display:flex;align-items:center;gap:10px;margin:0 0 16px;font:600 18px var(--b)}
+.rgi{flex:none;width:13px;height:13px;border-radius:50%;background:var(--mut)}
+[data-q=ok]>.rgi{background:var(--rec-ok)}[data-q=warn]>.rgi{background:var(--yellow);box-shadow:0 0 0 1.5px var(--dv-warn)}[data-q=bad]>.rgi{background:var(--dv-bad)}[data-q=search]>.rgi{animation:recblink 1.2s ease-in-out infinite}
+[data-q=bad]>#rgpst{color:var(--dv-bad)}[data-q=""]>.rgi{display:none}
+.rechint{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;padding:12px 14px;margin:0 0 14px;border:1px solid color-mix(in srgb,var(--yellow) 60%,var(--rule));border-left:4px solid var(--yellow);border-radius:var(--r);background:color-mix(in srgb,var(--yellow) 10%,var(--card))}
+.rechint>span:first-child{flex:1 1 220px;min-width:0}.rechint b{font-weight:600}.rechint[data-p=saved]{border-color:var(--rule);border-left-color:var(--dv-ok);background:var(--card)}
+.rechb{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.rec .rechint .btn{min-height:48px}
+.recsports{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 20px}
+.recsp{min-height:48px;padding:4px 6px;border:1.5px solid color-mix(in srgb,var(--ink) 28%,transparent);border-radius:var(--r);background:var(--card);color:var(--ink);font:600 16px var(--d);letter-spacing:.2px;cursor:pointer;overflow-wrap:anywhere}
+.recsp[aria-checked=true]{background:var(--yellow);border-color:var(--yellow);color:var(--yellow-ink);font-weight:700}
+/* Start: ein Wegweiser – das eine laute Element der Seite */
+.recstart{display:flex;align-items:center;gap:16px;width:100%;min-height:96px;padding:10px 58px 10px 22px;border:0;background:var(--yellow);color:var(--yellow-ink);font:700 30px/1.05 var(--d);letter-spacing:.3px;text-align:left;cursor:pointer;
+clip-path:polygon(0 0,calc(100% - 40px) 0,100% 50%,calc(100% - 40px) 100%,0 100%);-webkit-tap-highlight-color:transparent}
+.recstart .rsd{flex:none;width:34px;height:34px;border-radius:50%;background:var(--rec);box-shadow:0 0 0 5px #24100026}
+.recstart:active{filter:brightness(.93)}.recstart:focus-visible{outline:0;box-shadow:inset 0 0 0 4px var(--yellow-ink)}
+.recnote{margin:10px 0 20px;font-size:14px}
+.reclbl{display:block;margin:0 0 4px;color:var(--mut);font:500 15px var(--b)}
+.rec select,.rec input:not([type=checkbox]){width:100%;min-height:48px;font-size:16px}
+.recroute{margin:0 0 6px}.recroute #rrinfo{margin-top:6px;min-height:0}
+.recgi{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;margin-top:8px}.recgi .chk{display:inline-flex;align-items:center;min-height:48px;margin:0}.rec .recgi .btn{min-height:48px}
+.recset{margin-top:18px;padding:0;border-top:2px solid var(--ink)}
+.recset>summary{display:flex;align-items:center;gap:10px;min-height:52px;list-style:none;font:600 18px var(--d)}
+.recset>summary::-webkit-details-marker{display:none}
+.recset>summary::after{content:"";margin-left:auto;margin-right:6px;width:9px;height:9px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:rotate(45deg);transition:transform .15s}
+.recset[open]>summary::after{transform:rotate(-135deg)}
+.recsetb{padding:2px 0 8px}.recf{margin:0 0 18px}.recf>small{display:block;margin-top:6px;font-size:14px}
+.rectog{display:flex;align-items:center;min-height:48px;margin:0}.rectog small{display:block;font-size:14px}
+.recpair{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rec .recpair .btn{min-height:48px}
+.recseg{display:flex;gap:8px;flex-wrap:wrap}.rec .recseg .btn{min-height:48px;padding:6px 18px;font-size:16px}
+.recdev{display:grid;gap:2px}.recdev b{font:600 18px var(--d)}.recdev a{font-weight:600}
+.recbks{margin-top:8px}.recbk{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--rule)}.rec .recbk .btn{min-height:48px}
+.recrowb{display:flex;gap:8px;flex-wrap:wrap}.rec .recrowb .btn{min-height:48px}
+/* läuft / pausiert */
+.recstate{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;margin:0 0 4px;min-height:32px}
+.recstate .rsdot{flex:none;width:14px;height:14px;border-radius:50%;background:var(--rec);animation:recblink 1.6s ease-in-out infinite}
+.recstate b{font:700 20px var(--d);letter-spacing:.2px}
+.recstate .rsg{display:inline-flex;align-items:center;gap:7px;margin-left:auto;color:var(--mut);font:500 15px var(--b)}.recstate .rsg[data-q=bad],.recstate .rsg[data-q=warn]{color:var(--ink);font-weight:600}
+.rec[data-s=paused] .recstate{padding:12px 14px;margin:0 0 10px;border-radius:var(--r);background:var(--yellow);color:var(--yellow-ink)}
+.rec[data-s=paused] .recstate .rsdot{width:auto;height:auto;border-radius:0;background:none;animation:none;display:flex}
+.rec[data-s=paused] .recstate b{font-size:26px}.recstate .rsp{flex:1 0 100%;font:500 15px var(--b)}
+.rec[data-s=paused] .recstate .rsg{color:var(--yellow-ink)}
+.recbig{font-family:var(--d);font-weight:700;font-variant-numeric:tabular-nums;line-height:.98;letter-spacing:-.5px}
+.rbt{font-size:clamp(64px,21vw,96px)}.rbd{font-size:clamp(56px,18vw,84px);margin-top:2px}
+.rbd small{margin-left:10px;font:600 26px var(--d);letter-spacing:0;color:var(--mut)}
+.rec[data-s=paused] .recbig{color:var(--mut)}
+.recrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:12px 0 0;border-top:2px solid var(--ink);border-bottom:1px solid var(--rule)}
+.recrow.four{grid-template-columns:repeat(4,minmax(0,1fr));border-top:0;margin:0}
+.recrow>div{padding:8px 4px 8px 12px;border-left:1px solid var(--rule);min-width:0}.recrow>div:first-child{padding-left:0;border-left:0}
+.recrow b{display:block;font:700 26px/1.1 var(--d);font-variant-numeric:tabular-nums;white-space:nowrap}.recrow span{display:block;color:var(--mut);font-size:13px;line-height:1.25}
+.recrow.sum{margin:0 0 18px}.recrow.sum b{font-size:30px}.recrow.sum span{font-size:14px}.recrow b small{margin-left:5px;font:600 16px var(--d);color:var(--mut)}
+.reclater{margin-top:18px}
+.reclive{margin:12px 0 0;padding:12px 14px;border:1px solid var(--rule);border-radius:var(--r-l);background:var(--card);text-align:center}
+.recprog{height:6px;margin-top:8px;border-radius:3px;background:var(--soft);overflow:hidden}.recprog>div{height:6px;border-radius:3px;background:#2f6bd9}
+.recprof{display:block;width:100%;height:70px;margin-top:8px}
+.recwx{margin:12px 0 0;padding:10px 14px;border:1px solid var(--rule);border-left:5px solid #d97706;border-radius:var(--r);background:var(--card)}.recwx[data-l=danger]{border-left-color:#dc2626}
+.recmap{position:relative;z-index:0;isolation:isolate;height:340px;margin:12px 0 0;border-radius:var(--r-l);overflow:hidden;background:var(--soft)}
+html.mob .recmap{height:max(180px,calc(100vh - 558px - var(--wbh,0px) - env(safe-area-inset-bottom)));height:max(180px,calc(100dvh - 558px - var(--wbh,0px) - env(safe-area-inset-bottom)))}
+.recdock{display:grid;gap:8px;padding:12px 0}
+html.mob .recdock{position:sticky;bottom:calc(64px + env(safe-area-inset-bottom));z-index:5;margin:0 -14px;padding:10px 14px 12px;background:var(--bg);border-top:1px solid var(--rule)}
+.recb{display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:6px 12px;border:1.5px solid color-mix(in srgb,var(--ink) 38%,transparent);border-radius:var(--r);background:var(--card);color:var(--ink);font:600 18px var(--d);letter-spacing:.3px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.recb.big{min-height:66px;font:700 22px var(--d)}.recb svg{flex:none}.recb:active{filter:brightness(.93)}.recb:disabled{opacity:.6}
+.recb.stop{background:var(--rec);border-color:var(--rec);color:#fff}.recb.go{background:var(--yellow);border-color:var(--yellow);color:var(--yellow-ink)}
+.recb.quiet{border-color:transparent;background:none;color:var(--mut);text-decoration:underline}
+.rec [hidden]{display:none!important}
+.recinfo{margin:4px 0 0;font-size:14px;min-height:20px}
+.recwps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 16px}.uimod .recf input{width:100%;min-height:48px}
+/* fertig */
+.recup{display:flex;gap:12px;align-items:flex-start;padding:14px;margin:0 0 14px;border:1px solid var(--rule);border-left:5px solid var(--mut);border-radius:var(--r);background:var(--card)}
+.recup b{display:block;font:700 22px/1.15 var(--d)}.recup #rups{display:block;margin-top:2px;color:var(--mut);font-size:15px}.recup>span:last-child{min-width:0}
+.rupi{flex:none;width:16px;height:16px;margin-top:5px;border-radius:50%;background:var(--mut)}
+.recup[data-p=uploading] .rupi{animation:recblink 1.2s ease-in-out infinite}
+.recup[data-p=saved]{border-left-color:var(--dv-ok)}.recup[data-p=saved] .rupi{background:var(--rec-ok)}
+.recup[data-p=waiting]{border-left-color:var(--yellow)}.recup[data-p=waiting] .rupi{background:var(--yellow);box-shadow:0 0 0 1.5px var(--dv-warn)}
+.recup[data-p=error]{border-left-color:var(--dv-bad)}.recup[data-p=error] .rupi{background:var(--dv-bad)}
+.recact{display:grid;gap:8px}
+.reclog{max-height:320px;padding:8px;overflow:auto;border-radius:8px;background:var(--soft);font-size:12px;white-space:pre-wrap}
+/* Meine Geräte: die App als Aufzeichnungsgerät */
+.dvc.app{background:color-mix(in srgb,var(--yellow) 30%,var(--card));color:var(--ink)}.dvappnote{margin:0 0 14px}
+@media (prefers-reduced-motion:reduce){#tabbar a.trec[data-s=recording] .trc::after{animation:none;opacity:.7;transform:none}nav a[data-k=record][data-s=recording]::before,.recstate .rsdot,[data-q=search]>.rgi,.recup[data-p=uploading] .rupi{animation:none}.recset>summary::after{transition:none}}

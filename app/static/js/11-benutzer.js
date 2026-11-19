@@ -18,7 +18,7 @@ async function aboutBox() {
     if (window.MTApp && MTApp.version) app = MTApp.version();
   } catch (e) {}
   const m = uiModal(`<h3>Meine Touren</h3>
-    <div class="rows"><div class="r"><span>Android-App<small>${app ? "läuft auf diesem Gerät" : "du nutzt gerade den Browser"}</small></span><b>${app ? esc(app) : "–"}</b></div>
+    <div class="rows"><div class="r"><span>Android-App<small>${window.MTApp ? "läuft auf diesem Gerät" : "du nutzt gerade den Browser"}</small></span><b>${window.MTApp ? esc(app || "?") : "–"}</b></div>
     <div class="r"><span>Server<small>dein Meine-Touren-Server</small></span><b>${esc((sv.split(" ·")[0] || "?").trim())}</b></div></div>
     <p class="mut fs13 m6-0-0">${esc(sv)}</p>
     <h4 class="m18-0-6">Ersteller</h4>
@@ -49,7 +49,7 @@ function codeBox(w, ticket) {
     e.preventDefault();
     try {
       const j = await postJson("/api/login/2fa", {ticket, code: $("#au_c").value});
-      location.hash = "#/dash";
+      location.hash = typeof appHome === "function" ? appHome() : "#/dash";      // in der Android-App: Startseite der App (30-aufzeichnen.js)
       location.reload();
     } catch (x) {
       $("#au_e").textContent = x.message;
@@ -101,7 +101,7 @@ function showAuth(kind, msg = "") {
     try {
       const j = await postJson(setup ? "/api/setup" : "/api/login", {name: $("#au_n").value, password: $("#au_p").value, email: setup ? $("#au_m").value : undefined});
       if (j && j.need_2fa) return codeBox(w, j.ticket);
-      location.hash = "#/dash";
+      location.hash = typeof appHome === "function" ? appHome() : "#/dash";
       location.reload();
     } catch (x) {
       $("#au_e").textContent = x.message;
@@ -144,8 +144,13 @@ function applyView() {
     ["tours", "Touren", `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 19l6-10 4 6 2-3 6 7z"/><circle cx="17" cy="6" r="1.6"/></svg>`],
     ["photos", "Fotos", `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>`],
   ];
+  /* 3.49.0 – in der Android-App steht „Aufzeichnen“ in der Mitte (runder Knopf mit Zustand, siehe recNavPaint in 30-aufzeichnen.js); „Fotos“ liegt dort unter „Mehr“ */
+  const inApp = !!window.MTApp,
+    tab = ([k, l, i]) => `<a href="#/${k}" data-k="${k}"><span class="ti">${i}</span><span>${l}</span></a>`,
+    rec = `<a href="#/record" data-k="record" class="trec" data-s="idle"><span class="trc" aria-hidden="true"></span><span class="trl">Aufzeichnen</span></a>`;
+  tb.classList.toggle("app", inApp);
   tb.innerHTML =
-    T.map(([k, l, i]) => `<a href="#/${k}" data-k="${k}"><span class="ti">${i}</span><span>${l}</span></a>`).join("") +
+    (inApp ? tab(T[0]) + tab(T[2]) + rec + tab(T[1]) : T.map(tab).join("")) +
     `<button id="tmore"><span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span><span>Mehr</span></button>`;
   $("#tmore").onclick = () => {
     const items = isViewer() ? MORE.filter(x => ["trips", "places"].includes(x[0])) : MORE,
@@ -178,11 +183,16 @@ function applyView() {
     m2.querySelector("#mab").onclick = () => (m2.remove(), aboutBox());
   };
   markTabs();
+  if (inApp && typeof recNavSync === "function") recNavSync();
 }
 const markTabs = () => {
   const k = (location.hash || "#/dash").replace(/^#\/?/, "").split(/[/?]/)[0],
     kk = k === "tour" || k === "flight" ? "tours" : k;
-  document.querySelectorAll("#tabbar a").forEach(a => a.classList.toggle("on", a.dataset.k === kk));
+  document.querySelectorAll("#tabbar a").forEach(a => {
+    a.classList.toggle("on", a.dataset.k === kk);
+    if (a.dataset.k === kk) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
+  });
 };
 addEventListener("hashchange", markTabs);
 let rzT;

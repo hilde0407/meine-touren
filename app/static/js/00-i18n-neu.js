@@ -245,17 +245,13 @@ Zurück zu Name und Zeitraum, wie sie erkannt wurden || Back to name and period 
 Es wurde nichts empfangen. || Nothing was received. || Rien n’a été reçu. || No se recibió nada.
 Teilen-Menü || Share menu || Menu Partager || Menú Compartir
 Ohne Installation: In Chrome ⋮ → „Zum Startbildschirm hinzufügen“. || Without installing: in Chrome ⋮ → “Add to Home screen”. || Sans installation : dans Chrome ⋮ → « Ajouter à l’écran d’accueil ». || Sin instalar: en Chrome ⋮ → «Añadir a la pantalla de inicio».
-Strecke km || Distance km || Distance km || Distancia km
 Höhe m || Altitude m || Altitude m || Altitud m
 Höchster Punkt m || Highest point m || Point culminant m || Punto más alto m
 Die Strecke hat zu wenige Punkte || The track has too few points || Le tracé a trop peu de points || El trazado tiene muy pocos puntos
 Für die Aufzeichnung braucht die App Zugriff auf den genauen Standort. || For recording, the app needs access to your precise location. || Pour l’enregistrement, l’application a besoin d’accéder à votre position précise. || Para grabar, la aplicación necesita acceso a tu ubicación exacta.
-● Aufzeichnung starten || ● Start recording || ● Démarrer l’enregistrement || ● Iniciar grabación
-Die Aufzeichnung läuft auch bei ausgeschaltetem Bildschirm weiter. Tipp: Akku-Optimierung für diese App ausschalten. || Recording continues even when the screen is off. Tip: turn off battery optimisation for this app. || L’enregistrement continue même écran éteint. Astuce : désactivez l’optimisation de la batterie pour cette application. || La grabación continúa aunque la pantalla esté apagada. Consejo: desactiva la optimización de batería para esta aplicación.
 Akku-Einstellungen öffnen || Open battery settings || Ouvrir les réglages de batterie || Abrir ajustes de batería
 Aufzeichnung beendet || Recording finished || Enregistrement terminé || Grabación terminada
 Auf den Server speichern || Save to the server || Enregistrer sur le serveur || Guardar en el servidor
-■ Beenden – gedrückt halten || ■ Stop – hold down || ■ Arrêter – maintenir appuyé || ■ Detener: mantén pulsado
 Jede beendete Aufzeichnung wird zusätzlich auf dem Handy gesichert (die letzten 10). Falls eine Tour nicht auf dem Server angekommen ist, kannst du sie hier erneut speichern. || Every finished recording is also backed up on the phone (the last 10). If a tour did not reach the server, you can save it again here. || Chaque enregistrement terminé est aussi sauvegardé sur le téléphone (les 10 derniers). Si un parcours n’est pas arrivé sur le serveur, vous pouvez l’enregistrer à nouveau ici. || Cada grabación terminada se guarda además en el móvil (las últimas 10). Si una ruta no llegó al servidor, puedes guardarla de nuevo aquí.
 {} Foto(s) aus früheren Aufzeichnungen liegen noch auf dem Handy (sie sind auch in der Galerie). || {} photo(s) from earlier recordings are still on the phone (they are also in the gallery). || {} photo(s) d’enregistrements précédents se trouvent encore sur le téléphone (elles sont aussi dans la galerie). || {} foto(s) de grabaciones anteriores siguen en el móvil (también están en la galería).
 Wird gespeichert … || Saving … || Enregistrement … || Guardando …
@@ -264,15 +260,12 @@ Keine Route – freie Aufzeichnung. || No route – free recording. || Pas d’i
 Die Ansagen beginnen, sobald du auf der Route bist. || Voice guidance starts as soon as you are on the route. || Le guidage vocal commence dès que vous êtes sur l’itinéraire. || La guía por voz empieza en cuanto estés en la ruta.
 Route konnte nicht geladen werden: {} || The route could not be loaded: {} || L’itinéraire n’a pas pu être chargé : {} || No se pudo cargar la ruta: {}
 Aufzeichnung wirklich verwerfen? || Really discard the recording? || Vraiment abandonner l’enregistrement ? || ¿Descartar de verdad la grabación?
-Die Aufzeichnung bleibt auf dem Handy erhalten – später erneut versuchen. || The recording stays on the phone – try again later. || L’enregistrement reste sur le téléphone – réessayez plus tard. || La grabación se conserva en el móvil: inténtalo de nuevo más tarde.
 {} Foto(s) aufgenommen || {} photo(s) taken || {} photo(s) prise(s) || {} foto(s) tomada(s)
 · {} warten auf den Upload{} || · {} waiting for upload{} || · {} en attente d’envoi{} || · {} esperando a subirse{}
 Version {} · Server: {} || Version {} · Server: {} || Version {} · Serveur : {} || Versión {} · Servidor: {}
 Serveradresse ändern || Change server address || Modifier l’adresse du serveur || Cambiar dirección del servidor
 App-Test und Protokoll || App test and log || Test de l’application et journal || Prueba de la aplicación y registro
 Serveradresse wirklich ändern? || Really change the server address? || Vraiment modifier l’adresse du serveur ? || ¿Cambiar de verdad la dirección del servidor?
-Eine Aufzeichnung wartet auf das Speichern – tippen. || A recording is waiting to be saved – tap. || Un enregistrement attend d’être sauvegardé – appuyez. || Hay una grabación pendiente de guardar: toca aquí.
-Aufzeichnung läuft – tippen zum Anzeigen. || Recording in progress – tap to show. || Enregistrement en cours – appuyez pour l’afficher. || Grabación en curso: toca para verla.
 Nur in der Android-App verfügbar. || Only available in the Android app. || Disponible uniquement dans l’application Android. || Solo disponible en la aplicación de Android.
 Server erreichbar ({} ms) || Server reachable ({} ms) || Serveur joignable ({} ms) || Servidor accesible ({} ms)
 Aufzeichnung: || Recording: || Enregistrement : || Grabación:
@@ -626,7 +619,6 @@ Nächste Abbiegung || Next turn || Prochain virage || Próximo giro
 Ziel in {} km || Destination in {} km || Arrivée dans {} km || Destino en {} km
 Ankunft ca. {} Uhr || Arrival about {} || Arrivée vers {} || Llegada hacia las {}
 {} m · noch ↑ {} m · höchster Punkt {} m || {} m · ↑ {} m to go · highest point {} m || {} m · encore ↑ {} m · point culminant {} m || {} m · aún ↑ {} m · punto más alto {} m
-📍 Wegpunkt setzen || 📍 Set waypoint || 📍 Poser un point de passage || 📍 Marcar punto de ruta
 Rast || Rest stop || Pause || Descanso
 Aussicht || View || Point de vue || Mirador
 Quelle || Spring || Source || Fuente
@@ -650,12 +642,10 @@ Start || Start || Départ || Inicio
 Ziel || Finish || Arrivée || Meta
 {} Foto || {} photo || {} photo || {} foto
 {} Fotos || {} photos || {} photos || {} fotos
-Wetterwarnung unterwegs (Gewitter, Starkregen, Sturm, Kälteeinbruch) || Weather warning on the way (thunderstorm, heavy rain, storm, cold snap) || Alerte météo en chemin (orage, fortes pluies, tempête, coup de froid) || Aviso meteorológico en ruta (tormenta, lluvia intensa, temporal, bajada de temperatura)
 3 Stunden || 3 hours || 3 heures || 3 horas
 12 Stunden || 12 hours || 12 heures || 12 horas
 24 Stunden || 24 hours || 24 heures || 24 horas
 3 Tage || 3 days || 3 jours || 3 días
-📡 Live-Standort für Kontakt teilen || 📡 Share live location with a contact || 📡 Partager la position en direct avec un contact || 📡 Compartir ubicación en directo con un contacto
 Wird erstellt … || Being created … || Création en cours … || Creando …
 Link bis {} Uhr erstellt. || Link created, valid until {}. || Lien créé, valable jusqu’à {}. || Enlace creado, válido hasta las {}.
 Die App meldet den Standort nur über HTTPS – bitte eine https-Serveradresse verwenden. || The app only reports the location over HTTPS – please use an https server address. || L’application ne transmet la position qu’en HTTPS – utilisez une adresse de serveur en https. || La aplicación solo envía la ubicación por HTTPS: usa una dirección de servidor https.
@@ -3187,4 +3177,114 @@ Dein {}. Besuch dieser Strecke || Your visit number {} to this route || Votre {}
 {}. Besuch || Visit {} || Passage {} || Visita {}
 Üblich = Median der Vergleichstouren. Unter 80 % davon gilt als kürzer, weniger oder langsamer, über 125 % als länger, mehr oder schneller. Tempo = Strecke geteilt durch die gesamte Dauer. || Usual = median of the comparison tours. Below 80 % of it counts as shorter, less or slower, above 125 % as longer, more or faster. Pace = distance divided by total time. || Habituel = médiane des sorties de comparaison. En dessous de 80 % : plus court, moins ou plus lent ; au-dessus de 125 % : plus long, plus ou plus rapide. Tempo = distance divisée par la durée totale. || Habitual = mediana de las rutas de comparación. Por debajo del 80 % cuenta como más corto, menos o más lento, por encima del 125 % como más largo, más o más rápido. Ritmo = distancia dividida por el tiempo total.
 Zu dieser Tour gibt es weder einen verknüpften Plan noch genug Vergleichstouren (mindestens 5). Der Baustein erscheint nur bei Touren mit Plan oder genug Vergleichstouren. || This tour has neither a linked plan nor enough comparison tours (at least 5). The block only appears for tours with a plan or enough comparison tours. || Cette sortie n’a ni plan lié ni assez de sorties de comparaison (au moins 5). Le bloc n’apparaît que pour les sorties avec plan ou assez de sorties de comparaison. || Esta ruta no tiene ni un plan vinculado ni suficientes rutas de comparación (al menos 5). El bloque solo aparece en rutas con plan o con suficientes rutas de comparación.
+Aufzeichnen || Record || Enregistrer || Grabar
+Läuft || Running || En cours || En curso
+Pausiert || Paused || En pause || En pausa
+Aufzeichnung läuft || Recording in progress || Enregistrement en cours || Grabación en curso
+Aufzeichnung pausiert || Recording paused || Enregistrement en pause || Grabación en pausa
+Aufzeichnung wartet auf das Hochladen || Recording is waiting to be uploaded || L’enregistrement attend d’être envoyé || La grabación está pendiente de subirse
+Startseite der App || App start page || Page d’accueil de l’application || Página de inicio de la aplicación
+GPS ist ausgeschaltet || GPS is switched off || Le GPS est désactivé || El GPS está desactivado
+GPS ist ausgeschaltet. || GPS is switched off. || Le GPS est désactivé. || El GPS está desactivado.
+GPS ist eingeschaltet || GPS is switched on || Le GPS est activé || El GPS está activado
+Suche GPS … || Searching for GPS … || Recherche du GPS … || Buscando GPS …
+Kein GPS-Signal seit {} || No GPS signal for {} || Pas de signal GPS depuis {} || Sin señal GPS desde hace {}
+GPS bereit || GPS ready || GPS prêt || GPS listo
+GPS bereit, ±{} m || GPS ready, ±{} m || GPS prêt, ±{} m || GPS listo, ±{} m
+GPS ungenau, ±{} m || GPS inaccurate, ±{} m || GPS imprécis, ±{} m || GPS impreciso, ±{} m
+Standort-Berechtigung fehlt || Location permission missing || Autorisation de localisation manquante || Falta el permiso de ubicación
+Standort-Berechtigung fehlt. || Location permission missing. || Autorisation de localisation manquante. || Falta el permiso de ubicación.
+In den Android-Schnellmenüs „Standort“ einschalten. || Turn on “Location” in the Android quick settings. || Activez « Position » dans les réglages rapides d’Android. || Activa «Ubicación» en los ajustes rápidos de Android.
+Benachrichtigungen blockiert. || Notifications blocked. || Notifications bloquées. || Notificaciones bloqueadas.
+Die Aufzeichnung zeigt eine Dauer-Benachrichtigung; ohne Erlaubnis beendet Android sie früher. || The recording shows a permanent notification; without permission Android ends it sooner. || L’enregistrement affiche une notification permanente ; sans autorisation, Android l’arrête plus tôt. || La grabación muestra una notificación permanente; sin permiso, Android la termina antes.
+Bitte in den Android-Einstellungen der App erlauben. || Please allow them in the app’s Android settings. || Veuillez les autoriser dans les réglages Android de l’application. || Permítelas en los ajustes de Android de la aplicación.
+Akku-Optimierung ist aktiv. || Battery optimisation is active. || L’optimisation de la batterie est active. || La optimización de batería está activa.
+Android kann die Aufzeichnung im Hintergrund beenden. || Android may end the recording in the background. || Android peut arrêter l’enregistrement en arrière-plan. || Android puede terminar la grabación en segundo plano.
+Verstanden || Got it || Compris || Entendido
+Jetzt hochladen || Upload now || Envoyer maintenant || Subir ahora
+Route mit Sprachansagen || Route with voice guidance || Itinéraire avec guidage vocal || Ruta con indicaciones por voz
+Bergtour || Mountain tour || Course en montagne || Ruta de montaña
+Lauf || Run || Course à pied || Carrera
+Skitour || Ski tour || Ski de randonnée || Esquí de travesía
+Schneeschuh || Snowshoeing || Raquettes || Raquetas de nieve
+Langlauf || Cross-country skiing || Ski de fond || Esquí de fondo
+Aufzeichnung starten || Start recording || Démarrer l’enregistrement || Iniciar grabación
+Läuft auch bei ausgeschaltetem Bildschirm weiter. || Keeps running when the screen is off. || Continue même écran éteint. || Sigue funcionando con la pantalla apagada.
+Einstellungen der Aufzeichnung || Recording settings || Réglages de l’enregistrement || Ajustes de la grabación
+Name der Tour (optional) || Tour name (optional) || Nom du parcours (facultatif) || Nombre de la ruta (opcional)
+wird sonst automatisch vergeben || otherwise assigned automatically || sinon attribué automatiquement || si no, se asigna automáticamente
+Fotos während der Aufzeichnung || Photos during the recording || Photos pendant l’enregistrement || Fotos durante la grabación
+Sofort auf den Server laden || Upload to the server immediately || Envoyer tout de suite sur le serveur || Subir al servidor de inmediato
+Gesammelt am Ende laden || Upload all together at the end || Envoyer toutes ensemble à la fin || Subir todas juntas al final
+Wetterwarnung unterwegs || Weather warning on the way || Alerte météo en route || Aviso meteorológico en ruta
+Gewitter, Starkregen, Sturm, Kälteeinbruch || Thunderstorms, heavy rain, storm, cold snap || Orages, fortes pluies, tempête, coup de froid || Tormentas, lluvia intensa, temporal, ola de frío
+Live-Standort für einen Kontakt || Live location for a contact || Position en direct pour un contact || Ubicación en directo para un contacto
+Link teilen || Share link || Partager le lien || Compartir enlace
+Gilt auf diesem Handy. || Applies on this phone. || Valable sur ce téléphone. || Se aplica en este móvil.
+Läuft eine Aufzeichnung, öffnet die App immer diese Seite. || While a recording is running, the app always opens this page. || Si un enregistrement est en cours, l’application ouvre toujours cette page. || Si hay una grabación en curso, la aplicación abre siempre esta página.
+Was die App nach dem Öffnen zeigt. || What the app shows after opening. || Ce que l’application affiche à l’ouverture. || Lo que muestra la aplicación al abrirse.
+Läuft eine Aufzeichnung, öffnet die App immer die Aufzeichnung. || While a recording is running, the app always opens the recording. || Si un enregistrement est en cours, l’application ouvre toujours l’enregistrement. || Si hay una grabación en curso, la aplicación abre siempre la grabación.
+Dieses Gerät || This device || Cet appareil || Este dispositivo
+Diese App-Fassung meldet das Handy noch nicht als Aufzeichnungsgerät an. || This app version does not yet register the phone as a recording device. || Cette version de l’application n’enregistre pas encore le téléphone comme appareil d’enregistrement. || Esta versión de la aplicación aún no registra el móvil como dispositivo de grabación.
+Mit der aktuellen App (ab 3.49.0) erscheint es unter „Meine Geräte“. || With the current app (3.49.0 or later) it appears under “My devices”. || Avec l’application actuelle (à partir de 3.49.0), il apparaît sous « Mes appareils ». || Con la aplicación actual (desde 3.49.0) aparece en «Mis dispositivos».
+Gesicherte Aufzeichnungen || Backed-up recordings || Enregistrements sauvegardés || Grabaciones guardadas
+Beim Server bekannt seit {}. || Known to the server since {}. || Connu du serveur depuis le {}. || Conocido por el servidor desde el {}.
+Beim Server bekannt. || Known to the server. || Connu du serveur. || Conocido por el servidor.
+Noch nicht angemeldet || Not registered yet || Pas encore enregistré || Aún no registrado
+Wird beim ersten Hochladen angemeldet und erscheint dann unter „Meine Geräte“. || It is registered with the first upload and then appears under “My devices”. || Il sera enregistré lors du premier envoi et apparaîtra ensuite sous « Mes appareils ». || Se registra con la primera subida y luego aparece en «Mis dispositivos».
+Nicht prüfbar || Cannot be checked || Vérification impossible || No se puede comprobar
+Der Server ist gerade nicht erreichbar. || The server cannot be reached right now. || Le serveur est injoignable pour le moment. || Ahora mismo no se puede acceder al servidor.
+Aufnahme läuft || Recording || Enregistrement en cours || Grabando
+Es wird nichts aufgezeichnet, bis du fortsetzt. || Nothing is recorded until you resume. || Rien n’est enregistré tant que vous n’avez pas repris. || No se graba nada hasta que reanudes.
+Ansagen || Voice guidance || Guidage vocal || Indicaciones por voz
+Testansage || Test announcement || Annonce de test || Anuncio de prueba
+Pausieren || Pause || Mettre en pause || Pausar
+Fortsetzen || Resume || Reprendre || Reanudar
+Beenden || Stop || Arrêter || Detener
+Weitere Werte || More values || Autres valeurs || Más valores
+Aufzeichnung beenden? || Stop the recording? || Arrêter l’enregistrement ? || ¿Detener la grabación?
+Die Tour wird abgeschlossen und auf deinen Server geladen. Danach lässt sie sich nicht fortsetzen. || The tour is completed and uploaded to your server. After that it cannot be continued. || Le parcours est terminé et envoyé sur votre serveur. Il ne pourra plus être poursuivi ensuite. || La ruta se cierra y se sube a tu servidor. Después ya no se puede continuar.
+Weiter aufzeichnen || Keep recording || Continuer l’enregistrement || Seguir grabando
+Wegpunkt setzen || Set waypoint || Poser un point de passage || Marcar punto de ruta
+Höhenprofil der Route || Elevation profile of the route || Profil altimétrique de l’itinéraire || Perfil de altitud de la ruta
+Name der Tour || Tour name || Nom du parcours || Nombre de la ruta
+leer lassen = automatisch || leave empty = automatic || laisser vide = automatique || dejar vacío = automático
+Die Tour wird auf deinen Server geladen. || The tour is being uploaded to your server. || Le parcours est envoyé sur votre serveur. || La ruta se está subiendo a tu servidor.
+Die Tour ist auf deinem Server. || The tour is on your server. || Le parcours est sur votre serveur. || La ruta está en tu servidor.
+Dieses Handy ist jetzt unter „Meine Geräte“ als „{}“ angemeldet. || This phone is now registered under “My devices” as “{}”. || Ce téléphone est maintenant enregistré sous « Mes appareils » en tant que « {} ». || Este móvil está ahora registrado en «Mis dispositivos» como «{}».
+Wartet auf Netz – wird später gesendet || Waiting for network – will be sent later || En attente de réseau – sera envoyé plus tard || Esperando red: se enviará más tarde
+Die Aufzeichnung bleibt sicher auf dem Handy. || The recording stays safely on the phone. || L’enregistrement reste en sécurité sur le téléphone. || La grabación se conserva segura en el móvil.
+Sobald der Server erreichbar ist, wird sie von selbst hochgeladen. || As soon as the server can be reached, it is uploaded automatically. || Dès que le serveur est joignable, il est envoyé automatiquement. || En cuanto se pueda acceder al servidor, se sube automáticamente.
+Bitte anmelden – danach wird die Tour gesendet. || Please sign in – the tour will be sent afterwards. || Veuillez vous connecter – le parcours sera envoyé ensuite. || Inicia sesión: después se enviará la ruta.
+Bitte anmelden. || Please sign in. || Veuillez vous connecter. || Inicia sesión.
+Speichern nicht möglich || Cannot save || Enregistrement impossible || No se puede guardar
+📷 {} Foto(s) werden mit hochgeladen. || 📷 {} photo(s) will be uploaded as well. || 📷 {} photo(s) seront envoyées en même temps. || 📷 También se subirán {} foto(s).
+Jetzt erneut versuchen || Try again now || Réessayer maintenant || Reintentar ahora
+Neue Aufzeichnung || New recording || Nouvel enregistrement || Nueva grabación
+Später senden, neue Aufzeichnung || Send later, new recording || Envoyer plus tard, nouvel enregistrement || Enviar más tarde, nueva grabación
+Name geändert. || Name changed. || Nom modifié. || Nombre cambiado.
+Aufzeichnung verwerfen? || Discard the recording? || Abandonner l’enregistrement ? || ¿Descartar la grabación?
+Später senden? || Send later? || Envoyer plus tard ? || ¿Enviar más tarde?
+Später senden || Send later || Envoyer plus tard || Enviar más tarde
+Die Aufzeichnung bleibt als Sicherung auf dem Handy (die App behält die letzten 10) und wird gesendet, sobald der Server erreichbar ist. Du kannst gleich eine neue Aufzeichnung beginnen. || The recording stays on the phone as a backup (the app keeps the last 10) and is sent as soon as the server can be reached. You can start a new recording right away. || L’enregistrement reste sur le téléphone comme sauvegarde (l’application conserve les 10 derniers) et sera envoyé dès que le serveur sera joignable. Vous pouvez commencer tout de suite un nouvel enregistrement. || La grabación se queda en el móvil como copia (la aplicación conserva las últimas 10) y se envía en cuanto se pueda acceder al servidor. Puedes empezar enseguida una nueva grabación.
+Die Aufzeichnung enthielt keine GPS-Punkte und wurde nicht gespeichert. || The recording contained no GPS points and was not saved. || L’enregistrement ne contenait aucun point GPS et n’a pas été sauvegardé. || La grabación no contenía puntos GPS y no se ha guardado.
+1 Aufzeichnung ist noch nicht auf dem Server. || 1 recording is not on the server yet. || 1 enregistrement n’est pas encore sur le serveur. || 1 grabación aún no está en el servidor.
+{} Aufzeichnungen sind noch nicht auf dem Server. || {} recordings are not on the server yet. || {} enregistrements ne sont pas encore sur le serveur. || {} grabaciones aún no están en el servidor.
+Sie liegen sicher auf dem Handy und werden gesendet, sobald der Server erreichbar ist. || They are stored safely on the phone and are sent as soon as the server can be reached. || Ils sont en sécurité sur le téléphone et seront envoyés dès que le serveur sera joignable. || Están guardadas de forma segura en el móvil y se envían en cuanto se pueda acceder al servidor.
+1 Aufzeichnung hochgeladen. || 1 recording uploaded. || 1 enregistrement envoyé. || 1 grabación subida.
+{} Aufzeichnungen hochgeladen. || {} recordings uploaded. || {} enregistrements envoyés. || {} grabaciones subidas.
+1 weitere wartet noch. || 1 more is still waiting. || 1 autre attend encore. || 1 más sigue pendiente.
+{} weitere warten noch. || {} more are still waiting. || {} autres attendent encore. || {} más siguen pendientes.
+Der Server ist gerade nicht erreichbar – später erneut versuchen. || The server cannot be reached right now – try again later. || Le serveur est injoignable pour le moment – réessayez plus tard. || Ahora mismo no se puede acceder al servidor: inténtalo más tarde.
+Serveradresse ändern? || Change the server address? || Modifier l’adresse du serveur ? || ¿Cambiar la dirección del servidor?
+Aufzeichnungs-App || Recording app || Application d’enregistrement || Aplicación de grabación
+Zuletzt aufgezeichnet am {} || Last recorded on {} || Dernier enregistrement le {} || Última grabación el {}
+Noch nichts aufgezeichnet || Nothing recorded yet || Rien d’enregistré pour l’instant || Aún no se ha grabado nada
+Bisherige Handy-Aufzeichnungen zuordnen … || Assign earlier phone recordings … || Associer les anciens enregistrements du téléphone … || Asignar grabaciones anteriores del móvil …
+Bisherige Handy-Aufzeichnungen zuordnen? || Assign earlier phone recordings? || Associer les anciens enregistrements du téléphone ? || ¿Asignar las grabaciones anteriores del móvil?
+{} Handy-Aufzeichnung ohne Gerät „{}“ zuordnen? || Assign {} phone recording without a device to “{}”? || Associer {} enregistrement du téléphone sans appareil à « {} » ? || ¿Asignar {} grabación del móvil sin dispositivo a «{}»?
+{} Handy-Aufzeichnungen ohne Gerät „{}“ zuordnen? || Assign {} phone recordings without a device to “{}”? || Associer {} enregistrements du téléphone sans appareil à « {} » ? || ¿Asignar {} grabaciones del móvil sin dispositivo a «{}»?
+Touren, die schon ein Gerät haben, bleiben unberührt. Je Tour lässt sich die Zuordnung auf der Tourseite wieder ändern. || Tours that already have a device remain untouched. The assignment can be changed again for each tour on the tour page. || Les parcours qui ont déjà un appareil restent inchangés. L’association peut être modifiée pour chaque parcours sur sa page. || Las rutas que ya tienen un dispositivo no se tocan. La asignación se puede volver a cambiar en la página de cada ruta.
+Dieses Gerät hat die Android-App beim Hochladen einer Aufzeichnung selbst angemeldet. Name, Modell und Notiz kannst du frei ändern – die App erkennt ihr Gerät trotzdem wieder. || The Android app registered this device itself when uploading a recording. You can freely change name, model and note – the app still recognises its device. || L’application Android a enregistré elle-même cet appareil lors de l’envoi d’un enregistrement. Vous pouvez modifier librement le nom, le modèle et la note – l’application reconnaît quand même son appareil. || La aplicación de Android registró este dispositivo al subir una grabación. Puedes cambiar libremente el nombre, el modelo y la nota: la aplicación reconoce igualmente su dispositivo.
+App-Test || App test || Test de l’application || Prueba de la aplicación
 `;

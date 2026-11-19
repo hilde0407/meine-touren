@@ -22,6 +22,12 @@ const dvPeriod = g => {
 };
 /* „Das liefert diese Uhr“: Kanäle, die bei mindestens 20 % der Touren des Geräts vorkommen (aus den Messwert-Zusatzdateien) */
 const dvGives = q => (!q || !q.n_tours ? "" : `<span class="dvsub dvgive"><b>Das liefert diese Uhr:</b> ${q.channels.length ? q.channels.map(c => `<span class="dvch" title="bei ${c.share} % der Touren">${esc(c.label)}</span>`).join(" ") : `<span class="mut">noch keine Messwerte erkannt (Verwaltung → „Messwerte nachladen“)</span>`}</span>`);
+/* 3.49.0 – von der Android-App angemeldetes Gerät: Android- und App-Version, letzte Aufzeichnung */
+const dvAppInfo = g => {
+  if (!g.app) return "";
+  const tech = [g.app.android ? `Android ${g.app.android}` : "", g.app.version ? `App ${g.app.version}` : ""].filter(Boolean).join(" · ");
+  return `${tech ? `<span class="dvsub" data-notr>${esc(tech)}</span>` : ""}<span class="dvsub dvapprec">${g.app.last_rec ? `Zuletzt aufgezeichnet am ${fmtDatum(g.app.last_rec)}` : "Noch nichts aufgezeichnet"}</span>`;
+};
 const dvTours = n => (n === 0 ? "Noch keine Touren" : `${n} ${n === 1 ? "Tour" : "Touren"}`);
 
 /* Aktionsmenü an einem Knopf (fest positioniert, damit nichts abgeschnitten wird) */
@@ -60,6 +66,7 @@ function devForm(dv, g, done) {
   const m = dvBox(`<h2>${g.id ? "Gerät bearbeiten" : "Neues Gerät"}</h2>
    <div class="dvtop"><span id="dvpv"></span><div><div class="row"><button class="btn alt sm" id="dvpick" type="button">Foto wählen</button><button class="btn ghost sm" id="dvpclr" type="button">Foto entfernen</button></div>
      <small class="dvh">Dein eigenes Foto, zum Beispiel von der Uhr am Handgelenk. Es bleibt auf deinem Server und wird auf höchstens 512 Pixel verkleinert.</small><input type="file" id="dvfile" accept="image/*" hidden></div></div>
+   ${g.app ? `<p class="dvh dvappnote">Dieses Gerät hat die Android-App beim Hochladen einer Aufzeichnung selbst angemeldet. Name, Modell und Notiz kannst du frei ändern – die App erkennt ihr Gerät trotzdem wieder.</p>` : ""}
    <div class="dvf"><label for="dvn">Name</label><input id="dvn" maxlength="80" value="${esc(g.name || "")}" placeholder="z. B. Amazfit Balance 2"><small class="dvh">So heißt das Gerät bei allen Touren („Quelle“). Du kannst es jederzeit umbenennen.</small></div>
    <div class="dvf"><label for="dvk">Art</label><select id="dvk">${dv.kinds.map(k => `<option value="${k.kind}" ${k.kind === g.kind ? "selected" : ""}>${esc(k.label)}</option>`).join("")}</select><small class="dvh">Touren einer Zepp-Uhr gehören zu einem Zepp-Gerät, Garmin-Touren zu einem Garmin-Gerät usw.</small></div>
    <div class="dvf"><label for="dvm">Modell (optional)</label><input id="dvm" maxlength="80" value="${esc(g.model || "")}" placeholder="z. B. Balance 2"><small class="dvh">Nur zur Anzeige: Das Modell steht in der Geräteliste unter dem Namen und hilft, ähnliche Geräte auseinanderzuhalten. An der Auswertung ändert es nichts.</small></div>
@@ -652,6 +659,21 @@ async function dvUhrFelder(scope, id, name) {
   }
 }
 
+/* 3.49.0 – ältere Handy-Aufzeichnungen ohne Gerät (vor der Geräteanmeldung der App hochgeladen) auf Wunsch dem App-Gerät zuordnen */
+async function devAdoptPhone(g, done) {
+  const n = g.app.orphans;
+  if (!(await uiConfirm({title: "Bisherige Handy-Aufzeichnungen zuordnen?", ok: "Zuordnen", text: `${n} ${n === 1 ? "Handy-Aufzeichnung" : "Handy-Aufzeichnungen"} ohne Gerät „${g.name}“ zuordnen?\n\nTouren, die schon ein Gerät haben, bleiben unberührt. Je Tour lässt sich die Zuordnung auf der Tourseite wieder ändern.`}))) return;
+  try {
+    const r = await api(`/api/devices/${g.id}/adopt-phone`, dvJson("POST", {}));
+    MET_CACHE.clear();
+    await loadTours().catch(() => {});
+    uiAlert({title: "Touren zugeordnet", text: `${r.n} Touren zugeordnet.`});
+  } catch (e) {
+    await uiAlert({title: "Nicht möglich", text: e.message});
+  }
+  done();
+}
+
 /* ---------- Abschnitt in der Verwaltung ---------- */
 async function devPanel() {
   const root = $("#devsec");
@@ -666,11 +688,12 @@ async function devPanel() {
       <div class="dvn">${esc(g.name)}</div>
       <span class="dvsub">${esc(devKindLabel(dv, g.kind))}${g.model ? ` · ${esc(g.model)}` : ""}</span>
       ${!g.model && g.zsrc ? `<span class="dvsub">Zepp meldet: ${esc(g.zsrc)}</span>` : ""}
-      <span class="dvper">${dvPeriod(g).map(x => `<span>${esc(x)}</span>`).join("")}</span>
+      ${dvAppInfo(g)}
+      ${g.app && !g.since && !g.until ? "" : `<span class="dvper">${dvPeriod(g).map(x => `<span>${esc(x)}</span>`).join("")}</span>`}
       ${g.note ? `<span class="dvsub">${esc(g.note)}</span>` : ""}
-      <div class="dvchips"><span class="dvc ${g.active ? "on" : ""}">${g.active ? "Aktiv" : "Deaktiviert"}</span><span class="dvc">${dvTours(g.n)}</span></div>
-      ${dvGives(qmap[g.id])}
-      <button class="dvuhr" type="button" data-uhr="${g.id}">Was liefert diese Uhr?</button></div>
+      <div class="dvchips">${g.app ? `<span class="dvc app">Aufzeichnungs-App</span>` : ""}<span class="dvc ${g.active ? "on" : ""}">${g.active ? "Aktiv" : "Deaktiviert"}</span><span class="dvc">${dvTours(g.n)}</span></div>
+      ${g.app && !(qmap[g.id] && qmap[g.id].channels && qmap[g.id].channels.length) ? "" : dvGives(qmap[g.id])}
+      ${g.app ? "" : `<button class="dvuhr" type="button" data-uhr="${g.id}">Was liefert diese Uhr?</button>`}</div>
       ${viewer ? "" : `<button class="dvmore" aria-haspopup="menu" aria-expanded="false" title="Aktionen" aria-label="Aktionen">${DV_SVG.dots}</button>`}
       ${qmap[g.id] ? `<details class="dvq" data-q="${g.id}" ${dvqOpen(g.id) ? "open" : ""}><summary aria-expanded="${dvqOpen(g.id)}"><span>Genauigkeit</span>${qmap[g.id].n_eval ? `<span class="dvqs ${DVQ_CLS[qmap[g.id].verdict.level] || "none"}">${esc(qmap[g.id].verdict.label)}</span>` : `<span class="dvqs none">noch nicht ausgewertet</span>`}</summary><div class="dvqb">${dvQBody(qa, qmap[g.id], viewer)}</div></details>` : ""}</div>`;
   const empty = `<div class="dvempty"><span class="dvav">${dvIcon("zepp")}</span><h3>Noch kein Gerät angelegt</h3>
@@ -745,8 +768,9 @@ async function devPanel() {
       dvMenu(mb, [
         {icon: DV_SVG.edit, label: "Bearbeiten", run: () => devForm(dv, g, again)},
         {icon: DV_SVG.photo, label: g.photo ? "Foto ändern oder entfernen" : "Foto hinzufügen", run: () => devForm(dv, g, again)},
-        {icon: DV_SVG.info, label: "Was liefert diese Uhr?", run: () => dvUhrFelder("device", g.id, g.name)},
+        ...(g.app ? [] : [{icon: DV_SVG.info, label: "Was liefert diese Uhr?", run: () => dvUhrFelder("device", g.id, g.name)}]),
         {icon: DV_SVG.range, label: "Touren zuordnen …", run: () => devRange(dv, g, again)},
+        ...(g.app && g.app.orphans ? [{icon: DV_SVG.range, label: "Bisherige Handy-Aufzeichnungen zuordnen …", run: () => devAdoptPhone(g, again)}] : []),
         {icon: g.active ? DV_SVG.off : DV_SVG.on, label: g.active ? "Deaktivieren" : "Aktivieren", run: async () => {
           try { await api("/api/devices/" + g.id, dvJson("PATCH", {active: !g.active})); MET_CACHE.clear(); } catch (er) { await uiAlert({title: "Nicht möglich", text: er.message}); }
           again();
