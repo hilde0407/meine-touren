@@ -2,6 +2,12 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.44.0 – Fitness-Einordnung
+
+- Neuer Baustein „Fitness-Einordnung“ (nur im Katalog, Kategorie Statistik): Umfang gegen die WHO-Empfehlung, Regelmäßigkeit und altersbezogene Intensität der letzten 12 Wochen mit Gesamtwert, Einordnung in Worten und Trend. Orientierung, keine medizinische Aussage.
+- Das Geburtsjahr (nur das Jahr) bleibt privat im Konto; nie in Freigaben, Exporten oder bei Betrachtern.
+- Übersicht am Handy: Zepp-Knopf allein in der ersten Zeile, „Seite anpassen“ und „Ansichten“ nebeneinander darunter.
+
 ## Version 3.43.0 – Karten-Paket
 
 - Bedienkästen der Karte in fester Reihenfolge (Jahr, Sportarten | Strecken, Heatmap, Fotos | Standort, Touren im Ausschnitt | Seite anpassen); Standort-Knopf heißt „Mein Standort“; Schalter melden ihren Zustand.

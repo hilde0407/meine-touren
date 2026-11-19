@@ -297,6 +297,7 @@ Eingeblendet steht ganz oben auf der Übersicht die einklappbare Leiste **Zeitra
 
 **Was ist das? Die Erklärung in der App.** Beim Schalter in „Seite anpassen“ (**Was ist das?**) und in der Leiste selbst (**ⓘ Hilfe**, mit `aria-expanded`) klappt dieselbe kurze Erklärung auf:
 
+* **Fitness-Einordnung** (nur im Katalog, Kategorie „Statistik“): ordnet deine letzten 12 Wochen in Relation zu deinem Alter ein (Umfang gegen die WHO-Empfehlung, Regelmäßigkeit, Intensität mit Puls oder Aufstieg je Stunde). Du gibst nur dein Geburtsjahr an; es bleibt privat in deinem Konto und erscheint nie in Freigaben, Exporten oder bei Betrachtern. Formeln und Quellen stehen im Baustein unter „So wird gerechnet“. Orientierung, keine medizinische Aussage.
 * Ein Zeitraum für alle Bausteine der Seite, die mit Zeit zu tun haben, statt für jeden Baustein einzeln.
 * Ein Baustein behält seinen eigenen Zeitraum, wenn du in seinen Einstellungen „Zeitraum der Seite verwenden“ abschaltest.
 * Bausteine ohne Zeitbezug, zum Beispiel „Heute vor X Jahren“ und die Erinnerungen, sind nicht betroffen.
