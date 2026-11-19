@@ -4,7 +4,7 @@ Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabe
 
 ## Version 3.44.0 – Fitness-Einordnung
 
-- Neuer Baustein „Fitness-Einordnung“ (nur im Katalog, Kategorie Statistik): Umfang gegen die WHO-Empfehlung, Regelmäßigkeit und altersbezogene Intensität der letzten 12 Wochen mit Gesamtwert, Einordnung in Worten und Trend. Orientierung, keine medizinische Aussage.
+- Neuer Baustein „Fitness-Einordnung“ (nur im Katalog, Kategorie Zahlen): Umfang gegen die WHO-Empfehlung, Regelmäßigkeit und altersbezogene Intensität der letzten 12 Wochen mit Gesamtwert, Einordnung in Worten und Trend. Orientierung, keine medizinische Aussage.
 - Das Geburtsjahr (nur das Jahr) bleibt privat im Konto; nie in Freigaben, Exporten oder bei Betrachtern.
 - Übersicht am Handy: Zepp-Knopf allein in der ersten Zeile, „Seite anpassen“ und „Ansichten“ nebeneinander darunter.
 

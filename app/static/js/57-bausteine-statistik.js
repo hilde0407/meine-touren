@@ -240,7 +240,7 @@ async function ftMal(c, b) {
 
 Object.assign(window.SL_WT, {
   fitness: {
-    fam: "uebersicht", cat: "statistik", icon: "heart", name: "Fitness-Einordnung", title: () => "Fitness-Einordnung", defaults: {}, filter: {range: null}, w: "halb", seiten: ["uebersicht", "statistik"],
+    fam: "uebersicht", cat: "zahlen", icon: "heart", name: "Fitness-Einordnung", title: () => "Fitness-Einordnung", defaults: {}, filter: {range: null}, w: "halb", seiten: ["uebersicht", "statistik"],
     desc: "Ordnet deine Aktivität der letzten 12 Wochen in Relation zu deinem Alter ein: Umfang (Dauer pro Woche gegen die WHO-Empfehlung), Regelmäßigkeit und Intensität (Puls im Verhältnis zum geschätzten Maximalpuls, sonst Aufstieg je Stunde) mit Gesamtwert und Trend. Braucht dein Geburtsjahr, das privat bleibt. Orientierung, keine medizinische Aussage.",
     preview: () => slPrev('<p class="slcmp">72 von 100</p><p class="slcmpn">Gut für dein Alter</p>' + slBr(72)),
     render: ftMal,

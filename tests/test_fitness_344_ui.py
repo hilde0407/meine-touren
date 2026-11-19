@@ -76,7 +76,7 @@ def test_nicht_auf_standardseiten_nur_im_katalog(pw, app):
         c = pg.locator('.slcard:has([data-add="fitness"])')
         expect(c).to_have_count(1, timeout=T)
         assert "Fitness-Einordnung" in c.inner_text() and "keine medizinische Aussage" in c.inner_text() and c.locator(".slpv").inner_html().strip()
-        assert pg.locator(".slcat .slcath", has_text="Statistik").count() == 1
+        assert "Zahlen" in pg.locator(".slcat .slcath").all_inner_texts()
         c.locator("[data-add=fitness]").click()
         expect(pg.locator('[data-wtype="fitness"]')).to_have_count(1, timeout=T)
         expect(pg.locator('[data-wtype="fitness"] input#ftj0')).to_be_visible(timeout=T)
