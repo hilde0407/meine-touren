@@ -211,7 +211,7 @@ function trackPanel(anchor, onChange, withBy) {
     <label>Breite <input type="range" id="tsb" min="2" max="9" step="1"> <span id="tsbv"></span></label>
     <label><input type="checkbox" id="tsk"> weiße Umrandung (besser sichtbar auf Satellit/Topo)</label>
     <button class="btn sm alt" type="button" id="tsx">Schließen</button>`;
-  anchor.parentElement.appendChild(d);
+  (document.documentElement.classList.contains("mob") && anchor.closest(".mapbox") || anchor.parentElement).appendChild(d);      // Handy: fest am unteren Rand, auch wenn der Auslöser im zugeklappten Blatt „Filter & Ebenen“ liegt
   const fitPanel = () => {      // nicht links aus dem Bild ragen lassen (Karte, 1280 px: Auslöser sitzt links)
     d.classList.remove("tl");
     if (d.getBoundingClientRect().left < 8) d.classList.add("tl");
