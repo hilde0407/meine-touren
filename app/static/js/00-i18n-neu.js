@@ -3161,4 +3161,10 @@ Orientierung, keine Sicherheitsgarantie. || Guidance, not a safety guarantee. ||
 Wetter, Lawinenlage und Gelände selbst prüfen. || Check weather, avalanche conditions and terrain yourself. || Vérifiez vous-même la météo, le risque d’avalanche et le terrain. || Comprueba tú mismo el tiempo, el riesgo de aludes y el terreno.
 Deine Quellen für Wetter und Lawinenbericht: || Your sources for weather and avalanche report: || Vos sources pour la météo et le bulletin d’avalanches : || Tus fuentes para el tiempo y el boletín de aludes:
 Noch keine Quelle für Wetter oder Lawinenbericht gespeichert – unter „Notizen & Quellen“ kannst du Links dazu ablegen. || No source for weather or avalanche report saved yet – you can add links under “Notes & sources”. || Aucune source de météo ou de bulletin d’avalanches enregistrée – vous pouvez ajouter des liens sous « Notes et sources ». || Todavía no hay ninguna fuente de tiempo o boletín de aludes guardada: puedes añadir enlaces en «Notas y fuentes».
+Letzte Sicherung vor 1 Tag. || Last backup 1 day ago. || Dernière sauvegarde il y a 1 jour. || Última copia de seguridad hace 1 día.
+Letzte Sicherung vor {} Tagen. || Last backup {} days ago. || Dernière sauvegarde il y a {} jours. || Última copia de seguridad hace {} días.
+Es gibt noch keine Sicherung deiner Touren. || There is no backup of your tours yet. || Il n’existe pas encore de sauvegarde de vos sorties. || Todavía no hay ninguna copia de seguridad de tus rutas.
+Die letzte Sicherung ist nicht lesbar oder beschädigt. || The latest backup is unreadable or damaged. || La dernière sauvegarde est illisible ou endommagée. || La última copia de seguridad es ilegible o está dañada.
+Morgen erinnern || Remind me tomorrow || Me le rappeler demain || Recordármelo mañana
+Zur Sicherung || Go to backup || Vers la sauvegarde || Ir a la copia de seguridad
 `;

@@ -2129,3 +2129,9 @@ details.slallg>summary:focus-visible{outline:3px solid var(--ink);outline-offset
 .slshow[hidden]{display:none}
 html.mob .zlrings{grid-template-columns:1fr}
 html.mob .zlrow select,html.mob .zlrow input{flex:1 1 100%;width:100%}
+/* 3.48.0 Sicherungs-Wächter: schmale Warnleiste unter der Kopfzeile; Text und Symbol tragen die Aussage, die Farbe nur die Stufe */
+.wbar{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:6px 24px;background:var(--dv-warn-bg,#fff3cd);color:var(--dv-warn,#5c4500);border-bottom:1px solid color-mix(in srgb,var(--dv-warn,#5c4500) 35%,transparent);font-size:14px;line-height:1.35}
+.wbar.bad{background:var(--dv-bad-bg,#fde4e1);color:var(--dv-bad,#7a1f1a);border-bottom-color:color-mix(in srgb,var(--dv-bad,#7a1f1a) 40%,transparent)}
+.wbar .wbi{font-weight:700;flex:none}.wbar .wbt{flex:1 1 220px;min-width:0}.wbar .wba{display:flex;gap:8px;flex:none;margin-left:auto}
+.wbar .btn{min-height:30px;white-space:nowrap}
+html.mob .wbar{padding:6px 16px}html.mob .wbar .wba{width:100%;justify-content:flex-end}html.mob .wbar .btn{min-height:36px;padding:6px 14px}

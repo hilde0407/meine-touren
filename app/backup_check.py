@@ -100,6 +100,44 @@ def api_status(request: Request):
     return status()
 
 
+def waechter(tage=None):
+    """Sicherungs-Wächter (3.48.0, Warnleiste unter der Kopfzeile). Keine zweite Berechnung: das Alter und die Schwelle kommen aus der Hinweis-Regel „sicherung“
+    (hinweise._sicherung, Schwelle sicherung_tage, Standard 7), der Fehlerfall aus status() (Anlegen fehlgeschlagen) und der letzten Prüfung (nur, wenn sie genau die neueste Datei betrifft).
+    Gibt {zeige, art, ...} zurück; art: keine (noch nie eine Sicherung, obwohl es Touren gibt) | fehler (grund: angelegt | pruefung) | alt (alter_tage ≥ schwelle)."""
+    from . import hinweise
+    t = hinweise.DEFAULTS["sicherung_tage"] if tage in (None, "") else max(1, min(365, int(tage)))
+    out = {"zeige": False, "art": "", "grund": "", "alter_tage": None, "datum": None, "schwelle": t, "ausblendbar": True}
+    if not db.one("SELECT 1 x FROM tours LIMIT 1"):
+        return out                                                    # nichts zu sichern
+    st = status()
+    r = hinweise._sicherung({"sicherung_tage": t}, None, None)
+    d = r[1] if r else {}
+    g = st.get("geprueft") or {}
+    nb = st.get("neueste")
+    pruef_bad = bool(g) and g.get("ok") is False and nb is not None and g.get("name") == nb["name"]
+    if nb is not None and not r:                                      # Alter in Ordnung: Tage trotzdem für den Fehlertext berechnen
+        d = {"alter_tage": max(0, int((time.time() - nb["ts"]) // 86400)), "datum": time.strftime("%Y-%m-%d", time.localtime(nb["ts"]))}
+    if st["fehler"] or pruef_bad:
+        out.update(zeige=True, art="fehler", grund="angelegt" if st["fehler"] else "pruefung", ausblendbar=False)
+    elif nb is None:
+        out.update(zeige=True, art="keine")
+    elif r:
+        out.update(zeige=True, art="alt")
+    if out["zeige"]:
+        out["alter_tage"] = d.get("alter_tage")
+        out["datum"] = d.get("datum")
+    return out
+
+
+@router.get("/api/backup/waechter")
+def api_waechter(request: Request, tage: str = ""):
+    extras._admin_only(request)
+    try:
+        return waechter(tage)
+    except ValueError:
+        raise HTTPException(400, "„tage“ muss eine Zahl sein")
+
+
 @router.post("/api/backup/check")
 def api_check(request: Request):
     """Admin: neueste Sicherung prüfen (Probelauf im Temp-Verzeichnis, ändert nichts an den Live-Daten) und das Ergebnis merken."""

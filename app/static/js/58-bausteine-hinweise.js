@@ -292,3 +292,58 @@ Object.entries(HN_ART).forEach(([art, A]) => {
 });
 /* 3.45.0 Baustein „Ziele“ (Code in 52-bausteine-uebersicht.js; nutzt die Hinweis-Hilfen dieser Datei für die Darstellung „Nur Warnung“) */
 window.SL_WT.ziele = zlType();
+
+
+/* ---- 3.48.0 Sicherungs-Wächter: schmale Warnleiste unter der Kopfzeile (nur Admin-Konten, nie für Betrachter) ----
+   Daten: GET /api/backup/waechter (nutzt die Hinweis-Regel „Sicherung“ und den Sicherungszustand; keine zweite Berechnung im Browser).
+   Abfrage einmal beim Laden und beim Seitenwechsel höchstens alle 5 Minuten, sonst aus dem Speicher. „Morgen erinnern“ merkt sich den Tag je Browser und Konto (nicht im Fehlerfall). */
+const WB_TTL = 5 * 60 * 1000;
+let wbData = null, wbAt = 0, wbLoad = null, wbMem = "";
+const wbTag = () => {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+};
+const wbKey = () => "wachterBis:" + (ME.user ? ME.user.uid : "0");
+const wbVerborgen = () => {
+  try { return localStorage.getItem(wbKey()) === wbTag(); } catch (e) { return wbMem === wbTag(); }
+};
+function wbText(d) {
+  if (d.art === "fehler") return d.grund === "pruefung" ? "Die letzte Sicherung ist nicht lesbar oder beschädigt." : "Die letzte Sicherung ist fehlgeschlagen.";
+  if (d.art === "keine") return "Es gibt noch keine Sicherung deiner Touren.";
+  if (d.alter_tage === 1) return "Letzte Sicherung vor 1 Tag.";
+  return `Letzte Sicherung vor ${nf(d.alter_tage, 0)} Tagen.`;
+}
+function wbZeichnen(d) {
+  let bar = document.getElementById("wbar");
+  const top = document.querySelector("header.top");
+  if (!d || !d.zeige || !top || !isAdmin() || isViewer() || (d.ausblendbar && wbVerborgen())) {
+    if (bar) bar.remove();
+    return;
+  }
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.id = "wbar";
+    top.insertAdjacentElement("afterend", bar);
+  }
+  const fehler = d.art === "fehler";
+  bar.className = "wbar" + (fehler ? " bad" : "");
+  bar.setAttribute("role", fehler ? "alert" : "status");
+  bar.innerHTML = `<span class="wbi" aria-hidden="true">${fehler ? "✗" : "⚠"}</span><span class="wbt"><b>Sicherung</b> <span>${wbText(d)}</span></span>` +
+    `<span class="wba">${d.ausblendbar ? `<button type="button" class="btn alt sm" id="wbhide">Morgen erinnern</button>` : ""}<a class="btn sm" id="wbgo" href="#/admin?tab=sicher">Zur Sicherung</a></span>`;
+  const h = bar.querySelector("#wbhide");
+  if (h) h.onclick = () => {
+    try { localStorage.setItem(wbKey(), wbTag()); } catch (e) {}
+    wbMem = wbTag();
+    bar.remove();
+  };
+}
+function wbAktualisieren(erzwingen) {
+  if (typeof isAdmin !== "function" || !isAdmin() || isViewer()) return wbZeichnen(null);
+  if (wbData && !erzwingen && Date.now() - wbAt < WB_TTL) return wbZeichnen(wbData);
+  if (!wbLoad) wbLoad = api("/api/backup/waechter").then(d => { wbData = d; wbAt = Date.now(); }).catch(() => {}).finally(() => { wbLoad = null; });
+  return wbLoad.then(() => wbZeichnen(wbData));
+}
+function waechterInit() {
+  wbAktualisieren(true);
+  addEventListener("hashchange", () => wbAktualisieren(false));
+}

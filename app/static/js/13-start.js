@@ -16,6 +16,7 @@ async function boot() {
   userMenu();
   await loadPrefs();
   route();
+  if (typeof waechterInit === "function") waechterInit();   // 3.48.0: Sicherungs-Wächter
 }
 
 /* ---- Verwaltung: nach Aufgaben geordnet in Reitern (statt einer langen Seite) ---- */
