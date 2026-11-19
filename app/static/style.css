@@ -2180,8 +2180,9 @@ nav a[data-k=record][data-s=recording].on,nav a[data-k=record][data-s=recording]
 .rgi{flex:none;width:13px;height:13px;border-radius:50%;background:var(--mut)}
 [data-q=ok]>.rgi{background:var(--rec-ok)}[data-q=warn]>.rgi{background:var(--yellow);box-shadow:0 0 0 1.5px var(--dv-warn)}[data-q=bad]>.rgi{background:var(--dv-bad)}[data-q=search]>.rgi{animation:recblink 1.2s ease-in-out infinite}
 [data-q=bad]>#rgpst{color:var(--dv-bad)}[data-q=""]>.rgi{display:none}
-.rechint{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;padding:12px 14px;margin:0 0 14px;border:1px solid color-mix(in srgb,var(--yellow) 60%,var(--rule));border-left:4px solid var(--yellow);border-radius:var(--r);background:color-mix(in srgb,var(--yellow) 10%,var(--card))}
-.rechint>span:first-child{flex:1 1 220px;min-width:0}.rechint b{font-weight:600}.rechint[data-p=saved]{border-color:var(--rule);border-left-color:var(--dv-ok);background:var(--card)}
+.rechint{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;padding:12px 14px;margin:0 0 14px;border:1px solid #e8cf7a;border-left:4px solid var(--yellow);border-radius:var(--r);background:#fff8dc;color:#2a2300}
+@media (prefers-color-scheme:dark){.rechint{background:#2a2508;border-color:#5d5113;color:#f4ecc4}}
+.rechint>span:first-child{flex:1 1 220px;min-width:0}.rechint b{font-weight:600}.rechint[data-p=saved]{border-color:var(--rule);border-left-color:var(--dv-ok);background:var(--card);color:var(--ink)}
 .rechb{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.rec .rechint .btn{min-height:48px}
 .recsports{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 20px}
 .recsp{min-height:48px;padding:4px 6px;border:1.5px solid color-mix(in srgb,var(--ink) 28%,transparent);border-radius:var(--r);background:var(--card);color:var(--ink);font:600 16px var(--d);letter-spacing:.2px;cursor:pointer;overflow-wrap:anywhere}
@@ -2193,7 +2194,9 @@ clip-path:polygon(0 0,calc(100% - 40px) 0,100% 50%,calc(100% - 40px) 100%,0 100%
 .recstart:active{filter:brightness(.93)}.recstart:focus-visible{outline:0;box-shadow:inset 0 0 0 4px var(--yellow-ink)}
 .recnote{margin:10px 0 20px;font-size:14px}
 .reclbl{display:block;margin:0 0 4px;color:var(--mut);font:500 15px var(--b)}
-.rec select,.rec input:not([type=checkbox]){width:100%;min-height:48px;font-size:16px}
+#main .rec select,#main .rec input:not([type=checkbox]){width:100%;min-height:48px!important;font-size:16px}
+#main .rec label.chk{min-height:48px}
+html .rec .btn,html .rec .btn.sm{min-height:48px;display:inline-flex;align-items:center;justify-content:center}
 .recroute{margin:0 0 6px}.recroute #rrinfo{margin-top:6px;min-height:0}
 .recgi{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;margin-top:8px}.recgi .chk{display:inline-flex;align-items:center;min-height:48px;margin:0}.rec .recgi .btn{min-height:48px}
 .recset{margin-top:18px;padding:0;border-top:2px solid var(--ink)}
@@ -2253,5 +2256,6 @@ html.mob .recdock{position:sticky;bottom:calc(64px + env(safe-area-inset-bottom)
 .recact{display:grid;gap:8px}
 .reclog{max-height:320px;padding:8px;overflow:auto;border-radius:8px;background:var(--soft);font-size:12px;white-space:pre-wrap}
 /* Meine Geräte: die App als Aufzeichnungsgerät */
-.dvc.app{background:color-mix(in srgb,var(--yellow) 30%,var(--card));color:var(--ink)}.dvappnote{margin:0 0 14px}
+.dvc.app{background:#f7e3a1;color:#241d00}
+@media (prefers-color-scheme:dark){.dvc.app{background:#4a3f12;color:#f6dc8c}}.dvappnote{margin:0 0 14px}
 @media (prefers-reduced-motion:reduce){#tabbar a.trec[data-s=recording] .trc::after{animation:none;opacity:.7;transform:none}nav a[data-k=record][data-s=recording]::before,.recstate .rsdot,[data-q=search]>.rgi,.recup[data-p=uploading] .rupi{animation:none}.recset>summary::after{transition:none}}

@@ -14,6 +14,8 @@ const REC_SPORTS = [
   ["nordic", "Langlauf"],
 ];
 const recApp = () => (window.MTApp ? window.MTApp : null);
+/* Einmal übersetzen und danach in Ruhe lassen (data-notr): nötig, wo das übersetzte Wort selbst ein deutscher Schlüssel der Tabelle ist („Pause“ → „Break“) */
+const recT = s => (typeof window.TL === "function" ? window.TL(s) : s);
 const recHas = fn => !!recApp() && typeof recApp()[fn] === "function";
 const recJson = (fn, def) => {
   try {
@@ -541,7 +543,7 @@ function recLiveHtml(A, st) {
     <div id="rmap" class="recmap"></div>
     <div class="recdock">
       ${recHas("takePhoto") || recHas("addWaypoint") ? `<div class="recpair">${recHas("takePhoto") ? `<button type="button" class="recb" id="rphoto">${REC_SVG.cam}<span>Foto</span></button>` : ""}${recHas("addWaypoint") ? `<button type="button" class="recb" id="rwpb">${REC_SVG.pin}<span>Wegpunkt</span></button>` : ""}</div>` : ""}
-      <div class="recpair">${s === "paused" ? `<button type="button" class="recb big go" id="rres">${REC_SVG.play}<span>Fortsetzen</span></button>` : `<button type="button" class="recb big" id="rpause">${REC_SVG.pause}<span>Pausieren</span></button>`}<button type="button" class="recb big stop" id="rstop">${REC_SVG.stop}<span>Beenden</span></button></div>
+      <div class="recpair">${s === "paused" ? `<button type="button" class="recb big go" id="rres">${REC_SVG.play}<span>Fortsetzen</span></button>` : `<button type="button" class="recb big" id="rpause">${REC_SVG.pause}<span data-notr>${recT("Pausieren")}</span></button>`}<button type="button" class="recb big stop" id="rstop">${REC_SVG.stop}<span>Beenden</span></button></div>
     </div>
     <p class="recinfo mut"><span id="rwpm">${st.wps ? `📍 ${st.wps} Wegpunkt(e) gesetzt` : ""}</span> <span id="rphinfo"></span></p>
     <details class="recset" id="rmore"${recLs("mt_rec_more") === "1" ? " open" : ""}><summary>Weitere Werte</summary><div class="recrow four">${cell("rdn", "Abstieg m")}${cell("rmax", "Höchster Punkt m")}${cell("ravg", "Ø km/h")}${cell("racc", "GPS ± m")}</div></details></div>`;

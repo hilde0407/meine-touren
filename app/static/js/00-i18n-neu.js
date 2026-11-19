@@ -3238,7 +3238,7 @@ Aufnahme läuft || Recording || Enregistrement en cours || Grabando
 Es wird nichts aufgezeichnet, bis du fortsetzt. || Nothing is recorded until you resume. || Rien n’est enregistré tant que vous n’avez pas repris. || No se graba nada hasta que reanudes.
 Ansagen || Voice guidance || Guidage vocal || Indicaciones por voz
 Testansage || Test announcement || Annonce de test || Anuncio de prueba
-Pausieren || Pause || Mettre en pause || Pausar
+Pausieren || Pause || Pause || Pausar
 Fortsetzen || Resume || Reprendre || Reanudar
 Beenden || Stop || Arrêter || Detener
 Weitere Werte || More values || Autres valeurs || Más valores
