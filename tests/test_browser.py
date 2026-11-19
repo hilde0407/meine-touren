@@ -136,8 +136,8 @@ def test_photo_selection_from_clicked(page):
     page.click("button:has-text('Fotos bearbeiten')")
     imgs = page.locator(".thumbs img[data-i]")
     assert imgs.count() == 6
-    cap = lambda sel: page.evaluate(f"[...document.querySelectorAll('.thumbs {sel}')].map(i => i.parentElement.querySelector('.cap').textContent.slice(-5)).sort()")
-    clicked = page.evaluate("document.querySelectorAll('.thumbs img[data-i]')[2].parentElement.querySelector('.cap').textContent.slice(-5)")
+    cap = lambda sel: page.evaluate(f"[...document.querySelectorAll('.thumbs {sel}')].map(i => i.parentElement.querySelector('.cap').textContent.slice(-9)).sort()")
+    clicked = page.evaluate("document.querySelectorAll('.thumbs img[data-i]')[2].parentElement.querySelector('.cap').textContent.slice(-9)")
     alle = cap("img[data-i]")
     page.evaluate("document.querySelectorAll('.thumbs img[data-i]')[2].scrollIntoView({block: 'start'})")     # nicht unter der Auswahlleiste klicken
     imgs.nth(2).click(force=True)
@@ -416,7 +416,7 @@ def test_sport_metrics_ski_and_bike(page):
     assert 1700 < m["tUp"] < 1900 and 150 < m["tDown"] < 260
     assert 500 < m["tPause"] < 700 and 220 < m["down"] < 260
     assert 25 < m["maxV"] < 33 and -14 < m["maxG"] < -10
-    assert "Aufstieg" in r["ski"] and "Abfahrtshöhenmeter" in r["ski"] and "Höchstes Tempo" in r["bike"] and "min/km" in r["run"]
+    assert "Aufstieg" in r["ski"] and "Abfahrt" in r["ski"] and "Höchstes Tempo" in r["bike"] and "min/km" in r["run"]
     assert not page.errors, page.errors
 
 
@@ -584,7 +584,7 @@ def test_plan_switch_ui_and_album_stats(page):
     page.goto(base + "#/tours"); page.reload(); quiet(page, 800)
     page.goto(base + "#/album/statstest"); quiet(page, 1500)
     txt = page.inner_text("main")
-    assert "Statistik nach Aktivität" in txt and "Abstieg" in txt and "Wandern" in txt, txt[:400]
+    assert "Statistik nach Sportart" in txt and "Abstieg" in txt and "Wandern" in txt, txt[:400]
 
 
 def test_trip_edit_and_pdf_sheet(page):
@@ -597,13 +597,13 @@ def test_trip_edit_and_pdf_sheet(page):
     page.route("**/api/trips", lambda r: r.fulfill(status=200, content_type="application/json", body=_j.dumps(fake)))
     page.goto(base + "#/trip/" + ids[0]); quiet(page, 1500)
     assert page.locator("#tredit").count() == 1 and page.locator("#trpdf").count() == 1
-    assert "Statistik nach Aktivität" in page.inner_text("main")
+    assert "Statistik nach Sportart" in page.inner_text("main")
     page.click("#tredit")
     assert page.input_value("#tn") == "Kanaren" and page.locator("#tf").count() == 1
     page.click("#tno")
     page.click("#trpdf"); quiet(page, 1800)
     txt = page.inner_text("main")
-    assert "Kanaren" in txt and "Tag für Tag" in txt and "Statistik nach Aktivität" in txt and "Drucken" in txt
+    assert "Kanaren" in txt and "Tag für Tag" in txt and "Statistik nach Sportart" in txt and "Drucken" in txt
     assert page.locator("#tm").count() == 1 and page.locator("#pdfdl").count() == 1
 
 
@@ -1050,8 +1050,8 @@ def test_nav_statistik_und_entwicklermodus(page, app_url):
     page.evaluate("() => location.hash = '#/records'"); quiet(page, 1200)
     assert page.locator(".segtabs a.on").inner_text() == "Rekorde"
     assert page.locator('#nav a[data-k="stats"]').get_attribute("class") == "on"
-    page.locator(".segtabs a", has_text="Auswertung").click(); quiet(page, 1200)
-    assert page.locator(".segtabs a.on").inner_text() == "Auswertung"
+    page.locator(".segtabs a", has_text="Orte & Ausrüstung").click(); quiet(page, 1200)
+    assert page.locator(".segtabs a.on").inner_text() == "Orte & Ausrüstung"
     page.locator("#hadm").click(); quiet(page, 1800)
     assert page.locator("#atabs .atlink").count() == 1
     assert not page.locator("#stest").is_visible()                     # Selbsttest: nur im Entwicklermodus

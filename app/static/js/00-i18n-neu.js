@@ -119,7 +119,7 @@ Sicherung wird angelegt … || Creating backup … || Création de la sauvegarde
 Version wird installiert … (dauert etwa ein bis zwei Minuten) || Installing version … (takes about one to two minutes) || Installation de la version … (environ une à deux minutes) || Instalando la versión … (tarda uno o dos minutos)
 Version {} ist installiert ✓ – Seite wird neu geladen … || Version {} is installed ✓ – reloading the page … || La version {} est installée ✓ – rechargement de la page … || La versión {} está instalada ✓: recargando la página …
 Das dauert ungewöhnlich lange. Bitte im Container || This is taking unusually long. Please, in the container || Cela prend un temps inhabituel. Veuillez, dans le conteneur, || Esto tarda más de lo habitual. Por favor, en el contenedor
-gesichert, die letzten 14 bleiben erhalten. Wiederherstellen: || backed up, the last 14 are kept. Restore: || sauvegardé, les 14 dernières sont conservées. Restauration : || guardada; se conservan las últimas 14. Restaurar:
+gesichert, die letzten 14 bleiben erhalten. Zurückspielen: || backed up, the last 14 are kept. Restore: || sauvegardé, les 14 dernières sont conservées. Restauration : || guardada; se conservan las últimas 14. Restaurar:
 {}-restore Datei || {}-restore file || {}-restore fichier || {}-restore archivo
 im Container. || in the container. || dans le conteneur. || en el contenedor.
 Passwortschutz wirklich aufheben? Danach kann jeder im Netzwerk die App öffnen. || Really remove password protection? Afterwards anyone on the network can open the app. || Vraiment supprimer la protection par mot de passe ? Ensuite, tout le monde sur le réseau pourra ouvrir l’application. || ¿Quitar de verdad la protección con contraseña? Después cualquiera en la red podrá abrir la aplicación.
@@ -2954,4 +2954,18 @@ Blick nach Süden || Looking south || Regard vers le sud || Vista hacia el sur
 Blick nach Südwesten || Looking south-west || Regard vers le sud-ouest || Vista hacia el suroeste
 Blick nach Westen || Looking west || Regard vers l’ouest || Vista hacia el oeste
 Blick nach Nordwesten || Looking north-west || Regard vers le nord-ouest || Vista hacia el noroeste
-Neigung {} Grad || Tilt {} degrees || Inclinaison {} degrés || Inclinación {} grados`;
+Neigung {} Grad || Tilt {} degrees || Inclinaison {} degrés || Inclinación {} grados
+Längste (km) || Longest (km) || Plus longue (km) || Más larga (km)
+{} von {} Kacheln fehlen noch (ca. {} Min.) || {} of {} tiles still missing (approx. {} min) || {} tuiles sur {} manquent encore (env. {} min) || Faltan {} de {} teselas (aprox. {} min)
+Keine Reise || Not a trip || Pas un voyage || No es un viaje
+Teilen & Export || Share & export || Partager & exporter || Compartir y exportar
+Freigegebene Links verwalten || Manage shared links || Gérer les liens partagés || Gestionar enlaces compartidos
+🔗 Freigegebene Links verwalten || 🔗 Manage shared links || 🔗 Gérer les liens partagés || 🔗 Gestionar enlaces compartidos
+km/h im Schnitt || km/h on average || km/h en moyenne || km/h de media
+Skifahren || Skiing || Ski || Esquí
+Orte & Ausrüstung || Places & gear || Lieux & équipement || Lugares y equipo
+Orte &amp; Ausrüstung || Places &amp; gear || Lieux &amp; équipement || Lugares y equipo
+Gipfel bestimmen || Identify peaks || Identifier les sommets || Identificar cimas
+Reisebericht (PDF) || Trip report (PDF) || Rapport de voyage (PDF) || Informe del viaje (PDF)
+{} von {} Kacheln fehlen noch || {} of {} tiles still missing || {} tuiles sur {} manquent encore || Faltan {} de {} teselas
+zum Übernehmen unten „Einstellungen speichern“ || press “Save settings” below to apply || pour appliquer, utilisez « Enregistrer les réglages » en bas || para aplicarlo, usa «Guardar ajustes» abajo`;

@@ -144,7 +144,7 @@ def test_trip_default_is_unchanged(pw, app):
         assert pg.locator("#main h1").inner_text().strip() == "La Gomera, Spanien"
         assert [f.inner_text().split("\n")[-1] for f in pg.locator("#main .figs .fig").all()] == ["Touren", "Strecke", "Aufstieg", "Abstieg", "Unterwegs", "Tage"]
         assert pg.locator("#main .figs .fig .v").first.inner_text().strip() == "7"
-        assert "Statistik nach Aktivität" in pg.locator("#tls-stat summary").text_content()
+        assert "Statistik nach Sportart" in pg.locator("#tls-stat summary").text_content()
         assert pg.locator("#trx details.tls[open]").count() == 6                                  # alle Karten standardmäßig offen
         assert pg.locator("#trx .slcell.w-voll").count() == 7
         # Reihenfolge der Aktionen im Kopf wie bisher: PDF, Senden, Bearbeiten, Keine Reise
@@ -167,7 +167,7 @@ def test_trip_actions_still_work(pw, app):
         assert pg.locator("#trpdf").get_attribute("href").startswith("#/tripsheet/")
         pg.locator("#trpdf").click()
         pg.wait_for_selector("#tm", timeout=T)
-        pg.wait_for_function("() => /Tag für Tag/.test(document.querySelector('#main').textContent) && /Statistik nach Aktivität/.test(document.querySelector('#main').textContent)", timeout=T)
+        pg.wait_for_function("() => /Tag für Tag/.test(document.querySelector('#main').textContent) && /Statistik nach Sportart/.test(document.querySelector('#main').textContent)", timeout=T)
         assert pg.locator("#pdfdl").count() == 1
         assert not pg.errors, pg.errors
     finally:
@@ -355,7 +355,7 @@ def test_new_trip_blocks_show_the_data_of_the_trip(pw, app):
         tiles = pg.evaluate("() => [...document.querySelectorAll('#tlw-wk1 .utile')].map(t => [t.querySelector('b').textContent.trim(), t.querySelector('span').textContent.trim()])")
         assert tiles == [["6", "Reisetage"], ["7", "Touren"], ["97,0 km", "Strecke"], ["3.320 m", "Aufstieg"], ["20:10 Std.", "Unterwegs"], ["1", "Länder"]], tiles
         assert pg.locator("#tlw-wk1 .utile small").first.inner_text() == "Spanien"
-        # Kilometer je Tag: sechs Säulen, die stärkste (Tag 2: 22 km) hervorgehoben
+        # Strecke je Tag: sechs Säulen, die stärkste (Tag 2: 22 km) hervorgehoben
         pg.wait_for_selector("#tlw-wt1 svg.slcol rect", timeout=T)
         assert pg.locator("#tlw-wt1 svg.slcol rect").count() == 6 and pg.locator("#tlw-wt1 svg.slcol rect.hl").count() == 1
         assert pg.evaluate("() => [...document.querySelectorAll('#tlw-wt1 svg.slcol rect')].findIndex(r => r.classList.contains('hl'))") == 1
@@ -392,7 +392,7 @@ def test_trip_blocks_can_be_added_from_the_catalog_and_only_fit_here(pw, app):
         pg.locator("#slbar [data-a=add]").click()
         pg.wait_for_selector(".slcat .slcard", timeout=T)
         names = pg.locator(".slcat .slcard h3").all_inner_texts()
-        assert {"Reise-Kennzahlen", "Kilometer je Tag", "Reise-Diashow"} <= set(names) and "Reisen-Kennzahlen" not in names and "Reisen je Jahr" not in names, names
+        assert {"Reise-Kennzahlen", "Strecke je Tag", "Reise-Diashow"} <= set(names) and "Reisen-Kennzahlen" not in names and "Reisen je Jahr" not in names, names
         assert pg.locator('.slcard:has([data-add="rkmtag"]) [data-add="rkmtag"]').inner_text() == "Hinzufügen"
         pg.locator('[data-add="rkmtag"]').click()
         pg.wait_for_function("() => !!document.querySelector('#trx [data-wtype=rkmtag] svg.slcol')", timeout=T)
@@ -412,7 +412,7 @@ def test_trip_blocks_can_be_added_from_the_catalog_and_only_fit_here(pw, app):
         pg.locator("#slbar [data-a=add]").click()
         pg.wait_for_selector(".slcat .slcard", timeout=T)
         names = pg.locator(".slcat .slcard h3").all_inner_texts()
-        assert {"Reisen-Kennzahlen", "Reisen je Jahr"} <= set(names) and "Reise-Kennzahlen" not in names and "Kilometer je Tag" not in names and "Reise-Diashow" not in names, names
+        assert {"Reisen-Kennzahlen", "Reisen je Jahr"} <= set(names) and "Reise-Kennzahlen" not in names and "Strecke je Tag" not in names and "Reise-Diashow" not in names, names
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -437,9 +437,9 @@ def test_trip_block_settings_dialogs(pw, app):
         pg.wait_for_selector("#tlw-wt1 svg.slcol", timeout=TL)
         click_gear(pg, '.slit[data-sl="wt1"] [data-a="cfg"]')
         pg.wait_for_selector(".sldlg form", timeout=T)
-        _chip(pg, "Höhenmetern").click()
+        _chip(pg, "Aufstieg").click()
         save_dialog(pg)
-        pg.wait_for_function("() => /Höhenmeter je Tag/.test(document.querySelector('.slit[data-sl=wt1]').textContent)", timeout=T)
+        pg.wait_for_function("() => /Aufstieg je Tag/.test(document.querySelector('.slit[data-sl=wt1]').textContent)", timeout=T)
         # Reise-Diashow: kein Filter und kein „An diesem Tag“ im Dialog
         click_gear(pg, '.slit[data-sl="wd1"] [data-a="cfg"]')
         pg.wait_for_selector(".sldlg form.erform", timeout=T)
@@ -746,9 +746,9 @@ def test_english_texts(pw, app):
     try:
         pg.wait_for_function("() => !!document.querySelector('#tlw-wk1 .utile') && !!document.querySelector('#tlw-wt1 svg.slcol rect')", timeout=TL)
         txt = pg.locator("#trx").inner_text()
-        for de in ("Reisetage", "Kilometer je Tag", "Stärkster Tag", "Reise-Kennzahlen", "Statistik nach Aktivität", "an 6 Tagen"):
+        for de in ("Reisetage", "Strecke je Tag", "Stärkster Tag", "Reise-Kennzahlen", "Statistik nach Sportart", "an 6 Tagen"):
             assert de not in txt, de
-        assert "Trip days" in txt and "Strongest day" in txt and "Trip key figures" in txt and "Kilometres per day" in txt, txt[:600]
+        assert "Trip days" in txt and "Strongest day" in txt and "Trip key figures" in txt and "Distance per day" in txt, txt[:600]
         pg.wait_for_function("() => /Strongest day: Oct/.test(document.querySelector('#tlw-wt1').textContent) || /Strongest day/.test(document.querySelector('#tlw-wt1').textContent)", timeout=T)
         _edit(pg)
         pg.locator("#slbar [data-a=add]").click()

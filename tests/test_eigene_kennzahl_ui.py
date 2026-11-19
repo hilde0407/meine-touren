@@ -71,9 +71,9 @@ def test_template_formula_goal_compare_edit_duplicate_remove(pw, app):
     try:
         _edit(pg)
         _open_new(pg)
-        # Vorlage „Höhenmeter je km“ übernimmt Name, Messgröße, Formel und Vergleich in den Dialog
-        pg.locator(".slkz .kztpl", has_text="Höhenmeter je km").first.click()
-        pg.wait_for_function("() => document.querySelector('.slkz #kz-title').value === 'Höhenmeter je km'", timeout=T)
+        # Vorlage „Aufstieg je km“ übernimmt Name, Messgröße, Formel und Vergleich in den Dialog
+        pg.locator(".slkz .kztpl", has_text="Aufstieg je km").first.click()
+        pg.wait_for_function("() => document.querySelector('.slkz #kz-title').value === 'Aufstieg je km'", timeout=T)
         assert pg.locator(".slkz #kz-formel").is_checked() and pg.locator(".slkz .kzformel").is_visible() and pg.locator(".slkz #kz-vgl").is_checked()
         assert pg.locator(".slkz #kz-mess").input_value() == "hm" and pg.locator(".slkz #kz-bmess").input_value() == "km"
         pg.locator(".slkz #kz-range").select_option("all")                                 # Gesamt: alle Touren
@@ -151,7 +151,7 @@ def test_dialog_validation_escape_and_viewport_390(pw, app):
 def test_block_390_light_and_dark_no_overflow_and_screens(pw, app):
     cfgs = [{"id": "k1", "type": "eigenkz", "cfg": {"title": "Wanderkilometer", "symbol": "🥾", "mess": "km", "agg": "sum", "sports": ["hike"], "range": "all", "ziel": 100}},
             {"id": "k2", "type": "eigenkz", "cfg": {"title": "Längste Wanderung", "symbol": "🏆", "mess": "km", "agg": "record", "sports": ["hike"], "range": "all"}},
-            {"id": "k3", "type": "eigenkz", "cfg": {"title": "Höhenmeter je km", "symbol": "⛰️", "mess": "hm", "agg": "sum", "durch": {"mess": "km", "agg": "sum"}, "op": "div", "range": "12m", "vgl": True}}]
+            {"id": "k3", "type": "eigenkz", "cfg": {"title": "Aufstieg je km", "symbol": "⛰️", "mess": "hm", "agg": "sum", "durch": {"mess": "km", "agg": "sum"}, "op": "div", "range": "12m", "vgl": True}}]
     _api(app, "statistik", "PUT", {"v": 1, "widgets": cfgs})
     for width, scheme in ((1280, "light"), (1280, "dark"), (390, "light"), (390, "dark")):
         pg = _stats(pw, app, width=width, height=900, scheme=scheme, dpr=2 if width == 390 else 1)

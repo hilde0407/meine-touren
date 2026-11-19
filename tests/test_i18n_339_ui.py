@@ -128,5 +128,5 @@ def test_deutsch_bleibt_unveraendert(pw, app):
     tab = pg.locator('.atab[data-t="sicher"]')
     expect(tab).to_contain_text("Umzug auf einen neuen Server", timeout=TL)
     expect(tab).to_contain_text("Das Umzugspaket enthält alles", timeout=TL)
-    expect(pg.locator(".warnbar").first).to_contain_text("Es gibt noch kein Backup", timeout=TL)
+    expect(pg.locator(".warnbar").first).to_contain_text("Es gibt noch keine Sicherung", timeout=TL)
     b.close()

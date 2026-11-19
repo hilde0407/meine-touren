@@ -509,8 +509,8 @@ def test_import_code_checked_by_server_and_bad_codes_rejected(pw, app):
         pg.locator(".slvws").get_by_role("button", name="Importieren …", exact=True).click()
         pg.wait_for_selector("#slimpcode", timeout=T)
         pg.get_by_role("button", name="Code prüfen", exact=True).click()                                   # leer
-        expect(pg.locator(".slimpbad")).to_contain_text("Bitte zuerst einen Layoutcode", timeout=T)
-        for bad, txt in (("MTA1.@@@", "ungültige Zeichen"), ("hallo", "kein Layoutcode"), (_mk({"groups": [{"id": "grpa1", "title": "", "ids": ["gibtsnicht"]}]}), "gibt")):
+        expect(pg.locator(".slimpbad")).to_contain_text("Bitte zuerst einen Ansichtscode", timeout=T)
+        for bad, txt in (("MTA1.@@@", "ungültige Zeichen"), ("hallo", "kein Ansichtscode"), (_mk({"groups": [{"id": "grpa1", "title": "", "ids": ["gibtsnicht"]}]}), "gibt")):
             pg.fill("#slimpcode", bad)
             pg.get_by_role("button", name="Code prüfen", exact=True).click()
             expect(pg.locator(".slimpbad")).to_contain_text(txt, timeout=T)

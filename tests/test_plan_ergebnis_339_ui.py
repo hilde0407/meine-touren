@@ -72,7 +72,7 @@ def test_karte_mit_verknuepfung_zahlen_symbole_linien_und_link(pw, app):
         txt = [r.inner_text() for r in rows.all()]
         assert "Strecke" in txt[0] and "8,0 km" in txt[0] and "9,0 km" in txt[0] and "↑" in txt[0] and "+1,0 km" in txt[0] and "länger als geplant" in txt[0]
         assert "Aufstieg" in txt[1] and "=" in txt[1] and "wie geplant" in txt[1]
-        assert "Zeit gesamt" in txt[2] and "3:00" in txt[2] and "2:30" in txt[2] and "↓" in txt[2] and "−0:30" in txt[2] and "kürzer als geplant" in txt[2]
+        assert "Zeit gesamt" in txt[2] and "3:00" in txt[2] and "2:30" in txt[2] and "↓" in txt[2] and "−30 Min." in txt[2] and "kürzer als geplant" in txt[2]
         # Linien: Plan gestrichelt, Ergebnis durchgezogen; Beschriftung und Legende
         svg = c.locator("svg.plmap")
         expect(svg).to_have_attribute("role", "img")

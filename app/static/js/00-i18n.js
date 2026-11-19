@@ -699,8 +699,11 @@ Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen 
   // Neue Einträge (00-i18n-neu.js): Zeilen „deutsch || englisch || französisch || spanisch“. Ein „{}“ im deutschen Text ist ein Platzhalter
   // (Zahl, Name, Datum …); er wird beim Übersetzen übernommen – selbst wieder übersetzt – und steht in der Übersetzung an derselben Stelle.
   const PAT = [];
-  const addEntry = (k, v) => {
+  const UNIT = /\{\} (km\/h|km|m|Std\.|h)(?![\wäöüÄÖÜ\/])/, UNIT_G = new RegExp(UNIT.source, "g");
+  const addEntry = (k, v, stripped) => {
     if (k.indexOf("{}") < 0) { D[k] = v; return; }
+    // 3.41.0: die Formatierer (01-format.js) liefern Zahl und Einheit zusammen („225 m“): jeden Eintrag mit „{} m“, „{} km“, „{} Std.“ zusätzlich ohne die Einheit hinter dem Platzhalter führen
+    if (!stripped && UNIT.test(k)) { const k2 = k.replace(UNIT_G, "{}"); if (k2.replace(/\{\}/g, "").trim().length >= 6) addEntry(k2, v.replace(UNIT_G, "{}"), true); }
     const parts = k.split("{}");
     PAT.push({re: new RegExp("^" + parts.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("(.+?)") + "$", "s"), v, pre: parts[0], n: k.length});
   };
@@ -792,6 +795,10 @@ Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen 
   const tr1 = t => {
     let r = D[t];
     if (r === undefined) for (const [re, f] of P) { const m = re.exec(t); if (m) { r = f(...m); break; } }
+    if (r === undefined && lang !== "de") {    // 3.41.0: die Formatierer schreiben die Dauer schon in der Sprache („2:00 h“); die Schlüssel sind deutsch („{} Std.“)
+      const t2 = t.replace(/(\d) h\b/g, "$1 Std.");
+      if (t2 !== t) { r = D[t2]; if (r === undefined) for (const q of PAT) { if (t2.startsWith(q.pre)) { const m = q.re.exec(t2); if (m) { let i = 0; r = q.v.replace(/\{\}/g, () => tr(String(m[++i]).trim())); break; } } } }
+    }
     if (r === undefined) for (const q of PAT) { if (t.startsWith(q.pre)) { const m = q.re.exec(t); if (m) { let i = 0; r = q.v.replace(/\{\}/g, () => tr(String(m[++i]).trim())); break; } } }
     if (r === undefined && t.length > 16) { let u = t; for (const k of long) if (u.includes(k)) u = u.split(k).join(D[k]); if (u !== t) r = u; }
     if (r === undefined) r = piecewise(t);

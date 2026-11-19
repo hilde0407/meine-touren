@@ -244,7 +244,7 @@ def test_dialog_danger_focuses_cancel_and_enter_never_confirms_by_itself(pw, app
 def test_dialog_is_translated_in_english(pw, app_url):
     pg = _page(pw, app_url, lang="en")
     try:
-        pg.evaluate("(() => { uiConfirm({title: 'Gerät entfernen?', text: 'Alle Touren dieses Laufs bekommen ihre ursprünglichen Höhen und Höhenmeter zurück. Touren, die du inzwischen selbst geändert oder zurückgenommen hast, bleiben unberührt.', ok: 'Entfernen', danger: true}); })()")
+        pg.evaluate("(() => { uiConfirm({title: 'Gerät entfernen?', text: 'Alle Touren dieses Laufs bekommen ihre ursprünglichen Höhen und Aufstieg zurück. Touren, die du inzwischen selbst geändert oder zurückgenommen hast, bleiben unberührt.', ok: 'Entfernen', danger: true}); })()")
         pg.wait_for_selector(".uidlg .uibox")
         t = pg.inner_text(".uibox")
         assert "Remove device?" in t and "Cancel" in t and "Remove" in t and "original elevations" in t, t
@@ -573,7 +573,7 @@ def test_mobile_390_no_horizontal_scroll_and_touch_targets(pw, app_url):
         assert bb["x"] >= 0 and bb["x"] + bb["width"] <= 390 and all(b.bounding_box()["height"] >= 44 for b in pg.locator(".uifoot .btn").all())
         _shot(pg, "bestaetigung-390.png")
         pg.keyboard.press("Escape")
-        pg.evaluate("(() => { uiConfirm({title: 'Diesen Sammel-Lauf rückgängig machen?', text: 'Alle Touren dieses Laufs bekommen ihre ursprünglichen Höhen und Höhenmeter zurück.', ok: 'Rückgängig machen', danger: true}); })()")
+        pg.evaluate("(() => { uiConfirm({title: 'Diesen Sammel-Lauf rückgängig machen?', text: 'Alle Touren dieses Laufs bekommen ihre ursprünglichen Höhen und Aufstieg zurück.', ok: 'Rückgängig machen', danger: true}); })()")
         pg.wait_for_selector(".uidlg .uibox.danger")
         _shot(pg, "gefahr-bestaetigung-390.png")
         assert not pg.errors, pg.errors

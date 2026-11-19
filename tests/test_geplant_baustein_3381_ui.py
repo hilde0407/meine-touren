@@ -145,7 +145,7 @@ def test_gegangene_mit_datum_und_differenz_verworfene_nie(pw, app):
         expect(li).to_have_count(1, timeout=TL)
         t = li.inner_text()
         assert f"gegangen am {_gone_date()}" in t, t
-        assert "geplant 2:00 Std." in t and "gelaufen 1:42 Std." in t and "(−0:18)" in t, t
+        assert "geplant 2:00 Std." in t and "gelaufen 1:42 Std." in t and "(−18 Min.)" in t, t
         assert "Alter Verworfener" not in pg.locator('[data-wtype="geplant"]').inner_text()
         assert pg.evaluate("() => document.documentElement.scrollWidth <= window.innerWidth + 1")
         assert not pg.errors, pg.errors

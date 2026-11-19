@@ -133,7 +133,7 @@ def test_dein_jahr_default_block_is_the_old_block(pw, app):
         assert pg.locator("main.home .slit").count() == 0 and pg.locator("#hyear .flk").count() == 0       # ohne Anpassung kein Kurztext, kein Rahmen
         assert pg.locator("#hyear h2").inner_text() == f"Dein Jahr {YEAR}"
         assert pg.locator("#hyear a.hmore").inner_text() == "Zur Statistik" and pg.locator("#hyear a.hmore").get_attribute("href") == "#/stats"
-        assert pg.locator("#hyear .hyn span").all_inner_texts() == ["Touren", "Kilometer", "Höhenmeter", "Stunden unterwegs"]
+        assert pg.locator("#hyear .hyn span").all_inner_texts() == ["Touren", "Strecke", "Aufstieg", "Zeit unterwegs"]
         wait_nums(pg, "#hyear", calc(rows, frm=f"{YEAR}-01-01"))
         assert pg.locator("#hyear .hym > div").count() == 12 and pg.locator("#hyear .hym .cur").count() == 1
         assert pg.locator("#hyear .hym .cur span").inner_text() == "N"                                          # November: laufender Monat hervorgehoben
@@ -298,7 +298,7 @@ def test_two_and_three_instances_values_ranges_titles(pw, app):
         # Instanz 2: zwei Kennzahlen (Kilometer, Höhenmeter), eigener Titel, Rad, letzte 12 Monate
         x = calc(rows, ["mtb", "touringbicycle"], frm=start12)
         wait_nums(pg, "#tlw-wj2", [x[1], x[2]])
-        assert pg.locator("#tlw-wj2 h2").inner_text() == "Rad, letzte 12 Monate" and pg.locator("#tlw-wj2 .hyn span").all_inner_texts() == ["Kilometer", "Höhenmeter"]
+        assert pg.locator("#tlw-wj2 h2").inner_text() == "Rad, letzte 12 Monate" and pg.locator("#tlw-wj2 .hyn span").all_inner_texts() == ["Strecke", "Aufstieg"]
         assert pg.locator("#tlw-wj2 .flk").inner_text() == "MTB, Radtour, Laufendes Jahr".replace("Laufendes Jahr", "Letzte 12 Monate")    # mit eigenem Titel steht der Zeitraum im Kurztext
         assert pg.locator("#tlw-wj2 .hyg").get_attribute("data-n") == "2"
         # Instanz 3: bestimmtes Jahr, ohne Vergleich
@@ -382,7 +382,7 @@ def test_other_widgets_honour_activity_range_and_count(pw, app):
         assert "Keine Touren mit diesem Filter" in pg.locator("#tlw-ws").inner_text()
         km_all = sum(t["dist_m"] for t in rows if t["sport"] == "hike") / 1000
         mt = pg.locator("#tlw-wm").inner_text()
-        assert abs(int(re.search(r"Kilometer gesamt\n([\d.]+) km", mt).group(1).replace(".", "")) - km_all) <= 0.5 + 1e-6 and f"Touren gesamt\n{sum(t['sport'] == 'hike' for t in rows)}\n" in mt
+        assert abs(int(re.search(r"Strecke gesamt\n([\d.]+) km", mt).group(1).replace(".", "")) - km_all) <= 0.5 + 1e-6 and f"Touren gesamt\n{sum(t['sport'] == 'hike' for t in rows)}\n" in mt
         assert pg.locator("#tlw-wh svg.slheat rect").count() >= 300 and pg.locator("#tlw-wh .flk").inner_text() == "Wandern"
         assert pg.locator("#tlw-ww .flk").inner_text() == f"Wandern, {YEAR - 1}"
         assert pg.locator("#tlw-wg .flk").inner_text() == "Letzte 12 Monate" and pg.locator("#tlw-wg circle.slsg").count() >= 1
@@ -391,7 +391,7 @@ def test_other_widgets_honour_activity_range_and_count(pw, app):
         km_hike = sum(t["dist_m"] for t in rows if t["sport"] == "hike" and t["date"][:4] == str(YEAR)) / 1000
         assert f"von 500 km" in pg.locator("#tlw-wz .slgt").inner_text() and pg.locator("#tlw-wz .flk").inner_text() == "Wandern"
         assert abs(int(re.search(r"([\d.]+) von 500", pg.locator("#tlw-wz .slgt").inner_text()).group(1).replace(".", "")) - km_hike) <= 0.5 + 1e-6
-        assert pg.locator("#tlw-wv .utile").count() == 2 and pg.locator("#tlw-wv .utile span").all_inner_texts() == ["Stunden", "Touren"]
+        assert pg.locator("#tlw-wv .utile").count() == 2 and pg.locator("#tlw-wv .utile span").all_inner_texts() == ["Zeit unterwegs", "Touren"]
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -524,7 +524,7 @@ def test_english_labels_in_header_and_dialog(pw, app):
         _edit(pg)
         click_gear(pg)
         pg.wait_for_selector('.sldlg [role="dialog"] form', timeout=T)
-        pg.wait_for_function("() => /Activity/.test(document.querySelector('.sldlg legend')?.textContent || '')", timeout=T)
+        pg.wait_for_function("() => /Sport/.test(document.querySelector('.sldlg legend')?.textContent || '')", timeout=T)
         txt = pg.locator(".sldlg").inner_text()
         for w in ("Activity", "Current year", "Last 12 months", "Last 90 days", "All time", "Compare with the previous year", "Custom title (optional)", "Save", "Cancel"):
             assert w in txt, (w, txt)

@@ -1,4 +1,4 @@
-"""3.33.0 – Reisen als anpassbare Seiten, Server: neue Layout-Schlüssel „reise“ und „reisen“, streng geprüfte Bausteine (Reise-Kennzahlen, Kilometer je Tag, Reise-Diashow, Reisen-Kennzahlen, Reisen je Jahr),
+"""3.33.0 – Reisen als anpassbare Seiten, Server: neue Layout-Schlüssel „reise“ und „reisen“, streng geprüfte Bausteine (Reise-Kennzahlen, Strecke je Tag, Reise-Diashow, Reisen-Kennzahlen, Reisen je Jahr),
 keine Bausteine fremder Seiten, keine Regeln, Export-Prüfung, Betrachter, Version, Hinweise und Dienstskript."""
 import sys
 from pathlib import Path
