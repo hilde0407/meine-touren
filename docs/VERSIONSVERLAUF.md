@@ -7,6 +7,7 @@ Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabe
 - Bedienkästen der Karte in fester Reihenfolge (Jahr, Sportarten | Strecken, Heatmap, Fotos | Standort, Touren im Ausschnitt | Seite anpassen); Standort-Knopf heißt „Mein Standort“; Schalter melden ihren Zustand.
 - Panels der Karte (Streckenfarbe, Ebenenwahl, Blatt „Filter & Ebenen“) schließen gleich – Esc, Klick daneben, Auslöser, Seitenwechsel, Fenster, Bearbeiten – und sind nie zugleich offen; feste Stapelordnung.
 - Handy: eine Zeile mit Standort, „Filter & Ebenen“ und „Seite anpassen“ statt Wischstreifen; „Touren im Ausschnitt“ nur noch einmal (Baustein oder Knopf).
+- Übersicht am Handy: Zepp-Schnellknopf so groß wie „Seite anpassen“/„Ansichten“; Lauftext „Zepp-Abruf läuft …“.
 
 ## Version 3.42.0 – Ein Dialog, ein Schalter, ein Knopf
 

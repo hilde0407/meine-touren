@@ -282,10 +282,10 @@ def test_karte_chips_ohne_hoehensprung(pw, app, scheme):
         _idle(pg)
         quiet(pg, 1500)                                                      # nach Netzwerk-Ruhe noch 1,5 s: späte Skripte und Stile haben gegriffen
         rec = pg.evaluate("() => window.__ka")
-        assert len(rec) >= 8, rec
+        assert len(rec) >= 6, rec                                                 # 3.43.0: am Handy sind nur Standort, „Filter & Ebenen“ und „Seite anpassen“ sichtbar
         jumps = {k: v for k, v in rec.items() if v["max"] - v["min"] > 1 or abs(v["last"] - v["first"]) > 1}
         assert not jumps, jumps                                                       # Höhe direkt nach dem Laden (erstes Bild) = nach 1,5 s Ruhe, auch zwischendurch nie anders (Toleranz 1 px)
-        chips = {k: v for k, v in rec.items() if k.startswith("chip") and not k.startswith("chip.kapt")}
+        chips = {k: v for k, v in rec.items() if (k.startswith("chip") and not k.startswith("chip.kapt")) or k.startswith(("mloc", "mfb"))}
         assert chips and all(v["max"] <= 40 for v in chips.values()), chips            # Mobilgröße der Chips (3.43.0: 40 px statt 32), kein Sprung auf 44
         assert rec["mapui#1"]["last"] <= 60, rec["mapui#1"]                            # die Reihe der Bedienfelder bleibt eine schlanke Zeile
         bt = pg.evaluate("() => [...document.querySelectorAll('.kaopen .btn')].filter(b => b.offsetParent !== null).map(b => Math.round(b.getBoundingClientRect().height))")
