@@ -33,8 +33,8 @@ def api_selftest():
     def disk():
         u = shutil.disk_usage(config.DATA_DIR); free = u.free / 1e9
         if free < 1:
-            raise RuntimeError(f"nur noch {free:.1f} GB frei")
-        return f"{free:.1f} GB frei"
+            raise RuntimeError("nur noch " + f"{free:.1f}".replace(".", ",") + " GB frei")
+        return f"{free:.1f}".replace(".", ",") + " GB frei"
     chk("Speicherplatz", disk)
     kc = {}
 

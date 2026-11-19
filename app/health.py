@@ -56,7 +56,7 @@ def health():
     try:
         du = shutil.disk_usage(config.DATA_DIR if config.DATA_DIR.exists() else config.DATA_DIR.parent)
         free = du.free / 1e9
-        add("Freier Speicher", free > 2, f"{free:.1f} GB frei", "" if free > 2 else "Weniger als 2 GB frei – Platz schaffen")
+        add("Freier Speicher", free > 2, f"{free:.1f}".replace(".", ",") + " GB frei", "" if free > 2 else "Weniger als 2 GB frei – Platz schaffen")
     except OSError:
         pass
     n = db.one("SELECT COUNT(*) n FROM tours")["n"]

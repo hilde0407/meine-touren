@@ -603,7 +603,6 @@ Verwaltung → Sicherung: jetzt sichern || Administration → Backup: back up no
 Datenbank || Database || Base de données || Base de datos
 {} MB || {} MB || {} Mo || {} MB
 Freier Speicher || Free storage || Espace libre || Espacio libre
-{} GB frei || {} GB free || {} Go libres || {} GB libres
 Weniger als 2 GB frei – Platz schaffen || Less than 2 GB free – free up some space || Moins de 2 Go libres – libérez de l’espace || Menos de 2 GB libres: libera espacio
 Touren ohne Strecke || Tours without a track || Parcours sans tracé || Rutas sin recorrido
 {} von {} || {} of {} || {} sur {} || {} de {}

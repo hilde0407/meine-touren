@@ -7,7 +7,7 @@ VIEWS.check = async () => {
     body = $("#chb");
   body.className = "";
   const nm = id =>
-    BY[id] ? `<a href="#/tour/${id}">${esc(BY[id].name)}</a> <span class="mut">${BY[id].km.toFixed(1)} km</span>` : esc(id);
+    BY[id] ? `<a href="#/tour/${id}">${esc(BY[id].name)}</a> <span class="mut">${fmtKm(BY[id].km)}</span>` : esc(id);
   body.innerHTML = `
    <div class="panel"><h2>Überblick</h2><div class="rows">
     <div class="r"><span>Touren insgesamt</span><b>${r.total}</b></div>

@@ -16,7 +16,7 @@ VIEWS.admin = async (...a) => {
     <div class="mut fs13" id="hst">${s.home_lat ? `📍 ${esc(s.home_name || "")} (${(+s.home_lat).toFixed(3)}, ${(+s.home_lng).toFixed(3)}) – zum Übernehmen unten „Einstellungen speichern“` : "Noch kein Heimatort eingetragen."}</div></div>`);
   const pick = (name, la, lo) => {
     $("#hn").value = name; $("#hla").value = la; $("#hlo").value = lo; $("#hsq").value = name;
-    $("#hst").textContent = `📍 ${name} (${(+la).toFixed(3)}, ${(+lo).toFixed(3)}) – zum Übernehmen unten „Einstellungen speichern“`;
+    $("#hst").textContent = `📍 ${name} (${nf(+la, 3)}, ${nf(+lo, 3)}) – zum Übernehmen unten „Einstellungen speichern“`;
     $("#hsr").innerHTML = "";
   };
   const search = async () => {

@@ -713,7 +713,7 @@ Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen 
 
   const decode = s => s.replace(/&amp;/g, "&");
   const MO = "Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember";
-  const dt = (d, mo, y) => (lang === "en" ? `${D[mo] || mo} ${d}, ${y}` : lang === "fr" ? `${d === "1" ? "1er" : d} ${D[mo] || mo} ${y}` : `${d} de ${D[mo] || mo} de ${y}`);
+  const dt = (d, mo, y) => (lang === "en" ? `${d} ${D[mo] || mo} ${y}` : lang === "fr" ? `${d === "1" ? "1er" : d} ${D[mo] || mo} ${y}` : `${d} de ${D[mo] || mo} de ${y}`);
   const pl = (n, one, many) => (n === "1" ? one : many);
   const U = {   // Einheiten und Satzteile je Sprache
     en: {photo: ["photo", "photos"], tour: ["tour", "tours"], day: ["day", "days"], of: "of", img: "images", asg: "assigned to a tour", lib: "in the library", libc: "Library:", free: "free", adm: "Admin → ", open: "Open admin", asgp: "Assign photos", show: "Slideshow", act: "activities", Tours: "Tours", Photos: "Photos", miss: "missing – ", none: "none yet – ", latest: "latest version on GitHub", ltour: "Latest tour", lh: "Latest tour, hiking", lc: "Latest tour, cycling", yr: "Year in review", stg: ["stage", "stages"], fast: ["section with vehicle pace (cable car, bus, car?)", "sections with vehicle pace (cable car, bus, car?)"], tfast: "too fast for hiking", nobk: "There is no backup yet – the first one is created automatically (at night), or right now:"},
@@ -743,7 +743,7 @@ Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen 
     [/ in der Bibliothek/g, () => " " + U.lib],
     [/neueste Version auf GitHub/g, () => U.latest],
     [/Bibliothek:/g, () => U.libc],
-    [/(\d+(?:[.,]\d+)?) GB frei/g, (m, g) => `${g} GB ${U.free}`],
+    [/(\d+(?:[.,]\d+)?) GB frei/g, (m, g) => `${lang === "en" ? g.replace(",", ".") : g} GB ${U.free}`],
     [/Verwaltung → /g, () => U.adm],
     [/fehlt – /g, () => U.miss],
     [/noch keines – /g, () => U.none],
