@@ -88,17 +88,7 @@ VIEWS.dash = async (...a) => {
 };
 
 /* =====================  Tags, Teilen, Neuland (Tourdetail)  ===================== */
-const modal = html => {
-  const m = document.createElement("div");
-  m.className = "modal";
-  m.innerHTML = `<div class="mbox">${html}</div>`;
-  document.body.appendChild(m);
-  m.onclick = e => {
-    if (e.target === m) m.remove();
-    return m;
-  };
-  return m;
-};
+const modal = html => uiModal(html);   // 3.42.0: ein Dialog für alle Formular-Fenster (00-dialog.js)
 const _tourT = VIEWS.tour;
 VIEWS.tour = async (id, q) => {
   await _tourT(id, q);
@@ -119,7 +109,7 @@ VIEWS.tour = async (id, q) => {
       <div id="tgc" class="chips"></div><input id="tgi" list="tgl" placeholder="Neuer Tag + Enter" class="w100 mt10"><datalist id="tgl">${allTags()
         .map(x => `<option value="${esc(x)}">`)
         .join("")}</datalist>
-      <div class="row jce mt16"><button class="btn alt" id="tgx">Abbrechen</button><button class="btn" id="tgs">Speichern</button></div>`);
+      <div class="uifoot"><button class="btn ghost" id="tgx">Abbrechen</button><button class="btn" id="tgs">Speichern</button></div>`);
     const draw = () => {
       m.querySelector("#tgc").innerHTML =
         cur.map((x, i) => `<button class="chip on" data-i="${i}" title="Entfernen">${esc(x)} ×</button>`).join("") ||
@@ -168,7 +158,7 @@ VIEWS.tour = async (id, q) => {
   $("#eshr").onclick = async () => {
     const m =
       modal(`<h3>Tour teilen</h3><p class="mut fs14">Erzeugt einen Link, den man <b>ohne Anmeldung</b> öffnen kann – du wählst, was er zeigt (Karte, Höhenprofil, Fotos …). Er funktioniert nur, wenn dein Server von außen erreichbar ist, z. B. per VPN oder Reverse-Proxy.</p>
-      <div class="row mt14"><button class="btn" id="shn">Neuen Link erstellen …</button></div><div id="shl" class="mt14"></div><div class="row jce mt12"><button class="btn alt" id="shx">Schließen</button></div>`);
+      <div class="row mt14"><button class="btn" id="shn">Neuen Link erstellen …</button></div><div id="shl" class="mt14"></div><div class="uifoot"><button class="btn ghost" id="shx">Schließen</button></div>`);
     m.querySelector("#shx").onclick = () => m.remove();
     const list = async () => {
       const s = await api(`/api/tours/${encodeURIComponent(t.id)}/shares`).catch(() => []);

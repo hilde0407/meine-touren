@@ -198,7 +198,7 @@ function shiftDialog(sp, done) {
    <div class="row m8-0"><button class="btn alt sm" data-p="-3600">−1 Std.</button><button class="btn alt sm" data-p="3600">+1 Std.</button><button class="btn alt sm" data-p="-7200">−2 Std.</button><button class="btn alt sm" data-p="7200">+2 Std.</button></div>
    <div class="row aic g8"><select id="shs"><option value="1">später (+)</option><option value="-1">früher (−)</option></select><input id="shh" type="number" min="0" value="0" style="width:70px"> Std. <input id="shm" type="number" min="0" max="59" value="0" style="width:70px"> Min.</div>
    <p class="mut fs14 mt8" id="shp"></p>
-   <div class="row mt14"><button class="btn" id="shok">Verschieben</button><button class="btn ghost" id="shno">Abbrechen</button><span id="sher" class="bad"></span></div>`);
+   <div id="sher" class="bad"></div><div class="uifoot"><button class="btn ghost" id="shno">Abbrechen</button><button class="btn" id="shok">Verschieben</button></div>`);
   const delta = () => (+m.querySelector("#shs").value || 1) * ((+m.querySelector("#shh").value || 0) * 3600 + (+m.querySelector("#shm").value || 0) * 60);
   const upd = () => {
     const d = delta();
@@ -229,16 +229,13 @@ function shiftDialog(sp, done) {
 let assignDialog = function (sp, done) {
   const first = sp.slice().sort((a, b) => a.taken_ts - b.taken_ts)[0];
   const tours = TOURS.slice().sort((a, b) => Math.abs(a.start_ts - first.taken_ts) - Math.abs(b.start_ts - first.taken_ts));
-  const m = document.createElement("div");
-  m.className = "modal";
-  m.innerHTML = `<div class="mbox"><h2>${sp.length} Foto${sp.length > 1 ? "s" : ""} zuordnen</h2>
+  const m = uiModal(`<h2>${sp.length} Foto${sp.length > 1 ? "s" : ""} zuordnen</h2>
    <div class="field"><label>Tour (nächstgelegene zuerst)</label><select id="at">${tours.map(t => `<option value="${t.id}">${fmtDatumKurz(t.date)} · ${esc(t.name)} (${sName(t.sport)})</option>`).join("")}</select></div>
    <label class="chk"><input type="checkbox" id="as"> Zeit der Fotos anpassen: Das erste gewählte Foto (${fmtDatumKurz(first.taken_ts, {zeit: true})}) wurde</label>
    <div id="aso" class="m6-0-0-24" style="display:none"><input id="am" type="number" value="0" step="5" style="width:80px"> Minuten nach dem Start der Tour aufgenommen.
      <div class="field"><label>Zeitversatz anwenden auf</label><select id="asc"><option value="selected">nur die gewählten Fotos</option><option value="day">alle Fotos desselben Aufnahmetags</option><option value="unassigned">alle noch nicht zugeordneten Fotos</option></select></div>
      <div class="mut fs14" id="ap"></div></div>
-   <div class="row mt18"><button class="btn" id="aok">Zuordnen</button><button class="btn alt" id="ano">Abbrechen</button><span id="aer" class="bad"></span></div></div>`;
-  document.body.appendChild(m);
+   <div id="aer" class="bad"></div><div class="uifoot"><button class="btn ghost" id="ano">Abbrechen</button><button class="btn" id="aok">Zuordnen</button></div>`);
   const upd = () => {
     $("#aso").style.display = $("#as").checked ? "" : "none";
     const t = BY[$("#at").value];
@@ -425,11 +422,8 @@ function photoImportModal(o = {}) {
   const q = s => m.querySelector(s);
   let busy = false,
     stop = false;
-  m.style.zIndex = 120;
-  m.onclick = e => {
-    if (e.target === m && !busy) m.remove();
-  };
-  q(".mbox").style.maxWidth = "720px";
+  m.noClose = () => busy;
+  q(".uibox").classList.add("pimbox");
   const close = async () => {
     if (busy && !(await uiConfirm({title: "Import abbrechen?", text: "Der Import läuft noch. Wirklich abbrechen?", ok: "Abbrechen", cancel: "Weiterlaufen lassen", danger: true}))) return;
     stop = true;
@@ -454,7 +448,7 @@ function photoImportModal(o = {}) {
       <div class="mut m8-0-16 fs14">JPG, PNG oder WebP – du musst nichts vorsortieren. Die Fotos werden nach Aufnahmezeit und Aufnahmeort den Touren zugeordnet; du siehst vor dem Import, was wohin kommt. Deine Originale bleiben unverändert, importiert wird eine verkleinerte Kopie.</div>
       <div class="row jcc"><button class="btn" id="pdirb">Ordner wählen …</button><button class="btn alt" id="pfilb">Einzelne Fotos wählen …</button></div></div>
       <input type="file" id="pdir" webkitdirectory multiple hidden><input type="file" id="pfil" accept="image/jpeg,image/png,image/webp" multiple hidden>
-      <div class="row"><span class="sp"></span><button class="btn ghost" id="pcx">Schließen</button></div>`);
+      <div class="uifoot"><button class="btn ghost" id="pcx">Schließen</button></div>`);
     const dz = q("#pdz");
     q("#pdirb").onclick = () => q("#pdir").click();
     q("#pfilb").onclick = () => q("#pfil").click();
@@ -539,7 +533,7 @@ function photoImportModal(o = {}) {
       if (!fresh.length) {
         busy = false;
         body(`<p><b>Nichts zu importieren:</b> ${info.dup ? `${info.dup} Bilder sind schon in der Bibliothek` : ""}${info.dup && deleted ? " und " : ""}${deleted ? `${deleted} Bilder hast du früher gelöscht – sie werden deshalb nicht erneut übernommen` : ""}.</p>
-          <div class="row">${deleted ? `<button class="btn" id="pre">Die ${deleted} gelöschten Fotos erneut importieren</button>` : ""}<button class="btn alt" id="pback">Anderen Ordner wählen</button><button class="btn ghost" id="pcx">Schließen</button></div>`);
+          <div class="uifoot"><button class="btn ghost" id="pcx">Schließen</button><button class="btn alt" id="pback">Anderen Ordner wählen</button>${deleted ? `<button class="btn" id="pre">Die ${deleted} gelöschten Fotos erneut importieren</button>` : ""}</div>`);
         if (deleted) q("#pre").onclick = () => analyse(all, true);
         q("#pback").onclick = start;
         q("#pcx").onclick = close;
@@ -588,7 +582,7 @@ function photoImportModal(o = {}) {
           <div class="mt6"><button class="btn ghost sm" data-mp="${i}">Auf der Karte ansehen</button></div><div data-map="${i}" class="mt8 br6 ovh" style="display:none;height:230px"></div></div>`
         )
         .join("")}
-      <div class="row mt14"><button class="btn" id="pigo">Importieren</button><button class="btn ghost" id="pcx">Abbrechen</button><span class="sp"></span><span class="mut" id="pisum"></span></div>`);
+      <div class="uifoot"><span class="mut" id="pisum"></span><span class="sp"></span><button class="btn ghost" id="pcx">Abbrechen</button><button class="btn" id="pigo">Importieren</button></div>`);
     if (q("#pre"))
       q("#pre").onclick = e => {
         e.preventDefault();
@@ -832,7 +826,7 @@ function photoImportModal(o = {}) {
     const gain = PHINFO ? PHINFO.assigned - before : 0;
     q("#pih").textContent = ok ? "Import abgeschlossen" : "Import fast abgeschlossen";
     body(`<p>${ok ? "✓" : "⚠"} <b>${sum}.</b></p>${failed.length ? `<details open><summary>${failed.length} Foto${failed.length > 1 ? "s" : ""} konnte${failed.length > 1 ? "n" : ""} nicht importiert werden</summary><ul class="fs14 ova m6-0" style="max-height:200px">${failed.slice(0, 200).map(x => `<li><b>${esc(x.name)}</b> – ${esc(x.reason)}</li>`).join("")}${failed.length > 200 ? `<li>… und ${failed.length - 200} weitere</li>` : ""}</ul></details>` : ""}${ok ? `<p>${gain > 0 ? `<b>${gain}</b> Fotos wurden Touren zugeordnet.` : "Es wurden keine Fotos automatisch einer Tour zugeordnet."}${PHINFO && PHINFO.count - PHINFO.assigned > 0 ? ` ${nf(PHINFO.count - PHINFO.assigned, 0)} Fotos sind „ohne Tour“ – unter Fotos → „Fotos zuordnen“ lassen sie sich Touren zuweisen, in der Tour per „Zeit per GPS prüfen“ korrigieren.` : ""}</p>` : `<p>Das Einlesen konnte nicht gestartet werden – bitte in der Verwaltung „Bibliothek neu einlesen“ ausführen.</p>`}
-      <div class="row"><a class="btn" href="#/photos" id="pgo">Fotos ansehen</a><button class="btn ghost" id="pcx">Schließen</button></div>`);
+      <div class="uifoot"><button class="btn ghost" id="pcx">Schließen</button><a class="btn" href="#/photos" id="pgo">Fotos ansehen</a></div>`);
     q("#pcx").onclick = close;
     q("#pgo").onclick = () => {
       stop = true;

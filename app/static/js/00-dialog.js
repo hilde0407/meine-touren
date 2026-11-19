@@ -101,6 +101,62 @@
   }
   const open = (o, kind) => new Promise(res => { queue.push({o: norm(o, kind), res: kind === "alert" ? () => res() : res}); next(); });
 
+
+  /* 3.42.0 Formular-Fenster (früher .modal/.mbox): derselbe Rahmen wie uiConfirm, Hintergrund inert, Fokusfalle, Esc und Klick daneben schließen, Fokus geht an den Auslöser zurück.
+     uiModal(html) -> Host-Element (class "uidlg uimod"); darin .uibox mit dem übergebenen HTML. `host.remove()` schließt sauber (stellt Hintergrund und Fokus wieder her);
+     eine erste Überschrift (h2/h3) wird zur Titelzeile des Dialogs. */
+  let mseq = 0;
+  window.uiModal = html => {
+    const trigger = document.activeElement, id = "uimd" + ++mseq;
+    const host = document.createElement("div");
+    host.className = "uidlg uimod";
+    const box = document.createElement("div");
+    box.className = "uibox";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.tabIndex = -1;
+    box.innerHTML = html;
+    let h = box.querySelector(":scope > h2, :scope > h3, :scope > .sec h2");
+    if (h && h.tagName === "H3") {
+      const h2 = document.createElement("h2");
+      h2.innerHTML = h.innerHTML;
+      for (const a of h.attributes) h2.setAttribute(a.name, a.value);
+      h.replaceWith(h2);
+      h = h2;
+    }
+    if (h) { if (!h.id) h.id = id; box.setAttribute("aria-labelledby", h.id); }
+    host.appendChild(box);
+    const inerted = [];
+    [...document.body.children].forEach(el => { if (!el.inert) { el.inert = true; inerted.push(el); } });
+    document.body.appendChild(host);
+    const realRemove = Element.prototype.remove;
+    let closed = false;
+    const close = () => {
+      if (closed) return;
+      closed = true;
+      host.removeEventListener("keydown", key, true);
+      realRemove.call(host);
+      inerted.forEach(el => (el.inert = false));
+      if (trigger && trigger.isConnected && typeof trigger.focus === "function") { try { trigger.focus(); } catch (e) {} }
+    };
+    const key = e => {
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); if (!(host.noClose && host.noClose())) close(); }
+      else if (e.key === "Tab") {
+        const f = [...box.querySelectorAll("button:not([disabled]), input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), a[href], summary")].filter(x => x.offsetParent !== null);
+        if (!f.length) { e.preventDefault(); box.focus(); return; }
+        const i = f.indexOf(document.activeElement);
+        if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+        else if (!e.shiftKey && (i === f.length - 1 || i < 0)) { e.preventDefault(); f[0].focus(); }
+      }
+    };
+    host.addEventListener("keydown", key, true);
+    host.addEventListener("mousedown", e => { if (e.target === host && !(host.noClose && host.noClose())) close(); });   // host.noClose(): z. B. solange ein Import läuft
+    host.remove = close;
+    host._close = close;
+    box.focus({preventScroll: true});
+    return host;
+  };
+
   window.uiConfirm = o => open(o, "confirm");
   window.uiAlert = o => open(o, "alert");
 })();

@@ -21,7 +21,7 @@ function gearForm(g, done) {
    <div class="row mt10"><label>Im Gebrauch ab<input type="date" id="gsince" value="${esc(g.since || "")}"></label><label>bis (leer = noch aktiv)<input type="date" id="guntil" value="${esc(g.until || "")}"></label></div>
    <label>Wechsel-Hinweis ab Kilometern<input type="number" id="glim" min="0" step="50" value="${g.limit_km || ""}" placeholder="z. B. 800 für Schuhe, 3000 für eine Kette"></label>
    <label>Notiz<input id="gnote" maxlength="300" value="${esc(g.note || "")}"></label>
-   <div class="row mt14"><button class="btn" id="gsave">Speichern</button><button class="btn ghost" id="gcancel">Abbrechen</button><span class="sp"></span>${g.id ? `<button class="btn ghost" id="gdel">Löschen</button>` : ""}</div><div id="gerr" class="bad"></div>`);
+   <div id="gerr" class="bad"></div><div class="uifoot">${g.id ? `<button class="btn ghost" id="gdel" data-danger>Löschen</button><span class="sp"></span>` : ""}<button class="btn ghost" id="gcancel">Abbrechen</button><button class="btn" id="gsave">Speichern</button></div>`);
   m.querySelectorAll("#gs input").forEach(i => (i.onchange = () => i.parentElement.classList.toggle("on", i.checked)));
   m.querySelector("#gcancel").onclick = () => m.remove();
   m.querySelector("#gsave").onclick = async () => {
@@ -87,7 +87,7 @@ VIEWS.tour = async (...a) => {
     $("#gedit").onclick = () => {
       const m = modal(`<h2>Ausrüstung dieser Tour</h2><label class="row g8"><input type="checkbox" id="gauto" ${r.auto ? "checked" : ""}> automatisch nach Sportart und Datum</label>
         <div id="glist" class="m10-0">${r.all.map(g => `<label class="row g8 m4-0"><input type="checkbox" value="${g.id}" ${r.ids.includes(g.id) ? "checked" : ""}> ${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)}</label>`).join("")}</div>
-        <div class="row"><button class="btn" id="gok">Speichern</button><button class="btn ghost" id="gno">Abbrechen</button></div>`);
+        <div class="uifoot"><button class="btn ghost" id="gno">Abbrechen</button><button class="btn" id="gok">Speichern</button></div>`);
       const sync = () => m.querySelectorAll("#glist input").forEach(i => (i.disabled = $("#gauto").checked));
       $("#gauto").onchange = sync;
       sync();

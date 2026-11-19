@@ -21,7 +21,7 @@ async function cleanUnusedDialog() {
    <h3 class="m12-0-4">Welche Jahre löschen?</h3>
    <div class="rows" id="cuy">${u.years.map(y => `<label class="r g8 aic" style="display:flex"><input type="checkbox" data-y="${y.y}"><span class="fx1">${y.y}</span><span class="mut">${nf(y.n, 0)} Fotos · ${mb(y.b)}</span></label>`).join("")}</div>
    <div class="notice m12-0 fs14">Gelöscht werden nur die Kopien in der Fotobibliothek dieser App – <b>niemals deine Originale</b>. Die Fotos tauchen beim nächsten Import nicht wieder auf. Das Löschen lässt sich nicht rückgängig machen.</div>
-   <div class="row"><button class="btn" id="cudo" disabled>Löschen</button><button class="btn ghost" id="cuno">Abbrechen</button><span id="cuer" class="bad"></span></div>`);
+   <div id="cuer" class="bad"></div><div class="uifoot"><button class="btn ghost" id="cuno">Abbrechen</button><button class="btn alt uidanger" data-danger id="cudo" disabled>Löschen</button></div>`);
   const sel = () => [...m.querySelectorAll("[data-y]:checked")].map(x => +x.dataset.y);
   const upd = () => {
     const ys = sel(),

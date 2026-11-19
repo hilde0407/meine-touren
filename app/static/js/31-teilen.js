@@ -90,7 +90,7 @@ VIEWS.tour = async id => {
         <label>Fotos<br><select id="sh_b"><option value="0">Alle Fotos</option><option value="20">Nur die besten 20</option><option value="50">Nur die besten 50</option></select></label>
         <label class="mt10" style="display:block">Link gültig<br><select id="sh_d"><option value="7">7 Tage</option><option value="30">30 Tage</option><option value="0">Unbegrenzt (bis ich ihn widerrufe)</option></select></label>
         <label class="mt10" style="display:block"><input type="checkbox" id="sh_c"> Besucher dürfen Fotos kommentieren</label><p class="mut fs13 m4-0-0">Kommentare sind für alle mit dem Link sichtbar; Gäste brauchen kein Konto. Du kannst sie in der Erzählung löschen.</p>
-        <div class="row mt14 jce"><button class="btn alt" id="sh_x">Abbrechen</button><button class="btn" id="sh_go">Senden</button></div>`);
+        <div class="uifoot"><button class="btn ghost" id="sh_x">Abbrechen</button><button class="btn" id="sh_go">Senden</button></div>`);
       m.querySelector("#sh_c").checked = keep("c") === "1";
       m.querySelector("#sh_b").value = keep("b") || "0";
       m.querySelector("#sh_d").value = keep("d") || "30";

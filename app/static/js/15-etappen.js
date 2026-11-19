@@ -73,7 +73,7 @@ function seriesBuildDialog() {
    <div class="row g8 aic"><label>Von <input id="sbf" type="date" value="${iso(newest - 6 * 86400)}"></label><label>bis <input id="sbt" type="date" value="${iso(newest)}"></label></div>
    <div class="row g8 aic mt8"><input id="sbn" placeholder="Name, z. B. Alpenüberquerung E5" class="fx1 mnw200"><select id="sbw" style="width:auto"><option>Tag</option><option>Etappe</option></select></div>
    <div id="sbl" class="rows m10-0 ova" style="max-height:260px"></div>
-   <div class="row"><button class="btn" id="sbok">Benennen</button><button class="btn ghost" id="sbno">Abbrechen</button><span id="sber" class="bad"></span></div>`);
+   <div id="sber" class="bad"></div><div class="uifoot"><button class="btn ghost" id="sbno">Abbrechen</button><button class="btn" id="sbok">Benennen</button></div>`);
   const list = () => {
     const f = m.querySelector("#sbf").value,
       t = m.querySelector("#sbt").value;
@@ -119,7 +119,7 @@ VIEWS.series = async id => {
   if (!s || !row || $("#serren")) return;
   row.parentElement.insertAdjacentHTML("beforeend", `<button class="btn alt" id="serren">✎ Reihe umbenennen</button>`);
   $("#serren").onclick = () => {
-    const m = modal(`<h2>Mehrtagestour umbenennen</h2><p class="mut fs14">Alle ${s.n} Etappen heißen danach „Neuer Name – Tag N“ (die Nummern bleiben).</p><input id="srn" value="${esc(s.name)}" class="w100"><div class="row mt12"><button class="btn" id="srok">Umbenennen</button><button class="btn ghost" id="srno">Abbrechen</button><span id="srer" class="bad"></span></div>`);
+    const m = modal(`<h2>Mehrtagestour umbenennen</h2><p class="mut fs14">Alle ${s.n} Etappen heißen danach „Neuer Name – Tag N“ (die Nummern bleiben).</p><input id="srn" value="${esc(s.name)}" class="w100"><div id="srer" class="bad"></div><div class="uifoot"><button class="btn ghost" id="srno">Abbrechen</button><button class="btn" id="srok">Umbenennen</button></div>`);
     m.querySelector("#srno").onclick = () => m.remove();
     m.querySelector("#srok").onclick = async () => {
       const name = m.querySelector("#srn").value.trim();

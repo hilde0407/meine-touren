@@ -37,8 +37,6 @@ async function uploadDialog(t) {
   } catch (e) {
     return uiAlert(e.message);
   }
-  const m = document.createElement("div");
-  m.className = "modal";
   const rows = pf.portals
     .map(p => {
       const fromHere = p.id === "komoot" && t.source !== "local",
@@ -61,14 +59,9 @@ async function uploadDialog(t) {
       return `<label class="chk m8-0" style="display:block"><input type="checkbox" class="pp" value="${p.id}" ${fromHere || !p.connected || done ? "disabled" : ""}> <b>${p.name}</b> <span class="mut">${why}</span>${done && p.connected && !fromHere ? `<br><label class="fs12 ml22"><input type="checkbox" class="ff" data-p="${p.id}"> trotzdem erneut hochladen (z. B. wenn die Tour bei ${p.name} fehlt)</label>` : ""}</label>`;
     })
     .join("");
-  m.innerHTML = `<div class="mbox"><h3>Tour hochladen</h3><p class="mut">„${esc(t.name)}“ wird mit der lokal gespeicherten Strecke zu den gewählten Portalen gesendet. Es passiert nichts ohne dein Häkchen.</p>${rows}<div id="upr" class="mt10"></div>
-    <div class="mt18 g8 jce" style="display:flex"><button class="btn alt" id="ucx">Schließen</button><button class="btn" id="uok">Hochladen</button></div></div>`;
-  document.body.appendChild(m);
-  const close = () => m.remove();
-  m.querySelector("#ucx").onclick = close;
-  m.onclick = e => {
-    if (e.target === m) close();
-  };
+  const m = uiModal(`<h3>Tour hochladen</h3><p class="mut">„${esc(t.name)}“ wird mit der lokal gespeicherten Strecke zu den gewählten Portalen gesendet. Es passiert nichts ohne dein Häkchen.</p>${rows}<div id="upr" class="mt10"></div>
+    <div class="uifoot"><button class="btn ghost" id="ucx">Schließen</button><button class="btn" id="uok">Hochladen</button></div>`);
+  m.querySelector("#ucx").onclick = () => m.remove();
   m.querySelectorAll(".ff").forEach(
     f =>
       (f.onchange = () => {
@@ -291,17 +284,11 @@ VIEWS.tour = async id => {
   if ($("#edel") && t.source !== "local")
     $("#edel").onclick = () => {
       // Tour von Komoot: nur hier entfernen (kommt beim Abgleich nicht wieder) oder auch bei Komoot endgültig löschen
-      const m = document.createElement("div");
-      m.className = "modal";
-      m.innerHTML = `<div class="mbox"><h3>Tour löschen?</h3><p>„${esc(t.name)}“ (${fmtKm(t.km)}) wird aus Meine Touren entfernt – mit Strecke, Notizen und Tags. Zugeordnete Fotos bleiben erhalten.</p>
+      const m = uiModal(`<h3>Tour löschen?</h3><p>„${esc(t.name)}“ (${fmtKm(t.km)}) wird aus Meine Touren entfernt – mit Strecke, Notizen und Tags. Zugeordnete Fotos bleiben erhalten.</p>
         <label class="chk"><input type="checkbox" id="dk"> <b>auch bei Komoot endgültig löschen</b> <span class="mut">(lässt sich nicht rückgängig machen)</span></label>
         <p class="mut fs13">Ohne Häkchen bleibt die Tour bei Komoot und wird beim nächsten Abgleich nicht wieder übernommen.</p>
-        <div id="dm" class="mut"></div><div class="mt18 g8 jce" style="display:flex"><button class="btn alt" id="dx">Abbrechen</button><button class="btn c-white" id="dok" style="background:var(--bad,#b3261e);border-color:var(--bad,#b3261e)">Löschen</button></div></div>`;
-      document.body.appendChild(m);
+        <div id="dm" class="mut"></div><div class="uifoot"><button class="btn ghost" id="dx">Abbrechen</button><button class="btn alt uidanger" data-danger id="dok">Löschen</button></div>`);
       m.querySelector("#dx").onclick = () => m.remove();
-      m.onclick = e => {
-        if (e.target === m) m.remove();
-      };
       m.querySelector("#dok").onclick = async e => {
         const k = !!m.querySelector("#dk").checked;
         if (k && !await uiConfirm({text: `„${t.name}“ wirklich auch bei Komoot endgültig löschen?`, danger: true, ok: "Löschen"})) return;
@@ -435,24 +422,17 @@ VIEWS.tour = async id => {
     );
   };
   $("#ren").onclick = () => {
-    const m = document.createElement("div");
-    m.className = "modal";
-    m.innerHTML = `<div class="mbox"><h3>Tour umbenennen</h3>
+    const m = uiModal(`<h3>Tour umbenennen</h3>
       <input id="rnn" type="text" class="w100" maxlength="200">
       <div class="mt12"><b>Vorschläge aus den Kartendaten</b></div>
       <div id="rsg" class="chips mt6 fxw g6" style="display:flex"><span class="mut">Suche Orte und Gipfel …</span></div>
       ${t.source === "local" ? "" : '<label class="chk"><input type="checkbox" id="rkom"> auch bei Komoot umbenennen</label>'}
-      <div class="mt18 g8 jce" style="display:flex"><button class="btn alt" id="rcx">Abbrechen</button><button class="btn" id="rok">Umbenennen</button></div></div>`;
-    document.body.appendChild(m);
+      <div class="uifoot"><button class="btn ghost" id="rcx">Abbrechen</button><button class="btn" id="rok">Umbenennen</button></div>`);
     const inp = m.querySelector("#rnn");
     inp.value = t.name;
     inp.focus();
     inp.select();
-    const close = () => m.remove();
-    m.querySelector("#rcx").onclick = close;
-    m.onclick = e => {
-      if (e.target === m) close();
-    };
+    m.querySelector("#rcx").onclick = () => m.remove();
     const box = m.querySelector("#rsg");
     let pend = 4,
       got = 0,

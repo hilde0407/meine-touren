@@ -327,7 +327,7 @@ async function route() {
   const [k0 = "dash", name, sub] = path.split("/");
   const k = k0 === "tour" && sub === "auswertung" ? "tourauswertung" : k0;      // #/tour/<id>/auswertung = Unterseite der Tour (3.16.0)
   document.querySelectorAll("nav a").forEach(a => a.classList.toggle("on", a.dataset.k === (k === "tour" || k === "tourauswertung" || k === "story" || k === "flight" || k === "plan" ? "tours" : k === "tripsheet" || k === "trip" ? "trips" : k)));
-  document.querySelectorAll(".modal").forEach(m => m.remove());
+  document.querySelectorAll(".uimod").forEach(m => m.remove());
   closeFloaters();
   clearInterval(pollTimer);
   if (map) {

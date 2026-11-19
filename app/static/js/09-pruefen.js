@@ -91,17 +91,11 @@ VIEWS.check = async () => {
           (b.onclick = () => {
             const row = b.closest("[data-id]"),
               d = row.dataset;
-            const m = document.createElement("div");
-            m.className = "modal";
-            m.innerHTML = `<div class="mbox"><h3>Tour löschen?</h3><p>„${esc(d.name)}“ (${fmtKm(+d.km)}) wird aus Meine Touren entfernt – mit Strecke, Notizen und Tags. Zugeordnete Fotos bleiben erhalten.</p>
+            const m = uiModal(`<h3>Tour löschen?</h3><p>„${esc(d.name)}“ (${fmtKm(+d.km)}) wird aus Meine Touren entfernt – mit Strecke, Notizen und Tags. Zugeordnete Fotos bleiben erhalten.</p>
         ${d.onk ? `<label class="chk"><input type="checkbox" id="dk"> <b>auch bei Komoot endgültig löschen</b> <span class="mut">(lässt sich nicht rückgängig machen)</span></label>` : ""}
         ${!d.local && d.onk ? `<p class="mut fs13">Ohne Häkchen bleibt die Tour bei Komoot und wird beim nächsten Abgleich nicht wieder übernommen.</p>` : ""}
-        <div id="dm" class="mut"></div><div class="mt18 g8 jce" style="display:flex"><button class="btn alt" id="dx">Abbrechen</button><button class="btn c-white" id="dok" style="background:var(--bad,#b3261e);border-color:var(--bad,#b3261e)">Löschen</button></div></div>`;
-            document.body.appendChild(m);
+        <div id="dm" class="mut"></div><div class="uifoot"><button class="btn ghost" id="dx">Abbrechen</button><button class="btn alt uidanger" data-danger id="dok">Löschen</button></div>`);
             m.querySelector("#dx").onclick = () => m.remove();
-            m.onclick = e => {
-              if (e.target === m) m.remove();
-            };
             m.querySelector("#dok").onclick = async e => {
               const k = !!m.querySelector("#dk")?.checked;
               if (k && !await uiConfirm({text: `„${d.name}“ wirklich auch bei Komoot endgültig löschen?`, danger: true, ok: "Löschen"})) return;

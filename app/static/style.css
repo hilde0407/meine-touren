@@ -119,9 +119,10 @@ details{border-top:1px solid var(--rule);padding:10px 0;margin-top:10px}summary{
 .selmode .thumbs img{cursor:crosshair}.thumbs img.sel{outline:4px solid var(--yellow);outline-offset:-4px;filter:brightness(.8)}
 .btn.on{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}
 .gsel{display:none}.selmode .gsel{display:inline-block}
-.modal{position:fixed;inset:0;background:#0009;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
-.mbox{background:var(--bg);color:var(--ink);border-radius:8px;padding:24px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
-.mbox .chk{display:block;margin-top:14px;font-size:15px}.mbox select{width:100%}
+/* 3.42.0 Ein Dialog: die früheren .modal/.mbox-Fenster laufen über uiModal() (00-dialog.js) und sehen aus wie .uibox */
+.uimod .uibox{width:min(560px,100%)}
+.uimod .uibox .chk{display:block;margin-top:14px;font-size:15px}.uimod .uibox select{width:100%}
+.uimod .uibox.pimbox{width:min(720px,100%)}.uimod .uibox.tfbox{width:min(760px,100%)}
 
 .thumbs .th{position:relative}.thumbs .th .cap{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 5px;border-radius:0 0 3px 3px;background:linear-gradient(transparent,#000b);color:#fff;font-size:13px;pointer-events:none;font-variant-numeric:tabular-nums}
 .thumbs .th img.sel{outline:4px solid var(--yellow);outline-offset:-4px}
@@ -217,7 +218,7 @@ html.mob .leaflet-control-zoom{display:none}
 html.mob .thumbs{grid-template-columns:repeat(3,1fr);gap:3px}
 html.mob .tr{grid-template-columns:62px 1fr;gap:4px 12px;padding:12px 0}html.mob .tr .n{grid-column:1/-1;justify-content:flex-start}
 html.mob .panel{padding:14px}html.mob .rows .r{gap:8px}
-html.mob .modal{align-items:flex-end;padding:0}html.mob .mbox,html.mob .modal.sheet .mbox{max-width:none;border-radius:16px 16px 0 0;max-height:88vh;padding:20px 18px calc(20px + env(safe-area-inset-bottom))}
+html.mob .uimod .uibox{padding:20px 18px calc(18px + env(safe-area-inset-bottom))}
 html.mob .moregrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}html.mob .moregrid .btn{width:100%}
 html.mob .tpanel{position:fixed;left:8px;right:8px;bottom:calc(70px + env(safe-area-inset-bottom));top:auto;width:auto}
 html.mob .warnbar{font-size:14px}
@@ -274,8 +275,7 @@ a.chip{text-decoration:none;color:inherit;cursor:pointer}a.chip .sw{margin-right
 .pdfctl{display:inline-flex;gap:6px;align-items:center;font-size:14px;margin-right:10px}.pdfctl select{padding:4px 6px;font-size:14px;min-height:0}
 .offbar{position:sticky;top:0;z-index:50;background:#f2c230;color:#241d00;text-align:center;padding:7px 12px;font-size:14px;font-weight:600}
 /* Smartphone: Fenster über der Tab-Leiste, scrollbar, nichts abgeschnitten */
-html.mob .modal{z-index:1000}
-html.mob .modal .mbox{overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:88vh;max-height:88dvh}
+html.mob .uimod .uibox{-webkit-overflow-scrolling:touch}
 html.mob .moregrid .btn{min-height:46px;display:flex;align-items:center;justify-content:center;text-align:center}
 /* Smartphone: mehr Inhalt auf kleinem Bildschirm (Übersicht, Filter, Kennzahlen) */
 html.mob .hero{min-height:0}
@@ -624,13 +624,13 @@ svg.ic{display:inline-block;vertical-align:-3px;margin-right:6px;flex:none}
 .dvhint{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 14px;border:1px solid color-mix(in srgb,var(--yellow) 60%,var(--rule));border-left:4px solid var(--yellow);border-radius:var(--r);background:color-mix(in srgb,var(--yellow) 10%,var(--card));margin:0 0 14px}
 .dvhint>span:first-child{flex:1;min-width:220px}.dvhint b{display:block}
 /* Dialoge */
-.mbox.dvbox{max-width:600px;padding:22px 24px}.mbox.dvbox>h2{font-size:26px;margin-bottom:4px}.mbox.dvbox .dvlead{margin:2px 0 14px;color:var(--mut)}
+.uibox.dvbox{width:min(600px,100%);padding:22px 24px}.uibox.dvbox>h2{margin-bottom:4px}.uibox.dvbox .dvlead{margin:2px 0 14px;color:var(--mut)}
 .dvf{margin:14px 0 0;border:0;padding:0;min-width:0}.dvf>label,.dvf>legend{display:block;font:600 15px var(--b);margin:0 0 4px;padding:0}
 .dvf input:not([type=checkbox]),.dvf select{width:100%}.dvh{display:block;color:var(--mut);font-size:14px;line-height:1.4;margin-top:4px}
 .dvf2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.dvf2 label{font:500 14px var(--b);display:block;margin-bottom:3px}
 .dvtop{display:flex;gap:16px;align-items:center;margin:12px 0 2px}.dvtop .row{margin:0 0 6px}
 .dvadv{margin-top:14px;border-top:1px solid var(--rule);padding-top:8px}.dvadv summary{cursor:pointer;font:600 15px var(--b);padding:4px 0}
-.dvfoot{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:20px}
+.dvfoot{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end;margin-top:20px}
 .dvpickrow{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--rule);border-radius:var(--r);margin:8px 0;cursor:pointer;background:var(--card)}
 .dvpickrow:has(input:checked){border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}.dvpickrow input{flex:none}.dvpickrow b{display:block;font-weight:600}.dvpickrow small{color:var(--mut)}
 .dvprobe{display:grid;gap:12px;margin-top:10px}
@@ -649,7 +649,7 @@ svg.ic{display:inline-block;vertical-align:-3px;margin-right:6px;flex:none}
 .dvsrc{display:inline-flex;align-items:center;gap:6px;vertical-align:middle}
 html.mob .dvlist{grid-template-columns:1fr}html.mob .dvf2{grid-template-columns:1fr}html.mob .dvmenu button{min-height:44px}html.mob .dvmore{width:44px;height:44px;top:4px;right:4px}
 html.mob .dvrow{border-radius:16px}
-.mbox.dvbox .dvfoot{position:sticky;bottom:-22px;background:var(--bg);padding:12px 0 6px;margin-bottom:-6px;z-index:1}
+.uibox.dvbox .dvfoot{position:sticky;bottom:-22px;background:var(--card,var(--bg));padding:12px 0 6px;margin-bottom:-6px;z-index:1}
 
 /* Genauigkeit der Uhren (3.10.0) */
 .dvcard{flex-wrap:wrap}.dvcard:has(.dvq[open]){grid-column:1/-1}
@@ -695,7 +695,7 @@ html.mob .dvq>summary{min-height:48px}
 .dvulink{display:inline;margin:0;padding:4px 2px;font-size:14px;min-height:0}
 .dvuhr:hover,.dvulink:hover{text-decoration-thickness:2px}
 .dvuhr:focus-visible,.dvulink:focus-visible,.dvuchk input:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:3px}
-.mbox.dvbox.dvubox{max-width:900px}
+.uibox.dvbox.dvubox{width:min(900px,100%)}
 .dvubody{min-width:0}.dvuh{font-size:15px;margin:4px 0 8px;line-height:1.45}
 .dvuempty{padding:12px 14px;border:1px solid var(--rule);border-left:4px solid var(--yellow);border-radius:var(--r);background:var(--card);margin:6px 0 12px}
 .dvuempty ul{margin:6px 0 0;padding-left:20px}.dvuempty li{margin:3px 0}
@@ -711,9 +711,9 @@ html.mob .dvq>summary{min-height:48px}
 .dvuy{background:var(--dv-ok-bg);color:var(--dv-ok)}.dvun{background:var(--soft);color:var(--mut)}.dvun.has{background:var(--dv-warn-bg);color:var(--dv-warn)}
 .dvuy svg,.dvun svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .dvuchk{display:flex;align-items:center;gap:8px;font:500 15px var(--b);cursor:pointer;min-height:32px;margin:8px 0 2px}.dvuchk input{width:18px;height:18px;flex:none}
-.mbox.dvubox .dvfoot{align-items:center}.mbox.dvubox .dvfoot .sp{flex:1}
+.uibox.dvubox .dvfoot{align-items:center}.uibox.dvubox .dvfoot .sp{flex:1}
 @media (max-width:640px){
-  .mbox.dvbox.dvubox{padding:18px 14px}
+  .uibox.dvbox.dvubox{padding:18px 14px}
   .dvut,.dvut tbody,.dvut tr,.dvut td,.dvut tbody th{display:block;width:auto}.dvut thead{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
   .dvut tbody tr{border:1px solid var(--rule);border-radius:var(--r);background:var(--card);margin:0 0 8px;padding:6px 0}
   .dvut th,.dvut td{border-top:0;padding:4px 12px}.dvut tbody th{width:auto!important}
@@ -830,9 +830,9 @@ details.trsub .tblw{max-height:340px;overflow:auto}
 .uifoot{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px}
 .uifoot .btn{min-height:44px}
 .uifoot .btn:focus-visible,.uidlg button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
-.uibox.danger .uidanger{background:var(--dv-bad);border-color:var(--dv-bad);color:var(--card,#fff)}
+.uibox .uidanger{background:var(--dv-bad);border-color:var(--dv-bad);color:var(--card,#fff)}
 @media (prefers-reduced-motion:no-preference){.uibox{animation:uipop .12s ease-out}@keyframes uipop{from{transform:translateY(6px);opacity:0}}}
-@media (max-width:420px){.uifoot{flex-direction:column-reverse}.uifoot .btn{width:100%}}
+@media (max-width:420px){.uifoot,.dvfoot{flex-direction:column-reverse}.uifoot .btn,.dvfoot .btn{width:100%}}
 
 /* Fortschrittsbalken (role=progressbar) und Job-Kasten */
 .dvbar{height:12px;border-radius:99px;background:var(--soft);border:1px solid var(--rule);overflow:hidden;margin:6px 0}
@@ -868,7 +868,7 @@ details.trsub .tblw{max-height:340px;overflow:auto}
 .dvundo{margin-right:10px}
 
 /* Sammel-Korrektur (Dialog) */
-.mbox.dvbox.dvbatchbox{max-width:760px}
+.uibox.dvbox.dvbatchbox{width:min(760px,100%)}
 .dvbintro{margin:6px 0 0;line-height:1.5}
 .dvbmeth .dvpickrow{margin:6px 0;padding:12px 14px;line-height:1.35;display:flex;flex-direction:row;align-items:flex-start;gap:12px;text-align:left}.dvbmeth .dvpickrow input{width:20px;height:20px;margin:2px 0 0;flex:none}.dvbmeth .dvpickrow>span{display:block;min-width:0}.dvbmeth .dvpickrow small{display:block;margin-top:2px}
 .dvblist{border:1px solid var(--rule);border-radius:var(--r);margin-top:14px;background:var(--card);overflow:hidden}
@@ -885,7 +885,7 @@ details.trsub .tblw{max-height:340px;overflow:auto}
 .dvbsum{margin:14px 0 0;padding:10px 12px;border-left:4px solid var(--yellow);background:color-mix(in srgb,var(--yellow) 10%,var(--card));border-radius:var(--r)}
 .dvbsum b{display:block}.dvbsum .dvh{margin-top:2px}
 .dvbdone{font-size:18px;margin:6px 0}
-@media (max-width:520px){.dvbrow{grid-template-columns:auto minmax(0,1fr)}.dvbnum{grid-column:2;justify-content:flex-start}.mbox.dvbox.dvbatchbox{padding:18px 14px}}
+@media (max-width:520px){.dvbrow{grid-template-columns:auto minmax(0,1fr)}.dvbnum{grid-column:2;justify-content:flex-start}.uibox.dvbox.dvbatchbox{padding:18px 14px}}
 
 /* =====================  3.14.0: Ähnliche Touren im Vergleich (Tourseite)  ===================== */
 .aesaid{font-size:16px;margin:2px 0 4px;color:var(--ink)}
@@ -1989,8 +1989,8 @@ html.mob .mapui>.kaopen .slok{flex:0 0 auto;white-space:nowrap}
 .pcmp{margin-top:4px;color:var(--ink)}.psug{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:8px;padding:8px 10px;border-radius:var(--r);background:var(--dv-warn-bg);color:var(--dv-warn);font-size:14px}.psug a{color:inherit;font-weight:600}
 .bkst p{margin:6px 0}.bkst .fs13{margin-top:0}
 
-/* 3.39.0 Karte: Fenster „Touren im Ausschnitt“ liegt über den Bedienfeldern (.mapui, z-index 500) und den Kartensteuerelementen; auch mobil (dort .modal 1000) */
-.modal.mbxfen,html.mob .modal.mbxfen{z-index:1100}.modal.mbxfen .mbox{max-width:760px;width:100%}.modal.mbxfen .mbox:focus{outline:none}
+/* 3.39.0 Karte: Fenster „Touren im Ausschnitt“ liegt über den Bedienfeldern (.mapui, z-index 500) und den Kartensteuerelementen; auch mobil */
+.uimod.mbxfen .uibox{width:min(760px,100%)}
 
 /* 3.39.0 Plan und Ergebnis (Baustein „planergebnis“, 51-bausteine-tour.js): Soll/Ist-Zeilen mit Pfeil und Wort (nie nur Farbe), gestrichelte Plan-Linie über der durchgezogenen gelaufenen Linie */
 .plname{margin:0 0 8px;font-size:16px}.plrows{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:10px}

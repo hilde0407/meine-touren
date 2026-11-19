@@ -1,14 +1,14 @@
 /* =====================  GPS-Track korrigieren  ===================== */
 function trackFixDialog(id, done) {
   const m = modal(`<h2>GPS-Track korrigieren</h2><div id="tfb" class="mut">Track wird untersucht …</div>`);
-  m.querySelector(".mbox").style.maxWidth = "760px";
+  m.querySelector(".uibox").classList.add("tfbox");
   (async () => {
     const b = m.querySelector("#tfb");
     let a;
     try {
       a = await api(`/api/tours/${encodeURIComponent(id)}/trackfix`);
     } catch (e) {
-      b.innerHTML = `<p class="bad">${esc(e.message)}</p><div class="row"><button class="btn ghost" id="tfx">Schließen</button></div>`;
+      b.innerHTML = `<p class="bad">${esc(e.message)}</p><div class="uifoot"><button class="btn ghost" id="tfx">Schließen</button></div>`;
       b.querySelector("#tfx").onclick = () => m.remove();
       return;
     }
@@ -45,7 +45,7 @@ function trackFixDialog(id, done) {
      ${a.jitter_m >= 200 && a.jitter_m >= a.raw_m * 0.03 ? `<label class="chk"><input type="checkbox" id="tfj"> <b>GPS-Zittern glätten:</b> der Track ist durch Messrauschen etwa ${fmtKm(a.jitter_m / 1000)} (${Math.round((a.jitter_m / a.raw_m) * 100)} %) zu lang. Die Länge wird entsprechend verringert, der Weg bleibt unverändert.</label>` : ""}
      <p id="tfp" class="panel p10-14 m14-0-0 fs14"></p>
      ${!a.has_time ? `<p class="mut fs13">Dieser Track hat keine Zeitstempel – schnelle Abschnitte lassen sich daher nicht erkennen.</p>` : ""}
-     <div class="row mt16">${none && !a.fixed && !a.timing.uniform ? "" : `<button class="btn" id="tfok">${a.fixed ? "Erneut anwenden" : "Korrigieren"}</button>`}${a.fixed ? `<button class="btn alt" id="tfre">Original wiederherstellen</button>` : ""}<button class="btn ghost" id="tfno">Schließen</button><span id="tfer" class="bad"></span></div>`;
+     <div id="tfer" class="bad"></div><div class="uifoot"><button class="btn ghost" id="tfno">Schließen</button>${a.fixed ? `<button class="btn alt" id="tfre">Original wiederherstellen</button>` : ""}${none && !a.fixed && !a.timing.uniform ? "" : `<button class="btn" id="tfok">${a.fixed ? "Erneut anwenden" : "Korrigieren"}</button>`}</div>`;
     const preview = () => {
       let d = a.dist_km * 1000,
         s = a.dur_s;

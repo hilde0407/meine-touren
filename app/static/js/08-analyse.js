@@ -432,7 +432,7 @@ VIEWS.dash = async (...a) => {
       document.removeEventListener("keydown", key);
       return;
     }
-    if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || "") || $(".modal")) return;
+    if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || "") || $(".uidlg")) return;
     if (e.key === "ArrowLeft") show(i - 1);
     else if (e.key === "ArrowRight") show(i + 1);
   };

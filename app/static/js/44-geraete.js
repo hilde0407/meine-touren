@@ -12,7 +12,7 @@ const DV_SVG = {
 const dvJson = (m, o) => ({method: m, headers: {"content-type": "application/json"}, body: JSON.stringify(o)});
 const dvBox = html => {
   const m = modal(html);
-  m.querySelector(".mbox").classList.add("dvbox");
+  m.querySelector(".uibox").classList.add("dvbox");
   return m;
 };
 const dvPeriod = g => {
@@ -68,7 +68,7 @@ function devForm(dv, g, done) {
    <div class="dvf"><label for="dvt">Notiz (optional)</label><input id="dvt" maxlength="300" value="${esc(g.note || "")}"></div>
    <label class="chk"><input type="checkbox" id="dva" ${g.active ? "checked" : ""}> Aktiv</label><small class="dvh">Deaktivierte Geräte behalten ihre Touren, ihre Messwerte werden aber eingeklappt.</small>
    <details class="dvadv" id="dvadv" ${g.zsrc ? "open" : ""}><summary>Erweitert</summary><div class="dvf"><label for="dvz">Zepp-Kennung</label><input id="dvz" maxlength="120" value="${esc(g.zsrc || "")}" placeholder="z. B. run.46.huami.com"><small class="dvh">So meldet sich die Uhr in der Zepp-Cloud. Mit Kennung werden Touren dieser Uhr auch dann richtig zugeordnet, wenn sich die Zeiträume überschneiden. Am einfachsten über „Geräte aus Zepp ermitteln“ eintragen lassen.</small></div></details>
-   <div class="dvfoot"><button class="btn" id="dvsave">Speichern</button><button class="btn ghost" id="dvcancel">Abbrechen</button></div><div id="dverr" class="bad mt8"></div>`);
+   <div class="dvfoot"><button class="btn ghost" id="dvcancel">Abbrechen</button><button class="btn" id="dvsave">Speichern</button></div><div id="dverr" class="bad mt8"></div>`);
   const preview = () => {
     const k = $("#dvk").value;
     $("#dvpv").innerHTML = st.url ? `<span class="dvav lg"><img src="${st.url}" alt=""></span>` : g.photo && !st.del ? dvAvatar(g, "lg") : dvAvatar({kind: k}, "lg");
@@ -124,7 +124,7 @@ function devRange(dv, g, done) {
     <p class="mut">Du kannst das jederzeit bei einzelnen Touren ändern („Quelle“ → „Ändern“ → „Automatisch“).</p>
     <div class="dvf2"><div><label for="rf">Von (einschließlich)</label><input type="date" id="rf" value="${esc(g.since || "")}"></div><div><label for="rt">Bis (einschließlich)</label><input type="date" id="rt" value="${esc(g.until || "")}"></div></div>
     <p class="dvh" id="rcnt"></p>
-    <div class="dvfoot"><button class="btn" id="rok">Touren zuordnen</button><button class="btn ghost" id="rno">Abbrechen</button></div><div id="rerr" class="bad mt8"></div>`);
+    <div class="dvfoot"><button class="btn ghost" id="rno">Abbrechen</button><button class="btn" id="rok">Touren zuordnen</button></div><div id="rerr" class="bad mt8"></div>`);
   const count = () => {
     const a = $("#rf").value, b = $("#rt").value;
     const n = (window.TOURS || []).filter(t => { const d = String(t.date || "").slice(0, 10); return d && (!a || d >= a) && (!b || d <= b); }).length;
@@ -158,7 +158,7 @@ async function devDelete(dv, g, done) {
     if (!/umhängen/.test(e.message)) return uiAlert({title: "Nicht möglich", text: e.message});
     if (!others.length) return uiAlert({title: "Nicht möglich", text: e.message + " Lege dafür zuerst ein anderes Gerät an."});
     const mv = dvBox(`<h2>Touren umhängen</h2><p>${esc(e.message)}</p><div class="dvf"><label for="mvto">Auf dieses Gerät umhängen</label><select id="mvto">${others.map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join("")}</select></div>
-      <div class="dvfoot"><button class="btn" id="mvok">Umhängen und löschen</button><button class="btn ghost" id="mvno">Abbrechen</button></div><div id="mverr" class="bad mt8"></div>`);
+      <div class="dvfoot"><button class="btn ghost" id="mvno">Abbrechen</button><button class="btn" id="mvok">Umhängen und löschen</button></div><div id="mverr" class="bad mt8"></div>`);
     $("#mvno").onclick = () => mv.remove();
     $("#mvok").onclick = async () => {
       try {
@@ -199,7 +199,7 @@ function devZepp(dv, done) {
           <div class="dvf2 zd"><div><label>Seit</label><input type="date" class="zs" value="${esc(x.first)}"></div><div><label>Bis (leer = aktuell)</label><input type="date" class="zu" value="${x === latest ? "" : esc(x.last)}"></div></div></div>`}</div>`).join("")}</div>
       <small class="dvh">Das Modell wird anhand der Zepp-Geräteliste erkannt, soweit die Kennung dort vorkommt; sonst trage es selbst ein.</small>
       <details class="dvadv"><summary>Technische Angaben</summary><p class="dvmeta">Felder eines Zepp-Trainings: ${res.sample_keys.map(k => `<code>${esc(k)}</code>`).join(" ")}</p></details>
-      <div class="dvfoot"><button class="btn" id="zok">Ausgewählte übernehmen</button><button class="btn ghost" id="zno">Abbrechen</button></div><div id="zerr" class="bad mt8"></div>`;
+      <div class="dvfoot"><button class="btn ghost" id="zno">Abbrechen</button><button class="btn" id="zok">Ausgewählte übernehmen</button></div><div id="zerr" class="bad mt8"></div>`;
     $("#zno").onclick = () => m.remove();
     body.querySelectorAll(".dvpr").forEach(r => {
       const upd = () => {
@@ -484,7 +484,7 @@ async function dvQRun(root, btn, again) {
 const dvSigned = v => (v > 0 ? "+" : v < 0 ? "−" : "") + fmtHm(Math.abs(v));
 async function dvBatch(g, again) {
   const m = dvBox(`<h2>Auffällige Höhen korrigieren</h2><p class="dvlead">${esc(g.name)}</p><div id="bxbody" aria-live="polite"><p class="mut"><span class="dvspin"></span>Liste wird geladen …</p></div>`);
-  m.querySelector(".mbox").classList.add("dvbatchbox");
+  m.querySelector(".uibox").classList.add("dvbatchbox");
   const body = $("#bxbody", m);
   let changed = false;
   const close = () => { m.remove(); if (changed) again(); };
@@ -511,7 +511,7 @@ async function dvBatch(g, again) {
       <ul class="dvbul">${pv.tours.map((t, i) => `<li><label class="dvbrow"><input type="checkbox" class="bxt" data-i="${i}" checked><span class="dvbname"><b>${esc(t.name)}</b><span class="mut">${esc(dvDay(t.day))}${t.rough ? " · Uhr: grob" : ""}</span></span>
         <span class="dvbnum"><span>Uhr <b>${fmtHm(t.up_dev)}</b></span><span>Gelände <b>${fmtHm(t.up_dem)}</b></span><span class="dvbnew">neu <b data-new>–</b></span></span></label></li>`).join("")}</ul></div>
     <p class="dvbsum" id="bxsum" role="status" aria-live="polite"></p>
-    <div class="dvfoot"><button class="btn" id="bxgo" type="button">Korrigieren …</button><button class="btn ghost" id="bxno" type="button">Abbrechen</button></div>`;
+    <div class="dvfoot"><button class="btn ghost" id="bxno" type="button">Abbrechen</button><button class="btn" id="bxgo" type="button">Korrigieren …</button></div>`;
   const boxes = [...m.querySelectorAll(".bxt")];
   const method = () => (m.querySelector("input[name=bxm]:checked") || {}).value || "dem";
   const sel = () => boxes.filter(b => b.checked).map(b => pv.tours[+b.dataset.i]);
@@ -564,7 +564,7 @@ async function dvBatch(g, again) {
       ${nSkip || nFail ? `<p class="dvh">${nSkip ? `<span>${nSkip} übersprungen</span> ` : ""}${nFail ? `<span>${nFail} nicht möglich</span> ` : ""}<span>Einzelheiten stehen im Protokoll der Verwaltung.</span></p>` : ""}
       ${fin && fin.ok === false ? `<p class="bad">Der Lauf ist mit einem Fehler beendet worden. Schon Korrigiertes bleibt (einzeln wiederherstellbar); du kannst erneut starten.</p>` : ""}
       ${rest ? `<p class="dvopen"><b>${rest === 1 ? "Noch 1 Tour mit auffälliger Höhe offen – erneut starten." : `Noch ${rest} Touren mit auffälliger Höhe offen – erneut starten.`}</b></p>` : ""}
-      <div class="dvfoot">${b && b.n_done ? `<button class="btn alt" id="bxundo" type="button" data-batch="${esc(b.id)}">Alles rückgängig machen</button>` : ""}<button class="btn ghost" id="bxclose" type="button">Schließen</button></div>`;
+      <div class="dvfoot"><button class="btn ghost" id="bxclose" type="button">Schließen</button>${b && b.n_done ? `<button class="btn alt" id="bxundo" type="button" data-batch="${esc(b.id)}">Alles rückgängig machen</button>` : ""}</div>`;
     $("#bxclose", m).onclick = close;
     const ub = $("#bxundo", m);
     if (ub) ub.onclick = () => dvUndo(g, ub.dataset.batch, async () => { MET_CACHE.clear(); await loadTours().catch(() => {}); close(); });
@@ -635,7 +635,7 @@ async function dvUhrFelder(scope, id, name) {
   const dev = scope === "device";
   const m = dvBox(`<h2>${dev ? "Was liefert diese Uhr?" : "Alle Felder dieser Tour"}</h2><p class="dvlead">${esc(name || "")}</p><label class="dvuchk"><input type="checkbox" id="dvuonly"> Nur Felder, die noch nicht ausgewertet werden</label><div id="dvubody" class="dvubody" aria-live="polite"><p class="mut">Wird gelesen … ${dev ? "Bei Zepp-Uhren kann das einige Sekunden dauern." : ""}</p></div>
     <div class="dvfoot"><span class="sp"></span>${dev ? `<a class="btn alt sm" id="dvudl" href="/api/devices/${id}/uhr-felder.json?download=1" download title="Enthält nur Feldnamen, Zähler und Wertebereiche – keine Koordinaten, Tournamen oder Zugangsdaten">Als Datei speichern</a>` : ""}<button class="btn ghost sm" id="dvuclose" type="button">Schließen</button></div>`);
-  m.querySelector(".mbox").classList.add("dvubox");
+  m.querySelector(".uibox").classList.add("dvubox");
   $("#dvuclose").onclick = () => m.remove();
   const body = $("#dvubody");
   try {

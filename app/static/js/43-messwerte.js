@@ -168,8 +168,8 @@ async function metDevRow(t) {
         ${pick("", `<span class="dvav xs">${dvIcon("other")}</span>`, "Automatisch", "nach Art der Quelle und Datum", !cur)}
         ${dv.devices.map(x => pick(x.id, dvAvatar(x, "xs"), esc(x.name) + (x.active ? "" : " (deaktiviert)"), esc([devKindLabel(dv, x.kind), x.model].filter(Boolean).join(" · ")), cur === x.id)).join("")}
         ${dv.devices.length ? "" : `<p class="mut">Noch kein Gerät angelegt – in der Verwaltung unter „Meine Geräte“.</p>`}
-        <div class="dvfoot"><button class="btn" id="dvok">Speichern</button><button class="btn ghost" id="dvno">Abbrechen</button></div><div id="dverr" class="bad"></div>`);
-      mo.querySelector(".mbox").classList.add("dvbox");
+        <div class="dvfoot"><button class="btn ghost" id="dvno">Abbrechen</button><button class="btn" id="dvok">Speichern</button></div><div id="dverr" class="bad"></div>`);
+      mo.querySelector(".uibox").classList.add("dvbox");
       $("#dvno").onclick = () => mo.remove();
       $("#dvok").onclick = async () => {
         const v = (mo.querySelector("input[name=dvm]:checked") || {}).value;

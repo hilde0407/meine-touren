@@ -6,7 +6,7 @@ function codesBox(codes) {
   const txt = codes.join("\n"),
     m = modal(`<h3>Wiederherstellungscodes</h3><p class="mut fs14">Bewahre diese Codes sicher auf (z. B. ausgedruckt oder im Passwort-Manager). Jeder Code funktioniert <b>einmal</b> und ersetzt den Authenticator-Code, falls dein Handy weg ist. <b>Sie werden nur jetzt angezeigt.</b></p>
       <pre class="fs18 lh1_6 p10-14 br8" style="background:var(--paper,#0001);user-select:all">${esc(txt)}</pre>
-      <div class="row jce"><button class="btn alt" id="cdc">Kopieren</button><button class="btn" id="cdx">Ich habe sie gespeichert</button></div>`);
+      <div class="uifoot"><button class="btn alt" id="cdc">Kopieren</button><button class="btn" id="cdx">Ich habe sie gespeichert</button></div>`);
   m.querySelector("#cdc").onclick = async e => {
     try {
       await navigator.clipboard.writeText(txt);
@@ -48,7 +48,7 @@ async function setup2fa(done) {
       <p class="mut fs13 tac">Schlüssel zum Abtippen:<br><code class="fs15" style="user-select:all">${esc(spaced)}</code><br><a href="${esc(s.uri)}">In der App öffnen</a></p>
       <label>6-stelliger Code<input id="t2c" inputmode="numeric" autocomplete="one-time-code" maxlength="8" class="w100"></label>
       <div class="bad" id="t2e" style="min-height:1.3em"></div>
-      <div class="row jce"><button class="btn alt" id="t2x">Abbrechen</button><button class="btn" id="t2ok">Einschalten</button></div>`);
+      <div class="uifoot"><button class="btn ghost" id="t2x">Abbrechen</button><button class="btn" id="t2ok">Einschalten</button></div>`);
   m.querySelector("#t2x").onclick = () => m.remove();
   m.querySelector("#t2ok").onclick = async () => {
     try {

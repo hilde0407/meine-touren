@@ -24,8 +24,7 @@ async function aboutBox() {
     <h4 class="m18-0-6">Ersteller</h4>
     <p class="m0">Entwickelt von <b>Volker Hildebrand</b> gemeinsam mit <b>Claude</b> (KI-Assistent von Anthropic).</p>
     <p class="mut fs13 m10-0-0">Karten © OpenStreetMap-Mitwirkende. Freie Software, Quellcode auf GitHub (hilde0407/meine-touren).</p>
-    <div class="row jce mt14"><button class="btn" id="abx">Schließen</button></div>`);
-  m.classList.add("sheet");
+    <div class="uifoot"><button class="btn ghost" id="abx">Schließen</button></div>`);
   m.querySelector("#abx").onclick = () => m.remove();
 }
 /* Anmeldehelfer: JSON senden, Fehlermeldung des Servers lesbar machen */
@@ -164,7 +163,6 @@ function applyView() {
         .join("")}</div>
       <div class="row mt16"><button class="btn alt sm" id="mab">ℹ️ Info: Version &amp; Ersteller</button></div>
       ${ME.user ? `<div class="row mt16"><button class="btn alt" id="mlo">Abmelden (${esc(ME.user.name)})</button></div>` : ""}`);
-    m2.classList.add("sheet");
     m2.querySelectorAll("a").forEach(a => (a.onclick = () => m2.remove()));
     m2.querySelectorAll("[data-vm]").forEach(
       b =>
@@ -488,7 +486,7 @@ VIEWS.tour = async (id, q) => {
       const us = (await api("/api/users").catch(() => [])).filter(u => u.uid !== ME.user.uid && (u.active === undefined || u.active));
       const m =
         modal(`<h3>Fotos dieser Tour freigeben</h3><p class="mut fs14">Die Freigabe gilt für alle Fotos, die dieser Tour zugeordnet sind.</p><div class="field"><label>Für</label><select id="fg"><option value="*">Alle Benutzer</option>${us.map(u => `<option value="${esc(u.uid)}">${esc(u.name)}</option>`).join("")}</select></div>
-      <div class="row jce"><button class="btn alt" id="fgx">Abbrechen</button><button class="btn" id="fgo">Freigeben</button></div>`);
+      <div class="uifoot"><button class="btn ghost" id="fgx">Abbrechen</button><button class="btn" id="fgo">Freigeben</button></div>`);
       m.querySelector("#fgx").onclick = () => m.remove();
       m.querySelector("#fgo").onclick = async () => {
         try {

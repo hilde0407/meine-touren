@@ -11,7 +11,7 @@ VIEWS.trip = async id => {
      <p class="mut fs14">Name und Zeitraum der automatisch erkannten Reise. Ein anderer Zeitraum nimmt alle Touren dieser Tage auf (auch solche, die nicht weit von zu Hause waren) bzw. lässt Touren außerhalb weg.</p>
      <div class="field"><label>Name</label><input id="tn" maxlength="120" value="${esc(tr.region)}" class="w100"></div>
      <div class="row g8 aic mt8"><label>Von <input id="tf" type="date" value="${tr.start}"></label><label>bis <input id="tt" type="date" value="${tr.end}"></label></div>
-     <div class="row mt12"><button class="btn" id="tok">Speichern</button>${tr.edited ? `<button class="btn alt" id="trs" title="Zurück zu Name und Zeitraum, wie sie erkannt wurden">Zurücksetzen</button>` : ""}<button class="btn ghost" id="tno">Abbrechen</button><span id="ter" class="bad"></span></div>`);
+     <div id="ter" class="bad"></div><div class="uifoot">${tr.edited ? `<button class="btn alt" id="trs" title="Zurück zu Name und Zeitraum, wie sie erkannt wurden">Zurücksetzen</button><span class="sp"></span>` : ""}<button class="btn ghost" id="tno">Abbrechen</button><button class="btn" id="tok">Speichern</button></div>`);
     const send = async body => {
       try {
         await api(`/api/trips/${encodeURIComponent(id)}/edit`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(body)});

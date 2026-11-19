@@ -580,43 +580,18 @@ VIEWS.map = async () => {
     "beforeend",
     `<div class="box"><button class="chip" id="mbx" title="Alle Touren auflisten, die den sichtbaren Kartenausschnitt berühren">Touren im Ausschnitt</button></div>`
   );
-  $("#mbx").onclick = ev => {
-    const btn = ev.currentTarget;
-    document.querySelectorAll(".modal.mbxfen").forEach(x => x._close ? x._close(false) : x.remove());     // ein zweiter Klick ersetzt das Fenster, es gibt nie mehrere
+  $("#mbx").onclick = () => {
+    document.querySelectorAll(".uimod.mbxfen").forEach(x => x.remove());     // ein zweiter Klick ersetzt das Fenster, es gibt nie mehrere
     const b = m.getBounds(),
       y = yearSel(),
       o = off();
     const a = TOURS.filter(t => (!y || t.y === y) && !o.has(t.sport) && cleanPts(routes[t.id]).some(p => b.contains(p)));
-    const md = document.createElement("div");
-    md.className = "modal mbxfen";
-    md.innerHTML = `<div class="mbox" role="dialog" aria-modal="true" aria-label="Im Kartenausschnitt" tabindex="-1"><div class="sec m0-0-10"><h2>Im Kartenausschnitt</h2><span class="sub">${a.length} Touren, ${fmtKm(a.reduce((c, t) => c + t.km, 0), {summe: true})} · ${fmtAuf(a.reduce((c, t) => c + (t.up_m || 0), 0))}</span></div>
+    const md = uiModal(`<div class="sec m0-0-10"><h2>Im Kartenausschnitt</h2><span class="sub">${a.length} Touren, ${fmtKm(a.reduce((c, t) => c + t.km, 0), {summe: true})} · ${fmtAuf(a.reduce((c, t) => c + (t.up_m || 0), 0))}</span></div>
       <div class="tl">${a.slice(0, 300).map(tourRow).join("") || '<div class="empty">Keine Touren in diesem Ausschnitt. Zoome heraus oder verschiebe die Karte.</div>'}</div>
-      <div class="row jce mt14"><button class="btn" id="mbc">Schließen</button></div></div>`;
-    const keys = e => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        md._close(true);
-      } else if (e.key === "Tab") {                                              // Fokus bleibt im Fenster
-        const f = [...md.querySelectorAll("a[href],button")];
-        if (!f.length) return;
-        const i = f.indexOf(document.activeElement);
-        if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
-        else if (!e.shiftKey && (i < 0 || i === f.length - 1)) { e.preventDefault(); f[0].focus(); }
-      }
-    };
-    md._close = back => {
-      document.removeEventListener("keydown", keys, true);
-      md.remove();
-      if (back && btn.isConnected) btn.focus();                                  // Fokus zurück auf den Knopf
-    };
-    document.addEventListener("keydown", keys, true);
-    document.body.appendChild(md);
-    md.querySelector("#mbc").onclick = () => md._close(true);
-    md.onclick = e => {
-      if (e.target === md) md._close(true);
-      else if (e.target.closest("a")) md._close(false);
-    };
-    md.querySelector(".mbox").focus({preventScroll: true});                       // Fokus ins Fenster (auf das Fenster selbst: die Titelzeile bleibt sichtbar)
+      <div class="uifoot"><button class="btn ghost" id="mbc">Schließen</button></div>`);
+    md.classList.add("mbxfen");
+    md.querySelector("#mbc").onclick = () => md.remove();
+    md.onclick = e => { if (e.target.closest("a")) md.remove(); };
   };
   ["#my"].forEach(s =>
     $(s).addEventListener("change", () => {
