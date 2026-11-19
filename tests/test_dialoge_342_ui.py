@@ -195,7 +195,7 @@ def test_seite_anpassen_sitzt_oben_rechts(pw, app, clean, hash_, sel):
         quiet(pg, 3000, 500)
         r = pg.evaluate("""() => { const w = document.querySelector('#slopenw'), m = document.querySelector('#main'), a = w.getBoundingClientRect(), b = m.getBoundingClientRect(), v = document.querySelector('#slviews').getBoundingClientRect();
           return {first: m.firstElementChild === w, top: a.top - b.top, right: b.right - v.right}; }""")
-        assert r["top"] < 60 and r["right"] < 60, r                                  # erste Zeile der Seite, rechtsbündig
+        assert r["top"] < 60 and r["right"] < 80, r                                  # erste Zeile der Seite, rechtsbündig (3.46.0: auf dem Desktop bündig mit der Inhaltsspalte, in randlosen Seiten bis zu 74 px vom Rand)
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
