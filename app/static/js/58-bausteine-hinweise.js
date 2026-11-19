@@ -142,7 +142,7 @@ const HN_ART = {
           u = x => (d.einheit === "km" ? `${nf(x, dec(x))} km` : d.einheit === "up" ? fmtHm(x) : d.einheit === "hours" ? fmtDauer(x * 3600, {summe: true}) : hnTours(Math.round(x))),
           pct = d.ziel > 0 ? Math.min(100, (d.ist / d.ziel) * 100) : 0, nm = d.sport ? ` <span class="mut">${esc(goalSportName(d.sport))}</span>` : "",
           left = d.tage_rest === 0 ? "Heute ist der letzte Tag der Woche." : d.tage_rest === 1 ? "Noch 1 Tag in dieser Woche." : `Noch ${d.tage_rest} Tage in dieser Woche.`;
-        return `<p class="hnt">${d.erreicht ? `Wochenziel erreicht: ${u(d.ist)} von ${u(d.ziel)}.` : `Wochenziel offen: noch ${u(d.rest)} (bisher ${u(d.ist)} von ${u(d.ziel)}).`}${nm}</p>` +
+        return `<p class="hnt">${d.erreicht ? `Wochenziel erreicht: ${u(d.ist)} von ${u(d.ziel)}.` : `Wochenziel offen: noch ${u(d.rest)} (bisher ${nf(d.ist, d.einheit === "km" || d.einheit === "hours" ? 1 : 0)} von ${u(d.ziel)}).`}${nm}</p>` +
           `<div class="hnbar" role="progressbar" aria-label="Fortschritt zum Wochenziel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}">${slBr(pct, d.erreicht ? "hnok" : "")}</div>` +
           (d.erreicht ? "" : `<p class="mut hnsub">${left}</p>`);
       }).join("");

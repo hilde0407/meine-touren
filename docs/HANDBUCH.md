@@ -247,7 +247,7 @@ Auf der Übersicht gibt es den Bereich **Touren holen** und oben in der Kopfzeil
 * Ist **Zepp**, **Garmin** oder **Suunto** verbunden, heißt der Knopf z. B. „Zepp-Import starten“, „Garmin-Import starten“ oder „Suunto-Import starten“. Bei mehreren Konten gibt es je Konto eine Zeile und **Alle holen** (nacheinander, nie gleichzeitig). Fortschritt („Tour 3 von 12“) und Ergebnis des letzten Laufs werden angezeigt.
 * Ist ein Gerät angelegt, aber das Konto noch nicht verbunden, heißt der Knopf z. B. **Zepp einrichten** und führt in die Verwaltung (so wie in Abbildung 1).
 * Für **Polar**, Handy-Aufzeichnung und andere Geräte ohne Konto-Anbindung steht nur ein Link „Touren per Datei importieren“.
-* Den Schnell-Knopf in der Kopfzeile kannst du unter „Seite anpassen“ (nur Übersicht) mit dem Schalter „Schnell-Knopf zum Touren holen in der Kopfzeile“ abschalten. Es gibt außerdem den Baustein „Touren-Knopf“ für das Raster.
+* Den Schnell-Knopf in der Kopfzeile kannst du unter „Seite anpassen“ (nur Übersicht) mit dem Schalter „Schnell-Knopf zum Touren holen in der Kopfzeile“ abschalten. Es gibt außerdem den Baustein „Touren holen (nur Knopf)“ für das Raster.
 
 ### 4.6 Meine Geräte
 
@@ -309,7 +309,7 @@ In den Einstellungen eines Bausteins steht unter **Zeitraum der Seite verwenden*
 
 *Abbildung 10: Die Übersicht (siehe auch Abbildung 1).*
 
-**Hinweis-Bausteine:** Im Katalog gibt es Bausteine, die sich nur zeigen, wenn es einen Anlass gibt – etwa „Jahresziel in Gefahr“, „Meilenstein erreicht“, „Lange Pause“, „Rekord-Tour“, „Wochenziel“, „Erholungshinweis“ oder „Datensicherung“. Ist nichts los, sind sie unsichtbar und brauchen keinen Platz.
+**Hinweis-Bausteine:** Im Katalog gibt es Bausteine, die sich nur zeigen, wenn es einen Anlass gibt – etwa „Meilenstein erreicht“, „Lange Pause“, „Rekord-Tour“, „Erholungshinweis“ oder „Datensicherung“. Ist nichts los, sind sie unsichtbar und brauchen keinen Platz. Ab 3.45.0 ist die Warnung „Ziel in Gefahr“ eine Darstellung des Bausteins **Ziele** („Nur Warnung“); der Baustein zeigt deine Ziele sonst als Balken oder Ring. Rekorde und Top-Touren sind der Baustein **Bestwerte** (Anzahl 1, 3, 5 oder 10).
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -687,9 +687,9 @@ Oben steht der **globale Filter**, der für alle Bausteine der Seite gilt:
 Daneben **Jahresrückblick 2026** ([Kapitel 12](#k12)). Die Bausteine:
 
 * **Kennzahlen** (Touren, Strecke, Aufstieg, Unterwegs, pro Tour im Schnitt),
-* **Ziele** – ein Ziel anlegen: **Ziel hinzufügen**, Messgröße (Kilometer, Höhenmeter, Touren, Stunden), Sportart, **Zielwert**, **Speichern**. Die App zeigt Fortschritt, Prognose zum Jahresende und ob du im Plan liegst,
+* **Ziele** – ein Ziel anlegen: **Ziel hinzufügen**, Zeitraum (Ziel für das Jahr oder für jede Woche, ab 3.45.0), Messgröße (Kilometer, Höhenmeter, Touren, Stunden), Sportart, **Zielwert**, **Speichern**. Nur hier werden Ziele gepflegt; der Baustein „Ziele“ zeigt sie auf anderen Seiten. Die App zeigt Fortschritt, Prognose zum Jahresende und ob du im Plan liegst,
 * **Kilometer pro Jahr** (ein Klick auf einen Balken öffnet das Jahr) und **Kilometer im Jahresverlauf** (mit Vorjahreslinie),
-* **Sportarten**, **Bestwerte gesamt**, **Aktivität im Jahr** (Kalender-Heatmap),
+* **Sportarten**, **Bestwerte** (Baustein, Anzahl einstellbar), **Aktivität im Jahr** (Kalender-Heatmap),
 * **Dein typisches Tempo** (bergauf, eben, bergab; mit **Schätzen** für eine Tour, die du planst),
 * **Erinnerungen**.
 

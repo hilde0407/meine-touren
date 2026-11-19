@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.45.0](3.45.0.md) – Weniger Bausteine, klarere Namen (Ziele, Bestwerte, Umzug alter Bausteine, Katalog)
 - [3.44.0](3.44.0.md) – Fitness-Einordnung (Baustein im Katalog, Geburtsjahr privat), Handy-Leiste der Übersicht
 - [3.43.0](3.43.0.md) – Karten-Paket: feste Reihenfolge der Bedienkästen, Panels schließen einheitlich, mobil „Filter & Ebenen“, „Touren im Ausschnitt“ nur einmal
 - [3.42.0](3.42.0.md) – Ein Dialog, ein Schalter, ein Knopf: alle Fenster über `uiModal`, ein Schalter für An/Aus, Abbrechen links

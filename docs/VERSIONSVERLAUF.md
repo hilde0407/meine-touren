@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.45.0 – Weniger Bausteine, klarere Namen
+
+- Ein Baustein „Ziele“ statt vier („Jahresziel“, „Ziele“, „Jahresziel in Gefahr“, „Wochenziel“): Darstellung Balken, Ring oder „Nur Warnung“, Jahres- und/oder Wochenziele. Ziele (jetzt auch Wochenziele) werden nur noch in der Statistik unter „Ziele“ gepflegt; eigene Ziele der alten Bausteine wurden dorthin übernommen.
+- Ein Baustein „Bestwerte“ statt „Rekorde“ und „Top-Touren“ (Anzahl 1, 3, 5 oder 10; Strecke, Aufstieg, Dauer, Tempo, stärkster Monat); der Abschnitt „Bestwerte“ der Statistik ist dieser Baustein.
+- Katalogname = Titel auf der Seite, die Form steht in der Beschreibung; kein Baustein heißt wie ein Abschnitt seiner Seite. Tourseite: Bausteine ohne Tourbezug in der zugeklappten Gruppe „Allgemein (nicht zu dieser Tour)“.
+- Gespeicherte Ansichten, Vorlagen, Export-Dateien und Ansichtscodes mit den alten Kennungen laden weiter (Umzugstabelle im Server und in der Oberfläche).
+
 ## Version 3.44.0 – Fitness-Einordnung
 
 - Neuer Baustein „Fitness-Einordnung“ (nur im Katalog, Kategorie Zahlen): Umfang gegen die WHO-Empfehlung, Regelmäßigkeit und altersbezogene Intensität der letzten 12 Wochen mit Gesamtwert, Einordnung in Worten und Trend. Orientierung, keine medizinische Aussage.
