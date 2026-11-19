@@ -29,6 +29,32 @@ def test_guide_java(tmp_path):
         assert r.returncode == 0 and "OK" in r.stdout, r.stdout + r.stderr
 
 
+@pytest.mark.skipif(not shutil.which("javac"), reason="kein JDK")
+def test_deviceinfo_java(tmp_path):
+    """3.49.0 – Geräteangaben der App (reines Java): gültiges JSON, Bereinigung, Längen, Kennung."""
+    d = ROOT / "android/app/src/main/java/de/meinetouren/app"
+    subprocess.run(["javac", "-d", str(tmp_path), str(d / "DeviceInfo.java"), str(ROOT / "tests/android/DeviceInfoCheck.java")], check=True)
+    r = subprocess.run(["java", "-cp", str(tmp_path), "de.meinetouren.app.DeviceInfoCheck"], capture_output=True, text=True, cwd=tmp_path)
+    assert r.returncode == 0 and "OK" in r.stdout, r.stdout + r.stderr
+
+
+def test_bridge_device_info_wired():
+    """3.49.0 – Brücke: deviceInfo() und die echte App-Version (kein fest eingetragener Stand); die Kennung ist eine zufällige UUID, keine Hardware-Kennung."""
+    import re
+    d = ROOT / "android/app/src/main/java/de/meinetouren/app"
+    ma = (d / "MainActivity.java").read_text(encoding="utf8")
+    assert "public String deviceInfo()" in ma and "DeviceInfo.json(installId(), Build.MANUFACTURER, Build.MODEL, Build.VERSION.RELEASE, appVersion())" in ma
+    assert "getPackageInfo(getPackageName(), 0).versionName" in ma and "BuildConfig" not in ma
+    assert 'public String version() { return appVersion(); }' in ma and 'o.put("version", appVersion())' in ma
+    assert not re.search(r'"\d+\.\d+\.\d+"', ma) and not re.search(r'MeineTourenApp/\d', ma), "fest eingetragene Versionsnummer"
+    assert "UUID.randomUUID()" in ma and '"install_id"' in ma
+    for verboten in ("ANDROID_ID", "getImei", "getDeviceId", "getSerial", "Build.SERIAL", "getMacAddress", "AdvertisingId"):
+        for f in d.glob("*.java"):
+            assert verboten not in f.read_text(encoding="utf8"), (verboten, f.name)
+    wf = (ROOT / ".github/workflows/android.yml").read_text(encoding="utf8")
+    assert "DeviceInfoCheck" in wf                                     # die Prüfung läuft auch vor dem APK-Bau
+
+
 def _gpx():
     pts = "".join(f'<trkpt lat="{47+i*0.0005}" lon="11.0"><ele>{1000+i*3}</ele><time>2026-07-01T08:{i//60:02d}:{i%60:02d}Z</time></trkpt>' for i in range(60))
     return f'<?xml version="1.0"?><gpx version="1.1"><trk><name>x</name><type>skitour</type><trkseg>{pts}</trkseg></trk></gpx>'

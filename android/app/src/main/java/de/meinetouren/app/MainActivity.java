@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
         s.setDomStorageEnabled(true);
         s.setGeolocationEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
-        s.setUserAgentString(s.getUserAgentString() + " MeineTourenApp/2.2");
+        s.setUserAgentString(s.getUserAgentString() + " MeineTourenApp/" + appVersion());
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(web, false);
         web.addJavascriptInterface(new Bridge(), "MTApp");
@@ -185,6 +185,26 @@ public class MainActivity extends Activity {
 
     private boolean hasLoc() {
         return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /** Versionsname der installierten App (android/app/build.gradle leitet ihn aus app/config.py ab); leer, falls er sich nicht lesen lässt. */
+    private String appVersion() {
+        try {
+            String v = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            return v == null ? "" : v;
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /** Zufällige Kennung dieser Installation: einmalig erzeugt und in den App-Einstellungen gemerkt. Keine Hardware-Kennung (Android-ID, IMEI, Seriennummer). */
+    private synchronized String installId() {
+        String id = prefs.getString("install_id", "");
+        if (!DeviceInfo.validId(id)) {
+            id = UUID.randomUUID().toString();
+            prefs.edit().putString("install_id", id).apply();
+        }
+        return id;
     }
 
     private void start(Intent in) {
@@ -379,7 +399,9 @@ public class MainActivity extends Activity {
 
     /* ---------- Brücke zur Weboberfläche ---------- */
     public class Bridge {
-        @JavascriptInterface public String version() { return "3.0.0"; }
+        @JavascriptInterface public String version() { return appVersion(); }
+        /** Ab 3.49.0: Geräteangaben für „Meine Geräte“ (zufällige Installationskennung, Hersteller, Modell, Android- und App-Version) als JSON. */
+        @JavascriptInterface public String deviceInfo() { return DeviceInfo.json(installId(), Build.MANUFACTURER, Build.MODEL, Build.VERSION.RELEASE, appVersion()); }
         @JavascriptInterface public String serverUrl() { return server(); }
 
         @JavascriptInterface
@@ -465,7 +487,7 @@ public class MainActivity extends Activity {
             try {
                 android.os.PowerManager pm = (android.os.PowerManager) getSystemService(POWER_SERVICE);
                 android.location.LocationManager lm = (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
-                o.put("version", "2.6.0");
+                o.put("version", appVersion());
                 o.put("android", Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
                 o.put("device", Build.MANUFACTURER + " " + Build.MODEL);
                 o.put("server", server());
