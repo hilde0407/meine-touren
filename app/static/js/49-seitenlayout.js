@@ -1437,7 +1437,7 @@ function slCatalog() {
     body.innerHTML =
       `<p class="mut slcatin">Bausteine zeigen Auswertungen aus deinen vorhandenen Daten. Die Vorschau zeigt deine echten Zahlen; Beispielwerte erscheinen nur, wenn noch keine Daten da sind.</p>` +
       `<div class="slfilt"><div class="slchips" role="group" aria-label="Kategorie"><button type="button" class="slchip" data-cat="" aria-pressed="true">Alle</button>` +
-      cats.map(([k, l]) => `<button type="button" class="slchip" data-cat="${k}" aria-pressed="false">${l}</button>`).join("") +
+      cats.map(([k, l]) => `<button type="button" class="slchip" data-cat="${k}" aria-pressed="false">${k === SL_ALLG[0] ? "Allgemein" : l}</button>`).join("") +
       `</div><label class="slsr" for="slq">Bausteine suchen</label><input id="slq" type="search" class="slq" placeholder="Bausteine suchen …" autocomplete="off" enterkeyhint="search"></div>` +
       `<p class="mut slcnt" role="status" aria-live="polite"></p><div class="slcatl">` +
       cats.map(([k, l]) => (k === SL_ALLG[0]

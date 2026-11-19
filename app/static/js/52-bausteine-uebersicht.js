@@ -49,7 +49,7 @@ function zlBar(g, yr, cy, now, ed) {
   const del = ed ? ` <button type="button" class="gx" data-g="${g.id}" aria-label="${esc(`Ziel löschen: ${zlName(g)}`)}" title="Ziel löschen">×</button>` : "";
   if (zlWeek(g)) {
     const v = zlWeekVal(g, now), p = Math.min(100, (v / g.target) * 100), u = GM[g.metric][0], rest = 6 - ((now.getDay() + 6) % 7);
-    return `<div class="goal zlw"><div class="gh"><b>${zlName(g)}</b><span>${nf(v, g.metric === "hours" || g.target < 50 ? 1 : 0)} / ${nf(g.target, 0)} ${u}${del}</span></div>${slBr(p, v >= g.target ? "kzfull" : "")}` +
+    return `<div class="goal zlw"><div class="gh"><b>${zlName(g)}</b><span>${nf(v, g.metric === "count" ? 0 : g.metric === "hours" || g.target < 50 ? 1 : 0)} / ${nf(g.target, 0)} ${u}${del}</span></div>${slBr(p, v >= g.target ? "kzfull" : "")}` +
       `<div class="gs">${nf(p, 0)} %${v >= g.target ? ` · <span class="ok">Wochenziel erreicht ✓</span>` : ` · ${rest === 0 ? "Heute ist der letzte Tag der Woche." : rest === 1 ? "Noch 1 Tag in dieser Woche." : `Noch ${rest} Tage in dieser Woche.`}`}</div></div>`;
   }
   const frac = yr === cy ? Math.max(0, (now - new Date(cy, 0, 1)) / (new Date(cy + 1, 0, 1) - new Date(cy, 0, 1))) : yr > cy ? 0 : 1,
@@ -59,7 +59,7 @@ function zlBar(g, yr, cy, now, ed) {
 }
 function zlRing(g, yr, cy, now) {
   const wk = zlWeek(g), val = wk ? zlWeekVal(g, now) : goalVal(g, TOURS), goal = Math.max(1e-9, g.target), u = GM[g.metric][0] || (g.metric === "count" ? "Touren" : ""),
-    frac = val / goal, C1 = 263.9, C2 = 194.8, dec = g.metric === "hours" || goal < 50 ? 1 : 0;
+    frac = val / goal, C1 = 263.9, C2 = 194.8, dec = g.metric === "count" ? 0 : g.metric === "hours" || goal < 50 ? 1 : 0;
   let tf, fc = null, need = "";
   if (wk) {
     const d = (now.getDay() + 6) % 7;
