@@ -3168,4 +3168,23 @@ Die letzte Sicherung ist nicht lesbar oder beschädigt. || The latest backup is 
 Morgen erinnern || Remind me tomorrow || Me le rappeler demain || Recordármelo mañana
 Zur Sicherung || Go to backup || Vers la sauvegarde || Ir a la copia de seguridad
 Filter ({} aktiv) || Filter ({} active) || Filtre ({} actif) || Filtro ({} activo)
+Wie ist es gelaufen? || How did it go? || Comment cela s’est-il passé ? || ¿Cómo ha ido?
+kürzer als üblich || shorter than usual || plus court que d’habitude || más corto de lo habitual
+ähnlich lang wie üblich || about as long as usual || à peu près aussi long que d’habitude || casi tan largo como de costumbre
+länger als üblich || longer than usual || plus long que d’habitude || más largo de lo habitual
+weniger Aufstieg als üblich || less ascent than usual || moins de montée que d’habitude || menos subida de lo habitual
+ähnlich viel Aufstieg wie üblich || about as much ascent as usual || à peu près autant de montée que d’habitude || casi la misma subida de costumbre
+mehr Aufstieg als üblich || more ascent than usual || plus de montée que d’habitude || más subida de lo habitual
+langsamer als üblich || slower than usual || plus lent que d’habitude || más lento de lo habitual
+ähnlich schnell wie üblich || about as fast as usual || à peu près aussi rapide que d’habitude || casi tan rápido como de costumbre
+schneller als üblich || faster than usual || plus rapide que d’habitude || más rápido de lo habitual
+Üblich (Median) || Usual (median) || Habituel (médiane) || Habitual (mediana)
+Gegenüber deiner Tour dieser Sportart in den 12 Monaten davor || Compared with your tour of this sport in the 12 months before || Par rapport à votre sortie de ce sport dans les 12 mois précédents || En comparación con tu ruta de este deporte en los 12 meses anteriores
+Gegenüber deinen {} Touren dieser Sportart in den 12 Monaten davor || Compared with your {} tours of this sport in the 12 months before || Par rapport à vos {} sorties de ce sport dans les 12 mois précédents || En comparación con tus {} rutas de este deporte en los 12 meses anteriores
+Gegenüber {} ähnlichen Touren auf dieser Strecke || Compared with {} similar tours on this route || Par rapport à {} sorties similaires sur ce parcours || En comparación con {} rutas similares en este recorrido
+Dein {}. Besuch dieser Strecke || Your visit number {} to this route || Votre {}e passage sur ce parcours || Tu visita número {} a este recorrido
+({} Läufe insgesamt) || ({} runs in total) || ({} parcours au total) || ({} recorridos en total)
+{}. Besuch || Visit {} || Passage {} || Visita {}
+Üblich = Median der Vergleichstouren. Unter 80 % davon gilt als kürzer, weniger oder langsamer, über 125 % als länger, mehr oder schneller. Tempo = Strecke geteilt durch die gesamte Dauer. || Usual = median of the comparison tours. Below 80 % of it counts as shorter, less or slower, above 125 % as longer, more or faster. Pace = distance divided by total time. || Habituel = médiane des sorties de comparaison. En dessous de 80 % : plus court, moins ou plus lent ; au-dessus de 125 % : plus long, plus ou plus rapide. Tempo = distance divisée par la durée totale. || Habitual = mediana de las rutas de comparación. Por debajo del 80 % cuenta como más corto, menos o más lento, por encima del 125 % como más largo, más o más rápido. Ritmo = distancia dividida por el tiempo total.
+Zu dieser Tour gibt es weder einen verknüpften Plan noch genug Vergleichstouren (mindestens 5). Der Baustein erscheint nur bei Touren mit Plan oder genug Vergleichstouren. || This tour has neither a linked plan nor enough comparison tours (at least 5). The block only appears for tours with a plan or enough comparison tours. || Cette sortie n’a ni plan lié ni assez de sorties de comparaison (au moins 5). Le bloc n’apparaît que pour les sorties avec plan ou assez de sorties de comparaison. || Esta ruta no tiene ni un plan vinculado ni suficientes rutas de comparación (al menos 5). El bloque solo aparece en rutas con plan o con suficientes rutas de comparación.
 `;

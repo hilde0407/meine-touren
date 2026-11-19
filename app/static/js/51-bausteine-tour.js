@@ -279,8 +279,44 @@ async function planErgData(id, fresh) {
   if (!fresh && PLAN_OF[id]) return PLAN_OF[id];
   const d = await slGet(`/api/tours/${slEnc(id)}/plan`);
   if (d && d.status === "ok") PLAN_OF[id] = d;
-  else delete PLAN_OF[id];
+  else {
+    delete PLAN_OF[id];
+    const r = await slGet(`/api/tours/${slEnc(id)}/rueckblick`).catch(() => null);          // 3.48.0: ohne Plan „Wie ist es gelaufen?“ (nur mit genug Vergleichstouren, sonst gibt es den Abschnitt nicht)
+    if (r && r.status === "ok") PLAN_OF[id] = {...r, modus: "rueckblick"};
+  }
   return PLAN_OF[id] || null;
+}
+const planErgModus = () => {
+  const r = typeof tlRoot === "function" ? tlRoot() : null, d = r && PLAN_OF[r.dataset.tid];
+  return d && d.modus === "rueckblick" ? "rueckblick" : "plan";
+};
+/* 3.48.0 Rückblick „Wie ist es gelaufen?“ (ohne Plan): Dauer, Strecke, Aufstieg und Tempo gegenüber den eigenen Touren derselben Sportart der letzten 12 Monate und den ähnlichen Touren
+   (Median-Verhältnis, Schwellen 80 %/125 %, Server: app/tourrueckblick.py). Mit verknüpftem Plan gilt allein Plan und Ergebnis. */
+const RB_ROWS = [["dauer", "Dauer"], ["strecke", "Strecke"], ["auf", "Aufstieg"], ["tempo", "Tempo"]];
+const RB_WORD = {
+  dauer: {unter: "kürzer als üblich", aehnlich: "ähnlich lang wie üblich", ueber: "länger als üblich"},
+  strecke: {unter: "kürzer als üblich", aehnlich: "ähnlich lang wie üblich", ueber: "länger als üblich"},
+  auf: {unter: "weniger Aufstieg als üblich", aehnlich: "ähnlich viel Aufstieg wie üblich", ueber: "mehr Aufstieg als üblich"},
+  tempo: {unter: "langsamer als üblich", aehnlich: "ähnlich schnell wie üblich", ueber: "schneller als üblich"},
+};
+const RB_SYM = {unter: "↓", aehnlich: "=", ueber: "↑"};
+const rbVal = (k, v) => (k === "dauer" ? fmtDauer(v * 3600) : k === "strecke" ? slKm(v) : k === "auf" ? slHm(v) : fmtTempo(v));
+function rbBlock(blk, head) {
+  const rows = RB_ROWS.filter(([k]) => blk.kennzahlen[k]);
+  return `<h3 class="rbh">${head}</h3><ul class="plrows">${rows.map(([k, lab]) => {
+    const m = blk.kennzahlen[k];
+    return `<li class="plrow"><span class="pll">${lab}</span><span class="plv"><small class="mut">Diese Tour</small> ${rbVal(k, m.wert)}</span><span class="plv"><small class="mut">Üblich (Median)</small> ${rbVal(k, m.median)}</span>` +
+      `<span class="pld"><span aria-hidden="true">${RB_SYM[m.einordnung]}</span> <b>${RB_WORD[k][m.einordnung]}</b></span></li>`;
+  }).join("")}</ul>`;
+}
+function rbPaint(c, b, d) {
+  const parts = [];
+  if (d.eigene) parts.push(rbBlock(d.eigene, d.eigene.n === 1 ? "Gegenüber deiner Tour dieser Sportart in den 12 Monaten davor" : `Gegenüber deinen ${d.eigene.n} Touren dieser Sportart in den 12 Monaten davor`));
+  if (d.aehnliche) parts.push(rbBlock(d.aehnliche, `Gegenüber ${d.aehnliche.n} ähnlichen Touren auf dieser Strecke`));
+  const bs = d.besuch ? `<p class="rbv"><b>Dein ${d.besuch.nr}. Besuch dieser Strecke</b> <span class="mut">(${d.besuch.von} Läufe insgesamt)</span></p>` : "";
+  b.innerHTML = `<div role="group" aria-label="Wie ist es gelaufen?">${bs}${parts.join("")}<p class="mut slcap">Üblich = Median der Vergleichstouren. Unter 80 % davon gilt als kürzer, weniger oder langsamer, über 125 % als länger, mehr oder schneller. Tempo = Strecke geteilt durch die gesamte Dauer.</p></div>`;
+  const first = RB_ROWS.map(([k]) => [k, (d.eigene && d.eigene.kennzahlen[k]) || (d.aehnliche && d.aehnliche.kennzahlen[k])]).find(([, m]) => m);
+  slBadge(c, d.besuch ? `${d.besuch.nr}. Besuch` : first ? RB_WORD[first[0]][first[1].einordnung] : "");
 }
 /* Unterschied Ist − Soll: Pfeil, Zahl mit Vorzeichen und Wort („länger als geplant“); innerhalb der Toleranz „wie geplant“ (=). Fehlt ein Wert, steht „ohne Angabe“ (nie 0). */
 const PLAN_TOL = {km: 0.05, up: 1, h: 1 / 60};
@@ -336,6 +372,7 @@ function planErgPaint(c, b, d, t) {
       slNote(b, "Zu dieser Tour gibt es keine verknüpfte Planung. Der Baustein erscheint nur bei Touren mit verknüpftem Plan.");
       slBadge(c, "");
       if (typeof tlRefresh === "function") tlRefresh();
+      planErgLoad(t).catch(() => {});                                                               // ohne Plan: gegebenenfalls „Wie ist es gelaufen?“
     };
 }
 /* Nach dem Öffnen der Tourseite (und der Unterseite) nachsehen, ob es eine Verknüpfung gibt; erst dann wird die Karte gebaut und eingeordnet */
@@ -350,17 +387,18 @@ function planErgLoad(t) {
 
 Object.assign(window.SL_WT, {
   planergebnis: {
-    fam: "tour", cat: "plan", icon: "map", name: "Plan und Ergebnis", title: () => "Plan und Ergebnis", defaults: {},
-    desc: "Wie die Tour im Vergleich zur verknüpften Planung ausgefallen ist: Strecke, Aufstieg und Zeit als Plan und Ergebnis mit Unterschied (↑ ↓ =), die geplante Linie gestrichelt über der gelaufenen, Link zum Plan. Erscheint nur bei Touren, die mit einem Plan verknüpft sind.",
+    fam: "tour", cat: "plan", icon: "map", name: "Plan und Ergebnis", title: () => (planErgModus() === "rueckblick" ? "Wie ist es gelaufen?" : "Plan und Ergebnis"), defaults: {},
+    desc: "Wie die Tour im Vergleich zur verknüpften Planung ausgefallen ist: Strecke, Aufstieg und Zeit als Plan und Ergebnis mit Unterschied (↑ ↓ =), die geplante Linie gestrichelt über der gelaufenen, Link zum Plan. Ohne Plan zeigt der Baustein „Wie ist es gelaufen?“: Dauer, Strecke, Aufstieg und Tempo gegenüber deinen Touren derselben Sportart der letzten 12 Monate und den ähnlichen Touren (ab 5 Vergleichstouren). Erscheint nur bei Touren, die mit einem Plan verknüpft sind.",
     preview: () => slPrev('<svg viewBox="0 0 120 40" class="slpvs" aria-hidden="true"><polyline class="plpl" fill="none" points="6,32 30,12 56,26 84,8 112,20"/><polyline class="plis" fill="none" points="6,34 32,16 58,30 86,12 112,24"/></svg><p class="slcmp">Plan 12,0 km · Ergebnis 12,6 km (↑ +0,6 km)</p>'),
     async render(c, b, cfg, {t}) {
       c.dataset.hn = "lade";                                                                          // unsichtbar, bis feststeht, dass es eine Verknüpfung gibt
       const d = t && (await planErgData(t.id));
       if (!d) {
         c.dataset.hn = "aus";
-        return slNote(b, "Zu dieser Tour gibt es keine verknüpfte Planung. Der Baustein erscheint nur bei Touren mit verknüpftem Plan.");
+        return slNote(b, "Zu dieser Tour gibt es weder einen verknüpften Plan noch genug Vergleichstouren (mindestens 5). Der Baustein erscheint nur bei Touren mit Plan oder genug Vergleichstouren.");
       }
       c.dataset.hn = "an";
+      if (d.modus === "rueckblick") return rbPaint(c, b, d);
       planErgPaint(c, b, d, t);
     },
   },

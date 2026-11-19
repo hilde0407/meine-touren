@@ -17,7 +17,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche, layout, bausteine_daten, hinweise, kennzahl, suche, fotofilter, backup_check, wiederherstellung, fitness
+from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche, layout, bausteine_daten, hinweise, kennzahl, suche, fotofilter, backup_check, wiederherstellung, fitness, tourrueckblick
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -97,7 +97,7 @@ def index_page(request: Request):
 
 VIEWER_GET = re.compile(
     r"^(/api/(me|version|tour-covers|routes|photos|photo-info|collection/coords|trips|stats|workouts|places|repeats|tags|newground|goals|live|settings|layout/[a-z-]+|bausteine/[a-z]+|hr/stats|stats/belastung|stats/tempo|stats/gehzeit|my-devices|my-devices/\d+/photo|devices/quality|devices/\d+/quality/tours|devices/\d+/uhr-felder(?:\.json)?"
-    r"|tours|tours/[^/]+|tours/[^/]+/(coords|best-photos|weather|gpx|hr|metrics|uhr-felder|uhr-training|tempo|aehnliche|plan)|trips/[^/]+|records/altitude|weather/stats)"
+    r"|tours|tours/[^/]+|tours/[^/]+/(coords|best-photos|weather|gpx|hr|metrics|uhr-felder|uhr-training|tempo|aehnliche|plan|rueckblick)|trips/[^/]+|records/altitude|weather/stats)"
     r"|/photo/[^/]+|/pic/[^/]+|/tiles/.+)$")
 # Ohne Anmeldung nur diese Pfade – exakt verglichen (ein Präfix würde auch /api/me/2fa/… oder /api/zepp-token/test öffnen).
 # /api/reset/<Token> (Passwort-Link) ist der einzige offene Unterpfad.
@@ -968,6 +968,7 @@ app.include_router(uhrdiag.router)
 app.include_router(uhrtraining.router)
 app.include_router(belastung.router)
 app.include_router(aehnliche.router)
+app.include_router(tourrueckblick.router)
 app.include_router(layout.router)
 app.include_router(bausteine_daten.router)
 app.include_router(fitness.router)
