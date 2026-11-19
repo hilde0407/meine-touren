@@ -557,7 +557,7 @@ def test_baustein_touren_knopf_eine_quelle_und_katalog(pw, app, clean):
         _edit(pg)
         _catalog(pg)
         card = pg.locator('.slcard:has([data-add="holenknopf"])')
-        assert card.get_attribute("data-cat") == "quellen" and card.locator("h3").inner_text() == "Touren-Knopf" and card.locator(".slpv").inner_html().strip()
+        assert card.get_attribute("data-cat") == "quellen" and card.locator("h3").inner_text() == "Touren holen (nur Knopf)" and card.locator(".slpv").inner_html().strip()
         assert card.locator("[data-add]").is_enabled()
         pg.locator('[data-add="holenknopf"]').click()
         w = pg.locator('[data-wtype="holenknopf"]')

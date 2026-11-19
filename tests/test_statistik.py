@@ -50,9 +50,10 @@ def test_layout_key_statistik_saves_validates_and_is_separate():
                {"widgets": [{"id": "w1", "type": "kennzahlen", "cfg": {}}]}, {"widgets": [{"id": "w1", "type": "sttop", "cfg": {"range": "c"}}]}, {"evil": 1}, {"order": ["a b"]}]
         for b in bad:
             assert c.put("/api/layout/statistik", json=b).status_code == 400, b
-        # die Statistik-Bausteine gehören nur auf die Statistikseite, Bausteine der Übersicht dürfen dorthin
+        # die Statistik-Bausteine gehören nur auf die Statistikseite, Bausteine der Übersicht dürfen dorthin (3.45.0: „Top-Touren“ ist jetzt „Bestwerte“ und darf überall stehen)
+        assert got["layout"]["widgets"][0] == {"id": "w1", "type": "bestwerte", "cfg": {"n": 10, "werte": ["tempo"], "eigen": True, "sports": ["hike"], "range": "12m"}}
         for k in ("uebersicht", "tour-haupt", "tour-auswertung"):
-            assert c.put(f"/api/layout/{k}", json={"widgets": [{"id": "w1", "type": "sttop", "cfg": {}}]}).status_code == 400, k
+            assert c.put(f"/api/layout/{k}", json={"widgets": [{"id": "w1", "type": "stmonate", "cfg": {}}]}).status_code == 400, k
         assert c.put("/api/layout/tour-haupt", json={"widgets": [{"id": "w1", "type": "rekorde", "cfg": {}}]}).status_code == 200
         assert c.get("/api/layout/statistik").json()["layout"]["order"] == ["kpi", "heat"]      # nichts davon wurde überschrieben
         assert c.delete("/api/layout/statistik").status_code == 200 and c.get("/api/layout/statistik").json()["layout"] is None
@@ -68,8 +69,8 @@ def test_views_container_and_export_check_for_statistik():
         lay = box["views"][1]["layout"]
         doc = {"format": "meine-touren-ansicht", "format_version": 1, "app_version": "3.22.0", "page": "statistik", "name": "Training", "exported": "2026-11-15T10:00:00Z", "layouts": {"statistik": lay}}
         r = c.post("/api/layout/check", json=doc).json()
-        assert r["ok"] is True and r["page"] == "statistik" and r["stats"]["statistik"]["types"] == ["sttop"], r
-        wrong = dict(doc, page="uebersicht", layouts={"uebersicht": lay})
+        assert r["ok"] is True and r["page"] == "statistik" and r["stats"]["statistik"]["types"] == ["bestwerte"], r          # 3.45.0: alte Kennung „sttop“ wird abgebildet
+        wrong = dict(doc, page="uebersicht", layouts={"uebersicht": {"widgets": [{"id": "m", "type": "stmonate", "cfg": {}}]}})
         assert c.post("/api/layout/check", json=wrong).json()["ok"] is False                                      # Statistik-Baustein in der Übersicht
         assert c.post("/api/layout/check", json=dict(doc, page="gibtsnicht")).json()["ok"] is False
 

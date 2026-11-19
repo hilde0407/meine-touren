@@ -237,7 +237,7 @@ def test_templates_dialog_adopts_a_template_as_new_editable_view(pw, app):
         _btn(pg, "Aus Vorlage …").click()
         pg.wait_for_selector(".slvt .slcard", timeout=T)
         assert pg.locator(".slvt .slcard h3").all_inner_texts() == ["Wandern", "Radtour / Training", "Kompakt"]
-        assert pg.locator(".slvt .slcard svg.slvpv").count() == 3 and "Gipfel-Tafel" in pg.locator(".slvt .slcard").first.inner_text()
+        assert pg.locator(".slvt .slcard svg.slvpv").count() == 3 and "Höchster Punkt" in pg.locator(".slvt .slcard").first.inner_text()
         pg.get_by_role("button", name="Kompakt: Als neue Ansicht übernehmen", exact=True).click()
         pg.wait_for_function("() => !document.querySelector('.slvt')", timeout=T)
         _view_is(pg, "Kompakt")
@@ -270,7 +270,7 @@ def test_templates_dialog_adopts_a_template_as_new_editable_view(pw, app):
         assert pg.locator(".slvt .slcard h3").all_inner_texts() == ["Wanderer", "Training", "Rückblick", "Kompakt", "Mit Hinweisen", "Mit Gruppe"]
         pg.get_by_role("button", name="Wanderer: Als neue Ansicht übernehmen", exact=True).click()
         _view_is(pg, "Wanderer", "uebersicht")
-        pg.wait_for_function("() => ['t-jahresziel','t-meilensteine','t-heatmap','t-letzte','t-rekorde'].every(i => !!document.getElementById('tlw-' + i))", timeout=T)
+        pg.wait_for_function("() => ['t-ziele','t-meilensteine','t-heatmap','t-letzte','t-bestwerte'].every(i => !!document.getElementById('tlw-' + i))", timeout=T)
         assert pg.evaluate("document.querySelector('#hlast').closest('.sl-dim') !== null")        # nicht aufgeführte Standard-Abschnitte sind ausgeblendet
         assert not pg.errors, pg.errors
     finally:
@@ -376,7 +376,7 @@ def test_export_file_and_import_valid_invalid_and_replace_only_after_confirmatio
         d = dl.value
         assert d.suggested_filename == "ansicht-uebersicht-training-test.json"
         doc = json.loads(open(d.path(), encoding="utf-8").read())
-        assert doc["format"] == "meine-touren-ansicht" and doc["format_version"] == 1 and doc["app_version"] == "3.44.0" and doc["page"] == "uebersicht" and doc["name"] == "Training-Test"
+        assert doc["format"] == "meine-touren-ansicht" and doc["format_version"] == 1 and doc["app_version"] == "3.45.0" and doc["page"] == "uebersicht" and doc["name"] == "Training-Test"
         assert list(doc["layouts"]) == ["uebersicht"] and doc["layouts"]["uebersicht"]["widgets"][0]["type"] == "periode" and doc["layouts"]["uebersicht"]["hidden"] == ["tag"]
         # Import gültig: Vorschau, dann als NEUE Ansicht (Name vergeben → nummeriert)
         f = _write(tmp_path, "gut.json", {**doc, "zukunft": 1})

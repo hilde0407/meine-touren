@@ -21,8 +21,8 @@ T = 15000
 KEYS = ("tour-haupt", "tour-auswertung", "uebersicht")
 TOUR_TYPES = ["kennzahlen", "tempo", "vergleich", "pulszonen", "wetter", "fotostreifen", "notiz",
               "splits", "steigung", "bewegung", "durchschnitt", "jahresrang", "tageslicht", "gipfel", "vergleiche", "stimmung", "fotohighlights", "miniprofil", "steckbrief"]
-DASH_TYPES = ["periode", "belastung", "jahresvergleich", "letzte", "neuefotos", "auffaellig", "rekorde", "heutevor",
-              "jahresziel", "serie", "heatmap", "meilensteine", "wochentage", "sportarten", "wiederentdecken", "orte", "uhrenzeit", "ausruestung", "geplant", "rueckblick", "jahresziele", "saison"]
+DASH_TYPES = ["periode", "belastung", "jahresvergleich", "letzte", "neuefotos", "auffaellig", "bestwerte", "heutevor",                 # 3.45.0: „Bestwerte“ statt „Rekorde“, „Ziele“ statt „Jahresziel“ und „Ziele“
+              "ziele", "serie", "heatmap", "meilensteine", "wochentage", "sportarten", "wiederentdecken", "orte", "uhrenzeit", "ausruestung", "geplant", "rueckblick", "saison"]
 NEW_TOUR = TOUR_TYPES[7:]
 NEW_DASH = DASH_TYPES[8:]
 
@@ -219,11 +219,12 @@ def test_catalog_categories_search_and_390px(pw, app):
         _edit(pg)
         _catalog(pg)
         n_all = len(TOUR_TYPES) + len(DASH_TYPES) + 1                  # 3.20.0: auch die Bausteine der Übersicht (ohne „Auffällige Touren“, plus „Dein Jahr“)
-        assert pg.locator(".slcard:visible").count() == n_all and pg.locator(".slcard .slpv").count() == n_all
+        # 3.45.0: die Bausteine der Übersicht stehen in der zugeklappten Gruppe „Allgemein (nicht zu dieser Tour)“
+        assert pg.locator(".slcard:visible").count() == len(TOUR_TYPES) + 1 and pg.locator(".slcard .slpv").count() == n_all      # plus „Plan und Ergebnis“
         assert pg.locator(".slcnt").inner_text() == f"{n_all} Bausteine"
         heads = pg.locator(".slcath:visible").all_inner_texts()
-        assert heads == ["Zahlen", "Grafiken", "Spaß und Eigenes", "Rückblick", "Planung"], heads                  # 3.20.0: mit den Bausteinen der Übersicht auch Rückblick und Planung
-        assert pg.locator(".slchip").all_inner_texts() == ["Alle", "Zahlen", "Grafiken", "Spaß und Eigenes", "Rückblick", "Planung"]
+        assert heads == ["Zahlen", "Grafiken", "Spaß und Eigenes", "Planung", "Allgemein (nicht zu dieser Tour)"], heads          # Planung: „Plan und Ergebnis“
+        assert pg.locator(".slchip").all_inner_texts() == ["Alle", "Zahlen", "Grafiken", "Spaß und Eigenes", "Planung", "Allgemein"]
         assert pg.locator('.slchip[aria-pressed="true"]').inner_text() == "Alle"
         # jeder Eintrag hat Vorschau, Kurzbeschreibung und Knopf
         assert pg.evaluate("() => [...document.querySelectorAll('.slcard')].filter(c => !c.querySelector('.slpv').innerHTML.trim() || !c.querySelector('p').textContent.trim() || !c.querySelector('[data-add]')).length") == 0
@@ -240,7 +241,7 @@ def test_catalog_categories_search_and_390px(pw, app):
         pg.locator("#slq").fill("WETTER")
         pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length >= 2", timeout=T)
         names = pg.locator(".slcard:visible .slci h3").all_inner_texts()
-        assert "Wetter-Streifen" in names and "Wetter und Tageszeit" in names, names
+        assert "Wetter zur Tour" in names and "Wetter und Tageszeit" in names, names
         pg.locator("#slq").fill("gibt es nicht")
         pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length === 0", timeout=T)
         assert pg.locator(".slnorsl").is_visible() and pg.locator(".slcnt").inner_text() == "0 Bausteine"
@@ -267,13 +268,13 @@ def test_catalog_dash_has_all_categories_and_desktop_shot(pw, app):
     try:
         _edit(pg)
         _catalog(pg)
-        assert pg.locator(".slcard").count() == len(DASH_TYPES) + 15                    # plus „Fitness-Einordnung“ (3.44.0), plus „Erinnerungen“ (3.32.0, mehrfach), plus „Touren-Knopf“ (3.31.0), plus „Zepp-Import“ (3.30.0), plus „Dein Jahr“ und 9 Hinweis-Bausteine (3.23.0) und „Eigene Kennzahl“ (3.28.0) (3.19.0, hat kein .tlsb und wird in test_bausteine_konfig_ui.py geprüft)
+        assert pg.locator(".slcard").count() == len(DASH_TYPES) + 13                    # 3.45.0: 7 statt 9 Hinweis-Bausteine; plus „Fitness-Einordnung“ (3.44.0), plus „Erinnerungen“ (3.32.0, mehrfach), plus „Touren-Knopf“ (3.31.0), plus „Zepp-Import“ (3.30.0), plus „Dein Jahr“ und 9 Hinweis-Bausteine (3.23.0) und „Eigene Kennzahl“ (3.28.0) (3.19.0, hat kein .tlsb und wird in test_bausteine_konfig_ui.py geprüft)
         assert pg.locator(".slchip").all_inner_texts() == ["Alle", "Zahlen", "Grafiken", "Rückblick", "Planung", "Touren holen", "Hinweise", "Eigene Kennzahlen"]
         pg.locator(".slchip", has_text="Planung").click()
-        pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length === 5", timeout=T)
-        assert sorted(pg.locator(".slcard:visible .slci h3").all_inner_texts()) == ["Ausrüstungs-Kilometerstand", "Geplante Touren", "Jahresziel", "Meilensteine", "Ziele"]
+        pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length === 4", timeout=T)
+        assert sorted(pg.locator(".slcard:visible .slci h3").all_inner_texts()) == ["Ausrüstung", "Geplante Touren", "Meilensteine", "Ziele"]
         pg.locator(".slchip", has_text="Alle").click()
-        pg.wait_for_function("(n) => document.querySelectorAll('.slcard:not([hidden])').length === n", arg=len(DASH_TYPES) + 15, timeout=T)
+        pg.wait_for_function("(n) => document.querySelectorAll('.slcard:not([hidden])').length === n", arg=len(DASH_TYPES) + 13, timeout=T)
         _shot(pg, "katalog-desktop-hell.png", full=False)
         assert not pg.errors, pg.errors
     finally:
@@ -375,7 +376,7 @@ def test_add_all_dash_widgets_render_and_look_right(pw, app):
         assert [x["type"] for x in w] == DASH_TYPES
         assert not pg.errors, pg.errors
         q = lambda t, s: pg.locator(f'[data-wtype="{t}"] {s}')  # noqa: E731
-        assert q("jahresziel", ".slring svg circle").count() == 4 and "Prognose" in q("jahresziel", ".slgt").inner_text() and q("jahresziel", ".slrc b").inner_text().endswith("%")
+        assert q("ziele", ".goal, .slnone").count() >= 1 and q("bestwerte", ".utile").count() == 5                # 3.45.0: Ziele (Balken) und Bestwerte (fünf Kacheln)
         assert q("serie", ".utile").count() == 3 and q("serie", "svg.slpts rect").count() == 26
         assert q("heatmap", "svg.slheat rect").count() >= 300 and q("heatmap", ".slmos span").count() >= 10
         assert q("meilensteine", ".slrows li").count() == 3 and "Mount Everest" in q("meilensteine", ".slrows").inner_text()
@@ -402,23 +403,22 @@ def test_add_all_dash_widgets_render_and_look_right(pw, app):
 
 
 def test_dash_config_number_field_goal_and_ring(pw, app):
+    """3.45.0: Das eigene Ziel des früheren „Jahresziel“-Bausteins gibt es nicht mehr (Ziele stehen in der Statistik); geprüft wird das Zahlenfeld „Schwelle“ des Bausteins „Ziele“."""
     _reset(app)
-    _api(app, "uebersicht", "PUT", {"widgets": [{"id": "wj", "type": "jahresziel", "cfg": {"metric": "km", "goal": 1000}}]})
+    _api(app, "uebersicht", "PUT", {"widgets": [{"id": "wj", "type": "ziele", "cfg": {"view": "warnung"}}]})
     pg = _dash(pw, app)
     try:
-        pg.wait_for_function(READY, arg=["jahresziel"], timeout=T)
-        before = pg.locator('[data-wtype="jahresziel"] .slrc b').inner_text()
+        pg.wait_for_selector("#tlw-wj", state="attached", timeout=T)
         _edit(pg)
         pg.locator('.slit[data-sl="wj"] [data-a="cfg"]').click()
         pg.wait_for_selector(".slform input[type=number]", timeout=T)
-        pg.locator(".slform input[type=number]").fill("5")                                  # zu klein: Fehlermeldung, nichts gespeichert
+        pg.locator(".slform input[type=number]").fill("0")                                  # zu klein: Fehlermeldung, nichts gespeichert
         pg.get_by_role("button", name="Speichern", exact=True).click()
         pg.wait_for_function("() => document.querySelector('.slerr').textContent.length > 5", timeout=T)
-        pg.locator(".slform input[type=number]").fill("200")
+        pg.locator(".slform input[type=number]").fill("20")
         pg.get_by_role("button", name="Speichern", exact=True).click()
-        pg.wait_for_function("(b) => { const e = document.querySelector('[data-wtype=jahresziel] .slrc b'); return !!e && e.textContent !== b; }", arg=before, timeout=T)
         pg.wait_for_function("() => document.getElementById('slsaved').textContent.trim() === 'Gespeichert'", timeout=T)
-        assert _api(app, "uebersicht")["layout"]["widgets"][0]["cfg"]["goal"] == 200
+        assert _api(app, "uebersicht")["layout"]["widgets"][0]["cfg"]["schwelle"] == 20
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -484,11 +484,12 @@ def test_empty_states_dash_widgets(pw, app):
         pg.route("**/api/my-devices", lambda r: r.fulfill(json={"devices": [], "kinds": []}))
         pg.route("**/api/bausteine/ausruestung", lambda r: r.fulfill(json=[]))
         pg.route("**/api/bausteine/geplant", lambda r: r.fulfill(json=[]))
+        pg.route("**/api/goals", lambda r: r.fulfill(json=[]))
         r = pg.evaluate(EMPTY, [NEW_DASH, "r3", True])
         bad = {k: v for k, v in r.items() if not v or v.startswith("FEHLER") or "Wird geladen" in v}
         assert not bad, bad
         assert r["uhrenzeit"].startswith("Noch kein Gerät") and r["ausruestung"] == "Noch keine Ausrüstung angelegt." and r["geplant"].startswith("Keine offenen Pläne")
-        assert r["heatmap"] == "Noch keine Touren." and r["jahresziel"] != "" and "Noch keine Tour in diesem Jahr" in r["jahresziel"]
+        assert r["heatmap"] == "Noch keine Touren." and r["ziele"].startswith("Noch kein Ziel für")
         assert r["orte"].startswith("Noch keine Regionen bestimmt") and r["rueckblick"].startswith("Im Jahr ")
         assert not pg.errors, pg.errors
     finally:

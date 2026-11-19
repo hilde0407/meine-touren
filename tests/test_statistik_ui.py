@@ -105,7 +105,8 @@ def test_default_layout_is_unchanged_and_sections_fold(pw, app):
         assert pg.locator(".years button").count() == 1 + len(pg.evaluate("years()")) and pg.locator(".years button.on").inner_text() == "Gesamt"
         assert pg.locator("#sch [data-s='']").inner_text() == "Alle Sportarten" and pg.locator("#sch [data-s]").count() == 1 + 3
         assert pg.locator("#tlsb-kpi .fig").count() == 5 and pg.locator("#tls-kmmonat .chart").count() == 1 and pg.locator("#tls-kmverlauf .chart").count() == 1
-        assert pg.locator("#tls-bestwerte .rows .r").count() == 4 and pg.locator("#tls-heat svg.heat").count() == 1
+        expect(pg.locator("#tlw-bestwerte .utile")).to_have_count(5, timeout=T)                  # 3.45.0: Abschnitt „Bestwerte“ ist der Baustein (Strecke, Aufstieg, Dauer, Tempo, Monat)
+        assert pg.locator("#tls-heat svg.heat").count() == 1
         assert pg.locator("#stf h2").inner_text() == "Alle Touren" and _vals(pg)["n"] == "10 Touren"
         # Köpfe mit Kurzaussage, Aufbau wie bei den anderen Abschnitten (tlCard)
         assert "10 Touren" in pg.locator("#tlk-kpi").inner_text() and "km" in pg.locator("#tlk-kpi").inner_text()
@@ -161,7 +162,7 @@ def test_global_filter_changes_several_blocks_keeps_own_filter_and_survives_relo
         assert pg.locator("#tlk-kpi").inner_text().startswith("8 Touren")
         assert pg.locator("#tlw-wa .slcmpn").inner_text() != before                        # Baustein übernimmt den Filter
         assert pg.locator("#tlw-wa .flk").inner_text() == "Wandern, Radtour"
-        assert pg.locator("#tlw-wb .sllist li").count() == 2 and pg.locator("#tlw-wb .flk").inner_text().startswith("Laufen")      # eigener Filter bleibt
+        assert pg.locator("#tlw-wb .sllist li").count() == 2 and "Laufen" in pg.locator("#tlw-wb .flk").inner_text()      # eigener Filter bleibt
         assert pg.locator("#tlw-wb .stn").count() == 0
         # Hinweis bei Abschnitten, die den Filter nicht kennen
         assert pg.locator("#tls-sportarten .stn").inner_text() == "Sportart gilt hier nicht"
@@ -204,7 +205,7 @@ def test_widget_dialog_switch_global_or_own_filter(pw, app):
     pg = _stats(pw, app, "?s=hike")
     try:
         pg.wait_for_selector("#tlw-wa .sllist li", timeout=T)
-        assert pg.locator("#tlw-wa .sllist li").count() == 5 and pg.locator("#tlw-wa .flk").inner_text() == "Wandern"
+        assert pg.locator("#tlw-wa .sllist li").count() == 5 and pg.locator("#tlw-wa .flk").inner_text() == "Top 5, Wandern"
         _edit(pg)
         pg.locator('.slit[data-sl="wa"] [data-a=cfg]').click()
         pg.wait_for_selector(".slform [data-global]", timeout=T)
@@ -380,7 +381,7 @@ def test_contrast_and_screenshots_light_and_dark(pw, app, scheme):
         _shot(pg, f"statistik-{scheme}-bearbeiten.png")
         pg.locator("#slbar [data-a=add]").click()
         pg.wait_for_selector(".slcat .slcard", timeout=T)
-        assert pg.locator(".slcat .slcath").first.inner_text() == "Statistik" and pg.locator('.slcat [data-add="sttop"]').count() == 1
+        assert pg.locator(".slcat .slcath").first.inner_text() == "Statistik" and pg.locator('.slcat [data-add="bestwerte"]').count() == 1
         assert pg.locator('.slcat [data-add="splits"]').count() == 0                         # Tour-Bausteine gehören nicht hierher
         _shot(pg, f"statistik-{scheme}-katalog.png", full=False)
         assert not pg.errors, pg.errors

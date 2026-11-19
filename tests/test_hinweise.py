@@ -362,9 +362,9 @@ def test_layout_hint_types_pages_and_config():
             assert c.put("/api/layout/uebersicht", json=_w(typ, {"sports": ["hike"], "title": " Mein Hinweis "})).status_code == 200, typ
         for typ in ("hnziel", "hnmeilenstein", "hnrekord", "hnerholung", "hinweise"):
             assert c.put("/api/layout/statistik", json=_w(typ)).status_code == 200, typ
-        for typ in ("hnauffaellig", "hnpause", "hnwoche", "hnsicherung"):
+        for typ in ("hnauffaellig", "hnpause", "hnsicherung"):                                         # 3.45.0: hnwoche ist jetzt der Baustein „Ziele“ (überall erlaubt)
             assert c.put("/api/layout/statistik", json=_w(typ)).status_code == 400, typ              # nur auf der Übersicht
-        for typ in ("hnziel", "hinweise"):
+        for typ in ("hnrekord", "hinweise"):                                                         # 3.45.0: hnziel ist jetzt der Baustein „Ziele“
             for k in ("tour-haupt", "tour-auswertung"):
                 assert c.put("/api/layout/" + k, json=_w(typ)).status_code == 400, (typ, k)         # nie auf der Tourseite
         good = {"schwelle": 12.5, "tage": 14, "min": 2, "ziel": 50, "ausblenden": 7, "einheit": "touren", "stufe": "mehr", "woche_ziel": 80.5, "woche_einheit": "km",
@@ -379,8 +379,8 @@ def test_layout_hint_types_pages_and_config():
                 {"ausblenden": 91}, {"ausblenden": -1}, {"einheit": "meilen"}, {"stufe": "viel"}, {"woche_einheit": 1}, {"arten": []}, {"arten": ["foo"]}, {"arten": "ziel"},
                 {"snoozes": [far]}, {"snoozes": ["foo:1"]}, {"snoozes": ["ziel:abc"]}, {"snoozes": ["ziel:1", "ziel:2"]}, {"snoozes": "ziel:1"}, {"snoozes": [5]}, {"snoozes": ["ziel:123456789012"]},
                 {"unbekannt": 1}, {"range": "all"}, {"sports": "hike"}, {"title": "x" * 61}]
-        for b in bads:
-            assert c.put("/api/layout/uebersicht", json=_w("hnziel", b)).status_code == 400, b
+        for b in bads:                                                                                # 3.45.0: hnziel zieht in „Ziele“ um (unbekannte Felder fallen dort weg), daher hier ein anderer Hinweis
+            assert c.put("/api/layout/uebersicht", json=_w("hnrekord", b)).status_code == 400, b
         assert c.get("/api/layout/uebersicht").json()["layout"]["widgets"][0]["cfg"]["snoozes"] == [snooze, "pause:5"]            # fehlgeschlagene Versuche ändern nichts
         assert c.put("/api/layout/uebersicht", json=_w("hnziel", {"snoozes": []})).status_code == 200                                # leer = nicht ausgeblendet
         # in einer Ansicht (Behälter) gilt dieselbe Prüfung
@@ -388,18 +388,18 @@ def test_layout_hint_types_pages_and_config():
         assert c.put("/api/layout/uebersicht", json=box).status_code == 200
         box["views"][1]["layout"] = _w("hnziel", {"schwelle": 500})
         assert c.put("/api/layout/uebersicht", json=box).status_code == 400
-        box["views"][1]["layout"] = _w("hnwoche")
+        box["views"][1]["layout"] = _w("hnpause")
         assert c.put("/api/layout/statistik", json=box).status_code == 400
         # Export-Datei einer Ansicht
         lay = {"v": 1, **_w("hnziel", {"schwelle": 15, "snoozes": [snooze]}), "order": ["w1"]}
         doc = {"format": "meine-touren-ansicht", "format_version": 1, "app_version": "3.23.0", "page": "uebersicht", "name": "Mit Hinweisen", "exported": "2026-11-15T10:00:00Z", "layouts": {"uebersicht": lay}}
         r = c.post("/api/layout/check", json=doc).json()
-        assert r["ok"] and r["stats"]["uebersicht"]["types"] == ["hnziel"] and r["layouts"]["uebersicht"]["widgets"][0]["cfg"]["schwelle"] == 15
+        assert r["ok"] and r["stats"]["uebersicht"]["types"] == ["ziele"] and r["layouts"]["uebersicht"]["widgets"][0]["cfg"]["schwelle"] == 15          # 3.45.0: „Ziele“, Darstellung „Nur Warnung“
         doc["layouts"]["uebersicht"]["widgets"][0]["cfg"]["schwelle"] = 0
         assert not c.post("/api/layout/check", json=doc).json()["ok"]
         doc["page"] = "tour"
-        doc["layouts"] = {"tour-haupt": lay}
-        assert not c.post("/api/layout/check", json=doc).json()["ok"]                                                                 # auf der Tourseite abgelehnt
+        doc["layouts"] = {"tour-haupt": {"widgets": [{"id": "w1", "type": "hnpause", "cfg": {}}]}}
+        assert not c.post("/api/layout/check", json=doc).json()["ok"]                                                                 # Hinweise auf der Tourseite abgelehnt
 
 
 def test_layout_hint_viewer_cannot_write_and_users_are_separate():

@@ -392,7 +392,7 @@ def test_trip_blocks_can_be_added_from_the_catalog_and_only_fit_here(pw, app):
         pg.locator("#slbar [data-a=add]").click()
         pg.wait_for_selector(".slcat .slcard", timeout=T)
         names = pg.locator(".slcat .slcard h3").all_inner_texts()
-        assert {"Reise-Kennzahlen", "Strecke je Tag", "Reise-Diashow"} <= set(names) and "Reisen-Kennzahlen" not in names and "Reisen je Jahr" not in names, names
+        assert {"Reise-Kennzahlen", "Strecke je Tag", "Fotos der Reise"} <= set(names) and "Reisen-Kennzahlen" not in names and "Reisen je Jahr" not in names, names
         assert pg.locator('.slcard:has([data-add="rkmtag"]) [data-add="rkmtag"]').inner_text() == "Hinzufügen"
         pg.locator('[data-add="rkmtag"]').click()
         pg.wait_for_function("() => !!document.querySelector('#trx [data-wtype=rkmtag] svg.slcol')", timeout=T)
@@ -412,7 +412,7 @@ def test_trip_blocks_can_be_added_from_the_catalog_and_only_fit_here(pw, app):
         pg.locator("#slbar [data-a=add]").click()
         pg.wait_for_selector(".slcat .slcard", timeout=T)
         names = pg.locator(".slcat .slcard h3").all_inner_texts()
-        assert {"Reisen-Kennzahlen", "Reisen je Jahr"} <= set(names) and "Reise-Kennzahlen" not in names and "Strecke je Tag" not in names and "Reise-Diashow" not in names, names
+        assert {"Reisen-Kennzahlen", "Reisen je Jahr"} <= set(names) and "Reise-Kennzahlen" not in names and "Strecke je Tag" not in names and "Fotos der Reise" not in names, names
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -605,7 +605,7 @@ def test_export_and_import_of_a_view(pw, app, tmp_path, page, key, widget):
         d = dl.value
         assert d.suggested_filename == f"ansicht-{key}-mein-reiselayout.json"
         doc = json.loads(open(d.path(), encoding="utf-8").read())
-        assert doc["format"] == "meine-touren-ansicht" and doc["page"] == key and doc["app_version"] == "3.44.0" and list(doc["layouts"]) == [key] and doc["layouts"][key]["widgets"][0]["type"] == widget["type"]
+        assert doc["format"] == "meine-touren-ansicht" and doc["page"] == key and doc["app_version"] == "3.45.0" and list(doc["layouts"]) == [key] and doc["layouts"][key]["widgets"][0]["type"] == widget["type"]
         f = tmp_path / "gut.json"
         f.write_text(json.dumps(doc), encoding="utf-8")
         pg.locator(".slvws").get_by_role("button", name="Importieren …", exact=True).click()
@@ -754,7 +754,7 @@ def test_english_texts(pw, app):
         pg.locator("#slbar [data-a=add]").click()
         pg.wait_for_selector(".slcat .slcard", timeout=T)
         names = pg.locator(".slcat .slcard h3").all_inner_texts()
-        assert "Trip slideshow" in names and "Trip key figures" in names, names
+        assert "Photos of the trip" in names and "Trip key figures" in names, names
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()

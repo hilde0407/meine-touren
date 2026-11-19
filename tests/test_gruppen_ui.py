@@ -391,7 +391,7 @@ def test_group_template_and_group_survives_export_and_import_of_a_view(pw, app):
         pg.wait_for_function("() => SL.docs.uebersicht && SL.docs.uebersicht.groups && SL.docs.uebersicht.groups[0].title === 'Rückblick' && SL.docs.uebersicht.groups[0].ids.length === 3", timeout=T)
         pg.wait_for_function("() => document.querySelectorAll('#main .slgrp .slit').length === 3", timeout=T)
         doc = pg.evaluate("() => slExportDoc('uebersicht', SL.view.uebersicht)")
-        assert doc["layouts"]["uebersicht"]["groups"][0]["ids"] == ["t-rueckblick", "t-heutevor", "t-rekorde"]
+        assert doc["layouts"]["uebersicht"]["groups"][0]["ids"] == ["t-rueckblick", "t-heutevor", "t-bestwerte"]
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()

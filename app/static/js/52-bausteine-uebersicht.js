@@ -142,7 +142,7 @@ function zlType() {
   return {
     fam: "uebersicht", cat: "plan", icon: "pin", name: "Ziele", multi: true, defaults: {view: "balken", zeit: "alle"}, filter: {range: null}, w: "halb", seiten: ["uebersicht", "tour", "statistik"],
     title: cfg => (cfg.zeit === "woche" ? "Ziele dieser Woche" : `Ziele ${zlYear(cfg)}`), stJahr: true,
-    kurz: cfg => [cfg.view === "ring" ? "Ring" : cfg.view === "warnung" ? "Nur Warnung" : "", ...flParts(cfg, null)].filter(Boolean),
+    kurz: cfg => flParts(cfg, null),
     desc: "Deine Ziele aus der Statistik (zum Beispiel 1000 km im Jahr oder 3 Touren pro Woche) mit Stand und Prognose – als Balken, als Ring oder nur als Warnung, wenn ein Ziel in Gefahr ist. Angelegt und gelöscht werden Ziele in der Statistik unter „Ziele“.",
     fields: [{k: "view", kind: "radio", def: "balken", label: "Darstellung", options: ZL_VIEW}, {k: "zeit", kind: "radio", def: "alle", label: "Welche Ziele", options: ZL_ZEIT},
       {k: "year", kind: "radio", def: "cur", label: "Jahr der Jahresziele", options: [["cur", "Dieses Jahr"], ["last", "Letztes Jahr"]], show: {view: ["balken", "ring"]}},

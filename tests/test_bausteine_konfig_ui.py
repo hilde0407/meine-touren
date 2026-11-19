@@ -386,7 +386,7 @@ def test_other_widgets_honour_activity_range_and_count(pw, app):
         assert pg.locator("#tlw-wh svg.slheat rect").count() >= 300 and pg.locator("#tlw-wh .flk").inner_text() == "Wandern"
         assert pg.locator("#tlw-ww .flk").inner_text() == f"Wandern, {YEAR - 1}"
         assert pg.locator("#tlw-wg .flk").inner_text() == "Letzte 12 Monate" and pg.locator("#tlw-wg circle.slsg").count() >= 1
-        assert pg.locator("#tlw-wk .tlt").inner_text() == f"Rückblick {YEAR - 1}" and pg.locator("#tlw-wo .tlt").inner_text() == f"Rückblick {YEAR - 1}"      # neue und ältere Einstellung
+        assert pg.locator("#tlw-wk .tlt").inner_text() == f"Jahres-Rückblick {YEAR - 1}" and pg.locator("#tlw-wo .tlt").inner_text() == f"Jahres-Rückblick {YEAR - 1}"      # neue und ältere Einstellung
         assert pg.locator("#tlw-wk .flk").inner_text() == f"Wandern, {YEAR - 1}" and pg.locator("#tlw-wo .flk").count() == 0
         km_hike = sum(t["dist_m"] for t in rows if t["sport"] == "hike" and t["date"][:4] == str(YEAR)) / 1000
         assert f"von 500 km" in pg.locator("#tlw-wz .slgt").inner_text() and pg.locator("#tlw-wz .flk").inner_text() == "Wandern"

@@ -123,12 +123,12 @@ HN_ICON = "() => {" + _NORM + """
 
 def test_quiet_hints_are_invisible_and_take_no_space(pw, app):
     _reset(app)
-    _put(app, [("hp", "hnpause", {}), ("hs", "hnsicherung", {}), ("hw", "hnwoche", {}), ("he", "hnerholung", {})])
+    _put(app, [("hp", "hnpause", {}), ("hs", "hnsicherung", {}), ("he", "hnerholung", {})])          # 3.45.0: das Wochenziel ist jetzt Teil des Bausteins „Ziele“
     pg = _dash(pw, app)
     try:
-        for w in ("hp", "hs", "hw", "he"):
+        for w in ("hp", "hs", "he"):
             _wait_state(pg, w, "aus")
-        r = pg.evaluate("() => ['hp','hs','hw','he'].map(w => { const c = document.getElementById('tlw-' + w); return [getComputedStyle(c).display, c.getBoundingClientRect().height]; })")
+        r = pg.evaluate("() => ['hp','hs','he'].map(w => { const c = document.getElementById('tlw-' + w); return [getComputedStyle(c).display, c.getBoundingClientRect().height]; })")
         assert all(x == ["none", 0] for x in r), r
         assert not pg.errors, pg.errors
     finally:
@@ -304,7 +304,7 @@ def test_catalog_category_and_page_rules(pw, app):
         _edit(pg)
         _catalog(pg)
         pg.locator(".slchip", has_text="Hinweise").click()
-        pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length === 9", timeout=T)
+        pg.wait_for_function("() => document.querySelectorAll('.slcard:not([hidden])').length === 7", timeout=T)          # 3.45.0: ohne „Jahresziel in Gefahr“ und „Wochenziel“ (jetzt Baustein „Ziele“)
         assert pg.locator(".slcath:visible").all_inner_texts() == ["Hinweise"]
         assert pg.evaluate("() => [...document.querySelectorAll('.slcard:not([hidden])')].every(c => c.querySelector('.slpv').innerHTML.trim() && c.querySelector('p').textContent.trim() && c.querySelector('[data-add]'))")
         assert pg.locator('[data-add="hinweise"]').count() == 1

@@ -21,8 +21,8 @@ Erinnerungen (3.32.0, Typ „erinn“, als Standard-Abschnitt der Übersicht unt
   mode random|best|day|recent (Auswahl der Fotos)   n 3|6|9|12 (Anzahl)   view grid|strip|show (Darstellung)   ratio sq|43|169|orig (Seitenverhältnis)   size s|m|l (Größe der Bilder)
   height k|n|h (Höhe der Einzelbild-Show)   tempo 3|5|8|12 (Sekunden je Bild)   caption / shuffle / link  Ja-Nein (Bildunterschrift, Knopf „Neu mischen“, Link „Diashow starten“)
   sports, range, yr, title wie üblich. Gespeichert werden nur Abweichungen vom Standard (ohne cfg: 6 zufällige Fotos als Raster, mit Link zur Diashow).
-Hinweis-Bausteine (3.23.0, „Alarm-Bausteine“: erscheinen nur, wenn etwas los ist; Typen hnziel, hnmeilenstein, hnauffaellig, hnpause, hnrekord, hnwoche, hnerholung, hnsicherung und die Sammel-Variante „hinweise“):
-nur in „uebersicht“ und „statistik“ (hnauffaellig, hnpause, hnwoche, hnsicherung nur in „uebersicht“). Ihre Konfiguration wird streng geprüft, andere Felder sind nicht erlaubt:
+Hinweis-Bausteine (3.23.0, „Alarm-Bausteine“: erscheinen nur, wenn etwas los ist; Typen hnmeilenstein, hnauffaellig, hnpause, hnrekord, hnerholung, hnsicherung und die Sammel-Variante „hinweise“):
+nur in „uebersicht“ und „statistik“ (hnauffaellig, hnpause, hnsicherung nur in „uebersicht“). 3.45.0: hnziel und hnwoche sind der Baustein „Ziele“ (siehe unten). Ihre Konfiguration wird streng geprüft, andere Felder sind nicht erlaubt:
   schwelle 1–90 (Prozent)   tage 1–365   min 1–1000   ziel / woche_ziel 0–100000   einheit / woche_einheit km|touren   stufe mehr|deutlich_mehr   ausblenden 0–90 (Tage, 0 = Knopf aus)
   arten [ziel, meilenstein, auffaellig, pause, rekord, woche, erholung, sicherung] (Sammel-Baustein)   sports, title wie üblich
   snoozes ["Art:Zeitstempel", …]  bis wann (Sekunden seit 1970, höchstens ein Jahr im Voraus) der Hinweis dieser Art ausgeblendet ist – je Instanz im Layout-Dokument gespeichert.
@@ -58,6 +58,10 @@ Handy (3.36.0, optional): mob {order [id], hidden [id]} = abweichende Reihenfolg
   ohne „mob“ gilt überall die Desktop-Anordnung wie bisher. Nicht auf der Karte. Gruppen gelten auf dem Handy wie am Desktop (gleiche Mitglieder).
 Ansichtscode (3.36.0): POST /api/layout/code {code} prüft einen Code (Vorsilbe „MTA1.“ + JSON der Export-Datei als base64url, höchstens CODE_MAX Zeichen) mit denselben Regeln wie die Export-Datei (check_export).
   Der Code enthält nur Layout und Baustein-Einstellungen, nie Tourdaten; es gibt keinen Zugriff auf Daten über einen Code.
+3.45.0 Weniger Bausteine: alte Typen werden beim Prüfen abgebildet (app/baustein_umzug.py: jahresziel, jahresziele, hnziel, hnwoche → ziele; rekorde, sttop → bestwerte); eigene Ziele
+  alter Bausteine gehen beim Speichern in die Ziele der Statistik (Tabelle goals), beim Prüfen einer Export-Datei oder eines Codes nicht (Hinweis unter „ignored“).
+  ziele      view balken|ring|warnung   zeit jahr|woche|alle   year cur|last   schwelle 1–90   ausblenden 0–90   snoozes (ziel, woche)   sports, title
+  bestwerte  n 1|3|5|10   werte [km, hm, dauer, tempo, monat]   sports, range, yr, eigen, title     (beide auch als cfg.ziele / cfg.bestwerte der Statistik-Abschnitte)
 Betrachter dürfen lesen, bekommen aber immer den Standard (das Layout des Besitzers wird nicht übernommen) und dürfen nichts schreiben.
 """
 import base64

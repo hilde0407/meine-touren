@@ -252,9 +252,10 @@ def test_dein_jahr_can_be_added_on_the_tour_page_and_tour_widgets_not_on_the_ove
         _edit(pg)
         pg.locator('#slbar [data-a="add"]').click()
         pg.wait_for_selector(".slcard", timeout=T)
-        names = pg.locator(".slcard h3").all_inner_texts()
-        assert "Dein Jahr" in names and "Kennzahlen-Kachel" in names and "Heute vor X Jahren" in names
+        names = pg.locator(".slcard h3").evaluate_all("es => es.map(e => e.textContent)")                 # 3.45.0: Übersichts-Bausteine in der zugeklappten Gruppe „Allgemein“
+        assert "Dein Jahr" in names and "Kennzahlen" in names and "Heute vor X Jahren" in names
         assert "Auffällige Touren" not in names                                                              # nur Übersicht
+        pg.locator(".slchip", has_text="Allgemein").click()
         pg.locator('.slcard:has(h3:text-is("Dein Jahr")) [data-add]').click()
         pg.wait_for_function("() => !!document.querySelector('.tlw[data-wtype=\"jahr\"], section.hyear.tlw')", timeout=T)
         pg.wait_for_function("() => { const e = document.querySelector('section.hyear.tlw'); return !!e && !!e.querySelector('.hyn b'); }", timeout=T)
@@ -274,7 +275,7 @@ def test_dein_jahr_can_be_added_on_the_tour_page_and_tour_widgets_not_on_the_ove
         pg.wait_for_selector(".slcard", timeout=T)
         names = pg.locator(".slcard h3").all_inner_texts()
         assert "Dein Jahr" in names and "Auffällige Touren" in names
-        assert "Kennzahlen-Kachel" not in names and "Eigene Notiz" not in names and "Puls-Zonen" not in names
+        assert "Kennzahlen" not in names and "Notiz" not in names and "Puls-Zonen" not in names
     finally:
         pg.browser_.close()
 
