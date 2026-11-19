@@ -151,4 +151,4 @@ def test_version_notes_and_files():
     assert "Ansichten" in notes and "Vorlagen" in notes and "Export" in notes and "/api/layout/check" in notes and "54-ansichten.js" in notes
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("js/53-filter.js") < html.index("js/54-ansichten.js") < html.index("js/55-vorlagen.js") < html.index("js/39-sw.js")
-    assert 'const V = "mt-v127"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v128"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")

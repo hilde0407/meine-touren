@@ -428,4 +428,4 @@ def test_version_notes_and_script_order():
     assert "Hinweis-Bausteine" in notes and "/api/bausteine/hinweise" in notes
     for name in ("Jahresziel in Gefahr", "Meilenstein erreicht", "Neue Auffälligkeiten", "Lange Pause", "Rekord-Tour", "Wochenziel", "Erholung", "Sicherung", "Mit Hinweisen"):
         assert name in notes, name
-    assert "mt-v127" in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert "mt-v128" in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")

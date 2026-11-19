@@ -119,8 +119,8 @@ def test_version_and_notes():
     assert config.VERSION.startswith("3.46.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.35.0.md").read_text(encoding="utf-8")
     assert "Fortschrittsbalken" in notes and "Sparkline" in notes and "Trend" in notes and "Antippen" in notes
-    assert 'const V = "mt-v127"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.45.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v128"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.46.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
     hist = (ROOT / "docs" / "VERSIONSVERLAUF.md").read_text(encoding="utf-8")
     assert hist.index("## Version 3.35.0") < hist.index("## Version 3.34.0")
     assert "3.35.0.md" in (ROOT / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")

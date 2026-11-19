@@ -183,8 +183,8 @@ def test_version_notes_service_worker_and_script_registration():
     assert config.VERSION.startswith("3.46.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.32.0.md").read_text(encoding="utf-8")
     assert "Erinnerungen" in notes and "Diashow" in notes and "Datenschutz" in notes
-    assert 'const V = "mt-v127"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.45.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v128"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.46.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
     assert "js/60-bausteine-erinnerungen.js" in (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     show = (ROOT / "app" / "static" / "js" / "seite-slideshow.js").read_text(encoding="utf-8")
     for k in ("sport", "date_from", "date_to", "day", "before", "recent", "best"):                # die Parameter, die der Link der Kachel setzt, versteht die Diashow

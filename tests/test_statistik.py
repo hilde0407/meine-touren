@@ -170,4 +170,4 @@ def test_version_and_notes():
     assert "Statistik" in notes and "globale" in notes.lower() and "Bewusst nicht enthalten" in notes
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("js/55-vorlagen.js") < html.index("js/56-statistik.js") < html.index("js/57-bausteine-statistik.js") < html.index("js/39-sw.js")
-    assert 'const V = "mt-v127"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v128"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
