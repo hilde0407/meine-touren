@@ -553,7 +553,17 @@ VIEWS.plan = async (pid, q) => {
       hRun();
     }
   };
-  ["#phd", "#phs", "#php"].forEach(id => ($(id).onchange = hRun));
+  let hTm = null;
+  ["#phd", "#phs", "#php"].forEach(id => {
+    $(id).addEventListener("change", () => {
+      clearTimeout(hTm);
+      hRun();
+    });
+    $(id).addEventListener("input", () => {                // beim Tippen mit kurzer Verzögerung, nicht bei jedem Zeichen
+      clearTimeout(hTm);
+      hTm = setTimeout(hRun, 350);
+    });
+  });
   const calc = async () => {
     const my = ++seq,
       pth = path();
