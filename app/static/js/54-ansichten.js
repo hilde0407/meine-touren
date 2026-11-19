@@ -296,7 +296,7 @@ function slViewsDialog() {
           (sp.length ? `<div class="slvrg">${sp.map((s, i) => `<label class="slvrl" for="slvr${i}">${esc(sName(s))}</label><select id="slvr${i}" data-rule="${esc(s)}"><option value="">Standardansicht (${esc(slViewName(fam, m.active))})</option>` +
             m.views.map(v => `<option value="${esc(v.id)}"${(m.rules || {})[s] === v.id ? " selected" : ""}>${esc(v.name)}</option>`).join("") + `</select>`).join("")}</div>` : `<p class="mut">Sobald es Touren gibt, kannst du hier Sportarten zuordnen.</p>`) + `</section>`;
       }
-      h += `<p class="slsr" id="slvlive" role="status" aria-live="polite"></p><div class="uifoot"><button type="button" class="btn" data-close>Schließen</button></div>`;
+      h += `<p class="slsr" id="slvlive" role="status" aria-live="polite"></p><div class="uifoot"><button type="button" class="btn ghost" data-close>Schließen</button></div>`;
       body.innerHTML = h;
       if (focus) {
         const f = body.querySelector(focus) || body.querySelector(".slvr .slb, [data-a=new]");

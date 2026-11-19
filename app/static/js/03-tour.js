@@ -56,7 +56,7 @@ async function uploadDialog(t) {
             : s && s.status === "error"
               ? `<span class="bad">letzter Versuch: ${esc(s.msg)}</span>`
               : "";
-      return `<label class="chk m8-0" style="display:block"><input type="checkbox" class="pp" value="${p.id}" ${fromHere || !p.connected || done ? "disabled" : ""}> <b>${p.name}</b> <span class="mut">${why}</span>${done && p.connected && !fromHere ? `<br><label class="fs12 ml22"><input type="checkbox" class="ff" data-p="${p.id}"> trotzdem erneut hochladen (z. B. wenn die Tour bei ${p.name} fehlt)</label>` : ""}</label>`;
+      return `<label class="chk m8-0" style="display:block"><input type="checkbox" class="pp cb" value="${p.id}" ${fromHere || !p.connected || done ? "disabled" : ""}> <b>${p.name}</b> <span class="mut">${why}</span>${done && p.connected && !fromHere ? `<br><label class="fs12 ml22"><input type="checkbox" class="ff cb" data-p="${p.id}"> trotzdem erneut hochladen (z. B. wenn die Tour bei ${p.name} fehlt)</label>` : ""}</label>`;
     })
     .join("");
   const m = uiModal(`<h3>Tour hochladen</h3><p class="mut">„${esc(t.name)}“ wird mit der lokal gespeicherten Strecke zu den gewählten Portalen gesendet. Es passiert nichts ohne dein Häkchen.</p>${rows}<div id="upr" class="mt10"></div>

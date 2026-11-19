@@ -79,7 +79,7 @@ function seriesBuildDialog() {
       t = m.querySelector("#sbt").value;
     const ts = TOURS.filter(x => iso(x.start_ts) >= f && iso(x.start_ts) <= t).sort((a, b) => a.start_ts - b.start_ts);
     m.querySelector("#sbl").innerHTML = ts.length
-      ? ts.map(x => `<label class="r g8 aic" style="display:flex"><input type="checkbox" data-i="${esc(x.id)}" data-s="${x.start_ts}" checked><span>${fmtDatumKurz(x.date)} · ${esc(x.name)} <span class="mut">${fmtKm(x.km)}</span></span></label>`).join("")
+      ? ts.map(x => `<label class="r g8 aic" style="display:flex"><input type="checkbox" class="cb" data-i="${esc(x.id)}" data-s="${x.start_ts}" checked><span>${fmtDatumKurz(x.date)} · ${esc(x.name)} <span class="mut">${fmtKm(x.km)}</span></span></label>`).join("")
       : '<p class="mut">Keine Touren in diesem Zeitraum.</p>';
   };
   m.querySelectorAll("input[type=date]").forEach(i => (i.onchange = list));

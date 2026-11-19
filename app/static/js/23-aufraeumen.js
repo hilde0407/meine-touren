@@ -19,7 +19,7 @@ async function cleanUnusedDialog() {
    <div class="thumbs m8-0" style="grid-template-columns:repeat(6,1fr)">${u.sample.map(i => `<img loading="lazy" src="/pic/${i}?size=200">`).join("")}</div>
    <p class="mut fs14">Stichprobe. Bitte zuerst prüfen, ob die Fotos wirklich nicht zu einer Tour gehören – oft liegt es an einer falsch gestellten Kamerauhr (Prüfen → „Kamerauhr“) oder an einer Tour, die noch nicht in der App ist.</p>
    <h3 class="m12-0-4">Welche Jahre löschen?</h3>
-   <div class="rows" id="cuy">${u.years.map(y => `<label class="r g8 aic" style="display:flex"><input type="checkbox" data-y="${y.y}"><span class="fx1">${y.y}</span><span class="mut">${nf(y.n, 0)} Fotos · ${mb(y.b)}</span></label>`).join("")}</div>
+   <div class="rows" id="cuy">${u.years.map(y => `<label class="r g8 aic" style="display:flex"><input type="checkbox" class="cb" data-y="${y.y}"><span class="fx1">${y.y}</span><span class="mut">${nf(y.n, 0)} Fotos · ${mb(y.b)}</span></label>`).join("")}</div>
    <div class="notice m12-0 fs14">Gelöscht werden nur die Kopien in der Fotobibliothek dieser App – <b>niemals deine Originale</b>. Die Fotos tauchen beim nächsten Import nicht wieder auf. Das Löschen lässt sich nicht rückgängig machen.</div>
    <div id="cuer" class="bad"></div><div class="uifoot"><button class="btn ghost" id="cuno">Abbrechen</button><button class="btn alt uidanger" data-danger id="cudo" disabled>Löschen</button></div>`);
   const sel = () => [...m.querySelectorAll("[data-y]:checked")].map(x => +x.dataset.y);

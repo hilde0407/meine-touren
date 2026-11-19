@@ -112,7 +112,7 @@ function photoChain(map, t, coords, ph) {
     bar.innerHTML = `<b>Fotos ausrichten:</b> Ziehe ein Foto auf der Karte an die Stelle der Strecke, an der du sicher bist, dass es dort aufgenommen wurde. Alle anderen Fotos wandern wie auf einer Perlenkette im gleichen zeitlichen Abstand mit.
      <div class="row mt8"><span id="chi">${info()}</span><span class="sp"></span>
       <select id="chs" title="Welche Fotos verschoben werden"><option value="tour">nur Fotos dieser Tour</option><option value="day">auch andere Fotos desselben Tages</option></select>
-      <button class="btn sm" id="chok" ${delta ? "" : "disabled"}>Speichern</button><button class="btn alt sm" id="chre" title="Alle bisherigen Zeitverschiebungen der Fotos dieser Tour zurücknehmen">Original-Zeiten</button><button class="btn alt sm" id="chno">Abbrechen</button><span id="cher" class="bad"></span></div>`;
+      <button class="btn alt sm" id="chre" title="Alle bisherigen Zeitverschiebungen der Fotos dieser Tour zurücknehmen">Original-Zeiten</button><button class="btn alt sm" id="chno">Abbrechen</button><button class="btn sm" id="chok" ${delta ? "" : "disabled"}>Speichern</button><span id="cher" class="bad"></span></div>`;
     $("#chno").onclick = () => end(true);
     $("#chre").onclick = async () => {
       if (!await uiConfirm({text: "Alle Zeitverschiebungen der Fotos dieser Tour zurücknehmen (zurück auf die Aufnahmezeit der Kamera)?", danger: true, ok: "Zurücknehmen"})) return;

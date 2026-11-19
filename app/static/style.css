@@ -110,7 +110,6 @@ details{border-top:1px solid var(--rule);padding:10px 0;margin-top:10px}summary{
 @media(max-width:700px){.top{height:auto;flex-wrap:wrap;gap:0 12px;padding:8px 14px 0}.brand{white-space:nowrap;font-size:22px}nav{width:100%;height:44px;margin-top:4px}nav a{margin-top:0;padding:0 11px}
 .hero{min-height:520px}.hero::after{background:linear-gradient(0deg,#071314f5 0%,#071314b0 55%,#07131433 100%)}.hero .in{padding-bottom:26px}.signs{min-width:0;width:100%}.mapbox{height:calc(100vh - 100px)}main{padding:22px 16px 60px}.inner{padding:0 16px}}
 .field .row label{display:inline-flex;align-items:center;gap:6px;margin:0;font-size:14px}
-.field input[type=checkbox]{width:auto;margin:0}
 .field .row input[type=file]{width:auto;flex:1;min-width:220px}
 .panel .row:first-of-type .btn{white-space:nowrap}
 
@@ -710,7 +709,7 @@ html.mob .dvq>summary{min-height:48px}
 .dvuy,.dvun{display:inline-flex!important;align-items:center;gap:5px;padding:1px 10px 1px 6px;border-radius:99px;font:600 14px/1.6 var(--b);width:max-content}
 .dvuy{background:var(--dv-ok-bg);color:var(--dv-ok)}.dvun{background:var(--soft);color:var(--mut)}.dvun.has{background:var(--dv-warn-bg);color:var(--dv-warn)}
 .dvuy svg,.dvun svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.dvuchk{display:flex;align-items:center;gap:8px;font:500 15px var(--b);cursor:pointer;min-height:32px;margin:8px 0 2px}.dvuchk input{width:18px;height:18px;flex:none}
+.dvuchk{display:flex;align-items:center;gap:8px;font:500 15px var(--b);cursor:pointer;min-height:32px;margin:8px 0 2px}
 .uibox.dvubox .dvfoot{align-items:center}.uibox.dvubox .dvfoot .sp{flex:1}
 @media (max-width:640px){
   .uibox.dvbox.dvubox{padding:18px 14px}
@@ -830,7 +829,10 @@ details.trsub .tblw{max-height:340px;overflow:auto}
 .uifoot{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px}
 .uifoot .btn{min-height:44px}
 .uifoot .btn:focus-visible,.uidlg button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
-.uibox .uidanger{background:var(--dv-bad);border-color:var(--dv-bad);color:var(--card,#fff)}
+/* 3.42.0 Knopfstufen im Dialog: sekundär (alt = ghost, ein Stil), primär gelb, gefährlich rot gefüllt */
+.uibox .btn.alt,.uibox .btn.ghost{background:var(--card,var(--bg));color:var(--ink);border-color:color-mix(in srgb,var(--ink) 38%,transparent);opacity:1}
+.uibox .btn.alt:hover,.uibox .btn.ghost:hover{border-color:var(--ink);filter:none}
+.uibox .btn.uidanger{background:var(--dv-bad);border-color:var(--dv-bad);color:var(--card,#fff)}
 @media (prefers-reduced-motion:no-preference){.uibox{animation:uipop .12s ease-out}@keyframes uipop{from{transform:translateY(6px);opacity:0}}}
 @media (max-width:420px){.uifoot,.dvfoot{flex-direction:column-reverse}.uifoot .btn,.dvfoot .btn{width:100%}}
 
@@ -1011,7 +1013,7 @@ details.tls[open]>summary{border-bottom:1px solid var(--rule);border-radius:var(
 .hcols:not(:has(>:not([hidden],.sl-off))){display:none}
 .slopen{display:flex;justify-content:flex-end;margin:14px 0 0}
 .slopen[hidden]{display:none}
-main.home>.slopen{margin:0 0 -18px}
+main.home>.slopen{margin:0 0 -18px}main:not(.home)>.slopen{margin:0 0 12px}
 .slopen .btn{display:inline-flex;align-items:center;gap:8px;min-height:40px}
 .slopen .btn[hidden]{display:none}
 .sli{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -1050,7 +1052,6 @@ html body.sl-editing{padding-bottom:calc(var(--slbh,120px) + 16px)}
 .slb[aria-disabled=true]{opacity:.55;cursor:default}
 .slgrip:focus-visible,.slb:focus-visible,.slsw:focus-within,.slfotos img:focus-visible,.slrec:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .slsw{min-height:40px;display:inline-flex;align-items:center;gap:8px;padding:0 6px;font:500 14px var(--b);cursor:pointer}
-.slsw input,.slck input{width:20px;height:20px;margin:0;accent-color:var(--bars)}
 .slmust{font:500 14px var(--b);color:var(--mut)}
 .slmust,.slhid{white-space:nowrap}
 .slbox.slcat{width:min(780px,100%)}
@@ -2045,3 +2046,17 @@ html.mob .flight{height:calc(100vh - 102px - env(safe-area-inset-bottom));height
 /* 3.41.0 Fotoauswahl: Schalter „Fotos zuordnen“ im aktiven Zustand lesbar (ghost überschrieb das Gelb); Leiste über der Tableiste des Handys */
 .btn.ghost.on{background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}
 html.mob .seltb{bottom:calc(66px + env(safe-area-inset-bottom));z-index:901;border-radius:18px;padding:10px 14px}
+
+/* 3.42.0 Ein Schalter: jede An/Aus-Einstellung ist derselbe Schalter (aus = Rand, an = gelb). Auswahl in Listen (.cb) und Chips (.flchip) bleiben, was sie sind */
+input[type=checkbox]:not(.cb):not([style*="display:none"]):not(.flchip input){appearance:none;-webkit-appearance:none;flex:none;position:relative;width:44px;height:26px;margin:0 10px 0 0;border-radius:99px;border:2px solid color-mix(in srgb,var(--ink) 45%,transparent);background:color-mix(in srgb,var(--ink) 12%,var(--card,var(--bg)));cursor:pointer;vertical-align:middle;transition:background .12s,border-color .12s}
+input[type=checkbox]:not(.cb):not([style*="display:none"]):not(.flchip input)::before{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--ink);transition:transform .12s}
+input[type=checkbox]:not(.cb):not([style*="display:none"]):not(.flchip input):checked{background:var(--yellow);border-color:var(--yellow)}
+input[type=checkbox]:not(.cb):not([style*="display:none"]):not(.flchip input):checked::before{transform:translateX(18px);background:var(--yellow-ink)}
+input[type=checkbox]:not(.cb):not([style*="display:none"]):not(.flchip input):disabled{opacity:.5;cursor:default}
+input[type=checkbox]:not(.cb):not([style*="display:none"]):not(.flchip input):focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+label:has(>input[type=checkbox]:not(.cb)){min-height:40px}
+@media (prefers-reduced-motion:reduce){input[type=checkbox]:not(.cb),input[type=checkbox]:not(.cb)::before{transition:none}}
+input[type=checkbox].cb{accent-color:var(--yellow);width:18px;height:18px}
+/* 3.42.0 „An“ ist immer gelb: Filter-Chips im Dialog, Breiten- und Geräteknöpfe der Bearbeitungsleiste */
+.slchip[aria-pressed=true],.slw[aria-pressed=true],.slbdb[aria-pressed=true],.flchip:has(input:checked){background:var(--yellow);color:var(--yellow-ink);border-color:var(--yellow)}
+.slw[aria-pressed=true]:focus-visible{outline-color:var(--yellow-ink)}

@@ -1,4 +1,7 @@
 /* ---------- Verwaltung ---------- */
+/* 3.42.0 Ein Schalter für jede An/Aus-Einstellung (statt Auswahlfeld „an/aus“, „ja/nein“): Schalter lesen/setzen für Felder mit data-k (Werte "1"/"0") */
+const swField = (k, label, id = "", cls = "") => `<div class="field ${cls}"><label class="slck"><input type="checkbox" data-k="${k}"${id ? ` id="${id}"` : ""}><span>${label}</span></label></div>`;
+const swSet = (k, v) => { const e = document.querySelector(`[data-k="${k}"]`); if (e) e.checked = String(v) === "1"; };
 const STATUS_DE = {
   local: "lokal übernommen",
   new: "noch nicht übernommen",
@@ -55,10 +58,10 @@ VIEWS.admin = async (_, q) => {
    <p class="mut">${w.length} exportiert · ${w.filter(x => x.status === "local").length} lokal übernommen · ${w.filter(x => x.status === "in_komoot" || x.status === "uploaded").length} bereits in Komoot · ${w.filter(x => x.status === "no_gps").length} ohne GPS · ${pend.length} noch offen</p>
    ${
      pend.length
-       ? `<details${pend.length <= 8 ? " open" : ""}><summary>${pend.length} offene Trainings anzeigen</summary><div class="ova" style="max-height:300px"><table><tr><th></th><th>Datum</th><th>Sport</th><th class="n">km</th></tr>${pend.map(x => `<tr><td><input type="checkbox" class="pk" value="${x.trackid}"></td><td>${fmtDatumKurz(x.date, {zeit: true})}</td><td>${sName(x.sport)}</td><td class="n">${nf(x.dist_m / 1000, 1)}</td></tr>`).join("")}</table></div></details>
+       ? `<details${pend.length <= 8 ? " open" : ""}><summary>${pend.length} offene Trainings anzeigen</summary><div class="ova" style="max-height:300px"><table><tr><th></th><th>Datum</th><th>Sport</th><th class="n">km</th></tr>${pend.map(x => `<tr><td><input type="checkbox" class="pk cb" value="${x.trackid}"></td><td>${fmtDatumKurz(x.date, {zeit: true})}</td><td>${sName(x.sport)}</td><td class="n">${nf(x.dist_m / 1000, 1)}</td></tr>`).join("")}</table></div></details>
    <div class="row mt10"><button class="btn alt sm" id="pall">Alle wählen</button><button class="btn alt sm" id="pdry">Probelauf</button><button class="btn" id="plocal">Lokal übernehmen</button></div>
-   <div class="row mt8"><span class="mut">Zusätzlich hochladen zu:</span>${pf.portals.map(p => `<label class="chk m0"><input type="checkbox" class="zp" value="${p.id}" ${p.connected ? "" : "disabled"}> ${p.name}${p.connected ? "" : `<span class="mut fs12"> (${p.id === "komoot" ? "Zugang fehlt: im Panel „Komoot“ (Komoot-E-Mail und -Passwort) speichern" : "nicht verbunden: bei „Portale“ verbinden"})</span>`}</label>`).join("")}<button class="btn" id="pup">Übernehmen und hochladen</button></div>
-   <div class="field mt8"><label>Neue Zepp-Trainings automatisch lokal übernehmen (ohne Upload)</label><select data-k="zepp_auto_adopt"><option value="0">aus</option><option value="1">an</option></select></div>`
+   <div class="row mt8"><span class="mut">Zusätzlich hochladen zu:</span>${pf.portals.map(p => `<label class="chk m0"><input type="checkbox" class="zp cb" value="${p.id}" ${p.connected ? "" : "disabled"}> ${p.name}${p.connected ? "" : `<span class="mut fs12"> (${p.id === "komoot" ? "Zugang fehlt: im Panel „Komoot“ (Komoot-E-Mail und -Passwort) speichern" : "nicht verbunden: bei „Portale“ verbinden"})</span>`}</label>`).join("")}<button class="btn" id="pup">Übernehmen und hochladen</button></div>
+   ${swField("zepp_auto_adopt", "Neue Zepp-Trainings automatisch lokal übernehmen (ohne Upload)", "", "mt8")}`
        : ""
    }
    </div>
@@ -66,7 +69,7 @@ VIEWS.admin = async (_, q) => {
    <p class="mut">Aktivitäten werden <b>lokal</b> als Touren gespeichert (Karte, Statistik, Fotozuordnung), mit Doppelten-Prüfung. Hochgeladen wird nur, wenn du es unten ausdrücklich ankreuzt.<br>
    <b>Tipp:</b> Ist deine Uhr in Garmin Connect bzw. der Suunto-App mit <b>Komoot</b> verbunden, kommen die Touren ohnehin über „Komoot aktualisieren“.</p>
    <h3>Dateien importieren <span class="ok fs14">funktioniert immer</span></h3>
-   <div class="field"><label>FIT-, GPX-, TCX- oder ZIP-Dateien (mehrere möglich; ZIP darf viele Aktivitäten enthalten, auch der komplette Garmin-Export)</label><div class="row"><input type="file" id="files" multiple accept=".fit,.gpx,.tcx,.zip,.gz"><span class="mut">zusätzlich zu:</span>${pf.portals.map(p => `<label class="chk m0"><input type="checkbox" class="fp" value="${p.id}" ${p.connected ? "" : "disabled"}> ${p.name}${p.connected ? "" : `<span class="mut fs12"> (${p.id === "komoot" ? "Zugang fehlt: im Panel „Komoot“ (Komoot-E-Mail und -Passwort) speichern" : "nicht verbunden: bei „Portale“ verbinden"})</span>`}</label>`).join("")}<button class="btn alt sm" id="upl">Importieren</button><label class="m0"><input type="checkbox" id="dry"> Probelauf</label></div></div>
+   <div class="field"><label>FIT-, GPX-, TCX- oder ZIP-Dateien (mehrere möglich; ZIP darf viele Aktivitäten enthalten, auch der komplette Garmin-Export)</label><div class="row"><input type="file" id="files" multiple accept=".fit,.gpx,.tcx,.zip,.gz"><span class="mut">zusätzlich zu:</span>${pf.portals.map(p => `<label class="chk m0"><input type="checkbox" class="fp cb" value="${p.id}" ${p.connected ? "" : "disabled"}> ${p.name}${p.connected ? "" : `<span class="mut fs12"> (${p.id === "komoot" ? "Zugang fehlt: im Panel „Komoot“ (Komoot-E-Mail und -Passwort) speichern" : "nicht verbunden: bei „Portale“ verbinden"})</span>`}</label>`).join("")}<button class="btn alt sm" id="upl">Importieren</button><label class="m0"><input type="checkbox" id="dry"> Probelauf</label></div></div>
    <details><summary>So kommst du an die Dateien</summary><ul class="mut pl18">
     <li><b>Garmin, alles auf einmal:</b> auf <a target="_blank" rel="noopener" href="https://www.garmin.com/account/datamanagement/">garmin.com/account/datamanagement</a> „Daten exportieren“ anfordern (Garmin schickt nach ein bis zwei Tagen eine ZIP-Datei per E-Mail) und die ZIP-Datei hier importieren.</li>
     <li><b>Garmin, einzelne Aktivität:</b> connect.garmin.com → Aktivität öffnen → Zahnrad ⚙ → „Original exportieren“ (FIT in einer ZIP) oder „Als GPX exportieren“.</li>
@@ -81,7 +84,7 @@ VIEWS.admin = async (_, q) => {
          : gm.connected
            ? `<p class="mut">${nf(gm.imported || 0, 0)} Aktivitäten übernommen${gm.checked ? ", zuletzt geprüft " + fmtDatumKurz(+gm.checked, {zeit: true}) : ""}.</p>
      <div class="field"><label>Nur Aktivitäten ab Datum (JJJJ-MM-TT, leer = alle)</label><input data-k="garmin_since" value="${esc(s.garmin_since)}" placeholder="2024-01-01"></div>
-     <div class="field"><label>Neue Aktivitäten täglich automatisch übernehmen</label><select data-k="garmin_auto"><option value="0">aus</option><option value="1">an</option></select></div>
+     ${swField("garmin_auto", "Neue Aktivitäten täglich automatisch übernehmen")}
      <div class="row"><button class="btn" id="gsync">Jetzt importieren</button><button class="btn alt" id="gdis">Trennen</button><span id="gres"></span></div>`
            : `<p class="mut">Anmeldung wie im Browser (E-Mail und Passwort von Garmin Connect). Das Passwort wird <b>nicht gespeichert</b>, nur der Anmelde-Schlüssel (verschlüsselt). Konten mit Google-/Apple-Login haben kein Garmin-Passwort – dann bitte den Dateiweg nehmen.</p>
      <div class="field"><label>Garmin-E-Mail</label><input id="gem" autocomplete="off"></div><div class="field"><label>Garmin-Passwort</label><input id="gpw" type="password" autocomplete="off"></div>
@@ -96,17 +99,13 @@ VIEWS.admin = async (_, q) => {
       ${f("suunto_client_id", "Client-ID")}${f("suunto_client_secret", "Client-Secret", "password")}${f("suunto_key", "Subscription-Key (Primary Key)", "password")}
       <p class="mut fs13">Weiterleitungsadresse (in der API Zone eintragen): <code>${esc(su.redirect || "")}</code></p>
       <div class="field"><label>Nur Workouts ab Datum (JJJJ-MM-TT, leer = alle)</label><input data-k="suunto_since" value="${esc(s.suunto_since)}"></div>
-      <div class="field"><label>Neue Workouts täglich automatisch übernehmen</label><select data-k="suunto_auto"><option value="0">aus</option><option value="1">an</option></select></div>
+      ${swField("suunto_auto", "Neue Workouts täglich automatisch übernehmen")}
       <div class="row"><button class="btn" id="sunconn">${su.connected ? "Neu verbinden" : "Mit Suunto verbinden"}</button>${su.connected ? `<button class="btn" id="sunsync">Jetzt importieren</button><button class="btn alt" id="sundis">Trennen</button>` : ""}<span id="sunres"></span></div></details></div></div></div>
   <div class="grid g2 mt40">
-   <div class="panel"><h2>Automatik</h2><div class="field"><label>Täglich aktualisieren (Komoot, Routen, Fotos)</label><select data-k="auto_sync"><option value="0">aus</option><option value="1">an</option></select></div>${f("auto_sync_hour", "Uhrzeit (Stunde)", "number")}</div>
+   <div class="panel"><h2>Automatik</h2>${swField("auto_sync", "Täglich aktualisieren (Komoot, Routen, Fotos)")}${f("auto_sync_hour", "Uhrzeit (Stunde)", "number")}</div>
    <div class="panel"><h2>Protokoll</h2><div class="pre" id="log">–</div></div></div>
   <div class="row mt34"><button class="btn" id="save">Einstellungen speichern</button><span id="ok" class="ok"></span></div>`;
-  document.querySelector('[data-k="auto_sync"]').value = s.auto_sync;
-  ["garmin_auto", "suunto_auto"].forEach(
-    k => document.querySelector(`[data-k="${k}"]`) && (document.querySelector(`[data-k="${k}"]`).value = s[k])
-  );
-  if (document.querySelector('[data-k="zepp_auto_adopt"]')) document.querySelector('[data-k="zepp_auto_adopt"]').value = s.zepp_auto_adopt;
+  ["auto_sync", "garmin_auto", "suunto_auto", "zepp_auto_adopt"].forEach(k => swSet(k, s[k]));
   const run = async (u, o) => {
     try {
       await api(u, o);
@@ -264,7 +263,7 @@ VIEWS.admin = async (_, q) => {
   };
   const save = async () => {
     const d = {};
-    document.querySelectorAll("[data-k]").forEach(e => (d[e.dataset.k] = e.value));
+    document.querySelectorAll("[data-k]").forEach(e => (d[e.dataset.k] = e.type === "checkbox" ? (e.checked ? "1" : "0") : e.value));
     await api("/api/settings", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(d)});
   };
   $("#save").onclick = async () => {

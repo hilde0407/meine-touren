@@ -157,7 +157,7 @@ VIEWS.tour = async (id, q) => {
   };
   $("#eshr").onclick = async () => {
     const m =
-      modal(`<h3>Tour teilen</h3><p class="mut fs14">Erzeugt einen Link, den man <b>ohne Anmeldung</b> öffnen kann – du wählst, was er zeigt (Karte, Höhenprofil, Fotos …). Er funktioniert nur, wenn dein Server von außen erreichbar ist, z. B. per VPN oder Reverse-Proxy.</p>
+      modal(`<h3>Links dieser Tour</h3><p class="mut fs14">Erzeugt einen Link, den man <b>ohne Anmeldung</b> öffnen kann – du wählst, was er zeigt (Karte, Höhenprofil, Fotos …). Er funktioniert nur, wenn dein Server von außen erreichbar ist, z. B. per VPN oder Reverse-Proxy.</p>
       <div class="row mt14"><button class="btn" id="shn">Neuen Link erstellen …</button></div><div id="shl" class="mt14"></div><div class="uifoot"><button class="btn ghost" id="shx">Schließen</button></div>`);
     m.querySelector("#shx").onclick = () => m.remove();
     const list = async () => {
@@ -556,7 +556,7 @@ VIEWS.admin = async (...a) => {
   sv.closest(".row").insertAdjacentHTML(
     "beforebegin",
     `<div class="panel gap"><h2>Benachrichtigung (optional)</h2><p class="mut">Trage eine Webhook-Adresse ein (z. B. ntfy, Gotify oder ein eigener Dienst). Bei einer neuen Warnung (Zepp-Token, Sicherung, Job-Fehler, Speicher) wird dort eine Textnachricht abgeliefert, höchstens stündlich geprüft. Leer = aus. Die App stellt keine Verbindung zu Home Assistant her.</p>
-   <div class="field"><label>Webhook-Adresse</label><input data-k="notify_url" value="${esc(s.notify_url || "")}" placeholder="https://ntfy.sh/mein-thema"></div><div class="field"><label>Auch bei neuen Touren melden</label><select data-k="notify_events"><option value="1"${s.notify_events !== "0" ? " selected" : ""}>Ja (Aufzeichnung, Teilen-Menü, Import)</option><option value="0"${s.notify_events === "0" ? " selected" : ""}>Nein, nur Warnungen</option></select></div><div class="row"><button class="btn alt" id="ntest">Testnachricht senden (nach „Speichern“)</button><span id="ntm" class="mut"></span></div></div>`
+   <div class="field"><label>Webhook-Adresse</label><input data-k="notify_url" value="${esc(s.notify_url || "")}" placeholder="https://ntfy.sh/mein-thema"></div><div class="field"><label class="slck"><input type="checkbox" data-k="notify_events"${s.notify_events !== "0" ? " checked" : ""}><span>Auch bei neuen Touren melden</span></label></div><div class="row"><button class="btn alt" id="ntest">Testnachricht senden (nach „Speichern“)</button><span id="ntm" class="mut"></span></div></div>`
   );
   $("#ntest").onclick = async () => {
     try {

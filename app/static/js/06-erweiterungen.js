@@ -413,10 +413,10 @@ async function updatePanel() {
        ? `<p class="mut fs13">Die Installation aus der Oberfläche ist hier noch nicht eingerichtet. Im Container <b>einmal</b> ausführen: <code>${esc(u.command)}</code> – danach klappt es per Knopfdruck.</p>`
        : ""
    }
-   <div class="field mt8"><label>Regelmäßig (alle 6 Stunden) auf neue Versionen prüfen</label><select data-k="update_check"><option value="1">ja</option><option value="0">nein</option></select></div>
+   ${swField("update_check", "Regelmäßig (alle 6 Stunden) auf neue Versionen prüfen", "", "mt8")}
    ${u.status && u.status.state === "error" ? `<p class="bad fs13">Letztes Update fehlgeschlagen: ${esc(u.status.message || "")}</p>` : ""}</div>`;
   const sel = b.querySelector('[data-k="update_check"]');
-  if (sel) sel.value = u.enabled ? "1" : "0";
+  if (sel) sel.checked = !!u.enabled;
   const uc = b.querySelector("#ucheck");
   if (!uc || !b.isConnected) return;       // Seite wurde inzwischen gewechselt
   uc.onclick = async () => {

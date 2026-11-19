@@ -638,7 +638,7 @@ VIEWS.admin = async (...a) => {
   sv.closest(".row").insertAdjacentHTML(
     "beforebegin",
     `<div class="panel" id="brpanel"><h2>Tourplanung</h2>
-     <div class="field"><label>Funktion „Tour planen“</label><select data-k="plan_enabled" id="pon"><option value="1">an</option><option value="0">aus</option></select></div>
+     ${swField("plan_enabled", "Funktion „Tour planen“", "pon")}
      <div id="pbox">
       <p class="mut">Die Planung verbindet deine Punkte über Wege aus OpenStreetMap. Dafür braucht es einen Routing-Dienst (BRouter). Wähle, wo er läuft:</p>
       <label class="pmode"><input type="radio" name="pm" value="public"> <b>Öffentlicher Dienst brouter.de</b><small>Nichts zu installieren. Die Koordinaten der geplanten Punkte werden an brouter.de gesendet.</small></label>
@@ -656,13 +656,13 @@ ${esc(cmd)}
   const upd = () => {
     mode = (document.querySelector('input[name="pm"]:checked') || {}).value || "public";
     $("#pmode").value = mode;
-    $("#pbox").style.display = $("#pon").value === "0" ? "none" : "";
+    $("#pbox").style.display = $("#pon").checked ? "" : "none";
     $("#purlf").style.display = mode === "public" ? "none" : "";
     $("#pinst").style.display = mode === "local" ? "" : "none";
     if (mode === "local" && !$("#purl").value.trim()) $("#purl").value = localUrl;
     $("#ptest").style.display = mode === "public" ? "none" : "";
   };
-  $("#pon").value = on ? "1" : "0";
+  $("#pon").checked = on;
   document.querySelector(`input[name="pm"][value="${mode}"]`).checked = true;
   $("#pon").onchange = upd;
   document.querySelectorAll('input[name="pm"]').forEach(r => (r.onchange = upd));

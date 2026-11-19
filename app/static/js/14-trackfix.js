@@ -39,7 +39,7 @@ function trackFixDialog(id, done) {
      ${a.fast.length ? `<h3 class="m16-0-4">Schnelle Abschnitte</h3><p class="mut fs13 m0-0-6">Nichts ist vorgewählt. Anhaken = als Fahrt aus Strecke und Dauer herausrechnen (der Weg bleibt auf der Karte sichtbar). Bitte Karte und Uhrzeit prüfen: Nur echte Fahrten (Seilbahn, Bus, Auto) anhaken, keine Wegstücke, die du gelaufen bist.</p>
       <div class="rows">${a.fast
         .map(
-          f => `<label class="r cp g8 aic" style="display:flex"><input type="checkbox" data-f="${f.id}"><span>${a.has_time ? clock(f.t0) + " Uhr · " : ""}${fmtKm(f.m / 1000)} in ${fmtMin(f.s)}<small class="mut"> · Ø ${fmtTempo(f.avg)}, bis ${fmtTempo(f.max, {d: 0})}</small></span></label>`
+          f => `<label class="r cp g8 aic" style="display:flex"><input type="checkbox" class="cb" data-f="${f.id}"><span>${a.has_time ? clock(f.t0) + " Uhr · " : ""}${fmtKm(f.m / 1000)} in ${fmtMin(f.s)}<small class="mut"> · Ø ${fmtTempo(f.avg)}, bis ${fmtTempo(f.max, {d: 0})}</small></span></label>`
         )
         .join("")}</div>` : ""}
      ${a.jitter_m >= 200 && a.jitter_m >= a.raw_m * 0.03 ? `<label class="chk"><input type="checkbox" id="tfj"> <b>GPS-Zittern glätten:</b> der Track ist durch Messrauschen etwa ${fmtKm(a.jitter_m / 1000)} (${Math.round((a.jitter_m / a.raw_m) * 100)} %) zu lang. Die Länge wird entsprechend verringert, der Weg bleibt unverändert.</label>` : ""}

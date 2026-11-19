@@ -188,7 +188,7 @@ function devZepp(dv, done) {
     const free = dv.devices.filter(x => x.kind === "zepp" && !x.zsrc);
     body.innerHTML = `<p>${src.length === 1 ? `Zepp meldet ${res.total} Trainings von einer Quelle.` : `Zepp meldet ${res.total} Trainings von ${src.length} Quellen.`}</p><p class="mut">Prüfe die Vorschläge, ändere sie nach Bedarf und wähle, was angelegt werden soll. Vorher wird nichts gespeichert.</p>
       <div class="dvprobe">${src.map((x, i) => `<div class="dvpr ${x.device ? "dis" : ""}" data-i="${i}">
-        <label class="chk"><input type="checkbox" class="zon" ${x.device ? "disabled" : "checked"}> <span>${x.device ? `Bereits angelegt als „${esc(x.device.name)}“` : x.model || (src.length > 1 ? `Zepp-Uhr ${i + 1}` : "Zepp-Uhr")}</span></label>
+        <label class="chk"><input type="checkbox" class="zon cb" ${x.device ? "disabled" : "checked"}> <span>${x.device ? `Bereits angelegt als „${esc(x.device.name)}“` : x.model || (src.length > 1 ? `Zepp-Uhr ${i + 1}` : "Zepp-Uhr")}</span></label>
         <div class="dvmeta"><span>Zepp meldet: </span><code>${esc(x.zsrc)}</code> · <span>${x.n} Trainings</span> · <span>${esc(dvDay(x.first))} bis ${esc(dvDay(x.last))}</span><br><span>${x.sports.slice(0, 4).map(s => `${esc(s.label)} ${s.n}`).join(", ")}</span></div>
         ${x.model && !x.model_sure && !x.device ? `<div class="dvwarn"><b>Vermutlich ${esc(x.model)}.</b> Die Kennung ist nur ein Codename der Uhren-Generation, kein Modell. Bitte prüfen und bei Bedarf ändern.</div>` : ""}
         ${!x.model && !x.device ? `<div class="dvwarn">Zepp nennt hier nur eine allgemeine Altnummer, kein Modell. Vergib selbst einen Namen – am Zeitraum erkennst du die Uhr.</div>` : ""}
@@ -508,7 +508,7 @@ async function dvBatch(g, again) {
     ${pv.zepp_missing ? `<p class="dvh">Die Methode „Uhr (Zepp)“ gibt es erst, wenn in der Verwaltung ein Zepp-Zugang eingerichtet ist.</p>` : ""}
     <div class="dvblist" role="group" aria-label="Touren">
       <div class="dvbtools"><span class="dvbcount" id="bxcount"></span><span class="sp"></span><button class="btn ghost sm" id="bxall" type="button">Alle</button><button class="btn ghost sm" id="bxnone" type="button">Keine</button></div>
-      <ul class="dvbul">${pv.tours.map((t, i) => `<li><label class="dvbrow"><input type="checkbox" class="bxt" data-i="${i}" checked><span class="dvbname"><b>${esc(t.name)}</b><span class="mut">${esc(dvDay(t.day))}${t.rough ? " · Uhr: grob" : ""}</span></span>
+      <ul class="dvbul">${pv.tours.map((t, i) => `<li><label class="dvbrow"><input type="checkbox" class="bxt cb" data-i="${i}" checked><span class="dvbname"><b>${esc(t.name)}</b><span class="mut">${esc(dvDay(t.day))}${t.rough ? " · Uhr: grob" : ""}</span></span>
         <span class="dvbnum"><span>Uhr <b>${fmtHm(t.up_dev)}</b></span><span>Gelände <b>${fmtHm(t.up_dem)}</b></span><span class="dvbnew">neu <b data-new>–</b></span></span></label></li>`).join("")}</ul></div>
     <p class="dvbsum" id="bxsum" role="status" aria-live="polite"></p>
     <div class="dvfoot"><button class="btn ghost" id="bxno" type="button">Abbrechen</button><button class="btn" id="bxgo" type="button">Korrigieren …</button></div>`;

@@ -1040,7 +1040,11 @@ function slOpener(root, edit) {
     slShowMsg(w);
     w.hidden = false;
   }                  // 3.22.0: „Ansicht speichern“, solange der Filter vom gespeicherten Stand abweicht
-  if (!root.matches("main.home") && SL.fam !== "karte" && w.nextElementSibling !== root) root.parentNode.insertBefore(w, root);          // Karte: der Knopf sitzt auf der Karte (kaAfter)
+  if (!root.matches("main.home") && SL.fam !== "karte") {                                  // 3.42.0: fester Ort auf jeder Seite: ganz oben rechts im Inhalt (wie auf der Übersicht); Karte: der Knopf sitzt auf der Karte (kaAfter)
+    const mn = root.closest("#main");
+    if (mn && mn !== root && mn.firstChild !== w) mn.insertBefore(w, mn.firstChild);
+    else if (!mn && w.nextElementSibling !== root) root.parentNode.insertBefore(w, root);
+  }
   if (SL.fam === "karte") {
     const ui = document.querySelector(".mapui");
     if (ui && w.parentElement !== ui) {
@@ -1519,7 +1523,7 @@ function slField(f, cfg, i) {
   if (f.kind === "checks")
     return `<fieldset class="slfs"><legend>${esc(f.label)}</legend><div class="flchips">${f.options.map(([v, l]) => `<label class="flchip"><input type="checkbox" name="f${i}" value="${v}"${(cfg[f.k] || f.def || []).includes(v) ? " checked" : ""}><span>${esc(l)}</span></label>`).join("")}</div><p class="slerr" role="alert"></p></fieldset>`;
   if (f.kind === "bool")
-    return `<fieldset class="slfs"><div class="flchips"><label class="flchip"><input type="checkbox" name="f${i}"${cfg[f.k] === true ? " checked" : ""}><span>${esc(f.label)}</span></label></div></fieldset>`;
+    return `<fieldset class="slfs"><label class="slck"><input type="checkbox" name="f${i}"${cfg[f.k] === true ? " checked" : ""}><span>${esc(f.label)}</span></label></fieldset>`;
   if (f.kind === "radio")
     return `<fieldset class="slfs"><legend>${esc(f.label)}</legend><div class="flchips">${f.options.map(([v, l]) => `<label class="flchip"><input type="radio" name="f${i}" value="${v}"${String(cfg[f.k] ?? f.def) === String(v) ? " checked" : ""}><span>${esc(l)}</span></label>`).join("")}</div></fieldset>`;
   if (f.kind === "number")
