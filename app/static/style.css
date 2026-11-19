@@ -393,6 +393,8 @@ html.mob .inner .panel.gap{margin-top:var(--gap-panel)!important}
 @media(min-width:701px) and (max-width:1180px){nav a{padding:0 6px;font-size:14px}#gs{width:110px}.umenu .un{display:none}}
 /* Hinweisleiste auf der Übersicht in derselben Spalte wie überall sonst */
 html:not(.mob) main.flush>.warnbar,html:not(.mob) main.wide>.warnbar{max-width:1132px;margin:16px auto 18px}
+/* 3.46.0: „Seite anpassen“/„Ansichten“ in randlosen Seiten (Statistik) bündig mit der Inhaltsspalte statt am Fensterrand */
+html:not(.mob) main.flush>.slopen,html:not(.mob) main.wide>.slopen{max-width:1132px;margin-left:auto;margin-right:auto}
 /* Handy/App: ein Einzug (14 px) für Überschrift und Inhalt; Abschnitte ohne Kasten rücken nicht doppelt ein */
 html.mob main.flush .inner{padding:0}
 html.mob .panel{padding:12px 0 0}
