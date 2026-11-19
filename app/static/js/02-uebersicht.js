@@ -31,12 +31,7 @@ VIEWS.dash = async (_, q) => {
     b
       ? `<div class="d ${a >= b ? "up" : "down"}">${a >= b ? "+" : "−"}${nf((Math.abs(a - b) / b) * 100, 0)} % gegenüber ${cmpL}</div>`
       : "";
-  const longest = [...sel].sort((a, b) => b.km - a.km)[0],
-    steepest = [...sel].sort((a, b) => (b.up_m || 0) - (a.up_m || 0))[0],
-    longT = [...sel].sort((a, b) => b.h - a.h)[0];
-  const mm = Array(12).fill(0);
-  sel.forEach(t => (mm[t.m - 1] += t.km));
-  const bestM = mm.indexOf(Math.max(...mm));
+  /* 3.45.0: „Bestwerte“ (vorher „Rekorde“) ist ein Baustein (50-bausteine.js) und wird von der Layout-Engine gebaut */
   const pm = Array(12).fill(0);
   prev.forEach(t => (pm[t.m - 1] += t.km));
   /* Säulen „Strecke pro Monat oder Jahr“: ein Jahr = 12 Monate; 12 Monate, 90 Tage, freier Zeitraum bis 24 Monate = Monate des Zeitraums; sonst je Jahr */
@@ -121,15 +116,7 @@ VIEWS.dash = async (_, q) => {
     <div class="panel" data-st="kmverlauf" data-badge="${esc(`${cy}: ${fmtKm(cs[cs.length - 1].pts[cs[cs.length - 1].pts.length - 1][1], {d: 0})}`)}"><h2>Strecke im Jahresverlauf</h2>${lineChart(cs)}<div class="legend"><span><i style="background:var(--bars)"></i>${cy}</span>${own && ys.includes(cy - 1) ? `<span><i style="background:var(--accent2)"></i>${cy - 1}</span>` : ""}</div></div>
     <div class="panel" data-st="sportarten" data-badge="${esc(sports.length ? `${sName(sports[0][0])} ${nf((sports[0][1] / tot) * 100, 0)} %` : "")}"><h2>Sportarten</h2><div class="stack">${sports.map(([s, v]) => `<div style="width:${(v / tot) * 100}%;background:${sCol(s)}" title="${sName(s)}"></div>`).join("")}</div>
       <div class="rows mt10">${sports.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${fmtKm(v, {d: 0})}, ${nf((v / tot) * 100, 0)} %</span></div>`).join("")}</div></div>
-    <div class="panel" data-st="bestwerte" data-badge="${esc(longest ? `Längste Tour ${fmtKm(longest.km)}` : "")}"><h2>Rekorde ${Y || (R.kind === "all" ? "gesamt" : R.label)}</h2><div class="rows">
-      ${
-        longest
-          ? `<div class="r"><span><a href="#/tour/${longest.id}">Längste Tour</a><small>${esc(longest.name)}</small></span><b>${fmtKm(longest.km)}</b></div>
-      <div class="r"><span><a href="#/tour/${steepest.id}">Größter Aufstieg</a><small>${esc(steepest.name)}</small></span><b>${fmtHm(steepest.up_m)}</b></div>
-      <div class="r"><span><a href="#/tour/${longT.id}">Längste Dauer</a><small>${esc(longT.name)}</small></span><b>${fmtDauer(longT.h * 3600)}</b></div>
-      <div class="r"><span>Stärkster Monat<small>${MONL[bestM]}</small></span><b>${fmtKm(mm[bestM], {d: 0})}</b></div>`
-          : '<div class="mut">Keine Touren</div>'
-      }</div></div></div>
+    </div>
   <div class="panel gap" data-st="heat" data-badge="${esc(`${Object.keys(byDay).length} Tage mit Touren`)}"><h2>Aktivität im Jahr ${hy}</h2>${heat(hy, byDay)}</div>
   ${otd.length ? `<div data-st="tag" data-badge="${esc(otd.length === 1 ? "1 Tour" : otd.length + " Touren")}"><div class="sec"><h2>An diesem Tag</h2><span class="sub">in früheren Jahren</span></div><div class="tl">${otd.map(tourRow).join("")}</div></div>` : ""}
   <div data-st="erinn"><div class="sec" id="memh"><h2>Erinnerungen</h2><span class="sub" id="memsub"></span></div><div id="mem" class="thumbs"></div></div></div>`;

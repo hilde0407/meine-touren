@@ -63,7 +63,7 @@ Object.assign(window.SL_WT, {
     },
   },
   rdiashow: {
-    fam: "reise", cat: "reise", icon: "cam", name: "Reise-Diashow", title: () => "Fotos der Reise", multi: true, w: "voll", seiten: ["reise"], defaults: {mode: "best", view: "show", n: 12, link: true},
+    fam: "reise", cat: "reise", icon: "cam", name: "Fotos der Reise", title: () => "Fotos der Reise", multi: true, w: "voll", seiten: ["reise"], defaults: {mode: "best", view: "show", n: 12, link: true},
     desc: "Die Fotos aus dem Zeitraum dieser Reise als Einzelbild-Show, Raster oder Streifen, mit Link zur Vollbild-Diashow. Das ist der Baustein „Erinnerungen“, eingeschränkt auf diese Reise: Auswahl, Anzahl, Darstellung und Bildgröße stellst du in den Einstellungen ein.",
     dialog: (id, cfg) => erDialog(id, cfg, true), fields: [{kind: "erinn"}],
     kurz: cfg => (erCfg(cfg).mode === "random" ? ["Zufällig"] : erCfg(cfg).mode === "recent" ? ["Neueste"] : []),

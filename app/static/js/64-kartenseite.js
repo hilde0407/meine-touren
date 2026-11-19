@@ -92,7 +92,7 @@ Object.assign(window.SL_WT, {
     },
   },
   klegende: {
-    fam: "karte", cat: "karte", icon: "pin", name: "Legende der Sportarten", title: () => "Legende", multi: true, w: "drittel", seiten: ["karte"], defaults: {metric: "count"},
+    fam: "karte", cat: "karte", icon: "pin", name: "Legende der Sportarten", title: () => "Legende der Sportarten", multi: true, w: "drittel", seiten: ["karte"], defaults: {metric: "count"},
     desc: "Welche Farbe zu welcher Sportart gehört, mit der Zahl der Touren (oder den Kilometern) im gewählten Jahr. Sportarten, die du oben auf der Karte abwählst, erscheinen blass.",
     fields: [{k: "metric", kind: "radio", def: "count", label: "Zahl je Sportart", options: [["count", "Anzahl der Touren"], ["km", "Strecke"]]}, {kind: "title"}],
     preview: () => slPvHbars([90, 62, 40, 22]),

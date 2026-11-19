@@ -154,8 +154,8 @@ Object.assign(window.SL_WT, {
     },
   },
   gipfel: {
-    fam: "tour", cat: "zahlen", icon: "pin", name: "Gipfel-Tafel", title: () => "Gipfel-Tafel", defaults: {ab: "500"},
-    desc: "Höchster Punkt der Tour als Wegweiser-Tafel, wann du ihn erreicht hast und wie viel der Strecke über einer wählbaren Höhe lag.",
+    fam: "tour", cat: "zahlen", icon: "pin", name: "Höchster Punkt", title: () => "Höchster Punkt", defaults: {ab: "500"},
+    desc: "Der höchste Punkt der Tour als Wegweiser-Tafel, wann du ihn erreicht hast und wie viel der Strecke über einer wählbaren Höhe lag.",
     fields: [{k: "ab", kind: "radio", label: "Anteil der Strecke über", options: [["500", "500 m"], ["1000", "1.000 m"], ["1500", "1.500 m"], ["2000", "2.000 m"]]}],
     preview: () => slPrev('<div class="slsign slsign-pv"><span>Höchster Punkt</span><b>1.234 m</b></div>'),
     async render(c, b, cfg, {t}) {
@@ -225,7 +225,7 @@ Object.assign(window.SL_WT, {
     },
   },
   miniprofil: {
-    fam: "tour", cat: "grafik", icon: "prof", name: "Mini-Höhenprofil", title: () => "Mini-Höhenprofil",
+    fam: "tour", cat: "grafik", icon: "prof", name: "Höhenprofil nach Steigung", title: () => "Höhenprofil nach Steigung",
     desc: "Das Höhenprofil kompakt, die Linie nach Steigung eingefärbt: bergab, eben, bergauf.",
     preview: () => slPvLine([32, 26, 14, 8, 16, 12, 24, 30]),
     async render(c, b, cfg, {t}) {

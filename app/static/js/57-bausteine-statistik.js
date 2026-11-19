@@ -6,7 +6,6 @@
 const ST_FIELDS = [{kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}];
 const ST_LEN = [5, 10, 15, 20, 30, 50];                                                  // Obergrenzen der Längenklassen in km (wie LAENGEN im Server)
 const ST_LENL = ["unter 5", "5–10", "10–15", "15–20", "20–30", "30–50", "über 50"];
-const ST_WERT = {km: ["Strecke", t => t.km, v => slKm(v)], hm: ["Aufstieg", t => t.up_m || 0, v => slHm(v)], dauer: ["Dauer", t => t.h, v => slDur(v * 3600)], tempo: ["Tempo", t => (t.h > 0 ? t.km / t.h : 0), v => fmtTempo(v)]};
 const stNoTours = (b, cfg) => flNone(b, (cfg.sports || []).length || cfg.range ? "" : "Noch keine Touren.");
 /* Spaltendiagramm-Zeitstrahl und Trend: kleine Linie als Inline-SVG (Farben über Klassen, Maße als Attribute) */
 function stLine(pts, trend, label) {
@@ -91,7 +90,7 @@ Object.assign(window.SL_WT, {
     },
   },
   sthoehe: {
-    fam: "statistik", cat: "statistik", icon: "prof", name: "Aufstieg im Jahr", title: () => "Aufstieg im Jahresverlauf", multi: true, filter: {range: "year"}, w: "halb", seiten: ["statistik"],
+    fam: "statistik", cat: "statistik", icon: "prof", name: "Aufstieg im Jahresverlauf", title: () => "Aufstieg im Jahresverlauf", multi: true, filter: {range: "year"}, w: "halb", seiten: ["statistik"],
     desc: "Wie sich dein Aufstieg im Lauf eines Jahres aufsummiert, als Linie, dazu das Vorjahr gestrichelt. Gezeigt wird das gewählte Jahr, sonst das jüngste Jahr mit Touren.",
     fields: [{kind: "sports"}, {kind: "range", def: "year", opts: ["year", "y"], label: "Jahr"}, {kind: "title"}],
     preview: () => slPvLine([40, 38, 34, 30, 24, 20, 12, 6]),
@@ -117,20 +116,7 @@ Object.assign(window.SL_WT, {
       slBadge(c, `${yr}: ${fmtHm(tot)}`);
     },
   },
-  sttop: {
-    fam: "statistik", cat: "statistik", icon: "cmp", name: "Top-Touren", title: cfg => `Top-Touren nach ${(ST_WERT[cfg.wert] || ST_WERT.km)[0]}`, multi: true, defaults: {wert: "km", n: 5}, filter: {range: "all"}, w: "halb", seiten: ["statistik"],
-    desc: "Deine besten Touren als Liste mit Link: nach Strecke, Aufstieg, Dauer oder Tempo, drei bis zehn Einträge.",
-    fields: [{k: "wert", kind: "radio", def: "km", label: "Sortiert nach", options: [["km", "Strecke"], ["hm", "Aufstieg"], ["dauer", "Dauer"], ["tempo", "Tempo"]]}, {k: "n", kind: "radio", num: true, def: 5, label: "Anzahl", options: [[3, "3"], [5, "5"], [8, "8"], [10, "10"]]}, ...ST_FIELDS],
-    preview: () => slPrev('<ul class="sllist"><li><b>Gipfelrunde</b><span>32,4 km</span></li><li><b>Seeufer</b><span>28,1 km</span></li></ul>'),
-    render(c, b, cfg) {
-      const W = ST_WERT[cfg.wert] || ST_WERT.km, A = flSelect(cfg, "all").list.filter(t => cfg.wert !== "tempo" || (t.km >= 3 && t.h >= 0.5)), n = +cfg.n >= 1 && +cfg.n <= 10 ? +cfg.n : 5;
-      if (!A.length) return stNoTours(b, cfg);
-      const L = A.slice().sort((x, y) => W[1](y) - W[1](x) || (x.start_ts || 0) - (y.start_ts || 0)).filter(t => W[1](t) > 0).slice(0, n);
-      if (!L.length) return slNote(b, "Dafür fehlen Angaben in den Touren.");
-      b.innerHTML = `<ol class="sllist stt-l">${L.map(t => `<li><a href="#/tour/${slEnc(t.id)}">${esc(t.name)}</a><b>${W[2](W[1](t))}</b><span class="mut">${fmtDatumKurz(t.date)} · ${fmtKm(t.km)}</span></li>`).join("")}</ol>`;
-      slBadge(c, W[2](W[1](L[0])));
-    },
-  },
+  /* 3.45.0: „Top-Touren“ (sttop) ist jetzt der Baustein „Bestwerte“ (50-bausteine.js) mit Anzahl 3, 5 oder 10 */
 });
 
 /* =====================  3.44.0 Fitness-Einordnung  =====================

@@ -22,6 +22,160 @@ const slRows = list => `<ul class="slrows">${list.join("")}</ul>`;
 /* Jahres-Rückblick: bis 3.18.0 „Dieses/Letztes Jahr“ (cfg.year), seit 3.19.0 wie die übrigen Bausteine (range year | y + yr); die ältere Einstellung gilt weiter */
 const slRbRange = cfg => flRange(cfg.range || cfg.yr ? cfg : cfg.year === "last" ? {range: "y", yr: new Date().getFullYear() - 1} : {}, "year");
 
+/* ---- 3.45.0 Baustein „Ziele“: ein Baustein statt vier (bis 3.44: „Jahresziel“ mit eigenem Ziel, „Ziele“, Hinweis „Jahresziel in Gefahr“, Hinweis „Wochenziel“ mit eigenem Ziel).
+   Ziele werden nur an einer Stelle gepflegt: GET/POST/DELETE /api/goals (app/extras.py; period year | week). Darstellung (cfg.view): balken (Fortschrittsbalken mit Prognose), ring (je Ziel ein Ring
+   wie der frühere „Jahresziel“-Baustein), warnung (erscheint nur, wenn ein Ziel in Gefahr ist; Regeln und Zahlen aus GET /api/bausteine/hinweise, Arten ziel und woche, Ausblenden wie bei den
+   Hinweisen). Welche Ziele (cfg.zeit): alle | jahr | woche; Jahr (cfg.year): cur | last; Sportart wählt Ziele aus (ein Ziel ohne Sportart betrifft alle).
+   Als Abschnitt „Ziele“ der Statistik (SL_REG, verwalten) zeigt er zusätzlich Löschen und „Ziel hinzufügen“ – das ist die eine Stelle zum Pflegen; das Jahr folgt dort dem Filter der Seite.
+   Alte Typkennungen bildet SL_ALIAS (49-seitenlayout.js) bzw. app/baustein_umzug.py auf diesen Baustein ab. ---- */
+const ZL_VIEW = [["balken", "Balken"], ["ring", "Ring"], ["warnung", "Nur Warnung, wenn ein Ziel in Gefahr ist"]];
+const ZL_ZEIT = [["alle", "Jahres- und Wochenziele"], ["jahr", "Nur Jahresziele"], ["woche", "Nur Wochenziele"]];
+const zlWeek = g => g && g.period === "week";
+const zlSports = g => (!g.sport ? null : GOAL_GRP[g.sport] ? SPORT_GRP[GOAL_GRP[g.sport][1]] || [] : [g.sport]);
+const zlFits = (g, cfg) => {
+  const want = cfg.sports || [], sp = zlSports(g);
+  return !want.length || sp === null || sp.some(s => want.includes(s));
+};
+const zlMon = (now = new Date()) => new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
+const zlWeekVal = (g, now = new Date()) => {
+  const from = slIso(zlMon(now)), to = slIso(now);
+  return TOURS.filter(t => t.date.slice(0, 10) >= from && t.date.slice(0, 10) <= to && goalSport(g, t))
+    .reduce((c, t) => c + (g.metric === "km" ? t.km : g.metric === "up" ? t.up_m || 0 : g.metric === "hours" ? t.h : 1), 0);
+};
+const zlName = g => `${GM[g.metric][1]}${zlWeek(g) ? " pro Woche" : ""}${g.sport ? " " + goalSportName(g.sport) : ""}`;
+const zlYear = cfg => (cfg._jahr >= 1970 ? cfg._jahr : new Date().getFullYear() - (cfg.year === "last" ? 1 : 0));          // Statistik: das gewählte Jahr der Seite (56-statistik.js, stApply)
+const zlCan = () => (typeof isViewer === "function" ? !isViewer() : true);
+function zlBar(g, yr, cy, now, ed) {
+  const del = ed ? ` <button type="button" class="gx" data-g="${g.id}" aria-label="${esc(`Ziel löschen: ${zlName(g)}`)}" title="Ziel löschen">×</button>` : "";
+  if (zlWeek(g)) {
+    const v = zlWeekVal(g, now), p = Math.min(100, (v / g.target) * 100), u = GM[g.metric][0], rest = 6 - ((now.getDay() + 6) % 7);
+    return `<div class="goal zlw"><div class="gh"><b>${zlName(g)}</b><span>${nf(v, g.metric === "hours" || g.target < 50 ? 1 : 0)} / ${nf(g.target, 0)} ${u}${del}</span></div>${slBr(p, v >= g.target ? "kzfull" : "")}` +
+      `<div class="gs">${nf(p, 0)} %${v >= g.target ? ` · <span class="ok">Wochenziel erreicht ✓</span>` : ` · ${rest === 0 ? "Heute ist der letzte Tag der Woche." : rest === 1 ? "Noch 1 Tag in dieser Woche." : `Noch ${rest} Tage in dieser Woche.`}`}</div></div>`;
+  }
+  const frac = yr === cy ? Math.max(0, (now - new Date(cy, 0, 1)) / (new Date(cy + 1, 0, 1) - new Date(cy, 0, 1))) : yr > cy ? 0 : 1,
+    v = goalVal(g, TOURS), p = Math.min(100, (v / g.target) * 100), u = GM[g.metric][0], proj = frac > 0.02 && frac < 1 ? v / frac : null;
+  return `<div class="goal"><div class="gh"><b>${zlName(g)}</b><span>${nf(v, 0)} / ${nf(g.target, 0)} ${u}${del}</span></div>${slBr(p, v >= g.target ? "kzfull" : "")}` +
+    `<div class="gs">${nf(p, 0)} %${goalNote(g, v, u, frac, proj, yr, cy)}</div></div>`;
+}
+function zlRing(g, yr, cy, now) {
+  const wk = zlWeek(g), val = wk ? zlWeekVal(g, now) : goalVal(g, TOURS), goal = Math.max(1e-9, g.target), u = GM[g.metric][0] || (g.metric === "count" ? "Touren" : ""),
+    frac = val / goal, C1 = 263.9, C2 = 194.8, dec = g.metric === "hours" || goal < 50 ? 1 : 0;
+  let tf, fc = null, need = "";
+  if (wk) {
+    const d = (now.getDay() + 6) % 7;
+    tf = (d + 1) / 7;
+    if (val < goal) need = 6 - d > 0 ? `Noch ${nf(goal - val, dec)} ${u} in ${6 - d === 1 ? "1 Tag" : `${6 - d} Tagen`}.` : "Heute ist der letzte Tag der Woche.";
+  } else {
+    const ylen = (yr % 4 === 0 && yr % 100 !== 0) || yr % 400 === 0 ? 366 : 365, doy = yr === cy ? Math.floor((now - new Date(cy, 0, 0)) / 864e5) : yr < cy ? ylen : 0, left = Math.max(1, (ylen - doy) / 7);
+    tf = doy / ylen;
+    fc = yr === cy && doy >= 14 ? val / tf : null;
+    need = fc != null && fc >= goal ? "Auf Kurs: Bei diesem Tempo erreichst du dein Ziel." : yr === cy ? `Dafür brauchst du noch ${nf((goal - val) / left, dec)} ${u} pro Woche.` : "";
+  }
+  const pct = Math.round(frac * 100), yp = Math.round(tf * 100), lbl = wk ? `Die Woche ist zu ${yp} % vorbei` : `Das Jahr ist zu ${yp} % vorbei`;
+  return `<div class="slgoal"><div class="slring" role="img" aria-label="${esc(`Ring: ${pct} % des Ziels erreicht, ${lbl}`)}"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">` +
+    `<circle class="t" cx="50" cy="50" r="42"/><circle class="f${frac >= 1 ? " done" : ""}" cx="50" cy="50" r="42" stroke-dasharray="${(C1 * slClamp(frac, 0, 1)).toFixed(1)} ${C1}" transform="rotate(-90 50 50)"/>` +
+    `<circle class="t2" cx="50" cy="50" r="31"/><circle class="g" cx="50" cy="50" r="31" stroke-dasharray="${(C2 * slClamp(tf, 0, 1)).toFixed(1)} ${C2}" transform="rotate(-90 50 50)"/></svg><div class="slrc"><b>${pct} %</b></div></div>` +
+    `<div class="slgt"><p class="zlrn">${zlName(g)}</p><p class="slcmp">${nf(val, dec)} von ${nf(goal, 0)} ${u}</p><p class="mut slcmpn">${frac >= 1 ? `Das sind ${nf(val - goal, dec)} ${u} über dem Ziel.` : `Noch ${nf(goal - val, dec)} ${u}`}</p>` +
+    (fc != null ? `<p class="slfc">Prognose zum Jahresende: ${nf(fc, 0)} ${u}</p>` : "") + `<p class="mut slcmpn">${frac >= 1 ? "Das Ziel ist erreicht." : val > 0 ? need : wk ? "Noch keine Tour in dieser Woche." : "Noch keine Tour in diesem Jahr."}</p>` +
+    `<ul class="sllg"><li><i class="slsq slbf"></i>Ziel</li><li><i class="slsq slyr"></i>${lbl}</li></ul></div></div>`;
+}
+/* Nur Warnung: Server-Hinweise „ziel“ (Prognose zum Jahresende unter der Schwelle) und „woche“ (Wochenziel am Samstag/Sonntag noch offen); Ausblenden je Art wie bei den Hinweisen */
+async function zlWarn(c, b, cfg) {
+  const arts = cfg.zeit === "jahr" ? ["ziel"] : cfg.zeit === "woche" ? ["woche"] : ["ziel", "woche"], sch = cfg.schwelle ?? 10,
+    cond = `<p class="hnphc">${esc(cfg.zeit === "woche" ? "Wird nur angezeigt, wenn ein Wochenziel am Samstag oder Sonntag noch offen ist."
+      : cfg.zeit === "jahr" ? `Wird nur angezeigt, wenn die Prognose zum Jahresende um mehr als ${hnNum(sch)} % unter einem deiner Jahresziele liegt.`
+        : `Wird nur angezeigt, wenn ein Ziel in Gefahr ist: Die Prognose zum Jahresende liegt um mehr als ${hnNum(sch)} % unter einem Jahresziel, oder ein Wochenziel ist am Samstag oder Sonntag noch offen.`)}</p>` +
+      `<p class="mut hnphs">${esc("Voraussetzung: ein Ziel in der Statistik unter „Ziele“; die Prognose eines Jahresziels gibt es ab dem 14. Tag des Jahres.")}</p>`;
+  c.dataset.hn = "lade";
+  let d;
+  try {
+    d = await hnGet(hnQuery(arts, cfg, false));
+  } catch (e) {
+    b.innerHTML = cond + `<p class="mut hnphs">Die Hinweise konnten nicht geladen werden.</p>`;
+    slBadge(c, "");
+    return hnState(c, "aus");
+  }
+  const all = d.hinweise.filter(h => arts.includes(h.art) && (h.art === "ziel" || (h.stufe === "hinweis" && !h.daten.erreicht))),
+    items = all.filter(h => !hnSnoozed(cfg, h.art)), hidden = all.filter(h => hnSnoozed(cfg, h.art)).map(h => h.art);
+  if (!items.length) {
+    b.innerHTML = cond + `<p class="mut hnphs">${hidden.length ? "" : "Gerade ist kein Ziel in Gefahr: Der Baustein ist unsichtbar."}</p>` +
+      hidden.map(a => `<p class="mut hnphs"><span>Ausgeblendet bis ${fmtDatumKurz(slIso(new Date(hnSnoozeTs(cfg, a) * 1000)))}.</span> ${slCan() ? `<button type="button" class="btn ghost sm hnun" data-art="${a}">Wieder anzeigen</button>` : ""}</p>`).join("");
+    slBadge(c, hidden.length ? "ausgeblendet" : "nichts los");
+    return hnState(c, "aus");
+  }
+  b.innerHTML = items.length > 1 ? `<div class="hnlist">${items.map(h => hnBox(h, cfg, {titel: true})).join("")}</div>` : hnBox(items[0], cfg, {titel: true});
+  slBadge(c, HN_ART[items[0].art].badge(items[0]));
+  hnState(c, "an");
+}
+/* Pflege der Ziele (nur als Abschnitt „Ziele“ der Statistik): Ziel hinzufügen (Jahr oder Woche), löschen, aus dem Vorjahr übernehmen */
+function zlForm(yr, prev) {
+  const sp = [...new Set(TOURS.map(t => t.sport))];
+  return (prev.length ? `<p><button type="button" class="btn sm alt" id="gcopy">Ziele aus ${yr - 1} übernehmen (${prev.length})</button></p>` : "") +
+    `<details class="zladd"><summary>Ziel hinzufügen</summary><div class="row mt8 zlrow"><label class="slsr" for="gper">Zeitraum</label><select id="gper"><option value="year">Ziel für ${yr}</option><option value="week">Ziel für jede Woche</option></select>` +
+    `<label class="slsr" for="gm">Messgröße</label><select id="gm">${Object.entries(GM).map(([k, v]) => `<option value="${k}">${v[1]}</option>`).join("")}</select>` +
+    `<label class="slsr" for="gsp">Sportart</label><select id="gsp"><option value="">alle Sportarten</option>${Object.entries(GOAL_GRP).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join("")}${sp.map(s => `<option value="${s}">${sName(s)}</option>`).join("")}</select>` +
+    `<label class="slsr" for="gt">Zielwert</label><input id="gt" type="number" min="1" inputmode="decimal" placeholder="Zielwert"><button type="button" class="btn sm" id="gadd">Speichern</button></div><p class="slerr" role="alert"></p></details>`;
+}
+function zlBind(b, yr, prev) {
+  const post = g => api("/api/goals", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(g)});
+  b.onclick = async e => {
+    const x = e.target.closest(".gx"), cp = e.target.closest("#gcopy"), add = e.target.closest("#gadd");
+    if (x && (await uiConfirm({text: "Ziel löschen?", danger: true, ok: "Löschen"}))) {
+      await api(`/api/goals/${x.dataset.g}`, {method: "DELETE"});
+      route();
+    } else if (cp) {
+      for (const g of prev) await post({year: yr, metric: g.metric, sport: g.sport, target: g.target});
+      route();
+    } else if (add) {
+      const t = parseFloat(String(b.querySelector("#gt").value).replace(",", ".")), er = b.querySelector(".zladd .slerr");
+      if (!(t > 0)) {
+        er.textContent = "Bitte einen Zielwert größer als 0 eingeben.";
+        return b.querySelector("#gt").focus();
+      }
+      await post({period: b.querySelector("#gper").value, year: yr, metric: b.querySelector("#gm").value, sport: b.querySelector("#gsp").value, target: t});
+      route();
+    }
+  };
+}
+/* Registriert wird der Baustein am Ende von 58-bausteine-hinweise.js (er nutzt dessen Hinweis-Hilfen) */
+function zlType() {
+  return {
+    fam: "uebersicht", cat: "plan", icon: "pin", name: "Ziele", multi: true, defaults: {view: "balken", zeit: "alle"}, filter: {range: null}, w: "halb", seiten: ["uebersicht", "tour", "statistik"],
+    title: cfg => (cfg.zeit === "woche" ? "Ziele dieser Woche" : `Ziele ${zlYear(cfg)}`), stJahr: true,
+    kurz: cfg => [cfg.view === "ring" ? "Ring" : cfg.view === "warnung" ? "Nur Warnung" : "", ...flParts(cfg, null)].filter(Boolean),
+    desc: "Deine Ziele aus der Statistik (zum Beispiel 1000 km im Jahr oder 3 Touren pro Woche) mit Stand und Prognose – als Balken, als Ring oder nur als Warnung, wenn ein Ziel in Gefahr ist. Angelegt und gelöscht werden Ziele in der Statistik unter „Ziele“.",
+    fields: [{k: "view", kind: "radio", def: "balken", label: "Darstellung", options: ZL_VIEW}, {k: "zeit", kind: "radio", def: "alle", label: "Welche Ziele", options: ZL_ZEIT},
+      {k: "year", kind: "radio", def: "cur", label: "Jahr der Jahresziele", options: [["cur", "Dieses Jahr"], ["last", "Letztes Jahr"]], show: {view: ["balken", "ring"]}},
+      {kind: "sports", label: "Sportart (nur Ziele, die sie betreffen)"},
+      {k: "schwelle", kind: "number", def: 10, label: "Warnung, wenn die Prognose um mehr als so viele Prozent unter dem Jahresziel liegt", min: 1, max: 90, step: 1, int: true, show: {view: ["warnung"]}},
+      {kind: "title"}, {...HN_FIELD_AUS, show: {view: ["warnung"]}}],
+    preview: () => slPvHbars([84, 52]),
+    async render(c, b, cfg, ctx = {}) {
+      cfg = {view: "balken", zeit: "alle", ...cfg};
+      if (cfg.view === "warnung" && !(ctx && ctx.verwalten)) return zlWarn(c, b, cfg);
+      delete c.dataset.hn;
+      const now = new Date(), cy = now.getFullYear(), yr = zlYear(cfg), ed = !!(ctx && ctx.verwalten) && zlCan();
+      const all = await slGet("/api/goals");
+      if (all === null) return slNote(b, "Die Ziele konnten nicht geladen werden.");
+      const ys = cfg.zeit === "woche" ? [] : all.filter(g => !zlWeek(g) && g.year === yr && zlFits(g, cfg)),
+        ws = cfg.zeit === "jahr" || yr !== cy ? [] : all.filter(g => zlWeek(g) && zlFits(g, cfg)),
+        gs = [...ys, ...ws], prev = all.filter(g => !zlWeek(g) && g.year === yr - 1);
+      if (!gs.length) {
+        const what = cfg.zeit === "woche" ? "Noch kein Wochenziel." : `Noch kein Ziel für ${yr}.`;
+        b.innerHTML = `<div${ed ? ' id="goals"' : ""} class="zlbox"><p class="mut slnone">${what}${ed ? " Setze dir eines, zum Beispiel 1000 km Wandern." : ""}</p>` +
+          (ed ? zlForm(yr, ys.length ? [] : prev) : zlCan() ? `<p><a href="#/stats">Ziel in der Statistik festlegen ›</a></p>` : "") + "</div>";
+        if (ed) zlBind(b, yr, prev);
+        return slBadge(c, "Noch kein Ziel");
+      }
+      const body = cfg.view === "ring" && !ed ? `<div class="zlrings">${gs.slice(0, 6).map(g => zlRing(g, yr, cy, now)).join("")}</div>` : gs.map(g => zlBar(g, yr, cy, now, ed)).join("");
+      b.innerHTML = `<div${ed ? ' id="goals"' : ""} class="zlbox">${body}${ed ? zlForm(yr, ys.length ? [] : prev) : `<p><a href="#/stats">Ziele in der Statistik verwalten ›</a></p>`}</div>`;
+      if (ed) zlBind(b, yr, prev);
+      const done = gs.filter(g => (zlWeek(g) ? zlWeekVal(g, now) : goalVal(g, TOURS)) >= g.target).length;
+      slBadge(c, gs.length === 1 ? (done ? "erreicht" : "1 Ziel") : `${done} von ${gs.length} erreicht`);
+    },
+  };
+}
+
 Object.assign(window.SL_WT, {
   jahr: {
     fam: "uebersicht", cat: "zahlen", icon: "trend", name: "Dein Jahr", title: () => "Dein Jahr", multi: true, shell: it => slYearShell(it), defaults: {},
@@ -29,27 +183,6 @@ Object.assign(window.SL_WT, {
     desc: "Touren, Strecke, Aufstieg und Stunden mit Monatssäulen und Vorjahresvergleich, wählbar nach Sportart und Zeitraum. In der Übersicht steht „Dein Jahr“ schon; hier kannst du weitere mit anderem Filter hinzufügen.",
     fields: [{kind: "sports"}, {kind: "range", def: "year"}, {k: "metrics", kind: "checks", def: ["count", "km", "up", "h"], label: "Angezeigte Werte", min: 1, options: [["count", "Touren"], ["km", "Strecke"], ["up", "Aufstieg"], ["h", "Dauer"]]}, {kind: "compare"}, {kind: "title", ph: "Dein Jahr"}],
     preview: () => slPrev(slTiles([["31", "Touren"], ["412", "Strecke"], ["8.400", "Aufstieg"]]) + '<svg viewBox="0 0 120 30" class="slpvs" aria-hidden="true">' + [6, 10, 14, 22, 18, 26, 24, 16, 12, 8, 4, 2].map((h, i) => `<rect x="${i * 10 + 1}" y="${30 - h}" width="8" height="${h}" rx="1"/>`).join("") + "</svg>"),
-  },
-  jahresziel: {
-    fam: "uebersicht", cat: "plan", icon: "trend", name: "Jahresziel", title: () => "Jahresziel", multi: true, defaults: {metric: "km", goal: 1000}, filter: {range: null},
-    desc: "Ein Ring zeigt, wie weit du auf dein Jahresziel bist, dazu der Stand des Jahres und eine Prognose bis Silvester.",
-    fields: [{k: "metric", kind: "radio", label: "Ziel in", options: [["km", "Strecke"], ["hm", "Aufstieg"]]}, {k: "goal", kind: "number", label: "Ziel für das Jahr (Zahl in der gewählten Einheit)", min: 10, max: 100000, step: 10}, {kind: "sports"}, {kind: "title"}],
-    preview: () => slPvRing(0.62),
-    render(c, b, cfg) {
-      const now = new Date(), cy = now.getFullYear(), hm = cfg.metric === "hm", u = hm ? "m" : "km", goal = Math.max(1, +cfg.goal || (hm ? 20000 : 1000)),
-        val = slSum(TOURS.filter(t => t.y === cy && flSport(t, cfg)), t => (hm ? t.up_m || 0 : t.km)), frac = val / goal,
-        ylen = (cy % 4 === 0 && cy % 100 !== 0) || cy % 400 === 0 ? 366 : 365, doy = Math.floor((now - new Date(cy, 0, 0)) / 864e5), tf = doy / ylen,
-        fc = doy >= 14 ? val / tf : null, left = Math.max(1, (ylen - doy) / 7), C1 = 263.9, C2 = 194.8,
-        pct = Math.round(frac * 100), yp = Math.round(tf * 100),
-        status = frac >= 1 ? "Das Ziel ist erreicht." : fc != null && fc >= goal ? "Auf Kurs: Bei diesem Tempo erreichst du dein Ziel." : `Dafür brauchst du noch ${nf((goal - val) / left, hm ? 0 : 1)} ${u} pro Woche.`;
-      b.innerHTML = `<div class="slgoal"><div class="slring" role="img" aria-label="${esc(`Ring: ${pct} % des Jahresziels erreicht, das Jahr ist zu ${yp} % vorbei`)}"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">` +
-        `<circle class="t" cx="50" cy="50" r="42"/><circle class="f${frac >= 1 ? " done" : ""}" cx="50" cy="50" r="42" stroke-dasharray="${(C1 * slClamp(frac, 0, 1)).toFixed(1)} ${C1}" transform="rotate(-90 50 50)"/>` +
-        `<circle class="t2" cx="50" cy="50" r="31"/><circle class="g" cx="50" cy="50" r="31" stroke-dasharray="${(C2 * tf).toFixed(1)} ${C2}" transform="rotate(-90 50 50)"/></svg><div class="slrc"><b>${pct} %</b></div></div>` +
-        `<div class="slgt"><p class="slcmp">${nf(val, 0)} von ${nf(goal, 0)} ${u}</p><p class="mut slcmpn">${frac >= 1 ? `Das sind ${nf(val - goal, 0)} ${u} über dem Ziel.` : `Noch ${nf(goal - val, 0)} ${u}`}</p>` +
-        (fc != null ? `<p class="slfc">Prognose zum Jahresende: ${nf(fc, 0)} ${u}</p>` : "") + `<p class="mut slcmpn">${val > 0 ? status : "Noch keine Tour in diesem Jahr."}</p>` +
-        `<ul class="sllg"><li><i class="slsq slbf"></i>Ziel</li><li><i class="slsq slyr"></i>Das Jahr ist zu ${yp} % vorbei</li></ul></div></div>`;
-      slBadge(c, `${pct} %`);
-    },
   },
   serie: {
     fam: "uebersicht", cat: "zahlen", icon: "heart", name: "Wochen-Serie", title: () => "Wochen-Serie", filter: {range: null}, fields: [{kind: "sports"}, {kind: "title"}],
@@ -278,7 +411,7 @@ Object.assign(window.SL_WT, {
     },
   },
   uhrenzeit: {
-    fam: "uebersicht", cat: "grafik", icon: "watch", name: "Uhren-Zeitleiste", title: () => "Uhren und Geräte",
+    fam: "uebersicht", cat: "grafik", icon: "watch", name: "Uhren und Geräte", title: () => "Uhren und Geräte",
     desc: "Deine Geräte (Uhren, Handys) auf einer Zeitleiste: wann du sie genutzt hast und wie viele Touren sie aufgezeichnet haben.",
     preview: () => slPrev('<svg viewBox="0 0 120 34" class="slpvs" aria-hidden="true"><rect class="slhz" x="0" y="2" width="120" height="8" rx="4"/><rect class="slhb" x="4" y="2" width="56" height="8" rx="4"/><rect class="slhz" x="0" y="14" width="120" height="8" rx="4"/><rect class="slhb" x="50" y="14" width="70" height="8" rx="4"/><rect class="slhz" x="0" y="26" width="120" height="8" rx="4"/><rect class="slhb" x="30" y="26" width="40" height="8" rx="4"/></svg>'),
     async render(c, b) {
@@ -302,7 +435,7 @@ Object.assign(window.SL_WT, {
     },
   },
   ausruestung: {
-    fam: "uebersicht", cat: "plan", icon: "dot", name: "Ausrüstungs-Kilometerstand", title: () => "Ausrüstung",
+    fam: "uebersicht", cat: "plan", icon: "dot", name: "Ausrüstung", title: () => "Ausrüstung",
     desc: "Kilometerstand deiner Ausrüstung (Schuhe, Rad, Ski) gegen das Limit, mit Hinweis, wann ein Wechsel ansteht.",
     preview: () => slPvHbars([96, 70, 34]),
     async render(c, b) {
@@ -343,29 +476,6 @@ Object.assign(window.SL_WT, {
       slBadge(c, open === 1 ? "1 Plan" : open ? `${open} Pläne` : "");
     },
   },
-  jahresziele: {
-    fam: "uebersicht", cat: "plan", icon: "pin", name: "Ziele", title: cfg => `Ziele ${new Date().getFullYear() - (cfg.year === "last" ? 1 : 0)}`, multi: true, defaults: {year: "cur"}, filter: {range: null},
-    desc: "Deine Jahresziele aus der Statistik (zum Beispiel 1000 km Wandern) mit Fortschrittsbalken, Stand und Prognose. Angelegt und gelöscht werden sie in der Statistik.",
-    fields: [{k: "year", kind: "radio", def: "cur", label: "Jahr", options: [["cur", "Dieses Jahr"], ["last", "Letztes Jahr"]]}],
-    preview: () => slPvHbars([84, 52]),
-    async render(c, b, cfg) {
-      const now = new Date(), cy = now.getFullYear(), yr = cy - (cfg.year === "last" ? 1 : 0), can = typeof isViewer === "function" ? !isViewer() : true;
-      const all = await slGet("/api/goals");
-      if (all === null) return slNote(b, "Die Ziele konnten nicht geladen werden.");
-      const gs = all.filter(g => g.year === yr), frac = yr === cy ? Math.max(0, (now - new Date(cy, 0, 1)) / (new Date(cy + 1, 0, 1) - new Date(cy, 0, 1))) : 1;
-      if (!gs.length) {
-        b.innerHTML = `<p class="mut slnone">Noch kein Ziel für ${yr}.</p>${can ? '<p><a href="#/stats">Ziel in der Statistik festlegen ›</a></p>' : ""}`;
-        return slBadge(c, "");
-      }
-      b.innerHTML = gs.map(g => {
-        const v = goalVal(g, TOURS), p = Math.min(100, (v / g.target) * 100), u = GM[g.metric][0], proj = frac > 0.02 && frac < 1 ? v / frac : null;
-        return `<div class="goal"><div class="gh"><b>${GM[g.metric][1]}${g.sport ? " " + goalSportName(g.sport) : ""}</b><span>${nf(v, 0)} / ${nf(g.target, 0)} ${u}</span></div>${slBr(p, v >= g.target ? "kzfull" : "")}` +
-          `<div class="gs">${nf(p, 0)} %${goalNote(g, v, u, frac, proj, yr, cy)}</div></div>`;
-      }).join("") + `<p><a href="#/stats">Ziele in der Statistik verwalten ›</a></p>`;
-      const done = gs.filter(g => goalVal(g, TOURS) >= g.target).length;
-      slBadge(c, gs.length === 1 ? (done ? "erreicht" : "1 Ziel") : `${done} von ${gs.length} erreicht`);
-    },
-  },
   /* Schlüssel bleibt „zeppimport“ (gespeicherte Layouts und Ansichten); seit 3.31.0 der Baustein „Touren holen“ */
   zeppimport: {
     fam: "uebersicht", cat: "quellen", icon: "watch", name: "Touren holen", title: () => "Touren holen", defaults: {}, filter: {range: null},
@@ -383,7 +493,7 @@ Object.assign(window.SL_WT, {
     },
   },
   holenknopf: {
-    fam: "uebersicht", cat: "quellen", icon: "watch", name: "Touren-Knopf", title: () => "Touren-Knopf", defaults: {}, filter: {range: null}, ws: ["drittel", "halb"],
+    fam: "uebersicht", cat: "quellen", icon: "watch", name: "Touren holen (nur Knopf)", title: () => "Touren holen (nur Knopf)", defaults: {}, filter: {range: null}, ws: ["drittel", "halb"],
     desc: "Ein einziger Knopf, der deine Touren aus dem Konto deiner Uhr holt: beschriftet mit der Marke (Zepp, Garmin, Suunto), bei mehreren Konten mit einem kleinen Menü. Darunter eine Statuszeile. Für alle, die den Knopf lieber im Raster haben als in der Kopfzeile. Für Betrachter unsichtbar.",
     preview: () => slPrev('<span class="zpi-pv"><b>Touren-Knopf</b></span>'),
     render(c, b) {
@@ -400,7 +510,7 @@ Object.assign(window.SL_WT, {
     },
   },
   rueckblick: {
-    fam: "uebersicht", cat: "rueck", icon: "trend", name: "Jahres-Rückblick", title: cfg => `Rückblick ${slRbRange(cfg).year}`, multi: true, defaults: {}, filter: {range: "year"},
+    fam: "uebersicht", cat: "rueck", icon: "trend", name: "Jahres-Rückblick", title: cfg => `Jahres-Rückblick ${slRbRange(cfg).year}`, multi: true, defaults: {}, filter: {range: "year"},
     desc: "Das Jahr in einer Kachel: Touren, Strecke und Aufstieg, die Monate als Säulen, die längste und die höchste Tour.",
     fields: [{kind: "range", opts: ["year", "y"], def: "year", label: "Jahr"}, {kind: "sports"}, {kind: "title"}],
     preview: () => slPvBars([8, 14, 20, 30, 26, 34, 28, 22, 14, 12, 6, 4]),
@@ -878,8 +988,8 @@ function slYearShell(it) {
   const META = {
     kennzahlen: "halb", tempo: "halb", vergleich: "halb", pulszonen: "halb", wetter: "halb", fotostreifen: "voll", notiz: "halb", splits: "voll", steigung: "halb", bewegung: "halb",
     durchschnitt: "halb", jahresrang: "halb", tageslicht: "halb", gipfel: "halb", vergleiche: "halb", stimmung: "halb", fotohighlights: "voll", miniprofil: "voll", steckbrief: "halb",
-    jahr: "voll", periode: "halb", belastung: "halb", jahresvergleich: "halb", letzte: "halb", neuefotos: "voll", auffaellig: "drittel", rekorde: "halb", heutevor: "halb", jahresziel: "halb",
-    serie: "halb", heatmap: "voll", meilensteine: "halb", wochentage: "halb", saison: "voll", sportarten: "halb", wiederentdecken: "voll", orte: "halb", uhrenzeit: "voll", ausruestung: "halb", geplant: "halb", rueckblick: "voll", jahresziele: "halb", zeppimport: "halb", holenknopf: "drittel", planergebnis: "voll",
+    jahr: "voll", periode: "halb", belastung: "halb", jahresvergleich: "halb", letzte: "halb", neuefotos: "voll", auffaellig: "drittel", bestwerte: "halb", heutevor: "halb",
+    serie: "halb", heatmap: "voll", meilensteine: "halb", wochentage: "halb", saison: "voll", sportarten: "halb", wiederentdecken: "voll", orte: "halb", uhrenzeit: "voll", ausruestung: "halb", geplant: "halb", rueckblick: "voll", zeppimport: "halb", holenknopf: "drittel", planergebnis: "voll",
   };
   Object.entries(META).forEach(([k, w]) => {
     const T = window.SL_WT[k];

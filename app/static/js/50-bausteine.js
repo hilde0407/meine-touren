@@ -91,11 +91,29 @@ const slPvDonut = parts => {
 const slPvHbars = v => slPrev(`<svg viewBox="0 0 120 ${v.length * 12 + 2}" class="slpvs" aria-hidden="true">${v.map((w, i) => `<rect class="slhb" x="0" y="${i * 12 + 2}" width="${w}" height="8" rx="4"/>`).join("")}</svg>`);
 const slPvLine = pts => slPrev(`<svg viewBox="0 0 120 44" class="slpvs" aria-hidden="true"><path class="slpa" d="M0 44 ${pts.map((y, i) => `L${(i * 120) / (pts.length - 1)} ${y}`).join(" ")} L120 44Z"/><path class="slpl" d="M${pts.map((y, i) => `${(i * 120) / (pts.length - 1)} ${y}`).join(" L")}"/></svg>`);
 
+/* 3.45.0 Bestwerte: [Name im Zahnrad, Bezeichnung des Bestwerts, Überschrift der Rangliste, Format]; Rangliste je Wert (Gleichstand: die frühere Tour zuerst) */
+const BW_WERT = {
+  km: ["Strecke", "Längste Tour", "Nach Strecke", v => fmtKm(v)], hm: ["Aufstieg", "Größter Aufstieg", "Nach Aufstieg", v => fmtHm(v)], dauer: ["Dauer", "Längste Dauer", "Nach Dauer", v => fmtDauer(v * 3600)],
+  tempo: ["Tempo", "Schnellstes Tempo", "Nach Tempo", v => fmtTempo(v)], monat: ["Stärkster Monat", "Stärkster Monat", "Stärkste Monate", v => fmtKm(v, {d: 0})],
+};
+const BW_DEF = ["km", "hm", "dauer", "tempo", "monat"];
+const BW_F = {km: t => t.km, hm: t => t.up_m || 0, dauer: t => t.h, tempo: t => (t.km >= 3 && t.h >= 0.5 ? t.km / t.h : 0)};
+function bwTop(A, w, n) {
+  if (w === "monat") {
+    const m = {};
+    A.forEach(t => (m[t.date.slice(0, 7)] = (m[t.date.slice(0, 7)] || 0) + t.km));
+    const one = new Set(Object.keys(m).map(k => k.slice(0, 4))).size === 1;
+    return Object.entries(m).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, n)
+      .map(([k, v]) => ({v, l: one ? MONL[+k.slice(5, 7) - 1] : `${MONL[+k.slice(5, 7) - 1]} ${k.slice(0, 4)}`}));
+  }
+  const f = BW_F[w];
+  return A.filter(t => f(t) > 0).sort((x, y) => f(y) - f(x) || (x.start_ts || 0) - (y.start_ts || 0) || x.date.localeCompare(y.date)).slice(0, n).map(t => ({t, v: f(t)}));
+}
 const SL_KZ = [["km", "Strecke"], ["up", "Aufstieg"], ["down", "Abstieg"], ["dur", "Dauer"], ["pace", "Tempo"], ["hr", "Puls (Durchschnitt)"], ["kcal", "Kalorien"]];
 Object.assign(window.SL_WT, {
   /* ---------------- Tourseite ---------------- */
   kennzahlen: {
-    fam: "tour", cat: "zahlen", icon: "met", name: "Kennzahlen-Kachel", title: () => "Kennzahlen", multi: true, defaults: {values: ["km", "up", "dur", "pace"]},
+    fam: "tour", cat: "zahlen", icon: "met", name: "Kennzahlen", title: () => "Kennzahlen", multi: true, defaults: {values: ["km", "up", "dur", "pace"]},
     desc: "Wählbare Kennzahlen dieser Tour als Kacheln: Strecke, Aufstieg, Dauer, Tempo, Puls, Kalorien.",
     fields: [{k: "values", kind: "checks", label: "Angezeigte Werte", min: 1, options: SL_KZ}],
     preview: () => slPvTiles([["12,4 km", "Strecke"], ["420 m", "Aufstieg"], ["3:05", "Dauer"]]),
@@ -122,8 +140,8 @@ Object.assign(window.SL_WT, {
     },
   },
   tempo: {
-    fam: "tour", cat: "zahlen", icon: "trend", name: "Tempo-Mini", title: () => "Tempo bergauf, eben, bergab",
-    desc: "Durchschnittstempo bergauf, auf ebenem Weg und bergab, aus der Steigung der Strecke.",
+    fam: "tour", cat: "zahlen", icon: "trend", name: "Tempo bergauf, eben, bergab", title: () => "Tempo bergauf, eben, bergab",
+    desc: "Durchschnittstempo bergauf, auf ebenem Weg und bergab als drei Kacheln, aus der Steigung der Strecke.",
     preview: () => slPvTiles([["3,1 km/h", "Bergauf"], ["4,6 km/h", "Eben"], ["4,2 km/h", "Bergab"]]),
     async render(c, b, cfg, {t}) {
       const d = t && (await api(`/api/tours/${encodeURIComponent(t.id)}/tempo`).catch(() => null));
@@ -135,8 +153,8 @@ Object.assign(window.SL_WT, {
     },
   },
   vergleich: {
-    fam: "tour", cat: "zahlen", icon: "cmp", name: "Vergleich in einer Zeile", title: () => "Vergleich auf dieser Strecke",
-    desc: "„Platz x von y“ unter allen Touren auf derselben Strecke, nach Tempo, mit Link zur Auswertung.",
+    fam: "tour", cat: "zahlen", icon: "cmp", name: "Platz auf dieser Strecke", title: () => "Platz auf dieser Strecke",
+    desc: "In einer Zeile: „Platz x von y“ unter allen Touren auf derselben Strecke, nach Tempo, mit Link zur Auswertung.",
     preview: () => slPrev('<p class="slcmp">Platz 2 von 5 auf dieser Strecke</p>'),
     async render(c, b, cfg, {t}) {
       const d = t && (await api(`/api/tours/${encodeURIComponent(t.id)}/aehnliche`).catch(() => null)),
@@ -168,8 +186,8 @@ Object.assign(window.SL_WT, {
     },
   },
   wetter: {
-    fam: "tour", cat: "zahlen", icon: "cloud", name: "Wetter-Streifen", title: () => "Wetter zur Tour",
-    desc: "Wetter am Tag der Tour in einer Zeile: Himmel, Temperatur, Niederschlag, Wind.",
+    fam: "tour", cat: "zahlen", icon: "cloud", name: "Wetter zur Tour", title: () => "Wetter zur Tour",
+    desc: "Wetter am Tag der Tour als Kacheln in einer Zeile: Himmel, Temperatur, Niederschlag, Wind.",
     preview: () => slPvTiles([["Leicht bewölkt", "Wetter"], ["8–15 °C", "Temperatur"], ["18 km/h", "Wind bis"]]),
     async render(c, b, cfg, {t}) {
       const w = t && (await api(`/api/tours/${encodeURIComponent(t.id)}/weather`).catch(() => null));
@@ -179,7 +197,7 @@ Object.assign(window.SL_WT, {
     },
   },
   fotostreifen: {
-    fam: "tour", cat: "grafik", icon: "cam", name: "Fotostreifen", title: () => "Fotostreifen",
+    fam: "tour", cat: "grafik", icon: "cam", name: "Erste Fotos der Tour", title: () => "Erste Fotos der Tour",
     desc: "Die ersten Fotos dieser Tour als Streifen zum Anklicken.",
     preview: () => slPrev('<div class="slpvf" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'),
     async render(c, b, cfg, {t}) {
@@ -189,7 +207,7 @@ Object.assign(window.SL_WT, {
     },
   },
   notiz: {
-    fam: "tour", cat: "spass", icon: "note", name: "Eigene Notiz", title: () => "Notiz", multi: true, cfgOnAdd: true, defaults: {text: ""},
+    fam: "tour", cat: "spass", icon: "note", name: "Notiz", title: () => "Notiz", multi: true, cfgOnAdd: true, defaults: {text: ""},
     desc: "Ein freier Text (bis 500 Zeichen), den du selbst schreibst, zum Beispiel eine Erinnerung an die Tour.",
     fields: [{k: "text", kind: "text", label: "Text der Notiz", max: 500}],
     preview: () => slPrev('<p class="slnote">Einkehr im Gasthof, Rückweg über den Grat …</p>'),
@@ -216,7 +234,7 @@ Object.assign(window.SL_WT, {
     },
   },
   belastung: {
-    fam: "uebersicht", cat: "grafik", icon: "heart", name: "Belastung und Erholung", title: () => "Belastung und Erholung", defaults: {view: "kompakt", weeks: 8},
+    fam: "uebersicht", cat: "grafik", icon: "heart", name: "Belastung im Wochenvergleich", title: () => "Belastung im Wochenvergleich", defaults: {view: "kompakt", weeks: 8},
     desc: "Wie viel Belastung die letzten vier Wochen laut Uhr hatten, verglichen mit dem Schnitt davor, mit Wochenbalken. Als Wochenansicht: je Woche die Belastung laut Uhr, die Touren und die Ruhetage dazu.",
     fields: [{k: "view", kind: "radio", def: "kompakt", label: "Ansicht", options: [["kompakt", "Kompakt (Vergleich mit Wochenbalken)"], ["wochen", "Wochenansicht mit Ruhetagen"]]},
       {k: "weeks", kind: "radio", num: true, def: 8, label: "Wochen in der Wochenansicht", options: [[8, "8 Wochen"], [12, "12 Wochen"]]}],
@@ -256,7 +274,7 @@ Object.assign(window.SL_WT, {
     },
   },
   letzte: {
-    fam: "uebersicht", cat: "rueck", icon: "map", name: "Letzte Touren", title: () => "Letzte Touren", filter: {range: null}, defaults: {n: 5},
+    fam: "uebersicht", cat: "rueck", icon: "map", name: "Neueste Touren", title: () => "Neueste Touren", filter: {range: null}, defaults: {n: 5},
     fields: [{k: "n", kind: "radio", num: true, def: 5, label: "Anzahl", options: [[3, "3"], [5, "5"], [8, "8"], [10, "10"]]}, {kind: "sports"}, {kind: "title"}],
     desc: "Die zuletzt gemachten Touren (3 bis 10, wählbar, auch nur einer Sportart) als Liste mit Link.",
     preview: () => slPrev('<ul class="sllist"><li><b>Gipfelrunde</b><span>12,4 km</span></li><li><b>Seeufer</b><span>8,1 km</span></li></ul>'),
@@ -291,19 +309,32 @@ Object.assign(window.SL_WT, {
       slBadge(c, n ? String(n) : "keine");
     },
   },
-  rekorde: {
-    fam: "uebersicht", cat: "rueck", icon: "trend", name: "Rekorde", title: () => "Rekorde", filter: {range: "all"}, defaults: {},
-    fields: [{kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}],
-    desc: "Längste Tour, größter Aufstieg und schnellstes Tempo, mit Link zur Tour.",
-    preview: () => slPvTiles([["32,4 km", "Längste Tour"], ["1.480 m", "Größter Aufstieg"]]),
+  /* 3.45.0 „Bestwerte“: ein Baustein statt „Rekorde“ (drei Spitzenwerte) und „Top-Touren“ (Liste); auch der Abschnitt „Bestwerte“ der Statistik ist dieser Baustein.
+     Anzahl 1 = je Wert eine Kachel mit der besten Tour, 3/5/10 = je Wert eine Rangliste. Werte: Strecke, Aufstieg, Dauer, Tempo (ab 3 km und 30 Minuten), stärkster Monat (Strecke je
+     Kalendermonat). Gleichstand: die frühere Tour zuerst. Alte Kennungen „rekorde“ und „sttop“ bildet SL_ALIAS (49-seitenlayout.js) bzw. app/baustein_umzug.py hierauf ab. */
+  bestwerte: {
+    fam: "uebersicht", cat: "rueck", icon: "trophy", name: "Bestwerte", title: () => "Bestwerte", multi: true, filter: {range: "all"}, defaults: {n: 1, werte: BW_DEF},
+    kurz: cfg => [...(+cfg.n > 1 ? [`Top ${+cfg.n}`] : []), ...flParts(cfg, "all")],
+    fields: [{k: "n", kind: "radio", num: true, def: 1, label: "Anzahl je Wert", options: [[1, "1 (nur der Bestwert)"], [3, "3"], [5, "5"], [10, "10"]]},
+      {k: "werte", kind: "checks", def: BW_DEF, label: "Werte", min: 1, options: Object.entries(BW_WERT).map(([k, v]) => [k, v[0]])}, {kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}],
+    desc: "Deine Bestwerte mit Link zur Tour: längste Tour, größter Aufstieg, längste Dauer, schnellstes Tempo und stärkster Monat – als Kacheln mit dem Bestwert oder als Rangliste der besten 3, 5 oder 10.",
+    preview: () => slPvTiles([["32,4 km", "Längste Tour"], ["1.480 m", "Größter Aufstieg"], ["7:40", "Längste Dauer"]]),
     render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
-      const A = flSelect(cfg, "all").list;
+      const A = flSelect(cfg, "all").list, n = [1, 3, 5, 10, 8].includes(+cfg.n) ? +cfg.n : 1,
+        werte = (cfg.werte && cfg.werte.length ? cfg.werte : BW_DEF).filter(w => BW_WERT[w]);
       if (!A.length) return flNone(b);
-      const best = (f, ok) => A.filter(ok || (() => true)).reduce((m, t) => (!m || f(t) > f(m) ? t : m), null),
-        L = best(t => t.km), U = best(t => t.up_m || 0), S = best(t => t.km / t.h, t => t.km >= 3 && t.h >= 0.5),
-        tile = (t, v, l) => (t ? `<a class="utile slrec" href="#/tour/${encodeURIComponent(t.id)}"><b>${v}</b><span>${l}</span><small class="mut">${esc(t.name)} · ${fmtDatumKurz(t.date)}</small></a>` : "");
-      b.innerHTML = `<div class="utiles">${tile(L, fmtKm(L && L.km), "Längste Tour")}${tile(U && U.up_m ? U : null, fmtHm(U && U.up_m), "Größter Aufstieg")}${tile(S, fmtTempo(S && S.km / S.h), "Schnellstes Tempo")}</div>`;
+      const lists = werte.map(w => [w, bwTop(A, w, n)]).filter(([, L]) => L.length);
+      if (!lists.length) return slNote(b, "Dafür fehlen Angaben in den Touren.");
+      if (n === 1)
+        b.innerHTML = `<div class="utiles">${lists.map(([w, [x]]) => (x.t ? `<a class="utile slrec" href="#/tour/${slEnc(x.t.id)}"><b>${BW_WERT[w][3](x.v)}</b><span>${BW_WERT[w][1]}</span><small class="mut">${esc(x.t.name)} · ${fmtDatumKurz(x.t.date)}</small></a>`
+          : `<div class="utile"><b>${BW_WERT[w][3](x.v)}</b><span>${BW_WERT[w][1]}</span><small class="mut">${esc(x.l)}</small></div>`)).join("")}</div>`;
+      else
+        b.innerHTML = lists.map(([w, L]) => `${lists.length > 1 ? `<h4 class="bwh">${BW_WERT[w][2]}</h4>` : ""}<ol class="sllist stt-l">${L.map(x => (x.t
+          ? `<li><a href="#/tour/${slEnc(x.t.id)}">${esc(x.t.name)}</a><b>${BW_WERT[w][3](x.v)}</b><span class="mut">${fmtDatumKurz(x.t.date)} · ${fmtKm(x.t.km)}</span></li>`
+          : `<li><span>${esc(x.l)}</span><b>${BW_WERT[w][3](x.v)}</b></li>`)).join("")}</ol>`).join("");
+      const [w0, L0] = lists[0];
+      slBadge(c, `${BW_WERT[w0][1]} ${BW_WERT[w0][3](L0[0].v)}`);
     },
   },
   heutevor: {
@@ -340,7 +371,7 @@ window.slWidgetBuild = (it, root) => {
   body.innerHTML = '<p class="mut slnone">Wird geladen …</p>';
   const t = root && root.dataset && root.dataset.tid ? BY[root.dataset.tid] : null;
   Promise.resolve()
-    .then(() => T.render(c, body, it.cfg || {}, {t, reise: window.RS_CUR || null}))
+    .then(() => T.render(c, body, it.cfg || {}, {t, reise: window.RS_CUR || null, verwalten: !!it.verwalten}))
     .catch(() => {
       body.innerHTML = '<p class="mut slnone">Dieser Baustein konnte nicht geladen werden.</p>';
       if (T.hinweis) c.dataset.hn = "aus";

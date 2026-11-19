@@ -83,57 +83,8 @@ VIEWS.dash = async (n, q) => {
   const fg = $(".figs");
   if (!fg) return;
   const ys = years(),
-    Y = +(q.get("y") || 0) || 0,
-    cy = new Date().getFullYear(),
-    yr = Y || cy;
-  const allGoals = await api("/api/goals").catch(() => []),
-    goals = allGoals.filter(g => g.year === yr),
-    prevGoals = allGoals.filter(g => g.year === yr - 1),
-    sp = [...new Set(TOURS.map(t => t.sport))];
-  const now = new Date(),
-    frac = yr === cy ? Math.max(0, (now - new Date(cy, 0, 1)) / (new Date(cy + 1, 0, 1) - new Date(cy, 0, 1))) : 1;
-  const row = g => {
-    const v = goalVal(g, TOURS),
-      p = Math.min(100, (v / g.target) * 100),
-      u = GM[g.metric][0],
-      proj = frac > 0.02 && frac < 1 ? v / frac : null;
-    return `<div class="goal"><div class="gh"><b>${GM[g.metric][1]}${g.sport ? " " + goalSportName(g.sport) : ""}</b><span>${nf(v, g.metric === "count" ? 0 : 0)} / ${nf(g.target, 0)} ${u} <button class="gx" data-g="${g.id}" title="Ziel löschen">×</button></span></div>
-     <div class="gb"><i style="width:${p}%"></i>${frac < 1 ? `<u style="left:${frac * 100}%" title="Soll heute"></u>` : ""}</div>
-     <div class="gs">${nf(p, 0)} %${goalNote(g, v, u, frac, proj, yr, cy)}</div></div>`;
-  };
-  const box = document.createElement("div");
-  box.className = "panel";
-  box.id = "goals";
-  box.style.marginTop = "34px";
-  box.innerHTML = `<h2>Ziele ${yr}</h2>${goals.map(row).join("") || `<p class="mut">Noch kein Ziel für ${yr}. Setze dir eines, zum Beispiel 1000 km Wandern.</p>${prevGoals.length ? `<button class="btn sm alt" id="gcopy">Ziele aus ${yr - 1} übernehmen (${prevGoals.length})</button>` : ""}`}
-   <details><summary>Ziel hinzufügen</summary><div class="row mt8"><select id="gm">${Object.entries(GM)
-     .map(([k, v]) => `<option value="${k}">${v[1]}</option>`)
-     .join("")}</select>
-   <select id="gsp"><option value="">alle Sportarten</option>${Object.entries(GOAL_GRP).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join("")}${sp.map(s => `<option value="${s}">${sName(s)}</option>`).join("")}</select><input id="gt" type="number" min="1" placeholder="Zielwert" style="width:130px"><button class="btn sm" id="gadd">Speichern</button></div></details>`;
-  fg.after(box);
-  box.onclick = async e => {
-    const g = e.target.dataset.g;
-    if (g && await uiConfirm({text: "Ziel löschen?", danger: true, ok: "Löschen"})) {
-      await api(`/api/goals/${g}`, {method: "DELETE"});
-      route();
-    }
-  };
-  if ($("#gcopy"))
-    $("#gcopy").onclick = async () => {
-      for (const g of prevGoals)
-        await api("/api/goals", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({year: yr, metric: g.metric, sport: g.sport, target: g.target})});
-      route();
-    };
-  $("#gadd").onclick = async () => {
-    const t = +$("#gt").value;
-    if (!t) return;
-    await api("/api/goals", {
-      method: "POST",
-      headers: {"content-type": "application/json"},
-      body: JSON.stringify({year: yr, metric: $("#gm").value, sport: $("#gsp").value, target: t}),
-    });
-    route();
-  };
+    Y = +(q.get("y") || 0) || 0;
+  /* 3.45.0: Die Ziele (Anzeige und Pflege) sind der Baustein „Ziele“ (52-bausteine-uebersicht.js), als Abschnitt „Ziele“ der Statistik mit „Ziel hinzufügen“ und Löschen. */
   const yrs = $(".years");
   if (yrs)
     yrs.insertAdjacentHTML(

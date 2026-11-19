@@ -12,10 +12,10 @@ const ST = {F: {sports: [], kind: "all", yr: 0, von: "", bis: ""}, focus: "", ba
 const ST_SPORT = /^[A-Za-z0-9_]{1,40}$/, ST_DATE = /^\d{4}-\d{2}-\d{2}$/;
 /* Fähigkeit der festen Abschnitte: s = Sportart, r = Zeitraum (1 = ja, "y" = nur als Jahr, 0 = nein) */
 const ST_CAP = {
-  kpi: {s: 1, r: 1}, ziele: {s: 0, r: "y"}, kmmonat: {s: 1, r: 1}, kmverlauf: {s: 1, r: 1}, sportarten: {s: 0, r: 1}, bestwerte: {s: 1, r: 1}, heat: {s: 1, r: 1},
+  kpi: {s: 1, r: 1}, kmmonat: {s: 1, r: 1}, kmverlauf: {s: 1, r: 1}, sportarten: {s: 0, r: 1}, heat: {s: 1, r: 1},          // 3.45.0: „Ziele“ und „Bestwerte“ sind Bausteine (Filter über ihr Schema)
   bl: {s: 0, r: 0}, tp: {s: 0, r: 0}, tag: {s: 0, r: 0}, erinn: {s: 0, r: 0},
 };
-const ST_ICON = {kpi: "met", ziele: "pin", kmmonat: "met", kmverlauf: "trend", sportarten: "map", bestwerte: "trend", heat: "met", tag: "cmp", erinn: "cam"};
+const ST_ICON = {kpi: "met", kmmonat: "met", kmverlauf: "trend", sportarten: "map", heat: "met", tag: "cmp", erinn: "cam"};
 
 /* 3.22.0 Der Filter gehört zur Ansicht: gespeichert im Layout der Ansicht (Feld „filter“: {sports, range, yr, from, to}). Ohne Angabe in der Adresse gilt der Stand dieser Sitzung (sessionStorage,
    solange nicht gespeichert oder verworfen), sonst der gespeicherte Filter der Ansicht, sonst der alte Standard (alle Sportarten, gesamte Zeit). „z=all“ in der Adresse = ausdrücklich alles. */
@@ -238,7 +238,8 @@ function stApply(it, F = ST.F, o = {}) {
     }    if (F.kind === "all" && T.filter && T.filter.range === "all") delete out.range;               // Standard des Bausteins: kein Zusatz im Kopf
   }
   if (F.kind === "all") out._nr = true;                                                  // „Gesamte Zeit“ ist der Standard: nicht im Kopf wiederholen
-  it.note = o.page ? (ok ? "" : "Zeitraum gilt hier nur als Jahr") : stNote({s: hasS ? 1 : 0, r: rf ? (ok ? 1 : "y") : 0}, F);
+  if (T.stJahr && !o.page && F.kind === "y") out._jahr = F.yr;                           // 3.45.0 Baustein „Ziele“: das gewählte Jahr der Seite gilt als Jahr der Jahresziele
+  it.note = o.page ? (ok ? "" : "Zeitraum gilt hier nur als Jahr") : stNote({s: hasS ? 1 : 0, r: rf ? (ok ? 1 : "y") : T.stJahr ? "y" : 0}, F);
   it.cfg = out;
   it.fl = slWFl(T, out);
 }
@@ -247,13 +248,6 @@ function stApply(it, F = ST.F, o = {}) {
 function stBuild() {
   const inner = document.querySelector("#main .inner"), bar = document.getElementById("stf");
   if (!inner || !bar || document.getElementById("stx")) return;
-  const goals = document.getElementById("goals");
-  if (goals) {
-    goals.dataset.st = "ziele";
-    goals.style.removeProperty("margin-top");
-    const n = goals.querySelectorAll(".goal").length;
-    goals.dataset.badge = n ? (n === 1 ? "1 Ziel" : n + " Ziele") : "Noch kein Ziel";
-  }
   const host = document.createElement("div");
   host.id = "stx";
   host.className = "stx";

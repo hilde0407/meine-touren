@@ -55,11 +55,11 @@ const SL_REG = {
      „bl“ und „tp“ (Belastung, Tempo) sind schon einklappbare Abschnitte mit eigenem Zustand (plain). Fehlen Daten (Tage, Fotos), gibt es den Abschnitt nicht. */
   statistik: [
     {id: "kpi", w: "voll", title: "Kennzahlen", page: "statistik", def: true, ckeys: ["st_kpi"]},
-    {id: "ziele", w: "voll", title: "Ziele", page: "statistik", def: true, ckeys: ["st_ziele"]},
+    {id: "ziele", w: "voll", title: "Ziele", page: "statistik", build: "ziele", verwalten: true, def: true, ckeys: ["tl_w_ziele"]},            // 3.45.0: Baustein „Ziele“ mit Pflege der Ziele (die eine Stelle dafür)
     {id: "kmmonat", w: "halb", title: "Strecke pro Monat oder Jahr", page: "statistik", def: true, ckeys: ["st_kmmonat"]},
     {id: "kmverlauf", w: "halb", title: "Strecke im Jahresverlauf", page: "statistik", def: true, ckeys: ["st_kmverlauf"]},
     {id: "sportarten", w: "halb", title: "Sportarten", page: "statistik", def: true, ckeys: ["st_sportarten"]},
-    {id: "bestwerte", w: "halb", title: "Rekorde", page: "statistik", def: true, ckeys: ["st_bestwerte"]},
+    {id: "bestwerte", w: "halb", title: "Bestwerte", page: "statistik", build: "bestwerte", def: true, ckeys: ["tl_w_bestwerte"]},         // 3.45.0: Baustein „Bestwerte“ (vorher eigener Abschnitt „Rekorde“)
     {id: "heat", w: "voll", title: "Aktivität im Jahr", page: "statistik", def: true, ckeys: ["st_heat"]},
     {id: "bl", w: "voll", title: "Belastung und Erholung", page: "statistik", plain: true},
     {id: "tp", w: "voll", title: "Dein typisches Tempo", page: "statistik", plain: true},
@@ -92,7 +92,7 @@ const SL_EL = {
   reise: Object.fromEntries(["kopf", "kennzahlen", "stat", "flug", "karte", "fotos", "touren"].map(id => [id, () => (id === "kopf" ? document.getElementById("rs-kopf") : document.getElementById("rsc-" + id))])),
   reisen: Object.fromEntries(["serien", "reisen", "alben", "entfernt"].map(id => [id, () => document.getElementById("rnc-" + id)])),
   uebersicht: {aufmacher: () => $("#hlast"), jahr: () => $("#hyear"), zuletzt: () => $("#hrecent"), tag: () => $("#htag"), erinn: () => $("#hmemsec")},
-  statistik: Object.fromEntries(["kpi", "ziele", "kmmonat", "kmverlauf", "sportarten", "bestwerte", "heat", "tag", "erinn"].map(id => [id, () => document.getElementById("stc-" + id)]).concat([["bl", () => $("#blsec")], ["tp", () => $("#tpsec")]])),
+  statistik: Object.fromEntries(["kpi", "kmmonat", "kmverlauf", "sportarten", "heat", "tag", "erinn"].map(id => [id, () => document.getElementById("stc-" + id)]).concat([["bl", () => $("#blsec")], ["tp", () => $("#tpsec")]])),
 };
 /* 3.21.0 Ansichten: SL.store[Schlüssel] = Behälter {views:[{id,name,layout}], active, rules} (so liegt er auf dem Server); SL.docs[Schlüssel] = Layout der gerade angezeigten Ansicht
    (damit arbeitet der ganze übrige Code unverändert); SL.view[fam] = Kennung der angezeigten Ansicht; SL.manual[fam] = in dieser Sitzung von Hand gewählte Ansicht (vor den Regeln). */
@@ -100,15 +100,44 @@ const SL = {docs: {}, store: {}, view: {}, manual: {}, sport: {}, loaded: {}, ed
 const SL_STD = "standard";
 const SL_MAXV = 12;
 const slBlank = () => ({v: 2, views: [{id: SL_STD, name: "Standard", layout: {v: 1}}], active: SL_STD, rules: {}});
+/* 3.45.0 Umzug alter Bausteine: alte Typkennung → [neuer Typ, Einstellung] (gleiche Tabelle wie app/baustein_umzug.py; der Server zieht gespeicherte Layouts beim Öffnen der Datenbank um
+   und übernimmt eigene Ziele in die Ziele der Statistik – hier wird nur angezeigt, damit Zwischenspeicher, ältere Antworten und Ansichten nie leer oder kaputt sind) */
+const slPick = (c, ks) => Object.fromEntries(ks.filter(k => k in c).map(k => [k, c[k]]));
+const SL_ALIAS = {
+  jahresziel: c => ["ziele", {view: "ring", zeit: "jahr", ...slPick(c, ["sports", "title"])}],
+  jahresziele: c => ["ziele", {view: "balken", zeit: "jahr", ...slPick(c, ["sports", "title"]), ...(c.year === "last" ? {year: "last"} : {})}],
+  hnziel: c => {
+    const sn = (c.snoozes || []).filter(x => typeof x === "string" && x.startsWith("ziel:"));
+    return ["ziele", {view: "warnung", zeit: "jahr", ...slPick(c, ["sports", "title", "schwelle", "ausblenden"]), ...(sn.length ? {snoozes: sn} : {})}];
+  },
+  hnwoche: c => ["ziele", {view: "balken", zeit: "woche", ...slPick(c, ["sports", "title"])}],
+  rekorde: c => ["bestwerte", {n: 1, werte: ["km", "hm", "tempo"], ...slPick(c, ["sports", "range", "yr", "eigen", "title"])}],
+  sttop: c => ["bestwerte", {n: c.n === 8 ? 10 : [1, 3, 5, 10].includes(c.n) ? c.n : 5, werte: [["km", "hm", "dauer", "tempo"].includes(c.wert) ? c.wert : "km"], ...slPick(c, ["sports", "range", "yr", "eigen", "title"])}],
+};
+function slAliasW(w) {
+  if (!w || typeof w !== "object" || typeof w.type !== "string") return w;
+  const c = w.cfg && typeof w.cfg === "object" ? w.cfg : {};
+  if (w.type === "hinweise" && ("woche_ziel" in c || "woche_einheit" in c)) {
+    const o = {...c};
+    delete o.woche_ziel;
+    delete o.woche_einheit;
+    return {...w, cfg: o};
+  }
+  const f = SL_ALIAS[w.type];
+  if (!f) return w;
+  const [type, cfg] = f(c);
+  return {...w, type, cfg};
+}
+const slAliasLay = l => (l && typeof l === "object" && Array.isArray(l.widgets) && l.widgets.some(w => w && (SL_ALIAS[w.type] || (w.type === "hinweise" && w.cfg && "woche_ziel" in w.cfg))) ? {...l, widgets: l.widgets.map(slAliasW)} : l);
 /* Gespeichertes (Server, Zwischenspeicher; altes Format = ein Layout-Dokument) als Behälter, unbrauchbares als null */
 function slNorm(x) {
   if (!x || typeof x !== "object" || Array.isArray(x)) return null;
-  if (!Array.isArray(x.views)) return {v: 2, views: [{id: SL_STD, name: "Standard", layout: x}], active: SL_STD, rules: {}};
+  if (!Array.isArray(x.views)) return {v: 2, views: [{id: SL_STD, name: "Standard", layout: slAliasLay(x)}], active: SL_STD, rules: {}};
   const ids = new Set(), views = [];
   x.views.forEach(v => {
     if (v && typeof v.id === "string" && !ids.has(v.id) && views.length < SL_MAXV) {
       ids.add(v.id);
-      views.push({id: v.id, name: String(v.name || "Ansicht").slice(0, 40), layout: v.layout && typeof v.layout === "object" ? v.layout : {v: 1}});
+      views.push({id: v.id, name: String(v.name || "Ansicht").slice(0, 40), layout: v.layout && typeof v.layout === "object" ? slAliasLay(v.layout) : {v: 1}});
     }
   });
   if (!views.length) return null;
@@ -1387,18 +1416,21 @@ function slLivePreviews(body) {
     }
   }).observe(document.body, {childList: true});
 }
+/* 3.45.0 Tourseite: Bausteine ohne Bezug zur einzelnen Tour (Übersichts-Bausteine wie „Dein Jahr“ oder „Ziele“) stehen im Katalog in einer eigenen, zugeklappten Gruppe */
+const SL_ALLG = ["allg", "Allgemein (nicht zu dieser Tour)"];
+const slCatOf = T => (SL.fam === "tour" && T.fam !== "tour" ? SL_ALLG[0] : T.cat || "zahlen");
 function slCatalog() {
   const list = Object.entries(window.SL_WT).filter(([, T]) => slFits(T, SL.fam)),
     have = type => (slSt(SL.fam).widgets || []).filter(w => w.type === type).length,
-    cats = SL_CATS.filter(([k]) => list.some(([, T]) => (T.cat || "zahlen") === k)),
+    cats = [...SL_CATS, SL_ALLG].filter(([k]) => list.some(([, T]) => slCatOf(T) === k)),
     card = ([type, T]) => {
       const n = have(type),
         std = !T.multi && SL_REG[SL.fam].some(r => r.build === type && !(slSt(SL.fam).hidden || []).includes(r.id)),             // 3.30.0: steht als Standard-Abschnitt schon (sichtbar) auf der Seite
         dis = !T.multi && (n > 0 || std);
       if (T.neu)                                                                                         // 3.28.0: Baustein, den der Benutzer in einem eigenen Dialog zusammenstellt
-        return `<article class="slcard" data-cat="${T.cat || "zahlen"}"><div class="slpv" aria-hidden="true">${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name)}</h3><p>${esc(T.desc || "")}</p>` +
+        return `<article class="slcard" data-cat="${slCatOf(T)}"><div class="slpv" aria-hidden="true">${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name)}</h3><p>${esc(T.desc || "")}</p>` +
           `<button type="button" class="btn sm" data-neu="${type}">${n ? "Noch eine erstellen" : "Erstellen"}</button></div></article>`;
-      return `<article class="slcard" data-cat="${T.cat || "zahlen"}"><div class="slpv" aria-hidden="true"${T.hinweis ? "" : ` data-live="${type}"`}>${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name || T.title(T.defaults || {}))}</h3>${n || std ? '<span class="slhave">Bereits auf dieser Seite</span>' : ""}<p>${esc(T.desc || "")}</p>` +
+      return `<article class="slcard" data-cat="${slCatOf(T)}"><div class="slpv" aria-hidden="true"${T.hinweis ? "" : ` data-live="${type}"`}>${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name || T.title(T.defaults || {}))}</h3>${n || std ? '<span class="slhave">Bereits auf dieser Seite</span>' : ""}<p>${esc(T.desc || "")}</p>` +
         `<button type="button" class="btn sm${dis ? " ghost" : ""}" data-add="${type}"${dis ? " disabled" : ""}>${dis ? (std && !n ? "Steht schon auf der Seite" : "Bereits hinzugefügt") : n ? "Noch einmal hinzufügen" : "Hinzufügen"}</button></div></article>`;
     };
   slModal("Baustein hinzufügen", (body, close) => {
@@ -1408,7 +1440,9 @@ function slCatalog() {
       cats.map(([k, l]) => `<button type="button" class="slchip" data-cat="${k}" aria-pressed="false">${l}</button>`).join("") +
       `</div><label class="slsr" for="slq">Bausteine suchen</label><input id="slq" type="search" class="slq" placeholder="Bausteine suchen …" autocomplete="off" enterkeyhint="search"></div>` +
       `<p class="mut slcnt" role="status" aria-live="polite"></p><div class="slcatl">` +
-      cats.map(([k, l]) => `<section class="slsec" data-cat="${k}"><h3 class="slcath">${l}</h3><div class="slcats">${list.filter(([, T]) => (T.cat || "zahlen") === k).map(card).join("")}</div></section>`).join("") +
+      cats.map(([k, l]) => (k === SL_ALLG[0]
+        ? `<details class="slsec slallg" data-cat="${k}"><summary class="slcath">${l}</summary><p class="mut slallgp">Diese Bausteine zeigen nichts zu dieser Tour, sondern deine Touren insgesamt (wie auf der Übersicht).</p><div class="slcats">${list.filter(([, T]) => slCatOf(T) === k).map(card).join("")}</div></details>`
+        : `<section class="slsec" data-cat="${k}"><h3 class="slcath">${l}</h3><div class="slcats">${list.filter(([, T]) => slCatOf(T) === k).map(card).join("")}</div></section>`)).join("") +
       `</div><p class="slnorsl mut" hidden>Nichts gefunden. Probiere einen anderen Suchbegriff oder eine andere Kategorie.</p><div class="uifoot"><button type="button" class="btn ghost" data-close>Schließen</button></div>`;
     let cat = "";
     const q = body.querySelector("#slq"),
@@ -1425,6 +1459,7 @@ function slCatalog() {
             any += ok ? 1 : 0;
           });
           sec.hidden = !any;
+          if (sec.tagName === "DETAILS" && any && (term || cat === sec.dataset.cat)) sec.open = true;              // Suche oder Kategorie „Allgemein“: die zugeklappte Gruppe öffnen
           n += any;
         });
         none.hidden = n > 0;
@@ -1463,13 +1498,30 @@ function slCfgDialog(id) {
   slModal(`Einstellungen: ${T.name || T.title(w.cfg)}`, (body, close) => {
     const cfg = JSON.parse(JSON.stringify(w.cfg || {}));
     const FS = slFieldsOf(T);
-    body.innerHTML = `<form class="slform" novalidate>${FS.map((f, i) => slField(f, cfg, i)).join("")}<div class="uifoot"><button type="button" class="btn ghost" data-close>Abbrechen</button><button type="submit" class="btn">Speichern</button></div></form>`;
+    body.innerHTML = `<form class="slform" novalidate>${FS.map((f, i) => (f.show ? `<div class="slshow" data-show="${i}">${slField(f, cfg, i)}</div>` : slField(f, cfg, i))).join("")}<div class="uifoot"><button type="button" class="btn ghost" data-close>Abbrechen</button><button type="submit" class="btn">Speichern</button></div></form>`;
     const form = body.querySelector("form");
+    /* 3.45.0 Felder, die nur zu einer Auswahl gehören (f.show = {Schlüssel: [Werte]}, z. B. „Schwelle“ nur bei „Nur Warnung“): sonst ausgeblendet und nicht geprüft */
+    const shown = i => {
+      const f = FS[i];
+      if (!f.show) return true;
+      return Object.entries(f.show).every(([k, vs]) => {
+        const j = FS.findIndex(x => x.k === k), sel = j >= 0 && form.querySelector(`input[name="f${j}"]:checked`);
+        return vs.map(String).includes(String(sel ? sel.value : cfg[k] ?? (FS[j] || {}).def));
+      });
+    };
+    const syncShow = () => form.querySelectorAll("[data-show]").forEach(el => {
+      const on = shown(+el.dataset.show);
+      el.hidden = !on;
+      el.querySelectorAll("input,select,textarea").forEach(x => (x.disabled = !on));
+    });
+    syncShow();
+    form.addEventListener("change", syncShow);
     form.onsubmit = e => {
       e.preventDefault();
       const out = {...cfg};
       let bad = null;
       FS.forEach((f, i) => {
+        if (!shown(i)) return;
         if (FL_KINDS.has(f.kind)) flRead(f, form, i, out);
         else if (f.kind === "checks") out[f.k] = [...form.querySelectorAll(`input[name="f${i}"]:checked`)].map(x => x.value);
         else if (f.kind === "bool") {
@@ -1494,11 +1546,11 @@ function slCfgDialog(id) {
         bad.inp.focus();
         return;
       }
-      if (FS.some(f => f.kind === "checks" && f.min && out[f.k].length < f.min)) {
+      if (FS.some((f, i) => f.kind === "checks" && f.min && shown(i) && out[f.k].length < f.min)) {
         form.querySelector(".slerr").textContent = "Bitte mindestens einen Wert wählen.";
         return;
       }
-      FS.forEach(f => f.kind === "checks" && f.def && out[f.k].join() === f.def.join() && delete out[f.k]);          // Standardwerte nicht speichern
+      FS.forEach(f => f.kind === "checks" && f.def && out[f.k] && out[f.k].join() === f.def.join() && delete out[f.k]);          // Standardwerte nicht speichern
       close();
       slSetCfg(id, out);
     };

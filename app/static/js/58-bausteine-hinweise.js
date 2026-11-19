@@ -4,7 +4,9 @@
    Export) läuft über die Layout-Engine.
    Gerechnet wird NUR im Server (GET /api/bausteine/hinweise, app/hinweise.py – dort die Regeln und die Referenz); die Oberfläche baut aus den Zahlen die Texte (vier Sprachen, je Satz ein Textknoten).
    Zustand der Karte: data-hn = lade | aus | an (style.css „3.23.0“). Ausblenden („Snooze“): cfg.snoozes = ["Art:Sekunden seit 1970"] im Layout-Dokument der Instanz, abgelaufen = wieder sichtbar.
-   Typen: hnziel, hnmeilenstein, hnauffaellig, hnpause, hnrekord, hnwoche, hnerholung, hnsicherung und die Sammel-Variante „hinweise“ (alle aktiven Hinweise gebündelt, Auswahl der Arten im Zahnrad). */
+   Typen: hnmeilenstein, hnauffaellig, hnpause, hnrekord, hnerholung, hnsicherung und die Sammel-Variante „hinweise“ (alle aktiven Hinweise gebündelt, Auswahl der Arten im Zahnrad).
+   3.45.0: „Jahresziel in Gefahr“ (hnziel) und „Wochenziel“ (hnwoche) sind jetzt der Baustein „Ziele“ mit der Darstellung „Nur Warnung“ bzw. „Balken“ (unten registriert, Code in
+   52-bausteine-uebersicht.js); die Arten „ziel“ und „woche“ gibt es weiter im Sammel-Baustein. Wochenziele stehen in den Zielen der Statistik, nicht mehr im Baustein. */
 Object.assign(TL_ICON, {
   flag: '<path d="M5 21V4"/><path d="M5 4h12l-2.5 4.5L17 13H5"/>',
   clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
@@ -23,7 +25,7 @@ const HN_STUFE = {
 };
 const hnIcon = s => `<svg class="hnsi" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${HN_STUFE[s][1]}</svg>`;
 const HN_ARTEN = ["ziel", "meilenstein", "auffaellig", "pause", "rekord", "woche", "erholung", "sicherung"];
-const HN_SAMMEL = HN_ARTEN.filter(a => a !== "woche");                                             // Standardauswahl des Sammel-Bausteins (das Wochenziel braucht ein eigenes Ziel)
+const HN_SAMMEL = HN_ARTEN.filter(a => a !== "woche");                                             // Standardauswahl des Sammel-Bausteins (wie bisher ohne Wochenziel; das Wochenziel steht seit 3.45.0 in den Zielen der Statistik)
 const HN_AUS = [[0, "Nicht anbieten"], [1, "1 Tag"], [3, "3 Tage"], [7, "7 Tage"], [14, "14 Tage"], [30, "30 Tage"]];
 const HN = {pending: new Map(), focus: null};
 const hnPl = (n, one, many) => (n === 1 ? one : many);
@@ -53,13 +55,8 @@ function hnQuery(arts, cfg, sammel) {
     set("auffaellig_min", c.min);
     set("pause_tage", c.tage);
     set("rekord_tage", c.tage);
-    set("woche_ziel", c.ziel);
-    set("woche_einheit", c.einheit);
     set("erholung_stufe", c.stufe);
     set("sicherung_tage", c.tage);
-  } else {
-    set("woche_ziel", c.woche_ziel);
-    set("woche_einheit", c.woche_einheit);
   }
   return q.toString();
 }
@@ -78,7 +75,7 @@ function hnGet(qs) {
 const hnRows = rows => `<ul class="hnrows">${rows.join("")}</ul>`;
 const HN_ART = {
   ziel: {
-    name: "Jahresziel in Gefahr", icon: "flag", wtype: "hnziel", seiten: ["uebersicht", "statistik"], defaults: {schwelle: 10, ausblenden: 7},
+    name: "Jahresziel in Gefahr", icon: "flag", wtype: "", seiten: ["uebersicht", "statistik"], defaults: {schwelle: 10, ausblenden: 7},          // 3.45.0: nur noch als Art (Baustein „Ziele“, Darstellung „Nur Warnung“)
     desc: "Erscheint nur, wenn die Prognose zum Jahresende deutlich unter einem deiner Jahresziele liegt. Sonst ist der Baustein unsichtbar.",
     sample: ["warnung", "Prognose 780 km bei einem Ziel von 1.000 km (22 % darunter)."],
     fields: [{k: "schwelle", kind: "number", label: "Schwelle: Prognose liegt um mehr als so viele Prozent unter dem Ziel", min: 1, max: 90, step: 1, int: true}, {kind: "sports", label: "Sportart (nur Ziele, die sie betreffen)"}],
@@ -134,21 +131,23 @@ const HN_ART = {
     link: () => "",
     badge: h => (h.daten.rekorde.length === 1 ? "1 Rekord" : `${h.daten.rekorde.length} Rekorde`),
   },
-  woche: {
-    name: "Wochenziel", icon: "cal", wtype: "hnwoche", seiten: ["uebersicht"], defaults: {einheit: "km", ziel: 0, ausblenden: 7}, cfgOnAdd: true,
-    desc: "Zeigt, ob du dein Wochenziel in Kilometern oder Touren erreicht hast oder wie viel noch fehlt, mit Fortschrittsbalken. Ohne gesetztes Ziel ist der Baustein unsichtbar.",
-    sample: ["info", "Wochenziel offen: noch 18 km (bisher 32 von 50 km)."],
-    fields: [{k: "einheit", kind: "radio", def: "km", label: "Ziel in", options: [["km", "Strecke"], ["touren", "Touren"]]}, {k: "ziel", kind: "number", label: "Wochenziel (0 = kein Ziel)", min: 0, max: 10000, step: 1},
-      {kind: "sports"}],
-    cond: c => [c.ziel > 0 ? `Wird nur angezeigt, wenn ein Wochenziel gesetzt ist (aktuell ${c.einheit === "touren" ? hnTours(c.ziel) : `${fmtKm(c.ziel, {d: 0})}`}).` : "Wird nur angezeigt, wenn ein Wochenziel gesetzt ist. Das Ziel stellst du unter „Einstellungen“ ein."],
+  woche: {                                                                     // 3.45.0: nur noch als Art (Sammel-Baustein, Baustein „Ziele“); die Ziele kommen aus der Statistik
+    name: "Wochenziel", icon: "cal", wtype: "", seiten: ["uebersicht"], defaults: {ausblenden: 7},
+    desc: "", sample: ["info", "Wochenziel offen: noch 18 km (bisher 32 von 50 km)."], fields: [],
+    cond: () => ["Wird nur angezeigt, wenn ein Wochenziel gesetzt ist (Statistik → Ziele)."],
     body(h) {
-      const d = h.daten, u = x => (d.einheit === "km" ? `${nf(x, x % 1 ? 1 : 0)} km` : hnTours(Math.round(x))), pct = d.ziel > 0 ? Math.min(100, (d.ist / d.ziel) * 100) : 0,
-        left = d.tage_rest === 0 ? "Heute ist der letzte Tag der Woche." : d.tage_rest === 1 ? "Noch 1 Tag in dieser Woche." : `Noch ${d.tage_rest} Tage in dieser Woche.`;
-      return `<p class="hnt">${d.erreicht ? `Wochenziel erreicht: ${u(d.ist)} von ${u(d.ziel)}.` : `Wochenziel offen: noch ${u(d.rest)} (bisher ${nf(d.ist, d.einheit === "km" ? 1 : 0)} von ${u(d.ziel)}).`}</p>` +
-        `<div class="hnbar" role="progressbar" aria-label="Fortschritt zum Wochenziel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}">${slBr(pct, d.erreicht ? "hnok" : "")}</div>` +
-        (d.erreicht ? "" : `<p class="mut hnsub">${left}</p>`);
+      const L = h.daten.ziele || [h.daten];
+      return L.map(d => {
+        const dec = x => (d.einheit === "km" || d.einheit === "hours" ? (x % 1 ? 1 : 0) : 0),
+          u = x => (d.einheit === "km" ? `${nf(x, dec(x))} km` : d.einheit === "up" ? fmtHm(x) : d.einheit === "hours" ? fmtDauer(x * 3600, {summe: true}) : hnTours(Math.round(x))),
+          pct = d.ziel > 0 ? Math.min(100, (d.ist / d.ziel) * 100) : 0, nm = d.sport ? ` <span class="mut">${esc(goalSportName(d.sport))}</span>` : "",
+          left = d.tage_rest === 0 ? "Heute ist der letzte Tag der Woche." : d.tage_rest === 1 ? "Noch 1 Tag in dieser Woche." : `Noch ${d.tage_rest} Tage in dieser Woche.`;
+        return `<p class="hnt">${d.erreicht ? `Wochenziel erreicht: ${u(d.ist)} von ${u(d.ziel)}.` : `Wochenziel offen: noch ${u(d.rest)} (bisher ${u(d.ist)} von ${u(d.ziel)}).`}${nm}</p>` +
+          `<div class="hnbar" role="progressbar" aria-label="Fortschritt zum Wochenziel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}">${slBr(pct, d.erreicht ? "hnok" : "")}</div>` +
+          (d.erreicht ? "" : `<p class="mut hnsub">${left}</p>`);
+      }).join("");
     },
-    link: () => "",
+    link: () => hnTrLink("#/stats", "Zu den Zielen ›"),
     badge: h => `${nf(Math.min(100, h.daten.ziel > 0 ? (h.daten.ist / h.daten.ziel) * 100 : 0), 0)} %`,
   },
   erholung: {
@@ -271,9 +270,9 @@ const HN_FIELD_AUS = {k: "ausblenden", kind: "radio", num: true, def: 7, label: 
 window.SL_WT.hinweise = {
   fam: "uebersicht", cat: "hinweise", icon: "bell", name: "Hinweise", title: () => "Hinweise", multi: true, hinweis: true, sammel: true, w: "voll", seiten: ["uebersicht", "statistik"],
   defaults: {arten: HN_SAMMEL.slice(), ausblenden: 7}, kurz: cfg => flParts(cfg, null),
-  desc: "Alle gerade aktiven Hinweise gebündelt in einer Liste: Jahresziel, Meilenstein, Auffälligkeiten, Pause, Rekord, Wochenziel, Erholung, Sicherung. Nur sichtbar, wenn mindestens einer aktiv ist. Empfohlen für den Alltag.",
+  desc: "Alle gerade aktiven Hinweise gebündelt in einer Liste: Jahresziel, Meilenstein, Auffälligkeiten, Pause, Rekord, Wochenziel, Erholung, Sicherung. Nur sichtbar, wenn mindestens einer aktiv ist. Ziele und Wochenziele legst du in der Statistik unter „Ziele“ fest.",
   fields: [{k: "arten", kind: "checks", def: HN_SAMMEL, label: "Berücksichtigte Hinweise", min: 1, options: HN_ARTEN.map(a => [a, HN_ART[a].name])}, {kind: "sports", label: "Sportart (für Ziele, Pause, Rekord, Meilenstein und Wochenziel)"},
-    {k: "woche_einheit", kind: "radio", def: "km", label: "Wochenziel in", options: [["km", "Strecke"], ["touren", "Touren"]]}, {k: "woche_ziel", kind: "number", def: 0, label: "Wochenziel (0 = kein Ziel)", min: 0, max: 10000, step: 1}, {kind: "title"}, HN_FIELD_AUS],
+    {kind: "title"}, HN_FIELD_AUS],
   preview: () => slPrev(`<div class="hnpv2"><div class="hnbox hn-warnung hnpv">${hnIcon("warnung")}<div class="hnmain"><p class="hnlbl">${HN_STUFE.warnung[0]}</p><p class="hnt">${esc(HN_ART.ziel.name)}</p></div></div>` +
     `<div class="hnbox hn-info hnpv">${hnIcon("info")}<div class="hnmain"><p class="hnlbl">${HN_STUFE.info[0]}</p><p class="hnt">${esc(HN_ART.meilenstein.name)}</p></div></div></div>`),
   render(c, b, cfg) {
@@ -281,6 +280,7 @@ window.SL_WT.hinweise = {
   },
 };
 Object.entries(HN_ART).forEach(([art, A]) => {
+  if (!A.wtype) return;                                                                            // 3.45.0: ziel und woche sind Teil des Bausteins „Ziele“
   window.SL_WT[A.wtype] = {
     fam: "uebersicht", cat: "hinweise", icon: A.icon, name: A.name, title: () => A.name, multi: true, defaults: A.defaults, hinweis: true, art, w: "voll", seiten: A.seiten, cfgOnAdd: !!A.cfgOnAdd,
     kurz: cfg => flParts(cfg, null), desc: A.desc, fields: [...A.fields, {kind: "title"}, HN_FIELD_AUS],
@@ -290,3 +290,5 @@ Object.entries(HN_ART).forEach(([art, A]) => {
     },
   };
 });
+/* 3.45.0 Baustein „Ziele“ (Code in 52-bausteine-uebersicht.js; nutzt die Hinweis-Hilfen dieser Datei für die Darstellung „Nur Warnung“) */
+window.SL_WT.ziele = zlType();
