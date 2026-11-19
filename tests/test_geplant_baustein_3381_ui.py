@@ -167,7 +167,7 @@ def test_einstellung_im_dialog_speichern_und_wieder_ausschalten(pw, app):
         pg.wait_for_selector('.sldlg [role="dialog"] form', timeout=TL)
         box = pg.locator('.sldlg input[type=checkbox]')
         expect(box).to_have_count(1, timeout=TL)
-        assert pg.locator(".sldlg .flchip").inner_text() == "Gegangene Pläne auch zeigen" and not box.is_checked()      # Standard: aus
+        assert pg.locator(".sldlg label.slck").inner_text() == "Gegangene Pläne auch zeigen" and not box.is_checked()      # Standard: aus
         box.check()
         pg.get_by_role("button", name="Speichern", exact=True).click()
         pg.wait_for_function("() => !document.querySelector('.sldlg')", timeout=TL)

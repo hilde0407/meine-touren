@@ -404,12 +404,12 @@ def test_batch_dialog_preview_selection_confirm_job_and_undo(pw, app_url):
         _shot(pg, "sammel-dialog-desktop-hell.png")
         # Bestätigung im gemeinsamen Dialog; Abbrechen ändert nichts
         pg.click("#bxgo")
-        pg.wait_for_selector(".uidlg .uibox")
-        t = pg.inner_text(".uibox")
+        pg.wait_for_selector(".uidlg:not(.uimod) .uibox")
+        t = pg.inner_text(".uidlg:not(.uimod) .uibox")
         assert f"{pv['total'] - 2} Touren korrigieren?" in t and "Methode: Aus dem Geländemodell berechnen." in t and "ändert den Aufstieg um insgesamt" in t and "rückgängig machen" in t
         _shot(pg, "sammel-bestaetigung-desktop-hell.png")
-        pg.locator(".uidlg .uifoot button", has_text="Abbrechen").click()
-        pg.wait_for_selector(".uidlg", state="detached", timeout=15000)
+        pg.locator(".uidlg:not(.uimod) .uifoot button", has_text="Abbrechen").click()
+        pg.wait_for_selector(".uidlg:not(.uimod)", state="detached", timeout=15000)
         pg.wait_for_function("() => document.activeElement && document.activeElement.id === 'bxgo'", timeout=15000)
         assert not _posts(pg, "/quality/fix") and pg.evaluate("document.activeElement.id") == "bxgo"             # Fokus zurück an den Auslöser
         # bestätigen: Start (nachgebaut) und Fortschritt
@@ -425,8 +425,8 @@ def test_batch_dialog_preview_selection_confirm_job_and_undo(pw, app_url):
                         {"running": None, "ok": True, "progress": "", "done": 7, "total": 7, "log": ["12:00:00 Korrigiert: 7 Touren, Aufstieg zusammen 3000 m → 2100 m (-900 m); 1 übersprungen"]}])
         st["arm"]()
         pg.click("#bxgo")
-        pg.wait_for_selector(".uidlg .uibox")
-        pg.locator(".uidlg .uifoot button", has_text="Korrigieren").click()
+        pg.wait_for_selector(".uidlg:not(.uimod) .uibox")
+        pg.locator(".uidlg:not(.uimod) .uifoot button", has_text="Korrigieren").click()
         pg.wait_for_selector("#bxjob [role=progressbar]", timeout=5000)
         assert started["body"]["method"] == "dem" and started["body"]["tours"] == want                               # genau die gewählten Touren
         pg.wait_for_function("() => document.querySelector('#bxjob [role=progressbar]')?.getAttribute('aria-valuenow') === '5'", timeout=8000)
@@ -439,11 +439,11 @@ def test_batch_dialog_preview_selection_confirm_job_and_undo(pw, app_url):
         _shot(pg, "sammel-ergebnis-desktop-hell.png")
         # Rückgängig: gefährliche Aktion → Fokus auf „Abbrechen“, Esc bricht ab
         pg.click("#bxundo")
-        pg.wait_for_selector(".uidlg [role=alertdialog]", timeout=15000)
+        pg.wait_for_selector(".uidlg:not(.uimod) [role=alertdialog]", timeout=15000)
         pg.wait_for_function("() => document.activeElement && document.activeElement.textContent === 'Abbrechen'", timeout=15000)
-        assert pg.evaluate("document.activeElement.textContent") == "Abbrechen" and "Diesen Sammel-Lauf rückgängig machen?" in pg.inner_text(".uibox")
+        assert pg.evaluate("document.activeElement.textContent") == "Abbrechen" and "Diesen Sammel-Lauf rückgängig machen?" in pg.inner_text(".uidlg:not(.uimod) .uibox")
         pg.keyboard.press("Escape")
-        pg.wait_for_selector(".uidlg", state="detached", timeout=15000)
+        pg.wait_for_selector(".uidlg:not(.uimod)", state="detached", timeout=15000)
         assert not _posts(pg, "/quality/fix-undo")
         undo = {}
 
@@ -452,12 +452,12 @@ def test_batch_dialog_preview_selection_confirm_job_and_undo(pw, app_url):
             route.fulfill(status=200, content_type="application/json", body='{"restored":3,"changed":0}')
         pg.route(f"**/api/devices/{did}/quality/fix-undo", fixundo)
         pg.click("#bxundo")
-        pg.wait_for_selector(".uidlg [role=alertdialog]")
-        pg.locator(".uidlg .uifoot button", has_text="Rückgängig machen").click()
-        pg.wait_for_selector(".uidlg .uibox:has-text('3 Touren wiederhergestellt.')", timeout=5000)
+        pg.wait_for_selector(".uidlg:not(.uimod) [role=alertdialog]")
+        pg.locator(".uidlg:not(.uimod) .uifoot button", has_text="Rückgängig machen").click()
+        pg.wait_for_selector(".uidlg:not(.uimod) .uibox:has-text('3 Touren wiederhergestellt.')", timeout=5000)
         assert undo["body"] == {"batch": "b1"}
         pg.keyboard.press("Enter")
-        pg.wait_for_selector(".uidlg", state="detached")
+        pg.wait_for_selector(".uidlg:not(.uimod)", state="detached")
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -567,14 +567,14 @@ def test_mobile_390_no_horizontal_scroll_and_touch_targets(pw, app_url):
         assert min(r.bounding_box()["height"] for r in pg.locator(".dvbrow").all()[:5]) >= 44
         _shot(pg, "sammel-dialog-390.png")
         pg.click("#bxgo")
-        pg.wait_for_selector(".uidlg .uibox")
+        pg.wait_for_selector(".uidlg:not(.uimod) .uibox")
         assert pg.evaluate("document.documentElement.scrollWidth") <= 391
-        bb = pg.locator(".uibox").bounding_box()
+        bb = pg.locator(".uidlg:not(.uimod) .uibox").bounding_box()
         assert bb["x"] >= 0 and bb["x"] + bb["width"] <= 390 and all(b.bounding_box()["height"] >= 44 for b in pg.locator(".uifoot .btn").all())
         _shot(pg, "bestaetigung-390.png")
         pg.keyboard.press("Escape")
         pg.evaluate("(() => { uiConfirm({title: 'Diesen Sammel-Lauf rückgängig machen?', text: 'Alle Touren dieses Laufs bekommen ihre ursprünglichen Höhen und Aufstieg zurück.', ok: 'Rückgängig machen', danger: true}); })()")
-        pg.wait_for_selector(".uidlg .uibox.danger")
+        pg.wait_for_selector(".uidlg:not(.uimod) .uibox.danger")
         _shot(pg, "gefahr-bestaetigung-390.png")
         assert not pg.errors, pg.errors
     finally:

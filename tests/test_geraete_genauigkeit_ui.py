@@ -161,12 +161,12 @@ def test_open_section_kpis_chart_list_and_suggestion_dialog(pw, app_url):
         assert "Höhe aus Geländemodell neu berechnen" in pg.inner_text(".dvsug") and "Es passiert nichts, bevor du es bestätigst" in pg.inner_text(".dvbox")
         # Bestätigung ist jetzt der gemeinsame Dialog (kein Browser-confirm): Abbrechen ändert nichts
         pg.locator(".dvsug button", has_text="Ausführen").first.click()
-        pg.wait_for_selector(".uidlg [role=dialog], .uidlg [role=alertdialog]", timeout=15000)
-        dlg = pg.locator(".uidlg .uibox")
+        pg.wait_for_selector(".uidlg:not(.uimod) [role=dialog], .uidlg:not(.uimod) [role=alertdialog]", timeout=15000)
+        dlg = pg.locator(".uidlg:not(.uimod) .uibox")
         assert dlg.get_attribute("aria-modal") == "true" and "Höhe aus Geländemodell neu berechnen?" in dlg.inner_text()
-        pg.locator(".uidlg .uifoot button", has_text="Abbrechen").click()
-        pg.wait_for_selector(".uidlg", state="detached", timeout=15000)
-        assert not pg.locator(".uidlg").count() and not pg.posts                               # abgebrochen: kein Aufruf
+        pg.locator(".uidlg:not(.uimod) .uifoot button", has_text="Abbrechen").click()
+        pg.wait_for_selector(".uidlg:not(.uimod)", state="detached", timeout=15000)
+        assert not pg.locator(".uidlg:not(.uimod)").count() and not pg.posts                               # abgebrochen: kein Aufruf
         # bestätigen (Antwort nachgebaut) und rückgängig machen
         calls = []
 
@@ -176,8 +176,8 @@ def test_open_section_kpis_chart_list_and_suggestion_dialog(pw, app_url):
         pg.route("**/api/tours/*/elev-fix", fake)
         pg.route("**/api/tours/*/elev-restore", fake)
         pg.locator(".dvsug button", has_text="Ausführen").first.click()
-        pg.wait_for_selector(".uidlg", timeout=15000)
-        pg.locator(".uidlg .uifoot button", has_text="Ausführen").click()                      # bestätigen
+        pg.wait_for_selector(".uidlg:not(.uimod)", timeout=15000)
+        pg.locator(".uidlg:not(.uimod) .uifoot button", has_text="Ausführen").click()                      # bestätigen
         pg.wait_for_selector("#dvsundo", timeout=15000)
         pg.wait_for_function("() => { const r = document.querySelector('.dvsres'); return !!r && r.innerText.includes('Aufstieg 420 m') && r.innerText.includes('vorher 610 m'); }", timeout=15000)
         assert calls == ["elev-fix"] and "Aufstieg 420 m" in pg.inner_text(".dvsres") and "vorher 610 m" in pg.inner_text(".dvsres")
