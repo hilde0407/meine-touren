@@ -266,7 +266,7 @@ VIEWS.account = async () => {
      <div class="field"><label>Für</label><select id="gg"><option value="*">Alle Benutzer</option>${others.map(u => `<option value="${esc(u.uid)}">${esc(u.name)}</option>`).join("")}</select></div>
      <div class="field"><label>Was</label><select id="gs2"><option value="all">Meine ganze Fotobibliothek</option><option value="tour">Nur die Fotos einer Tour</option></select></div>
      <div class="field" id="gtw" style="display:none"><label>Tour</label><select id="gt">${TOURS.slice(0, 400)
-       .map(t => `<option value="${t.id}">${dateS(t.date)} · ${esc(t.name)}</option>`)
+       .map(t => `<option value="${t.id}">${fmtDatumKurz(t.date)} · ${esc(t.name)}</option>`)
        .join("")}</select></div>
      <div class="row"><button class="btn" id="gadd">Freigeben</button><span id="gm" class="mut"></span></div></div>
     <div class="panel"><h2>Von mir freigegeben</h2><div class="rows">${gr.mine.map(g => `<div class="r"><span>${esc(g.grantee_name)}<small>${g.scope === "all" ? "ganze Fotobibliothek" : "Tour: " + esc(g.ref_name || g.ref)}</small></span><button class="btn alt sm" data-gd="${g.id}">Entfernen</button></div>`).join("") || '<div class="mut">Noch nichts freigegeben.</div>'}</div>
@@ -420,7 +420,7 @@ VIEWS.shared = async () => {
               tid,
               ps,
             ]) => `<div class="pgroup"><div class="ph"><h3>${esc(tid ? o.tours[tid] || "Tour" : "Ohne Tour")}</h3><span>${ps.length} Fotos</span><button class="btn alt sm" data-grp="${oi}|${esc(tid)}">Übernehmen</button></div>
-      <div class="thumbs" data-g="${oi}|${esc(tid)}">${ps.map((p, i) => `<img loading="lazy" src="/spic/${esc(o.owner)}/${p.id}?size=300" data-i="${i}" title="${new Date(p.taken_ts * 1000).toLocaleString("de-DE")}">`).join("")}</div></div>`
+      <div class="thumbs" data-g="${oi}|${esc(tid)}">${ps.map((p, i) => `<img loading="lazy" src="/spic/${esc(o.owner)}/${p.id}?size=300" data-i="${i}" title="${fmtDatumKurz(p.taken_ts, {zeit: true})}">`).join("")}</div></div>`
           )
           .join("")
       );

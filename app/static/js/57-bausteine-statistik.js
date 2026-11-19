@@ -6,7 +6,7 @@
 const ST_FIELDS = [{kind: "sports"}, {kind: "range", def: "all"}, {kind: "title"}];
 const ST_LEN = [5, 10, 15, 20, 30, 50];                                                  // Obergrenzen der Längenklassen in km (wie LAENGEN im Server)
 const ST_LENL = ["unter 5", "5–10", "10–15", "15–20", "20–30", "30–50", "über 50"];
-const ST_WERT = {km: ["Strecke", t => t.km, v => slKm(v)], hm: ["Aufstieg", t => t.up_m || 0, v => slHm(v)], dauer: ["Dauer", t => t.h, v => slDur(v * 3600)], tempo: ["Tempo", t => (t.h > 0 ? t.km / t.h : 0), v => nf(v, 1) + " km/h"]};
+const ST_WERT = {km: ["Strecke", t => t.km, v => slKm(v)], hm: ["Aufstieg", t => t.up_m || 0, v => slHm(v)], dauer: ["Dauer", t => t.h, v => slDur(v * 3600)], tempo: ["Tempo", t => (t.h > 0 ? t.km / t.h : 0), v => fmtTempo(v)]};
 const stNoTours = (b, cfg) => flNone(b, (cfg.sports || []).length || cfg.range ? "" : "Noch keine Touren.");
 /* Spaltendiagramm-Zeitstrahl und Trend: kleine Linie als Inline-SVG (Farben über Klassen, Maße als Attribute) */
 function stLine(pts, trend, label) {
@@ -33,9 +33,9 @@ Object.assign(window.SL_WT, {
       if (!A.length) return stNoTours(b, cfg);
       const v = Array(12).fill(0);
       A.forEach(t => (v[t.m - 1] += FL_MET[MT].f(t)));
-      const best = v.indexOf(Math.max(...v)), un = MT === "count" ? "Touren" : FL_MET[MT].unit, avg = slSum(v, x => x) / 12;
-      b.innerHTML = slCols(v, {hl: best, avg, label: `Säulendiagramm ${FL_MET[MT].name} je Monat, am stärksten ${MONL[best]} mit ${nf(v[best], 0)} ${un}`, labels: SL_MON, cls: "slsm"}) +
-        `<p class="slcmp">${MONL[best]} ist dein stärkster Monat.</p><p class="mut slcmpn">${nf(v[best], 0)} ${un}; im Schnitt aller Monate ${nf(avg, 0)} ${un} (gestrichelte Linie).</p>`;
+      const best = v.indexOf(Math.max(...v)), avg = slSum(v, x => x) / 12, F = FL_MET[MT].fmt, un = MT === "count" ? " Touren" : "";
+      b.innerHTML = slCols(v, {hl: best, avg, label: `Säulendiagramm ${FL_MET[MT].name} je Monat, am stärksten ${MONL[best]} mit ${F(v[best])}${un}`, labels: SL_MON, cls: "slsm"}) +
+        `<p class="slcmp">${MONL[best]} ist dein stärkster Monat.</p><p class="mut slcmpn">${F(v[best])}${un}; im Schnitt aller Monate ${F(avg)}${un} (gestrichelte Linie).</p>`;
       slBadge(c, MONL[best]);
     },
   },
@@ -111,10 +111,10 @@ Object.assign(window.SL_WT, {
         cur = cum(yr), tot = cur[cur.length - 1][1], ser = [{pts: cur, color: cssv("--bars"), w: 3.2}];
       if (base.some(t => t.y === yr - 1)) ser.unshift({pts: cum(yr - 1), color: cssv("--accent2"), dash: 1, w: 2});
       const vj = ser.length > 1 ? ser[0].pts[ser[0].pts.length - 1][1] : 0;
-      b.innerHTML = lineChart(ser).replace('<svg class="chart"', `<svg class="chart" role="img" aria-label="${esc(`Höhenmeter im Jahr ${yr} kumuliert, insgesamt ${nf(tot, 0)} m`)}"`) +
-        `<div class="legend"><span><i class="stk"></i>${yr}</span>${vj ? `<span><i class="stk stk2"></i>${yr - 1}</span>` : ""}</div><p class="slcmp">${nf(tot, 0)} m in ${yr}</p>` +
-        (vj ? `<p class="mut slcmpn">Vorjahr insgesamt ${nf(vj, 0)} m.</p>` : "");
-      slBadge(c, `${yr}: ${nf(tot, 0)} m`);
+      b.innerHTML = lineChart(ser).replace('<svg class="chart"', `<svg class="chart" role="img" aria-label="${esc(`Höhenmeter im Jahr ${yr} kumuliert, insgesamt ${fmtHm(tot)}`)}"`) +
+        `<div class="legend"><span><i class="stk"></i>${yr}</span>${vj ? `<span><i class="stk stk2"></i>${yr - 1}</span>` : ""}</div><p class="slcmp">${fmtHm(tot)} in ${yr}</p>` +
+        (vj ? `<p class="mut slcmpn">Vorjahr insgesamt ${fmtHm(vj)}.</p>` : "");
+      slBadge(c, `${yr}: ${fmtHm(tot)}`);
     },
   },
   sttop: {
@@ -127,7 +127,7 @@ Object.assign(window.SL_WT, {
       if (!A.length) return stNoTours(b, cfg);
       const L = A.slice().sort((x, y) => W[1](y) - W[1](x) || (x.start_ts || 0) - (y.start_ts || 0)).filter(t => W[1](t) > 0).slice(0, n);
       if (!L.length) return slNote(b, "Dafür fehlen Angaben in den Touren.");
-      b.innerHTML = `<ol class="sllist stt-l">${L.map(t => `<li><a href="#/tour/${slEnc(t.id)}">${esc(t.name)}</a><b>${W[2](W[1](t))}</b><span class="mut">${dateS(t.date)} · ${nf(t.km, 1)} km</span></li>`).join("")}</ol>`;
+      b.innerHTML = `<ol class="sllist stt-l">${L.map(t => `<li><a href="#/tour/${slEnc(t.id)}">${esc(t.name)}</a><b>${W[2](W[1](t))}</b><span class="mut">${fmtDatumKurz(t.date)} · ${fmtKm(t.km)}</span></li>`).join("")}</ol>`;
       slBadge(c, W[2](W[1](L[0])));
     },
   },

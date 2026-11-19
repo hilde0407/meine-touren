@@ -45,10 +45,6 @@ function analyse(c) {
   }
   return {cum, pauses, total, pausedS, segs, band, dist: cum[n - 1]};
 }
-const fmtH = s => {
-  const [h, m] = hmParts(s);
-  return h ? `${h}:${pad2(m)} h` : `${m} min`;
-};
 /* Wetter und Analyse: Karten für die Unterseite „Auswertung“ (auf der Hauptseite nur, damit der Einstieg Kurzaussagen hat – 48-tourlayout.js nimmt sie wieder heraus).
    Liefert {wx: Promise} – die Unterseite wartet darauf, bevor sie „keine Auswertung“ meldet. */
 async function anaRun(id) {
@@ -79,7 +75,7 @@ async function anaRun(id) {
                     : "☀️";
       f.insertAdjacentHTML(
         "afterend",
-        `<div class="wx">${ic} <b>${esc(w.text)}</b> · ${nf(w.tmin, 0)}–${nf(w.tmax, 0)} °C · Niederschlag ${nf(w.precip, 1)} mm · Wind bis ${nf(w.wind, 0)} km/h${w.snow_depth != null && (w.snow_depth > 0 || w.snow72 > 0 || w.snowfall > 0) ? ` · ❄ Schneehöhe ca. ${nf(w.snow_depth, 0)} cm${w.snow72 > 0 ? `, Neuschnee 3 Tage davor ${nf(w.snow72, 0)} cm` : ""}${w.snowfall > 0 ? `, während der Tour ${nf(w.snowfall, 0)} cm` : ""}` : ""} <span class="mut">(Open-Meteo, grobe Modelldaten)</span></div>`
+        `<div class="wx">${ic} <b>${esc(w.text)}</b> · ${nf(w.tmin, 0)}–${nf(w.tmax, 0)} °C · Niederschlag ${nf(w.precip, 1)} mm · Wind bis ${fmtTempo(w.wind, {d: 0})}${w.snow_depth != null && (w.snow_depth > 0 || w.snow72 > 0 || w.snowfall > 0) ? ` · ❄ Schneehöhe ca. ${nf(w.snow_depth, 0)} cm${w.snow72 > 0 ? `, Neuschnee 3 Tage davor ${nf(w.snow72, 0)} cm` : ""}${w.snowfall > 0 ? `, während der Tour ${nf(w.snowfall, 0)} cm` : ""}` : ""} <span class="mut">(Open-Meteo, grobe Modelldaten)</span></div>`
       );
     })
     .catch(() => {});
@@ -96,18 +92,18 @@ async function anaRun(id) {
       .slice(0, 25);
   const tot = A.dist || 1,
     box = tlCard("anacard", {sec: "ana", key: "tl_ana", icon: "trend", title: "Analyse", def: false, bodyCls: "tlana",
-      badge: A.total ? `<span>Bewegungszeit</span> <b>${fmtH(A.total - A.pausedS)}</b>${A.pauses.length ? ` · ${A.pauses.length} Pause${A.pauses.length === 1 ? "" : "n"}` : ""}` : "Steigungsanteile"});
+      badge: A.total ? `<span>Bewegungszeit</span> <b>${fmtDauer(A.total - A.pausedS)}</b>${A.pauses.length ? ` · ${A.pauses.length} Pause${A.pauses.length === 1 ? "" : "n"}` : ""}` : "Steigungsanteile"});
   tlBody(box).innerHTML = `<div class="rows">
     ${
       A.total
-        ? `<div class="r"><span>Bewegungszeit<small>${A.pauses.length} Pause${A.pauses.length === 1 ? "" : "n"} (ab 3 Min.) mit zusammen ${fmtH(A.pausedS)}</small></span><b>${fmtH(A.total - A.pausedS)}</b></div>
-    <div class="r"><span>Ø-Tempo in Bewegung<small>gesamt inkl. Pausen: ${nf(t.km / (A.total / 3600), 1)} km/h</small></span><b>${nf(t.km / Math.max(0.01, (A.total - A.pausedS) / 3600), 1)} km/h</b></div>`
+        ? `<div class="r"><span>Bewegungszeit<small>${A.pauses.length} Pause${A.pauses.length === 1 ? "" : "n"} (ab 3 Min.) mit zusammen ${fmtDauer(A.pausedS)}</small></span><b>${fmtDauer(A.total - A.pausedS)}</b></div>
+    <div class="r"><span>Ø-Tempo in Bewegung<small>gesamt inkl. Pausen: ${fmtTempo(t.km / (A.total / 3600))}</small></span><b>${fmtTempo(t.km / Math.max(0.01, (A.total - A.pausedS) / 3600))}</b></div>`
         : ""
     }</div>
    <h3 class="m16-0-8 fs18">Steigung (Anteil der Strecke)</h3><div class="stack">${GR.map((b, k) => `<div style="width:${(A.band[k] / tot) * 100}%;background:${b[2]}" title="${b[3]}"></div>`).join("")}</div>
-   <div class="legend">${GR.map((b, k) => `<span><i style="background:${b[2]}"></i>${b[3]} ${nf(A.band[k] / 1000, 1)} km</span>`).join("")}</div>
+   <div class="legend">${GR.map((b, k) => `<span><i style="background:${b[2]}"></i>${b[3]} ${fmtKm(A.band[k] / 1000)}</span>`).join("")}</div>
    <div class="row mt12"><a class="btn alt sm" id="gtog" href="#/tour/${esc(String(id))}?karte=steigung">Steigung auf der Karte zeigen</a>${A.pauses.length ? `<a class="btn alt sm" id="ptog" href="#/tour/${esc(String(id))}?karte=pausen">Pausen auf der Karte zeigen</a>` : ""}
-    <select id="cmp" class="mw340"><option value="">Mit anderer Tour vergleichen …</option>${others.map(x => `<option value="${x.o.id}">${dateS(x.o.date)} · ${esc(x.o.name)} (${nf(x.o.km, 1)} km)</option>`).join("")}</select></div>`;
+    <select id="cmp" class="mw340"><option value="">Mit anderer Tour vergleichen …</option>${others.map(x => `<option value="${x.o.id}">${fmtDatumKurz(x.o.date)} · ${esc(x.o.name)} (${fmtKm(x.o.km)})</option>`).join("")}</select></div>`;
   tlAnc().after(box);
   $("#cmp").onchange = e => {
     if (e.target.value) location.hash = `#/compare?a=${encodeURIComponent(id)}&b=${encodeURIComponent(e.target.value)}`;
@@ -144,7 +140,7 @@ async function anaRun(id) {
       L.layerGroup(
         A.pauses.map(p =>
           L.circleMarker([p.lat, p.lng], {radius: 9, color: "#fff", weight: 2, fillColor: "#7b61c9", fillOpacity: 1}).bindTooltip(
-            `Pause ${fmtH(p.dur)}, ${nf(p.t / 60000, 0)} Min. nach dem Start`
+            `Pause ${fmtDauer(p.dur)}, ${nf(p.t / 60000, 0)} Min. nach dem Start`
           )
         )
       ).addTo(map)
@@ -181,7 +177,7 @@ function xyChart(series, o) {
     s += `<line x1="${L0}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)" stroke-dasharray="2 4"/><text x="${L0 - 6}" y="${y(v) + 4}" text-anchor="end">${o.fy ? o.fy(v) : nf(v, 0)}</text>`;
   });
   for (let k = 0; k <= 4; k++)
-    s += `<text x="${x((X1 * k) / 4)}" y="${H - 6}" text-anchor="${k === 4 ? "end" : k === 0 ? "start" : "middle"}">${nf((X1 * k) / 4, 0)} km</text>`;
+    s += `<text x="${x((X1 * k) / 4)}" y="${H - 6}" text-anchor="${k === 4 ? "end" : k === 0 ? "start" : "middle"}">${fmtKm((X1 * k) / 4, {d: 0})}</text>`;
   series.forEach(
     se =>
       (s += `<path d="${se.pts.map((p, i) => `${i ? "L" : "M"}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join("")}" fill="none" stroke="${se.color}" stroke-width="2.6"/>`)
@@ -214,22 +210,23 @@ VIEWS.compare = async (_, q) => {
   };
   const a = info(ta, ca),
     b = info(tb, cb),
-    d = (x, y, u, dg = 1) => {
+    VF = {km: v => fmtKm(v), m: v => fmtHm(v), h: v => fmtDauer(v * 3600), "km/h": v => fmtTempo(v), "": v => nf(v, 0)},
+    d = (x, y, u) => {
       const v = y - x;
-      return `<span>${v > 0 ? "+" : v < 0 ? "−" : ""}${nf(Math.abs(v), dg)} ${u}</span>`;
+      return `<span>${v > 0 ? "+" : v < 0 ? "−" : ""}${VF[u](Math.abs(v))}</span>`;
     };
-  const row = (l, x, y, u, dg = 1) =>
+  const row = (l, x, y, u) =>
     x == null || y == null
       ? ""
-      : `<tr><td>${l}</td><td class="n">${nf(x, dg)} ${u}</td><td class="n">${nf(y, dg)} ${u}</td><td class="n">${d(x, y, u, dg)}</td></tr>`;
+      : `<tr><td>${l}</td><td class="n">${VF[u](x)}</td><td class="n">${VF[u](y)}</td><td class="n">${d(x, y, u)}</td></tr>`;
   const alt = (c, A) => c.map((p, i) => [A.cum[i] / 1000, p[2] ?? 0]),
     tim = (c, A) => c.map((p, i) => [A.cum[i] / 1000, (p[3] ?? 0) / 60000]);
   const hasT = ca[0] && ca[0][3] != null && cb[0] && cb[0][3] != null;
   $("#main").innerHTML =
     `<div class="row"><a class="back" href="#/tour/${ta.id}">‹ ${esc(ta.name)}</a></div><div class="sec"><h2>Tourvergleich</h2></div>
-   <div class="legend mb10"><span><i style="background:${cols[0]}"></i><a href="#/tour/${ta.id}">${esc(ta.name)}</a> (${dateS(ta.date)})</span><span><i style="background:${cols[1]}"></i><a href="#/tour/${tb.id}">${esc(tb.name)}</a> (${dateS(tb.date)})</span></div>
+   <div class="legend mb10"><span><i style="background:${cols[0]}"></i><a href="#/tour/${ta.id}">${esc(ta.name)}</a> (${fmtDatumKurz(ta.date)})</span><span><i style="background:${cols[1]}"></i><a href="#/tour/${tb.id}">${esc(tb.name)}</a> (${fmtDatumKurz(tb.date)})</span></div>
    <div class="grid g2"><div id="cm" class="cmap"></div><div><table class="cmp"><tr><th></th><th class="n">A</th><th class="n">B</th><th class="n">B − A</th></tr>
-    ${row("Strecke", a.km, b.km, "km")}${row("Aufstieg", a.up, b.up, "m", 0)}${row("Dauer", a.h, b.h, "h", 2)}${row("Ø-Tempo gesamt", a.v, b.v, "km/h")}${row("Bewegungszeit", a.moving, b.moving, "h", 2)}${row("Pausen", a.pauses, b.pauses, "", 0)}</table>
+    ${row("Strecke", a.km, b.km, "km")}${row("Aufstieg", a.up, b.up, "m")}${row("Dauer", a.h, b.h, "h")}${row("Ø-Tempo gesamt", a.v, b.v, "km/h")}${row("Bewegungszeit", a.moving, b.moving, "h")}${row("Pausen", a.pauses, b.pauses, "")}</table>
     <div class="panel gap"><h3>Höhenprofil</h3>${
       ca.length > 2 && cb.length > 2
         ? xyChart(
@@ -237,7 +234,7 @@ VIEWS.compare = async (_, q) => {
               {pts: alt(ca, a.A), color: cols[0]},
               {pts: alt(cb, b.A), color: cols[1]},
             ],
-            {fy: v => nf(v, 0) + " m"}
+            {fy: v => fmtHm(v)}
           )
         : "<div class='mut'>keine Höhendaten</div>"
     }</div></div></div>
@@ -248,7 +245,7 @@ VIEWS.compare = async (_, q) => {
              {pts: tim(ca, a.A), color: cols[0]},
              {pts: tim(cb, b.A), color: cols[1]},
            ],
-           {zero: true, fy: v => fmtH(v * 60)}
+           {zero: true, fy: v => fmtDauer(v * 60)}
          )}</div>`
        : ""
    }`;
@@ -288,7 +285,7 @@ VIEWS.admin = async (...a) => {
   if (zr)
     zr.closest(".row").insertAdjacentHTML(
       "afterend",
-      `<p class="mut fs14 mn4-0-8">${z.state === "ok" ? "✓ Token gültig" : /^fail/.test(z.state || "") ? `<span class="bad">✗ Token ungültig: ${esc(z.state.slice(5))}</span>` : z.state === "none" ? "Kein Token gespeichert" : "Token noch nicht geprüft"}${age != null ? ` · gespeichert vor ${age} Tag${age === 1 ? "" : "en"}` : ""}${z.checked ? ` · zuletzt geprüft ${new Date(+z.checked * 1000).toLocaleString("de-DE")}` : ""} (wird täglich mitgeprüft)</p>`
+      `<p class="mut fs14 mn4-0-8">${z.state === "ok" ? "✓ Token gültig" : /^fail/.test(z.state || "") ? `<span class="bad">✗ Token ungültig: ${esc(z.state.slice(5))}</span>` : z.state === "none" ? "Kein Token gespeichert" : "Token noch nicht geprüft"}${age != null ? ` · gespeichert vor ${age} Tag${age === 1 ? "" : "en"}` : ""}${z.checked ? ` · zuletzt geprüft ${fmtDatumKurz(+z.checked, {zeit: true})}` : ""} (wird täglich mitgeprüft)</p>`
     );
   sv.closest(".row").insertAdjacentHTML(
     "beforebegin",
@@ -383,9 +380,9 @@ VIEWS.dash = async (...a) => {
       my = ++tok;
     k.textContent = (i ? `${i + 1}. letzte Tour` : "Letzte Tour") + ", " + sName(t.sport);
     h1.textContent = t.name;
-    w.textContent = `${dateL(t.date)}, ${timeS(t.date)} Uhr`;
+    w.textContent = `${fmtDatum(t.date, {zeit: true})}`;
     btns.innerHTML = `<a class="btn" href="#/tour/${t.id}">Tour ansehen</a>${t.photos ? `<a class="btn alt c-white" target="_blank" href="slideshow.html?tour=${t.id}">Diashow</a>` : ""}`;
-    signs.innerHTML = `<div class="sign">${nf(t.km, 1)}<small>Kilometer</small></div><div class="sign l">${nf(t.up_m, 0)}<small>Meter aufwärts</small></div><div class="sign">${nf(t.h, 1)}<small>Stunden</small></div>`;
+    signs.innerHTML = `<div class="sign">${fmtKm(t.km)}<small>Strecke</small></div><div class="sign l">${fmtHm(t.up_m)}<small>Aufstieg</small></div><div class="sign">${fmtDauer(t.h * 3600)}<small>Dauer</small></div>`;
     $("#hcnt").textContent = `${i + 1} / ${N}`;
     const old = hero.querySelector(".thumbrow");
     if (old) old.remove();

@@ -161,7 +161,7 @@ function recLive(st) {
   if (ri.off) nxt = '<div class="bad fs20 fw700">⚠ Abseits der Route</div>';
   else if (ri.next_m !== undefined) {
     const a = ri.next_angle, ar = Math.abs(a) >= 150 ? "↩" : a > 0 ? "➡" : "⬅";
-    nxt = `<div class="fs34 lh1_1">${ar} <b>${ri.next_m >= 1000 ? nf(ri.next_m / 1000, 1) + " km" : Math.max(10, Math.round(ri.next_m / 10) * 10) + " m"}</b></div><div class="mut fs13">Nächste Abbiegung</div>`;
+    nxt = `<div class="fs34 lh1_1">${ar} <b>${ri.next_m >= 1000 ? fmtKm(ri.next_m / 1000) : Math.max(10, Math.round(ri.next_m / 10) * 10) + " m"}</b></div><div class="mut fs13">Nächste Abbiegung</div>`;
   } else nxt = '<div class="fs20">Keine Abbiegung mehr</div>';
   let prof = "";
   const pr = recProfile(ri.name);
@@ -175,7 +175,7 @@ function recLive(st) {
       `<line x1="${X(prog).toFixed(1)}" x2="${X(prog).toFixed(1)}" y1="0" y2="${H}" stroke="#2f6bd9" stroke-width="2"/><circle cx="${X(prog).toFixed(1)}" cy="${Y(pr.e[ie]).toFixed(1)}" r="4" fill="#2f6bd9"/></svg>` +
       `<div class="mut fs13">${pr.e[ie]} m · noch ↑ ${Math.round(upLeft)} m · höchster Punkt ${hi} m</div>`;
   }
-  box.innerHTML = `${nxt}<div class="row g16 jcc mt6"><span>Ziel in <b>${nf(rest / 1000, 1)} km</b></span><span>Ankunft ca. <b>${hh} Uhr</b></span></div>` +
+  box.innerHTML = `${nxt}<div class="row g16 jcc mt6"><span>Ziel in <b>${fmtKm(rest / 1000)}</b></span><span>Ankunft ca. <b>${hh} Uhr</b></span></div>` +
     `<div class="br3 mt8" style="height:6px;background:var(--line,#ddd)"><div class="br3" style="height:6px;width:${Math.min(100, (prog / ri.total_m) * 100).toFixed(0)}%;background:#2f6bd9"></div></div>${prof}`;
 }
 
@@ -206,7 +206,7 @@ VIEWS.record = async () => {
         <p class="mut fs13 mt10">Die Aufzeichnung läuft auch bei ausgeschaltetem Bildschirm weiter. Tipp: Akku-Optimierung für diese App ausschalten.</p>
         <button class="btn alt mt6" id="rbat">Akku-Einstellungen öffnen</button> <a class="btn alt mt6" href="#/apptest">App-Test</a></div>`;
     } else if (s === "finished") {
-      h += `<div class="panel"><h2>Aufzeichnung beendet</h2><p>${nf((st.dist_m || 0) / 1000, 2)} km · ${recDur(st.active_s || 0)} h · ↑ ${nf(st.up_m || 0, 0)} m · ↓ ${nf(st.down_m || 0, 0)} m</p>
+      h += `<div class="panel"><h2>Aufzeichnung beendet</h2><p>${fmtKm((st.dist_m || 0) / 1000)} · ${fmtDauer(st.active_s || 0)} · ${fmtAuf(st.up_m || 0)} · ${fmtAb(st.down_m || 0)}</p>
         <input id="rname" value="${esc(st.name)}" class="w100 fs16 p10 m6-0-12" placeholder="Name der Tour (leer lassen = automatisch)">
         ${(() => {
           const pi = typeof A.photoInfo === "function" ? recPhotoInfo() : {};
@@ -221,7 +221,7 @@ VIEWS.record = async () => {
         <div class="recgrid">${recCells(st)}</div>
         <div id="rlive" class="panel m12-0-0 tac" style="display:none"></div>
         <div id="rwx" class="panel m12-0-0" style="display:none;border-left:5px solid #d97706"></div>
-        ${typeof A.routeInfo === "function" && recRouteInfo().has ? `<div class="mut fs13 mt8" id="rgi">🧭 ${esc(recRouteInfo().name)} · ${nf(recRouteInfo().km, 1)} km <label class="ml8"><input type="checkbox" id="rgon" ${recRouteInfo().on ? "checked" : ""}> Ansagen</label></div>` : ""}
+        ${typeof A.routeInfo === "function" && recRouteInfo().has ? `<div class="mut fs13 mt8" id="rgi">🧭 ${esc(recRouteInfo().name)} · ${fmtKm(recRouteInfo().km)} <label class="ml8"><input type="checkbox" id="rgon" ${recRouteInfo().on ? "checked" : ""}> Ansagen</label></div>` : ""}
         ${typeof A.takePhoto === "function" ? '<button class="btn w100 fs20 p16 mt12" id="rphoto">📷 Foto aufnehmen</button><div id="rphinfo" class="mut fs13 mt4"></div>' : ""}
         ${typeof A.addWaypoint === "function" ? `<button class="btn alt w100 fs18 p12 mt10" id="rwpb">📍 Wegpunkt setzen</button>
           <div id="rwp" class="mt8" style="display:none"><div class="row g6 fxw jcc">${REC_WP.map(w => `<button class="btn alt sm" data-wp="${esc(w)}">${esc(w)}</button>`).join("")}</div>
@@ -238,7 +238,7 @@ VIEWS.record = async () => {
     } catch (e) {}
     if (bk.length)
       h += `<div class="panel"><h2>Gesicherte Aufzeichnungen</h2><p class="mut fs13">Jede beendete Aufzeichnung wird zusätzlich auf dem Handy gesichert (die letzten 10). Falls eine Tour nicht auf dem Server angekommen ist, kannst du sie hier erneut speichern.</p>${bk
-        .map(b => `<div class="row g8 m6-0"><span>${new Date(b.ts).toLocaleString("de-DE", {dateStyle: "short", timeStyle: "short"})} · ${Math.round(b.size / 1024)} kB</span><span class="sp"></span><button class="btn alt sm" data-bk="${esc(b.file)}">Auf den Server speichern</button></div>`)
+        .map(b => `<div class="row g8 m6-0"><span>${fmtDatumKurz(b.ts, {zeit: true})} · ${Math.round(b.size / 1024)} kB</span><span class="sp"></span><button class="btn alt sm" data-bk="${esc(b.file)}">Auf den Server speichern</button></div>`)
         .join("")}<p id="bkmsg" class="mut"></p></div>`;
     if (s === "idle" && typeof A.photoInfo === "function" && recPhotoInfo().pending)
       h += `<div class="panel"><h2>Fotos warten auf den Upload</h2><p class="mut fs13">${recPhotoInfo().pending} Foto(s) aus früheren Aufzeichnungen liegen noch auf dem Handy (sie sind auch in der Galerie).</p><button class="btn alt" id="rphup">Jetzt hochladen</button> <span id="rphupm" class="mut"></span></div>`;
@@ -273,7 +273,7 @@ VIEWS.record = async () => {
         m.textContent = "Wird erstellt …";
         try {
           const r = await api("/api/live/link", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({hours: +$("#rlh").value})});
-          const until = new Date(r.exp * 1000).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"});
+          const until = fmtUhrzeit(r.exp);
           m.innerHTML = `Link bis ${until} Uhr erstellt.${r.https ? "" : ' <span class="bad">Die App meldet den Standort nur über HTTPS – bitte eine https-Serveradresse verwenden.</span>'}`;
           const text = `Hier kannst du meinen Live-Standort verfolgen (gültig bis ${until} Uhr): ${r.url}`;
           if (typeof A.shareText === "function") A.shareText(text);
@@ -302,12 +302,12 @@ VIEWS.record = async () => {
       Promise.all([api("/api/plans").catch(() => []), TOURS.length ? Promise.resolve() : loadTours().catch(() => {})]).then(([plans]) => {
         if (!$("#rroute")) return;
         let h = '<option value="">Keine – frei aufzeichnen</option>';
-        if (plans.length) h += `<optgroup label="Geplante Touren">${plans.map(p => `<option value="p${p.id}">${esc(p.name)} · ${nf(p.km || 0, 1)} km</option>`).join("")}</optgroup>`;
+        if (plans.length) h += `<optgroup label="Geplante Touren">${plans.map(p => `<option value="p${p.id}">${esc(p.name)} · ${fmtKm(p.km || 0)}</option>`).join("")}</optgroup>`;
         const tl = [...TOURS].sort((a, b) => (b.date || "").localeCompare(a.date || "")).slice(0, 40);
-        if (tl.length) h += `<optgroup label="Frühere Touren (zum Nachgehen)">${tl.map(t => `<option value="t${t.id}">${esc(t.name)} · ${(t.date || "").slice(0, 10)} · ${nf(t.km, 1)} km</option>`).join("")}</optgroup>`;
+        if (tl.length) h += `<optgroup label="Frühere Touren (zum Nachgehen)">${tl.map(t => `<option value="t${t.id}">${esc(t.name)} · ${(t.date || "").slice(0, 10)} · ${fmtKm(t.km)}</option>`).join("")}</optgroup>`;
         sel.innerHTML = h;
         const ri = recRouteInfo();
-        if (ri.has) info.innerHTML = `Geladen: <b>${esc(ri.name)}</b> · ${nf(ri.km, 1)} km · ${ri.turns} Abbiegungen. Die Ansagen beginnen, sobald du auf der Route bist.`;
+        if (ri.has) info.innerHTML = `Geladen: <b>${esc(ri.name)}</b> · ${fmtKm(ri.km)} · ${ri.turns} Abbiegungen. Die Ansagen beginnen, sobald du auf der Route bist.`;
       });
       sel.onchange = async () => {
         if (!sel.value) {
@@ -320,7 +320,7 @@ VIEWS.record = async () => {
         try {
           await recLoadRoute(sel.value);
           const ri = recRouteInfo();
-          info.innerHTML = `Geladen: <b>${esc(ri.name)}</b> · ${nf(ri.km, 1)} km · ${ri.turns} Abbiegungen.<br>Die Ansagen beginnen, sobald du auf der Route bist. <label><input type="checkbox" id="rgon2" ${ri.on ? "checked" : ""}> Ansagen</label> <button class="btn alt sm" id="rgtest">Testansage</button>`;
+          info.innerHTML = `Geladen: <b>${esc(ri.name)}</b> · ${fmtKm(ri.km)} · ${ri.turns} Abbiegungen.<br>Die Ansagen beginnen, sobald du auf der Route bist. <label><input type="checkbox" id="rgon2" ${ri.on ? "checked" : ""}> Ansagen</label> <button class="btn alt sm" id="rgtest">Testansage</button>`;
           $("#rgon2").onchange = e => A.setGuide(e.target.checked);
           $("#rgtest").onclick = () => A.guideTest();
         } catch (e) {

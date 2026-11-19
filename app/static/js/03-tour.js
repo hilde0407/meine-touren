@@ -115,12 +115,12 @@ const tlOnSub = fn => TL_DETAIL.push(fn);
 VIEWS.tourauswertung = async id => {
   const t = BY[id];
   if (!t) throw new Error("Tour nicht gefunden");
-  const hm = fmtHM(t.h * 3600);
+  const hm = fmtDauer(t.h * 3600);
   $("#main").innerHTML =
     `<div class="row"><a class="back" id="tlback" href="#/tour/${esc(String(t.id))}">‹ Zurück zur Tour</a></div>
    <div class="tlsubhead"><span class="tlsubeb">Detaillierte Auswertung</span>
    <h1 class="tlsubt">${esc(t.name)}</h1>
-   <p class="tlsubfig"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span>${dateL(t.date)}</span> <span>${nf(t.km, 1)} km</span> <span>${nf(t.up_m, 0)} m aufwärts</span> <span>${hm} Std.</span>${t.h ? ` <span>${nf(t.km / t.h, 1)} km/h</span>` : ""}</p></div>
+   <p class="tlsubfig"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span>${fmtDatum(t.date)}</span> <span>${fmtKm(t.km)}</span> <span>${fmtAuf(t.up_m)}</span> <span>${hm}</span>${t.h ? ` <span>${fmtTempo(t.km / t.h)}</span>` : ""}</p></div>
    <nav class="tlnav" id="tlnav" aria-label="Abschnitte dieser Auswertung" hidden></nav>
    <p class="mut tlload" id="tlload" role="status">Auswertung wird geladen …</p>
    <div class="tlx tlsub" id="tl" data-tid="${esc(String(t.id))}"><div id="tlsubanc" hidden></div>
@@ -145,15 +145,15 @@ VIEWS.tour = async id => {
     pv = TOURS[i + 1];
   $("#main").innerHTML =
     `<div class="row"><a class="back" href="${window._from || "#/tours"}">${window._from ? (window._from.startsWith("#/trip/") ? "‹ Zurück zur Reise" : "‹ Zurück zum Album") : "‹ Alle Touren"}</a><span class="sp"></span>${pv ? `<a class="btn ghost sm" href="#/tour/${pv.id}">Vorherige</a>` : ""}${nx ? `<a class="btn ghost sm" href="#/tour/${nx.id}">Nächste</a>` : ""}</div>
-   <div class="mt18"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span class="mut ml8">${dateL(t.date)}, ${timeS(t.date)} Uhr</span>${t.g_country ? `<span class="mut ml8">· ${esc([t.g_place, t.g_state, t.g_country].filter(Boolean).join(", "))}</span>` : ""}</div>
+   <div class="mt18"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span class="mut ml8">${fmtDatum(t.date, {zeit: true})}</span>${t.g_country ? `<span class="mut ml8">· ${esc([t.g_place, t.g_state, t.g_country].filter(Boolean).join(", "))}</span>` : ""}</div>
    <h1 class="m10-0-18" style="font-size:clamp(34px,5vw,56px)"><span id="tname">${esc(t.name)}</span> <button class="btn ghost sm vam fs15" id="ren" title="Tour umbenennen">✎ Umbenennen</button></h1>
    <div class="row mn6-0-14">${t.source === "local" ? `<span class="tag" style="background:var(--yellow);color:#000" title="Diese Tour liegt nur lokal vor (Strecke als GPX im Datenordner)">lokal gespeichert</span>` : `<button class="btn ghost sm" id="ksync" title="Daten und GPS-Track neu von Komoot laden">⟳ Mit Komoot abgleichen</button>`}<button class="btn ghost sm" id="eup" title="Zu Komoot, Strava … hochladen">⬆ Hochladen</button><a class="btn ghost sm" id="egpx" href="/api/tours/${encodeURIComponent(t.id)}/gpx" title="Strecke als GPX-Datei herunterladen">⬇ GPX</a><button class="btn ghost sm" id="edel" title="Tour löschen">🗑 Löschen</button><button class="btn ghost sm" id="etag" title="Schlagworte / Alben">🏷 Tags</button><button class="btn ghost sm" id="eshr" title="Öffentlichen Link erzeugen">🔗 Teilen</button><button class="btn ghost sm" id="etc" title="Farbe und Breite der Strecke">🎨 Streckenfarbe</button><button class="btn ghost sm" id="efix" title="Höhen mit Geländemodell neu berechnen"></button><button class="btn ghost sm" id="ezepp" title="Auf-/Abstieg aus der barometrischen Höhe der Zepp-Uhr übernehmen">⌚ Höhe aus Uhr abgleichen (Zepp)</button><span id="ksm" class="mut fs14"></span></div><div id="upst" class="chips mn4-0-10"></div><div id="tagl" class="chips mn4-0-12"></div><div id="ewarn"></div>
-   <div class="figs"><div class="fig"><div class="v">${nf(t.km, 2)}<span class="u">km</span></div><div class="l">Strecke</div></div><div class="fig"><div class="v">${nf(t.up_m, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div></div>
-   <div class="fig"><div class="v">${nf(t.down_m, 0)}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${fmtHM(t.h * 3600)}<span class="u">Std.</span></div><div class="l">Dauer</div></div>
+   <div class="figs"><div class="fig"><div class="v">${fmtKm(t.km, {einheit: false})}<span class="u">km</span></div><div class="l">Strecke</div></div><div class="fig"><div class="v">${nf(t.up_m, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div></div>
+   <div class="fig"><div class="v">${nf(t.down_m, 0)}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${fmtDauerTeile(t.h * 3600).v}<span class="u">${fmtDauerTeile(t.h * 3600).u}</span></div><div class="l">Dauer</div></div>
    <div class="fig"><div class="v">${t.h ? nf(t.km / t.h, 1) : "–"}<span class="u">km/h</span></div><div class="l">Tempo im Schnitt</div></div><div id="kmax" class="fig" style="display:none"><div class="v" id="kmaxv"></div><div class="l">Höchster Punkt</div></div></div>
    <div class="tlx" id="tl" data-tid="${esc(String(t.id))}">
    <section class="tlg" id="tlg-route" aria-labelledby="tlgh-route"><h2 class="tlgh" id="tlgh-route">Streckenverlauf</h2><div class="tlgb" id="tlgb-route">
-   ${tlSecHtml({id: "map", key: "tl_map", icon: "map", title: "Karte", badge: `${nf(t.km, 1)} km`, def: true, bodyCls: "tlmap", body: '<div class="tmap" id="tm"></div>'})}
+   ${tlSecHtml({id: "map", key: "tl_map", icon: "map", title: "Karte", badge: `${fmtKm(t.km)}`, def: true, bodyCls: "tlmap", body: '<div class="tmap" id="tm"></div>'})}
    ${tlSecHtml({id: "prof", key: "tl_prof", icon: "prof", title: "Höhenprofil", def: true, bodyCls: "tlprof", body: '<div class="prof" id="profcard"><div id="prof" class="mut">Wird geladen …</div></div>'})}
    </div></section>
    <section class="tlg tlsumg" id="tlg-sum" aria-labelledby="tlgh-sum" hidden><h2 class="tlgh" id="tlgh-sum">Auswertung dieser Tour</h2><div class="tlgb" id="tlgb-sum"></div></section>
@@ -209,7 +209,7 @@ VIEWS.tour = async id => {
             [tcc[i + 1][0], tcc[i + 1][1]],
           ],
           {color: col(x), weight: TS.weight + 1, opacity: 0.95, lineCap: "butt"}
-        ).bindTooltip(x == null ? "–" : TS.by === "grade" ? `${nf(x, 0)} % Steigung` : TS.by === "hr" ? `${x} bpm` : `${nf(x, 1)} km/h`)
+        ).bindTooltip(x == null ? "–" : TS.by === "grade" ? `${nf(x, 0)} % Steigung` : TS.by === "hr" ? `${x} bpm` : `${fmtTempo(x)}`)
       )
     ).addTo(map);
     tleg = document.createElement("div");
@@ -267,7 +267,7 @@ VIEWS.tour = async id => {
   $("#th").innerHTML = ph
     .map(
       (p, k) =>
-        `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=500" data-i="${k}"><span class="cap">${new Date(p.taken_ts * 1000).toLocaleString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"})}${p.manual === 1 ? " 📌" : ""}</span></div>`
+        `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=500" data-i="${k}"><span class="cap">${fmtDatumKurz(p.taken_ts, {zeit: true})}${p.manual === 1 ? " 📌" : ""}</span></div>`
     )
     .join("");
   bindThumbs($("#th"), ph);
@@ -293,7 +293,7 @@ VIEWS.tour = async id => {
       // Tour von Komoot: nur hier entfernen (kommt beim Abgleich nicht wieder) oder auch bei Komoot endgültig löschen
       const m = document.createElement("div");
       m.className = "modal";
-      m.innerHTML = `<div class="mbox"><h3>Tour löschen?</h3><p>„${esc(t.name)}“ (${nf(t.km, 2)} km) wird aus Meine Touren entfernt – mit Strecke, Notizen und Tags. Zugeordnete Fotos bleiben erhalten.</p>
+      m.innerHTML = `<div class="mbox"><h3>Tour löschen?</h3><p>„${esc(t.name)}“ (${fmtKm(t.km)}) wird aus Meine Touren entfernt – mit Strecke, Notizen und Tags. Zugeordnete Fotos bleiben erhalten.</p>
         <label class="chk"><input type="checkbox" id="dk"> <b>auch bei Komoot endgültig löschen</b> <span class="mut">(lässt sich nicht rückgängig machen)</span></label>
         <p class="mut fs13">Ohne Häkchen bleibt die Tour bei Komoot und wird beim nächsten Abgleich nicht wieder übernommen.</p>
         <div id="dm" class="mut"></div><div class="mt18 g8 jce" style="display:flex"><button class="btn alt" id="dx">Abbrechen</button><button class="btn c-white" id="dok" style="background:var(--bad,#b3261e);border-color:var(--bad,#b3261e)">Löschen</button></div></div>`;
@@ -348,7 +348,7 @@ VIEWS.tour = async id => {
         const n = BY[t.id];
         await route();
         const m = $("#ksm");
-        if (m) m.textContent = `Abgeglichen: ${nf(o, 2)} km → ${nf(n.km, 2)} km`;
+        if (m) m.textContent = `Abgeglichen: ${fmtKm(o)} → ${fmtKm(n.km)}`;
       } catch (e) {
         $("#ksync").disabled = false;
         $("#ksm").innerHTML = `<span class="bad">${esc(e.message)}</span>`;
@@ -373,7 +373,7 @@ VIEWS.tour = async id => {
           n.className = "panel";
           n.setAttribute("role", "status");
           n.style.cssText = "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:9999;padding:10px 16px;max-width:90vw;box-shadow:0 4px 18px rgba(0,0,0,.3)";
-          n.textContent = `Höhe aus Zepp übernommen: ↑ ${nf(r.up, 0)} m (vorher ${nf(r.orig_up, 0)} m)`;
+          n.textContent = `Höhe aus Zepp übernommen: ${fmtAuf(r.up)} (vorher ${fmtHm(r.orig_up)})`;
           document.body.appendChild(n);
           setTimeout(() => n.remove(), 6000);
         } catch (e) {
@@ -384,9 +384,9 @@ VIEWS.tour = async id => {
       };
     }
     if (fixed)
-      w.innerHTML = `<div class="panel mb14 p12-16">${t.fix_src === "zepp" ? `Höhen aus der Zepp-Uhr übernommen (Komoot/GPS meldete ${nf(t.fix_up, 0)} m Aufstieg).` : `Höhen mit Geländemodell korrigiert (Komoot/GPS meldete ${nf(t.fix_up, 0)} m Aufstieg).`}</div>`;
+      w.innerHTML = `<div class="panel mb14 p12-16">${t.fix_src === "zepp" ? `Höhen aus der Zepp-Uhr übernommen (Komoot/GPS meldete ${fmtHm(t.fix_up)} Aufstieg).` : `Höhen mit Geländemodell korrigiert (Komoot/GPS meldete ${fmtHm(t.fix_up)} Aufstieg).`}</div>`;
     else if (sus)
-      w.innerHTML = `<div class="panel mb14 p12-16" style="border-left:4px solid var(--yellow)"><b>Auffällige Höhendaten:</b> ${nf(t.up_m, 0)} m Aufstieg auf ${nf(t.km, 1)} km sind unwahrscheinlich. Mit „Höhen korrigieren“ werden sie aus dem Geländemodell berechnet.</div>`;
+      w.innerHTML = `<div class="panel mb14 p12-16" style="border-left:4px solid var(--yellow)"><b>Auffällige Höhendaten:</b> ${fmtHm(t.up_m)} Aufstieg auf ${fmtKm(t.km)} sind unwahrscheinlich. Mit „Höhen korrigieren“ werden sie aus dem Geländemodell berechnet.</div>`;
     b.onclick = async () => {
       b.disabled = true;
       $("#ksm").textContent = fixed ? "Stelle Original wieder her …" : "Berechne Höhen aus Geländedaten …";
@@ -396,7 +396,7 @@ VIEWS.tour = async id => {
           const r = await api(`/api/tours/${encodeURIComponent(t.id)}/elev-fix`, {method: "POST"});
           if (
             !(await uiConfirm({title: "Neu berechnete Höhen übernehmen?", ok: "Übernehmen", cancel: "Original behalten",
-              text: `Neu berechnet: ${nf(r.up_m, 0)} m Aufstieg, ${nf(r.down_m, 0)} m Abstieg (vorher ${nf(r.orig_up, 0)} m / ${nf(r.orig_down, 0)} m).`}))
+              text: `Neu berechnet: ${fmtHm(r.up_m)} Aufstieg, ${fmtHm(r.down_m)} Abstieg (vorher ${fmtHm(r.orig_up)} / ${fmtHm(r.orig_down)}).`}))
           )
             await api(`/api/tours/${encodeURIComponent(t.id)}/elev-restore`, {method: "POST"});
         }
@@ -553,16 +553,16 @@ function profile(c, t) {
   let g = "";
   [lo + (hi - lo) * 0.05, (lo + hi) / 2, hi - (hi - lo) * 0.05].forEach(
     v =>
-      (g += `<line x1="${L0}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/><text x="${L0 - 6}" y="${y(v) + 4}" text-anchor="end">${nf(v, 0)} m</text>`)
+      (g += `<line x1="${L0}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/><text x="${L0 - 6}" y="${y(v) + 4}" text-anchor="end">${fmtHm(v)}</text>`)
   );
   for (let k = 0; k <= 4; k++)
-    g += `<text x="${x((D * k) / 4)}" y="${H - 6}" text-anchor="${k === 4 ? "end" : k === 0 ? "start" : "middle"}">${nf((D * k) / 4000, 1)} km</text>`;
+    g += `<text x="${x((D * k) / 4)}" y="${H - 6}" text-anchor="${k === 4 ? "end" : k === 0 ? "start" : "middle"}">${fmtKm((D * k) / 4000)}</text>`;
   $("#prof").className = "";
   $("#prof").innerHTML =
     `<svg viewBox="0 0 ${W} ${H}" id="psvg">${g}<path d="${line}L${x(D)},${H - B}L${L0},${H - B}Z" fill="${sCol(t.sport)}" opacity=".22"/><path d="${line}" fill="none" stroke="${sCol(t.sport)}" stroke-width="2.4"/><line id="pl" y1="${T}" y2="${H - B}" stroke="var(--ink)" opacity="0" /></svg><div class="tip" id="ptip" style="display:none"></div>`;
   $("#kmax").style.display = "";
   $("#kmaxv").innerHTML = `${nf(mxA, 0)}<span class="u">m</span>`;
-  tlSetBadge("prof", `höchster Punkt ${nf(mxA, 0)} m`);
+  tlSetBadge("prof", `höchster Punkt ${fmtHm(mxA)}`);
   let mkr = null;
   const svg = $("#psvg");
   svg.onmousemove = svg.ontouchmove = e => {
@@ -580,7 +580,7 @@ function profile(c, t) {
     tp.style.display = "";
     tp.style.left = (pts[k][0] / W) * r.width + "px";
     tp.style.top = (pts[k][1] / H) * r.height + 34 + "px";
-    tp.textContent = `${nf(dist[k] / 1000, 2)} km · ${nf(c[k][2], 0)} m`;
+    tp.textContent = `${fmtKm(dist[k] / 1000)} · ${fmtHm(c[k][2])}`;
     if (map) {
       if (!mkr)
         mkr = L.circleMarker([c[k][0], c[k][1]], {radius: 8, color: "#fff", fillColor: "#e2b13c", fillOpacity: 1, weight: 3}).addTo(map);

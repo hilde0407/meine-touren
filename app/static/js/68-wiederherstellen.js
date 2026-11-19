@@ -4,7 +4,7 @@
    Der Server spielt nur zurück, was er unmittelbar vorher geprüft hat (Token aus der Vorprüfung). Kein window.confirm.
    Texte stehen deutsch im Markup und werden von der Übersetzungsschicht (00-i18n.js, Zeilen in 00-i18n-neu.js) ersetzt; Zahlen und Namen stehen in eigenen Elementen. */
 const rsMb = n => (n >= 1e8 ? (n / 1e9).toFixed(2) + " GB" : n >= 1e5 ? (n / 1e6).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1e3)) + " kB");
-const rsDt = ts => new Date(ts * 1000).toLocaleString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"});
+const rsDt = ts => fmtDatumKurz(ts, {zeit: true});
 const rsAlter = h => (h == null ? "" : h < 1 ? "(weniger als eine Stunde alt)" : h < 48 ? `(vor ${Math.round(h)} Stunden)` : `(vor ${Math.round(h / 24)} Tagen)`);
 const RS_ZEILEN = [["touren", "Touren"], ["strecken", "Strecken (GPX-Dateien)"], ["reisen", "Reisen"], ["plaene", "Geplante Touren"], ["layouts", "Seitenlayouts"]];
 const rsZahl = v => (v == null ? "–" : String(v));

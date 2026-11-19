@@ -71,11 +71,11 @@ function pulsCard(t) {
       [lo, (lo + hi) / 2, hi].forEach(v => (g += `<line x1="${L0}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/><text x="${L0 - 6}" y="${y(v) + 4}" text-anchor="end">${Math.round(v)}</text>`));
       for (let k = 0; k <= 4; k++) {
         const s = (dur * k) / 4, m = Math.round(s / 60);
-        g += `<text x="${x(s)}" y="${H - 6}" text-anchor="${k === 4 ? "end" : k === 0 ? "start" : "middle"}">${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")} h</text>`;
+        g += `<text x="${x(s)}" y="${H - 6}" text-anchor="${k === 4 ? "end" : k === 0 ? "start" : "middle"}">${Math.floor(m / 60)}:${pad2(m % 60)}</text>`;
       }
       const ZC = HR_ZC, ZN = HR_ZN;
       const tot = h.zones.reduce((a, b) => a + b, 0) || 1;
-      const mm = s => (Math.round(s / 60) >= 60 ? hmParts(s)[0] + " h " + hmParts(s)[1] + " min" : Math.round(s / 60) + " min");
+      const mm = s => fmtDauer(s);
       const bar = h.zones.map((s, i) => `<span style="flex:${Math.max(s, 0.001)};background:${ZC[i]}" title="${ZN[i]}: ${mm(s)}"></span>`).join("");
       const leg = h.zones.map((s, i) => `<span class="nw"><i class="br2 mr5" style="display:inline-block;width:10px;height:10px;background:${ZC[i]}"></i>Z${i + 1} ${ZN[i]}: ${mm(s)} (${Math.round((s / tot) * 100)} %)</span>`).join("");
       const d = tlCard("pulscard", {sec: "puls", key: "tl_puls", icon: "heart", title: "Herzfrequenz", badge: `Ø ${h.avg} · max ${h.max} bpm`, def: true});
@@ -156,13 +156,13 @@ VIEWS.pulse = async (_, q) => {
   let bars = "";
   [0, 0.5, 1].forEach(f => {
     const yy = T + (H - T - B) * (1 - f);
-    bars += `<line x1="${L0}" x2="${W}" y1="${yy}" y2="${yy}" stroke="var(--rule)"/><text x="${L0 - 6}" y="${yy + 4}" text-anchor="end">${nf(hh(mx * f), mx * f >= 36000 ? 0 : 1)} h</text>`;
+    bars += `<line x1="${L0}" x2="${W}" y1="${yy}" y2="${yy}" stroke="var(--rule)"/><text x="${L0 - 6}" y="${yy + 4}" text-anchor="end">${fmtDauer(mx * f, {summe: true, einheit: false})}</text>`;
   });
   grp.forEach((g, i) => {
     let y0 = H - B;
     g.forEach((s, z) => {
       const h = ((H - T - B) * s) / mx;
-      if (h > 0) bars += `<rect x="${(L0 + i * bw + bw * 0.16).toFixed(1)}" y="${(y0 - h).toFixed(1)}" width="${(bw * 0.68).toFixed(1)}" height="${h.toFixed(1)}" fill="${HR_ZC[z]}"><title>${lab(keys[i])} – Z${z + 1} ${HR_ZN[z]}: ${nf(hh(s), 1)} h</title></rect>`;
+      if (h > 0) bars += `<rect x="${(L0 + i * bw + bw * 0.16).toFixed(1)}" y="${(y0 - h).toFixed(1)}" width="${(bw * 0.68).toFixed(1)}" height="${h.toFixed(1)}" fill="${HR_ZC[z]}"><title>${lab(keys[i])} – Z${z + 1} ${HR_ZN[z]}: ${fmtDauer(s)}</title></rect>`;
       y0 -= h;
     });
     bars += `<text x="${(L0 + i * bw + bw / 2).toFixed(1)}" y="${H - 8}" text-anchor="middle">${lab(keys[i])}</text>`;
@@ -177,11 +177,11 @@ VIEWS.pulse = async (_, q) => {
     py = v => T + (H - T - B) * (1 - (v - lo) / (hi - lo || 1));
   let dots = "";
   [lo + 5, (lo + hi) / 2, hi - 5].forEach(v => (dots += `<line x1="${L0}" x2="${W}" y1="${py(v)}" y2="${py(v)}" stroke="var(--rule)"/><text x="${L0 - 6}" y="${py(v) + 4}" text-anchor="end">${Math.round(v)}</text>`));
-  dots += seq.map(x => `<a href="#/tour/${x.id}"><circle cx="${px(x).toFixed(1)}" cy="${py(x.avg).toFixed(1)}" r="4.5" fill="${sCol(x.t.sport)}" stroke="var(--card)" stroke-width="1.5"><title>${esc(x.t.name)} – ${dateS(x.t.date)}: Ø ${x.avg} bpm, max ${x.max} bpm</title></circle></a>`).join("");
-  dots += `<text x="${L0}" y="${H - 8}">${dateS(seq[0].t.date)}</text><text x="${W}" y="${H - 8}" text-anchor="end">${dateS(seq[seq.length - 1].t.date)}</text>`;
+  dots += seq.map(x => `<a href="#/tour/${x.id}"><circle cx="${px(x).toFixed(1)}" cy="${py(x.avg).toFixed(1)}" r="4.5" fill="${sCol(x.t.sport)}" stroke="var(--card)" stroke-width="1.5"><title>${esc(x.t.name)} – ${fmtDatumKurz(x.t.date)}: Ø ${x.avg} bpm, max ${x.max} bpm</title></circle></a>`).join("");
+  dots += `<text x="${L0}" y="${H - 8}">${fmtDatumKurz(seq[0].t.date)}</text><text x="${W}" y="${H - 8}" text-anchor="end">${fmtDatumKurz(seq[seq.length - 1].t.date)}</text>`;
   const hard = [...sel].map(x => ({...x, hs: (x.zones[3] + x.zones[4]) / x.sec})).sort((a, b) => b.hs - a.hs || b.avg - a.avg).slice(0, 8),
-    zbar = `<div class="zbar">${zs.map((s, i) => `<span style="flex:${Math.max(s, 0.001)};background:${HR_ZC[i]}" title="Z${i + 1} ${HR_ZN[i]}: ${nf(hh(s), 1)} h"></span>`).join("")}</div>
-      <div class="mut zleg">${zs.map((s, i) => `<span><i style="background:${HR_ZC[i]}"></i>Z${i + 1} ${HR_ZN[i]}: ${nf(hh(s), 1)} h (${Math.round((s / (tot || 1)) * 100)} %)</span>`).join("")}</div>`;
+    zbar = `<div class="zbar">${zs.map((s, i) => `<span style="flex:${Math.max(s, 0.001)};background:${HR_ZC[i]}" title="Z${i + 1} ${HR_ZN[i]}: ${fmtDauer(s)}"></span>`).join("")}</div>
+      <div class="mut zleg">${zs.map((s, i) => `<span><i style="background:${HR_ZC[i]}"></i>Z${i + 1} ${HR_ZN[i]}: ${fmtDauer(s)} (${Math.round((s / (tot || 1)) * 100)} %)</span>`).join("")}</div>`;
   main.innerHTML = `<div class="sec mt0"><h2>Puls</h2><span class="sub">${nf(sel.length, 0)} Touren mit Herzfrequenz</span></div>
     <div class="chips mb12"><a class="chip ${Y ? "" : "on"}" href="#/pulse">Alle Jahre</a>${ys.map(y => `<a class="chip ${Y === y ? "on" : ""}" href="#/pulse?y=${y}">${y}</a>`).join("")}</div>
     <div class="figs"><div class="fig"><div class="v">${nf(hh(tot), 0)}<span class="u">h</span></div><div class="l">mit Pulsmessung</div></div>
@@ -192,6 +192,6 @@ VIEWS.pulse = async (_, q) => {
       <svg class="chart" viewBox="0 0 ${W} ${H}">${bars}</svg>
       <div class="mut fs13">Zonen nach ${r.hrmax} bpm Maximalpuls (einstellbar in der Verwaltung). ${Y ? "Je Monat." : "Je Jahr."}</div></div>
     <div class="panel gap"><h2>Durchschnittspuls je Tour</h2><svg class="chart" viewBox="0 0 ${W} ${H}">${dots}</svg><div class="mut fs13">Ein Punkt je Tour, eingefärbt nach Sportart. Antippen öffnet die Tour.</div></div>
-    <div class="panel gap"><h2>Die anstrengendsten Touren</h2><div class="rows">${hard.map(x => `<a class="r" href="#/tour/${x.id}"><span>${esc(x.t.name)} <span class="mut">${dateS(x.t.date)}</span></span><b>${Math.round(x.hs * 100)} %</b><span class="mut">in Zone 4–5, Ø ${x.avg} bpm</span></a>`).join("")}</div></div>`;
+    <div class="panel gap"><h2>Die anstrengendsten Touren</h2><div class="rows">${hard.map(x => `<a class="r" href="#/tour/${x.id}"><span>${esc(x.t.name)} <span class="mut">${fmtDatumKurz(x.t.date)}</span></span><b>${Math.round(x.hs * 100)} %</b><span class="mut">in Zone 4–5, Ø ${x.avg} bpm</span></a>`).join("")}</div></div>`;
   statTabs("pulse");
 };

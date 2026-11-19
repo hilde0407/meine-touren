@@ -55,7 +55,7 @@ VIEWS.admin = async (_, q) => {
    <p class="mut">${w.length} exportiert · ${w.filter(x => x.status === "local").length} lokal übernommen · ${w.filter(x => x.status === "in_komoot" || x.status === "uploaded").length} bereits in Komoot · ${w.filter(x => x.status === "no_gps").length} ohne GPS · ${pend.length} noch offen</p>
    ${
      pend.length
-       ? `<details${pend.length <= 8 ? " open" : ""}><summary>${pend.length} offene Trainings anzeigen</summary><div class="ova" style="max-height:300px"><table><tr><th></th><th>Datum</th><th>Sport</th><th class="n">km</th></tr>${pend.map(x => `<tr><td><input type="checkbox" class="pk" value="${x.trackid}"></td><td>${dateS(x.date)} ${timeS(x.date)}</td><td>${sName(x.sport)}</td><td class="n">${nf(x.dist_m / 1000, 1)}</td></tr>`).join("")}</table></div></details>
+       ? `<details${pend.length <= 8 ? " open" : ""}><summary>${pend.length} offene Trainings anzeigen</summary><div class="ova" style="max-height:300px"><table><tr><th></th><th>Datum</th><th>Sport</th><th class="n">km</th></tr>${pend.map(x => `<tr><td><input type="checkbox" class="pk" value="${x.trackid}"></td><td>${fmtDatumKurz(x.date, {zeit: true})}</td><td>${sName(x.sport)}</td><td class="n">${nf(x.dist_m / 1000, 1)}</td></tr>`).join("")}</table></div></details>
    <div class="row mt10"><button class="btn alt sm" id="pall">Alle wählen</button><button class="btn alt sm" id="pdry">Probelauf</button><button class="btn" id="plocal">Lokal übernehmen</button></div>
    <div class="row mt8"><span class="mut">Zusätzlich hochladen zu:</span>${pf.portals.map(p => `<label class="chk m0"><input type="checkbox" class="zp" value="${p.id}" ${p.connected ? "" : "disabled"}> ${p.name}${p.connected ? "" : `<span class="mut fs12"> (${p.id === "komoot" ? "Zugang fehlt: im Panel „Komoot“ (Komoot-E-Mail und -Passwort) speichern" : "nicht verbunden: bei „Portale“ verbinden"})</span>`}</label>`).join("")}<button class="btn" id="pup">Übernehmen und hochladen</button></div>
    <div class="field mt8"><label>Neue Zepp-Trainings automatisch lokal übernehmen (ohne Upload)</label><select data-k="zepp_auto_adopt"><option value="0">aus</option><option value="1">an</option></select></div>`
@@ -79,7 +79,7 @@ VIEWS.admin = async (_, q) => {
        gm.available === false
          ? `<p class="mut">Nicht verfügbar: ${esc(gm.why)}</p>`
          : gm.connected
-           ? `<p class="mut">${nf(gm.imported || 0, 0)} Aktivitäten übernommen${gm.checked ? ", zuletzt geprüft " + new Date(+gm.checked * 1000).toLocaleString("de-DE") : ""}.</p>
+           ? `<p class="mut">${nf(gm.imported || 0, 0)} Aktivitäten übernommen${gm.checked ? ", zuletzt geprüft " + fmtDatumKurz(+gm.checked, {zeit: true}) : ""}.</p>
      <div class="field"><label>Nur Aktivitäten ab Datum (JJJJ-MM-TT, leer = alle)</label><input data-k="garmin_since" value="${esc(s.garmin_since)}" placeholder="2024-01-01"></div>
      <div class="field"><label>Neue Aktivitäten täglich automatisch übernehmen</label><select data-k="garmin_auto"><option value="0">aus</option><option value="1">an</option></select></div>
      <div class="row"><button class="btn" id="gsync">Jetzt importieren</button><button class="btn alt" id="gdis">Trennen</button><span id="gres"></span></div>`

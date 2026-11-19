@@ -50,7 +50,7 @@ async function gearPanel() {
      list.length
        ? `<div class="rows">${list
            .map(
-             g => `<div class="r gr" data-g="${g.id}" style="${g.until ? "opacity:.6" : ""}"><span>${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)} ${gStatus(g)}<small>${esc(g.kind)}${g.until ? " · seit " + esc(g.until) + " nicht mehr im Gebrauch" : ""}${g.limit_km ? ` · Hinweis ab ${nf(g.limit_km, 0)} km` : ""}${g.note ? " · " + esc(g.note) : ""}</small></span><span class="tar"><b>${nf(g.km, 0)} km</b><small style="display:block">↑ ${nf(g.up, 0)} m · ${g.n} Touren</small></span></div>`
+             g => `<div class="r gr" data-g="${g.id}" style="${g.until ? "opacity:.6" : ""}"><span>${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)} ${gStatus(g)}<small>${esc(g.kind)}${g.until ? " · seit " + esc(g.until) + " nicht mehr im Gebrauch" : ""}${g.limit_km ? ` · Hinweis ab ${fmtKm(g.limit_km, {d: 0})}` : ""}${g.note ? " · " + esc(g.note) : ""}</small></span><span class="tar"><b>${fmtKm(g.km, {d: 0})}</b><small style="display:block">${fmtAuf(g.up)} · ${g.n} Touren</small></span></div>`
            )
            .join("")}</div>`
        : `<p class="mut">Noch nichts angelegt. Lege zum Beispiel dein Rad oder deine Wanderschuhe an und wähle die Sportart – dann zählt die App die Kilometer automatisch mit.</p>`

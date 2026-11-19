@@ -335,9 +335,9 @@ VIEWS.flight = async id => {
     const i = Math.min(N - 1, Math.round(f)),
       p = P[i];
     if (SET && p.trans) return ($("#fh").innerHTML = `✈ weiter zu <b>${esc(p.name)}</b>`);
-    if (SET) return ($("#fh").innerHTML = `<b>${esc(p.name)}</b> · ${nf(p.d / 1000, 1)} / ${nf(total / 1000, 1)} km · ${nf(p.alt, 0)} m`);
+    if (SET) return ($("#fh").innerHTML = `<b>${esc(p.name)}</b> · ${nf(p.d / 1000, 1)} / ${fmtKm(total / 1000)} · ${fmtHm(p.alt)}`);
     const bpm = flHr && p.t != null ? flHr(p.t) : null;
-    $("#fh").innerHTML = `<b>${nf(p.d / 1000, 1)}</b> / ${nf(total / 1000, 1)} km · <b>${nf(p.alt, 0)}</b> m · ↑ ${nf(p.up, 0)} m` + (bpm ? ` · <span style="color:${HR_ZC[hrZone(bpm, flHrMax)]}">❤</span> <b>${bpm}</b>` : "");
+    $("#fh").innerHTML = `<b>${nf(p.d / 1000, 1)}</b> / ${fmtKm(total / 1000)} · <b>${nf(p.alt, 0)}</b> m · ${fmtAuf(p.up)}` + (bpm ? ` · <span style="color:${HR_ZC[hrZone(bpm, flHrMax)]}">❤</span> <b>${bpm}</b>` : "");
   };
   // Fotos entlang der Strecke: Marker + Einblendung beim Vorbeifliegen
   const phs = PHS0;
@@ -363,7 +363,7 @@ VIEWS.flight = async id => {
   const phi = $("#fphi");
   const showPh = p => {
     phi.src = `/pic/${p.id}?size=500`;
-    $("#fphc").textContent = new Date(p.taken_ts * 1000).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"}) + " Uhr";
+    $("#fphc").textContent = fmtUhrzeit(p.taken_ts);
     $("#fph").classList.add("on");
     phUntil = performance.now() + 4500;
   };
@@ -386,7 +386,7 @@ VIEWS.flight = async id => {
     x.fillText(t.name, 16, 25);
     x.textAlign = "right";
     x.fillStyle = "#f2c230";
-    x.fillText(`${nf(p.d / 1000, 1)} km · ${nf(p.alt, 0)} m`, W - 16, 25);
+    x.fillText(`${fmtKm(p.d / 1000)} · ${fmtHm(p.alt)}`, W - 16, 25);
     x.fillStyle = "#f2c230";
     x.fillRect(0, H - 6, W * u, 6);
     if (performance.now() < phUntil && phi.complete && phi.naturalWidth) {

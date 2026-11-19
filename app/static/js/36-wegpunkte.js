@@ -1,5 +1,5 @@
 /* =====================  Wegpunkte (unterwegs in der App gesetzt) und Erzählung zur Tour  ===================== */
-const wpTime = ts => new Date(ts * 1000).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"});
+const wpTime = ts => fmtUhrzeit(ts);
 const wpIcon = (n, cls = "") => L.divIcon({className: "", html: `<div style="background:#d9534f;border:2px solid #fff;border-radius:50%;width:26px;height:26px;line-height:22px;font:700 13px system-ui;box-shadow:0 1px 4px #0006" class="${cls} c-white tac">${n}</div>`, iconSize: [26, 26], iconAnchor: [13, 13]});
 
 const _tourW = VIEWS.tour;
@@ -68,14 +68,14 @@ VIEWS.story = async id => {
   });
   ev.push({ts: t0 + T, kind: "end", txt: "Ziel", pos: co.length ? [co[co.length - 1][0], co[co.length - 1][1]] : null});
   ev.sort((a, b) => a.ts - b.ts);
-  const rel = ts => { const m = Math.max(0, Math.round((ts - t0) / 60)); return `+${Math.floor(m / 60)}:${pad2(m % 60)} h`; };
+  const rel = ts => { const m = Math.max(0, Math.round((ts - t0) / 60)); return `+${Math.floor(m / 60)}:${pad2(m % 60)}`; };
   const icon = k => ({start: "🏁", end: "🎯", wp: "📍", ph: "📷"})[k];
   const cmLine = e => (e.ph || []).flatMap(p => (CM[p.id] || [])).map(c => `<div>💬 <b>${esc(c.author || "")}</b>${c.author ? ": " : ""}${esc(c.text)}</div>`).join("");
   const cmRefresh = () => document.querySelectorAll("#stl .scm").forEach(b => { const e = ev[+b.dataset.i]; if (e) b.innerHTML = cmLine(e); });
   const item = (e, i) => `<div class="stev g12 m0-0-18" data-e="${i}" style="display:flex;cursor:${e.pos ? "pointer" : "default"}"><div class="mnw78 tar"><b>${wpTime(e.ts)}</b><div class="mut fs12">${rel(e.ts)}</div></div><div class="fx1 pl14" style="border-left:3px solid var(--line,#ccc)"><div class="fs18">${icon(e.kind)} ${e.kind === "ph" ? `${e.ph.length} Foto${e.ph.length > 1 ? "s" : ""}` : esc(e.txt)}</div><div class="splc mut fs14"></div>` +
     (e.kind === "ph" ? `<div class="row g6 fxw mt6">${e.ph.slice(0, 8).map(p => `<span class="sph" data-p="${p.id}" style="position:relative;cursor:zoom-in"><img loading="lazy" src="/pic/${p.id}?size=500" class="br8" style="height:120px;display:block">${(CM[p.id] || []).length ? `<b class="scn c-white br10 p1-7 fs12" style="position:absolute;right:4px;bottom:4px;background:#000a">💬 ${CM[p.id].length}</b>` : ""}</span>`).join("")}${e.ph.length > 8 ? `<span class="mut">+${e.ph.length - 8}</span>` : ""}</div><div class="scm fs14 mt6" data-i="${i}">${cmLine(e)}</div>` : "") + `</div></div>`;
   $("#main").innerHTML = `<div class="row noprint"><a class="back" href="#/tour/${esc(id)}">‹ Zur Tour</a><span class="sp"></span><button class="btn ghost sm" id="sshare" title="Link zur Diashow mit Kommentarfunktion erzeugen – ohne Benutzerkonto ansehbar">🔗 Teilen (mit Kommentaren)</button><button class="btn ghost sm" id="sprint" title="Erzählung ausdrucken oder als PDF speichern">🖨 Drucken</button></div>
-   <h1 class="m14-0-4" style="font-size:clamp(30px,5vw,48px)">${esc(t.name)}</h1><p class="mut">${dateL(t.date)} · ${nf(t.km, 1)} km · ↑ ${nf(t.up_m, 0)} m · ${fmtHM(t.h * 3600)} h${t.h ? ` · ${nf(t.km / t.h, 1)} km/h` : ""}</p>
+   <h1 class="m14-0-4" style="font-size:clamp(30px,5vw,48px)">${esc(t.name)}</h1><p class="mut">${fmtDatum(t.date)} · ${fmtKm(t.km)} · ${fmtAuf(t.up_m)} · ${fmtDauer(t.h * 3600)}${t.h ? ` · ${fmtTempo(t.km / t.h)}` : ""}</p>
    <div class="tmap" id="sm" style="height:320px"></div><div class="mt22" id="stl">${ev.map(item).join("")}</div>`;
   $("#sprint").onclick = () => { if (map) map.invalidateSize(); setTimeout(() => window.print(), 300); };
   $("#sshare").onclick = async () => {
@@ -127,7 +127,7 @@ VIEWS.story = async id => {
       ov.innerHTML = `<div class="br14 mw760 w100 ova p14" style="background:var(--bg,#fff);color:var(--fg,#222);max-height:96vh">
        <div class="row jcsb"><b>📷 Foto</b><button class="btn ghost sm" id="pcx">✕</button></div>
        <img src="/pic/${pid}?size=1200" class="w100 br8 m8-0" style="max-height:55vh;object-fit:contain">
-       <div id="pcl">${l.length ? l.map(c => `<div class="pcc m6-0 p6-10 br8" style="background:rgba(128,128,128,.12)"><div class="mut fs12">${c.author ? esc(c.author) + " · " : ""}${new Date(c.ts * 1000).toLocaleString()} <a href="#" class="pcd" data-c="${c.id}" title="Löschen">🗑</a></div>${esc(c.text)}</div>`).join("") : `<p class="mut">Noch keine Kommentare.</p>`}</div>
+       <div id="pcl">${l.length ? l.map(c => `<div class="pcc m6-0 p6-10 br8" style="background:rgba(128,128,128,.12)"><div class="mut fs12">${c.author ? esc(c.author) + " · " : ""}${fmtDatumKurz(c.ts, {zeit: true})} <a href="#" class="pcd" data-c="${c.id}" title="Löschen">🗑</a></div>${esc(c.text)}</div>`).join("") : `<p class="mut">Noch keine Kommentare.</p>`}</div>
        <div class="row g6 mt8"><input id="pci" maxlength="1000" placeholder="Kommentar schreiben …" class="fx1"><button class="btn sm" id="pcs">Senden</button></div></div>`;
       ov.querySelector("#pcx").onclick = () => ov.remove();
       const send = async () => {

@@ -62,7 +62,7 @@ Object.assign(window.SL_WT, {
           slBadge(c, "");
           return true;
         }
-        const tile = {touren: [nf(L.length, 0), L.length === 1 ? "Tour" : "Touren"], km: [nf(slSum(L, t => t.km), 0) + " km", "Strecke"], up: [nf(slSum(L, t => t.up_m || 0), 0) + " m", "Aufstieg"], h: [slDur(slSum(L, t => t.h) * 3600), "Unterwegs"]};
+        const tile = {touren: [nf(L.length, 0), L.length === 1 ? "Tour" : "Touren"], km: [slKm(slSum(L, t => t.km)), "Strecke"], up: [slHm(slSum(L, t => t.up_m || 0)), "Aufstieg"], h: [slDur(slSum(L, t => t.h) * 3600), "Unterwegs"]};
         b.innerHTML = slTiles(want.map(v => tile[v]).filter(Boolean)) + `<p class="mut slcmpn">${esc(kaTxt(st, aus))}</p>`;
         slBadge(c, L.length === 1 ? "1 Tour" : `${L.length} Touren`);
         return true;
@@ -84,7 +84,7 @@ Object.assign(window.SL_WT, {
           slBadge(c, "");
           return true;
         }
-        b.innerHTML = `<ul class="sllist kalist">${L.slice(0, n).map(t => `<li><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${dateS(t.date)} · ${nf(t.km, 1)} km · ${nf(t.up_m || 0, 0)} m</span></li>`).join("")}</ul>` +
+        b.innerHTML = `<ul class="sllist kalist">${L.slice(0, n).map(t => `<li><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${fmtDatumKurz(t.date)} · ${fmtKm(t.km)} · ${fmtHm(t.up_m || 0)}</span></li>`).join("")}</ul>` +
           (L.length > n ? `<p class="mut slcmpn">und ${nf(L.length - n, 0)} weitere</p>` : "");
         slBadge(c, L.length === 1 ? "1 Tour" : `${L.length} Touren`);
         return true;
@@ -107,7 +107,7 @@ Object.assign(window.SL_WT, {
           slNote(b, "Keine Touren in diesem Jahr.");
           return true;
         }
-        b.innerHTML = `<ul class="sllist kaleg">${keys.map(s => `<li class="${st.off.has(s) ? "kaoff" : ""}"><i class="kasw" data-c="${esc(s)}"></i><span>${esc(sName(s))}</span><b>${km ? nf(by[s], 0) + " km" : nf(by[s], 0)}</b></li>`).join("")}</ul>`;
+        b.innerHTML = `<ul class="sllist kaleg">${keys.map(s => `<li class="${st.off.has(s) ? "kaoff" : ""}"><i class="kasw" data-c="${esc(s)}"></i><span>${esc(sName(s))}</span><b>${km ? fmtKm(by[s], {d: 0}) : nf(by[s], 0)}</b></li>`).join("")}</ul>`;
         b.querySelectorAll(".kasw").forEach(e => e.style.setProperty("background", sCol(e.dataset.c)));
         slBadge(c, `${keys.length} Aktivitäten`);
         return true;

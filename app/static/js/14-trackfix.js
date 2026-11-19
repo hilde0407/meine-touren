@@ -13,13 +13,13 @@ function trackFixDialog(id, done) {
       return;
     }
     const lim = a.limit_sustain;
-    const fmtMin = s => (hmParts(s)[0] ? hmParts(s)[0] + " Std. " : "") + hmParts(s)[1] + " Min.";
+    const fmtMin = s => fmtDauer(s);
     const clock = s => {
       const t = BY[id];
-      return t ? new Date((t.start_ts + s) * 1000).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"}) : "";
+      return t ? fmtUhrzeit(t.start_ts + s, {uhr: false}) : "";
     };
     const none = !a.n_spikes && !a.fast.length;
-    const hm = ts => new Date(ts * 1000).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"});
+    const hm = ts => fmtUhrzeit(ts, {uhr: false});
     const avg = a.dur_s > 0 ? a.dist_km / (a.dur_s / 3600) : 0;
     const showT = a.timing.uniform || !!(a.photos && avg > a.limit_sustain * 0.6);
     const initS = a.photos ? a.photos.last - a.photos.first : a.timing.est_s || a.dur_s;
@@ -27,9 +27,9 @@ function trackFixDialog(id, done) {
     b.innerHTML = `
      <p class="mut fs14 mt0">Gesucht wird nach <b>Ausreißern</b> (Punkte, die mit unmöglichem Tempo vom Weg wegspringen) und nach <b>schnellen Abschnitten</b> (dauerhaft über ${lim} km/h, z. B. Seilbahn, Bus oder Auto) sowie nach <b>GPS-Zittern</b>, das die Strecke künstlich verlängert. Das Original bleibt erhalten und lässt sich zurückholen.</p>
      <div id="tfm" class="br6 m8-0" style="height:280px"></div>
-     ${a.fixed ? `<p class="ok">✓ Bereits korrigiert: ${a.applied.spikes} Ausreißer entfernt, ${a.applied.excluded} Abschnitt(e) herausgerechnet (Strecke vorher ${nf(a.dist_km, 1)} km, jetzt ${nf(a.now_km, 1)} km). Die Liste unten zeigt, was vom Original aus gefunden wird.</p>` : ""}
+     ${a.fixed ? `<p class="ok">✓ Bereits korrigiert: ${a.applied.spikes} Ausreißer entfernt, ${a.applied.excluded} Abschnitt(e) herausgerechnet (Strecke vorher ${fmtKm(a.dist_km)}, jetzt ${fmtKm(a.now_km)}). Die Liste unten zeigt, was vom Original aus gefunden wird.</p>` : ""}
      ${none && !a.timing.uniform ? `<p class="ok">✓ Im Track wurde nichts Auffälliges gefunden.</p><div id="tfack" class="panel p10-14 m10-0" hidden></div>` : ""}
-     ${showT ? `<div class="panel p10-14 m10-0" style="border-left:4px solid var(--yellow)">${a.timing.uniform ? `<b>Die Zeitangaben stammen nicht von einer echten Aufzeichnung.</b> In jedem Abschnitt der Tour ist das Tempo exakt gleich (Ø ${nf(a.dist_km / (a.dur_s / 3600), 1)} km/h) – die Zeitpunkte sind nur gleichmäßig über die Strecke verteilt, z. B. bei einer geplanten Route. Die Dauer von ${fmtMin(a.dur_s)} ist deshalb nicht glaubwürdig.` : `<b>Das Durchschnittstempo (${nf(a.dist_km / (a.dur_s / 3600), 1)} km/h) ist für diese Sportart ungewöhnlich hoch.</b> Vielleicht stimmt die Dauer nicht.`}
+     ${showT ? `<div class="panel p10-14 m10-0" style="border-left:4px solid var(--yellow)">${a.timing.uniform ? `<b>Die Zeitangaben stammen nicht von einer echten Aufzeichnung.</b> In jedem Abschnitt der Tour ist das Tempo exakt gleich (Ø ${fmtTempo(a.dist_km / (a.dur_s / 3600))}) – die Zeitpunkte sind nur gleichmäßig über die Strecke verteilt, z. B. bei einer geplanten Route. Die Dauer von ${fmtMin(a.dur_s)} ist deshalb nicht glaubwürdig.` : `<b>Das Durchschnittstempo (${fmtTempo(a.dist_km / (a.dur_s / 3600))}) ist für diese Sportart ungewöhnlich hoch.</b> Vielleicht stimmt die Dauer nicht.`}
        <label class="chk mt8"><input type="checkbox" id="tfd" ${a.timing.uniform ? "checked" : ""}> <b>Dauer korrigieren auf</b> <input id="tfdh" type="number" min="0" max="99" style="width:64px" value="${hmParts(initS)[0]}"> Std. <input id="tfdm" type="number" min="0" max="59" style="width:64px" value="${hmParts(initS)[1]}"> Min.</label>
        ${a.photos ? `<div class="row m4-0 g6 aic"><button class="btn alt sm" type="button" id="tfph">Aus den Fotos übernehmen</button><span class="mut fs13">${a.photos.n} Fotos von ${hm(a.photos.first)} bis ${hm(a.photos.last)} Uhr = ${fmtMin(a.photos.last - a.photos.first)}</span></div><label class="chk m2-0"><input type="checkbox" id="tfst"> Start der Tour auf die Zeit des ersten Fotos (${hm(a.photos.first)} Uhr) setzen</label>` : ""}
        <span class="mut fs13">${a.timing.est_s ? "Vorschlag nach Strecke und Höhenmetern (Wanderzeit nach SAC-Formel, ohne Pausen); du kannst den Wert ändern. " : ""}Die Zeitpunkte im Track werden entsprechend gestreckt, schnelle Abschnitte werden bei solchen Zeiten nicht gesucht.</span></div>` : ""}
@@ -39,10 +39,10 @@ function trackFixDialog(id, done) {
      ${a.fast.length ? `<h3 class="m16-0-4">Schnelle Abschnitte</h3><p class="mut fs13 m0-0-6">Nichts ist vorgewählt. Anhaken = als Fahrt aus Strecke und Dauer herausrechnen (der Weg bleibt auf der Karte sichtbar). Bitte Karte und Uhrzeit prüfen: Nur echte Fahrten (Seilbahn, Bus, Auto) anhaken, keine Wegstücke, die du gelaufen bist.</p>
       <div class="rows">${a.fast
         .map(
-          f => `<label class="r cp g8 aic" style="display:flex"><input type="checkbox" data-f="${f.id}"><span>${a.has_time ? clock(f.t0) + " Uhr · " : ""}${nf(f.m / 1000, 2)} km in ${fmtMin(f.s)}<small class="mut"> · Ø ${nf(f.avg, 1)} km/h, bis ${nf(f.max, 0)} km/h</small></span></label>`
+          f => `<label class="r cp g8 aic" style="display:flex"><input type="checkbox" data-f="${f.id}"><span>${a.has_time ? clock(f.t0) + " Uhr · " : ""}${fmtKm(f.m / 1000)} in ${fmtMin(f.s)}<small class="mut"> · Ø ${fmtTempo(f.avg)}, bis ${fmtTempo(f.max, {d: 0})}</small></span></label>`
         )
         .join("")}</div>` : ""}
-     ${a.jitter_m >= 200 && a.jitter_m >= a.raw_m * 0.03 ? `<label class="chk"><input type="checkbox" id="tfj"> <b>GPS-Zittern glätten:</b> der Track ist durch Messrauschen etwa ${nf(a.jitter_m / 1000, 1)} km (${Math.round((a.jitter_m / a.raw_m) * 100)} %) zu lang. Die Länge wird entsprechend verringert, der Weg bleibt unverändert.</label>` : ""}
+     ${a.jitter_m >= 200 && a.jitter_m >= a.raw_m * 0.03 ? `<label class="chk"><input type="checkbox" id="tfj"> <b>GPS-Zittern glätten:</b> der Track ist durch Messrauschen etwa ${fmtKm(a.jitter_m / 1000)} (${Math.round((a.jitter_m / a.raw_m) * 100)} %) zu lang. Die Länge wird entsprechend verringert, der Weg bleibt unverändert.</label>` : ""}
      <p id="tfp" class="panel p10-14 m14-0-0 fs14"></p>
      ${!a.has_time ? `<p class="mut fs13">Dieser Track hat keine Zeitstempel – schnelle Abschnitte lassen sich daher nicht erkennen.</p>` : ""}
      <div class="row mt16">${none && !a.fixed && !a.timing.uniform ? "" : `<button class="btn" id="tfok">${a.fixed ? "Erneut anwenden" : "Korrigieren"}</button>`}${a.fixed ? `<button class="btn alt" id="tfre">Original wiederherstellen</button>` : ""}<button class="btn ghost" id="tfno">Schließen</button><span id="tfer" class="bad"></span></div>`;
@@ -59,7 +59,7 @@ function trackFixDialog(id, done) {
       });
       if (b.querySelector("#tfj")?.checked) d -= a.jitter_m;
       const v = (km, sec) => (sec > 0 ? nf(km / (sec / 3600), 1) : "–");
-      b.querySelector("#tfp").innerHTML = `Original: <b>${nf(a.dist_km, 1)} km</b> in ${fmtMin(a.dur_s)} (Ø ${v(a.dist_km, a.dur_s)} km/h)<br>Nach der Korrektur: <b>${nf(Math.max(0, d) / 1000, 1)} km</b> in ${fmtMin(Math.max(0, s))} (Ø ${v(Math.max(0, d) / 1000, s)} km/h)`;
+      b.querySelector("#tfp").innerHTML = `Original: <b>${fmtKm(a.dist_km)}</b> in ${fmtMin(a.dur_s)} (Ø ${v(a.dist_km, a.dur_s)} km/h)<br>Nach der Korrektur: <b>${fmtKm(Math.max(0, d) / 1000)}</b> in ${fmtMin(Math.max(0, s))} (Ø ${v(Math.max(0, d) / 1000, s)} km/h)`;
     };
     const ph = b.querySelector("#tfph");
     if (ph)
@@ -78,7 +78,7 @@ function trackFixDialog(id, done) {
       const mp = L.map(b.querySelector("#tfm"), {zoomControl: true});
       tileL("osm", "https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 18, attribution: "© OpenStreetMap"}).addTo(mp);
       const base = L.polyline(a.line, {color: "#2a7f62", weight: 4}).addTo(mp);
-      a.fast.forEach(f => L.polyline(f.line, {color: "#e8a200", weight: 6, opacity: 0.9}).addTo(mp).bindTooltip(`${nf(f.avg, 0)} km/h`));
+      a.fast.forEach(f => L.polyline(f.line, {color: "#e8a200", weight: 6, opacity: 0.9}).addTo(mp).bindTooltip(`${fmtTempo(f.avg, {d: 0})}`));
       a.spikes.forEach(s => L.circleMarker(s.at, {radius: 7, color: "#c0392b", fillColor: "#c0392b", fillOpacity: 0.8}).addTo(mp).bindTooltip(`${s.n} Ausreißer`));
       mp.fitBounds(base.getBounds(), {padding: [20, 20]});
       setTimeout(() => mp.invalidateSize(), 50);

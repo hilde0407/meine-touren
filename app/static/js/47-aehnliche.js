@@ -20,19 +20,19 @@ function aeCell(label, val, delta) {
 function aeDeltas(r) {
   const a = r.abweichung || {}, o = {};
   if (a.dauer_s != null) o.dauer = a.dauer_s === 0 ? ["±0:00", "gleich"] : [aeClock(a.dauer_s), a.dauer_s > 0 ? "länger" : "kürzer"];
-  if (a.strecke_m != null) o.strecke = Math.abs(a.strecke_m) < 50 ? ["±0,0 km", "gleich"] : [aeSign(a.strecke_m) + nf(Math.abs(a.strecke_m) / 1000, 1) + " km", a.strecke_m > 0 ? "länger" : "kürzer"];
-  if (a.auf_m != null) o.auf = a.auf_m === 0 ? ["±0 m", "gleich"] : [aeSign(a.auf_m) + nf(Math.abs(a.auf_m), 0) + " m", a.auf_m > 0 ? "mehr" : "weniger"];
+  if (a.strecke_m != null) o.strecke = Math.abs(a.strecke_m) < 50 ? ["±0,0 km", "gleich"] : [aeSign(a.strecke_m) + fmtKm(Math.abs(a.strecke_m) / 1000), a.strecke_m > 0 ? "länger" : "kürzer"];
+  if (a.auf_m != null) o.auf = a.auf_m === 0 ? ["±0 m", "gleich"] : [aeSign(a.auf_m) + fmtHm(Math.abs(a.auf_m)), a.auf_m > 0 ? "mehr" : "weniger"];
   if (a.tempo_pct != null) o.tempo = Math.round(a.tempo_pct) === 0 ? ["±0 %", "gleich"] : [aeSign(a.tempo_pct) + nf(Math.abs(a.tempo_pct), 0) + " %", a.tempo_pct > 0 ? "schneller" : "langsamer"];
   return o;
 }
 function aeRow(r, bestId) {
   const dl = r.aktuell ? {} : aeDeltas(r),
-    head = r.aktuell ? `<span class="aedt">${esc(dateS(r.datum))}</span>` : `<a class="aedt" href="#/tour/${encodeURIComponent(r.id)}/auswertung" title="Auswertung dieser Tour">${esc(dateS(r.datum))}</a>`,
+    head = r.aktuell ? `<span class="aedt">${esc(fmtDatumKurz(r.datum))}</span>` : `<a class="aedt" href="#/tour/${encodeURIComponent(r.id)}/auswertung" title="Auswertung dieser Tour">${esc(fmtDatumKurz(r.datum))}</a>`,
     tags = (r.aktuell ? `<span class="aetag cur">Diese Tour</span>` : "") + (r.id === bestId ? `<span class="aetag">Schnellster Lauf</span>` : ""),
     sub = [r.name ? `<span>${esc(r.name)}</span>` : "", r.geraet ? `<span class="aedev">${esc(r.geraet)}</span>` : ""].filter(Boolean).join(" · ");
   return `<li class="aer${r.aktuell ? " cur" : ""}"><div class="aeh">${head}${tags}</div>${sub ? `<div class="aesub">${sub}</div>` : ""}<div class="aem">` +
-    aeCell("Dauer", aeDur(r.dauer_s), dl.dauer) + aeCell("Strecke", r.strecke_m == null ? "–" : nf(r.strecke_m / 1000, 1) + " km", dl.strecke) +
-    aeCell("Aufstieg", r.auf_m == null ? "–" : nf(r.auf_m, 0) + " m", dl.auf) + aeCell("Tempo", r.tempo_kmh == null ? "–" : nf(r.tempo_kmh, 1) + " km/h", dl.tempo) + `</div></li>`;
+    aeCell("Dauer", aeDur(r.dauer_s), dl.dauer) + aeCell("Strecke", r.strecke_m == null ? "–" : fmtKm(r.strecke_m / 1000), dl.strecke) +
+    aeCell("Aufstieg", r.auf_m == null ? "–" : fmtHm(r.auf_m), dl.auf) + aeCell("Tempo", r.tempo_kmh == null ? "–" : fmtTempo(r.tempo_kmh), dl.tempo) + `</div></li>`;
 }
 /* Kurzaussage: [fett, Zusatz] – der Text steht in der Zeile des Abschnitts und im Kopf des Inhalts */
 function aeSaid(a) {
@@ -68,7 +68,7 @@ function aeChart(rows, bestId, width) {
   pts.forEach((r, i) => {
     const cx = x(i).toFixed(1), cy = y(r.tempo_kmh).toFixed(1), show = r.aktuell || all || r.id === bestId;
     if (i % step === 0 || r.aktuell) g += `<text x="${cx}" y="${H - 8}" text-anchor="middle"${r.aktuell ? ' class="aeval"' : ""}>${esc(lab(r))}</text>`;
-    g += `<g class="aept"><title>${esc(dateS(r.datum) + ": " + nf(r.tempo_kmh, 1) + " km/h")}</title><circle class="aedot${r.aktuell ? " cur" : ""}" cx="${cx}" cy="${cy}" r="${r.aktuell ? 8 : 5}"/>` +
+    g += `<g class="aept"><title>${esc(fmtDatumKurz(r.datum) + ": " + fmtTempo(r.tempo_kmh))}</title><circle class="aedot${r.aktuell ? " cur" : ""}" cx="${cx}" cy="${cy}" r="${r.aktuell ? 8 : 5}"/>` +
       (show ? `<text class="${r.aktuell ? "aeval" : ""}" x="${cx}" y="${(y(r.tempo_kmh) - (r.aktuell ? 14 : 11)).toFixed(1)}" text-anchor="middle">${nf(r.tempo_kmh, 1)}</text>` : "") + `</g>`;
   });
   return `<div class="aescroll"><svg class="aesvg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Liniendiagramm: Durchschnittstempo der Läufe über die Zeit">${g}</svg></div>` +

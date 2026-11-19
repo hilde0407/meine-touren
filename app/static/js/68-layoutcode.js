@@ -73,7 +73,7 @@ function slCodeDialog(fam, id) {
     body.innerHTML = `<p class="slcatin"><b class="slcn"></b></p><p class="mut slcatin">Wer den Code bekommt, kann ihn bei „Ansichten“ → „Importieren …“ einfügen oder den Link öffnen. Der Code enthält nur die Anordnung und die Einstellungen der Bausteine ` +
       `(auch eigene Titel und Notizen), keine Touren, Fotos oder Zugangsdaten.</p>` +
       `<div class="slfs"><label for="slcode">Layoutcode</label><textarea id="slcode" rows="5" readonly spellcheck="false" aria-describedby="slcodeh"></textarea>` +
-      `<p class="mut slimphint" id="slcodeh">${n.toLocaleString("de-DE")} Zeichen</p>${n > SL_LINK_WARN ? `<p class="mut slimphint">Der Link wäre sehr lang. Manche Programme kürzen so lange Links, dann den Code selbst weitergeben.</p>` : ""}</div>` +
+      `<p class="mut slimphint" id="slcodeh">${nf(n, 0)} Zeichen</p>${n > SL_LINK_WARN ? `<p class="mut slimphint">Der Link wäre sehr lang. Manche Programme kürzen so lange Links, dann den Code selbst weitergeben.</p>` : ""}</div>` +
       `<div class="slcodego"><button type="button" class="btn sm" data-a="copy">Code kopieren</button><button type="button" class="btn ghost sm" data-a="link">Link kopieren</button></div>` +
       `<p class="slcodeok" id="slcodeok" role="status" aria-live="polite"></p>` +
       `<div class="uifoot"><button type="button" class="btn ghost" data-close>Schließen</button></div>`;

@@ -38,11 +38,11 @@ Object.assign(window.SL_WT, {
         full = S.filter(x => !x.teil).length ? S.filter(x => !x.teil) : S,
         fast = full.reduce((m, x) => (x.kmh > m.kmh ? x : m)), slow = full.reduce((m, x) => (x.kmh < m.kmh ? x : m)),
         lens = S.map((x, i) => (x.km - (i ? S[i - 1].km : 0)) * 1000), avg = (slSum(lens, x => x) / slSum(S, x => x.dauer_s)) * 3.6,
-        f = kmh => (pace ? `${slMin(3600 / kmh)} min/km` : `${nf(kmh, 1)} km/h`),
+        f = kmh => (pace ? `${slMin(3600 / kmh)} min/km` : `${fmtTempo(kmh)}`),
         every = Math.ceil(S.length / 9),
         labels = S.map((x, i) => (S.length <= 9 || (i + 1) % every === 0 || i === S.length - 1 ? nf(x.km, x.teil ? 1 : 0) : "")),
         label = `Säulendiagramm: Tempo je Abschnitt, von ${f(slow.kmh)} bis ${f(fast.kmh)}`;
-      b.innerHTML = `<p class="mut slcap">${step === 1000 ? "Tempo je Kilometer (nur Bewegungszeit)" : `Tempo je ${nf(step / 1000, 0)} km (nur Bewegungszeit)`}</p>` +
+      b.innerHTML = `<p class="mut slcap">${step === 1000 ? "Tempo je Kilometer (nur Bewegungszeit)" : `Tempo je ${fmtKm(step / 1000, {d: 0})} (nur Bewegungszeit)`}</p>` +
         slCols(S.map(x => x.kmh), {hl: S.indexOf(fast), dim: S.map((x, i) => (x.teil ? i : -1)).filter(i => i >= 0), avg, label, labels, cls: "slsp"}) +
         `<ul class="slfacts"><li><i class="slsq hl"></i><span>Schnellster Abschnitt</span><b>bis km ${nf(fast.km, fast.teil ? 1 : 0)} · ${f(fast.kmh)}</b></li>` +
         `<li><i class="slsq v"></i><span>Langsamster Abschnitt</span><b>bis km ${nf(slow.km, slow.teil ? 1 : 0)} · ${f(slow.kmh)}</b></li>` +
@@ -61,7 +61,7 @@ Object.assign(window.SL_WT, {
       b.innerHTML = `<ul class="slhist">${SL_SLOPE.map(([k, name, rng], i) => {
         const p = d.anteile[k] * 100;
         return `<li><span class="slhn">${name}<small class="mut">${rng}</small></span>${slBr(p, "slc" + i)}<b>${p > 0 && p < 1 ? "unter 1 %" : Math.round(p) + " %"}</b></li>`;
-      }).join("")}</ul><p class="mut slcap">Anteil an der Strecke von ${slKm(d.dist_m / 1000)}, Steigung über 50 m geglättet.</p>`;
+      }).join("")}</ul><p class="mut slcap">Anteil an der Strecke von ${fmtKm(d.dist_m / 1000)}, Steigung über 50 m geglättet.</p>`;
       slBadge(c, `${Math.round(up * 100)} % bergauf`);
     },
   },
@@ -96,7 +96,7 @@ Object.assign(window.SL_WT, {
       const pace = o => (o.h > 0.2 ? o.km / o.h : null),
         M = {
           km: ["Strecke", t.km, others.map(o => o.km), slKm], up: ["Aufstieg", t.up_m, others.map(o => o.up_m).filter(v => v != null), slHm],
-          pace: ["Tempo", pace(t), others.map(pace).filter(v => v != null), v => nf(v, 1) + " km/h"], dur: ["Dauer", t.h > 0 ? t.h * 3600 : null, others.filter(o => o.h > 0).map(o => o.h * 3600), slDur],
+          pace: ["Tempo", pace(t), others.map(pace).filter(v => v != null), v => fmtTempo(v)], dur: ["Dauer", t.h > 0 ? t.h * 3600 : null, others.filter(o => o.h > 0).map(o => o.h * 3600), slDur],
         },
         want = (cfg.values && cfg.values.length ? cfg.values : ["km", "up", "pace"]).filter(k => M[k]),
         rows = want.map(k => {
@@ -128,7 +128,7 @@ Object.assign(window.SL_WT, {
         label = `Säulendiagramm: alle Touren ${t.y} nach ${what}, diese Tour liegt auf Platz ${rank}`;
       b.innerHTML = `<p class="slcmp">Platz ${rank} von ${pool.length}</p><p class="mut slcmpn">Touren im Jahr ${t.y}${cfg.scope === "sport" ? ` (${esc(sName(t.sport))})` : ""}, sortiert nach ${what}</p>` +
         slCols(shown, {hl: rank <= 60 ? rank - 1 : -1, dim: [], label, cls: "slsm"}) +
-        `<p class="mut slcap">${rank === 1 ? "Das ist die Spitze des Jahres." : `Die Spitze liegt bei ${{km: slKm, up: slHm, dur: x => slDur(x * 3600)}[cfg.metric || "km"](v[0])}.`}</p>`;
+        `<p class="mut slcap">${rank === 1 ? "Das ist die Spitze des Jahres." : `Die Spitze liegt bei ${{km: fmtKm, up: slHm, dur: x => slDur(x * 3600)}[cfg.metric || "km"](v[0])}.`}</p>`;
       slBadge(c, `Platz <b>${rank}</b> von ${pool.length}`);
     },
   },
@@ -161,10 +161,10 @@ Object.assign(window.SL_WT, {
     async render(c, b, cfg, {t}) {
       const ab = +cfg.ab || 500, d = t && (await slGet(`/api/bausteine/gipfel?tour=${slEnc(t.id)}&ab=${ab}`));
       if (!d || d.status !== "ok") return slWhy(b, d);
-      const tiles = [d.nach_s != null ? [slDur(d.nach_s), "Erreicht nach"] : null, d.bei_m != null ? [slKm(d.bei_m / 1000), "Bei Kilometer"] : null, [slHm(d.tief_m), "Tiefster Punkt"], [slHm(d.hoch_m - d.tief_m), "Höhenunterschied"]].filter(Boolean),
+      const tiles = [d.nach_s != null ? [slDur(d.nach_s), "Erreicht nach"] : null, d.bei_m != null ? [fmtKm(d.bei_m / 1000), "Bei Kilometer"] : null, [slHm(d.tief_m), "Tiefster Punkt"], [slHm(d.hoch_m - d.tief_m), "Höhenunterschied"]].filter(Boolean),
         sh = d.ueber_anteil != null ? Math.round(d.ueber_anteil * 100) : null;
       b.innerHTML = `<div class="slsign"><span>Höchster Punkt</span><b>${slHm(d.hoch_m)}</b></div>${slTiles(tiles)}` +
-        (sh != null ? `<div class="slr1"><span>Anteil der Strecke über ${nf(ab, 0)} m</span><b>${sh} %</b></div>${slBr(sh, "slc5")}` : "");
+        (sh != null ? `<div class="slr1"><span>Anteil der Strecke über ${fmtHm(ab)}</span><b>${sh} %</b></div>${slBr(sh, "slc5")}` : "");
       slBadge(c, slHm(d.hoch_m));
     },
   },
@@ -184,7 +184,7 @@ Object.assign(window.SL_WT, {
         row = (em, n, name, sub) => `<li><span class="slem" aria-hidden="true">${em}</span><div><p class="slfn"><b>${slFmtN(n)} ×</b> ${name}</p><p class="mut slfs2">${sub}</p></div></li>`,
         rows = [];
       if (t.up_m > 0) rows.push(row("⛰️", t.up_m / H[2], H[1], `Aufstieg ${slHm(t.up_m)} geteilt durch ${slHm(H[2])}`));
-      if (t.km > 0) rows.push(row("👟", (t.km * 1000) / G[2], G[1], `Strecke ${slKm(t.km)} geteilt durch ${G[2] >= 1000 ? slKm(G[2] / 1000) : slHm(G[2])}`));
+      if (t.km > 0) rows.push(row("👟", (t.km * 1000) / G[2], G[1], `Strecke ${fmtKm(t.km)} geteilt durch ${G[2] >= 1000 ? fmtKm(G[2] / 1000) : slHm(G[2])}`));
       rows.push(kc ? row("🍽️", kc / K[2], K[1], `Kalorien ${nf(kc, 0)} kcal geteilt durch ${nf(K[2], 0)} kcal`) : `<li><span class="slem" aria-hidden="true">🍽️</span><p class="mut slfs2">Kalorien wurden bei dieser Tour nicht aufgezeichnet.</p></li>`);
       b.innerHTML = `<ul class="slfun">${rows.join("")}</ul>`;
       if (t.up_m > 0) slBadge(c, `${slFmtN(t.up_m / H[2])} × ${H[1]}`);
@@ -203,7 +203,7 @@ Object.assign(window.SL_WT, {
         const cd = w.code, sky = cd === 0 ? "☀️" : cd === 1 ? "🌤️" : cd === 2 ? "⛅" : cd === 3 ? "☁️" : cd === 45 || cd === 48 ? "🌫️" : cd >= 95 ? "⛈️" : cd >= 71 && cd <= 77 || cd === 85 || cd === 86 ? "❄️" : cd >= 61 && cd <= 67 || cd >= 80 && cd <= 82 ? "🌧️" : cd >= 51 ? "🌦️" : "🌡️",
           tm = w.tmax, feel = tm < 2 ? ["🥶", "Frostig"] : tm < 12 ? ["🧥", "Kühl"] : tm < 20 ? ["🙂", "Mild"] : tm < 27 ? ["😎", "Warm"] : ["🥵", "Heiß"],
           wind = w.wind < 15 ? ["🍃", "Kaum Wind"] : w.wind < 30 ? ["💨", "Frischer Wind"] : ["🌬️", "Stürmisch"];
-        chips.push([sky, esc(w.text || "–"), ""], [feel[0], feel[1], `${nf(w.tmin, 0)}–${nf(w.tmax, 0)} °C`], [wind[0], wind[1], `bis ${nf(w.wind, 0)} km/h`]);
+        chips.push([sky, esc(w.text || "–"), ""], [feel[0], feel[1], `${nf(w.tmin, 0)}–${nf(w.tmax, 0)} °C`], [wind[0], wind[1], `bis ${fmtTempo(w.wind, {d: 0})}`]);
         if (w.precip >= 1) chips.push(["☔", "Regen", nf(w.precip, 1) + " mm"]);
       }
       b.innerHTML = `<ul class="slmood">${chips.map(([e, l, s]) => `<li><span class="slem" aria-hidden="true">${e}</span><b>${l}</b>${s ? `<small class="mut">${s}</small>` : ""}</li>`).join("")}</ul>` + (w && w.tmin != null ? "" : '<p class="mut slcap">Für diese Tour liegen keine Wetterdaten vor.</p>');
@@ -239,9 +239,9 @@ Object.assign(window.SL_WT, {
         },
         line = d.h.slice(1).map((_, i) => `<path class="slpl slcl${cls(i)}" d="M${X(i)} ${Y(i)}L${X(i + 1)} ${Y(i + 1)}"/>`).join(""),
         area = `M0 120${d.h.map((_, i) => `L${X(i)} ${Y(i)}`).join("")}L600 120Z`,
-        label = `Höhenprofil, tiefster Punkt ${slHm(lo)}, höchster Punkt ${slHm(hi)}, Länge ${slKm(dm / 1000)}`;
+        label = `Höhenprofil, tiefster Punkt ${slHm(lo)}, höchster Punkt ${slHm(hi)}, Länge ${fmtKm(dm / 1000)}`;
       b.innerHTML = `<svg class="slprof" viewBox="0 0 600 120" preserveAspectRatio="none" role="img" aria-label="${esc(label)}"><path class="slpa" d="${area}"/>${line}</svg>` +
-        `<div class="slxl sb" aria-hidden="true"><span>0 km</span><span>${slHm(lo)} bis ${slHm(hi)}</span><span>${slKm(dm / 1000)}</span></div>` +
+        `<div class="slxl sb" aria-hidden="true"><span>0 km</span><span>${slHm(lo)} bis ${slHm(hi)}</span><span>${fmtKm(dm / 1000)}</span></div>` +
         `<ul class="sllg"><li><i class="slsq slc1"></i>bergab</li><li><i class="slsq slc3"></i>eben</li><li><i class="slsq slc5"></i>bergauf</li></ul>`;
       slBadge(c, `${slHm(lo)} bis ${slHm(hi)}`);
     },
@@ -256,9 +256,9 @@ Object.assign(window.SL_WT, {
       const R = d.touren.slice().sort((x, y) => x.start_ts - y.start_ts), f = R[0], l = R[R.length - 1], best = R.find(r => r.id === d.bestes_id),
         span = Math.max(1, l.start_ts - f.start_ts),
         dots = R.map(r => `<span class="sltd${r.aktuell ? " cur" : ""}" data-l="${(((r.start_ts - f.start_ts) / span) * 100).toFixed(1)}"></span>`).join(""),
-        label = `Zeitleiste: ${R.length} Wiederholungen von ${dateS(f.datum)} bis ${dateS(l.datum)}`;
-      b.innerHTML = slTiles([[`${R.length} ×`, "Auf dieser Strecke"], [dateS(f.datum), "Erstes Mal", f.aktuell ? "diese Tour" : ""], [dateS(l.datum), "Letztes Mal", l.aktuell ? "diese Tour" : ""],
-        best ? [nf(best.tempo_kmh, 1) + " km/h", "Bestes Tempo", best.aktuell ? "diese Tour" : dateS(best.datum)] : null].filter(Boolean)) +
+        label = `Zeitleiste: ${R.length} Wiederholungen von ${fmtDatumKurz(f.datum)} bis ${fmtDatumKurz(l.datum)}`;
+      b.innerHTML = slTiles([[`${R.length} ×`, "Auf dieser Strecke"], [fmtDatumKurz(f.datum), "Erstes Mal", f.aktuell ? "diese Tour" : ""], [fmtDatumKurz(l.datum), "Letztes Mal", l.aktuell ? "diese Tour" : ""],
+        best ? [fmtTempo(best.tempo_kmh), "Bestes Tempo", best.aktuell ? "diese Tour" : fmtDatumKurz(best.datum)] : null].filter(Boolean)) +
         `<div class="sltl" role="img" aria-label="${esc(label)}"><span class="sltl-l"></span>${dots}</div><div class="slxl sb" aria-hidden="true"><span>${f.datum.slice(0, 4)}</span><span>${l.datum.slice(0, 4)}</span></div>`;
       slPos(b);
       slBadge(c, `${R.length} ×`);
@@ -290,9 +290,9 @@ function planErgDiff(k, v) {
   if (Math.abs(v) < PLAN_TOL[k]) return '<span class="pld"><span aria-hidden="true">=</span> <span>wie geplant</span></span>';
   const num = k === "km" ? `${nSigned(v, 1)} km` : k === "up" ? `${nSigned(v, 0)} m` : null;
   return `<span class="pld"><span aria-hidden="true">${v > 0 ? "↑" : "↓"}</span> ` +
-    (num ? `<b>${num}</b>` : `<b>${v < 0 ? "−" : "+"}${fmtHM(Math.abs(v) * 3600)}</b> <span>Std.</span>`) + ` <small class="mut">${PLAN_WORDS[k][v > 0 ? 0 : 1]}</small></span>`;
+    (num ? `<b>${num}</b>` : `<b>${v < 0 ? "−" : "+"}${fmtDauer(Math.abs(v) * 3600)}</b>`) + ` <small class="mut">${PLAN_WORDS[k][v > 0 ? 0 : 1]}</small></span>`;
 }
-const planErgVal = (k, v) => (v == null ? '<span class="mut">ohne Angabe</span>' : k === "km" ? slKm(v) : k === "up" ? slHm(v) : `${fmtHM(v * 3600)} <span>Std.</span>`);
+const planErgVal = (k, v) => (v == null ? '<span class="mut">ohne Angabe</span>' : k === "km" ? slKm(v) : k === "up" ? slHm(v) : fmtDauer(v * 3600));
 /* Linien übereinander: gleichmäßige Abbildung (Längengrad mit cos(Breite) gestreckt), Strichbreite bleibt beim Skalieren gleich */
 function planErgSvg(d) {
   const A = (d.plan_linie || []).filter(p => p.length >= 2), B = (d.tour_linie || []).filter(p => p.length >= 2), all = A.concat(B);
@@ -318,7 +318,7 @@ function planErgPaint(c, b, d, t) {
     `<p class="mut slcap">Zeit gesamt: einschließlich Pausen; geplante Zeit nach deinem persönlichen Tempo.</p>` +
     (can ? `<div class="row g8 plact"><a class="btn alt sm" href="#/plan/${d.plan.id}">Zum Plan ›</a><button type="button" class="btn ghost sm" data-a="unlink">Verknüpfung lösen</button></div>` : "") + "</div>";
   const first = [["km", D.km], ["h", D.h]].find(([, v]) => v != null);
-  slBadge(c, !first ? "" : Math.abs(first[1]) < PLAN_TOL[first[0]] ? "wie geplant" : `${first[1] > 0 ? "↑" : "↓"} ${first[0] === "km" ? nSigned(first[1], 1) + " km" : (first[1] < 0 ? "−" : "+") + fmtHM(Math.abs(first[1]) * 3600) + " Std."}`);
+  slBadge(c, !first ? "" : Math.abs(first[1]) < PLAN_TOL[first[0]] ? "wie geplant" : `${first[1] > 0 ? "↑" : "↓"} ${first[0] === "km" ? nSigned(first[1], 1) + " km" : (first[1] < 0 ? "−" : "+") + fmtDauer(Math.abs(first[1]) * 3600)}`);
   const ub = b.querySelector('[data-a="unlink"]');
   if (ub)
     ub.onclick = async () => {

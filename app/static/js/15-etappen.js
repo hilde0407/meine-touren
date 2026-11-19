@@ -24,11 +24,11 @@ VIEWS.trips = async () => {
   const L = seriesList(),
     tr = $("#tr");
   if (!tr || !L.length) return;
-  const ds = ts => new Date(ts * 1000).toLocaleDateString("de-DE");
+  const ds = ts => fmtDatumKurz(ts);
   tr.insertAdjacentHTML(
     "afterbegin",
     `<div id="rnser"><div class="sec mt0"><h2>Mehrtagestouren</h2><span class="sub">erkannt an Namen wie „… Tag 3“ oder „… Etappe 2“</span></div><div class="otdg">${L.map(
-      s => `<a class="otd" href="#/series/${s.id}" style="background-image:linear-gradient(#0e2a2b99,#0e2a2bee)"><b>${esc(s.name)}</b><span>${ds(s.start)}${s.end - s.start > 86400 ? " – " + ds(s.end) : ""}</span><small>${s.n} Etappen · ${nf(s.km, 0)} km · ${nf(s.up, 0)} m</small></a>`
+      s => `<a class="otd" href="#/series/${s.id}" style="background-image:linear-gradient(#0e2a2b99,#0e2a2bee)"><b>${esc(s.name)}</b><span>${ds(s.start)}${s.end - s.start > 86400 ? " – " + ds(s.end) : ""}</span><small>${s.n} Etappen · ${fmtKm(s.km, {d: 0})} · ${fmtHm(s.up)}</small></a>`
     ).join("")}</div></div>`
   );
   // Titelfoto je Mehrtagestour: ein Foto aus der Mitte der Reihe
@@ -57,7 +57,7 @@ VIEWS.tour = async (id, q) => {
   const m = SER_RE.exec((t.name || "").trim());
   if (!m || !m[1].trim()) return;
   const s = seriesList().find(x => x.name.toLowerCase() === m[1].trim().toLowerCase());
-  if (s) w.insertAdjacentHTML("beforebegin", `<div id="sernote" class="mut mn4-0-10">Etappe der Mehrtagestour <a href="#/series/${s.id}"><b>${esc(s.name)}</b></a> (${s.n} Etappen, ${nf(s.km, 0)} km, ${nf(s.up, 0)} m Aufstieg) – <a href="#/series/${s.id}">Gesamtansicht</a></div>`);
+  if (s) w.insertAdjacentHTML("beforebegin", `<div id="sernote" class="mut mn4-0-10">Etappe der Mehrtagestour <a href="#/series/${s.id}"><b>${esc(s.name)}</b></a> (${s.n} Etappen, ${fmtKm(s.km, {d: 0})}, ${fmtHm(s.up)} Aufstieg) – <a href="#/series/${s.id}">Gesamtansicht</a></div>`);
 };
 
 /* ---- Reihe bilden / umbenennen ---- */
@@ -79,7 +79,7 @@ function seriesBuildDialog() {
       t = m.querySelector("#sbt").value;
     const ts = TOURS.filter(x => iso(x.start_ts) >= f && iso(x.start_ts) <= t).sort((a, b) => a.start_ts - b.start_ts);
     m.querySelector("#sbl").innerHTML = ts.length
-      ? ts.map(x => `<label class="r g8 aic" style="display:flex"><input type="checkbox" data-i="${esc(x.id)}" data-s="${x.start_ts}" checked><span>${dateS(x.date)} · ${esc(x.name)} <span class="mut">${nf(x.km, 1)} km</span></span></label>`).join("")
+      ? ts.map(x => `<label class="r g8 aic" style="display:flex"><input type="checkbox" data-i="${esc(x.id)}" data-s="${x.start_ts}" checked><span>${fmtDatumKurz(x.date)} · ${esc(x.name)} <span class="mut">${fmtKm(x.km)}</span></span></label>`).join("")
       : '<p class="mut">Keine Touren in diesem Zeitraum.</p>';
   };
   m.querySelectorAll("input[type=date]").forEach(i => (i.onchange = list));

@@ -16,10 +16,10 @@ const FL_KINDS = new Set(["sports", "range", "compare", "title", "global"]);
 const FL_RANGE_ALL = ["year", "y", "12m", "90d", "all"];
 const FL_RLAB = {year: "Laufendes Jahr", "12m": "Letzte 12 Monate", "90d": "Letzte 90 Tage", all: "Gesamte Zeit"};
 const FL_MET = {
-  count: {name: "Touren", unit: "Touren", f: () => 1},
-  km: {name: "Kilometer", unit: "km", f: t => t.km},
-  up: {name: "Höhenmeter", unit: "m", f: t => t.up_m || 0},
-  h: {name: "Stunden unterwegs", unit: "Std.", f: t => t.h},
+  count: {name: "Touren", unit: "Touren", f: () => 1, fmt: v => nf(v, 0)},
+  km: {name: "Strecke", unit: "km", f: t => t.km, fmt: v => fmtKm(v, {summe: true})},
+  up: {name: "Aufstieg", unit: "m", f: t => t.up_m || 0, fmt: v => fmtHm(v)},
+  h: {name: "Zeit unterwegs", unit: "Std.", f: t => t.h, fmt: v => fmtDauer(v * 3600, {summe: true})},
 };
 const flVal = (list, m) => list.reduce((x, t) => x + FL_MET[m].f(t), 0);
 const flDayAdd = (iso, n) => new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10) + n)).toISOString().slice(0, 10);
@@ -43,7 +43,7 @@ function flRange(cfg, def = "year", o = {}) {
     const ly = Math.max(...TOURS.map(t => t.y));
     return {kind: "y", from: `${ly}-01-01`, to: `${ly}-12-31`, prev: null, year: ly, label: String(ly)};
   }
-  if (kind === "c") return {kind, from: cfg.from, to: cfg.to, prev: null, year: null, label: `${dateS(cfg.from)} – ${dateS(cfg.to)}`};
+  if (kind === "c") return {kind, from: cfg.from, to: cfg.to, prev: null, year: null, label: `${fmtDatumKurz(cfg.from)} – ${fmtDatumKurz(cfg.to)}`};
   if (kind === "y") return {kind, from: `${yr}-01-01`, to: `${yr}-12-31`, prev: {from: `${yr - 1}-01-01`, to: `${yr - 1}-12-31`}, year: yr, label: String(yr)};
   if (kind === "12m") {
     const m = cy * 12 + now.getMonth() - 11, from = `${Math.floor(m / 12)}-${pad2((m % 12) + 1)}-01`;           // der laufende und die 11 Kalendermonate davor

@@ -97,37 +97,37 @@ VIEWS.dash = async (_, q) => {
   const ph = last.photos ? await api(`/api/photos?tour_id=${last.id}&limit=4`) : [];
   $("#main").innerHTML = `
   <section class="hero"><div id="hm"></div><div class="in"><div class="t">
-    <div class="k">Letzte Tour, ${sName(last.sport)}</div><h1>${esc(last.name)}</h1><div class="w">${dateL(last.date)}, ${timeS(last.date)} Uhr</div>
+    <div class="k">Letzte Tour, ${sName(last.sport)}</div><h1>${esc(last.name)}</h1><div class="w">${fmtDatum(last.date, {zeit: true})}</div>
     ${ph.length ? `<div class="thumbrow">${ph.map((p, i) => `<img loading="lazy" src="/pic/${p.id}?size=300" data-i="${i}">`).join("")}</div>` : ""}
     <div class="btns"><a class="btn" href="#/tour/${last.id}">Tour ansehen</a>${last.photos ? `<a class="btn alt c-white" target="_blank" href="slideshow.html?tour=${last.id}">Diashow</a>` : ""}</div></div>
-    <div class="signs"><div class="sign">${nf(last.km, 1)}<small>Kilometer</small></div><div class="sign l">${nf(last.up_m, 0)}<small>Meter aufwärts</small></div><div class="sign">${nf(last.h, 1)}<small>Stunden</small></div></div></div></section>
+    <div class="signs"><div class="sign">${fmtKm(last.km)}<small>Strecke</small></div><div class="sign l">${fmtHm(last.up_m)}<small>Aufstieg</small></div><div class="sign">${fmtDauer(last.h * 3600)}<small>Dauer</small></div></div></div></section>
   <div class="inner">
   ${stFilterBar(F, R, sel.length, yearAll)}
-  <div class="figs" data-st="kpi" data-badge="${esc(`${nf(sel.length, 0)} Touren · ${nf(km, 0)} km`)}">
+  <div class="figs" data-st="kpi" data-badge="${esc(`${nf(sel.length, 0)} Touren · ${fmtKm(km, {d: 0})}`)}">
     <div class="fig"><div class="v">${nf(sel.length, 0)}</div><div class="l">Touren</div>${delta(sel.length, prev.length)}</div>
-    <div class="fig"><div class="v">${nf(km, 0)}<span class="u">km</span></div><div class="l">Strecke</div>${delta(km, pk)}</div>
+    <div class="fig"><div class="v">${fmtKm(km, {summe: true, einheit: false})}<span class="u">km</span></div><div class="l">Strecke</div>${delta(km, pk)}</div>
     <div class="fig"><div class="v">${nf(up, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div>${delta(
       up,
       sum(prev, t => t.up_m || 0)
     )}</div>
-    <div class="fig"><div class="v">${nf(hh, 0)}<span class="u">h</span></div><div class="l">Unterwegs</div>${delta(
+    <div class="fig"><div class="v">${fmtDauerHtml(hh * 3600, {summe: true})}</div><div class="l">Unterwegs</div>${delta(
       hh,
       sum(prev, t => t.h)
     )}</div>
     <div class="fig"><div class="v">${nf(km / (sel.length || 1), 1)}<span class="u">km</span></div><div class="l">pro Tour im Schnitt</div></div></div>
   <div class="grid g2 mt44">
-    <div class="panel" data-st="kmmonat" data-badge="${esc(bestKL ? "Stärkster Monat: " + bestKL : monthly ? "" : `${nf(sum(sel, t => t.km), 0)} km`)}"><h2>${monthly ? "Kilometer pro Monat" : "Kilometer pro Jahr"}</h2>${monthly ? barChart(mkm, mlab, {ghost: mghost, ghostLabel: Y ? Y - 1 : "Vorzeitraum"}) : barChart(byYear, yrs.map(String), {href: yrs})}
+    <div class="panel" data-st="kmmonat" data-badge="${esc(bestKL ? "Stärkster Monat: " + bestKL : monthly ? "" : `${fmtKm(sum(sel, t => t.km), {d: 0})}`)}"><h2>${monthly ? "Kilometer pro Monat" : "Kilometer pro Jahr"}</h2>${monthly ? barChart(mkm, mlab, {ghost: mghost, ghostLabel: Y ? Y - 1 : "Vorzeitraum"}) : barChart(byYear, yrs.map(String), {href: yrs})}
       <div class="legend">${monthly ? `<span><i style="background:var(--yellow);border:1px solid var(--ink)"></i>stärkster Monat</span>${mghost && mghost.some(v => v > 0) ? `<span><i style="background:var(--accent2)"></i>${Y ? Y - 1 : "Zeitraum davor"}</span>` : ""}` : "<span>Ein Klick auf einen Balken öffnet das Jahr.</span>"}</div></div>
-    <div class="panel" data-st="kmverlauf" data-badge="${esc(`${cy}: ${nf(cs[cs.length - 1].pts[cs[cs.length - 1].pts.length - 1][1], 0)} km`)}"><h2>Kilometer im Jahresverlauf</h2>${lineChart(cs)}<div class="legend"><span><i style="background:var(--bars)"></i>${cy}</span>${own && ys.includes(cy - 1) ? `<span><i style="background:var(--accent2)"></i>${cy - 1}</span>` : ""}</div></div>
+    <div class="panel" data-st="kmverlauf" data-badge="${esc(`${cy}: ${fmtKm(cs[cs.length - 1].pts[cs[cs.length - 1].pts.length - 1][1], {d: 0})}`)}"><h2>Kilometer im Jahresverlauf</h2>${lineChart(cs)}<div class="legend"><span><i style="background:var(--bars)"></i>${cy}</span>${own && ys.includes(cy - 1) ? `<span><i style="background:var(--accent2)"></i>${cy - 1}</span>` : ""}</div></div>
     <div class="panel" data-st="sportarten" data-badge="${esc(sports.length ? `${sName(sports[0][0])} ${nf((sports[0][1] / tot) * 100, 0)} %` : "")}"><h2>Sportarten</h2><div class="stack">${sports.map(([s, v]) => `<div style="width:${(v / tot) * 100}%;background:${sCol(s)}" title="${sName(s)}"></div>`).join("")}</div>
-      <div class="rows mt10">${sports.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${nf(v, 0)} km, ${nf((v / tot) * 100, 0)} %</span></div>`).join("")}</div></div>
-    <div class="panel" data-st="bestwerte" data-badge="${esc(longest ? `Längste Tour ${nf(longest.km, 1)} km` : "")}"><h2>Bestwerte ${Y || (R.kind === "all" ? "gesamt" : R.label)}</h2><div class="rows">
+      <div class="rows mt10">${sports.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${fmtKm(v, {d: 0})}, ${nf((v / tot) * 100, 0)} %</span></div>`).join("")}</div></div>
+    <div class="panel" data-st="bestwerte" data-badge="${esc(longest ? `Längste Tour ${fmtKm(longest.km)}` : "")}"><h2>Bestwerte ${Y || (R.kind === "all" ? "gesamt" : R.label)}</h2><div class="rows">
       ${
         longest
-          ? `<div class="r"><span><a href="#/tour/${longest.id}">Längste Tour</a><small>${esc(longest.name)}</small></span><b>${nf(longest.km, 1)} km</b></div>
-      <div class="r"><span><a href="#/tour/${steepest.id}">Meiste Höhenmeter</a><small>${esc(steepest.name)}</small></span><b>${nf(steepest.up_m, 0)} m</b></div>
-      <div class="r"><span><a href="#/tour/${longT.id}">Längste Dauer</a><small>${esc(longT.name)}</small></span><b>${nf(longT.h, 1)} h</b></div>
-      <div class="r"><span>Stärkster Monat<small>${MONL[bestM]}</small></span><b>${nf(mm[bestM], 0)} km</b></div>`
+          ? `<div class="r"><span><a href="#/tour/${longest.id}">Längste Tour</a><small>${esc(longest.name)}</small></span><b>${fmtKm(longest.km)}</b></div>
+      <div class="r"><span><a href="#/tour/${steepest.id}">Meiste Höhenmeter</a><small>${esc(steepest.name)}</small></span><b>${fmtHm(steepest.up_m)}</b></div>
+      <div class="r"><span><a href="#/tour/${longT.id}">Längste Dauer</a><small>${esc(longT.name)}</small></span><b>${fmtDauer(longT.h * 3600)}</b></div>
+      <div class="r"><span>Stärkster Monat<small>${MONL[bestM]}</small></span><b>${fmtKm(mm[bestM], {d: 0})}</b></div>`
           : '<div class="mut">Keine Touren</div>'
       }</div></div></div>
   <div class="panel gap" data-st="heat" data-badge="${esc(`${Object.keys(byDay).length} Tage mit Touren`)}"><h2>Aktivität im Jahr ${hy}</h2>${heat(hy, byDay)}</div>
@@ -169,8 +169,8 @@ VIEWS.dash = async (_, q) => {
 const seasonOfMonth = m => (m >= 5 && m <= 10 ? "sommer" : "winter");
 const seasonOf = d => seasonOfMonth(+String(d).slice(5, 7));
 function tourRow(t) {
-  return `<a class="tr" href="#/tour/${t.id}">${miniRoute(t.id, t.sport)}<span><div class="nm">${esc(t.name)}</div><div class="s"><span>${dateS(t.date)}, ${timeS(t.date)}</span><span><i style="background:${sCol(t.sport)}"></i>${sName(t.sport)}</span>${t.photos ? `<span>${t.photos} Fotos</span>` : ""}${t.has_hr ? `<span class="hrt" title="Mit Herzfrequenz">❤</span>` : ""}${t.stars ? `<span class="stars" title="Meine Bewertung">${"★".repeat(t.stars)}</span>` : ""}</div></span>
-  <span class="n"><span>${nf(t.km, 1)}<small>km</small></span><span>${nf(t.up_m, 0)}<small>m auf</small></span><span>${nf(t.h, 1)}<small>Std.</small></span></span></a>`;
+  return `<a class="tr" href="#/tour/${t.id}">${miniRoute(t.id, t.sport)}<span><div class="nm">${esc(t.name)}</div><div class="s"><span>${fmtDatumKurz(t.date, {zeit: true})}</span><span><i style="background:${sCol(t.sport)}"></i>${sName(t.sport)}</span>${t.photos ? `<span>${t.photos} Fotos</span>` : ""}${t.has_hr ? `<span class="hrt" title="Mit Herzfrequenz">❤</span>` : ""}${t.stars ? `<span class="stars" title="Meine Bewertung">${"★".repeat(t.stars)}</span>` : ""}</div></span>
+  <span class="n"><span>${fmtKm(t.km)}</span><span>${fmtAuf(t.up_m)}</span><span>${fmtDauer(t.h * 3600)}</span></span></a>`;
 }
 
 /* ---------- Gesamtkarte ---------- */
@@ -191,7 +191,7 @@ VIEWS.map = async () => {
     busy = new Set();
   let shown = [];
   const popup = t =>
-    `<b>${esc(t.name)}</b><br>${dateS(t.date)}, ${nf(t.km, 1)} km, ${nf(t.up_m, 0)} m auf<br><a href="#/tour/${t.id}">Tour öffnen</a>`;
+    `<b>${esc(t.name)}</b><br>${fmtDatumKurz(t.date)}, ${fmtKm(t.km)} · ${fmtAuf(t.up_m)}<br><a href="#/tour/${t.id}">Tour öffnen</a>`;
   const line = (t, pts) => {
     if (lines[t.id]) grp.removeLayer(lines[t.id]);
     if (casings[t.id]) {
@@ -356,9 +356,9 @@ const tourXfOk = (t, x) => {
 function tourXfBar(x) {
   const c = [];
   x.sp.forEach(s => c.push(sName(s)));
-  if (x.von && x.bis) c.push(`${dateS(x.von)} – ${dateS(x.bis)}`);
-  else if (x.von) c.push(`ab ${dateS(x.von)}`);
-  else if (x.bis) c.push(`bis ${dateS(x.bis)}`);
+  if (x.von && x.bis) c.push(`${fmtDatumKurz(x.von)} – ${fmtDatumKurz(x.bis)}`);
+  else if (x.von) c.push(`ab ${fmtDatumKurz(x.von)}`);
+  else if (x.bis) c.push(`bis ${fmtDatumKurz(x.bis)}`);
   if (x.tag) c.push(`Schlagwort „${x.tag}“`);
   if (x.minkm) c.push(`mindestens ${nf(x.minkm, x.minkm % 1 ? 1 : 0)} km`);
   return `<div class="kzxf" role="status"><p class="kzxt"><b>Touren der Kennzahl „${esc(x.kz)}“</b> <a href="#/tours">Filter aufheben</a></p>` +

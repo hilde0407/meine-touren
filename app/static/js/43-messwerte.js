@@ -44,7 +44,7 @@ function metChart(k, ch, m, dur) {
   [lo, (lo + hi) / 2, hi].forEach(v => (g += `<line x1="${L0}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/><text x="${L0 - 6}" y="${y(v) + 4}" text-anchor="end">${k === "pace" ? metPace(v) : nf(v, ch.dec > 1 ? 1 : ch.dec)}</text>`));
   for (let q = 0; q <= 4; q++) {
     const s = (dur * q) / 4, mi = Math.round(s / 60);
-    g += `<text x="${x(s)}" y="${H - 6}" text-anchor="${q === 4 ? "end" : q === 0 ? "start" : "middle"}">${Math.floor(mi / 60)}:${pad2(mi % 60)} h</text>`;
+    g += `<text x="${x(s)}" y="${H - 6}" text-anchor="${q === 4 ? "end" : q === 0 ? "start" : "middle"}">${Math.floor(mi / 60)}:${pad2(mi % 60)}</text>`;
   }
   return `<svg viewBox="0 0 ${W} ${H}" class="w100 ha metsvg" data-k="${k}">${g}<path d="${d}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><line class="metcur" y1="${T}" y2="${H - B}" stroke="var(--mut)" stroke-dasharray="3 3" display="none"/></svg>`;
 }
@@ -114,7 +114,7 @@ async function metCard(t) {
         const cx = 46 + ((vb.width - 46 - 6) * tt[best]) / dur, mi = Math.round(tt[best] / 60);
         cur.setAttribute("x1", cx); cur.setAttribute("x2", cx); cur.removeAttribute("display");
         const dr = body.getBoundingClientRect();
-        tip.textContent = `${Math.floor(mi / 60)}:${pad2(mi % 60)} h · ${metFmt(k, ch.series[best], ch)} ${ch.unit}`;
+        tip.textContent = `${Math.floor(mi / 60)}:${pad2(mi % 60)} · ${metFmt(k, ch.series[best], ch)} ${ch.unit}`;
         tip.hidden = false;
         tip.style.left = Math.min(Math.max(e.clientX - dr.left, 60), dr.width - 60) + "px";
         tip.style.top = e.clientY - dr.top - 4 + "px";

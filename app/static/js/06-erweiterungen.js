@@ -30,7 +30,7 @@ VIEWS.search = async (_, q) => {
   const term = (q.get("q") || "").trim(),
     toks = term.split(/\s+/).filter(Boolean);
   const hay = t =>
-    `${t.name} ${t.note || ""} ${sName(t.sport)} ${dateS(t.date)} ${MONL[t.m - 1]} ${t.y} ${t.g_place || ""} ${t.g_county || ""} ${t.g_state || ""} ${t.g_country || ""} ${(t.tags || "").replace(/\|/g, " ")}`;
+    `${t.name} ${t.note || ""} ${sName(t.sport)} ${fmtDatumKurz(t.date)} ${MONL[t.m - 1]} ${t.y} ${t.g_place || ""} ${t.g_county || ""} ${t.g_state || ""} ${t.g_country || ""} ${(t.tags || "").replace(/\|/g, " ")}`;
   const a = toks.length
     ? TOURS.filter(t => {
         const h = sforms(hay(t));
@@ -68,7 +68,7 @@ function goalNote(g, v, u, frac, proj, yr, cy) {
   if (rate > 0) {
     const d = (g.target - v) / rate,
       when = new Date(Date.now() + d * 864e5);
-    if (proj >= g.target) s += ` · Ziel voraussichtlich am ${when.toLocaleDateString("de-DE", {day: "numeric", month: "long"})}`;
+    if (proj >= g.target) s += ` · Ziel voraussichtlich am ${fmtDatum(when)}`;
     else {
       const left = (new Date(cy + 1, 0, 1) - Date.now()) / 864e5 / 7;
       s += ` · <span class="bad">Ziel wird bei diesem Tempo verfehlt – nötig wären ${nf((g.target - v) / Math.max(0.5, left), g.target < 50 ? 1 : 0)} ${u} pro Woche (bisher ${nf(rate * 7, g.target < 50 ? 1 : 0)})</span>`;
@@ -169,7 +169,7 @@ VIEWS.records = async (_, q) => {
   );
   const lnk = (t, v) =>
     t
-      ? `<div class="r"><span>${v[0]}<small><a href="#/tour/${t.id}">${esc(t.name)}</a>, ${dateS(t.date)}</small></span><b>${v[1]}</b></div>`
+      ? `<div class="r"><span>${v[0]}<small><a href="#/tour/${t.id}">${esc(t.name)}</a>, ${fmtDatumKurz(t.date)}</small></span><b>${v[1]}</b></div>`
       : "";
   const wkIdx = t => Math.floor((Date.UTC(t.y, t.m - 1, +t.date.slice(8, 10)) / 864e5 + 3) / 7),
     wks = [...new Set(T.map(wkIdx))].sort((a, b) => a - b);
@@ -198,23 +198,23 @@ VIEWS.records = async (_, q) => {
     .slice(0, 8);
   $("#main").innerHTML =
     `<div class="sec mt0"><h2>Rekorde</h2><span class="sub">${nf(T.length, 0)} Touren seit ${T[T.length - 1].y}${fs ? " · " + sName(fs) : ""}</span></div>${chips}
-   <div class="figs"><div class="fig"><div class="v">${nf(km / 40075, 2)}<span class="u">×</span></div><div class="l">um die Erde (${nf(km, 0)} km)</div></div>
-    <div class="fig"><div class="v">${nf(up / 8849, 1)}<span class="u">×</span></div><div class="l">Mount Everest bergauf (${nf(up, 0)} m)</div></div>
-    <div class="fig"><div class="v">${nf(h / 24, 1)}<span class="u">Tage</span></div><div class="l">unterwegs (${nf(h, 0)} Std.)</div></div>
+   <div class="figs"><div class="fig"><div class="v">${nf(km / 40075, 2)}<span class="u">×</span></div><div class="l">um die Erde (${fmtKm(km, {d: 0})})</div></div>
+    <div class="fig"><div class="v">${nf(up / 8849, 1)}<span class="u">×</span></div><div class="l">Mount Everest bergauf (${fmtHm(up)})</div></div>
+    <div class="fig"><div class="v">${nf(h / 24, 1)}<span class="u">Tage</span></div><div class="l">unterwegs (${fmtDauer(h * 3600, {summe: true})})</div></div>
     <div class="fig"><div class="v">${nf(dayN, 0)}</div><div class="l">Tage mit Touren</div></div>
     <div class="fig"><div class="v">${longest}<span class="u">Wochen</span></div><div class="l">längste Serie · aktuell ${cur}</div></div></div>
    <div class="grid g2 mt36">
     <div class="panel"><h2>Bestwerte gesamt</h2><div class="rows">${lnk(
       best(T, t => t.km),
-      ["Längste Strecke", nf(best(T, t => t.km).km, 1) + " km"]
+      ["Längste Strecke", fmtKm(best(T, t => t.km).km)]
     )}${lnk(
       best(T, t => t.up_m || 0),
-      ["Meiste Höhenmeter", nf(best(T, t => t.up_m || 0).up_m, 0) + " m"]
+      ["Größter Aufstieg", fmtHm(best(T, t => t.up_m || 0).up_m)]
     )}${lnk(
       best(T, t => t.h),
-      ["Längste Dauer", nf(best(T, t => t.h).h, 1) + " h"]
+      ["Längste Dauer", fmtDauer(best(T, t => t.h).h * 3600)]
     )}</div></div>
-    <div class="panel"><h2>Höchste Punkte</h2><div class="rows">${alts.length ? alts.map(a => (BY[a.id] ? `<div class="r"><span><a href="#/tour/${a.id}">${esc(BY[a.id].name)}</a><small>${dateS(BY[a.id].date)}</small></span><b>${nf(a.alt, 0)} m</b></div>` : "")).join("") : `<div class="mut">Sobald die Strecken geladen sind („Routen laden“ in der Verwaltung), erscheinen hier die höchsten Punkte.</div>`}</div></div>
+    <div class="panel"><h2>Höchste Punkte</h2><div class="rows">${alts.length ? alts.map(a => (BY[a.id] ? `<div class="r"><span><a href="#/tour/${a.id}">${esc(BY[a.id].name)}</a><small>${fmtDatumKurz(BY[a.id].date)}</small></span><b>${fmtHm(a.alt)}</b></div>` : "")).join("") : `<div class="mut">Sobald die Strecken geladen sind („Routen laden“ in der Verwaltung), erscheinen hier die höchsten Punkte.</div>`}</div></div>
     <div class="panel"><h2>Nach Wochentag</h2>${barChart(wd, ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"])}</div>
     <div class="panel"><h2>Je Sportart</h2><div class="rows">${sports
       .map(s => {
@@ -232,7 +232,7 @@ VIEWS.records = async (_, q) => {
           sum(a, t => t.up_m || 0),
           0
         )} m</span></div>
-       <small>Längste: <a href="#/tour/${l.id}">${nf(l.km, 1)} km</a> · Meiste Höhenmeter: <a href="#/tour/${u.id}">${nf(u.up_m, 0)} m</a>${f ? ` · Schnellste: <a href="#/tour/${f.id}">${nf(f.km / f.h, 1)} km/h</a>` : ""}</small></div>`;
+       <small>Längste: <a href="#/tour/${l.id}">${fmtKm(l.km)}</a> · Meiste Höhenmeter: <a href="#/tour/${u.id}">${fmtHm(u.up_m)}</a>${f ? ` · Schnellste: <a href="#/tour/${f.id}">${fmtTempo(f.km / f.h)}</a>` : ""}</small></div>`;
       })
       .join("")}</div></div></div>`;
 };
@@ -269,14 +269,14 @@ VIEWS.recap = async name => {
   sel.forEach(t => { if (t.g_place) { const o = byPlace[t.g_place] || (byPlace[t.g_place] = {n: 0, km: 0, st: t.g_state || t.g_country || ""}); o.n++; o.km += t.km; } });
   const places = Object.entries(byPlace).sort((a, b) => b[1].n - a[1].n || b[1].km - a[1].km),
     states = new Set(sel.map(t => t.g_state).filter(Boolean)).size, lands = new Set(sel.map(t => t.g_country).filter(Boolean)).size;
-  const placePanel = places.length ? `<div class="panel gap"><h2>Orte des Jahres</h2><div class="mut fs14 mb8">${places.length} Startorte${states ? ` · ${states} Bundesländer/Regionen` : ""}${lands ? ` · ${lands} ${lands === 1 ? "Land" : "Länder"}` : ""}</div><div class="rows">${places.slice(0, 8).map(([n, o]) => `<div class="row"><span>📌 ${esc(n)}${o.st ? ` <span class="mut">(${esc(o.st)})</span>` : ""}</span><span class="sp"></span><b>${o.n} ${o.n === 1 ? "Tour" : "Touren"} · ${nf(o.km, 0)} km</b></div>`).join("")}</div></div>` : "";
+  const placePanel = places.length ? `<div class="panel gap"><h2>Orte des Jahres</h2><div class="mut fs14 mb8">${places.length} Startorte${states ? ` · ${states} Bundesländer/Regionen` : ""}${lands ? ` · ${lands} ${lands === 1 ? "Land" : "Länder"}` : ""}</div><div class="rows">${places.slice(0, 8).map(([n, o]) => `<div class="row"><span>📌 ${esc(n)}${o.st ? ` <span class="mut">(${esc(o.st)})</span>` : ""}</span><span class="sp"></span><b>${o.n} ${o.n === 1 ? "Tour" : "Touren"} · ${fmtKm(o.km, {d: 0})}</b></div>`).join("")}</div></div>` : "";
   await pdfPhotoLoad();
   const days = new Set(sel.map(t => t.date.slice(0, 10))).size,
     ph = await api(`/api/photos?year=${Y}&random=true&limit=${Math.max(12, PDFP.n)}`).catch(() => []);
   const dl = (a, b) => (b ? `${a >= b ? "+" : "−"}${nf((Math.abs(a - b) / b) * 100, 0)} % gegenüber ${Y - 1}` : "");
   $("#main").innerHTML =
     `<div class="recap"><div class="noprint row mb10"><a class="back" href="#/dash?y=${Y}">‹ Übersicht</a><span class="sp"></span>${pdfPhotoBar()}${pdfBtn()}<button class="btn ghost sm" data-act="print">Drucken</button></div>
-   <div class="rhero"><div class="k">Mein Tourenjahr</div><h1>${Y}</h1><div class="rs"><span><b>${nf(sel.length, 0)}</b> Touren</span><span><b>${nf(km, 0)}</b> km</span><span><b>${nf(up, 0)}</b> Höhenmeter</span><span><b>${nf(h, 0)}</b> Stunden</span><span><b>${days}</b> Tage unterwegs</span></div>
+   <div class="rhero"><div class="k">Mein Tourenjahr</div><h1>${Y}</h1><div class="rs"><span><b>${nf(sel.length, 0)}</b> Touren</span><span><b>${fmtKm(km, {summe: true})}</b> Strecke</span><span><b>${fmtHm(up)}</b> Aufstieg</span><span><b>${fmtDauer(h * 3600, {summe: true})}</b> unterwegs</span><span><b>${days}</b> Tage unterwegs</span></div>
    <div class="rd">${[
      dl(
        km,
@@ -285,9 +285,9 @@ VIEWS.recap = async name => {
    ]
      .filter(Boolean)
      .join("")}</div></div>
-   <div class="grid g2 mt34"><div class="panel"><h2>Kilometer pro Monat</h2>${barChart(mm, MON, {ghost: pm, ghostLabel: Y - 1})}<div class="mut fs14">Stärkster Monat: ${MONL[bm]} mit ${nf(mm[bm], 0)} km</div></div>
-    <div class="panel"><h2>Sportarten</h2><div class="stack">${sp.map(([s, v]) => `<div style="width:${(v / km) * 100}%;background:${sCol(s)}"></div>`).join("")}</div><div class="rows mt10">${sp.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${nf(v, 0)} km, ${nf((v / km) * 100, 0)} %</span></div>`).join("")}</div></div></div>
-   <div class="panel gap"><h2>Die fünf stärksten Touren</h2><div class="tl">${top.map(tourRow).join("")}</div><div class="mut mt10">Meiste Höhenmeter: <a href="#/tour/${steep.id}">${esc(steep.name)}</a> (${nf(steep.up_m, 0)} m)</div></div>
+   <div class="grid g2 mt34"><div class="panel"><h2>Kilometer pro Monat</h2>${barChart(mm, MON, {ghost: pm, ghostLabel: Y - 1})}<div class="mut fs14">Stärkster Monat: ${MONL[bm]} mit ${fmtKm(mm[bm], {d: 0})}</div></div>
+    <div class="panel"><h2>Sportarten</h2><div class="stack">${sp.map(([s, v]) => `<div style="width:${(v / km) * 100}%;background:${sCol(s)}"></div>`).join("")}</div><div class="rows mt10">${sp.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${fmtKm(v, {d: 0})}, ${nf((v / km) * 100, 0)} %</span></div>`).join("")}</div></div></div>
+   <div class="panel gap"><h2>Die fünf stärksten Touren</h2><div class="tl">${top.map(tourRow).join("")}</div><div class="mut mt10">Meiste Höhenmeter: <a href="#/tour/${steep.id}">${esc(steep.name)}</a> (${fmtHm(steep.up_m)})</div></div>
    ${placePanel}
    ${ph.length ? `<div class="panel gap"><div class="row"><h2>Fotos des Jahres</h2><span class="sp"></span><a class="btn sm noprint" target="_blank" href="slideshow.html?year=${Y}">Diashow</a></div><div class="thumbs" id="rph">${ph.map((p, i) => `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=400" data-i="${i}"></div>`).join("")}</div></div>` : ""}</div>`;
   if (ph.length) bindThumbs($("#rph"), ph);
@@ -548,7 +548,7 @@ VIEWS.map = async () => {
       L.circleMarker([p.lat, p.lng], {radius: p.est ? 4 : 5, color: "#fff", weight: 1.5, fillColor: "#e11d74", fillOpacity: p.est ? 0.6 : 0.95})
         .addTo(pl)
         .bindPopup(
-          `<img src="/pic/${p.id}?size=300" class="br3" style="width:220px;display:block"><div class="mt4">${new Date(p.taken_ts * 1000).toLocaleString("de-DE")}${p.tour_id && BY[p.tour_id] ? `<br><a href="#/tour/${p.tour_id}">${esc(BY[p.tour_id].name)}</a>` : "<br>ohne Tour"}${p.est ? '<br><small style="opacity:.7">Position aus der Uhrzeit auf dem Track berechnet</small>' : ""}</div>`
+          `<img src="/pic/${p.id}?size=300" class="br3" style="width:220px;display:block"><div class="mt4">${fmtDatumKurz(p.taken_ts, {zeit: true})}${p.tour_id && BY[p.tour_id] ? `<br><a href="#/tour/${p.tour_id}">${esc(BY[p.tour_id].name)}</a>` : "<br>ohne Tour"}${p.est ? '<br><small style="opacity:.7">Position aus der Uhrzeit auf dem Track berechnet</small>' : ""}</div>`
         );
     });
     $("#mph").textContent = `Fotos (${n})`;       // so sieht man, wie viele Fotos mit Standort gezeigt werden
@@ -670,7 +670,7 @@ assignDialog = (sp, done) => {
 async function bkInit() {
   const box = $("#bkst"), btn = $("#bkchk"), msg = $("#bkmsg");
   if (!box || !btn) return;
-  const dt = ts => new Date(ts * 1000).toLocaleString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"});
+  const dt = ts => fmtDatumKurz(ts, {zeit: true});
   const mb = n => (n >= 1e8 ? (n / 1e9).toFixed(2) + " GB" : (n / 1e6).toFixed(1) + " MB");
   const render = s => {
     if (!box.isConnected) return;
@@ -711,7 +711,7 @@ async function umzugInit() {
   const fmt = n => (n > 1e9 ? (n / 1e9).toFixed(1) + " GB" : (n / 1e6).toFixed(1) + " MB");
   const list = async () => {
     const l = await api("/api/backup/full").catch(() => []);
-    ls.innerHTML = l.map(x => `<div class="row g8"><a href="/api/backup/full/${encodeURIComponent(x.name)}" download>${esc(x.name)}</a><small class="mut">${fmt(x.size)} · ${new Date(x.ts * 1000).toLocaleString("de-DE")}</small></div>`).join("") || '<small class="mut">Noch kein Umzugspaket erstellt.</small>';
+    ls.innerHTML = l.map(x => `<div class="row g8"><a href="/api/backup/full/${encodeURIComponent(x.name)}" download>${esc(x.name)}</a><small class="mut">${fmt(x.size)} · ${fmtDatumKurz(x.ts, {zeit: true})}</small></div>`).join("") || '<small class="mut">Noch kein Umzugspaket erstellt.</small>';
   };
   const poll = async () => {
     const j = await api("/api/jobs").catch(() => null);

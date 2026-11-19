@@ -72,25 +72,25 @@ function sportMetrics(c) {
 /* Welche Kennzahlen passen zur Sportart? Liefert [[Wert, Einheit, Beschriftung], …] */
 function sportFigs(t, m) {
   const km = m.dist / 1000,
-    H = s => fmtHM(s),
+    H = (s, l) => [...Object.values(fmtDauerTeile(s)), l],
     deg = g => Math.round((Math.atan(Math.abs(g) / 100) * 180) / Math.PI),
     f = [],
     g = sportGrp(t.sport),
     mov = m.hasT && m.tMove > 0;
-  const pause = () => m.hasT && f.push([H(m.tPause), "Std.", "Pausen"]);
+  const pause = () => m.hasT && f.push(H(m.tPause, "Pausen"));
   if (g === "bike") {
     if (mov) f.push([nf(km / (m.tMove / 3600), 1), "km/h", "Ø in Bewegung"]);
     if (m.maxV) f.push([nf(m.maxV, 0), "km/h", "Höchstes Tempo"]);
     pause();
     f.push([`${Math.round((m.dUp / m.dist) * 100)} / ${Math.round((m.dDown / m.dist) * 100)}`, "%", "bergauf / bergab"]);
   } else if (g === "ski") {
-    if (m.hasT) f.push([H(m.tUp), "Std.", "Aufstieg"], [H(m.tDown), "Std.", "Abfahrt"]);
+    if (m.hasT) f.push(H(m.tUp, "Aufstieg"), H(m.tDown, "Abfahrt"));
     f.push([nf(m.down, 0), "m", "Abfahrtshöhenmeter"]);
     if (m.maxV) f.push([nf(m.maxV, 0), "km/h", "Höchstes Tempo"]);
     f.push([`${deg(m.maxG)}`, "°", "steilster Abschnitt"]);
     f.push([`${Math.round(m.steep * 100)}`, "%", "der Strecke über 30°"]);
   } else if (g === "foot") {
-    if (mov) f.push([H(m.tMove), "Std.", "Gehzeit"]);
+    if (mov) f.push(H(m.tMove, "Gehzeit"));
     pause();
     if (m.tUp > 600 && m.up > 50) f.push([nf(m.up / (m.tUp / 3600), 0), "m/h", "Steigrate"]);
     f.push([`${deg(m.maxG)}`, "°", "steilster Abschnitt"]);
@@ -99,7 +99,7 @@ function sportFigs(t, m) {
     if (mov) f.push([fmtMS(m.tMove / km), "min/km", "Pace in Bewegung"]);
     pause();
   } else {
-    if (mov) f.push([H(m.tMove), "Std.", "Zeit in Bewegung"]);
+    if (mov) f.push(H(m.tMove, "Zeit in Bewegung"));
     pause();
   }
   return f;

@@ -27,7 +27,7 @@ VIEWS.check = async () => {
       list.length
         ? `<p class="mut">Bei diesen Touren passen die Foto-Zeiten nicht zum Aufnahmeort (Kamerauhr falsch gestellt, z. B. Zeitzone der Reise). Mit „Korrigieren“ werden die Fotos um den Unterschied verschoben und der Tour zugeordnet.</p><div class="rows">${list
             .map(
-              x => `<div class="r" data-t="${esc(x.tour_id)}" style="display:block"><a href="#/tour/${encodeURIComponent(x.tour_id)}" class="fw600">${esc(x.name)}</a> <span class="mut">${new Date(x.start_ts * 1000).toLocaleDateString("de-DE")}</span><br>
+              x => `<div class="r" data-t="${esc(x.tour_id)}" style="display:block"><a href="#/tour/${encodeURIComponent(x.tour_id)}" class="fw600">${esc(x.name)}</a> <span class="mut">${fmtDatumKurz(x.start_ts)}</span><br>
         <span class="bad fs14">Foto-Zeiten müssen um ${fmt(x.delta_s)} korrigiert werden (${x.n} von ${x.of} Fotos mit Aufnahmeort stimmen überein)</span>
         <div class="row m4-0"><button class="btn sm" data-ck>Korrigieren (${fmt(x.delta_s)})</button><button class="btn alt sm" data-ci>Ignorieren</button></div></div>`
             )

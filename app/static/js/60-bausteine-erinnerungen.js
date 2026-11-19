@@ -99,7 +99,7 @@ const erShuffle = a => {
   return l;
 };
 const erCap = p => {
-  const d = p.taken_ts ? dateS(slIso(new Date(p.taken_ts * 1000))) : "";
+  const d = p.taken_ts ? fmtDatumKurz(slIso(new Date(p.taken_ts * 1000))) : "";
   return `<figcaption>${p.tour_name ? `<b>${esc(p.tour_name)}</b>` : ""}${d ? `<span>${d}</span>` : ""}</figcaption>`;
 };
 /* Spalten im Raster: so viele, wie bei der gewählten Größe in die Breite passen. Reichen sie nicht für alle Fotos, wird höchstens bis zur Hälfte (mindestens 2) verringert,

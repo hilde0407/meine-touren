@@ -22,7 +22,7 @@ VIEWS.tour = async (id, q) => {
       $("#th").innerHTML = r.photos
         .map(
           (p, k) =>
-            `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=500" data-i="${k}"><span class="cap">${"★".repeat(Math.max(0, p.rating || 0))}${p.rating ? " " : ""}${new Date(p.taken_ts * 1000).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"})}</span></div>`
+            `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=500" data-i="${k}"><span class="cap">${"★".repeat(Math.max(0, p.rating || 0))}${p.rating ? " " : ""}${fmtUhrzeit(p.taken_ts)}</span></div>`
         )
         .join("");
       bindThumbs($("#th"), r.photos);

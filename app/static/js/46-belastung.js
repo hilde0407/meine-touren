@@ -6,13 +6,13 @@ const BL = {mode: "w", range: "6", sport: "wandern", jahr: 0},
   BL_RANGES = [["3", "Letzte 3 Monate"], ["6", "Letzte 6 Monate"], ["12", "Letzte 12 Monate"], ["0", "Alles"]],
   blDate = d => d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()),
   blParse = iso => new Date(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)),
-  blDay = iso => blParse(iso).toLocaleDateString("de-DE", {day: "numeric", month: "short"}),
+  blDay = iso => fmtTagKurz(iso),
   blRange = b => (b.von === b.bis ? blDay(b.von) : blDay(b.von) + " – " + blDay(b.bis)),
   blDur = s => {
     const m = Math.round(s / 60);
     return m >= 60 ? Math.floor(m / 60) + " h " + pad2(m % 60) + " min" : Math.max(1, m) + " min";
   },
-  blLabel = (b, mode) => (mode === "m" ? blParse(b.von).toLocaleDateString("de-DE", {month: "long", year: "numeric"}) : b.label);
+  blLabel = (b, mode) => (mode === "m" ? fmtMonat(b.von) : b.label);
 
 function blRangeQuery() {
   const n = +BL.range;
@@ -58,7 +58,7 @@ function blChart(buckets, mode, width) {
   buckets.forEach((b, i) => {
     const x = L + i * slot + (slot - bw) / 2;
     if (i % step === 0) {
-      const t = mode === "m" ? blParse(b.von).toLocaleDateString("de-DE", {month: "short", year: "2-digit"}) : b.label.replace(/\/\d{4}$/, "");
+      const t = mode === "m" ? fmtMonat(b.von, {kurz: true, jahr2: true}) : b.label.replace(/\/\d{4}$/, "");
       g += `<text x="${(L + i * slot + slot / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle">${esc(t)}</text>`;
     }
     if (!b.touren) return;
@@ -139,7 +139,7 @@ function blTop(d) {
       ? d.haertest_wochen.map(b => `<div class="r"><span>${esc(b.label)}<small>${esc(blRange(b))}${b.ohne_angabe ? " · " + (b.mit_daten + " von " + b.touren + " Touren mit Uhr-Daten") : ""}</small></span><b>${nf(b.belastung, 0)}</b></div>`).join("")
       : `<div class="mut">Noch keine Uhr-Daten im Zeitraum.</div>`,
     to = d.haertest_touren.length
-      ? d.haertest_touren.map(t => `<div class="r"><span><a href="#/tour/${esc(t.id)}">${esc(t.name)}</a><small>${esc(dateS(t.datum))} · ${nf(t.km, 1)} km</small></span><b>${nf(t.belastung, 0)}</b></div>`).join("")
+      ? d.haertest_touren.map(t => `<div class="r"><span><a href="#/tour/${esc(t.id)}">${esc(t.name)}</a><small>${esc(fmtDatumKurz(t.datum))} · ${fmtKm(t.km)}</small></span><b>${nf(t.belastung, 0)}</b></div>`).join("")
       : `<div class="mut">Noch keine Uhr-Daten im Zeitraum.</div>`;
   return trFold("bl_top", "Die härtesten Wochen und Touren", "", `<div class="grid g2"><div><div class="uth">Die härtesten Wochen</div><div class="rows">${wk}</div></div><div><div class="uth">Die härtesten Touren</div><div class="rows">${to}</div></div></div>`, true);
 }
@@ -270,14 +270,14 @@ async function tpDraw(root) {
   const e = d.gruppen[BL.sport] || {touren: 0};
   let h = "";
   if (e.touren) {
-    h += `<div class="utiles">` + TP_CLS.filter(c => e[c[0]] != null).map(c => `<div class="utile" title="${esc(c[2])}"><b>${nf(e[c[0]], 1)} km/h</b><span class="mut">${c[1]}</span><small class="mut">${e["n_" + c[0]]} Touren</small></div>`).join("") +
+    h += `<div class="utiles">` + TP_CLS.filter(c => e[c[0]] != null).map(c => `<div class="utile" title="${esc(c[2])}"><b>${fmtTempo(e[c[0]])}</b><span class="mut">${c[1]}</span><small class="mut">${e["n_" + c[0]]} Touren</small></div>`).join("") +
       (e.vert_mh != null ? `<div class="utile" title="Steigung über 5 %"><b>${nf(e.vert_mh, 0)} m/h</b><span class="mut">Aufstieg pro Stunde</span><small class="mut">${e.n_vert_mh} Touren</small></div>` : "") + `</div>`;
     h += `<div class="mut hrnote"><span>Median über ${e.touren} Touren (mindestens 2 km, mit Höhendaten).</span> <span>Nur Bewegungszeit: Pausen unter 0,3 km/h sind herausgenommen; die Steigung ist über etwa 50 m geglättet.</span></div>`;
   } else h += `<p class="mut">Keine Touren mit Höhendaten und mindestens 2 km.</p>`;
   if (d.offen) h += `<div class="mut hrnote" role="status">${d.offen} Touren werden noch berechnet …</div>`;
   box.innerHTML = h;
   const tk = root.querySelector("#tpkey");
-  if (tk) tk.innerHTML = e.touren ? TP_CLS.filter(c => e[c[0]] != null).map(c => `<span>${c[1]}</span> <b>${nf(e[c[0]], 1)} km/h</b>`).join(" · ") : "";
+  if (tk) tk.innerHTML = e.touren ? TP_CLS.filter(c => e[c[0]] != null).map(c => `<span>${c[1]}</span> <b>${fmtTempo(e[c[0]])}</b>`).join(" · ") : "";
   if (d.offen && root.isConnected && (root.dataset.retry = +(root.dataset.retry || 0) + 1) <= 40) setTimeout(() => tpDraw(root), 700);
 }
 
@@ -366,13 +366,13 @@ async function steigCard(t) {
   }
   if (!d || d.status !== "ok" || $("#steigcard") || !tlAnc() || !BY[t.id]) return;
   const k = d.klassen,
-    tile = (key, lab, tip, extra) => (k[key] ? `<div class="utile" title="${esc(tip)}"><b>${nf(k[key].kmh, 1)} km/h</b><span class="mut">${lab}</span><small class="mut">${extra}</small></div>` : ""),
-    km = key => nf(k[key].dist_m / 1000, 1) + " km";
+    tile = (key, lab, tip, extra) => (k[key] ? `<div class="utile" title="${esc(tip)}"><b>${fmtTempo(k[key].kmh)}</b><span class="mut">${lab}</span><small class="mut">${extra}</small></div>` : ""),
+    km = key => fmtKm(k[key].dist_m / 1000);
   const tiles = tile("auf", "Bergauf", "Steigung über 5 %", (d.vert_mh != null ? `<span>${nf(d.vert_mh, 0)} m/h Aufstieg</span> · ` : "") + (k.auf ? `<span>${km("auf")}</span>` : "")) +
     tile("eben", "Eben", "Steigung zwischen −5 % und 5 %", k.eben ? km("eben") : "") + tile("ab", "Bergab", "Gefälle über 5 %", k.ab ? km("ab") : "");
   if (!tiles) return;
   const first = k.auf ? "auf" : k.eben ? "eben" : "ab",
-    key = [k.auf ? `<span>Bergauf</span> <b>${nf(k.auf.kmh, 1)} km/h</b>${d.vert_mh != null ? ` · <b>${nf(d.vert_mh, 0)} m/h</b>` : ""}` : "", k.eben ? `<span>Eben</span> <b>${nf(k.eben.kmh, 1)} km/h</b>` : "", k.ab ? `<span>Bergab</span> <b>${nf(k.ab.kmh, 1)} km/h</b>` : ""].filter(Boolean).join(" · ");
+    key = [k.auf ? `<span>Bergauf</span> <b>${fmtTempo(k.auf.kmh)}</b>${d.vert_mh != null ? ` · <b>${nf(d.vert_mh, 0)} m/h</b>` : ""}` : "", k.eben ? `<span>Eben</span> <b>${fmtTempo(k.eben.kmh)}</b>` : "", k.ab ? `<span>Bergab</span> <b>${fmtTempo(k.ab.kmh)}</b>` : ""].filter(Boolean).join(" · ");
   const c = tlCard("steigcard", {sec: "steig", key: "steig", icon: "trend", title: "Tempo nach Steigung", badge: key, def: false});
   tlBody(c).innerHTML = `<div class="utiles">${tiles}</div><div class="mut hrnote"><span>Aus Strecke, Höhe und Zeit berechnet.</span> <span>Nur Bewegungszeit: Pausen unter 0,3 km/h sind herausgenommen; die Steigung ist über etwa 50 m geglättet (bergauf über 5 %, bergab unter −5 %).</span></div>`;
   ($("#uhrcard") || $("#metcard") || $("#pulscard") || tlAnc()).after(c);

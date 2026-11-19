@@ -7,7 +7,7 @@ VIEWS.places = async () => {
   box.className = "";
   const mx = Math.max(1, ...p.starts.map(s => s.n));
   box.innerHTML = `<div class="grid g2">
-   <div class="panel"><h2>Häufigste Startorte</h2>${p.starts.length ? `<div class="rows">${p.starts.map(s => `<div class="r"><span><a href="#/search?q=${encodeURIComponent(s.place)}">${esc(s.place)}</a><small>${esc(s.state || "")} · ${nf(s.km, 0)} km</small></span><b>${s.n}×</b></div>`).join("")}</div>` : '<p class="mut">Noch keine Regionen bestimmt: Verwaltung → „Regionen bestimmen“.</p>'}</div>
+   <div class="panel"><h2>Häufigste Startorte</h2>${p.starts.length ? `<div class="rows">${p.starts.map(s => `<div class="r"><span><a href="#/search?q=${encodeURIComponent(s.place)}">${esc(s.place)}</a><small>${esc(s.state || "")} · ${fmtKm(s.km, {d: 0})}</small></span><b>${s.n}×</b></div>`).join("")}</div>` : '<p class="mut">Noch keine Regionen bestimmt: Verwaltung → „Regionen bestimmen“.</p>'}</div>
    <div class="panel"><h2>Gipfel &amp; Pässe</h2>${
      p.peaks.length
        ? `<div class="rows">${p.peaks
@@ -15,7 +15,7 @@ VIEWS.places = async () => {
              s =>
                `<div class="r"><span>${esc(s.name)}<small>${s.alt ? nf(s.alt, 0) + " m · " : ""}${s.tours
                  .slice(0, 4)
-                 .map(id => `<a href="#/tour/${id}">${BY[id] ? dateS(BY[id].date) : id}</a>`)
+                 .map(id => `<a href="#/tour/${id}">${BY[id] ? fmtDatumKurz(BY[id].date) : id}</a>`)
                  .join(", ")}${s.tours.length > 4 ? " …" : ""}</small></span><b>${s.n}×</b></div>`
            )
            .join("")}</div>`
@@ -29,7 +29,7 @@ VIEWS.places = async () => {
            .map(
              b => `<div class="panel mb16"><h2>${esc(b.book)} <span class="mut" style="font:500 16px var(--b)">${b.done} von ${b.total} gewandert</span></h2>
      <div class="stack m8-0-12" style="height:10px"><div style="width:${b.total ? (100 * b.done) / b.total : 0}%;background:var(--acc)"></div></div>
-     <div class="rows">${b.tours.map(x => `<div class="r"><span>${x.tour ? "✓" : "○"} ${esc(x.title)}</span>${x.tour ? `<a href="#/tour/${x.tour}">${BY[x.tour] ? dateS(BY[x.tour].date) : "Tour"}</a>` : '<span class="mut">offen</span>'}</div>`).join("")}</div></div>`
+     <div class="rows">${b.tours.map(x => `<div class="r"><span>${x.tour ? "✓" : "○"} ${esc(x.title)}</span>${x.tour ? `<a href="#/tour/${x.tour}">${BY[x.tour] ? fmtDatumKurz(BY[x.tour].date) : "Tour"}</a>` : '<span class="mut">offen</span>'}</div>`).join("")}</div></div>`
            )
            .join("")
        : '<p class="mut">Noch keine Wanderführer hinterlegt: Verwaltung → „Wanderführer“ (GPX-Dateien hochladen).</p>'
@@ -79,7 +79,7 @@ VIEWS.dash = async (...a) => {
   const cards = await Promise.all(
     ot.map(async t => {
       const ph = t.photos ? await api(`/api/photos?tour_id=${t.id}&limit=1`).catch(() => []) : [];
-      return `<a class="otd" href="#/tour/${t.id}" style="${ph[0] ? `background-image:linear-gradient(transparent 40%,#000b),url(/pic/${ph[0].id}?size=600)` : ""}"><b>Vor ${now.getFullYear() - t.y} ${now.getFullYear() - t.y === 1 ? "Jahr" : "Jahren"}</b><span>${esc(t.name)}</span><small>${nf(t.km, 1)} km · ${nf(t.up_m, 0)} m</small></a>`;
+      return `<a class="otd" href="#/tour/${t.id}" style="${ph[0] ? `background-image:linear-gradient(transparent 40%,#000b),url(/pic/${ph[0].id}?size=600)` : ""}"><b>Vor ${now.getFullYear() - t.y} ${now.getFullYear() - t.y === 1 ? "Jahr" : "Jahren"}</b><span>${esc(t.name)}</span><small>${fmtKm(t.km)} · ${fmtHm(t.up_m)}</small></a>`;
     })
   );
   const sec = h.closest(".sec");
@@ -176,7 +176,7 @@ VIEWS.tour = async (id, q) => {
         s
           .map(x => {
             const u = location.origin + "/s/" + x.token;
-            return `<div class="r p8-0" style="display:block;border-top:1px solid var(--rule)"><input readonly value="${esc(u)}" class="w100" data-act="select"><small class="mut">${x.photos == 2 ? "Diashow" : `<b>Zeigt:</b> ${esc(shrLabel(x.blocks))}`}${x.trim ? ", Anfang/Ende ausgeblendet" : ""}${x.best ? `, beste ${x.best} Fotos` : ""} · ${x.exp ? (x.exp * 1000 < Date.now() ? "abgelaufen" : "gültig bis " + new Date(x.exp * 1000).toLocaleDateString("de-DE")) : "unbegrenzt"}${x.photos == 2 ? ` · ${x.views || 0}× angesehen` : ""}</small> <button class="btn alt sm" data-cp="${esc(u)}">Kopieren</button> ${x.photos != 2 ? `<button class="btn alt sm" data-bl="${x.token}">Auswahl ändern</button> ` : ""}<button class="btn alt sm" data-rv="${x.token}">Widerrufen</button></div>`;
+            return `<div class="r p8-0" style="display:block;border-top:1px solid var(--rule)"><input readonly value="${esc(u)}" class="w100" data-act="select"><small class="mut">${x.photos == 2 ? "Diashow" : `<b>Zeigt:</b> ${esc(shrLabel(x.blocks))}`}${x.trim ? ", Anfang/Ende ausgeblendet" : ""}${x.best ? `, beste ${x.best} Fotos` : ""} · ${x.exp ? (x.exp * 1000 < Date.now() ? "abgelaufen" : "gültig bis " + fmtDatumKurz(x.exp)) : "unbegrenzt"}${x.photos == 2 ? ` · ${x.views || 0}× angesehen` : ""}</small> <button class="btn alt sm" data-cp="${esc(u)}">Kopieren</button> ${x.photos != 2 ? `<button class="btn alt sm" data-bl="${x.token}">Auswahl ändern</button> ` : ""}<button class="btn alt sm" data-rv="${x.token}">Widerrufen</button></div>`;
           })
           .join("") || '<span class="mut">Noch kein Link.</span>';
       m.querySelectorAll("[data-cp]").forEach(
@@ -235,7 +235,7 @@ VIEWS.tour = async (id, q) => {
       if (!r || !f) return;
       f.insertAdjacentHTML(
         "beforeend",
-        `<div class="fig" title="Anteil der Strecke, der auf keiner früheren Tour lag"><div class="v">${r.pct}<span class="u">%</span></div><div class="l">Neuland (${nf(r.new_km, 1)} km)</div></div>`
+        `<div class="fig" title="Anteil der Strecke, der auf keiner früheren Tour lag"><div class="v">${r.pct}<span class="u">%</span></div><div class="l">Neuland (${fmtKm(r.new_km)})</div></div>`
       );
     })
     .catch(() => {});
@@ -253,7 +253,7 @@ function collStats(ts) {
     const sm = f => a.reduce((c, t) => c + (f(t) || 0), 0),
       km = sm(t => t.km),
       h = sm(t => t.h);
-    return `<tr><td>${col ? `<i class="dot" style="background:${col}"></i>` : ""}${esc(name)}</td><td>${a.length}</td><td>${nf(km, 1)}</td><td>${nf(sm(t => t.up_m), 0)}</td><td>${nf(sm(t => t.down_m), 0)}</td><td>${nf(h, 1)}</td><td>${h > 0 ? nf(km / h, 1) : "–"}</td><td>${nf(Math.max(...a.map(t => t.km || 0)), 1)}</td></tr>`;
+    return `<tr><td>${col ? `<i class="dot" style="background:${col}"></i>` : ""}${esc(name)}</td><td>${a.length}</td><td>${fmtKm(km, {summe: true, einheit: false})}</td><td>${nf(sm(t => t.up_m), 0)}</td><td>${nf(sm(t => t.down_m), 0)}</td><td>${fmtDauer(h * 3600, {summe: true})}</td><td>${h > 0 ? nf(km / h, 1) : "–"}</td><td>${fmtKm(Math.max(...a.map(t => t.km || 0)), {einheit: false})}</td></tr>`;
   };
   return `<div class="sec"><h2>Statistik nach Aktivität</h2></div><div class="tblw"><table class="cstat"><thead><tr><th>Aktivität</th><th>Touren</th><th>km</th><th>Aufstieg m</th><th>Abstieg m</th><th>Stunden</th><th>Ø km/h</th><th>Längste km</th></tr></thead><tbody>${keys.map(k => row(sName(k), typeof sCol === "function" ? sCol(k) : "", g[k])).join("")}</tbody>${keys.length > 1 ? `<tfoot>${row("Gesamt", "", ts).replace(/<td>/g, "<td><b>").replace(/<\/td>/g, "</b></td>")}</tfoot>` : ""}</table></div>`;
 }
@@ -267,20 +267,14 @@ async function collView(title, sub, ids, back, opt = {}) {
   const days = [...new Set(ts.map(t => t.date.slice(0, 10)))];
   $("#main").innerHTML =
     `<div data-rs="kopf"><div class="row"><a class="back" href="${back}">‹ Zurück</a></div><div class="sec mt12"><h1 style="font-size:clamp(30px,5vw,52px)">${esc(title)}</h1></div><div class="mut">${esc(sub)}</div></div>
-   <div class="figs mt14" data-rs="kennzahlen"><div class="fig"><div class="v">${ts.length}</div><div class="l">Touren</div></div><div class="fig"><div class="v">${nf(
-     sum(t => t.km),
-     0
-   )}<span class="u">km</span></div><div class="l">Strecke</div></div>
+   <div class="figs mt14" data-rs="kennzahlen"><div class="fig"><div class="v">${ts.length}</div><div class="l">Touren</div></div><div class="fig"><div class="v">${fmtKm(sum(t => t.km), {summe: true, einheit: false})}<span class="u">km</span></div><div class="l">Strecke</div></div>
     <div class="fig"><div class="v">${nf(
       sum(t => t.up_m || 0),
       0
     )}<span class="u">m</span></div><div class="l">Aufstieg</div></div><div class="fig"><div class="v">${nf(
       sum(t => t.down_m || 0),
       0
-    )}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${nf(
-      sum(t => t.h),
-      0
-    )}<span class="u">h</span></div><div class="l">Unterwegs</div></div><div class="fig"><div class="v">${days.length}</div><div class="l">Tage</div></div></div>
+    )}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${fmtDauerHtml(sum(t => t.h) * 3600, {summe: true})}</div><div class="l">Unterwegs</div></div><div class="fig"><div class="v">${days.length}</div><div class="l">Tage</div></div></div>
    <div data-rs="stat">${collStats(ts)}</div>
    <div class="row m6-0-12" data-rs="flug"><a class="btn" href="#/flight/${encodeURIComponent("set:" + ts.map(t => t.id).join(","))}">3D-Flug über alles</a><button class="btn alt" id="coff" title="Kartenkacheln dieser Strecken zwischenspeichern">Karte offline speichern</button><span id="cofm" class="mut"></span></div>
    <div data-rs="karte"><div class="tmap" id="cm" style="height:460px"></div></div><div data-rs="fotos"><div class="sec"><h2>Fotos</h2></div><div class="thumbs" id="cph"></div></div><div data-rs="touren"><div class="sec"><h2>Touren</h2></div><div class="tl">${ts.map(tourRow).join("")}</div></div>`;
@@ -292,7 +286,7 @@ async function collView(title, sub, ids, back, opt = {}) {
     const p = cleanPts(co[i]).map(x => [x[0], x[1]]);
     if (p.length > 1) {
       const ln = L.polyline(p, {color: DAYC[days.indexOf(t.date.slice(0, 10)) % DAYC.length], weight: 5, className: "clk"})
-        .bindTooltip(`${dateS(t.date)} · ${esc(t.name)} – anklicken für Einzelheiten`, {sticky: true})
+        .bindTooltip(`${fmtDatumKurz(t.date)} · ${esc(t.name)} – anklicken für Einzelheiten`, {sticky: true})
         .addTo(fg);
       ln.on("click", () => {
         location.hash = `#/tour/${t.id}`;
@@ -346,11 +340,11 @@ VIEWS.trips = async () => {
   $("#tr").className = "";
   $("#tr").innerHTML =
     (tr.length
-      ? `<div class="otdg">${tr.map(x => `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${dateS(x.start)}${x.end !== x.start ? " – " + dateS(x.end) : ""}</span><small>${x.tours.length} Touren · ${nf(x.km, 0)} km · ${nf(x.up_m, 0)} m</small></a>`).join("")}</div>`
+      ? `<div class="otdg">${tr.map(x => `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${fmtDatumKurz(x.start)}${x.end !== x.start ? " – " + fmtDatumKurz(x.end) : ""}</span><small>${x.tours.length} Touren · ${fmtKm(x.km, {d: 0})} · ${fmtHm(x.up_m)}</small></a>`).join("")}</div>`
       : '<p class="mut">Keine Reisen erkannt (es braucht Touren an mindestens 4 Tagen am Stück, über 60 km von deinem üblichen Startort entfernt – Wochenendausflüge zählen nicht). Eigene Gruppen legst du mit Tags an.</p>') +
     `<div id="rnalb"><div class="sec"><h2>Alben &amp; Tags</h2><span class="sub">in der Tour über „🏷 Tags“ vergeben</span></div>` +
     (tg.length
-      ? `<div class="otdg">${tg.map(x => `<a class="otd" href="#/album/${encodeURIComponent(x.tag)}"${x.photo ? ` style="background-image:linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)"` : ""}><b>🏷 ${esc(x.tag)}</b><small>${x.n} Touren · ${nf(x.km, 0)} km</small></a>`).join("")}</div>`
+      ? `<div class="otdg">${tg.map(x => `<a class="otd" href="#/album/${encodeURIComponent(x.tag)}"${x.photo ? ` style="background-image:linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)"` : ""}><b>🏷 ${esc(x.tag)}</b><small>${x.n} Touren · ${fmtKm(x.km, {d: 0})}</small></a>`).join("")}</div>`
       : '<p class="mut">Noch keine Tags vergeben.</p>') + "</div>";
 };
 VIEWS.trip = async id => {
@@ -358,7 +352,7 @@ VIEWS.trip = async id => {
   if (!tr) throw new Error("Reise nicht gefunden");
   await collView(
     `${tr.region}${tr.country && tr.country !== tr.region ? ", " + tr.country : ""}`,
-    `${dateL(tr.start)}${tr.end !== tr.start ? " – " + dateL(tr.end) : ""}`,
+    `${fmtDatum(tr.start)}${tr.end !== tr.start ? " – " + fmtDatum(tr.end) : ""}`,
     tr.tours,
     "#/trips",
     {reise: tr}
@@ -477,10 +471,10 @@ VIEWS.places = async (...a) => {
       .reverse()
       .map(
         ([y, v]) =>
-          `<div class="r"><span>${y}<div class="stack mt4" style="width:${(100 * v.km) / mxy}%"><div style="width:${v.km ? (100 * v.new_km) / v.km : 0}%;background:var(--yellow)"></div></div></span><b>${nf(v.new_km, 0)} von ${nf(v.km, 0)} km neu</b></div>`
+          `<div class="r"><span>${y}<div class="stack mt4" style="width:${(100 * v.km) / mxy}%"><div style="width:${v.km ? (100 * v.new_km) / v.km : 0}%;background:var(--yellow)"></div></div></span><b>${nf(v.new_km, 0)} von ${fmtKm(v.km, {d: 0})} neu</b></div>`
       )
       .join("")}</div></div>
-     <div class="panel"><h2>Größte Entdeckungen</h2><div class="rows">${tops.map(([id, v]) => `<div class="r"><span><a href="#/tour/${id}">${esc(BY[id]?.name || id)}</a><small>${BY[id] ? dateS(BY[id].date) : ""} · ${v.pct} % neu</small></span><b>${nf(v.new_km, 1)} km</b></div>`).join("")}</div></div></div>`;
+     <div class="panel"><h2>Größte Entdeckungen</h2><div class="rows">${tops.map(([id, v]) => `<div class="r"><span><a href="#/tour/${id}">${esc(BY[id]?.name || id)}</a><small>${BY[id] ? fmtDatumKurz(BY[id].date) : ""} · ${v.pct} % neu</small></span><b>${fmtKm(v.new_km)}</b></div>`).join("")}</div></div></div>`;
   }
   box.insertAdjacentHTML("beforeend", h);
   if ($("#wxb"))

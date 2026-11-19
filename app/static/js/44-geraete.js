@@ -242,7 +242,7 @@ const DVQ_ACKOPEN = new Set();                 // „Als geprüft markiert“ au
 const dvqOpen = id => { if (DVQ_OPEN.has(id)) return true; try { return localStorage.getItem("mt_dvq_" + id) === "1"; } catch (e) { return false; } };
 const DVQ_CLS = {"gut": "ok", "mäßig": "warn", "auffällig": "bad"};
 const dvPct = v => (v > 0.04 ? "+" : v < -0.04 ? "−" : "") + nf(Math.abs(v), 1) + " %";
-const dvQTime = ts => (ts ? new Date(ts * 1000).toLocaleDateString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric"}) : "");
+const dvQTime = ts => (ts ? fmtDatumKurz(ts) : "");
 
 /* Punktdiagramm: jeder Punkt eine Tour, Balken = mittlere Hälfte (25.–75. Perzentil), Strich = Median; Hintergrund = Bewertungsstufen */
 function dvDots(a, lim, good, ok, label) {
@@ -286,7 +286,7 @@ function dvQBody(q, g, viewer) {
   const d = g.dist, h = g.height, p = g.gps, r = g.hr;
   const tiles = [
     tile("Strecke", d.n ? dvPct(d.median) : "–", d.n ? `${d.n} ${d.n === 1 ? "Tour" : "Touren"} verglichen${d.n_implausible ? `, ${d.n_implausible} unplausibel` : ""}` : d.n_implausible ? `${d.n_implausible} unplausibel` : "nicht vergleichbar", d),
-    tile("Höhe", h.n_pct ? dvPct(h.up_err_pct.median) : "–", h.n ? `${h.n} ${h.n === 1 ? "Tour" : "Touren"}${h.rough ? " (grob)" : ""}, Aufstieg ${h.up_err_m.median > 0 ? "+" : h.up_err_m.median < 0 ? "−" : ""}${nf(Math.abs(h.up_err_m.median), 0)} m` : "nicht vergleichbar", h, h.rough),
+    tile("Höhe", h.n_pct ? dvPct(h.up_err_pct.median) : "–", h.n ? `${h.n} ${h.n === 1 ? "Tour" : "Touren"}${h.rough ? " (grob)" : ""}, Aufstieg ${h.up_err_m.median > 0 ? "+" : h.up_err_m.median < 0 ? "−" : ""}${fmtHm(Math.abs(h.up_err_m.median))}` : "nicht vergleichbar", h, h.rough),
     tile("GPS-Spur", p.n ? `${nf(p.jump_tours_pct, 0)} %` : "–", p.n ? `Touren mit Sprüngen (von ${p.n})` : "keine Spur", p),
     tile("Puls", r.n ? `${nf(r.bad_tours_pct, 0)} %` : "–", r.n ? `Touren mit Aussetzern (von ${r.n})` : "kein Puls", r),
   ].join("");
@@ -301,7 +301,7 @@ function dvQBody(q, g, viewer) {
     ${pr.open ? `<p class="dvopen" role="status"><b>${dvOpenText(pr.open)}</b><span class="dvh">Offen sind Touren, bei denen noch Geländekacheln oder Zepp-Details fehlen. Je Lauf gibt es Obergrenzen, damit nichts überlastet wird.</span></p>` : ""}
     <div class="row dvqfoot">${run}${prog}</div></div>`;
   const bat = g.batch && !viewer ? dvSec("batch", "Sammel-Korrektur", g.batch.n_done ? `<span class="dvqs ok">${g.batch.n_done}</span>` : `<span class="dvqs none">zurückgenommen</span>`,
-    `<p class="dvbatchl">${g.batch.n_done ? `Letzter Sammel-Lauf am ${esc(dvQTime(g.batch.ts))}: ${g.batch.n_done} ${g.batch.n_done === 1 ? "Tour" : "Touren"} korrigiert (${g.batch.method === "zepp" ? "Höhe von der Uhr" : "Höhe aus dem Geländemodell"}), Aufstieg zusammen ${g.batch.delta_up > 0 ? "+" : g.batch.delta_up < 0 ? "−" : ""}${nf(Math.abs(g.batch.delta_up), 0)} m.` : `Der letzte Sammel-Lauf vom ${esc(dvQTime(g.batch.ts))} ist zurückgenommen.`}</p>
+    `<p class="dvbatchl">${g.batch.n_done ? `Letzter Sammel-Lauf am ${esc(dvQTime(g.batch.ts))}: ${g.batch.n_done} ${g.batch.n_done === 1 ? "Tour" : "Touren"} korrigiert (${g.batch.method === "zepp" ? "Höhe von der Uhr" : "Höhe aus dem Geländemodell"}), Aufstieg zusammen ${g.batch.delta_up > 0 ? "+" : g.batch.delta_up < 0 ? "−" : ""}${fmtHm(Math.abs(g.batch.delta_up))}.` : `Der letzte Sammel-Lauf vom ${esc(dvQTime(g.batch.ts))} ist zurückgenommen.`}</p>
      ${g.batch.n_done ? `<button class="btn alt sm dvundo" type="button" data-batch="${esc(g.batch.id)}">Alles rückgängig machen</button><span class="dvh">Nur dieser Lauf wird zurückgenommen; Touren, die du inzwischen selbst geändert hast, bleiben unberührt.</span>` : ""}`, true) : "";
   const batchBtn = !viewer && g.flagged_height ? `<div class="dvbatchbar"><button class="btn sm dvbatch" type="button">Alle auffälligen Höhen korrigieren …</button><span class="dvh">Du siehst vorher eine Liste und entscheidest, was geändert wird.</span></div>` : "";
   return `<div class="dvqv ${cls}"><b>${esc(v.label)}</b>${g.period ? `<span class="mut"> · ${esc(dvDay(g.period.from))} bis ${esc(dvDay(g.period.to))}</span>` : ""}</div>
@@ -317,9 +317,9 @@ function dvQBody(q, g, viewer) {
 }
 
 const DVQ_FLAG = f => ({
-  dist_implausible: `Strecke unplausibel: Uhr ${nf((f.dev_m || 0) / 1000, 1)} km, Tour ${nf((f.tour_m || 0) / 1000, 1)} km`,
+  dist_implausible: `Strecke unplausibel: Uhr ${fmtKm((f.dev_m || 0) / 1000)}, Tour ${fmtKm((f.tour_m || 0) / 1000)}`,
   dist: `Strecke ${nf(Math.abs(f.pct), 1)} % ${f.pct < 0 ? "kürzer" : "länger"}`,
-  height: `Aufstieg ${nf(f.up_dev, 0)} m laut Uhr, ${nf(f.up_dem, 0)} m laut Gelände${f.rough ? " (grob)" : ""}`,
+  height: `Aufstieg ${fmtHm(f.up_dev)} laut Uhr, ${fmtHm(f.up_dem)} laut Gelände${f.rough ? " (grob)" : ""}`,
   gps_jumps: `${f.n} ${f.n === 1 ? "GPS-Sprung" : "GPS-Sprünge"}`,
   gps_gaps: `${nf(f.pct, 0)} % Lücken oder Pausen`,
   hr: `${nf(f.pct, 0)} % Puls unplausibel`,
@@ -396,7 +396,7 @@ function dvSuggest(t, g, again) {
       MET_CACHE.clear();
       await loadTours().catch(() => {});
       if (s.undo) {
-        res.innerHTML = `<p><b>Übernommen:</b> Aufstieg ${nf(r.up_m ?? r.up, 0)} m, Abstieg ${nf(r.down_m ?? r.down, 0)} m (vorher ${nf(r.orig_up, 0)} m / ${nf(r.orig_down, 0)} m).</p><button class="btn alt sm" id="dvsundo" type="button">Rückgängig machen</button>`;
+        res.innerHTML = `<p><b>Übernommen:</b> Aufstieg ${fmtHm(r.up_m ?? r.up)}, Abstieg ${fmtHm(r.down_m ?? r.down)} (vorher ${fmtHm(r.orig_up)} / ${fmtHm(r.orig_down)}).</p><button class="btn alt sm" id="dvsundo" type="button">Rückgängig machen</button>`;
         $("#dvsundo").onclick = async () => {
           try { await api(s.undo, {method: "POST"}); changed = true; MET_CACHE.clear(); await loadTours().catch(() => {}); res.textContent = "Zurückgenommen: das Original ist wieder da."; } catch (e) { res.innerHTML = `<span class="bad">${esc(e.message)}</span>`; }
         };
@@ -481,7 +481,7 @@ async function dvQRun(root, btn, again) {
 }
 
 /* ---------- Sammel-Korrektur der Höhen: Vorschau → Bestätigung → Hintergrundjob → „Alles rückgängig machen“ ---------- */
-const dvSigned = v => (v > 0 ? "+" : v < 0 ? "−" : "") + nf(Math.abs(v), 0) + " m";
+const dvSigned = v => (v > 0 ? "+" : v < 0 ? "−" : "") + fmtHm(Math.abs(v));
 async function dvBatch(g, again) {
   const m = dvBox(`<h2>Auffällige Höhen korrigieren</h2><p class="dvlead">${esc(g.name)}</p><div id="bxbody" aria-live="polite"><p class="mut"><span class="dvspin"></span>Liste wird geladen …</p></div>`);
   m.querySelector(".mbox").classList.add("dvbatchbox");
@@ -509,7 +509,7 @@ async function dvBatch(g, again) {
     <div class="dvblist" role="group" aria-label="Touren">
       <div class="dvbtools"><span class="dvbcount" id="bxcount"></span><span class="sp"></span><button class="btn ghost sm" id="bxall" type="button">Alle</button><button class="btn ghost sm" id="bxnone" type="button">Keine</button></div>
       <ul class="dvbul">${pv.tours.map((t, i) => `<li><label class="dvbrow"><input type="checkbox" class="bxt" data-i="${i}" checked><span class="dvbname"><b>${esc(t.name)}</b><span class="mut">${esc(dvDay(t.day))}${t.rough ? " · Uhr: grob" : ""}</span></span>
-        <span class="dvbnum"><span>Uhr <b>${nf(t.up_dev, 0)} m</b></span><span>Gelände <b>${nf(t.up_dem, 0)} m</b></span><span class="dvbnew">neu <b data-new>–</b></span></span></label></li>`).join("")}</ul></div>
+        <span class="dvbnum"><span>Uhr <b>${fmtHm(t.up_dev)}</b></span><span>Gelände <b>${fmtHm(t.up_dem)}</b></span><span class="dvbnew">neu <b data-new>–</b></span></span></label></li>`).join("")}</ul></div>
     <p class="dvbsum" id="bxsum" role="status" aria-live="polite"></p>
     <div class="dvfoot"><button class="btn" id="bxgo" type="button">Korrigieren …</button><button class="btn ghost" id="bxno" type="button">Abbrechen</button></div>`;
   const boxes = [...m.querySelectorAll(".bxt")];
@@ -517,10 +517,10 @@ async function dvBatch(g, again) {
   const sel = () => boxes.filter(b => b.checked).map(b => pv.tours[+b.dataset.i]);
   const refresh = () => {
     const mt = method(), s = sel();
-    boxes.forEach(b => { const t = pv.tours[+b.dataset.i]; b.closest("li").querySelector("[data-new]").textContent = nf(t.new[mt] ?? 0, 0) + " m"; });
+    boxes.forEach(b => { const t = pv.tours[+b.dataset.i]; b.closest("li").querySelector("[data-new]").textContent = fmtHm(t.new[mt] ?? 0); });
     const a = s.reduce((x, t) => x + (t.up_now || 0), 0), n = s.reduce((x, t) => x + (t.new[mt] || 0), 0);
     $("#bxcount", m).textContent = `${s.length} von ${pv.total} Touren ausgewählt`;
-    $("#bxsum", m).innerHTML = s.length ? `<b>${s.length} ${s.length === 1 ? "Tour" : "Touren"}, ändert den Aufstieg um insgesamt ${esc(dvSigned(n - a))}</b><span class="dvh">Aufstieg aller gewählten Touren von ${nf(a, 0)} m auf etwa ${nf(n, 0)} m. Der genaue Wert wird beim Korrigieren neu berechnet.</span>${s.length > pv.cap ? `<span class="dvh">In einem Lauf werden höchstens ${pv.cap} Touren korrigiert; der Rest bleibt offen und lässt sich danach mit einem neuen Start erledigen.</span>` : ""}` : `<span class="mut">Keine Tour ausgewählt.</span>`;
+    $("#bxsum", m).innerHTML = s.length ? `<b>${s.length} ${s.length === 1 ? "Tour" : "Touren"}, ändert den Aufstieg um insgesamt ${esc(dvSigned(n - a))}</b><span class="dvh">Aufstieg aller gewählten Touren von ${fmtHm(a)} auf etwa ${fmtHm(n)}. Der genaue Wert wird beim Korrigieren neu berechnet.</span>${s.length > pv.cap ? `<span class="dvh">In einem Lauf werden höchstens ${pv.cap} Touren korrigiert; der Rest bleibt offen und lässt sich danach mit einem neuen Start erledigen.</span>` : ""}` : `<span class="mut">Keine Tour ausgewählt.</span>`;
     $("#bxgo", m).disabled = !s.length;
   };
   boxes.forEach(b => (b.onchange = refresh));

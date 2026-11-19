@@ -30,7 +30,8 @@ def _helpers(pw):
     import re
     from pathlib import Path
     src = (Path(__file__).resolve().parent.parent / "app" / "static" / "js" / "01-grundlagen.js").read_text(encoding="utf-8")
-    code = "const pad2 = n => String(n).padStart(2, '0');\n" + re.search(r"const hmParts = .*?\nconst fmtMS = .*?\n};\n", src, re.S).group(0)
+    fmt = (Path(__file__).resolve().parent.parent / "app" / "static" / "js" / "01-format.js").read_text(encoding="utf-8")
+    code = fmt + "\nconst fmtHM = s => fmtDauer(s, {hmm: true, einheit: false});\nconst pad2 = n => String(n).padStart(2, '0');\n" + re.search(r"const hmParts = .*?\nconst fmtMS = .*?\n};\n", src, re.S).group(0)
     b = pw.chromium.launch()
     pg = b.new_page()
     pg.set_content("<html><body></body></html>")

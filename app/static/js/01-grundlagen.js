@@ -91,23 +91,13 @@ const hmParts = s => {
   const t = Math.max(0, Math.round((+s || 0) / 60));
   return [Math.floor(t / 60), t % 60];
 };
-const fmtHM = s => {
-  const [h, m] = hmParts(s);
-  return `${h}:${pad2(m)}`;
-};
 const fmtMS = s => {
   const t = Math.max(0, Math.round(+s || 0));
   return `${Math.floor(t / 60)}:${pad2(t % 60)}`;
 };
-const nf = (n, d = 1) => Number(n ?? 0).toLocaleString("de-DE", {minimumFractionDigits: d, maximumFractionDigits: d});
+const nf = fmtZahl;      // Zahl im Format der Sprache (01-format.js)
 const MON = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
 const MONL = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
-const dateL = iso => {
-  const d = iso.slice(0, 10).split("-");
-  return `${+d[2]}. ${MONL[+d[1] - 1]} ${d[0]}`;
-};
-const dateS = iso => iso.slice(8, 10) + "." + iso.slice(5, 7) + "." + iso.slice(0, 4);
-const timeS = iso => iso.slice(11, 16);
 const SPORT = {
   hike: ["Wandern", "--hike"],
   touringbicycle: ["Radtour", "--bike"],
@@ -454,7 +444,7 @@ function heat(year, byDay) {
       cx = 22 + Math.floor(i / 7) * (cell + gap),
       cy = (i % 7) * (cell + gap);
     const a = v ? 0.25 + 0.75 * Math.min(1, v / mx) : 0;
-    s += `<rect x="${cx}" y="${cy}" width="${cell}" height="${cell}" rx="3" fill="${v ? `color-mix(in srgb,var(--bars) ${Math.round(a * 100)}%,var(--surface))` : "var(--soft)"}"><title>${dateS(k)}${v ? ": " + nf(v) + " km" : ""}</title></rect>`;
+    s += `<rect x="${cx}" y="${cy}" width="${cell}" height="${cell}" rx="3" fill="${v ? `color-mix(in srgb,var(--bars) ${Math.round(a * 100)}%,var(--surface))` : "var(--soft)"}"><title>${fmtDatumKurz(k)}${v ? ": " + nf(v) + " km" : ""}</title></rect>`;
   }
   ["Mo", "Mi", "Fr"].forEach((l, i) => (s += `<text x="0" y="${i * 2 * (cell + gap) + 10}">${l}</text>`));
   for (let m = 0; m < 12; m++) {

@@ -32,7 +32,7 @@ function showRepNote(id) {
     w = $("#ewarn");
   if (!t || !r || !w || $("#repnote")) return;
   const rank = 1 + r.with.filter(x => x.start_ts < r.start_ts).length,
-    ds = ts => new Date(ts * 1000).toLocaleDateString("de-DE");
+    ds = ts => fmtDatumKurz(ts);
   w.insertAdjacentHTML(
     "beforebegin",
     `<div id="repnote" class="mn4-0-10">🔁 Diese Strecke bist du schon <b>${r.n}-mal</b> gegangen – diese Tour war das <b>${rank}. Mal</b>. <span class="mut">Weitere: ${r.with

@@ -18,7 +18,6 @@ const homeRoute = pts => {
     z = P(pts[pts.length - 1]);
   return `<svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d="${d}" fill="none" stroke="#0b1d1e" stroke-opacity=".35" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/><path d="${d}" fill="none" stroke="var(--yellow)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${a[0]}" cy="${a[1]}" r="8" fill="#fff" stroke="#0b1d1e" stroke-width="3"/><circle cx="${z[0]}" cy="${z[1]}" r="8" fill="var(--yellow)" stroke="#0b1d1e" stroke-width="3"/></svg>`;
 };
-const homeDur = h => fmtHM(h * 3600);
 
 /* --- Ziele des Jahres (höchstens zwei), Verwaltung der Ziele in der Statistik; steht im Baustein „Dein Jahr“ (Standard-Instanz) --- */
 function homeGoals(box, ys, now) {
@@ -50,8 +49,8 @@ async function homeView() {
     recent = TOURS.slice(0, 9);
   const card = t => `<a class="hcard" href="#/tour/${t.id}" data-t="${t.id}">
       <div class="hcm" data-m="${t.id}">${miniRoute(t.id, t.sport)}</div>
-      <div class="hcb"><b>${esc(t.name)}</b><span class="mut">${dateL(t.date)}</span>
-      <span class="hcf">${nf(t.km, 1)} km<i></i>${nf(t.up_m || 0, 0)} m<i></i>${homeDur(t.h)} h${t.has_hr ? `<span class="hrt" title="Mit Herzfrequenz">❤</span>` : ""}</span></div></a>`;
+      <div class="hcb"><b>${esc(t.name)}</b><span class="mut">${fmtDatum(t.date)}</span>
+      <span class="hcf">${fmtKm(t.km)}<i></i>${fmtAuf(t.up_m || 0)}<i></i>${fmtDauer(t.h * 3600)}${t.has_hr ? `<span class="hrt" title="Mit Herzfrequenz">❤</span>` : ""}</span></div></a>`;
   /* „Dein Jahr“ (#hyear) setzt die Layout-Engine als Baustein ein (49-seitenlayout.js, 52-bausteine-uebersicht.js: slYearShell); ohne eigenes Layout steht er an der alten Stelle */
   main.innerHTML = `
   <section class="hlast" id="hlast"></section>
@@ -75,8 +74,8 @@ async function homeView() {
       <div class="hli">
         <div class="hlk">${cur ? `${cur + 1}. letzte Tour` : "Zuletzt unterwegs"}<span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span></div>
         <h1>${esc(t.name)}</h1>
-        <div class="hlw">${dateL(t.date)}, ${timeS(t.date)} Uhr</div>
-        <div class="signs"><div class="sign">${nf(t.km, 1)}<small>Kilometer</small></div><div class="sign l">${nf(t.up_m || 0, 0)}<small>Meter aufwärts</small></div><div class="sign">${homeDur(t.h)}<small>Stunden</small></div></div>
+        <div class="hlw">${fmtDatum(t.date, {zeit: true})}</div>
+        <div class="signs"><div class="sign">${fmtKm(t.km)}<small>Strecke</small></div><div class="sign l">${fmtHm(t.up_m || 0)}<small>Aufstieg</small></div><div class="sign">${fmtDauer(t.h * 3600)}<small>Dauer</small></div></div>
         <div class="hlx" id="hlx">${t.has_hr ? `<span><span class="hrt">❤</span> <span id="hlhr">Puls aufgezeichnet</span></span>` : ""}${t.stars ? `<span class="stars">${"★".repeat(t.stars)}</span>` : ""}</div>
         <div class="btns"><a class="btn" href="#/tour/${t.id}">Tour ansehen</a>${t.photos ? `<a class="btn alt" href="#/story/${t.id}">Erzählung</a>` : ""}<a class="btn alt" href="#/flight/${encodeURIComponent(t.id)}">3D-Flug</a></div>
         ${N > 1 ? `<div class="hlnav"><button id="hprev" aria-label="Neuere Tour" title="Neuere Tour">‹</button><span>${cur + 1} / ${N}</span><button id="hnext" aria-label="Ältere Tour" title="Ältere Tour">›</button></div>` : ""}

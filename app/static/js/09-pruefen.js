@@ -16,15 +16,15 @@ VIEWS.check = async () => {
     <div class="r"><span>Noch mit Standardname</span><b>${r.default_names.length}</b></div>
     <div class="r"><span>Ohne gespeicherte Strecke / ohne Region / ohne Fotos</span><b>${G.no_route} / ${G.no_region} / ${G.no_photos}</b></div></div>
     <p class="mut fs13">Fehlende Strecken: Verwaltung → „Routen laden“. Fehlende Regionen: „Regionen bestimmen“.</p></div>
-   <div class="panel gap"><h2>Mögliche Duplikate</h2>${r.duplicates.length ? `<div class="rows">${r.duplicates.map(d => `<div class="r" style="display:block">${nm(d.a)}${d.a_local ? ` <button class="btn alt sm" data-del="${d.a}">lokal löschen</button>` : ""}<br>${nm(d.b)}${d.b_local ? ` <button class="btn alt sm" data-del="${d.b}">lokal löschen</button>` : ""}<small class="mut">${BY[d.a] ? dateS(BY[d.a].date) : ""} – gleiche Zeit, Startort und Länge</small></div>`).join("")}</div><p class="mut fs13">Lokale Touren (Zepp/GPX) lassen sich hier löschen, die Komoot-Tour nicht. Bei Komoot-Touren die Tour dort entfernen und „Komoot aktualisieren“ ausführen.</p>` : '<p class="ok">✓ Keine Duplikate gefunden.</p>'}</div>
-   <div class="panel gap"><h2>Auffällige Höhenmeter</h2>${r.suspicious.length ? `<div class="row"><button class="btn" id="fixall">Alle ${r.suspicious.length} korrigieren</button><span id="fixm" class="mut"></span></div><div class="rows" id="fixl">${r.suspicious.map(t => `<div class="r" data-id="${t.id}"><span>${nm(t.id)}<small class="bad">${nf(t.up_m, 0)} m Aufstieg auf ${nf(t.km, 1)} km</small></span><button class="btn alt sm" data-fix="${t.id}">Korrigieren</button></div>`).join("")}</div>` : '<p class="ok">✓ Keine auffälligen Höhen.</p>'}</div>
+   <div class="panel gap"><h2>Mögliche Duplikate</h2>${r.duplicates.length ? `<div class="rows">${r.duplicates.map(d => `<div class="r" style="display:block">${nm(d.a)}${d.a_local ? ` <button class="btn alt sm" data-del="${d.a}">lokal löschen</button>` : ""}<br>${nm(d.b)}${d.b_local ? ` <button class="btn alt sm" data-del="${d.b}">lokal löschen</button>` : ""}<small class="mut">${BY[d.a] ? fmtDatumKurz(BY[d.a].date) : ""} – gleiche Zeit, Startort und Länge</small></div>`).join("")}</div><p class="mut fs13">Lokale Touren (Zepp/GPX) lassen sich hier löschen, die Komoot-Tour nicht. Bei Komoot-Touren die Tour dort entfernen und „Komoot aktualisieren“ ausführen.</p>` : '<p class="ok">✓ Keine Duplikate gefunden.</p>'}</div>
+   <div class="panel gap"><h2>Auffällige Höhenmeter</h2>${r.suspicious.length ? `<div class="row"><button class="btn" id="fixall">Alle ${r.suspicious.length} korrigieren</button><span id="fixm" class="mut"></span></div><div class="rows" id="fixl">${r.suspicious.map(t => `<div class="r" data-id="${t.id}"><span>${nm(t.id)}<small class="bad">${fmtHm(t.up_m)} Aufstieg auf ${fmtKm(t.km)}</small></span><button class="btn alt sm" data-fix="${t.id}">Korrigieren</button></div>`).join("")}</div>` : '<p class="ok">✓ Keine auffälligen Höhen.</p>'}</div>
    <div class="panel gap"><h2>Namen vergeben</h2>${
      r.default_names.length
        ? `<p class="mut">${r.default_names.length} Touren heißen noch wie vorgegeben. Mit „Vorschläge laden“ werden Namen aus Karte, Routen und Wanderführern vorbelegt; gespeichert wird erst mit „Speichern“.</p>
     <div class="row"><button class="btn" id="sugall">Vorschläge für die nächsten 10 laden</button><label class="chk m0"><input type="checkbox" id="rkomall"> auch bei Komoot umbenennen</label><span id="sugm" class="mut"></span></div>
     <div class="rows" id="nml">${r.default_names
       .map(
-        t => `<div class="r nm" data-id="${t.id}" style="display:block"><div class="mut fs13">${dateS(BY[t.id]?.date || "0000-00-00")} · ${esc(sName(t.sport))} · ${t.km} km · <a href="#/tour/${t.id}">öffnen</a></div>
+        t => `<div class="r nm" data-id="${t.id}" style="display:block"><div class="mut fs13">${fmtDatumKurz(BY[t.id]?.date || "0000-00-00")} · ${esc(sName(t.sport))} · ${t.km} km · <a href="#/tour/${t.id}">öffnen</a></div>
       <div class="row m4-0"><input class="nin fx1 mnw220" value="${esc(t.name)}"><button class="btn alt sm" data-sug="${t.id}">💡</button><button class="btn sm" data-save="${t.id}">Speichern</button></div><div class="chips sugs"></div></div>`
       )
       .join("")}</div>`
@@ -62,7 +62,7 @@ VIEWS.check = async () => {
         im.length
           ? `<div class="rows">${im
               .map(
-                t => `<div class="r" style="display:block" data-id="${esc(t.id)}" data-name="${esc(t.name)}" data-km="${t.km}" data-onk="${t.on_komoot ? 1 : ""}" data-local="${t.local ? 1 : ""}"><div class="iop cp" title="Tour öffnen"><a href="#/tour/${encodeURIComponent(t.id)}" class="fw600" style="text-decoration:underline">${esc(t.name)}</a> <span class="mut">${dateS(BY[t.id]?.date || "0000-00-00")} · ${esc(sName(t.sport))} · ${nf(t.km, 2)} km</span></div>
+                t => `<div class="r" style="display:block" data-id="${esc(t.id)}" data-name="${esc(t.name)}" data-km="${t.km}" data-onk="${t.on_komoot ? 1 : ""}" data-local="${t.local ? 1 : ""}"><div class="iop cp" title="Tour öffnen"><a href="#/tour/${encodeURIComponent(t.id)}" class="fw600" style="text-decoration:underline">${esc(t.name)}</a> <span class="mut">${fmtDatumKurz(BY[t.id]?.date || "0000-00-00")} · ${esc(sName(t.sport))} · ${fmtKm(t.km)}</span></div>
         ${t.diag ? (t.diag.length ? `<div class="fs13 m2-0"><b>Mögliche Ursache:</b> ${t.diag.map(esc).join(" · ")} <span class="mut">– „🧹 Track korrigieren“ hilft dabei.</span></div>` : `<div class="mut fs13 m2-0">Der Track selbst ist unauffällig – wahrscheinlich ist nur die Sportart falsch.</div>`) : ""}
         <div class="row m4-0 g6"><span class="bad fs14">${esc(t.why)}</span><span class="sp"></span>
         <select class="isp">${SP.map(x => `<option value="${x}" ${x === (t.suggest || t.sport) ? "selected" : ""}>${esc(sName(x))}</option>`).join("")}</select><button class="btn alt sm" data-isp>Sportart ändern</button>${t.on_komoot ? `<label class="fs12 m0"><input type="checkbox" class="iko" checked> auch bei Komoot</label>` : ""}<button class="btn ${t.diag && t.diag.length ? "" : "alt "}sm" data-itf title="Ausreißer im Track entfernen, Seilbahn-/Autofahrten herausrechnen">🧹 Track korrigieren</button><button class="btn alt sm" data-ihide>Ausblenden</button><button class="btn alt sm" data-idel data-danger>Löschen …</button></div></div>`
@@ -70,7 +70,7 @@ VIEWS.check = async () => {
               .join("")}</div>`
           : '<p class="ok">✓ Keine auffälligen Touren.</p>'
       }
-      ${hd.length ? `<h3 class="mt18">Ausgeblendet (${hd.length})</h3><div class="rows">${hd.map(t => `<div class="r" data-id="${esc(t.id)}"><span>${esc(t.name || t.id)} <span class="mut">${t.start_ts ? new Date(t.start_ts * 1000).toLocaleDateString("de-DE") : ""} · ${nf((t.dist_m || 0) / 1000, 2)} km</span></span><button class="btn alt sm" data-ishow>Wieder einblenden</button><button class="btn alt sm" data-ishowfix title="Tour einblenden und gleich den GPS-Track korrigieren">Einblenden &amp; Track korrigieren</button></div>`).join("")}</div>` : ""}</div>`
+      ${hd.length ? `<h3 class="mt18">Ausgeblendet (${hd.length})</h3><div class="rows">${hd.map(t => `<div class="r" data-id="${esc(t.id)}"><span>${esc(t.name || t.id)} <span class="mut">${t.start_ts ? fmtDatumKurz(t.start_ts) : ""} · ${fmtKm((t.dist_m || 0) / 1000)}</span></span><button class="btn alt sm" data-ishow>Wieder einblenden</button><button class="btn alt sm" data-ishowfix title="Tour einblenden und gleich den GPS-Track korrigieren">Einblenden &amp; Track korrigieren</button></div>`).join("")}</div>` : ""}</div>`
     );
     const after = async () => {
       await loadTours();
@@ -93,7 +93,7 @@ VIEWS.check = async () => {
               d = row.dataset;
             const m = document.createElement("div");
             m.className = "modal";
-            m.innerHTML = `<div class="mbox"><h3>Tour löschen?</h3><p>„${esc(d.name)}“ (${nf(+d.km, 2)} km) wird aus Meine Touren entfernt – mit Strecke, Notizen und Tags. Zugeordnete Fotos bleiben erhalten.</p>
+            m.innerHTML = `<div class="mbox"><h3>Tour löschen?</h3><p>„${esc(d.name)}“ (${fmtKm(+d.km)}) wird aus Meine Touren entfernt – mit Strecke, Notizen und Tags. Zugeordnete Fotos bleiben erhalten.</p>
         ${d.onk ? `<label class="chk"><input type="checkbox" id="dk"> <b>auch bei Komoot endgültig löschen</b> <span class="mut">(lässt sich nicht rückgängig machen)</span></label>` : ""}
         ${!d.local && d.onk ? `<p class="mut fs13">Ohne Häkchen bleibt die Tour bei Komoot und wird beim nächsten Abgleich nicht wieder übernommen.</p>` : ""}
         <div id="dm" class="mut"></div><div class="mt18 g8 jce" style="display:flex"><button class="btn alt" id="dx">Abbrechen</button><button class="btn c-white" id="dok" style="background:var(--bad,#b3261e);border-color:var(--bad,#b3261e)">Löschen</button></div></div>`;
@@ -195,7 +195,7 @@ VIEWS.check = async () => {
       const x = await api(`/api/tours/${encodeURIComponent(id)}/elev-fix`, {method: "POST"});
       if (b)
         b.closest(".r").innerHTML =
-          `<span>${nm(id)}<small class="ok">korrigiert: ${nf(x.up_m, 0)} m Aufstieg (vorher ${nf(x.orig_up, 0)} m)</small></span>`;
+          `<span>${nm(id)}<small class="ok">korrigiert: ${fmtHm(x.up_m)} Aufstieg (vorher ${fmtHm(x.orig_up)})</small></span>`;
       return true;
     } catch (e) {
       if (b) {

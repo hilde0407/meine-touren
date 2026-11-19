@@ -41,7 +41,7 @@ const uhrData = (id, fresh) => {
   return UHR_CACHE.get(id);
 };
 const uhrHas = u => !!u && (Object.keys(u.werte || {}).length || (u.pulszonen && u.pulszonen.length) || (u.splits && u.splits.length) || u.wetter);
-const uhrMin = s => (Math.round(s / 60) >= 60 ? hmParts(s)[0] + " h " + pad2(hmParts(s)[1]) + " min" : Math.max(1, Math.round(s / 60)) + " min");
+const uhrMin = s => fmtDauer(Math.max(60, s));
 
 function uhrTiles(w) {
   return UHR_TILES.filter(k => w[k[0]] != null)
@@ -78,11 +78,11 @@ function uhrSplits(sp) {
   let h = `<div class="uth">Tempo je Kilometer</div><div class="utsp"><div class="utgrid" data-n="${sp.length}">`;
   const row = (lab, cells) => `<div class="utl">${lab}</div>` + cells.join("");
   const title = s =>
-    (s.strecke_m < 1000 ? `Letztes Teilstück (${nf(s.strecke_m / 1000, 1)} km): ${metPace(s.min_km)} min/km` : `Kilometer ${s.km}: ${metPace(s.min_km)} min/km`) +
+    (s.strecke_m < 1000 ? `Letztes Teilstück (${fmtKm(s.strecke_m / 1000)}): ${metPace(s.min_km)} min/km` : `Kilometer ${s.km}: ${metPace(s.min_km)} min/km`) +
     (s.puls != null ? `, Puls ${s.puls} bpm` : "") + (s.schritte != null ? `, ${s.schritte} Schritte/min` : "");
   h += row("", sp.map(s => `<div class="utv">${metPace(s.min_km)}</div>`));
   h += row(`<span>min/km</span>`, sp.map(s => `<div class="utc${s.strecke_m < 1000 ? " part" : ""}" title="${esc(title(s))}" tabindex="0" role="img" aria-label="${esc(title(s))}"><i data-h="${Math.max(3, (s.min_km / mx) * 100).toFixed(1)}"></i></div>`));
-  h += row(`<span>Kilometer</span>`, sp.map(s => `<div class="utk">${s.strecke_m < 1000 ? nf(s.strecke_m / 1000, 1) + " km" : s.km}</div>`));
+  h += row(`<span>Kilometer</span>`, sp.map(s => `<div class="utk">${s.strecke_m < 1000 ? fmtKm(s.strecke_m / 1000) : s.km}</div>`));
   if (hasP) h += row(`<span>Puls (bpm)</span>`, sp.map(s => `<div class="utp">${s.puls != null ? s.puls : "–"}</div>`));
   if (hasS) h += row(`<span>Schritte/min</span>`, sp.map(s => `<div class="utp">${s.schritte != null ? s.schritte : "–"}</div>`));
   h += `</div></div><div class="mut hrnote"><span>Kürzere Balken = schneller.</span>${part ? ` <span>Der hellere Balken ist das letzte Teilstück (kürzer als ein Kilometer).</span>` : ""}</div>`;
@@ -105,7 +105,7 @@ function uhrFatigue(e) {
   if (e.status === "nur_hinweis") {
     const a = e.hoehen.erste, b = e.hoehen.zweite;
     return trFold("uhr_erm", "Ermüdungsverlauf", `<b>Zweite Hälfte:</b> <span>nicht bewertet</span>`,
-      `<div class="mut hrnote utfat"><span>Bergauf-Anteil nicht herausgerechnet:</span> <span>Die Hälften unterscheiden sich stark in den Höhenmetern.</span> <span>Erste Hälfte ${nf(a.auf, 0)} m bergauf, zweite Hälfte ${nf(b.auf, 0)} m bergauf.</span></div>`, false);
+      `<div class="mut hrnote utfat"><span>Bergauf-Anteil nicht herausgerechnet:</span> <span>Die Hälften unterscheiden sich stark in den Höhenmetern.</span> <span>Erste Hälfte ${fmtHm(a.auf)} bergauf, zweite Hälfte ${fmtHm(b.auf)} bergauf.</span></div>`, false);
   }
   const p = e.tempo_pct,
     tempo = p === 0 ? "Tempo unverändert" : p > 0 ? `Tempo ${nf(p, 0)} % langsamer` : `Tempo ${nf(-p, 0)} % schneller`,
@@ -146,7 +146,7 @@ async function uhrCard(t) {
     msg = "";
   const draw = () => {
     const dv = u.device || {name: "Amazfit/Zepp", kind: "zepp"},
-      ge = u.geladen ? new Date(u.geladen * 1000).toLocaleDateString("de-DE") : "";
+      ge = u.geladen ? fmtDatumKurz(u.geladen) : "";
     tlSetBadge(d, uhrBadge(u));
     body.innerHTML = `<div class="mut hrnote utsrc"><span class="dvsrc">${typeof dvAvatar === "function" ? dvAvatar(dv, "xs") : ""}<span>Quelle:</span> <span>${esc(dv.name)}</span></span>${ge ? ` · <span>geladen am</span> ${ge}` : ""}</div>` +
       (u.werte && Object.keys(u.werte).length ? `<div class="utiles">${uhrTiles(u.werte)}</div>` : "") +

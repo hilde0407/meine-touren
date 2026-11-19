@@ -39,14 +39,14 @@ VIEWS.tripsheet = async id => {
     fig = (v, u, l) => `<div class="fig"><div class="v">${v}${u ? `<span class="u">${u}</span>` : ""}</div><div class="l">${l}</div></div>`;
   const perDay = days.map(d => {
     const a = ts.filter(t => t.date.slice(0, 10) === d);
-    return `<tr class="dayh"><td colspan="6"><b>${dateL(d)}</b> <span class="mut">· ${nf(a.reduce((c, t) => c + t.km, 0), 1)} km · ↑ ${nf(a.reduce((c, t) => c + (t.up_m || 0), 0), 0)} m · ↓ ${nf(a.reduce((c, t) => c + (t.down_m || 0), 0), 0)} m</span></td></tr>` +
-      a.map(t => `<tr><td>${timeS(t.date)}</td><td class="tal">${esc(t.name)}</td><td>${sName(t.sport)}</td><td>${nf(t.km, 1)}</td><td>${nf(t.up_m || 0, 0)}</td><td>${nf(t.down_m || 0, 0)}</td></tr>`).join("");
+    return `<tr class="dayh"><td colspan="6"><b>${fmtDatum(d)}</b> <span class="mut">· ${fmtKm(a.reduce((c, t) => c + t.km, 0))} · ${fmtAuf(a.reduce((c, t) => c + (t.up_m || 0), 0))} · ${fmtAb(a.reduce((c, t) => c + (t.down_m || 0), 0))}</span></td></tr>` +
+      a.map(t => `<tr><td>${fmtUhrzeit(t.date)}</td><td class="tal">${esc(t.name)}</td><td>${sName(t.sport)}</td><td>${nf(t.km, 1)}</td><td>${nf(t.up_m || 0, 0)}</td><td>${nf(t.down_m || 0, 0)}</td></tr>`).join("");
   }).join("");
   $("#main").innerHTML = `<div class="sheet">
    <div class="row noprint"><a class="back" href="#/trip/${esc(id)}">‹ Zurück zur Reise</a><span class="sp"></span>${pdfPhotoBar()}${pdfBtn()}<button class="btn ghost" id="shp">Drucken</button></div>
-   <div class="mut mt14">${dateL(tr.start)}${tr.end !== tr.start ? " – " + dateL(tr.end) : ""}</div>
+   <div class="mut mt14">${fmtDatum(tr.start)}${tr.end !== tr.start ? " – " + fmtDatum(tr.end) : ""}</div>
    <h1 class="fs34 m8-0-14">${esc(tr.region)}${tr.country && tr.country !== tr.region ? ", " + esc(tr.country) : ""}</h1>
-   <div class="figs">${fig(ts.length, "", "Touren")}${fig(nf(sum(t => t.km), 1), "km", "Strecke")}${fig(nf(sum(t => t.up_m), 0), "m", "Aufstieg")}${fig(nf(sum(t => t.down_m), 0), "m", "Abstieg")}${fig(nf(sum(t => t.h), 1), "h", "Unterwegs")}${fig(days.length, "", "Tage")}</div>
+   <div class="figs">${fig(ts.length, "", "Touren")}${fig(fmtKm(sum(t => t.km), {summe: true, einheit: false}), "km", "Strecke")}${fig(nf(sum(t => t.up_m), 0), "m", "Aufstieg")}${fig(nf(sum(t => t.down_m), 0), "m", "Abstieg")}${fig(fmtDauerTeile(sum(t => t.h) * 3600, {summe: true}).v, fmtDauerTeile(sum(t => t.h) * 3600, {summe: true}).u, "Unterwegs")}${fig(days.length, "", "Tage")}</div>
    <div class="tmap mt14" id="tm" style="height:380px"></div>
    <div id="tleg" class="mut fs13 m6-0-0"></div>
    ${collStats(ts)}
@@ -61,7 +61,7 @@ VIEWS.tripsheet = async id => {
     if (p.length > 1) L.polyline(p, {color: DAYC[days.indexOf(t.date.slice(0, 10)) % DAYC.length], weight: 4}).addTo(fg);
   });
   if (fg.getLayers().length) map.fitBounds(fg.getBounds(), {padding: [20, 20]});
-  $("#tleg").innerHTML = days.map((d, i) => `<span class="mr12 nw"><i class="vam mr4" style="display:inline-block;width:14px;height:4px;background:${DAYC[i % DAYC.length]}"></i>${dateS(d)}</span>`).join("");
+  $("#tleg").innerHTML = days.map((d, i) => `<span class="mr12 nw"><i class="vam mr4" style="display:inline-block;width:14px;height:4px;background:${DAYC[i % DAYC.length]}"></i>${fmtDatumKurz(d)}</span>`).join("");
   $("#shp").onclick = () => {
     map.invalidateSize();
     setTimeout(() => print(), 300);

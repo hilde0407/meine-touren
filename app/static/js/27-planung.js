@@ -27,7 +27,7 @@ const planTime = (m, km, up) => {
   const h = m.a * km + m.b * (up || 0);
   return {h, lo: h * (1 - m.rel), hi: h * (1 + m.rel)};
 };
-const hmm = h => fmtHM(h * 3600);
+const hmm = h => fmtDauer(h * 3600);
 
 function densify(pts, step = 50, max = 2000) {
   let tot = 0;
@@ -82,7 +82,7 @@ function planProfile(dense, ele) {
     y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
   const line = ele.map((h, i) => `${i ? "L" : "M"}${x(d[i]).toFixed(1)},${y(h).toFixed(1)}`).join("");
   const ticks = [lo + pad, (lo + hi) / 2, hi - pad].map(v => `<text x="2" y="${y(v) + 4}" font-size="11" fill="currentColor" opacity=".6">${Math.round(v)} m</text><line x1="${L}" x2="${W - 6}" y1="${y(v)}" y2="${y(v)}" stroke="currentColor" opacity=".12"/>`).join("");
-  const kms = [0, 0.25, 0.5, 0.75, 1].map(f => `<text x="${x(D * f)}" y="${H - 4}" font-size="11" text-anchor="${f === 0 ? "start" : f === 1 ? "end" : "middle"}" fill="currentColor" opacity=".6">${nf((D * f) / 1000, 1)} km</text>`).join("");
+  const kms = [0, 0.25, 0.5, 0.75, 1].map(f => `<text x="${x(D * f)}" y="${H - 4}" font-size="11" text-anchor="${f === 0 ? "start" : f === 1 ? "end" : "middle"}" fill="currentColor" opacity=".6">${fmtKm((D * f) / 1000)}</text>`).join("");
   return `<svg viewBox="0 0 ${W} ${H}" class="w100" style="height:auto">${ticks}${kms}<path d="${line}L${x(D)},${H - B}L${L},${H - B}Z" fill="var(--green,#2f8f5f)" opacity=".22"/><path d="${line}" fill="none" stroke="var(--green,#2f8f5f)" stroke-width="2.2"/></svg>`;
 }
 
@@ -97,27 +97,27 @@ const PLAN_QUELLE = {eigene: "nach deinem Steigungstempo", teilweise: "teilweise
 function planCheckHtml(r, estH) {
   const st = PLAN_STUFE[r.stufe] || PLAN_STUFE.zu_wenig,
     dk = r.diese,
-    kmup = (km, up) => (up != null ? `${nf(km, 1)} km mit ${nf(up, 0)} m` : `${nf(km, 1)} km (ohne Höhenangabe)`),
+    kmup = (km, up) => (up != null ? `${fmtKm(km)} mit ${fmtHm(up)}` : `${fmtKm(km)} (ohne Höhenangabe)`),
     li = [];
   if (r.stufe === "zu_wenig") li.push(`<li>Gefunden: ${r.n} Touren dieser Sportart in den letzten ${r.monate} Monaten, nötig sind mindestens ${r.min_n}.</li>`);
   else {
     const L = r.laengste,
       H = r.hoechster_aufstieg;
     li.push(`<li>Deine längste Tour der letzten ${r.monate} Monate: ${kmup(L.km, L.up)}; diese: ${kmup(dk.km, dk.up)}</li>`);
-    if (H && H.id !== L.id && dk.up != null) li.push(`<li>Dein größter Aufstieg der letzten ${r.monate} Monate: ${nf(H.up, 0)} m auf ${nf(H.km, 1)} km; diese: ${nf(dk.up, 0)} m</li>`);
+    if (H && H.id !== L.id && dk.up != null) li.push(`<li>Dein größter Aufstieg der letzten ${r.monate} Monate: ${fmtHm(H.up)} auf ${fmtKm(H.km)}; diese: ${fmtHm(dk.up)}</li>`);
     if (r.gruende.includes("km")) li.push(`<li>Länger als deine längste Tour (+${Math.round((dk.km / L.km - 1) * 100)} %)</li>`);
     if (r.gruende.includes("up") && H && H.up > 0) li.push(`<li>Mehr Aufstieg als deine bisher höchste Tour (+${Math.round((dk.up / H.up - 1) * 100)} %)</li>`);
     li.push(`<li>Länger als diese Strecke: ${r.laenger} von ${r.n} Touren</li>`);
     const a = r.aehnlich;
     if (a) {
       li.push(`<li>Ähnlich lange Touren (±25 % der Länge): ${a.n} in den letzten ${r.monate} Monaten</li>`);
-      if (a.dauer_h != null) li.push(`<li>Mittlere Gesamtzeit dieser Touren: ${hmm(a.dauer_h)} Std.</li>`);
-      if (a.up != null) li.push(`<li>Mittlerer Aufstieg dieser Touren: ${nf(a.up, 0)} m</li>`);
+      if (a.dauer_h != null) li.push(`<li>Mittlere Gesamtzeit dieser Touren: ${hmm(a.dauer_h)}</li>`);
+      if (a.up != null) li.push(`<li>Mittlerer Aufstieg dieser Touren: ${fmtHm(a.up)}</li>`);
     }
-    if (r.hoechster_punkt) li.push(`<li>Höchster Punkt dieser Strecke: ${nf(dk.max_alt, 0)} m; höchster Punkt deiner Touren der letzten ${r.monate} Monate: ${nf(r.hoechster_punkt.eigen, 0)} m</li>`);
+    if (r.hoechster_punkt) li.push(`<li>Höchster Punkt dieser Strecke: ${fmtHm(dk.max_alt)}; höchster Punkt deiner Touren der letzten ${r.monate} Monate: ${fmtHm(r.hoechster_punkt.eigen)}</li>`);
   }
-  if (estH != null) li.push(`<li>Geschätzte Gesamtzeit inkl. Pausen: ${hmm(estH)} Std. (wie oben)</li>`);
-  if (r.gehzeit) li.push(`<li><span>Reine Gehzeit ohne Pausen: ca. ${hmm(r.gehzeit.sekunden / 3600)} Std.</span> <span class="mut">(${PLAN_QUELLE[r.gehzeit.quelle] || PLAN_QUELLE.standard})</span></li>`);
+  if (estH != null) li.push(`<li>Geschätzte Gesamtzeit inkl. Pausen: ${hmm(estH)} (wie oben)</li>`);
+  if (r.gehzeit) li.push(`<li><span>Reine Gehzeit ohne Pausen: ca. ${hmm(r.gehzeit.sekunden / 3600)}</span> <span class="mut">(${PLAN_QUELLE[r.gehzeit.quelle] || PLAN_QUELLE.standard})</span></li>`);
   const base = r.stufe === "zu_wenig" ? "" : `<p class="mut fs13">Grundlage: ${r.n} Touren dieser Sportart der letzten ${r.monate} Monate.</p>`;
   return {
     cls: st[0],
@@ -125,20 +125,20 @@ function planCheckHtml(r, estH) {
     body: `<p class="pcst ${st[0]}"><i aria-hidden="true">${st[1]}</i><span>${st[2]}</span></p><ul class="pcl">${li.join("")}</ul>${base}`,
   };
 }
-const hmSigned = h => (h < 0 ? "−" : "+") + fmtHM(Math.abs(h) * 3600);
+const hmSigned = h => (h < 0 ? "−" : "+") + fmtDauer(Math.abs(h) * 3600);
 const nSigned = (v, d) => (v < 0 ? "−" : "+") + nf(Math.abs(v), d);
 /* verknüpfte Pläne: geplant ↔ gelaufen (fehlende Werte werden weggelassen, nie als 0 gerechnet) */
 function planCmpHtml(p) {
   const t = p.tour;
   if (!t) return "";
   const out = [];
-  if (p.est_h && t.h) out.push(`<span>geplant ${hmm(p.est_h)} Std.</span> · <span>gelaufen ${hmm(t.h)} Std. (${hmSigned(t.h - p.est_h)})</span>`);
-  else if (t.h) out.push(`<span>gelaufen ${hmm(t.h)} Std.</span>`);
-  if (p.km && t.km) out.push(`<span>Strecke: geplant ${nf(p.km, 1)} km, gelaufen ${nf(t.km, 1)} km (${nSigned(t.km - p.km, 1)} km)</span>`);
-  if (p.up != null && t.up != null) out.push(`<span>Aufstieg: geplant ${nf(p.up, 0)} m, gelaufen ${nf(t.up, 0)} m (${nSigned(t.up - p.up, 0)} m)</span>`);
+  if (p.est_h && t.h) out.push(`<span>geplant ${hmm(p.est_h)}</span> · <span>gelaufen ${hmm(t.h)} (${hmSigned(t.h - p.est_h)})</span>`);
+  else if (t.h) out.push(`<span>gelaufen ${hmm(t.h)}</span>`);
+  if (p.km && t.km) out.push(`<span>Strecke: geplant ${fmtKm(p.km)}, gelaufen ${fmtKm(t.km)} (${nSigned(t.km - p.km, 1)} km)</span>`);
+  if (p.up != null && t.up != null) out.push(`<span>Aufstieg: geplant ${fmtHm(p.up)}, gelaufen ${fmtHm(t.up)} (${nSigned(t.up - p.up, 0)} m)</span>`);
   return `<small class="pcmp">${out.join(" · ") || ""}</small>`;
 }
-const planDate = ts => (ts ? new Date(ts * 1000).toLocaleDateString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric"}) : "");
+const planDate = ts => (ts ? fmtDatumKurz(ts) : "");
 const planSugGone = () => {
   try {
     return JSON.parse(localStorage.getItem("mt-plan-sug-no") || "[]");
@@ -158,7 +158,7 @@ function planRowHtml(p, sug) {
   const sg = sug && !planSugGone().includes(key)
     ? `<span class="psug"><span>Gelaufen am ${planDate(Date.parse(sug.datum) / 1000)} vorschlagen:</span> <a href="#/tour/${esc(sug.tour_id)}">${esc(sug.name || "Tour")}</a> <button class="btn sm" data-ok="${p.id}:${esc(sug.tour_id)}" type="button" aria-label="Verknüpfung bestätigen: ${esc(p.name)}">Bestätigen</button> <button class="btn ghost sm" data-no="${esc(key)}" type="button">Nicht passend</button></span>`
     : "";
-  return `<div class="r cp prow" data-p="${p.id}" role="group" aria-label="Plan: ${esc(p.name)}"><span><a class="prn" href="#/plan/${p.id}">${esc(p.name)}</a>${badge}<small>${sName(p.sport)} · ${nf(p.km || 0, 1)} km · ↑ ${nf(p.up || 0, 0)} m${p.est_h ? " · ca. " + hmm(p.est_h) + " h" : ""}</small>${planCmpHtml(p)}${sg}</span><span class="prow-a">${
+  return `<div class="r cp prow" data-p="${p.id}" role="group" aria-label="Plan: ${esc(p.name)}"><span><a class="prn" href="#/plan/${p.id}">${esc(p.name)}</a>${badge}<small>${sName(p.sport)} · ${fmtKm(p.km || 0)} · ${fmtAuf(p.up || 0)}${p.est_h ? " · ca. " + hmm(p.est_h) : ""}</small>${planCmpHtml(p)}${sg}</span><span class="prow-a">${
     p.tour ? `<a class="btn ghost sm" href="#/tour/${esc(p.tour.id)}" aria-label="Zur gelaufenen Tour: ${esc(p.name)}">Tour ansehen</a><button class="btn ghost sm" data-un="${p.id}" type="button" aria-label="Verknüpfung lösen: ${esc(p.name)}">Verknüpfung lösen</button>` : ""
   }<select class="pstat" data-s="${p.id}" aria-label="Status: ${esc(p.name)}">${stOpt.map(o => `<option value="${o[0]}" ${o[0] === (p.status || "geplant") ? "selected" : ""}>${o[1]}</option>`).join("")}</select><button class="btn ghost sm" data-d="${p.id}" title="Plan löschen" aria-label="Plan löschen: ${esc(p.name)}" type="button">✕</button></span></div>`;
 }
@@ -225,7 +225,7 @@ VIEWS.plan = async (pid, q) => {
     if (P.stored || P.sel == null || P.sel >= P.wp.length - 1 || !routedOK()) return (el.style.display = "none");
     const r = segRes(P.sel);
     el.style.display = "";
-    el.innerHTML = `<b>Abschnitt ${P.sel + 1} von ${P.wp.length - 1}</b> ${r && r.pts ? `· ${nf(r.km, 2)} km · ↑ ${nf(r.up, 0)} m` : r && r.fail ? `· <span class="bad">kein Weg gefunden – gerade Linie</span>` : "· wird berechnet …"} <button class="btn alt sm ml8" id="palts">Alternativen anzeigen</button><span id="paltl"></span>`;
+    el.innerHTML = `<b>Abschnitt ${P.sel + 1} von ${P.wp.length - 1}</b> ${r && r.pts ? `· ${fmtKm(r.km)} · ${fmtAuf(r.up)}` : r && r.fail ? `· <span class="bad">kein Weg gefunden – gerade Linie</span>` : "· wird berechnet …"} <button class="btn alt sm ml8" id="palts">Alternativen anzeigen</button><span id="paltl"></span>`;
     $("#palts").onclick = () => showAlts(P.sel);
   };
   const redraw = () => {
@@ -268,11 +268,11 @@ VIEWS.plan = async (pid, q) => {
     P.est = est ? est.h : null;
     const F = (v, u, l) => `<div class="fig"><div class="v">${v}<span class="u">${u}</span></div><div class="l">${l}</div></div>`;
     $("#pf").innerHTML = pth.length > 1
-      ? F(nf(km, 2), "km", "Strecke") + F(up != null ? nf(up, 0) : "…", "m", "Aufstieg") + F(P.down != null ? nf(P.down, 0) : "…", "m", "Abstieg") + F(P.max != null ? nf(P.max, 0) : "…", "m", "Höchster Punkt") + F(`${hmm(est.h)}`, "Std.", `Geschätzte Zeit inkl. Pausen (${hmm(est.lo)}–${hmm(est.hi)})`)
+      ? F(fmtKm(km, {d: 2, einheit: false}), "km", "Strecke") + F(up != null ? nf(up, 0) : "…", "m", "Aufstieg") + F(P.down != null ? nf(P.down, 0) : "…", "m", "Abstieg") + F(P.max != null ? nf(P.max, 0) : "…", "m", "Höchster Punkt") + F(fmtDauerTeile(est.h * 3600).v, fmtDauerTeile(est.h * 3600).u, `Geschätzte Zeit inkl. Pausen (${hmm(est.lo)}–${hmm(est.hi)})`)
       : `<div class="mut">Setze mindestens zwei Punkte oder lade eine GPX-Datei.</div>`;
     $("#pb").textContent = pth.length > 1
       ? m.n
-        ? `Zeit nach deinem Tempo aus ${m.n} ähnlichen Touren (im Schnitt ${nf(m.kmh, 1)} km/h, Gesamtzeit inklusive Pausen).`
+        ? `Zeit nach deinem Tempo aus ${m.n} ähnlichen Touren (im Schnitt ${fmtTempo(m.kmh)}, Gesamtzeit inklusive Pausen).`
         : `Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.`
       : "";
     if (P.ele && P.dense) {
@@ -382,9 +382,9 @@ VIEWS.plan = async (pid, q) => {
       });
     if (list.length < 2) return ($("#paltl").innerHTML = ` <span class="mut">Keine Alternativen gefunden.</span>`);
     const cur = P.alt[b] || 0;
-    $("#paltl").innerHTML = " " + list.map(x => `<button class="btn ${x.a === cur ? "" : "ghost"} sm alt-c" data-a="${x.a}" style="border-left:6px solid ${ALT_COL[x.a]}">${nf(x.r.km, 2)} km · ↑ ${nf(x.r.up, 0)} m</button>`).join(" ");
+    $("#paltl").innerHTML = " " + list.map(x => `<button class="btn ${x.a === cur ? "" : "ghost"} sm alt-c" data-a="${x.a}" style="border-left:6px solid ${ALT_COL[x.a]}">${fmtKm(x.r.km)} · ${fmtAuf(x.r.up)}</button>`).join(" ");
     list.forEach(x => {
-      if (x.a !== cur) L.polyline(x.r.pts.map(p => [p[0], p[1]]), {color: ALT_COL[x.a], weight: 5, opacity: 0.85, dashArray: "2 8", bubblingMouseEvents: false}).bindTooltip(`${nf(x.r.km, 2)} km · ↑ ${nf(x.r.up, 0)} m`).addTo(altLayer);
+      if (x.a !== cur) L.polyline(x.r.pts.map(p => [p[0], p[1]]), {color: ALT_COL[x.a], weight: 5, opacity: 0.85, dashArray: "2 8", bubblingMouseEvents: false}).bindTooltip(`${fmtKm(x.r.km)} · ${fmtAuf(x.r.up)}`).addTo(altLayer);
       P.segs[b + "#" + x.a] = x.r;
     });
     $("#paltl").querySelectorAll(".alt-c").forEach(btn => (btn.onclick = () => {

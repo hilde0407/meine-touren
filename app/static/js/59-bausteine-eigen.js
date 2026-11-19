@@ -17,7 +17,7 @@ const KZ_AGG = {sum: "Summe", avg: "Durchschnitt", max: "Maximum (größter Wert
 const KZ_RANGES = [["year", "Laufendes Jahr"], ["12m", "Letzte 12 Monate"], ["90d", "Letzte 90 Tage"], ["all", "Gesamte Zeit"], ["y", "Bestimmtes Jahr"], ["c", "Eigener Bereich"]];
 const KZ_SYMS = ["🥾", "🚴", "⛰️", "⏱️", "📈", "🏆", "🎯", "🔥", "🌲", "☀️"];
 const KZ_UNIT = {touren: "touren", km: "km", hm: "m", abstieg: "m", dauer: "h", gehzeit: "h", puls: "bpm", pulsmax: "bpm", tempo: "kmh", steigung: "pct", hmkm: "m_km"};
-const KZ_UL = {km: "km", m: "m", h: "Std.", kmh: "km/h", pct: "%", m_km: "m/km", bpm: "bpm", monat: "Monat"};
+const KZ_UL = {km: "km", m: "m", h: FMT_E[FMT_LG()].h, kmh: "km/h", pct: "%", m_km: "m/km", bpm: "bpm", monat: "Monat"};
 const kzT = s => (typeof window.TL === "function" ? window.TL(s) : s);                          // Übersetzung zur Laufzeit (nur nicht-deutsch vorhanden)
 /* Vorlagen zum Start: ein Klick übernimmt die Einstellung in den Dialog */
 const KZ_TPL = [
@@ -44,7 +44,7 @@ function kzUnitText(e, v) {
 }
 function kzNum(v, e) {
   if (v == null) return "–";
-  if (e && e.z === "h" && !e.n) return fmtHM(v * 3600);
+  if (e && e.z === "h" && !e.n) return fmtDauer(v * 3600, {einheit: false});
   const a = Math.abs(v);
   let d;
   if (!e || !e.z || e.n) d = a >= 100 ? 0 : a >= 10 ? 1 : 2;
@@ -124,7 +124,7 @@ function kzTrend(cfg, d, e) {
   const sg = dir === "auf" ? "+" : dir === "ab" ? "−" : "±", ar = dir === "auf" ? "↑" : dir === "ab" ? "↓" : "→", wort = dir === "auf" ? "Anstieg:" : dir === "ab" ? "Rückgang:" : "Unverändert:";
   const pc = o.pct != null ? `${sg}${nf(Math.abs(o.pct), 1)} %` : "", df = o.diff != null && dir !== "gleich" ? `${sg}${kzNum(Math.abs(o.diff), e)} ${kzUnitText(e, Math.abs(o.diff))}`.trim() : "";
   return `<p class="kzvgl kztr"><span class="slsr">${wort}</span><b class="kzd kz-${dir}"><span aria-hidden="true">${ar}</span> ${esc(pc || df || "0")}</b>${pc && df ? ` <span class="kzdf">(${esc(df)})</span>` : ""} <span class="mut">${kzVglLab(cfg)}</span></p>` +
-    (o.wert != null ? `<p class="mut kzvv"><span>Vorher</span> ${esc(kzNum(o.wert, e))} <span>${esc(kzUnitText(e, o.wert))}</span> <span>(${dateS(o.von)} – ${dateS(o.bis)})</span></p>` : "");
+    (o.wert != null ? `<p class="mut kzvv"><span>Vorher</span> ${esc(kzNum(o.wert, e))} <span>${esc(kzUnitText(e, o.wert))}</span> <span>(${fmtDatumKurz(o.von)} – ${fmtDatumKurz(o.bis)})</span></p>` : "");
 }
 function kzZiel(d, e, v) {
   const z = d.ziel, p = z.pct, full = p >= 100, goal = `${kzNum(z.ziel, e)} ${kzUnitText(e, z.ziel)}`.trim(), rest = Math.max(0, z.ziel - (v == null ? 0 : v)), pl = full ? null : z.plan;
@@ -146,7 +146,7 @@ function kzHtml(cfg, d, o = {}) {
   let h = `<div class="kz"${go && !o.vorschau ? ` data-go="${esc(go.href)}"` : ""}><p class="kzmain">${sym}<b class="kzval">${esc(kzNum(v, e))}</b>${un ? `<span class="kzun">${esc(un)}</span>` : ""}</p>`;
   if (v == null) h += `<p class="mut kzsub">${d.n ? "Für diese Rechenart fehlen Angaben in den Touren." : "Im Zeitraum gibt es keine passenden Touren."}</p>`;
   if (d.offen) h += `<p class="mut kzsub">${d.offen === 1 ? "Für 1 Tour wird die Gehzeit noch berechnet. Öffne die Seite später erneut." : `Für ${d.offen} Touren wird die Gehzeit noch berechnet. Öffne die Seite später erneut.`}</p>`;
-  if (d.rekord) h += `<p class="kzsub"><span class="mut">Rekord-Tour</span> <a href="#/tour/${slEnc(d.rekord.id)}">${esc(d.rekord.name || "Tour")}</a> <span class="mut">${dateS(d.rekord.datum)}</span></p>`;
+  if (d.rekord) h += `<p class="kzsub"><span class="mut">Rekord-Tour</span> <a href="#/tour/${slEnc(d.rekord.id)}">${esc(d.rekord.name || "Tour")}</a> <span class="mut">${fmtDatumKurz(d.rekord.datum)}</span></p>`;
   if (cfg.vgl) h += kzTrend(cfg, d, e);
   const w = (d.reihe && d.reihe.werte) || [], mode = cfg.spark || "saeulen";
   if (mode !== "aus" && w.length > 1 && w.some(x => x)) {

@@ -63,7 +63,7 @@ function rsFrame(tr, ts, days) {
     if (sec) sec.remove();                                                              // die Überschrift steht im Kopf der Karte
     if (!e.children.length) return e.remove();                                          // z. B. keine Statistik ohne Touren
     const badge = {
-      kennzahlen: `${ts.length} Touren · ${nf(km, 0)} km`,
+      kennzahlen: `${ts.length} Touren · ${fmtKm(km, {d: 0})}`,
       stat: (n => (n === 1 ? "1 Aktivität" : `${n} Aktivitäten`))(e.querySelectorAll("tbody tr").length),
       touren: `${ts.length} Touren`,
     }[reg.id] || "";

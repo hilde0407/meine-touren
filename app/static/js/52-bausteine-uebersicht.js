@@ -109,7 +109,7 @@ Object.assign(window.SL_WT, {
           const e = byDay.get(k), l = lvl(val(e));
           if (e) days++;
           const dt = new Date(k * 864e5), ds = `${pad2(dt.getUTCDate())}.${pad2(dt.getUTCMonth() + 1)}.${dt.getUTCFullYear()}`;
-          rects += `<rect class="slh${l}" x="${w * 12}" y="${r * 12}" width="10" height="10" rx="2">${e ? `<title>${ds} · ${e.n === 1 ? "1 Tour" : e.n + " Touren"} · ${nf(e.km, 1)} km</title>` : ""}</rect>`;
+          rects += `<rect class="slh${l}" x="${w * 12}" y="${r * 12}" width="10" height="10" rx="2">${e ? `<title>${ds} · ${e.n === 1 ? "1 Tour" : e.n + " Touren"} · ${fmtKm(e.km)}</title>` : ""}</rect>`;
         }
       }
       b.innerHTML = `<div class="slmos" aria-hidden="true">${mos}</div><svg class="slheat" viewBox="0 0 636 82" role="img" aria-label="${esc(`Kalender der letzten 52 Wochen: ${days} Tage mit Touren`)}">${rects}</svg>` +
@@ -135,7 +135,7 @@ Object.assign(window.SL_WT, {
         ev = up / EV, evn = Math.floor(ev) + 1,
         row = (lab, val, p, line) => `<li><div class="slr1"><span>${lab}</span><b>${val}</b></div>${slBr(p)}<p class="mut slr2">${line}</p></li>`;
       b.innerHTML = slRows([
-        row("Kilometer gesamt", slKm(km), K.p, K.nx ? `Noch ${slKm(K.nx - km)} bis ${nf(K.nx, 0)} km` : "Alle Meilensteine erreicht: mehr als einmal um die Erde."),
+        row("Kilometer gesamt", slKm(km), K.p, K.nx ? `Noch ${slKm(K.nx - km)} bis ${fmtKm(K.nx, {d: 0})}` : "Alle Meilensteine erreicht: mehr als einmal um die Erde."),
         row("Höhenmeter gesamt", `${nf(ev, ev >= 10 ? 0 : 1)} × Mount Everest`, (ev % 1) * 100, `Noch ${slHm(evn * EV - up)} bis zum nächsten Everest`),
         row("Touren gesamt", nf(n, 0), N.p, N.nx ? `Noch ${N.nx - n} bis ${N.nx} Touren` : "Alle Meilensteine erreicht."),
       ]);
@@ -186,7 +186,7 @@ Object.assign(window.SL_WT, {
         tt = x => `im Schnitt ${nf(x.t_mittel, 0)} °C (${nf(x.t_min, 0)} bis ${nf(x.t_max, 0)} °C)`,
         zmax = Math.max(...d.jahreszeiten.map(val), 1e-9), best = d.jahreszeiten.reduce((a, x) => (val(x) > val(a) ? x : a), d.jahreszeiten[0]),
         zrows = d.jahreszeiten.map(z => `<li${z === best ? ' class="slbest"' : ""}><div class="slr1"><span>${ZN[z.key]}</span><b>${nf(val(z), 0)} ${un}</b></div>${slBr((val(z) / zmax) * 100)}` +
-          `<p class="mut slr2 slsegs">${slSegs([ZM[z.key], z.touren === 1 ? "1 Tour" : z.touren + " Touren", km ? "" : `${nf(z.km, 0)} km`, z.mit_wetter ? tt(z) : ""])}</p></li>`),
+          `<p class="mut slr2 slsegs">${slSegs([ZM[z.key], z.touren === 1 ? "1 Tour" : z.touren + " Touren", km ? "" : `${fmtKm(z.km, {d: 0})}`, z.mit_wetter ? tt(z) : ""])}</p></li>`),
         vals = d.monate.map(val), mb = vals.indexOf(Math.max(...vals));
       let h = `${val(best) > 0 ? `<p class="slcmp">Deine stärkste Jahreszeit: ${ZN[best.key]}.</p>` : ""}<p class="mut slcmpn">${d.touren === 1 ? "1 Tour" : d.touren + " Touren"} im gewählten Zeitraum, Jahreszeiten nach den Monaten der nördlichen Halbkugel.</p>` + slRows(zrows) +
         `<p class="slcmpn">Monate</p>` + slCols(vals, {hl: mb, label: `Säulendiagramm ${km ? "Kilometer" : "Touren"} je Monat, am stärksten ${MONL[mb]} mit ${nf(vals[mb], 0)} ${un}`, labels: SL_MON, cls: "slsm"});
@@ -194,7 +194,7 @@ Object.assign(window.SL_WT, {
       if (!has) h += '<p class="mut slnone slwx">Für diese Touren liegen noch keine Wetterdaten vor, deshalb gibt es keine Temperaturen. Sie werden beim Öffnen einer Tour oder in der Verwaltung mit „Wetter laden“ gespeichert; hier wird nichts abgerufen.</p>';
       else {
         const KL = {kalt: "Unter 0 °C", kuehl: "0 bis 10 °C", mild: "10 bis 20 °C", warm: "Ab 20 °C"}, kmax = Math.max(...wx.klassen.map(x => x.touren), 1);
-        h += `<p class="slcmpn">Touren nach Temperatur</p>` + slRows(wx.klassen.map(k => `<li><div class="slr1"><span>${KL[k.key]}</span><b>${k.touren === 1 ? "1 Tour" : k.touren + " Touren"}</b></div>${slBr((k.touren / kmax) * 100)}<p class="mut slr2">${nf(k.km, 0)} km</p></li>`)) +
+        h += `<p class="slcmpn">Touren nach Temperatur</p>` + slRows(wx.klassen.map(k => `<li><div class="slr1"><span>${KL[k.key]}</span><b>${k.touren === 1 ? "1 Tour" : k.touren + " Touren"}</b></div>${slBr((k.touren / kmax) * 100)}<p class="mut slr2">${fmtKm(k.km, {d: 0})}</p></li>`)) +
           `<p class="mut slcmpn">${wx.ohne ? `Wetterdaten für ${wx.mit} von ${d.touren} Touren; die übrigen fehlen und zählen nicht mit (nie als 0 °C).` : `Wetterdaten für alle ${wx.mit} Touren.`} Gespeichertes Wetter, kein neuer Abruf.</p>`;
       }
       b.innerHTML = h;
@@ -217,7 +217,7 @@ Object.assign(window.SL_WT, {
         g.v += m(t);
         g.n++;
       });
-      const L = Object.values(G).filter(g => g.v > 0).sort((x, y) => y.v - x.v), tot = slSum(L, g => g.v), C = 213.6, fmt = v => (cfg.metric === "km" ? slKm(v) : cfg.metric === "time" ? nf(v, 0) + " Std." : nf(v, 0));
+      const L = Object.values(G).filter(g => g.v > 0).sort((x, y) => y.v - x.v), tot = slSum(L, g => g.v), C = 213.6, fmt = v => (cfg.metric === "km" ? slKm(v) : cfg.metric === "time" ? slDur(v * 3600) : nf(v, 0));
       if (!L.length) return slNote(b, "Für diese Auswertung fehlen Angaben in den Touren.");
       let off = 0;
       const segs = L.map(g => {
@@ -243,7 +243,7 @@ Object.assign(window.SL_WT, {
           ph = t.photos ? await slGet(`/api/photos?tour_id=${slEnc(t.id)}&limit=1`) : null, p = ph && ph[0];
         cur = t;
         b.innerHTML = `<div class="slrd">${p ? `<img src="/pic/${p.id}?size=300" alt="${esc(t.name)}" loading="lazy">` : '<span class="slrd-i" aria-hidden="true">⛰️</span>'}` +
-          `<div class="slrdt"><a class="slrdn" href="#/tour/${slEnc(t.id)}">${esc(t.name)}</a><span class="mut">${dateS(t.date)} · ${slAgo(t.date)}</span><span class="mut">${slKm(t.km)} · ${slHm(t.up_m || 0)} · ${slDur(t.h * 3600)}</span>` +
+          `<div class="slrdt"><a class="slrdn" href="#/tour/${slEnc(t.id)}">${esc(t.name)}</a><span class="mut">${fmtDatumKurz(t.date)} · ${slAgo(t.date)}</span><span class="mut">${fmtKm(t.km)} · ${fmtAuf(t.up_m || 0)} · ${fmtDauer(t.h * 3600)}</span>` +
           (pool.length > 1 ? '<button type="button" class="btn sm ghost" data-other>Andere Tour</button>' : "") + "</div></div>";
         const o = b.querySelector("[data-other]");
         if (o) o.onclick = () => draw().then(() => {
@@ -334,8 +334,8 @@ Object.assign(window.SL_WT, {
           nm = can ? `<a href="#/plan/${p.id}">${esc(p.name || "Ohne Namen")}</a>` : `<b>${esc(p.name || "Ohne Namen")}</b>`,
           vals = [p.km != null ? slKm(p.km) : "", p.up ? slHm(p.up) : "", p.est_h ? slDur(p.est_h * 3600) : ""].filter(Boolean).join(" · ");
         if (!done) return `<li>${nm}<span class="mut">${vals}</span></li>`;
-        const cmp = t && p.est_h && t.h ? `<span>geplant ${hmm(p.est_h)} Std.</span> · <span>gelaufen ${hmm(t.h)} Std. (${hmSigned(t.h - p.est_h)})</span>`
-          : t && p.km && t.km ? `<span>Strecke: geplant ${nf(p.km, 1)} km, gelaufen ${nf(t.km, 1)} km (${nSigned(t.km - p.km, 1)} km)</span>` : "";
+        const cmp = t && p.est_h && t.h ? `<span>geplant ${hmm(p.est_h)}</span> · <span>gelaufen ${hmm(t.h)} (${hmSigned(t.h - p.est_h)})</span>`
+          : t && p.km && t.km ? `<span>Strecke: geplant ${fmtKm(p.km)}, gelaufen ${fmtKm(t.km)} (${nSigned(t.km - p.km, 1)} km)</span>` : "";
         return `<li class="slgone">${nm}<span class="mut"><span aria-hidden="true">✓</span> ${t && t.start_ts ? `gegangen am ${esc(planDate(t.start_ts))}` : "gegangen"}</span>${cmp ? `<small class="mut slgcmp">${cmp}</small>` : ""}</li>`;
       };
       b.innerHTML = `<ul class="sllist">${[...L.filter(p => p.status !== "gegangen"), ...L.filter(p => p.status === "gegangen")].slice(0, 5).map(row).join("")}</ul>` + (can ? '<p><a href="#/plan">Tour planen ›</a></p>' : "");
@@ -413,11 +413,11 @@ Object.assign(window.SL_WT, {
         mn[t.m - 1]++;
       });
       const best = mk.indexOf(Math.max(...mk)), L = A.reduce((m, t) => (t.km > m.km ? t : m)), U = A.reduce((m, t) => ((t.up_m || 0) > (m.up_m || 0) ? t : m)),
-        tile = (t, v, l) => `<a class="utile slrec" href="#/tour/${slEnc(t.id)}"><b>${v}</b><span>${l}</span><small class="mut">${esc(t.name)} · ${dateS(t.date)}</small></a>`;
+        tile = (t, v, l) => `<a class="utile slrec" href="#/tour/${slEnc(t.id)}"><b>${v}</b><span>${l}</span><small class="mut">${esc(t.name)} · ${fmtDatumKurz(t.date)}</small></a>`;
       b.innerHTML = slTiles([[nf(A.length, 0), A.length === 1 ? "Tour" : "Touren"], [slKm(slSum(A, t => t.km)), "Kilometer"], [slHm(slSum(A, t => t.up_m || 0)), "Höhenmeter"]]) +
         `<p class="slcmpn">Kilometer je Monat</p>${slCols(mk, {hl: best, label: `Säulendiagramm der Kilometer je Monat, am meisten im ${SL_MON[best]}`, labels: SL_MON, cls: "slsm"})}` +
-        `<div class="utiles">${tile(L, slKm(L.km), "Längste Tour")}${U.up_m ? tile(U, slHm(U.up_m), "Meiste Höhenmeter") : ""}<div class="utile"><b>${SL_MON[best]}</b><span>Aktivster Monat</span><small class="mut">${slKm(mk[best])} · ${mn[best] === 1 ? "1 Tour" : mn[best] + " Touren"}</small></div></div>`;
-      slBadge(c, `${nf(slSum(A, t => t.km), 0)} km`);
+        `<div class="utiles">${tile(L, fmtKm(L.km), "Längste Tour")}${U.up_m ? tile(U, slHm(U.up_m), "Meiste Höhenmeter") : ""}<div class="utile"><b>${SL_MON[best]}</b><span>Aktivster Monat</span><small class="mut">${slKm(mk[best])} · ${mn[best] === 1 ? "1 Tour" : mn[best] + " Touren"}</small></div></div>`;
+      slBadge(c, `${fmtKm(slSum(A, t => t.km), {d: 0})}`);
     },
   },
 });
@@ -438,8 +438,8 @@ const ziBusy = () => ziMine() || ZI.busy || ZI.queue.length > 0;
 const ziLab = k => ((ZI.q && ZI.q.quellen.find(x => x.kind === k)) || {}).label || k;
 const ziNext = () => ziKind() || ZI.queue[0] || (ZI.busy && ZI.cur) || "";
 function ziWhen(ts) {
-  const d = new Date(ts * 1000), same = d.toDateString() === new Date().toDateString();
-  return same ? d.toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"}) + " Uhr" : d.toLocaleString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"});
+  const same = new Date(ts * 1000).toDateString() === new Date().toDateString();
+  return same ? fmtUhrzeit(ts) : fmtDatumKurz(ts, {zeit: true});
 }
 const ziN = (n, one, many) => (n === 1 ? one : many.replace("{}", nf(n, 0)));
 /* Was die Oberfläche anbietet: load (Stand fehlt), one (genau ein Konto), many (mehrere), setup (Konto einrichten), file (nur Dateiimport) */
@@ -792,7 +792,7 @@ function ziAll() {
 const SL_JM = ["count", "km", "up", "h"];
 /* Säulen des Verlaufs je Zeitraumart: {vals, labels, tips, cur}; Einheit je Kennzahl */
 function slYearSeries(list, R, m, now) {
-  const f = FL_MET[m].f, un = FL_MET[m].unit, fmt = v => `${nf(v, 0)} ${un}`, vals = [], labels = [], tips = [];
+  const f = FL_MET[m].f, fmt = FL_MET[m].fmt, vals = [], labels = [], tips = [];
   let cur = -1, step = "Monat";
   if (R.kind === "year" || R.kind === "y") {
     for (let i = 0; i < 12; i++) {
@@ -821,7 +821,7 @@ function slYearSeries(list, R, m, now) {
       const d = flDayAdd(R.from, i * 7);
       vals.push(0);
       labels.push(i % 4 === 0 ? `${+d.slice(8, 10)}.${+d.slice(5, 7)}.` : "");
-      tips.push(`Woche ab ${dateS(d)}`);
+      tips.push(`Woche ab ${fmtDatumKurz(d)}`);
     }
     list.forEach(t => {
       const i = Math.min(12, Math.floor((slDay(t.date) - slDay(R.from)) / 7));
@@ -850,7 +850,7 @@ function slYearShell(it) {
     cmpTxt = was > 0 && now_ > 0 && cfg.compare !== false && R.prev
       ? `${up ? "+" : "−"}${nf((Math.abs(now_ - was) / was) * 100, 0)} % gegenüber ` + (R.kind === "year" ? `${R.year - 1} bis heute` : R.kind === "y" ? String(R.year - 1) : R.kind === "12m" ? "den 12 Monaten davor" : "den 90 Tagen davor")
       : "",
-    kz = ms.map(m => `<div class="hyn"><b>${nf(flVal(list, m), 0)}</b><span>${m === "count" ? "Touren" : FL_MET[m].name}</span></div>`).join(""),
+    kz = ms.map(m => `<div class="hyn"><b>${FL_MET[m].fmt(flVal(list, m))}</b><span>${m === "count" ? "Touren" : FL_MET[m].name}</span></div>`).join(""),
     sec = document.createElement("section");
   sec.className = "hyear" + (it.widget ? " tlw" : "");
   sec.id = it.widget ? "tlw-" + it.id : "hyear";

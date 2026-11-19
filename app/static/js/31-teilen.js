@@ -15,7 +15,7 @@ async function shareOut(title, text, url) {
 }
 const shareCanNative = () => !!(window.MTApp || navigator.share);
 
-const tourShareText = t => `${t.name} – ${nf(t.km, 1)} km, ${nf(t.up_m || 0, 0)} m aufwärts, ${nf(t.h, 1)} h (${dateL(t.date)})`;
+const tourShareText = t => `${t.name} – ${fmtKm(t.km)}, ${fmtHm(t.up_m || 0)} Aufstieg, ${fmtDauer(t.h * 3600)} (${fmtDatum(t.date)})`;
 
 /* =====================  3.25.0 Teilen mit Ansicht: Auswahl „Was wird gezeigt?“ (Dialog für neue Links und zum nachträglichen Ändern)  ===================== */
 const SHR_BLOCKS = [["karte", "Karte"], ["hoehe", "Höhenprofil"], ["zahlen", "Kennzahlen"], ["fotos", "Fotos"], ["notiz", "Notiz und Beschreibung"], ["wege", "Wegpunkte"], ["puls", "Pulsverlauf"], ["wetter", "Wetter"]];
@@ -109,7 +109,7 @@ VIEWS.tour = async id => {
             body: JSON.stringify({show: true, trim: true, days, best, comments}),
           });
           m.remove();
-          await shareOut(t.name, `Diashow: ${t.name} (${dateL(t.date)})`, location.origin + s.url);
+          await shareOut(t.name, `Diashow: ${t.name} (${fmtDatum(t.date)})`, location.origin + s.url);
         } catch (e) {
           b.disabled = false;
           uiAlert("Link konnte nicht erstellt werden: " + e.message);
@@ -162,6 +162,6 @@ if (_recap31)
     $("#rcsnd").onclick = () => {
       const n = TOURS.filter(t => String(t.y) === String(y)),
         s = f => n.reduce((a, t) => a + (f(t) || 0), 0);
-      shareOut(`Mein Tourenjahr ${y}`, `Mein Tourenjahr ${y}: ${n.length} Touren, ${nf(s(t => t.km), 0)} km, ${nf(s(t => t.up_m), 0)} m aufwärts, ${nf(s(t => t.h), 0)} Stunden unterwegs.`);
+      shareOut(`Mein Tourenjahr ${y}`, `Mein Tourenjahr ${y}: ${n.length} Touren, ${fmtKm(s(t => t.km), {summe: true})}, ${fmtHm(s(t => t.up_m))} Aufstieg, ${fmtDauer(s(t => t.h) * 3600, {summe: true})} unterwegs.`);
     };
   };

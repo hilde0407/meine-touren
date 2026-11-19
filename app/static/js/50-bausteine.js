@@ -47,7 +47,7 @@ function slBelWochen(c, b, d, said, nw, mon, now) {
       val = none ? "Ruhewoche" : noval ? "Belastung ohne Angabe" : `Belastung ${nf(v.belastung, 0)}`,
       dots = [...v.tage].map((x, k) => `<i class="slwdo ${k >= r.elapsed ? "fut" : x === "1" ? "on" : "off"}"><span class="slwdl">${wd[k]}</span></i>`).join("");
     return `<li class="slwk${r.cur ? " cur" : ""}"><div class="slr1"><span>${esc(lab)}${r.cur ? ' <small class="mut">läuft</small>' : ""}</span><b>${val}</b></div>${slBr(v.belastung == null ? 0 : (v.belastung / mx) * 100)}` +
-      `<div class="slwdd" aria-hidden="true">${dots}</div><p class="mut slr2 slsegs">${slSegs([v.touren === 1 ? "1 Tour" : `${v.touren} Touren`, `${nf(v.km || 0, 1)} km`, r.rest === 1 ? "1 Ruhetag" : `${r.rest} Ruhetage`])}</p></li>`;
+      `<div class="slwdd" aria-hidden="true">${dots}</div><p class="mut slr2 slsegs">${slSegs([v.touren === 1 ? "1 Tour" : `${v.touren} Touren`, `${fmtKm(v.km || 0)}`, r.rest === 1 ? "1 Ruhetag" : `${r.rest} Ruhetage`])}</p></li>`;
   });
   b.innerHTML = `<p class="slcmp">${said || "Für einen Vergleich liegen noch zu wenige Wochen mit Uhr-Daten vor"}</p>` +
     `<p class="mut slcmpn">In ${nw} Wochen: ${rest === 1 ? "1 Ruhetag" : rest + " Ruhetage"} bei ${tours === 1 ? "1 Tour" : tours + " Touren"} (im Schnitt ${nf((rest / days) * 7, 1)} Ruhetage je Woche).</p>` +
@@ -56,12 +56,10 @@ function slBelWochen(c, b, d, said, nw, mon, now) {
   slBadge(c, rest === 1 ? "1 Ruhetag" : `${rest} Ruhetage`);
 }
 const slClamp = (x, a = 0, b = 100) => Math.max(a, Math.min(b, x));
-const slDur = s => {
-  const m = Math.round(s / 60);
-  return m >= 60 ? `${Math.floor(m / 60)}:${pad2(m % 60)} Std.` : `${m} Min.`;
-};
-const slKm = km => nf(km, km >= 100 ? 0 : 1) + " km";
-const slHm = h => nf(h, 0) + " m";
+/* Bausteine: Summen über viele Touren – ab 24 Stunden bzw. 100 km ganzzahlig (zentrale Formatierer in 01-format.js) */
+const slDur = s => fmtDauer(s, {summe: true});
+const slKm = km => fmtKm(km, {summe: true});
+const slHm = m => fmtHm(m);
 const slBr = (pct, cls = "") => `<svg class="slbr${cls ? " " + cls : ""}" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="slbr-t" width="100" height="10"/><rect class="slbr-f" width="${slClamp(pct).toFixed(1)}" height="10"/></svg>`;
 /* Spaltendiagramm: vals = Zahlen; o = {hl: Index (hervorgehoben), dim: [Indizes] (blass), avg: Mittellinie, label: Beschreibung für Vorlesehilfen, labels: Beschriftungen unter den Spalten} */
 const slCols = (vals, o = {}) => {
@@ -105,8 +103,8 @@ Object.assign(window.SL_WT, {
       if (!t) return slNote(b, "Keine Tour.");
       const want = (cfg.values && cfg.values.length ? cfg.values : ["km", "up", "dur", "pace"]).filter(v => SL_KZ.some(k => k[0] === v)),
         tiles = {
-          km: [nf(t.km, 1) + " km", "Strecke"], up: [nf(t.up_m, 0) + " m", "Aufstieg"], down: [nf(t.down_m, 0) + " m", "Abstieg"],
-          dur: [`${fmtHM(t.h * 3600)} Std.`, "Dauer"], pace: t.h ? [nf(t.km / t.h, 1) + " km/h", "Tempo im Schnitt"] : null,
+          km: [fmtKm(t.km), "Strecke"], up: [fmtHm(t.up_m), "Aufstieg"], down: [fmtHm(t.down_m), "Abstieg"],
+          dur: [fmtDauer(t.h * 3600), "Dauer"], pace: t.h ? [fmtTempo(t.km / t.h), "Tempo im Schnitt"] : null,
         };
       if (want.includes("hr")) {
         const h = await api(`/api/tours/${encodeURIComponent(t.id)}/hr`).catch(() => null);
@@ -120,7 +118,7 @@ Object.assign(window.SL_WT, {
       const list = want.map(v => tiles[v]).filter(Boolean);
       if (!list.length) return slNote(b, "Für die gewählten Werte liegen bei dieser Tour keine Daten vor.");
       b.innerHTML = slTiles(list);
-      slBadge(c, `${nf(t.km, 1)} km · ${nf(t.up_m, 0)} m`);
+      slBadge(c, `${fmtKm(t.km)} · ${fmtHm(t.up_m)}`);
     },
   },
   tempo: {
@@ -131,9 +129,9 @@ Object.assign(window.SL_WT, {
       const d = t && (await api(`/api/tours/${encodeURIComponent(t.id)}/tempo`).catch(() => null));
       if (!d || d.status !== "ok") return slNote(b, "Für diese Tour liegt keine Auswertung nach Steigung vor (Strecke mit Höhen und Zeit nötig).");
       const k = d.klassen,
-        one = (key, lab) => (k[key] ? [nf(k[key].kmh, 1) + " km/h", lab, nf(k[key].dist_m / 1000, 1) + " km"] : null);
+        one = (key, lab) => (k[key] ? [fmtTempo(k[key].kmh), lab, fmtKm(k[key].dist_m / 1000)] : null);
       b.innerHTML = slTiles([one("auf", "Bergauf"), one("eben", "Eben"), one("ab", "Bergab")].filter(Boolean));
-      slBadge(c, k.auf ? `Bergauf <b>${nf(k.auf.kmh, 1)} km/h</b>` : "");
+      slBadge(c, k.auf ? `Bergauf <b>${fmtTempo(k.auf.kmh)}</b>` : "");
     },
   },
   vergleich: {
@@ -213,8 +211,8 @@ Object.assign(window.SL_WT, {
         from = cfg.period === "month" ? new Date(now.getFullYear(), now.getMonth(), 1) : new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7)),
         iso = slIso(from),
         a = TOURS.filter(t => t.date.slice(0, 10) >= iso && flSport(t, cfg));
-      b.innerHTML = slTiles([[nf(a.length, 0), a.length === 1 ? "Tour" : "Touren"], [nf(slSum(a, t => t.km), 1) + " km", "Kilometer"], [nf(slSum(a, t => t.up_m || 0), 0) + " m", "Höhenmeter"], [nf(slSum(a, t => t.h), 1) + " Std.", "Unterwegs"]]);
-      slBadge(c, a.length ? `${nf(slSum(a, t => t.km), 0)} km` : "Noch keine Tour");
+      b.innerHTML = slTiles([[nf(a.length, 0), a.length === 1 ? "Tour" : "Touren"], [slKm(slSum(a, t => t.km)), "Strecke"], [slHm(slSum(a, t => t.up_m || 0)), "Aufstieg"], [slDur(slSum(a, t => t.h) * 3600), "Unterwegs"]]);
+      slBadge(c, a.length ? `${fmtKm(slSum(a, t => t.km), {d: 0})}` : "Noch keine Tour");
     },
   },
   belastung: {
@@ -250,7 +248,7 @@ Object.assign(window.SL_WT, {
       const cy = new Date().getFullYear(), {list: a, prev: p} = flSelect(cfg, "year"),
         row = (m, d) => {
           const x = flVal(a, m), y = flVal(p, m), pct = y > 0 ? Math.round(((x - y) / y) * 100) : null;
-          return [`${nf(x, d)}`, m === "count" ? "Touren" : m === "h" ? "Stunden" : FL_MET[m].name, `Vorjahr bis heute: ${nf(y, d)}${pct == null ? "" : ` (${pct >= 0 ? "+" : "−"}${Math.abs(pct)} %)`}`];
+          return [FL_MET[m].fmt(x), FL_MET[m].name, `Vorjahr bis heute: ${FL_MET[m].fmt(y)}${pct == null ? "" : ` (${pct >= 0 ? "+" : "−"}${Math.abs(pct)} %)`}`];
         };
       if (!a.length && !p.length) return flNone(b, (cfg.sports || []).length ? "" : "Noch keine Touren in diesem und im letzten Jahr.");
       b.innerHTML = slTiles((cfg.metrics && cfg.metrics.length ? cfg.metrics : ["count", "km", "up"]).filter(m => FL_MET[m]).map(m => row(m, 0)));
@@ -266,7 +264,7 @@ Object.assign(window.SL_WT, {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
       const L = TOURS.filter(t => flSport(t, cfg)).slice(0, +cfg.n >= 1 && +cfg.n <= 10 ? +cfg.n : 5);
       if (!L.length) return flNone(b);
-      b.innerHTML = `<ul class="sllist">${L.map(t => `<li><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${dateS(t.date)} · ${nf(t.km, 1)} km · ${nf(t.up_m || 0, 0)} m</span></li>`).join("")}</ul>`;
+      b.innerHTML = `<ul class="sllist">${L.map(t => `<li><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${fmtDatumKurz(t.date)} · ${fmtKm(t.km)} · ${fmtHm(t.up_m || 0)}</span></li>`).join("")}</ul>`;
     },
   },
   neuefotos: {
@@ -304,8 +302,8 @@ Object.assign(window.SL_WT, {
       if (!A.length) return flNone(b);
       const best = (f, ok) => A.filter(ok || (() => true)).reduce((m, t) => (!m || f(t) > f(m) ? t : m), null),
         L = best(t => t.km), U = best(t => t.up_m || 0), S = best(t => t.km / t.h, t => t.km >= 3 && t.h >= 0.5),
-        tile = (t, v, l) => (t ? `<a class="utile slrec" href="#/tour/${encodeURIComponent(t.id)}"><b>${v}</b><span>${l}</span><small class="mut">${esc(t.name)} · ${dateS(t.date)}</small></a>` : "");
-      b.innerHTML = `<div class="utiles">${tile(L, nf(L && L.km, 1) + " km", "Längste Tour")}${tile(U && U.up_m ? U : null, nf(U && U.up_m, 0) + " m", "Meiste Höhenmeter")}${tile(S, nf(S && S.km / S.h, 1) + " km/h", "Schnellstes Tempo")}</div>`;
+        tile = (t, v, l) => (t ? `<a class="utile slrec" href="#/tour/${encodeURIComponent(t.id)}"><b>${v}</b><span>${l}</span><small class="mut">${esc(t.name)} · ${fmtDatumKurz(t.date)}</small></a>` : "");
+      b.innerHTML = `<div class="utiles">${tile(L, fmtKm(L && L.km), "Längste Tour")}${tile(U && U.up_m ? U : null, fmtHm(U && U.up_m), "Meiste Höhenmeter")}${tile(S, fmtTempo(S && S.km / S.h), "Schnellstes Tempo")}</div>`;
     },
   },
   heutevor: {
@@ -317,7 +315,7 @@ Object.assign(window.SL_WT, {
         md = `${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`,
         a = TOURS.filter(t => t.date.slice(5, 10) === md && t.y !== now.getFullYear());
       if (!a.length) return slNote(b, "An diesem Tag gab es in früheren Jahren keine Tour.");
-      b.innerHTML = `<ul class="sllist">${a.map(t => `<li><b>${now.getFullYear() - t.y === 1 ? "Vor 1 Jahr" : "Vor " + (now.getFullYear() - t.y) + " Jahren"}</b><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${nf(t.km, 1)} km</span></li>`).join("")}</ul>`;
+      b.innerHTML = `<ul class="sllist">${a.map(t => `<li><b>${now.getFullYear() - t.y === 1 ? "Vor 1 Jahr" : "Vor " + (now.getFullYear() - t.y) + " Jahren"}</b><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${fmtKm(t.km)}</span></li>`).join("")}</ul>`;
       slBadge(c, a.length === 1 ? "1 Tour" : `${a.length} Touren`);
     },
   },

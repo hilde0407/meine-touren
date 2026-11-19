@@ -12,7 +12,7 @@ function showLb() {
   if (!p) return;
   $("#lbi").src = p.src || `/pic/${p.id}?size=2000`;
   $("#lbc").textContent =
-    `${p.tour_name ? p.tour_name + " · " : ""}${new Date(p.taken_ts * 1000).toLocaleString("de-DE", {dateStyle: "long", timeStyle: "short"})} · ${LB_I + 1}/${PH_LIST.length}`;
+    `${p.tour_name ? p.tour_name + " · " : ""}${fmtDatum(p.taken_ts, {zeit: true})} · ${LB_I + 1}/${PH_LIST.length}`;
 }
 function bindThumbs(box, list) {
   box.querySelectorAll("img[data-i]").forEach(im => (im.onclick = () => openLb(list, +im.dataset.i)));
@@ -65,8 +65,8 @@ VIEWS.photos = async (_, q) => {
   $("#pg").innerHTML = [...groups.entries()]
     .map(([k, a]) => {
       const t = BY[k];
-      return `<div class="pgroup"><div class="ph"><h3>${t ? `<a href="#/tour/${k}">${esc(t.name)}</a>` : "Ohne Tour"}</h3><span>${t ? dateL(t.date) : new Date(a[0].taken_ts * 1000).toLocaleDateString("de-DE")}, ${a.length} Fotos</span><span class="sp"></span>${t ? `<a class="btn ghost sm" target="_blank" href="slideshow.html?tour=${k}">Diashow</a>` : ""}</div>
-    <div class="thumbs">${a.map(p => `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=400" data-i="${ph.indexOf(p)}"><span class="cap">${new Date(p.taken_ts * 1000).toLocaleString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"})}${p.manual === 1 ? " 📌" : ""}</span></div>`).join("")}</div></div>`;
+      return `<div class="pgroup"><div class="ph"><h3>${t ? `<a href="#/tour/${k}">${esc(t.name)}</a>` : "Ohne Tour"}</h3><span>${t ? fmtDatum(t.date) : fmtDatumKurz(a[0].taken_ts)}, ${a.length} Fotos</span><span class="sp"></span>${t ? `<a class="btn ghost sm" target="_blank" href="slideshow.html?tour=${k}">Diashow</a>` : ""}</div>
+    <div class="thumbs">${a.map(p => `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=400" data-i="${ph.indexOf(p)}"><span class="cap">${fmtDatumKurz(p.taken_ts, {zeit: true})}${p.manual === 1 ? " 📌" : ""}</span></div>`).join("")}</div></div>`;
     })
     .join("");
   bindThumbs($("#pg"), ph);
@@ -117,7 +117,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
           id = p0.id;
         if (!sel.size) {
           // erstes Foto: alle Fotos desselben Tages ab diesem (einschließlich) vorauswählen – mit Umschalttaste alle bis zu diesem
-          const dk = x => new Date(x.taken_ts * 1000).toLocaleDateString("de-DE"),
+          const dk = x => fmtDatumKurz(x.taken_ts),
             k = dk(p0),
             i0 = +im.dataset.i,
             after = (x, i) => x.taken_ts > p0.taken_ts || (x.taken_ts === p0.taken_ts && i >= i0),
@@ -194,7 +194,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
 function shiftDialog(sp, done) {
   const first = sp.slice().sort((a, b) => a.taken_ts - b.taken_ts)[0];
   const m = modal(`<h2>Zeit von ${sp.length} Foto${sp.length > 1 ? "s" : ""} verschieben</h2>
-   <p class="mut fs14">Alle gewählten Fotos wandern um denselben Betrag, ihre Abstände bleiben gleich. Typischer Fall: Kamera stand auf deutscher Zeit, die Reise lag in einer anderen Zeitzone (z. B. Kanaren: 1 Stunde früher).<br>Das erste gewählte Foto hat jetzt: <b>${new Date(first.taken_ts * 1000).toLocaleString("de-DE")}</b></p>
+   <p class="mut fs14">Alle gewählten Fotos wandern um denselben Betrag, ihre Abstände bleiben gleich. Typischer Fall: Kamera stand auf deutscher Zeit, die Reise lag in einer anderen Zeitzone (z. B. Kanaren: 1 Stunde früher).<br>Das erste gewählte Foto hat jetzt: <b>${fmtDatumKurz(first.taken_ts, {zeit: true})}</b></p>
    <div class="row m8-0"><button class="btn alt sm" data-p="-3600">−1 Std.</button><button class="btn alt sm" data-p="3600">+1 Std.</button><button class="btn alt sm" data-p="-7200">−2 Std.</button><button class="btn alt sm" data-p="7200">+2 Std.</button></div>
    <div class="row aic g8"><select id="shs"><option value="1">später (+)</option><option value="-1">früher (−)</option></select><input id="shh" type="number" min="0" value="0" style="width:70px"> Std. <input id="shm" type="number" min="0" max="59" value="0" style="width:70px"> Min.</div>
    <p class="mut fs14 mt8" id="shp"></p>
@@ -202,7 +202,7 @@ function shiftDialog(sp, done) {
   const delta = () => (+m.querySelector("#shs").value || 1) * ((+m.querySelector("#shh").value || 0) * 3600 + (+m.querySelector("#shm").value || 0) * 60);
   const upd = () => {
     const d = delta();
-    m.querySelector("#shp").textContent = d ? `Neue Zeit des ersten Fotos: ${new Date((first.taken_ts + d) * 1000).toLocaleString("de-DE")}` : "";
+    m.querySelector("#shp").textContent = d ? `Neue Zeit des ersten Fotos: ${fmtDatumKurz((first.taken_ts + d), {zeit: true})}` : "";
   };
   m.querySelectorAll("[data-p]").forEach(b => (b.onclick = () => {
     const v = +b.dataset.p;
@@ -232,8 +232,8 @@ let assignDialog = function (sp, done) {
   const m = document.createElement("div");
   m.className = "modal";
   m.innerHTML = `<div class="mbox"><h2>${sp.length} Foto${sp.length > 1 ? "s" : ""} zuordnen</h2>
-   <div class="field"><label>Tour (nächstgelegene zuerst)</label><select id="at">${tours.map(t => `<option value="${t.id}">${dateS(t.date)} · ${esc(t.name)} (${sName(t.sport)})</option>`).join("")}</select></div>
-   <label class="chk"><input type="checkbox" id="as"> Zeit der Fotos anpassen: Das erste gewählte Foto (${new Date(first.taken_ts * 1000).toLocaleString("de-DE")}) wurde</label>
+   <div class="field"><label>Tour (nächstgelegene zuerst)</label><select id="at">${tours.map(t => `<option value="${t.id}">${fmtDatumKurz(t.date)} · ${esc(t.name)} (${sName(t.sport)})</option>`).join("")}</select></div>
+   <label class="chk"><input type="checkbox" id="as"> Zeit der Fotos anpassen: Das erste gewählte Foto (${fmtDatumKurz(first.taken_ts, {zeit: true})}) wurde</label>
    <div id="aso" class="m6-0-0-24" style="display:none"><input id="am" type="number" value="0" step="5" style="width:80px"> Minuten nach dem Start der Tour aufgenommen.
      <div class="field"><label>Zeitversatz anwenden auf</label><select id="asc"><option value="selected">nur die gewählten Fotos</option><option value="day">alle Fotos desselben Aufnahmetags</option><option value="unassigned">alle noch nicht zugeordneten Fotos</option></select></div>
      <div class="mut fs14" id="ap"></div></div>

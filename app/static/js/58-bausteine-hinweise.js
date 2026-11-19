@@ -28,7 +28,7 @@ const HN_AUS = [[0, "Nicht anbieten"], [1, "1 Tag"], [3, "3 Tage"], [7, "7 Tage"
 const HN = {pending: new Map(), focus: null};
 const hnPl = (n, one, many) => (n === 1 ? one : many);
 const hnTours = n => (n === 1 ? "1 Tour" : `${nf(n, 0)} Touren`);
-const hnVal = (m, x) => (m === "km" ? `${nf(x, 0)} km` : m === "up" ? `${nf(x, 0)} m` : m === "hours" ? `${nf(x, 0)} h` : hnTours(Math.round(x)));
+const hnVal = (m, x) => (m === "km" ? `${fmtKm(x, {d: 0})}` : m === "up" ? `${fmtHm(x)}` : m === "hours" ? fmtDauer(x * 3600, {summe: true}) : hnTours(Math.round(x)));
 const hnMetric = {km: "Kilometer", up: "Höhenmeter", count: "Touren", hours: "Stunden"};
 const hnNum = x => nf(x, x % 1 ? 1 : 0);
 const hnNow = () => Math.floor(Date.now() / 1000);
@@ -98,9 +98,9 @@ const HN_ART = {
     fields: [{k: "tage", kind: "number", label: "Zeitraum in Tagen (so lange nach dem Überschreiten bleibt der Hinweis)", min: 1, max: 365, step: 1, int: true}, {kind: "sports"}],
     cond: c => [(c.tage ?? 7) === 1 ? "Wird nur angezeigt, wenn du heute oder gestern eine runde Marke überschritten hast: 100, 250, 500, 1.000 … Kilometer, 10.000 Höhenmeter oder die 25., 50., 100. Tour."
       : `Wird nur angezeigt, wenn du in den letzten ${nf(c.tage ?? 7, 0)} Tagen eine runde Marke überschritten hast: 100, 250, 500, 1.000 … Kilometer, 10.000 Höhenmeter oder die 25., 50., 100. Tour.`],
-    body: h => hnRows(h.daten.marken.slice(0, 3).map(m => `<li><b>${m.typ === "km" ? `${nf(m.wert, 0)} km insgesamt überschritten` : m.typ === "hm" ? `${nf(m.wert, 0)} Höhenmeter insgesamt überschritten` : `${nf(m.wert, 0)}. Tour erreicht`}</b> ${hnTour(m)} <span class="mut">${dateS(m.datum)}</span></li>`)),
+    body: h => hnRows(h.daten.marken.slice(0, 3).map(m => `<li><b>${m.typ === "km" ? `${fmtKm(m.wert, {d: 0})} insgesamt überschritten` : m.typ === "hm" ? `${nf(m.wert, 0)} Höhenmeter insgesamt überschritten` : `${nf(m.wert, 0)}. Tour erreicht`}</b> ${hnTour(m)} <span class="mut">${fmtDatumKurz(m.datum)}</span></li>`)),
     link: () => "",
-    badge: h => (h.daten.marken[0].typ === "km" ? `${nf(h.daten.marken[0].wert, 0)} km` : h.daten.marken[0].typ === "hm" ? `${nf(h.daten.marken[0].wert, 0)} m` : `${nf(h.daten.marken[0].wert, 0)}. Tour`),
+    badge: h => (h.daten.marken[0].typ === "km" ? `${fmtKm(h.daten.marken[0].wert, {d: 0})}` : h.daten.marken[0].typ === "hm" ? `${fmtHm(h.daten.marken[0].wert)}` : `${nf(h.daten.marken[0].wert, 0)}. Tour`),
   },
   auffaellig: {
     name: "Neue Auffälligkeiten", icon: "watch", wtype: "hnauffaellig", seiten: ["uebersicht"], defaults: {min: 1, ausblenden: 7},
@@ -119,7 +119,7 @@ const HN_ART = {
     sample: ["info", "Seit 20 Tagen keine Tour."],
     fields: [{k: "tage", kind: "number", label: "Pause ab so vielen Tagen", min: 1, max: 365, step: 1, int: true}, {kind: "sports"}],
     cond: c => [(c.tage ?? 14) === 1 ? "Wird nur angezeigt, wenn seit mindestens einem Tag keine Tour mehr gemacht wurde." : `Wird nur angezeigt, wenn seit mindestens ${nf(c.tage ?? 14, 0)} Tagen keine Tour mehr gemacht wurde.`],
-    body: h => `<p class="hnt">${h.daten.tage === 1 ? "Seit 1 Tag keine Tour." : `Seit ${nf(h.daten.tage, 0)} Tagen keine Tour.`}</p><p class="hnsub"><span class="mut">Letzte Tour:</span> ${hnTour(h.daten)} <span class="mut">${dateS(h.daten.letzte)}</span></p>`,
+    body: h => `<p class="hnt">${h.daten.tage === 1 ? "Seit 1 Tag keine Tour." : `Seit ${nf(h.daten.tage, 0)} Tagen keine Tour.`}</p><p class="hnsub"><span class="mut">Letzte Tour:</span> ${hnTour(h.daten)} <span class="mut">${fmtDatumKurz(h.daten.letzte)}</span></p>`,
     link: () => (typeof isViewer === "function" && isViewer() ? "" : hnTrLink("#/plan", "Tour planen ›")),
     badge: h => (h.daten.tage === 1 ? "1 Tag" : `${nf(h.daten.tage, 0)} Tage`),
   },
@@ -130,7 +130,7 @@ const HN_ART = {
     fields: [{k: "tage", kind: "number", label: "Zeitraum in Tagen (so lange bleibt der Hinweis)", min: 1, max: 365, step: 1, int: true}, {kind: "sports"}],
     cond: c => [(c.tage ?? 7) === 1 ? "Wird nur angezeigt, wenn du heute oder gestern deine längste Tour, die meisten Höhenmeter oder das schnellste Tempo aller Zeiten erreicht hast."
       : `Wird nur angezeigt, wenn du in den letzten ${nf(c.tage ?? 7, 0)} Tagen deine längste Tour, die meisten Höhenmeter oder das schnellste Tempo aller Zeiten erreicht hast.`, "Voraussetzung: mindestens 5 Touren."],
-    body: h => hnRows(h.daten.rekorde.map(r => `<li><b>${r.metrik === "km" ? `${nf(r.wert, 1)} km` : r.metrik === "hm" ? `${nf(r.wert, 0)} m` : `${nf(r.wert, 1)} km/h`}</b><span>${r.metrik === "km" ? "Längste Tour" : r.metrik === "hm" ? "Meiste Höhenmeter" : "Schnellstes Tempo"}</span> ${hnTour(r)} <span class="mut">${dateS(r.datum)}</span></li>`)),
+    body: h => hnRows(h.daten.rekorde.map(r => `<li><b>${r.metrik === "km" ? `${fmtKm(r.wert)}` : r.metrik === "hm" ? `${fmtHm(r.wert)}` : `${fmtTempo(r.wert)}`}</b><span>${r.metrik === "km" ? "Längste Tour" : r.metrik === "hm" ? "Meiste Höhenmeter" : "Schnellstes Tempo"}</span> ${hnTour(r)} <span class="mut">${fmtDatumKurz(r.datum)}</span></li>`)),
     link: () => "",
     badge: h => (h.daten.rekorde.length === 1 ? "1 Rekord" : `${h.daten.rekorde.length} Rekorde`),
   },
@@ -140,7 +140,7 @@ const HN_ART = {
     sample: ["info", "Wochenziel offen: noch 18 km (bisher 32 von 50 km)."],
     fields: [{k: "einheit", kind: "radio", def: "km", label: "Ziel in", options: [["km", "Kilometern"], ["touren", "Touren"]]}, {k: "ziel", kind: "number", label: "Wochenziel (0 = kein Ziel)", min: 0, max: 10000, step: 1},
       {kind: "sports"}],
-    cond: c => [c.ziel > 0 ? `Wird nur angezeigt, wenn ein Wochenziel gesetzt ist (aktuell ${c.einheit === "touren" ? hnTours(c.ziel) : `${nf(c.ziel, 0)} km`}).` : "Wird nur angezeigt, wenn ein Wochenziel gesetzt ist. Das Ziel stellst du unter „Einstellungen“ ein."],
+    cond: c => [c.ziel > 0 ? `Wird nur angezeigt, wenn ein Wochenziel gesetzt ist (aktuell ${c.einheit === "touren" ? hnTours(c.ziel) : `${fmtKm(c.ziel, {d: 0})}`}).` : "Wird nur angezeigt, wenn ein Wochenziel gesetzt ist. Das Ziel stellst du unter „Einstellungen“ ein."],
     body(h) {
       const d = h.daten, u = x => (d.einheit === "km" ? `${nf(x, x % 1 ? 1 : 0)} km` : hnTours(Math.round(x))), pct = d.ziel > 0 ? Math.min(100, (d.ist / d.ziel) * 100) : 0,
         left = d.tage_rest === 0 ? "Heute ist der letzte Tag der Woche." : d.tage_rest === 1 ? "Noch 1 Tag in dieser Woche." : `Noch ${d.tage_rest} Tage in dieser Woche.`;
@@ -172,7 +172,7 @@ const HN_ART = {
     body(h) {
       const d = h.daten;
       return `<p class="hnt">${d.fehler ? "Die letzte Sicherung ist fehlgeschlagen." : d.alter_tage === null ? "Es gibt noch keine Sicherung deiner Daten." : d.alter_tage === 1 ? "Die letzte Sicherung ist 1 Tag alt." : `Die letzte Sicherung ist ${nf(d.alter_tage, 0)} Tage alt.`}</p>` +
-        (d.datum ? `<p class="mut hnsub">Letzte Sicherung: ${dateS(d.datum)}</p>` : "");
+        (d.datum ? `<p class="mut hnsub">Letzte Sicherung: ${fmtDatumKurz(d.datum)}</p>` : "");
     },
     link: () => hnAdminLink("sicher"),
     badge: h => (h.daten.alter_tage === null ? "fehlt" : h.daten.alter_tage === 1 ? "1 Tag" : `${nf(h.daten.alter_tage, 0)} Tage`),
@@ -194,7 +194,7 @@ function hnPlaceholder(T, cfg, d, snoozed, failed) {
     sn = (snoozed || []).filter(Boolean);
   return conds.map((x, i) => `<p class="${i ? "mut hnphs" : "hnphc"}">${esc(x)}</p>`).join("") +
     `<p class="mut hnphs">${failed ? "Die Hinweise konnten nicht geladen werden." : sn.length ? "" : "Gerade ist nichts los: Der Baustein ist unsichtbar."}</p>` +
-    sn.map(a => `<p class="mut hnphs"><span>Ausgeblendet bis ${dateS(slIso(new Date(hnSnoozeTs(cfg, a) * 1000)))}.</span> ${slCan() ? `<button type="button" class="btn ghost sm hnun" data-art="${a}">Wieder anzeigen</button>` : ""}</p>`).join("");
+    sn.map(a => `<p class="mut hnphs"><span>Ausgeblendet bis ${fmtDatumKurz(slIso(new Date(hnSnoozeTs(cfg, a) * 1000)))}.</span> ${slCan() ? `<button type="button" class="btn ghost sm hnun" data-art="${a}">Wieder anzeigen</button>` : ""}</p>`).join("");
 }
 const hnArten = cfg => (cfg.arten && cfg.arten.length ? HN_ARTEN.filter(a => cfg.arten.includes(a)) : HN_SAMMEL);
 
@@ -239,7 +239,7 @@ function hnSnooze(id, art, days) {
   if (days > 0) cfg.snoozes.push(`${art}:${until}`);
   if (!cfg.snoozes.length) delete cfg.snoozes;
   slSetCfg(id, cfg);
-  hnLive(days > 0 ? `${HN_ART[art].name}: ausgeblendet bis ${dateS(slIso(new Date(until * 1000)))}` : `${HN_ART[art].name}: wieder sichtbar`);
+  hnLive(days > 0 ? `${HN_ART[art].name}: ausgeblendet bis ${fmtDatumKurz(slIso(new Date(until * 1000)))}` : `${HN_ART[art].name}: wieder sichtbar`);
 }
 function hnLive(text) {
   let l = document.getElementById("hnlive");
