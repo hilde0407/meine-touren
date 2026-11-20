@@ -327,6 +327,7 @@ In den Einstellungen eines Bausteins steht unter **Zeitraum der Seite verwenden*
 
 1. Klicke in der Menüleiste auf **Touren**.
 2. Jede Zeile zeigt Streckenform, Name, Datum, Sportart, Fotos, Bewertung sowie Kilometer, Höhenmeter („m auf“) und Dauer („Std.“). Ein Klick öffnet die Tour.
+   **Ab 3.52.0** steht vorn ein **Foto der Tour** (Touren ohne Fotos zeigen weiter die Streckenform in der Farbe der Sportart). Gewählt wird ein Foto mit deinen Sternen, sonst eines aus der Mitte der Tour, das nicht als unscharf oder abgelehnt bekannt ist; dieselbe Tour zeigt immer dasselbe Foto, bis sich ihre Fotos ändern. Die Bilder bleiben im Browser: beim nächsten Öffnen der Liste wird nichts nachgeladen. Abschalten lässt sich das je Gerät unter **Konto & Freigaben → Darstellung** oder am Handy unter **Mehr → Darstellung** („Fotos in der Tourenliste“).
 3. Oben filterst du:
    * **Name suchen** – Textfeld,
    * **Alle Jahre**, **Alle Sportarten**,

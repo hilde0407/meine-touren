@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.52.0 – Ein Foto je Tour in der Tourenliste
+
+- Tourenliste (auch Suche, „An diesem Tag“, Karte „Touren im Ausschnitt“, Rückblick, Reisen): vorn eine feste Kachel mit einem Foto der Tour, ohne Fotos die Streckenform in der Farbe der Sportart.
+- Stabile Wahl: Foto mit Sternen, sonst aus der Tourmitte ohne abgelehnte, unscharfe oder ausgeschlossene; wartet nie auf eine Berechnung.
+- Ein Aufruf für alle Titelfotos (mit Bildversion, 15 kB gzip bei 800 Touren), Bilder nur für den sichtbaren Bereich; erneutes Öffnen und Neuladen der Liste: keine Bildanfrage. Startseite „Zuletzt unterwegs“ ohne Anfrage je Karte.
+- Titelfotos werden nach dem Start und nach Import/Zuordnung vorab erzeugt; abschaltbar je Gerät („Fotos in der Tourenliste“ unter Darstellung).
+
 ## Version 3.51.0 – Schneller, ruhiger Foto-Abschnitt
 
 - Tourseite: fester Foto-Streifen mit den besten bis zu 12 Fotos (feste Höhe, am Handy zum Wischen); „Alle … Fotos“ öffnet das Raster erst auf Wunsch und lädt in Blöcken zu 60 nach.
