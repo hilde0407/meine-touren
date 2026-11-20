@@ -499,11 +499,12 @@ VIEWS.tour = async id => {
       <div id="rsg" class="chips mt6 fxw g6" style="display:flex"><span class="mut">Suche Orte und Gipfel …</span></div>
       ${t.source === "local" ? "" : '<label class="chk"><input type="checkbox" id="rkom"> auch bei Komoot umbenennen</label>'}
       <div class="uifoot"><button class="btn ghost" id="rcx">Abbrechen</button><button class="btn" id="rok">Umbenennen</button></div>`);
+    const close = () => m.remove();      // fehlte seit 3.42.0: close() war dann window.close() und tat nichts, der Dialog blieb offen
     const inp = m.querySelector("#rnn");
     inp.value = t.name;
     inp.focus();
     inp.select();
-    m.querySelector("#rcx").onclick = () => m.remove();
+    m.querySelector("#rcx").onclick = close;
     const box = m.querySelector("#rsg");
     let pend = 4,
       got = 0,

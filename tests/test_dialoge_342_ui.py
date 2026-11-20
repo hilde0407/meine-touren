@@ -94,6 +94,26 @@ def test_umbenennen_esc_fokusfalle_und_fokus_zurueck(pw, app, clean):
         pg.browser_.close()
 
 
+def test_umbenennen_speichern_schliesst_den_dialog(pw, app, clean):
+    """Fehler seit 3.42.0: nach dem Umbenennen blieb der Dialog offen (close() war nicht definiert)."""
+    pg = _tour(pw, app)
+    try:
+        name = pg.inner_text("#tname")
+        _oeffne(pg, "ren")
+        pg.fill("#rnn", name + " neu")
+        pg.click("#rok")
+        expect(pg.locator(".uimod")).to_have_count(0, timeout=T)
+        expect(pg.locator("#tname")).to_have_text(name + " neu", timeout=T)
+        _oeffne(pg, "ren")                                  # auch Esc schließt
+        press_until_gone(pg, "Escape", ".uimod")
+        _oeffne(pg, "ren")
+        pg.fill("#rnn", name)
+        pg.click("#rok")                                    # zurück zum alten Namen, Dialog wieder zu
+        expect(pg.locator(".uimod")).to_have_count(0, timeout=T)
+    finally:
+        pg.browser_.close()
+
+
 def test_klick_daneben_und_abbrechen_schliessen(pw, app, clean):
     pg = _tour(pw, app)
     try:
