@@ -1,5 +1,5 @@
 /* =====================  Orte & Gipfel, Wanderführer  ===================== */
-VIEWS.places = async () => {
+VIEWS.places = async (...a) => {
   $("#main").innerHTML =
     `<div class="sec mt0"><h2>Orte & Ausrüstung</h2><span class="sub">Orte, Gipfel, Leistung, Wetter, Neuland</span></div><div id="plb" class="mut">Wird geladen …</div>`;
   const [p, gp] = await Promise.all([api("/api/places"), api("/api/guides/progress").catch(() => [])]),
@@ -22,18 +22,9 @@ VIEWS.places = async () => {
        : '<p class="mut">Noch keine Gipfel bestimmt.</p>'
    }
     <div class="row mt12"><button class="btn alt" id="pkb">Gipfel bestimmen${p.pending_peaks ? ` (${p.pending_peaks} Touren offen)` : ""}</button><span id="pkm" class="mut"></span></div></div></div>
-   <div class="sec"><h2>Wanderführer-Fortschritt</h2></div>
-   ${
-     gp.length
-       ? gp
-           .map(
-             b => `<div class="panel mb16"><h2>${esc(b.book)} <span class="mut" style="font:500 16px var(--b)">${b.done} von ${b.total} gewandert</span></h2>
-     <div class="stack m8-0-12" style="height:10px"><div style="width:${b.total ? (100 * b.done) / b.total : 0}%;background:var(--acc)"></div></div>
-     <div class="rows">${b.tours.map(x => `<div class="r"><span>${x.tour ? "✓" : "○"} ${esc(x.title)}</span>${x.tour ? `<a href="#/tour/${x.tour}">${BY[x.tour] ? fmtDatumKurz(BY[x.tour].date) : "Tour"}</a>` : '<span class="mut">offen</span>'}</div>`).join("")}</div></div>`
-           )
-           .join("")
-       : '<p class="mut">Noch keine Wanderführer hinterlegt: Verwaltung → „Wanderführer“ (GPX-Dateien hochladen).</p>'
-   }`;
+   <div class="sec"><h2>Wanderführer-Fortschritt</h2>${gp.length ? `<span class="sub">${gfSum(gp)}</span>` : ""}</div>
+   ${gp.length ? '<div id="gfx"></div>' : '<p class="mut">Noch keine Wanderführer hinterlegt: Verwaltung → „Wanderführer“ (GPX-Dateien hochladen).</p>'}`;
+  if (gp.length) gfMount($("#gfx"), gp, a[1]);
   $("#pkb").onclick = async e => {
     e.target.disabled = true;
     try {
@@ -566,3 +557,245 @@ VIEWS.admin = async (...a) => {
     }
   };
 };
+
+/* =====================  3.53.0 Wanderführer übersichtlich  =====================
+   Je Buch eine eingeklappte Karte (Titelbild, Name, „x von y gewandert“, Ring); die Tourenliste entsteht erst beim Aufklappen und in Blöcken zu 60.
+   Filter Alle/Offen/Gewandert, Suche über Bücher und Touren, Reihenfolge der Touren; Zustand in der Adresse (#/places?wf=…&wo=…&wq=…),
+   aufgeklappte Bücher je Gerät (localStorage). Titelbild wählt der Benutzer selbst (nie aus dem Netz), es wird im Browser verkleinert. */
+const GF_BLOCK = 60;
+const GF = {f: "", o: "", q: "", lim: {}, books: [], covers: {}};
+const GF_FILTER = [["", "Alle"], ["offen", "Offen"], ["gewandert", "Gewandert"]];
+const GF_ORDER = [["", "Buchreihenfolge"], ["laenge", "Nach Länge"], ["zuletzt", "Zuletzt gewandert"]];
+const GF_BOOK_ICON = `<svg viewBox="0 0 24 24" class="gfico" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5zM5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 7h6M9 10h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const gfSum = gp => {
+  const d = gp.reduce((c, b) => c + b.done, 0),
+    t = gp.reduce((c, b) => c + b.total, 0);
+  return `${gp.length === 1 ? "1 Buch" : gp.length + " Bücher"} · ${d} von ${t} gewandert`;
+};
+const gfLs = (k, v) => {
+  try {
+    if (v === undefined) return localStorage.getItem("mt_gf_" + k);
+    localStorage.setItem("mt_gf_" + k, v);
+  } catch (e) {}
+  return null;
+};
+const gfNorm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ß/g, "ss");
+const gfCover = b => (b.cover ? `/api/guides/cover?book=${encodeURIComponent(b.key)}&v=${b.cover}` : "");
+/* Ring (Donut) ohne Bibliothek: Umfang 100 (r = 15,9155), Anteil als stroke-dasharray; Farben aus dem Stylesheet (hell und dunkel) */
+function gfRing(done, total) {
+  const p = total ? done / total : 0,
+    pc = fmtProzent(p);
+  return `<svg class="gfring" viewBox="0 0 36 36" role="img" aria-label="Anteil gewandert: ${pc}"><circle class="gfr0" cx="18" cy="18" r="15.9155"/>${done ? `<circle class="gfr1" cx="18" cy="18" r="15.9155" stroke-dasharray="${(100 * p).toFixed(2)} 100" transform="rotate(-90 18 18)"/>` : ""}<text x="18" y="18" class="gfrt" font-size="9" aria-hidden="true">${pc}</text></svg>`;
+}
+/* Buchreihenfolge: tragen die meisten Titel eine Nummer vorn („3 Feldberg“, „Tour 12 …“), natürlich nach Titel („2“ vor „10“), sonst in der Reihenfolge der Dateien beim Hochladen */
+const GF_COLL = new Intl.Collator("de", {numeric: true, sensitivity: "base"});
+function gfOrder(ts, o) {
+  const num = ts.filter(x => /^\D{0,8}\d/.test(x.title || "")).length * 2 >= ts.length,
+    base = ts.slice().sort((a, b) => (num ? GF_COLL.compare(a.title || "", b.title || "") : 0) || a.id - b.id);
+  if (o === "laenge") return base.sort((a, b) => (a.km == null) - (b.km == null) || (a.km || 0) - (b.km || 0));
+  if (o === "zuletzt") return base.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  return base;
+}
+/* Treffer der Suche je Buch: null = Buch ausblenden; {all: true} = Buchname passt (alle Touren); {ids} = nur diese Touren (Karte klappt auf) */
+function gfMatch(b) {
+  if (!GF.q) return {all: true};
+  const q = gfNorm(GF.q);
+  if (gfNorm(b.book).includes(q)) return {all: true};
+  const ids = new Set(b.tours.filter(x => gfNorm(x.title).includes(q) || (x.tour && BY[x.tour] && gfNorm(BY[x.tour].name).includes(q))).map(x => x.id));
+  return ids.size ? {ids} : null;
+}
+const gfVisible = (b, m) => b.tours.filter(x => (!GF.f || (GF.f === "offen" ? !x.tour : !!x.tour)) && (!m || m.all || m.ids.has(x.id)));
+function gfCount(b, m) {
+  const n = gfVisible(b, m).length;
+  if (GF.q && m && !m.all) return n === 1 ? "1 Treffer" : `${n} Treffer`;
+  return GF.f === "gewandert" ? `gewandert: ${n}` : `offen: ${GF.f ? n : b.total - b.done}`;
+}
+function gfHash() {
+  const u = new URLSearchParams();
+  if (GF.f) u.set("wf", GF.f);
+  if (GF.o) u.set("wo", GF.o);
+  if (GF.q) u.set("wq", GF.q);
+  const h = "#/places" + (u.toString() ? "?" + u : "");
+  if (location.hash !== h) history.replaceState(null, "", h);                 // teilbar, ohne die Seite neu aufzubauen
+}
+function gfMount(host, gp, q) {
+  q = q || new URLSearchParams();
+  GF.books = gp;
+  GF.f = GF_FILTER.some(x => x[0] === q.get("wf")) ? q.get("wf") || "" : "";
+  GF.o = GF_ORDER.some(x => x[0] === q.get("wo")) ? q.get("wo") || "" : "";
+  GF.q = (q.get("wq") || "").slice(0, 80);
+  GF.lim = {};
+  GF.covers = {};
+  gp.forEach(b => b.cover && (GF.covers[b.key] = gfCover(b)));
+  host.innerHTML = `<div class="gfbar"><div class="chips" role="group" aria-label="Touren zeigen">${GF_FILTER.map(([k, l]) => `<button type="button" class="chip${GF.f === k ? " on" : ""}" data-gff="${k}" aria-pressed="${GF.f === k}">${l}</button>`).join("")}</div>
+    <input type="search" id="gfq" class="gfq" value="${esc(GF.q)}" placeholder="Buch oder Tour suchen" aria-label="Buch oder Tour suchen" autocomplete="off">
+    <select id="gfo" class="gfo" aria-label="Reihenfolge der Touren im Buch">${GF_ORDER.map(([k, l]) => `<option value="${k}"${GF.o === k ? " selected" : ""}>${l}</option>`).join("")}</select></div>
+    <div id="gfl" class="gfl"></div><input type="file" id="gffile" accept="image/jpeg,image/png,image/webp,image/gif" hidden>`;
+  host.querySelectorAll("[data-gff]").forEach(
+    c =>
+      (c.onclick = () => {
+        GF.f = c.dataset.gff;
+        host.querySelectorAll("[data-gff]").forEach(x => (x.classList.toggle("on", x === c), x.setAttribute("aria-pressed", x === c)));
+        gfHash();
+        gfDraw();
+      })
+  );
+  let tq = 0;
+  $("#gfq").oninput = e => {
+    clearTimeout(tq);
+    tq = setTimeout(() => {
+      GF.q = e.target.value.trim().slice(0, 80);
+      gfHash();
+      gfDraw();
+    }, 180);
+  };
+  $("#gfo").onchange = e => {
+    GF.o = e.target.value;
+    gfHash();
+    gfDraw();
+  };
+  $("#gffile").onchange = gfCoverPick;
+  gfDraw();
+}
+function gfDraw() {
+  const box = $("#gfl");
+  if (!box) return;
+  const cards = GF.books
+    .map((b, i) => {
+      const m = gfMatch(b);
+      if (!m) return "";
+      const forced = !!(GF.q && !m.all),
+        open = forced || gfLs("o_" + b.key) === "1",
+        cv = GF.covers[b.key];
+      return `<details class="gfb" data-i="${i}" data-sy="${open ? 1 : 0}"${forced ? ' data-forced="1"' : ""}${open ? " open" : ""}>
+       <summary class="gfh"><span class="gfc">${cv ? `<img src="${cv}" alt="" loading="lazy" decoding="async">` : GF_BOOK_ICON}</span>
+        <span class="gft"><span class="gfname" translate="no">${esc(b.book)}</span><span class="gfn">${b.done} von ${b.total} gewandert</span><span class="gfz">${gfCount(b, m)}</span></span>${gfRing(b.done, b.total)}</summary>
+       <div class="gfbody"></div></details>`;
+    })
+    .join("");
+  box.innerHTML = cards || `<p class="mut">Kein Buch und keine Tour passt zu „${esc(GF.q)}“.</p>`;
+  box.querySelectorAll("details.gfb").forEach(d => {
+    if (d.open) gfBody(d);
+    d.addEventListener("toggle", () => {
+      const v = d.open ? "1" : "0";
+      if (d.open && !d.dataset.r) gfBody(d);
+      if (d.dataset.sy === v) return;                                         // vom Programm gesetzt
+      d.dataset.sy = v;
+      if (!d.dataset.forced) gfLs("o_" + GF.books[+d.dataset.i].key, v);     // von der Suche aufgeklappt: nicht merken
+    });
+  });
+}
+function gfRow(x) {
+  const t = x.tour && BY[x.tour],
+    meta = [x.km != null ? fmtKm(x.km) : "", x.up != null ? fmtAuf(x.up) : ""].filter(Boolean).join(" · ");
+  return `<div class="r gfr${x.tour ? " done" : ""}"><span><span class="gfst" aria-hidden="true">${x.tour ? "✓" : "○"}</span><span translate="no">${esc(x.title)}</span>${meta ? `<small>${meta}</small>` : ""}</span>${
+    x.tour ? `<a href="#/tour/${x.tour}" aria-label="Gewandert am ${t ? fmtDatumKurz(t.date) : ""}">${t ? fmtDatumKurz(t.date) : "Tour"}</a>` : '<span class="mut">offen</span>'
+  }</div>`;
+}
+function gfBody(d) {
+  const b = GF.books[+d.dataset.i],
+    body = d.querySelector(".gfbody"),
+    m = gfMatch(b),
+    ls = gfOrder(gfVisible(b, m), GF.o),
+    lim = GF.lim[b.key] || GF_BLOCK,
+    ro = typeof isViewer === "function" && isViewer(),
+    nOpen = b.tours.filter(x => !x.tour && x.s).length;
+  d.dataset.r = "1";
+  const empty = GF.f === "offen" ? "Alle Touren dieses Buchs sind gewandert." : GF.f === "gewandert" ? "Aus diesem Buch ist noch keine Tour gewandert." : "Keine Touren.";
+  body.innerHTML = `<div class="row gfacts">${nOpen ? `<button type="button" class="btn alt sm gfmapb" aria-expanded="false">Offene Touren auf der Karte</button>` : ""}${
+    ro ? "" : `<button type="button" class="btn ghost sm gfcov">Titelbild wählen</button>${b.cover ? '<button type="button" class="btn ghost sm gfcovx">Titelbild entfernen</button>' : ""}`
+  }</div><div class="gfmap" hidden></div>
+   ${ls.length ? `<div class="rows gfrows">${ls.slice(0, lim).map(gfRow).join("")}</div>` : `<p class="mut">${empty}</p>`}
+   ${ls.length > lim ? `<div class="row jcc gfmore"><button type="button" class="btn ghost sm gfmoreb">Mehr anzeigen</button><span class="mut fs13">${lim} von ${ls.length}</span></div>` : ""}`;
+  const mb = body.querySelector(".gfmoreb");
+  if (mb)
+    mb.onclick = () => {
+      GF.lim[b.key] = lim + GF_BLOCK;
+      gfBody(d);
+      const rows = d.querySelectorAll(".gfrows .r");
+      if (rows[lim]) rows[lim].scrollIntoView({block: "nearest"});
+    };
+  const cb = body.querySelector(".gfcov");
+  if (cb)
+    cb.onclick = () => {
+      GF.pick = b;
+      $("#gffile").click();
+    };
+  const cx = body.querySelector(".gfcovx");
+  if (cx)
+    cx.onclick = async () => {
+      if (!(await uiConfirm({text: `Titelbild von „${b.book}“ entfernen?`, ok: "Entfernen", danger: true}))) return;
+      try {
+        await api(`/api/guides/cover?book=${encodeURIComponent(b.key)}`, {method: "DELETE"});
+        b.cover = null;
+        delete GF.covers[b.key];
+        gfRefresh(d);
+      } catch (e) {
+        uiAlert({title: "Titelbild", text: e.message});
+      }
+    };
+  const mp = body.querySelector(".gfmapb");
+  if (mp) mp.onclick = () => gfMap(d, b, mp);
+}
+/* Karte der offenen Touren: erst auf Wunsch aufgebaut (Startpunkte), beim Schließen wieder abgebaut */
+function gfMap(d, b, btn) {
+  const el = d.querySelector(".gfmap");
+  if (!el.hidden) {
+    if (el._m) el._m.remove();
+    el._m = null;
+    el.hidden = true;
+    el.innerHTML = "";
+    btn.setAttribute("aria-expanded", "false");
+    return;
+  }
+  el.hidden = false;
+  btn.setAttribute("aria-expanded", "true");
+  const pts = b.tours.filter(x => !x.tour && x.s);
+  const m = (el._m = mkMap(el, {layers: true}));
+  const grp = L.featureGroup(
+    pts.map(x =>
+      L.circleMarker(x.s, {radius: 7, weight: 2, color: "#fff", fillColor: "#d0652a", fillOpacity: 0.95}).bindPopup(
+        `<b translate="no">${esc(x.title)}</b>${x.km != null ? "<br>" + fmtKm(x.km) + (x.up != null ? " · " + fmtAuf(x.up) : "") : ""}`
+      )
+    )
+  ).addTo(m);
+  m.fitBounds(grp.getBounds(), {padding: [24, 24], maxZoom: 13});
+}
+function gfRefresh(d) {
+  const b = GF.books[+d.dataset.i],
+    c = d.querySelector(".gfc"),
+    cv = GF.covers[b.key];
+  c.innerHTML = cv ? `<img src="${cv}" alt="" decoding="async">` : GF_BOOK_ICON;
+  gfBody(d);
+}
+/* Titelbild: im Browser auf ~400 px Kante verkleinern (JPEG), dann hochladen; der Server prüft und kodiert neu */
+async function gfCoverPick(e) {
+  const f = e.target.files[0],
+    b = GF.pick;
+  e.target.value = "";
+  if (!f || !b) return;
+  let blob = f;
+  try {
+    const bmp = await createImageBitmap(f, {imageOrientation: "from-image"}),
+      k = Math.min(1, 400 / Math.max(bmp.width, bmp.height)),
+      c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(bmp.width * k));
+    c.height = Math.max(1, Math.round(bmp.height * k));
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    bmp.close();
+    blob = (await new Promise(r => c.toBlob(r, "image/jpeg", 0.85))) || f;
+  } catch (x) {
+    blob = f; // Browser kann das Bild nicht lesen: der Server versucht es (und lehnt Nicht-Bilder ab)
+  }
+  const fd = new FormData();
+  fd.append("file", blob, "cover.jpg");
+  try {
+    const r = await api(`/api/guides/cover?book=${encodeURIComponent(b.key)}`, {method: "POST", body: fd});
+    b.cover = r.v;
+    GF.covers[b.key] = gfCover(b);
+    const d = [...document.querySelectorAll("details.gfb")].find(x => GF.books[+x.dataset.i] === b);
+    if (d) gfRefresh(d);
+  } catch (x) {
+    uiAlert({title: "Titelbild", text: x.message});
+  }
+}

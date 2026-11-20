@@ -1,6 +1,6 @@
 // Service Worker: App-Dateien offline verfügbar; Daten (/api), Kartenkacheln und kleine Fotos werden bei Verbindung
 // frisch geladen und zuletzt Gesehenes dient als Rückfall, wenn keine Verbindung besteht.
-const V = "mt-v135", API = "mt-api-v1", TILES = "mt-tiles-v1", PICS = "mt-pics-v2";
+const V = "mt-v136", API = "mt-api-v1", TILES = "mt-tiles-v1", PICS = "mt-pics-v2";
 const KEEP = [V, API, TILES, PICS];
 const NOCACHE = /^\/api\/(jobs|update|selftest|health|login|logout|setup|restore|me\/password|clock-check\/ignore)/;
 self.addEventListener("install", e => { self.skipWaiting(); });
@@ -19,6 +19,10 @@ self.addEventListener("fetch", e => {
   const u = new URL(e.request.url);
   if (e.request.method !== "GET" || u.origin !== location.origin) return;
   const p = u.pathname;
+  if (p === "/api/guides/cover" && u.searchParams.get("v")) {   // 3.53.0: Titelbild eines Wanderführers mit Version: wie Bilder mit Version zuerst aus dem Speicher
+    e.respondWith(caches.open(PICS).then(c => c.match(e.request)).then(m => m || fetch(e.request).then(r => { if (r.ok && /immutable/.test(r.headers.get("cache-control") || "")) { const c = r.clone(); caches.open(PICS).then(ch => ch.put(e.request, c)).then(() => trim(PICS, 1200)); } return r; })));
+    return;
+  }
   if (p.startsWith("/api/")) { if (NOCACHE.test(p) || e.request.headers.has("range")) return; e.respondWith(netFirst(e.request, API, 600)); return; }
   if (p.includes("/tiles/")) {   // Kacheln ändern sich praktisch nie: zuerst aus dem Speicher
     e.respondWith(caches.match(e.request).then(m => m || fetch(e.request).then(r => { if (r.ok) { const c = r.clone(); caches.open(TILES).then(ch => ch.put(e.request, c)).then(() => trim(TILES, 1500)); } return r; })));

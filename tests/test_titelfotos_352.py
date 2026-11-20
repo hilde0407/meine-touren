@@ -129,7 +129,7 @@ def test_antwort_klein_bei_800_touren():
 
 def test_oberflaeche_und_service_worker():
     sw = (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'const V = "mt-v135"' in sw and "trim(PICS, 1200)" in sw and "netFirst(e.request, PICS, 1200)" in sw
+    assert 'const V = "mt-v136"' in sw and "trim(PICS, 1200)" in sw and "netFirst(e.request, PICS, 1200)" in sw
     js = (ROOT / "app" / "static" / "js" / "02-uebersicht.js").read_text(encoding="utf-8")
     assert 'loading="lazy" decoding="async"' in js and "size=${TR_PIC}&v=" in js and "const TR_PIC = 300" in js
     assert "/api/photos?tour_id=${t.id}&limit=1" not in (ROOT / "app" / "static" / "js" / "41-startseite.js").read_text(encoding="utf-8")   # keine Anfrage je Karte mehr

@@ -228,9 +228,17 @@ def api_check():
 
 # ---------- Wanderführer-Fortschritt ----------
 @router.get("/api/guides/progress")
+def api_guides_progress_get():
+    """3.53.0: je Buch zusätzlich „key“ (gespeicherter Buchname, für das Titelbild), „cover“ (Bildversion oder null) und je Tour Länge, Aufstieg und
+    Startpunkt (für Sortierung und die Karte der offenen Touren). Die Titelbilder kommen außerhalb des Zwischenspeichers dazu (billige Abfrage)."""
+    from . import wanderfuehrer
+    cv = wanderfuehrer.cover_versions()
+    return [{**b, "cover": cv.get(b["key"])} for b in api_guides_progress()]
+
+
 @memo.cached
 def api_guides_progress():
-    gs = db.query("SELECT id,book,title,pts FROM guide_tours ORDER BY book,title")
+    gs = db.query("SELECT id,book,title,pts,km,up FROM guide_tours ORDER BY book,id")
     if not gs:
         return []
     mine = []
@@ -249,8 +257,10 @@ def api_guides_progress():
             n = min(40, len(p)); samp = [(p[int(i * (len(p) - 1) / max(1, n - 1))][0], p[int(i * (len(p) - 1) / max(1, n - 1))][1]) for i in range(n)]
             if extras._covered(line[::step], [(x[0], x[1]) for x in p], 120) >= 0.7 and extras._covered(samp, line, 80) >= 0.4:
                 done = (tid, ts); break
-        books.setdefault(g["book"] or "(ohne Buch)", []).append({"id": g["id"], "title": g["title"], "tour": done[0] if done else None, "ts": done[1] if done else None})
-    return [{"book": b, "total": len(v), "done": sum(1 for x in v if x["tour"]), "tours": v} for b, v in books.items()]
+        books.setdefault(g["book"] or "", []).append({"id": g["id"], "title": g["title"], "tour": done[0] if done else None, "ts": done[1] if done else None,
+                                                     "km": round(g["km"], 1) if g["km"] is not None else None, "up": round(g["up"]) if g["up"] is not None else None,
+                                                     "s": line[0] if line else None})
+    return [{"book": b or "(ohne Buch)", "key": b, "total": len(v), "done": sum(1 for x in v if x["tour"]), "tours": v} for b, v in books.items()]
 
 
 # ---------- Unbenutzte Fotos (keiner Tour zugeordnet) aufräumen ----------

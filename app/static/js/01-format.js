@@ -69,6 +69,11 @@ const fmtKm = (km, o = {}) => {
 const fmtHm = (m, o = {}) => (o.pfeil ? o.pfeil + " " : "") + fmtZahl(m, 0) + (o.einheit === false ? "" : " m");
 const fmtAuf = m => fmtHm(m, {pfeil: "↑"});
 const fmtAb = m => fmtHm(m, {pfeil: "↓"});
+/* Anteil 0…1 als ganze Prozent (3.53.0): abgerundet, damit „100 %“ nur bei vollständig erscheint; Englisch ohne Leerzeichen („42%“), sonst mit schmalem Leerzeichen */
+const fmtProzent = p => {
+  const n = Math.max(0, Math.min(100, Math.floor(100 * (Number(p) || 0) + 1e-9)));
+  return FMT_LG() === "en" ? n + "%" : fmtZahl(n, 0) + "\u202f%";
+};
 /* Dateigröße in Bytes: „12,3 MB“ (ab 1 GB „1,2 GB“, unter 100 kB ganze „kB“); französisch mit Go/Mo/ko. Eine Funktion für alle Größenangaben (3.46.0). */
 const FMT_BYTE = {de: ["kB", "MB", "GB"], en: ["kB", "MB", "GB"], fr: ["ko", "Mo", "Go"], es: ["kB", "MB", "GB"]};
 const fmtGroesse = n => {

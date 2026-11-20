@@ -3,12 +3,16 @@
 Ein Buch liegt als ZIP mit GPX-Dateien vor. Daraus merkt sich die App Name, Länge und
 Streckenverlauf jeder Buchtour und erkennt später, welche eigene Tour dazu passt.
 """
+import hashlib
+import io
 import re
 import json
+import time
 import zipfile
 from xml.etree import ElementTree as ET
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, File, HTTPException, Request, UploadFile
+from fastapi.responses import Response
 
 from . import db
 
@@ -135,10 +139,95 @@ async def api_guides_add(request: Request):
     return {"added": ok, "failed": bad}
 
 
+# ---------- 3.53.0: Titelbild je Buch ----------
+# Der Benutzer wählt das Bild selbst (nie ein Download aus dem Netz). Gespeichert wird ein kleines, vom Server neu kodiertes JPEG
+# in der Datenbank (Tabelle guide_cover): kein Dateipfad, also keine Pfadangriffe; Sicherung, Wiederherstellung und Umzug nehmen es von selbst mit.
+COVER_MAX_BYTES = 3 * 1024 * 1024          # hochgeladene Datei (die Oberfläche schickt ~400 px, typisch 20–60 kB)
+COVER_MAX_PIXELS = 40_000_000
+COVER_SIDE = 480                           # längste Seite nach dem Neukodieren (Oberfläche: 400 px; etwas Spielraum, nie größer)
+
+
+def _book_or_404(book):
+    book = (book or "")[:80]
+    if not db.one("SELECT 1 FROM guide_tours WHERE COALESCE(book,'')=? LIMIT 1", (book,)):
+        raise HTTPException(404, "Buch nicht gefunden")
+    return book
+
+
+def _cover_jpeg(raw):
+    """Bild prüfen und neu kodieren: nur echte Bilder (JPEG, PNG, WebP, GIF), Metadaten fallen weg, längste Seite höchstens COVER_SIDE. ValueError sonst."""
+    from PIL import Image, ImageOps
+    try:
+        im = Image.open(io.BytesIO(raw))
+        if im.format not in ("JPEG", "PNG", "WEBP", "GIF", "MPO"):
+            raise ValueError("Format nicht unterstützt")
+        if im.width * im.height > COVER_MAX_PIXELS:
+            raise ValueError("Bild zu groß")
+        im.load()
+    except ValueError:
+        raise
+    except Exception as e:  # noqa
+        raise ValueError(str(e) or "kein Bild")
+    im = ImageOps.exif_transpose(im)
+    if im.mode in ("RGBA", "LA", "P"):
+        im = im.convert("RGBA")
+        bg = Image.new("RGB", im.size, (255, 255, 255))
+        bg.paste(im, mask=im.split()[-1])
+        im = bg
+    else:
+        im = im.convert("RGB")
+    im.thumbnail((COVER_SIDE, COVER_SIDE), Image.LANCZOS)
+    out = io.BytesIO()
+    im.save(out, "JPEG", quality=84, optimize=True)
+    return out.getvalue()
+
+
+def cover_versions():
+    """{Buch: Version} für alle Bücher mit Titelbild (für /api/guides/progress und die Wunschliste)."""
+    return {r["book"]: r["v"] for r in db.query("SELECT book, v FROM guide_cover")}
+
+
+@router.get("/api/guides/cover")
+def api_guide_cover_get(request: Request, book: str = "", v: str = ""):
+    r = db.one("SELECT img, v FROM guide_cover WHERE book=?", ((book or "")[:80],))
+    if not r:
+        raise HTTPException(404, "Kein Titelbild")
+    etag = f'"{r["v"]}"'
+    # wie /pic (3.51.0): mit passender Version darf der Browser das Bild behalten, sonst fragt er nach; immer „private“, nie „public“
+    h = {"Cache-Control": "private, max-age=31536000, immutable" if v and v == r["v"] else "private, no-cache", "ETag": etag, "X-Content-Type-Options": "nosniff"}
+    if etag in (request.headers.get("if-none-match") or ""):
+        return Response(status_code=304, headers=h)
+    return Response(bytes(r["img"]), media_type="image/jpeg", headers=h)
+
+
+@router.post("/api/guides/cover")
+async def api_guide_cover_put(book: str = "", file: UploadFile = File(...)):
+    book = _book_or_404(book)
+    raw = await file.read(COVER_MAX_BYTES + 1)
+    if len(raw) > COVER_MAX_BYTES:
+        raise HTTPException(413, f"Das Bild ist zu groß (höchstens {COVER_MAX_BYTES // 1048576} MB)")
+    try:
+        data = _cover_jpeg(raw)
+    except ValueError:
+        raise HTTPException(400, "Das ist keine Bilddatei, die ich lesen kann (JPEG, PNG, WebP oder GIF)")
+    v = hashlib.sha1(data).hexdigest()[:12]
+    db.execute("INSERT OR REPLACE INTO guide_cover(book, img, v, ts) VALUES(?,?,?,?)", (book, data, v, int(time.time())))
+    return {"ok": True, "v": v, "bytes": len(data)}
+
+
+@router.delete("/api/guides/cover")
+def api_guide_cover_del(book: str = ""):
+    book = _book_or_404(book)
+    db.execute("DELETE FROM guide_cover WHERE book=?", (book,))
+    return {"ok": True}
+
+
+# nach den festen Pfaden (/api/guides/cover) registriert, sonst fängt {gid} sie ab
 @router.delete("/api/guides/{gid}")
 def api_guides_del(gid: str):
     if gid.startswith("book:"):
         db.execute("DELETE FROM guide_tours WHERE book=?", (gid[5:],))
     else:
         db.execute("DELETE FROM guide_tours WHERE id=?", (int(gid),))
+    db.execute("DELETE FROM guide_cover WHERE book NOT IN (SELECT DISTINCT COALESCE(book,'') FROM guide_tours)")   # 3.53.0: Titelbild verschwindet mit dem Buch
     return {"ok": True}

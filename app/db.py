@@ -96,6 +96,7 @@ def migrate(conn):
         conn.execute("ALTER TABLE guide_tours ADD COLUMN km REAL")
     if "up" not in gcols:
         conn.execute("ALTER TABLE guide_tours ADD COLUMN up REAL")
+    conn.execute("CREATE TABLE IF NOT EXISTS guide_cover (book TEXT PRIMARY KEY, img BLOB, v TEXT, ts INTEGER)")   # 3.53.0: Titelbild je Wanderführer (kleines JPEG, vom Benutzer gewählt; Teil der Datenbank und damit der Sicherung)
     conn.execute("CREATE TABLE IF NOT EXISTS tour_wps (id INTEGER PRIMARY KEY AUTOINCREMENT, tour_id TEXT, ts INTEGER, lat REAL, lng REAL, note TEXT)")   # Wegpunkte mit Notiz
     conn.execute("CREATE TABLE IF NOT EXISTS photo_comments (id INTEGER PRIMARY KEY AUTOINCREMENT, photo_id INTEGER, ts INTEGER, author TEXT, text TEXT)")   # Kommentare zu Fotos
     conn.execute("CREATE INDEX IF NOT EXISTS photo_comments_p ON photo_comments(photo_id)")

@@ -3303,4 +3303,34 @@ Weniger zeigen || Show less || Afficher moins || Mostrar menos
 Ausgewählte Fotos || Selected photos || Photos choisies || Fotos seleccionadas
 Fotos in der Tourenliste || Photos in the tour list || Photos dans la liste des parcours || Fotos en la lista de rutas
 Je Tour ein Foto statt der Strecke (gilt nur auf diesem Gerät) || One photo per tour instead of the route (this device only) || Une photo par parcours au lieu du tracé (sur cet appareil uniquement) || Una foto por ruta en lugar del trazado (solo en este dispositivo)
+1 Buch || 1 book || 1 guide || 1 guía
+{} Bücher || {} books || {} guides || {} guías
+{} von {} gewandert || {} of {} hiked || {} sur {} randonnés || {} de {} recorridas
+Touren zeigen || Show tours || Afficher les parcours || Mostrar rutas
+Offen || Open || À faire || Pendientes
+Gewandert || Hiked || Randonnés || Recorridas
+Buch oder Tour suchen || Search guide or tour || Rechercher un guide ou un parcours || Buscar guía o ruta
+Reihenfolge der Touren im Buch || Order of tours in the guide || Ordre des parcours dans le guide || Orden de las rutas en la guía
+Buchreihenfolge || Guide order || Ordre du guide || Orden de la guía
+Nach Länge || By length || Par longueur || Por longitud
+Zuletzt gewandert || Last hiked || Randonnés récemment || Recorridas recientemente
+Anteil gewandert: {} || Share hiked: {} || Part randonnée : {} || Parte recorrida: {}
+offen: {} || open: {} || à faire : {} || pendientes: {}
+gewandert: {} || hiked: {} || randonnés : {} || recorridas: {}
+1 Treffer || 1 match || 1 résultat || 1 resultado
+{} Treffer || {} matches || {} résultats || {} resultados
+Kein Buch und keine Tour passt zu „{}“. || No guide and no tour matches “{}”. || Aucun guide ni parcours ne correspond à « {} ». || Ninguna guía ni ruta coincide con «{}».
+Gewandert am {} || Hiked on {} || Randonné le {} || Recorrida el {}
+Alle Touren dieses Buchs sind gewandert. || All tours in this guide have been hiked. || Tous les parcours de ce guide ont été randonnés. || Ya has recorrido todas las rutas de esta guía.
+Aus diesem Buch ist noch keine Tour gewandert. || No tour from this guide hiked yet. || Aucun parcours de ce guide n’a encore été randonné. || Aún no has recorrido ninguna ruta de esta guía.
+Keine Touren. || No tours. || Aucun parcours. || No hay rutas.
+Offene Touren auf der Karte || Open tours on the map || Parcours à faire sur la carte || Rutas pendientes en el mapa
+Titelbild wählen || Choose cover || Choisir la couverture || Elegir portada
+Titelbild entfernen || Remove cover || Supprimer la couverture || Quitar portada
+Titelbild || Cover || Couverture || Portada
+Titelbild von „{}“ entfernen? || Remove the cover of “{}”? || Supprimer la couverture de « {} » ? || ¿Quitar la portada de «{}»?
+Das ist keine Bilddatei, die ich lesen kann (JPEG, PNG, WebP oder GIF) || This is not an image file I can read (JPEG, PNG, WebP or GIF) || Ce n’est pas un fichier image lisible (JPEG, PNG, WebP ou GIF) || No es un archivo de imagen legible (JPEG, PNG, WebP o GIF)
+Das Bild ist zu groß (höchstens {} MB) || The image is too large (at most {} MB) || L’image est trop grande ({} Mo maximum) || La imagen es demasiado grande (máximo {} MB)
+Buch nicht gefunden || Guide not found || Guide introuvable || Guía no encontrada
+offen || open || à faire || pendiente
 `;
