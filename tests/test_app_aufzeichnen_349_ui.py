@@ -482,9 +482,10 @@ def test_wartet_auf_netz_und_spaeter_senden(pw, app):
         expect(pg.locator("#rupt")).to_have_text("Wartet auf Netz – wird später gesendet", timeout=T)
         expect(pg.locator("#rups")).to_contain_text("bleibt sicher auf dem Handy", timeout=T)
         for sel, vis in (("#rview", False), ("#rnew", False), ("#rretry", True), ("#rlater", True), ("#rdrop", True)):
-            assert pg.locator(sel).is_visible() is vis, sel
+            (expect(pg.locator(sel)).to_be_visible(timeout=T) if vis else expect(pg.locator(sel)).to_be_hidden(timeout=T))      # (die Seite versucht es zwischendurch von selbst erneut)
         assert "uploaded" not in pg.evaluate("() => window._calls") and pg.evaluate("() => window._st.state") == "finished"       # nichts verworfen
         expect(pg.locator("#tabbar .trl")).to_have_text("Hochladen", timeout=T)
+        pg.wait_for_function("() => document.querySelector('#rup').dataset.p === 'waiting' && !recUp.busy", timeout=T)
         assert _small_targets(pg) == []
         _shot(pg, "fertig-wartet-390-light.png")
         n0 = net["n"]
