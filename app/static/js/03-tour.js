@@ -143,7 +143,8 @@ function phSecHtml(t) {
     `<div class="thumbs" id="th" hidden></div><div class="phpg" id="phpg" hidden><button class="btn sm alt" id="phnext">Mehr anzeigen</button></div></div>`
   );
 }
-/* Streifen zeichnen; liefert das Raster-Objekt {open(on)} (Raster erst beim Öffnen, in Blöcken zu PH_PAGE Fotos) */
+/* Streifen zeichnen; liefert das Raster-Objekt {open(on)} (Raster erst beim Öffnen, in Blöcken zu PH_PAGE Fotos).
+   Die 12 Streifenbilder laden gleich (niedrige Priorität, wenige KB): „lazy“ lüde im waagerechten Streifen erst beim Wischen – das wirkt unruhig. */
 function phStrip(ph) {
   const strip = $("#phs"),
     more = $("#phm"),
@@ -157,7 +158,7 @@ function phStrip(ph) {
   strip.innerHTML = pick
     .map(
       ([p, i]) =>
-        `<span class="phi" role="listitem"><img src="${picSrc(p, PH_STRIP_PX)}" width="104" height="104" loading="lazy" decoding="async" alt="" title="${fmtDatumKurz(p.taken_ts, {zeit: true})}" data-i="${i}"></span>`
+        `<span class="phi" role="listitem"><img src="${picSrc(p, PH_STRIP_PX)}" width="104" height="104" decoding="async" fetchpriority="low" alt="" title="${fmtDatumKurz(p.taken_ts, {zeit: true})}" data-i="${i}"></span>`
     )
     .join("");
   more.hidden = !showAll;

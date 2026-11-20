@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.51.0 – Schneller, ruhiger Foto-Abschnitt
+
+- Tourseite: fester Foto-Streifen mit den besten bis zu 12 Fotos (feste Höhe, am Handy zum Wischen); „Alle … Fotos“ öffnet das Raster erst auf Wunsch und lädt in Blöcken zu 60 nach.
+- Bilder mit Version in der Adresse (`&v=…`) darf der Browser behalten (`private, immutable`): erneutes Öffnen einer Tour mit 84 Fotos braucht keine Bildanfrage mehr (vorher 168 Nachfragen); ohne Version wie bisher.
+- Streifenbilder werden nach Start, Import und Zuordnung im Hintergrund vorab erzeugt.
+- Vollbild, Diashow, Auswahlmodus, Beste Fotos, Fotos auf Karte und Profil unverändert.
+
 ## Version 3.50.0 – Laufen und Schneeschuh wie im Tagebuch
 
 - Läufe der Zepp-Uhr (Typ 1, Laufband 8) sind „Laufen“ statt „Wandern“; „Gehen“ und Wandern der Uhr bleiben Wandern. GPX mit „running“ wird Laufen.

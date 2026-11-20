@@ -8,7 +8,7 @@ function photoChain(map, t, coords, ph) {
     .filter(p => p[3] != null)
     .sort((a, b) => a[3] - b[3]);
   const mkIcon = p =>
-    L.divIcon({className: "", html: `<div class="pm" style="background-image:url(/pic/${p.id}?size=120)"></div>`, iconSize: [36, 36]});
+    L.divIcon({className: "", html: `<div class="pm" style="background-image:url(${picSrc(p, 120)})"></div>`, iconSize: [36, 36]});
   const fmtT = s => fmtUhrzeit(s, {uhr: false}) + ":" + pad2(new Date(s * 1000).getSeconds());
   const hasTime = pts.length > 1;
   const T = pts.map(p => p[3]);

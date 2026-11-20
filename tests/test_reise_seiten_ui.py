@@ -605,7 +605,7 @@ def test_export_and_import_of_a_view(pw, app, tmp_path, page, key, widget):
         d = dl.value
         assert d.suggested_filename == f"ansicht-{key}-mein-reiselayout.json"
         doc = json.loads(open(d.path(), encoding="utf-8").read())
-        assert doc["format"] == "meine-touren-ansicht" and doc["page"] == key and doc["app_version"] == "3.50.0" and list(doc["layouts"]) == [key] and doc["layouts"][key]["widgets"][0]["type"] == widget["type"]
+        assert doc["format"] == "meine-touren-ansicht" and doc["page"] == key and doc["app_version"] == "3.51.0" and list(doc["layouts"]) == [key] and doc["layouts"][key]["widgets"][0]["type"] == widget["type"]
         f = tmp_path / "gut.json"
         f.write_text(json.dumps(doc), encoding="utf-8")
         pg.locator(".slvws").get_by_role("button", name="Importieren …", exact=True).click()

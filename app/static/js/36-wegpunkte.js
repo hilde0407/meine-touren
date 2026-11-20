@@ -73,7 +73,7 @@ VIEWS.story = async id => {
   const cmLine = e => (e.ph || []).flatMap(p => (CM[p.id] || [])).map(c => `<div>💬 <b>${esc(c.author || "")}</b>${c.author ? ": " : ""}${esc(c.text)}</div>`).join("");
   const cmRefresh = () => document.querySelectorAll("#stl .scm").forEach(b => { const e = ev[+b.dataset.i]; if (e) b.innerHTML = cmLine(e); });
   const item = (e, i) => `<div class="stev g12 m0-0-18" data-e="${i}" style="display:flex;cursor:${e.pos ? "pointer" : "default"}"><div class="mnw78 tar"><b>${wpTime(e.ts)}</b><div class="mut fs12">${rel(e.ts)}</div></div><div class="fx1 pl14" style="border-left:3px solid var(--line,#ccc)"><div class="fs18">${icon(e.kind)} ${e.kind === "ph" ? `${e.ph.length} Foto${e.ph.length > 1 ? "s" : ""}` : esc(e.txt)}</div><div class="splc mut fs14"></div>` +
-    (e.kind === "ph" ? `<div class="row g6 fxw mt6">${e.ph.slice(0, 8).map(p => `<span class="sph" data-p="${p.id}" style="position:relative;cursor:zoom-in"><img loading="lazy" src="/pic/${p.id}?size=500" class="br8" style="height:120px;display:block">${(CM[p.id] || []).length ? `<b class="scn c-white br10 p1-7 fs12" style="position:absolute;right:4px;bottom:4px;background:#000a">💬 ${CM[p.id].length}</b>` : ""}</span>`).join("")}${e.ph.length > 8 ? `<span class="mut">+${e.ph.length - 8}</span>` : ""}</div><div class="scm fs14 mt6" data-i="${i}">${cmLine(e)}</div>` : "") + `</div></div>`;
+    (e.kind === "ph" ? `<div class="row g6 fxw mt6">${e.ph.slice(0, 8).map(p => `<span class="sph" data-p="${p.id}" style="position:relative;cursor:zoom-in"><img loading="lazy" src="${picSrc(p, 500)}" class="br8" style="height:120px;display:block">${(CM[p.id] || []).length ? `<b class="scn c-white br10 p1-7 fs12" style="position:absolute;right:4px;bottom:4px;background:#000a">💬 ${CM[p.id].length}</b>` : ""}</span>`).join("")}${e.ph.length > 8 ? `<span class="mut">+${e.ph.length - 8}</span>` : ""}</div><div class="scm fs14 mt6" data-i="${i}">${cmLine(e)}</div>` : "") + `</div></div>`;
   $("#main").innerHTML = `<div class="row noprint"><a class="back" href="#/tour/${esc(id)}">‹ Zur Tour</a><span class="sp"></span><button class="btn ghost sm" id="sshare" title="Link zur Diashow mit Kommentarfunktion erzeugen – ohne Benutzerkonto ansehbar">🔗 Teilen (mit Kommentaren)</button><button class="btn ghost sm" id="sprint" title="Erzählung ausdrucken oder als PDF speichern">🖨 Drucken</button></div>
    <h1 class="m14-0-4" style="font-size:clamp(30px,5vw,48px)">${esc(t.name)}</h1><p class="mut">${fmtDatum(t.date)} · ${fmtKm(t.km)} · ${fmtAuf(t.up_m)} · ${fmtDauer(t.h * 3600)}${t.h ? ` · ${fmtTempo(t.km / t.h)}` : ""}</p>
    <div class="tmap" id="sm" style="height:320px"></div><div class="mt22" id="stl">${ev.map(item).join("")}</div>`;
@@ -92,7 +92,7 @@ VIEWS.story = async id => {
   } else map.setView([t.lat || 50, t.lng || 8], 12);
   ph.forEach(p => {   // Fotostandorte auf der Karte
     if (!p._pos) return;
-    L.marker(p._pos, {icon: wpIcon("📷")}).addTo(map).bindPopup(`<img src="/pic/${p.id}?size=300" data-p="${p.id}" class="br6" style="width:200px;cursor:zoom-in;display:block">`)
+    L.marker(p._pos, {icon: wpIcon("📷")}).addTo(map).bindPopup(`<img src="${picSrc(p, 300)}" data-p="${p.id}" class="br6" style="width:200px;cursor:zoom-in;display:block">`)
       .on("popupopen", ev2 => { const im = ev2.popup.getElement().querySelector("img[data-p]"); if (im) im.onclick = () => openPhoto(+im.dataset.p); });
   });
   ev.forEach((e, i) => { if (e.pos && e.kind !== "ph") L.marker(e.pos, {icon: wpIcon(icon(e.kind))}).addTo(map).bindPopup(esc(e.txt)); });

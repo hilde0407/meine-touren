@@ -425,7 +425,7 @@ Unter **Auswertung dieser Tour** findest du **Analyse** (Bewegungszeit, Pausen),
 
 ### 7.6 Fotos der Tour
 
-Der Abschnitt **Fotos** zeigt die der Tour zugeordneten Fotos mit Uhrzeit. Die Knöpfe:
+Der Abschnitt **Fotos** zeigt zuerst einen **Foto-Streifen** mit den besten (höchstens 12) Fotos der Tour in Aufnahmereihenfolge – nach Sternen und Schärfe gewählt, sonst gleichmäßig über die Tour verteilt; am Handy wischst du ihn zur Seite. Ein Tipp auf ein Foto öffnet das Vollbild, dort blätterst du durch alle Fotos. **Alle … Fotos** öffnet das volle Raster mit Uhrzeit (es lädt beim Herunterscrollen in Blöcken nach), **Weniger zeigen** schließt es wieder. Einmal gesehene Fotos lädt die App nicht erneut. Die Knöpfe:
 
 * **Fotos bearbeiten**,
 * **Fotos hinzufügen …**,
