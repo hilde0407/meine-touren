@@ -4,7 +4,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
 
-from . import db
+from . import db, gpxtools
 
 router = APIRouter()
 KINDS = ("Rad", "Schuhe", "Ski", "Schneeschuhe", "Sonstiges")
@@ -74,7 +74,7 @@ def api_gear_save(body: dict):
     if not name:
         raise HTTPException(400, "Bitte einen Namen eingeben")
     kind = body.get("kind") if body.get("kind") in KINDS else "Sonstiges"
-    sports = ",".join(s for s in (body.get("sports") or []) if isinstance(s, str) and s.replace("_", "").isalnum())
+    sports = ",".join(dict.fromkeys(gpxtools.norm(s)[0] for s in (body.get("sports") or []) if isinstance(s, str) and s.replace("_", "").isalnum()))   # 3.50.0: Schneeschuh -> Wandern
     try:
         lim = float(body.get("limit_km") or 0) or None
     except (TypeError, ValueError):

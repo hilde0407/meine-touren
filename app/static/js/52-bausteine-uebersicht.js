@@ -14,7 +14,7 @@ const slAgo = iso => {
 };
 const SL_SPG = {                                                                  // Sportart → Gruppe [Name, Farb-Klasse]
   hike: ["Wandern", "hike"], mountaineering: ["Wandern", "hike"], nordicwalking: ["Wandern", "hike"], touringbicycle: ["Rad", "bike"], racebike: ["Rad", "bike"], mtb: ["Rad", "bike"],
-  e_touringbicycle: ["E-Bike", "ebike"], jogging: ["Laufen", "run"], skialpin: ["Ski", "ski"], skitour: ["Ski", "ski"], nordic: ["Ski", "ski"], snowshoe: ["Schneeschuh", "snow"],
+  e_touringbicycle: ["E-Bike", "ebike"], jogging: ["Laufen", "run"], skialpin: ["Ski", "ski"], skitour: ["Ski", "ski"], nordic: ["Ski", "ski"], snowshoe: ["Wandern", "hike"],
 };
 const slGroup = s => SL_SPG[s] || ["Sonstiges", "other"];
 const slRows = list => `<ul class="slrows">${list.join("")}</ul>`;

@@ -27,7 +27,7 @@ const flYearBack = (iso, n = 1) => {
   const y = +iso.slice(0, 4) - n, m = +iso.slice(5, 7);
   return `${y}-${pad2(m)}-${pad2(Math.min(+iso.slice(8, 10), new Date(Date.UTC(y, m, 0)).getUTCDate()))}`;
 };
-const flSport = (t, cfg) => !(cfg && cfg.sports && cfg.sports.length) || cfg.sports.includes(t.sport);
+const flSport = (t, cfg) => !(cfg && cfg.sports && cfg.sports.length) || sNormList(cfg.sports).includes(sNorm(t.sport));      // 3.50.0: „snowshoe“ = Wandern
 const flIn = (t, r) => {
   const d = t.date.slice(0, 10);
   return (!r.from || d >= r.from) && d <= r.to;
@@ -63,7 +63,7 @@ function flSelect(cfg, def, o = {}) {
 /* Sportarten des Nutzers, häufigste zuerst; schon gewählte, aber nicht mehr vorhandene bleiben wählbar */
 function flSportOptions(sel = []) {
   const n = {};
-  TOURS.forEach(t => t.sport && (n[t.sport] = (n[t.sport] || 0) + 1));
+  TOURS.forEach(t => t.sport && (n[sNorm(t.sport)] = (n[sNorm(t.sport)] || 0) + 1));
   const keys = Object.keys(n).sort((a, b) => n[b] - n[a] || sName(a).localeCompare(sName(b)));
   sel.forEach(s => !keys.includes(s) && keys.push(s));
   return keys.map(k => [k, sName(k)]);
@@ -76,7 +76,7 @@ const flYears = () => {
 /* ---------- Kurztext ---------- */
 function flParts(cfg, rangeDef, o = {}) {
   cfg = cfg || {};
-  const s = cfg.sports || [], out = [];
+  const s = sNormList(cfg.sports), out = [];
   if (s.length) {
     if (s.length <= 2) s.forEach(x => out.push(sName(x)));
     else out.push(`${s.length} Sportarten`);
@@ -105,7 +105,7 @@ const flNone = (b, what) => slNote(b, what || "Keine Touren mit diesem Filter.")
 function flField(f, cfg, i) {
   const id = "slf" + i;
   if (f.kind === "sports") {
-    const sel = cfg.sports || [];
+    const sel = sNormList(cfg.sports);
     return `<fieldset class="slfs flsp"><legend>${esc(f.label || "Sportart")}</legend><div class="flchips">` +
       `<label class="flchip"><input type="checkbox" data-all${sel.length ? "" : " checked"}><span>Alle</span></label>` +
       flSportOptions(sel).map(([v, l]) => `<label class="flchip"><input type="checkbox" name="f${i}" value="${esc(v)}"${sel.includes(v) ? " checked" : ""}><span>${esc(l)}</span></label>`).join("") +

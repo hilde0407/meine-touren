@@ -39,7 +39,6 @@ VIEWS.check = async () => {
       "mtb",
       "jogging",
       "skialpin",
-      "snowshoe",
       "mountaineering",
       "nordic",
       "nordicwalking",
@@ -304,4 +303,52 @@ VIEWS.check = async () => {
       $("#sugm").textContent = rows.length ? "Fertig – bitte prüfen und speichern." : "Alle schon geladen.";
       e.target.disabled = false;
     };
+};
+
+/* 3.50.0: Läufe der Zepp-Uhr, die noch „Wandern“ heißen. Sicher zuordenbare Touren hat der Umzug selbst umgestellt (app/sport_umzug.py); diese hier stammen von Komoot
+   oder passen nur über Startzeit und Länge zu einem Lauf der Uhr – sie werden nicht geraten, sondern hier zur Wahl gestellt. Erscheint nur, wenn es solche Touren gibt. */
+const _check350 = VIEWS.check;
+VIEWS.check = async (...a) => {
+  await _check350(...a);
+  if (!$("#chb") || $("#zlauf")) return;
+  let r;
+  try {
+    r = await api("/api/sport-umzug");
+  } catch (e) {
+    return;
+  }
+  const k = (r && r.kandidaten) || [],
+    anker = $("#impl") || $("#chb .panel");
+  if (!k.length || !anker || $("#zlauf")) return;
+  anker.insertAdjacentHTML(
+    "afterend",
+    `<div class="panel gap" id="zlauf"><h2>Läufe von der Uhr</h2>
+    <p class="mut">Laufen ist eine eigene Sportart. Diese Touren sind laut Zepp-Uhr ein Lauf, heißen hier aber noch „Wandern“. Sie stammen von Komoot oder passen nur über Startzeit und Länge zu einem Lauf der Uhr und wurden deshalb nicht von selbst umgestellt.</p>
+    <div class="row"><button class="btn" id="zlall">Alle ${k.length} auf Laufen umstellen</button><span id="zlm" class="mut" role="status"></span></div>
+    <div class="rows">${k
+      .map(
+        t =>
+          `<div class="r" data-id="${esc(t.id)}"><span><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name || t.id)}</a> <span class="mut">${fmtDatumKurz(t.start_ts)} · ${fmtKm(t.km)}${t.kmh ? " · " + fmtTempo(t.kmh) : ""}</span> · <span class="mut">${t.wie === "zeit" ? "passt über die Startzeit" : "Komoot-Tour"}</span></span><button class="btn alt sm" data-zl>Auf Laufen umstellen</button></div>`
+      )
+      .join("")}</div></div>`
+  );
+  const box = $("#zlauf"),
+    go = async (ids, b) => {
+      b.disabled = true;
+      try {
+        const x = await api("/api/sport-umzug/laufen", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({ids})});
+        $("#zlm").textContent = x.n === 1 ? "1 Tour umgestellt." : `${x.n} Touren umgestellt.`;
+        await loadTours();
+        route();
+      } catch (e) {
+        uiAlert(e.message);
+        b.disabled = false;
+      }
+    };
+  box.querySelectorAll("[data-zl]").forEach(b => (b.onclick = () => go([b.closest("[data-id]").dataset.id], b)));
+  $("#zlall").onclick = async e => {
+    const b = e.currentTarget;
+    if (!(await uiConfirm({text: `Alle ${k.length} Touren auf „Laufen“ umstellen? Die Sportart gilt dann als von dir gewählt und bleibt auch nach dem Komoot-Abgleich.`, ok: "Umstellen"}))) return;
+    go(k.map(t => t.id), b);
+  };
 };

@@ -108,13 +108,20 @@ const SPORT = {
   skialpin: ["Skifahren", "--ski"],
   skitour: ["Skitour", "--ski"],
   nordic: ["Langlauf", "--ski"],
-  snowshoe: ["Schneeschuh", "--snow"],
   mountaineering: ["Bergtour", "--hike"],
   nordicwalking: ["Nordic Walking", "--hike"],
 };
-const sName = s => (SPORT[s] || [s || "Sonstiges"])[0];
+/* 3.50.0: zusammengelegte Sportarten (wie app/gpxtools.py MERGE): Schneeschuh zählt als Wandern und trägt das Schlagwort „Schneeschuh“.
+   Ältere gespeicherte Filter, Ansichten und Antworten mit „snowshoe“ werden beim Lesen umgesetzt. */
+const SPORT_ALIAS = {snowshoe: "hike"};
+const SCHNEESCHUH = "Schneeschuh";
+const sNorm = s => SPORT_ALIAS[s] || s;
+const sNormList = l => [...new Set((Array.isArray(l) ? l : []).map(sNorm))];
+const tourTags = t => (Array.isArray(t && t.tags) ? t.tags : String((t && t.tags) || "").split("|")).map(x => String(x).trim()).filter(Boolean);
+const isSnowshoe = t => !!t && (t.sport === "snowshoe" || tourTags(t).includes(SCHNEESCHUH));
+const sName = s => (SPORT[sNorm(s)] || [s || "Sonstiges"])[0];
 const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const sCol = s => cssv((SPORT[s] || [0, "--other"])[1]);
+const sCol = s => cssv((SPORT[sNorm(s)] || [0, "--other"])[1]);
 /* ---- Streckenfarbe (pro Gerät gemerkt) ---- */
 const TS = (() => {
   let s = {};

@@ -105,16 +105,29 @@ def adopt(text, filename="", prefix="g", ident=None, name=None, sport=None, tour
     gpx_file(tid).write_text(c["gpx"], encoding="utf-8")
     routes.store(tid, items)
     nm = name or c["name"]
+    tags = list(c.get("tags") or [])
+    if sport:                                       # Sportart des Aufrufers (Aufzeichnung, Gerät): zusammengelegte Kennungen umsetzen (3.50.0)
+        sport, tag = gpxtools.norm(sport)
+        if tag and tag not in tags:
+            tags.append(tag)
     db.execute("INSERT OR REPLACE INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,up_m,down_m,lat,lng,status,source) "
                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
                (tid, nm, sport or c["sport"], c["start_ts"], c["end_ts"], c["dist_m"], c["end_ts"] - c["start_ts"], up, down,
                 items[0][0], items[0][1], "tour_recorded", "local"))
+    for tag in tags:
+        add_tag(tid, tag)
     try:
         from . import metrics
         metrics.store_from_text(tid, text, filename, t0=c["start_ts"], src=src, sport=sport or c["sport"])      # Messwerte des Geräts (Zusatzdatei); Fehler stören den Import nie
     except Exception:  # noqa
         pass
     return db.one("SELECT * FROM tours WHERE id=?", (tid,)), c
+
+
+def add_tag(tid, tag):
+    """Schlagwort ergänzen, wenn die Tour es noch nicht hat (z. B. „Schneeschuh“ beim Zusammenlegen der Sportart, 3.50.0)."""
+    if tag:
+        db.execute("INSERT OR IGNORE INTO tour_tags(id,tag) VALUES(?,?)", (str(tid), str(tag)[:40]))
 
 
 def delete_local(tid):

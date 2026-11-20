@@ -11,7 +11,7 @@ from datetime import date, datetime, timedelta
 
 from fastapi import HTTPException
 
-from . import db, photos, stats
+from . import db, gpxtools, photos, stats
 from .gpxtools import TZ
 
 BLOCKS = ("kennzahlen", "rekorde", "heatmap", "fotos")
@@ -76,6 +76,7 @@ def check(year, sport):
     sport = sport if isinstance(sport, str) else ""
     if len(sport) > 40 or ":" in sport:
         raise HTTPException(400, "Ungültige Sportart")
+    sport = gpxtools.norm(sport)[0]           # 3.50.0: ältere Links „Schneeschuh“ zeigen Wandern
     if not tours(year, sport):
         raise HTTPException(400, "Keine Touren in diesem Zeitraum")
     return year, sport

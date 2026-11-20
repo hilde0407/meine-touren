@@ -1,7 +1,7 @@
 /* =====================  Tagebuch: Sterne · Sicherheitsnotiz (Ski/Schneeschuh) · Vergleich derselben Strecke  ===================== */
 const SAFE_GEAR = [["lvs", "LVS"], ["sonde", "Sonde"], ["schaufel", "Schaufel"], ["helm", "Helm"], ["airbag", "Airbag"], ["erste-hilfe", "Erste Hilfe"], ["biwaksack", "Biwaksack"], ["stirnlampe", "Stirnlampe"]];
 const AVAL = {1: ["#5cb85c", "gering"], 2: ["#ffeb3b", "mäßig"], 3: ["#ff9800", "erheblich"], 4: ["#f44336", "groß"], 5: ["#7b1111", "sehr groß"]};
-const safetySport = s => ["skitour", "skialpin", "snowshoe", "mountaineering"].includes(s);
+const safetySport = (s, t) => ["skitour", "skialpin", "snowshoe", "mountaineering"].includes(s) || isSnowshoe(t);      // 3.50.0: Schneeschuh = Wandern mit Schlagwort
 const post26 = o => ({method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(o)});
 
 /* Größe eines Textfelds merken (pro Gerät/Browser) und beim nächsten Öffnen wiederherstellen */
@@ -71,7 +71,7 @@ VIEWS.tour = async (...a) => {
     drawStars();
   }
   /* ---- Sicherheitsnotiz ---- */
-  if (safetySport(t.sport) && !$("#safety")) {
+  if (safetySport(t.sport, t) && !$("#safety")) {
     const anchor = ($("#note") && $("#note").closest(".field")) || $("#profcard");
     if (anchor) {
       const s = await api(`/api/tours/${encodeURIComponent(t.id)}/safety`).catch(() => null);

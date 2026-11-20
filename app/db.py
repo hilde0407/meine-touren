@@ -150,6 +150,11 @@ def migrate(conn):
     if "period" not in {r["name"] for r in conn.execute("PRAGMA table_info(goals)")}:
         conn.execute("ALTER TABLE goals ADD COLUMN period TEXT DEFAULT 'year'")     # 3.45.0: Zeitraum eines Ziels: year (Jahresziel) | week (Wochenziel, dann year = 0)
     conn.commit()
+    try:                                                                          # 3.50.0: Laufen von der Uhr, Schneeschuh zählt als Wandern (Kopie der Datenbank vorher)
+        from . import sport_umzug
+        sport_umzug.migrate(conn)
+    except Exception:                                                             # nie das Öffnen verhindern; die Oberfläche zeigt „snowshoe“ ohnehin als Wandern
+        conn.rollback()
     try:                                                                          # 3.45.0: alte Bausteine in gespeicherten Layouts umziehen, eigene Ziele in die Ziele übernehmen
         from . import baustein_umzug
         baustein_umzug.migrate_rows(conn)

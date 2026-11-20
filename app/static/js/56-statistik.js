@@ -22,7 +22,7 @@ const ST_ICON = {kpi: "met", kmmonat: "met", kmverlauf: "trend", sportarten: "ma
 const ST_DEF = () => ({sports: [], kind: "all", yr: 0, von: "", bis: ""});
 function stFromDoc(d) {
   if (!d || typeof d !== "object") return ST_DEF();
-  const r = d.range, sp = (Array.isArray(d.sports) ? d.sports : []).filter(x => ST_SPORT.test(x)).slice(0, 20);
+  const r = d.range, sp = sNormList((Array.isArray(d.sports) ? d.sports : []).filter(x => ST_SPORT.test(x))).slice(0, 20);      // 3.50.0: „snowshoe“ = Wandern
   if (r === "y" && d.yr >= 1970) return {sports: sp, kind: "y", yr: +d.yr, von: "", bis: ""};
   if (r === "12m" || r === "90d") return {sports: sp, kind: r, yr: 0, von: "", bis: ""};
   if (r === "year") return {sports: sp, kind: "y", yr: new Date().getFullYear(), von: "", bis: ""};
@@ -83,7 +83,7 @@ function stFilter(q) {
   const has = q && q.get && ["y", "z", "s", "von", "bis"].some(k => q.has(k));
   if (!has && ST.base) return ST.base;
   const g = k => (q && q.get && q.get(k)) || "",
-    sports = [...new Set(g("s").split(",").filter(x => ST_SPORT.test(x)))].slice(0, 20),
+    sports = sNormList(g("s").split(",").filter(x => ST_SPORT.test(x))).slice(0, 20),
     y = +g("y"), z = g("z"), von = g("von"), bis = g("bis");
   let kind = "all", yr = 0;
   if (y >= 1970 && y <= 2100) {

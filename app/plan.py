@@ -8,7 +8,7 @@ import requests
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from . import db, elev, config, routes, planhilfe
+from . import db, elev, config, gpxtools, routes, planhilfe
 
 def _gate(request: Request):
     """Ist die Tourplanung ausgeschaltet, antwortet die ganze Planungs-Schnittstelle mit 403 (außer dem Verbindungstest der Einstellungen)."""
@@ -275,7 +275,7 @@ def api_plan_save(body: dict):
                  planhilfe.pruefe_start(body.get("plan_start")), planhilfe.pruefe_puffer(body.get("puffer_pct")))
     except ValueError as e:
         raise HTTPException(400, str(e))
-    vals = (name, str(body.get("sport") or "hike")[:30], json.dumps(pts), num("km"), num("up"), num("down"), num("max_alt"), num("est_h"), note, int(time.time()), wps) + extra
+    vals = (name, gpxtools.norm(str(body.get("sport") or "hike")[:30])[0], json.dumps(pts), num("km"), num("up"), num("down"), num("max_alt"), num("est_h"), note, int(time.time()), wps) + extra
     if old:
         cols = ["name", "sport", "pts", "km", "up", "down", "max_alt", "est_h", "note", "ts", "wps"]
         for k, c in (("links", ["links"]), ("quelle", ["quelle"]), ("quelle_text", ["quelle_text"]), ("plan_datum", ["plan_datum"]), ("plan_start", ["plan_start"]), ("puffer_pct", ["puffer_pct"])):

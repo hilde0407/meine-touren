@@ -17,7 +17,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche, layout, bausteine_daten, hinweise, kennzahl, suche, fotofilter, backup_check, wiederherstellung, fitness, tourrueckblick
+from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche, layout, bausteine_daten, hinweise, kennzahl, suche, fotofilter, backup_check, wiederherstellung, fitness, tourrueckblick, sport_umzug
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -641,7 +641,7 @@ async def api_record_upload(request: Request):
     tid = f"g{c['start_ts']}"
     if db.one("SELECT 1 FROM tours WHERE id=?", (tid,)):
         return {"id": tid, "dup": True}
-    if sport not in gpxtools.LABEL:
+    if not gpxtools.known(sport):             # 3.50.0: „snowshoe“ (Taste „Schneeschuh“, ältere App) wird in tracks.adopt zu Wandern + Schlagwort
         sport = None
     t, _ = await asyncio.get_running_loop().run_in_executor(None, contextvars.copy_context().run, lambda: tracks.adopt(gpx, "rec.gpx", name=name, sport=sport, src="phone"))
     try:
@@ -984,6 +984,7 @@ app.include_router(kennzahl.router)
 app.include_router(hinweise.router)
 app.include_router(steigung.router)
 app.include_router(more.router)
+app.include_router(sport_umzug.router)
 app.include_router(more2.router)
 app.include_router(gear.router)
 app.include_router(plan.router)

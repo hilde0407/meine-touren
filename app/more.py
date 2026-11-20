@@ -37,7 +37,7 @@ def duplicates(tours):
 
 
 WALK = ("hike", "nordicwalking", "snowshoe", "mountaineering")
-SPORT_OK = {"hike", "touringbicycle", "e_touringbicycle", "racebike", "mtb", "e_mtb", "jogging", "skialpin", "snowshoe", "mountaineering",
+SPORT_OK = {"hike", "touringbicycle", "e_touringbicycle", "racebike", "mtb", "e_mtb", "jogging", "skialpin", "snowshoe", "mountaineering",   # „snowshoe“: ältere Clients, wird zu Wandern + Schlagwort
             "nordic", "nordicwalking", "skitour", "other"}
 
 
@@ -51,7 +51,7 @@ def implausible(tours):
         if d < 300 or (s and s < 180):
             why = f"Fehlaufzeichnung? nur {d:.0f} m" + (f" in {s // 60:.0f} min" if s else "")
         elif t["sport"] in WALK and v > 8:
-            why, sug = f"{v:.1f} km/h – zu schnell für {t['sport'] == 'hike' and 'Wandern' or 'diese Sportart'}", "touringbicycle"
+            why, sug = f"{v:.1f} km/h – zu schnell für {t['sport'] == 'hike' and 'Wandern' or 'diese Sportart'}", "jogging" if v <= 16 else "touringbicycle"   # 3.50.0: bis 16 km/h eher ein Lauf
         elif t["sport"] == "jogging" and v > 22:
             why, sug = f"{v:.1f} km/h – zu schnell zum Laufen", "touringbicycle"
         elif t["sport"] in ("touringbicycle", "racebike", "mtb") and 0 < v < 4 and d > 2000:
@@ -84,9 +84,9 @@ def api_set_sport(tour_id: str, body: dict):
                 raise HTTPException(502, str(e))
         else:
             msg = "bei Komoot nicht vorhanden – nur hier geändert"
-    db.execute("INSERT OR REPLACE INTO tour_sport(id,sport) VALUES(?,?)", (tour_id, sp))
-    db.execute("UPDATE tours SET sport=? WHERE id=?", (sp, tour_id))
-    return {"ok": True, "komoot": msg}
+    from . import sport_umzug
+    sp = sport_umzug.set_sport(tour_id, sp)          # 3.50.0: „snowshoe“ -> Wandern + Schlagwort „Schneeschuh“
+    return {"ok": True, "komoot": msg, "sport": sp}
 
 
 def _fixerr(tour_id, e):

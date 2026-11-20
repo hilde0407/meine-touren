@@ -33,6 +33,8 @@ def refresh_tours(k=None):
         for t in tours:
             if str(t["id"]) == r["id"]:
                 t["sport"] = r["sport"]
+    from . import sport_umzug
+    merged = sport_umzug.merge_komoot(tours)                            # 3.50.0: Schneeschuh bei Komoot -> Wandern + Schlagwort (einmal)
     old = {r["id"]: (r["dist_m"], r["dur_s"], r["up_m"]) for r in db.query("SELECT id,dist_m,dur_s,up_m FROM tours")}
     changed = [t["id"] for t in tours if t["id"] in old and (
         abs((old[t["id"]][0] or 0) - (t["dist_m"] or 0)) > 5 or abs((old[t["id"]][1] or 0) - (t["dur_s"] or 0)) > 5)]
@@ -54,6 +56,7 @@ def refresh_tours(k=None):
                 c.execute("DELETE FROM tour_names WHERE id=?", (o["id"],))
             else:
                 c.execute("UPDATE tours SET name=? WHERE id=?", (o["name"], o["id"]))
+    sport_umzug.tag_merged(merged)
     elev.reapply(tours)
     trackfix.reapply(tours)
     log(f"Komoot: {len(tours)} abgeschlossene Touren geladen")
@@ -192,10 +195,11 @@ def export_zepp(limit=None):
     for i, s in enumerate(new, 1):
         tid = int(s["trackid"])
         jobs.progress(f"Export {i}/{len(new)}", i - 1, len(new))
-        sport = gpxtools.ZEPP_SPORT.get(int(s.get("type", 0)), "type_%s" % s.get("type"))
-        sport = gpxtools.ALIAS.get(sport, sport)
-        if sport not in gpxtools.LABEL:
-            sport = db.get("default_sport") or "hike"
+        raw = gpxtools.ZEPP_SPORT.get(int(s.get("type", 0)), "type_%s" % s.get("type"))
+        raw = gpxtools.ALIAS.get(raw, raw)
+        if not gpxtools.known(raw):
+            raw = db.get("default_sport") or "hike"
+        sport = gpxtools.norm(raw)[0]                          # 3.50.0: Schneeschuh -> Wandern; die GPX-Datei behält die Angabe der Uhr (Schlagwort bei der Übernahme)
         dist, dur = float(s.get("dis") or 0), int(float(s.get("run_time") or 0))
         end_ts = int(s.get("end_time") or tid + dur)
         try:
@@ -212,7 +216,7 @@ def export_zepp(limit=None):
             continue
         path = gpx_path_for(tid)
         path.parent.mkdir(parents=True, exist_ok=True)
-        gpx = zepp.points_to_gpx(s, pts, sport)
+        gpx = zepp.points_to_gpx(s, pts, raw)
         path.write_text(gpx, encoding="utf-8")
         try:                                                   # Messwerte (Tempo, Kadenz …) neben die GPX-Datei legen; nur geprüfte Spalten, sonst nichts
             samples, sm = metrics.zepp_samples(s, det, pts)
@@ -298,6 +302,18 @@ def _zepp_api():
     return zepp.ZeppApi(token, db.get("zepp_host"))
 
 
+def zepp_text(r, text):
+    """GPX-Text eines Zepp-Trainings mit der Sportart aus dem gespeicherten Zepp-Typ (3.50.0): Dateien älterer Versionen tragen bei Läufen noch „hike“."""
+    try:
+        raw = gpxtools.ZEPP_SPORT.get(int(r["ztype"]))
+    except (TypeError, ValueError, KeyError):
+        raw = None
+    if not raw:
+        return text
+    import re
+    return re.sub(r"<type>[^<]*</type>", f"<type>{raw}</type>", text, count=1)
+
+
 def adopt_workout(trackid):
     """Zepp-Training als lokale Tour übernehmen (kein Upload). Gibt die Tour-ID zurück."""
     r = db.one("SELECT * FROM workouts WHERE trackid=?", (int(trackid),))
@@ -307,7 +323,7 @@ def adopt_workout(trackid):
     tid = f"z{int(trackid)}"
     if not db.one("SELECT 1 x FROM tours WHERE id=?", (tid,)):
         try:                                             # dieselbe Sportart schon vorhanden (z. B. doppelt von der Uhr gemeldet)?
-            c = gpxtools.convert(p.read_text(encoding="utf-8"), p.name, db.get("default_sport") or "hike")
+            c = gpxtools.convert(zepp_text(r, p.read_text(encoding="utf-8")), p.name, db.get("default_sport") or "hike")
             dup = is_duplicate(c["start_ts"], c["dist_m"], c["end_ts"] - c["start_ts"], db.query("SELECT id,start_ts,dist_m,dur_s FROM tours"), db.get_int("dup_tolerance_s", 300))
         except Exception:  # noqa
             dup = None
@@ -315,7 +331,7 @@ def adopt_workout(trackid):
             db.execute("UPDATE workouts SET status=?, komoot_id=?, updated=? WHERE trackid=? AND status IN ('new','local')", ("dup", dup["id"], int(time.time()), int(trackid)))
             log(f"  Training {trackid}: schon vorhanden als Tour {dup['id']} – nicht doppelt übernommen")
             return dup["id"]
-        tracks.adopt(p.read_text(encoding="utf-8"), p.name, ident=tid, src="zepp")
+        tracks.adopt(zepp_text(r, p.read_text(encoding="utf-8")), p.name, ident=tid, src="zepp")
         metrics.adopt_staged(tid, p)
         photos.assign_all()
     db.execute("UPDATE workouts SET status=?, komoot_id=?, updated=? WHERE trackid=? AND status IN ('new','local')",
@@ -388,7 +404,7 @@ def upload_selected(trackids, dry_run=False, portals_=("komoot",), local_only=Fa
         r = db.one("SELECT * FROM workouts WHERE trackid=?", (int(t),))
         if r and r["gpx_path"] and Path(r["gpx_path"]).exists():
             p = Path(r["gpx_path"])
-            items.append((r["trackid"], p.read_text(encoding="utf-8"), p.name)); ids.append(int(t))
+            items.append((r["trackid"], zepp_text(r, p.read_text(encoding="utf-8")), p.name)); ids.append(int(t))
     log(f"Import: {len(items)} ausgewählte Dateien → lokal" + ("" if local_only else " + " + ", ".join(portals.PORTALS.get(p, p) for p in portals_)))
     res = import_items(items, () if local_only else tuple(portals_), dry_run)
     if not dry_run:

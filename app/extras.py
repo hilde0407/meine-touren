@@ -246,7 +246,8 @@ def api_goal_add(body: dict):
     metric = body.get("metric", "km")
     if metric not in METRICS or not target > 0 or target > 1e7:
         raise HTTPException(400, "Ungültiges Ziel")
-    db.execute("INSERT INTO goals(year,sport,metric,target,period) VALUES(?,?,?,?,?)", (year, body.get("sport") or "", metric, target, period))
+    from . import gpxtools
+    db.execute("INSERT INTO goals(year,sport,metric,target,period) VALUES(?,?,?,?,?)", (year, gpxtools.norm(body.get("sport") or "")[0], metric, target, period))   # 3.50.0: Schneeschuh -> Wandern
     return {"ok": True}
 
 

@@ -83,8 +83,12 @@ def ingest(src, entries, portals_=()):
             if tid and e:
                 if e[3]:
                     db.execute("UPDATE tours SET name=? WHERE id=?", (e[3], tid))
-                if e[4] and e[4] in gpxtools.LABEL:
-                    db.execute("UPDATE tours SET sport=? WHERE id=?", (e[4], tid))
+                sp, tag = gpxtools.norm(e[4])                     # 3.50.0: Schneeschuh -> Wandern + Schlagwort
+                if sp and sp in gpxtools.LABEL:
+                    db.execute("UPDATE tours SET sport=? WHERE id=?", (sp, tid))
+                    if tag:
+                        from . import tracks
+                        tracks.add_tag(tid, tag)
             db.execute("INSERT OR REPLACE INTO ext_imports VALUES(?,?,?,?,?)", (src, str(label), tid, "imported", now))
         elif state == "skipped_dup":
             cnt["dup"] += 1

@@ -2,10 +2,10 @@
 const SPORT_GRP = {
   bike: ["touringbicycle", "e_touringbicycle", "racebike", "mtb"],
   ski: ["skitour", "skialpin"],
-  foot: ["hike", "mountaineering", "nordicwalking", "snowshoe"],
+  foot: ["hike", "mountaineering", "nordicwalking"],      // 3.50.0: Schneeschuh ist Wandern (Schlagwort „Schneeschuh“, isSnowshoe)
   run: ["jogging", "nordic"],
 };
-const sportGrp = s => Object.keys(SPORT_GRP).find(k => SPORT_GRP[k].includes(s)) || "other";
+const sportGrp = s => Object.keys(SPORT_GRP).find(k => SPORT_GRP[k].includes(sNorm(s))) || "other";
 const STEEP30 = 58; // 30° Hangneigung entsprechen ≈ 58 % Steigung
 
 /* Kennzahlen aus den Streckenpunkten [lat, lng, Höhe, ms seit Start]; Abschnitte von mindestens 30 m glätten das GPS-Rauschen. */
@@ -94,7 +94,7 @@ function sportFigs(t, m) {
     pause();
     if (m.tUp > 600 && m.up > 50) f.push([nf(m.up / (m.tUp / 3600), 0), "m/h", "Steigrate"]);
     f.push([`${deg(m.maxG)}`, "°", "steilster Abschnitt"]);
-    if (t.sport === "snowshoe") f.push([`${Math.round(m.steep * 100)}`, "%", "der Strecke über 30°"]);
+    if (isSnowshoe(t)) f.push([`${Math.round(m.steep * 100)}`, "%", "der Strecke über 30°"]);
   } else if (g === "run") {
     if (mov) f.push([fmtMS(m.tMove / km), "min/km", "Pace in Bewegung"]);
     pause();
@@ -132,7 +132,7 @@ function steepButton(t) {
   const go = () => {
     if (!window.tlSlope || !map || !map.addControl) return k++ < 40 && setTimeout(go, 200);
     if (document.querySelector("#tm .smap")) return;
-    const ski = sportGrp(t.sport) === "ski" || t.sport === "snowshoe";
+    const ski = sportGrp(t.sport) === "ski" || isSnowshoe(t);
     const C = L.Control.extend({
       options: {position: "topleft"},
       onAdd() {
