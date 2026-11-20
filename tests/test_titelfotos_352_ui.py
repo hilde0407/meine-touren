@@ -83,6 +83,9 @@ def hits(app, pat=r"/pic/(\d+)\?size=(\d+)[^ \"]*"):
     return re.findall(r'"GET ' + pat + r' HTTP', app["log"].read_text(errors="replace"))
 
 
+VPIC = r"/pic/(\d+)\?size=(\d+)&v=[0-9a-f]+"        # Bilder mit Version (die Liste); die Übersicht lädt daneben eigene Bilder ohne Version
+
+
 @pytest.fixture(scope="module")
 def pw():
     from playwright.sync_api import sync_playwright
@@ -123,16 +126,16 @@ def _shots(pg, name):
 def test_bildanfragen_begrenzt_und_beim_zweiten_mal_keine(pw, app):
     ctx = _ctx(pw)
     pg = _page(ctx)
-    n0, c0 = len(hits(app)), len(hits(app, r"/api/tour-covers"))
+    n0, c0 = len(hits(app, VPIC)), len(hits(app, r"/api/tour-covers"))
     pg.goto(app["url"] + "/#/dash")
     pg.wait_for_function("() => { try { return TOURS.length > 0 && COVERS !== null } catch (e) { return false } }", timeout=T)
     quiet(pg, 3000)
-    n1 = len(hits(app))
+    n1 = len(hits(app, VPIC))
     pg.evaluate("() => { window.__t0 = performance.now(); location.hash = '#/tours'; }")
     pg.wait_for_selector("#tl a.tr", timeout=T)
     build = pg.evaluate("() => performance.now() - window.__t0")
     _list_ready(pg)
-    first = hits(app)[n1:]
+    first = hits(app, VPIC)[n1:]
     rows = pg.locator("#tl a.tr").count()
     with_photo = pg.locator("#tl a.tr .trimg").count()
     assert rows == 80 and with_photo == 64                                   # 80 Zeilen, 4 von 5 mit Foto
@@ -144,19 +147,19 @@ def test_bildanfragen_begrenzt_und_beim_zweiten_mal_keine(pw, app):
     assert pg.eval_on_selector_all("#tl img.trimg", "l => l.every(i => i.loading === 'lazy' && i.decoding === 'async')")
     pg.mouse.wheel(0, 3000)                                                   # beim Scrollen kommt nach, was in die Nähe des Sichtbereichs rückt
     _list_ready(pg)
-    scrolled = hits(app)[n1:]
+    scrolled = hits(app, VPIC)[n1:]
     assert len(first) < len(scrolled) <= 64
-    n2 = len(hits(app))
+    n2 = len(hits(app, VPIC))
     pg.evaluate("() => { location.hash = '#/dash'; }")
     pg.wait_for_function("() => location.hash === '#/dash'")
     quiet(pg, 2000)
     pg.evaluate("() => { location.hash = '#/tours'; }")
     _list_ready(pg)
-    assert [h for h in hits(app)[n2:] if h[1] == "300"] == []                   # erneut öffnen: keine Bildanfrage
-    n3, c3 = len(hits(app)), len(hits(app, r"/api/tour-covers"))
+    assert [h for h in hits(app, VPIC)[n2:] if h[1] == "300"] == []                   # erneut öffnen: keine Bildanfrage
+    n3, c3 = len(hits(app, VPIC)), len(hits(app, r"/api/tour-covers"))
     pg.reload()
     _list_ready(pg)
-    assert [h for h in hits(app)[n3:] if h[1] == "300"] == []                   # neu laden: keine Bildanfrage
+    assert [h for h in hits(app, VPIC)[n3:] if h[1] == "300"] == []                   # neu laden: keine Bildanfrage
     assert len(hits(app, r"/api/tour-covers")) - c3 == 1
     print(f"\n[Messung 3.52.0] {N} Touren, Liste mit 80 Zeilen ({with_photo} mit Foto): erstes Öffnen {len(first)} Bildanfragen, nach Scrollen {len(scrolled)}, "
           f"erneut 0, neu geladen 0; Aufbau der Liste {build:.0f} ms")
@@ -255,11 +258,9 @@ def test_schalter_je_geraet_und_suche(pw, app):
     chk.uncheck()
     pg.keyboard.press("Escape")
     pg.wait_for_function("() => localStorage.getItem('mt_tlfotos') === '0'")
-    pg.evaluate("() => { location.hash = '#/dash'; }")
     quiet(pg, 2000)
     c0 = len(hits(app, r"/api/tour-covers"))
-    pg.reload()
-    pg.evaluate("() => { location.hash = '#/tours'; }")
+    pg.reload()                                                                               # direkt auf der Liste (die Startseite holt ihre Karten-Fotos auch bei „aus“)
     pg.wait_for_selector("#tl a.tr", timeout=T)
     quiet(pg, 2000)
     assert pg.locator("#tl .trp").count() == 0 and pg.locator("#tl a.tr.trf").count() == 0      # aus: wie bisher (Strecke), keine Titelfotos geladen
@@ -267,6 +268,7 @@ def test_schalter_je_geraet_und_suche(pw, app):
     assert len(hits(app, r"/api/tour-covers")) == c0
     pg.click("#tmore")
     pg.locator(".uimod input[data-tlf]").check()
+    pg.wait_for_function("() => localStorage.getItem('mt_tlfotos') === '1' && COVERS && Object.keys(COVERS).length > 0", timeout=T)   # wieder an: Titelfotos geladen
     pg.keyboard.press("Escape")
     pg.evaluate("() => { location.hash = '#/dash'; }")
     quiet(pg, 1500)

@@ -125,7 +125,8 @@ def _shot(pg, name, full=True):
 
 def _browser(pw, url, width=1280, height=1000, scheme="light", dpr=1, locale="de-DE", tour="r3"):
     b = pw.chromium.launch()
-    ctx = b.new_context(locale=locale, viewport={"width": width, "height": height}, color_scheme=scheme, device_scale_factor=dpr, reduced_motion="reduce")
+    ctx = b.new_context(locale=locale, viewport={"width": width, "height": height}, color_scheme=scheme, device_scale_factor=dpr, reduced_motion="reduce",
+                        service_workers="block")      # 3.52.0: Antworten werden abgefangen – ohne Service Worker, der sonst an page.route vorbei holt (Flake unter Last)
     pg = ctx.new_page()
     pg.errors = []
     pg.on("pageerror", lambda e: pg.errors.append(str(e)))
