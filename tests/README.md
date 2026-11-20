@@ -1,6 +1,6 @@
 # Tests
 
-Rund 1170 Tests: schnelle Tests des Servers (in-process, `TestClient`) und Browsertests mit Playwright/Chromium (`*_ui.py`, `test_browser.py` u. a.).
+Rund 1590 Tests: schnelle Tests des Servers (in-process, `TestClient`) und Browsertests mit Playwright/Chromium (`*_ui.py`, `test_browser.py` u. a.).
 
 ## Starten
 
