@@ -547,8 +547,10 @@ def assign_manual(ids, tour_id, shift=False, minutes_after_start=0, scope="selec
             part = tgt[i:i + 500]
             db.execute(f"UPDATE photos SET taken_ts=taken_ts+?, offset_s=COALESCE(offset_s,0)+? WHERE id IN ({','.join('?' * len(part))})",
                        (offset, offset, *part))
+    prev = {r["tour_id"] for r in db.query(f"SELECT DISTINCT tour_id FROM photos WHERE id IN ({q})", ids)}
     db.execute(f"UPDATE photos SET tour_id=?, manual=1 WHERE id IN ({q})", (str(tour_id), *ids))
     assign_all()
+    warm_strip_bg(prev | {str(tour_id)}, metrics=True)
     return {"offset_s": offset, "shifted": n_shift, "assigned": len(ids)}
 
 
@@ -616,7 +618,7 @@ def thumb(photo_id, size):
                 pass
             im = ImageOps.exif_transpose(im).convert("RGB")
             im.thumbnail((size, size), Image.LANCZOS)
-            tmp = out.with_suffix(".tmp")
+            tmp = out.with_name(f"{out.stem}.{os.getpid()}-{threading.get_ident()}.tmp")    # 3.51.0: eigener Name je Thread (Hintergrund und Anfrage gleichzeitig)
             im.save(tmp, "JPEG", quality=82)
             tmp.replace(out)
     return out
@@ -998,32 +1000,23 @@ def strip_ids(tour_id, n=STRIP_N, bg=False):
     """Die besten n Fotos einer Tour für den Foto-Streifen – schnell: nur mit schon bekannter Bewertung/Schärfe (pick_best, sonst
     gleichmäßig über die Tour verteilt). Fehlen Werte, rechnet sie (bg=True) ein Hintergrund-Thread nach; beim nächsten Aufruf zählen sie."""
     rows = db.query("SELECT id,taken_ts,rating,sharp FROM photos WHERE tour_id=? AND COALESCE(manual,0)!=2 ORDER BY taken_ts", (str(tour_id),))
+    b = max(1, (len(rows) - 1).bit_length())
+    rev = lambda i: int(format(i, f"0{b}b")[::-1], 2)
+    rows = [rows[i] for i in sorted(range(len(rows)), key=rev)]     # gleich gute Fotos: Reihenfolge Mitte, Viertel, Achtel … – pick_best nimmt bei Gleichstand die ersten
     ids = [r["id"] for r in pick_best(rows, n)]
-    if bg:
-        missing = any(r["rating"] is None or r["sharp"] is None for r in rows)
-        if missing or any(not thumb_cached(i, STRIP_SIZE) for i in ids):
-            warm_strip_bg([tour_id], metrics=missing)
+    if bg and any(r["rating"] is None or r["sharp"] is None for r in rows):
+        warm_strip_bg([tour_id], metrics=True)        # die Bilder selbst erzeugt die Anfrage des Browsers gleich (parallel), hier nur Bewertung/Schärfe
     return ids
 
 
-def thumb_cached(photo_id, size):
-    r = db.one("SELECT path,mtime FROM photos WHERE id=?", (photo_id,))
-    if not r:
-        return True
-    key = hashlib.sha1(f"{r['path']}|{r['mtime']}|{size}".encode()).hexdigest()
-    return (config.CACHE_DIR / "thumb" / key[:2] / f"{key}.jpg").exists()
-
-
 def warm_strip(tour_id, metrics=False):
-    """Vorschaubilder des Foto-Streifens einer Tour erzeugen; mit metrics=True vorher fehlende Bewertung/Schärfe berechnen."""
-    for i in strip_ids(tour_id):
-        thumb(i, STRIP_SIZE)
+    """Vorschaubilder des Foto-Streifens einer Tour erzeugen; mit metrics=True vorher fehlende Bewertung/Schärfe berechnen (bestimmt die Auswahl)."""
     if metrics:
         rows = db.query("SELECT id,path,rating,sharp FROM photos WHERE tour_id=? AND COALESCE(manual,0)!=2", (str(tour_id),))
         if any(r["rating"] is None or r["sharp"] is None for r in rows):
             ensure_metrics(rows, budget_s=120)
-            for i in strip_ids(tour_id):
-                thumb(i, STRIP_SIZE)
+    for i in strip_ids(tour_id):
+        thumb(i, STRIP_SIZE)
 
 
 def warm_strip_bg(tour_ids, metrics=False):

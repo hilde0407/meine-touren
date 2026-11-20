@@ -16,6 +16,8 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+# 3.51.0: kein Vorab-Erzeugen der Foto-Streifen im Hintergrund (Threads würden in die Datenbank des nächsten Tests schreiben); test_fotostreifen_351*.py schaltet es gezielt ein.
+os.environ.setdefault("MT_NO_WARM", "1")
 
 from tests.helpers_ui import QUIET_INIT_JS  # noqa: E402
 
