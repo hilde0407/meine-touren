@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.53.0](3.53.0.md) – Wanderführer übersichtlich: eingeklappte Buchkarten mit Titelbild und Ring, Filter, Suche, Reihenfolge, Karte der offenen Touren
 - [3.52.0](3.52.0.md) – Ein Foto je Tour in der Tourenliste: ein Aufruf für alle Titelfotos, stabile Wahl, beim erneuten Öffnen keine Bildanfrage
 - [3.51.0](3.51.0.md) – Schneller, ruhiger Foto-Abschnitt: Foto-Streifen mit den besten Fotos, Raster erst auf Wunsch, Bilder bleiben im Browser
 - [3.50.0](3.50.0.md) – Laufen und Schneeschuh wie im Tagebuch: Läufe der Zepp-Uhr sind „Laufen“, Schneeschuh zählt als Wandern (Schlagwort), Prüfen „Läufe von der Uhr“

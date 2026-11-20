@@ -742,9 +742,7 @@ function gfMap(d, b, btn) {
   const el = d.querySelector(".gfmap");
   if (!el.hidden) {
     if (el._m) el._m.remove();
-    el._m = null;
-    el.hidden = true;
-    el.innerHTML = "";
+    el.replaceWith(Object.assign(document.createElement("div"), {className: "gfmap", hidden: true}));     // Karte ganz abbauen
     btn.setAttribute("aria-expanded", "false");
     return;
   }

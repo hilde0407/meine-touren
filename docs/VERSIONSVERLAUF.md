@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.53.0 – Wanderführer übersichtlich
+
+- Wanderführer-Fortschritt: je Buch eine eingeklappte Karte mit Titelbild (oder Buch-Symbol), „x von y gewandert“ und Ring mit Prozent; die Tourenliste entsteht erst beim Aufklappen, in Blöcken zu 60. Aufgeklappte Bücher merkt sich das Gerät.
+- Filter Alle / Offen / Gewandert, Suche über Bücher und Touren (Treffer klappen auf), Reihenfolge Buchreihenfolge / Nach Länge / Zuletzt gewandert; Zustand in der Adresse.
+- „Offene Touren auf der Karte“ je Buch (Startpunkte, nur auf Wunsch aufgebaut).
+- Titelbild je Buch selbst wählen (im Browser auf 400 px verkleinert, vom Server geprüft, in der Datenbank und damit in der Sicherung; nie aus dem Netz), entfernen; auch in der Wunschliste. Betrachter sehen Fortschritt und Titelbilder.
+
 ## Version 3.52.0 – Ein Foto je Tour in der Tourenliste
 
 - Tourenliste (auch Suche, „An diesem Tag“, Karte „Touren im Ausschnitt“, Rückblick, Reisen): vorn eine feste Kachel mit einem Foto der Tour, ohne Fotos die Streckenform in der Farbe der Sportart.
