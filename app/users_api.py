@@ -84,6 +84,7 @@ async def api_login(request: Request, response: Response):
 def api_logout(request: Request, response: Response):
     auth.logout(request.cookies.get(auth.COOKIE))
     _cookie(response, None, request, clear=True)
+    response.headers["Clear-Site-Data"] = '"cache"'     # 3.51.0: Fotos mit Version bleiben sonst im Browser-Zwischenspeicher (gemeinsam genutzte Geräte; wirkt nur über HTTPS/localhost)
     return {"ok": True}
 
 

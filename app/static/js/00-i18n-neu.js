@@ -3298,4 +3298,7 @@ Komoot-Tour || Komoot tour || Parcours Komoot || Ruta de Komoot
 {} Touren umgestellt. || {} tours switched. || {} parcours modifiés. || {} rutas cambiadas.
 Alle {} Touren auf „Laufen“ umstellen? Die Sportart gilt dann als von dir gewählt und bleibt auch nach dem Komoot-Abgleich. || Switch all {} tours to “Running”? The sport then counts as chosen by you and stays after the Komoot sync. || Passer les {} parcours en « Course à pied » ? Le sport est alors considéré comme choisi par vous et reste après la synchronisation avec Komoot. || ¿Cambiar las {} rutas a «Correr»? El deporte se considerará elegido por ti y se mantendrá tras la sincronización con Komoot.
 Umstellen || Switch || Modifier || Cambiar
+Alle {} Fotos || All {} photos || Les {} photos || Las {} fotos
+Weniger zeigen || Show less || Afficher moins || Mostrar menos
+Ausgewählte Fotos || Selected photos || Photos choisies || Fotos seleccionadas
 `;

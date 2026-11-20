@@ -750,8 +750,10 @@ def _photos_located(limit, year=0):
 
 @app.get("/api/photos")
 def api_photos(tour_id: str = "", year: int = 0, random: bool = False, recent: bool = False, limit: int = 500, unassigned: bool = False, gps: bool = False, est: bool = False,
-               sport: str = "", date_from: str = "", date_to: str = "", day: str = "", before: int = 0, best: bool = False):
-    """Fotos. 3.32.0: zusätzlich sport (kommagetrennt), date_from/date_to (JJJJ-MM-TT), day (MM-TT) mit before (Jahr) und best (die besten Fotos), alles geprüft in fotofilter.py."""
+               sport: str = "", date_from: str = "", date_to: str = "", day: str = "", before: int = 0, best: bool = False, strip: int = 0):
+    """Fotos. 3.32.0: zusätzlich sport (kommagetrennt), date_from/date_to (JJJJ-MM-TT), day (MM-TT) mit before (Jahr) und best (die besten Fotos), alles geprüft in fotofilter.py.
+    3.51.0: jede Zeile hat „v“ (Version für die Bildadresse /pic/<id>?size=…&v=…, damit der Browser das Bild behalten darf); mit tour_id und strip=n
+    tragen die Fotos des Foto-Streifens (die besten n, schnell gewählt) „s“: 1."""
     limit = max(1, min(limit, fotofilter.MAX_LIMIT))
     extra = fotofilter.build(sport, date_from, date_to, day, before)
     if extra is None:
@@ -771,7 +773,12 @@ def api_photos(tour_id: str = "", year: int = 0, random: bool = False, recent: b
     if best:
         return fotofilter.best(where, args, limit)
     order = "RANDOM()" if random else "p.taken_ts DESC" if recent else "p.taken_ts"
-    rows = db.query(f"SELECT p.id,p.taken_ts,p.tour_id,p.lat,p.lng,p.manual,p.offset_s,t.name AS tour_name FROM photos p LEFT JOIN tours t ON t.id=p.tour_id WHERE {' AND '.join(where)} ORDER BY {order} LIMIT ?", (*args, limit))
+    rows = db.query(f"SELECT p.id,p.taken_ts,p.tour_id,p.lat,p.lng,p.manual,p.offset_s,t.name AS tour_name,p.path,p.mtime,p.size FROM photos p LEFT JOIN tours t ON t.id=p.tour_id WHERE {' AND '.join(where)} ORDER BY {order} LIMIT ?", (*args, limit))
+    pick = set(photos.strip_ids(tour_id, max(1, min(strip, 24)), bg=True)) if tour_id and strip > 0 else ()
+    for r in rows:
+        r["v"] = photos.ver(r.pop("path"), r.pop("mtime"), r.pop("size"))     # Dateipfad verlässt den Server nicht
+        if r["id"] in pick:
+            r["s"] = 1
     return rows
 
 
@@ -951,13 +958,14 @@ def photo_info():
 
 @app.get("/pic/{photo_id}")
 @app.get("/photo/{photo_id}")
-def photo(photo_id: int, request: Request, size: int = 1600):
+def photo(photo_id: int, request: Request, size: int = 1600, v: str = ""):
     size = max(120, min(size, 3000))
     p = photos.thumb(photo_id, size)
     if not p:
         raise HTTPException(404)
-    # Immer beim Server nachfragen (ETag → 304): verhindert, dass der Browser Bilder eines früheren Servers unter derselben Adresse anzeigt
-    return photos.respond(request, p)
+    # Ohne Version immer beim Server nachfragen (ETag → 304): verhindert, dass der Browser Bilder eines früheren Servers unter derselben Adresse anzeigt.
+    # 3.51.0: mit der aktuellen Version (&v=…, aus /api/photos) darf der Browser das Bild behalten; eine veraltete Version wird wie „ohne“ behandelt.
+    return photos.respond(request, p, immutable=bool(v) and v == photos.ver_of(photo_id))
 
 
 app.include_router(extras.router)

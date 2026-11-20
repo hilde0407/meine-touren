@@ -2259,3 +2259,11 @@ html.mob .recdock{position:sticky;bottom:calc(64px + env(safe-area-inset-bottom)
 .dvc.app{background:#f7e3a1;color:#241d00}
 @media (prefers-color-scheme:dark){.dvc.app{background:#4a3f12;color:#f6dc8c}}.dvappnote{margin:0 0 14px}
 @media (prefers-reduced-motion:reduce){#tabbar a.trec[data-s=recording] .trc::after{animation:none;opacity:.7;transform:none}nav a[data-k=record][data-s=recording]::before,.recstate .rsdot,[data-q=search]>.rgi,.recup[data-p=uploading] .rupi{animation:none}.recset>summary::after{transition:none}}
+/* 3.51.0: Foto-Streifen der Tourseite – feste Höhe und feste Kästchen (nichts springt beim Laden), waagerecht wischen; volles Raster erst auf Wunsch */
+#phbox .phstrip{display:flex;gap:6px;height:118px;align-items:flex-start;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;overscroll-behavior-x:contain;scrollbar-width:thin;margin:6px 0 0;padding:0}
+#phbox .phstrip[hidden],#phbox .phmore[hidden],#phbox .phpg[hidden],#phbox .thumbs[hidden]{display:none}
+.phstrip .phi{flex:0 0 104px;width:104px;height:104px;border-radius:4px;background:var(--soft);overflow:hidden;scroll-snap-align:start}
+.phstrip .phi img{display:block;width:104px;height:104px;object-fit:cover;cursor:pointer}
+.selmode .phstrip img{cursor:crosshair}.phstrip img.sel{outline:4px solid var(--yellow);outline-offset:-4px;filter:brightness(.8)}
+#phbox .phmore{margin:2px 0 0}#phbox .phpg{margin:10px 0 0;text-align:center}#phbox .thumbs{margin-top:8px}
+html.mob #phbox .phstrip{gap:4px;height:110px}html.mob .phstrip .phi,html.mob .phstrip .phi img{width:96px;height:96px;flex-basis:96px}

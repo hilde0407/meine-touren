@@ -7,10 +7,12 @@ function openLb(list, i) {
   showLb();
   $("#lb").classList.add("on");
 }
+/* Bildadresse; mit Version (p.v aus /api/photos, 3.51.0) darf der Browser das Bild behalten, ohne jedes Mal nachzufragen */
+const picSrc = (p, size) => `/pic/${p.id}?size=${size}${p.v ? `&v=${p.v}` : ""}`;
 function showLb() {
   const p = PH_LIST[LB_I];
   if (!p) return;
-  $("#lbi").src = p.src || `/pic/${p.id}?size=2000`;
+  $("#lbi").src = p.src || picSrc(p, 2000);
   $("#lbc").textContent =
     `${p.tour_name ? p.tour_name + " · " : ""}${fmtDatum(p.taken_ts, {zeit: true})} · ${LB_I + 1}/${PH_LIST.length}`;
 }
@@ -66,7 +68,7 @@ VIEWS.photos = async (_, q) => {
     .map(([k, a]) => {
       const t = BY[k];
       return `<div class="pgroup"><div class="ph"><h3>${t ? `<a href="#/tour/${k}">${esc(t.name)}</a>` : "Ohne Tour"}</h3><span>${t ? fmtDatum(t.date) : fmtDatumKurz(a[0].taken_ts)}, ${a.length} Fotos</span><span class="sp"></span>${t ? `<a class="btn ghost sm" target="_blank" href="slideshow.html?tour=${k}">Diashow</a>` : ""}</div>
-    <div class="thumbs">${a.map(p => `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=400" data-i="${ph.indexOf(p)}"><span class="cap">${fmtDatumKurz(p.taken_ts, {zeit: true})}${p.manual === 1 ? " 📌" : ""}</span></div>`).join("")}</div></div>`;
+    <div class="thumbs">${a.map(p => `<div class="th"><img loading="lazy" src="${picSrc(p, 400)}" data-i="${ph.indexOf(p)}"><span class="cap">${fmtDatumKurz(p.taken_ts, {zeit: true})}${p.manual === 1 ? " 📌" : ""}</span></div>`).join("")}</div></div>`;
     })
     .join("");
   bindThumbs($("#pg"), ph);
@@ -103,8 +105,10 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
     on = !on;
     if (!on) sel.clear();
     document.body.classList.toggle("selmode", on);
+    if (o.onMode) o.onMode(on);          // Tourseite: Auswahl öffnet das volle Raster
     paint();
   };
+  $(BOX)._selPaint = paint;               // nachgeladene Rasterseiten zeigen die Auswahl gleich mit
   $(BOX).addEventListener(
     "click",
     e => {

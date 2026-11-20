@@ -129,6 +129,82 @@ VIEWS.tourauswertung = async id => {
   if ($("#tlnav") && !any) $("#tlnav").hidden = true;
 };
 
+/* ---------- Fotos der Tourseite (3.51.0): fester Foto-Streifen mit den besten Fotos, volles Raster erst auf Wunsch, seitenweise ---------- */
+const PH_STRIP_N = 12,
+  PH_STRIP_PX = 300,        // Kantenlänge der Streifenbilder (Server: photos.STRIP_SIZE)
+  PH_PAGE = 60;
+/* Gerüst mit fester Höhe, bevor die Fotoliste da ist: t.photos (Tourenliste) sagt schon, ob und wie viele Fotos es gibt – nichts springt */
+function phSecHtml(t) {
+  const n = +t.photos || 0,
+    sk = Array.from({length: Math.min(n, PH_STRIP_N)}, () => '<span class="phi phsk"></span>').join("");
+  return (
+    `<div id="phbox"><div class="phstrip" id="phs" role="list" aria-label="Ausgewählte Fotos"${n ? "" : " hidden"}>${sk}</div>` +
+    `<div class="phmore" id="phm"${n > PH_STRIP_N ? "" : " hidden"}><button class="btn sm ghost" id="phall" aria-expanded="false" aria-controls="th">Alle ${n} Fotos</button></div>` +
+    `<div class="thumbs" id="th" hidden></div><div class="phpg" id="phpg" hidden><button class="btn sm alt" id="phnext">Mehr anzeigen</button></div></div>`
+  );
+}
+/* Streifen zeichnen; liefert das Raster-Objekt {open(on)} (Raster erst beim Öffnen, in Blöcken zu PH_PAGE Fotos) */
+function phStrip(ph) {
+  const strip = $("#phs"),
+    more = $("#phm"),
+    th = $("#th"),
+    pg = $("#phpg"),
+    box = $("#phbox");
+  let pick = ph.map((p, i) => [p, i]).filter(([p]) => p.s);
+  if (!pick.length) pick = ph.slice(0, PH_STRIP_N).map((p, i) => [p, i]);
+  const showAll = ph.length > pick.length;
+  strip.hidden = !ph.length;
+  strip.innerHTML = pick
+    .map(
+      ([p, i]) =>
+        `<span class="phi" role="listitem"><img src="${picSrc(p, PH_STRIP_PX)}" width="104" height="104" loading="lazy" decoding="async" alt="" title="${fmtDatumKurz(p.taken_ts, {zeit: true})}" data-i="${i}"></span>`
+    )
+    .join("");
+  more.hidden = !showAll;
+  const btn = $("#phall");
+  let shown = 0,
+    isOpen = false,
+    io = null;
+  const label = () => (btn.textContent = isOpen ? "Weniger zeigen" : `Alle ${ph.length} Fotos`);
+  const page = () => {
+    const part = ph.slice(shown, shown + PH_PAGE);
+    th.insertAdjacentHTML(
+      "beforeend",
+      part
+        .map(
+          (p, j) =>
+            `<div class="th"><img loading="lazy" decoding="async" src="${picSrc(p, 500)}" data-i="${shown + j}" alt=""><span class="cap">${fmtDatumKurz(p.taken_ts, {zeit: true})}${p.manual === 1 ? " 📌" : ""}</span></div>`
+        )
+        .join("")
+    );
+    shown += part.length;
+    pg.hidden = shown >= ph.length;
+    bindThumbs(th, ph);
+    if (box._selPaint) box._selPaint();
+    if (shown >= ph.length && io) io.disconnect();
+  };
+  const open = on => {
+    if (on === isOpen) return;
+    isOpen = on;
+    if (on && !shown) page();
+    th.hidden = !on;
+    pg.hidden = !on || shown >= ph.length;
+    strip.hidden = on || !ph.length;
+    more.hidden = !showAll && !on;
+    btn.setAttribute("aria-expanded", String(on));
+    label();
+    if (on && !io && "IntersectionObserver" in window && shown < ph.length) {
+      io = new IntersectionObserver(es => es.some(e => e.isIntersecting) && !pg.hidden && page(), {rootMargin: "400px 0px"});
+      io.observe(pg);
+    }
+  };
+  label();
+  btn.onclick = () => open(!isOpen);
+  $("#phnext").onclick = page;
+  bindThumbs(strip, ph);
+  return {open};
+}
+
 /* ---------- Tourdetail ---------- */
 VIEWS.tour = async id => {
   const t = BY[id];
@@ -151,7 +227,7 @@ VIEWS.tour = async id => {
    </div></section>
    <section class="tlg tlsumg" id="tlg-sum" aria-labelledby="tlgh-sum" hidden><h2 class="tlgh" id="tlgh-sum">Auswertung dieser Tour</h2><div class="tlgb" id="tlgb-sum"></div></section>
    <section class="tlg" id="tlg-more" aria-labelledby="tlgh-more"><h2 class="tlgh" id="tlgh-more">Fotos zur Tour</h2><div class="tlgb" id="tlgb-more">
-   ${tlSecHtml({id: "photos", key: "tl_photos", icon: "cam", title: "Fotos", def: true, body: '<div class="tlbar"><span class="sub" id="pc"></span><span class="sp"></span><button class="btn sm alt" id="padd">Fotos hinzufügen …</button><button class="btn sm alt" id="pgps" title="Vergleicht den Aufnahmeort der Fotos mit der Strecke und korrigiert eine falsch gestellte Kamerauhr">Zeit per GPS prüfen</button><a class="btn sm" id="ss" hidden target="_blank">Diashow</a></div><div class="thumbs" id="th"></div>'})}
+   ${tlSecHtml({id: "photos", key: "tl_photos", icon: "cam", title: "Fotos", def: true, body: '<div class="tlbar"><span class="sub" id="pc"></span><span class="sp"></span><button class="btn sm alt" id="padd">Fotos hinzufügen …</button><button class="btn sm alt" id="pgps" title="Vergleicht den Aufnahmeort der Fotos mit der Strecke und korrigiert eine falsch gestellte Kamerauhr">Zeit per GPS prüfen</button><a class="btn sm" id="ss" hidden target="_blank">Diashow</a></div>' + phSecHtml(t)})}
    </div></section></div>
    ${t.source === "local" ? "" : `<p class="mt30"><a class="back" target="_blank" href="https://www.komoot.com/tour/${t.id}">In Komoot öffnen</a></p>`}`;
   map = mkMap("tm", {layers: true});
@@ -250,20 +326,14 @@ VIEWS.tour = async id => {
       if (window.tlRefresh) tlRefresh();
       return null;
     });
-  const ph = await api(`/api/photos?tour_id=${t.id}&limit=400`);
+  const ph = await api(`/api/photos?tour_id=${encodeURIComponent(t.id)}&limit=400&strip=${PH_STRIP_N}`);     // nur Metadaten (id, Zeit, Ort, Version), ein Aufruf
   $("#pc").textContent = ph.length ? `${ph.length} Fotos` : "Zu dieser Tour gibt es noch keine Fotos.";
   tlSetBadge("photos", ph.length ? `${ph.length} Fotos` : "keine");
   if (ph.length) {
     $("#ss").hidden = false;
     $("#ss").href = `slideshow.html?tour=${t.id}`;
   }
-  $("#th").innerHTML = ph
-    .map(
-      (p, k) =>
-        `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=500" data-i="${k}"><span class="cap">${fmtDatumKurz(p.taken_ts, {zeit: true})}${p.manual === 1 ? " 📌" : ""}</span></div>`
-    )
-    .join("");
-  bindThumbs($("#th"), ph);
+  const grid = phStrip(ph);
   $("#padd").onclick = () => photoImportModal({tour: t});
   $("#pgps").onclick = async () => {
     try {
@@ -272,7 +342,7 @@ VIEWS.tour = async id => {
       uiAlert(e.message || e);
     }
   };
-  if (ph.length) photoSelect(ph, 0, {box: "#th", anchor: "#pc", tour: true});
+  if (ph.length) photoSelect(ph, 0, {box: "#phbox", anchor: "#pc", tour: true, onMode: on => on && grid.open(true)});
   mk.then(c => {
     if (c && ph.length) {
       photoChain(map, t, c, ph); // Fotos auf der Strecke; verschiebbar (12-fotokette.js)

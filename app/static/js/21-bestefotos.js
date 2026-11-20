@@ -3,10 +3,9 @@ const _tourBF = VIEWS.tour;
 VIEWS.tour = async (id, q) => {
   await _tourBF(id, q);
   const b0 = $("#pgps");
-  if (!b0 || $("#pbest") || !$("#th") || !$("#th").children.length) return;
+  if (!b0 || $("#pbest") || !$("#th") || !$("#phs img")) return;      // 3.51.0: Tour mit Fotos (Foto-Streifen da; das Raster entsteht erst beim Öffnen)
   b0.insertAdjacentHTML("afterend", `<button class="btn sm alt" id="pbest" title="Wählt aus den Fotos der Tour die besten aus: Sterne aus Lightroom (XMP), unscharfe und abgelehnte Fotos fallen heraus, verteilt über die ganze Tour">⭐ Beste Fotos</button>`);
   let on = false;
-  const all = $("#th").innerHTML;
   $("#pbest").onclick = async () => {
     const b = $("#pbest");
     if (on) {
@@ -19,6 +18,8 @@ VIEWS.tour = async (id, q) => {
     try {
       const r = await api(`/api/tours/${encodeURIComponent(id)}/best-photos?n=10`);
       on = true;
+      ["#phs", "#phm", "#phpg"].forEach(x => $(x) && ($(x).hidden = true));
+      $("#th").hidden = false;
       $("#th").innerHTML = r.photos
         .map(
           (p, k) =>

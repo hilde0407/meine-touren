@@ -2,16 +2,19 @@
 import hashlib
 import os
 import re
+import threading
 import time
 from datetime import datetime, timedelta, timezone
 
 from PIL import Image, ImageOps
 
-from . import config, db, jobs
+from . import config, ctx, db, jobs
 from .gpxtools import TZ
 from .jobs import log
 
 EXTS = {".jpg", ".jpeg", ".png", ".webp"}
+STRIP_SIZE = 300        # 3.51.0: Kantenlänge der Bilder im Foto-Streifen der Tourseite (Kästchen 104 px, scharf bis 3-fache Pixeldichte; dieselbe Größe wärmt warm_thumbs schon immer vor)
+STRIP_N = 12
 try:
     import pillow_heif  # optional
     pillow_heif.register_heif_opener()
@@ -363,6 +366,7 @@ def assign_all(force=False):
             far += 1
             continue
         upd.append((tid, p["id"]))
+    old = {r["id"]: r["tour_id"] for r in db.query("SELECT id,tour_id FROM photos")}
     with db.cur() as c:       # alles in einer Transaktion: andere Anfragen sehen nie den Zwischenstand „nichts zugeordnet“
         c.execute("UPDATE photos SET tour_id=NULL WHERE COALESCE(manual,0)=0")
         c.executemany("UPDATE photos SET tour_id=? WHERE id=?", upd)
@@ -370,6 +374,11 @@ def assign_all(force=False):
                   "WHERE COALESCE(manual,0)=0 AND path IN (SELECT path FROM photo_pref) AND (SELECT tour_id FROM photo_pref WHERE photo_pref.path=photos.path) IN (SELECT id FROM tours)")
     r = db.one("SELECT COUNT(*) n FROM photos WHERE tour_id IS NOT NULL")
     db.put("assign_sig", _assign_sig(margin, tours))
+    changed = set()
+    for x in db.query("SELECT id,tour_id FROM photos"):
+        if old.get(x["id"], "-") != x["tour_id"]:
+            changed |= {old.get(x["id"]), x["tour_id"]}
+    warm_strip_bg(changed, metrics=len(changed - {None}) <= 5)     # 3.51.0: Foto-Streifen der betroffenen Touren vorab erzeugen
     log(f"Fotos: {r['n']} einer Tour zugeordnet" + (f", {far} wegen großer Entfernung zur Strecke nicht" if far else ""))
 
 
@@ -574,18 +583,22 @@ def shift_photos(tour_id, delta_s, scope="tour", reset=False):
         else:
             db.execute(f"UPDATE photos SET taken_ts=taken_ts+?, offset_s=COALESCE(offset_s,0)+? WHERE id IN ({q})", (delta_s, delta_s, *part))
     q = ",".join("?" * len(own))
+    prev = {r["tour_id"] for r in db.query(f"SELECT DISTINCT tour_id FROM photos WHERE id IN ({q})", own)}
     db.execute(f"UPDATE photos SET tour_id=?, manual=1 WHERE id IN ({q})", (str(tour_id), *own))
     assign_all()
+    warm_strip_bg(prev | {str(tour_id)}, metrics=True)
     return {"shifted": len(ids), "delta_s": 0 if reset else delta_s}
 
 
 def unassign_manual(ids, reset_time=False, exclude=False):
     ids = [int(i) for i in ids]
     q = ",".join("?" * len(ids))
+    prev = {r["tour_id"] for r in db.query(f"SELECT DISTINCT tour_id FROM photos WHERE id IN ({q})", ids)}
     if reset_time:
         db.execute(f"UPDATE photos SET taken_ts=taken_ts-COALESCE(offset_s,0), offset_s=0 WHERE id IN ({q})", ids)
     db.execute(f"UPDATE photos SET manual=?, tour_id=NULL WHERE id IN ({q})", (2 if exclude else 0, *ids))
     assign_all()
+    warm_strip_bg(prev, metrics=True)
 
 
 def thumb(photo_id, size):
@@ -609,13 +622,22 @@ def thumb(photo_id, size):
     return out
 
 
-def warm_thumbs(sizes=(300, 400, 500), stop=None):
-    """Fehlende Vorschaubilder der Übersicht im Hintergrund erzeugen (gedrosselt), damit der erste Seitenaufruf nicht darauf wartet."""
+def warm_thumbs(sizes=(STRIP_SIZE, 400, 500), stop=None):
+    """Fehlende Vorschaubilder der Übersicht im Hintergrund erzeugen (gedrosselt), damit der erste Seitenaufruf nicht darauf wartet.
+    3.51.0: zuerst die Foto-Streifen der Tourseiten (neueste Touren zuerst), dann alle übrigen Vorschaubilder."""
     import time as _t
     try:
         os.nice(10)                       # nur dieser Thread (Linux); Fehler anderswo ignorieren
     except Exception:  # noqa
         pass
+    for t in db.query("SELECT DISTINCT p.tour_id FROM photos p JOIN tours t ON t.id=p.tour_id ORDER BY t.start_ts DESC"):
+        try:
+            warm_strip(t["tour_id"])
+        except Exception:  # noqa
+            pass
+        _t.sleep(0.01)
+        if stop and stop():
+            return 0
     n = 0
     for r in db.query("SELECT id FROM photos WHERE tour_id IS NOT NULL ORDER BY taken_ts DESC"):
         for sz in sizes:
@@ -630,12 +652,26 @@ def warm_thumbs(sizes=(300, 400, 500), stop=None):
     return n
 
 
-def respond(request, path):
-    """Bilddatei mit ETag ausliefern; der Browser fragt jedes Mal nach (304, wenn unverändert)."""
+def ver(path, mtime, size):
+    """3.51.0: Version eines Fotos für die Bildadresse (&v=…): ändert sich mit Benutzer, Datei (Pfad), Änderungszeit und Größe.
+    Eine neue Datei, eine ersetzte oder anders bearbeitete Datei, ein anderer Server oder ein anderer Benutzer ergeben eine andere Adresse."""
+    return hashlib.sha1(f"{ctx.uid() or ''}|{path}|{mtime}|{size}".encode()).hexdigest()[:12]
+
+
+def ver_of(photo_id):
+    r = db.one("SELECT path,mtime,size FROM photos WHERE id=?", (photo_id,))
+    return ver(r["path"], r["mtime"], r["size"]) if r else None
+
+
+def respond(request, path, immutable=False):
+    """Bilddatei mit ETag ausliefern. Ohne Version in der Adresse fragt der Browser jedes Mal nach (304, wenn unverändert) –
+    so zeigt er nie Bilder eines früheren Servers unter derselben Adresse. 3.51.0: Mit passender Version (immutable=True)
+    darf er das Bild ein Jahr behalten, ohne nachzufragen; ändert sich die Datei, ändert sich die Adresse. Immer „private“
+    (nur der Browser des angemeldeten Benutzers, nie ein gemeinsamer Zwischenspeicher)."""
     from fastapi.responses import FileResponse, Response
     st = os.stat(path)
     etag = f'"{st.st_mtime_ns:x}-{st.st_size:x}"'
-    h = {"Cache-Control": "private, no-cache", "ETag": etag}
+    h = {"Cache-Control": "private, max-age=31536000, immutable" if immutable else "private, no-cache", "ETag": etag}
     if etag in (request.headers.get("if-none-match") or ""):
         return Response(status_code=304, headers=h)
     return FileResponse(path, media_type="image/jpeg", headers=h)
@@ -951,6 +987,79 @@ def pick_best(rows, n=10):
         if r not in chosen:
             chosen.append(r)
     return sorted(chosen, key=lambda r: r["taken_ts"])
+
+
+_STRIP_LOCK = threading.Lock()
+_STRIP_Q = {}           # Benutzer -> {tour_id: mit Bewertung/Schärfe nachrechnen}
+_STRIP_RUN = set()
+
+
+def strip_ids(tour_id, n=STRIP_N, bg=False):
+    """Die besten n Fotos einer Tour für den Foto-Streifen – schnell: nur mit schon bekannter Bewertung/Schärfe (pick_best, sonst
+    gleichmäßig über die Tour verteilt). Fehlen Werte, rechnet sie (bg=True) ein Hintergrund-Thread nach; beim nächsten Aufruf zählen sie."""
+    rows = db.query("SELECT id,taken_ts,rating,sharp FROM photos WHERE tour_id=? AND COALESCE(manual,0)!=2 ORDER BY taken_ts", (str(tour_id),))
+    ids = [r["id"] for r in pick_best(rows, n)]
+    if bg:
+        missing = any(r["rating"] is None or r["sharp"] is None for r in rows)
+        if missing or any(not thumb_cached(i, STRIP_SIZE) for i in ids):
+            warm_strip_bg([tour_id], metrics=missing)
+    return ids
+
+
+def thumb_cached(photo_id, size):
+    r = db.one("SELECT path,mtime FROM photos WHERE id=?", (photo_id,))
+    if not r:
+        return True
+    key = hashlib.sha1(f"{r['path']}|{r['mtime']}|{size}".encode()).hexdigest()
+    return (config.CACHE_DIR / "thumb" / key[:2] / f"{key}.jpg").exists()
+
+
+def warm_strip(tour_id, metrics=False):
+    """Vorschaubilder des Foto-Streifens einer Tour erzeugen; mit metrics=True vorher fehlende Bewertung/Schärfe berechnen."""
+    for i in strip_ids(tour_id):
+        thumb(i, STRIP_SIZE)
+    if metrics:
+        rows = db.query("SELECT id,path,rating,sharp FROM photos WHERE tour_id=? AND COALESCE(manual,0)!=2", (str(tour_id),))
+        if any(r["rating"] is None or r["sharp"] is None for r in rows):
+            ensure_metrics(rows, budget_s=120)
+            for i in strip_ids(tour_id):
+                thumb(i, STRIP_SIZE)
+
+
+def warm_strip_bg(tour_ids, metrics=False):
+    """warm_strip im Hintergrund (ein Thread je Benutzer, niedrige Priorität); Aufrufe während der Arbeit landen in der Warteschlange."""
+    tids = {str(t) for t in tour_ids or () if t}
+    if not tids or os.environ.get("MT_NO_WARM") == "1":
+        return
+    u = ctx.uid()
+    with _STRIP_LOCK:
+        q = _STRIP_Q.setdefault(u, {})
+        for t in tids:
+            q[t] = q.get(t, False) or metrics
+        if u in _STRIP_RUN:
+            return
+        _STRIP_RUN.add(u)
+    threading.Thread(target=_strip_worker, args=(u,), daemon=True, name="mt-strip").start()
+
+
+def _strip_worker(u):
+    try:
+        os.nice(10)
+    except Exception:  # noqa
+        pass
+    while True:
+        with _STRIP_LOCK:
+            q = _STRIP_Q.get(u)
+            if not q:
+                _STRIP_Q.pop(u, None)
+                _STRIP_RUN.discard(u)
+                return
+            tid, m = q.popitem()
+        try:
+            with ctx.as_user(u):
+                warm_strip(tid, m)
+        except Exception:  # noqa
+            pass
 
 
 def best_of_tour(tour_id, n=10):

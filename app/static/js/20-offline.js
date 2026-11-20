@@ -14,7 +14,7 @@
   // Beim Abmelden die zwischengespeicherten Daten löschen (gemeinsam genutzte Geräte)
   document.addEventListener("click", e => {
     if (e.target && e.target.id === "umo") {
-      if (window.caches) ["mt-api-v1", "mt-pics-v1"].forEach(n => caches.delete(n));
+      if (window.caches) ["mt-api-v1", "mt-pics-v1", "mt-pics-v2"].forEach(n => caches.delete(n));
       try { if (window.MTApp && MTApp.clearOffline) MTApp.clearOffline(); } catch (x) {}
     }
   }, true);
