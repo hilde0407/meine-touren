@@ -7,7 +7,7 @@ import requests
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse, Response
 
-from . import config, db, tracks
+from . import config, db, gpxtools, tracks
 from .jobs import log
 
 router = APIRouter()
@@ -170,12 +170,15 @@ def upload_tour(tid, portal, gpx=None, force=False, dry_run=False):
         raise PortalError("Strava ist nicht verbunden (Verwaltung → Portale)")
     gpx = gpx or tracks.gpx_for(tid)
     name = t["name"] or tid
+    sport = t["sport"] or "hike"
+    if sport == "hike" and db.one("SELECT 1 x FROM tour_tags WHERE id=? AND tag=?", (tid, gpxtools.MERGE["snowshoe"][1])):
+        sport = "snowshoe"                     # 3.50.0: Wandern mit Schlagwort „Schneeschuh“ geht als Schneeschuhwanderung zu Komoot/Strava
     try:
         if portal == "komoot":
-            st, rid = komoot_upload(gpx, t["sport"] or "hike", name)
+            st, rid = komoot_upload(gpx, sport, name)
             st = "created" if st == "created" else "duplicate"
         else:
-            st, rid = strava_upload(gpx, t["sport"] or "hike", name, f"meine-touren-{tid}")
+            st, rid = strava_upload(gpx, sport, name, f"meine-touren-{tid}")
     except Exception as e:  # noqa
         record(tid, portal, "error", "", str(e)[:300])
         raise

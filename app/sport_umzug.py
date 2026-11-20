@@ -106,7 +106,7 @@ def _snow(conn, now):
     ids += [r[0] for r in conn.execute("SELECT id FROM tour_sport WHERE sport=?", (ALT,)) if r[0] not in ids]
     for tid in ids:
         _tag(conn, tid, now)
-        _log(conn, "tours", tid, ALT, NEU, "Schneeschuh zählt als Wandern")
+        _log(conn, "tours", tid, ALT, NEU, "Schneeschuh zählt als Wandern", now)
     conn.execute("UPDATE tours SET sport=? WHERE sport=?", (NEU, ALT))
     conn.execute("UPDATE tour_sport SET sport=? WHERE sport=?", (NEU, ALT))
     n["touren"] = len(ids)
@@ -119,10 +119,10 @@ def _snow(conn, now):
             d["sport"] = NEU
             conn.execute("UPDATE tour_hidden SET js=? WHERE id=?", (json.dumps(d), r[0]))
             _tag(conn, r[0], now)
-            _log(conn, "tour_hidden", r[0], ALT, NEU, "Schneeschuh zählt als Wandern")
+            _log(conn, "tour_hidden", r[0], ALT, NEU, "Schneeschuh zählt als Wandern", now)
     if _has(conn, "plans"):
         for r in conn.execute("SELECT id FROM plans WHERE sport=?", (ALT,)).fetchall():
-            _log(conn, "plans", r[0], ALT, NEU, "Schneeschuh zählt als Wandern")
+            _log(conn, "plans", r[0], ALT, NEU, "Schneeschuh zählt als Wandern", now)
             n["plaene"] += 1
         conn.execute("UPDATE plans SET sport=? WHERE sport=?", (NEU, ALT))
     if _has(conn, "goals"):
@@ -133,10 +133,10 @@ def _snow(conn, now):
                                 (NEU, g["year"], g["metric"]) + ((g.get("period") or "year",) if per else ())).fetchone()
             if same:      # dasselbe Ziel gibt es für Wandern schon: das Wandern-Ziel gilt (zählt Schneeschuh jetzt mit)
                 conn.execute("DELETE FROM goals WHERE id=?", (g["id"],))
-                _log(conn, "goals", g["id"], ALT, "", f"Ziel entfernt, Wandern-Ziel gilt ({g['metric']} {g['target']})")
+                _log(conn, "goals", g["id"], ALT, "", f"Ziel entfernt, Wandern-Ziel gilt ({g['metric']} {g['target']})", now)
             else:
                 conn.execute("UPDATE goals SET sport=? WHERE id=?", (NEU, g["id"]))
-                _log(conn, "goals", g["id"], ALT, NEU, "Schneeschuh zählt als Wandern")
+                _log(conn, "goals", g["id"], ALT, NEU, "Schneeschuh zählt als Wandern", now)
             n["ziele"] += 1
     if _has(conn, "gear", "sports"):
         for r in conn.execute("SELECT id, sports FROM gear WHERE ','||sports||',' LIKE ?", (f"%,{ALT},%",)).fetchall():
@@ -146,7 +146,7 @@ def _snow(conn, now):
                 if s and s not in sp:
                     sp.append(s)
             conn.execute("UPDATE gear SET sports=? WHERE id=?", (",".join(sp), r[0]))
-            _log(conn, "gear", r[0], r[1], ",".join(sp), "Schneeschuh zählt als Wandern")
+            _log(conn, "gear", r[0], r[1], ",".join(sp), "Schneeschuh zählt als Wandern", now)
             n["ausruestung"] += 1
     for tab in ("workouts", "device_quality"):
         if _has(conn, tab):
@@ -168,7 +168,7 @@ def migrate(conn):
         res = _snow(conn, now) if snow else {"touren": 0, "plaene": 0, "ziele": 0, "ausruestung": 0}
         for tid, trackid in lauf:
             conn.execute("UPDATE tours SET sport=? WHERE id=? AND sport='hike'", (LAUFEN, tid))
-            _log(conn, "tours", tid, "hike", LAUFEN, f"Zepp-Training {trackid} ist ein Lauf (Typ 1/8)")
+            _log(conn, "tours", tid, "hike", LAUFEN, f"Zepp-Training {trackid} ist ein Lauf (Typ 1/8)", now)
         if not done and _has(conn, "workouts", "ztype"):
             conn.execute(f"UPDATE workouts SET sport=? WHERE ztype IN ({_ZT}) AND sport='hike'", (LAUFEN,))
         alt = {}
