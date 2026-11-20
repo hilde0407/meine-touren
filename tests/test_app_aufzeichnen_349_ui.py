@@ -407,6 +407,20 @@ def test_warnleiste_wird_bei_der_kartenhoehe_beruecksichtigt(pw, app):
         pg.browser_.close()
 
 
+def test_warnleiste_fehlt_auf_der_aufzeichnungsseite(pw, app):
+    """Auf der Aufzeichnungsseite der App zählt nur die Aufnahme: die Sicherungs-Warnleiste bleibt dort weg und erscheint auf anderen Seiten wieder."""
+    pg = _open(pw, app, state=REC)
+    try:
+        pg.wait_for_selector("#rmap", timeout=T)
+        pg.evaluate("() => { location.hash = '#/tours'; }")
+        expect(pg.locator("#wbar")).to_be_visible(timeout=T)
+        pg.evaluate("() => { location.hash = '#/record'; }")
+        expect(pg.locator("#wbar")).to_have_count(0, timeout=T)
+        pg.wait_for_function("() => getComputedStyle(document.documentElement).getPropertyValue('--wbh').trim() === '0px'", timeout=T)
+    finally:
+        pg.browser_.close()
+
+
 # ---------------------------------------------------------------------------------------------- beenden, hochladen, fertig
 def test_beenden_rueckfrage_hochladen_und_geraet(pw, app):
     pg = _open(pw, app, state=REC, day=11)

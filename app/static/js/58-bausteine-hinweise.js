@@ -321,7 +321,9 @@ function wbText(d) {
 function wbZeichnen(d) {
   let bar = document.getElementById("wbar");
   const top = document.querySelector("header.top");
-  if (!d || !d.zeige || !top || !isAdmin() || isViewer() || (d.ausblendbar && wbVerborgen())) {
+  /* 3.49.0: Auf der Aufzeichnungsseite der App bleibt die Leiste weg – dort zählt nur die Aufnahme; auf jeder anderen Seite erscheint sie wieder. */
+  const aufnahme = !!window.MTApp && location.hash.startsWith("#/record");
+  if (!d || !d.zeige || !top || !isAdmin() || isViewer() || aufnahme || (d.ausblendbar && wbVerborgen())) {
     if (bar) bar.remove();
     wbHoehe();
     return;
