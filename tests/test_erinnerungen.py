@@ -64,7 +64,7 @@ def test_default_call_is_unchanged_and_never_leaks_paths():
         r = c.get("/api/photos?random=true&limit=6")
         assert r.status_code == 200 and len(r.json()) == 6
         for p in r.json():
-            assert set(p) == {"id", "taken_ts", "tour_id", "lat", "lng", "manual", "offset_s", "tour_name"}
+            assert set(p) == {"id", "taken_ts", "tour_id", "lat", "lng", "manual", "offset_s", "tour_name", "v"}     # 3.51.0: „v“ = Bildversion (kein Pfad)
         assert len(c.get("/api/photos").json()) == 14
         assert "geheim" not in c.get("/api/photos?limit=100").text
 
