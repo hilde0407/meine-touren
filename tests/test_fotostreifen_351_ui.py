@@ -27,7 +27,10 @@ now = int(time.time())
 def loop(n=200):
     return [(47.5 + 0.01 * math.sin(2 * math.pi * i / (n - 1)), 11.0 + 0.012 * (1 - math.cos(2 * math.pi * i / (n - 1))), 1200 + 260 * math.sin(i / 9), i * 60000) for i in range(n)]
 def tour(tid, days, name, n):
-    ts = now - days * 86400
+    from datetime import datetime
+    from app.gpxtools import TZ
+    d = datetime.fromtimestamp(now - days * 86400, TZ)
+    ts = int(d.replace(hour=9, minute=0, second=0, microsecond=0).timestamp())     # 3.52.0: Start 9 Uhr – die Fotos (bis 3 Std.) bleiben am selben Tag, unabhängig von der Uhrzeit des Testlaufs
     db.execute("INSERT INTO tours(id,name,sport,start_ts,end_ts,dist_m,dur_s,up_m,down_m,lat,lng,status,source) VALUES(?,?,?,?,?,?,?,?,?,?,?,'t','komoot')",
                (tid, name, "hike", ts, ts + 12000, 12000, 12000, 500, 500, 47.5, 11.0))
     routes.store(tid, loop())

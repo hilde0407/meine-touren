@@ -105,9 +105,9 @@ def test_mobile_karten_ruhig_ohne_ueberlauf(pw, app, scheme, zoom):
         r = pg.evaluate("""() => {
           const W = innerWidth, out = {over: document.documentElement.scrollWidth - W, rows: []};
           document.querySelectorAll('#tl a.tr').forEach(t => {
-            const b = t.getBoundingClientRect(), nm = t.querySelector('.nm').getBoundingClientRect(), n = t.querySelector('.n').getBoundingClientRect(), svg = t.querySelector('svg.mini').getBoundingClientRect();
+            const b = t.getBoundingClientRect(), nm = t.querySelector('.nm').getBoundingClientRect(), n = t.querySelector('.n').getBoundingClientRect(), svg = (t.querySelector('.trp') || t.querySelector('svg.mini')).getBoundingClientRect();   // 3.52.0: Kachel (Foto oder Strecke)
             const s = t.querySelector('.s').getBoundingClientRect();
-            out.rows.push({h: Math.round(b.height), left: Math.abs(n.left - nm.left), svgW: Math.round(svg.width / (+document.body.style.zoom || 1)), cut: t.scrollWidth > t.clientWidth + 1, right: Math.max(nm.right, n.right, s.right) <= b.right + 1,
+            out.rows.push({h: Math.round(b.height), left: Math.abs(n.left - nm.left), svgW: Math.round(svg.width / (+document.body.style.zoom || 1)), trf: t.classList.contains('trf'), cut: t.scrollWidth > t.clientWidth + 1, right: Math.max(nm.right, n.right, s.right) <= b.right + 1,
               nfs: parseFloat(getComputedStyle(t.querySelector('.n span')).fontSize), nmfs: parseFloat(getComputedStyle(t.querySelector('.nm')).fontSize), nmH: Math.round(nm.height / (+document.body.style.zoom || 1)),
               nOverlap: n.top < s.bottom - 1 && n.left < s.right && n.right > s.left, sep: getComputedStyle(t.querySelector('.n')).borderTopWidth});
           });
@@ -115,7 +115,7 @@ def test_mobile_karten_ruhig_ohne_ueberlauf(pw, app, scheme, zoom):
         assert r["over"] <= 0, r
         assert len(r["rows"]) >= 3
         for x in r["rows"]:
-            assert x["h"] >= 44 and x["left"] <= 1.5 and x["svgW"] <= 70 and not x["cut"] and x["right"] and not x["nOverlap"], x
+            assert x["h"] >= 44 and x["left"] <= 1.5 and x["svgW"] <= (88 if x["trf"] else 70) and not x["cut"] and x["right"] and not x["nOverlap"], x
             assert x["nfs"] <= 16 and x["nmfs"] <= 20 and x["nmH"] <= 2 * 24, x                               # kleinere, einheitliche Schrift; Titel höchstens zwei Zeilen
         assert len({x["nfs"] for x in r["rows"]}) == 1
         if zoom == 1:
