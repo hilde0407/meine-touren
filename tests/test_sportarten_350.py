@@ -251,3 +251,9 @@ def test_hochladen_wandern_mit_schneeschuh_geht_als_schneeschuh(fresh, monkeypat
     portals.upload_tour(t["id"], "komoot")
     portals.upload_tour(u["id"], "komoot")
     assert seen == ["snowshoe", "hike"]
+
+
+def test_alte_rueckblick_und_diashow_links_zeigen_wandern():
+    from app import diashow_link, rueckblick
+    assert rueckblick.parse("rb:2026:snowshoe") == (2026, "hike") and rueckblick.parse("rb:2026:jogging") == (2026, "jogging")
+    assert diashow_link.parse("ds:2026:snowshoe") == (2026, "hike") and diashow_link.parse("ds:all") == (0, "")

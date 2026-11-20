@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.50.0 – Laufen und Schneeschuh wie im Tagebuch
+
+- Läufe der Zepp-Uhr (Typ 1, Laufband 8) sind „Laufen“ statt „Wandern“; „Gehen“ und Wandern der Uhr bleiben Wandern. GPX mit „running“ wird Laufen.
+- Schneeschuhwandern zählt als Wandern und trägt das Schlagwort „Schneeschuh“ (Statistik, Ziele, Bestwerte, Fitness, Rückblick, Planhilfe); Steilheit und Sicherheitsnotiz hängen am Schlagwort, Komoot/Strava bekommen weiter „Schneeschuh“.
+- Einmaliger Umzug beim Start: sicher zuordenbare Zepp-Läufe werden umgestellt (nie eine selbst gewählte Sportart), die übrigen stehen unter Prüfen → „Läufe von der Uhr“ zur Wahl; vorher eine Kopie der Datenbank, jede Änderung im Protokoll.
+- Damit zählen Meine Touren und Mein Tourentagebuch unter „Wandern“ dieselben Touren.
+
 ## Version 3.49.0 – App: Aufzeichnen im Fokus
 
 - Android-App: „Aufzeichnen“ ist der mittlere, hervorgehobene Reiter (zeigt „Läuft“ mit Zeit, „Pausiert“, „Hochladen“) und die Startseite der App (umstellbar auf „Übersicht“).

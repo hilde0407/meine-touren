@@ -1095,6 +1095,10 @@ Siehe [Abschnitt 10.1](#k10).
 
 Hier findest du auffällige Touren (zum Beispiel unplausible Tempi) und Aufräum-Werkzeuge. Touren, die nur wegen Lücken oder Pausen auffallen, kannst du als **geprüft** markieren.
 
+**Läufe von der Uhr (ab 3.50.0):** Läufe der Zepp-Uhr sind „Laufen“, nicht mehr „Wandern“. Was sicher zugeordnet werden konnte, hat die App beim Update selbst umgestellt. Touren, die von Komoot stammen oder nur über Startzeit und Länge zu einem Lauf der Uhr passen, stehen hier: **Auf Laufen umstellen** (einzeln) oder **Alle … auf Laufen umstellen** (mit Rückfrage). Der Abschnitt erscheint nur, wenn es solche Touren gibt.
+
+**Schneeschuh (ab 3.50.0):** Schneeschuhtouren sind Wanderungen mit dem Schlagwort **„Schneeschuh“** – sie zählen in Statistik und Zielen als Wandern, wie im Tourentagebuch. Steilheit über 30° und die Sicherheitsnotiz gibt es weiterhin bei Touren mit diesem Schlagwort.
+
 [↑ Inhaltsverzeichnis](#inhalt)
 
 ---
@@ -1171,6 +1175,8 @@ Auch im Handy-Browser passt sich die Oberfläche an: unten die Leiste mit **Übe
 **Mein Tourentagebuch** ist eine **eigenständige Android-App**, die ganz ohne Server auskommt: Touren, Fotos, Aufzeichnung, Planung und Routing liegen **lokal auf dem Handy**. Sie ist ein separates Projekt ([hilde0407/mein-tourentagebuch](https://github.com/hilde0407/mein-tourentagebuch)) und nicht Teil von Meine Touren.
 
 Laut Projektbeschreibung kann sie unter anderem: Touren mit Karte und Höhenprofil, Fotos (automatisch den Touren zugeordnet), GPS-Aufzeichnung mit Sprachansagen, Tourplanung mit Routing, Import aus Dateien (GPX, FIT, TCX, ZIP) sowie aus Komoot, Strava und Zepp, eine Statistik und eine Sicherung. Wer unterwegs lieber ohne Server arbeitet, nutzt sie; Meine Touren ist das Archiv für den eigenen Server. Alles Weitere steht in der Beschreibung des Projekts auf GitHub.
+
+Beide Apps ordnen die Sportarten seit 3.50.0 gleich zu: Läufe der Zepp-Uhr sind „Laufen“, Schneeschuhwandern zählt als „Wandern“ (Schlagwort „Schneeschuh“). Nordic Walking ist hier eine eigene Sportart, im Tagebuch zählt es als Wandern.
 
 [↑ Inhaltsverzeichnis](#inhalt)
 

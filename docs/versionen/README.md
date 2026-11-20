@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.50.0](3.50.0.md) – Laufen und Schneeschuh wie im Tagebuch: Läufe der Zepp-Uhr sind „Laufen“, Schneeschuh zählt als Wandern (Schlagwort), Prüfen „Läufe von der Uhr“
 - [3.49.0](3.49.0.md) – App: Aufzeichnen im Fokus (Reiter, Startseite, neue Aufzeichnungsseite), die App als Aufzeichnungsgerät in „Meine Geräte“
 - [3.48.0](3.48.0.md) – Sicherungs-Wächter, „Touren holen“ mit Darstellung, Rückblick „Wie ist es gelaufen?“, ruhigere Tourenliste am Handy
 - [3.47.1](3.47.1.md) – Fehlerkorrektur: Notizbox der Tour wird nicht mehr zu hoch

@@ -31,7 +31,7 @@ def ref(year, sport=""):
 def parse(tour_id):
     """'rb:2025:hike' -> (2025, 'hike'); 'rb:2025' -> (2025, '')."""
     p = tour_id[len(PREFIX):].split(":", 1)
-    return int(p[0]), (p[1] if len(p) > 1 else "")
+    return int(p[0]), (gpxtools.norm(p[1])[0] if len(p) > 1 else "")      # 3.50.0: ältere Links „snowshoe“ = Wandern
 
 
 def normalize(blocks):

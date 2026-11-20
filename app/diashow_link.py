@@ -13,7 +13,7 @@ from datetime import datetime
 
 from fastapi import HTTPException
 
-from . import db, photos, stats
+from . import db, gpxtools, photos, stats
 from .gpxtools import TZ
 from .rueckblick import _range
 
@@ -33,7 +33,7 @@ def ref(year, sport=""):
 def parse(tour_id):
     """'ds:2025:hike' -> (2025, 'hike'); 'ds:all' -> (0, '')."""
     p = tour_id[len(PREFIX):].split(":", 1)
-    return (0 if p[0] == "all" else int(p[0])), (p[1] if len(p) > 1 else "")
+    return (0 if p[0] == "all" else int(p[0])), (gpxtools.norm(p[1])[0] if len(p) > 1 else "")      # 3.50.0: ältere Links „snowshoe“ = Wandern
 
 
 def title(year, sport=""):
@@ -67,6 +67,7 @@ def check(year, sport, best):
     sport = sport if isinstance(sport, str) else ""
     if len(sport) > 40 or ":" in sport:
         raise HTTPException(400, "Ungültige Sportart")
+    sport = gpxtools.norm(sport)[0]
     try:
         best = int(best or 0)
     except (TypeError, ValueError):
