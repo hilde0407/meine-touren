@@ -78,7 +78,7 @@ VIEWS.tripsheet = async id => {
       const per = Math.max(2, Math.ceil(24 / Math.max(1, ts.length)));
       all = (await Promise.all(ts.map(t => (t.photos ? api(`/api/tours/${t.id}/best-photos?n=${per}`).then(r => r.photos || []).catch(() => []) : Promise.resolve([]))))).flat();
     }
-    $("#th").innerHTML = [...new Set(spread(all, PDFP.n))].map(p => `<div class="th"><img src="/pic/${p.id}?size=500"></div>`).join("");
+    $("#th").innerHTML = [...new Set(spread(all, PDFP.n))].map(p => `<div class="th"><img decoding="async" src="${picSrc(p, 500)}"></div>`).join("");
   };
   pdfPhotoBind(photos);
   pdfBindDl(`/api/trips/${encodeURIComponent(id)}/pdf`);

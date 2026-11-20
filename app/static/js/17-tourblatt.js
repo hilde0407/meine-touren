@@ -67,7 +67,7 @@ VIEWS.sheet = async id => {
     } catch (e) {
       pick = spread(await api(`/api/photos?tour_id=${t.id}&limit=400`).catch(() => []), PDFP.n);
     }
-    $("#th").innerHTML = [...new Set(pick)].slice(0, PDFP.n).map(p => `<div class="th"><img src="/pic/${p.id}?size=500"></div>`).join("");
+    $("#th").innerHTML = [...new Set(pick)].slice(0, PDFP.n).map(p => `<div class="th"><img decoding="async" src="${picSrc(p, 500)}"></div>`).join("");
   };
   pdfPhotoBind(photos);
   pdfBindDl(`/api/tours/${encodeURIComponent(t.id)}/pdf`);

@@ -101,8 +101,8 @@ def build(sport="", date_from="", date_to="", day="", before=0):
 
 
 def best(where, args, n):
-    """Die besten n Fotos zu den Bedingungen (zeitlich sortiert, ohne Dateipfad)."""
-    rows = db.query("SELECT p.id,p.taken_ts,p.tour_id,p.lat,p.lng,p.manual,p.offset_s,p.path,p.rating,p.sharp,t.name AS tour_name FROM photos p LEFT JOIN tours t ON t.id=p.tour_id "
+    """Die besten n Fotos zu den Bedingungen (zeitlich sortiert, ohne Dateipfad). 3.54.0: mit Bildversion „v“ wie /api/photos (der Browser darf das Bild behalten)."""
+    rows = db.query("SELECT p.id,p.taken_ts,p.tour_id,p.lat,p.lng,p.manual,p.offset_s,p.path,p.mtime,p.size,p.rating,p.sharp,t.name AS tour_name FROM photos p LEFT JOIN tours t ON t.id=p.tour_id "
                     f"WHERE {' AND '.join(where)} AND COALESCE(p.manual,0)!=2 AND p.taken_ts IS NOT NULL ORDER BY p.taken_ts LIMIT {BEST_POOL}", tuple(args))
     photos.ensure_metrics([r for r in rows if r.get("rating") is None or r.get("sharp") is None][:300], budget_s=4)         # fehlende Bewertung nachrechnen, begrenzt
-    return [{k: v for k, v in r.items() if k not in ("path", "rating", "sharp")} for r in photos.pick_best(rows, n)]
+    return [{**{k: v for k, v in r.items() if k not in ("path", "mtime", "size", "rating", "sharp")}, "v": photos.ver(r["path"], r["mtime"], r["size"])} for r in photos.pick_best(rows, n)]

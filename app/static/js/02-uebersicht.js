@@ -93,7 +93,7 @@ VIEWS.dash = async (_, q) => {
   $("#main").innerHTML = `
   <section class="hero"><div id="hm"></div><div class="in"><div class="t">
     <div class="k">Letzte Tour, ${sName(last.sport)}</div><h1>${esc(last.name)}</h1><div class="w">${fmtDatum(last.date, {zeit: true})}</div>
-    ${ph.length ? `<div class="thumbrow">${ph.map((p, i) => `<img loading="lazy" src="/pic/${p.id}?size=300" data-i="${i}">`).join("")}</div>` : ""}
+    ${ph.length ? `<div class="thumbrow">${ph.map((p, i) => `<img loading="lazy" decoding="async" src="${picSrc(p, 300)}" data-i="${i}">`).join("")}</div>` : ""}
     <div class="btns"><a class="btn" href="#/tour/${last.id}">Tour ansehen</a>${last.photos ? `<a class="btn alt c-white" target="_blank" href="slideshow.html?tour=${last.id}">Diashow</a>` : ""}</div></div>
     <div class="signs"><div class="sign">${fmtKm(last.km)}<small>Strecke</small></div><div class="sign l">${fmtHm(last.up_m)}<small>Aufstieg</small></div><div class="sign">${fmtDauer(last.h * 3600)}<small>Dauer</small></div></div></div></section>
   <div class="inner">
@@ -142,7 +142,7 @@ VIEWS.dash = async (_, q) => {
     const r = await api("/api/photos?random=true&limit=8");
     if (r.length) {
       $("#mem").innerHTML = r
-        .map((p, i) => `<img loading="lazy" src="/pic/${p.id}?size=400" data-i="${i}" title="${esc(p.tour_name || "")}">`)
+        .map((p, i) => `<img loading="lazy" decoding="async" src="${picSrc(p, 400)}" data-i="${i}" title="${esc(p.tour_name || "")}">`)
         .join("");
       $("#memsub").innerHTML = `<a target="_blank" href="slideshow.html?random=1">Zufalls-Diashow starten</a>`;
       bindThumbs($("#mem"), r);
@@ -184,6 +184,8 @@ function loadCovers() {
     })
     .catch(() => (COVERS = COVERS || {})));
 }
+/* 3.54.0: Titelfotos für Startseite und Bausteine (Zuletzt unterwegs, Wiederentdecken): dieselbe Antwort wie die Tourenliste, auch wenn die Fotos der Liste ausgeschaltet sind */
+const homeCovers = () => (tlFotos() ? (COVERS ? Promise.resolve(COVERS) : window.COVP || loadCovers()) : api("/api/tour-covers"));
 const trImg = c => `<img class="trimg" src="/pic/${+c.id}?size=${TR_PIC}&v=${esc(c.v || "")}" alt="" loading="lazy" decoding="async" width="${TR_PIC}" height="${TR_PIC}">`;
 function trThumb(t) {
   if (!trfOn()) return miniRoute(t.id, t.sport);

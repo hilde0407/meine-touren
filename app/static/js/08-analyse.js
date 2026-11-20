@@ -394,7 +394,7 @@ VIEWS.dash = async (...a) => {
     if (ph.length) {
       w.insertAdjacentHTML(
         "afterend",
-        `<div class="thumbrow">${ph.map((p, x) => `<img loading="lazy" src="/pic/${p.id}?size=300" data-i="${x}">`).join("")}</div>`
+        `<div class="thumbrow">${ph.map((p, x) => `<img loading="lazy" decoding="async" src="${picSrc(p, 300)}" data-i="${x}">`).join("")}</div>`
       );
       bindThumbs(hero.querySelector(".thumbrow"), ph);
     }

@@ -15,6 +15,7 @@
   document.addEventListener("click", e => {
     if (e.target && e.target.id === "umo") {
       if (window.caches) ["mt-api-v1", "mt-pics-v1", "mt-pics-v2"].forEach(n => caches.delete(n));
+      try { ["mt_erhold", "mt_wied"].forEach(k => sessionStorage.removeItem(k)); } catch (x) {}     // 3.54.0: gemerkte Zufallsauswahl der Übersicht
       try { if (window.MTApp && MTApp.clearOffline) MTApp.clearOffline(); } catch (x) {}
     }
   }, true);
@@ -42,8 +43,8 @@ async function prepareOffline(onProgress, nTours = 8, all = false) {
       const c = await api(`/api/tours/${t.id}/coords`);
       const pts = c.filter((_, i) => i % Math.max(1, Math.floor(c.length / 60)) === 0);
       for (const z of [11, 13, 14]) pts.forEach(p => { const [x, y] = tileXY(p[0], p[1], z); for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) tiles.add(`${z}/${x + dx}/${y + dy}`); });
-      const ph = await api(`/api/photos?tour_id=${t.id}&limit=400`);
-      for (const p of ph.slice(0, 12)) await fetch(`/pic/${p.id}?size=500`).then(r => r.blob()).catch(() => 0);
+      const ph = await api(`/api/photos?tour_id=${t.id}&limit=400&strip=12`);           // 3.54.0: die Bilder des Foto-Streifens mit Version (dieselben Adressen wie auf der Tourseite)
+      for (const p of ph.filter(x => x.s).slice(0, 12)) await fetch(picSrc(p, PH_STRIP_PX)).then(r => r.blob()).catch(() => 0);
     } catch (e) {}
   }
   const list = [...tiles].slice(0, 1200);

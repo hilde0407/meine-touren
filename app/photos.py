@@ -628,13 +628,16 @@ def thumb(photo_id, size):
 def warm_thumbs(sizes=(STRIP_SIZE, 400, 500), stop=None):
     """Fehlende Vorschaubilder der Übersicht im Hintergrund erzeugen (gedrosselt), damit der erste Seitenaufruf nicht darauf wartet.
     3.51.0: zuerst die Foto-Streifen der Tourseiten (neueste Touren zuerst), dann alle übrigen Vorschaubilder.
-    3.52.0: noch davor die Titelfotos der Tourenliste (ein Bild je Tour, neueste Touren zuerst)."""
+    3.52.0: noch davor die Titelfotos der Tourenliste (ein Bild je Tour, neueste Touren zuerst).
+    3.54.0: danach die großen Bilder des Kopfbereichs der Übersicht (warm_home, höchstens HOME_TOURS Bilder)."""
     import time as _t
     try:
         os.nice(10)                       # nur dieser Thread (Linux); Fehler anderswo ignorieren
     except Exception:  # noqa
         pass
     if warm_covers(stop) is None:
+        return 0
+    if warm_home(stop) is None:
         return 0
     for t in db.query("SELECT DISTINCT p.tour_id FROM photos p JOIN tours t ON t.id=p.tour_id ORDER BY t.start_ts DESC"):
         try:
@@ -1107,6 +1110,29 @@ def warm_covers(stop=None):
     return n
 
 
+HOME_SIZE = 1200        # 3.54.0: Hauptbild des Kopfbereichs der Übersicht (js/41-startseite.js HL_PX); die kleinen Bilder dort haben STRIP_SIZE
+HOME_TOURS = 8          # so viele letzte Touren blättert der Kopfbereich durch
+
+
+def warm_home(stop=None):
+    """3.54.0: das große Bild des Kopfbereichs der Übersicht (erstes Foto der Tour, wie /api/photos?tour_id=…&limit=4) für die letzten HOME_TOURS Touren vorab erzeugen,
+    gedrosselt; die kleinen Bilder daneben (STRIP_SIZE) entstehen mit den übrigen Vorschaubildern. None = abgebrochen."""
+    import time as _t
+    n = 0
+    for t in db.query("SELECT id FROM tours ORDER BY start_ts DESC LIMIT ?", (HOME_TOURS,)):
+        r = db.one("SELECT id FROM photos WHERE tour_id=? ORDER BY taken_ts LIMIT 1", (t["id"],))
+        if r:
+            try:
+                thumb(r["id"], HOME_SIZE)
+                n += 1
+            except Exception:  # noqa
+                pass
+        _t.sleep(0.03)
+        if stop and stop():
+            return None
+    return n
+
+
 def warm_strip_bg(tour_ids, metrics=False):
     """warm_strip im Hintergrund (ein Thread je Benutzer, niedrige Priorität); Aufrufe während der Arbeit landen in der Warteschlange."""
     tids = list(dict.fromkeys(str(t) for t in tour_ids or () if t))       # 3.52.0: Reihenfolge behalten (zuletzt eingereiht = zuerst bearbeitet)
@@ -1144,7 +1170,7 @@ def _strip_worker(u):
 
 
 def best_of_tour(tour_id, n=10):
-    rows = db.query("SELECT id,taken_ts,tour_id,lat,lng,path,rating,sharp FROM photos WHERE tour_id=? AND COALESCE(manual,0)!=2 ORDER BY taken_ts", (tour_id,))
+    rows = db.query("SELECT id,taken_ts,tour_id,lat,lng,path,mtime,size,rating,sharp FROM photos WHERE tour_id=? AND COALESCE(manual,0)!=2 ORDER BY taken_ts", (tour_id,))
     ensure_metrics(rows)
     out = pick_best(rows, n)
-    return [{k: r[k] for k in ("id", "taken_ts", "tour_id", "lat", "lng", "rating", "sharp")} for r in out], len(rows)
+    return [{**{k: r[k] for k in ("id", "taken_ts", "tour_id", "lat", "lng", "rating", "sharp")}, "v": ver(r["path"], r["mtime"], r["size"])} for r in out], len(rows)    # 3.54.0: mit Bildversion

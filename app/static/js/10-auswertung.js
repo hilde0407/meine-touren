@@ -70,7 +70,7 @@ VIEWS.dash = async (...a) => {
   const cards = await Promise.all(
     ot.map(async t => {
       const ph = t.photos ? await api(`/api/photos?tour_id=${t.id}&limit=1`).catch(() => []) : [];
-      return `<a class="otd" href="#/tour/${t.id}" style="${ph[0] ? `background-image:linear-gradient(transparent 40%,#000b),url(/pic/${ph[0].id}?size=600)` : ""}"><b>Vor ${now.getFullYear() - t.y} ${now.getFullYear() - t.y === 1 ? "Jahr" : "Jahren"}</b><span>${esc(t.name)}</span><small>${fmtKm(t.km)} · ${fmtHm(t.up_m)}</small></a>`;
+      return `<a class="otd" href="#/tour/${t.id}" style="${ph[0] ? `background-image:linear-gradient(transparent 40%,#000b),url(${picSrc(ph[0], 500)})` : ""}"><b>Vor ${now.getFullYear() - t.y} ${now.getFullYear() - t.y === 1 ? "Jahr" : "Jahren"}</b><span>${esc(t.name)}</span><small>${fmtKm(t.km)} · ${fmtHm(t.up_m)}</small></a>`;
     })
   );
   const sec = h.closest(".sec");
@@ -287,7 +287,7 @@ async function collView(title, sub, ids, back, opt = {}) {
     const ph = a.flat();
     if (!$("#cph")) return;
     $("#cph").innerHTML =
-      ph.map((p, i) => `<img loading="lazy" src="/pic/${p.id}?size=300" data-i="${i}">`).join("") ||
+      ph.map((p, i) => `<img loading="lazy" decoding="async" src="${picSrc(p, 300)}" data-i="${i}">`).join("") ||
       '<span class="mut">Keine Fotos.</span>';
     bindThumbs($("#cph"), ph);
     if (opt.reise && typeof rsBadge === "function") rsBadge("fotos", ph.length ? (ph.length === 1 ? "1 Foto" : `${ph.length} Fotos`) : "");
@@ -320,11 +320,11 @@ VIEWS.trips = async () => {
   $("#tr").className = "";
   $("#tr").innerHTML =
     (tr.length
-      ? `<div class="otdg">${tr.map(x => `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${fmtDatumKurz(x.start)}${x.end !== x.start ? " – " + fmtDatumKurz(x.end) : ""}</span><small>${x.tours.length} Touren · ${fmtKm(x.km, {d: 0})} · ${fmtHm(x.up_m)}</small></a>`).join("")}</div>`
+      ? `<div class="otdg">${tr.map(x => `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(${picSrc({id: x.photo, v: x.photo_v}, 500)})` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${fmtDatumKurz(x.start)}${x.end !== x.start ? " – " + fmtDatumKurz(x.end) : ""}</span><small>${x.tours.length} Touren · ${fmtKm(x.km, {d: 0})} · ${fmtHm(x.up_m)}</small></a>`).join("")}</div>`
       : '<p class="mut">Keine Reisen erkannt (es braucht Touren an mindestens 4 Tagen am Stück, über 60 km von deinem üblichen Startort entfernt – Wochenendausflüge zählen nicht). Eigene Gruppen legst du mit Tags an.</p>') +
     `<div id="rnalb"><div class="sec"><h2>Alben &amp; Tags</h2><span class="sub">in der Tour über „🏷 Tags“ vergeben</span></div>` +
     (tg.length
-      ? `<div class="otdg">${tg.map(x => `<a class="otd" href="#/album/${encodeURIComponent(x.tag)}"${x.photo ? ` style="background-image:linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(/pic/${x.photo}?size=600)"` : ""}><b>🏷 ${esc(x.tag)}</b><small>${x.n} Touren · ${fmtKm(x.km, {d: 0})}</small></a>`).join("")}</div>`
+      ? `<div class="otdg">${tg.map(x => `<a class="otd" href="#/album/${encodeURIComponent(x.tag)}"${x.photo ? ` style="background-image:linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(${picSrc({id: x.photo, v: x.photo_v}, 500)})"` : ""}><b>🏷 ${esc(x.tag)}</b><small>${x.n} Touren · ${fmtKm(x.km, {d: 0})}</small></a>`).join("")}</div>`
       : '<p class="mut">Noch keine Tags vergeben.</p>') + "</div>";
 };
 VIEWS.trip = async id => {

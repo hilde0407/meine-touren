@@ -126,7 +126,7 @@ VIEWS.story = async id => {
       const l = CM[pid] || [];
       ov.innerHTML = `<div class="br14 mw760 w100 ova p14" style="background:var(--bg,#fff);color:var(--fg,#222);max-height:96vh">
        <div class="row jcsb"><b>📷 Foto</b><button class="btn ghost sm" id="pcx">✕</button></div>
-       <img src="/pic/${pid}?size=1200" class="w100 br8 m8-0" style="max-height:55vh;object-fit:contain">
+       <img src="${picSrc(ph.find(x => x.id === +pid) || {id: pid}, 1200)}" class="w100 br8 m8-0" style="max-height:55vh;object-fit:contain">
        <div id="pcl">${l.length ? l.map(c => `<div class="pcc m6-0 p6-10 br8" style="background:rgba(128,128,128,.12)"><div class="mut fs12">${c.author ? esc(c.author) + " · " : ""}${fmtDatumKurz(c.ts, {zeit: true})} <a href="#" class="pcd" data-c="${c.id}" title="Löschen">🗑</a></div>${esc(c.text)}</div>`).join("") : `<p class="mut">Noch keine Kommentare.</p>`}</div>
        <div class="row g6 mt8"><input id="pci" maxlength="1000" placeholder="Kommentar schreiben …" class="fx1"><button class="btn sm" id="pcs">Senden</button></div></div>`;
       ov.querySelector("#pcx").onclick = () => ov.remove();

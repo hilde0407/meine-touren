@@ -289,6 +289,8 @@ Von oben nach unten (in der Standardeinstellung):
 
 Über **Seite anpassen** und **Ansichten** gestaltest du die Übersicht selbst ([Kapitel 13](#k13)).
 
+**Ab 3.54.0** behält der Browser die Bilder der Übersicht (Kopfbereich, „Zuletzt unterwegs“, „An diesem Tag“, Erinnerungen, „Zuletzt aufgenommene Fotos“, „Wiederentdecken“): Beim nächsten Öffnen oder Neuladen erscheinen sie sofort, ohne erneut beim Server nachzufragen. Die **zufälligen** Erinnerungen und die Tour bei **Wiederentdecken** bleiben deshalb in diesem Browser-Tab bis zum nächsten Tag dieselben; neue Fotos holst du mit **Neu mischen** (falls in den Einstellungen der Kachel eingeschaltet) bzw. **Andere Tour**.
+
 ### Zeitraum der Seite
 
 Die Leiste **Zeitraum der Seite** ist **standardmäßig ausgeblendet**: Ohne Anpassung zeigt jeder Baustein seinen eigenen Zeitraum, die Übersicht sieht aus wie gewohnt. Du blendest sie über **Seite anpassen** mit dem Schalter **Zeitraum der Seite anzeigen** ein (gespeichert je Seite und Ansicht, wieder ausschaltbar). Ein gewählter Seitenzeitraum ist nie unsichtbar: Gilt einer (aus einer Adresse mit `?z=…`, deiner letzten Wahl oder einer gespeicherten Ansicht), steht die Leiste immer da, und der Schalter ist dann gesperrt, bis du auf „Je Baustein“ zurückgesetzt hast.

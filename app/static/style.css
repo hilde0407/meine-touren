@@ -2315,3 +2315,6 @@ html.mob .gfname{font-size:16px;white-space:normal;display:-webkit-box;-webkit-l
 html.mob .gfbody{padding:0 12px 10px}html.mob .gfacts .btn{min-height:44px}
 html.mob .gfrows .r{min-height:44px;flex-wrap:nowrap}html.mob .gfrows .r>span:first-child{flex:1 1 auto}
 html.mob .gfmore .btn{min-height:44px}
+/* 3.54.0 Übersicht: Platzhalterfarbe, solange ein Bild unterwegs ist (die Kästchen haben schon ihre feste Größe) */
+.slfotos img,.hlt img{background:var(--soft)}
+.hcm{position:relative;overflow:hidden;min-height:0}.hcm img{position:absolute;inset:0}

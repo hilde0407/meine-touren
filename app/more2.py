@@ -32,11 +32,19 @@ def cover_photo(tour_ids):
     return ph[len(ph) // 2]["id"] if ph else None
 
 
+def _with_cover(r, tour_ids):
+    """3.54.0: Titelfoto „photo“ und seine Bildversion „photo_v“ (für /pic/<id>?size=…&v=…; nie der Dateipfad)."""
+    from . import photos
+    r["photo"] = cover_photo(tour_ids)
+    r["photo_v"] = photos.ver_of(r["photo"]) if r["photo"] else None
+    return r
+
+
 @router.get("/api/tags")
 def api_tags():
     rows = db.query("SELECT x.tag AS tag, COUNT(*) AS n, ROUND(SUM(t.dist_m)/1000.0,0) AS km FROM tour_tags x JOIN tours t ON t.id=x.id GROUP BY x.tag ORDER BY n DESC, tag")
     for r in rows:
-        r["photo"] = cover_photo([x["id"] for x in db.query("SELECT id FROM tour_tags WHERE tag=?", (r["tag"],))])
+        _with_cover(r, [x["id"] for x in db.query("SELECT id FROM tour_tags WHERE tag=?", (r["tag"],))])
     return rows
 
 
@@ -221,7 +229,7 @@ def api_trips(hidden: int = 0):
     # Nur echte Reisen: kürzere Ausflüge (z. B. Wochenende) bleiben draußen, außer man hat die Reise selbst bearbeitet
     out = [t for t in _apply_trip_edits(build_trips()) if (t["id"] in hid) == bool(hidden) and (t["days"] >= mind or t.get("edited"))]
     for t in out:
-        t["photo"] = cover_photo(t["tours"])
+        _with_cover(t, t["tours"])
     return out
 
 

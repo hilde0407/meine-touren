@@ -23,7 +23,7 @@ VIEWS.tour = async (id, q) => {
       $("#th").innerHTML = r.photos
         .map(
           (p, k) =>
-            `<div class="th"><img loading="lazy" src="/pic/${p.id}?size=500" data-i="${k}"><span class="cap">${"★".repeat(Math.max(0, p.rating || 0))}${p.rating ? " " : ""}${fmtUhrzeit(p.taken_ts)}</span></div>`
+            `<div class="th"><img loading="lazy" decoding="async" src="${picSrc(p, 500)}" data-i="${k}"><span class="cap">${"★".repeat(Math.max(0, p.rating || 0))}${p.rating ? " " : ""}${fmtUhrzeit(p.taken_ts)}</span></div>`
         )
         .join("");
       bindThumbs($("#th"), r.photos);

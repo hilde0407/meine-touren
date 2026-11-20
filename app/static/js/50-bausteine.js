@@ -8,9 +8,10 @@ const slNote = (b, text) => (b.innerHTML = `<p class="mut slnone">${text}</p>`);
 const slTiles = list => `<div class="utiles">${list.map(([v, l, s]) => `<div class="utile"><b>${v}</b><span class="mut">${l}</span>${s ? `<small class="mut">${s}</small>` : ""}</div>`).join("")}</div>`;
 const slMin = s => fmtMS(s);
 const slBadge = (c, html) => typeof tlSetBadge === "function" && tlSetBadge(c, html);
+/* 3.54.0: Bildadressen mit Version (picSrc), nur vorab erzeugte Größen (300, groß 500 statt 600) – beim nächsten Besuch keine Bildanfrage */
 const slPhotos = (c, body, list, label, cls = "") => {
   if (!list.length) return slNote(body, "Keine Fotos vorhanden.");
-  body.innerHTML = `<div class="slfotos${cls ? " " + cls : ""}">${list.map((p, i) => `<img loading="lazy" tabindex="0" role="button" src="/pic/${p.id}?size=${cls ? 600 : 300}" data-i="${i}" alt="${esc(p.tour_name || label)}">`).join("")}</div>`;
+  body.innerHTML = `<div class="slfotos${cls ? " " + cls : ""}">${list.map((p, i) => `<img loading="lazy" tabindex="0" role="button" decoding="async" src="${picSrc(p, cls ? 500 : 300)}" data-i="${i}" alt="${esc(p.tour_name || label)}">`).join("")}</div>`;
   if (typeof bindThumbs === "function") bindThumbs(body, list);
   body.querySelectorAll("img[data-i]").forEach(im => (im.onkeydown = e => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), im.click())));
 };

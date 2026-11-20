@@ -371,11 +371,24 @@ Object.assign(window.SL_WT, {
       const old = TOURS.filter(t => Date.now() - Date.parse(t.date) > 365 * 864e5), pool = old.length >= 2 ? old : TOURS.filter(t => Date.now() - Date.parse(t.date) > 30 * 864e5);
       if (!pool.length) return slNote(b, "Sobald du ältere Touren hast, zeige ich dir hier eine zufällige.");
       let cur = null;
-      const draw = async () => {
-        const others = pool.filter(t => !cur || t.id !== cur.id), t = others[Math.floor(Math.random() * others.length)] || pool[0],
-          ph = t.photos ? await slGet(`/api/photos?tour_id=${slEnc(t.id)}&limit=1`) : null, p = ph && ph[0];
+      /* 3.54.0: das Titelfoto der Tour (wie in der Tourenliste, mit Bildversion) statt je Besuch einer Anfrage; die gewürfelte Tour bleibt für diesen Tab bis zum nächsten Tag
+         oder bis „Andere Tour“ – beim erneuten Öffnen der Übersicht dieselbe Tour und keine Bildanfrage */
+      const hk = "mt_wied", day = slIso(new Date()), held = () => {
+        try {
+          const h = JSON.parse(sessionStorage.getItem(hk) || "null");
+          return h && h.day === day && pool.find(t => t.id === h.id);
+        } catch (e) {
+          return null;
+        }
+      };
+      const draw = async keep => {
+        const others = pool.filter(t => !cur || t.id !== cur.id), t = (keep && held()) || others[Math.floor(Math.random() * others.length)] || pool[0],
+          cv = t.photos ? await homeCovers().catch(() => null) : null, p = cv && cv[t.id];
         cur = t;
-        b.innerHTML = `<div class="slrd">${p ? `<img src="/pic/${p.id}?size=300" alt="${esc(t.name)}" loading="lazy">` : '<span class="slrd-i" aria-hidden="true">⛰️</span>'}` +
+        try {
+          sessionStorage.setItem(hk, JSON.stringify({day, id: t.id}));
+        } catch (e) {}
+        b.innerHTML = `<div class="slrd">${p ? `<img src="${picSrc({id: +p.id, v: esc(p.v || "")}, PH_STRIP_PX)}" width="112" height="112" alt="${esc(t.name)}" loading="lazy" decoding="async">` : '<span class="slrd-i" aria-hidden="true">⛰️</span>'}` +
           `<div class="slrdt"><a class="slrdn" href="#/tour/${slEnc(t.id)}">${esc(t.name)}</a><span class="mut">${fmtDatumKurz(t.date)} · ${slAgo(t.date)}</span><span class="mut">${fmtKm(t.km)} · ${fmtAuf(t.up_m || 0)} · ${fmtDauer(t.h * 3600)}</span>` +
           (pool.length > 1 ? '<button type="button" class="btn sm ghost" data-other>Andere Tour</button>' : "") + "</div></div>";
         const o = b.querySelector("[data-other]");
@@ -385,7 +398,7 @@ Object.assign(window.SL_WT, {
         });
         slBadge(c, slAgo(t.date));
       };
-      return draw();
+      return draw(true);
     },
   },
   orte: {

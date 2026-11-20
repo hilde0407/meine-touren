@@ -18,7 +18,7 @@ const ER_SIZES = [["s", "Klein"], ["m", "Mittel"], ["l", "Groß"]];
 const ER_HEIGHTS = [["k", "Kompakt"], ["n", "Normal"], ["h", "Hoch"]];
 const ER_TEMPO = [3, 5, 8, 12];
 const ER_MINW = {s: 90, m: 130, l: 170};                                                   // Mindestbreite einer Kachel im Raster (px)
-const ER_PX = {s: 400, m: 400, l: 600};                                                     // Größe der geladenen Vorschaubilder je „Größe der Bilder“
+const ER_PX = {s: 400, m: 400, l: 500};                                                     // Größe der geladenen Vorschaubilder je „Größe der Bilder“ (3.54.0: nur vorab erzeugte Größen, 500 statt 600)
 const erPick = (v, list, d) => (list.includes(v) ? v : d);
 const erIds = l => l.map(x => x[0]);
 /* Einstellung mit allen Standardwerten (fehlende oder ungültige Werte → Standard) */
@@ -131,8 +131,8 @@ const erIcon = {
 };
 /* Raster und Streifen: die Fotos als anklickbare Bilder (Lightbox wie überall) */
 function erThumbs(box, list, c, o) {
-  const px = c.view === "strip" ? 600 : ER_PX[c.size],
-    figs = list.map((p, i) => `<figure class="erf"><img loading="lazy"${o.preview ? "" : ' tabindex="0" role="button"'} src="/pic/${p.id}?size=${px}" data-i="${i}" alt="${esc(p.tour_name || "Foto")}">${c.caption ? erCap(p) : ""}</figure>`).join("");
+  const px = c.view === "strip" ? 500 : ER_PX[c.size],
+    figs = list.map((p, i) => `<figure class="erf"><img loading="lazy" decoding="async"${o.preview ? "" : ' tabindex="0" role="button"'} src="${picSrc(p, px)}" data-i="${i}" alt="${esc(p.tour_name || "Foto")}">${c.caption ? erCap(p) : ""}</figure>`).join("");
   if (c.view === "strip") box.innerHTML = `<div class="ers er-s-${c.size} er-r-${c.ratio}"${o.preview ? "" : ' tabindex="0" role="region" aria-label="Fotos, seitlich scrollbar"'}>${figs}</div>`;
   else {
     box.innerHTML = `<div class="erg er-s-${c.size} er-r-${c.ratio}">${figs}</div>`;
@@ -155,7 +155,7 @@ function erShow(box, list, c, o) {
     (c.caption ? `<div class="erpcap"></div>` : "") + `</div>`;
   const root = box.firstChild, st = root.querySelector(".erpv"), imgs = [...st.querySelectorAll("img")], cnt = root.querySelector(".erpc"), cap = root.querySelector(".erpcap"), pp = root.querySelector(".erpp");
   let i = 0, playing = !reduce && !o.preview, hold = 0, timer = 0, swiped = 0;
-  const ld = im => !im.getAttribute("src") && im.setAttribute("src", `/pic/${list[+im.dataset.i].id}?size=1200`);
+  const ld = im => !im.getAttribute("src") && im.setAttribute("src", picSrc(list[+im.dataset.i], 1200));
   const go = k => {
     i = ((k % n) + n) % n;
     imgs.forEach((im, j) => {
@@ -243,16 +243,37 @@ function erPaint(sec, cfg, list, o) {
   if (c.view === "show") erShow(box, list, c, o);
   else erThumbs(box, list, c, o);
 }
+/* 3.54.0: Zufällige Auswahl (auch „an diesem Tag“) bleibt für diesen Tab bis zum nächsten Tag oder bis „Neu mischen“ dieselbe: beim erneuten Öffnen und Neuladen der Übersicht
+   dieselben Fotos – der Browser hat sie schon (Adresse mit Version), es gibt keine Bildanfrage. Gemerkt werden nur Kennung, Zeit, Tourname und Version (sessionStorage, beim Abmelden gelöscht). */
+const ER_HOLD = "mt_erhold";
+function erHold(url, list) {
+  const day = slIso(new Date());
+  let all = {};
+  try {
+    all = JSON.parse(sessionStorage.getItem(ER_HOLD) || "{}") || {};
+  } catch (e) {}
+  if (all.day !== day) all = {day};
+  if (list === undefined) return Array.isArray(all[url]) ? all[url] : null;
+  all[url] = list.slice(0, 12).map(p => ({id: p.id, v: p.v, taken_ts: p.taken_ts, tour_id: p.tour_id, tour_name: p.tour_name}));
+  try {
+    sessionStorage.setItem(ER_HOLD, JSON.stringify(all));
+  } catch (e) {}
+}
 async function erLoad(sec, cfg, o = {}) {
   const my = (sec._erTok = (sec._erTok || 0) + 1);
   let list = sec._erList;
   if (!list || !o.mix) {
-    try {
-      list = await api(erUrl(cfg, o.fix));
-    } catch (e) {
-      list = [];
+    const url = erUrl(cfg, o.fix), rnd = /random=true/.test(url);
+    list = rnd && !o.fresh ? erHold(url) : null;
+    if (!list) {
+      try {
+        list = await api(url);
+      } catch (e) {
+        list = [];
+      }
+      if (!Array.isArray(list)) list = [];
+      if (rnd && list.length && !o.preview) erHold(url, list);
     }
-    if (!Array.isArray(list)) list = [];
     sec._erList = list;
   } else list = erShuffle(list);
   if (my === sec._erTok) erPaint(sec, cfg, list, o);
@@ -272,7 +293,7 @@ function erShell(it, o = {}) {
     (c.shuffle ? `<button type="button" class="btn ghost sm ernew">Neu mischen</button>` : "") +
     (c.link ? `<a class="hmore erdia" target="_blank" rel="noopener" href="${esc(erSlideUrl(cfg, o.fix))}">${c.mode === "random" ? "Zufalls-Diashow" : "Diashow starten"}</a>` : "") + `</div><div class="erb"></div>`;
   const nb = sec.querySelector(".ernew");
-  if (nb) nb.onclick = () => erLoad(sec, cfg, c.mode === "random" ? o : {...o, mix: true});
+  if (nb) nb.onclick = () => erLoad(sec, cfg, c.mode === "random" ? {...o, fresh: true} : {...o, mix: true});
   erLoad(sec, cfg, o);
   return sec;
 }

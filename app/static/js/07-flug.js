@@ -362,7 +362,7 @@ VIEWS.flight = async id => {
     prevU = 0;
   const phi = $("#fphi");
   const showPh = p => {
-    phi.src = `/pic/${p.id}?size=500`;
+    phi.src = picSrc(p, 500);
     $("#fphc").textContent = fmtUhrzeit(p.taken_ts);
     $("#fph").classList.add("on");
     phUntil = performance.now() + 4500;

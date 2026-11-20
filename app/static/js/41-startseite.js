@@ -38,6 +38,7 @@ function homeGoals(box, ys, now) {
     .catch(() => {});
 }
 
+const HL_PX = 1200;                       // 3.54.0: Hauptbild des Kopfbereichs (bis 1200 px breit); warm_thumbs erzeugt es für die letzten Touren vorab (photos.warm_home)
 async function homeView() {
   const main = $("#main");
   main.className = "home";
@@ -88,7 +89,8 @@ async function homeView() {
     if (my !== tok || !$("#hlm")) return;
     if (ph.length) {
       $("#hlm").classList.add("ph");
-      $("#hlm").insertAdjacentHTML("afterbegin", `<img class="hlp" src="/pic/${ph[0].id}?size=1200" alt="" data-i="0">${ph.length > 1 ? `<div class="hlt">${ph.slice(1).map((p, j) => `<img loading="lazy" src="/pic/${p.id}?size=300" alt="" data-i="${j + 1}">`).join("")}</div>` : ""}`);
+      /* 3.54.0: Bildadressen mit Version (der Browser behält die Bilder; beim nächsten Besuch keine Anfrage), feste Kästchen ohne Layoutsprung */
+      $("#hlm").insertAdjacentHTML("afterbegin", `<img class="hlp" src="${picSrc(ph[0], HL_PX)}" alt="" decoding="async" data-i="0">${ph.length > 1 ? `<div class="hlt">${ph.slice(1).map((p, j) => `<img loading="lazy" decoding="async" src="${picSrc(p, PH_STRIP_PX)}" width="84" height="60" alt="" data-i="${j + 1}">`).join("")}</div>` : ""}`);
       bindThumbs($("#hlm"), ph);
     }
     api(`/api/tours/${t.id}/coords`)
@@ -112,14 +114,14 @@ async function homeView() {
       .catch(() => {});
   /* 3.52.0: dasselbe Titelfoto wie in der Tourenliste, aus einem Aufruf für alle Touren und mit Bildversion (der Browser behält das Bild) statt je Karte einer Anfrage */
   if (recent.slice(1).some(t => t.photos))
-    (tlFotos() ? (COVERS ? Promise.resolve(COVERS) : window.COVP || loadCovers()) : api("/api/tour-covers"))
+    homeCovers()
       .then(cv =>
         recent.slice(1).forEach(t => {
           const c = t.photos && cv && cv[t.id],
             el = c && document.querySelector(`.hcm[data-m="${t.id}"]`);
           if (!el) return;
           el.classList.add("ph");
-          el.innerHTML = `<img loading="lazy" decoding="async" src="/pic/${+c.id}?size=500&v=${esc(c.v || "")}" alt="">`;
+          el.innerHTML = `<img loading="lazy" decoding="async" src="${picSrc({id: +c.id, v: esc(c.v || "")}, 500)}" alt="">`;
         })
       )
       .catch(() => {});

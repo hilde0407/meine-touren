@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.54.0](3.54.0.md) – Bilder der Übersicht bleiben im Browser: Bildadressen mit Version, beim erneuten Öffnen und Neuladen keine Bildanfrage
 - [3.53.0](3.53.0.md) – Wanderführer übersichtlich: eingeklappte Buchkarten mit Titelbild und Ring, Filter, Suche, Reihenfolge, Karte der offenen Touren
 - [3.52.0](3.52.0.md) – Ein Foto je Tour in der Tourenliste: ein Aufruf für alle Titelfotos, stabile Wahl, beim erneuten Öffnen keine Bildanfrage
 - [3.51.0](3.51.0.md) – Schneller, ruhiger Foto-Abschnitt: Foto-Streifen mit den besten Fotos, Raster erst auf Wunsch, Bilder bleiben im Browser
