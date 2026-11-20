@@ -110,18 +110,19 @@ async function homeView() {
     loadRoutes()
       .then(() => document.querySelectorAll(".hcm:not(.ph)").forEach(el => BY[el.dataset.m] && (el.innerHTML = miniRoute(el.dataset.m, BY[el.dataset.m].sport))))
       .catch(() => {});
-  recent.slice(1).forEach(t => {
-    if (!t.photos) return;
-    api(`/api/photos?tour_id=${t.id}&limit=1`)
-      .then(p => {
-        const el = document.querySelector(`.hcm[data-m="${t.id}"]`);
-        if (el && p.length) {
+  /* 3.52.0: dasselbe Titelfoto wie in der Tourenliste, aus einem Aufruf für alle Touren und mit Bildversion (der Browser behält das Bild) statt je Karte einer Anfrage */
+  if (recent.slice(1).some(t => t.photos))
+    (tlFotos() ? (COVERS ? Promise.resolve(COVERS) : window.COVP || loadCovers()) : api("/api/tour-covers"))
+      .then(cv =>
+        recent.slice(1).forEach(t => {
+          const c = t.photos && cv && cv[t.id],
+            el = c && document.querySelector(`.hcm[data-m="${t.id}"]`);
+          if (!el) return;
           el.classList.add("ph");
-          el.innerHTML = `<img loading="lazy" src="/pic/${p[0].id}?size=500" alt="">`;
-        }
-      })
+          el.innerHTML = `<img loading="lazy" decoding="async" src="/pic/${+c.id}?size=500&v=${esc(c.v || "")}" alt="">`;
+        })
+      )
       .catch(() => {});
-  });
 }
 
 {

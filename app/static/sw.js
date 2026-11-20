@@ -1,6 +1,6 @@
 // Service Worker: App-Dateien offline verfügbar; Daten (/api), Kartenkacheln und kleine Fotos werden bei Verbindung
 // frisch geladen und zuletzt Gesehenes dient als Rückfall, wenn keine Verbindung besteht.
-const V = "mt-v134", API = "mt-api-v1", TILES = "mt-tiles-v1", PICS = "mt-pics-v2";
+const V = "mt-v135", API = "mt-api-v1", TILES = "mt-tiles-v1", PICS = "mt-pics-v2";
 const KEEP = [V, API, TILES, PICS];
 const NOCACHE = /^\/api\/(jobs|update|selftest|health|login|logout|setup|restore|me\/password|clock-check\/ignore)/;
 self.addEventListener("install", e => { self.skipWaiting(); });
@@ -26,10 +26,10 @@ self.addEventListener("fetch", e => {
   }
   if (p.startsWith("/pic/") && u.searchParams.get("v")) {   // 3.51.0: Bild mit Version in der Adresse ändert sich nie (neue Datei = neue Adresse): zuerst aus dem Speicher
     const s = +(u.searchParams.get("size") || 0);
-    if (s && s <= 600) e.respondWith(caches.open(PICS).then(c => c.match(e.request)).then(m => m || fetch(e.request).then(r => { if (r.ok && /immutable/.test(r.headers.get("cache-control") || "")) { const c = r.clone(); caches.open(PICS).then(ch => ch.put(e.request, c)).then(() => trim(PICS, 600)); } return r; })));
+    if (s && s <= 600) e.respondWith(caches.open(PICS).then(c => c.match(e.request)).then(m => m || fetch(e.request).then(r => { if (r.ok && /immutable/.test(r.headers.get("cache-control") || "")) { const c = r.clone(); caches.open(PICS).then(ch => ch.put(e.request, c)).then(() => trim(PICS, 1200)); } return r; })));   // 3.52.0: 1200 statt 600 (Titelfotos der Tourenliste + Foto-Streifen)
     return;
   }
-  if (p.startsWith("/pic/") || p.startsWith("/spic/")) { const s = +(u.searchParams.get("size") || 0); if (s && s <= 600) e.respondWith(netFirst(e.request, PICS, 600)); return; }
+  if (p.startsWith("/pic/") || p.startsWith("/spic/")) { const s = +(u.searchParams.get("size") || 0); if (s && s <= 600) e.respondWith(netFirst(e.request, PICS, 1200)); return; }
   if (p.startsWith("/photo/") || p.startsWith("/sphoto/")) return;
   e.respondWith(fetch(e.request).then(r => { if (r.ok) { const c = r.clone(); caches.open(V).then(ch => ch.put(e.request, c)); } return r; }).catch(() => caches.match(e.request).then(m => m || caches.match(u.pathname.endsWith("/") ? e.request : new Request(u.origin + u.pathname.replace(/[^/]*$/, ""))))));
 });

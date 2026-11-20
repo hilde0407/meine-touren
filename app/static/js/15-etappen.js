@@ -33,12 +33,12 @@ VIEWS.trips = async () => {
   );
   // Titelfoto je Mehrtagestour: ein Foto aus der Mitte der Reihe
   try {
-    const cv = await api("/api/tour-covers");
+    const cv = COVERS && tlFotos() ? COVERS : await api("/api/tour-covers");      // 3.52.0: die Titelfotos der Tourenliste (mit Bildversion) mitbenutzen
     L.forEach((s, i) => {
       // Tour der Reihe mit den meisten Fotos; davon das Foto aus der Mitte
       const best = s.ids.filter(id => cv[id]).sort((x, y) => cv[y].n - cv[x].n)[0],
         el = tr.querySelectorAll(".otdg .otd")[i];
-      if (best && el) el.style.backgroundImage = `linear-gradient(#0e2a2b33,#0e2a2bdd),url(/pic/${cv[best].id}?size=500)`;
+      if (best && el) el.style.backgroundImage = `linear-gradient(#0e2a2b33,#0e2a2bdd),url(/pic/${+cv[best].id}?size=500${cv[best].v ? "&v=" + esc(cv[best].v) : ""})`;
     });
   } catch (e) {}
 };

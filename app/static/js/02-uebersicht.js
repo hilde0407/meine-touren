@@ -173,16 +173,16 @@ let _trfT = null,
 const trfOn = () => (_trfT === TOURS ? _trf : ((_trfT = TOURS), (_trf = tlFotos() && TOURS.some(t => t.photos > 0))));
 function loadCovers() {
   _trfT = null;
-  if (!tlFotos()) return Promise.resolve((COVERS = {}));
+  if (!tlFotos()) return (window.COVP = Promise.resolve((COVERS = {})));
   const pre = window._preCovers;
   window._preCovers = null;
-  return (pre ? pre.then(c => c || api("/api/tour-covers")) : api("/api/tour-covers"))
+  return (window.COVP = (pre ? pre.then(c => c || api("/api/tour-covers")) : api("/api/tour-covers"))
     .then(c => {
       COVERS = c || {};
       patchCovers();
       return COVERS;
     })
-    .catch(() => (COVERS = COVERS || {}));
+    .catch(() => (COVERS = COVERS || {})));
 }
 const trImg = c => `<img class="trimg" src="/pic/${+c.id}?size=${TR_PIC}&v=${esc(c.v || "")}" alt="" loading="lazy" decoding="async" width="${TR_PIC}" height="${TR_PIC}">`;
 function trThumb(t) {
