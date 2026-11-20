@@ -234,7 +234,7 @@ const recBkOpen = () => {
 if (recApp() && recBkDone() === null) recBkMark(recBk().map(b => b.file));       // erster Lauf mit dieser Fassung: der Bestand gilt als erledigt (er bleibt unter „Einstellungen“ erreichbar)
 
 /* ---- Hochladen: nach dem Beenden von selbst; ohne Netz wartet die Aufzeichnung auf dem Handy und wird später gesendet ---- */
-const recUp = {phase: "", busy: false, id: null, msg: "", sent: "", sum: null, dev: null, left: 0, note: "", bk: "", keep: null};
+const recUp = {phase: "", busy: false, id: null, msg: "", sent: "", sum: null, dev: null, left: 0, note: "", bk: "", keep: null, tries: 0, next: 0};
 /* Notnagel für „später senden“: konnte die App keine Sicherung anlegen, bleibt die Aufzeichnung im Speicher der Seite (und, wenn sie hineinpasst, im Browser-Speicher) */
 const recKeep = () => {
   try {
@@ -307,6 +307,9 @@ async function recSend() {
     Object.assign(recUp, {phase: "waiting", msg: ""});
   } finally {
     recUp.busy = false;
+    /* von selbst wird in wachsenden Abständen erneut versucht (30 s, 1, 2, 4 … höchstens 10 Minuten) – die ganze Aufzeichnung geht jedes Mal über das Netz */
+    recUp.tries = recUp.phase === "waiting" ? recUp.tries + 1 : 0;
+    recUp.next = Date.now() + Math.min(600000, 30000 * 2 ** Math.max(0, recUp.tries - 1));
     recTell();
   }
 }
@@ -363,7 +366,7 @@ if (recApp()) {
   window.addEventListener("online", recAuto);
   window.addEventListener("mtresume", recAuto);
   window.addEventListener("load", () => setTimeout(recAuto, 2500));
-  setInterval(() => recUp.phase === "waiting" && recAuto(), 30000);
+  setInterval(() => recUp.phase === "waiting" && Date.now() >= recUp.next && recAuto(), 15000);
 }
 
 /* Route zum Folgen mit Sprachansagen (Planungen und frühere Touren) */
@@ -676,10 +679,10 @@ VIEWS.record = async () => {
     const ok = await uiConfirm({title: "Aufzeichnung beenden?", text: "Die Tour wird abgeschlossen und auf deinen Server geladen. Danach lässt sie sich nicht fortsetzen.", ok: "Beenden", cancel: "Weiter aufzeichnen", danger: true});
     if (!ok || !here()) return;
     if (navigator.vibrate) navigator.vibrate(60);
+    if (!recUp.busy) Object.assign(recUp, {phase: "", id: null, msg: "", tries: 0});
     A.stopRecording("");
     for (let i = 0; i < 20 && ["recording", "paused"].includes(recStatus().state); i++) await new Promise(r => setTimeout(r, 100));
-    if (recStatus().state === "idle") recUp.note = "Die Aufzeichnung enthielt keine GPS-Punkte und wurde nicht gespeichert.";
-    Object.assign(recUp, {phase: "", id: null, msg: ""});
+    if (recStatus().state === "idle" && !recUp.busy && recUp.phase !== "saved") recUp.note = "Die Aufzeichnung enthielt keine GPS-Punkte und wurde nicht gespeichert.";
     if (here()) draw();
   };
   const waypoint = () => {
