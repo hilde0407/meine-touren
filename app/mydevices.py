@@ -626,7 +626,7 @@ def probe_summaries(summaries):
             sp = gpxtools.ZEPP_SPORT.get(int(s.get("type", 0)), "type_%s" % s.get("type"))
         except (TypeError, ValueError):
             sp = "type_%s" % s.get("type")
-        sp = gpxtools.ALIAS.get(sp, sp)
+        sp = gpxtools.norm(gpxtools.ALIAS.get(sp, sp))[0]        # 3.50.0: Schneeschuh zählt als Wandern
         g["sports"][sp] = g["sports"].get(sp, 0) + 1
     known = {d["zsrc"]: d for d in db.query("SELECT * FROM devices WHERE COALESCE(zsrc,'')!=''")}
     tours = {r["zsrc"]: r["n"] for r in db.query("SELECT zsrc, COUNT(*) n FROM tour_zsrc GROUP BY zsrc")}

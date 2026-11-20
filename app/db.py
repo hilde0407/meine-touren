@@ -153,8 +153,13 @@ def migrate(conn):
     try:                                                                          # 3.50.0: Laufen von der Uhr, Schneeschuh zählt als Wandern (Kopie der Datenbank vorher)
         from . import sport_umzug
         sport_umzug.migrate(conn)
-    except Exception:                                                             # nie das Öffnen verhindern; die Oberfläche zeigt „snowshoe“ ohnehin als Wandern
+    except Exception as e:                                                        # nie das Öffnen verhindern; die Oberfläche zeigt „snowshoe“ ohnehin als Wandern
         conn.rollback()
+        try:                                                                      # Grund merken (Fehlersuche), der Umzug wird beim nächsten Öffnen erneut versucht
+            conn.execute("INSERT OR REPLACE INTO settings(k,v) VALUES('sport_umzug_fehler',?)", (str(e)[:300],))
+            conn.commit()
+        except Exception:  # noqa
+            conn.rollback()
     try:                                                                          # 3.45.0: alte Bausteine in gespeicherten Layouts umziehen, eigene Ziele in die Ziele übernehmen
         from . import baustein_umzug
         baustein_umzug.migrate_rows(conn)
