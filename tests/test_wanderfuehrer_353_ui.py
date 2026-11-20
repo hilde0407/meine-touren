@@ -131,6 +131,7 @@ def _shots(pg, name, el=None):
         pg.screenshot(path=str(Path(d) / name))
 
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_eingeklappt_ring_titelbild_und_aufbauzeit(pw, app):
     ctx = _ctx(pw)
     pg = _page(ctx)

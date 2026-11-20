@@ -139,6 +139,7 @@ def _server(url, key):
 
 # ------------------------------------------------------------------  Standard bleibt Standard  ------------------------------------------------------------------
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_default_is_unchanged_and_edit_button_is_there(pw, app):
     pg = _tour(pw, app)
     try:

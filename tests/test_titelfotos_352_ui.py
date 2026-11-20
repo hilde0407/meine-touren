@@ -123,6 +123,7 @@ def _shots(pg, name):
         pg.screenshot(path=str(Path(d) / name))
 
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_bildanfragen_begrenzt_und_beim_zweiten_mal_keine(pw, app):
     ctx = _ctx(pw)
     pg = _page(ctx)

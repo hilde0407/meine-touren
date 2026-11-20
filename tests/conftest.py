@@ -7,7 +7,9 @@ geschlossen, damit nichts in den nächsten Test hineinragt (Cookies, Speicher, R
 Stürzt der Chromium ab, wird beim nächsten `launch()` ein neuer gestartet.
 Fehlersuche: MT_NO_SHARED=1 schaltet das gemeinsame Browser-Handling ab (jeder Test startet seinen eigenen Chromium), MT_NO_QUIET_INIT=1 lässt den Zähler für `quiet` weg.
 """
+import inspect
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -96,6 +98,10 @@ class _Playwright:
 
 class _SharedSyncPlaywright:
     def __enter__(self):
+        it = _STATE.get("item")
+        if it is not None and not it.get_closest_marker("browser"):          # Prüfung der Einordnung (siehe unten „Kern und volle Suite“)
+            pytest.fail(f"{it.nodeid} startet einen Browser, wurde aber nicht als Browsertest erkannt (sonst liefe er im schnellen Kern). "
+                        "Bitte mit @pytest.mark.browser kennzeichnen (oder @pytest.mark.kern, wenn er als Stichprobe in den Kern gehört).", pytrace=False)
         self._mark = _STATE["seq"]
         if _STATE["pw"] is None:
             _STATE["pw"] = _REAL_SYNC_PLAYWRIGHT().start()
@@ -155,3 +161,87 @@ def _browser_aufraeumen():
 
 def pytest_sessionfinish(session, exitstatus):
     _shutdown()
+
+
+# ---------- Kern und volle Suite (tests/README.md, Abschnitt „Kern und volle Suite“) ----------
+# Jeder Test landet automatisch in genau einem Topf:
+#   * Server-, Unit-, Format- und Stiltests (alles ohne Browser) gehören immer zum Kern.
+#   * Browsertests gehören zur vollen Suite (Marker „voll“, hier gesetzt) – außer sie tragen @pytest.mark.kern (Stichprobe je Hauptseite).
+# Kern = -m "not voll", Rest = -m voll, volle Suite = ohne -m. Ein Browsertest wird an seinem Quelltext erkannt (Testfunktion, ihre Fixtures und die Hilfsfunktionen,
+# die sie aufruft); @pytest.mark.browser erzwingt die Einordnung. Startet ein nicht erkannter Test trotzdem einen Browser, schlägt er mit einem klaren Hinweis fehl
+# (_SharedSyncPlaywright.__enter__), statt den Kern unbemerkt langsam zu machen.
+_BROWSER_RE = re.compile(r"\bplaywright\b|sync_playwright|\.goto\(|\.new_page\(|\bchromium\b")
+_SRC_CACHE = {}
+
+
+def _src(obj):
+    k = id(obj)
+    if k not in _SRC_CACHE:
+        try:
+            _SRC_CACHE[k] = inspect.getsource(obj)
+        except (OSError, TypeError):
+            _SRC_CACHE[k] = ""
+    return _SRC_CACHE[k]
+
+
+def _is_test_code(fn):
+    mod = getattr(fn, "__module__", "") or ""
+    return mod.startswith("tests.") and mod != "tests.conftest" or (mod.startswith("test_") and mod != "conftest")
+
+
+def _uses_browser(fn, depth=3, seen=None):
+    """Quelltext der Funktion und der Test-Hilfsfunktionen, die sie beim Namen aufruft (bis `depth` Ebenen), nennt den Browser."""
+    seen = seen if seen is not None else set()
+    fn = inspect.unwrap(fn)
+    if id(fn) in seen or not callable(fn):
+        return False
+    seen.add(id(fn))
+    if _BROWSER_RE.search(_src(fn)):
+        return True
+    if depth <= 0:
+        return False
+    g = getattr(fn, "__globals__", {})
+    code = getattr(fn, "__code__", None)
+    for name in (code.co_names if code else ()):
+        f = g.get(name)
+        if inspect.isfunction(f) and _is_test_code(f) and _uses_browser(f, depth - 1, seen):
+            return True
+    return False
+
+
+def _browser_item(item):
+    if item.get_closest_marker("browser"):
+        return True
+    fn = getattr(item, "function", None)
+    if fn is not None and _uses_browser(fn):
+        return True
+    for defs in getattr(getattr(item, "_fixtureinfo", None), "name2fixturedefs", {}).values():
+        for d in defs:
+            f = getattr(d, "func", None)
+            if f is not None and _is_test_code(f) and _uses_browser(f):
+                return True
+    return False
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "browser: Browsertest (wird meist automatisch erkannt; erzwingt die Einordnung)")
+    config.addinivalue_line("markers", "kern: Browsertest, der als Stichprobe zum schnellen Kern gehört (jeder Push)")
+    config.addinivalue_line("markers", "voll: automatisch gesetzt – Browsertest nur in der vollen Suite (vor dem Veröffentlichen, nachts, manuell)")
+
+
+def pytest_collection_modifyitems(config, items):
+    for it in items:
+        if _browser_item(it):
+            if not it.get_closest_marker("browser"):
+                it.add_marker(pytest.mark.browser)
+            if not it.get_closest_marker("kern"):
+                it.add_marker(pytest.mark.voll)
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_runtest_setup(item):
+    _STATE["item"] = item
+
+
+def pytest_runtest_teardown(item, nextitem):
+    _STATE["item"] = None

@@ -173,6 +173,7 @@ OPEN = "() => Object.fromEntries([...document.querySelectorAll('#tl details.tls'
 
 # ------------------------------------------------------------------  Hauptseite  ------------------------------------------------------------------
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_main_page_is_slim(pw, app):
     pg = _page(pw, app, devs="one")
     try:
@@ -230,6 +231,7 @@ def test_entry_card_only_when_there_is_something(pw, app):
         pg.browser_.close()
 
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_navigation_there_and_back(pw, app):
     pg = _page(pw, app, devs="one")
     try:

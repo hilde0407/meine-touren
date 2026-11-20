@@ -1,6 +1,6 @@
 # Tests
 
-Rund 1590 Tests: schnelle Tests des Servers (in-process, `TestClient`) und Browsertests mit Playwright/Chromium (`*_ui.py`, `test_browser.py` u. a.).
+Rund 1690 Tests: schnelle Tests des Servers (in-process, `TestClient`) und Browsertests mit Playwright/Chromium (`*_ui.py`, `test_browser.py` u. a.).
 
 ## Starten
 
@@ -8,15 +8,37 @@ Rund 1590 Tests: schnelle Tests des Servers (in-process, `TestClient`) und Brows
 pip install -r requirements-dev.txt
 python -m playwright install chromium
 
-python scripts/test.py                                   # alles, parallel, mit --reruns 2 (wie die CI)
-python scripts/test.py tests/test_gruppen_ui.py -k link  # Auswahl; weitere Argumente gehen an pytest
+python scripts/test.py                                   # schneller Kern (Standard), parallel, mit --reruns 2 (wie die CI bei jedem Push)
+python scripts/test.py --voll                            # volle Suite (Kern + alle übrigen Browsertests) – vor dem Veröffentlichen
+python scripts/test.py --rest                            # nur die Tests außerhalb des Kerns
+python scripts/test.py tests/test_gruppen_ui.py -k link  # Auswahl: alle genannten Tests (ohne Kern-Filter); weitere Argumente gehen an pytest
 MT_TEST_WORKERS=1 python scripts/test.py                 # seriell (Fehlersuche)
 MT_TEST_RERUNS=0 python scripts/test.py                  # ohne Wiederholung: Flakes sichtbar machen
 MT_CPU_THROTTLE=6 python -m pytest -q tests/test_x_ui.py # Stresstest: CPU der Browserseiten um Faktor 6 bremsen
 ```
 
-`python -m pytest -q tests` geht weiterhin (seriell, ohne Wiederholung). Parallel immer mit `--dist loadfile` (ganze Dateien je Worker): die Browsertests starten ihren Server
+`python -m pytest -q tests` geht weiterhin (seriell, ohne Wiederholung, alles); `python -m pytest -m "not voll" tests` ist der Kern. Parallel immer mit `--dist loadfile` (ganze Dateien je Worker): die Browsertests starten ihren Server
 je Datei einmal (`scope="module"`), einzelne Tests einer Datei teilen sich Datenbank und Server und räumen per `clean`-Fixture auf.
+
+## Kern und volle Suite
+
+Die volle Suite braucht in der CI rund 17–20 Minuten, fast alles davon sind Browsertests. Deshalb gibt es zwei Töpfe:
+
+| Topf | Inhalt | Wann |
+| --- | --- | --- |
+| **Kern** (`-m "not voll"`, `scripts/test.py`) | alle Server-, Unit-, Format- und Stiltests (ohne Browser) **und** eine Stichprobe von Browsertests mit `@pytest.mark.kern`: je Hauptseite ein Rauchtest (alle Ansichten ohne JavaScript-Fehler, Tourseite, Tourenliste mit Fotos, Statistik, Verwaltung, Aufzeichnen im Browser und in der App, Foto-Streifen, Wanderführer, Übersicht mit Bildern, Seite anpassen, Karte, Betrachter) | jeder Push und Pull-Request (Workflow „Tests“), lokal im Alltag |
+| **voll** (ohne `-m`, `scripts/test.py --voll`) | Kern + alle übrigen Browsertests (`-m voll`) | vor jedem Veröffentlichen (Workflow „Veröffentlichen“ ruft „Tests (voll)“ auf; schlägt sie fehl, entsteht keine Veröffentlichung), nachts bei neuen Commits, wöchentlich (Montag, dazu Windows), manuell (Actions → „Tests“ oder „Tests (voll)“), und bei einem Push mit `[voll]` in der Commit-Nachricht. Windows unverändert: wöchentlich, manuell oder `[windows]`. |
+
+**Einordnung neuer Tests – automatisch:** Tests ohne Browser landen immer im Kern. Browsertests werden an ihrem Quelltext erkannt (Testfunktion, ihre Fixtures und die Hilfsfunktionen, die sie aufruft:
+`playwright`, `sync_playwright`, `.goto(`, `.new_page(`, `chromium`) und bekommen in `conftest.py` den Marker `voll` – außer sie tragen `@pytest.mark.kern`.
+Warum so und nicht „ohne Marker = Kern“: Neue Browsertests würden den Kern sonst still wachsen lassen, bis er wieder so langsam ist wie die volle Suite; und eine Marker-Pflicht für über 800 Browsertests wäre fehleranfällig.
+Kein Test kann verloren gehen: die volle Suite ist immer „alles“, und sie läuft vor jedem Veröffentlichen. Zwei Sicherungen:
+
+* Startet ein Test einen Browser, ohne als Browsertest erkannt worden zu sein, schlägt er mit einem Hinweis fehl (dann `@pytest.mark.browser` setzen) – der Kern wird nie unbemerkt langsam.
+* `tests/test_testsuite_kern.py` prüft: Kern + Rest = alle gesammelten Tests (keine Lücke, keine Doppelung), jede Hauptseite hat eine Stichprobe im Kern, Skript und Workflows nutzen die Töpfe richtig.
+
+Eine neue Hauptseite oder ein neues großes Feature bekommt **einen** schnellen Rauchtest mit `@pytest.mark.kern` (und einen Eintrag in `test_jede_hauptseite_hat_eine_stichprobe_im_kern`); alles Übrige läuft in der vollen Suite.
+Eine Stichprobe soll schnell sein (eine vorhandene Datei mit ohnehin gestartetem Server bevorzugen, wenige Sekunden je Test).
 
 ## Aufbau
 

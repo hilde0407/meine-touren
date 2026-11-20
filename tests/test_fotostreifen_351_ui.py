@@ -120,6 +120,7 @@ def _strip_loaded(pg):
     quiet(pg, 3000)
 
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_streifen_erst_und_zweitaufruf(pw, app):
     """Messung: Bildanfragen des Fotoabschnitts beim ersten Öffnen ≤ 12 (vorher bis zu 84/400), beim erneuten Öffnen 0."""
     ctx = _ctx(pw)

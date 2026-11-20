@@ -2,14 +2,19 @@ name: Tests
 on:
   push:
   pull_request:
-  workflow_dispatch:       # manuell: Actions -> Tests -> Run workflow (läuft dann auch unter Windows)
+  workflow_dispatch:       # manuell: Actions -> Tests -> Run workflow (volle Suite unter Linux, dazu Windows)
   schedule:
-    - cron: "17 4 * * 1"   # wöchentlich Montag früh: Windows-Gesamtlauf
-# Testlauf wie lokal: scripts/test.py (parallel mit pytest-xdist, ganze Dateien je Worker; --reruns 2 für verbleibende Flakes). Details: tests/README.md
+    - cron: "17 4 * * 1"          # wöchentlich Montag früh: volle Suite unter Linux und Windows-Gesamtlauf
+    - cron: "41 2 * * 0,2-6"      # nachts (außer Montag): volle Suite unter Linux, aber nur, wenn es seit gestern neue Commits gibt
+# Zwei Töpfe (tests/README.md, „Kern und volle Suite“): bei jedem Push und Pull-Request nur der schnelle Kern (python scripts/test.py --kern, Ziel ≤ 6 min);
+# die volle Suite (Workflow „Tests (voll)“) manuell, nachts bei neuen Commits, wöchentlich, mit „[voll]“ in der Commit-Nachricht und vor jedem Veröffentlichen.
+# Testlauf wie lokal: parallel mit pytest-xdist, ganze Dateien je Worker; --reruns 2 für verbleibende Flakes.
 jobs:
-  pytest:
+  kern:
+    # „[voll]“ in der Commit-Nachricht: statt des Kerns läuft die volle Suite (sie enthält den Kern)
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[voll]'))
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     env:
       PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.pw-browsers
     steps:
@@ -28,13 +33,37 @@ jobs:
           restore-keys: pw-${{ runner.os }}-
       - run: pip install -r requirements-dev.txt
       - run: python -m playwright install --with-deps chromium
-      - run: python scripts/test.py
+      - run: python scripts/test.py --kern
         env:
           MT_TEST_WORKERS: "4"
       - run: bash -n deploy/install.sh && bash -n deploy/update.sh && bash -n deploy/restore.sh && bash -n ct/meine-touren.sh && bash -n install/meine-touren-install.sh
+  neu:
+    # nur beim nächtlichen Lauf: gibt es seit dem letzten Lauf (25 Stunden) neue Commits auf dem Standardzweig?
+    if: github.event_name == 'schedule' && github.event.schedule == '41 2 * * 0,2-6'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      neu: ${{ steps.c.outputs.neu }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: c
+        run: |
+          alt=$(( $(date +%s) - $(git log -1 --format=%ct) ))
+          if [ "$alt" -lt 90000 ]; then echo "neu=true" >> "$GITHUB_OUTPUT"; else echo "neu=false" >> "$GITHUB_OUTPUT"; fi
+          echo "Letzter Commit vor $((alt / 3600)) Stunden"
+  voll:
+    needs: neu
+    if: >-
+      !cancelled() && (github.event_name == 'workflow_dispatch'
+      || (github.event_name == 'schedule' && github.event.schedule == '17 4 * * 1')
+      || needs.neu.outputs.neu == 'true'
+      || (github.event_name == 'push' && contains(github.event.head_commit.message, '[voll]')))
+    uses: ./.github/workflows/tests-voll.yml
+    permissions:
+      contents: read
   windows:
-    # Windows ist doppelt so teuer und findet selten etwas: nur wöchentlich, manuell, oder wenn die Commit-Nachricht "[windows]" enthält
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[windows]')
+    # Windows ist doppelt so teuer und findet selten etwas: nur wöchentlich, manuell, oder wenn die Commit-Nachricht "[windows]" enthält (volle Suite, wie bisher)
+    if: (github.event_name == 'schedule' && github.event.schedule == '17 4 * * 1') || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[windows]')
     runs-on: windows-latest
     timeout-minutes: 75
     env:
@@ -56,6 +85,6 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - run: python -m playwright install chromium
       # Windows: bewusst nur 2 Worker (Prozess-/Port-Besonderheiten); auf 1 setzen, falls dort Parallellauf Probleme macht
-      - run: python scripts/test.py
+      - run: python scripts/test.py --voll
         env:
           MT_TEST_WORKERS: "2"

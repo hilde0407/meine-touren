@@ -95,6 +95,7 @@ def _server(url, key="statistik"):
 
 # ------------------------------------------------------------------  Standard bleibt Standard  ------------------------------------------------------------------
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_default_layout_is_unchanged_and_sections_fold(pw, app):
     pg = _stats(pw, app)
     try:

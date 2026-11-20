@@ -43,6 +43,7 @@ def _schnitt(a, b):
 
 # ------------------------------------------------------------------  Reihenfolge und Lage  ------------------------------------------------------------------
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_reihenfolge_desktop(pw, app, clean):
     pg = _karte(pw, app)
     try:

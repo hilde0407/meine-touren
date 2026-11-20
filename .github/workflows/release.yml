@@ -3,6 +3,7 @@ name: Veröffentlichen
 # Legt die Veröffentlichung für die Version aus app/config.py an (Tag v<Version> auf dem aktuellen Stand von main),
 # baut danach das Docker-Image (<Version> und latest) und die Android-App und hängt die APK an.
 # Start: Actions -> „Veröffentlichen“ -> Run workflow (oder per API). Die Beschreibung kommt aus docs/versionen/<Version>.md.
+# Vorher läuft die volle Testsuite (Workflow „Tests (voll)“, derselbe Stand): schlägt sie fehl, entsteht keine Veröffentlichung, kein Image und keine APK.
 on:
   workflow_dispatch:
 
@@ -11,7 +12,12 @@ permissions:
   packages: write
 
 jobs:
+  tests:
+    uses: ./.github/workflows/tests-voll.yml
+    permissions:
+      contents: read
   release:
+    needs: tests
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.v.outputs.version }}

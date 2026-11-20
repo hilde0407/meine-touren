@@ -138,7 +138,7 @@ Neueste zuerst. Alle Versionen (bis 1.3) in **[docs/VERSIONSVERLAUF.md](docs/VER
 
 ```bash
 pip install -r requirements-dev.txt && python -m playwright install chromium
-python scripts/test.py        # parallel, mit Wiederholung wackliger Tests wie in der CI (Hinweise: tests/README.md)
+python scripts/test.py        # schneller Kern, parallel, mit Wiederholung wackliger Tests wie in der CI (volle Suite: --voll; Hinweise: tests/README.md)
 DATA_DIR=/tmp/mt uvicorn app.main:app --port 8080
 ```
 
@@ -310,4 +310,4 @@ Das Skript installiert Java, lädt BRouter 1.7.7 und die Kartenkacheln (je ca. 1
   `wanderfuehrer.py` (Buchtouren erkennen), `selbsttest.py` (Prüfung ohne Änderung), `photos.py`, `pdfgen.py`, `trackfix.py`, `security.py`, `users_api.py`.
   `extras.py`, `more.py` und `more2.py` sind historisch gewachsene Sammelstellen, aus denen Stück für Stück eigene Module herausgelöst werden;
   die gewohnten Namen bleiben dort über `__getattr__` erreichbar, damit nichts bricht.
-- Tests: `python scripts/test.py` (oder `python -m pytest -q tests`) – darunter Browsertests mit Playwright (`pip install -r requirements-dev.txt && python -m playwright install chromium`), die jede Ansicht mit Beispieldaten öffnen und auf JavaScript-Fehler prüfen. Helfer, Regeln gegen wacklige Tests und Stresstest: [tests/README.md](tests/README.md).
+- Tests: `python scripts/test.py` (schneller Kern; volle Suite mit `--voll` oder `python -m pytest -q tests`) – darunter Browsertests mit Playwright (`pip install -r requirements-dev.txt && python -m playwright install chromium`), die jede Ansicht mit Beispieldaten öffnen und auf JavaScript-Fehler prüfen. Helfer, Regeln gegen wacklige Tests und Stresstest: [tests/README.md](tests/README.md).

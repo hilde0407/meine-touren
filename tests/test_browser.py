@@ -80,6 +80,7 @@ def _tour_id(page):
     return page.evaluate("TOURS.find(t => t.source === 'local').id")
 
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 @pytest.mark.parametrize("view", VIEWS)
 def test_view_loads_without_errors(page, view):
     if view.startswith("tour/"):
@@ -93,6 +94,7 @@ def test_view_loads_without_errors(page, view):
     assert not page.errors, f"{view}: {page.errors}"
 
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md): schneller Seitenwechsel auf gebremster CPU
 @pytest.mark.parametrize("pause", [15, 40, 90, 200])
 def test_fast_navigation_no_errors(page, pause):
     cdp = page.context.new_cdp_session(page); cdp.send("Emulation.setCPUThrottlingRate", {"rate": int(os.environ.get("MT_CPU_RATE", "4"))})   # langsamer Rechner (wie GitHub Actions)
@@ -105,6 +107,7 @@ def test_fast_navigation_no_errors(page, pause):
     assert not page.errors, page.errors
 
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_fresh_load_without_errors(page, app_url):
     pg = page.context.browser.new_page(locale="de-DE"); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
@@ -115,6 +118,7 @@ def test_fresh_load_without_errors(page, app_url):
     assert not errs, errs
 
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_interactions(page):
     page.errors.clear()
     page.evaluate("location.hash = '#/tour/' + TOURS.find(t => t.source === 'local').id"); quiet(page, 1200)
@@ -332,6 +336,7 @@ def test_best_photos_button(page):
     assert not page.errors, page.errors
 
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_admin_tabs(page):
     base = page.url.split("#")[0]
     page.goto(base + "#/dash"); page.wait_for_timeout(300)
@@ -654,6 +659,7 @@ def test_offline_banner(page):
     assert page.locator("#offbar").count() == 0
 
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_record_view_app(page):
     """Aufzeichnungsseite mit nachgebildeter Android-Brücke (window.MTApp)."""
     base = page.url.split("#")[0]
@@ -859,6 +865,7 @@ def test_mobile_map_and_more_menu(page):
     page.set_viewport_size({"width": 1280, "height": 900})
 
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_viewer_ui(page):
     """Betrachter: kein Verwaltungs-Menü, keine Bearbeiten-Knöpfe; Karte lädt ohne Fehler."""
     base = page.url.split("#")[0]

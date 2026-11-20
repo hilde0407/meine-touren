@@ -232,6 +232,7 @@ def test_menueleiste_computer_ansicht(pw, app):
         pg.browser_.close()
 
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_startseite_der_app(pw, app):
     pg = _open(pw, app, "/")
     try:
@@ -272,6 +273,7 @@ def test_startseite_der_app(pw, app):
 
 
 # ---------------------------------------------------------------------------------------------- bereit
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_bereit_start_sportart_gps(pw, app):
     pg = _open(pw, app, geo=True)
     try:

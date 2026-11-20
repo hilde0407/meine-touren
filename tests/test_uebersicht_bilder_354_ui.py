@@ -161,6 +161,7 @@ def _prime_best(app):
 VPIC = r"/pic/\d+\?size=\d+&v=[0-9a-f]{12}"
 
 
+@pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_messung_erneut_keine_bildanfrage(pw, app):
     _prime_best(app)
     ctx = _ctx(pw)

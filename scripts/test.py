@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Testlauf mit denselben Standardoptionen wie die CI (siehe tests/README.md).
+"""Testlauf mit denselben Standardoptionen wie die CI (siehe tests/README.md, Abschnitt „Kern und volle Suite“).
 
-    python scripts/test.py                      # alles, parallel (falls pytest-xdist da ist), Wiederholung fehlgeschlagener Tests (falls pytest-rerunfailures da ist)
-    python scripts/test.py tests/test_gruppen_ui.py -k link      # weitere Argumente gehen an pytest
+    python scripts/test.py                      # schneller Kern (Standard): alle Server-/Unit-/Format-/Stiltests + Browser-Stichproben (@pytest.mark.kern)
+    python scripts/test.py --voll               # volle Suite: alles (= Kern + übrige Browsertests) – vor dem Veröffentlichen
+    python scripts/test.py --rest               # nur die Tests, die nicht zum Kern gehören (Kontrolle: Kern + Rest = voll)
+    python scripts/test.py tests/test_gruppen_ui.py -k link      # mit Dateien/Tests: alle genannten Tests (kein Kern-Filter, außer mit --kern)
     MT_TEST_WORKERS=1 python scripts/test.py    # seriell (Fehlersuche); MT_TEST_WORKERS=4 für feste Anzahl
     MT_TEST_RERUNS=0 python scripts/test.py     # ohne Wiederholung (Flakes sichtbar machen)
 
@@ -16,13 +18,21 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+MODES = {"--kern": "not voll", "--voll": None, "--rest": "voll"}
 
 
 def _has(mod):
     return importlib.util.find_spec(mod) is not None
 
 
-def main(argv):
+def build(argv):
+    """Befehlszeile für pytest (ohne Ausführung; getestet in tests/test_testsuite_kern.py)."""
+    modes = [a for a in argv if a in MODES]
+    argv = [a for a in argv if a not in MODES]
+    if len(modes) > 1:
+        raise SystemExit("Bitte nur einen Modus angeben: --kern, --voll oder --rest.")
+    paths = any(not a.startswith("-") and (ROOT / a.split("::")[0]).exists() for a in argv)
+    mode = modes[0] if modes else ("--voll" if paths else "--kern")    # genannte Dateien laufen ganz; ohne Angabe der Kern
     cmd = [sys.executable, "-m", "pytest", "-q", "-rfER"]            # -rR: Tests, die erst beim Wiederholen bestanden, am Ende auflisten
     reruns = os.environ.get("MT_TEST_RERUNS", "2")
     if reruns != "0" and _has("pytest_rerunfailures"):
@@ -32,9 +42,17 @@ def main(argv):
         cmd += ["-n", workers, "--dist", "loadfile"]
     elif workers != "1":
         print("Hinweis: pytest-xdist fehlt (pip install -r requirements-dev.txt) – der Lauf ist seriell und dauert deutlich länger.", file=sys.stderr)
-    if not any(not a.startswith("-") and (ROOT / a.split("::")[0]).exists() for a in argv):
+    if MODES[mode]:
+        cmd += ["-m", MODES[mode]]
+    if not paths:
         cmd.append("tests")
-    return subprocess.call(cmd + argv, cwd=ROOT)
+    return cmd + argv, mode
+
+
+def main(argv):
+    cmd, mode = build(argv)
+    print(f"Testlauf: {'schneller Kern' if mode == '--kern' else 'volle Suite' if mode == '--voll' else 'nur der Rest (ohne Kern)'}", file=sys.stderr)
+    return subprocess.call(cmd, cwd=ROOT)
 
 
 if __name__ == "__main__":
