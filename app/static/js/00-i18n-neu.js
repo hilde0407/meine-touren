@@ -3301,4 +3301,6 @@ Umstellen || Switch || Modifier || Cambiar
 Alle {} Fotos || All {} photos || Les {} photos || Las {} fotos
 Weniger zeigen || Show less || Afficher moins || Mostrar menos
 Ausgewählte Fotos || Selected photos || Photos choisies || Fotos seleccionadas
+Fotos in der Tourenliste || Photos in the tour list || Photos dans la liste des parcours || Fotos en la lista de rutas
+Je Tour ein Foto statt der Strecke (gilt nur auf diesem Gerät) || One photo per tour instead of the route (this device only) || Une photo par parcours au lieu du tracé (sur cet appareil uniquement) || Una foto por ruta en lugar del trazado (solo en este dispositivo)
 `;

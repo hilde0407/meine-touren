@@ -15,6 +15,7 @@ from .jobs import log
 EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 STRIP_SIZE = 300        # 3.51.0: Kantenlänge der Bilder im Foto-Streifen der Tourseite (Kästchen 104 px, scharf bis 3-fache Pixeldichte; dieselbe Größe wärmt warm_thumbs schon immer vor)
 STRIP_N = 12
+COVER_SIZE = STRIP_SIZE  # 3.52.0: Titelfoto je Tour in der Tourenliste (Kachel 88–120 px): dieselbe Größe wie der Foto-Streifen – nichts Neues zu erzeugen, oft schon vorhanden
 try:
     import pillow_heif  # optional
     pillow_heif.register_heif_opener()
@@ -626,12 +627,15 @@ def thumb(photo_id, size):
 
 def warm_thumbs(sizes=(STRIP_SIZE, 400, 500), stop=None):
     """Fehlende Vorschaubilder der Übersicht im Hintergrund erzeugen (gedrosselt), damit der erste Seitenaufruf nicht darauf wartet.
-    3.51.0: zuerst die Foto-Streifen der Tourseiten (neueste Touren zuerst), dann alle übrigen Vorschaubilder."""
+    3.51.0: zuerst die Foto-Streifen der Tourseiten (neueste Touren zuerst), dann alle übrigen Vorschaubilder.
+    3.52.0: noch davor die Titelfotos der Tourenliste (ein Bild je Tour, neueste Touren zuerst)."""
     import time as _t
     try:
         os.nice(10)                       # nur dieser Thread (Linux); Fehler anderswo ignorieren
     except Exception:  # noqa
         pass
+    if warm_covers(stop) is None:
+        return 0
     for t in db.query("SELECT DISTINCT p.tour_id FROM photos p JOIN tours t ON t.id=p.tour_id ORDER BY t.start_ts DESC"):
         try:
             warm_strip(t["tour_id"])
@@ -1010,18 +1014,102 @@ def strip_ids(tour_id, n=STRIP_N, bg=False):
 
 
 def warm_strip(tour_id, metrics=False):
-    """Vorschaubilder des Foto-Streifens einer Tour erzeugen; mit metrics=True vorher fehlende Bewertung/Schärfe berechnen (bestimmt die Auswahl)."""
+    """Vorschaubilder des Foto-Streifens einer Tour erzeugen; mit metrics=True vorher fehlende Bewertung/Schärfe berechnen (bestimmt die Auswahl).
+    3.52.0: zuerst das Titelfoto der Tourenliste (nach den Werten gewählt)."""
     if metrics:
         rows = db.query("SELECT id,path,rating,sharp FROM photos WHERE tour_id=? AND COALESCE(manual,0)!=2", (str(tour_id),))
         if any(r["rating"] is None or r["sharp"] is None for r in rows):
             ensure_metrics(rows, budget_s=120)
+    c = cover_of(tour_id)
+    if c:
+        thumb(c, COVER_SIZE)
     for i in strip_ids(tour_id):
         thumb(i, STRIP_SIZE)
 
 
+# ---------- 3.52.0: Titelfoto je Tour (Tourenliste) ----------
+def cover_pick(rows):
+    """Ein Titelfoto aus den Fotos einer Tour (dicts mit id, rating, sharp; zeitlich sortiert, ohne ausgeschlossene).
+    Stabil: dieselben Fotos ergeben immer dasselbe Bild. Abgelehnte Fotos (Bewertung < 0) nur, wenn es keine anderen gibt; mit eigener
+    Bewertung (Sterne) das bestbewertete; sonst das Foto aus der Mitte der Tour, das nicht als unscharf bekannt ist (Schärfe wie bei
+    „Beste Fotos“, nur wenn für mindestens 5 Fotos bekannt). Bei Gleichstand das der Tourmitte nächste, dann das frühere.
+    Fehlende Werte zählen als „unbekannt“ (nicht abgelehnt, nicht unscharf): die Wahl wartet nie auf eine Berechnung."""
+    if not rows:
+        return None
+    n = len(rows)
+    idx = list(range(n))
+    ok = [i for i in idx if (rows[i].get("rating") or 0) >= 0] or idx
+    best = max((rows[i].get("rating") or 0) for i in ok)
+    if best > 0:
+        ok = [i for i in ok if (rows[i].get("rating") or 0) == best]
+    else:
+        sh = sorted(rows[i]["sharp"] for i in ok if rows[i].get("sharp") is not None)
+        if len(sh) >= 5:
+            lim = 0.35 * sh[len(sh) // 2]
+            ok = [i for i in ok if rows[i].get("sharp") is None or rows[i]["sharp"] >= lim] or ok
+    mid = (n - 1) / 2
+    return rows[min(ok, key=lambda i: (abs(i - mid), i))]
+
+
+def cover_of(tour_id):
+    rows = db.query("SELECT id,rating,sharp FROM photos WHERE tour_id=? AND COALESCE(manual,0)!=2 ORDER BY taken_ts,id", (str(tour_id),))
+    r = cover_pick(rows)
+    return r["id"] if r else None
+
+
+def covers():
+    """Titelfotos aller Touren mit einem Aufruf: {tour_id: {"id": Foto, "n": Anzahl Fotos, "v": Bildversion}} (ohne Dateipfad).
+    Ein Datenbankdurchgang über die Fotos; die Bildversion nur für das gewählte Foto."""
+    by = {}
+    for r in db.query("SELECT id,tour_id,rating,sharp,path,mtime,size FROM photos WHERE tour_id IS NOT NULL AND COALESCE(manual,0)!=2 ORDER BY tour_id,taken_ts,id"):
+        by.setdefault(r["tour_id"], []).append(r)
+    out, miss = {}, []
+    for t, rows in by.items():
+        c = cover_pick(rows)
+        out[t] = {"id": c["id"], "n": len(rows), "v": ver(c["path"], c["mtime"], c["size"])}
+        if any(r["rating"] is None or r["sharp"] is None for r in rows):
+            miss.append(t)
+    if miss:
+        _cover_metrics_bg(miss)
+    return out
+
+
+_COVER_ASKED = set()     # (Benutzer, Tour): fehlende Werte schon einmal nachgefordert (eine unlesbare Datei nicht bei jedem Aufruf erneut)
+
+
+def _cover_metrics_bg(tids):
+    """Fehlende Bewertung/Schärfe der Touren im Hintergrund nachrechnen (über den Foto-Streifen-Thread, neueste Touren zuerst);
+    beim nächsten Aufruf der Liste zählen sie – die Liste wartet nie darauf."""
+    u = ctx.uid()
+    new = [t for t in tids if (u, t) not in _COVER_ASKED]
+    if not new or os.environ.get("MT_NO_WARM") == "1":
+        return
+    _COVER_ASKED.update((u, t) for t in new)
+    st = {r["id"]: r["start_ts"] or 0 for r in db.query("SELECT id,start_ts FROM tours")}
+    warm_strip_bg(sorted(new, key=lambda t: st.get(t, 0)), metrics=True)    # die Warteschlange nimmt die zuletzt eingereihte Tour zuerst
+
+
+def warm_covers(stop=None):
+    """Vorschaubilder der Titelfotos (COVER_SIZE) erzeugen, neueste Touren zuerst, gedrosselt. None = abgebrochen."""
+    import time as _t
+    n = 0
+    for t in db.query("SELECT DISTINCT p.tour_id FROM photos p JOIN tours t ON t.id=p.tour_id ORDER BY t.start_ts DESC"):
+        try:
+            c = cover_of(t["tour_id"])
+            if c:
+                thumb(c, COVER_SIZE)
+                n += 1
+        except Exception:  # noqa
+            pass
+        _t.sleep(0.01)
+        if stop and stop():
+            return None
+    return n
+
+
 def warm_strip_bg(tour_ids, metrics=False):
     """warm_strip im Hintergrund (ein Thread je Benutzer, niedrige Priorität); Aufrufe während der Arbeit landen in der Warteschlange."""
-    tids = {str(t) for t in tour_ids or () if t}
+    tids = list(dict.fromkeys(str(t) for t in tour_ids or () if t))       # 3.52.0: Reihenfolge behalten (zuletzt eingereiht = zuerst bearbeitet)
     if not tids or os.environ.get("MT_NO_WARM") == "1":
         return
     u = ctx.uid()

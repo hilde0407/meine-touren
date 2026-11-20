@@ -5,6 +5,13 @@ async function boot() {
   window._preTours = fetch("/api/tours")
     .then(r => (r.ok ? r.json() : null))
     .catch(() => null);
+  window._preCovers = (() => {                 // 3.52.0: Titelfotos der Tourenliste gleich mit (eine kleine Antwort für alle Touren)
+    try {
+      return localStorage.getItem("mt_tlfotos") === "0" ? null : fetch("/api/tour-covers").then(r => (r.ok ? r.json() : null)).catch(() => null);
+    } catch (e) {
+      return null;
+    }
+  })();
   try {
     ME = await fetch("/api/me").then(r => r.json());
   } catch (e) {}

@@ -345,6 +345,7 @@ async function loadTours() {
     t.h = (t.dur_s || 0) / 3600;
     BY[t.id] = t;
   });
+  loadCovers();                              // 3.52.0: Titelfotos der Tourenliste, nicht abwarten (die Liste zeichnet Platzhalter fester Größe)
 }
 const years = () => [...new Set(TOURS.map(t => t.y))].sort((a, b) => b - a);
 

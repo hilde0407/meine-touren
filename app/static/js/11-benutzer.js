@@ -165,7 +165,7 @@ function applyView() {
         ["desktop", "Computer"],
       ]
         .map(([k, l]) => `<button class="btn ${viewPref() === k ? "" : "alt"} sm" data-vm="${k}">${l}</button>`)
-        .join("")}</div>
+        .join("")}</div>${tlFotosChk()}
       <div class="row mt16"><button class="btn alt sm" id="mab">ℹ️ Info: Version &amp; Ersteller</button></div>
       ${ME.user ? `<div class="row mt16"><button class="btn alt" id="mlo">Abmelden (${esc(ME.user.name)})</button></div>` : ""}`);
     m2.querySelectorAll("a").forEach(a => (a.onclick = () => m2.remove()));
@@ -268,7 +268,7 @@ VIEWS.account = async () => {
       ["desktop", "Computer"],
     ]
       .map(([k, l]) => `<button class="btn ${viewPref() === k ? "" : "alt"} sm" data-vm="${k}">${l}</button>`)
-      .join("")}</div></div></div>
+      .join("")}</div>${tlFotosChk()}</div></div>
    <div class="sec"><h2>Fotos freigeben</h2><span class="sub">Andere Benutzer können freigegebene Fotos ansehen und in ihre Bibliothek übernehmen. Deine Originale bleiben bei dir.</span></div>
    <div class="grid g2"><div class="panel"><h2>Neue Freigabe</h2>
      <div class="field"><label>Für</label><select id="gg"><option value="*">Alle Benutzer</option>${others.map(u => `<option value="${esc(u.uid)}">${esc(u.name)}</option>`).join("")}</select></div>

@@ -2267,3 +2267,15 @@ html.mob .recdock{position:sticky;bottom:calc(64px + env(safe-area-inset-bottom)
 .selmode .phstrip img{cursor:crosshair}.phstrip img.sel{outline:4px solid var(--yellow);outline-offset:-4px;filter:brightness(.8)}
 #phbox .phmore{margin:2px 0 0}#phbox .phpg{margin:10px 0 0;text-align:center}#phbox .thumbs{margin-top:8px}
 html.mob #phbox .phstrip{gap:4px;height:110px}html.mob .phstrip .phi,html.mob .phstrip .phi img{width:96px;height:96px;flex-basis:96px}
+/* 3.52.0 Titelfoto je Tour in den Tourenlisten: feste Kachel (Platzhalterfarbe wie der Foto-Streifen), Foto oder Strecke */
+.tr.trf{grid-template-columns:120px 1fr auto}
+.tr .trp{position:relative;display:block;width:120px;height:80px;border-radius:var(--r);overflow:hidden;background:var(--soft)}
+.tr .trp img{display:block;width:100%;height:100%;object-fit:cover}
+.tr .trp.trr{display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--soft) 55%,transparent)}
+.tr .trp.trr svg.mini{width:78px;height:50px}
+@media(max-width:700px){.tr.trf{grid-template-columns:88px 1fr}.tr.trf .trp{width:88px;height:88px}.tr.trf .trp.trr svg.mini{width:70px;height:46px}}
+html.mob .tl .tr.trf{grid-template-columns:88px minmax(0,1fr)}
+html.mob .tr.trf .trp{width:88px;height:88px;grid-row:1/span 2;grid-column:1;align-self:start}
+html.mob .tr.trf .trp.trr svg.mini{width:70px;height:46px;margin:0}
+.tr .trp.trr svg.mini rect{display:none}
+.tlfchk{display:flex!important;gap:8px;align-items:center;min-height:44px;margin:10px 0 0!important;font-size:15px;cursor:pointer}.tlfchk input{width:18px;height:18px;margin:0}

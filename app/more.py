@@ -286,11 +286,11 @@ def api_photos_unused_delete(body: dict):
 # ---------- Titelfoto je Tour ----------
 @router.get("/api/tour-covers")
 def api_tour_covers():
-    """Pro Tour ein Foto aus der Mitte der Aufnahmen: {tour_id: {"id": Foto-ID, "n": Anzahl Fotos}}"""
-    by = {}
-    for r in db.query("SELECT id,tour_id FROM photos WHERE tour_id IS NOT NULL AND COALESCE(manual,0)!=2 ORDER BY tour_id,taken_ts"):
-        by.setdefault(r["tour_id"], []).append(r["id"])
-    return {t: {"id": ids[len(ids) // 2], "n": len(ids)} for t, ids in by.items()}
+    """Titelfoto je Tour für die Tourenliste und die Mehrtagestouren: {tour_id: {"id": Foto-ID, "n": Anzahl Fotos, "v": Bildversion}}.
+    3.52.0: stabile Wahl (Sterne, sonst Tourmitte ohne unscharfe/abgelehnte, photos.cover_pick) und Version für /pic/<id>?size=…&v=…
+    (der Browser darf das Bild behalten). Nie der Dateipfad. Fehlende Bewertung/Schärfe wartet nicht: sie wird im Hintergrund nachgerechnet."""
+    from . import photos
+    return photos.covers()
 
 
 # ---------- Beste Fotos ----------

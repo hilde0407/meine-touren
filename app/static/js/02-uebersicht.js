@@ -155,8 +155,86 @@ VIEWS.dash = async (_, q) => {
 /* Jahreszeit: Sommerhalbjahr Mai–Oktober, Winterhalbjahr November–April */
 const seasonOfMonth = m => (m >= 5 && m <= 10 ? "sommer" : "winter");
 const seasonOf = d => seasonOfMonth(+String(d).slice(5, 7));
+/* 3.52.0: Titelfoto je Tour in den Tourenlisten. Ein Aufruf für alle Touren (/api/tour-covers: Foto, Anzahl, Bildversion), parallel zur Tourenliste
+   geladen; die Kachel hat eine feste Größe und steht sofort (die Zahl der Fotos kennt die Liste schon), das Bild kommt mit Version in der Adresse
+   (der Browser behält es, beim erneuten Öffnen keine Bildanfrage) und erst kurz vor dem Sichtbereich (loading=lazy). Ohne Fotos: die Strecke.
+   Abschaltbar je Gerät (Konto → Darstellung, „Mehr“ → Darstellung). */
+let COVERS = null;
+const TR_PIC = 300;                                           // = photos.COVER_SIZE (Größe des Foto-Streifens, wird vorab erzeugt)
+const tlFotos = () => {
+  try {
+    return localStorage.getItem("mt_tlfotos") !== "0";
+  } catch (e) {
+    return true;
+  }
+};
+let _trfT = null,
+  _trf = false;
+const trfOn = () => (_trfT === TOURS ? _trf : ((_trfT = TOURS), (_trf = tlFotos() && TOURS.some(t => t.photos > 0))));
+function loadCovers() {
+  _trfT = null;
+  if (!tlFotos()) return Promise.resolve((COVERS = {}));
+  const pre = window._preCovers;
+  window._preCovers = null;
+  return (pre ? pre.then(c => c || api("/api/tour-covers")) : api("/api/tour-covers"))
+    .then(c => {
+      COVERS = c || {};
+      patchCovers();
+      return COVERS;
+    })
+    .catch(() => (COVERS = COVERS || {}));
+}
+const trImg = c => `<img class="trimg" src="/pic/${+c.id}?size=${TR_PIC}&v=${esc(c.v || "")}" alt="" loading="lazy" decoding="async" width="${TR_PIC}" height="${TR_PIC}">`;
+function trThumb(t) {
+  if (!trfOn()) return miniRoute(t.id, t.sport);
+  const c = t.photos && COVERS ? COVERS[t.id] : null;
+  if (c) return `<span class="trp">${trImg(c)}</span>`;
+  if (t.photos && !COVERS) return `<span class="trp" data-cv="${esc(t.id)}"></span>`;      // Titelfoto ist unterwegs: Platzhalter in fester Größe, nichts springt
+  return `<span class="trp trr">${miniRoute(t.id, t.sport)}</span>`;
+}
+/* Schalter „Fotos in der Tourenliste“ (Konto → Darstellung und „Mehr“ → Darstellung), je Gerät */
+const tlFotosChk = () =>
+  `<label class="chk tlfchk" title="Je Tour ein Foto statt der Strecke (gilt nur auf diesem Gerät)"><input type="checkbox" data-tlf${tlFotos() ? " checked" : ""}> <span>Fotos in der Tourenliste</span></label>`;
+document.addEventListener("change", e => {
+  const i = e.target;
+  if (!i || !i.matches || !i.matches("input[data-tlf]")) return;
+  try {
+    localStorage.setItem("mt_tlfotos", i.checked ? "1" : "0");
+  } catch (err) {}
+  document.querySelectorAll("input[data-tlf]").forEach(x => (x.checked = i.checked));
+  COVERS = i.checked ? null : {};
+  loadCovers();
+});
+/* Platzhalter füllen, sobald die Titelfotos da sind (nur beim allerersten Aufbau, danach stehen sie schon beim Zeichnen fest) */
+function patchCovers() {
+  document.querySelectorAll(".trp[data-cv]").forEach(el => {
+    const id = el.dataset.cv,
+      c = COVERS && COVERS[id],
+      t = BY[id];
+    el.removeAttribute("data-cv");
+    if (c) el.innerHTML = trImg(c);
+    else {
+      el.classList.add("trr");
+      el.innerHTML = miniRoute(id, t ? t.sport : "");
+    }
+  });
+}
+/* Bild nicht ladbar (gelöscht, kein Zugriff): die Strecke zeigen */
+document.addEventListener(
+  "error",
+  e => {
+    const i = e.target,
+      s = i && i.classList && i.classList.contains("trimg") && i.closest(".trp"),
+      a = s && s.closest("a.tr"),
+      id = a && decodeURIComponent((a.getAttribute("href") || "").slice(7));
+    if (!s) return;
+    s.classList.add("trr");
+    s.innerHTML = miniRoute(id, BY[id] ? BY[id].sport : "");
+  },
+  true
+);
 function tourRow(t) {
-  return `<a class="tr" href="#/tour/${t.id}">${miniRoute(t.id, t.sport)}<span><div class="nm">${esc(t.name)}</div><div class="s"><span>${fmtDatumKurz(t.date, {zeit: true})}</span><span><i style="background:${sCol(t.sport)}"></i>${sName(t.sport)}</span>${t.photos ? `<span>${t.photos} Fotos</span>` : ""}${t.has_hr ? `<span class="hrt" title="Mit Herzfrequenz">❤</span>` : ""}${t.stars ? `<span class="stars" title="Meine Bewertung">${"★".repeat(t.stars)}</span>` : ""}</div></span>
+  return `<a class="tr${trfOn() ? " trf" : ""}" href="#/tour/${t.id}">${trThumb(t)}<span><div class="nm">${esc(t.name)}</div><div class="s"><span>${fmtDatumKurz(t.date, {zeit: true})}</span><span><i style="background:${sCol(t.sport)}"></i>${sName(t.sport)}</span>${t.photos ? `<span>${t.photos} Fotos</span>` : ""}${t.has_hr ? `<span class="hrt" title="Mit Herzfrequenz">❤</span>` : ""}${t.stars ? `<span class="stars" title="Meine Bewertung">${"★".repeat(t.stars)}</span>` : ""}</div></span>
   <span class="n"><span>${fmtKm(t.km)}</span><span>${fmtAuf(t.up_m)}</span><span>${fmtDauer(t.h * 3600)}</span></span></a>`;
 }
 
