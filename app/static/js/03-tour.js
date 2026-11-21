@@ -88,6 +88,12 @@ async function uploadDialog(t) {
             `<div class="${v.status === "error" ? "bad" : "ok"}"><b>${k === "komoot" ? "Komoot" : "Strava"}:</b> ${v.status === "uploaded" ? "hochgeladen ✓" : v.status === "duplicate" ? "dort schon vorhanden" : v.status === "already" ? "schon erledigt" : esc(v.msg || v.status)}${v.url ? ` – <a target="_blank" href="${esc(v.url)}">öffnen</a>` : ""}</div>`
         )
         .join("");
+      // 3.54.1: Ist alles gut gegangen, schließt der Dialog von selbst – das Ergebnis steht danach bei der Tour (Hochgeladen-Hinweis). Bei Fehlern, „schon vorhanden“ u. Ä. bleibt er offen und zeigt es.
+      if (Object.values(r).every(v => v.status === "uploaded")) {
+        m.remove();
+        uploadChips(t);
+        return;
+      }
     } catch (er) {
       m.querySelector("#upr").innerHTML = `<span class="bad">${esc(er.message)}</span>`;
     }

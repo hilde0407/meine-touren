@@ -2,6 +2,10 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.54.1 – Fenster „Tour hochladen“ schließt nach dem Hochladen
+
+- Nach erfolgreichem Hochladen (Komoot/Strava) schließt das Fenster von selbst; bei Fehler oder „schon vorhanden“ bleibt es offen und zeigt die Meldung
+
 ## Version 3.54.0 – Bilder der Übersicht bleiben im Browser
 
 - Übersicht (Kopfbereich, Zuletzt unterwegs, An diesem Tag, Erinnerungen, Zuletzt aufgenommene Fotos, Wiederentdecken): alle Bildadressen mit Version; erneutes Öffnen und Neuladen: keine Bildanfrage (vorher 12 bzw. 22 bei 130 Touren).

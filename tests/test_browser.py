@@ -118,6 +118,25 @@ def test_fresh_load_without_errors(page, app_url):
     assert not errs, errs
 
 
+def test_upload_dialog_schliesst(page):
+    """3.54.1: „Tour hochladen“ schließt nach erfolgreichem Hochladen von selbst; bei Fehler oder „schon vorhanden“ bleibt er offen."""
+    page.errors.clear()
+    page.evaluate("location.hash = '#/tour/' + TOURS.find(t => t.source === 'local').id"); quiet(page, 1200)
+    antwort = {"v": {"komoot": {"status": "uploaded", "url": ""}}}
+    page.route("**/api/tours/*/upload", lambda r: r.fulfill(status=200, content_type="application/json", body=__import__("json").dumps(antwort["v"])))
+    def los():
+        page.evaluate("document.querySelector(\"#eup\").click()"); page.wait_for_selector(".uimod .pp")
+        page.evaluate("document.querySelectorAll('.uimod .pp').forEach((c, i) => { if (!i) { c.disabled = false; c.checked = true; } })")
+        page.click("#uok")
+    los(); page.wait_for_selector(".uimod", state="detached")
+    antwort["v"] = {"komoot": {"status": "error", "msg": "Anmeldung abgelehnt"}}
+    los(); page.wait_for_selector("#upr .bad"); assert page.locator(".uimod").count() == 1
+    page.click("#ucx"); page.wait_for_selector(".uimod", state="detached")
+    antwort["v"] = {"komoot": {"status": "duplicate"}}
+    los(); page.wait_for_selector("#upr .ok"); assert page.locator(".uimod").count() == 1
+    page.click("#ucx"); page.unroute("**/api/tours/*/upload")
+
+
 @pytest.mark.kern                     # Stichprobe im schnellen Kern (tests/README.md)
 def test_interactions(page):
     page.errors.clear()
