@@ -14,6 +14,7 @@ python scripts/test.py --rest                            # nur die Tests außerh
 python scripts/test.py tests/test_gruppen_ui.py -k link  # Auswahl: alle genannten Tests (ohne Kern-Filter); weitere Argumente gehen an pytest
 MT_TEST_WORKERS=1 python scripts/test.py                 # seriell (Fehlersuche)
 MT_TEST_RERUNS=0 python scripts/test.py                  # ohne Wiederholung: Flakes sichtbar machen
+MT_TEST_TIMEOUT=0 python scripts/test.py                 # ohne Zeitgrenze je Test (Standard 600 s: ein hängender Test scheitert und wird wiederholt, statt den Lauf anzuhalten)
 MT_CPU_THROTTLE=6 python -m pytest -q tests/test_x_ui.py # Stresstest: CPU der Browserseiten um Faktor 6 bremsen
 ```
 

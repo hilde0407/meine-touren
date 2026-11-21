@@ -3,5 +3,6 @@
 pytest>=8
 pytest-xdist>=3.5            # parallele Läufe (-n), Dateien bleiben zusammen (--dist loadfile)
 pytest-rerunfailures>=14     # --reruns 2 wie in der CI
+pytest-timeout>=2.3          # ein hängender Test (z. B. beim Beenden des TestClient) scheitert nach MT_TEST_TIMEOUT s statt den Lauf anzuhalten
 httpx
 playwright

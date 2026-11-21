@@ -7,6 +7,7 @@
     python scripts/test.py tests/test_gruppen_ui.py -k link      # mit Dateien/Tests: alle genannten Tests (kein Kern-Filter, außer mit --kern)
     MT_TEST_WORKERS=1 python scripts/test.py    # seriell (Fehlersuche); MT_TEST_WORKERS=4 für feste Anzahl
     MT_TEST_RERUNS=0 python scripts/test.py     # ohne Wiederholung (Flakes sichtbar machen)
+    MT_TEST_TIMEOUT=0 python scripts/test.py    # ohne Zeitgrenze je Test (Standard 600 s, pytest-timeout; ein hängender Test scheitert dann und wird wiederholt)
 
 Worker: Standard = Zahl der Prozessoren, mindestens 2 und höchstens 4 (die Browsertests warten viel und belasten die CPU nur zur Hälfte).
 Je Worker laufen ganze Dateien nacheinander (--dist loadfile): die Server der Browsertests werden je Datei einmal gestartet.
@@ -37,6 +38,9 @@ def build(argv):
     reruns = os.environ.get("MT_TEST_RERUNS", "2")
     if reruns != "0" and _has("pytest_rerunfailures"):
         cmd += ["--reruns", reruns]
+    timeout = os.environ.get("MT_TEST_TIMEOUT", "600")                # je Test höchstens 10 min (der längste braucht rund 1 min); 0 = aus
+    if timeout != "0" and _has("pytest_timeout") and os.name != "nt":    # Windows kennt kein SIGALRM: dort beendet pytest-timeout den ganzen Worker – lieber ohne
+        cmd += ["--timeout", timeout]
     workers = os.environ.get("MT_TEST_WORKERS") or str(min(4, max(2, os.cpu_count() or 2)))
     if workers != "1" and _has("xdist"):
         cmd += ["-n", workers, "--dist", "loadfile"]
