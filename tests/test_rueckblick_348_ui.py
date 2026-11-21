@@ -118,7 +118,7 @@ def test_mit_plan_bleibt_plan_und_ergebnis_ohne_doppelanzeige(pw, app):
         c = pg.locator(CARD)
         expect(c.locator("summary h3")).to_have_text("Plan und Ergebnis", timeout=T)
         assert pg.locator(CARD).count() == 1 and "Wie ist es gelaufen?" not in pg.locator("#main").inner_text()
-        assert c.locator(".plrow").count() == 3
+        assert c.locator(".pe-ist .pek").count() == 4 and c.locator(".plrow").count() == 0         # 3.55.0: Spalten Geplant/Gelaufen
     finally:
         pg.browser_.close()
 

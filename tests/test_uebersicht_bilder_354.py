@@ -1,6 +1,6 @@
 """3.54.0 – Bilder der Übersicht mit Zwischenspeicher (Server): die Fotolisten, aus denen Übersicht, Statistik und Diashow ihre Bilder holen, tragen die Bildversion „v“
 (nie den Dateipfad) – auch „beste Fotos“, die besten Fotos einer Tour, die Titelfotos der Reisen und Schlagwörter. Das große Bild des Kopfbereichs wird vorab erzeugt.
-Oberfläche: keine unversionierte Bildadresse mehr in den Bausteinen der Übersicht; Service Worker mt-v138 mit Grenze 2000; Freigaben (/spic, /sphoto) unverändert."""
+Oberfläche: keine unversionierte Bildadresse mehr in den Bausteinen der Übersicht; Service Worker mt-v139 mit Grenze 2000; Freigaben (/spic, /sphoto) unverändert."""
 import re
 from pathlib import Path
 
@@ -87,6 +87,6 @@ def test_oberflaeche_ohne_unversionierte_bilder():
 
 def test_service_worker():
     sw = (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'const V = "mt-v138"' in sw and 'PICS = "mt-pics-v2"' in sw and "const PICMAX = 2000" in sw
+    assert 'const V = "mt-v139"' in sw and 'PICS = "mt-pics-v2"' in sw and "const PICMAX = 2000" in sw
     assert "trim(PICS, 1200)" not in sw and sw.count("trim(PICS, PICMAX)") == 2
     assert 'p.startsWith("/pic/") && u.searchParams.get("v")' in sw and "s <= 600" in sw

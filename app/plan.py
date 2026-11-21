@@ -342,14 +342,16 @@ def simplify(pts, n=MAXLINE):
 def api_tour_plan(tour_id: str):
     """Verknüpfte Planung einer gelaufenen Tour (Soll/Ist): Kopf des Plans, Kennzahlen mit Differenzen und beide Linien auf höchstens 400 Punkte verkürzt.
     Ohne Verknüpfung {"status": "kein_plan"}; fehlende Werte sind null (nie 0). Nur lesend, gehört dem angemeldeten Benutzer (Betrachter dürfen lesen); Freigabelinks liefern nichts davon."""
-    t = db.one("SELECT id,name,start_ts,dist_m,dur_s,up_m FROM tours WHERE id=?", (tour_id,))
+    t = db.one("SELECT id,name,start_ts,dist_m,dur_s,up_m,down_m FROM tours WHERE id=?", (tour_id,))
     if not t:
         raise HTTPException(404, "Tour nicht gefunden")
     p = db.one("SELECT id,name,sport,km,up,down,est_h,ts,pts FROM plans WHERE tour_id=? ORDER BY ts DESC LIMIT 1", (tour_id,))
     if not p:
         return {"status": "kein_plan"}
-    ist = {"km": round(t["dist_m"] / 1000.0, 2) if t["dist_m"] else None, "up": round(t["up_m"]) if t["up_m"] is not None else None, "h": round(t["dur_s"] / 3600.0, 3) if t["dur_s"] else None}
-    soll = {"km": p["km"] if p["km"] else None, "up": round(p["up"]) if p["up"] is not None else None, "h": p["est_h"] if p["est_h"] else None}
+    ist = {"km": round(t["dist_m"] / 1000.0, 2) if t["dist_m"] else None, "up": round(t["up_m"]) if t["up_m"] is not None else None, "h": round(t["dur_s"] / 3600.0, 3) if t["dur_s"] else None,
+           "down": round(t["down_m"]) if t["down_m"] is not None else None}                       # 3.55.0: Abstieg dazu (Spalten Geplant/Gelaufen)
+    soll = {"km": p["km"] if p["km"] else None, "up": round(p["up"]) if p["up"] is not None else None, "h": p["est_h"] if p["est_h"] else None,
+            "down": round(p["down"]) if p["down"] is not None else None}
 
     def diff(k, nd):
         return round(ist[k] - soll[k], nd) if ist[k] is not None and soll[k] is not None else None
@@ -359,4 +361,4 @@ def api_tour_plan(tour_id: str):
         plan_line = []
     track = routes.load(tour_id)
     return {"status": "ok", "plan": {"id": p["id"], "name": p["name"] or "", "sport": p["sport"], "ts": p["ts"]}, "soll": soll, "ist": ist,
-            "diff": {"km": diff("km", 2), "up": diff("up", 0), "h": diff("h", 3)}, "plan_linie": plan_line, "tour_linie": simplify(track) if track else []}
+            "diff": {"km": diff("km", 2), "up": diff("up", 0), "h": diff("h", 3), "down": diff("down", 0)}, "plan_linie": plan_line, "tour_linie": simplify(track) if track else []}

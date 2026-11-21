@@ -2318,3 +2318,27 @@ html.mob .gfmore .btn{min-height:44px}
 /* 3.54.0 Übersicht: Platzhalterfarbe, solange ein Bild unterwegs ist (die Kästchen haben schon ihre feste Größe) */
 .slfotos img,.hlt img{background:var(--soft)}
 .hcm{position:relative;overflow:hidden;min-height:0}.hcm img{position:absolute;inset:0}
+/* 3.55.0 Plan und Ergebnis: Geplant/Gelaufen als zwei beschriftete Spalten in eigener Farbe (Plan Indigo, gelaufen Sportfarbe – wie Karte und Legende), Karte mit beiden Strecken, gleich hohe Knöpfe */
+:root{--pe-plan:#5c6bdc}
+.pewrap{--pe-ist:var(--hike)}.pe-s-bike{--pe-ist:var(--bike)}.pe-s-ebike{--pe-ist:var(--ebike)}.pe-s-run{--pe-ist:var(--run)}.pe-s-ski{--pe-ist:var(--ski)}.pe-s-other{--pe-ist:var(--other)}
+.pecols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;margin:0 0 14px;container-type:inline-size}
+.pecol{--pe-c:var(--pe-plan);min-width:0;border:1px solid var(--rule);border-left:5px solid var(--pe-c);border-radius:var(--r);padding:12px 14px 14px;background:color-mix(in srgb,var(--pe-c) 5%,var(--card,var(--surface)))}
+.pe-ist{--pe-c:var(--pe-ist)}
+.peh{margin:0 0 8px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.petag{display:inline-flex;align-items:center;gap:8px;padding:3px 11px 3px 9px;border-radius:999px;background:color-mix(in srgb,var(--pe-c) 15%,var(--card,var(--surface)));color:var(--ink)}
+.pename{margin:0;font:600 18px var(--d);line-height:1.3;overflow-wrap:anywhere}.pename a{color:inherit}
+.pedt{margin:2px 0 0;font-size:14px}
+.pefig{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;margin:12px 0 0;padding-top:12px;border-top:1px solid var(--rule)}
+.pefig>div{min-width:0}.pefig dt{font-size:13px;color:var(--mut)}.pefig dd{margin:0}
+.pev{display:block;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.3}
+.pefig .pld{display:flex;flex-wrap:wrap;gap:0 5px;align-items:baseline;font-size:13px;color:var(--mut);margin-top:2px}.pefig .pld b{color:var(--ink);font-weight:600}.pefig .pld small{font-size:13px}
+.pe0{display:block;visibility:hidden}
+@container (max-width:611px){.pe0{display:none}}
+.pemap{height:320px;border:1px solid var(--rule);border-radius:var(--r);background:var(--soft);isolation:isolate}
+html.mob .pemap{height:240px}
+.pemap path.pepl{stroke:var(--pe-plan)}.pemap path.peis{stroke:var(--pe-ist)}.plmap .pepl{stroke:var(--pe-plan);stroke-width:3}.plmap .peis{stroke:var(--pe-ist);stroke-width:4.5}
+.peleg{margin:8px 0 10px}
+.pesw{width:28px;height:10px;overflow:visible;flex:none}.pesw line{stroke-width:4;stroke-linecap:round}.pesw .pesw-pl{stroke:var(--pe-plan);stroke-width:3.5;stroke-dasharray:6 4;stroke-linecap:butt}.pesw .pesw-is{stroke:var(--pe-ist);stroke-width:5}
+.pedot{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--rule);flex:none}.pedot-s{background:#2f8f5f}.pedot-z{background:#c0504d}
+.plact.pebtns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-width:440px;margin:12px 0 0}
+.pebtns .btn,.pebtns .btn.sm,html.mob .pebtns .btn.sm{display:flex;align-items:center;justify-content:center;min-height:44px;margin:0;padding:6px 14px;font:600 15px/1.25 var(--d);letter-spacing:.3px;text-align:center;vertical-align:top}

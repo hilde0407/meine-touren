@@ -319,40 +319,95 @@ function rbPaint(c, b, d) {
   slBadge(c, d.besuch ? `${d.besuch.nr}. Besuch` : first ? RB_WORD[first[0]][first[1].einordnung] : "");
 }
 /* Unterschied Ist − Soll: Pfeil, Zahl mit Vorzeichen und Wort („länger als geplant“); innerhalb der Toleranz „wie geplant“ (=). Fehlt ein Wert, steht „ohne Angabe“ (nie 0). */
-const PLAN_TOL = {km: 0.05, up: 1, h: 1 / 60};
-const PLAN_WORDS = {km: ["länger als geplant", "kürzer als geplant"], up: ["mehr Aufstieg als geplant", "weniger Aufstieg als geplant"], h: ["länger als geplant", "kürzer als geplant"]};
+const PLAN_TOL = {km: 0.05, up: 1, down: 1, h: 1 / 60};
+const PLAN_WORDS = {km: ["länger als geplant", "kürzer als geplant"], up: ["mehr Aufstieg als geplant", "weniger Aufstieg als geplant"], down: ["mehr Abstieg als geplant", "weniger Abstieg als geplant"], h: ["länger als geplant", "kürzer als geplant"]};
 function planErgDiff(k, v) {
   if (v == null) return '<span class="pld mut"><span>ohne Angabe</span></span>';
   if (Math.abs(v) < PLAN_TOL[k]) return '<span class="pld"><span aria-hidden="true">=</span> <span>wie geplant</span></span>';
-  const num = k === "km" ? `${nSigned(v, 1)} km` : k === "up" ? `${nSigned(v, 0)} m` : null;
+  const num = k === "km" ? `${nSigned(v, 1)} km` : k === "up" || k === "down" ? `${nSigned(v, 0)} m` : null;
   return `<span class="pld"><span aria-hidden="true">${v > 0 ? "↑" : "↓"}</span> ` +
     (num ? `<b>${num}</b>` : `<b>${v < 0 ? "−" : "+"}${fmtDauer(Math.abs(v) * 3600)}</b>`) + ` <small class="mut">${PLAN_WORDS[k][v > 0 ? 0 : 1]}</small></span>`;
 }
-const planErgVal = (k, v) => (v == null ? '<span class="mut">ohne Angabe</span>' : k === "km" ? slKm(v) : k === "up" ? slHm(v) : fmtDauer(v * 3600));
-/* Linien übereinander: gleichmäßige Abbildung (Längengrad mit cos(Breite) gestreckt), Strichbreite bleibt beim Skalieren gleich */
+const planErgVal = (k, v) => (v == null ? '<span class="mut">ohne Angabe</span>' : k === "km" ? slKm(v) : k === "up" || k === "down" ? slHm(v) : fmtDauer(v * 3600));
+/* Ersatz ohne Leaflet (z. B. Vorschau): Linien übereinander als SVG, gleichmäßige Abbildung (Längengrad mit cos(Breite) gestreckt), Strichbreite bleibt beim Skalieren gleich */
 function planErgSvg(d) {
   const A = (d.plan_linie || []).filter(p => p.length >= 2), B = (d.tour_linie || []).filter(p => p.length >= 2), all = A.concat(B);
   if (all.length < 2) return "";
   const la = all.map(p => p[0]), lo = all.map(p => p[1]), k = Math.cos((((Math.min(...la) + Math.max(...la)) / 2) * Math.PI) / 180),
     x0 = Math.min(...lo) * k, y1 = Math.max(...la), w0 = Math.max(1e-6, (Math.max(...lo) - Math.min(...lo)) * k), h0 = Math.max(1e-6, y1 - Math.min(...la)),
     W = 600, H = Math.round(Math.max(120, Math.min(420, (W * h0) / w0))), sc = Math.min((W - 24) / w0, (H - 24) / h0), ox = (W - w0 * sc) / 2, oy = (H - h0 * sc) / 2,
-    pts = L => L.map(p => `${(ox + (p[1] * k - x0) * sc).toFixed(1)},${(oy + (y1 - p[0]) * sc).toFixed(1)}`).join(" "),
-    label = "Karte: geplante Linie gestrichelt, gelaufene Linie durchgezogen" + (A.length && B.length ? "" : A.length ? " (die gelaufene Linie liegt nicht vor)" : " (die geplante Linie liegt nicht vor)");
-  return `<svg class="plmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}" focusable="false">` +
-    (A.length ? `<polyline class="plpl" fill="none" points="${pts(A)}" vector-effect="non-scaling-stroke"/>` : "") +
-    (B.length ? `<polyline class="plis" fill="none" points="${pts(B)}" vector-effect="non-scaling-stroke"/>` : "") + "</svg>" +
-    `<ul class="plleg"><li><svg viewBox="0 0 28 8" class="plsw" aria-hidden="true" focusable="false"><line class="plpl" x1="1" y1="4" x2="27" y2="4"/></svg><span>Plan (gestrichelt)</span></li>` +
-    `<li><svg viewBox="0 0 28 8" class="plsw" aria-hidden="true" focusable="false"><line class="plis" x1="1" y1="4" x2="27" y2="4"/></svg><span>Ergebnis (durchgezogen)</span></li></ul>`;
+    pts = L => L.map(p => `${(ox + (p[1] * k - x0) * sc).toFixed(1)},${(oy + (y1 - p[0]) * sc).toFixed(1)}`).join(" ");
+  return `<svg class="plmap" viewBox="0 0 ${W} ${H}" aria-hidden="true" focusable="false">` +
+    (B.length ? `<polyline class="plis peis" fill="none" points="${pts(B)}" vector-effect="non-scaling-stroke"/>` : "") +
+    (A.length ? `<polyline class="plpl pepl" fill="none" points="${pts(A)}" vector-effect="non-scaling-stroke"/>` : "") + "</svg>";
+}
+/* 3.55.0: Geplant und Gelaufen als zwei klar beschriftete Spalten (mobil untereinander) in eigener Farbe – Plan Indigo gestrichelt, gelaufen in der Sportfarbe durchgezogen, wie in Karte und Legende.
+   Die Abweichung steht unter dem gelaufenen Wert; in der Planspalte steht dieselbe Zeile unsichtbar (pe0), damit beide Spalten gleich hohe Zeilen haben. */
+const PLAN_KEYS = [["km", "Strecke"], ["up", "Aufstieg"], ["down", "Abstieg"], ["h", "Dauer"]];
+const peSw = side => `<svg class="pesw" viewBox="0 0 28 10" aria-hidden="true" focusable="false"><line class="pesw-${side}" x1="2" y1="5" x2="26" y2="5"/></svg>`;
+const peSport = s => ((typeof SPORT === "object" && SPORT[typeof sNorm === "function" ? sNorm(s) : s]) || [0, "--other"])[1].slice(2);
+function planErgCol(side, d, t, can) {
+  const plan = side === "pl", S = plan ? d.soll : d.ist, nm = esc((plan ? d.plan.name : t && t.name) || "Ohne Namen"), dt = plan ? d.plan.ts : t && t.date,
+    name = plan && can ? `<a href="#/plan/${d.plan.id}">${nm}</a>` : nm;
+  return `<section class="pecol pe-${plan ? "plan" : "ist"}" aria-label="${plan ? "Geplant" : "Gelaufen"}"><h4 class="peh"><span class="petag">${peSw(side)}<span>${plan ? "Geplant" : "Gelaufen"}</span></span></h4>` +
+    `<p class="pename${plan ? " plname" : ""}">${name}</p>${dt ? `<p class="pedt mut">${plan ? "Geplant" : "Gelaufen"} am ${fmtDatumKurz(dt)}</p>` : ""}` +
+    `<dl class="pefig">${PLAN_KEYS.map(([k, lab]) => `<div class="pek pek-${k}"><dt>${lab}</dt><dd><b class="pev">${planErgVal(k, S[k])}</b>` +
+      (plan ? `<span class="pe0" aria-hidden="true">${planErgDiff(k, d.diff[k])}</span>` : planErgDiff(k, d.diff[k])) + "</dd></div>").join("")}</dl></section>`;
+}
+/* Karte mit beiden Strecken: dieselben Bausteine wie die Tourkarte (mkMap: Kacheln über den Zwischenspeicher des Servers, offline aus dem Service Worker; Start/Ziel wie dort).
+   Plan gestrichelt über der gelaufenen Linie, beide mit weißem Rand; die Ansicht passt auf beide Strecken und wird nach jeder Größenänderung neu eingepasst, bis jemand selbst verschiebt oder zoomt. */
+function planErgMap(b, d) {
+  const el = b.querySelector(".pemap");
+  if (b._plm) {
+    try { b._plm.remove(); } catch (e) {}
+    b._plm = null;
+  }
+  if (b._plro) b._plro.disconnect();
+  if (!el) return;
+  const A = cleanPts(d.plan_linie).map(p => [p[0], p[1]]), B = cleanPts(d.tour_linie).map(p => [p[0], p[1]]);
+  if (A.length < 2 && B.length < 2) return el.remove();
+  if (typeof L === "undefined" || typeof mkMap !== "function") return (el.innerHTML = planErgSvg(d));
+  const m = (b._plm = mkMap(el, {layers: false, leaflet: {scrollWheelZoom: false, zoomSnap: 0.25, dragging: !document.documentElement.classList.contains("mob")}})),
+    cs = getComputedStyle(el), cPl = cs.getPropertyValue("--pe-plan").trim() || "#5c6bdc", cIs = cs.getPropertyValue("--pe-ist").trim() || "#2f8f5f",
+    line = (P, o) => L.polyline(P, {interactive: false, ...o}).addTo(m);
+  if (B.length > 1) {
+    line(B, {color: "#fff", weight: 9, opacity: 0.85, className: "pecase"});
+    line(B, {color: cIs, weight: 5, opacity: 0.95, className: "peis"});
+  }
+  if (A.length > 1) {
+    line(A, {color: "#fff", weight: 7, opacity: 0.8, className: "pecase"});
+    line(A, {color: cPl, weight: 4, opacity: 1, dashArray: "9 8", lineCap: "butt", className: "pepl"});
+  }
+  const E = B.length > 1 ? B : A;
+  L.circleMarker(E[0], {radius: 7, color: "#fff", fillColor: "#2f8f5f", fillOpacity: 1, weight: 2, className: "pestart"}).addTo(m).bindTooltip("Start");
+  L.circleMarker(E[E.length - 1], {radius: 7, color: "#fff", fillColor: "#c0504d", fillOpacity: 1, weight: 2, className: "peziel"}).addTo(m).bindTooltip("Ziel");
+  const bb = L.latLngBounds(A.concat(B)), fit = () => m.fitBounds(bb, {padding: [24, 24]});
+  let user = false, w0 = el.clientWidth;
+  ["pointerdown", "wheel", "keydown"].forEach(ev => el.addEventListener(ev, () => (user = true), {passive: true}));
+  if (w0) fit();
+  else m.setView(bb.getCenter(), 13);
+  m._peFit = fit;
+  if (typeof ResizeObserver === "function") {
+    b._plro = new ResizeObserver(() => {
+      const w = el.clientWidth;
+      if (!w || w === w0) return;
+      w0 = w;
+      m.invalidateSize();
+      if (!user) fit();
+    });
+    b._plro.observe(el);
+  }
 }
 function planErgPaint(c, b, d, t) {
-  const can = typeof isViewer === "function" ? !isViewer() : true, S = d.soll, I = d.ist, D = d.diff,
-    rows = [["km", "Strecke"], ["up", "Aufstieg"], ["h", "Zeit gesamt"]];
-  b.innerHTML = `<div role="group" aria-label="Plan und Ergebnis im Vergleich"><p class="plname">${can ? `<a href="#/plan/${d.plan.id}">${esc(d.plan.name || "Ohne Namen")}</a>` : `<b>${esc(d.plan.name || "Ohne Namen")}</b>`}</p>` +
-    `<ul class="plrows">${rows.map(([k, lab]) => `<li class="plrow"><span class="pll">${lab}</span><span class="plv"><small class="mut">Plan</small> ${planErgVal(k, S[k])}</span>` +
-      `<span class="plv"><small class="mut">Ergebnis</small> ${planErgVal(k, I[k])}</span>${planErgDiff(k, D[k])}</li>`).join("")}</ul>` +
-    `${planErgSvg(d)}` +
-    `<p class="mut slcap">Zeit gesamt: einschließlich Pausen; geplante Zeit nach deinem persönlichen Tempo.</p>` +
-    (can ? `<div class="row g8 plact"><a class="btn alt sm" href="#/plan/${d.plan.id}">Zum Plan ›</a><button type="button" class="btn ghost sm" data-a="unlink">Verknüpfung lösen</button></div>` : "") + "</div>";
+  const can = typeof isViewer === "function" ? !isViewer() : true, D = d.diff, hasLine = (d.plan_linie || []).length > 1 || (d.tour_linie || []).length > 1;
+  b.innerHTML = `<div class="pewrap pe-s-${peSport((t && t.sport) || d.plan.sport)}" role="group" aria-label="Plan und Ergebnis im Vergleich">` +
+    `<div class="pecols">${planErgCol("pl", d, t, can)}${planErgCol("is", d, t, can)}</div>` +
+    (hasLine ? `<div class="pemap" role="region" aria-label="Karte: geplante Linie gestrichelt, gelaufene Linie durchgezogen"></div>` : "") +
+    `<ul class="plleg peleg"><li>${peSw("pl")}<span>Geplant (gestrichelt)</span></li><li>${peSw("is")}<span>Gelaufen (durchgezogen)</span></li>` +
+    (hasLine ? `<li><i class="pedot pedot-s" aria-hidden="true"></i><span>Start</span></li><li><i class="pedot pedot-z" aria-hidden="true"></i><span>Ziel</span></li>` : "") + "</ul>" +
+    `<p class="mut slcap">Dauer: einschließlich Pausen; geplante Dauer nach deinem persönlichen Tempo.</p>` +
+    (can ? `<div class="plact pebtns"><a class="btn alt sm" data-a="plan" href="#/plan/${d.plan.id}">Zum Plan ›</a><button type="button" class="btn alt sm" data-a="unlink">Verknüpfung lösen</button></div>` : "") + "</div>";
+  planErgMap(b, d);
   const first = [["km", D.km], ["h", D.h]].find(([, v]) => v != null);
   slBadge(c, !first ? "" : Math.abs(first[1]) < PLAN_TOL[first[0]] ? "wie geplant" : `${first[1] > 0 ? "↑" : "↓"} ${first[0] === "km" ? nSigned(first[1], 1) + " km" : (first[1] < 0 ? "−" : "+") + fmtDauer(Math.abs(first[1]) * 3600)}`);
   const ub = b.querySelector('[data-a="unlink"]');
@@ -368,6 +423,7 @@ function planErgPaint(c, b, d, t) {
         return;
       }
       delete PLAN_OF[t.id];
+      planErgMap(b, {});
       c.dataset.hn = "aus";
       slNote(b, "Zu dieser Tour gibt es keine verknüpfte Planung. Der Baustein erscheint nur bei Touren mit verknüpftem Plan.");
       slBadge(c, "");
@@ -388,17 +444,21 @@ function planErgLoad(t) {
 Object.assign(window.SL_WT, {
   planergebnis: {
     fam: "tour", cat: "plan", icon: "map", name: "Plan und Ergebnis", title: () => (planErgModus() === "rueckblick" ? "Wie ist es gelaufen?" : "Plan und Ergebnis"), defaults: {},
-    desc: "Wie die Tour im Vergleich zur verknüpften Planung ausgefallen ist: Strecke, Aufstieg und Zeit als Plan und Ergebnis mit Unterschied (↑ ↓ =), die geplante Linie gestrichelt über der gelaufenen, Link zum Plan. Ohne Plan zeigt der Baustein „Wie ist es gelaufen?“: Dauer, Strecke, Aufstieg und Tempo gegenüber deinen Touren derselben Sportart der letzten 12 Monate und den ähnlichen Touren (ab 5 Vergleichstouren). Erscheint nur bei Touren, die mit einem Plan verknüpft sind.",
+    desc: "Wie die Tour im Vergleich zur verknüpften Planung ausgefallen ist: Geplant und Gelaufen nebeneinander mit Strecke, Aufstieg, Abstieg und Dauer samt Abweichung, beide Strecken übereinander auf der Karte (geplant gestrichelt), Link zum Plan. Ohne Plan zeigt der Baustein „Wie ist es gelaufen?“: Dauer, Strecke, Aufstieg und Tempo gegenüber deinen Touren derselben Sportart der letzten 12 Monate und den ähnlichen Touren (ab 5 Vergleichstouren). Erscheint nur bei Touren, die mit einem Plan verknüpft sind.",
     preview: () => slPrev('<svg viewBox="0 0 120 40" class="slpvs" aria-hidden="true"><polyline class="plpl" fill="none" points="6,32 30,12 56,26 84,8 112,20"/><polyline class="plis" fill="none" points="6,34 32,16 58,30 86,12 112,24"/></svg><p class="slcmp">Plan 12,0 km · Ergebnis 12,6 km (↑ +0,6 km)</p>'),
     async render(c, b, cfg, {t}) {
       c.dataset.hn = "lade";                                                                          // unsichtbar, bis feststeht, dass es eine Verknüpfung gibt
       const d = t && (await planErgData(t.id));
       if (!d) {
         c.dataset.hn = "aus";
+        planErgMap(b, {});
         return slNote(b, "Zu dieser Tour gibt es weder einen verknüpften Plan noch genug Vergleichstouren (mindestens 5). Der Baustein erscheint nur bei Touren mit Plan oder genug Vergleichstouren.");
       }
       c.dataset.hn = "an";
-      if (d.modus === "rueckblick") return rbPaint(c, b, d);
+      if (d.modus === "rueckblick") {
+        planErgMap(b, {});                                                                            // eine frühere Karte (mit Plan) aufräumen
+        return rbPaint(c, b, d);
+      }
       planErgPaint(c, b, d, t);
     },
   },

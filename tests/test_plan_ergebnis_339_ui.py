@@ -69,27 +69,29 @@ def test_karte_mit_verknuepfung_zahlen_symbole_linien_und_link(pw, app):
         expect(pg.locator(CARD)).to_be_visible(timeout=T)
         c = pg.locator(CARD)
         expect(c.locator("summary h3")).to_have_text("Plan und Ergebnis", timeout=T)
-        rows = c.locator(".plrow")
-        expect(rows).to_have_count(3, timeout=T)
-        txt = [r.inner_text() for r in rows.all()]
-        assert "Strecke" in txt[0] and "8,0 km" in txt[0] and "9,0 km" in txt[0] and "↑" in txt[0] and "+1,0 km" in txt[0] and "länger als geplant" in txt[0]
+        # 3.55.0: Geplant / Gelaufen als zwei Spalten, je vier Kennzahlen; die Abweichung steht beim gelaufenen Wert
+        expect(c.locator(".pe-ist .pek")).to_have_count(4, timeout=T)
+        pl = [r.inner_text() for r in c.locator(".pe-plan .pek").all()]
+        txt = [r.inner_text() for r in c.locator(".pe-ist .pek").all()]
+        assert "Strecke" in pl[0] and "8,0 km" in pl[0] and "länger" not in pl[0] and "Dauer" in pl[3] and "3:00" in pl[3]
+        assert "Strecke" in txt[0] and "9,0 km" in txt[0] and "↑" in txt[0] and "+1,0 km" in txt[0] and "länger als geplant" in txt[0]
         assert "Aufstieg" in txt[1] and "=" in txt[1] and "wie geplant" in txt[1]
-        assert "Zeit gesamt" in txt[2] and "3:00" in txt[2] and "2:30" in txt[2] and "↓" in txt[2] and "−30 Min." in txt[2] and "kürzer als geplant" in txt[2]
-        # Linien: Plan gestrichelt, Ergebnis durchgezogen; Beschriftung und Legende
-        svg = c.locator("svg.plmap")
-        expect(svg).to_have_attribute("role", "img")
-        assert "gestrichelt" in svg.get_attribute("aria-label")
-        assert svg.locator("polyline.plpl").evaluate("e => getComputedStyle(e).strokeDasharray") not in ("none", "")
-        assert svg.locator("polyline.plis").evaluate("e => getComputedStyle(e).strokeDasharray") in ("none", "")
-        assert svg.locator("polyline").count() == 2
-        assert "Plan (gestrichelt)" in c.locator(".plleg").inner_text() and "Ergebnis (durchgezogen)" in c.locator(".plleg").inner_text()
+        assert "Abstieg" in txt[2] and "wie geplant" in txt[2]
+        assert "Dauer" in txt[3] and "2:30" in txt[3] and "↓" in txt[3] and "−30 Min." in txt[3] and "kürzer als geplant" in txt[3]
+        # Karte mit beiden Linien: Plan gestrichelt, gelaufen durchgezogen; Beschriftung und Legende
+        mp = c.locator(".pemap")
+        assert "gestrichelt" in mp.get_attribute("aria-label")
+        expect(mp.locator("path.pepl")).to_have_count(1, timeout=T)
+        assert mp.locator("path.pepl").get_attribute("stroke-dasharray") not in (None, "", "none")
+        assert mp.locator("path.peis").get_attribute("stroke-dasharray") in (None, "", "none")
+        assert "Geplant (gestrichelt)" in c.locator(".plleg").inner_text() and "Gelaufen (durchgezogen)" in c.locator(".plleg").inner_text()
         # Link zum Plan
         assert c.locator(".plname a").get_attribute("href") == f"#/plan/{pid}" and c.locator(".plact a").get_attribute("href") == f"#/plan/{pid}"
         # einklappbar
         toggle_details(pg, CARD + " details.tls", False)
-        expect(c.locator(".plrows")).to_be_hidden(timeout=T)
+        expect(c.locator(".pecols")).to_be_hidden(timeout=T)
         toggle_details(pg, CARD + " details.tls", True)
-        expect(c.locator(".plrows")).to_be_visible(timeout=T)
+        expect(c.locator(".pecols")).to_be_visible(timeout=T)
         _shot(pg, "tour-plan-ergebnis-1280-hell.png")
         assert not pg.errors, pg.errors
     finally:
@@ -138,12 +140,12 @@ def test_englisch(pw, app):
         expect(c).to_be_visible(timeout=30000)
         expect(c.locator("summary h3")).to_have_text("Plan and result", timeout=T)
         t = c.inner_text()
-        for w in ("Distance", "Ascent", "Total time", "longer than planned", "as planned", "shorter than planned", "To the plan", "Remove link"):
+        for w in ("Distance", "Ascent", "Descent", "Duration", "longer than planned", "as planned", "shorter than planned", "To the plan", "Remove link", "Planned", "Walked"):
             assert w in t, (w, t)
-        assert "Plan (dashed)" in t and "Result (solid)" in t
-        for de in ("länger als geplant", "wie geplant", "Zeit gesamt", "Zum Plan", "gestrichelt"):
+        assert "Planned (dashed)" in t and "Walked (solid)" in t
+        for de in ("länger als geplant", "wie geplant", "Dauer", "Zum Plan", "gestrichelt", "Geplant", "Gelaufen"):
             assert de not in t, de
-        assert "dashed" in c.locator("svg.plmap").get_attribute("aria-label")
+        assert "dashed" in c.locator(".pemap").get_attribute("aria-label")
     finally:
         pg.browser_.close()
 
@@ -164,9 +166,9 @@ def test_responsiv_ohne_ueberlauf_und_screenshots(pw, app, scheme, width, height
         for sel in (".plact .btn", ".plact a"):
             assert pg.locator(CARD + " " + sel).first.bounding_box()["height"] >= 44 - 1
         # Kontrast der Differenzzeile und Legende
-        ratio = pg.evaluate("""() => { const p = c => c.match(/[\\d.]+/g).map(Number), L = a => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(a[0]) + .7152 * f(a[1]) + .0722 * f(a[2]); };
+        ratio = pg.evaluate("""() => { const p = c => { const n = c.match(/[\\d.]+/g).map(Number); return c.startsWith('color(') ? [n[0] * 255, n[1] * 255, n[2] * 255, n[3] ?? 1] : n; }, L = a => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(a[0]) + .7152 * f(a[1]) + .0722 * f(a[2]); };
           const bg = el => { for (let e = el; e; e = e.parentElement) { const c = p(getComputedStyle(e).backgroundColor); if ((c[3] ?? 1) > .5) return c; } return [255, 255, 255]; };
-          return ['#tlw-planist .pld small', '#tlw-planist .plleg span', '#tlw-planist .plv small'].map(s => { const e = document.querySelector(s); const a = L(p(getComputedStyle(e).color)), b = L(bg(e)); return (Math.max(a, b) + .05) / (Math.min(a, b) + .05); }); }""")
+          return ['#tlw-planist .pe-ist .pld small', '#tlw-planist .plleg span', '#tlw-planist .pefig dt', '#tlw-planist .pedt'].map(s => { const e = document.querySelector(s); const a = L(p(getComputedStyle(e).color)), b = L(bg(e)); return (Math.max(a, b) + .05) / (Math.min(a, b) + .05); }); }""")
         assert min(ratio) >= 4.5, ratio
         _shot(pg, f"tour-plan-ergebnis-{width}-{scheme}.png")
         assert not pg.errors, pg.errors

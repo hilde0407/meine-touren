@@ -2,6 +2,12 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.55.0 – Plan und Ergebnis mit Karte, Geplant und Gelaufen getrennt
+
+- Tourseite, Baustein „Plan und Ergebnis“: echte Karte mit beiden Strecken (Plan gestrichelt Indigo, gelaufen durchgezogen in der Sportfarbe, Start/Ziel, Ansicht passt auf beide)
+- Zwei beschriftete Spalten „Geplant“ / „Gelaufen“ (mobil untereinander) mit Farbmarkierung wie in Karte und Legende, Name, Datum, Strecke, Aufstieg, Abstieg (neu), Dauer und Abweichung
+- „Zum Plan“ und „Verknüpfung lösen“ gleich hoch und gleich breit, Text auf einer Höhe; SW mt-v139
+
 ## Version 3.54.1 – Fenster „Tour hochladen“ schließt nach dem Hochladen
 
 - Nach erfolgreichem Hochladen (Komoot/Strava) schließt das Fenster von selbst; bei Fehler oder „schon vorhanden“ bleibt es offen und zeigt die Meldung

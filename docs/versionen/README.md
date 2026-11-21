@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.55.0](3.55.0.md) – Plan und Ergebnis: Karte mit beiden Strecken, Spalten „Geplant“/„Gelaufen“ mit Abstieg und Abweichung, gleich hohe Knöpfe
 - [3.54.1](3.54.1.md) – Fenster „Tour hochladen“ schließt nach erfolgreichem Hochladen von selbst
 - [3.54.0](3.54.0.md) – Bilder der Übersicht bleiben im Browser: Bildadressen mit Version, beim erneuten Öffnen und Neuladen keine Bildanfrage
 - [3.53.0](3.53.0.md) – Wanderführer übersichtlich: eingeklappte Buchkarten mit Titelbild und Ring, Filter, Suche, Reihenfolge, Karte der offenen Touren

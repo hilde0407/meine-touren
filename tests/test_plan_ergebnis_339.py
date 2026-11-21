@@ -42,12 +42,12 @@ def _endpunkt(c, db, routes):
     assert r.status_code == 200
     d = r.json()
     assert d["status"] == "ok" and d["plan"]["id"] == pid and d["plan"]["name"] == "Mein Plan"
-    assert d["soll"] == {"km": 12.0, "up": 500, "h": 2.0} and d["ist"]["km"] == 12.6 and d["ist"]["up"] == 540
+    assert d["soll"] == {"km": 12.0, "up": 500, "h": 2.0, "down": 500} and d["ist"]["down"] == 500 and d["diff"]["down"] == 0 and d["ist"]["km"] == 12.6 and d["ist"]["up"] == 540
     assert d["diff"]["km"] == 0.6 and d["diff"]["up"] == 40 and abs(d["diff"]["h"] - (6120 / 3600 - 2.0)) < 0.001
     assert 2 <= len(d["plan_linie"]) <= 400 and 2 <= len(d["tour_linie"]) <= 400
     # fehlende Werte: null, nie 0
     d2 = c.get("/api/tours/tp2/plan").json()
-    assert d2["status"] == "ok" and d2["ist"] == {"km": None, "up": None, "h": None} and d2["diff"] == {"km": None, "up": None, "h": None} and d2["soll"]["up"] is None and d2["tour_linie"] == []
+    assert d2["status"] == "ok" and d2["ist"] == {"km": None, "up": None, "h": None, "down": None} and d2["diff"] == {"km": None, "up": None, "h": None, "down": None} and d2["soll"]["up"] is None and d2["tour_linie"] == []
     # keine Verknüpfung / unbekannte Tour
     db.execute("UPDATE plans SET tour_id=NULL WHERE id=?", (pid,))
     assert c.get("/api/tours/tp1/plan").json() == {"status": "kein_plan"}
