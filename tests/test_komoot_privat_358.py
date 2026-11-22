@@ -354,3 +354,45 @@ def test_rechte_betrachter_liest_paket_aber_setzt_nichts(monkeypatch):
 def test_viewer_get_liste(path, ok):
     from app import main
     assert bool(main.VIEWER_GET.match(path)) is ok
+
+
+def test_version_doku_und_uebersetzungen():
+    from pathlib import Path
+    from app import config
+    root = Path(__file__).resolve().parent.parent
+    assert config.VERSION.startswith("3.58.0 · Meine Touren") and komoot.user_agent() == "MeineTouren/3.58.0"
+    notes = (root / "docs" / "versionen" / "3.58.0.md").read_text(encoding="utf-8")
+    assert notes.startswith("# 3.58.0") and "Standard-Sichtbarkeit" in notes and "kompy" in notes and "nicht geprüft" in notes
+    assert "3.58.0" in (root / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")
+    assert "Version 3.58.0" in (root / "docs" / "VERSIONSVERLAUF.md").read_text(encoding="utf-8")
+    hb = (root / "docs" / "HANDBUCH.md").read_text(encoding="utf-8")
+    assert "Komoot: immer privat (ab 3.58.0)" in hb and "Komoot-Paket" in hb
+    st = root / "app" / "static"
+    assert 'const V = "mt-v143"' in (st / "sw.js").read_text(encoding="utf-8") and "komoot-paket" in (st / "sw.js").read_text(encoding="utf-8")
+    i18n = (st / "js" / "00-i18n-neu.js").read_text(encoding="utf-8")
+    for k in ("Bei Komoot: privat bestätigt", "Notiz und Pins mitsenden (Komoot)", "Ort aus den Fotos entfernen", "{} öffentlich, {} privat, {} unbekannt",
+              "Sichtbarkeit nicht bestätigt, bitte in Komoot prüfen", "Paket herunterladen"):
+        assert f"\n{k} || " in i18n, k
+    assert config.DEFAULTS["komoot_with_notes"] == "1"
+
+
+def test_wiederholung_nach_netzfehler_gilt_als_eigener_upload(monkeypatch):
+    """Erster Versuch kommt an, die Antwort geht verloren; der zweite meldet „schon vorhanden“ – trotzdem wird auf privat gesetzt."""
+    k = komoot.Komoot("a@b.de", "pw"); k.user_id, k.token = "1", "t"
+    monkeypatch.setattr(komoot.time, "sleep", lambda s: None)
+    seq = [komoot.requests.ConnectionError("weg"), _R(202, {"id": 31, "status": "public"})]
+
+    def post(url, **kw):
+        x = seq.pop(0)
+        if isinstance(x, Exception):
+            raise x
+        return x
+    state = {"vis": "public", "patch": 0}
+    monkeypatch.setattr(komoot.requests, "post", post)
+    monkeypatch.setattr(komoot.requests, "get", lambda url, **kw: _R(200, {"id": 31, "status": state["vis"]}))
+    monkeypatch.setattr(komoot.requests, "patch", lambda url, **kw: (state.update(vis=kw["json"]["status"], patch=state["patch"] + 1), _R(200, {"status": "private"}))[1])
+    _local(wpt=False, note="")
+    _stub(monkeypatch, k)
+    info = {}
+    st, rid, _ = portals.upload_tour("g1", "komoot", info=info)
+    assert (st, rid) == ("uploaded", "31") and state["patch"] == 1 and info["vis"] == "private"

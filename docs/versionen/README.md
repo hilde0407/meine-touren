@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.58.0](3.58.0.md) – Komoot: Upload immer privat (gesetzt und geprüft), Notiz und Pins mitsenden, Rückprüfung früherer Uploads, Komoot-Paket zum Selbst-Hochladen
 - [3.57.0](3.57.0.md) – Notizen, Fotos und Videos mit Mein Tourentagebuch abgleichen: neue Schnittstelle (Server-Seite), Notizen werden zusammengeführt
 - [3.56.0](3.56.0.md) – Wanderführer für Mein Tourentagebuch: neue Schnittstelle `/api/guides/export` (auch für Betrachter)
 - [3.55.1](3.55.1.md) – Lange Kennzahlen (z. B. „403.707 m“) passen auf dem Handy in ihre Spalte, auch mit großer Systemschrift

@@ -265,6 +265,19 @@ Unter **Wanderführer (z. B. Rother)** lädst du die GPX-Dateien deiner Wanderf�
 
 Der Reiter **Hochladen & Planen** nimmt die Zugänge zu **Strava** (eigene App anlegen, Client-ID und -Secret eintragen, „Mit Strava verbinden“) und Komoot auf. Hochgeladen wird einzeln (Tour → **Bearbeiten → Hochladen**) oder gesammelt, immer nur ausdrücklich. Dort stellst du auch die **Tourplanung** ein (Routing über einen BRouter-Dienst; öffentlich, auf dem eigenen Server oder im Netz).
 
+**Komoot: immer privat (ab 3.58.0).** Komoot gibt jeder hochgeladenen Tour zuerst die **Standard-Sichtbarkeit deines Kontos** (Komoot → Einstellungen → Privatsphäre). Steht sie dort auf „Jeder“, war eine hochgeladene Tour bis 3.57.0 sofort öffentlich. Meine Touren setzt die Tour deshalb gleich nach dem Hochladen auf **„privat“** und liest danach bei Komoot nach, ob das stimmt:
+
+* **„Bei Komoot: privat bestätigt“** (grün) – alles in Ordnung.
+* **„Sichtbarkeit unbestätigt – bitte in Komoot prüfen“** (gelb) oder **„öffentlich – bitte in Komoot prüfen“** (rot) – Komoot hat „privat“ nicht bestätigt. Das Fenster „Tour hochladen“ bleibt dann offen und zeigt eine deutliche Warnung. Öffne die Tour in Komoot und stelle sie auf „Nur ich“ (oder lösche sie dort).
+
+Der Hinweis steht auch auf der Tourseite unter den Knöpfen. Ist eine Tour nicht privat, gibt es dort den Knopf **Bei Komoot auf privat setzen** (mit Rückfrage). Meine Touren macht nie etwas öffentlich und lädt keine Fotos, Highlights oder Tipps zu Komoot.
+
+**Notiz und Pins mitsenden:** Im Fenster „Tour hochladen“ (und als Vorgabe unter Verwaltung → Hochladen & Planen → „Komoot: Sichtbarkeit, Notiz und Pins“) steht **Notiz und Pins mitsenden** – vorgegeben ist „an“. Dann geht deine Notiz als Beschreibung und jeder Pin (Wegpunkt aus der Aufzeichnung, mit Uhrzeit und Text) als Wegpunkt in die **gesendete** GPX-Datei; ein benannter Gipfel kommt als Wegpunkt dazu. Die bei dir gespeicherte GPX-Datei bleibt unverändert. Ob Komoot Beschreibung und Wegpunkte bei einer aufgezeichneten Tour anzeigt, ist nicht sicher – sieh es dir bei der ersten Tour in Komoot an.
+
+**Frühere Uploads prüfen:** Unter Verwaltung → Hochladen & Planen → **Sichtbarkeit bei Komoot prüfen …** siehst du alle Touren, die laut Meine Touren bei Komoot liegen. **Alle hochgeladenen prüfen** fragt bei Komoot eine Tour nach der anderen nach (nur lesend, mit Fortschritt) und zeigt z. B. „3 öffentlich, 12 privat, 1 unbekannt“. Auf „privat“ gesetzt wird nur, was du anklickst: je Tour **Auf privat setzen** oder – nach Rückfrage – **Alle … nicht privaten auf privat setzen**.
+
+**Komoot-Paket (selbst hochladen):** Im Tourmenü **Teilen & Export → Komoot-Paket …** (am Rechner der Knopf „📦 Komoot-Paket“) lädst du eine ZIP-Datei herunter: die GPX-Datei mit Pins und Notiz, die Notiz als `notiz.txt`, eine Anleitung (`README.txt`) und – nur wenn du sie einzeln ankreuzt – Fotos. Vorgegeben ist **kein** Foto. Die Fotos werden auf höchstens 2000 Pixel verkleinert; **Ort aus den Fotos entfernen** ist vorgegeben (die Aufnahmezeit bleibt). In Komoot importierst du die GPX-Datei dann selbst und wählst dabei die Sichtbarkeit; Fotos hängst du in Komoot einzeln an. Meine Touren erkennt keine Gesichter: Für erkennbare Personen und für fremde Fotos bist du selbst verantwortlich, und was in Komoot einmal öffentlich war, lässt sich nicht zuverlässig zurückholen. Das Paket darf auch ein **Betrachter**-Konto herunterladen (wie die GPX-Datei); Hochladen, Prüfen und „auf privat setzen“ nicht.
+
 ### 4.9 Fotos importieren
 
 Fotos kommen separat – siehe [Kapitel 10](#k10).
@@ -1059,7 +1072,7 @@ Die Verwaltung wird **Administratoren** angezeigt. **Einstellungen speichern** a
 
 ### 15.2 Hochladen & Planen
 
-**Portale (Upload):** Strava (Client-ID und -Secret aus strava.com/settings/api, „Mit Strava verbinden“) und Komoot. **Tourplanung:** Funktion an/aus und wo der Routing-Dienst BRouter läuft (öffentlich über brouter.de – dann werden die Koordinaten der geplanten Punkte dorthin gesendet –, auf dem eigenen Server oder im Netz).
+**Portale (Upload):** Strava (Client-ID und -Secret aus strava.com/settings/api, „Mit Strava verbinden“) und Komoot. Unter **Komoot: Sichtbarkeit, Notiz und Pins** (ab 3.58.0): Schalter „Notiz und Pins mitsenden“ und **Sichtbarkeit bei Komoot prüfen …** – siehe [Abschnitt 4.8](#k4). **Tourplanung:** Funktion an/aus und wo der Routing-Dienst BRouter läuft (öffentlich über brouter.de – dann werden die Koordinaten der geplanten Punkte dorthin gesendet –, auf dem eigenen Server oder im Netz).
 
 ![Verwaltung, Reiter „Hochladen & Planen“](handbuch/bilder/46-verwaltung-hochladen.png)
 

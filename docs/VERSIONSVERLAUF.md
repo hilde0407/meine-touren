@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.58.0 – Komoot: Upload immer privat, Notiz und Pins, Komoot-Paket
+
+- **Achtung:** Komoot gibt hochgeladenen Touren zuerst die Standard-Sichtbarkeit des Kontos. Steht sie auf „Jeder“, waren frühere Uploads öffentlich – unter Verwaltung → Hochladen & Planen → „Sichtbarkeit bei Komoot prüfen …“ nachsehen
+- Nach dem Upload setzt Meine Touren die Tour auf „privat“ und prüft das; Anzeige „Bei Komoot: privat bestätigt“ bzw. Warnung „bitte in Komoot prüfen“ im Fenster und auf der Tourseite; „Bei Komoot auf privat setzen“ nur per Klick
+- Notiz (als Beschreibung) und Pins (als Wegpunkte) gehen in der gesendeten GPX-Kopie mit (abschaltbar); Neuanmeldung bei abgelaufener Anmeldung, eigener User-Agent
+- Komoot-Paket: ZIP mit GPX, Anleitung und einzeln gewählten Fotos (verkleinert, Ort vorgegeben entfernt) zum Selbst-Hochladen, auch für Betrachter
+
 ## Version 3.57.0 – Notizen, Fotos und Videos mit Mein Tourentagebuch abgleichen (Server-Seite)
 
 - Neue Schnittstelle für das Tagebuch: `GET /api/tours/<id>/tagebuch` (Notiz mit Stempel „geändert am“, Foto- und Videoliste), verkleinerte Fotos, Videos nur mit `video=1`, `GET /api/tagebuch/uebersicht` für die Vorschau

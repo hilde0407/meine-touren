@@ -247,7 +247,7 @@ def test_hochladen_wandern_mit_schneeschuh_geht_als_schneeschuh(fresh, monkeypat
     t, _ = tracks.adopt(gpx("Workout--2026-01-20--10-00-00.gpx"), "a.gpx", sport="snowshoe")
     u, _ = tracks.adopt(gpx("Workout--2026-01-21--10-00-00.gpx"), "b.gpx")
     seen = []
-    monkeypatch.setattr(portals, "komoot_upload", lambda g, sport, name: (seen.append(sport), ("created", "1"))[1])
+    monkeypatch.setattr(portals, "komoot_upload", lambda g, sport, name, **kw: (seen.append(sport), ("created", "1"))[1])
     portals.upload_tour(t["id"], "komoot")
     portals.upload_tour(u["id"], "komoot")
     assert seen == ["snowshoe", "hike"]

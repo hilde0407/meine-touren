@@ -82,7 +82,10 @@ class Komoot:
         send = getattr(requests, method.lower())       # requests.get/post/patch/delete (in Tests einzeln ersetzbar)
         relogin = False
         r = None
+        self.retried = False                            # True: eine frühere Anfrage kann trotz Fehler angekommen sein (Netzfehler, 5xx)
         for i in range(max(1, tries)):
+            if i:
+                self.retried = True
             try:
                 r = send(url, auth=self._auth(), headers=h, **kw)
                 if r.status_code == 401 and not relogin:
@@ -222,6 +225,7 @@ class Komoot:
             j = {}
         if info is not None:
             info["vis"] = _vis(j)
+            info["wiederholt"] = bool(getattr(self, "retried", False))
         if r.status_code == 201:
             return "created", str(j.get("id", "") or "")
         if r.status_code == 202:

@@ -29,7 +29,7 @@ async function uploadChips(t) {
   if (!box) return;
   let st = await api(`/api/tours/${encodeURIComponent(t.id)}/uploads`).catch(() => ({}));
   const nm = {komoot: "Komoot", strava: "Strava"};
-  if (st.komoot && st.komoot.remote_id && ["uploaded", "pending", "duplicate", "linked"].includes(st.komoot.status) && !(typeof isViewer === "function" && isViewer())) {
+  if (st.komoot && ["uploaded", "pending"].includes(st.komoot.status) && !(typeof isViewer === "function" && isViewer())) {     // wie bisher nur eigene Uploads automatisch nachsehen (nur lesend)
     const c = await api(`/api/tours/${encodeURIComponent(t.id)}/komoot-check`, {method: "POST"}).catch(() => ({}));
     if (c.checked && !c.exists) {
       st = await api(`/api/tours/${encodeURIComponent(t.id)}/uploads`).catch(() => ({}));

@@ -179,12 +179,14 @@ def komoot_upload(gpx, sport, name, info=None):
     if not rid:
         info["fehler"] = "Komoot hat keine Tour-Kennung genannt"
         return st, rid
-    if st == "duplicate":
+    if st == "duplicate" and not up.get("wiederholt"):
         try:                                            # vorhandene Tour: nur nachsehen, nichts ändern (Änderung nur per Klick)
             info["vis"] = _vis_from(k.visibility(rid))
         except Exception as e:  # noqa
             info["fehler"] = str(e)[:200]
         return st, rid
+    if st == "duplicate":                               # zweiter Versuch nach Netzfehler/5xx: der erste ist wohl angekommen – wie neu behandeln
+        st = "created"
     try:
         vorher = up.get("vis") or k.visibility(rid)
         info["vorher"] = vorher
