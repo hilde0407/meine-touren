@@ -7,6 +7,8 @@ import io
 import json
 import os
 import re
+from datetime import datetime
+from app.gpxtools import TZ
 import shutil
 import subprocess
 import time
@@ -108,7 +110,7 @@ def test_format_wie_tagebuch_und_gewandert():
     t1 = bk["touren"][1]
     assert set(t1) == {"id", "ord", "mt_id", "title", "km", "up", "f", "pts", "gewandert"}
     assert t1["title"] == "2 Tour 2" and t1["km"] == 4.0 and t1["up"] == 210 and t1["f"] == ""
-    assert t1["gewandert"] == [{"datum": time.strftime("%Y-%m-%d", time.localtime(now - 86400 * 3)), "name": "Meine Runde am See"}]
+    assert t1["gewandert"] == [{"datum": datetime.fromtimestamp(now - 86400 * 3, tz=TZ).strftime("%Y-%m-%d"), "name": "Meine Runde am See"}]
     assert "gewandert" not in bk["touren"][0] and "gewandert" not in bk["touren"][2]
     # Strecke: gepackt wie Fuehrer.packe (Deltas in 1e-5 Grad, Reihenfolge der GPX-Datei), ohne Höhen; entpackt = gespeicherte Punkte
     assert set(t1["pts"]) == {"la", "lo"} and all(isinstance(v, int) for v in t1["pts"]["la"] + t1["pts"]["lo"])
