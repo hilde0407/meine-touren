@@ -121,10 +121,10 @@ def test_isolation_and_viewer():
 
 def test_version_and_notes():
     from app import config
-    assert config.VERSION.startswith("3.55.1 · Meine Touren")
+    assert config.VERSION.startswith("3.56.0 · Meine Touren")
     assert (ROOT / "docs" / "versionen" / "3.31.0.md").exists()
-    assert 'const V = "mt-v140"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.55.1"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v141"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.56.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
     assert "59-bausteine-eigen.js" in (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
 
 

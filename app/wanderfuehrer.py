@@ -222,6 +222,104 @@ def api_guide_cover_del(book: str = ""):
     return {"ok": True}
 
 
+# ---------- 3.56.0: Wanderführer für „Mein Tourentagebuch“ ----------
+# Liefert alle Bücher mit Buchtouren genau im Dateiformat des Tagebuchs („Wanderführer exportieren/importieren“ ab Tagebuch 2.13.0,
+# js/calc-fuehrer-datei.js): das Tagebuch kann die Antwort unverändert mit FuehrerDatei.lies() lesen. Nur lesend; für Betrachter freigegeben
+# (main.VIEWER_GET). Enthält nur, was das Konto für Wanderführer ohnehin sieht: Buchname, Buchtouren (Titel, Länge, Aufstieg, Strecke) und
+# je Buchtour die zugeordnete eigene Tour (Datum, Name) aus dem vorhandenen Abgleich (more.api_guides_progress). Keine Fotos, Notizen oder Spuren eigener Touren.
+EXPORT_FORMAT, EXPORT_VERSION = "tourentagebuch-wanderfuehrer", 1
+EXPORT_MAX_PTS = 400                       # Punkte je Buchtour (wie MAX_BUCH im Tagebuch und wie beim Hochladen gespeichert)
+EXPORT_COVER_MAX = 200_000                 # Zeichen der Daten-Adresse (COVER_MAX in calc-fuehrer-datei.js)
+
+
+def _duenne(pts, mx=EXPORT_MAX_PTS):
+    """Höchstens `mx` Punkte: jeder step-te, der letzte bleibt (wie Fuehrer.duenne im Tagebuch)."""
+    if len(pts) <= mx:
+        return list(pts)
+    step = -(-len(pts) // mx)
+    out = pts[::step]
+    if out[-1] is not pts[-1]:
+        out.append(pts[-1])
+    return out
+
+
+def _packe(pts):
+    """Strecke gepackt wie Fuehrer.packe im Tagebuch: Grad × 1e5 als ganze Zahlen, je Punkt der Unterschied zum Vorgänger, in Streckenreihenfolge.
+    Höhen speichert Meine Touren für Buchtouren nicht – darum ohne „e“ (das Tagebuch kommt ohne Höhen aus)."""
+    la = [round(p[0] * 1e5) for p in pts]
+    lo = [round(p[1] * 1e5) for p in pts]
+    d = lambda a: [v - a[i - 1] if i else v for i, v in enumerate(a)]
+    return {"la": d(la), "lo": d(lo)}
+
+
+def _cover_data(img):
+    """Titelbild als Daten-Adresse (JPEG, Base64) innerhalb der Grenze des Tagebuchs; sonst kleiner neu kodiert, notfalls None."""
+    import base64
+    data = bytes(img)
+    for side, q in ((None, None), (400, 80), (300, 70)):
+        if side:
+            from PIL import Image
+            im = Image.open(io.BytesIO(bytes(img))).convert("RGB")
+            im.thumbnail((side, side), Image.LANCZOS)
+            out = io.BytesIO()
+            im.save(out, "JPEG", quality=q, optimize=True)
+            data = out.getvalue()
+        s = "data:image/jpeg;base64," + base64.b64encode(data).decode("ascii")
+        if len(s) <= EXPORT_COVER_MAX:
+            return s
+    return None
+
+
+def _book_id(key):
+    """Stabile Kennung je Buch im Format, das das Tagebuch annimmt (^[\\w-]{1,40}$); ein Buchname mit Leerzeichen ginge dort verloren."""
+    return "mt-" + hashlib.sha1(("guide-book:" + key).encode("utf-8")).hexdigest()[:12]
+
+
+@router.get("/api/guides/export")
+def api_guides_export(cover: int = 0):
+    from datetime import datetime
+    from . import config, more
+    from .gpxtools import TZ
+    done = {x["id"]: x for b in more.api_guides_progress() for x in b["tours"] if x.get("tour")}
+    names = {}
+    if done:
+        ids = sorted({x["tour"] for x in done.values()})
+        for i in range(0, len(ids), 500):
+            part = ids[i:i + 500]
+            for r in db.query(f"SELECT id,name FROM tours WHERE id IN ({','.join('?' * len(part))})", tuple(part)):
+                names[r["id"]] = r["name"] or ""
+    cv = cover_versions()
+    imgs = {r["book"]: r["img"] for r in db.query("SELECT book, img FROM guide_cover")} if cover else {}
+    books = {}
+    for g in db.query("SELECT id,book,title,pts,km,up FROM guide_tours ORDER BY book,id"):
+        books.setdefault(g["book"] or "", []).append(g)
+    out = {"format": EXPORT_FORMAT, "version": EXPORT_VERSION, "app": "Meine Touren " + config.VERSION.split(" ")[0],
+           "erstellt": datetime.now(TZ).isoformat(timespec="seconds"), "buecher": []}
+    for key, gs in books.items():
+        e = {"id": _book_id(key), "key": key, "name": key or "(ohne Buch)", "cover_v": cv.get(key), "touren": []}
+        for ord_, g in enumerate(gs):
+            try:
+                line = [(float(p[0]), float(p[1])) for p in json.loads(g["pts"] or "[]")]
+            except (TypeError, ValueError, IndexError):
+                continue
+            line = [p for p in line if abs(p[0]) <= 90 and abs(p[1]) <= 180]
+            if len(line) < 3:
+                continue                                   # ohne Strecke nicht übertragbar (das Tagebuch verwirft sie auch)
+            km = g["km"] if g["km"] is not None else guide_stats("<x/>", line)[0]
+            t = {"id": f"t{ord_}", "ord": ord_, "mt_id": g["id"], "title": (g["title"] or "Tour")[:200], "km": round(float(km), 3),
+                 "up": round(g["up"]) if g["up"] is not None else None, "f": "", "pts": _packe(_duenne(line))}
+            d = done.get(g["id"])
+            if d and d.get("ts"):
+                t["gewandert"] = [{"datum": datetime.fromtimestamp(d["ts"], tz=TZ).strftime("%Y-%m-%d"), "name": names.get(d["tour"], "")[:200]}]
+            e["touren"].append(t)
+        if cover and key in imgs:
+            c = _cover_data(imgs[key])
+            if c:
+                e["cover"] = c
+        out["buecher"].append(e)
+    return out
+
+
 # nach den festen Pfaden (/api/guides/cover) registriert, sonst fängt {gid} sie ab
 @router.delete("/api/guides/{gid}")
 def api_guides_del(gid: str):

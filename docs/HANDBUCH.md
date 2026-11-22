@@ -1181,6 +1181,8 @@ Auch im Handy-Browser passt sich die Oberfläche an: unten die Leiste mit **Übe
 
 Laut Projektbeschreibung kann sie unter anderem: Touren mit Karte und Höhenprofil, Fotos (automatisch den Touren zugeordnet), GPS-Aufzeichnung mit Sprachansagen, Tourplanung mit Routing, Import aus Dateien (GPX, FIT, TCX, ZIP) sowie aus Komoot, Strava und Zepp, eine Statistik und eine Sicherung. Wer unterwegs lieber ohne Server arbeitet, nutzt sie; Meine Touren ist das Archiv für den eigenen Server. Alles Weitere steht in der Beschreibung des Projekts auf GitHub.
 
+**Wanderführer ins Tagebuch (ab 3.56.0):** Meine Touren stellt deine Wanderführer für das Tagebuch bereit – unter der Adresse `GET /api/guides/export` (nur lesend). Die Antwort hat genau das Format der Tagebuch-Datei „Wanderführer exportieren“ (`tourentagebuch-wanderfuehrer`, Version 1): je Buch Name und Kennung, je Buchtour Titel, Länge, Aufstieg, die Strecke (höchstens 400 Punkte, platzsparend gepackt) und – falls schon gewandert – Datum und Name deiner passenden Tour. Titelbilder kommen nur mit `?cover=1` dazu (klein, als JPEG). Keine Fotos, keine Notizen, keine Spuren deiner eigenen Touren. Ein **Betrachter**-Konto darf die Adresse abrufen, wie den Wanderführer-Fortschritt; es sieht damit die Bücher seines Benutzers. Die einzelnen Buchstrecken (`/api/plan/guide/…`) bleiben für Betrachter gesperrt. Ob und wann das Tagebuch einen Knopf „Aus Meine Touren holen“ für Wanderführer bekommt, entscheidet das Tagebuch-Projekt.
+
 Beide Apps ordnen die Sportarten seit 3.50.0 gleich zu: Läufe der Zepp-Uhr sind „Laufen“, Schneeschuhwandern zählt als „Wandern“ (Schlagwort „Schneeschuh“). Nordic Walking ist hier eine eigene Sportart, im Tagebuch zählt es als Wandern.
 
 [↑ Inhaltsverzeichnis](#inhalt)

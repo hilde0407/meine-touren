@@ -2,6 +2,11 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.56.0 – Wanderführer für Mein Tourentagebuch abrufbar
+
+- Neue Schnittstelle `GET /api/guides/export` (nur lesend, auch für Betrachter): Bücher, Buchtouren mit Strecke und „gewandert“ im Dateiformat des Tagebuchs; Titelbilder nur mit `cover=1`
+- Keine Änderung an der Oberfläche
+
 ## Version 3.55.1 – Lange Kennzahlen passen auf dem Handy in ihre Spalte
 
 - Kennzahlen (Übersicht, Jahresansicht, Statistik, Tourseite): Zahlen wie „403.707 m“ ragen nicht mehr über die Karte hinaus, auch bei 320 px und großer Systemschrift; Desktop unverändert
