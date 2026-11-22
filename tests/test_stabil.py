@@ -100,7 +100,7 @@ def _komoot(monkeypatch, antworten):
     monkeypatch.setattr(komoot.time, "sleep", lambda s: None)
     monkeypatch.setattr(k, "login", lambda: setattr(k, "token", "neu") or "1")
 
-    def fake_get(url, params=None, auth=None, timeout=0):
+    def fake_get(url, params=None, auth=None, timeout=0, **kw):
         calls.append((url, auth[1])); return antworten.pop(0)
     monkeypatch.setattr(komoot.requests, "get", fake_get)
     return k, calls

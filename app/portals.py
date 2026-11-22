@@ -112,36 +112,185 @@ def strava_upload(gpx, sport, name, ext_id):
 
 
 # ---------- Komoot ----------
-def komoot_upload(gpx, sport, name):
-    from . import sync
-    return sync._komoot().upload(gpx, sport, name)
+# 3.58.0: Komoot gibt jeder hochgeladenen Tour die Standard-Sichtbarkeit des Kontos (laut kompy; ein Parameter beim Upload wirkt nicht).
+# Meine Touren setzt deshalb gleich nach dem Upload „private“ (PATCH) und liest danach nach (GET). Nie wird etwas öffentlich gemacht.
+VIS_LABEL = {"private": "privat", "friends": "für Freunde sichtbar", "public": "öffentlich", "unbekannt": "Sichtbarkeit unbestätigt"}
+CHECK_PAUSE_S = 0.4          # Pause zwischen zwei Touren bei der gesammelten Prüfung (gedrosselt)
+CHECK_MAX = 10               # höchstens so viele Touren je Aufruf
 
 
-def komoot_check(tid):
-    """Fragt bei Komoot nach, ob die hochgeladene Tour wirklich dort liegt. Fehlt sie, wird der Upload-Vermerk gelöscht."""
+def with_notes_enabled():
+    return (db.get("komoot_with_notes") or "1") != "0"
+
+
+def wps_for(tid):
+    """Pins (tour_wps) und – falls benannt – den Gipfel (tour_peak) einer Tour als Wegpunkte für eine GPX-Kopie."""
+    out = []
+    try:
+        rows = db.query("SELECT ts,lat,lng,note FROM tour_wps WHERE tour_id=? ORDER BY ts,id", (str(tid),))
+    except Exception:  # noqa  (Tabelle fehlt in sehr alten Datenbanken)
+        rows = []
+    for i, r in enumerate(rows, 1):
+        note = (r["note"] or "").strip()
+        first = note.split("\n", 1)[0].strip()
+        out.append({"lat": r["lat"], "lng": r["lng"], "ts": r["ts"] or None, "name": first or f"Wegpunkt {i}", "desc": note})
+    pk = db.one("SELECT name,alt,lat,lng FROM tour_peak WHERE id=?", (str(tid),))
+    if pk and (pk["name"] or "").strip() and pk["lat"] is not None and pk["lng"] is not None:
+        out.append({"lat": pk["lat"], "lng": pk["lng"], "ele": pk["alt"], "name": f"Gipfel: {pk['name'].strip()}", "sym": "Summit"})
+    return out
+
+
+def note_for(tid):
+    r = db.one("SELECT note FROM tour_notes WHERE id=?", (str(tid),))
+    return (r["note"] or "").strip() if r else ""
+
+
+def upload_copy(tid, gpx, with_notes=True):
+    """GPX-Kopie zum Senden: mit Notiz (Beschreibung) und Pins (Wegpunkte), wenn gewünscht. Die gespeicherte Datei bleibt unverändert.
+    Gibt (gpx, anzahl_wegpunkte, notiz_dabei) zurück."""
+    if not with_notes:
+        return gpx, 0, False
+    w, n = wps_for(tid), note_for(tid)
+    if not w and not n:
+        return gpx, 0, False
+    return gpxtools.with_waypoints(gpx, w, n), len(w), bool(n)
+
+
+def _vis_from(v):
+    return v if v in ("private", "friends", "public") else ("unbekannt" if v is None else v)
+
+
+def komoot_upload(gpx, sport, name, info=None):
+    """Hochladen und danach die Sichtbarkeit auf „privat“ setzen und prüfen. info (dict) bekommt:
+    vis      – Ergebnis nach der Prüfung: private | friends | public | unbekannt
+    vorher   – Sichtbarkeit direkt nach dem Upload (= Konto-Vorgabe), soweit bekannt
+    geaendert – True, wenn Meine Touren sie geändert hat; fehler – Text, falls Setzen oder Prüfen scheiterte."""
     from . import sync
+    k = sync._komoot()
+    info = info if info is not None else {}
+    up = {}
+    try:
+        st, rid = k.upload(gpx, sport, name, info=up)
+    except TypeError as e:                               # ältere Client-Nachbildungen ohne info-Parameter
+        if "info" not in str(e):
+            raise
+        st, rid = k.upload(gpx, sport, name)
+    info.update(vis="unbekannt", vorher=up.get("vis"), geaendert=False, fehler="")
+    if not rid:
+        info["fehler"] = "Komoot hat keine Tour-Kennung genannt"
+        return st, rid
+    if st == "duplicate":
+        try:                                            # vorhandene Tour: nur nachsehen, nichts ändern (Änderung nur per Klick)
+            info["vis"] = _vis_from(k.visibility(rid))
+        except Exception as e:  # noqa
+            info["fehler"] = str(e)[:200]
+        return st, rid
+    try:
+        vorher = up.get("vis") or k.visibility(rid)
+        info["vorher"] = vorher
+        if vorher != "private":
+            k.set_visibility(rid, "private")
+            info["geaendert"] = True
+    except Exception as e:  # noqa
+        info["fehler"] = f"Sichtbarkeit setzen: {str(e)[:200]}"
+    try:
+        info["vis"] = _vis_from(k.visibility(rid))       # immer nachlesen – erst das bestätigt „privat“
+    except Exception as e:  # noqa
+        info["vis"] = "unbekannt"
+        info["fehler"] = (info["fehler"] + "; " if info["fehler"] else "") + f"Sichtbarkeit prüfen: {str(e)[:200]}"
+    return st, rid
+
+
+def set_vis(tid, vis):
+    db.execute("UPDATE tour_uploads SET vis=?, vis_ts=? WHERE tour_id=? AND portal='komoot'", (vis, int(time.time()), str(tid)))
+
+
+def vis_text(vis, vorher=None):
+    """Kurztext für Upload-Vermerk und Oberfläche."""
+    if vis == "private":
+        return "bei Komoot privat (bestätigt)"
+    if vis == "public":
+        return "ACHTUNG: bei Komoot öffentlich – bitte in Komoot prüfen"
+    if vis == "friends":
+        return "bei Komoot für Freunde sichtbar – bitte in Komoot prüfen"
+    return "Sichtbarkeit nicht bestätigt, bitte in Komoot prüfen"
+
+
+def komoot_check(tid, visibility=True):
+    """Fragt bei Komoot nach, ob die hochgeladene Tour wirklich dort liegt (nur lesend). Fehlt sie, wird der Upload-Vermerk gelöscht.
+    3.58.0: liest dabei auch die Sichtbarkeit und speichert sie im Vermerk (vis); geprüft werden alle Vermerke mit Komoot-Kennung."""
+    from . import komoot as komoot_mod, sync
     old = status_of(tid).get("komoot")
-    if not old or not old["remote_id"] or old["status"] not in ("uploaded", "pending"):
+    if not old or not old["remote_id"] or old["status"] not in ("uploaded", "pending", "duplicate", "linked"):
         return {"checked": False}
     try:
-        t = sync._komoot().tour(old["remote_id"])
+        raw = sync._komoot().tour_raw(old["remote_id"])
+    except komoot_mod.KomootNotFound:
+        db.execute("DELETE FROM tour_uploads WHERE tour_id=? AND portal='komoot'", (str(tid),))
+        return {"checked": True, "exists": False}
     except Exception as e:  # noqa
         if "nicht gefunden" in str(e):
             db.execute("DELETE FROM tour_uploads WHERE tour_id=? AND portal='komoot'", (str(tid),))
             return {"checked": True, "exists": False}
-        return {"checked": False, "msg": str(e)}
-    return {"checked": True, "exists": True, "type": t.get("status"), "name": t.get("name")}
+        return {"checked": False, "msg": str(e)[:300], "vis": old.get("vis")}
+    vis = _vis_from(komoot_mod._vis(raw))
+    if visibility:
+        set_vis(tid, vis)
+    return {"checked": True, "exists": True, "type": raw.get("type", "tour_recorded"), "name": raw.get("name", ""), "vis": vis, "vis_text": vis_text(vis)}
+
+
+def komoot_make_private(tid):
+    """Nur auf ausdrücklichen Klick: eine schon hochgeladene Tour bei Komoot auf „privat“ setzen und nachlesen."""
+    from . import sync
+    old = status_of(tid).get("komoot")
+    if not old or not old["remote_id"]:
+        raise PortalError("Zu dieser Tour ist keine Komoot-Tour bekannt")
+    k = sync._komoot()
+    err = ""
+    try:
+        k.set_visibility(old["remote_id"], "private")
+    except Exception as e:  # noqa
+        err = str(e)[:200]
+    try:
+        vis = _vis_from(k.visibility(old["remote_id"]))
+    except Exception as e:  # noqa
+        vis, err = "unbekannt", (err + "; " if err else "") + str(e)[:200]
+    set_vis(tid, vis)
+    log(f"  Tour {tid}: Komoot-Sichtbarkeit auf privat gesetzt → {vis}{' (' + err + ')' if err else ''}")
+    return {"vis": vis, "vis_text": vis_text(vis), "ok": vis == "private", "msg": err}
+
+
+def komoot_uploaded():
+    """Alle Touren mit Komoot-Kennung aus dem Upload-Vermerk (hochgeladen, Duplikat, verknüpft) – für die gesammelte Prüfung."""
+    rows = db.query("SELECT u.tour_id,u.remote_id,u.status,u.vis,u.vis_ts,u.ts,t.name,t.start_ts FROM tour_uploads u LEFT JOIN tours t ON t.id=u.tour_id "
+                    "WHERE u.portal='komoot' AND u.remote_id!='' AND u.status IN ('uploaded','pending','duplicate','linked') ORDER BY t.start_ts DESC")
+    return [{"id": r["tour_id"], "name": r["name"] or r["tour_id"], "start_ts": r["start_ts"], "remote_id": r["remote_id"], "status": r["status"],
+             "vis": r["vis"], "vis_ts": r["vis_ts"], "url": remote_url("komoot", r["remote_id"])} for r in rows]
+
+
+def count_vis(items):
+    z = {"oeffentlich": 0, "freunde": 0, "privat": 0, "unbekannt": 0, "fehlt": 0}
+    for v in items:
+        z[{"public": "oeffentlich", "friends": "freunde", "private": "privat", "fehlt": "fehlt"}.get(v, "unbekannt")] += 1
+    return z
 
 
 # ---------- gemeinsam ----------
 def status_of(tid):
-    return {r["portal"]: {"status": r["status"], "remote_id": r["remote_id"], "msg": r["msg"], "ts": r["ts"]}
-            for r in db.query("SELECT * FROM tour_uploads WHERE tour_id=?", (str(tid),))}
+    out = {}
+    for r in db.query("SELECT * FROM tour_uploads WHERE tour_id=?", (str(tid),)):
+        o = {"status": r["status"], "remote_id": r["remote_id"], "msg": r["msg"], "ts": r["ts"]}
+        if r["portal"] == "komoot":
+            o["vis"], o["vis_ts"] = r.get("vis"), r.get("vis_ts")
+            if o["vis"]:
+                o["vis_text"] = vis_text(o["vis"])
+        out[r["portal"]] = o
+    return out
 
 
-def record(tid, portal, status, remote="", msg=""):
-    db.execute("INSERT OR REPLACE INTO tour_uploads(tour_id,portal,remote_id,status,msg,ts) VALUES(?,?,?,?,?,?)",
-               (str(tid), portal, remote or "", status, msg or "", int(time.time())))
+def record(tid, portal, status, remote="", msg="", vis=None):
+    db.execute("INSERT OR REPLACE INTO tour_uploads(tour_id,portal,remote_id,status,msg,ts,vis,vis_ts) VALUES(?,?,?,?,?,?,?,?)",
+               (str(tid), portal, remote or "", status, msg or "", int(time.time()), vis, int(time.time()) if vis else None))
 
 
 def remote_url(portal, remote):
@@ -150,9 +299,12 @@ def remote_url(portal, remote):
     return {"komoot": f"https://www.komoot.com/tour/{remote}", "strava": f"https://www.strava.com/activities/{remote}"}.get(portal, "")
 
 
-def upload_tour(tid, portal, gpx=None, force=False, dry_run=False):
+def upload_tour(tid, portal, gpx=None, force=False, dry_run=False, with_notes=None, info=None):
     """Eine Tour zu einem Portal senden. Gibt (status, remote_id, meldung) zurück:
-    uploaded | duplicate | already | skipped | would_upload."""
+    uploaded | duplicate | already | skipped | would_upload.
+    3.58.0 (Komoot): with_notes (None = Einstellung „komoot_with_notes“) schreibt Notiz und Pins in die gesendete Kopie; danach wird die Tour
+    auf „privat“ gesetzt und geprüft. info (dict) bekommt vis, vis_text, warnung, wegpunkte, notiz."""
+    info = info if info is not None else {}
     tid = str(tid)
     if portal not in PORTALS:
         raise PortalError(f"Unbekanntes Portal {portal}")
@@ -173,30 +325,54 @@ def upload_tour(tid, portal, gpx=None, force=False, dry_run=False):
     sport = t["sport"] or "hike"
     if sport == "hike" and db.one("SELECT 1 x FROM tour_tags WHERE id=? AND tag=?", (tid, gpxtools.MERGE["snowshoe"][1])):
         sport = "snowshoe"                     # 3.50.0: Wandern mit Schlagwort „Schneeschuh“ geht als Schneeschuhwanderung zu Komoot/Strava
+    kinfo = {}
     try:
         if portal == "komoot":
-            st, rid = komoot_upload(gpx, sport, name)
+            wn = with_notes_enabled() if with_notes is None else bool(with_notes)
+            send, nw, nn = upload_copy(tid, gpx, wn)
+            info.update(wegpunkte=nw, notiz=nn)
+            st, rid = komoot_upload(send, sport, name, info=kinfo)
             st = "created" if st == "created" else "duplicate"
         else:
             st, rid = strava_upload(gpx, sport, name, f"meine-touren-{tid}")
     except Exception as e:  # noqa
         record(tid, portal, "error", "", str(e)[:300])
         raise
+    vis = kinfo.get("vis") if portal == "komoot" else None
+    if portal == "komoot":
+        info.update(vis=vis, vis_text=vis_text(vis), vorher=kinfo.get("vorher"), geaendert=kinfo.get("geaendert"))
+        if vis != "private":
+            info["warnung"] = _vis_warning(vis, kinfo, st == "duplicate")
+            log(f"  {name}: WARNUNG Komoot-Sichtbarkeit {vis} ({kinfo.get('fehler') or 'nicht bestätigt'})")
     if st == "duplicate":
-        record(tid, portal, "duplicate", rid, "Das Portal kennt die Tour bereits")
+        record(tid, portal, "duplicate", rid, "Das Portal kennt die Tour bereits" + (f" · {vis_text(vis)}" if portal == "komoot" and rid else ""), vis=vis if rid else None)
         log(f"  {name}: {PORTALS[portal]} kennt die Tour schon")
         return "duplicate", rid, "Das Portal kennt die Tour bereits"
-    record(tid, portal, "uploaded" if st == "created" else "pending", rid, "")
+    extra = ""
     if portal == "komoot":
-        chk = komoot_check(tid)
+        extra = vis_text(vis) + (f" · {info.get('wegpunkte')} Wegpunkte" if info.get("wegpunkte") else "") + (" · mit Notiz" if info.get("notiz") else "")
+    record(tid, portal, "uploaded" if st == "created" else "pending", rid, extra, vis=vis)
+    if portal == "komoot" and rid:
+        chk = komoot_check(tid, visibility=False)          # Sichtbarkeit ist schon geprüft; hier nur „liegt sie dort?“ und als was
         if chk.get("checked") and not chk.get("exists"):
             raise PortalError("Komoot hat den Upload angenommen, die Tour ist dort aber nicht auffindbar. Bitte erneut versuchen.")
         if chk.get("exists"):
             typ = {"tour_recorded": "als aufgezeichnete Tour", "tour_planned": "als geplante Route (unter „Geplant“ in Komoot)"}.get(chk.get("type"), chk.get("type") or "")
-            record(tid, portal, "uploaded", rid, f"bei Komoot geprüft: {typ}")
+            record(tid, portal, "uploaded", rid, f"bei Komoot geprüft: {typ} · {extra}", vis=vis)
             log(f"  {name}: bei Komoot geprüft ({chk.get('type')})")
     log(f"  {name}: zu {PORTALS[portal]} hochgeladen {rid}")
     return "uploaded", rid, ""
+
+
+def _vis_warning(vis, kinfo, duplicate=False):
+    if duplicate:
+        if vis == "public":
+            return "Komoot kannte die Tour schon – sie ist dort ÖFFENTLICH. Meine Touren ändert eine vorhandene Tour nicht von selbst: „Bei Komoot auf privat setzen“ oder in Komoot ändern."
+        return "Komoot kannte die Tour schon. " + vis_text(vis) + "."
+    if kinfo.get("vorher") == "public":
+        return ("Deine Komoot-Vorgabe für neue Aktivitäten ist „öffentlich“, und das Zurücksetzen auf „privat“ hat nicht geklappt. "
+                "Die Tour (mit Notiz und Pins, falls mitgesendet) kann gerade für alle sichtbar sein. Bitte sofort in Komoot auf „Nur ich“ stellen oder die Tour dort löschen.")
+    return "Die Sichtbarkeit bei Komoot ist nicht bestätigt. Bitte in Komoot prüfen (Tour öffnen → Sichtbarkeit „Nur ich“)."
 
 
 def info():
@@ -274,13 +450,58 @@ def api_komoot_check(tour_id: str):
     return komoot_check(tour_id)
 
 
+@router.post("/api/tours/{tour_id}/komoot-privat")
+def api_komoot_privat(tour_id: str):
+    """3.58.0: nur auf ausdrücklichen Klick – eine hochgeladene Tour bei Komoot auf „privat“ setzen (Betrachter: gesperrt wie jedes POST)."""
+    try:
+        return komoot_make_private(tour_id)
+    except PortalError as e:
+        raise HTTPException(400, str(e))
+    except Exception as e:  # noqa
+        raise HTTPException(502, f"Komoot: {str(e)[:200]}")
+
+
+@router.get("/api/komoot/hochgeladen")
+def api_komoot_hochgeladen():
+    """3.58.0: Touren, die bei Komoot liegen (laut Upload-Vermerk), mit der zuletzt gelesenen Sichtbarkeit – ohne Anfrage an Komoot."""
+    items = komoot_uploaded()
+    return {"touren": items, "zaehler": count_vis([x["vis"] for x in items])}
+
+
+@router.post("/api/komoot/sichtbarkeit")
+def api_komoot_sichtbarkeit(body: dict):
+    """3.58.0: Sichtbarkeit bei Komoot nachlesen (nur lesend), höchstens CHECK_MAX Touren je Aufruf, mit Pause dazwischen.
+    Die Oberfläche ruft das in kleinen Gruppen nacheinander auf und zeigt den Fortschritt."""
+    ids = [str(x) for x in (body.get("ids") or []) if str(x).strip()][:CHECK_MAX]
+    out = {}
+    for i, tid in enumerate(ids):
+        if i:
+            time.sleep(CHECK_PAUSE_S)
+        try:
+            c = komoot_check(tid)
+        except Exception as e:  # noqa
+            c = {"checked": False, "msg": str(e)[:200]}
+        if c.get("checked") and not c.get("exists"):
+            out[tid] = {"vis": "fehlt", "msg": "bei Komoot nicht (mehr) gefunden"}
+        elif c.get("checked"):
+            out[tid] = {"vis": c["vis"], "vis_text": c.get("vis_text")}
+        else:
+            out[tid] = {"vis": "unbekannt", "msg": c.get("msg") or "nicht geprüft"}
+    return {"ergebnis": out, "zaehler": count_vis([v["vis"] for v in out.values()])}
+
+
 @router.post("/api/tours/{tour_id}/upload")
 def api_tour_upload(tour_id: str, body: dict):
     res = {}
+    wn = body.get("with_notes")
     for p in body.get("portals", []):
+        info = {}
         try:
-            st, rid, msg = upload_tour(tour_id, p, force=bool(body.get("force")), dry_run=bool(body.get("dry_run")))
+            st, rid, msg = upload_tour(tour_id, p, force=bool(body.get("force")), dry_run=bool(body.get("dry_run")),
+                                       with_notes=None if wn is None else bool(wn), info=info)
             res[p] = {"status": st, "remote_id": rid, "msg": msg, "url": remote_url(p, rid)}
+            if p == "komoot" and "vis" in info:
+                res[p].update({k: info.get(k) for k in ("vis", "vis_text", "warnung", "wegpunkte", "notiz", "vorher") if info.get(k) is not None})
         except Exception as e:  # noqa
             res[p] = {"status": "error", "msg": str(e)}
     return res

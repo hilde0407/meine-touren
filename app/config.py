@@ -26,6 +26,7 @@ DEFAULTS = {
     "zepp_host": "",             # leer = automatisch probieren
     "komoot_email": "",
     "komoot_password": "",
+    "komoot_with_notes": "1",    # 3.58.0: beim Upload zu Komoot Notiz (als Beschreibung) und Pins (als Wegpunkte) in die gesendete GPX-Kopie schreiben; die Tour wird danach immer auf „privat“ gesetzt
     "strava_client_id": "",
     "strava_client_secret": "",
     "strava_redirect": "",      # leer = Adresse der Seite selbst

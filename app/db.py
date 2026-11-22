@@ -105,6 +105,11 @@ def migrate(conn):
     conn.execute("CREATE TABLE IF NOT EXISTS tour_videos (id INTEGER PRIMARY KEY AUTOINCREMENT, tour_id TEXT, path TEXT, size INTEGER, taken_ts INTEGER, lat REAL, lng REAL, "
                  "dur_ms INTEGER, sha1 TEXT, ref TEXT, name TEXT, src TEXT, ts INTEGER)")   # 3.57.0: Videos aus dem Tagebuch (nur auf ausdrücklichen Wunsch hochgeladen)
     conn.execute("CREATE INDEX IF NOT EXISTS tour_videos_t ON tour_videos(tour_id)")
+    ucols = {r["name"] for r in conn.execute("PRAGMA table_info(tour_uploads)")}
+    if "vis" not in ucols:
+        conn.execute("ALTER TABLE tour_uploads ADD COLUMN vis TEXT")      # 3.58.0: Sichtbarkeit bei Komoot (private/friends/public, „unbekannt“ = nicht bestätigt; NULL = nie geprüft)
+    if "vis_ts" not in ucols:
+        conn.execute("ALTER TABLE tour_uploads ADD COLUMN vis_ts INTEGER")   # 3.58.0: wann zuletzt geprüft (s)
     conn.execute("CREATE TABLE IF NOT EXISTS tour_wps (id INTEGER PRIMARY KEY AUTOINCREMENT, tour_id TEXT, ts INTEGER, lat REAL, lng REAL, note TEXT)")   # Wegpunkte mit Notiz
     conn.execute("CREATE TABLE IF NOT EXISTS photo_comments (id INTEGER PRIMARY KEY AUTOINCREMENT, photo_id INTEGER, ts INTEGER, author TEXT, text TEXT)")   # Kommentare zu Fotos
     conn.execute("CREATE INDEX IF NOT EXISTS photo_comments_p ON photo_comments(photo_id)")

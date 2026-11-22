@@ -101,8 +101,84 @@ def _points_tcx(text):
     return "", pts
 
 
-def convert(text, filename="", default_sport="hike"):
-    """Gibt dict(gpx, name, sport, start_ts, end_ts, dist_m, n, tags) zurück. tags: Schlagworte aus der Sportart (3.50.0: Schneeschuh -> Wandern + „Schneeschuh“)."""
+# ---------- 3.58.0: Wegpunkte und Beschreibung nur in Kopien zum Hochladen bzw. im Komoot-Paket (die gespeicherte GPX bleibt unverändert) ----------
+_CTRL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f\ud800-\udfff\ufffe\uffff]")
+DESC_MAX = 2000          # Zeichen der Notiz in <desc>
+WPT_DESC_MAX = 200       # Zeichen einer Pin-Notiz (wie tour_wps)
+WPT_NAME_MAX = 60
+WPT_MAX = 200
+
+
+def clean_text(s, n):
+    """Text für eine GPX-Datei: ohne Steuerzeichen (Zeilenumbrüche und Tabulator bleiben), Zeilenenden vereinheitlicht, höchstens n Zeichen
+    (gekürzt mit „…“), noch NICHT XML-maskiert (das macht der Aufrufer mit escape)."""
+    s = _CTRL.sub("", str(s or "")).replace("\r\n", "\n").replace("\r", "\n").strip()
+    s = re.sub(r"\n{3,}", "\n\n", s)
+    return s if len(s) <= n else s[: max(0, n - 1)].rstrip() + "…"
+
+
+def _wpt_xml(w):
+    f = lambda ts: datetime.fromtimestamp(int(ts), tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    try:
+        la, lo = float(w["lat"]), float(w["lng"])
+    except (KeyError, TypeError, ValueError):
+        return ""
+    if not (-90 <= la <= 90 and -180 <= lo <= 180) or (la == 0 and lo == 0):
+        return ""
+    name = clean_text(w.get("name") or "", WPT_NAME_MAX).replace("\n", " ")
+    desc = clean_text(w.get("desc") or "", WPT_DESC_MAX)
+    out = f'<wpt lat="{la:.7f}" lon="{lo:.7f}">'
+    if w.get("ele") is not None:
+        try:
+            out += f"<ele>{float(w['ele']):.1f}</ele>"
+        except (TypeError, ValueError):
+            pass
+    if w.get("ts"):
+        try:
+            out += f"<time>{f(w['ts'])}</time>"
+        except (TypeError, ValueError, OverflowError, OSError):
+            pass
+    if name:
+        out += f"<name>{escape(name)}</name>"
+    if desc and desc != name:
+        out += f"<desc>{escape(desc)}</desc>"
+    if w.get("sym"):
+        out += f"<sym>{escape(str(w['sym'])[:30])}</sym>"
+    return out + "</wpt>"
+
+
+def with_waypoints(gpx, wpts=(), desc=""):
+    """Kopie einer GPX 1.1 mit <wpt> (Liste von dict: lat, lng, ts, name, desc, ele, sym) und der Beschreibung desc in <metadata><desc>
+    und <trk><desc>. Vorhandene <wpt> der Vorlage werden ersetzt (sonst doppelt). Reihenfolge nach GPX-1.1-Schema: metadata, wpt, trk."""
+    desc = clean_text(desc, DESC_MAX)
+    g = re.sub(r"<wpt\b[^>]*/>|<wpt\b.*?</wpt>\s*", "", gpx, flags=re.S)
+    if desc:
+        d = f"<desc>{escape(desc)}</desc>"
+        m = re.search(r"<metadata>(.*?)</metadata>", g, flags=re.S)
+        if m and "<desc>" not in m.group(1):
+            inner = m.group(1)
+            nm = re.match(r"(\s*<name>.*?</name>)", inner, flags=re.S)
+            inner = (nm.group(1) + d + inner[nm.end():]) if nm else d + inner
+            g = g[:m.start(1)] + inner + g[m.end(1):]
+        elif not m:
+            g = re.sub(r"(<gpx\b[^>]*>)", lambda x: x.group(1) + f"\n<metadata>{d}</metadata>", g, count=1)
+        t = re.search(r"<trk>(\s*<name>.*?</name>)?", g, flags=re.S)
+        if t and not re.match(r"\s*<desc>", g[t.end():]):
+            g = g[:t.end()] + d + g[t.end():]
+    xs = [x for x in (_wpt_xml(w) for w in list(wpts)[:WPT_MAX]) if x]
+    if xs:
+        block = "\n".join(xs) + "\n"
+        m = re.search(r"</metadata>\s*", g)
+        if m:
+            g = g[:m.end()] + block + g[m.end():]
+        else:
+            g = re.sub(r"(<gpx\b[^>]*>\s*)", lambda x: x.group(1) + block, g, count=1)
+    return g
+
+
+def convert(text, filename="", default_sport="hike", wpts=None, desc=""):
+    """Gibt dict(gpx, name, sport, start_ts, end_ts, dist_m, n, tags) zurück. tags: Schlagworte aus der Sportart (3.50.0: Schneeschuh -> Wandern + „Schneeschuh“).
+    3.58.0: mit wpts/desc (nur für Kopien zum Hochladen) enthält die GPX zusätzlich Wegpunkte und Beschreibung; der Import ruft ohne sie auf (unverändert)."""
     if filename.lower().endswith(".gpx") or "<gpx" in text[:2000]:
         typ, raw = _points_gpx_hr(text)
     else:
@@ -133,5 +209,7 @@ def convert(text, filename="", default_sport="hike"):
         f"<metadata><name>{escape(name)}</name><time>{f(start)}</time></metadata>\n"
         f"<trk><name>{escape(name)}</name><type>{sport}</type><trkseg>\n{body}</trkseg></trk></gpx>\n"
     )
+    if wpts or desc:
+        gpx = with_waypoints(gpx, wpts or (), desc)
     return {"gpx": gpx, "name": name, "sport": sport, "start_ts": int(start.timestamp()),
             "end_ts": int(end.timestamp()), "dist_m": dist, "n": len(pts), "tags": [tag] if tag else []}
