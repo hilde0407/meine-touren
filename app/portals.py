@@ -378,7 +378,7 @@ def _vis_warning(vis, kinfo, duplicate=False):
 def info():
     ts = strava_tokens()
     return [
-        {"id": "komoot", "name": "Komoot", "configured": bool(db.get("komoot_email") and db.get("komoot_password")), "connected": bool(db.get("komoot_email") and db.get("komoot_password")), "account": db.get("komoot_email") or ""},
+        {"id": "komoot", "name": "Komoot", "configured": bool(db.get("komoot_email") and db.get("komoot_password")), "connected": bool(db.get("komoot_email") and db.get("komoot_password")), "account": db.get("komoot_email") or "", "with_notes": with_notes_enabled()},
         {"id": "strava", "name": "Strava", "configured": strava_configured(), "connected": strava_connected(), "account": ts.get("athlete", "")},
     ]
 

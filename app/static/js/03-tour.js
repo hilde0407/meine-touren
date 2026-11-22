@@ -6,12 +6,30 @@ const UPST = {
   pending: "wird verarbeitet",
   error: "Fehler",
 };
+/* 3.58.0: Sichtbarkeit bei Komoot (nach dem Upload gesetzt und geprüft bzw. per Rückprüfung gelesen) */
+const KVIS = {
+  private: ["ok", "Bei Komoot: privat bestätigt"],
+  friends: ["warn", "Bei Komoot: für Freunde sichtbar – bitte in Komoot prüfen"],
+  public: ["bad", "Bei Komoot: öffentlich – bitte in Komoot prüfen"],
+  unbekannt: ["warn", "Bei Komoot: Sichtbarkeit unbestätigt – bitte in Komoot prüfen"],
+};
+const kvisChip = v => (KVIS[v] ? `<span class="kvis ${KVIS[v][0]}" role="status">${KVIS[v][1]}</span>` : "");
+async function komootPrivat(t, after) {
+  if (!(await uiConfirm({text: `„${t.name}“ bei Komoot auf „privat“ (nur ich) setzen?`, ok: "Auf privat setzen"}))) return;
+  try {
+    const r = await api(`/api/tours/${encodeURIComponent(t.id)}/komoot-privat`, {method: "POST"});
+    if (!r.ok) uiAlert("Komoot hat „privat“ nicht bestätigt. Bitte in Komoot prüfen.");
+  } catch (e) {
+    uiAlert(e.message);
+  }
+  if (after) after();
+}
 async function uploadChips(t) {
   const box = $("#upst");
   if (!box) return;
   let st = await api(`/api/tours/${encodeURIComponent(t.id)}/uploads`).catch(() => ({}));
   const nm = {komoot: "Komoot", strava: "Strava"};
-  if (st.komoot && ["uploaded", "pending"].includes(st.komoot.status)) {
+  if (st.komoot && st.komoot.remote_id && ["uploaded", "pending", "duplicate", "linked"].includes(st.komoot.status) && !(typeof isViewer === "function" && isViewer())) {
     const c = await api(`/api/tours/${encodeURIComponent(t.id)}/komoot-check`, {method: "POST"}).catch(() => ({}));
     if (c.checked && !c.exists) {
       st = await api(`/api/tours/${encodeURIComponent(t.id)}/uploads`).catch(() => ({}));
@@ -20,15 +38,23 @@ async function uploadChips(t) {
         "beforebegin",
         '<p class="bad m6-0">Die Tour wurde bei Komoot nicht gefunden – sie kann jetzt erneut hochgeladen werden.</p>'
       );
-    }
+    } else if (c.checked && st.komoot) st.komoot.vis = c.vis;
   }
-  box.innerHTML = Object.entries(st)
-    .filter(([, v]) => v.status !== "error")
-    .map(
-      ([k, v]) =>
-        `<span class="chip">${v.url ? `<a target="_blank" href="${esc(v.url)}">${nm[k] || k} ↗</a>` : nm[k] || k} · ${UPST[v.status] || v.status}</span>`
-    )
-    .join(" ");
+  const k = st.komoot,
+    kv = k && k.remote_id && ["uploaded", "pending", "duplicate", "linked"].includes(k.status) ? k.vis : null,
+    can = !(typeof isViewer === "function" && isViewer());
+  box.innerHTML =
+    Object.entries(st)
+      .filter(([, v]) => v.status !== "error")
+      .map(
+        ([k, v]) =>
+          `<span class="chip">${v.url ? `<a target="_blank" href="${esc(v.url)}">${nm[k] || k} ↗</a>` : nm[k] || k} · ${UPST[v.status] || v.status}</span>`
+      )
+      .join(" ") +
+    (kv ? " " + kvisChip(kv) : "") +
+    (kv && kv !== "private" && can ? ` <button class="btn ghost sm" id="kpriv">Bei Komoot auf privat setzen</button>` : "");
+  const b = box.querySelector("#kpriv");
+  if (b) b.onclick = () => komootPrivat(t, () => uploadChips(t));
 }
 async function uploadDialog(t) {
   let pf, st;
@@ -59,7 +85,14 @@ async function uploadDialog(t) {
       return `<label class="chk m8-0" style="display:block"><input type="checkbox" class="pp cb" value="${p.id}" ${fromHere || !p.connected || done ? "disabled" : ""}> <b>${p.name}</b> <span class="mut">${why}</span>${done && p.connected && !fromHere ? `<br><label class="fs12 ml22"><input type="checkbox" class="ff cb" data-p="${p.id}"> trotzdem erneut hochladen (z. B. wenn die Tour bei ${p.name} fehlt)</label>` : ""}</label>`;
     })
     .join("");
-  const m = uiModal(`<h3>Tour hochladen</h3><p class="mut">„${esc(t.name)}“ wird mit der lokal gespeicherten Strecke zu den gewählten Portalen gesendet. Es passiert nichts ohne dein Häkchen.</p>${rows}<div id="upr" class="mt10"></div>
+  const kp = pf.portals.find(p => p.id === "komoot"),
+    kok = kp && kp.connected && t.source === "local";
+  const kopt = kok
+    ? `<div class="kupopt"><label class="shrck"><input type="checkbox" id="kwn" ${kp.with_notes === false ? "" : "checked"}> Notiz und Pins mitsenden (Komoot)</label>
+    <p class="mut fs13 m4-0-0">Die Notiz geht als Beschreibung, die Pins als Wegpunkte in die gesendete GPX-Datei. Ob Komoot sie anzeigt, ist nicht sicher.</p>
+    <p class="kvnote">Nach dem Hochladen setzt Meine Touren die Tour bei Komoot auf „privat“ und prüft das. Öffentlich macht Meine Touren nie etwas.</p></div>`
+    : "";
+  const m = uiModal(`<h3>Tour hochladen</h3><p class="mut">„${esc(t.name)}“ wird mit der lokal gespeicherten Strecke zu den gewählten Portalen gesendet. Es passiert nichts ohne dein Häkchen.</p>${rows}${kopt}<div id="upr" class="mt10"></div>
     <div class="uifoot"><button class="btn ghost" id="ucx">Schließen</button><button class="btn" id="uok">Hochladen</button></div>`);
   m.querySelector("#ucx").onclick = () => m.remove();
   m.querySelectorAll(".ff").forEach(
@@ -80,16 +113,19 @@ async function uploadDialog(t) {
       const r = await api(`/api/tours/${encodeURIComponent(t.id)}/upload`, {
         method: "POST",
         headers: {"content-type": "application/json"},
-        body: JSON.stringify({portals: ps, force}),
+        body: JSON.stringify({portals: ps, force, with_notes: m.querySelector("#kwn") ? m.querySelector("#kwn").checked : undefined}),
       });
       m.querySelector("#upr").innerHTML = Object.entries(r)
         .map(
           ([k, v]) =>
-            `<div class="${v.status === "error" ? "bad" : "ok"}"><b>${k === "komoot" ? "Komoot" : "Strava"}:</b> ${v.status === "uploaded" ? "hochgeladen ✓" : v.status === "duplicate" ? "dort schon vorhanden" : v.status === "already" ? "schon erledigt" : esc(v.msg || v.status)}${v.url ? ` – <a target="_blank" href="${esc(v.url)}">öffnen</a>` : ""}</div>`
+            `<div class="${v.status === "error" ? "bad" : "ok"}"><b>${k === "komoot" ? "Komoot" : "Strava"}:</b> ${v.status === "uploaded" ? "hochgeladen ✓" : v.status === "duplicate" ? "dort schon vorhanden" : v.status === "already" ? "schon erledigt" : esc(v.msg || v.status)}${v.url ? ` – <a target="_blank" href="${esc(v.url)}">öffnen</a>` : ""}</div>` +
+            (v.vis ? `<div class="mt6">${kvisChip(v.vis)}</div>` : "") +
+            (v.warnung ? `<div class="kvwarn" role="alert">${esc(v.warnung)}</div>` : "")
         )
         .join("");
       // 3.54.1: Ist alles gut gegangen, schließt der Dialog von selbst – das Ergebnis steht danach bei der Tour (Hochgeladen-Hinweis). Bei Fehlern, „schon vorhanden“ u. Ä. bleibt er offen und zeigt es.
-      if (Object.values(r).every(v => v.status === "uploaded")) {
+      // 3.58.0: bei Komoot nur, wenn „privat“ bestätigt ist – sonst bleibt die Warnung stehen
+      if (Object.values(r).every(v => v.status === "uploaded" && (!v.vis || v.vis === "private"))) {
         m.remove();
         uploadChips(t);
         return;
@@ -100,6 +136,36 @@ async function uploadDialog(t) {
     e.target.disabled = false;
     uploadChips(t);
   };
+}
+
+/* ---------- 3.58.0 Komoot-Paket: ZIP zum Selbst-Hochladen (GPX mit Pins und Notiz, Anleitung, nur ausdrücklich gewählte Fotos) ----------
+   Es geht nichts an Komoot. Fotos: Vorgabe keins; Ort aus den Fotos entfernen: Vorgabe an. Auch für Betrachter (nur lesend). */
+async function komootPaketDialog(t) {
+  let ph;
+  try {
+    ph = await api(`/api/photos?tour_id=${encodeURIComponent(t.id)}&limit=400`);
+  } catch (e) {
+    return uiAlert(e.message);
+  }
+  ph = (ph || []).slice(0, 60);
+  const m = uiModal(`<h3>Komoot-Paket</h3>
+    <p class="mut">Eine ZIP-Datei zum Selbst-Hochladen in Komoot: GPX-Datei, Anleitung und – nur wenn du welche ankreuzt – Fotos. Es wird nichts an Komoot gesendet.</p>
+    <label class="shrck"><input type="checkbox" id="kpn" checked> Notiz und Pins in die GPX-Datei</label>
+    <label class="shrck"><input type="checkbox" id="kpo" checked> Ort aus den Fotos entfernen</label>
+    <h4 class="kph">Fotos <span class="mut" id="kpc">keins ausgewählt</span></h4>
+    ${ph.length ? `<div class="kpgrid">${ph.map(p => `<label class="kpf" title="${esc(fmtDatumKurz(p.taken_ts, {zeit: true}))}"><input type="checkbox" class="kpcb" value="${+p.id}"><img src="${picSrc(p, 200)}" alt="Foto ${esc(fmtDatumKurz(p.taken_ts, {zeit: true}))}" loading="lazy" decoding="async"></label>`).join("")}</div>` : `<p class="mut">Zu dieser Tour gibt es keine Fotos.</p>`}
+    <div class="kpwarn" role="note"><b>Bitte beachten:</b> <span>Wähle nur Fotos, die du selbst gemacht hast oder für die du die Rechte hast.</span> <span>Sind Personen erkennbar, brauchst du für eine Veröffentlichung in der Regel ihre Einwilligung – Meine Touren erkennt keine Gesichter.</span> <span>Was in Komoot einmal öffentlich war, lässt sich nicht zuverlässig zurückholen.</span> <span>Die Sichtbarkeit wählst du beim Hochladen in Komoot selbst.</span></div>
+    <div class="uifoot"><button class="btn ghost" id="kpx">Schließen</button><a class="btn" id="kpd" download>Paket herunterladen</a></div>`);
+  const upd = () => {
+    const ids = [...m.querySelectorAll(".kpcb:checked")].map(c => c.value);
+    m.querySelector("#kpc").textContent = ids.length ? (ids.length === 1 ? "1 Foto ausgewählt" : `${ids.length} Fotos ausgewählt`) : "keins ausgewählt";
+    const q = new URLSearchParams({notiz: m.querySelector("#kpn").checked ? "1" : "0", ohne_ort: m.querySelector("#kpo").checked ? "1" : "0"});
+    if (ids.length) q.set("fotos", ids.join(","));
+    m.querySelector("#kpd").href = `/api/tours/${encodeURIComponent(t.id)}/komoot-paket?${q}`;
+  };
+  m.querySelectorAll("input").forEach(i => (i.onchange = upd));
+  m.querySelector("#kpx").onclick = () => m.remove();
+  upd();
 }
 
 /* ---------- Tourseite und Unterseite „Auswertung“ (3.16.0) ----------
@@ -223,7 +289,7 @@ VIEWS.tour = async id => {
     `<div class="row"><a class="back" href="${window._from || "#/tours"}">${window._from ? (window._from.startsWith("#/trip/") ? "‹ Zurück zur Reise" : "‹ Zurück zum Album") : "‹ Alle Touren"}</a><span class="sp"></span>${pv ? `<a class="btn ghost sm" href="#/tour/${pv.id}">Vorherige</a>` : ""}${nx ? `<a class="btn ghost sm" href="#/tour/${nx.id}">Nächste</a>` : ""}</div>
    <div class="mt18"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span class="mut ml8">${fmtDatum(t.date, {zeit: true})}</span>${t.g_country ? `<span class="mut ml8">· ${esc([t.g_place, t.g_state, t.g_country].filter(Boolean).join(", "))}</span>` : ""}</div>
    <h1 class="m10-0-18" style="font-size:clamp(34px,5vw,56px)"><span id="tname">${esc(t.name)}</span> <button class="btn ghost sm vam fs15" id="ren" title="Tour umbenennen">✎ Umbenennen</button></h1>
-   <div class="row mn6-0-14">${t.source === "local" ? `<span class="tag" style="background:var(--yellow);color:#000" title="Diese Tour liegt nur lokal vor (Strecke als GPX im Datenordner)">lokal gespeichert</span>` : `<button class="btn ghost sm" id="ksync" title="Daten und GPS-Track neu von Komoot laden">⟳ Mit Komoot abgleichen</button>`}<button class="btn ghost sm" id="eup" title="Zu Komoot, Strava … hochladen">⬆ Hochladen</button><a class="btn ghost sm" id="egpx" href="/api/tours/${encodeURIComponent(t.id)}/gpx" title="Strecke als GPX-Datei herunterladen">⬇ GPX</a><button class="btn ghost sm" id="edel" title="Tour löschen">🗑 Löschen</button><button class="btn ghost sm" id="etag" title="Schlagworte / Alben">🏷 Tags</button><button class="btn ghost sm" id="eshr" title="Öffentlichen Link erzeugen">🔗 Teilen</button><button class="btn ghost sm" id="etc" title="Farbe und Breite der Strecke">🎨 Streckenfarbe</button><button class="btn ghost sm" id="efix" title="Höhen mit Geländemodell neu berechnen"></button><button class="btn ghost sm" id="ezepp" title="Auf-/Abstieg aus der barometrischen Höhe der Zepp-Uhr übernehmen">⌚ Höhe aus Uhr abgleichen (Zepp)</button><span id="ksm" class="mut fs14"></span></div><div id="upst" class="chips mn4-0-10"></div><div id="tagl" class="chips mn4-0-12"></div><div id="ewarn"></div>
+   <div class="row mn6-0-14">${t.source === "local" ? `<span class="tag" style="background:var(--yellow);color:#000" title="Diese Tour liegt nur lokal vor (Strecke als GPX im Datenordner)">lokal gespeichert</span>` : `<button class="btn ghost sm" id="ksync" title="Daten und GPS-Track neu von Komoot laden">⟳ Mit Komoot abgleichen</button>`}<button class="btn ghost sm" id="eup" title="Zu Komoot, Strava … hochladen">⬆ Hochladen</button><a class="btn ghost sm" id="egpx" href="/api/tours/${encodeURIComponent(t.id)}/gpx" title="Strecke als GPX-Datei herunterladen">⬇ GPX</a><button class="btn ghost sm" id="ekpk" title="GPX mit Pins und Notiz, Anleitung und ausgewählte Fotos als ZIP – zum Selbst-Hochladen in Komoot">📦 Komoot-Paket</button><button class="btn ghost sm" id="edel" title="Tour löschen">🗑 Löschen</button><button class="btn ghost sm" id="etag" title="Schlagworte / Alben">🏷 Tags</button><button class="btn ghost sm" id="eshr" title="Öffentlichen Link erzeugen">🔗 Teilen</button><button class="btn ghost sm" id="etc" title="Farbe und Breite der Strecke">🎨 Streckenfarbe</button><button class="btn ghost sm" id="efix" title="Höhen mit Geländemodell neu berechnen"></button><button class="btn ghost sm" id="ezepp" title="Auf-/Abstieg aus der barometrischen Höhe der Zepp-Uhr übernehmen">⌚ Höhe aus Uhr abgleichen (Zepp)</button><span id="ksm" class="mut fs14"></span></div><div id="upst" class="chips mn4-0-10"></div><div id="tagl" class="chips mn4-0-12"></div><div id="ewarn"></div>
    <div class="figs"><div class="fig"><div class="v">${fmtKm(t.km, {einheit: false})}<span class="u">km</span></div><div class="l">Strecke</div></div><div class="fig"><div class="v">${nf(t.up_m, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div></div>
    <div class="fig"><div class="v">${nf(t.down_m, 0)}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${fmtDauerTeile(t.h * 3600).v}<span class="u">${fmtDauerTeile(t.h * 3600).u}</span></div><div class="l">Dauer</div></div>
    <div class="fig"><div class="v">${t.h ? nf(t.km / t.h, 1) : "–"}<span class="u">km/h</span></div><div class="l">Tempo im Schnitt</div></div><div id="kmax" class="fig" style="display:none"><div class="v" id="kmaxv"></div><div class="l">Höchster Punkt</div></div></div>
@@ -357,6 +423,7 @@ VIEWS.tour = async id => {
     }
   });
   $("#eup").onclick = () => uploadDialog(t);
+  if ($("#ekpk")) $("#ekpk").onclick = () => komootPaketDialog(t);
   uploadChips(t);
   if ($("#edel") && t.source !== "local")
     $("#edel").onclick = () => {

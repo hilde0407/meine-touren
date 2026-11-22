@@ -3,7 +3,7 @@
 const V = "mt-v142", API = "mt-api-v1", TILES = "mt-tiles-v1", PICS = "mt-pics-v2";
 const KEEP = [V, API, TILES, PICS];
 const PICMAX = 2000;   // 3.54.0: höchstens so viele kleine Bilder (bis 600 px, typisch 10–40 kB) im Speicher: Tourenliste, Foto-Streifen und jetzt auch die Bilder der Übersicht (vorher 1200)
-const NOCACHE = /^\/api\/(jobs|update|selftest|health|login|logout|setup|restore|me\/password|clock-check\/ignore)/;
+const NOCACHE = /^\/api\/(jobs|update|selftest|health|login|logout|setup|restore|me\/password|clock-check\/ignore|komoot\/|tours\/[^/]+\/komoot-paket)/;   // 3.58.0: Komoot-Sichtbarkeit immer frisch, Komoot-Paket (ZIP, evtl. groß) nie im Speicher
 self.addEventListener("install", e => { self.skipWaiting(); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => !KEEP.includes(x)).map(x => caches.delete(x)))).then(() => clients.claim())); });
 async function trim(name, max) {

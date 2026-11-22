@@ -19,6 +19,7 @@ const TACT = [
       ["eshr", "Links verwalten", "Erzeugte Links ansehen, kopieren, widerrufen"],
       ["-", "Datei"],
       ["egpx", "GPX-Datei laden", "Strecke als GPX herunterladen"],
+      ["ekpk", "Komoot-Paket …", "GPX mit Pins und Notiz, ausgewählte Fotos – zum Selbst-Hochladen"],
     ],
   },
   {

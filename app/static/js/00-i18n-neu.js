@@ -3343,4 +3343,75 @@ Das ist keine Bilddatei, die ich lesen kann (JPEG, PNG, WebP oder GIF) || This i
 Das Bild ist zu groß (höchstens {} MB) || The image is too large (at most {} MB) || L’image est trop grande ({} Mo maximum) || La imagen es demasiado grande (máximo {} MB)
 Buch nicht gefunden || Guide not found || Guide introuvable || Guía no encontrada
 offen || open || à faire || pendiente
+Bei Komoot: privat bestätigt || On Komoot: private (confirmed) || Sur Komoot : privé (confirmé) || En Komoot: privada (confirmado)
+Bei Komoot: für Freunde sichtbar – bitte in Komoot prüfen || On Komoot: visible to friends – please check in Komoot || Sur Komoot : visible par les amis – veuillez vérifier dans Komoot || En Komoot: visible para amigos; compruébalo en Komoot
+Bei Komoot: öffentlich – bitte in Komoot prüfen || On Komoot: public – please check in Komoot || Sur Komoot : public – veuillez vérifier dans Komoot || En Komoot: pública; compruébalo en Komoot
+Bei Komoot: Sichtbarkeit unbestätigt – bitte in Komoot prüfen || On Komoot: visibility not confirmed – please check in Komoot || Sur Komoot : visibilité non confirmée – veuillez vérifier dans Komoot || En Komoot: visibilidad sin confirmar; compruébalo en Komoot
+„{}“ bei Komoot auf „privat“ (nur ich) setzen? || Set “{}” to “private” (only me) on Komoot? || Rendre « {} » privé (moi uniquement) sur Komoot ? || ¿Poner «{}» como privada (solo yo) en Komoot?
+Auf privat setzen || Make private || Rendre privé || Hacer privada
+Bei Komoot auf privat setzen || Make private on Komoot || Rendre privé sur Komoot || Hacer privada en Komoot
+Komoot hat „privat“ nicht bestätigt. Bitte in Komoot prüfen. || Komoot did not confirm “private”. Please check in Komoot. || Komoot n’a pas confirmé « privé ». Veuillez vérifier dans Komoot. || Komoot no ha confirmado «privada». Compruébalo en Komoot.
+Komoot hat „privat“ nicht bestätigt. || Komoot did not confirm “private”. || Komoot n’a pas confirmé « privé ». || Komoot no ha confirmado «privada».
+Bitte in Komoot prüfen. || Please check in Komoot. || Veuillez vérifier dans Komoot. || Compruébalo en Komoot.
+Notiz und Pins mitsenden (Komoot) || Send note and pins (Komoot) || Envoyer la note et les repères (Komoot) || Enviar nota y marcadores (Komoot)
+Die Notiz geht als Beschreibung, die Pins als Wegpunkte in die gesendete GPX-Datei. || The note goes into the uploaded GPX file as its description, the pins as waypoints. || La note est ajoutée au fichier GPX envoyé comme description, les repères comme points de passage. || La nota va en el archivo GPX enviado como descripción, los marcadores como waypoints.
+Ob Komoot sie anzeigt, ist nicht sicher. || Whether Komoot displays them is not certain. || Il n’est pas certain que Komoot les affiche. || No es seguro que Komoot los muestre.
+Nach dem Hochladen setzt Meine Touren die Tour bei Komoot auf „privat“ und prüft das. || After uploading, Meine Touren sets the tour to “private” on Komoot and checks it. || Après l’envoi, Meine Touren rend le parcours privé sur Komoot et le vérifie. || Tras subirla, Meine Touren pone la ruta como privada en Komoot y lo comprueba.
+Öffentlich macht Meine Touren nie etwas. || Meine Touren never makes anything public. || Meine Touren ne rend jamais rien public. || Meine Touren nunca hace pública ninguna ruta.
+📦 Komoot-Paket || 📦 Komoot package || 📦 Paquet Komoot || 📦 Paquete Komoot
+Komoot-Paket || Komoot package || Paquet Komoot || Paquete Komoot
+Komoot-Paket … || Komoot package … || Paquet Komoot … || Paquete Komoot …
+GPX mit Pins und Notiz, Anleitung und ausgewählte Fotos als ZIP – zum Selbst-Hochladen in Komoot || GPX with pins and note, instructions and selected photos as a ZIP – to upload to Komoot yourself || GPX avec repères et note, mode d’emploi et photos choisies en ZIP – à envoyer vous-même sur Komoot || GPX con marcadores y nota, instrucciones y fotos elegidas en un ZIP, para subirlo tú a Komoot
+GPX mit Pins und Notiz, ausgewählte Fotos – zum Selbst-Hochladen || GPX with pins and note, selected photos – to upload yourself || GPX avec repères et note, photos choisies – à envoyer vous-même || GPX con marcadores y nota, fotos elegidas, para subirlo tú
+Eine ZIP-Datei zum Selbst-Hochladen in Komoot: GPX-Datei, Anleitung und – nur wenn du welche ankreuzt – Fotos. || A ZIP file to upload to Komoot yourself: GPX file, instructions and – only if you tick any – photos. || Un fichier ZIP à envoyer vous-même sur Komoot : fichier GPX, mode d’emploi et – seulement si vous en cochez – des photos. || Un archivo ZIP para subirlo tú a Komoot: archivo GPX, instrucciones y, solo si marcas alguna, fotos.
+Es wird nichts an Komoot gesendet. || Nothing is sent to Komoot. || Rien n’est envoyé à Komoot. || No se envía nada a Komoot.
+Notiz und Pins in die GPX-Datei || Note and pins in the GPX file || Note et repères dans le fichier GPX || Nota y marcadores en el archivo GPX
+Ort aus den Fotos entfernen || Remove location from the photos || Retirer le lieu des photos || Quitar la ubicación de las fotos
+keins ausgewählt || none selected || aucune sélectionnée || ninguna seleccionada
+1 Foto ausgewählt || 1 photo selected || 1 photo sélectionnée || 1 foto seleccionada
+{} Fotos ausgewählt || {} photos selected || {} photos sélectionnées || {} fotos seleccionadas
+Zu dieser Tour gibt es keine Fotos. || There are no photos for this tour. || Ce parcours n’a pas de photos. || Esta ruta no tiene fotos.
+Bitte beachten: || Please note: || À noter : || Ten en cuenta:
+Wähle nur Fotos, die du selbst gemacht hast oder für die du die Rechte hast. || Only choose photos you took yourself or hold the rights to. || Ne choisissez que des photos que vous avez prises ou dont vous détenez les droits. || Elige solo fotos que hayas hecho tú o de las que tengas los derechos.
+Sind Personen erkennbar, brauchst du für eine Veröffentlichung in der Regel ihre Einwilligung – Meine Touren erkennt keine Gesichter. || If people are recognisable, you usually need their consent to publish – Meine Touren does not detect faces. || Si des personnes sont reconnaissables, il faut en général leur accord pour publier – Meine Touren ne détecte pas les visages. || Si se reconoce a personas, normalmente necesitas su consentimiento para publicar; Meine Touren no detecta caras.
+Was in Komoot einmal öffentlich war, lässt sich nicht zuverlässig zurückholen. || Once something has been public on Komoot, it cannot reliably be taken back. || Ce qui a été public sur Komoot ne peut pas être retiré de façon fiable. || Lo que haya sido público en Komoot no se puede recuperar de forma fiable.
+Die Sichtbarkeit wählst du beim Hochladen in Komoot selbst. || You choose the visibility yourself when uploading to Komoot. || Vous choisissez vous-même la visibilité lors de l’envoi sur Komoot. || Tú eliges la visibilidad al subirla a Komoot.
+Paket herunterladen || Download package || Télécharger le paquet || Descargar paquete
+Foto {} || Photo {} || Photo {} || Foto {}
+Komoot: Sichtbarkeit, Notiz und Pins || Komoot: visibility, note and pins || Komoot : visibilité, note et repères || Komoot: visibilidad, nota y marcadores
+Komoot gibt jeder hochgeladenen Tour zuerst die Standard-Sichtbarkeit deines Kontos. || Komoot first gives every uploaded tour your account’s default visibility. || Komoot donne d’abord à chaque parcours envoyé la visibilité par défaut de votre compte. || Komoot da primero a cada ruta subida la visibilidad predeterminada de tu cuenta.
+Meine Touren setzt sie deshalb gleich danach auf „privat“ und prüft das. || So Meine Touren sets it to “private” right afterwards and checks it. || Meine Touren la rend donc privée juste après et le vérifie. || Por eso Meine Touren la pone como privada justo después y lo comprueba.
+Touren aus früheren Versionen können öffentlich sein – prüfe sie hier. || Tours uploaded by earlier versions may be public – check them here. || Les parcours envoyés par des versions précédentes peuvent être publics – vérifiez-les ici. || Las rutas subidas con versiones anteriores pueden ser públicas: compruébalas aquí.
+Beim Hochladen Notiz und Pins mitsenden (als Beschreibung und Wegpunkte; die Tour wird danach auf „privat“ gesetzt) || Send note and pins when uploading (as description and waypoints; the tour is then set to “private”) || Envoyer la note et les repères lors de l’envoi (comme description et points de passage ; le parcours est ensuite rendu privé) || Enviar nota y marcadores al subir (como descripción y waypoints; después la ruta se pone como privada)
+Sichtbarkeit bei Komoot prüfen … || Check visibility on Komoot … || Vérifier la visibilité sur Komoot … || Comprobar visibilidad en Komoot …
+Sichtbarkeit bei Komoot || Visibility on Komoot || Visibilité sur Komoot || Visibilidad en Komoot
+1 Tour liegt laut Meine Touren bei Komoot (hochgeladen oder dort gefunden). || According to Meine Touren, 1 tour is on Komoot (uploaded or found there). || Selon Meine Touren, 1 parcours se trouve sur Komoot (envoyé ou trouvé là-bas). || Según Meine Touren, 1 ruta está en Komoot (subida o encontrada allí).
+{} Touren liegen laut Meine Touren bei Komoot (hochgeladen oder dort gefunden). || According to Meine Touren, {} tours are on Komoot (uploaded or found there). || Selon Meine Touren, {} parcours se trouvent sur Komoot (envoyés ou trouvés là-bas). || Según Meine Touren, {} rutas están en Komoot (subidas o encontradas allí).
+Die Prüfung liest bei Komoot nur nach, eine Tour nach der anderen, und ändert nichts. || The check only reads from Komoot, one tour after another, and changes nothing. || La vérification ne fait que lire sur Komoot, un parcours après l’autre, et ne modifie rien. || La comprobación solo lee en Komoot, una ruta tras otra, y no cambia nada.
+Alle öffentlichen auf privat setzen … || Make all public ones private … || Rendre privés tous les parcours publics … || Hacer privadas todas las públicas …
+Alle {} nicht privaten auf privat setzen … || Make all {} non-private ones private … || Rendre privés les {} parcours non privés … || Hacer privadas las {} no privadas …
+Alle hochgeladenen prüfen || Check all uploaded || Vérifier tous les parcours envoyés || Comprobar todas las subidas
+Erneut prüfen || Check again || Vérifier à nouveau || Volver a comprobar
+{} öffentlich, {} privat, {} unbekannt || {} public, {} private, {} unknown || {} publics, {} privés, {} inconnus || {} públicas, {} privadas, {} desconocidas
+{} für Freunde sichtbar || {} visible to friends || {} visibles par les amis || {} visibles para amigos
+{} nicht mehr bei Komoot || {} no longer on Komoot || {} ne sont plus sur Komoot || {} ya no están en Komoot
+Bei Komoot nicht gefunden || Not found on Komoot || Introuvable sur Komoot || No encontrada en Komoot
+noch nicht geprüft || not checked yet || pas encore vérifié || aún sin comprobar
+in Komoot öffnen ↗ || open in Komoot ↗ || ouvrir dans Komoot ↗ || abrir en Komoot ↗
+Keine Touren bei Komoot bekannt. || No tours known on Komoot. || Aucun parcours connu sur Komoot. || No se conoce ninguna ruta en Komoot.
+{} Touren bei Komoot auf „privat“ (nur ich) setzen? Touren, die du absichtlich geteilt hast, sieht danach nur noch du. || Set {} tours to “private” (only me) on Komoot? Tours you shared on purpose will then be visible only to you. || Rendre {} parcours privés (moi uniquement) sur Komoot ? Les parcours que vous avez partagés exprès ne seront ensuite visibles que par vous. || ¿Poner {} rutas como privadas (solo yo) en Komoot? Las rutas que compartiste a propósito solo las verás tú.
+Wird geprüft … {} von {} || Checking … {} of {} || Vérification … {} sur {} || Comprobando … {} de {}
+bei Komoot privat (bestätigt) || private on Komoot (confirmed) || privé sur Komoot (confirmé) || privada en Komoot (confirmado)
+ACHTUNG: bei Komoot öffentlich – bitte in Komoot prüfen || WARNING: public on Komoot – please check in Komoot || ATTENTION : public sur Komoot – veuillez vérifier dans Komoot || ATENCIÓN: pública en Komoot; compruébalo en Komoot
+bei Komoot für Freunde sichtbar – bitte in Komoot prüfen || visible to friends on Komoot – please check in Komoot || visible par les amis sur Komoot – veuillez vérifier dans Komoot || visible para amigos en Komoot; compruébalo en Komoot
+Sichtbarkeit nicht bestätigt, bitte in Komoot prüfen || Visibility not confirmed, please check in Komoot || Visibilité non confirmée, veuillez vérifier dans Komoot || Visibilidad sin confirmar; compruébalo en Komoot
+Deine Komoot-Vorgabe für neue Aktivitäten ist „öffentlich“, und das Zurücksetzen auf „privat“ hat nicht geklappt. || Your Komoot default for new activities is “public”, and resetting it to “private” did not work. || Votre réglage Komoot par défaut pour les nouvelles activités est « public », et le passage à « privé » a échoué. || Tu ajuste predeterminado de Komoot para nuevas actividades es «público» y no se ha podido poner como privada.
+Die Tour (mit Notiz und Pins, falls mitgesendet) kann gerade für alle sichtbar sein. || The tour (with note and pins, if sent) may currently be visible to everyone. || Le parcours (avec note et repères, s’ils ont été envoyés) peut être visible par tous en ce moment. || La ruta (con nota y marcadores, si se enviaron) puede ser visible para todos ahora mismo.
+Bitte sofort in Komoot auf „Nur ich“ stellen oder die Tour dort löschen. || Please set it to “Only me” in Komoot right away or delete the tour there. || Veuillez la régler immédiatement sur « Moi uniquement » dans Komoot ou y supprimer le parcours. || Ponla de inmediato en «Solo yo» en Komoot o elimina allí la ruta.
+Die Sichtbarkeit bei Komoot ist nicht bestätigt. || The visibility on Komoot is not confirmed. || La visibilité sur Komoot n’est pas confirmée. || La visibilidad en Komoot no está confirmada.
+Bitte in Komoot prüfen (Tour öffnen → Sichtbarkeit „Nur ich“). || Please check in Komoot (open the tour → visibility “Only me”). || Veuillez vérifier dans Komoot (ouvrir le parcours → visibilité « Moi uniquement »). || Compruébalo en Komoot (abre la ruta → visibilidad «Solo yo»).
+Komoot kannte die Tour schon – sie ist dort ÖFFENTLICH. || Komoot already had this tour – it is PUBLIC there. || Komoot connaissait déjà ce parcours – il y est PUBLIC. || Komoot ya tenía esta ruta: allí es PÚBLICA.
+Meine Touren ändert eine vorhandene Tour nicht von selbst: || Meine Touren does not change an existing tour on its own: || Meine Touren ne modifie pas un parcours existant de lui-même : || Meine Touren no cambia por sí sola una ruta existente:
+„Bei Komoot auf privat setzen“ oder in Komoot ändern. || use “Make private on Komoot” or change it in Komoot. || utilisez « Rendre privé sur Komoot » ou modifiez-le dans Komoot. || usa «Hacer privada en Komoot» o cámbialo en Komoot.
+Komoot kannte die Tour schon. || Komoot already had this tour. || Komoot connaissait déjà ce parcours. || Komoot ya tenía esta ruta.
 `;

@@ -48,7 +48,10 @@ VIEWS.admin = async (_, q) => {
     ${f("strava_client_id", "Client-ID")}${f("strava_client_secret", "Client-Secret", "password")}
     <div class="row"><button class="btn" id="sconn">${sv.connected ? "Neu verbinden" : "Mit Strava verbinden"}</button>${sv.connected ? `<button class="btn alt" id="sdis">Trennen</button>` : ""}<span id="sres"></span></div></div>
     <ol class="mut pl18 mt0"><li>Auf <a target="_blank" href="https://www.strava.com/settings/api">strava.com/settings/api</a> eine eigene App anlegen (Name frei).</li><li>„Authorization Callback Domain“: <code>${esc(location.hostname)}</code> (bei Fehlermeldung: <code>localhost</code>).</li><li>Client-ID und -Secret hier eintragen, „Einstellungen speichern“, dann „Mit Strava verbinden“.</li><li>Falls Strava nach der Freigabe nicht zurückfindet: Adresse der leeren Seite kopieren und hier einfügen:<div class="row mt6"><input id="scode" placeholder="http://…?code=…" class="fx1"><button class="btn alt sm" id="scodeb">Code einlösen</button></div></li></ol></div>
-   <details><summary>Komoot</summary><p class="mut">Zugang siehe Panel „Komoot“ oben. Touren, die von Komoot stammen, können nicht erneut zu Komoot hochgeladen werden; zu Strava schon.</p></details></div>
+   <details class="kvdet" open><summary>Komoot: Sichtbarkeit, Notiz und Pins</summary><p class="mut">Zugang siehe Panel „Komoot“ oben. Touren, die von Komoot stammen, können nicht erneut zu Komoot hochgeladen werden; zu Strava schon.</p>
+    <p class="kvnote">Komoot gibt jeder hochgeladenen Tour zuerst die Standard-Sichtbarkeit deines Kontos. Meine Touren setzt sie deshalb gleich danach auf „privat“ und prüft das. Touren aus früheren Versionen können öffentlich sein – prüfe sie hier.</p>
+    ${swField("komoot_with_notes", "Beim Hochladen Notiz und Pins mitsenden (als Beschreibung und Wegpunkte; die Tour wird danach auf „privat“ gesetzt)")}
+    <div class="row"><button class="btn alt" id="kvchk">Sichtbarkeit bei Komoot prüfen …</button></div></details></div>
   <div class="panel gap"><h2>Zepp-Import <span class="mut" style="font:400 16px var(--b)">(optional)</span></h2>
    <p class="mut">Holt GPS-Trainings aus deinem Zepp-Konto (als GPX-Dateien). Ausgewählte Trainings werden lokal als Tour gespeichert (Karte, Statistik); ein Upload zu Komoot/Strava passiert <b>nur</b>, wenn du es unten ausdrücklich anhakst.</p>
    <div class="row"><button class="btn" data-job="export">Zepp-Import starten</button><button class="btn alt" data-job="elev-local" title="Falsche Höhenwerte (z. B. Platzhalter) aus bereits importierten Touren entfernen und Auf-/Abstieg neu berechnen">Aufstieg neu berechnen</button><button class="btn alt" data-job="hr-backfill" title="Herzfrequenz für bereits importierte Zepp-Touren aus der Zepp-Cloud nachladen (Touren bleiben unverändert)">Puls nachladen</button><button class="btn alt" data-job="dev-match" title="Alle Touren, zu denen es ein Zepp-Training gibt (auch Komoot- und Datei-Touren), als mit der Uhr aufgezeichnet markieren und dem passenden Gerät zuordnen. Von Hand zugeordnete Touren bleiben unverändert.">Touren den Uhren zuordnen</button><button class="btn alt" data-job="met-backfill" title="Messwerte (Tempo, Kadenz, Leistung, Temperatur …) für bereits importierte Touren aus der Zepp-Cloud bzw. aus Original-Dateien im Eingang/Export nachladen. Vorhandene Daten bleiben unverändert.">Messwerte nachladen</button><button class="btn alt" data-job="elev-zepp" title="Auf-/Abstieg von Komoot- und Datei-Touren mit der barometrischen Höhe der Uhr (Zepp) neu berechnen, wenn es ein passendes Training gibt. Bereits korrigierte Touren bleiben unberührt; je Tour wiederherstellbar.">Höhe aus Uhr abgleichen</button><button class="btn alt" id="ztest">Token testen</button><span id="zres"></span></div>
@@ -105,7 +108,8 @@ VIEWS.admin = async (_, q) => {
    <div class="panel"><h2>Automatik</h2>${swField("auto_sync", "Täglich aktualisieren (Komoot, Routen, Fotos)")}${f("auto_sync_hour", "Uhrzeit (Stunde)", "number")}</div>
    <div class="panel"><h2>Protokoll</h2><div class="pre" id="log">–</div></div></div>
   <div class="row mt34"><button class="btn" id="save">Einstellungen speichern</button><span id="ok" class="ok"></span></div>`;
-  ["auto_sync", "garmin_auto", "suunto_auto", "zepp_auto_adopt"].forEach(k => swSet(k, s[k]));
+  ["auto_sync", "garmin_auto", "suunto_auto", "zepp_auto_adopt", "komoot_with_notes"].forEach(k => swSet(k, s[k]));
+  if ($("#kvchk")) $("#kvchk").onclick = () => komootVisDialog();
   const run = async (u, o) => {
     try {
       await api(u, o);
@@ -287,3 +291,86 @@ VIEWS.admin = async (_, q) => {
   poll();
   pollTimer = setInterval(poll, 2000);
 };
+
+/* 3.58.0 Rückprüfung: Sichtbarkeit aller zu Komoot hochgeladenen Touren nachlesen (nur lesend, in kleinen Gruppen nacheinander, mit Fortschritt).
+   Auf „privat“ setzen nur per Klick – je Tour oder, nach Rückfrage, für alle gefundenen öffentlichen. Nie von selbst. */
+async function komootVisDialog() {
+  let h;
+  try {
+    h = await api("/api/komoot/hochgeladen");
+  } catch (e) {
+    return uiAlert(e.message);
+  }
+  const L = h.touren || [];
+  const m = uiModal(`<h3>Sichtbarkeit bei Komoot</h3>
+    <p class="mut">${L.length === 1 ? "1 Tour liegt" : `${L.length} Touren liegen`} laut Meine Touren bei Komoot (hochgeladen oder dort gefunden). Die Prüfung liest bei Komoot nur nach, eine Tour nach der anderen, und ändert nichts.</p>
+    <p class="kvsum" id="kvsum" role="status"></p><progress class="kvprog" id="kvprog" max="${Math.max(1, L.length)}" value="0" hidden></progress>
+    <ul class="kvlist" id="kvlist"></ul>
+    <div class="uifoot"><button class="btn ghost" id="kvx">Schließen</button><button class="btn alt" id="kvall" hidden>Alle öffentlichen auf privat setzen …</button><button class="btn" id="kvgo" ${L.length ? "" : "disabled"}>Alle hochgeladenen prüfen</button></div>`);
+  let open = true;
+  const zahl = () => {
+    const z = {oeffentlich: 0, freunde: 0, privat: 0, unbekannt: 0, fehlt: 0};
+    L.forEach(x => z[{public: "oeffentlich", friends: "freunde", private: "privat", fehlt: "fehlt"}[x.vis] || "unbekannt"]++);
+    return z;
+  };
+  const render = () => {
+    const z = zahl();
+    m.querySelector("#kvsum").innerHTML = `<b>${z.oeffentlich} öffentlich, ${z.privat} privat, ${z.unbekannt} unbekannt</b>${z.freunde ? ` <span>${z.freunde} für Freunde sichtbar</span>` : ""}${z.fehlt ? ` <span>${z.fehlt} nicht mehr bei Komoot</span>` : ""}`;
+    m.querySelector("#kvlist").innerHTML = L.map(
+      x => `<li><a href="#/tour/${encodeURIComponent(x.id)}">${esc(x.name)}</a> <span class="mut fs13">${x.start_ts ? fmtDatumKurz(x.start_ts) : ""}</span>
+        ${x.vis === "fehlt" ? '<span class="kvis warn">Bei Komoot nicht gefunden</span>' : x.vis ? kvisChip(x.vis) : '<span class="kvis">noch nicht geprüft</span>'}
+        ${x.url && x.vis !== "fehlt" ? `<a class="fs13" target="_blank" href="${esc(x.url)}">in Komoot öffnen ↗</a>` : ""}
+        ${x.vis && !["private", "fehlt"].includes(x.vis) ? `<button class="btn ghost sm" data-kp="${esc(x.id)}">Auf privat setzen</button>` : ""}</li>`
+    ).join("") || '<li class="mut">Keine Touren bei Komoot bekannt.</li>';
+    m.querySelectorAll("[data-kp]").forEach(b => (b.onclick = () => privat([L.find(x => x.id === b.dataset.kp)])));
+    const pub = L.filter(x => x.vis === "public" || x.vis === "friends");
+    const all = m.querySelector("#kvall");
+    all.hidden = pub.length < 2;
+    all.textContent = `Alle ${pub.length} nicht privaten auf privat setzen …`;
+  };
+  const privat = async list => {
+    for (const x of list) {
+      if (!open) return;
+      try {
+        const r = await api(`/api/tours/${encodeURIComponent(x.id)}/komoot-privat`, {method: "POST"});
+        x.vis = r.vis;
+      } catch (e) {
+        x.vis = "unbekannt";
+      }
+      render();
+    }
+  };
+  m.querySelector("#kvx").onclick = () => {
+    open = false;
+    m.remove();
+  };
+  m.querySelector("#kvall").onclick = async () => {
+    const pub = L.filter(x => x.vis === "public" || x.vis === "friends");
+    if (!pub.length) return;
+    if (!(await uiConfirm({text: `${pub.length} Touren bei Komoot auf „privat“ (nur ich) setzen? Touren, die du absichtlich geteilt hast, sieht danach nur noch du.`, ok: "Auf privat setzen"}))) return;
+    await privat(pub);
+  };
+  m.querySelector("#kvgo").onclick = async e => {
+    const prog = m.querySelector("#kvprog");
+    e.target.disabled = true;
+    prog.hidden = false;
+    prog.value = 0;
+    for (let i = 0; i < L.length && open; i += 5) {
+      const part = L.slice(i, i + 5);
+      m.querySelector("#kvsum").textContent = `Wird geprüft … ${i} von ${L.length}`;
+      try {
+        const r = await api("/api/komoot/sichtbarkeit", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({ids: part.map(x => x.id)})});
+        part.forEach(x => (x.vis = (r.ergebnis[x.id] || {}).vis || "unbekannt"));
+      } catch (er) {
+        part.forEach(x => (x.vis = "unbekannt"));
+      }
+      prog.value = Math.min(L.length, i + part.length);
+    }
+    if (!open) return;
+    prog.hidden = true;
+    e.target.disabled = false;
+    e.target.textContent = "Erneut prüfen";
+    render();
+  };
+  render();
+}
