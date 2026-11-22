@@ -97,6 +97,14 @@ def migrate(conn):
     if "up" not in gcols:
         conn.execute("ALTER TABLE guide_tours ADD COLUMN up REAL")
     conn.execute("CREATE TABLE IF NOT EXISTS guide_cover (book TEXT PRIMARY KEY, img BLOB, v TEXT, ts INTEGER)")   # 3.53.0: Titelbild je Wanderführer (kleines JPEG, vom Benutzer gewählt; Teil der Datenbank und damit der Sicherung)
+    if "ts" not in {r["name"] for r in conn.execute("PRAGMA table_info(tour_notes)")}:
+        conn.execute("ALTER TABLE tour_notes ADD COLUMN ts INTEGER")     # 3.57.0: Notiz geändert am (ms) für den Abgleich mit dem Tagebuch; NULL = früher gespeichert
+    conn.execute("CREATE TABLE IF NOT EXISTS photo_src (photo_id INTEGER PRIMARY KEY, sha1 TEXT, ref TEXT, name TEXT, src TEXT, ts INTEGER)")   # 3.57.0: Herkunft von Fotos aus dem Tagebuch (SHA-1 der Datei, Kennung dort, Dateiname)
+    conn.execute("CREATE INDEX IF NOT EXISTS photo_src_sha1 ON photo_src(sha1)")
+    conn.execute("CREATE INDEX IF NOT EXISTS photo_src_ref ON photo_src(ref)")
+    conn.execute("CREATE TABLE IF NOT EXISTS tour_videos (id INTEGER PRIMARY KEY AUTOINCREMENT, tour_id TEXT, path TEXT, size INTEGER, taken_ts INTEGER, lat REAL, lng REAL, "
+                 "dur_ms INTEGER, sha1 TEXT, ref TEXT, name TEXT, src TEXT, ts INTEGER)")   # 3.57.0: Videos aus dem Tagebuch (nur auf ausdrücklichen Wunsch hochgeladen)
+    conn.execute("CREATE INDEX IF NOT EXISTS tour_videos_t ON tour_videos(tour_id)")
     conn.execute("CREATE TABLE IF NOT EXISTS tour_wps (id INTEGER PRIMARY KEY AUTOINCREMENT, tour_id TEXT, ts INTEGER, lat REAL, lng REAL, note TEXT)")   # Wegpunkte mit Notiz
     conn.execute("CREATE TABLE IF NOT EXISTS photo_comments (id INTEGER PRIMARY KEY AUTOINCREMENT, photo_id INTEGER, ts INTEGER, author TEXT, text TEXT)")   # Kommentare zu Fotos
     conn.execute("CREATE INDEX IF NOT EXISTS photo_comments_p ON photo_comments(photo_id)")

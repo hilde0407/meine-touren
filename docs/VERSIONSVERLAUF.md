@@ -2,6 +2,12 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.57.0 – Notizen, Fotos und Videos mit Mein Tourentagebuch abgleichen (Server-Seite)
+
+- Neue Schnittstelle für das Tagebuch: `GET /api/tours/<id>/tagebuch` (Notiz mit Stempel „geändert am“, Foto- und Videoliste), verkleinerte Fotos, Videos nur mit `video=1`, `GET /api/tagebuch/uebersicht` für die Vorschau
+- Schreiben nur mit Schreibrechten: `POST /api/tours/<id>/notiz` (zusammenführen statt überschreiben, bei Konflikt bleiben beide Fassungen), `…/photo` (verkleinert, Doppelte erkannt), `…/video` (nur mit `bestaetigt=1`, höchstens 200 MB je Video, 1 GB je Tour)
+- Notizen bis 20 000 Zeichen; keine Änderung an der Oberfläche
+
 ## Version 3.56.0 – Wanderführer für Mein Tourentagebuch abrufbar
 
 - Neue Schnittstelle `GET /api/guides/export` (nur lesend, auch für Betrachter): Bücher, Buchtouren mit Strecke und „gewandert“ im Dateiformat des Tagebuchs; Titelbilder nur mit `cover=1`

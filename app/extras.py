@@ -210,13 +210,13 @@ def api_backup_full_get(name: str, request: Request):
 # ---------- Notizen ----------
 @router.post("/api/tours/{tour_id}/note")
 def api_note(tour_id: str, body: dict):
-    note = (body.get("note") or "").strip()[:5000]
+    """Notiz der Oberfläche (ersetzt). 3.57.0: bis 20 000 Zeichen (vorher 5000 – eine mit dem Tagebuch zusammengeführte Notiz wird so nie gekürzt)
+    und mit Stempel „geändert am“ (tour_notes.ts), an dem der Abgleich mit dem Tagebuch erkennt, ob sich die Notiz am Server geändert hat."""
+    from . import tagebuch_abgleich
+    note = (body.get("note") or "").strip()[:tagebuch_abgleich.NOTIZ_MAX]
     if not db.one("SELECT 1 x FROM tours WHERE id=?", (tour_id,)):
         raise HTTPException(404, "Tour nicht gefunden")
-    if note:
-        db.execute("INSERT OR REPLACE INTO tour_notes(id,note) VALUES(?,?)", (tour_id, note))
-    else:
-        db.execute("DELETE FROM tour_notes WHERE id=?", (tour_id,))
+    tagebuch_abgleich.notiz_set(tour_id, note)
     return {"ok": True}
 
 

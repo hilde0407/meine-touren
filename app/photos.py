@@ -510,6 +510,7 @@ def delete_photos(ids):
                 pass
             db.execute("DELETE FROM photo_pref WHERE path=?", (r["path"],))
             db.execute("DELETE FROM photo_comments WHERE photo_id=?", (r["id"],))
+            db.execute("DELETE FROM photo_src WHERE photo_id=?", (r["id"],))         # 3.57.0: Herkunft aus dem Tagebuch
             db.execute("DELETE FROM photos WHERE id=?", (r["id"],))
             n += 1
     log(f"Fotos: {n} gelöscht")
