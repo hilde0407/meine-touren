@@ -2,6 +2,10 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.55.1 – Lange Kennzahlen passen auf dem Handy in ihre Spalte
+
+- Kennzahlen (Übersicht, Jahresansicht, Statistik, Tourseite): Zahlen wie „403.707 m“ ragen nicht mehr über die Karte hinaus, auch bei 320 px und großer Systemschrift; Desktop unverändert
+
 ## Version 3.55.0 – Plan und Ergebnis mit Karte, Geplant und Gelaufen getrennt
 
 - Tourseite, Baustein „Plan und Ergebnis“: echte Karte mit beiden Strecken (Plan gestrichelt Indigo, gelaufen durchgezogen in der Sportfarbe, Start/Ziel, Ansicht passt auf beide)

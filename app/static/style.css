@@ -2342,3 +2342,14 @@ html.mob .pemap{height:240px}
 .pedot{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--rule);flex:none}.pedot-s{background:#2f8f5f}.pedot-z{background:#c0504d}
 .plact.pebtns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-width:440px;margin:12px 0 0}
 .pebtns .btn,.pebtns .btn.sm,html.mob .pebtns .btn.sm{display:flex;align-items:center;justify-content:center;min-height:44px;margin:0;padding:6px 14px;font:600 15px/1.25 var(--d);letter-spacing:.3px;text-align:center;vertical-align:top}
+/* 3.55.1 Kennzahlen: keine Zahl ragt über ihre Spalte oder den Kartenrand (lange Zahlen wie „403.707 m“, schmale Handys, große Systemschrift).
+   Spalten schrumpfen bis 0 statt mit dem Inhalt zu wachsen; .fig ist Container, die Zahl wird höchstens so groß, dass eine siebenstellige Zahl (≈ 3,2 em) in die Spalte passt;
+   die Einheit darf als Ganzes in die nächste Zeile rutschen. Desktop: Obergrenze liegt über der bisherigen Größe (unverändert); ohne Container Queries gilt die alte Größe. */
+.fig{min-width:0;container-type:inline-size}
+.fig .u{display:inline-block;white-space:nowrap}
+.fig .v{font-size:min(clamp(34px,4vw,50px),30cqw)}
+.figs.sm .fig .v{font-size:min(clamp(24px,3vw,34px),30cqw)}
+@media(min-width:701px){html:not(.mob) #main>.figs>.fig>.v{font-size:min(clamp(34px,4vw,50px),43cqw)}}
+@media(max-width:700px){.fig .v{font-size:min(clamp(34px,4vw,50px),23cqw)}.figs.sm .fig .v{font-size:min(clamp(24px,3vw,34px),23cqw)}.fig .u{font-size:16px;margin-left:4px}}
+html.mob .figs{grid-template-columns:repeat(3,minmax(0,1fr))}
+html.mob .fig .v{font-size:min(24px,23cqw)}html.mob .figs.sm .fig .v{font-size:min(clamp(24px,3vw,34px),23cqw)}html.mob .fig .u{font-size:15px;margin-left:3px}
