@@ -378,6 +378,10 @@ def test_links_anlegen_aendern_loeschen(pw, app):
             expect(li).to_have_count(0, timeout=TL)
             pg.click("#psave")
             expect(pg.locator("#pmsg")).to_contain_text("gespeichert", timeout=TL)
+            for _ in range(50):                                   # die Meldung „gespeichert“ steht schon von früheren Speichern da: auf den Stand im Server warten
+                if _req(app, f"/api/plans/{pid}")["links"] == []:
+                    break
+                pg.wait_for_timeout(100)
             assert _req(app, f"/api/plans/{pid}")["links"] == []
             assert angefragt == [], angefragt                                                          # Links werden nie vom Browser aufgerufen (kein Abruf, keine Vorschau)
             assert not pg.errors, pg.errors
