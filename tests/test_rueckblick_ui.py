@@ -166,7 +166,8 @@ def test_layout_kontrast_screenshots(pw, app, scheme, width):
         pub.wait_for_function("() => [...document.querySelectorAll('#p img')].every(i => i.complete)", timeout=T)
         c = pub.evaluate(CONTRAST, [".fig span", ".blk h2", ".rec .l", ".rec .w span", ".mo h3", ".leg", ".cmp", "footer", ".k", ".pbtn", "h1"])
         assert len(c) >= 8 and not {k: round(v, 2) for k, v in c.items() if v < 4.5}, c
-        assert pub.evaluate("() => document.documentElement.scrollWidth <= document.documentElement.clientWidth")
+        ov = pub.evaluate("() => document.documentElement.scrollWidth <= document.documentElement.clientWidth ? [] : [...document.querySelectorAll('body *')].filter(e => e.getBoundingClientRect().right > innerWidth + 1).slice(0, 8).map(e => e.tagName + '.' + e.className + ': ' + e.textContent.slice(0, 50) + ' @' + Math.round(e.getBoundingClientRect().right))")
+        assert not ov, ov
         small = pub.evaluate("() => [...document.querySelectorAll('.pbtn')].filter(e => e.getBoundingClientRect().height < 43).length")
         assert small == 0
         _shot(pub, f"rueckblick-public-{scheme}-{width}.png")
