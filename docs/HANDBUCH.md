@@ -747,16 +747,18 @@ Wenn deine Touren Pulsdaten haben: **Zeit in den Pulszonen** je Jahr, **Durchsch
 
 Die Statistik besteht aus Bausteinen wie die anderen Seiten: **Seite anpassen** und **Ansichten** ([Kapitel 13](#k13)). Neuere Bausteine wie „Jahreszeiten und Wetter“, die Wochenansicht von „Belastung und Erholung“ und „Ausrüstung“ stehen in [Abschnitt 13.12](#k13).
 
-### 11.6 Aktivitäten und Statistik-Gruppen (ab 3.59.0)
+### 11.6 Aktivitäten und Statistik-Gruppen (ab 3.59.0, Katalog ab 3.60.0)
 
-**Aktivitäten:** Meine Touren kennt 48 Aktivitäten in fünf Kategorien – **Zu Fuß** (Wandern, Spazieren/Gehen, Gassigehen, Bergtour, Klettern, Nordic Walking, Schneeschuh, Laufen, Trailrunning, Orientierungslauf), **Rad** (Radtour, Radpendeln, Rennrad, MTB, Gravelbike, Cyclocross, BMX, E-Bike, E-Mountainbike), **Winter** (Skifahren, Skitour, Langlauf, Snowboard, Rodeln/Bob, Eislaufen, Schneemobil), **Wasser** (Freiwasserschwimmen, Schnorcheln, Kajak/Kanu, Paddleboarding/SUP, Rudern, Drachenboot, Segeln, Bootfahren, Wasserski, Wellenreiten, Kitesurfen, Wakesurfen) und **Outdoor & Sonstige** (Skateboard, Rollschuh/Inline, Reiten, Angeln, Jagen, Bogenschießen, Golf, Quad/ATV, Offroad-Motorrad, Sonstiges). Jede hat ein Symbol und eine Kartenfarbe und ist überall wählbar, wo eine Sportart gewählt wird.
+**Aktivitäten:** Meine Touren kennt 29 Aktivitäten in fünf Kategorien – **Zu Fuß** (Wandern, Spazieren / Gehen, Bergsteigen, Klettern / Klettersteig, Nordic Walking, Laufen, Trailrunning), **Rad** (Radtour, Rennrad, Mountainbike, Gravelbike, E-Bike, E-Mountainbike, Bikepacking), **Winter** (Ski alpin, Skitour, Langlauf, Snowboard, Schneeschuhwandern), **Wasser** (Kajak / Kanu, Rudern, Drachenboot, Rafting, Bootfahren) und **Outdoor und Sonstige** (Skateboard, Inlineskaten / Rollschuh, Reiten, Gleitschirm, Sonstiges). Jede hat ein Symbol und eine Kartenfarbe und ist überall wählbar, wo eine Sportart gewählt wird. Die ganze Liste zeigt **Verwaltung → Aktivitäten → Aktivitäten-Katalog**.
 
-**Jede Aktivität zählt einzeln.** Die Statistik fasst nichts von sich aus zusammen – auch nicht Wandern und Bergtour oder die Radarten. Wer Aktivitäten gemeinsam sehen will, legt eine **Statistik-Gruppe** an: **Verwaltung → Übersicht → Statistik: Aktivitäten zusammenfassen**.
+**Frühere Aktivitäten (aus 3.59.0):** Touren mit einer Aktivität, die es nicht mehr gibt, bleiben unverändert. Sie werden wie ihr Rückfall angezeigt, gefiltert und gezählt – Gassigehen wie Spazieren / Gehen, Orientierungslauf wie Laufen, Radpendeln wie Radtour, Cyclocross wie Rennrad, Paddleboarding/SUP wie Kajak / Kanu, alle übrigen (z. B. Golf, Segeln, Eislaufen) wie Sonstiges. Das gilt auch für Ziele. Umstellen kannst du eine solche Tour mit **Bearbeiten → Sportart ändern**.
+
+**Jede Aktivität zählt einzeln.** Die Statistik fasst nichts von sich aus zusammen – auch nicht Wandern und Bergsteigen oder die Radarten. Wer Aktivitäten gemeinsam sehen will, legt eine **Statistik-Gruppe** an: **Verwaltung → Aktivitäten → Statistik-Gruppen** (bis 3.59.0 „Statistik: Aktivitäten zusammenfassen“ in der Übersicht).
 
 * Jede Gruppe hat einen **Namen** (1–30 Zeichen) und mindestens **zwei Aktivitäten** (nach Kategorien zum Ankreuzen). Eine Aktivität kann nur in einer Gruppe sein; ist sie schon in einer anderen, ist sie ausgegraut und zeigt „in „…““. Höchstens acht Gruppen. **Gruppe hinzufügen**, **🗑 Löschen**, **Gruppen speichern** (Rückmeldung „Gespeichert ✓“).
-* **Vorschläge** mit einem Klick: „Wandern und Bergtouren“ (Wandern, Bergtour, Schneeschuh), „Rad (alle)“, „Ski (alle)“ (Skifahren, Skitour, Langlauf). Sie werden nie automatisch angelegt; gespeichert wird erst mit „Gruppen speichern“.
+* **Vorschläge** mit einem Klick: „Wandern und Bergsteigen“ (Wandern, Bergsteigen, Schneeschuhwandern), „Rad (alle)“, „Ski (alle)“ (Ski alpin, Skitour, Langlauf). Sie werden nie automatisch angelegt; gespeichert wird erst mit „Gruppen speichern“.
 * **Wirkung:** Im Sportartfilter der Statistik und der Bausteine steht jede Gruppe als eigener Eintrag „Name (zusammengefasst)“; die einzelnen Aktivitäten bleiben wählbar. Die Aufteilungen nach Sportart – Abschnitt „Sportarten“, Sportarten-Verteilung, Rekorde „Je Sportart“, Jahresrückblick (auch als Link) – zeigen die Gruppe als eine Zeile. Bei **Ziele → Ziel hinzufügen** sind die Gruppen wählbar.
-* **Was bleibt:** Die Touren, ihre Sportart, der Abgleich mit Komoot und Zepp, Export, Tourenliste und Einzelansichten bleiben unverändert. Ältere Ziele wie „Alle Rad-Sportarten“ zählen weiter. Wird eine Gruppe gelöscht, zeigen gespeicherte Filter wieder alle Sportarten; ein Ziel für die Gruppe zählt alle Sportarten („(Gruppe gelöscht)“). Gruppen und Favoriten gehören zur Datensicherung.
+* **Was bleibt:** Die Touren, ihre Sportart, der Abgleich mit Komoot und Zepp, Export, Tourenliste und Einzelansichten bleiben unverändert. Ältere Ziele wie „Alle Rad-Sportarten“ zählen weiter. Wird eine Gruppe gelöscht, zeigen gespeicherte Filter wieder alle Sportarten; ein Ziel für die Gruppe zählt alle Sportarten („(Gruppe gelöscht)“). Gruppen und Favoriten gehören zur Datensicherung. Frühere Aktivitäten fallen aus Gruppen und Favoriten beim Laden still heraus.
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -1054,11 +1056,12 @@ Damit Empfänger ohne Konto einen Link öffnen können, muss deine Installation 
 
 ## 15. Die Verwaltung
 
-**Zweck:** Einrichtung, Wartung und Sicherung. Öffne sie mit dem **Zahnrad** oben (auf dem Handy: **Mehr → Verwaltung**). Die Verwaltung hat acht Reiter und oben die Knöpfe **Freigegebene Links verwalten** und – rechts oben – die Versionsangabe („Version: 3.37.0“).
+**Zweck:** Einrichtung, Wartung und Sicherung. Öffne sie mit dem **Zahnrad** oben (auf dem Handy: **Mehr → Verwaltung**). Die Verwaltung hat acht Reiter (ab 3.60.0; dazu der Link „Prüfen & Aufräumen“) und oben die Knöpfe **Freigegebene Links verwalten** und – rechts oben – die Versionsangabe („Version: 3.37.0“).
 
 | Reiter | Inhalt |
 |---|---|
-| **Übersicht** | Zustand, Updates, Protokoll, Heimatort und Puls, Entwicklermodus |
+| **Übersicht** | Zustand, Updates, Heimatort und Puls, Protokoll, Entwicklermodus |
+| **Aktivitäten** | Aktivitäten-Katalog, Favoriten für „Tour aufnehmen“, Statistik-Gruppen (ab 3.60.0) |
 | **Touren holen** | Meine Geräte, Komoot, Zepp, Garmin/Suunto/andere Uhren, Wanderführer ([Kapitel 4](#k4)) |
 | **Hochladen & Planen** | Strava und Komoot (Upload), Tourplanung |
 | **Fotos** | Fotobibliothek, Import, Foto-Eingang, Bildeinstellungen |
@@ -1067,17 +1070,23 @@ Damit Empfänger ohne Konto einen Link öffnen können, muss deine Installation 
 | **Sicherung & Zugang** | Sicherung, Umzugspaket, Zugriffsschutz, Offline-Nutzung |
 | **Prüfen & Aufräumen** | auffällige Touren, Aufräumen (eigene Seite) |
 
-Die Verwaltung wird **Administratoren** angezeigt. **Einstellungen speichern** am Ende jedes Reiters speichert die Eingaben.
+Die Verwaltung wird **Administratoren** angezeigt. Jeder Bereich ist eine gleich gestaltete Karte (Überschrift, kurze Erklärung, Inhalt). **Einstellungen speichern** am Ende jedes Reiters speichert die Eingaben; die Abschnitte im Reiter **Aktivitäten** haben eigene Knöpfe zum Speichern.
 
 ### 15.1 Übersicht: Zustand, Updates, Heimatort
 
 * **Zustand:** Haken oder Warnzeichen für Komoot-Zugang, letztes Backup, Datenbank, freien Speicher, Touren ohne Strecke und Fotos ohne Tour.
 * **Updates:** zeigt die installierte und die neueste Version auf GitHub. **Jetzt prüfen** fragt sofort nach; „Regelmäßig (alle 6 Stunden) auf neue Versionen prüfen“ kannst du einschalten. Administratoren installieren neue Versionen auf den meisten Installationen per Knopfdruck; bei Docker nennt die App nur den Befehl. Vor jedem Update gibt es automatisch eine Sicherung.
 * **Protokoll:** Meldungen der Hintergrundarbeiten.
-* **Favoriten-Aktivitäten:** Stern ☆/★ wählt bis zu 12 Aktivitäten, ↑/↓ ordnet sie (Vorgabe: Wandern, Laufen, Radtour, Skitour, MTB). Beim Aufzeichnen und Planen stehen sie zuerst, alle übrigen unter „Mehr …“; die zuletzt benutzte ist vorgewählt.
-* **Statistik: Aktivitäten zusammenfassen:** welche Aktivitäten die Statistik gemeinsam zählt ([Abschnitt 11.6](#k11)).
 * **Heimatort und Puls:** Heimatort suchen und festlegen; **Maximalpuls (bpm)** für die Pulszonen (leer = 185 bzw. der höchste gemessene Wert).
 * **Entwicklermodus:** blendet Ansichten zur Fehlersuche ein (Selbsttest, vollständiges Protokoll …). Im Alltag nicht nötig.
+
+### 15.1a Aktivitäten: Katalog, Favoriten, Statistik-Gruppen (ab 3.60.0)
+
+Verwaltung → **Aktivitäten** (`#/admin?tab=aktivitaeten`) hat drei Abschnitte:
+
+* **Aktivitäten-Katalog** (nur lesen): die 29 Aktivitäten nach Kategorien mit Symbol und Kartenfarbe. Aufgeklappt darunter **Frühere Aktivitäten**: was es seit 3.60.0 nicht mehr gibt, wie es jetzt zählt und wie viele deiner Touren betroffen sind.
+* **Favoriten für „Tour aufnehmen“:** Stern ☆/★ wählt bis zu 12 Aktivitäten, ↑/↓ ordnet sie, **Vorgabe wiederherstellen** setzt Wandern, Laufen, Radtour, Skitour, Mountainbike. Beim Aufzeichnen und Planen stehen sie zuerst, alle übrigen unter „Mehr …“; die zuletzt benutzte ist vorgewählt. **Favoriten speichern** übernimmt.
+* **Statistik-Gruppen:** welche Aktivitäten die Statistik gemeinsam zählt; Vorschläge nur per Klick ([Abschnitt 11.6](#k11)).
 
 ![Verwaltung, Reiter „Übersicht“](handbuch/bilder/37-verwaltung-uebersicht.png)
 
@@ -1142,7 +1151,7 @@ Hier findest du auffällige Touren (zum Beispiel unplausible Tempi) und Aufräum
 
 **Was sie bietet:**
 
-* **GPS-Aufzeichnung** im Hintergrund (auch bei ausgeschaltetem Bildschirm). Das Aufzeichnen steht in der App im Mittelpunkt: **Aufzeichnen** ist der runde Reiter in der Mitte der Tab-Leiste und die Startseite der App (umstellbar auf „Übersicht“ unter *Einstellungen der Aufzeichnung*). Der Reiter zeigt auf jeder Seite, ob eine Aufzeichnung läuft (rot, mit Zeit), pausiert ist oder auf das Hochladen wartet. Zur Wahl stehen deine **Favoriten-Aktivitäten** (Verwaltung → Übersicht), die zuletzt benutzte vorn und vorgewählt; **Mehr …** zeigt alle übrigen Aktivitäten nach Kategorien (ab 3.59.0).
+* **GPS-Aufzeichnung** im Hintergrund (auch bei ausgeschaltetem Bildschirm). Das Aufzeichnen steht in der App im Mittelpunkt: **Aufzeichnen** ist der runde Reiter in der Mitte der Tab-Leiste und die Startseite der App (umstellbar auf „Übersicht“ unter *Einstellungen der Aufzeichnung*). Der Reiter zeigt auf jeder Seite, ob eine Aufzeichnung läuft (rot, mit Zeit), pausiert ist oder auf das Hochladen wartet. Zur Wahl stehen deine **Favoriten-Aktivitäten** (Verwaltung → Aktivitäten), die zuletzt benutzte vorn und vorgewählt; **Mehr …** zeigt alle übrigen Aktivitäten nach Kategorien (ab 3.59.0).
   * **Bereit:** Sportart antippen (die zuletzt genutzte steht vorn), GPS-Zustand ablesen („GPS bereit, ±5 m“), **Aufzeichnung starten**. Route mit Sprachansagen wählst du direkt darunter; Name, Fotomodus, Wetterwarnung und Live-Standort-Link liegen unter **Einstellungen der Aufzeichnung**.
   * **Unterwegs:** Zeit und Strecke groß, darunter Aufstieg, Höhe und Tempo, Karte mit Spur; **Foto** und **Wegpunkt** als kleinere Knöpfe, **Pausieren** und **Beenden** groß am unteren Rand. **Beenden** fragt nach („Weiter aufzeichnen“ / „Beenden“).
   * **Fertig:** Die Tour wird von selbst hochgeladen; danach **Tour ansehen**. Ohne Netz steht dort „Wartet auf Netz – wird später gesendet“: Die Aufzeichnung bleibt auf dem Handy und wird gesendet, sobald der Server erreichbar ist. Mit **Später senden, neue Aufzeichnung** kannst du sofort weiter aufzeichnen (die App behält die letzten 10 Aufzeichnungen als Sicherung).

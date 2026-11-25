@@ -24,10 +24,10 @@
     if (top) top.appendChild(b);
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mkBtn); else mkBtn();
-  // Eigene Namen (Tour-, Reise-, Gerätenamen, Tags …) werden nie übersetzt oder verändert: api() meldet jede Antwort hier an.
+  // Eigene Namen (Tour-, Reise-, Gerätenamen, Tags …) werden nie übersetzt oder verändert: api() meldet jede Antwort hier an. 3.60.0: /api/aktivitaeten ausgenommen (die Kategorienamen dort sind Texte der App).
   const NT = new Set();
   let NTL = null;
-  const NT_SKIP = /^\/api\/(settings|status|me|bausteine|stats\/gruppen|zustand|selftest|update|update-check|tiles|users|grants|portals|jobs|layout|login|logout)\b/;
+  const NT_SKIP = /^\/api\/(settings|status|me|bausteine|stats\/gruppen|aktivitaeten|zustand|selftest|update|update-check|tiles|users|grants|portals|jobs|layout|login|logout)\b/;
   window.noTrAdd = (u, data) => {
     if (lang === "de" || NT_SKIP.test(String(u))) return;
     const add = v => { v = String(v).trim(); if (v.length >= 2 && v.length <= 160 && !NT.has(v)) { NT.add(v); NTL = null; } };

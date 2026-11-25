@@ -183,7 +183,7 @@ def test_gear_opens_dialog_filter_by_activity_changes_values_and_survives_reload
         assert box.get_attribute("aria-modal") == "true" and "Einstellungen: Dein Jahr" in box.locator("h2").inner_text()
         assert pg.evaluate("() => !!document.activeElement.closest('[role=dialog]')")                          # Fokus im Dialog
         labels = pg.locator(".sldlg .flsp .flchip").all_inner_texts()
-        assert labels[0] == "Alle" and {"Wandern", "MTB", "Radtour", "Laufen"} <= set(labels)                   # Sportarten des Nutzers
+        assert labels[0] == "Alle" and {"Wandern", "Mountainbike", "Radtour", "Laufen"} <= set(labels)                   # Sportarten des Nutzers
         assert chip(pg, "Alle").locator("input").is_checked() and not chip(pg, "Wandern").locator("input").is_checked()
         assert pg.locator(".sldlg select.flsel").input_value() == "year"                                        # Zeitraum: laufendes Jahr
         assert [o for o in pg.locator(".sldlg select.flsel option").all_inner_texts()][:4] == ["Laufendes Jahr", "Letzte 12 Monate", "Letzte 90 Tage", "Gesamte Zeit"]
@@ -250,12 +250,12 @@ def test_add_second_instance_via_catalog_configure_and_reload(pw, app):
         wait_nums(pg, sel2, calc(rows, frm=f"{YEAR}-01-01"))                                                    # neue Instanz: Standardfilter, unabhängig von der ersten
         assert pg.locator(f"{sel2} .flk").count() == 0
         open_gear(pg, f'.slit[data-sl="{wid}"] [data-a="cfg"]')
-        chip(pg, "MTB").click()
+        chip(pg, "Mountainbike").click()
         pg.locator(".sldlg select.flsel").select_option(label="Letzte 12 Monate")
         save_dialog(pg)
         exp2 = calc(rows, ["mtb"], frm=start12)
         wait_nums(pg, sel2, exp2)
-        assert pg.locator(f"{sel2} .flk").inner_text() == "MTB"
+        assert pg.locator(f"{sel2} .flk").inner_text() == "Mountainbike"
         assert pg.locator(f"{sel2} h2").inner_text() == "Deine letzten 12 Monate"
         assert pg.locator(f"{sel2} .hym > div").count() == 12
         wait_nums(pg, "#hyear", calc(rows, ["hike"], frm=f"{YEAR}-01-01"))                                      # die erste Instanz bleibt unberührt
@@ -299,7 +299,7 @@ def test_two_and_three_instances_values_ranges_titles(pw, app):
         x = calc(rows, ["mtb", "touringbicycle"], frm=start12)
         wait_nums(pg, "#tlw-wj2", [x[1], x[2]])
         assert pg.locator("#tlw-wj2 h2").inner_text() == "Rad, letzte 12 Monate" and pg.locator("#tlw-wj2 .hyn span").all_inner_texts() == ["Strecke", "Aufstieg"]
-        assert pg.locator("#tlw-wj2 .flk").inner_text() == "MTB, Radtour, Laufendes Jahr".replace("Laufendes Jahr", "Letzte 12 Monate")    # mit eigenem Titel steht der Zeitraum im Kurztext
+        assert pg.locator("#tlw-wj2 .flk").inner_text() == "Mountainbike, Radtour, Laufendes Jahr".replace("Laufendes Jahr", "Letzte 12 Monate")    # mit eigenem Titel steht der Zeitraum im Kurztext
         assert pg.locator("#tlw-wj2 .hyg").get_attribute("data-n") == "2"
         # Instanz 3: bestimmtes Jahr, ohne Vergleich
         y = calc(rows, ["hike"], frm=f"{YEAR - 1}-01-01", to=f"{YEAR - 1}-12-31")
@@ -378,7 +378,7 @@ def test_other_widgets_honour_activity_range_and_count(pw, app):
         pg.wait_for_function("() => !document.querySelector('#tlw-wr').open", timeout=T)
         assert pg.locator("#tlw-wr .flk").is_visible()
         # Eigener Titel, Aktivität ohne Touren
-        assert pg.locator("#tlw-wp .tlt").inner_text() == "Ski im Monat" and pg.locator("#tlw-wp .flk").inner_text() == "Skifahren"
+        assert pg.locator("#tlw-wp .tlt").inner_text() == "Ski im Monat" and pg.locator("#tlw-wp .flk").inner_text() == "Ski alpin"
         assert "Keine Touren mit diesem Filter" in pg.locator("#tlw-ws").inner_text()
         km_all = sum(t["dist_m"] for t in rows if t["sport"] == "hike") / 1000
         mt = pg.locator("#tlw-wm").inner_text()

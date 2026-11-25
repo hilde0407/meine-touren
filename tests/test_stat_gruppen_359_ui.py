@@ -1,4 +1,4 @@
-"""3.59.0 Aktivitäten (Oberfläche, Chromium): Verwaltung „Statistik: Aktivitäten zusammenfassen“ (ohne Gruppen jede Aktivität einzeln, Kategorien, ausgegraute
+"""3.59.0 Aktivitäten (Oberfläche, Chromium; 3.60.0: Verwaltung → Aktivitäten): „Statistik-Gruppen“ (ohne Gruppen jede Aktivität einzeln, Kategorien, ausgegraute
 Aktivitäten, Tastatur, Vorschläge, Speichern mit Rückmeldung), „Favoriten-Aktivitäten“ (Stern, Reihenfolge, Speichern), Statistikfilter mit Eintrag „<Name> (zusammengefasst)“,
 Abschnitt „Sportarten“ als eine Zeile, Rekorde je Sportart, gelöschte Gruppe in der Adresse ohne Fehler, Prüfen „Schneeschuh-Touren“, Englisch, 390 px."""
 import json
@@ -85,7 +85,7 @@ def clean(app):
 def _page(pw, url, w=1280, lang="de"):
     b = pw.chromium.launch()
     ctx = b.new_context(viewport={"width": w, "height": 900}, service_workers="block")
-    ctx.add_init_script(f"try {{ localStorage.setItem('lang', '{lang}'); localStorage.setItem('admtab', 'uebersicht'); }} catch (e) {{}}")
+    ctx.add_init_script(f"try {{ localStorage.setItem('lang', '{lang}'); localStorage.setItem('admtab', 'aktivitaeten'); }} catch (e) {{}}")
     pg = ctx.new_page()
     errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
@@ -93,7 +93,7 @@ def _page(pw, url, w=1280, lang="de"):
 
 
 def _admin(pg, url):
-    pg.goto(url + "/#/admin?tab=uebersicht")
+    pg.goto(url + "/#/admin?tab=aktivitaeten")
     pg.wait_for_selector("#sgp .sgg, #sgp .sgnone", timeout=TL)
     quiet(pg, 4000)
 
@@ -102,21 +102,21 @@ def test_verwaltung_gruppen_anlegen_vorschlaege_und_speichern(pw, clean):
     url = clean
     b, pg, errs = _page(pw, url)
     try:
-        pg.goto(url + "/#/admin?tab=uebersicht")
+        pg.goto(url + "/#/admin?tab=aktivitaeten")
         pg.wait_for_selector("#sgp .sgnone", timeout=TL)
         quiet(pg, 4000)
         sec = pg.locator("#sgp")
-        expect(sec.locator("h2")).to_have_text("Statistik: Aktivitäten zusammenfassen")
+        expect(sec.locator("h2")).to_have_text("Statistik-Gruppen")
         expect(sec.locator(".sgnone")).to_have_text("Keine Gruppen: Die Statistik zählt jede Aktivität einzeln.")
         assert sec.locator(".sgg").count() == 0
-        assert sec.locator(".sgsug:visible").all_inner_texts() == ["Vorschlag: Wandern und Bergtouren", "Vorschlag: Rad (alle)", "Vorschlag: Ski (alle)"]
+        assert sec.locator(".sgsug:visible").all_inner_texts() == ["Vorschlag: Wandern und Bergsteigen", "Vorschlag: Rad (alle)", "Vorschlag: Ski (alle)"]
         # Vorschlag „Rad (alle)“: MTB herauslösen (per Tastatur), danach ist MTB in einer neuen Gruppe frei
         sec.locator('.sgsug[data-v="bike"]').click()
         expect(sec.locator(".sgg")).to_have_count(1)
         expect(sec.locator("#sgok")).to_contain_text("Vorschlag übernommen")
         assert sec.locator('.sgsug[data-v="bike"]').is_hidden()
         assert sec.locator("#sgn0").input_value() == "Rad (alle)" and sec.locator("#sgc0_mtb_easy").is_checked() and sec.locator("#sgc0_e_mtb").is_checked()
-        assert sec.locator(".sgg").first.locator(".sgcl").all_inner_texts() == ["Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor & Sonstige"]
+        assert sec.locator(".sgg").first.locator(".sgcl").all_inner_texts() == ["Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor und Sonstige"]
         sec.locator("#sgc0_mtb").focus()
         pg.keyboard.press("Space")
         expect(sec.locator("#sgc0_mtb")).not_to_be_checked()
@@ -153,21 +153,21 @@ def test_verwaltung_favoriten(pw, clean):
     url = clean
     b, pg, errs = _page(pw, url)
     try:
-        pg.goto(url + "/#/admin?tab=uebersicht")
+        pg.goto(url + "/#/admin?tab=aktivitaeten")
         pg.wait_for_selector("#favp .favlist li", timeout=TL)
         quiet(pg, 4000)
         sec = pg.locator("#favp")
-        assert sec.locator(".favn").all_inner_texts() == ["Wandern", "Laufen", "Radtour", "Skitour", "MTB"]
+        assert sec.locator(".favn").all_inner_texts() == ["Wandern", "Laufen", "Radtour", "Skitour", "Mountainbike"]
         expect(sec.locator('.favst[data-k="hike"]')).to_have_attribute("aria-pressed", "true")
         sec.locator('.favst[data-k="kayak"]').click()
         expect(sec.locator('.favst[data-k="kayak"]')).to_have_attribute("aria-pressed", "true")
         assert pg.evaluate("() => document.activeElement.dataset.k") == "kayak"            # Fokus bleibt auf dem Stern
         sec.locator('.favst[data-k="jogging"]').click()
         sec.locator('.favup[data-k="kayak"]').click()
-        assert sec.locator(".favn").all_inner_texts() == ["Wandern", "Radtour", "Skitour", "Kajak/Kanu", "MTB"]
+        assert sec.locator(".favn").all_inner_texts() == ["Wandern", "Radtour", "Skitour", "Kajak / Kanu", "Mountainbike"]
         sec.locator('.favup[data-k="kayak"]').focus()
         pg.keyboard.press("Enter")
-        assert sec.locator(".favn").all_inner_texts() == ["Wandern", "Radtour", "Kajak/Kanu", "Skitour", "MTB"]
+        assert sec.locator(".favn").all_inner_texts() == ["Wandern", "Radtour", "Kajak / Kanu", "Skitour", "Mountainbike"]
         sec.locator("#favsave").click()
         expect(sec.locator("#favok")).to_have_text("Gespeichert ✓", timeout=TL)
         fav = json.loads(urllib.request.urlopen(url + "/api/aktivitaeten/favoriten", timeout=10).read())["favoriten"]
@@ -175,7 +175,7 @@ def test_verwaltung_favoriten(pw, clean):
         # Planung bietet die Favoriten zuerst an
         pg.goto(url + "/#/plan")
         pg.wait_for_selector("#ps", timeout=TL)
-        assert pg.eval_on_selector_all("#ps optgroup", "l => l.map(x => x.label)") == ["Favoriten", "Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor & Sonstige"]
+        assert pg.eval_on_selector_all("#ps optgroup", "l => l.map(x => x.label)") == ["Favoriten", "Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor und Sonstige"]
         assert pg.eval_on_selector_all("#ps optgroup:first-child option", "l => l.map(x => x.value)") == fav and pg.input_value("#ps") == "hike"
         assert not errs, errs
     finally:
@@ -220,7 +220,7 @@ def test_statistik_filter_aufteilung_und_rekorde_mit_gruppe(pw, clean):
         expect(pg.locator('#sch [data-s="hike"]')).to_be_visible()                       # die einzelnen Sportarten bleiben wählbar
         rows = pg.locator('[data-st="sportarten"] .rows, #stc-sportarten .rows').first
         expect(rows).to_contain_text("Bergwandern")
-        assert "Bergtour" not in rows.inner_text() and "Wandern\n" not in rows.inner_text()
+        assert "Bergsteigen" not in rows.inner_text() and "Wandern\n" not in rows.inner_text()
         chip.click()
         pg.wait_for_function("() => location.hash.includes('sgrp')", timeout=TL)
         quiet(pg, 4000)
@@ -250,7 +250,7 @@ def test_englisch_und_handy(pw, clean):
     try:
         _admin(pg, url)
         sec = pg.locator("#sgp")
-        expect(sec.locator("h2")).to_have_text("Statistics: combine activities")
+        expect(sec.locator("h2")).to_have_text("Statistics groups")
         expect(sec.locator("#sgsave")).to_have_text("Save groups")
         expect(sec.locator("#sgadd")).to_have_text("Add group")
         assert pg.evaluate("() => document.documentElement.scrollWidth <= window.innerWidth + 1")
@@ -273,8 +273,8 @@ def test_tour_sportart_aendern_alle_aktivitaeten(pw, clean):
         pg.locator('.tact-bar [data-g="edit"]').click()
         pg.locator('.tactl [data-e="esport"]').click()
         pg.wait_for_selector("#espsel", timeout=TL)
-        assert pg.eval_on_selector_all("#espsel optgroup", "l => l.map(x => x.label)") == ["Favoriten", "Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor & Sonstige"]
-        assert pg.input_value("#espsel") == "touringbicycle" and pg.locator("#espsel option").count() == 48
+        assert pg.eval_on_selector_all("#espsel optgroup", "l => l.map(x => x.label)") == ["Favoriten", "Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor und Sonstige"]
+        assert pg.input_value("#espsel") == "touringbicycle" and pg.locator("#espsel option").count() == 29
         pg.select_option("#espsel", "mtb_easy")
         pg.locator("#espok").click()
         pg.wait_for_selector("#espsel", state="detached", timeout=TL)

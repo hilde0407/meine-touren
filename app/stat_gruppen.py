@@ -40,7 +40,7 @@ SPORT_RE = re.compile(r"^[A-Za-z0-9_]{1,40}$")
 FILTER_RE = re.compile(r"^(?:sgrp:[a-z0-9]{1,12}|[A-Za-z0-9_]{1,40})$")       # ein Eintrag eines Sportartfilters (Layout, Bausteine, Hinweise)
 # Ein-Klick-Vorschläge in der Verwaltung (nie automatisch). Kennungen wie die älteren Ziele „grp:<id>“, damit ein solches Ziel der übernommenen Gruppe folgt.
 VORSCHLAEGE = [
-    {"id": "foot", "name": "Wandern und Bergtouren", "sports": ["hike", "mountaineering", "snowshoe"]},
+    {"id": "foot", "name": "Wandern und Bergsteigen", "sports": ["hike", "mountaineering", "snowshoe"]},
     {"id": "bike", "name": "Rad (alle)", "sports": [k for k, _, _, c in gpxtools.CATALOG if c == "rad"]},
     {"id": "ski", "name": "Ski (alle)", "sports": ["skialpin", "skitour", "nordic"]},
 ]
@@ -65,7 +65,7 @@ def _neue_id(used):
 
 def bereinigen(raw, known=None):
     """Nachsichtige Bereinigung gespeicherter Daten (Lesen): Unbekanntes fällt weg, nie ein Fehler.
-    Unbekannte oder doppelte Sportarten, Gruppen mit weniger als zwei Sportarten, ungültige Namen und alles über acht Gruppen werden verworfen."""
+    Unbekannte, doppelte oder entfernte Sportarten (3.60.0, gpxtools.RUECKFALL), Gruppen mit weniger als zwei Sportarten, ungültige Namen und alles über acht Gruppen werden verworfen."""
     if not isinstance(raw, list):
         return []
     known = known_sports() if known is None else known
@@ -81,7 +81,7 @@ def bereinigen(raw, known=None):
             continue
         sp = []
         for s in g.get("sports") if isinstance(g.get("sports"), list) else []:
-            if not isinstance(s, str):
+            if not isinstance(s, str) or s in gpxtools.RUECKFALL:          # 3.60.0: entfernte Aktivitäten (älterer Stand) fallen beim Laden still weg
                 continue
             s = gpxtools.norm(s)[0]
             if s in known and s not in used_sp and s not in sp:
@@ -123,6 +123,8 @@ def pruefen(raw, known=None):
         for s in sports:
             if not isinstance(s, str) or not SPORT_RE.match(s):
                 raise HTTPException(400, f"„{name}“: ungültige Sportart")
+            if s in gpxtools.RUECKFALL:                                   # 3.60.0: entfernte Aktivität (älterer Stand der Oberfläche): still weglassen
+                continue
             s = gpxtools.norm(s)[0]
             if s not in known:
                 raise HTTPException(400, f"„{name}“: unbekannte Sportart „{s}“")

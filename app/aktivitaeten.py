@@ -1,6 +1,7 @@
-"""3.59.0 Aktivitäten: Katalog (app/gpxtools.py CATALOG) und Favoriten-Aktivitäten je Benutzer.
+"""3.59.0/3.60.0 Aktivitäten: Katalog (app/gpxtools.py CATALOG) und Favoriten-Aktivitäten je Benutzer.
 
 Favoriten: geordnete Liste (höchstens 12) in der Tabelle `settings` unter `fav_sports` (JSON) – damit in jeder Sicherung, Wiederherstellung und im Umzugspaket.
+3.60.0: Katalog mit 29 Aktivitäten – entfernte Aktivitäten (gpxtools.RUECKFALL, z. B. „golf“ aus 3.59.0) fallen beim Lesen und Speichern still weg.
 Ohne Einstellung gilt FAV_DEF (Wandern, Laufen, Radtour, Skitour, Mountainbike). Die Oberfläche bietet die Favoriten überall zuerst an, wo eine Tour
 aufgenommen oder angelegt wird (Aufzeichnen, Planung), dazu „Mehr …“ mit allen Kategorien.
 """
@@ -15,6 +16,8 @@ router = APIRouter()
 KEY = "fav_sports"
 MAX_FAV = 12
 FAV_DEF = ["hike", "jogging", "touringbicycle", "skitour", "mtb"]
+
+
 def katalog():
     return [{"id": k, "name": n, "sports": [s for s, _, _, c in gpxtools.CATALOG if c == k]} for k, n in gpxtools.KATEGORIEN]
 
@@ -24,10 +27,14 @@ def pruefen(raw):
         raise HTTPException(400, "Bitte mindestens eine Favoriten-Aktivität wählen")
     out = []
     for s in raw:
+        if isinstance(s, str) and s in gpxtools.RUECKFALL:               # 3.60.0: entfernte Aktivität (älterer Stand der Oberfläche): still weglassen
+            continue
         if not isinstance(s, str) or s not in gpxtools.LABEL:
             raise HTTPException(400, "Unbekannte Aktivität")
         if s not in out:
             out.append(s)
+    if not out:
+        raise HTTPException(400, "Bitte mindestens eine Favoriten-Aktivität wählen")
     if len(out) > MAX_FAV:
         raise HTTPException(400, f"Höchstens {MAX_FAV} Favoriten")
     return out

@@ -42,7 +42,7 @@ from datetime import date, datetime, timedelta, timezone
 
 from fastapi import APIRouter, HTTPException
 
-from . import config, db, gear, steigung, trackfix
+from . import config, db, gear, gpxtools, steigung, trackfix
 from .gpxtools import TZ
 
 router = APIRouter()
@@ -484,7 +484,8 @@ def _filter(sport, zeitraum_, jahr, von, bis, heute):
 def _rows(sports, extra=""):
     rows = []
     for r in db.query("SELECT id,name,sport,start_ts,dist_m,dur_s,up_m FROM tours WHERE start_ts IS NOT NULL" + extra):
-        if sports and r["sport"] not in sports:
+        r["sport"] = gpxtools.norm(r["sport"])[0]                      # 3.60.0: entfernte Aktivitäten zählen als ihre Rückfall-Aktivität
+        if sports and r["sport"] not in {gpxtools.norm(x)[0] for x in sports}:
             continue
         r["d"] = datetime.fromtimestamp(r["start_ts"], tz=TZ).date()
         rows.append(r)

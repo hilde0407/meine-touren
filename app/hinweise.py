@@ -41,7 +41,7 @@ from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter, HTTPException
 
-from . import belastung, ctx, db, devquality, extras
+from . import belastung, ctx, db, devquality, extras, gpxtools
 from .gpxtools import TZ
 
 router = APIRouter()
@@ -101,9 +101,10 @@ def _touren(sport):
     """Touren mit Startzeit, älteste zuerst: [{id, name, sport, d (Datum in Ortszeit), start_ts, km, hm, s}]."""
     out = []
     for r in db.query("SELECT id,name,sport,start_ts,dist_m,dur_s,up_m FROM tours WHERE start_ts IS NOT NULL ORDER BY start_ts, id"):
-        if sport and r["sport"] not in sport:
+        sp = gpxtools.norm(r["sport"])[0]                              # 3.60.0: entfernte Aktivitäten zählen als ihre Rückfall-Aktivität
+        if sport and sp not in {gpxtools.norm(x)[0] for x in sport}:
             continue
-        out.append({"id": r["id"], "name": r["name"] or "", "sport": r["sport"], "d": datetime.fromtimestamp(r["start_ts"], tz=TZ).date(), "start_ts": r["start_ts"],
+        out.append({"id": r["id"], "name": r["name"] or "", "sport": sp, "d": datetime.fromtimestamp(r["start_ts"], tz=TZ).date(), "start_ts": r["start_ts"],
                     "km": (r["dist_m"] or 0) / 1000.0, "hm": r["up_m"] or 0.0, "s": r["dur_s"] or 0.0})
     return out
 

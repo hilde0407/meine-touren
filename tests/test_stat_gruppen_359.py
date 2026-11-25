@@ -128,7 +128,7 @@ def test_gespeicherter_unsinn_wird_beim_lesen_ignoriert():
 def test_zentrale_regeln():
     gr = [{"id": "bw", "name": "Bergwandern", "sports": ["hike", "mountaineering"]}]
     assert sg.key("hike", gr) == "sgrp:bw" and sg.key("snowshoe", gr) == "snowshoe" and sg.key("mtb", gr) == "mtb"
-    assert sg.name("sgrp:bw", gr) == "Bergwandern" and sg.name("mtb", gr) == "MTB" and sg.name("sgrp:weg", gr) == "sgrp:weg"
+    assert sg.name("sgrp:bw", gr) == "Bergwandern" and sg.name("mtb", gr) == "Mountainbike" and sg.name("sgrp:weg", gr) == "sgrp:weg"
     assert sg.expand(["sgrp:bw", "mtb"], gr) == {"hike", "mountaineering", "mtb"} and sg.expand(["sgrp:weg"], gr) is None
     assert sg.plain(["mtb", "sgrp:bw"], gr) == ["mtb", "hike", "mountaineering"] and sg.plain(["sgrp:weg"], gr) == []
     assert sg.passt("mountaineering", sg.expand(["sgrp:bw"], gr)) and not sg.passt("mtb", sg.expand(["sgrp:bw"], gr)) and sg.passt("mtb", None)
@@ -160,7 +160,7 @@ def test_ziele_mit_familie_eigener_und_geloeschter_gruppe():
     _daten()
     zs = hinweise._ziel_sportarten
     # ohne Gruppen: ältere Ziele grp:… zählen die Aktivitäten-Familie (Schneeschuh gehört zu „Zu Fuß“), sgrp ohne Gruppe = alle
-    assert zs("grp:bike") == {"touringbicycle", "e_touringbicycle", "racebike", "mtb", "mtb_easy", "e_mtb", "commute", "cyclocross", "bmx"} and "snowshoe" in zs("grp:foot")
+    assert zs("grp:bike") == {"touringbicycle", "e_touringbicycle", "racebike", "mtb", "mtb_easy", "e_mtb", "bikepacking"} and "snowshoe" in zs("grp:foot")   # 3.60.0: Katalog
     assert zs("sgrp:x") is None and zs("mtb") == {"mtb"} and zs("snowshoe") == {"snowshoe"} and zs("") is None
     with _client() as c:
         # Vorschlag „Rad (alle)“ ohne MTB übernehmen: das ältere Ziel „Alle Rad-Sportarten“ (grp:bike) folgt der Gruppe mit dieser Kennung
@@ -185,7 +185,7 @@ def test_jahresrueckblick_fasst_zusammen():
     y = datetime.fromtimestamp(NOW - 40 * 86400, tz=TZ).year
     ts = db.query("SELECT id,name,sport,start_ts,dist_m,dur_s,up_m FROM tours WHERE id IN ('w1','w2','b1')")       # unabhängig davon, ob die Touren ins selbe Kalenderjahr fallen
     names = lambda: {s["name"]: s["km"] for s in rueckblick._kennzahlen(ts, y, "")["sports"]}
-    assert names() == {"Wandern": 22.0, "Bergtour": 8.0}
+    assert names() == {"Wandern": 22.0, "Bergsteigen": 8.0}
     sg.save(GR)
     assert names() == {"Bergwandern": 30.0}
 
@@ -252,7 +252,6 @@ def test_sicherung_ohne_schluessel_gibt_keine_gruppen(tmp_path, monkeypatch):
 
 # ------------------------------------------------------------------------------------------------ Version und Dateien
 def test_version_texte_und_dateien():
-    assert config.VERSION.startswith("3.59.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.59.0.md").read_text(encoding="utf-8")
     assert notes.startswith("# 3.59.0") and "Was ist neu" in notes and "Wie benutze ich es" in notes and "Schneeschuh" in notes and "Favoriten" in notes
     assert "3.59.0" in (ROOT / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")
@@ -263,34 +262,10 @@ def test_version_texte_und_dateien():
         assert k in i18n
     js = (ROOT / "app" / "static" / "js" / "01-grundlagen.js").read_text(encoding="utf-8")
     assert "const sgKey" in js and "function sgExpand" in js and "const sgMatch" in js
-    assert 'const V = "mt-v144"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
 
 
 # ------------------------------------------------------------------------------------------------ Aktivitäten-Katalog
-def test_katalog_server_und_oberflaeche_gleich():
-    """Der Katalog ist je Seite EINE Tabelle (gpxtools.CATALOG, SPORT_TABLE in 01-grundlagen.js): gleiche Schlüssel, Reihenfolge, Kategorien und Namen."""
-    import re
-    from app import aktivitaeten, gpxtools, more, portals, stats
-    keys = [k for k, *_ in gpxtools.CATALOG]
-    assert len(keys) == len(set(keys)) == 48
-    for k in ("hike", "touringbicycle", "e_touringbicycle", "jogging", "snowshoe", "dogwalk", "orienteering", "commute", "cyclocross", "bmx", "mtb_easy", "e_mtb",
-              "snowmobile", "snorkel", "kayak", "dragonboat", "kitesurf", "wakesurf", "skateboard", "skaten", "fishing", "archery", "atv", "motorbike", "other"):
-        assert k in keys and gpxtools.known(k) and k in more.SPORT_OK and stats.SPORT_DE[k] and k in portals.STRAVA_SPORT
-    js = (ROOT / "app" / "static" / "js" / "01-grundlagen.js").read_text(encoding="utf-8")
-    table = js.split("const SPORT_TABLE = [", 1)[1].split("];", 1)[0]
-    rows = re.findall(r'^  \["(\w+)", "(\w+)", "([^"]+)", "(--\w+)", "[^"]+"\],$', table, re.M)
-    assert [(k, c, n) for k, c, n, _ in rows] == [(k, c, n) for k, n, _, c in gpxtools.CATALOG]
-    kat = re.findall(r'\["(\w+)", "([^"]+)"\]', js.split("const SPORT_KAT = [", 1)[1].split("];", 1)[0])
-    assert kat == gpxtools.KATEGORIEN and [k["name"] for k in aktivitaeten.katalog()] == ["Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor & Sonstige"]
-    assert {c for *_, c in gpxtools.CATALOG} == {k for k, _ in gpxtools.KATEGORIEN}
-    css = (ROOT / "app" / "static" / "style.css").read_text(encoding="utf-8")
-    assert all(f"{col}:" in css for col in {r[3] for r in rows})                      # jede Kartenfarbe ist definiert
-    i18n = (ROOT / "app" / "static" / "js" / "00-i18n-neu.js").read_text(encoding="utf-8") + (ROOT / "app" / "static" / "js" / "00-i18n.js").read_text(encoding="utf-8")
-    assert [n for _, n, _, _ in gpxtools.CATALOG if f"\n{n} || " not in i18n and f"\n{n}|" not in i18n] == []     # jeder Name ist übersetzt
-    fam = [s for v in gpxtools.FAMILIE.values() for s in v]
-    assert len(fam) == len(set(fam)) and set(fam) <= set(keys)
-
-
+# 3.60.0: Der Katalog (29 Aktivitäten) und die Gleichheit beider Tabellen prüft tests/test_katalog_360.py.
 def test_neue_aktivitaet_setzen_und_hochladen(monkeypatch):
     from app import portals, tracks
     _tour("k1", "hike")

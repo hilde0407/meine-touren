@@ -20,7 +20,7 @@ def _sports(g):
 
 def _matches(g, t):
     """Standard-Zuordnung: Sportart passt und Datum liegt im Nutzungszeitraum."""
-    if t["sport"] not in _sports(g):
+    if gpxtools.norm(t["sport"])[0] not in _sports(g):                # 3.60.0: entfernte Aktivitäten wie ihre Rückfall-Aktivität
         return False
     d = _day(t["start_ts"])
     return (not g["since"] or d >= g["since"]) and (not g["until"] or d <= g["until"])

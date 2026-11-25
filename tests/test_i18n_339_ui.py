@@ -16,7 +16,7 @@ from tests.helpers_ui import quiet
 ROOT = Path(__file__).resolve().parent.parent
 expect = pytest.importorskip("playwright.sync_api").expect
 TL = 15000
-TABS = ["uebersicht", "quellen", "weitergabe", "fotos", "auto", "handy", "sicher"]
+TABS = ["uebersicht", "aktivitaeten", "quellen", "weitergabe", "fotos", "auto", "handy", "sicher"]
 LOC = {"en": "en-GB", "fr": "fr-FR", "es": "es-ES"}
 
 # Erwartete Übersetzungen (Auszug der Prüfliste): Warnleiste, Backup, Umzug
@@ -80,7 +80,7 @@ def _admin(pw, url, lang, tab):
     pg.route("**/*", lambda r: r.abort() if not r.request.url.startswith(url) else r.continue_())
     pg.browser_ = b
     pg.goto(f"{url}/#/admin?tab={tab}")
-    pg.wait_for_function("() => document.querySelectorAll('.atab').length === 7 && !!document.querySelector('#umzls') && !!document.querySelector('.warnbar')", timeout=TL)
+    pg.wait_for_function("() => document.querySelectorAll('.atab').length === 8 && !!document.querySelector('#umzls') && !!document.querySelector('.warnbar')", timeout=TL)
     pg.wait_for_function("() => !!document.querySelector('#umzls').textContent.trim()", timeout=TL)       # Liste der Umzugspakete geladen
     quiet(pg, 4000)
     return pg

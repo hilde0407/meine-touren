@@ -19,7 +19,8 @@ TL = 15000
 
 # Reiterkennung -> Karten (Kennung: #id oder deutscher Titel der Überschrift)
 ERWARTET = {
-    "uebersicht": ["#hlt", "#upd", "#favp", "#sgp", "Selbsttest", "Protokoll", "#homep", "Entwicklermodus"],      # 3.59.0: Favoriten-Aktivitäten, Statistik-Gruppen
+    "uebersicht": ["#hlt", "#upd", "Selbsttest", "Protokoll", "#homep", "Entwicklermodus"],
+    "aktivitaeten": ["#katp", "#favp", "#sgp"],                                     # 3.60.0: eigener Reiter (Katalog, Favoriten, Statistik-Gruppen)
     "quellen": ["#devsec", "Komoot (optional)", "Zepp-Import (optional)", "Garmin, Suunto & andere Uhren (Import)", "Wanderführer (z. B. Rother)"],
     "weitergabe": ["Portale (Upload)", "#brpanel"],
     "fotos": ["Fotos", "Foto-Eingang"],
@@ -34,7 +35,7 @@ TITEL = {
     "es": {"Sicherung": "Copia de seguridad", "Fotos": "Fotos", "Automatik": "Automatización", "Selbsttest": "Autodiagnóstico", "Protokoll": "Registro"},
 }
 KARTEN = """() => [...document.querySelectorAll('.atab')].map(s => [s.dataset.t, [...s.querySelectorAll(':scope > .gbody > *')].map(e => e.id ? '#' + e.id : (() => { const h = e.querySelector(':scope > h2'); return h ? (h.dataset.de || h.textContent).trim() : '?'; })())])"""
-VOLL = """(erw) => { const t = document.querySelectorAll('.atab'); if (t.length !== 7) return false; const have = new Set([...document.querySelectorAll('.atab > .gbody > *')].map(e => e.id ? '#' + e.id : (((e.querySelector(':scope > h2') || {}).dataset || {}).de || ((e.querySelector(':scope > h2') || {}).textContent || '')).trim())); return erw.every(k => have.has(k)); }"""
+VOLL = """(erw) => { const t = document.querySelectorAll('.atab'); if (t.length !== 8) return false; const have = new Set([...document.querySelectorAll('.atab > .gbody > *')].map(e => e.id ? '#' + e.id : (((e.querySelector(':scope > h2') || {}).dataset || {}).de || ((e.querySelector(':scope > h2') || {}).textContent || '')).trim())); return erw.every(k => have.has(k)); }"""
 
 
 @pytest.fixture(scope="module")
@@ -91,7 +92,7 @@ def test_jede_karte_im_erwarteten_reiter(pw, app, lang):
     try:
         ist = {t: sorted(k) for t, k in pg.evaluate(KARTEN)}
         assert ist == {t: sorted(k) for t, k in ERWARTET.items()}, (lang, ist)
-        assert pg.locator("#atabs button").count() == 7 and pg.locator("#atabs button.on").count() == 1
+        assert pg.locator("#atabs button").count() == 8 and pg.locator("#atabs button.on").count() == 1
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -106,7 +107,7 @@ def test_ueberschriften_uebersetzt_und_reiter_beschriftet(pw, app, lang):
             expect(h).to_have_text(fremd, timeout=TL)
         # Reiternamen sind übersetzt (nicht mehr deutsch), und Karten sind nicht unübersetzt deutsch
         namen = pg.locator("#atabs button").all_inner_texts()
-        assert "Übersicht" not in namen and "Fotos" not in namen[:1] and len(set(namen)) == 7, namen
+        assert "Übersicht" not in namen and "Fotos" not in namen[:1] and len(set(namen)) == 8, namen
         assert pg.locator('.atab[data-t="weitergabe"] h2[data-de="Portale (Upload)"]').inner_text().startswith(("Portals", "Portails", "Portales")), lang
     finally:
         pg.browser_.close()

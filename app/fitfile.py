@@ -28,13 +28,15 @@ BASE = {
 }
 
 # FIT-Sportart (sport) -> Komoot-Sportart dieser App
+# 3.60.0: Katalog mit 29 Aktivitäten – weitere FIT-Sportarten zugeordnet; was der Katalog nicht führt, geht über den Rückfall (gpxtools.RUECKFALL, z. B. SUP -> Kajak)
 SPORT = {
-    1: "jogging", 2: "touringbicycle", 11: "hike", 12: "nordic", 13: "skialpin", 14: "skialpin",
-    16: "mountaineering", 17: "hike", 21: "e_touringbicycle", 35: "snowshoe",
+    1: "jogging", 2: "touringbicycle", 11: "hike", 12: "nordic", 13: "skialpin", 14: "snowboard",
+    15: "rowing", 16: "mountaineering", 17: "hike", 19: "kayak", 21: "e_touringbicycle", 23: "boat", 26: "paraglide", 27: "horse",
+    30: "skaten", 31: "climbing", 35: "snowshoe", 37: "kayak", 41: "kayak", 42: "rafting",
 }
 SUB_SPORT = {                     # (sport, sub_sport) -> genauer
     (2, 7): "racebike", (2, 8): "mtb", (2, 28): "e_touringbicycle", (2, 46): "e_touringbicycle", (2, 47): "e_touringbicycle",
-    (13, 37): "skitour", (12, 37): "skitour", (14, 37): "skitour", (1, 3): "jogging", (11, 0): "hike", (11, 19): "nordicwalking",
+    (13, 37): "skitour", (12, 37): "skitour", (14, 37): "skitour", (1, 3): "trailrun", (2, 11): "racebike", (2, 48): "touringbicycle", (11, 0): "hike", (11, 19): "nordicwalking",
 }
 
 

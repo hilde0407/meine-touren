@@ -12,25 +12,26 @@ from .jobs import log
 
 router = APIRouter()
 
+# 3.60.0: genau die 29 Aktivitäten des Katalogs (gpxtools.CATALOG); entfernte Schlüssel älterer Touren gehen als ihr Rückfall (sende_sport)
 STRAVA_SPORT = {
-    "hike": "Hike", "mountaineering": "Hike", "jogging": "Run", "touringbicycle": "Ride", "e_touringbicycle": "EBikeRide",
-    "racebike": "Ride", "mtb": "MountainBikeRide", "skialpin": "AlpineSki", "skitour": "BackcountrySki",
-    "snowshoe": "Snowshoe", "nordic": "NordicSki", "nordicwalking": "Walk",
-    # 3.59.0 neue Aktivitäten (Strava „sport_type“)
-    "walk": "Walk", "dogwalk": "Walk", "climbing": "RockClimbing", "trailrun": "TrailRun", "orienteering": "Run",
-    "commute": "Ride", "mtb_easy": "GravelRide", "cyclocross": "Ride", "bmx": "Ride", "e_mtb": "EMountainBikeRide",
-    "snowboard": "Snowboard", "sled": "Workout", "iceskate": "IceSkate", "snowmobile": "Workout",
-    "swim": "Swim", "snorkel": "Swim", "kayak": "Kayaking", "sup": "StandUpPaddling", "rowing": "Rowing", "dragonboat": "Canoeing", "sailing": "Sail",
-    "boat": "Workout", "waterski": "Workout", "surf": "Surfing", "kitesurf": "Kitesurf", "wakesurf": "Surfing",
-    "skateboard": "Skateboard", "skaten": "InlineSkate", "horse": "Workout", "fishing": "Workout", "hunting": "Workout", "archery": "Workout", "golf": "Golf",
-    "atv": "Workout", "motorbike": "Workout", "other": "Workout",
+    "hike": "Hike", "walk": "Walk", "mountaineering": "Hike", "climbing": "RockClimbing", "nordicwalking": "Walk", "jogging": "Run", "trailrun": "TrailRun",
+    "touringbicycle": "Ride", "racebike": "Ride", "mtb": "MountainBikeRide", "mtb_easy": "GravelRide", "e_touringbicycle": "EBikeRide",
+    "e_mtb": "EMountainBikeRide", "bikepacking": "Ride",
+    "skialpin": "AlpineSki", "skitour": "BackcountrySki", "nordic": "NordicSki", "snowboard": "Snowboard", "snowshoe": "Snowshoe",
+    "kayak": "Kayaking", "rowing": "Rowing", "dragonboat": "Canoeing", "rafting": "Canoeing", "boat": "Workout",
+    "skateboard": "Skateboard", "skaten": "InlineSkate", "horse": "Workout", "paraglide": "Workout", "other": "Workout",
 }
-# 3.59.0: Aktivitäten, die Komoot nicht kennt, gehen mit einer ähnlichen Komoot-Sportart hin (Komoot-Kennungen e_mtb, mtb_easy, climbing, snowboard, sled, skaten
+# Aktivitäten, die Komoot nicht kennt, gehen mit einer ähnlichen Komoot-Sportart hin (Komoot-Kennungen e_mtb, mtb_easy, climbing, snowboard, skaten
 # gehen unverändert); alles ohne Entsprechung als Wandern
-KOMOOT_SPORT = {"walk": "hike", "dogwalk": "hike", "trailrun": "jogging", "orienteering": "jogging", "commute": "touringbicycle", "cyclocross": "racebike", "bmx": "mtb",
-                "iceskate": "skaten", "skateboard": "skaten"}
-KOMOOT_SPORT.update({k: "hike" for k in ("snowmobile", "swim", "snorkel", "kayak", "sup", "rowing", "dragonboat", "sailing", "boat", "waterski", "surf", "kitesurf",
-                                        "wakesurf", "horse", "fishing", "hunting", "archery", "golf", "atv", "motorbike", "other")})
+KOMOOT_SPORT = {"walk": "hike", "trailrun": "jogging", "bikepacking": "touringbicycle", "skateboard": "skaten"}
+KOMOOT_SPORT.update({k: "hike" for k in ("kayak", "rowing", "dragonboat", "rafting", "boat", "horse", "paraglide", "other")})
+
+
+def sende_sport(sport):
+    """3.60.0: Sportart einer Tour zum Senden – entfernte Aktivitäten (gpxtools.RUECKFALL, z. B. ältere Touren „Gassigehen“) gehen als Rückfall-Aktivität."""
+    return gpxtools.norm(sport or "hike")[0] or "hike"
+
+
 PORTALS = {"komoot": "Komoot", "strava": "Strava"}
 
 
@@ -99,7 +100,7 @@ def strava_exchange(code):
 def strava_upload(gpx, sport, name, ext_id):
     h = {"Authorization": f"Bearer {strava_access()}"}
     r = requests.post(f"{SB}/api/v3/uploads", headers=h, timeout=120,
-                      data={"data_type": "gpx", "name": name, "sport_type": STRAVA_SPORT.get(sport, "Hike"), "external_id": ext_id},
+                      data={"data_type": "gpx", "name": name, "sport_type": STRAVA_SPORT.get(sende_sport(sport), "Hike"), "external_id": ext_id},
                       files={"file": (f"{ext_id}.gpx", gpx.encode("utf-8"), "application/gpx+xml")})
     if r.status_code == 401:
         raise PortalError("Strava hat den Zugriff abgelehnt – in der Verwaltung neu verbinden (Berechtigung „Aktivitäten hochladen“)")
@@ -338,7 +339,7 @@ def upload_tour(tid, portal, gpx=None, force=False, dry_run=False, with_notes=No
         raise PortalError("Strava ist nicht verbunden (Verwaltung → Portale)")
     gpx = gpx or tracks.gpx_for(tid)
     name = t["name"] or tid
-    sport = t["sport"] or "hike"
+    sport = sende_sport(t["sport"])               # 3.60.0: entfernte Aktivitäten als Rückfall (Gassigehen -> Spazieren, SUP -> Kajak, sonst Sonstiges)
     if sport == "hike" and db.one("SELECT 1 x FROM tour_tags WHERE id=? AND tag=?", (tid, gpxtools.SCHNEESCHUH_TAG)):
         sport = "snowshoe"                     # 3.50.0: Wandern mit Schlagwort „Schneeschuh“ geht als Schneeschuhwanderung zu Komoot/Strava
     kinfo = {}

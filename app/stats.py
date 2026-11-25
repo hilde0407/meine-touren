@@ -1,7 +1,7 @@
 """Kennzahlen wie im Home-Assistant-Komoot-Dashboard."""
 from datetime import datetime
 
-from . import db
+from . import db, gpxtools
 from .gpxtools import TZ
 
 from .gpxtools import SPORT_NAME as SPORT_DE        # 3.59.0: Namen aus dem Aktivitäten-Katalog (app/gpxtools.py)
@@ -30,7 +30,8 @@ def compute(now=None):
         a["count"] += 1; a["km"] += t["dist_m"] / 1000; a["up"] += t["up_m"] or 0; a["hours"] += (t["dur_s"] or 0) / 3600
     by_sport = {}
     for t in this_year:
-        by_sport[t["sport"]] = by_sport.get(t["sport"], 0) + t["dist_m"] / 1000
+        k = gpxtools.norm(t["sport"])[0]                                  # 3.60.0: entfernte Aktivitäten zählen als ihre Rückfall-Aktivität
+        by_sport[k] = by_sport.get(k, 0) + t["dist_m"] / 1000
     r = lambda v, n=1: round(v, n)
     return {
         "touren_gesamt": tot["count"], "strecke_gesamt": r(tot["km"]),

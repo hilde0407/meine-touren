@@ -9,7 +9,7 @@ const REC_SPORTS = [
   ["jogging", "Lauf"],
   ["touringbicycle", "Radtour"],
   ["racebike", "Rennrad"],
-  ["mtb", "MTB"],
+  ["mtb", "Mountainbike"],
   ["skitour", "Skitour"],
   ["snowshoe", "Schneeschuh"],
   ["nordic", "Langlauf"],

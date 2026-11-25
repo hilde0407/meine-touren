@@ -21,50 +21,70 @@ ALIAS = {
     "type_1": "jogging", "type_6": "hike", "type_7": "hike", "type_8": "jogging", "type_9": "touringbicycle",
     "type_13": "hike", "type_15": "hike", "type_22": "hike", "type_43": "skialpin", "type_105": "skialpin",
     "type_178": "snowshoe", "type_206": "e_touringbicycle",
+    # 3.60.0: übliche englische GPX-/TCX-Typen anderer Apps -> Katalog (entfernte Aktivitäten über RUECKFALL)
+    "trail_running": "trailrun", "mountain_biking": "mtb", "road_biking": "racebike", "gravel_cycling": "mtb_easy", "e_biking": "e_touringbicycle",
+    "alpine_skiing": "skialpin", "backcountry_skiing": "skitour", "cross_country_skiing": "nordic", "snowboarding": "snowboard", "snowshoeing": "snowshoe",
+    "kayaking": "kayak", "canoeing": "kayak", "paddling": "kayak", "rafting": "rafting", "boating": "boat", "inline_skating": "skaten",
+    "horseback_riding": "horse", "paragliding": "paraglide", "rock_climbing": "climbing", "mountaineering": "mountaineering",
+    "stand_up_paddleboarding": "sup", "swimming": "swim", "sailing": "sailing", "ice_skating": "iceskate",
 }
-# 3.59.0 Aktivitäten-Katalog – EINE Tabelle (wie SPORT_TABLE in 01-grundlagen.js; tests/test_stat_gruppen_359.py prüft, dass beide gleich sind).
-# Quelle: Liste der Amazfit Balance 2 (Auswahl: Aktivitäten mit Strecke/Ort). Vorhandene Schlüssel bleiben (auch Komoot-Kennungen wie touringbicycle, e_mtb,
-# mtb_easy = Gravel, skaten = Inline); neue Aktivitäten haben eigene Schlüssel. Eine weitere Aktivität = eine Zeile hier und eine in SPORT_TABLE (+ Übersetzung).
+# Aktivitäten-Katalog – EINE Tabelle (wie SPORT_TABLE in 01-grundlagen.js; tests/test_katalog_360.py prüft, dass beide gleich sind).
+# 3.60.0: die endgültige Auswahl – genau 29 Aktivitäten in 5 Kategorien (in beiden Apps gleich). Vorhandene Schlüssel bleiben (auch Komoot-Kennungen wie
+# touringbicycle, e_mtb, mtb_easy = Gravel, skaten = Inline); neu sind bikepacking, rafting und paraglide. Schneeschuh gehört zur Kategorie „Winter“.
+# Eine weitere Aktivität = eine Zeile hier und eine in SPORT_TABLE (+ Übersetzung des Namens in 00-i18n-neu.js).
 #   (Schlüssel, Name der Sportart, Vorgabename einer Tour, Kategorie)
-KATEGORIEN = [("fuss", "Zu Fuß"), ("rad", "Rad"), ("winter", "Winter"), ("wasser", "Wasser"), ("sonst", "Outdoor & Sonstige")]
+KATEGORIEN = [("fuss", "Zu Fuß"), ("rad", "Rad"), ("winter", "Winter"), ("wasser", "Wasser"), ("sonst", "Outdoor und Sonstige")]
 CATALOG = [
-    ("hike", "Wandern", "Wanderung", "fuss"), ("walk", "Spazieren/Gehen", "Spaziergang", "fuss"), ("dogwalk", "Gassigehen", "Gassirunde", "fuss"),
-    ("mountaineering", "Bergtour", "Bergtour", "fuss"), ("climbing", "Klettern", "Klettertour", "fuss"), ("nordicwalking", "Nordic Walking", "Nordic Walking", "fuss"),
-    ("snowshoe", "Schneeschuh", "Schneeschuhwanderung", "fuss"), ("jogging", "Laufen", "Lauf", "fuss"), ("trailrun", "Trailrunning", "Trailrun", "fuss"),
-    ("orienteering", "Orientierungslauf", "Orientierungslauf", "fuss"),
-    ("touringbicycle", "Radtour", "Radtour", "rad"), ("commute", "Radpendeln", "Radpendeln", "rad"), ("racebike", "Rennrad", "Rennradtour", "rad"),
-    ("mtb", "MTB", "MTB-Tour", "rad"), ("mtb_easy", "Gravelbike", "Gravel-Tour", "rad"), ("cyclocross", "Cyclocross", "Cyclocross", "rad"), ("bmx", "BMX", "BMX", "rad"),
-    ("e_touringbicycle", "E-Bike", "E-Bike-Tour", "rad"), ("e_mtb", "E-Mountainbike", "E-MTB-Tour", "rad"),
-    ("skialpin", "Skifahren", "Skifahren", "winter"), ("skitour", "Skitour", "Skitour", "winter"), ("nordic", "Langlauf", "Langlauf", "winter"),
-    ("snowboard", "Snowboard", "Snowboard", "winter"), ("sled", "Rodeln/Bob", "Rodeltour", "winter"), ("iceskate", "Eislaufen", "Eislaufen", "winter"),
-    ("snowmobile", "Schneemobil", "Schneemobil-Tour", "winter"),
-    ("swim", "Freiwasserschwimmen", "Schwimmen", "wasser"), ("snorkel", "Schnorcheln", "Schnorcheln", "wasser"), ("kayak", "Kajak/Kanu", "Paddeltour", "wasser"),
-    ("sup", "Paddleboarding/SUP", "SUP-Tour", "wasser"), ("rowing", "Rudern", "Rudertour", "wasser"), ("dragonboat", "Drachenboot", "Drachenboot", "wasser"),
-    ("sailing", "Segeln", "Segeltour", "wasser"), ("boat", "Bootfahren", "Bootstour", "wasser"), ("waterski", "Wasserski", "Wasserski", "wasser"),
-    ("surf", "Wellenreiten", "Wellenreiten", "wasser"), ("kitesurf", "Kitesurfen", "Kitesurfen", "wasser"), ("wakesurf", "Wakesurfen", "Wakesurfen", "wasser"),
-    ("skateboard", "Skateboard", "Skateboard", "sonst"), ("skaten", "Rollschuh/Inline", "Inlinetour", "sonst"), ("horse", "Reiten", "Ausritt", "sonst"),
-    ("fishing", "Angeln", "Angeln", "sonst"), ("hunting", "Jagen", "Jagd", "sonst"), ("archery", "Bogenschießen", "Bogenschießen", "sonst"),
-    ("golf", "Golf", "Golfrunde", "sonst"), ("atv", "Quad/ATV", "Quad-Tour", "sonst"), ("motorbike", "Offroad-Motorrad", "Motorradtour", "sonst"),
-    ("other", "Sonstiges", "Tour", "sonst"),
+    ("hike", "Wandern", "Wanderung", "fuss"), ("walk", "Spazieren / Gehen", "Spaziergang", "fuss"), ("mountaineering", "Bergsteigen", "Bergtour", "fuss"),
+    ("climbing", "Klettern / Klettersteig", "Klettertour", "fuss"), ("nordicwalking", "Nordic Walking", "Nordic Walking", "fuss"),
+    ("jogging", "Laufen", "Lauf", "fuss"), ("trailrun", "Trailrunning", "Trailrun", "fuss"),
+    ("touringbicycle", "Radtour", "Radtour", "rad"), ("racebike", "Rennrad", "Rennradtour", "rad"), ("mtb", "Mountainbike", "Mountainbike-Tour", "rad"),
+    ("mtb_easy", "Gravelbike", "Gravel-Tour", "rad"), ("e_touringbicycle", "E-Bike", "E-Bike-Tour", "rad"), ("e_mtb", "E-Mountainbike", "E-Mountainbike-Tour", "rad"),
+    ("bikepacking", "Bikepacking", "Bikepacking-Tour", "rad"),
+    ("skialpin", "Ski alpin", "Skifahren", "winter"), ("skitour", "Skitour", "Skitour", "winter"), ("nordic", "Langlauf", "Langlauf", "winter"),
+    ("snowboard", "Snowboard", "Snowboard", "winter"), ("snowshoe", "Schneeschuhwandern", "Schneeschuhwanderung", "winter"),
+    ("kayak", "Kajak / Kanu", "Paddeltour", "wasser"), ("rowing", "Rudern", "Rudertour", "wasser"), ("dragonboat", "Drachenboot", "Drachenboot", "wasser"),
+    ("rafting", "Rafting", "Raftingtour", "wasser"), ("boat", "Bootfahren", "Bootstour", "wasser"),
+    ("skateboard", "Skateboard", "Skateboard", "sonst"), ("skaten", "Inlineskaten / Rollschuh", "Inlinetour", "sonst"), ("horse", "Reiten", "Ausritt", "sonst"),
+    ("paraglide", "Gleitschirm", "Gleitschirmflug", "sonst"), ("other", "Sonstiges", "Tour", "sonst"),
 ]
-LABEL = {k: tour for k, _, tour, _ in CATALOG}                  # Vorgabename einer importierten Tour je Sportart
+# 3.60.0 Rückfall: Schlüssel, die 3.59.0 im Katalog hatte (oder die eine Quelle meldet) und die nicht mehr angeboten werden -> Aktivität des Katalogs.
+# Touren mit einem solchen Schlüssel bleiben, wie sie sind (keine Datenänderung); Anzeige, Filter, Statistik und Ziele behandeln sie wie ihre Rückfall-Aktivität
+# (norm, stat_gruppen, 01-grundlagen.js SPORT_ALIAS/sNorm – dieselbe Tabelle). Import (Komoot-Datei, GPX/TCX, FIT, Zepp, Aufzeichnung) und Senden (Strava, Komoot)
+# setzen den Rückfall ein. Favoriten und Statistik-Gruppen lassen entfernte Schlüssel beim Laden still weg.
+RUECKFALL = {
+    "dogwalk": "walk", "orienteering": "jogging", "pilgrimage": "hike", "commute": "touringbicycle", "cyclocross": "racebike", "bmx": "other",
+    "splitboard": "skitour", "snowmobile": "other", "sled": "other", "iceskate": "other", "sup": "kayak",
+    "sailing": "other", "swim": "other", "snorkel": "other", "diving": "other", "surf": "other", "kitesurf": "other", "wakesurf": "other", "waterski": "other",
+    "fishing": "other", "hunting": "other", "archery": "other", "golf": "other", "atv": "other", "motorbike": "other",
+}
+LABEL = {k: tour for k, _, tour, _ in CATALOG}                  # Vorgabename einer importierten Tour je Sportart (nur der Katalog)
 SPORT_NAME = {k: n for k, n, _, _ in CATALOG}                   # Name der Sportart (deutsch)
+SPORT_NAME.update({k: SPORT_NAME[v] for k, v in RUECKFALL.items()})   # 3.60.0: ältere Touren mit entferntem Schlüssel zeigen den Namen ihres Rückfalls
 # Aktivitäten-Familien (intern, für Tempo-Schätzung, Planung, Steilheit und ältere Ziele „grp:…“) – NICHT die Statistik-Gruppen (app/stat_gruppen.py, je Benutzer)
 FAMILIE = {
-    "foot": ("hike", "mountaineering", "nordicwalking", "snowshoe", "walk", "climbing", "dogwalk"),
-    "bike": ("touringbicycle", "e_touringbicycle", "racebike", "mtb", "mtb_easy", "e_mtb", "commute", "cyclocross", "bmx"),
+    "foot": ("hike", "mountaineering", "nordicwalking", "snowshoe", "walk", "climbing"),
+    "bike": ("touringbicycle", "e_touringbicycle", "racebike", "mtb", "mtb_easy", "e_mtb", "bikepacking"),
     "ski": ("skitour", "skialpin", "snowboard"),
-    "run": ("jogging", "nordic", "trailrun", "orienteering"),
+    "run": ("jogging", "nordic", "trailrun"),
 }
 # 3.50.0 legte Schneeschuh mit Wandern zusammen (Wandern + Schlagwort). Seit 3.59.0 ist Schneeschuh wieder eine eigene Sportart: nichts wird mehr zusammengelegt.
 # Touren, die 3.50.0 umgestellt hat, bleiben Wandern mit Schlagwort, bis du sie unter Prüfen „als Schneeschuh führst“ (app/sport_umzug.py).
-MERGE = {}
+# 3.60.0: Die entfernten Aktivitäten (RUECKFALL) werden wie früher zusammengelegte Kennungen umgesetzt (ohne Schlagwort).
+MERGE = {k: (v, None) for k, v in RUECKFALL.items()}
 SCHNEESCHUH_TAG = "Schneeschuh"
 NAME_RAW = {"snowshoe": "Schneeschuhwanderung"}   # Vorgabename einer importierten Tour, deren Quelle Schneeschuh meldet
 
 
+def roh(sport):
+    """3.60.0: alle gespeicherten Schlüssel, die als diese Sportart zählen (sie selbst und die entfernten Schlüssel mit ihr als Rückfall) – für SQL-Filter."""
+    s = norm(sport)[0]
+    return [s] + [k for k, v in RUECKFALL.items() if v == s]
+
+
 def norm(sport):
-    """Sportart einer Quelle -> (Sportart dieser App, Schlagwort oder None). Zusammengelegte Kennungen (MERGE) werden umgesetzt, alles andere bleibt."""
+    """Sportart einer Quelle -> (Sportart dieser App, Schlagwort oder None). Zusammengelegte bzw. entfernte Kennungen (MERGE, 3.60.0 RUECKFALL) werden umgesetzt,
+    alles andere bleibt (auch fremde Komoot-Kennungen)."""
     s = str(sport or "")
     if s in MERGE:
         return MERGE[s]

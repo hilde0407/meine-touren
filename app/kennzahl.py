@@ -33,7 +33,7 @@ from fastapi import APIRouter, HTTPException, Request
 from starlette.concurrency import run_in_threadpool
 
 from . import bausteine_daten as bd
-from . import db, puls, steigung
+from . import db, gpxtools, puls, steigung
 from .gpxtools import TZ
 
 router = APIRouter()
@@ -215,7 +215,8 @@ def _rows(cfg):
     from . import stat_gruppen
     sports, minkm, rows = stat_gruppen.plain(cfg.get("sports") or []), cfg.get("minkm") or 0, []      # 3.59.0: Gruppen aufgelöst; gelöschte Gruppe = alle
     for r in db.query(sql, tuple(par)):
-        if sports and r["sport"] not in sports:
+        r["sport"] = gpxtools.norm(r["sport"])[0]                      # 3.60.0: entfernte Aktivitäten zählen als ihre Rückfall-Aktivität
+        if sports and r["sport"] not in {gpxtools.norm(x)[0] for x in sports}:
             continue
         if minkm and (r["dist_m"] or 0) < minkm * 1000:
             continue

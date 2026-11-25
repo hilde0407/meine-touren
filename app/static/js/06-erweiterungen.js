@@ -418,7 +418,7 @@ VIEWS.admin = async (...a) => {
       const b = $("#hlt");
       if (!b) return;
       b.innerHTML =
-        `<h2>Zustand <span class="mut" style="font:400 16px var(--b)">${h.ok ? "– alles in Ordnung" : "– bitte prüfen"}</span></h2><div class="rows">${h.checks.map(c => `<div class="r"><span><i style="font-style:normal">${c.ok ? "✓" : "⚠"}</i> <span>${esc(c.name)}</span></span><span class="${c.ok ? "mut" : "bad"}"><span>${esc(c.detail)}</span>${c.hint ? ` – <span>${esc(c.hint)}</span>` : ""}${c.name === "Letzte Sicherung" && !c.ok ? ` <button class="btn sm" data-act="backup">Jetzt sichern</button>` : ""}</span></div>`).join("")}</div>` +
+        `<h2>Zustand <span class="mut h2sub">${h.ok ? "– alles in Ordnung" : "– bitte prüfen"}</span></h2><div class="rows">${h.checks.map(c => `<div class="r"><span><i style="font-style:normal">${c.ok ? "✓" : "⚠"}</i> <span>${esc(c.name)}</span></span><span class="${c.ok ? "mut" : "bad"}"><span>${esc(c.detail)}</span>${c.hint ? ` – <span>${esc(c.hint)}</span>` : ""}${c.name === "Letzte Sicherung" && !c.ok ? ` <button class="btn sm" data-act="backup">Jetzt sichern</button>` : ""}</span></div>`).join("")}</div>` +
         (h.duplicates.length
           ? `<p class="mut mt8">Doppelte Namen: ${h.duplicates.map(d => esc(d.name) + " (" + d.tours.map(t => `<a href="#/tour/${t.id}">${t.date}</a>`).join(", ") + ")").join(" · ")}</p>`
           : "");

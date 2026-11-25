@@ -31,7 +31,7 @@ VIEWS.admin = async (_, q) => {
   <div class="sec admin mt0"><h2>Verwaltung</h2><span class="sub" id="st"></span><span class="sp"></span><span class="mut fs13" id="ver"></span></div>
   <div id="upd"></div><div class="panel mb16" id="hlt"><h2>Zustand</h2><p class="mut">wird geprüft …</p></div>
   <div class="grid g2">
-   <div class="panel"><h2>Komoot <span class="mut" style="font:400 16px var(--b)">(optional)</span></h2><p class="mut">${nf(st.tours, 0)} Touren (davon ${nf(st.local_tours, 0)} nur lokal) · ${nf(st.routes, 0)} Strecken lokal gespeichert. Karten und Tourdetails nutzen immer die lokal gespeicherten Strecken; Komoot wird nur zum Laden und Hochladen gebraucht.</p>
+   <div class="panel"><h2>Komoot <span class="mut h2sub">(optional)</span></h2><p class="mut">${nf(st.tours, 0)} Touren (davon ${nf(st.local_tours, 0)} nur lokal) · ${nf(st.routes, 0)} Strecken lokal gespeichert. Karten und Tourdetails nutzen immer die lokal gespeicherten Strecken; Komoot wird nur zum Laden und Hochladen gebraucht.</p>
     <div class="row"><button class="btn" data-job="refresh">Komoot aktualisieren</button><button class="btn alt" data-job="tours">Nur Touren</button><button class="btn alt" data-job="routes" title="Fehlende Strecken von Komoot lokal speichern">Strecken lokal sichern</button><button class="btn alt" data-job="geo" title="Land, Bundesland und Ort jeder Tour per OpenStreetMap bestimmen (für Suche und Filter)">Regionen bestimmen</button><button class="btn alt" id="diag">Komoot-Test</button></div>
     <p class="mut fs13">„Aktualisieren“ lädt neue Touren und deren Strecken von Komoot und liest die Fotos ein. Es wird <b>nichts</b> zu Komoot hochgeladen. <span id="dres"></span></p>
     <div class="field"><label>Komoot-E-Mail</label><input data-k="komoot_email" value="${esc(s.komoot_email)}"></div><div class="field"><label>Komoot-Passwort</label><input data-k="komoot_password" type="password" value="${esc(s.komoot_password)}"></div></div>
@@ -41,7 +41,7 @@ VIEWS.admin = async (_, q) => {
     <details><summary>Weitere Wege (SMB-Ordner, Mac-Skript)</summary><div class="row m8-0"><button class="btn alt sm" data-job="photo-import" ${pi.folder_exists ? "" : 'disabled title="Quellordner nicht gefunden"'}>Fotos aus Ordner übernehmen</button></div>
     <p class="mut fs13">„Übernehmen“ verkleinert die Originale aus <code>${esc(pi.source_dir)}</code> ${pi.folder_exists ? "" : "<b class='bad'>(Ordner nicht gefunden)</b>"} für die Bildschirmdarstellung und legt sie in der Bibliothek ab. Alternativ vom Mac aus mit dem Skript <code>mac/fotos_senden.sh</code>.</p></details><p class="mut fs13">Beim Hochladen werden die Bilder <b>im Browser</b> für die Bildschirmdarstellung verkleinert; nur die kleinen Dateien gehen übers Netz. Originale werden nie verändert.</p>
     <details><summary>Bildeinstellungen</summary>${f("photo_max_side", "Längste Bildseite (Pixel)", "number")}${f("photo_quality", "JPEG-Qualität (1–95)", "number")}${f("photo_margin_min", "Zuordnung: Toleranz vor/nach der Tour (Min.)", "number")}${f("photo_only_tracked", "Beim Foto-Import nur Fotos mit passender GPS-Strecke übernehmen (1 = ja, 0 = alle)")}${f("camera_utc_offset_h", "Kamerazeit-Versatz zu UTC in Stunden (leer = lokale Zeit)")}${f("slideshow_seconds", "Diashow: Sekunden pro Bild", "number")}</details></div></div>
-  <div class="panel gap"><h2>Portale <span class="mut" style="font:400 16px var(--b)">(Upload)</span></h2>
+  <div class="panel gap"><h2>Portale <span class="mut h2sub">(Upload)</span></h2>
    <p class="mut">Touren liegen lokal vor und können einzeln (Tourdetail → „⬆ Hochladen“) oder gesammelt (Zepp/Dateien unten) zu Komoot und Strava gesendet werden – immer nur auf deinen ausdrücklichen Wunsch.</p>
    ${sres ? `<p class="${sres === "ok" ? "ok" : "bad"}"><b>${sres === "ok" ? "Strava ist verbunden ✓" : "Strava: " + esc(sres)}</b></p>` : ""}
    <div class="grid g2"><div><h3 class="mt0">Strava ${sv.connected ? `<span class="ok fs15">✓ verbunden${sv.account ? " als " + esc(sv.account) : ""}</span>` : ""}</h3>
@@ -52,7 +52,7 @@ VIEWS.admin = async (_, q) => {
     <p class="kvnote">Komoot gibt jeder hochgeladenen Tour zuerst die Standard-Sichtbarkeit deines Kontos. Meine Touren setzt sie deshalb gleich danach auf „privat“ und prüft das. Touren aus früheren Versionen können öffentlich sein – prüfe sie hier.</p>
     ${swField("komoot_with_notes", "Beim Hochladen Notiz und Pins mitsenden (als Beschreibung und Wegpunkte; die Tour wird danach auf „privat“ gesetzt)")}
     <div class="row"><button class="btn alt" id="kvchk">Sichtbarkeit bei Komoot prüfen …</button></div></details></div>
-  <div class="panel gap"><h2>Zepp-Import <span class="mut" style="font:400 16px var(--b)">(optional)</span></h2>
+  <div class="panel gap"><h2>Zepp-Import <span class="mut h2sub">(optional)</span></h2>
    <p class="mut">Holt GPS-Trainings aus deinem Zepp-Konto (als GPX-Dateien). Ausgewählte Trainings werden lokal als Tour gespeichert (Karte, Statistik); ein Upload zu Komoot/Strava passiert <b>nur</b>, wenn du es unten ausdrücklich anhakst.</p>
    <div class="row"><button class="btn" data-job="export">Zepp-Import starten</button><button class="btn alt" data-job="elev-local" title="Falsche Höhenwerte (z. B. Platzhalter) aus bereits importierten Touren entfernen und Auf-/Abstieg neu berechnen">Aufstieg neu berechnen</button><button class="btn alt" data-job="hr-backfill" title="Herzfrequenz für bereits importierte Zepp-Touren aus der Zepp-Cloud nachladen (Touren bleiben unverändert)">Puls nachladen</button><button class="btn alt" data-job="dev-match" title="Alle Touren, zu denen es ein Zepp-Training gibt (auch Komoot- und Datei-Touren), als mit der Uhr aufgezeichnet markieren und dem passenden Gerät zuordnen. Von Hand zugeordnete Touren bleiben unverändert.">Touren den Uhren zuordnen</button><button class="btn alt" data-job="met-backfill" title="Messwerte (Tempo, Kadenz, Leistung, Temperatur …) für bereits importierte Touren aus der Zepp-Cloud bzw. aus Original-Dateien im Eingang/Export nachladen. Vorhandene Daten bleiben unverändert.">Messwerte nachladen</button><button class="btn alt" data-job="elev-zepp" title="Auf-/Abstieg von Komoot- und Datei-Touren mit der barometrischen Höhe der Uhr (Zepp) neu berechnen, wenn es ein passendes Training gibt. Bereits korrigierte Touren bleiben unberührt; je Tour wiederherstellbar.">Höhe aus Uhr abgleichen</button><button class="btn alt" id="ztest">Token testen</button><span id="zres"></span></div>
    <details><summary>Zepp-Zugang / Token holen</summary><div class="grid g2"><div>${f("zepp_email", "E-Mail (nur wenn dein Konto ein Zepp-Passwort hat)")}${f("zepp_password", "Passwort", "password")}${f("zepp_token", "Token (für Mi-/Google-/Apple-Konten)", "password")}${f("zepp_host", "Server (leer = automatisch)")}</div>
@@ -68,7 +68,7 @@ VIEWS.admin = async (_, q) => {
        : ""
    }
    </div>
-  <div class="panel gap"><h2>Garmin, Suunto &amp; andere Uhren <span class="mut" style="font:400 16px var(--b)">(Import)</span></h2>
+  <div class="panel gap"><h2>Garmin, Suunto &amp; andere Uhren <span class="mut h2sub">(Import)</span></h2>
    <p class="mut">Aktivitäten werden <b>lokal</b> als Touren gespeichert (Karte, Statistik, Fotozuordnung), mit Doppelten-Prüfung. Hochgeladen wird nur, wenn du es unten ausdrücklich ankreuzt.<br>
    <b>Tipp:</b> Ist deine Uhr in Garmin Connect bzw. der Suunto-App mit <b>Komoot</b> verbunden, kommen die Touren ohnehin über „Komoot aktualisieren“.</p>
    <h3>Dateien importieren <span class="ok fs14">funktioniert immer</span></h3>
@@ -104,14 +104,16 @@ VIEWS.admin = async (_, q) => {
       <div class="field"><label>Nur Workouts ab Datum (JJJJ-MM-TT, leer = alle)</label><input data-k="suunto_since" value="${esc(s.suunto_since)}"></div>
       ${swField("suunto_auto", "Neue Workouts täglich automatisch übernehmen")}
       <div class="row"><button class="btn" id="sunconn">${su.connected ? "Neu verbinden" : "Mit Suunto verbinden"}</button>${su.connected ? `<button class="btn" id="sunsync">Jetzt importieren</button><button class="btn alt" id="sundis">Trennen</button>` : ""}<span id="sunres"></span></div></details></div></div></div>
-  <div class="panel gap sgp" id="favp"><h2>Favoriten-Aktivitäten</h2><div id="favbody"><p class="mut">Wird geladen …</p></div></div>
-  <div class="panel gap sgp" id="sgp"><h2>Statistik: Aktivitäten zusammenfassen</h2><div id="sgbody"><p class="mut">Wird geladen …</p></div></div>
+  <div class="panel gap sgp" id="katp"><h2>Aktivitäten-Katalog</h2><div id="katbody"></div></div>
+  <div class="panel gap sgp" id="favp"><h2>Favoriten für „Tour aufnehmen“</h2><div id="favbody"><p class="mut">Wird geladen …</p></div></div>
+  <div class="panel gap sgp" id="sgp"><h2>Statistik-Gruppen</h2><div id="sgbody"><p class="mut">Wird geladen …</p></div></div>
   <div class="grid g2 mt40">
    <div class="panel"><h2>Automatik</h2>${swField("auto_sync", "Täglich aktualisieren (Komoot, Routen, Fotos)")}${f("auto_sync_hour", "Uhrzeit (Stunde)", "number")}</div>
    <div class="panel"><h2>Protokoll</h2><div class="pre" id="log">–</div></div></div>
   <div class="row mt34"><button class="btn" id="save">Einstellungen speichern</button><span id="ok" class="ok"></span></div>`;
   ["auto_sync", "garmin_auto", "suunto_auto", "zepp_auto_adopt", "komoot_with_notes"].forEach(k => swSet(k, s[k]));
   if ($("#kvchk")) $("#kvchk").onclick = () => komootVisDialog();
+  katAdmin($("#katbody"));
   sgAdmin($("#sgbody"));
   favAdmin($("#favbody"));
   const run = async (u, o) => {
@@ -379,9 +381,9 @@ async function komootVisDialog() {
   render();
 }
 
-/* 3.59.0 Statistik-Gruppen bearbeiten (Verwaltung → Übersicht): welche Aktivitäten die Statistik gemeinsam zählt – jeder entscheidet selbst. Ohne Gruppen zählt jede
+/* 3.59.0 Statistik-Gruppen bearbeiten (3.60.0: Verwaltung → Aktivitäten): welche Aktivitäten die Statistik gemeinsam zählt – jeder entscheidet selbst. Ohne Gruppen zählt jede
    Aktivität einzeln. Speichern über PUT /api/stats/gruppen (app/stat_gruppen.py prüft und bereinigt: höchstens 8 Gruppen, Name 1–30 Zeichen, mindestens 2 Sportarten,
-   jede Sportart in höchstens einer Gruppe). Die Vorschläge (Wandern + Bergtour + Schneeschuh, alle Rad-Arten, alle Ski-Arten) übernimmt nur ein Klick – nie automatisch. */
+   jede Sportart in höchstens einer Gruppe). Die Vorschläge (Wandern + Bergsteigen + Schneeschuh, alle Rad-Arten, alle Ski-Arten) übernimmt nur ein Klick – nie automatisch. */
 async function sgAdmin(box) {
   if (!box) return;
   let d;
@@ -403,7 +405,7 @@ async function sgAdmin(box) {
   const cats = (g, i) => SPORT_CAT.map(([id, l, ks]) => `<div class="sgcat"><span class="sgcl" id="sgcl${i}_${id}">${esc(l)}</span><div class="flchips sgchips" role="group" aria-labelledby="sgcl${i}_${id}">${ks.map(s => chip(g, i, s)).join("")}</div></div>`).join("") +
     (ALL.some(s => !SPORT[s]) ? `<div class="sgcat"><span class="sgcl">Weitere aus deinen Touren</span><div class="flchips sgchips">${ALL.filter(s => !SPORT[s]).map(s => chip(g, i, s)).join("")}</div></div>` : "");
   const draw = (focus = "") => {
-    box.innerHTML = `<p class="mut">Ohne Gruppen zählt die Statistik jede Aktivität einzeln. Wenn du Aktivitäten gemeinsam sehen möchtest – zum Beispiel Wandern, Bergtour und Schneeschuh –, lege hier eine Gruppe an. Jede Gruppe ist im Sportartfilter als eigener Eintrag wählbar, und die Aufteilungen nach Sportart (Sportarten, Bestwerte, Jahresrückblick) zeigen sie als eine Zeile. Die Touren und ihre Sportart bleiben unverändert.</p>
+    box.innerHTML = `<p class="mut">Ohne Gruppen zählt die Statistik jede Aktivität einzeln. Wenn du Aktivitäten gemeinsam sehen möchtest – zum Beispiel Wandern, Bergsteigen und Schneeschuhwandern –, lege hier eine Gruppe an. Jede Gruppe ist im Sportartfilter als eigener Eintrag wählbar, und die Aufteilungen nach Sportart (Sportarten, Bestwerte, Jahresrückblick) zeigen sie als eine Zeile. Die Touren und ihre Sportart bleiben unverändert.</p>
       <div class="sglist">${G.map((g, i) => `<fieldset class="sgg" data-i="${i}"><legend class="slsr">${esc(`Gruppe ${i + 1}`)}</legend>
         <div class="row g6 sgrow"><label class="sgnl" for="sgn${i}">Name</label><input id="sgn${i}" class="sgn fx1" data-i="${i}" maxlength="${NMAX}" value="${esc(g.name)}" autocomplete="off"><button type="button" class="btn ghost sm sgdel" data-i="${i}" aria-label="${esc(`Gruppe „${g.name}“ löschen`)}">🗑 Löschen</button></div>
         <div class="sgcats" role="group" aria-label="${esc(`Sportarten der Gruppe „${g.name}“`)}">${cats(g, i)}</div></fieldset>`).join("") || '<p class="mut sgnone">Keine Gruppen: Die Statistik zählt jede Aktivität einzeln.</p>'}</div>
@@ -496,7 +498,7 @@ async function sgAdmin(box) {
   draw();
 }
 
-/* 3.59.0 Favoriten-Aktivitäten (Verwaltung → Übersicht): Stern wählt, Pfeile ordnen (höchstens 12). Die Favoriten erscheinen zuerst, wo eine Tour aufgenommen oder
+/* 3.59.0 Favoriten-Aktivitäten (3.60.0: Verwaltung → Aktivitäten, „Favoriten für „Tour aufnehmen““): Stern wählt, Pfeile ordnen (höchstens 12). Die Favoriten erscheinen zuerst, wo eine Tour aufgenommen oder
    angelegt wird (Aufzeichnen, Planung); alle übrigen stehen dort unter „Mehr …“. Speichern über PUT /api/aktivitaeten/favoriten (app/aktivitaeten.py). */
 async function favAdmin(box) {
   if (!box) return;
@@ -563,4 +565,25 @@ async function favAdmin(box) {
     }
   });
   draw();
+}
+
+/* 3.60.0 Aktivitäten-Katalog (Verwaltung → Aktivitäten, nur lesen): die 29 Aktivitäten nach Kategorien mit Symbol und Kartenfarbe (SPORT_TABLE, 01-grundlagen.js).
+   Darunter die Aktivitäten, die 3.59.0 noch angeboten hat, mit ihrem Rückfall (SPORT_ALIAS): ältere Touren bleiben unverändert und zählen als diese Aktivität. */
+const KAT_FRUEHER = [
+  ["dogwalk", "Gassigehen"], ["orienteering", "Orientierungslauf"], ["commute", "Radpendeln"], ["cyclocross", "Cyclocross"], ["bmx", "BMX"],
+  ["sled", "Rodeln/Bob"], ["iceskate", "Eislaufen"], ["snowmobile", "Schneemobil"], ["swim", "Freiwasserschwimmen"], ["snorkel", "Schnorcheln"],
+  ["sup", "Paddleboarding/SUP"], ["sailing", "Segeln"], ["waterski", "Wasserski"], ["surf", "Wellenreiten"], ["kitesurf", "Kitesurfen"], ["wakesurf", "Wakesurfen"],
+  ["fishing", "Angeln"], ["hunting", "Jagen"], ["archery", "Bogenschießen"], ["golf", "Golf"], ["atv", "Quad/ATV"], ["motorbike", "Offroad-Motorrad"],
+];
+function katAdmin(box) {
+  if (!box) return;
+  const T = typeof TOURS !== "undefined" && Array.isArray(TOURS) ? TOURS : [];
+  const n = k => T.filter(t => t && (t.sport_alt || t.sport) === k).length;      // loadTours merkt sich den entfernten Schlüssel in sport_alt
+  const item = k => `<li class="katit" data-k="${k}"><span class="katdot" style="background:var(${SPORT[k][1]})" aria-hidden="true"></span><span class="katic" aria-hidden="true">${SPORT[k][2]}</span><span class="katn">${esc(SPORT[k][0])}</span></li>`;
+  const alt = KAT_FRUEHER.filter(([k]) => n(k));
+  box.innerHTML = `<p class="mut">Diese Aktivitäten bietet Meine Touren überall an – beim Aufnehmen, Importieren und Planen, in Filtern und in der Statistik. Symbol und Farbe erscheinen in Listen und auf der Karte.</p>
+    ${SPORT_CAT.map(([id, l, ks]) => `<div class="sgcat"><span class="sgcl" id="katc-${id}">${esc(l)}</span><ul class="katlist" aria-labelledby="katc-${id}">${ks.map(item).join("")}</ul></div>`).join("")}
+    <details class="katalt"${alt.length ? " open" : ""}><summary>Frühere Aktivitäten</summary>
+      <p class="mut">Diese Aktivitäten gibt es nicht mehr. Touren damit bleiben unverändert; angezeigt, gefiltert und gezählt werden sie wie die Aktivität rechts. Mit „Sportart ändern“ (Tour bearbeiten) kannst du sie jederzeit umstellen.</p>
+      <ul class="katfr">${KAT_FRUEHER.map(([k, nm]) => `<li data-k="${k}"><span>${esc(nm)}</span> <span aria-hidden="true">→</span> <span class="katic" aria-hidden="true">${sIcon(k)}</span> <span>${esc(sName(k))}</span>${n(k) ? ` <small class="mut katcnt">${esc(n(k) === 1 ? "1 Tour" : `${n(k)} Touren`)}</small>` : ""}</li>`).join("")}</ul></details>`;
 }

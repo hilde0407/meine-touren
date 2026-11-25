@@ -468,7 +468,7 @@ def api_weather(tour_id: str):
 
 
 # ---------- Namensvorschläge aus Kartendaten (Nominatim + Overpass, beide OpenStreetMap) ----------
-SPORT_NAME = {"hike": "Wanderung", "touringbicycle": "Radtour", "e_touringbicycle": "E-Bike-Tour", "racebike": "Rennradtour", "mtb": "MTB-Tour",
+SPORT_NAME = {"hike": "Wanderung", "touringbicycle": "Radtour", "e_touringbicycle": "E-Bike-Tour", "racebike": "Rennradtour", "mtb": "Mountainbike-Tour",
               "jogging": "Lauf", "skialpin": "Skifahren", "skitour": "Skitour", "nordic": "Langlauf", "snowshoe": "Schneeschuhwanderung",
               "mountaineering": "Bergtour", "nordicwalking": "Nordic Walking"}
 _last_geo = [0.0]

@@ -36,7 +36,7 @@ def duplicates(tours):
     return out
 
 
-WALK = ("hike", "nordicwalking", "snowshoe", "mountaineering", "walk", "dogwalk")
+WALK = ("hike", "nordicwalking", "snowshoe", "mountaineering", "walk")
 SPORT_OK = set(gpxtools.LABEL)                       # 3.59.0: alle Aktivitäten des Katalogs (app/gpxtools.py), Schneeschuh ist wieder eigene Sportart
 
 
@@ -44,6 +44,7 @@ def implausible(tours):
     """Fehlaufzeichnungen (fast keine Strecke/Dauer) und Tempo, das nicht zur Sportart passt (z. B. „Wandern“ mit 20 km/h)."""
     out = []
     for t in tours:
+        t = dict(t, sport=gpxtools.norm(t["sport"])[0])                 # 3.60.0: entfernte Aktivitäten wie ihre Rückfall-Aktivität (Gassigehen = Spazieren)
         d, s = t["dist_m"] or 0, t["dur_s"] or 0
         v = d / s * 3.6 if s else 0
         why, sug = None, None
@@ -51,9 +52,9 @@ def implausible(tours):
             why = f"Fehlaufzeichnung? nur {d:.0f} m" + (f" in {s // 60:.0f} min" if s else "")
         elif t["sport"] in WALK and v > 8:
             why, sug = f"{v:.1f} km/h – zu schnell für {t['sport'] == 'hike' and 'Wandern' or 'diese Sportart'}", "jogging" if v <= 16 else "touringbicycle"   # 3.50.0: bis 16 km/h eher ein Lauf
-        elif t["sport"] in ("jogging", "trailrun", "orienteering") and v > 22:
+        elif t["sport"] in ("jogging", "trailrun") and v > 22:
             why, sug = f"{v:.1f} km/h – zu schnell zum Laufen", "touringbicycle"
-        elif t["sport"] in ("touringbicycle", "racebike", "mtb", "mtb_easy", "commute", "cyclocross") and 0 < v < 4 and d > 2000:
+        elif t["sport"] in ("touringbicycle", "racebike", "mtb", "mtb_easy", "bikepacking") and 0 < v < 4 and d > 2000:
             why, sug = f"{v:.1f} km/h – sehr langsam für Rad", "hike"
         if why:
             why = re.sub(r"(\d)\.(\d)", r"\1,\2", why)

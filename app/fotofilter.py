@@ -12,7 +12,7 @@ from datetime import date, datetime
 
 from fastapi import HTTPException
 
-from . import db, photos
+from . import db, gpxtools, photos
 from .gpxtools import TZ
 
 SPORT_RE = re.compile(r"^[A-Za-z0-9_]{1,40}$")
@@ -75,6 +75,7 @@ def build(sport="", date_from="", date_to="", day="", before=0):
     where, args = [], []
     sp = clean_sports(sport)
     if sp:
+        sp = list(dict.fromkeys(x for s in sp for x in gpxtools.roh(s)))          # 3.60.0: entfernte Schlüssel älterer Touren zählen als ihr Rückfall
         where.append(f"t.sport IN ({','.join('?' * len(sp))})")
         args += sp
     a = _iso(date_from, "date_from") if date_from else None

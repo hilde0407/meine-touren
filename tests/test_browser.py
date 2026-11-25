@@ -362,10 +362,10 @@ def test_admin_tabs(page):
     page.evaluate("localStorage.removeItem('admtab')")
     page.goto(base + "#/admin"); quiet(page, 2500)
     tabs = page.evaluate("[...document.querySelectorAll('#atabs button')].map(b => b.textContent)")
-    assert tabs == ["Übersicht", "Touren holen", "Hochladen & Planen", "Fotos", "Automatik & Meldungen", "Handy & App", "Sicherung & Zugang"], tabs
+    assert tabs == ["Übersicht", "Aktivitäten", "Touren holen", "Hochladen & Planen", "Fotos", "Automatik & Meldungen", "Handy & App", "Sicherung & Zugang"], tabs
     vis = lambda: page.evaluate("[...document.querySelectorAll('.atab')].filter(s => s.style.display !== 'none').map(s => s.dataset.t)")
     assert vis() == ["uebersicht"]
-    for t, word in (("quellen", "Komoot"), ("weitergabe", "Portale"), ("fotos", "Fotos importieren"), ("auto", "Automatik"), ("handy", "Auf dem Handy"), ("sicher", "Sicherung")):
+    for t, word in (("aktivitaeten", "Aktivitäten-Katalog"), ("quellen", "Komoot"), ("weitergabe", "Portale"), ("fotos", "Fotos importieren"), ("auto", "Automatik"), ("handy", "Auf dem Handy"), ("sicher", "Sicherung")):
         page.click(f"#atabs [data-t={t}]")
         assert vis() == [t] and word in page.inner_text(f".atab[data-t={t}]"), (t, word)
     assert "tab=sicher" in page.url
@@ -526,7 +526,7 @@ def test_goal_sport_groups(page):
     assert r[0] + r[1] + r[2] >= 1 and r[4] >= r[3]
     page.goto(base + "#/stats"); quiet(page, 1500)
     opts = page.evaluate("[...document.querySelectorAll('#gsp option')].map(o => o.textContent).join('|')")
-    assert opts.count("Alle Rad-Sportarten") == 0 and "Kajak/Kanu" in opts and "Schneeschuh" in opts     # 3.59.0: keine festen Gruppen mehr (ältere Ziele „grp:…“ zählen weiter), alle Aktivitäten
+    assert opts.count("Alle Rad-Sportarten") == 0 and "Kajak / Kanu" in opts and "Schneeschuh" in opts     # 3.59.0: keine festen Gruppen mehr (ältere Ziele „grp:…“ zählen weiter), alle Aktivitäten
     assert not page.errors, page.errors
 
 
@@ -965,15 +965,16 @@ def test_record_live_values_and_photos(page):
 
 
 def test_admin_tabs_uniform(page):
-    """Verwaltung: sieben Reiter, jeder Bereich liegt in genau einem Reiter und ist eine gleich gestaltete Karte."""
+    """Verwaltung: acht Reiter (3.60.0: „Aktivitäten“), jeder Bereich liegt in genau einem Reiter und ist eine gleich gestaltete Karte."""
     base = page.url.split("#")[0]
     page.goto(base + "#/admin?tab=uebersicht"); page.reload(); quiet(page, 1800)
     tabs = page.evaluate("[...document.querySelectorAll('#atabs button')].map(b=>b.textContent)")
-    assert tabs == ["Übersicht", "Touren holen", "Hochladen & Planen", "Fotos", "Automatik & Meldungen", "Handy & App", "Sicherung & Zugang"]
+    assert tabs == ["Übersicht", "Aktivitäten", "Touren holen", "Hochladen & Planen", "Fotos", "Automatik & Meldungen", "Handy & App", "Sicherung & Zugang"]
     where = page.evaluate("Object.fromEntries([...document.querySelectorAll('.atab')].map(s=>[s.dataset.t,[...s.querySelectorAll(':scope > .gbody > *')].map(c=>(c.querySelector('h2')||{}).textContent||'').map(t=>t.trim().split(' ')[0])]))")
     assert "Zustand" in where["uebersicht"] and "Updates" in where["uebersicht"] and "Komoot" in where["quellen"]
     assert "Portale" in where["weitergabe"] and "Tourplanung" in where["weitergabe"] and "Standort" in where["handy"]
     assert "Zugriffsschutz" in where["sicher"] and "Sicherung" in where["sicher"]
+    assert where["aktivitaeten"] == ["Aktivitäten-Katalog", "Favoriten", "Statistik-Gruppen"] and "Heimatort" in where["uebersicht"]
     # gleiche Gestaltung: gleiche Schriftgröße der Kartentitel und gleicher Kartenrand
     sizes = page.evaluate("[...document.querySelectorAll('.atab .gbody > * > h2, .atab .gbody > * > .panel > h2')].map(h=>getComputedStyle(h).fontSize)")
     assert len(set(sizes)) == 1, sizes

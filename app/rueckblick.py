@@ -63,8 +63,9 @@ def tours(year, sport=""):
     sql = "SELECT id,name,sport,start_ts,dist_m,dur_s,up_m FROM tours WHERE start_ts>=? AND start_ts<?"
     args = [lo, hi]
     if sport:
-        sql += " AND sport=?"
-        args.append(sport)
+        r = gpxtools.roh(sport)                    # 3.60.0: auch ältere Touren mit entferntem Schlüssel, der als diese Sportart zählt
+        sql += f" AND sport IN ({','.join('?' * len(r))})"
+        args += r
     return db.query(sql + " ORDER BY start_ts", tuple(args))
 
 

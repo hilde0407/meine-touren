@@ -100,11 +100,12 @@ function sport34(id) {
   const b = $("#esport"), t = BY[id];
   if (!b || !t || (typeof isViewer === "function" && isViewer())) return;
   b.onclick = () => {
-    const m = uiModal(`<h3>Sportart ändern</h3><div class="field"><label for="espsel">Sportart</label><select id="espsel">${sportOptions(t.sport)}</select></div>
+    const cur = sNorm(t.sport);                                                 // 3.60.0: entfernte Aktivität (z. B. „golf“) -> ihr Rückfall ist vorgewählt
+    const m = uiModal(`<h3>Sportart ändern</h3><div class="field"><label for="espsel">Sportart</label><select id="espsel">${sportOptions(cur)}</select></div>
       ${t.source !== "local" ? '<label class="chk"><input type="checkbox" id="espko"> auch bei Komoot ändern</label>' : ""}<p class="bad" id="esperr" role="alert"></p>
       <div class="uifoot"><button class="btn ghost" id="espx">Abbrechen</button><button class="btn" id="espok">Übernehmen</button></div>`);
     const sel = m.querySelector("#espsel");
-    if (!SPORT[t.sport]) sel.insertAdjacentHTML("afterbegin", `<option value="${esc(t.sport)}" selected>${esc(sName(t.sport))}</option>`);
+    if (!SPORT[cur]) sel.insertAdjacentHTML("afterbegin", `<option value="${esc(t.sport)}" selected>${esc(sName(t.sport))}</option>`);
     sel.focus();
     m.querySelector("#espx").onclick = () => m.remove();
     m.querySelector("#espok").onclick = async e => {

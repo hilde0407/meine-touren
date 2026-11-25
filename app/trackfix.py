@@ -8,20 +8,20 @@ import json
 import math
 import time
 
-from . import config, db, routes, tracks
+from . import config, db, gpxtools, routes, tracks
 
-WALK = ("hike", "nordicwalking", "snowshoe", "mountaineering", "walk", "dogwalk")
+WALK = ("hike", "nordicwalking", "snowshoe", "mountaineering", "walk", "climbing")
 # (Spitzentempo in km/h für Sprung-Erkennung, Dauertempo in km/h für „schneller Abschnitt“)
 LIMITS = {"walk": (22, 12), "run": (35, 22), "bike": (90, 50), "other": (150, 60)}
 
 
 def kind(sport):
-    s = sport or "hike"
+    s = gpxtools.norm(sport or "hike")[0]          # 3.60.0: entfernte Aktivitäten wie ihre Rückfall-Aktivität
     if s in WALK:
         return "walk"
-    if s in ("jogging", "nordic", "trailrun", "orienteering"):
+    if s in ("jogging", "nordic", "trailrun"):
         return "run"
-    if s in ("touringbicycle", "e_touringbicycle", "racebike", "mtb", "e_mtb", "mtb_easy", "commute", "cyclocross", "bmx"):
+    if s in ("touringbicycle", "e_touringbicycle", "racebike", "mtb", "e_mtb", "mtb_easy", "bikepacking"):
         return "bike"
     return "other"
 

@@ -830,11 +830,11 @@ def test_favoriten_und_mehr_359(pw, app):
     try:
         pg.wait_for_selector("#rstart", timeout=T)
         assert pg.eval_on_selector_all(".recsp", "l => l.map(x => x.dataset.sp)") == ["kayak", "snowshoe"]
-        expect(pg.locator('.recsp[data-sp="kayak"]')).to_have_text("Kajak/Kanu")
+        expect(pg.locator('.recsp[data-sp="kayak"]')).to_have_text("Kajak / Kanu")
         assert not pg.evaluate("() => document.querySelector('#rspm').open")
         open_details(pg, "#rspm")
         cats = pg.eval_on_selector_all("#rspm .reclbl", "l => l.map(x => x.textContent)")
-        assert cats == ["Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor & Sonstige"]
+        assert cats == ["Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor und Sonstige"]
         assert pg.locator('#rspm .recspx[data-sp="kayak"]').count() == 0 and pg.locator('#rspm .recspx[data-sp="skitour"]').count() == 1
         pg.locator('#rspm .recspx[data-sp="mtb_easy"]').click()
         expect(pg.locator('#rspm .recspx[data-sp="mtb_easy"]')).to_have_attribute("aria-checked", "true", timeout=T)

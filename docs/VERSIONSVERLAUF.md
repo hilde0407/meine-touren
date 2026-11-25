@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.60.0 – Endgültiger Aktivitäten-Katalog, Verwaltung mit Reiter „Aktivitäten“
+
+- **Achtung:** Der Katalog hat jetzt genau 29 Aktivitäten (neu: Bikepacking, Rafting, Gleitschirm). Touren mit einer entfernten Aktivität aus 3.59.0 (z. B. Gassigehen, Golf, SUP) bleiben unverändert und zählen in Anzeige, Filtern, Statistik und Zielen als ihr Rückfall (Spazieren, Sonstiges, Kajak …); Favoriten und Statistik-Gruppen lassen sie still weg
+- Umbenannt: Bergtour → Bergsteigen, MTB → Mountainbike, Skifahren → Ski alpin, Schneeschuh → Schneeschuhwandern (jetzt Kategorie Winter)
+- Import (GPX/TCX, FIT, Aufzeichnung) und Senden (Strava, Komoot) setzen den Rückfall ein; Zepp unverändert
+- Verwaltung: neuer Reiter „Aktivitäten“ (Katalog, Favoriten für „Tour aufnehmen“, Statistik-Gruppen); Heimatort und Puls in der Übersicht; einheitliche Karten
+
 ## Version 3.59.0 – Aktivitäten-Katalog, Schneeschuh, Statistik-Gruppen, Favoriten
 
 - **Achtung:** Keine festen Zusammenfassungen mehr – die Statistik zählt jede Aktivität einzeln. Zusammenfassen über Verwaltung → Übersicht → „Statistik: Aktivitäten zusammenfassen“ (Ein-Klick-Vorschläge, nie automatisch); ältere Ziele „Alle Rad-Sportarten“ usw. zählen weiter

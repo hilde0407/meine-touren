@@ -217,7 +217,7 @@ def test_tourenliste_fuer_das_tagebuch(fresh):
     rows = {t["id"]: t for t in _client().get("/api/tours").json()}
     for k in ("id", "name", "sport", "start_ts", "end_ts", "dist_m", "dur_s", "up_m", "down_m", "source", "note", "stars", "tags", "date", "sport_de"):
         assert k in rows["s1"], k
-    assert rows["s1"]["sport"] == "snowshoe" and rows["s1"]["sport_de"] == "Schneeschuh"
+    assert rows["s1"]["sport"] == "snowshoe" and rows["s1"]["sport_de"] == "Schneeschuhwandern"      # 3.60.0: Name aus dem Katalog
     assert rows["r1"]["sport"] == "jogging" and rows["r1"]["sport_de"] == "Laufen"
 
 

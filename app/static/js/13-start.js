@@ -26,9 +26,12 @@ async function boot() {
   if (typeof waechterInit === "function") waechterInit();   // 3.48.0: Sicherungs-Wächter
 }
 
-/* ---- Verwaltung: nach Aufgaben geordnet in Reitern (statt einer langen Seite) ---- */
+/* ---- Verwaltung: nach Aufgaben geordnet in Reitern (statt einer langen Seite) ----
+   3.60.0 Gliederung: Übersicht (Zustand und Grundeinstellungen) · Aktivitäten (Katalog, Favoriten, Statistik-Gruppen) · Touren holen · Hochladen & Planen · Fotos ·
+   Automatik & Meldungen · Handy & App · Sicherung & Zugang. Jeder Bereich ist eine gleich gestaltete Karte (Titel h2, Erklärung, Inhalt; Unterabschnitte h3). */
 const ADM_TABS = [
-  ["uebersicht", "Übersicht", "Zustand der App, Updates, Selbsttest und Protokoll.", ["#hlt", "#upd", "Favoriten", "Statistik", "Selbsttest", "Protokoll"]],
+  ["uebersicht", "Übersicht", "Zustand der App, Updates, Heimatort und Puls sowie Protokoll und Fehlersuche.", ["#hlt", "#upd", "#homep", "Protokoll", "Selbsttest"]],
+  ["aktivitaeten", "Aktivitäten", "Welche Aktivitäten es gibt, welche beim Aufnehmen einer Tour zuerst erscheinen und wie die Statistik sie zusammenfasst.", ["#katp", "#favp", "#sgp"]],
   ["quellen", "Touren holen", "Woher deine Touren kommen: Komoot, Zepp, Uhren und Dateien, dazu Wanderführer.", ["Komoot", "Zepp-Import", "Garmin", "Wanderführer"]],
   ["weitergabe", "Hochladen & Planen", "Wohin Touren hochgeladen werden dürfen (nur auf deinen Wunsch) und wie Touren geplant werden.", ["Portale", "Tourplanung"]],
   ["fotos", "Fotos", "Fotobibliothek, Import und Eingangsordner.", ["Fotos", "Foto-Eingang"]],
@@ -92,6 +95,7 @@ VIEWS.admin = async (...a) => {
       b.setAttribute("aria-selected", b.dataset.t === id ? "true" : "false");
     });
     secs.forEach(sec => (sec.style.display = sec.dataset.t === id ? "" : "none"));
+    anchor.style.display = id === "aktivitaeten" ? "none" : "";          // 3.60.0: die Abschnitte „Aktivitäten“ speichern mit eigenen Knöpfen – keine zweite Speichern-Leiste
     try {
       localStorage.setItem("admtab", id);
     } catch (e) {}
