@@ -115,7 +115,7 @@ VIEWS.dash = async (_, q) => {
       <div class="legend">${monthly ? `<span><i style="background:var(--yellow);border:1px solid var(--ink)"></i>stärkster Monat</span>${mghost && mghost.some(v => v > 0) ? `<span><i style="background:var(--accent2)"></i>${Y ? Y - 1 : "Zeitraum davor"}</span>` : ""}` : "<span>Ein Klick auf einen Balken öffnet das Jahr.</span>"}</div></div>
     <div class="panel" data-st="kmverlauf" data-badge="${esc(`${cy}: ${fmtKm(cs[cs.length - 1].pts[cs[cs.length - 1].pts.length - 1][1], {d: 0})}`)}"><h2>Strecke im Jahresverlauf</h2>${lineChart(cs)}<div class="legend"><span><i style="background:var(--bars)"></i>${cy}</span>${own && ys.includes(cy - 1) ? `<span><i style="background:var(--accent2)"></i>${cy - 1}</span>` : ""}</div></div>
     <div class="panel" data-st="sportarten" data-badge="${esc(sports.length ? `${sName(sports[0][0])} ${nf((sports[0][1] / tot) * 100, 0)} %` : "")}"><h2>Sportarten</h2><div class="stack">${sports.map(([s, v]) => `<div style="width:${(v / tot) * 100}%;background:${sCol(s)}" title="${sName(s)}"></div>`).join("")}</div>
-      <div class="rows mt10">${sports.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${fmtKm(v, {d: 0})}, ${nf((v / tot) * 100, 0)} %</span></div>`).join("")}</div></div>
+      <div class="rows mt10">${sports.map(([s, v]) => `<div class="r"><span${isSg(s) ? ` title="${esc(sgTitle(s))}"` : ""}><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${fmtKm(v, {d: 0})}, ${nf((v / tot) * 100, 0)} %</span></div>`).join("")}</div></div>
     </div>
   <div class="panel gap" data-st="heat" data-badge="${esc(`${Object.keys(byDay).length} Tage mit Touren`)}"><h2>Aktivität im Jahr ${hy}</h2>${heat(hy, byDay)}</div>
   ${otd.length ? `<div data-st="tag" data-badge="${esc(otd.length === 1 ? "1 Tour" : otd.length + " Touren")}"><div class="sec"><h2>An diesem Tag</h2><span class="sub">in früheren Jahren</span></div><div class="tl">${otd.map(tourRow).join("")}</div></div>` : ""}
@@ -241,14 +241,31 @@ function tourRow(t) {
 }
 
 /* ---------- Gesamtkarte ---------- */
+/* 3.60.1 Sportarten der Karte (#ms): dieselbe Auswahl wie Statistik und Baustein-Filter (sportAuswahl, 01-grundlagen.js) – nach Kategorien in Katalog-Reihenfolge,
+   nur Sportarten mit Touren, dazu die Statistik-Gruppen (ein Klick schaltet alle Mitglieder). Abgewählt ist, was mapOff() liefert (nur Chips mit data-s). */
+function mapSportChips() {
+  const A = sportAuswahl(TOURS.map(t => t.sport));
+  const chip = s => `<button type="button" class="chip on" data-s="${esc(s)}" aria-pressed="true"><i style="background:${sCol(s)}"></i>${esc(sName(s))}</button>`;
+  return A.cats.map(([id, l, ks]) => `<div class="mscat" role="group" aria-labelledby="msc-${id}"><span class="mscl" id="msc-${id}">${esc(l)}</span>${ks.map(chip).join("")}</div>`).join("") +
+    (A.groups.length ? `<div class="mscat" role="group" aria-labelledby="msc-sg"><span class="mscl" id="msc-sg">Statistik-Gruppen</span>${A.groups.map(([k, l, t]) => `<button type="button" class="chip on msg" data-g="${esc(k)}" aria-pressed="true" title="${esc(t)}"><i style="background:${sCol(k)}"></i>${esc(l)}</button>`).join("")}</div>` : "");
+}
+const mapOff = () => new Set([...document.querySelectorAll("#ms .chip[data-s]:not(.on)")].map(c => c.dataset.s));
+/* Gruppen-Chip: an, solange alle vorhandenen Mitglieder an sind */
+function mapSyncGroups() {
+  document.querySelectorAll("#ms .chip[data-g]").forEach(g => {
+    const mem = (sgById(g.dataset.g) || {sports: []}).sports.map(s => document.querySelector(`#ms .chip[data-s="${CSS.escape(s)}"]`)).filter(Boolean);
+    const on = mem.length > 0 && mem.every(c => c.classList.contains("on"));
+    g.classList.toggle("on", on);
+    g.setAttribute("aria-pressed", String(on));
+  });
+}
 VIEWS.map = async () => {
   const routes = await loadRoutes(),
-    ys = years(),
-    sp = [...new Set(TOURS.map(t => t.sport))];
+    ys = years();
   $("#main").className = "wide";
   $("#main").innerHTML = `<div class="mapbox"><div id="bigmap"></div><div class="mapui">
     <div class="box"><select id="my"><option value="0">Alle Jahre</option>${ys.map(y => `<option>${y}</option>`).join("")}</select><span id="mc" class="cnt"></span></div>
-    <div class="box" id="ms">${sp.map(s => `<button class="chip on" data-s="${s}" aria-pressed="true"><i style="background:${sCol(s)}"></i>${sName(s)}</button>`).join("")}</div><div class="box" id="mn" style="display:none"></div></div></div>`;
+    <div class="box" id="ms">${mapSportChips()}</div><div class="box" id="mn" style="display:none"></div></div></div>`;
   map = mkMap("bigmap", {layers: true, leaflet: {preferCanvas: true}});
   const grp = L.layerGroup().addTo(map),
     off = new Set(),
@@ -387,10 +404,22 @@ VIEWS.map = async () => {
     if (b) map.fitBounds(b, {padding: [40, 40]});
   };
   $("#ms").onclick = e => {
-    const s = e.target.closest("[data-s]");
+    const s = e.target.closest("[data-s], [data-g]");
     if (!s) return;
-    s.setAttribute("aria-pressed", String(s.classList.toggle("on")));
-    off.has(s.dataset.s) ? off.delete(s.dataset.s) : off.add(s.dataset.s);
+    const set = (c, on) => {
+      c.classList.toggle("on", on);
+      c.setAttribute("aria-pressed", String(on));
+    };
+    if (s.dataset.g) {                                                       // Statistik-Gruppe: alle Mitglieder an bzw. aus
+      const on = !s.classList.contains("on");
+      (sgById(s.dataset.g) || {sports: []}).sports.forEach(k => {
+        const c = document.querySelector(`#ms .chip[data-s="${CSS.escape(k)}"]`);
+        if (c) set(c, on);
+      });
+    } else set(s, !s.classList.contains("on"));
+    mapSyncGroups();
+    off.clear();
+    mapOff().forEach(k => off.add(k));
     const b = draw();
     if (b) map.fitBounds(b, {padding: [40, 40]});
   };

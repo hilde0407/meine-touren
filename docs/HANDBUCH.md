@@ -499,7 +499,7 @@ Ob eine Maus oder ein Touchpad benutzt wird, erkennt die App an der Art der Bewe
 
 **Bearbeiten** bietet:
 
-* **Umbenennen**, **Tags & Alben** (Schlagworte), **Sportart ändern** (alle Aktivitäten, Favoriten zuerst; gilt auch nach dem Komoot-Abgleich, auf Wunsch auch bei Komoot geändert – ab 3.59.0),
+* **Umbenennen**, **Tags & Alben** (Schlagworte), **Sportart ändern** (alle Sportarten, Favoriten zuerst; gilt auch nach dem Komoot-Abgleich, auf Wunsch auch bei Komoot geändert – ab 3.59.0),
 * **Streckenfarbe** (Farbe und Breite auf der Karte),
 * **Höhen korrigieren** (mit Geländemodell neu berechnen), **Höhe aus Uhr abgleichen (Zepp)**,
 * **Track korrigieren** (Fehlpunkte und Pausen bereinigen; das Original bleibt erhalten),
@@ -532,7 +532,7 @@ Oben schwebt eine Leiste mit Bedienelementen:
 
 * **Standort** – zeigt deine Position (Browser fragt nach Erlaubnis),
 * **Alle Jahre** – Jahr wählen, daneben die Zahl der Touren,
-* **Wandern / Radtour …** – Sportarten ein- und ausschalten (jede hat ihre Farbe),
+* **Sportarten** – ein- und ausschalten, nach Kategorien (Zu Fuß, Rad, Winter, Wasser, Outdoor und Sonstige) in der Reihenfolge des Katalogs, nur Sportarten mit Touren. Jede Sportart hat ihre eigene Farbe (Punkt am Knopf, Legende und Strecke gleich; ab 3.60.1). Dazu deine **Statistik-Gruppen** als Knöpfe „Name = A + B + …“: ein Klick schaltet alle Sportarten der Gruppe an oder aus. Statistik, Rekorde und die Sportartfilter der Bausteine bieten dieselbe Auswahl,
 * **Strecken**, **Heatmap**, **Fotos** – Darstellungsarten: Strecken einzeln, Heatmap (Häufigkeit), Fotos als Marker (bei Fotos ohne eigenen Aufnahmeort wird die Position aus der Aufnahmezeit berechnet und blasser gezeigt),
 * **Touren im Ausschnitt** – listet die Touren des gerade sichtbaren Kartenausschnitts in einem Fenster über allen Bedienfeldern. Es gibt immer nur ein Fenster; **Esc** oder **Schließen** schließt es und bringt den Fokus zurück auf den Knopf.
 
@@ -548,7 +548,7 @@ Der Hinweistext am Knopf **Heatmap** erklärt den Unterschied: Die Heatmap zeich
 
 ### Die Karten-Seite anpassen
 
-Auch die Karte ist eine anpassbare Seite (**Seite anpassen**, [Kapitel 13](#k13)). Die **Karte** selbst bleibt immer sichtbar; du kannst nur ihre Breite wählen und sie verschieben. Die Bedienelemente sind einzelne **Bedienfelder**: **Mein Standort**, **Jahr und Anzahl**, **Aktivitäten**, Strecken-Stil, Heatmap und Fotos sowie **Touren im Ausschnitt**. Sie lassen sich verschieben, einklappen und ausblenden; ein ausgeblendetes Bedienfeld behält seine Einstellung. Nach jeder Änderung passt sich die Karte an, ohne dass ein selbst gewählter Kartenausschnitt verloren geht. Im Katalog (Kategorie **Karte**) gibt es zusätzlich die Bausteine **Karten-Kennzahlen**, **Touren im Kartenausschnitt** und **Legende der Aktivitäten**; Vorlagen sind „Karte mit Kennzahlen“, „Karte mit Liste“ und „Nur die Karte“. Gruppen gibt es auf der Karte nicht.
+Auch die Karte ist eine anpassbare Seite (**Seite anpassen**, [Kapitel 13](#k13)). Die **Karte** selbst bleibt immer sichtbar; du kannst nur ihre Breite wählen und sie verschieben. Die Bedienelemente sind einzelne **Bedienfelder**: **Mein Standort**, **Jahr und Anzahl**, **Sportarten**, Strecken-Stil, Heatmap und Fotos sowie **Touren im Ausschnitt**. Sie lassen sich verschieben, einklappen und ausblenden; ein ausgeblendetes Bedienfeld behält seine Einstellung. Nach jeder Änderung passt sich die Karte an, ohne dass ein selbst gewählter Kartenausschnitt verloren geht. Im Katalog (Kategorie **Karte**) gibt es zusätzlich die Bausteine **Karten-Kennzahlen**, **Touren im Kartenausschnitt** und **Legende der Sportarten**; Vorlagen sind „Karte mit Kennzahlen“, „Karte mit Liste“ und „Nur die Karte“. Gruppen gibt es auf der Karte nicht.
 
 ![Karte im Bearbeitungsmodus mit den Bedienfeldern als Bausteine](handbuch/bilder/18b-karte-anpassen.png)
 
@@ -585,7 +585,7 @@ Menü **Reisen**. Die Seite besteht aus den Abschnitten **Mehrtagestouren**, **R
 Ein Klick auf die Reise öffnet die Seite mit:
 
 * **Kennzahlen** (Touren, Strecke, Aufstieg, Abstieg, Unterwegs, Tage),
-* **Statistik nach Aktivität**,
+* **Statistik nach Sportart**,
 * **3D-Flug und Offline-Karte** (**3D-Flug über alles**, **Karte offline speichern**),
 * **Karte** mit den Tagen in verschiedenen Farben,
 * **Fotos** der Reise,
@@ -611,7 +611,7 @@ Reise-Seite und Reisen-Übersicht sind wie alle Seiten anpassbar ([Kapitel 13](#
 
 ![Reise-Seite im Bearbeitungsmodus](handbuch/bilder/30b-reise-seite-anpassen.png)
 
-*Abbildung 32: Die Reise-Seite im Bearbeitungsmodus: Kopf, Kennzahlen und „Statistik nach Aktivität“ als Bausteine mit Breitenwahl, Pfeilen und „Ausblenden“.*
+*Abbildung 32: Die Reise-Seite im Bearbeitungsmodus: Kopf, Kennzahlen und „Statistik nach Sportart“ als Bausteine mit Breitenwahl, Pfeilen und „Ausblenden“.*
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -682,7 +682,7 @@ Die Diashow läuft im Vollbild: automatischer Wechsel (3, 5 oder 8 Sekunden), un
 
 Die Kachel **Erinnerungen** (Übersicht und Statistik) zeigt Fotos aus deinem Archiv. Über **Seite anpassen → Erinnerungen → Einstellungen** (Zahnrad) legst du fest:
 
-* **Welche Fotos:** zufällig, beste Fotos, „an diesem Tag in früheren Jahren“ oder neueste; optional nach Aktivität und Zeitraum gefiltert; 3, 6, 9 oder 12 Stück.
+* **Welche Fotos:** zufällig, beste Fotos, „an diesem Tag in früheren Jahren“ oder neueste; optional nach Sportart und Zeitraum gefiltert; 3, 6, 9 oder 12 Stück.
 * **Darstellung:** Raster, Streifen (seitlich wischen) oder Einzelbild-Show (blättert selbst).
 * **Anzeige:** Titel, Bildunterschrift, „Neu mischen“, Link „Diashow starten“.
 
@@ -704,7 +704,7 @@ Oben steht der **globale Filter**, der für alle Bausteine der Seite gilt:
 
 * **Gesamt** oder ein einzelnes Jahr (2026, 2025 …),
 * Zeitraum: **Laufendes Jahr**, **Letzte 12 Monate**, **Letzte 90 Tage**, **Vorjahr**, **Von–bis …**,
-* Aktivität: **Alle Sportarten**, **Wandern**, **Radtour** …
+* Sportart: **Alle Sportarten**, **Wandern**, **Radtour** …
 
 Daneben **Jahresrückblick 2026** ([Kapitel 12](#k12)). Die Bausteine:
 
@@ -729,7 +729,7 @@ Die Auswertung zeigt Orte, Gipfel, Leistung, Wetter und Neuland: **Häufigste St
 
 ### 11.3 Rekorde
 
-Rekorde mit Vergleichen („um die Erde“, „Mount Everest bergauf“), **Bestwerte gesamt** (längste Strecke, meiste Höhenmeter, längste Dauer), **Höchste Punkte**, **Nach Wochentag** und **Je Sportart**. Oben wählst du die Aktivität.
+Rekorde mit Vergleichen („um die Erde“, „Mount Everest bergauf“), **Bestwerte gesamt** (längste Strecke, meiste Höhenmeter, längste Dauer), **Höchste Punkte**, **Nach Wochentag** und **Je Sportart**. Oben wählst du die Sportart.
 
 ![Statistik, Rekorde](handbuch/bilder/25-statistik-rekorde.png)
 
@@ -747,18 +747,18 @@ Wenn deine Touren Pulsdaten haben: **Zeit in den Pulszonen** je Jahr, **Durchsch
 
 Die Statistik besteht aus Bausteinen wie die anderen Seiten: **Seite anpassen** und **Ansichten** ([Kapitel 13](#k13)). Neuere Bausteine wie „Jahreszeiten und Wetter“, die Wochenansicht von „Belastung und Erholung“ und „Ausrüstung“ stehen in [Abschnitt 13.12](#k13).
 
-### 11.6 Aktivitäten und Statistik-Gruppen (ab 3.59.0, Katalog ab 3.60.0)
+### 11.6 Sportarten und Statistik-Gruppen (ab 3.59.0, Katalog ab 3.60.0)
 
-**Aktivitäten:** Meine Touren kennt 29 Aktivitäten in fünf Kategorien – **Zu Fuß** (Wandern, Spazieren / Gehen, Bergsteigen, Klettern / Klettersteig, Nordic Walking, Laufen, Trailrunning), **Rad** (Radtour, Rennrad, Mountainbike, Gravelbike, E-Bike, E-Mountainbike, Bikepacking), **Winter** (Ski alpin, Skitour, Langlauf, Snowboard, Schneeschuhwandern), **Wasser** (Kajak / Kanu, Rudern, Drachenboot, Rafting, Bootfahren) und **Outdoor und Sonstige** (Skateboard, Inlineskaten / Rollschuh, Reiten, Gleitschirm, Sonstiges). Jede hat ein Symbol und eine Kartenfarbe und ist überall wählbar, wo eine Sportart gewählt wird. Die ganze Liste zeigt **Verwaltung → Aktivitäten → Aktivitäten-Katalog**.
+**Sportarten:** Meine Touren kennt 29 Sportarten in fünf Kategorien – **Zu Fuß** (Wandern, Spazieren / Gehen, Bergsteigen, Klettern / Klettersteig, Nordic Walking, Laufen, Trailrunning), **Rad** (Radtour, Rennrad, Mountainbike, Gravelbike, E-Bike, E-Mountainbike, Bikepacking), **Winter** (Ski alpin, Skitour, Langlauf, Snowboard, Schneeschuhwandern), **Wasser** (Kajak / Kanu, Rudern, Drachenboot, Rafting, Bootfahren) und **Outdoor und Sonstige** (Skateboard, Inlineskaten / Rollschuh, Reiten, Gleitschirm, Sonstiges). Jede hat ein Symbol und eine Kartenfarbe und ist überall wählbar, wo eine Sportart gewählt wird. Die ganze Liste zeigt **Verwaltung → Sportarten → Sportarten-Katalog**.
 
-**Frühere Aktivitäten (aus 3.59.0):** Touren mit einer Aktivität, die es nicht mehr gibt, bleiben unverändert. Sie werden wie ihr Rückfall angezeigt, gefiltert und gezählt – Gassigehen wie Spazieren / Gehen, Orientierungslauf wie Laufen, Radpendeln wie Radtour, Cyclocross wie Rennrad, Paddleboarding/SUP wie Kajak / Kanu, alle übrigen (z. B. Golf, Segeln, Eislaufen) wie Sonstiges. Das gilt auch für Ziele. Umstellen kannst du eine solche Tour mit **Bearbeiten → Sportart ändern**.
+**Frühere Sportarten (aus 3.59.0):** Touren mit einer Sportart, die es nicht mehr gibt, bleiben unverändert. Sie werden wie ihr Rückfall angezeigt, gefiltert und gezählt – Gassigehen wie Spazieren / Gehen, Orientierungslauf wie Laufen, Radpendeln wie Radtour, Cyclocross wie Rennrad, Paddleboarding/SUP wie Kajak / Kanu, alle übrigen (z. B. Golf, Segeln, Eislaufen) wie Sonstiges. Das gilt auch für Ziele. Umstellen kannst du eine solche Tour mit **Bearbeiten → Sportart ändern**.
 
-**Jede Aktivität zählt einzeln.** Die Statistik fasst nichts von sich aus zusammen – auch nicht Wandern und Bergsteigen oder die Radarten. Wer Aktivitäten gemeinsam sehen will, legt eine **Statistik-Gruppe** an: **Verwaltung → Aktivitäten → Statistik-Gruppen** (bis 3.59.0 „Statistik: Aktivitäten zusammenfassen“ in der Übersicht).
+**Jede Sportart zählt einzeln.** Die Statistik fasst nichts von sich aus zusammen – auch nicht Wandern und Bergsteigen oder die Radarten. Wer Sportarten gemeinsam sehen will, legt eine **Statistik-Gruppe** an: **Verwaltung → Sportarten → Statistik-Gruppen** (bis 3.59.0 „Statistik: Sportarten zusammenfassen“ in der Übersicht).
 
-* Jede Gruppe hat einen **Namen** (1–30 Zeichen) und mindestens **zwei Aktivitäten** (nach Kategorien zum Ankreuzen). Eine Aktivität kann nur in einer Gruppe sein; ist sie schon in einer anderen, ist sie ausgegraut und zeigt „in „…““. Höchstens acht Gruppen. **Gruppe hinzufügen**, **🗑 Löschen**, **Gruppen speichern** (Rückmeldung „Gespeichert ✓“).
+* Jede Gruppe hat einen **Namen** (1–30 Zeichen; ab 3.60.1 darf der Gruppenname nicht wie eine Sportart heißen – etwa „Wandern“ oder „Hiking“, ohne Rücksicht auf Groß-/Kleinschreibung und Leerzeichen. Eine ältere Gruppe mit solchem Namen zählt weiter, zeigt aber „Name wie eine Sportart – bitte umbenennen“ und lässt sich erst mit einem anderen Namen speichern) und mindestens **zwei Sportarten** (nach Kategorien zum Ankreuzen). Eine Sportart kann nur in einer Gruppe sein; ist sie schon in einer anderen, ist sie ausgegraut und zeigt „in „…““. Höchstens acht Gruppen. **Gruppe hinzufügen**, **🗑 Löschen**, **Gruppen speichern** (Rückmeldung „Gespeichert ✓“).
 * **Vorschläge** mit einem Klick: „Wandern und Bergsteigen“ (Wandern, Bergsteigen, Schneeschuhwandern), „Rad (alle)“, „Ski (alle)“ (Ski alpin, Skitour, Langlauf). Sie werden nie automatisch angelegt; gespeichert wird erst mit „Gruppen speichern“.
-* **Wirkung:** Im Sportartfilter der Statistik und der Bausteine steht jede Gruppe als eigener Eintrag „Name (zusammengefasst)“; die einzelnen Aktivitäten bleiben wählbar. Die Aufteilungen nach Sportart – Abschnitt „Sportarten“, Sportarten-Verteilung, Rekorde „Je Sportart“, Jahresrückblick (auch als Link) – zeigen die Gruppe als eine Zeile. Bei **Ziele → Ziel hinzufügen** sind die Gruppen wählbar.
-* **Was bleibt:** Die Touren, ihre Sportart, der Abgleich mit Komoot und Zepp, Export, Tourenliste und Einzelansichten bleiben unverändert. Ältere Ziele wie „Alle Rad-Sportarten“ zählen weiter. Wird eine Gruppe gelöscht, zeigen gespeicherte Filter wieder alle Sportarten; ein Ziel für die Gruppe zählt alle Sportarten („(Gruppe gelöscht)“). Gruppen und Favoriten gehören zur Datensicherung. Frühere Aktivitäten fallen aus Gruppen und Favoriten beim Laden still heraus.
+* **Wirkung:** Im Sportartfilter der Statistik und der Bausteine steht jede Gruppe als eigener Eintrag „Name = Sportart + Sportart“ (ab 3.60.1, z. B. „Bergwandern = Wandern + Bergsteigen“; bei mehr als drei Sportarten „… + …“, die vollständige Liste zeigt der Tooltip); die einzelnen Sportarten bleiben wählbar. So beschriftet erscheint die Gruppe auch bei Zielen, in den Aufteilungen und im Jahresrückblick. Die Aufteilungen nach Sportart – Abschnitt „Sportarten“, Sportarten-Verteilung, Rekorde „Je Sportart“, Jahresrückblick (auch als Link) – zeigen die Gruppe als eine Zeile. Bei **Ziele → Ziel hinzufügen** sind die Gruppen wählbar.
+* **Was bleibt:** Die Touren, ihre Sportart, der Abgleich mit Komoot und Zepp, Export, Tourenliste und Einzelansichten bleiben unverändert. Ältere Ziele wie „Alle Rad-Sportarten“ zählen weiter. Wird eine Gruppe gelöscht, zeigen gespeicherte Filter wieder alle Sportarten; ein Ziel für die Gruppe zählt alle Sportarten („(Gruppe gelöscht)“). Gruppen und Favoriten gehören zur Datensicherung. Frühere Sportarten fallen aus Gruppen und Favoriten beim Laden still heraus.
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -786,7 +786,7 @@ Oben: **‹ Übersicht**, „Fotos im PDF“ (mit Anzahl), **PDF herunterladen**
 ### Als Link teilen
 
 1. **Als Link teilen** anklicken.
-2. **Jahr** und **Aktivität** (alle oder nur eine, z. B. Wandern) wählen.
+2. **Jahr** und **Sportart** (alle oder nur eine, z. B. Wandern) wählen.
 3. Unter **Was wird gezeigt?** auswählen: **Kennzahlen**, **Rekorde**, **Heatmap** (Kalender, kein Kartenbild), **Beste Fotos**. Die Zeile „Dieser Link zeigt: …“ fasst es zusammen.
 4. **Link gültig** wählen (z. B. 30 Tage).
 5. **Link erstellen.** Der Link lässt sich ohne Konto öffnen und sauber als PDF speichern oder drucken („Drucken / Als PDF speichern“ auf der Seite).
@@ -834,7 +834,7 @@ In der Kopfzeile jedes Bausteins:
 2. Im Katalog nach Kategorie filtern – **Alle**, **Statistik**, **Zahlen**, **Grafiken**, **Rückblick**, **Planung**, **Touren holen**, **Hinweise**, **Eigene Kennzahlen** (je nach Seite gibt es unterschiedliche, etwa Reisen, Fotos und Karte nur auf der jeweiligen Seite) – oder mit **Bausteine suchen …** nach einem Wort.
 3. Bei **Hinzufügen** bekommst du den Baustein ans Seitenende; verschiebe ihn dann an die richtige Stelle. Jeder Baustein hat im Katalog eine kleine, nicht bedienbare **Vorschau mit deinen echten Zahlen**. Sie wird erst geladen, wenn die Karte sichtbar wird; solange steht dort ein Ladezustand. Hast du noch keine passenden Daten, zeigt die Vorschau Beispielwerte und kennzeichnet sie als „Beispielwerte“.
 
-Bausteine gelten nicht nur für eine Seite: „Dein Jahr“ kannst du z. B. auch auf der Tourseite einsetzen, und mehrere Exemplare mit verschiedenen Filtern (Aktivität, Zeitraum, Kennzahlen, Titel) sind möglich.
+Bausteine gelten nicht nur für eine Seite: „Dein Jahr“ kannst du z. B. auch auf der Tourseite einsetzen, und mehrere Exemplare mit verschiedenen Filtern (Sportart, Zeitraum, Kennzahlen, Titel) sind möglich.
 
 ![Katalog „Baustein hinzufügen“](handbuch/bilder/33-baustein-hinzufuegen.png)
 
@@ -852,12 +852,12 @@ Mit einer eigenen Kennzahl rechnest du selbst aus, was du wissen willst – ohne
 2. Optional: **Mit einer Vorlage starten**, z. B. „Höhenmeter je km“, „Touren pro Monat“, „Längste Wanderung“, „Ziel: 1000 km im Jahr“, „Durchschnittstempo“, „Größter Aufstieg“.
 3. **Name und Symbol** vergeben (Emoji, optional).
 4. **Was wird gerechnet?** – **Messgröße** (Anzahl Touren, Strecke, Aufstieg, Abstieg, Dauer, Gehzeit, Durchschnittspuls, Höchstpuls, Geschwindigkeit, Steigung, Höhenmeter je Kilometer) und **Rechenart** (Summe, Durchschnitt, Maximum, Minimum, Anzahl, Rekord mit Tourname, Durchschnitt pro Monat). Optional **Formel: durch eine zweite Kennzahl teilen**, z. B. Aufstieg geteilt durch Strecke.
-5. **Filter:** Aktivität, Zeitraum (Laufendes Jahr, Letzte 12 Monate, Letzte 90 Tage, Gesamte Zeit, Bestimmtes Jahr, Eigener Bereich), Schlagwort, Mindeststrecke.
+5. **Filter:** Sportart, Zeitraum (Laufendes Jahr, Letzte 12 Monate, Letzte 90 Tage, Gesamte Zeit, Bestimmtes Jahr, Eigener Bereich), Schlagwort, Mindeststrecke.
 6. **Anzeige** – vier einklappbare Gruppen:
    * **Ziel:** ein Zielwert (z. B. 1000 km im Jahr) erzeugt einen Fortschrittsbalken mit Prozent und dem Rest bis zum Ziel. Mit **„Im Plan?“** vergleicht die Kachel deinen Stand mit einem gleichmäßigen Soll (Tag des Jahres bzw. Anteil deines Bereichs) und sagt in Worten **Vor dem Plan**, **Im Plan** oder **Hinter dem Plan**; eine dünne Marke im Balken zeigt das Soll. Es gibt keine Warnfarbe, jede Aussage steht als Text. Das Soll gibt es für Summe und Anzahl ohne Formel bei laufendem Jahr, bestimmtem Jahr und eigenem Bereich.
    * **Vergleich:** zeigt einen Pfeil (**↑ ↓ →**) mit Prozent und Differenz, zum Beispiel „↑ +23,1 % (+15 km)“. Du wählst, womit verglichen wird: **Zeitraum davor**, **Vorjahr** (gleicher Zeitraum bis zum selben Tag) oder **Vormonat** (einen Monat früher). Der Pfeil bewertet nichts: Ob mehr gut ist, hängt von der Kennzahl ab. Für „Gesamte Zeit“ gibt es keinen Vergleich.
    * **Verlauf:** eine kleine Grafik der Wochen- (bis 98 Tage), Monats- oder Jahreswerte als **Linie (Sparkline)**, als **Säulen** oder **Aus**.
-   * **Antippen:** Tippst du auf die Kachel oder auf „Touren anzeigen ›“, öffnet sich die Tourenliste mit den Filtern der Kennzahl (Aktivität, Zeitraum, Schlagwort, Mindeststrecke); bei einem Rekord öffnet sich die Rekordtour. Oben in der Liste steht, was gefiltert ist, mit „Filter aufheben“. Lässt sich etwas nicht genau abbilden (z. B. nur Touren mit Pulsdaten), steht ein Hinweis dabei.
+   * **Antippen:** Tippst du auf die Kachel oder auf „Touren anzeigen ›“, öffnet sich die Tourenliste mit den Filtern der Kennzahl (Sportart, Zeitraum, Schlagwort, Mindeststrecke); bei einem Rekord öffnet sich die Rekordtour. Oben in der Liste steht, was gefiltert ist, mit „Filter aufheben“. Lässt sich etwas nicht genau abbilden (z. B. nur Touren mit Pulsdaten), steht ein Hinweis dabei.
 7. Die **Vorschau** oben zeigt Wert, Trend, Verlauf und Ziel sofort. **Hinzufügen** übernimmt die Kennzahl als Baustein.
 
 Es zählen nur Touren, die die jeweilige Angabe haben (z. B. Puls); fehlende Angaben werden nie als 0 gerechnet.
@@ -975,7 +975,7 @@ Eine Ansicht lässt sich auch als kurzer Text weitergeben, zum Beispiel in einer
 Drei Bausteine der Übersicht (und der Statistik) helfen beim Blick auf Rhythmus und Verschleiß. Alle lesen nur Daten, die schon in deiner Installation liegen; beim Anzeigen wird nichts aus dem Internet geholt. Betrachter sehen sie wie die anderen Bausteine.
 
 * **Belastung und Erholung – Wochenansicht:** Im Einstellungsdialog des Bausteins wählst du bei **Ansicht** die **Wochenansicht mit Ruhetagen** (8 oder 12 Wochen). Je Woche siehst du die Belastung laut Uhr als Balken, die Zahl der Touren und Kilometer und die **Ruhetage** (Tage ohne Tour) als sieben Punkte von Montag bis Sonntag: gefüllt = Tour, leer = Ruhetag, gestrichelt = Tag der laufenden Woche, der noch kommt. Hat eine Woche Touren, aber keinen Uhr-Wert, steht dort **„Belastung ohne Angabe“** und es gibt keinen Balken; „ohne Angabe“ zählt nie als 0. Eine Woche ohne Tour heißt **„Ruhewoche“**. Die Ansicht **Kompakt** ist wie bisher.
-* **Jahreszeiten und Wetter:** Zeigt, wann du unterwegs bist: die vier Jahreszeiten (Frühling März bis Mai, Sommer Juni bis August, Herbst September bis November, Winter Dezember bis Februar, nach der nördlichen Halbkugel) mit Touren oder Kilometern, dazu zwölf Säulen für die Monate (alle Jahre des gewählten Zeitraums zusammen). Aktivität und Zeitraum stellst du wie bei den anderen Bausteinen ein. Liegen zu deinen Touren Wetterdaten vor (sie werden beim Öffnen einer Tour oder in der Verwaltung mit **Wetter laden** gespeichert), kommen die durchschnittliche Temperatur je Monat und Jahreszeit und die Verteilung der Touren nach Temperatur (unter 0 °C, 0 bis 10, 10 bis 20, ab 20 °C) dazu. Ohne Wetterdaten steht ein ehrlicher Hinweis statt der Temperaturen; Touren ohne Wetterdaten zählen bei den Temperaturen nie als 0 °C.
+* **Jahreszeiten und Wetter:** Zeigt, wann du unterwegs bist: die vier Jahreszeiten (Frühling März bis Mai, Sommer Juni bis August, Herbst September bis November, Winter Dezember bis Februar, nach der nördlichen Halbkugel) mit Touren oder Kilometern, dazu zwölf Säulen für die Monate (alle Jahre des gewählten Zeitraums zusammen). Sportart und Zeitraum stellst du wie bei den anderen Bausteinen ein. Liegen zu deinen Touren Wetterdaten vor (sie werden beim Öffnen einer Tour oder in der Verwaltung mit **Wetter laden** gespeichert), kommen die durchschnittliche Temperatur je Monat und Jahreszeit und die Verteilung der Touren nach Temperatur (unter 0 °C, 0 bis 10, 10 bis 20, ab 20 °C) dazu. Ohne Wetterdaten steht ein ehrlicher Hinweis statt der Temperaturen; Touren ohne Wetterdaten zählen bei den Temperaturen nie als 0 °C.
 * **Ausrüstung:** Der Baustein zeigt jetzt zusätzlich den Anteil am Limit in Prozent (zum Beispiel „412 von 600 km (69 %)“). Ab 90 % des Limits steht **„Bald fällig“** mit einem Ausrufezeichen-Symbol, ab 100 % **„Limit erreicht“** beziehungsweise „Limit überschritten um …“ mit einem Kreuz-Symbol; Farbe allein trägt die Aussage nie. Ausrüstung mit Warnung steht ganz oben.
 
 <img src="handbuch/bilder/58-saison-wetter.png" alt="Baustein Jahreszeiten und Wetter">
@@ -1061,7 +1061,7 @@ Damit Empfänger ohne Konto einen Link öffnen können, muss deine Installation 
 | Reiter | Inhalt |
 |---|---|
 | **Übersicht** | Zustand, Updates, Heimatort und Puls, Protokoll, Entwicklermodus |
-| **Aktivitäten** | Aktivitäten-Katalog, Favoriten für „Tour aufnehmen“, Statistik-Gruppen (ab 3.60.0) |
+| **Sportarten** | Sportarten-Katalog, Favoriten für „Tour aufnehmen“, Statistik-Gruppen (ab 3.60.0) |
 | **Touren holen** | Meine Geräte, Komoot, Zepp, Garmin/Suunto/andere Uhren, Wanderführer ([Kapitel 4](#k4)) |
 | **Hochladen & Planen** | Strava und Komoot (Upload), Tourplanung |
 | **Fotos** | Fotobibliothek, Import, Foto-Eingang, Bildeinstellungen |
@@ -1070,7 +1070,7 @@ Damit Empfänger ohne Konto einen Link öffnen können, muss deine Installation 
 | **Sicherung & Zugang** | Sicherung, Umzugspaket, Zugriffsschutz, Offline-Nutzung |
 | **Prüfen & Aufräumen** | auffällige Touren, Aufräumen (eigene Seite) |
 
-Die Verwaltung wird **Administratoren** angezeigt. Jeder Bereich ist eine gleich gestaltete Karte (Überschrift, kurze Erklärung, Inhalt). **Einstellungen speichern** am Ende jedes Reiters speichert die Eingaben; die Abschnitte im Reiter **Aktivitäten** haben eigene Knöpfe zum Speichern.
+Die Verwaltung wird **Administratoren** angezeigt. Jeder Bereich ist eine gleich gestaltete Karte (Überschrift, kurze Erklärung, Inhalt). **Einstellungen speichern** am Ende jedes Reiters speichert die Eingaben; die Abschnitte im Reiter **Sportarten** haben eigene Knöpfe zum Speichern.
 
 ### 15.1 Übersicht: Zustand, Updates, Heimatort
 
@@ -1080,13 +1080,13 @@ Die Verwaltung wird **Administratoren** angezeigt. Jeder Bereich ist eine gleich
 * **Heimatort und Puls:** Heimatort suchen und festlegen; **Maximalpuls (bpm)** für die Pulszonen (leer = 185 bzw. der höchste gemessene Wert).
 * **Entwicklermodus:** blendet Ansichten zur Fehlersuche ein (Selbsttest, vollständiges Protokoll …). Im Alltag nicht nötig.
 
-### 15.1a Aktivitäten: Katalog, Favoriten, Statistik-Gruppen (ab 3.60.0)
+### 15.1a Sportarten: Katalog, Favoriten, Statistik-Gruppen (ab 3.60.0)
 
-Verwaltung → **Aktivitäten** (`#/admin?tab=aktivitaeten`) hat drei Abschnitte:
+Verwaltung → **Sportarten** (`#/admin?tab=sportarten`; die ältere Adresse `?tab=aktivitaeten` führt ebenfalls dorthin) hat drei Abschnitte:
 
-* **Aktivitäten-Katalog** (nur lesen): die 29 Aktivitäten nach Kategorien mit Symbol und Kartenfarbe. Aufgeklappt darunter **Frühere Aktivitäten**: was es seit 3.60.0 nicht mehr gibt, wie es jetzt zählt und wie viele deiner Touren betroffen sind.
-* **Favoriten für „Tour aufnehmen“:** Stern ☆/★ wählt bis zu 12 Aktivitäten, ↑/↓ ordnet sie, **Vorgabe wiederherstellen** setzt Wandern, Laufen, Radtour, Skitour, Mountainbike. Beim Aufzeichnen und Planen stehen sie zuerst, alle übrigen unter „Mehr …“; die zuletzt benutzte ist vorgewählt. **Favoriten speichern** übernimmt.
-* **Statistik-Gruppen:** welche Aktivitäten die Statistik gemeinsam zählt; Vorschläge nur per Klick ([Abschnitt 11.6](#k11)).
+* **Sportarten-Katalog** (nur lesen): die 29 Sportarten nach Kategorien mit Symbol und Kartenfarbe. Aufgeklappt darunter **Frühere Sportarten**: was es seit 3.60.0 nicht mehr gibt, wie es jetzt zählt und wie viele deiner Touren betroffen sind.
+* **Favoriten für „Tour aufnehmen“:** Stern ☆/★ wählt bis zu 12 Sportarten, ↑/↓ ordnet sie, **Vorgabe wiederherstellen** setzt Wandern, Laufen, Radtour, Skitour, Mountainbike. Beim Aufzeichnen und Planen stehen sie zuerst, alle übrigen unter „Mehr …“; die zuletzt benutzte ist vorgewählt. **Favoriten speichern** übernimmt.
+* **Statistik-Gruppen:** welche Sportarten die Statistik gemeinsam zählt; Vorschläge nur per Klick ([Abschnitt 11.6](#k11)).
 
 ![Verwaltung, Reiter „Übersicht“](handbuch/bilder/37-verwaltung-uebersicht.png)
 
@@ -1151,7 +1151,7 @@ Hier findest du auffällige Touren (zum Beispiel unplausible Tempi) und Aufräum
 
 **Was sie bietet:**
 
-* **GPS-Aufzeichnung** im Hintergrund (auch bei ausgeschaltetem Bildschirm). Das Aufzeichnen steht in der App im Mittelpunkt: **Aufzeichnen** ist der runde Reiter in der Mitte der Tab-Leiste und die Startseite der App (umstellbar auf „Übersicht“ unter *Einstellungen der Aufzeichnung*). Der Reiter zeigt auf jeder Seite, ob eine Aufzeichnung läuft (rot, mit Zeit), pausiert ist oder auf das Hochladen wartet. Zur Wahl stehen deine **Favoriten-Aktivitäten** (Verwaltung → Aktivitäten), die zuletzt benutzte vorn und vorgewählt; **Mehr …** zeigt alle übrigen Aktivitäten nach Kategorien (ab 3.59.0).
+* **GPS-Aufzeichnung** im Hintergrund (auch bei ausgeschaltetem Bildschirm). Das Aufzeichnen steht in der App im Mittelpunkt: **Aufzeichnen** ist der runde Reiter in der Mitte der Tab-Leiste und die Startseite der App (umstellbar auf „Übersicht“ unter *Einstellungen der Aufzeichnung*). Der Reiter zeigt auf jeder Seite, ob eine Aufzeichnung läuft (rot, mit Zeit), pausiert ist oder auf das Hochladen wartet. Zur Wahl stehen deine **Favoriten-Sportarten** (Verwaltung → Sportarten), die zuletzt benutzte vorn und vorgewählt; **Mehr …** zeigt alle übrigen Sportarten nach Kategorien (ab 3.59.0).
   * **Bereit:** Sportart antippen (die zuletzt genutzte steht vorn), GPS-Zustand ablesen („GPS bereit, ±5 m“), **Aufzeichnung starten**. Route mit Sprachansagen wählst du direkt darunter; Name, Fotomodus, Wetterwarnung und Live-Standort-Link liegen unter **Einstellungen der Aufzeichnung**.
   * **Unterwegs:** Zeit und Strecke groß, darunter Aufstieg, Höhe und Tempo, Karte mit Spur; **Foto** und **Wegpunkt** als kleinere Knöpfe, **Pausieren** und **Beenden** groß am unteren Rand. **Beenden** fragt nach („Weiter aufzeichnen“ / „Beenden“).
   * **Fertig:** Die Tour wird von selbst hochgeladen; danach **Tour ansehen**. Ohne Netz steht dort „Wartet auf Netz – wird später gesendet“: Die Aufzeichnung bleibt auf dem Handy und wird gesendet, sobald der Server erreichbar ist. Mit **Später senden, neue Aufzeichnung** kannst du sofort weiter aufzeichnen (die App behält die letzten 10 Aufzeichnungen als Sicherung).
@@ -1220,7 +1220,7 @@ Laut Projektbeschreibung kann sie unter anderem: Touren mit Karte und Höhenprof
 
 **Notizen, Fotos und Videos abgleichen (ab 3.57.0):** Meine Touren hat die Gegenstelle dafür, dass das Tagebuch Notizen und Fotos einer verbundenen Tour in **beide Richtungen** abgleicht – nur wenn du in der App auf den Knopf tippst, und vorher zeigt die App, was neu ist. **Notizen** werden zusammengeführt, nie überschrieben: Hat sich die Notiz hier seit dem letzten Abgleich nicht geändert, übernimmt Meine Touren die Fassung aus der App. Wurde sie an beiden Stellen geändert, bleiben beide stehen – die Fassung aus der App wird unten mit der Trennzeile „——— Aus Mein Tourentagebuch, Datum Uhrzeit ———“ angehängt. Ein leerer Text aus der App löscht nichts. Eine Notiz darf jetzt bis zu 20 000 Zeichen lang sein. **Fotos** aus der App landen verkleinert (wie alle Fotos, Vorgabe 2200 Pixel) in deiner Fotobibliothek im Ordner `tagebuch/`, fest der Tour zugeordnet, mit Aufnahmezeit und Aufnahmeort. Schon vorhandene Fotos erkennt Meine Touren (gleiche Datei, gleiche Kennung aus der App, gleiches Bild zur gleichen Zeit oder gleicher Name zur gleichen Zeit) und legt sie nicht doppelt an. Ein Foto, das du hier gelöscht hast, kommt beim nächsten Abgleich nicht von selbst zurück. In die App gehen Fotos verkleinert. **Videos** gehen nur, wenn du sie in der App für eine Tour ausdrücklich auswählst: höchstens 200 MB je Video und 1 GB je Tour. Sie liegen im Datenordner deines Kontos und gehören zum Umzugspaket, aber nicht zur täglichen Datenbanksicherung. In der Weboberfläche von Meine Touren werden Videos (noch) nicht angezeigt. **Rechte:** Ein **Betrachter**-Konto darf Notiz, Fotos und Videos einer Tour lesen (wie bisher Tour und Fotos), aber nichts senden. Jedes Konto sieht nur seine eigenen Touren. Die Schnittstelle ist in den [Versionshinweisen 3.57.0](versionen/3.57.0.md) beschrieben.
 
-Läufe der Zepp-Uhr sind in beiden Apps „Laufen“ (seit 3.50.0). Seit 3.59.0 ist Schneeschuh in Meine Touren wieder eine eigene Sportart; das Tagebuch sendet Schneeschuh als „snowshoe“. Nordic Walking ist hier eine eigene Sportart, im Tagebuch zählt es als Wandern. Wer Aktivitäten gemeinsam zählen will, legt eine Statistik-Gruppe an ([Abschnitt 11.6](#k11)).
+Läufe der Zepp-Uhr sind in beiden Apps „Laufen“ (seit 3.50.0). Seit 3.59.0 ist Schneeschuh in Meine Touren wieder eine eigene Sportart; das Tagebuch sendet Schneeschuh als „snowshoe“. Nordic Walking ist hier eine eigene Sportart, im Tagebuch zählt es als Wandern. Wer Sportarten gemeinsam zählen will, legt eine Statistik-Gruppe an ([Abschnitt 11.6](#k11)).
 
 [↑ Inhaltsverzeichnis](#inhalt)
 

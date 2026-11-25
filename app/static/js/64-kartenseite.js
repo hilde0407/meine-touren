@@ -25,7 +25,7 @@ SL_EL.karte = Object.fromEntries([["karte", () => document.getElementById("kac-k
 
 /* ---------- Stand der Karte (für die Bausteine) ---------- */
 function kaState() {
-  const sel = document.getElementById("my"), y = sel ? +sel.value || 0 : 0, off = new Set([...document.querySelectorAll("#ms .chip:not(.on)")].map(c => c.dataset.s));
+  const sel = document.getElementById("my"), y = sel ? +sel.value || 0 : 0, off = mapOff();
   return {y, off, tours: TOURS.filter(t => (!y || t.y === y) && !off.has(t.sport))};
 }
 /* Touren, deren Strecke den sichtbaren Ausschnitt berührt (wie „Touren im Ausschnitt“ in 06-erweiterungen.js) */
@@ -102,7 +102,7 @@ Object.assign(window.SL_WT, {
         if (!b.isConnected) return false;
         const y = +((document.getElementById("my") || {}).value || 0), st = kaState(), L = TOURS.filter(t => !y || t.y === y), by = {};
         L.forEach(t => (by[t.sport] = (by[t.sport] || 0) + (km ? t.km : 1)));
-        const keys = Object.keys(by).sort((a, z) => by[z] - by[a]);
+        const keys = sportOrder(Object.keys(by)).filter(k => !isSg(k));            // 3.60.1: Katalog-Reihenfolge wie die Chips der Karte
         if (!keys.length) {
           slNote(b, "Keine Touren in diesem Jahr.");
           return true;

@@ -67,7 +67,7 @@ const goalSport = (g, t) => {
 const goalSportName = s => {
   if (s && (s.startsWith("grp:") || isSg(s))) {
     const g = SGRP.find(x => x.id === s.split(":")[1]);
-    if (g) return g.name;
+    if (g) return sgLabel(SG_PRE + g.id);                                  // 3.60.1: „<Name> = A + B + …“ wie in Filtern und Aufteilungen
     if (isSg(s)) return "(Gruppe gelöscht)";
   }
   return GOAL_GRP[s] ? GOAL_GRP[s][0] : sName(s);
@@ -131,12 +131,11 @@ VIEWS.records = async (_, q) => {
     sessionStorage.setItem("rec_s", fs);
   } catch (e) {}
   /* 3.59.0: Statistik-Gruppen als eigener Eintrag (Auswahl) und als eine Zeile in „Je Sportart“ (sgKey/sgMatch, 01-grundlagen.js) */
-  const nOf = x => TOURS.filter(t => (isSg(x) ? sgKey(t.sport) === x : t.sport === x)).length,
-    present = [...new Set(TOURS.map(t => t.sport))],
-    allSp = sgOptions(present.map(sNorm)).map(o => o[0]).concat(present).sort((a, b) => nOf(b) - nOf(a) || isSg(b) - isSg(a));
+  const present = [...new Set(TOURS.map(t => t.sport))],
+    allSp = sportOrder(present);                                                 // 3.60.1: dieselbe Auswahl wie Karte und Statistik
   if (fs && !allSp.includes(fs)) fs = "";
   const T = fs ? TOURS.filter(t => (isSg(fs) ? sgMatch(t.sport, [fs]) : t.sport === fs)) : TOURS;
-  const chips = `<div class="row g6 mn4-0-18 fxw"><a class="chip${fs ? "" : " on"}" href="#/records?s=">Alle Sportarten</a>${allSp.map(x => `<a class="chip${fs === x ? " on" : ""}" href="#/records?s=${encodeURIComponent(x)}"><i class="sw" style="background:${sCol(x)}"></i>${isSg(x) ? esc(sgLabel(x)) : sName(x)}</a>`).join("")}</div>`;
+  const chips = `<div class="row g6 mn4-0-18 fxw"><a class="chip${fs ? "" : " on"}" href="#/records?s=">Alle Sportarten</a>${allSp.map(x => `<a class="chip${fs === x ? " on" : ""}" href="#/records?s=${encodeURIComponent(x)}"${isSg(x) ? ` title="${esc(sgTitle(x))}"` : ""}><i class="sw" style="background:${sCol(x)}"></i>${isSg(x) ? esc(sgLabel(x)) : sName(x)}</a>`).join("")}</div>`;
   const sum = (a, f) => a.reduce((c, t) => c + f(t), 0),
     km = sum(T, t => t.km),
     up = sum(T, t => t.up_m || 0),
@@ -203,7 +202,7 @@ VIEWS.records = async (_, q) => {
             a.filter(t => t.km >= 3 && t.h > 0),
             t => t.km / t.h
           );
-        return `<div class="r" style="display:block"><div><i class="sw" style="background:${sCol(s)}"></i><b style="font:600 20px var(--d)">${isSg(s) ? esc(sName(s)) : sName(s)}</b> <span class="mut">· ${a.length} Touren, ${nf(
+        return `<div class="r" style="display:block"><div><i class="sw" style="background:${sCol(s)}"></i><b style="font:600 20px var(--d)"${isSg(s) ? ` title="${esc(sgTitle(s))}"` : ""}>${isSg(s) ? esc(sName(s)) : sName(s)}</b> <span class="mut">· ${a.length} Touren, ${nf(
           sum(a, t => t.km),
           0
         )} km, ${nf(
@@ -502,7 +501,7 @@ VIEWS.map = async () => {
     phs = null,
     phOn = false;
   const yearSel = () => +$("#my").value,
-    off = () => new Set([...document.querySelectorAll("#ms .chip:not(.on)")].map(c => c.dataset.s));
+    off = () => mapOff();                                                     // 3.60.1: abgewählte Sportarten (02-uebersicht.js; Gruppen-Chips zählen nicht selbst)
   const drawHeat = () => {
     hl.clearLayers();
     if (!heat) return;

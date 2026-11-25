@@ -2,19 +2,27 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
-## Version 3.60.0 – Endgültiger Aktivitäten-Katalog, Verwaltung mit Reiter „Aktivitäten“
+## Version 3.60.1 – Statistik-Gruppen eindeutig benannt, Karte mit Kategorien und eigenen Farben, Begriff „Sportart“
 
-- **Achtung:** Der Katalog hat jetzt genau 29 Aktivitäten (neu: Bikepacking, Rafting, Gleitschirm). Touren mit einer entfernten Aktivität aus 3.59.0 (z. B. Gassigehen, Golf, SUP) bleiben unverändert und zählen in Anzeige, Filtern, Statistik und Zielen als ihr Rückfall (Spazieren, Sonstiges, Kajak …); Favoriten und Statistik-Gruppen lassen sie still weg
+- Ein Gruppenname darf nicht wie eine Sportart heißen (alle vier Sprachen, ohne Groß-/Kleinschreibung und Leerzeichen); bestehende Gruppen mit solchem Namen zählen weiter, die Verwaltung bittet ums Umbenennen
+- Gruppen heißen in Filtern, Zielen, Aufteilungen und im Jahresrückblick „Name = A + B + C“ (ab vier Sportarten „… + …“, vollständige Liste im Tooltip) statt „Name (zusammengefasst)“
+- Karte: Sportarten nach Kategorien in Katalog-Reihenfolge, dazu die Statistik-Gruppen als Chips; dieselbe Auswahl wie Statistik, Rekorde, Baustein-Filter und Legende
+- Eigene, deutlich unterscheidbare Kartenfarbe je Sportart (Chip, Legende und Strecke gleich)
+- Durchgehend „Sportart“ statt „Aktivität“ (Reiter Verwaltung → Sportarten, `?tab=aktivitaeten` bleibt als Alias)
+
+## Version 3.60.0 – Endgültiger Sportarten-Katalog, Verwaltung mit Reiter „Sportarten“
+
+- **Achtung:** Der Katalog hat jetzt genau 29 Sportarten (neu: Bikepacking, Rafting, Gleitschirm). Touren mit einer entfernten Sportart aus 3.59.0 (z. B. Gassigehen, Golf, SUP) bleiben unverändert und zählen in Anzeige, Filtern, Statistik und Zielen als ihr Rückfall (Spazieren, Sonstiges, Kajak …); Favoriten und Statistik-Gruppen lassen sie still weg
 - Umbenannt: Bergtour → Bergsteigen, MTB → Mountainbike, Skifahren → Ski alpin, Schneeschuh → Schneeschuhwandern (jetzt Kategorie Winter)
 - Import (GPX/TCX, FIT, Aufzeichnung) und Senden (Strava, Komoot) setzen den Rückfall ein; Zepp unverändert
-- Verwaltung: neuer Reiter „Aktivitäten“ (Katalog, Favoriten für „Tour aufnehmen“, Statistik-Gruppen); Heimatort und Puls in der Übersicht; einheitliche Karten
+- Verwaltung: neuer Reiter „Sportarten“ (Katalog, Favoriten für „Tour aufnehmen“, Statistik-Gruppen); Heimatort und Puls in der Übersicht; einheitliche Karten
 
-## Version 3.59.0 – Aktivitäten-Katalog, Schneeschuh, Statistik-Gruppen, Favoriten
+## Version 3.59.0 – Sportarten-Katalog, Schneeschuh, Statistik-Gruppen, Favoriten
 
-- **Achtung:** Keine festen Zusammenfassungen mehr – die Statistik zählt jede Aktivität einzeln. Zusammenfassen über Verwaltung → Übersicht → „Statistik: Aktivitäten zusammenfassen“ (Ein-Klick-Vorschläge, nie automatisch); ältere Ziele „Alle Rad-Sportarten“ usw. zählen weiter
-- 48 Aktivitäten in fünf Kategorien (Zu Fuß, Rad, Winter, Wasser, Sonstige) mit Symbol, Kartenfarbe und vier Sprachen
+- **Achtung:** Keine festen Zusammenfassungen mehr – die Statistik zählt jede Sportart einzeln. Zusammenfassen über Verwaltung → Übersicht → „Statistik: Sportarten zusammenfassen“ (Ein-Klick-Vorschläge, nie automatisch); ältere Ziele „Alle Rad-Sportarten“ usw. zählen weiter
+- 48 Sportarten in fünf Kategorien (Zu Fuß, Rad, Winter, Wasser, Sonstige) mit Symbol, Kartenfarbe und vier Sprachen
 - Schneeschuh ist wieder eine eigene Sportart; bestehende Wandern-Touren mit Schlagwort „Schneeschuh“ stellt Prüfen auf Wunsch um (rückgängig machbar)
-- Favoriten-Aktivitäten (Verwaltung): beim Aufzeichnen und Planen zuerst angeboten, „Mehr …“ mit allen Kategorien
+- Favoriten-Sportarten (Verwaltung): beim Aufzeichnen und Planen zuerst angeboten, „Mehr …“ mit allen Kategorien
 
 ## Version 3.58.0 – Komoot: Upload immer privat, Notiz und Pins, Komoot-Paket
 
@@ -331,7 +339,7 @@ Einzelheiten: [docs/versionen/3.23.0.md](versionen/3.23.0.md)
 ## Version 3.22.0 – Statistik als anpassbare Seite
 
 - Die Statistikseite lässt sich wie Tourseite und Übersicht gestalten (Bausteine, Ansichten, Vorlagen, Export/Import).
-- Globaler Filter oben (Aktivität und Zeitraum) für alle Bausteine.
+- Globaler Filter oben (Sportart und Zeitraum) für alle Bausteine.
 
 Einzelheiten: [docs/versionen/3.22.0.md](versionen/3.22.0.md)
 
@@ -351,7 +359,7 @@ Einzelheiten: [docs/versionen/3.20.0.md](versionen/3.20.0.md)
 
 ## Version 3.19.0 – Konfigurierbare Bausteine
 
-- Bausteine der Übersicht lassen sich nach Aktivität, Zeitraum, Kennzahlen und Titel einstellen.
+- Bausteine der Übersicht lassen sich nach Sportart, Zeitraum, Kennzahlen und Titel einstellen.
 - „Dein Jahr“ ist ein richtiger Baustein, den man mehrfach mit verschiedenen Filtern hinzufügen kann.
 
 Einzelheiten: [docs/versionen/3.19.0.md](versionen/3.19.0.md)
@@ -704,7 +712,7 @@ Native Android-App als „Hülle“ um die Weboberfläche mit GPS-Aufzeichnung, 
 ## Version 1.13
 
 * **Reisen bearbeiten:** In der Reise gibt es „✎ Reise bearbeiten“: Name und Zeitraum lassen sich ändern. Ein größerer Zeitraum nimmt alle Touren dieser Tage auf, ein kleinerer lässt Touren weg; Kilometer, Aufstieg und Statistik passen sich an. „Zurücksetzen“ stellt die automatische Erkennung wieder her.
-* **Reisebericht als PDF:** „📄 Reisebericht (PDF)“ in der Reise öffnet eine druckbare Seite mit Karte (Tage in Farben), Statistik nach Aktivität, Tag-für-Tag-Liste und den besten Fotos. Als Datei über „⬇ PDF herunterladen“ (auch am Handy).
+* **Reisebericht als PDF:** „📄 Reisebericht (PDF)“ in der Reise öffnet eine druckbare Seite mit Karte (Tage in Farben), Statistik nach Sportart, Tag-für-Tag-Liste und den besten Fotos. Als Datei über „⬇ PDF herunterladen“ (auch am Handy).
 * **Fotos im PDF wählbar:** In Tourblatt, Reisebericht und Jahresrückblick lässt sich über „Fotos im PDF“ einstellen, ob Fotos dabei sind und wie viele (3 bis 24). Die Wahl gilt appweit und wird gespeichert.
 
 ## Version 1.12.2
@@ -718,7 +726,7 @@ Native Android-App als „Hülle“ um die Weboberfläche mit GPS-Aufzeichnung, 
 ## Version 1.12
 
 * **Tourplanung ein- und ausschaltbar:** Unter Verwaltung → „Touren & Quellen“ → „Tourplanung“. Ist sie aus, verschwinden alle „Tour planen“-Schaltflächen. Ist sie an, wählst du den Routing-Dienst: **brouter.de** (öffentlich), **eigener BRouter auf diesem Server** (mit Installationsbefehl direkt in der Oberfläche) oder **anderer BRouter-Server im Netz**. „Verbindung testen“ prüft die Adresse und meldet fehlende Karten-Kacheln.
-* **Statistik nach Aktivität** bei Reisen, Alben und Etappen: je Sportart Touren, Kilometer, Aufstieg, Abstieg, Stunden, Ø km/h und längste Tour, dazu eine Gesamtzeile; die Kennzahlen oben zeigen jetzt auch den Gesamtabstieg.
+* **Statistik nach Sportart** bei Reisen, Alben und Etappen: je Sportart Touren, Kilometer, Aufstieg, Abstieg, Stunden, Ø km/h und längste Tour, dazu eine Gesamtzeile; die Kennzahlen oben zeigen jetzt auch den Gesamtabstieg.
 
 ## Version 1.11.1
 

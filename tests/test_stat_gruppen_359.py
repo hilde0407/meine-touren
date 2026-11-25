@@ -187,7 +187,7 @@ def test_jahresrueckblick_fasst_zusammen():
     names = lambda: {s["name"]: s["km"] for s in rueckblick._kennzahlen(ts, y, "")["sports"]}
     assert names() == {"Wandern": 22.0, "Bergsteigen": 8.0}
     sg.save(GR)
-    assert names() == {"Bergwandern": 30.0}
+    assert names() == {"Bergwandern = Wandern + Bergsteigen": 30.0}       # 3.60.1: Gruppe mit ihren Aktivitäten
 
 
 def test_layout_filter_und_eigene_kennzahl_nehmen_gruppen_an():
@@ -256,9 +256,9 @@ def test_version_texte_und_dateien():
     assert notes.startswith("# 3.59.0") and "Was ist neu" in notes and "Wie benutze ich es" in notes and "Schneeschuh" in notes and "Favoriten" in notes
     assert "3.59.0" in (ROOT / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")
     assert "Version 3.59.0" in (ROOT / "docs" / "VERSIONSVERLAUF.md").read_text(encoding="utf-8")
-    assert "Aktivitäten zusammenfassen" in (ROOT / "docs" / "HANDBUCH.md").read_text(encoding="utf-8")
+    assert "Sportarten zusammenfassen" in (ROOT / "docs" / "HANDBUCH.md").read_text(encoding="utf-8")       # 3.60.1: Begriff „Sportart“
     i18n = (ROOT / "app" / "static" / "js" / "00-i18n-neu.js").read_text(encoding="utf-8")
-    for k in ("Statistik: Aktivitäten zusammenfassen || ", "{} (zusammengefasst) || ", "Gruppen speichern || ", "Zu Fuß || ", "Favoriten-Aktivitäten || ", "Kajak/Kanu || ", "Schneeschuh-Touren || "):
+    for k in ("Statistik: Sportarten zusammenfassen || ", "{} (zusammengefasst) || ", "Gruppen speichern || ", "Zu Fuß || ", "Favoriten-Sportarten || ", "Kajak/Kanu || ", "Schneeschuh-Touren || "):
         assert k in i18n
     js = (ROOT / "app" / "static" / "js" / "01-grundlagen.js").read_text(encoding="utf-8")
     assert "const sgKey" in js and "function sgExpand" in js and "const sgMatch" in js

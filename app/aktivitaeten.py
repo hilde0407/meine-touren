@@ -24,17 +24,17 @@ def katalog():
 
 def pruefen(raw):
     if not isinstance(raw, list) or not raw:
-        raise HTTPException(400, "Bitte mindestens eine Favoriten-Aktivität wählen")
+        raise HTTPException(400, "Bitte mindestens eine Favoriten-Sportart wählen")
     out = []
     for s in raw:
         if isinstance(s, str) and s in gpxtools.RUECKFALL:               # 3.60.0: entfernte Aktivität (älterer Stand der Oberfläche): still weglassen
             continue
         if not isinstance(s, str) or s not in gpxtools.LABEL:
-            raise HTTPException(400, "Unbekannte Aktivität")
+            raise HTTPException(400, "Unbekannte Sportart")
         if s not in out:
             out.append(s)
     if not out:
-        raise HTTPException(400, "Bitte mindestens eine Favoriten-Aktivität wählen")
+        raise HTTPException(400, "Bitte mindestens eine Favoriten-Sportart wählen")
     if len(out) > MAX_FAV:
         raise HTTPException(400, f"Höchstens {MAX_FAV} Favoriten")
     return out

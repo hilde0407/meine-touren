@@ -1,5 +1,5 @@
 """3.59.0 Aktivitäten (Oberfläche, Chromium; 3.60.0: Verwaltung → Aktivitäten): „Statistik-Gruppen“ (ohne Gruppen jede Aktivität einzeln, Kategorien, ausgegraute
-Aktivitäten, Tastatur, Vorschläge, Speichern mit Rückmeldung), „Favoriten-Aktivitäten“ (Stern, Reihenfolge, Speichern), Statistikfilter mit Eintrag „<Name> (zusammengefasst)“,
+Aktivitäten, Tastatur, Vorschläge, Speichern mit Rückmeldung), „Favoriten-Aktivitäten“ (Stern, Reihenfolge, Speichern), Statistikfilter mit Eintrag „<Name> = A + B“ (3.60.1),
 Abschnitt „Sportarten“ als eine Zeile, Rekorde je Sportart, gelöschte Gruppe in der Adresse ohne Fehler, Prüfen „Schneeschuh-Touren“, Englisch, 390 px."""
 import json
 import os
@@ -85,7 +85,7 @@ def clean(app):
 def _page(pw, url, w=1280, lang="de"):
     b = pw.chromium.launch()
     ctx = b.new_context(viewport={"width": w, "height": 900}, service_workers="block")
-    ctx.add_init_script(f"try {{ localStorage.setItem('lang', '{lang}'); localStorage.setItem('admtab', 'aktivitaeten'); }} catch (e) {{}}")
+    ctx.add_init_script(f"try {{ localStorage.setItem('lang', '{lang}'); localStorage.setItem('admtab', 'sportarten'); }} catch (e) {{}}")
     pg = ctx.new_page()
     errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
@@ -93,7 +93,7 @@ def _page(pw, url, w=1280, lang="de"):
 
 
 def _admin(pg, url):
-    pg.goto(url + "/#/admin?tab=aktivitaeten")
+    pg.goto(url + "/#/admin?tab=sportarten")
     pg.wait_for_selector("#sgp .sgg, #sgp .sgnone", timeout=TL)
     quiet(pg, 4000)
 
@@ -102,12 +102,12 @@ def test_verwaltung_gruppen_anlegen_vorschlaege_und_speichern(pw, clean):
     url = clean
     b, pg, errs = _page(pw, url)
     try:
-        pg.goto(url + "/#/admin?tab=aktivitaeten")
+        pg.goto(url + "/#/admin?tab=sportarten")
         pg.wait_for_selector("#sgp .sgnone", timeout=TL)
         quiet(pg, 4000)
         sec = pg.locator("#sgp")
         expect(sec.locator("h2")).to_have_text("Statistik-Gruppen")
-        expect(sec.locator(".sgnone")).to_have_text("Keine Gruppen: Die Statistik zählt jede Aktivität einzeln.")
+        expect(sec.locator(".sgnone")).to_have_text("Keine Gruppen: Die Statistik zählt jede Sportart einzeln.")
         assert sec.locator(".sgg").count() == 0
         assert sec.locator(".sgsug:visible").all_inner_texts() == ["Vorschlag: Wandern und Bergsteigen", "Vorschlag: Rad (alle)", "Vorschlag: Ski (alle)"]
         # Vorschlag „Rad (alle)“: MTB herauslösen (per Tastatur), danach ist MTB in einer neuen Gruppe frei
@@ -153,7 +153,7 @@ def test_verwaltung_favoriten(pw, clean):
     url = clean
     b, pg, errs = _page(pw, url)
     try:
-        pg.goto(url + "/#/admin?tab=aktivitaeten")
+        pg.goto(url + "/#/admin?tab=sportarten")
         pg.wait_for_selector("#favp .favlist li", timeout=TL)
         quiet(pg, 4000)
         sec = pg.locator("#favp")
@@ -216,11 +216,11 @@ def test_statistik_filter_aufteilung_und_rekorde_mit_gruppe(pw, clean):
     try:
         pg.goto(url + "/#/stats")
         chip = pg.locator(f'#sch [data-s="sgrp:{gid}"]')
-        expect(chip).to_have_text("Bergwandern (zusammengefasst)", timeout=TL)
+        expect(chip).to_have_text("Bergwandern = Wandern + Bergsteigen", timeout=TL)
         expect(pg.locator('#sch [data-s="hike"]')).to_be_visible()                       # die einzelnen Sportarten bleiben wählbar
         rows = pg.locator('[data-st="sportarten"] .rows, #stc-sportarten .rows').first
         expect(rows).to_contain_text("Bergwandern")
-        assert "Bergsteigen" not in rows.inner_text() and "Wandern\n" not in rows.inner_text()
+        assert rows.inner_text().count("Bergsteigen") == 1 and "Wandern\n" not in rows.inner_text()      # 3.60.1: nur in der Gruppenzeile „Bergwandern = Wandern + Bergsteigen“
         chip.click()
         pg.wait_for_function("() => location.hash.includes('sgrp')", timeout=TL)
         quiet(pg, 4000)
@@ -229,7 +229,7 @@ def test_statistik_filter_aufteilung_und_rekorde_mit_gruppe(pw, clean):
         # Rekorde: Gruppe als Auswahl und als eine Zeile „Je Sportart“
         pg.goto(url + "/#/records?s=")
         quiet(pg, 4000)
-        expect(pg.locator(f'a.chip[href="#/records?s=sgrp%3A{gid}"]')).to_contain_text("Bergwandern (zusammengefasst)")
+        expect(pg.locator(f'a.chip[href="#/records?s=sgrp%3A{gid}"]')).to_contain_text("Bergwandern = Wandern + Bergsteigen")
         expect(pg.locator(".panel", has_text="Je Sportart")).to_contain_text("Bergwandern")
         # gelöschte Gruppe in der Adresse: alle Sportarten, kein Fehler
         _put(url, {"gruppen": []})
@@ -257,7 +257,7 @@ def test_englisch_und_handy(pw, clean):
         box = sec.bounding_box()
         assert box["x"] >= 0 and box["x"] + box["width"] <= 391
         pg.goto(url + "/#/stats")
-        expect(pg.locator(f'#sch [data-s="sgrp:{gid}"]')).to_have_text("Bergwandern (combined)", timeout=TL)
+        expect(pg.locator(f'#sch [data-s="sgrp:{gid}"]')).to_have_text("Bergwandern = Hiking + Mountaineering", timeout=TL)
         assert not errs, errs
     finally:
         b.close()

@@ -178,7 +178,7 @@ def test_hintergrund_thread(monkeypatch):
 
 def test_service_worker_und_seite():
     sw = (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'const V = "mt-v145"' in sw and 'PICS = "mt-pics-v2"' in sw
+    assert 'const V = "mt-v146"' in sw and 'PICS = "mt-pics-v2"' in sw
     assert 'p.startsWith("/pic/") && u.searchParams.get("v")' in sw and "immutable" in sw     # nur bestätigt unveränderliche Bilder zuerst aus dem Speicher
     js = (ROOT / "app" / "static" / "js" / "03-tour.js").read_text(encoding="utf-8")
     assert "strip=${PH_STRIP_N}" in js and "IntersectionObserver" in js and 'width="104" height="104"' in js

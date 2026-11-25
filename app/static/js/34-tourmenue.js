@@ -28,7 +28,7 @@ const TACT = [
       ["-", "Beschriften"],
       ["ren", "Umbenennen", ""],
       ["etag", "Tags & Alben", "Schlagworte vergeben"],
-      ["esport", "Sportart ändern", "Alle Aktivitäten, Favoriten zuerst"],
+      ["esport", "Sportart ändern", "Alle Sportarten, Favoriten zuerst"],
       ["-", "Strecke und Höhen"],
       ["etc", "Streckenfarbe", "Farbe und Breite auf der Karte"],
       ["efix", "Höhen korrigieren", "Mit Geländemodell neu berechnen"],

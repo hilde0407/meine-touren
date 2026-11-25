@@ -13,15 +13,20 @@ Eine zentrale Stelle für alle Auswertungen (Server; die Oberfläche hat dieselb
     load()             die Gruppen des Benutzers ([] = jede Aktivität einzeln)
     key(sport)         Sportart -> Schlüssel der Auswertung („sgrp:<id>“ für Mitglieder einer Gruppe, sonst die Sportart)
     name(key)          Anzeigename eines Schlüssels (Gruppenname bzw. deutscher Sportname)
+    label(key)         3.60.1 Beschriftung einer Gruppe in Aufteilungen: „<Name> = A + B + C“ (ab 4 Mitgliedern „… + …“), sonst wie name()
+    namens_kollision(n)  3.60.1: Gruppenname gleich dem Namen einer Aktivität (4 Sprachen, ohne Groß-/Kleinschreibung und Leerzeichen)? Neue Namen werden abgelehnt,
+                       bestehende Gruppen bleiben (die Verwaltung zeigt einen Hinweis und verlangt beim Speichern einen anderen Namen).
     expand(liste)      Filterliste (Sportarten und/oder „sgrp:<id>“) -> Menge der Sportarten; None = alle (leer, oder nur gelöschte Gruppen)
     passt(sport, menge)  Filter passt (menge aus expand)
     ziel_sportarten(s) Sportarten eines Ziels (auch grp:… und sgrp:…); None = alle
 Filtereinträge: eine Sportart ([A-Za-z0-9_]{1,40}) oder „sgrp:<id>“ (FILTER_RE).
 Gespeicherte Filter oder Ziele mit einer inzwischen gelöschten Gruppe zählen wie „alle Sportarten“ – nie ein Fehler.
 """
+import functools
 import json
 import re
 import secrets
+from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
 
@@ -44,6 +49,33 @@ VORSCHLAEGE = [
     {"id": "bike", "name": "Rad (alle)", "sports": [k for k, _, _, c in gpxtools.CATALOG if c == "rad"]},
     {"id": "ski", "name": "Ski (alle)", "sports": ["skialpin", "skitour", "nordic"]},
 ]
+
+
+I18N_NEU = Path(__file__).resolve().parent / "static" / "js" / "00-i18n-neu.js"
+
+
+def _norm_name(n):
+    return re.sub(r"\s+", "", str(n or "")).casefold()
+
+
+@functools.lru_cache(maxsize=1)
+def aktivitaetsnamen():
+    """Namen der Katalog-Aktivitäten in allen vier Sprachen (normalisiert). Quelle der Übersetzungen ist dieselbe Tabelle wie in der Oberfläche (00-i18n-neu.js)."""
+    de = {n for _, n, _, _ in gpxtools.CATALOG}
+    out = {_norm_name(n) for n in de}
+    try:
+        for line in I18N_NEU.read_text(encoding="utf-8").split("\n"):
+            c = line.split(" || ")
+            if len(c) == 4 and c[0].strip() in de:
+                out.update(_norm_name(x) for x in c)
+    except OSError:
+        pass
+    out.discard("")
+    return frozenset(out)
+
+
+def namens_kollision(name):
+    return _norm_name(name) in aktivitaetsnamen()
 
 
 def known_sports():
@@ -113,6 +145,8 @@ def pruefen(raw, known=None):
             raise HTTPException(400, f"Gruppe {n}: Der Name muss 1 bis {NAME_MAX} Zeichen lang sein")
         if BAD_CHARS.search(name):
             raise HTTPException(400, f"Gruppe {n}: Der Name darf die Zeichen < > & \" nicht enthalten")
+        if namens_kollision(name):                                           # 3.60.1: „Wandern = Wandern + …“ neben „Wandern“ wäre verwirrend
+            raise HTTPException(400, f"Gruppe {n}: „{name}“ heißt schon eine Sportart – bitte einen anderen Gruppennamen wählen")
         if name.casefold() in names:
             raise HTTPException(400, f"Zwei Gruppen heißen „{name}“")
         names.add(name.casefold())
@@ -195,6 +229,18 @@ def name(k, gruppen=None):
     if isinstance(k, str) and k.startswith(PREFIX):
         g = next((g for g in (load() if gruppen is None else gruppen) if PREFIX + g["id"] == k), None)
         return g["name"] if g else k
+    return SPORT_DE.get(k, k)
+
+
+def label(k, gruppen=None):
+    """3.60.1: Beschriftung eines Schlüssels in Aufteilungen: Gruppe „<Name> = A + B + C“ (mehr als drei Mitglieder: „<Name> = A + B + C + …“), sonst der Sportname."""
+    from .stats import SPORT_DE
+    if isinstance(k, str) and k.startswith(PREFIX):
+        g = next((g for g in (load() if gruppen is None else gruppen) if PREFIX + g["id"] == k), None)
+        if not g:
+            return k
+        m = [SPORT_DE.get(s, s) for s in g["sports"]]
+        return f"{g['name']} = " + " + ".join(m[:3] + (["…"] if len(m) > 3 else []))
     return SPORT_DE.get(k, k)
 
 

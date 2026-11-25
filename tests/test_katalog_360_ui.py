@@ -30,7 +30,7 @@ for i, (tid, sp, km) in enumerate([("w1", "hike", 10), ("d1", "dogwalk", 4), ("g
 db.put("fav_sports", json.dumps(["golf", "hike", "sup", "rafting"]))
 db.put("stat_gruppen", json.dumps([{{"id": "geh", "name": "Gehen", "sports": ["hike", "dogwalk", "walk"]}}, {{"id": "nass", "name": "Nass", "sports": ["sup", "golf"]}}]))
 """
-DE = r"\\b(der|die|das|und|nicht|ist|wird|werden|für|mit|auf|noch|oder|kein|keine|Aktivitäten|Touren|Frühere|Sonstiges|Wandern|Favoriten|Gruppe|Gruppen|speichern)\\b"
+DE = r"\\b(der|die|das|und|nicht|ist|wird|werden|für|mit|auf|noch|oder|kein|keine|Aktivitäten|Aktivität|Sportarten|Touren|Frühere|Sonstiges|Wandern|Favoriten|Gruppe|Gruppen|speichern)\\b"
 SCAN = """([sel, re]) => { const R = new RegExp(re, 'i'), out = [];
   document.querySelectorAll(sel).forEach(root => { const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let n;
     while (n = w.nextNode()) { const p = n.parentElement; if (!p || p.closest('code,pre,script,style,option,.sgn')) continue; const t = n.nodeValue.trim(); if (t.length > 2 && R.test(t)) out.push(t.slice(0, 120)); } });
@@ -83,8 +83,8 @@ def _page(pw, url, w=1280, lang="de"):
     return b, pg, errs
 
 
-def _aktivitaeten(pg, url):
-    pg.goto(url + "/#/admin?tab=aktivitaeten")
+def _aktivitaeten(pg, url, tab="sportarten"):
+    pg.goto(url + "/#/admin?tab=" + tab)
     pg.wait_for_selector("#katp .katit", timeout=TL)
     pg.wait_for_selector("#favp .favlist li", timeout=TL)
     pg.wait_for_selector("#sgp .sgg, #sgp .sgnone", timeout=TL)
@@ -95,14 +95,15 @@ def test_reiter_aktivitaeten_drei_abschnitte_und_altdaten(pw, app):
     vorher = _tours(app)
     b, pg, errs = _page(pw, app)
     try:
-        _aktivitaeten(pg, app)
-        tab = pg.locator('.atab[data-t="aktivitaeten"]')
+        _aktivitaeten(pg, app, "aktivitaeten")                                     # alte Adresse aus 3.60.0: Alias auf „sportarten“
+        assert "tab=sportarten" in pg.url
+        tab = pg.locator('.atab[data-t="sportarten"]')
         expect(tab).to_be_visible()
-        expect(pg.locator('#atabs [data-t="aktivitaeten"]')).to_have_attribute("aria-selected", "true")
+        expect(pg.locator('#atabs [data-t="sportarten"]')).to_have_attribute("aria-selected", "true")
         assert tab.locator(":scope > .gbody > *").evaluate_all("l => l.map(e => e.id)") == ["katp", "favp", "sgp"]
-        assert tab.locator(".gbody > * > h2").all_inner_texts() == ["Aktivitäten-Katalog", "Favoriten für „Tour aufnehmen“", "Statistik-Gruppen"]
+        assert tab.locator(".gbody > * > h2").all_inner_texts() == ["Sportarten-Katalog", "Favoriten für „Tour aufnehmen“", "Statistik-Gruppen"]
         # einheitliche Optik: gleiche Kartenränder und Überschriftengröße, gleiche Kategorie-Beschriftung in allen drei Abschnitten
-        st = pg.evaluate("""() => [...document.querySelectorAll('.atab[data-t=aktivitaeten] .gbody > *')].map(c => [getComputedStyle(c).borderTopWidth, getComputedStyle(c).borderRadius,
+        st = pg.evaluate("""() => [...document.querySelectorAll('.atab[data-t=sportarten] .gbody > *')].map(c => [getComputedStyle(c).borderTopWidth, getComputedStyle(c).borderRadius,
             getComputedStyle(c.querySelector(':scope > h2')).fontSize])""")
         assert len({tuple(x) for x in st}) == 1, st
         kat = ["Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor und Sonstige"]
@@ -170,11 +171,11 @@ def test_englisch_ohne_deutsche_reste_und_390px(pw, app):
     b, pg, errs = _page(pw, app, w=390, lang="en")
     try:
         _aktivitaeten(pg, app)
-        expect(pg.locator('#atabs [data-t="aktivitaeten"]')).to_have_text("Activities")
-        assert pg.locator(".atab[data-t=aktivitaeten] .gbody > * > h2").all_inner_texts() == ["Activity catalogue", "Favourites for “Record a tour”", "Statistics groups"]
+        expect(pg.locator('#atabs [data-t="sportarten"]')).to_have_text("Sports")
+        assert pg.locator(".atab[data-t=sportarten] .gbody > * > h2").all_inner_texts() == ["Sports catalogue", "Favourites for “Record a tour”", "Statistics groups"]
         assert pg.locator('#katp .katit[data-k="mountaineering"] .katn').inner_text() == "Mountaineering"
         assert pg.locator("#katp .sgcl").all_inner_texts()[-1] == "Outdoor and other"
-        rest = pg.evaluate(SCAN, ['.atab[data-t="aktivitaeten"]', DE])
+        rest = pg.evaluate(SCAN, ['.atab[data-t="sportarten"]', DE])
         assert rest == [], rest
         assert pg.evaluate("() => document.documentElement.scrollWidth <= window.innerWidth + 1")
         for sel in ("#katp", "#favp", "#sgp"):

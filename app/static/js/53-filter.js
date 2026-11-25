@@ -60,13 +60,11 @@ function flSelect(cfg, def, o = {}) {
   const R = flRange(cfg, def, o), base = TOURS.filter(t => flSport(t, cfg));
   return {R, base, list: base.filter(t => flIn(t, R)), prev: R.prev ? base.filter(t => flIn(t, R.prev)) : null};
 }
-/* Sportarten des Nutzers, häufigste zuerst; schon gewählte, aber nicht mehr vorhandene bleiben wählbar */
+/* Sportarten des Nutzers – 3.60.1: dieselbe Auswahl wie Karte und Statistik (sportAuswahl, 01-grundlagen.js): Statistik-Gruppen, dann die Sportarten in
+   Katalog-Reihenfolge nach Kategorien; schon gewählte, aber nicht mehr vorhandene bleiben wählbar */
 function flSportOptions(sel = []) {
-  const n = {};
-  TOURS.forEach(t => t.sport && (n[sNorm(t.sport)] = (n[sNorm(t.sport)] || 0) + 1));
-  const keys = Object.keys(n).sort((a, b) => n[b] - n[a] || sName(a).localeCompare(sName(b)));
-  sel.forEach(s => !keys.includes(s) && !isSg(s) && keys.push(s));
-  return sgOptions(keys).concat(keys.map(k => [k, sName(k)]));                  // 3.59.0: jede Statistik-Gruppe als eigener Eintrag „<Name> (zusammengefasst)“
+  const A = sportAuswahl(TOURS.map(t => t.sport), sel);
+  return A.groups.map(([k, l]) => [k, l]).concat(A.cats.flatMap(c => c[2].map(k => [k, sName(k)])));
 }
 const flYears = () => {
   const ys = new Set(TOURS.map(t => t.y));
@@ -108,7 +106,12 @@ function flField(f, cfg, i) {
     const sel = sNormList(cfg.sports);
     return `<fieldset class="slfs flsp"><legend>${esc(f.label || "Sportart")}</legend><div class="flchips">` +
       `<label class="flchip"><input type="checkbox" data-all${sel.length ? "" : " checked"}><span>Alle</span></label>` +
-      flSportOptions(sel).map(([v, l]) => `<label class="flchip"><input type="checkbox" name="f${i}" value="${esc(v)}"${sel.includes(v) ? " checked" : ""}><span>${esc(l)}</span></label>`).join("") +
+      (() => {
+        const A = sportAuswahl(TOURS.map(t => t.sport), sel),
+          ch = (v, l) => `<label class="flchip"${isSg(v) ? ` title="${esc(sgTitle(v))}"` : ""}><input type="checkbox" name="f${i}" value="${esc(v)}"${sel.includes(v) ? " checked" : ""}><span>${esc(l)}</span></label>`;
+        return (A.groups.length ? `<span class="flcat">Statistik-Gruppen</span>` + A.groups.map(([v, l]) => ch(v, l)).join("") : "") +
+          A.cats.map(([, l, ks]) => `<span class="flcat">${esc(l)}</span>` + ks.map(k => ch(k, sName(k))).join("")).join("");
+      })() +
       `</div></fieldset>`;
   }
   if (f.kind === "range") {

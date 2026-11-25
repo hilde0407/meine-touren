@@ -104,7 +104,7 @@ VIEWS.admin = async (_, q) => {
       <div class="field"><label>Nur Workouts ab Datum (JJJJ-MM-TT, leer = alle)</label><input data-k="suunto_since" value="${esc(s.suunto_since)}"></div>
       ${swField("suunto_auto", "Neue Workouts täglich automatisch übernehmen")}
       <div class="row"><button class="btn" id="sunconn">${su.connected ? "Neu verbinden" : "Mit Suunto verbinden"}</button>${su.connected ? `<button class="btn" id="sunsync">Jetzt importieren</button><button class="btn alt" id="sundis">Trennen</button>` : ""}<span id="sunres"></span></div></details></div></div></div>
-  <div class="panel gap sgp" id="katp"><h2>Aktivitäten-Katalog</h2><div id="katbody"></div></div>
+  <div class="panel gap sgp" id="katp"><h2>Sportarten-Katalog</h2><div id="katbody"></div></div>
   <div class="panel gap sgp" id="favp"><h2>Favoriten für „Tour aufnehmen“</h2><div id="favbody"><p class="mut">Wird geladen …</p></div></div>
   <div class="panel gap sgp" id="sgp"><h2>Statistik-Gruppen</h2><div id="sgbody"><p class="mut">Wird geladen …</p></div></div>
   <div class="grid g2 mt40">
@@ -405,10 +405,11 @@ async function sgAdmin(box) {
   const cats = (g, i) => SPORT_CAT.map(([id, l, ks]) => `<div class="sgcat"><span class="sgcl" id="sgcl${i}_${id}">${esc(l)}</span><div class="flchips sgchips" role="group" aria-labelledby="sgcl${i}_${id}">${ks.map(s => chip(g, i, s)).join("")}</div></div>`).join("") +
     (ALL.some(s => !SPORT[s]) ? `<div class="sgcat"><span class="sgcl">Weitere aus deinen Touren</span><div class="flchips sgchips">${ALL.filter(s => !SPORT[s]).map(s => chip(g, i, s)).join("")}</div></div>` : "");
   const draw = (focus = "") => {
-    box.innerHTML = `<p class="mut">Ohne Gruppen zählt die Statistik jede Aktivität einzeln. Wenn du Aktivitäten gemeinsam sehen möchtest – zum Beispiel Wandern, Bergsteigen und Schneeschuhwandern –, lege hier eine Gruppe an. Jede Gruppe ist im Sportartfilter als eigener Eintrag wählbar, und die Aufteilungen nach Sportart (Sportarten, Bestwerte, Jahresrückblick) zeigen sie als eine Zeile. Die Touren und ihre Sportart bleiben unverändert.</p>
+    box.innerHTML = `<p class="mut">Ohne Gruppen zählt die Statistik jede Sportart einzeln. Wenn du Sportarten gemeinsam sehen möchtest – zum Beispiel Wandern, Bergsteigen und Schneeschuhwandern –, lege hier eine Gruppe an. Jede Gruppe ist im Sportartfilter als eigener Eintrag „Name = Sportart + Sportart“ wählbar, und die Aufteilungen nach Sportart (Sportarten, Bestwerte, Jahresrückblick) zeigen sie als eine Zeile. Die Touren und ihre Sportart bleiben unverändert.</p>
       <div class="sglist">${G.map((g, i) => `<fieldset class="sgg" data-i="${i}"><legend class="slsr">${esc(`Gruppe ${i + 1}`)}</legend>
-        <div class="row g6 sgrow"><label class="sgnl" for="sgn${i}">Name</label><input id="sgn${i}" class="sgn fx1" data-i="${i}" maxlength="${NMAX}" value="${esc(g.name)}" autocomplete="off"><button type="button" class="btn ghost sm sgdel" data-i="${i}" aria-label="${esc(`Gruppe „${g.name}“ löschen`)}">🗑 Löschen</button></div>
-        <div class="sgcats" role="group" aria-label="${esc(`Sportarten der Gruppe „${g.name}“`)}">${cats(g, i)}</div></fieldset>`).join("") || '<p class="mut sgnone">Keine Gruppen: Die Statistik zählt jede Aktivität einzeln.</p>'}</div>
+        <div class="row g6 sgrow"><label class="sgnl" for="sgn${i}">Name</label><input id="sgn${i}" class="sgn fx1" data-i="${i}" maxlength="${NMAX}" value="${esc(g.name)}" autocomplete="off" aria-describedby="sgw${i}"${sgNameClash(g.name) ? ' aria-invalid="true"' : ""}><button type="button" class="btn ghost sm sgdel" data-i="${i}" aria-label="${esc(`Gruppe „${g.name}“ löschen`)}">🗑 Löschen</button></div>
+        <p class="bad fs13 sgwarn" id="sgw${i}"${sgNameClash(g.name) ? "" : " hidden"}>Name wie eine Sportart – bitte umbenennen</p>
+        <div class="sgcats" role="group" aria-label="${esc(`Sportarten der Gruppe „${g.name}“`)}">${cats(g, i)}</div></fieldset>`).join("") || '<p class="mut sgnone">Keine Gruppen: Die Statistik zählt jede Sportart einzeln.</p>'}</div>
       <div class="row mt10 sgbtns"><button type="button" class="btn alt sm" id="sgadd"${G.length >= MAX ? " disabled" : ""}>Gruppe hinzufügen</button></div>
       <div class="sgvor"><span class="mut fs13">Vorschläge (ein Klick legt die Gruppe an, gespeichert wird erst mit „Gruppen speichern“):</span><div class="row g6 mt6">${VOR.map(v => `<button type="button" class="btn alt sm sgsug" data-v="${esc(v.id)}"${canSug(v) ? "" : " hidden"}>${esc(`Vorschlag: ${v.name}`)}</button>`).join("")}</div></div>
       ${G.length >= MAX ? `<p class="mut fs13">${esc(`Höchstens ${MAX} Gruppen.`)}</p>` : ""}
@@ -433,7 +434,10 @@ async function sgAdmin(box) {
       if (sm) sm.textContent = `in „${G[o].name || "…"}“`;
     });
     box.querySelectorAll(".sgg").forEach(f => {
-      const i = +f.dataset.i, nm = G[i].name;
+      const i = +f.dataset.i, nm = G[i].name, cl = sgNameClash(nm);          // 3.60.1: Hinweis, solange der Name wie eine Aktivität lautet (auch bei bestehenden Gruppen)
+      f.querySelector(".sgwarn").hidden = !cl;
+      if (cl) f.querySelector(".sgn").setAttribute("aria-invalid", "true");
+      else f.querySelector(".sgn").removeAttribute("aria-invalid");
       f.querySelector(".sgdel").setAttribute("aria-label", `Gruppe „${nm}“ löschen`);
       f.querySelector(".sgcats").setAttribute("aria-label", `Sportarten der Gruppe „${nm}“`);
     });
@@ -472,12 +476,16 @@ async function sgAdmin(box) {
       return draw("#sgsave");
     }
     if (b.id === "sgsave") {
-      const bad = G.findIndex(g => !g.name.trim() || g.name.trim().length > NMAX), few = G.findIndex(g => g.sports.length < 2);
+      const bad = G.findIndex(g => !g.name.trim() || g.name.trim().length > NMAX), few = G.findIndex(g => g.sports.length < 2), cl = G.findIndex(g => sgNameClash(g.name));
       const er = box.querySelector("#sgerr");
       box.querySelector("#sgok").textContent = "";
       if (bad >= 0) {
         er.textContent = `Gruppe ${bad + 1}: Bitte einen Namen mit 1 bis ${NMAX} Zeichen eingeben.`;
         return box.querySelector(`#sgn${bad}`).focus();
+      }
+      if (cl >= 0) {
+        er.textContent = `Gruppe ${cl + 1}: „${G[cl].name.trim()}“ heißt schon eine Sportart – bitte einen anderen Gruppennamen wählen`;
+        return box.querySelector(`#sgn${cl}`).focus();
       }
       if (few >= 0) {
         er.textContent = `„${G[few].name.trim()}“: Eine Gruppe braucht mindestens 2 Sportarten.`;
@@ -512,7 +520,7 @@ async function favAdmin(box) {
   const MAX = d.max || 12;
   let F = (d.favoriten || FAV_DEF).filter(k => SPORT[k]), msg = "", err = "";
   const draw = (focus = "") => {
-    box.innerHTML = `<p class="mut">Deine Favoriten bietet Meine Touren zuerst an, wenn du eine Tour aufnimmst oder planst; alle übrigen Aktivitäten stehen dort unter „Mehr …“.</p>
+    box.innerHTML = `<p class="mut">Deine Favoriten bietet Meine Touren zuerst an, wenn du eine Tour aufnimmst oder planst; alle übrigen Sportarten stehen dort unter „Mehr …“.</p>
       <ol class="favlist" aria-label="Reihenfolge der Favoriten">${F.map((k, i) => `<li><span aria-hidden="true">${sIcon(k)}</span> <span class="favn">${esc(sName(k))}</span>
         <button type="button" class="btn ghost sm favup" data-k="${k}"${i ? "" : " disabled"} aria-label="${esc(`${sName(k)} nach oben`)}">↑</button><button type="button" class="btn ghost sm favdn" data-k="${k}"${i < F.length - 1 ? "" : " disabled"} aria-label="${esc(`${sName(k)} nach unten`)}">↓</button></li>`).join("")}</ol>
       ${SPORT_CAT.map(([id, l, ks]) => `<div class="sgcat"><span class="sgcl" id="favc-${id}">${esc(l)}</span><div class="flchips favchips" role="group" aria-labelledby="favc-${id}">${ks.map(k => `<button type="button" class="flchip favst" data-k="${k}" aria-pressed="${F.includes(k)}"${!F.includes(k) && F.length >= MAX ? " disabled" : ""}><span aria-hidden="true">${F.includes(k) ? "★" : "☆"}</span> <span>${esc(sName(k))}</span></button>`).join("")}</div></div>`).join("")}
@@ -549,7 +557,7 @@ async function favAdmin(box) {
     }
     if (b.id === "favsave") {
       if (!F.length) {
-        box.querySelector("#faverr").textContent = "Bitte mindestens eine Favoriten-Aktivität wählen.";
+        box.querySelector("#faverr").textContent = "Bitte mindestens eine Favoriten-Sportart wählen.";
         return;
       }
       b.disabled = true;
@@ -581,9 +589,9 @@ function katAdmin(box) {
   const n = k => T.filter(t => t && (t.sport_alt || t.sport) === k).length;      // loadTours merkt sich den entfernten Schlüssel in sport_alt
   const item = k => `<li class="katit" data-k="${k}"><span class="katdot" style="background:var(${SPORT[k][1]})" aria-hidden="true"></span><span class="katic" aria-hidden="true">${SPORT[k][2]}</span><span class="katn">${esc(SPORT[k][0])}</span></li>`;
   const alt = KAT_FRUEHER.filter(([k]) => n(k));
-  box.innerHTML = `<p class="mut">Diese Aktivitäten bietet Meine Touren überall an – beim Aufnehmen, Importieren und Planen, in Filtern und in der Statistik. Symbol und Farbe erscheinen in Listen und auf der Karte.</p>
+  box.innerHTML = `<p class="mut">Diese Sportarten bietet Meine Touren überall an – beim Aufnehmen, Importieren und Planen, in Filtern und in der Statistik. Symbol und Farbe erscheinen in Listen und auf der Karte.</p>
     ${SPORT_CAT.map(([id, l, ks]) => `<div class="sgcat"><span class="sgcl" id="katc-${id}">${esc(l)}</span><ul class="katlist" aria-labelledby="katc-${id}">${ks.map(item).join("")}</ul></div>`).join("")}
-    <details class="katalt"${alt.length ? " open" : ""}><summary>Frühere Aktivitäten</summary>
-      <p class="mut">Diese Aktivitäten gibt es nicht mehr. Touren damit bleiben unverändert; angezeigt, gefiltert und gezählt werden sie wie die Aktivität rechts. Mit „Sportart ändern“ (Tour bearbeiten) kannst du sie jederzeit umstellen.</p>
+    <details class="katalt"${alt.length ? " open" : ""}><summary>Frühere Sportarten</summary>
+      <p class="mut">Diese Sportarten gibt es nicht mehr. Touren damit bleiben unverändert; angezeigt, gefiltert und gezählt werden sie wie die Sportart rechts. Mit „Sportart ändern“ (Tour bearbeiten) kannst du sie jederzeit umstellen.</p>
       <ul class="katfr">${KAT_FRUEHER.map(([k, nm]) => `<li data-k="${k}"><span>${esc(nm)}</span> <span aria-hidden="true">→</span> <span class="katic" aria-hidden="true">${sIcon(k)}</span> <span>${esc(sName(k))}</span>${n(k) ? ` <small class="mut katcnt">${esc(n(k) === 1 ? "1 Tour" : `${n(k)} Touren`)}</small>` : ""}</li>`).join("")}</ul></details>`;
 }

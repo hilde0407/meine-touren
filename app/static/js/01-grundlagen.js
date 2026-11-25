@@ -175,8 +175,11 @@ const isSnowshoe = t => !!t && (t.sport === "snowshoe" || tourTags(t).includes(S
      sgKey(s)        Sportart -> Schlüssel der Auswertung („sgrp:<id>“ für Mitglieder einer Gruppe, sonst die Sportart)
      sgExpand(l)     Filterliste (Sportarten und/oder „sgrp:<id>“) -> Sportarten; null = alle (leer oder nur gelöschte Gruppen: nie ein Fehler, sondern „alle“)
      sgMatch(s, l)   Filter passt          sgPlain(l)  Filterliste mit aufgelösten Gruppen (für Adressen, die keine Gruppen kennen)
-     sgOptions(sp)   Auswahl für Filter und Ziele: [Schlüssel, Beschriftung] je Gruppe mit vorhandenen Sportarten („<Name> (zusammengefasst)“)
-   sName/sCol kennen die Schlüssel der Gruppen (Gruppenname, Farbe der ersten Sportart).
+     sgOptions(sp)   Auswahl für Filter und Ziele: [Schlüssel, Beschriftung] je Gruppe mit vorhandenen Sportarten
+     sgLabel(k)      3.60.1 Beschriftung einer Gruppe überall (Filter, Ziele, Aufteilungen): „<Name> = A + B + C“, ab 4 Mitgliedern „<Name> = A + B + C + …“
+     sgTitle(k)      vollständige Liste für title/Tooltip („<Name> = A + B + C + D“)
+     sgNameClash(n)  3.60.1: Gruppenname gleich dem Namen einer Aktivität (in einer der 4 Sprachen, ohne Groß-/Kleinschreibung und Leerzeichen)?
+   sName/sCol kennen die Schlüssel der Gruppen (Beschriftung wie sgLabel, Farbe der ersten Sportart).
    Ohne eigene Gruppen (Standard) zählt jede Aktivität einzeln; feste Zusammenfassungen gibt es nicht mehr (SPORT_GRP in 24-sport.js sind interne Familien). */
 let SGRP = [];
 const SG_PRE = "sgrp:";
@@ -203,8 +206,56 @@ const sgMatch = (s, l) => {
   return !e || e.includes(sNorm(s));
 };
 const sgPlain = l => sgExpand(l) || [];
-const sgLabel = k => `${sName(k)} (zusammengefasst)`;
+const sgTL = x => (typeof window.TL === "function" ? window.TL(x) : x);          // Aktivitätsnamen schon übersetzt einsetzen (der Gruppenname bleibt, wie er ist)
+const sgParts = k => {
+  const g = sgById(k);
+  return g ? [g.name, g.sports.map(s => sgTL((SPORT[sNorm(s)] || [s])[0]))] : ["–", []];
+};
+const sgLabel = k => {
+  const [n, m] = sgParts(k);
+  return m.length ? `${n} = ${(m.length > 3 ? m.slice(0, 3).concat("…") : m).join(" + ")}` : n;
+};
+const sgTitle = k => {
+  const [n, m] = sgParts(k);
+  return m.length ? `${n} = ${m.join(" + ")}` : n;
+};
+/* 3.60.1: Ein Gruppenname darf nicht wie eine Aktivität heißen („Wandern = Wandern + …“ neben „Wandern“ verwirrt). Verglichen wird mit den Namen des Katalogs in allen vier
+   Sprachen (Übersetzungstabelle 00-i18n-neu.js), ohne Groß-/Kleinschreibung und Leerzeichen – wie stat_gruppen.namens_kollision auf dem Server. */
+const sgNorm = n => String(n || "").replace(/\s+/g, "").toLocaleLowerCase("de");
+let SG_NAMES = null;
+const sgNameClash = n => {
+  if (!SG_NAMES) {
+    const de = new Set(SPORT_TABLE.map(r => r[2]));
+    SG_NAMES = new Set([...de].map(sgNorm));
+    String(window.I18N_NEU || "").split("\n").forEach(l => {
+      const c = l.split(" || ");
+      if (c.length === 4 && de.has(c[0].trim())) c.forEach(x => SG_NAMES.add(sgNorm(x)));
+    });
+  }
+  return !!sgNorm(n) && SG_NAMES.has(sgNorm(n));
+};
 const sgOptions = (present = null) => SGRP.filter(g => !present || g.sports.some(s => present.includes(s))).map(g => [SG_PRE + g.id, sgLabel(SG_PRE + g.id)]);
+/* 3.60.1 Auswahl von Sportarten – EINE Stelle für Karte (#ms), Statistik, Rekorde, Baustein-Filter und Legende:
+     sportAuswahl(keys, sel)  -> {cats: [[Kategorie, Beschriftung, [Sportarten]]], groups: [[„sgrp:<id>“, Beschriftung, Tooltip]]}
+       keys: vorhandene Sportarten (Rückfall über sNorm), in Katalog-Reihenfolge nach Kategorien (Zu Fuß, Rad, Winter, Wasser, Outdoor), nur vorhandene;
+       fremde Schlüssel (z. B. von Komoot) unter „Weitere“; sel: gewählte, aber nicht mehr vorhandene Sportarten bleiben wählbar.
+       groups: die Statistik-Gruppen des Benutzers mit mindestens einer vorhandenen Sportart (Beschriftung „<Name> = A + B + …“, wählt alle Mitglieder).
+     sportOrder(keys)         dieselbe Reihenfolge flach: Gruppen, dann die Sportarten */
+function sportAuswahl(keys, sel = []) {
+  const have = [];
+  (keys || []).concat((sel || []).filter(s => !isSg(s))).forEach(s => {
+    const k = sNorm(s);
+    if (k && !have.includes(k)) have.push(k);
+  });
+  const cats = SPORT_CAT.map(([id, l, ks]) => [id, l, ks.filter(k => have.includes(k))]).filter(c => c[2].length);
+  const rest = have.filter(k => !SPORT[k]).sort((a, b) => sName(a).localeCompare(sName(b)));
+  if (rest.length) cats.push(["weitere", "Weitere aus deinen Touren", rest]);
+  return {cats, groups: sgOptions(have).map(([k, l]) => [k, l, sgTitle(k)])};
+}
+const sportOrder = keys => {
+  const a = sportAuswahl(keys);
+  return a.groups.map(g => g[0]).concat(a.cats.flatMap(c => c[2]));
+};
 /* Schlüssel einer gespeicherten Auswahl, den es nicht mehr gibt (gelöschte Gruppe), fällt weg */
 const sgClean = l => (Array.isArray(l) ? l : []).filter(k => !isSg(k) || sgById(k));
 async function sgLoad() {
@@ -215,9 +266,18 @@ async function sgLoad() {
       : [];                                                                     // 3.60.0: entfernte Aktivitäten fallen still weg (der Server bereinigt ebenso)
   } catch (e) {}                                                            // offline oder alter Server: ohne Gruppen (wie bisher)
 }
-const sName = s => (isSg(s) ? (sgById(s) || {name: "–"}).name : (SPORT[sNorm(s)] || [s || "Sonstiges"])[0]);
+const sName = s => (isSg(s) ? sgLabel(s) : (SPORT[sNorm(s)] || [s || "Sonstiges"])[0]);
 const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const sCol = s => (isSg(s) ? sCol((sgById(s) || {sports: [""]}).sports[0]) : cssv((SPORT[sNorm(s)] || [0, "--other"])[1]));
+const SCOL_C = Object.create(null);
+/* 3.60.1: jede Sportart hat ihre eigene Kartenfarbe (--sp-<Schlüssel> in style.css); die Spalte „Farbe“ der Tabelle bleibt die Familie (Klassen slsg-…, pe-s-…) und der Rückfall */
+const sCol = s => {
+  if (isSg(s)) return sCol((sgById(s) || {sports: [""]}).sports[0]);
+  const k = sNorm(s);
+  if (SCOL_C[k]) return SCOL_C[k];                                         // je Sitzung einmal gelesen (die Karte fragt je Tour)
+  const v = (SPORT[k] && cssv("--sp-" + k)) || cssv((SPORT[k] || [0, "--other"])[1]);
+  if (v) SCOL_C[k] = v;
+  return v;
+};
 /* ---- Streckenfarbe (pro Gerät gemerkt) ---- */
 const TS = (() => {
   let s = {};

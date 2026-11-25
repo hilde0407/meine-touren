@@ -7,6 +7,9 @@
 @font-face{font-family:"Barlow Semi Condensed";font-weight:700;font-display:swap;src:url(vendor/fonts/barlow-semi-condensed-latin-700-normal.woff2) format("woff2")}
 :root{--bg:#e9ede7;--surface:#f6f8f3;--ink:#0e2a2b;--mut:#5b6f6c;--rule:#c9d3cc;--soft:#dbe3dc;--forest:#0e2a2b;--yellow:#f2c230;--yellow-ink:#241d00;--bars:#17494a;--accent2:#d0652a;
 --hike:#2f8f5f;--bike:#d0792a;--ebike:#c9a21c;--ski:#3b7fb0;--snow:#7a5fb0;--run:#c0504d;--other:#78857f;--water:#1f8aa8;
+/* 3.60.1 eigene Kartenfarbe je Sportart (--sp-<Schlüssel>, sCol in 01-grundlagen.js; Chip-Punkt, Legende und Strecke gleich): je Kategorie eigene Töne, untereinander deutlich verschieden, Kontrast ≥ 3:1 zur Karte */
+--sp-hike:#2f8f5f;--sp-walk:#4f8a14;--sp-mountaineering:#14553a;--sp-climbing:#5d4a2a;--sp-nordicwalking:#55704a;--sp-jogging:#c62828;--sp-trailrun:#7b1f3a;--sp-touringbicycle:#d26a1a;--sp-racebike:#d0207a;--sp-mtb:#7a3b0c;--sp-mtb_easy:#857500;--sp-e_touringbicycle:#b06f00;--sp-e_mtb:#8e5a9e;--sp-bikepacking:#a33a1a;--sp-skialpin:#2f6fc0;--sp-skitour:#1d3f8f;--sp-nordic:#3c8fd6;--sp-snowboard:#4b3fb0;--sp-snowshoe:#9a5cc8;--sp-kayak:#0e8f9c;--sp-rowing:#1a4f7a;--sp-dragonboat:#c2185b;--sp-rafting:#2b7fa8;--sp-boat:#5a6f86;--sp-skateboard:#3f3f3f;--sp-skaten:#a23c8c;--sp-horse:#a0522d;--sp-paraglide:#6d4c9f;--sp-other:#78857f;
+
 --d:"Barlow Semi Condensed","Barlow",system-ui,sans-serif;--b:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;--r:6px}
 @media (prefers-color-scheme:dark){:root{--bg:#0b1718;--surface:#10272a;--ink:#e3ece8;--mut:#8aa5a1;--rule:#25403f;--soft:#183234;--forest:#071314;--bars:#6fb5a5;--yellow-ink:#241d00}}
 *{box-sizing:border-box}html{scroll-behavior:smooth}
@@ -2414,3 +2417,10 @@ html.mob .fig .v{font-size:min(24px,23cqw)}html.mob .figs.sm .fig .v{font-size:m
 .katic{font-size:16px;line-height:1}
 .katalt{margin-top:14px}
 .katfr{margin:6px 0 0;padding-left:20px;display:grid;gap:2px;font-size:14px}
+/* 3.60.1 Karte: Sportarten nach Kategorien (Beschriftung und Trennstrich), dazu die Statistik-Gruppen */
+#ms{flex-wrap:wrap;row-gap:6px;max-width:100%}
+#ms .mscat{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+#ms .mscat+.mscat{border-left:1px solid #ffffff4d;padding-left:10px}
+#ms .mscl{font:600 12px var(--b);color:#fff;opacity:.8;white-space:nowrap}
+#ms .chip.msg{border-style:dashed}
+.flchips .flcat{flex-basis:100%;font:600 12px var(--b);color:var(--mut);margin:6px 0 0}

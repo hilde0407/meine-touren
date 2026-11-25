@@ -112,7 +112,7 @@ function zlForm(yr, prev) {
   return (prev.length ? `<p><button type="button" class="btn sm alt" id="gcopy">Ziele aus ${yr - 1} übernehmen (${prev.length})</button></p>` : "") +
     `<details class="zladd"><summary>Ziel hinzufügen</summary><div class="row mt8 zlrow"><label class="slsr" for="gper">Zeitraum</label><select id="gper"><option value="year">Ziel für ${yr}</option><option value="week">Ziel für jede Woche</option></select>` +
     `<label class="slsr" for="gm">Messgröße</label><select id="gm">${Object.entries(GM).map(([k, v]) => `<option value="${k}">${v[1]}</option>`).join("")}</select>` +
-    `<label class="slsr" for="gsp">Sportart</label><select id="gsp"><option value="">alle Sportarten</option>${goalSportOptions().map(([k, l]) => `<option value="${esc(k)}">${esc(l)}</option>`).join("")}</select>` +
+    `<label class="slsr" for="gsp">Sportart</label><select id="gsp"><option value="">alle Sportarten</option>${goalSportOptions().map(([k, l]) => `<option value="${esc(k)}"${isSg(k) ? ` title="${esc(sgTitle(k))}"` : ""}>${esc(l)}</option>`).join("")}</select>` +
     `<label class="slsr" for="gt">Zielwert</label><input id="gt" type="number" min="1" inputmode="decimal" placeholder="Zielwert"><button type="button" class="btn sm" id="gadd">Speichern</button></div><p class="slerr" role="alert"></p></details>`;
 }
 function zlBind(b, yr, prev) {

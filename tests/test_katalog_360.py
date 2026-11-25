@@ -229,16 +229,13 @@ def test_oberflaeche_nutzt_den_rueckfall_an_einer_stelle():
     assert [k for k, _ in re.findall(r'\["(\w+)", "([^"]+)"\]', v.split("const KAT_FRUEHER = [", 1)[1].split("];", 1)[0])] == ENTFERNT_359
     st = (JS / "13-start.js").read_text(encoding="utf-8")
     assert re.findall(r'^  \["(\w+)", "', st.split("const ADM_TABS = [", 1)[1].split("];", 1)[0], re.M) == [
-        "uebersicht", "aktivitaeten", "quellen", "weitergabe", "fotos", "auto", "handy", "sicher"]
+        "uebersicht", "sportarten", "quellen", "weitergabe", "fotos", "auto", "handy", "sicher"]
 
 
 def test_version_texte_und_dateien():
-    assert config.VERSION.startswith("3.60.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.60.0.md").read_text(encoding="utf-8")
     assert notes.startswith("# 3.60.0") and "Was ist neu" in notes and "Bestand" in notes and "Verwaltung" in notes and "Bikepacking" in notes and "Gassigehen" in notes
     assert "3.60.0" in (ROOT / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")
     assert "Version 3.60.0" in (ROOT / "docs" / "VERSIONSVERLAUF.md").read_text(encoding="utf-8")
     hb = (ROOT / "docs" / "HANDBUCH.md").read_text(encoding="utf-8")
-    assert "Verwaltung → Aktivitäten" in hb and "Aktivitäten-Katalog" in hb and "Bergsteigen" in hb
-    assert 'const V = "mt-v145"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.60.0"' in (JS / "54-ansichten.js").read_text(encoding="utf-8")
+    assert "Verwaltung → Sportarten" in hb and "Sportarten-Katalog" in hb and "Bergsteigen" in hb       # 3.60.1: Begriff „Sportart“

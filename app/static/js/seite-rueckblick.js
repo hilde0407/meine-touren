@@ -48,12 +48,17 @@ fetch("/api/public/" + tok).then(r => { if (!r.ok) throw 0; return r.json(); }).
   const B = document.getElementById("b"), sec = (id, title, inner) => B.insertAdjacentHTML("beforeend", `<section class="blk" id="${id}"><h2>${title}</h2>${inner}</section>`);
   const kz = t.kz;
   if (kz) {
+    /* 3.60.1: Statistik-Gruppe als „<Name> = A + B + …“ – die Aktivitäten in der Sprache der Seite, der Gruppenname wie eingegeben */
+    const rbGrp = (x, voll) => {
+      const m = x.mitglieder.map(n => (typeof window.TL === "function" ? window.TL(n) : n));
+      return `${x.gruppe} = ${(voll || m.length <= 3 ? m : m.slice(0, 3).concat("…")).join(" + ")}`;
+    };
     const fig = (v, l) => `<div class="fig"><b>${v}</b><span>${l}</span></div>`;
     const d = kz.prev_km ? (kz.km - kz.prev_km) / kz.prev_km * 100 : null;
     sec("bz", "Dein Jahr", `<div class="figs">${fig(nf(kz.count, 0), kz.count === 1 ? "Tour" : "Touren")}${fig(nf(kz.km, 0) + " km", "Strecke")}${fig(nf(kz.up_m, 0) + " m", "Aufstieg")}${fig(nf(kz.h, 0) + " h", "Stunden")}${fig(nf(kz.days, 0), "Tage unterwegs")}</div>
       ${d != null ? `<p class="cmp"><b>${d >= 0 ? "+" : "−"}${nf(Math.abs(d), 0)} %</b> <span>gegenüber ${t.year - 1}</span></p>` : ""}
       <div class="panel"><h3>Strecke pro Monat</h3>${monthBars(t, kz)}</div>
-      ${kz.sports && kz.sports.length > 1 ? `<div class="panel"><h3>Sportarten</h3><ul class="sp">${kz.sports.map(s => `<li><span>${esc(s.name)}</span><b>${nf(s.km, 0)} km</b></li>`).join("")}</ul></div>` : ""}`);
+      ${kz.sports && kz.sports.length > 1 ? `<div class="panel"><h3>Sportarten</h3><ul class="sp">${kz.sports.map(s => `<li><span${s.mitglieder ? ` title="${esc(rbGrp(s, true))}"` : ""}>${esc(s.mitglieder ? rbGrp(s) : s.name)}</span><b>${nf(s.km, 0)} km</b></li>`).join("")}</ul></div>` : ""}`);
   }
   if (t.rek && t.rek.length) sec("br", "Rekorde", recs(t));
   if (t.heat) sec("bh", "Heatmap", heat(t.heat));

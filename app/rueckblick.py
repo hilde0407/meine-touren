@@ -126,7 +126,10 @@ def _kennzahlen(ts, year, sport):
         for t in ts:
             k = stat_gruppen.key(t["sport"], gr) if t["sport"] else "other"
             by[k] = by.get(k, 0) + (t["dist_m"] or 0) / 1000
-        out["sports"] = [{"sport": k, "name": stat_gruppen.name(k, gr), "km": round(v, 1)} for k, v in sorted(by.items(), key=lambda kv: -kv[1])]
+        gid = {stat_gruppen.PREFIX + g["id"]: g for g in gr}
+        out["sports"] = [dict({"sport": k, "name": stat_gruppen.label(k, gr), "km": round(v, 1)},              # 3.60.1: Gruppe als „<Name> = A + B + …“
+                              **({"gruppe": gid[k]["name"], "mitglieder": [stats.SPORT_DE.get(s, s) for s in gid[k]["sports"]]} if k in gid else {}))
+                         for k, v in sorted(by.items(), key=lambda kv: -kv[1])]
     return out
 
 

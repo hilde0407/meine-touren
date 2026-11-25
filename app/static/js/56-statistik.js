@@ -115,7 +115,7 @@ function stFilterBar(F, R, n, inRange) {
     km[t.sport] = (km[t.sport] || 0) + t.km;
     if (isSg(sgKey(t.sport))) km[sgKey(t.sport)] = (km[sgKey(t.sport)] || 0) + t.km;            // 3.59.0: jede Statistik-Gruppe als eigener Eintrag (zusätzlich zu ihren Sportarten)
   });
-  const sports = Object.keys(km).sort((a, b) => km[b] - km[a] || isSg(b) - isSg(a));
+  const sports = sportOrder(Object.keys(km).filter(k => !isSg(k)));             // 3.60.1: wie Karte und Baustein-Filter (Gruppen, dann Katalog-Reihenfolge)
   F.sports.forEach(s => !sports.includes(s) && sports.push(s));
   const title = (F.kind === "y" ? "Das Jahr " + F.yr : F.kind === "all" ? "Alle Touren" : R.label) + (F.sports.length ? ", " + stSportsTxt(F) : ""),
     Z = [["year", "Laufendes Jahr", F.kind === "y" && F.yr === cy], ["12m", "Letzte 12 Monate", F.kind === "12m"], ["90d", "Letzte 90 Tage", F.kind === "90d"], ["prev", "Vorjahr", F.kind === "y" && F.yr === cy - 1], ["c", "Von–bis …", F.kind === "c"]],
@@ -125,7 +125,7 @@ function stFilterBar(F, R, n, inRange) {
   <div class="years" role="group" aria-label="Zeitraum: Jahr"><button type="button" data-y="0" aria-pressed="${F.kind === "all"}" class="${F.kind === "all" ? "on" : ""}">Gesamt</button>${ys.map(y => `<button type="button" data-y="${y}" aria-pressed="${F.kind === "y" && F.yr === y}" class="${F.kind === "y" && F.yr === y ? "on" : ""}">${y}</button>`).join("")}</div>
   <div class="chips mt14 stz" role="group" aria-label="Zeitraum: weitere">${Z.map(([k, l, on]) => `<button type="button" class="chip${on ? " on" : ""}" data-z="${k}" aria-pressed="${on}"${k === "c" ? ' aria-controls="stfc"' : ""}>${l}</button>`).join("")}</div>
   <form class="stfc" id="stfc"${F.kind === "c" ? "" : " hidden"} novalidate><label>Von <input type="date" name="von" value="${F.von}"></label><label>Bis <input type="date" name="bis" value="${F.bis}"></label><button class="btn sm" type="submit">Übernehmen</button><span class="stfe" role="alert"></span></form>
-  <div class="chips mt14" id="sch" role="group" aria-label="Sportart"><button type="button" class="chip ${F.sports.length ? "" : "on"}" data-s="" aria-pressed="${!F.sports.length}">Alle Sportarten</button>${sports.map(s => `<button type="button" class="chip ${F.sports.includes(s) ? "on" : ""}" data-s="${esc(s)}" aria-pressed="${F.sports.includes(s)}"><i style="background:${sCol(s)}"></i>${isSg(s) ? esc(sgLabel(s)) : sName(s)}</button>`).join("")}</div>
+  <div class="chips mt14" id="sch" role="group" aria-label="Sportart"><button type="button" class="chip ${F.sports.length ? "" : "on"}" data-s="" aria-pressed="${!F.sports.length}">Alle Sportarten</button>${sports.map(s => `<button type="button" class="chip ${F.sports.includes(s) ? "on" : ""}" data-s="${esc(s)}" aria-pressed="${F.sports.includes(s)}"${isSg(s) ? ` title="${esc(sgTitle(s))}"` : ""}><i style="background:${sCol(s)}"></i>${isSg(s) ? esc(sgLabel(s)) : sName(s)}</button>`).join("")}</div>
   ${stDefault(F) || (!stDirty() && !stDefault(stSaved())) ? "" : `<p class="stfs mut"><span>Filter aktiv: ${esc(sum)}.</span> <a href="#/stats" id="stfr">${stDirty() ? "Auf den gespeicherten Filter zurücksetzen" : "Filter zurücksetzen"}</a></p>`}</section>`;
 }
 function stFilterBind(F) {

@@ -16,7 +16,7 @@ from tests.helpers_ui import quiet
 ROOT = Path(__file__).resolve().parent.parent
 expect = pytest.importorskip("playwright.sync_api").expect
 TL = 15000
-TABS = ["uebersicht", "aktivitaeten", "quellen", "weitergabe", "fotos", "auto", "handy", "sicher"]
+TABS = ["uebersicht", "sportarten", "quellen", "weitergabe", "fotos", "auto", "handy", "sicher"]
 LOC = {"en": "en-GB", "fr": "fr-FR", "es": "es-ES"}
 
 # Erwartete Übersetzungen (Auszug der Prüfliste): Warnleiste, Backup, Umzug

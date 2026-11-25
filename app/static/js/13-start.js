@@ -27,11 +27,12 @@ async function boot() {
 }
 
 /* ---- Verwaltung: nach Aufgaben geordnet in Reitern (statt einer langen Seite) ----
-   3.60.0 Gliederung: Übersicht (Zustand und Grundeinstellungen) · Aktivitäten (Katalog, Favoriten, Statistik-Gruppen) · Touren holen · Hochladen & Planen · Fotos ·
+   3.60.0 Gliederung: Übersicht (Zustand und Grundeinstellungen) · Sportarten (Katalog, Favoriten, Statistik-Gruppen; 3.60.1: Begriff „Sportart“, Schlüssel „sportarten“,
+   die Adresse ?tab=aktivitaeten aus 3.60.0 bleibt als Alias) · Touren holen · Hochladen & Planen · Fotos ·
    Automatik & Meldungen · Handy & App · Sicherung & Zugang. Jeder Bereich ist eine gleich gestaltete Karte (Titel h2, Erklärung, Inhalt; Unterabschnitte h3). */
 const ADM_TABS = [
   ["uebersicht", "Übersicht", "Zustand der App, Updates, Heimatort und Puls sowie Protokoll und Fehlersuche.", ["#hlt", "#upd", "#homep", "Protokoll", "Selbsttest"]],
-  ["aktivitaeten", "Aktivitäten", "Welche Aktivitäten es gibt, welche beim Aufnehmen einer Tour zuerst erscheinen und wie die Statistik sie zusammenfasst.", ["#katp", "#favp", "#sgp"]],
+  ["sportarten", "Sportarten", "Welche Sportarten es gibt, welche beim Aufnehmen einer Tour zuerst erscheinen und wie die Statistik sie zusammenfasst.", ["#katp", "#favp", "#sgp"]],
   ["quellen", "Touren holen", "Woher deine Touren kommen: Komoot, Zepp, Uhren und Dateien, dazu Wanderführer.", ["Komoot", "Zepp-Import", "Garmin", "Wanderführer"]],
   ["weitergabe", "Hochladen & Planen", "Wohin Touren hochgeladen werden dürfen (nur auf deinen Wunsch) und wie Touren geplant werden.", ["Portale", "Tourplanung"]],
   ["fotos", "Fotos", "Fotobibliothek, Import und Eingangsordner.", ["Fotos", "Foto-Eingang"]],
@@ -39,6 +40,7 @@ const ADM_TABS = [
   ["handy", "Handy & App", "Android-App, Standort teilen und die App auf dem Startbildschirm.", ["Android-App", "Standort teilen", "Verlorene", "Auf dem Handy"]],
   ["sicher", "Sicherung & Zugang", "Sicherungen, Zugriffsschutz und Offline-Nutzung.", ["Sicherung", "Zugriffsschutz", "Offline-Nutzung"]],
 ];
+const ADM_TAB_ALIAS = {aktivitaeten: "sportarten"};                        // ältere Links und gemerkter Reiter aus 3.60.0
 const _admG = VIEWS.admin;
 VIEWS.admin = async (...a) => {
   await _admG(...a);
@@ -89,13 +91,14 @@ VIEWS.admin = async (...a) => {
     if (!tab) tab = localStorage.getItem("admtab") || "";
   } catch (e) {}
   const show = id => {
+    if (ADM_TAB_ALIAS[id]) id = ADM_TAB_ALIAS[id];
     if (!ADM_TABS.some(t => t[0] === id)) id = "uebersicht";
     nav.querySelectorAll("button").forEach(b => {
       b.classList.toggle("on", b.dataset.t === id);
       b.setAttribute("aria-selected", b.dataset.t === id ? "true" : "false");
     });
     secs.forEach(sec => (sec.style.display = sec.dataset.t === id ? "" : "none"));
-    anchor.style.display = id === "aktivitaeten" ? "none" : "";          // 3.60.0: die Abschnitte „Aktivitäten“ speichern mit eigenen Knöpfen – keine zweite Speichern-Leiste
+    anchor.style.display = id === "sportarten" ? "none" : "";            // 3.60.0: die Abschnitte „Sportarten“ speichern mit eigenen Knöpfen – keine zweite Speichern-Leiste
     try {
       localStorage.setItem("admtab", id);
     } catch (e) {}
