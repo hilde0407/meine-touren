@@ -479,7 +479,7 @@ VIEWS.check = async (...a) => {
   body.insertAdjacentHTML(
     "beforeend",
     `<div class="panel gap"><h2>Umbenennen nach Regeln</h2><p class="mut">Wähle Touren aus, lege eine Regel fest, prüfe die Vorschau und wende sie an.</p>
-   <div class="filters"><input id="rn_q" placeholder="Name enthält …"><select id="rn_r"><option value="">Alle Regionen</option>${regionOpts()}</select><select id="rn_s" aria-label="Sportart">${sportFilterOptions(TOURS.map(t => t.sport))}</select></div>
+   <div class="filters"><input id="rn_q" placeholder="Name enthält …"><select id="rn_r"><option value="">Alle Regionen</option>${regionOpts()}</select><select data-spsheet id="rn_s" aria-label="Sportart">${sportFilterOptions(TOURS.map(t => t.sport))}</select></div>
    <div class="filters"><select id="rn_a"><option value="pre">Vorsilbe hinzufügen</option><option value="suf">Nachsilbe hinzufügen</option><option value="rep">Text ersetzen (Suchen → Ersetzen)</option><option value="date">Datum und Uhrzeit am Ende entfernen</option></select><input id="rn_x" placeholder="Text / Suchen"><input id="rn_y" placeholder="Ersetzen durch"></div>
    <div class="row"><label class="chk m0"><input type="checkbox" id="rn_k"> auch bei Komoot umbenennen</label><button class="btn alt" id="rn_p">Vorschau</button><button class="btn" id="rn_go" disabled>Umbenennen</button><span id="rn_m" class="mut"></span></div><div class="rows mt10" id="rn_l"></div></div>`
   );

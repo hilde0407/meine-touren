@@ -273,10 +273,34 @@ function sportFilterHtml(keys, sel, mk, o = {}) {
 function sportFilterOptions(keys, sel = "") {
   const A = sportAuswahl(keys, sel && !isSg(sel) ? [sel] : []),
     opt = (k, l, t) => `<option value="${esc(k)}"${k === sel ? " selected" : ""}${t ? ` title="${esc(t)}"` : ""}>${esc(l)}</option>`;
+  /* 3.61.1: im Auswahlfeld nur der Gruppenname (kurz, eine Zeile); die Zusammensetzung steht im Tooltip und in Verwaltung → Sportarten → Statistik-Gruppen */
   return opt("", "Alle Sportarten") +
-    (A.groups.length ? `<optgroup label="Statistik-Gruppen">${A.groups.map(([k, l, t]) => opt(k, l, t)).join("")}</optgroup>` : "") +
+    (A.groups.length ? `<optgroup label="Statistik-Gruppen">${A.groups.map(([k, , t]) => opt(k, sgParts(k)[0], t)).join("")}</optgroup>` : "") +
     A.cats.map(([, l, ks]) => `<optgroup label="${esc(l)}">${ks.map(k => opt(k, sName(k))).join("")}</optgroup>`).join("");
 }
+/* 3.61.1 Handy: das native Auswahlfeld (Android-WebView) zeigt riesige Zeilen mit Einrückung. Felder mit data-spsheet öffnen am Handy stattdessen ein kompaktes Blatt
+   mit Chips in derselben Reihenfolge (aus den <option>/<optgroup> des Feldes gebaut); die Wahl setzt das Feld und löst „input“ und „change“ aus. Am Computer bleibt das native Feld. */
+function sportSheetOpen(sel) {
+  const chip = o => `<button type="button" class="chip${o.value === sel.value ? " on" : ""}" data-v="${esc(o.value)}"${o.title ? ` title="${esc(o.title)}"` : ""}>${esc(o.textContent)}</button>`,
+    body = [...sel.children].map(c => c.tagName === "OPTGROUP"
+      ? `<span class="spkat">${esc(c.label)}</span>${[...c.children].map(chip).join("")}` : chip(c)).join("");
+  const m = uiModal(`<h3>Sportart</h3><div class="chips spsheet" role="group" aria-label="Sportart">${body}</div><div class="uifoot"><button type="button" class="btn ghost" data-x>Abbrechen</button></div>`);
+  m.addEventListener("click", e => {
+    const b = e.target.closest(".chip[data-v]");
+    if (b) {
+      sel.value = b.dataset.v;
+      m.remove();
+      ["input", "change"].forEach(n => sel.dispatchEvent(new Event(n, {bubbles: true})));          // wie eine Wahl im nativen Feld (die Seiten hören auf „input“ oder „change“)
+    } else if (e.target.closest("[data-x]")) m.remove();
+  });
+}
+document.addEventListener("mousedown", e => {
+  const s = e.target.closest && e.target.closest("select[data-spsheet]");
+  if (s && document.documentElement.classList.contains("mob")) {
+    e.preventDefault();
+    sportSheetOpen(s);
+  }
+}, true);
 /* 3.61.0 Sportart ZUWEISEN – eine Auswahl für „Sportart ändern“ (Tour), Ziele, Planung und Aufzeichnen (Leitfaden 2.6, Muster „Zuweisen“):
    die Favoriten-Sportarten als Knöpfe zuerst, darunter „Mehr …“ mit allen übrigen Sportarten nach Kategorien; die übergebene (aktuelle bzw. zuletzt benutzte) ist gewählt.
      sportWahlHtml(cur, o) -> HTML. o.id: verstecktes Feld mit dem Wert (input type=hidden, für Formulare und Tests); o.favs: Reihenfolge der Knöpfe (Standard FAV);

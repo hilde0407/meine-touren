@@ -112,12 +112,12 @@ def test_viewer_sees_default_and_cannot_write():
 
 def test_version_notes_and_assets():
     from app import config
-    assert config.VERSION.startswith("3.61.0 · Meine Touren")
+    assert config.VERSION.startswith("3.61.1 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.33.0.md").read_text(encoding="utf-8")
     assert "Reisen als anpassbare Seiten" in notes and "reise" in notes and "reisen" in notes
     assert 'const V = "mt-v147"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
     js = ROOT / "app" / "static" / "js"
-    assert 'SL_APPV = "3.61.0"' in (js / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.61.1"' in (js / "54-ansichten.js").read_text(encoding="utf-8")
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("60-bausteine-erinnerungen.js") < html.index("61-bausteine-reise.js") < html.index("62-reiseseiten.js")
     assert (js / "61-bausteine-reise.js").exists() and (js / "62-reiseseiten.js").exists()

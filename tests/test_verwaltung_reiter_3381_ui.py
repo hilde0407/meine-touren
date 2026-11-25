@@ -170,3 +170,32 @@ def test_reiterleiste_handy_wischen(pw, app):
         pg.wait_for_function("() => document.querySelector('#atabs').hasAttribute('data-end')", timeout=TL)
     finally:
         pg.browser_.close()
+
+
+# 3.61.1 Reiterleiste am Computer: bei üblichen Breiten (ab 1280) EINE Zeile, bei 1024 gleichmäßiger Umbruch (gleiche Zeilenhöhe), nie senkrecht scrollbar
+ZEILEN = """() => { const n = document.querySelector('#atabs'), k = [...n.children].map(e => e.getBoundingClientRect()),
+  tops = [...new Set(k.map(r => Math.round(r.top)))].sort((a, b) => a - b), hs = [...new Set(k.map(r => Math.round(r.height)))];
+  return {rows: tops.length, tops, hs, sh: n.scrollHeight, ch: n.clientHeight}; }"""
+
+
+@pytest.mark.parametrize("breite", [1280, 1440, 1600, 1920])
+def test_reiterleiste_eine_zeile(pw, app, breite):
+    pg = _admin(pw, app, "de", "allgemein", width=breite, height=900)
+    try:
+        pg.wait_for_function("() => !!document.querySelector('#atabs .atlink')", timeout=TL)
+        r = pg.evaluate(ZEILEN)
+        assert r["rows"] == 1 and r["sh"] <= r["ch"] + 1 and len(r["hs"]) == 1, r
+    finally:
+        pg.browser_.close()
+
+
+def test_reiterleiste_schmal_gleichmaessiger_umbruch(pw, app):
+    pg = _admin(pw, app, "de", "allgemein", width=1024, height=900)
+    try:
+        pg.wait_for_function("() => !!document.querySelector('#atabs .atlink')", timeout=TL)
+        r = pg.evaluate(ZEILEN)
+        assert r["rows"] == 2 and len(r["hs"]) == 1 and r["hs"][0] >= 44, r        # alle Einträge gleich hoch
+        assert r["tops"][1] - r["tops"][0] == r["hs"][0] + 2, r                    # gleicher Zeilenabstand
+        assert r["sh"] <= r["ch"] + 1, r
+    finally:
+        pg.browser_.close()

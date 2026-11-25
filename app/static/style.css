@@ -2444,3 +2444,16 @@ nav,html.mob .years,html.mob .chips,.tlchips,html.mob .segtabs,html.mob .hcards,
 /* Linie unter der Reiterleiste als Schatten statt Rand mit negativem Abstand der Knöpfe: so ragt nichts über die Leiste hinaus (scrollHeight = clientHeight) */
 .atabs{border-bottom:0;box-shadow:inset 0 -2px 0 var(--ink)}
 .atabs button{margin-bottom:0}
+/* 3.61.1 Sportart-Blatt am Handy (sportSheetOpen): Chips mit Umbruch, 44-px-Tippfläche, Kategorien als kleine Überschrift */
+html.mob .chips.spsheet{display:flex;flex-wrap:wrap;gap:8px;max-height:60vh;overflow-x:hidden;overflow-y:auto}
+html.mob .spsheet .chip{min-height:44px;padding:4px 14px;font-size:16px;white-space:normal;flex:none}
+.spsheet .spkat{margin:10px 0 0}
+/* 3.61.1 Verwaltung, Reiterleiste am Computer: kompaktere Abstände, damit alle Reiter bei üblichen Breiten (ab ca. 1200 px) in EINER Zeile stehen; bei weniger Breite bricht sie
+   gleichmäßig um (gleiche Höhe und Abstände in jeder Zeile, auch beim Link „Prüfen & Aufräumen“). Am Handy bleibt es beim Wischen. */
+html:not(.mob) .atabs{gap:2px;align-items:stretch}
+@media (min-width:701px){
+  html:not(.mob) .atabs button,html:not(.mob) .atabs .atlink{box-sizing:border-box;display:inline-flex;align-items:center;min-height:44px;padding:0 9px;margin:0;font:600 15px/1.2 var(--b);border-bottom:4px solid transparent}
+  html:not(.mob) .atabs button.on{border-bottom-color:var(--acc,#2f8f5f)}
+  html:not(.mob) .atabs .atlink{border-left:0;font-family:var(--b);color:var(--mut)}
+  html:not(.mob) .atabs .atlink:hover{color:var(--ink);background:var(--soft)}
+}

@@ -468,7 +468,7 @@ VIEWS.tours = async (_name, qp) => {
     sp = [...new Set(TOURS.map(t => t.sport))];
   $("#main").innerHTML = `<div class="sec mt0"><h2>Alle Touren</h2><span class="sub" id="cnt"></span></div>
    ${xf ? tourXfBar(xf) : ""}<div class="filters" id="flt"><input id="q" placeholder="Name suchen" class="mnw230"><span class="fxtra"><select id="fy"><option value="0">Gesamte Zeit</option>${ys.map(y => `<option>${y}</option>`).join("")}</select></span>
-   <select id="fs" aria-label="Sportart">${sportFilterOptions(sp)}</select>
+   <select data-spsheet id="fs" aria-label="Sportart">${sportFilterOptions(sp)}</select>
    <span class="fxtra"><select id="fz" title="Jahreszeit"><option value="">Ganzjährig</option><option value="sommer">Sommerhalbjahr (Mai–Okt)</option><option value="winter">Winterhalbjahr (Nov–Apr)</option></select>
    <select id="fb" title="Meine Bewertung"><option value="">Alle Bewertungen</option><option value="5">★★★★★</option><option value="4">ab ★★★★</option><option value="3">ab ★★★</option></select>
    <select id="fr" title="Region"><option value="">Alle Regionen</option>${regionOpts()}</select>
