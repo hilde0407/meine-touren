@@ -108,7 +108,7 @@ function flField(f, cfg, i) {
     return `<fieldset class="slfs flsp"><legend>${esc(f.label || "Sportart")}</legend><div class="flchips">` +
       sportFilterHtml(TOURS.map(t => t.sport), sel, (v, l, x) => x.all
         ? `<label class="flchip"><input type="checkbox" data-all${x.on ? " checked" : ""}><span>Alle Sportarten</span></label>`
-        : `<label class="flchip"${x.title ? ` title="${esc(x.title)}"` : ""}><input type="checkbox" name="f${i}" value="${esc(v)}"${x.on ? " checked" : ""}><span>${esc(l)}</span></label>`,
+        : `<label class="flchip"${x.title ? ` title="${esc(x.title)}" aria-label="${esc(x.title)}"` : ""}><input type="checkbox" name="f${i}" value="${esc(v)}"${x.on ? " checked" : ""}><span>${esc(l)}</span></label>`,
       {wrap: (id, l, h) => `<span class="flcat">${esc(l)}</span>${h}`}) +
       `</div></fieldset>`;
   }

@@ -25,8 +25,8 @@ new MutationObserver(() => viewerLock()).observe(document.body, {childList: true
 
 const fmtAge = s => {
   if (s < 90) return "gerade eben";
-  if (s < 3600) return `vor ${Math.round(s / 60)} Min.`;
-  if (s < 86400) return `vor ${Math.round(s / 3600)} Std.`;
+  if (s < 3600) return `vor ${Math.round(s / 60)}\u00a0Min.`;
+  if (s < 86400) return `vor ${Math.round(s / 3600)}\u00a0Std.`;
   return `vor ${Math.round(s / 86400)} Tagen`;
 };
 

@@ -71,7 +71,7 @@ def api_selftest():
         if not fs:
             raise RuntimeError("noch keine automatische Sicherung vorhanden (läuft nachts um 03:40)")
         age = (time.time() - fs[-1].stat().st_mtime) / 3600
-        return f"{len(fs)} Sicherungen, letzte vor {age:.0f} Std."
+        return f"{len(fs)} Sicherungen, letzte vor {age:.0f}\u00a0Std."
     chk("Automatische Sicherung", bk)
     def integ():
         r = db.one("PRAGMA integrity_check")

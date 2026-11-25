@@ -176,7 +176,7 @@ const isSnowshoe = t => !!t && (t.sport === "snowshoe" || tourTags(t).includes(S
      sgExpand(l)     Filterliste (Sportarten und/oder „sgrp:<id>“) -> Sportarten; null = alle (leer oder nur gelöschte Gruppen: nie ein Fehler, sondern „alle“)
      sgMatch(s, l)   Filter passt          sgPlain(l)  Filterliste mit aufgelösten Gruppen (für Adressen, die keine Gruppen kennen)
      sgOptions(sp)   Auswahl für Filter und Ziele: [Schlüssel, Beschriftung] je Gruppe mit vorhandenen Sportarten
-     sgLabel(k)      3.60.1 Beschriftung einer Gruppe überall (Filter, Ziele, Aufteilungen): „<Name> = A + B + C“, ab 4 Mitgliedern „<Name> = A + B + C + …“
+     sgLabel(k)      Beschriftung einer Gruppe überall (Filter, Ziele, Aufteilungen): nur der Name (3.61.3; bis 3.61.2 „<Name> = A + B + C“)
      sgTitle(k)      vollständige Liste für title/Tooltip („<Name> = A + B + C + D“)
      sgNameClash(n)  3.60.1: Gruppenname gleich dem Namen einer Aktivität (in einer der 4 Sprachen, ohne Groß-/Kleinschreibung und Leerzeichen)?
    sName/sCol kennen die Schlüssel der Gruppen (Beschriftung wie sgLabel, Farbe der ersten Sportart).
@@ -211,10 +211,7 @@ const sgParts = k => {
   const g = sgById(k);
   return g ? [g.name, g.sports.map(s => sgTL((SPORT[sNorm(s)] || [s])[0]))] : ["–", []];
 };
-const sgLabel = k => {
-  const [n, m] = sgParts(k);
-  return m.length ? `${n} = ${(m.length > 3 ? m.slice(0, 3).concat("…") : m).join(" + ")}` : n;
-};
+const sgLabel = k => sgParts(k)[0];                    // 3.61.3 „Gruppenname reicht“: in Anzeigen nur der Name; die Zusammensetzung steht im Tooltip (sgTitle) und in Verwaltung → Sportarten
 const sgTitle = k => {
   const [n, m] = sgParts(k);
   return m.length ? `${n} = ${m.join(" + ")}` : n;
@@ -707,7 +704,7 @@ function barChart(vals, labels, o = {}) {
       const x = L + i * bw + bw * 0.1,
         w = bw * 0.8;
       if (v > 0)
-        s += `<line x1="${x}" x2="${x + w}" y1="${y(v)}" y2="${y(v)}" stroke="var(--accent2)" stroke-width="3" stroke-linecap="round"><title>${o.ghostLabel}: ${labels[i]} ${nf(v)} km</title></line>`;
+        s += `<line x1="${x}" x2="${x + w}" y1="${y(v)}" y2="${y(v)}" stroke="var(--accent2)" stroke-width="3" stroke-linecap="round"><title>${o.ghostLabel}: ${labels[i]} ${nf(v)}\u00a0km</title></line>`;
     });
   return s + "</svg>";
 }

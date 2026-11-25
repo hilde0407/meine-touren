@@ -81,7 +81,7 @@ function planProfile(dense, ele) {
     x = v => L + (v / D) * (W - L - 6),
     y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
   const line = ele.map((h, i) => `${i ? "L" : "M"}${x(d[i]).toFixed(1)},${y(h).toFixed(1)}`).join("");
-  const ticks = [lo + pad, (lo + hi) / 2, hi - pad].map(v => `<text x="2" y="${y(v) + 4}" font-size="11" fill="currentColor" opacity=".6">${Math.round(v)} m</text><line x1="${L}" x2="${W - 6}" y1="${y(v)}" y2="${y(v)}" stroke="currentColor" opacity=".12"/>`).join("");
+  const ticks = [lo + pad, (lo + hi) / 2, hi - pad].map(v => `<text x="2" y="${y(v) + 4}" font-size="11" fill="currentColor" opacity=".6">${Math.round(v)}\u00a0m</text><line x1="${L}" x2="${W - 6}" y1="${y(v)}" y2="${y(v)}" stroke="currentColor" opacity=".12"/>`).join("");
   const kms = [0, 0.25, 0.5, 0.75, 1].map(f => `<text x="${x(D * f)}" y="${H - 4}" font-size="11" text-anchor="${f === 0 ? "start" : f === 1 ? "end" : "middle"}" fill="currentColor" opacity=".6">${fmtKm((D * f) / 1000)}</text>`).join("");
   return `<svg viewBox="0 0 ${W} ${H}" class="w100" style="height:auto">${ticks}${kms}<path d="${line}L${x(D)},${H - B}L${L},${H - B}Z" fill="var(--green,#2f8f5f)" opacity=".22"/><path d="${line}" fill="none" stroke="var(--green,#2f8f5f)" stroke-width="2.2"/></svg>`;
 }
@@ -105,8 +105,8 @@ function planCheckHtml(r, estH) {
       H = r.hoechster_aufstieg;
     li.push(`<li>Deine längste Tour der letzten ${r.monate} Monate: ${kmup(L.km, L.up)}; diese: ${kmup(dk.km, dk.up)}</li>`);
     if (H && H.id !== L.id && dk.up != null) li.push(`<li>Dein größter Aufstieg der letzten ${r.monate} Monate: ${fmtHm(H.up)} auf ${fmtKm(H.km)}; diese: ${fmtHm(dk.up)}</li>`);
-    if (r.gruende.includes("km")) li.push(`<li>Länger als deine längste Tour (+${Math.round((dk.km / L.km - 1) * 100)} %)</li>`);
-    if (r.gruende.includes("up") && H && H.up > 0) li.push(`<li>Mehr Aufstieg als deine bisher höchste Tour (+${Math.round((dk.up / H.up - 1) * 100)} %)</li>`);
+    if (r.gruende.includes("km")) li.push(`<li>Länger als deine längste Tour (+${Math.round((dk.km / L.km - 1) * 100)}\u00a0%)</li>`);
+    if (r.gruende.includes("up") && H && H.up > 0) li.push(`<li>Mehr Aufstieg als deine bisher höchste Tour (+${Math.round((dk.up / H.up - 1) * 100)}\u00a0%)</li>`);
     li.push(`<li>Länger als diese Strecke: ${r.laenger} von ${r.n} Touren</li>`);
     const a = r.aehnlich;
     if (a) {
@@ -134,8 +134,8 @@ function planCmpHtml(p) {
   const out = [];
   if (p.est_h && t.h) out.push(`<span>geplant ${hmm(p.est_h)}</span> · <span>gelaufen ${hmm(t.h)} (${hmSigned(t.h - p.est_h)})</span>`);
   else if (t.h) out.push(`<span>gelaufen ${hmm(t.h)}</span>`);
-  if (p.km && t.km) out.push(`<span>Strecke: geplant ${fmtKm(p.km)}, gelaufen ${fmtKm(t.km)} (${nSigned(t.km - p.km, 1)} km)</span>`);
-  if (p.up != null && t.up != null) out.push(`<span>Aufstieg: geplant ${fmtHm(p.up)}, gelaufen ${fmtHm(t.up)} (${nSigned(t.up - p.up, 0)} m)</span>`);
+  if (p.km && t.km) out.push(`<span>Strecke: geplant ${fmtKm(p.km)}, gelaufen ${fmtKm(t.km)} (${nSigned(t.km - p.km, 1)}\u00a0km)</span>`);
+  if (p.up != null && t.up != null) out.push(`<span>Aufstieg: geplant ${fmtHm(p.up)}, gelaufen ${fmtHm(t.up)} (${nSigned(t.up - p.up, 0)}\u00a0m)</span>`);
   return `<small class="pcmp">${out.join(" · ") || ""}</small>`;
 }
 const planDate = ts => (ts ? fmtDatumKurz(ts) : "");
@@ -239,7 +239,7 @@ const planClock = m => {
   const r = Math.round(m) % 1440;
   return fmtUhrzeit(`2000-01-01T${fmtPad2(Math.floor(r / 60))}:${fmtPad2(r % 60)}`);
 };
-const planSgn = p => `${p < 0 ? "−" : "+"}${Math.abs(p)} %`;
+const planSgn = p => `${p < 0 ? "−" : "+"}${Math.abs(p)}\u00a0%`;
 const PLAN_FORM = {
   km: {
     unter: "Strecke {}: kürzer als deine üblichen Touren (Median {})", aehnlich: "Strecke {}: ähnlich wie deine üblichen Touren (Median {})", ueber: "Strecke {}: länger als deine üblichen Touren (Median {})",

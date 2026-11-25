@@ -295,7 +295,7 @@ async function collView(title, sub, ids, back, opt = {}) {
   const plan = await api(`/api/tiles/plan?ids=${ts.map(t => t.id).join(",")}`).catch(() => null);
   if (plan)
     $("#cofm").textContent = plan.missing
-      ? `${plan.missing} von ${plan.total} Kacheln fehlen noch (ca. ${Math.ceil(plan.missing / 60)} Min.)`
+      ? `${plan.missing} von ${plan.total} Kacheln fehlen noch (ca. ${Math.ceil(plan.missing / 60)}\u00a0Min.)`
       : "✓ Karte ist offline verfügbar";
   $("#coff").onclick = async e => {
     e.target.disabled = true;
@@ -454,7 +454,7 @@ VIEWS.places = async (...a) => {
           `<div class="r"><span>${y}<div class="stack mt4" style="width:${(100 * v.km) / mxy}%"><div style="width:${v.km ? (100 * v.new_km) / v.km : 0}%;background:var(--yellow)"></div></div></span><b>${nf(v.new_km, 0)} von ${fmtKm(v.km, {d: 0})} neu</b></div>`
       )
       .join("")}</div></div>
-     <div class="panel"><h2>Größte Entdeckungen</h2><div class="rows">${tops.map(([id, v]) => `<div class="r"><span><a href="#/tour/${id}">${esc(BY[id]?.name || id)}</a><small>${BY[id] ? fmtDatumKurz(BY[id].date) : ""} · ${v.pct} % neu</small></span><b>${fmtKm(v.new_km)}</b></div>`).join("")}</div></div></div>`;
+     <div class="panel"><h2>Größte Entdeckungen</h2><div class="rows">${tops.map(([id, v]) => `<div class="r"><span><a href="#/tour/${id}">${esc(BY[id]?.name || id)}</a><small>${BY[id] ? fmtDatumKurz(BY[id].date) : ""} · ${v.pct}\u00a0% neu</small></span><b>${fmtKm(v.new_km)}</b></div>`).join("")}</div></div></div>`;
   }
   box.insertAdjacentHTML("beforeend", h);
   if ($("#wxb"))

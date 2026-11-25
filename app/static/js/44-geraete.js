@@ -21,7 +21,7 @@ const dvPeriod = g => {
   return [a ? `seit ${a}` : "", b ? `bis ${b}` : "aktuell"].filter(Boolean);
 };
 /* „Das liefert diese Uhr“: Kanäle, die bei mindestens 20 % der Touren des Geräts vorkommen (aus den Messwert-Zusatzdateien) */
-const dvGives = q => (!q || !q.n_tours ? "" : `<span class="dvsub dvgive"><b>Das liefert diese Uhr:</b> ${q.channels.length ? q.channels.map(c => `<span class="dvch" title="bei ${c.share} % der Touren">${esc(c.label)}</span>`).join(" ") : `<span class="mut">noch keine Messwerte erkannt (Verwaltung → Touren holen → Zepp-Import „Messwerte holen“)</span>`}</span>`);
+const dvGives = q => (!q || !q.n_tours ? "" : `<span class="dvsub dvgive"><b>Das liefert diese Uhr:</b> ${q.channels.length ? q.channels.map(c => `<span class="dvch" title="bei ${c.share}\u00a0% der Touren">${esc(c.label)}</span>`).join(" ") : `<span class="mut">noch keine Messwerte erkannt (Verwaltung → Touren holen → Zepp-Import „Messwerte holen“)</span>`}</span>`);
 /* 3.49.0 – von der Android-App angemeldetes Gerät: Android- und App-Version, letzte Aufzeichnung */
 const dvAppInfo = g => {
   if (!g.app) return "";
@@ -260,7 +260,7 @@ function dvDots(a, lim, good, ok, label) {
   const desc = `${label}: ${a.points.length} Touren, Median ${dvPct(a.median)}, mittlere Hälfte ${dvPct(a.p25)} bis ${dvPct(a.p75)}`;
   return `<svg class="dvdots" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(desc)}"><rect class="dvb bad" x="${pad}" y="6" width="${W - 2 * pad}" height="34"/>${band(ok, "warn")}${band(good, "ok")}
     <line class="dvzero" x1="${x(0)}" x2="${x(0)}" y1="6" y2="40"/>${dots}${box}
-    <text class="dvax" x="${pad}" y="70" text-anchor="start">${dvPct(-lim).replace(" %", "")} %</text><text class="dvax" x="${x(0)}" y="70" text-anchor="middle">0</text><text class="dvax" x="${W - pad}" y="70" text-anchor="end">${dvPct(lim)}</text></svg>`;
+    <text class="dvax" x="${pad}" y="70" text-anchor="start">${dvPct(-lim).replace(" %", "")}\u00a0%</text><text class="dvax" x="${x(0)}" y="70" text-anchor="middle">0</text><text class="dvax" x="${W - pad}" y="70" text-anchor="end">${dvPct(lim)}</text></svg>`;
 }
 
 /* Einklappbare Abschnitte der Genauigkeit: einheitlicher Kopf (Titel + Kennzeichen), Zustand je Abschnitt im Browser (localStorage, mit try/catch).
@@ -294,15 +294,15 @@ function dvQBody(q, g, viewer) {
   const tiles = [
     tile("Strecke", d.n ? dvPct(d.median) : "–", d.n ? `${d.n} ${d.n === 1 ? "Tour" : "Touren"} verglichen${d.n_implausible ? `, ${d.n_implausible} unplausibel` : ""}` : d.n_implausible ? `${d.n_implausible} unplausibel` : "nicht vergleichbar", d),
     tile("Höhe", h.n_pct ? dvPct(h.up_err_pct.median) : "–", h.n ? `${h.n} ${h.n === 1 ? "Tour" : "Touren"}${h.rough ? " (grob)" : ""}, Aufstieg ${h.up_err_m.median > 0 ? "+" : h.up_err_m.median < 0 ? "−" : ""}${fmtHm(Math.abs(h.up_err_m.median))}` : "nicht vergleichbar", h, h.rough),
-    tile("GPS-Spur", p.n ? `${nf(p.jump_tours_pct, 0)} %` : "–", p.n ? `Touren mit Sprüngen (von ${p.n})` : "keine Spur", p),
-    tile("Puls", r.n ? `${nf(r.bad_tours_pct, 0)} %` : "–", r.n ? `Touren mit Aussetzern (von ${r.n})` : "kein Puls", r),
+    tile("GPS-Spur", p.n ? `${nf(p.jump_tours_pct, 0)}\u00a0%` : "–", p.n ? `Touren mit Sprüngen (von ${p.n})` : "keine Spur", p),
+    tile("Puls", r.n ? `${nf(r.bad_tours_pct, 0)}\u00a0%` : "–", r.n ? `Touren mit Aussetzern (von ${r.n})` : "kein Puls", r),
   ].join("");
   const th = q.thresholds;
   const chart = (a, lim, t, title, cap) => (a.points && a.points.length >= 2 ? `<figure class="dvfig"><figcaption>${title}</figcaption>${dvDots(a, lim, t[0], t[1], title)}<small class="dvh">${cap} ${dvPct(a.p25)} bis ${dvPct(a.p75)}, Median ${dvPct(a.median)}.</small></figure>` : "");
   const hs = h.up_err_pct;
   /* genau (Track der Uhr oder abgerufenes Zepp-Detail) und grob (nur Zusammenfassung der Uhr) bleiben getrennt und sind so benannt */
   const split = h.n_summary ? `<div class="dvsplit" role="group" aria-label="Höhenvergleich: genau und grob"><span class="dvsl">Mit Detail (genau)</span><b>${dvTours(h.n_detail || 0)}</b><span class="dvsl">Nur Zusammenfassung (grob)</span><b>${dvTours(h.n_summary)}</b></div>
-    <span class="dvh dvsplith">Grobe Werte kommen aus dem Auf- und Abstieg, den die Uhr selbst meldet; sie haben großzügigere Grenzen (gut bis ${nf(th.height_summary[0], 0)} %, mäßig bis ${nf(th.height_summary[1], 0)} %) und werden nicht mit den genauen Werten vermischt.</span>${h.rough ? `<span class="dvh dvsplith">Die Einschätzung der Höhe beruht hier nur auf den groben Werten.</span>` : ""}` : "";
+    <span class="dvh dvsplith">Grobe Werte kommen aus dem Auf- und Abstieg, den die Uhr selbst meldet; sie haben großzügigere Grenzen (gut bis ${nf(th.height_summary[0], 0)}\u00a0%, mäßig bis ${nf(th.height_summary[1], 0)}\u00a0%) und werden nicht mit den genauen Werten vermischt.</span>${h.rough ? `<span class="dvh dvsplith">Die Einschätzung der Höhe beruht hier nur auf den groben Werten.</span>` : ""}` : "";
   const stand = `<div class="dvstand">${pr.total ? dvBar(pr.done, pr.total, "Fortschritt der Auswertung") : ""}
     <p class="mut dvqwhen">Zuletzt ausgewertet am ${esc(dvQTime(q.computed_at))}${pr.total ? `, ${pr.done} von ${pr.total} Touren` : ""}.</p>
     ${pr.open ? `<p class="dvopen" role="status"><b>${dvOpenText(pr.open)}</b><span class="dvh">Offen sind Touren, bei denen noch Geländekacheln oder Zepp-Details fehlen. Je Lauf gibt es Obergrenzen, damit nichts überlastet wird.</span></p>` : ""}
@@ -318,18 +318,18 @@ function dvQBody(q, g, viewer) {
     <div class="dvfigs">${chart(d, 20, th.dist, "Strecke: Abweichung der Uhr je Tour", "Mittlere Hälfte der Touren:")}${hs.n ? chart({points: h.points, p25: hs.p25, p75: hs.p75, median: hs.median}, 60, th.height, "Aufstieg: Abweichung vom Geländemodell je Tour", "Mittlere Hälfte der Touren:") : ""}</div>
     ${g.tips.map(t => `<p class="dvtip">${esc(t.text)}</p>`).join("")}
     ${dvSec("stand", "Auswertungsstand", pr.open ? `<span class="dvqs warn">noch ${pr.open} offen</span>` : `<span class="dvqs ok">vollständig</span>`, stand, true)}
-    <details class="dvhow"><summary>Wie wird bewertet?</summary><p class="dvh">Strecke: gut bis ${nf(th.dist[0], 0)} %, mäßig bis ${nf(th.dist[1], 0)} % mittlere Abweichung. Höhe: gut bis ${nf(th.height[0], 0)} %, mäßig bis ${nf(th.height[1], 0)} % gegenüber dem Geländemodell (das Modell glättet Gelände und unterschätzt Aufstiege etwas). GPS-Spur: gut, wenn höchstens ${nf(th.gps[0], 0)} % der Touren Sprünge haben, mäßig bis ${nf(th.gps[1], 0)} %. Puls: gut, wenn höchstens ${nf(th.hr[0], 0)} % der Touren Aussetzer haben, mäßig bis ${nf(th.hr[1], 0)} %. Eine Einschätzung gibt es ab ${q.min_n} verglichenen Touren. Strecke und Höhe der Touren werden dabei nie verändert.</p></details>
+    <details class="dvhow"><summary>Wie wird bewertet?</summary><p class="dvh">Strecke: gut bis ${nf(th.dist[0], 0)}\u00a0%, mäßig bis ${nf(th.dist[1], 0)}\u00a0% mittlere Abweichung. Höhe: gut bis ${nf(th.height[0], 0)}\u00a0%, mäßig bis ${nf(th.height[1], 0)}\u00a0% gegenüber dem Geländemodell (das Modell glättet Gelände und unterschätzt Aufstiege etwas). GPS-Spur: gut, wenn höchstens ${nf(th.gps[0], 0)}\u00a0% der Touren Sprünge haben, mäßig bis ${nf(th.gps[1], 0)}\u00a0%. Puls: gut, wenn höchstens ${nf(th.hr[0], 0)}\u00a0% der Touren Aussetzer haben, mäßig bis ${nf(th.hr[1], 0)}\u00a0%. Eine Einschätzung gibt es ab ${q.min_n} verglichenen Touren. Strecke und Höhe der Touren werden dabei nie verändert.</p></details>
     ${dvSec("auff", "Auffällige Touren", g.flagged ? `<span class="dvqs warn">${g.flagged}</span>` : `<span class="dvqs ok">keine</span>`, `${batchBtn}<div class="dvbad" data-bad="${g.id}">${g.flagged || g.n_acked ? `<div class="dvbadl mut">Wird geladen …</div>` : `<p class="mut">Keine auffälligen Touren.</p>`}</div>`, true)}
     ${bat}`;
 }
 
 const DVQ_FLAG = f => ({
   dist_implausible: `Strecke unplausibel: Uhr ${fmtKm((f.dev_m || 0) / 1000)}, Tour ${fmtKm((f.tour_m || 0) / 1000)}`,
-  dist: `Strecke ${nf(Math.abs(f.pct), 1)} % ${f.pct < 0 ? "kürzer" : "länger"}`,
+  dist: `Strecke ${nf(Math.abs(f.pct), 1)}\u00a0% ${f.pct < 0 ? "kürzer" : "länger"}`,
   height: `Aufstieg ${fmtHm(f.up_dev)} laut Uhr, ${fmtHm(f.up_dem)} laut Gelände${f.rough ? " (grob)" : ""}`,
   gps_jumps: `${f.n} ${f.n === 1 ? "GPS-Sprung" : "GPS-Sprünge"}`,
-  gps_gaps: `${nf(f.pct, 0)} % Lücken oder Pausen`,
-  hr: `${nf(f.pct, 0)} % Puls unplausibel`,
+  gps_gaps: `${nf(f.pct, 0)}\u00a0% Lücken oder Pausen`,
+  hr: `${nf(f.pct, 0)}\u00a0% Puls unplausibel`,
 }[f.kind] || f.kind);
 
 /* „Als geprüft markieren“ (3.16.1): Pausen und Lücken sind normal und nicht reparierbar. Die Markierung gilt für die Auffälligkeiten, die jetzt offen sind;
@@ -606,8 +606,8 @@ function dvuRange(f) {
   return `<span>${r}</span>${f.median != null && f.min !== f.max ? `<small>Median ${DVU_NF(f.median)}</small>` : ""}${f.unit === "roh" ? `<small>Rohwert</small>` : ""}`;
 }
 function dvuRow(f, src, scope) {
-  const pres = scope === "tour" ? (f.n > 0 ? `<span>vorhanden</span><small>${DVU_NF(f.n)} ${f.n === 1 ? "Wert" : "Werte"}${f.share != null && f.share < 1 ? `, ${nf(f.share * 100, 0)} % gefüllt` : ""}</small>` : `<span class="mut">leer</span>`)
-    : `<span>${f.n_tours} von ${src.tours_checked}</span><small>${f.n_tours ? (f.share != null ? `${nf(f.share * 100, 0)} % gefüllt` : f.type) : "immer leer"}</small>`;
+  const pres = scope === "tour" ? (f.n > 0 ? `<span>vorhanden</span><small>${DVU_NF(f.n)} ${f.n === 1 ? "Wert" : "Werte"}${f.share != null && f.share < 1 ? `, ${nf(f.share * 100, 0)}\u00a0% gefüllt` : ""}</small>` : `<span class="mut">leer</span>`)
+    : `<span>${f.n_tours} von ${src.tours_checked}</span><small>${f.n_tours ? (f.share != null ? `${nf(f.share * 100, 0)}\u00a0% gefüllt` : f.type) : "immer leer"}</small>`;
   const use = f.used ? `<span class="dvuy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>ja</span>`
     : `<span class="dvun ${f.n_tours ? "has" : ""}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg>nein</span>`;
   return `<tr class="${f.used ? "" : "unused"}${f.n_tours ? "" : " empty"}"><th scope="row"><code>${esc(f.name)}</code>${f.text ? `<small>${esc(f.text)}</small>` : ""}</th>

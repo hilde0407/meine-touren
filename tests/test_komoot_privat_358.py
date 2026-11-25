@@ -360,7 +360,7 @@ def test_version_doku_und_uebersetzungen():
     from pathlib import Path
     from app import config
     root = Path(__file__).resolve().parent.parent
-    assert config.VERSION.startswith("3.61.2 · Meine Touren") and komoot.user_agent() == "MeineTouren/3.61.2"
+    assert config.VERSION.startswith("3.61.3 · Meine Touren") and komoot.user_agent() == "MeineTouren/3.61.3"
     notes = (root / "docs" / "versionen" / "3.58.0.md").read_text(encoding="utf-8")
     assert notes.startswith("# 3.58.0") and "Standard-Sichtbarkeit" in notes and "kompy" in notes and "nicht geprüft" in notes
     assert "3.58.0" in (root / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")

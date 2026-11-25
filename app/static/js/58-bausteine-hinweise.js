@@ -79,14 +79,14 @@ const HN_ART = {
     desc: "Erscheint nur, wenn die Prognose zum Jahresende deutlich unter einem deiner Jahresziele liegt. Sonst ist der Baustein unsichtbar.",
     sample: ["warnung", "Prognose 780 km bei einem Ziel von 1.000 km (22 % darunter)."],
     fields: [{k: "schwelle", kind: "number", label: "Schwelle: Prognose liegt um mehr als so viele Prozent unter dem Ziel", min: 1, max: 90, step: 1, int: true}, {kind: "sports", label: "Sportart (nur Ziele, die sie betreffen)"}],
-    cond: c => [`Wird nur angezeigt, wenn die Prognose zum Jahresende um mehr als ${hnNum(c.schwelle ?? 10)} % unter einem deiner Jahresziele liegt.`, "Voraussetzung: ein Jahresziel (Statistik → Ziele); die Prognose gibt es ab dem 14. Tag des Jahres."],
+    cond: c => [`Wird nur angezeigt, wenn die Prognose zum Jahresende um mehr als ${hnNum(c.schwelle ?? 10)}\u00a0% unter einem deiner Jahresziele liegt.`, "Voraussetzung: ein Jahresziel (Statistik → Ziele); die Prognose gibt es ab dem 14. Tag des Jahres."],
     body(h) {
       const L = h.daten.ziele, more = L.length - 3;
-      return hnRows(L.slice(0, 3).map(z => `<li><b>${hnMetric[z.metrik]}</b>${z.sport ? ` <span class="mut">${esc(goalSportName(z.sport))}</span>` : ""}<span class="hnt">Prognose ${hnVal(z.metrik, z.prognose)} bei einem Ziel von ${hnVal(z.metrik, z.ziel)} (${nf(z.abweichung_pct, 0)} % darunter).</span></li>`)) +
+      return hnRows(L.slice(0, 3).map(z => `<li><b>${hnMetric[z.metrik]}</b>${z.sport ? ` <span class="mut">${esc(goalSportName(z.sport))}</span>` : ""}<span class="hnt">Prognose ${hnVal(z.metrik, z.prognose)} bei einem Ziel von ${hnVal(z.metrik, z.ziel)} (${nf(z.abweichung_pct, 0)}\u00a0% darunter).</span></li>`)) +
         (more > 0 ? `<p class="mut hnmore">${more === 1 ? "Dazu 1 weiteres Ziel." : `Dazu ${more} weitere Ziele.`}</p>` : "");
     },
     link: () => hnTrLink("#/stats", "Zu den Zielen ›"),
-    badge: h => `${nf(h.daten.ziele[0].abweichung_pct, 0)} % darunter`,
+    badge: h => `${nf(h.daten.ziele[0].abweichung_pct, 0)}\u00a0% darunter`,
   },
   meilenstein: {
     name: "Meilenstein erreicht", icon: "pin", wtype: "hnmeilenstein", seiten: ["uebersicht", "statistik"], defaults: {tage: 7, ausblenden: 7},
@@ -95,7 +95,7 @@ const HN_ART = {
     fields: [{k: "tage", kind: "number", label: "Zeitraum in Tagen (so lange nach dem Überschreiten bleibt der Hinweis)", min: 1, max: 365, step: 1, int: true}, {kind: "sports"}],
     cond: c => [(c.tage ?? 7) === 1 ? "Wird nur angezeigt, wenn du heute oder gestern eine runde Marke überschritten hast: 100, 250, 500, 1.000 … Kilometer, 10.000 m Aufstieg oder die 25., 50., 100. Tour."
       : `Wird nur angezeigt, wenn du in den letzten ${nf(c.tage ?? 7, 0)} Tagen eine runde Marke überschritten hast: 100, 250, 500, 1.000 … Kilometer, 10.000 m Aufstieg oder die 25., 50., 100. Tour.`],
-    body: h => hnRows(h.daten.marken.slice(0, 3).map(m => `<li><b>${m.typ === "km" ? `${fmtKm(m.wert, {d: 0})} insgesamt überschritten` : m.typ === "hm" ? `${nf(m.wert, 0)} m Aufstieg insgesamt überschritten` : `${nf(m.wert, 0)}. Tour erreicht`}</b> ${hnTour(m)} <span class="mut">${fmtDatumKurz(m.datum)}</span></li>`)),
+    body: h => hnRows(h.daten.marken.slice(0, 3).map(m => `<li><b>${m.typ === "km" ? `${fmtKm(m.wert, {d: 0})} insgesamt überschritten` : m.typ === "hm" ? `${nf(m.wert, 0)}\u00a0m Aufstieg insgesamt überschritten` : `${nf(m.wert, 0)}. Tour erreicht`}</b> ${hnTour(m)} <span class="mut">${fmtDatumKurz(m.datum)}</span></li>`)),
     link: () => "",
     badge: h => (h.daten.marken[0].typ === "km" ? `${fmtKm(h.daten.marken[0].wert, {d: 0})}` : h.daten.marken[0].typ === "hm" ? `${fmtHm(h.daten.marken[0].wert)}` : `${nf(h.daten.marken[0].wert, 0)}. Tour`),
   },
@@ -148,7 +148,7 @@ const HN_ART = {
       }).join("");
     },
     link: () => hnTrLink("#/stats", "Zu den Zielen ›"),
-    badge: h => `${nf(Math.min(100, h.daten.ziel > 0 ? (h.daten.ist / h.daten.ziel) * 100 : 0), 0)} %`,
+    badge: h => `${nf(Math.min(100, h.daten.ziel > 0 ? (h.daten.ist / h.daten.ziel) * 100 : 0), 0)}\u00a0%`,
   },
   erholung: {
     name: "Erholung empfohlen", icon: "heart", wtype: "hnerholung", seiten: ["uebersicht", "statistik"], defaults: {stufe: "deutlich_mehr", ausblenden: 7},
@@ -158,9 +158,9 @@ const HN_ART = {
     cond: c => [c.stufe === "mehr" ? "Wird nur angezeigt, wenn deine Belastung laut Uhr über dem Üblichen liegt und du in den letzten 7 Tagen trainiert hast." : "Wird nur angezeigt, wenn deine Belastung laut Uhr deutlich über dem Üblichen liegt und du in den letzten 7 Tagen trainiert hast.",
       "Voraussetzung: Trainingsdaten der Uhr."],
     body: h => `<p class="hnt">${h.daten.stufe === "deutlich_mehr" ? "Deutlich mehr Belastung als sonst: Erholung empfohlen." : "Etwas mehr Belastung als sonst: Erholung empfohlen."}</p>` +
-      `<p class="mut hnsub">${h.daten.abweichung_pct > 0 ? "+" : ""}${h.daten.abweichung_pct} % gegenüber dem Schnitt der 12 Wochen davor</p><p class="mut hnsub">Die Belastung stammt aus den Trainingsdaten deiner Uhr und ist keine medizinische Empfehlung.</p>`,
+      `<p class="mut hnsub">${h.daten.abweichung_pct > 0 ? "+" : ""}${h.daten.abweichung_pct}\u00a0% gegenüber dem Schnitt der 12 Wochen davor</p><p class="mut hnsub">Die Belastung stammt aus den Trainingsdaten deiner Uhr und ist keine medizinische Empfehlung.</p>`,
     link: () => hnTrLink("#/stats", "Mehr in der Statistik ›"),
-    badge: h => `${h.daten.abweichung_pct > 0 ? "+" : ""}${h.daten.abweichung_pct} %`,
+    badge: h => `${h.daten.abweichung_pct > 0 ? "+" : ""}${h.daten.abweichung_pct}\u00a0%`,
   },
   sicherung: {
     name: "Sicherung", icon: "shield", wtype: "hnsicherung", seiten: ["uebersicht"], defaults: {tage: 7, ausblenden: 7},

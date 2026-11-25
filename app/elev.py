@@ -125,7 +125,7 @@ def recompute_local():
                 f.write_text(text, encoding="utf-8"); routes.store(t["id"], items)
             db.execute("UPDATE tours SET up_m=?,down_m=? WHERE id=?", (up, down, t["id"])); ch += 1
             if ch <= 5:
-                jobs.log(f"  {t['id']}: Aufstieg {round(t['up_m'] or 0)} m → {round(up)} m")
+                jobs.log(f"  {t['id']}: Aufstieg {round(t['up_m'] or 0)}\u00a0m → {round(up)}\u00a0m")
     jobs.log(f"Aufstieg: {n} lokale Touren geprüft, {ch} korrigiert")
     return ch
 
@@ -325,7 +325,7 @@ def zepp_fix_all(api=None):
         try:
             r = _zepp_apply(t, s, api)
             done += 1
-            jobs.log(f"  {t['id']}: Aufstieg {round(r['orig_up'] or 0)} m → {round(r['up'])} m")
+            jobs.log(f"  {t['id']}: Aufstieg {round(r['orig_up'] or 0)}\u00a0m → {round(r['up'])}\u00a0m")
         except Exception as e:  # noqa
             jobs.log(f"  {t['id']}: {e}")
         time.sleep(0.2)

@@ -216,11 +216,11 @@ def test_statistik_filter_aufteilung_und_rekorde_mit_gruppe(pw, clean):
     try:
         pg.goto(url + "/#/stats")
         chip = pg.locator(f'#sch [data-s="sgrp:{gid}"]')
-        expect(chip).to_have_text("Bergwandern = Wandern + Bergsteigen", timeout=TL)
+        expect(chip).to_have_text("Bergwandern", timeout=TL)
         expect(pg.locator('#sch [data-s="hike"]')).to_be_visible()                       # die einzelnen Sportarten bleiben wählbar
         rows = pg.locator('[data-st="sportarten"] .rows, #stc-sportarten .rows').first
         expect(rows).to_contain_text("Bergwandern")
-        assert rows.inner_text().count("Bergsteigen") == 1 and "Wandern\n" not in rows.inner_text()      # 3.60.1: nur in der Gruppenzeile „Bergwandern = Wandern + Bergsteigen“
+        assert "Bergsteigen" not in rows.inner_text() and "Wandern\n" not in rows.inner_text() and " = " not in rows.inner_text()      # 3.61.3: nur der Gruppenname („Bergwandern“), die Zusammensetzung steht im Tooltip
         chip.click()
         pg.wait_for_function("() => location.hash.includes('sgrp')", timeout=TL)
         quiet(pg, 4000)
@@ -229,7 +229,7 @@ def test_statistik_filter_aufteilung_und_rekorde_mit_gruppe(pw, clean):
         # Rekorde: Gruppe als Auswahl und als eine Zeile „Je Sportart“
         pg.goto(url + "/#/records?s=")
         quiet(pg, 4000)
-        expect(pg.locator(f'a.chip[href="#/records?s=sgrp%3A{gid}"]')).to_contain_text("Bergwandern = Wandern + Bergsteigen")
+        expect(pg.locator(f'a.chip[href="#/records?s=sgrp%3A{gid}"]')).to_contain_text("Bergwandern")
         expect(pg.locator(".panel", has_text="Je Sportart")).to_contain_text("Bergwandern")
         # gelöschte Gruppe in der Adresse: alle Sportarten, kein Fehler
         _put(url, {"gruppen": []})
@@ -257,7 +257,7 @@ def test_englisch_und_handy(pw, clean):
         box = sec.bounding_box()
         assert box["x"] >= 0 and box["x"] + box["width"] <= 391
         pg.goto(url + "/#/stats")
-        expect(pg.locator(f'#sch [data-s="sgrp:{gid}"]')).to_have_text("Bergwandern = Hiking + Mountaineering", timeout=TL)
+        expect(pg.locator(f'#sch [data-s="sgrp:{gid}"]')).to_have_text("Bergwandern", timeout=TL)
         assert not errs, errs
     finally:
         b.close()

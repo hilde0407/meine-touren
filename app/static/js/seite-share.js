@@ -28,8 +28,8 @@ fetch("/api/public/" + tok).then(r => { if (!r.ok) throw 0; return r.json(); }).
   }
   if (has(t, "hoehe", t.prof) && t.prof.length > 1) sec("bh", "Höhenprofil", chart(t.prof, "Höhenprofil", x => nf(x) + " km", y => nf(y, 0) + " m"));
   if (has(t, "wege", t.wps) && t.wps.length) sec("bw", "Wegpunkte", `<ol class="wl">${t.wps.map((w, i) => `<li><b>${i + 1}${w.t ? " · " + esc(w.t) : ""}</b>${w.note ? esc(w.note) : ""}</li>`).join("")}</ol>`);
-  if (has(t, "puls", t.hr) && t.hr) sec("bp", "Pulsverlauf", chart(t.hr.pts, "Pulsverlauf", x => Math.round(x / 60) + " min", y => Math.round(y) + " bpm") + `<p class="k2">Ø ${nf(t.hr.avg, 0)} bpm · max. ${nf(t.hr.max, 0)} bpm</p>`);
-  if (has(t, "wetter", t.wx) && t.wx) sec("bx", "Wetter", `<div class="wx">${t.wx.text ? `<div>${esc(t.wx.text)}</div>` : ""}${t.wx.tmin != null ? `<div>${nf(t.wx.tmin, 0)} – ${nf(t.wx.tmax, 0)} °C<span>Temperatur</span></div>` : ""}${t.wx.precip != null ? `<div>${nf(t.wx.precip)} mm<span>Niederschlag</span></div>` : ""}${t.wx.wind != null ? `<div>${nf(t.wx.wind, 0)} km/h<span>Wind</span></div>` : ""}</div>`);
+  if (has(t, "puls", t.hr) && t.hr) sec("bp", "Pulsverlauf", chart(t.hr.pts, "Pulsverlauf", x => Math.round(x / 60) + " min", y => Math.round(y) + " bpm") + `<p class="k2">Ø ${nf(t.hr.avg, 0)}\u00a0bpm · max. ${nf(t.hr.max, 0)}\u00a0bpm</p>`);
+  if (has(t, "wetter", t.wx) && t.wx) sec("bx", "Wetter", `<div class="wx">${t.wx.text ? `<div>${esc(t.wx.text)}</div>` : ""}${t.wx.tmin != null ? `<div>${nf(t.wx.tmin, 0)} – ${nf(t.wx.tmax, 0)} °C<span>Temperatur</span></div>` : ""}${t.wx.precip != null ? `<div>${nf(t.wx.precip)} mm<span>Niederschlag</span></div>` : ""}${t.wx.wind != null ? `<div>${nf(t.wx.wind, 0)}\u00a0km/h<span>Wind</span></div>` : ""}</div>`);
   if (has(t, "notiz", t.note) && t.note) sec("bn", "Notiz", `<p class="note">${esc(t.note)}</p>`);
   if (has(t, "fotos", t.photos) && t.photos.length) {
     sec("bf", "Fotos", `<div class="ph" id="p">${t.photos.map(id => `<img loading="lazy" alt="Foto vergrößern" tabindex="0" role="button" src="/pub/${tok}/photo/${id}?size=400" data-id="${id}">`).join("")}</div>`);

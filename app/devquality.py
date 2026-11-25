@@ -480,11 +480,11 @@ def assess_dist(rows, ref):
     med = s["median"]
     out["level"] = _lvl(abs(med), DIST_GOOD, DIST_OK)
     if out["level"] == "gut":
-        out["text"] = f"Die Strecke passt zur {'Komoot-Strecke' if ref == 'komoot' else 'gespeicherten Strecke'} (im Mittel {_de(abs(med))} % Abweichung)."
+        out["text"] = f"Die Strecke passt zur {'Komoot-Strecke' if ref == 'komoot' else 'gespeicherten Strecke'} (im Mittel {_de(abs(med))}\u00a0% Abweichung)."
     else:
-        out["text"] = f"Die Uhr misst im Mittel {_de(abs(med))} % {'kürzer' if med < 0 else 'länger'} als die {'Komoot-Strecke' if ref == 'komoot' else 'gespeicherte Strecke'}."
+        out["text"] = f"Die Uhr misst im Mittel {_de(abs(med))}\u00a0% {'kürzer' if med < 0 else 'länger'} als die {'Komoot-Strecke' if ref == 'komoot' else 'gespeicherte Strecke'}."
     if s["p75"] - s["p25"] > SPREAD_PP:
-        out["spread"] = f"Die Abweichung schwankt von Tour zu Tour stark ({_de(s['p25'], 0)} bis {_de(s['p75'], 0)} %)."
+        out["spread"] = f"Die Abweichung schwankt von Tour zu Tour stark ({_de(s['p25'], 0)} bis {_de(s['p75'], 0)}\u00a0%)."
     return out
 
 
@@ -516,9 +516,9 @@ def _height_stats(rows, good, ok_, prefix):
     med, mad = median(up), median(abs(x) for x in up)
     out["level"] = _lvl(mad, good, ok_)                    # Streuung entscheidet (typisches |Fehler|), das Vorzeichen steht im Text
     if out["level"] == "gut":
-        out["text"] = prefix + f"Auf- und Abstieg passen zum Geländemodell (im Mittel {_de(mad)} % Abweichung)."
+        out["text"] = prefix + f"Auf- und Abstieg passen zum Geländemodell (im Mittel {_de(mad)}\u00a0% Abweichung)."
     else:
-        out["text"] = prefix + f"Der Aufstieg liegt im Mittel {_de(abs(med))} % {'niedriger' if med < 0 else 'höher'} als im Geländemodell (typische Abweichung {_de(mad, 0)} %)."
+        out["text"] = prefix + f"Der Aufstieg liegt im Mittel {_de(abs(med))}\u00a0% {'niedriger' if med < 0 else 'höher'} als im Geländemodell (typische Abweichung {_de(mad, 0)}\u00a0%)."
     return out
 
 
@@ -535,8 +535,8 @@ def assess_gps(rows):
     if len(g) < MIN_N:
         return out
     out["level"] = _lvl(share, G_GOOD, G_OK)
-    out["text"] = (f"Die GPS-Spur ist sauber (nur bei {_de(share, 0)} % der Touren Sprünge)." if out["level"] == "gut"
-                   else f"Bei {_de(share, 0)} % der Touren springt die GPS-Spur (unmögliches Tempo).")
+    out["text"] = (f"Die GPS-Spur ist sauber (nur bei {_de(share, 0)}\u00a0% der Touren Sprünge)." if out["level"] == "gut"
+                   else f"Bei {_de(share, 0)}\u00a0% der Touren springt die GPS-Spur (unmögliches Tempo).")
     return out
 
 
@@ -550,8 +550,8 @@ def assess_hr(rows):
     if len(h) < MIN_N:
         return out
     out["level"] = _lvl(share, HR_GOOD, HR_OK)
-    out["text"] = (f"Der Puls ist plausibel (nur bei {_de(share, 0)} % der Touren Aussetzer)." if out["level"] == "gut"
-                   else f"Bei {_de(share, 0)} % der Touren hat der Puls Aussetzer oder unmögliche Werte.")
+    out["text"] = (f"Der Puls ist plausibel (nur bei {_de(share, 0)}\u00a0% der Touren Aussetzer)." if out["level"] == "gut"
+                   else f"Bei {_de(share, 0)}\u00a0% der Touren hat der Puls Aussetzer oder unmögliche Werte.")
     return out
 
 
@@ -731,7 +731,7 @@ def payload():
         if parts["dist"]["level"] in ("mäßig", "auffällig") and parts["dist"].get("median") is not None:
             m = parts["dist"]["median"]
             who = "die Komoot-Strecke" if ref == "komoot" else "die gespeicherte Strecke"
-            tips.append({"kind": "dist", "text": f"Die Uhr misst im Mittel {_de(abs(m))} % {'kürzer' if m < 0 else 'länger'} als {who}. Für Vergleiche der Strecken bitte beachten – die Strecke wird nicht geändert."})
+            tips.append({"kind": "dist", "text": f"Die Uhr misst im Mittel {_de(abs(m))}\u00a0% {'kürzer' if m < 0 else 'länger'} als {who}. Für Vergleiche der Strecken bitte beachten – die Strecke wird nicht geändert."})
         out.append({"id": d["id"], "name": d["name"], "kind": d["kind"], "model": d["model"] or "", "active": bool(d["active"]),
                     "n_tours": len(mine.get(d["id"], [])), "n_eval": len(rows), "flagged": flagged, "n_acked": n_acked, "flagged_height": flagged_h, "progress": prog, "batch": _last_batch(d["id"]),
                     "period": {"from": days[0], "to": days[-1]} if days else None,

@@ -367,7 +367,7 @@ def import_items(items, portals_=(), dry_run=False, k=None):
                     pass
         else:
             if dry_run:
-                results.append((label, "would_upload", "")); log(f"  {c['name']}: wäre neu ({c['dist_m']/1000:.1f} km)"); continue
+                results.append((label, "would_upload", "")); log(f"  {c['name']}: wäre neu ({c['dist_m']/1000:.1f}\u00a0km)"); continue
             t, _ = tracks.adopt(text, fname)
             tid, state = t["id"], "imported"
             tours.append({"id": tid, "start_ts": c["start_ts"], "dist_m": c["dist_m"], "dur_s": c["end_ts"] - c["start_ts"], "source": "local"})

@@ -245,3 +245,56 @@ def pytest_runtest_setup(item):
 
 def pytest_runtest_teardown(item, nextitem):
     _STATE["item"] = None
+
+
+# 3.61.3: Zahl und Einheit stehen mit geschütztem Leerzeichen (U+00A0, „756 km, 68 %“ bricht nie in der Mitte um). Die vielen Browser-Tests, die Texte mit normalem Leerzeichen
+# vergleichen, sehen deshalb die gelesenen Texte (inner_text, text_content, Attribute, Ergebnisse von evaluate) mit normalem Leerzeichen; tests/test_zahl_einheit_3613_ui.py und
+# tests/test_format_341.py prüfen das geschützte Leerzeichen selbst (dort ist die Umwandlung aus).
+_RAW_MODULES = {"test_zahl_einheit_3613_ui", "test_format_341"}
+
+
+def _nb(x, _seen=None):
+    """Ersetzt U+00A0 in Texten (auch in Listen und Wörterbüchern); Zyklen (evaluate kann Objektgraphen liefern) werden unverändert durchgereicht."""
+    if isinstance(x, str):
+        return x.replace(chr(160), " ")
+    if isinstance(x, (list, dict)):
+        _seen = _seen if _seen is not None else set()
+        if id(x) in _seen:
+            return x
+        _seen.add(id(x))
+        if isinstance(x, list):
+            return [_nb(i, _seen) for i in x]
+        return {k: _nb(v, _seen) for k, v in x.items()}
+    return x
+
+
+@pytest.fixture(autouse=True)
+def _nbsp_wie_leerzeichen(request):
+    if request.module.__name__.split(".")[-1] in _RAW_MODULES:
+        yield
+        return
+    try:
+        from playwright.sync_api import ElementHandle, Frame, Locator, Page
+    except Exception:
+        yield
+        return
+    names = ["inner_text", "text_content", "all_inner_texts", "all_text_contents", "get_attribute", "input_value", "evaluate", "evaluate_all", "evaluate_handle_json"]
+    saved = []
+    for cls in (Locator, Page, Frame, ElementHandle):
+        for n in names:
+            f = getattr(cls, n, None)
+            if f is None:
+                continue
+
+            def mk(f):
+                def w(self, *a, **k):
+                    return _nb(f(self, *a, **k))
+                w.__name__ = f.__name__
+                return w
+            saved.append((cls, n, f))
+            setattr(cls, n, mk(f))
+    try:
+        yield
+    finally:
+        for cls, n, f in saved:
+            setattr(cls, n, f)

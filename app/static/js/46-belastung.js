@@ -126,7 +126,7 @@ function blAktuell(a) {
   let h = `<div class="blcore"><div class="uth">Aktuell im Vergleich</div>`;
   if (a.status === "ok") {
     const p = a.abweichung_pct;
-    h += `<div class="blnow"><b>${BL_STUFE[a.stufe]}</b></div><div class="mut blnowd"><span>Letzte 4 Wochen: Ø ${nf(a.aktuell_schnitt, 0)} pro Woche</span> · <span>die 12 Wochen davor: Ø ${nf(a.basis_schnitt, 0)} pro Woche</span> · <span>${p > 0 ? "+" : p < 0 ? "−" : "±"}${nf(Math.abs(p), 0)} %</span></div>`;
+    h += `<div class="blnow"><b>${BL_STUFE[a.stufe]}</b></div><div class="mut blnowd"><span>Letzte 4 Wochen: Ø ${nf(a.aktuell_schnitt, 0)} pro Woche</span> · <span>die 12 Wochen davor: Ø ${nf(a.basis_schnitt, 0)} pro Woche</span> · <span>${p > 0 ? "+" : p < 0 ? "−" : "±"}${nf(Math.abs(p), 0)}\u00a0%</span></div>`;
   } else if (a.status === "keine_aktuellen_daten") h += `<div class="mut">In den letzten 4 Wochen liegen keine Uhr-Daten vor.</div>`;
   else h += `<div class="mut">Für den Vergleich fehlen noch Daten: Es braucht mindestens ${a.mindestens} Wochen mit Uhr-Daten in den 12 Wochen vor den letzten 4 (bisher ${a.wochen_mit_daten_basis}).</div>`;
   return h + `</div>`;
@@ -165,7 +165,7 @@ async function blDraw(root) {
     avg = wd.length ? wd.reduce((s, b) => s + b.belastung, 0) / wd.length : null,
     pend = d.offen.zepp_ohne_werte;
   const tiles = g.touren
-    ? `<div class="utiles"><div class="utile"><b>${g.mit_daten} von ${g.touren}</b><span class="mut">Touren mit Uhr-Daten</span><small class="mut">${g.anteil_pct} % aller Touren im Zeitraum</small></div>` +
+    ? `<div class="utiles"><div class="utile"><b>${g.mit_daten} von ${g.touren}</b><span class="mut">Touren mit Uhr-Daten</span><small class="mut">${g.anteil_pct}\u00a0% aller Touren im Zeitraum</small></div>` +
       `<div class="utile"><b>${g.belastung == null ? "–" : nf(g.belastung, 0)}</b><span class="mut">Belastung im Zeitraum</span><small class="mut">Summe laut Uhr</small></div>` +
       `<div class="utile"><b>${avg == null ? "–" : nf(avg, 0)}</b><span class="mut">Ø je Woche mit Daten</span><small class="mut">Wochen ohne Uhr-Daten zählen nicht</small></div></div>`
     : "";

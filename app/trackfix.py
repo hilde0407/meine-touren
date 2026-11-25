@@ -298,7 +298,7 @@ def diagnose(tid):
                 out.append(f"{len(fast)} Abschnitt{'e' if len(fast) > 1 else ''} mit Fahrt-Tempo (Seilbahn, Bus, Auto?)")
         jit, raw = jitter_m(pts)
         if jit >= 300 and jit >= raw * 0.05:
-            out.append(f"GPS-Zittern (Strecke ca. {jit / 1000:.1f} km zu lang)".replace(".", ","))
+            out.append(f"GPS-Zittern (Strecke ca. {jit / 1000:.1f}\u00a0km zu lang)".replace(".", ","))
         return out
     except Exception:  # noqa
         return None

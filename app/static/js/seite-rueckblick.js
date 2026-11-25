@@ -9,7 +9,7 @@ function monthBars(t, kz) {
   const W = 640, H = 150, B = 24, T = 10, max = Math.max(1, ...kz.months), bw = W / 12;
   return `<svg class="mbars" viewBox="0 0 ${W} ${H}" role="img" aria-label="Strecke pro Monat">${kz.months.map((v, i) => {
     const h = Math.max(v ? 2 : 0, v / max * (H - B - T));
-    return `<rect x="${(i * bw + bw * 0.18).toFixed(1)}" y="${(H - B - h).toFixed(1)}" width="${(bw * 0.64).toFixed(1)}" height="${h.toFixed(1)}" rx="2"><title>${esc(mon(t.year, i, "long"))}: ${nf(v)} km</title></rect><text x="${(i * bw + bw / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle">${esc(mon(t.year, i, "short").replace(".", "").slice(0, 3))}</text>`;
+    return `<rect x="${(i * bw + bw * 0.18).toFixed(1)}" y="${(H - B - h).toFixed(1)}" width="${(bw * 0.64).toFixed(1)}" height="${h.toFixed(1)}" rx="2"><title>${esc(mon(t.year, i, "long"))}: ${nf(v)}\u00a0km</title></rect><text x="${(i * bw + bw / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle">${esc(mon(t.year, i, "short").replace(".", "").slice(0, 3))}</text>`;
   }).join("")}</svg>`;
 }
 
@@ -51,14 +51,14 @@ fetch("/api/public/" + tok).then(r => { if (!r.ok) throw 0; return r.json(); }).
     /* 3.60.1: Statistik-Gruppe als „<Name> = A + B + …“ – die Aktivitäten in der Sprache der Seite, der Gruppenname wie eingegeben */
     const rbGrp = (x, voll) => {
       const m = x.mitglieder.map(n => (typeof window.TL === "function" ? window.TL(n) : n));
-      return `${x.gruppe} = ${(voll || m.length <= 3 ? m : m.slice(0, 3).concat("…")).join(" + ")}`;
+      return voll ? `${x.gruppe} = ${m.join(" + ")}` : x.gruppe;      // 3.61.3: Anzeige nur der Name, Zusammensetzung im title
     };
     const fig = (v, l) => `<div class="fig"><b>${v}</b><span>${l}</span></div>`;
     const d = kz.prev_km ? (kz.km - kz.prev_km) / kz.prev_km * 100 : null;
     sec("bz", "Dein Jahr", `<div class="figs">${fig(nf(kz.count, 0), kz.count === 1 ? "Tour" : "Touren")}${fig(fmtKm(kz.km, {d: 0}), "Strecke")}${fig(fmtHm(kz.up_m), "Aufstieg")}${fig(fmtDauer(kz.h * 3600, {summe: true}), "Dauer")}${fig(nf(kz.days, 0), "Aktive Tage")}</div>
-      ${d != null ? `<p class="cmp"><b>${d >= 0 ? "+" : "−"}${nf(Math.abs(d), 0)} %</b> <span>gegenüber ${t.year - 1}</span></p>` : ""}
+      ${d != null ? `<p class="cmp"><b>${d >= 0 ? "+" : "−"}${nf(Math.abs(d), 0)}\u00a0%</b> <span>gegenüber ${t.year - 1}</span></p>` : ""}
       <div class="panel"><h3>Strecke pro Monat</h3>${monthBars(t, kz)}</div>
-      ${kz.sports && kz.sports.length > 1 ? `<div class="panel"><h3>Sportarten</h3><ul class="sp">${kz.sports.map(s => `<li><span${s.mitglieder ? ` title="${esc(rbGrp(s, true))}"` : ""}>${esc(s.mitglieder ? rbGrp(s) : s.name)}</span><b>${nf(s.km, 0)} km</b></li>`).join("")}</ul></div>` : ""}`);
+      ${kz.sports && kz.sports.length > 1 ? `<div class="panel"><h3>Sportarten</h3><ul class="sp">${kz.sports.map(s => `<li><span${s.mitglieder ? ` title="${esc(rbGrp(s, true))}"` : ""}>${esc(s.mitglieder ? rbGrp(s) : s.name)}</span><b>${nf(s.km, 0)}\u00a0km</b></li>`).join("")}</ul></div>` : ""}`);
   }
   if (t.rek && t.rek.length) sec("br", "Bestwerte", recs(t));
   if (t.heat) sec("bh", "Heatmap", heat(t.heat));

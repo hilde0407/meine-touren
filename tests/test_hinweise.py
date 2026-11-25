@@ -421,7 +421,7 @@ def test_layout_hint_viewer_cannot_write_and_users_are_separate():
 
 def test_version_notes_and_script_order():
     from app import config as cfg
-    assert cfg.VERSION.startswith("3.61.2 · Meine Touren")
+    assert cfg.VERSION.startswith("3.61.3 · Meine Touren")
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("js/57-bausteine-statistik.js") < html.index("js/58-bausteine-hinweise.js") < html.index("js/39-sw.js")
     notes = (ROOT / "docs" / "versionen" / "3.23.0.md").read_text(encoding="utf-8")

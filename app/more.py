@@ -49,13 +49,13 @@ def implausible(tours):
         v = d / s * 3.6 if s else 0
         why, sug = None, None
         if d < 300 or (s and s < 180):
-            why = f"Fehlaufzeichnung? nur {d:.0f} m" + (f" in {s // 60:.0f} min" if s else "")
+            why = f"Fehlaufzeichnung? nur {d:.0f}\u00a0m" + (f" in {s // 60:.0f} min" if s else "")
         elif t["sport"] in WALK and v > 8:
-            why, sug = f"{v:.1f} km/h – zu schnell für {t['sport'] == 'hike' and 'Wandern' or 'diese Sportart'}", "jogging" if v <= 16 else "touringbicycle"   # 3.50.0: bis 16 km/h eher ein Lauf
+            why, sug = f"{v:.1f}\u00a0km/h – zu schnell für {t['sport'] == 'hike' and 'Wandern' or 'diese Sportart'}", "jogging" if v <= 16 else "touringbicycle"   # 3.50.0: bis 16 km/h eher ein Lauf
         elif t["sport"] in ("jogging", "trailrun") and v > 22:
-            why, sug = f"{v:.1f} km/h – zu schnell zum Laufen", "touringbicycle"
+            why, sug = f"{v:.1f}\u00a0km/h – zu schnell zum Laufen", "touringbicycle"
         elif t["sport"] in ("touringbicycle", "racebike", "mtb", "mtb_easy", "bikepacking") and 0 < v < 4 and d > 2000:
-            why, sug = f"{v:.1f} km/h – sehr langsam für Rad", "hike"
+            why, sug = f"{v:.1f}\u00a0km/h – sehr langsam für Rad", "hike"
         if why:
             why = re.sub(r"(\d)\.(\d)", r"\1,\2", why)
             from . import trackfix

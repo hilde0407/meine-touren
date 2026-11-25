@@ -662,7 +662,7 @@ async def api_record_upload(request: Request):
     except Exception:  # noqa
         pass
     km_txt = f"{(t['dist_m'] or 0) / 1000:.1f}".replace(".", ",")
-    more2.notify_event(f"Neue Tour gespeichert: {t['name']} ({km_txt} km, Aufstieg {round(t['up_m'] or 0)} m)", "Neue Tour")
+    more2.notify_event(f"Neue Tour gespeichert: {t['name']} ({km_txt}\u00a0km, Aufstieg {round(t['up_m'] or 0)}\u00a0m)", "Neue Tour")
     return {"id": t["id"], "dup": False, "device": {"id": dev["id"], "name": dev["name"], "new": dev_new} if dev else None}
 
 

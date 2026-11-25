@@ -179,7 +179,7 @@ def test_open_section_kpis_chart_list_and_suggestion_dialog(pw, app_url):
         pg.wait_for_selector(".uidlg:not(.uimod)", timeout=15000)
         pg.locator(".uidlg:not(.uimod) .uifoot button", has_text="Ausführen").click()                      # bestätigen
         pg.wait_for_selector("#dvsundo", timeout=15000)
-        pg.wait_for_function("() => { const r = document.querySelector('.dvsres'); return !!r && r.innerText.includes('Aufstieg 420 m') && r.innerText.includes('vorher 610 m'); }", timeout=15000)
+        pg.wait_for_function("() => { const r = document.querySelector('.dvsres'); return !!r && r.innerText.replace(/\u00a0/g, String.fromCharCode(32)).includes('Aufstieg 420 m') && r.innerText.replace(/\u00a0/g, String.fromCharCode(32)).includes('vorher 610 m'); }", timeout=15000)
         assert calls == ["elev-fix"] and "Aufstieg 420 m" in pg.inner_text(".dvsres") and "vorher 610 m" in pg.inner_text(".dvsres")
         pg.click("#dvsundo")
         pg.wait_for_selector(".dvsres:has-text('Zurückgenommen')", timeout=15000)

@@ -84,9 +84,9 @@ Object.assign(window.SL_WT, {
         n[i < 0 ? ST_LEN.length : i]++;
       });
       const best = n.indexOf(Math.max(...n));
-      b.innerHTML = slCols(n, {hl: best, label: `Histogramm der Streckenlängen in Kilometern, die meisten Touren (${n[best]}) liegen bei ${ST_LENL[best]} km`, labels: ST_LENL.map(l => l.replace("unter ", "<").replace("über ", ">")), cls: "slsm"}) +
-        `<p class="slcmp">Meist ${ST_LENL[best]} km</p><p class="mut slcmpn">${n[best] === 1 ? "1 Tour" : n[best] + " Touren"} von ${A.length} liegen in dieser Klasse; die Strecke zählt in Kilometern.</p>`;
-      slBadge(c, `${ST_LENL[best]} km`);
+      b.innerHTML = slCols(n, {hl: best, label: `Histogramm der Streckenlängen in Kilometern, die meisten Touren (${n[best]}) liegen bei ${ST_LENL[best]}\u00a0km`, labels: ST_LENL.map(l => l.replace("unter ", "<").replace("über ", ">")), cls: "slsm"}) +
+        `<p class="slcmp">Meist ${ST_LENL[best]}\u00a0km</p><p class="mut slcmpn">${n[best] === 1 ? "1 Tour" : n[best] + " Touren"} von ${A.length} liegen in dieser Klasse; die Strecke zählt in Kilometern.</p>`;
+      slBadge(c, `${ST_LENL[best]}\u00a0km`);
     },
   },
   sthoehe: {
@@ -211,9 +211,9 @@ async function ftMal(c, b) {
   else if (d.status === "keine_aktuellen") kopf = `<p class="slnone">In den letzten 12 Wochen gab es keine Tour. Ohne aktuelle Touren lässt sich nichts einordnen.</p>`;
   else {
     const U = d.umfang, R = d.regel, I = d.intensitaet;
-    teile = `<ul class="slrows ftrows">${ftTeil("Umfang", U, U.wert == null ? [] : [`${fmtDauer(U.min_woche * 60)} pro Woche`, `Empfehlung der WHO: ${U.who_min}–${U.who_max} Min. pro Woche`])}` +
+    teile = `<ul class="slrows ftrows">${ftTeil("Umfang", U, U.wert == null ? [] : [`${fmtDauer(U.min_woche * 60)} pro Woche`, `Empfehlung der WHO: ${U.who_min}–${U.who_max}\u00a0Min. pro Woche`])}` +
       `${ftTeil("Regelmäßigkeit", R, R.wert == null ? [] : [`${nf(R.wochen_aktiv, 0)} von ${nf(R.wochen, 0)} Wochen mit Tour`])}` +
-      `${ftTeil("Intensität", I, I.wert == null ? [] : I.quelle === "puls" ? [`${nf(I.zone_pct, 0)} % der Pulszeit bei 60–90 % des Maximalpulses`, `Mittlerer Puls ${nf(I.mittel_bpm, 0)} bpm (${nf(I.mittel_pct, 0)} % des geschätzten Maximalpulses von ${nf(I.hfmax, 0)} bpm)`] : [`${nf(I.m_h, 0)} m Aufstieg je Stunde`, `Richtwert für dein Alter: ${nf(I.ref_m_h, 0)} m je Stunde`])}</ul>`;
+      `${ftTeil("Intensität", I, I.wert == null ? [] : I.quelle === "puls" ? [`${nf(I.zone_pct, 0)}\u00a0% der Pulszeit bei 60–90 % des Maximalpulses`, `Mittlerer Puls ${nf(I.mittel_bpm, 0)}\u00a0bpm (${nf(I.mittel_pct, 0)}\u00a0% des geschätzten Maximalpulses von ${nf(I.hfmax, 0)}\u00a0bpm)`] : [`${nf(I.m_h, 0)}\u00a0m Aufstieg je Stunde`, `Richtwert für dein Alter: ${nf(I.ref_m_h, 0)}\u00a0m je Stunde`])}</ul>`;
     if (d.status === "zu_wenig") kopf = `<p class="slnone">Zu wenig Daten für eine Einordnung: Es braucht mindestens zwei der drei Werte.</p>`;
     else {
       const tr = d.trend ? `<p class="mut slcmpn ftrend"><span aria-hidden="true">${FT_TREND[d.trend][0]}</span> <span>${FT_TREND[d.trend][1]}</span></p>` : `<p class="mut slcmpn ftrend">Ein Vergleich mit den 12 Wochen davor ist noch nicht möglich (zu wenig Daten).</p>`;

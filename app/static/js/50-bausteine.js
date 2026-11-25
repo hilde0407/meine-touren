@@ -126,7 +126,7 @@ Object.assign(window.SL_WT, {
         };
       if (want.includes("hr")) {
         const h = await api(`/api/tours/${encodeURIComponent(t.id)}/hr`).catch(() => null);
-        if (h && h.n && h.avg) tiles.hr = [`${h.avg} bpm`, "Puls (Durchschnitt)", `max ${h.max} bpm`];
+        if (h && h.n && h.avg) tiles.hr = [`${h.avg}\u00a0bpm`, "Puls (Durchschnitt)", `max ${h.max}\u00a0bpm`];
       }
       if (want.includes("kcal")) {
         const u = await api(`/api/tours/${encodeURIComponent(t.id)}/uhr-training`).catch(() => null),
@@ -180,9 +180,9 @@ Object.assign(window.SL_WT, {
         x += w;
         return r;
       }).join("");
-      b.innerHTML = `<svg class="slzb" viewBox="0 0 600 22" preserveAspectRatio="none" role="img" aria-label="Zeit in den Pulszonen">${bars}</svg><ul class="slzl">${h.zones.map((s, i) => `<li><i class="slzd" data-z="${i}"></i><span>Z${i + 1} ${HR_ZN[i]}</span><b>${slMin(s)}</b><span class="mut">${Math.round((s / tot) * 100)} %</span></li>`).join("")}</ul>`;
+      b.innerHTML = `<svg class="slzb" viewBox="0 0 600 22" preserveAspectRatio="none" role="img" aria-label="Zeit in den Pulszonen">${bars}</svg><ul class="slzl">${h.zones.map((s, i) => `<li><i class="slzd" data-z="${i}"></i><span>Z${i + 1} ${HR_ZN[i]}</span><b>${slMin(s)}</b><span class="mut">${Math.round((s / tot) * 100)}\u00a0%</span></li>`).join("")}</ul>`;
       b.querySelectorAll(".slzd").forEach(e => e.style.setProperty("background", HR_ZC[+e.dataset.z]));
-      slBadge(c, `Ø ${h.avg} · max ${h.max} bpm`);
+      slBadge(c, `Ø ${h.avg} · max ${h.max}\u00a0bpm`);
     },
   },
   wetter: {
@@ -252,7 +252,7 @@ Object.assign(window.SL_WT, {
       const w = d.wochen.slice(-12),
         mx = Math.max(1, ...w.map(x => x.belastung || 0)),
         bars = w.map((x, i) => `<rect class="${x.belastung == null ? "slbn" : "slbv"}" x="${i * 20 + 2}" y="${x.belastung == null ? 38 : 40 - Math.max(2, (x.belastung / mx) * 38)}" width="14" height="${x.belastung == null ? 2 : Math.max(2, (x.belastung / mx) * 38)}" rx="2"/>`).join("");
-      b.innerHTML = `<p class="slcmp">${said || "Für einen Vergleich liegen noch zu wenige Wochen mit Uhr-Daten vor"}</p>${A.abweichung_pct != null ? `<p class="mut slcmpn">${A.abweichung_pct > 0 ? "+" : ""}${A.abweichung_pct} % gegenüber dem Schnitt der 12 Wochen davor</p>` : ""}` +
+      b.innerHTML = `<p class="slcmp">${said || "Für einen Vergleich liegen noch zu wenige Wochen mit Uhr-Daten vor"}</p>${A.abweichung_pct != null ? `<p class="mut slcmpn">${A.abweichung_pct > 0 ? "+" : ""}${A.abweichung_pct}\u00a0% gegenüber dem Schnitt der 12 Wochen davor</p>` : ""}` +
         `<svg class="slbars" viewBox="0 0 ${w.length * 20} 42" role="img" aria-label="Belastung je Woche, letzte 12 Wochen">${bars}</svg><p><a href="#/places">Mehr in der Auswertung ›</a></p>`;
       slBadge(c, said || "");
     },
@@ -266,7 +266,7 @@ Object.assign(window.SL_WT, {
       const cy = new Date().getFullYear(), {list: a, prev: p} = flSelect(cfg, "year"),
         row = (m, d) => {
           const x = flVal(a, m), y = flVal(p, m), pct = y > 0 ? Math.round(((x - y) / y) * 100) : null;
-          return [FL_MET[m].fmt(x), FL_MET[m].name, `Vorjahr bis heute: ${FL_MET[m].fmt(y)}${pct == null ? "" : ` (${pct >= 0 ? "+" : "−"}${Math.abs(pct)} %)`}`];
+          return [FL_MET[m].fmt(x), FL_MET[m].name, `Vorjahr bis heute: ${FL_MET[m].fmt(y)}${pct == null ? "" : ` (${pct >= 0 ? "+" : "−"}${Math.abs(pct)}\u00a0%)`}`];
         };
       if (!a.length && !p.length) return flNone(b, (cfg.sports || []).length ? "" : "Noch keine Touren in diesem und im letzten Jahr.");
       b.innerHTML = slTiles((cfg.metrics && cfg.metrics.length ? cfg.metrics : ["count", "km", "up"]).filter(m => FL_MET[m]).map(m => row(m, 0)));

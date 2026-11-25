@@ -88,7 +88,7 @@ def test_template_formula_goal_compare_edit_duplicate_remove(pw, app):
         pg.locator(".slkz #kz-agg").select_option("sum")
         pg.locator(".slkz #kz-mess").select_option("km")
         pg.locator(".slkz #kz-ziel").fill("574")
-        pg.wait_for_function("() => !!document.querySelector('.slkz .kzgoal .kzgt') && document.querySelector('.slkz .kzgt').textContent.includes('50 %')", timeout=T)
+        pg.wait_for_function("() => !!document.querySelector('.slkz .kzgoal .kzgt') && document.querySelector('.slkz .kzgt').textContent.includes('50\u00a0%')", timeout=T)
         assert "574" in pg.locator(".slkz .kzgt").inner_text()
         pg.locator(".slkz #kz-title").fill("Halbzeit")
         pg.locator(".slkz button[type=submit]").click()

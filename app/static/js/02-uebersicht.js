@@ -29,7 +29,7 @@ VIEWS.dash = async (_, q) => {
     pk = sum(prev, t => t.km);
   const delta = (a, b) =>
     b
-      ? `<div class="d ${a >= b ? "up" : "down"}">${a >= b ? "+" : "−"}${nf((Math.abs(a - b) / b) * 100, 0)} % gegenüber ${cmpL}</div>`
+      ? `<div class="d ${a >= b ? "up" : "down"}">${a >= b ? "+" : "−"}${nf((Math.abs(a - b) / b) * 100, 0)}\u00a0% gegenüber ${cmpL}</div>`
       : "";
   /* 3.45.0: „Bestwerte“ (vorher „Rekorde“) ist ein Baustein (50-bausteine.js) und wird von der Layout-Engine gebaut */
   const pm = Array(12).fill(0);
@@ -114,8 +114,8 @@ VIEWS.dash = async (_, q) => {
     <div class="panel" data-st="kmmonat" data-badge="${esc(bestKL ? "Stärkster Monat: " + bestKL : monthly ? "" : `${fmtKm(sum(sel, t => t.km), {d: 0})}`)}"><h2>${monthly ? "Strecke pro Monat" : "Strecke pro Jahr"}</h2>${monthly ? barChart(mkm, mlab, {ghost: mghost, ghostLabel: Y ? Y - 1 : "Vorzeitraum"}) : barChart(byYear, yrs.map(String), {href: yrs})}
       <div class="legend">${monthly ? `<span><i style="background:var(--yellow);border:1px solid var(--ink)"></i>stärkster Monat</span>${mghost && mghost.some(v => v > 0) ? `<span><i style="background:var(--accent2)"></i>${Y ? Y - 1 : "Zeitraum davor"}</span>` : ""}` : "<span>Ein Klick auf einen Balken öffnet das Jahr.</span>"}</div></div>
     <div class="panel" data-st="kmverlauf" data-badge="${esc(`${cy}: ${fmtKm(cs[cs.length - 1].pts[cs[cs.length - 1].pts.length - 1][1], {d: 0})}`)}"><h2>Strecke im Jahresverlauf</h2>${lineChart(cs)}<div class="legend"><span><i style="background:var(--bars)"></i>${cy}</span>${own && ys.includes(cy - 1) ? `<span><i style="background:var(--accent2)"></i>${cy - 1}</span>` : ""}</div></div>
-    <div class="panel" data-st="sportarten" data-badge="${esc(sports.length ? `${sName(sports[0][0])} ${nf((sports[0][1] / tot) * 100, 0)} %` : "")}"><h2>Sportarten</h2><div class="stack">${sports.map(([s, v]) => `<div style="width:${(v / tot) * 100}%;background:${sCol(s)}" title="${sName(s)}"></div>`).join("")}</div>
-      <div class="rows mt10">${sports.map(([s, v]) => `<div class="r"><span${isSg(s) ? ` title="${esc(sgTitle(s))}"` : ""}><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${fmtKm(v, {d: 0})}, ${nf((v / tot) * 100, 0)} %</span></div>`).join("")}</div></div>
+    <div class="panel" data-st="sportarten" data-badge="${esc(sports.length ? `${sName(sports[0][0])} ${nf((sports[0][1] / tot) * 100, 0)}\u00a0%` : "")}"><h2>Sportarten</h2><div class="stack">${sports.map(([s, v]) => `<div style="width:${(v / tot) * 100}%;background:${sCol(s)}" title="${sName(s)}"></div>`).join("")}</div>
+      <div class="rows mt10">${sports.map(([s, v]) => `<div class="r"><span${isSg(s) ? ` title="${esc(sgTitle(s))}"` : ""}><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut rv">${fmtKm(v, {d: 0})}, ${fmtPct((v / tot) * 100)}</span></div>`).join("")}</div></div>
     </div>
   <div class="panel gap" data-st="heat" data-badge="${esc(`${Object.keys(byDay).length} Aktive Tage`)}"><h2>Touren im Jahr ${hy}</h2>${heat(hy, byDay)}</div>
   ${otd.length ? `<div data-st="tag" data-badge="${esc(otd.length === 1 ? "1 Tour" : otd.length + " Touren")}"><div class="sec"><h2>An diesem Tag</h2><span class="sub">in früheren Jahren</span></div><div class="tl">${otd.map(tourRow).join("")}</div></div>` : ""}
@@ -561,7 +561,7 @@ VIEWS.tours = async (_name, qp) => {
     $("#cnt").textContent = `${a.length} Touren, ${nf(
       a.reduce((c, t) => c + t.km, 0),
       0
-    )} km`;
+    )}\u00a0km`;
     $("#tl").innerHTML = a.slice(0, lim).map(tourRow).join("") || `<div class="empty">Keine Treffer</div>`;
     $("#more").style.display = a.length > lim ? "" : "none";
   };

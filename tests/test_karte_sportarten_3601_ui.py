@@ -92,7 +92,7 @@ def test_karte_kategorien_gruppen_und_farben(pw, app):
         assert pg.eval_on_selector_all("#ms .mscl", "l => l.map(x => x.textContent)") == ["Statistik-Gruppen", "Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor und Sonstige"]   # 3.61.0: Gruppen zuerst (Leitfaden 2.6)
         assert pg.eval_on_selector_all("#ms .chip[data-s]", "l => l.map(x => x.dataset.s)") == ORDER                # nur vorhandene, Katalog-Reihenfolge, „golf“ als Sonstiges
         g = pg.locator('#ms .chip[data-g="sgrp:rad"]')
-        assert g.inner_text().strip() == "Rad fahren = Radtour + Mountainbike + E-Bike" and g.get_attribute("title") == "Rad fahren = Radtour + Mountainbike + E-Bike"
+        assert g.inner_text().strip() == "Rad fahren" and g.get_attribute("title") == "Rad fahren = Radtour + Mountainbike + E-Bike"
         # Farben: drei Rad-Sportarten deutlich verschieden; Chip-Punkt = sCol = Strecke
         cols = pg.evaluate("""() => Object.fromEntries([...document.querySelectorAll('#ms .chip[data-s] i')].map(i => [i.parentElement.dataset.s, getComputedStyle(i).backgroundColor]))""")
         assert len({cols["touringbicycle"], cols["mtb"], cols["e_touringbicycle"]}) == 3 and len(set(cols.values())) == len(ORDER)
@@ -139,7 +139,7 @@ def test_karte_englisch(pw, app):
         pg.wait_for_selector("#ms .chip[data-s]", timeout=TL)
         quiet(pg, 3000)
         assert pg.eval_on_selector_all("#ms .mscl", "l => l.map(x => x.textContent)")[:3] == ["Statistics groups", "On foot", "Bike"]
-        assert pg.locator('#ms .chip[data-g="sgrp:rad"]').inner_text().strip() == "Rad fahren = Bike ride + Mountain bike + E-bike"
+        assert pg.locator('#ms .chip[data-g="sgrp:rad"]').inner_text().strip() == "Rad fahren"
         assert not errs, errs
     finally:
         b.close()

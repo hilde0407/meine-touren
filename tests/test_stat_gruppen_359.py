@@ -187,7 +187,7 @@ def test_jahresrueckblick_fasst_zusammen():
     names = lambda: {s["name"]: s["km"] for s in rueckblick._kennzahlen(ts, y, "")["sports"]}
     assert names() == {"Wandern": 22.0, "Bergsteigen": 8.0}
     sg.save(GR)
-    assert names() == {"Bergwandern = Wandern + Bergsteigen": 30.0}       # 3.60.1: Gruppe mit ihren Aktivitäten
+    assert names() == {"Bergwandern": 30.0}       # 3.61.3: Gruppe nur mit ihrem Namen
 
 
 def test_layout_filter_und_eigene_kennzahl_nehmen_gruppen_an():

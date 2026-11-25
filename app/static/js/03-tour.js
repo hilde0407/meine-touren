@@ -351,7 +351,7 @@ VIEWS.tour = async id => {
             [tcc[i + 1][0], tcc[i + 1][1]],
           ],
           {color: col(x), weight: TS.weight + 1, opacity: 0.95, lineCap: "butt"}
-        ).bindTooltip(x == null ? "–" : TS.by === "grade" ? `${nf(x, 0)} % Steigung` : TS.by === "hr" ? `${x} bpm` : `${fmtTempo(x)}`)
+        ).bindTooltip(x == null ? "–" : TS.by === "grade" ? `${nf(x, 0)}\u00a0% Steigung` : TS.by === "hr" ? `${x}\u00a0bpm` : `${fmtTempo(x)}`)
       )
     ).addTo(map);
     tleg = document.createElement("div");

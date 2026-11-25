@@ -74,14 +74,14 @@ def test_bestehende_gruppe_mit_aktivitaetsnamen_bleibt_und_zaehlt():
 def test_beschriftung_und_jahresrueckblick():
     from app import rueckblick
     gr = [{"id": "a", "name": "Berg", "sports": ["hike", "mountaineering"]}, {"id": "b", "name": "Rad fahren", "sports": BIKE4}]
-    assert sg.label("sgrp:a", gr) == "Berg = Wandern + Bergsteigen"
-    assert sg.label("sgrp:b", gr) == "Rad fahren = Radtour + Rennrad + Mountainbike + …"
+    assert sg.label("sgrp:a", gr) == "Berg" and sg.titel("sgrp:a", gr) == "Berg = Wandern + Bergsteigen"      # 3.61.3: Anzeige nur der Name
+    assert sg.label("sgrp:b", gr) == "Rad fahren" and sg.titel("sgrp:b", gr) == "Rad fahren = Radtour + Rennrad + Mountainbike + Gravelbike"
     assert sg.label("mtb", gr) == "Mountainbike" and sg.label("sgrp:weg", gr) == "sgrp:weg" and sg.name("sgrp:a", gr) == "Berg"
     _tour("w1", "hike", 10); _tour("m1", "mtb", 20, tage=41); _tour("x1", "kayak", 3, tage=42)
     sg.save(gr)
     ts = db.query("SELECT id,name,sport,start_ts,dist_m,dur_s,up_m FROM tours")
     rows = {s["sport"]: s for s in rueckblick._kennzahlen(ts, 2026, "")["sports"]}
-    assert rows["sgrp:b"]["name"] == "Rad fahren = Radtour + Rennrad + Mountainbike + …" and rows["sgrp:b"]["gruppe"] == "Rad fahren"
+    assert rows["sgrp:b"]["name"] == "Rad fahren" and rows["sgrp:b"]["gruppe"] == "Rad fahren"
     assert rows["sgrp:b"]["mitglieder"] == ["Radtour", "Rennrad", "Mountainbike", "Gravelbike"] and rows["kayak"] == {"sport": "kayak", "name": "Kajak / Kanu", "km": 3.0}
 
 
@@ -100,7 +100,7 @@ def test_oberflaeche_quelltext():
 
 
 def test_version_texte_und_dateien():
-    assert config.VERSION.startswith("3.61.2 · Meine Touren")
+    assert config.VERSION.startswith("3.61.3 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.60.1.md").read_text(encoding="utf-8")
     assert notes.startswith("# 3.60.1") and "heißt schon eine Sportart" in notes and " = " in notes
     assert "3.60.1" in (ROOT / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")
@@ -108,7 +108,7 @@ def test_version_texte_und_dateien():
     hb = (ROOT / "docs" / "HANDBUCH.md").read_text(encoding="utf-8")
     assert "(zusammengefasst)" not in hb and "Name = Sportart + Sportart" in hb
     assert 'const V = "mt-v147"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.61.2"' in (JS / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.61.3"' in (JS / "54-ansichten.js").read_text(encoding="utf-8")
     assert re.search(r"Gruppenname.*Sportart", hb)
 
 

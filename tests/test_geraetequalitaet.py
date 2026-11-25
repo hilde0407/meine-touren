@@ -136,7 +136,7 @@ def test_hr_quality_out_of_range_and_flat_runs():
     assert dq.hr_quality(ok) == (100, 0.0)
     bad = [[i * 5, 100 + (i % 7)] for i in range(100)]
     for i in range(10):
-        bad[i][1] = 250                                                      # 10 % außerhalb 30–220
+        bad[i][1] = 250                                                      # 10\u00a0% außerhalb 30–220
     for i in range(40, 60):
         bad[i][1] = 90                                                       # 20 Messwerte (100 s) konstant ... unter 120 s: noch kein Aussetzer
     assert dq.hr_quality(bad) == (100, 10.0)
@@ -150,7 +150,7 @@ def test_height_metrics_against_formula_terrain(dem):
     pts = [[la, lo, h, i * 5000] for i, (la, lo, h, _t) in enumerate(_line(300, f=1.3))]
     st, h = dq.height_metrics(pts, {"tiles": 50})
     assert st == "ok" and h["up_dem"] > 200
-    assert abs(h["up_dev"] / h["up_dem"] - 1.3) < 0.04 and abs(h["down_dev"] / h["down_dem"] - 1.3) < 0.04     # Uhr misst 30 % mehr Höhe
+    assert abs(h["up_dev"] / h["up_dem"] - 1.3) < 0.04 and abs(h["down_dev"] / h["down_dem"] - 1.3) < 0.04     # Uhr misst 30\u00a0% mehr Höhe
     st, h = dq.height_metrics([[la, lo, 1000.0, 0] for la, lo, _h_, _t in _line(300)], {"tiles": 50})
     assert st == "no_alt" and h == {}                                        # konstante Höhe = nicht gemessen
     assert dq.height_metrics(_line(10), {"tiles": 50})[0] == "no_pts"
@@ -165,9 +165,9 @@ def _rows(ratios, **kw):
 
 @pytest.mark.parametrize("ratios,level,word", [
     ([1.01, 0.99, 1.02, 1.0, 0.98, 1.01], "gut", "passt zur Komoot-Strecke"),
-    ([0.95, 0.96, 0.95, 0.94, 0.96, 0.95], "mäßig", "5,0 % kürzer als die Komoot-Strecke"),         # Median 0,95 = 5 %: zwischen 3 und 8
-    ([0.88, 0.9, 0.9, 0.91, 0.89], "auffällig", "10,0 % kürzer"),
-    ([1.12, 1.1, 1.09, 1.11, 1.1], "auffällig", "10,0 % länger"),
+    ([0.95, 0.96, 0.95, 0.94, 0.96, 0.95], "mäßig", "5,0\u00a0% kürzer als die Komoot-Strecke"),         # Median 0,95 = 5\u00a0%: zwischen 3 und 8
+    ([0.88, 0.9, 0.9, 0.91, 0.89], "auffällig", "10,0\u00a0% kürzer"),
+    ([1.12, 1.1, 1.09, 1.11, 1.1], "auffällig", "10,0\u00a0% länger"),
 ])
 def test_dist_thresholds_and_text(ratios, level, word):
     a = dq.assess_dist(_rows(ratios), "komoot")
@@ -175,8 +175,8 @@ def test_dist_thresholds_and_text(ratios, level, word):
 
 
 def test_dist_boundaries_and_min_n_and_outliers_counted_apart():
-    assert dq.assess_dist(_rows([1.03] * 5), "komoot")["level"] == "gut"                  # genau 3 % noch gut
-    assert dq.assess_dist(_rows([1.08] * 5), "komoot")["level"] == "mäßig"                # genau 8 % noch mäßig
+    assert dq.assess_dist(_rows([1.03] * 5), "komoot")["level"] == "gut"                  # genau 3\u00a0% noch gut
+    assert dq.assess_dist(_rows([1.08] * 5), "komoot")["level"] == "mäßig"                # genau 8\u00a0% noch mäßig
     assert dq.assess_dist(_rows([1.081] * 5), "komoot")["level"] == "auffällig"
     a = dq.assess_dist(_rows([1.0, 1.0, 1.0, 1.0]), "komoot")
     assert a["n"] == 4 and a["level"] is None and a["text"] is None                       # zu wenige Touren: keine Einschätzung
@@ -190,16 +190,16 @@ def test_dist_boundaries_and_min_n_and_outliers_counted_apart():
 def test_height_gps_hr_assessment_and_verdict():
     rows = [{"h_state": "ok", "up_dem": 400.0, "up_dev": 400.0 * 1.3, "down_dem": 400.0, "down_dev": 520.0} for _ in range(6)]
     h = dq.assess_height(rows)
-    assert h["level"] == "auffällig" and "30,0 % höher" in h["text"] and h["up_err_m"]["median"] == 120.0
+    assert h["level"] == "auffällig" and "30,0\u00a0% höher" in h["text"] and h["up_err_m"]["median"] == 120.0
     rows = [{"h_state": "ok", "up_dem": 400.0, "up_dev": 404.0, "down_dem": 400.0, "down_dev": 396.0} for _ in range(6)]
     assert dq.assess_height(rows)["level"] == "gut"
     assert dq.assess_height([{"h_state": "ok", "up_dem": 20.0, "up_dev": 80.0, "down_dem": 20.0, "down_dev": 80.0}] * 8)["level"] is None   # unter 50 m kein Prozentwert
     g = [{"gps_jumps": 0, "gps_gap_pct": 1.0, "gps_med_dt": 5.0, "gps_src": "track", "gps_dec": 0} for _ in range(19)] + [{"gps_jumps": 2, "gps_gap_pct": 1.0, "gps_med_dt": 5.0, "gps_src": "track", "gps_dec": 0}]
-    assert dq.assess_gps(g)["level"] == "gut" and dq.assess_gps(g)["jump_tours_pct"] == 5.0        # genau 5 % noch gut
+    assert dq.assess_gps(g)["level"] == "gut" and dq.assess_gps(g)["jump_tours_pct"] == 5.0        # genau 5\u00a0% noch gut
     g[1]["gps_jumps"] = 1
     assert dq.assess_gps(g)["level"] == "mäßig"
     hr = [{"hr_n": 100, "hr_bad_pct": 0.0}] * 7 + [{"hr_n": 100, "hr_bad_pct": 30.0}] * 3
-    assert dq.assess_hr(hr)["level"] == "auffällig" and "30 %" in dq.assess_hr(hr)["text"]
+    assert dq.assess_hr(hr)["level"] == "auffällig" and "30\u00a0%" in dq.assess_hr(hr)["text"]
     v = dq.verdict({"dist": {"level": "gut", "text": "A."}, "height": {"level": "mäßig", "text": "B."}, "gps": {"level": None}})
     assert v["level"] == "mäßig" and v["findings"] == ["B."] and "Einschränkungen" in v["label"]
     assert dq.verdict({"dist": {"level": "gut", "text": "A."}})["label"] == "Zuverlässig"
@@ -251,7 +251,7 @@ def test_job_zepp_distance_ratio_outliers_ambiguity_and_caps(dem):
     c = _client()
     d = _dev(c)
     hist, starts = [], []
-    for i in range(8):                                                                       # Komoot-Touren mit Zepp-Training, Uhr misst 5 % weniger
+    for i in range(8):                                                                       # Komoot-Touren mit Zepp-Training, Uhr misst 5\u00a0% weniger
         s = T0 + i * 20000
         _komoot(f"k{i}", s, 10000)
         hist.append(_summ(s, 9500))
@@ -276,7 +276,7 @@ def test_job_zepp_distance_ratio_outliers_ambiguity_and_caps(dem):
     r = dq.run(api=api, detail_max=5, tile_max=500)
     assert api.details == 9 and r["height"] == 9 + 1                                         # dritter Lauf ruft nichts mehr ab (9 Zepp-Details + 1 eigene Spur)
     a = dq.assess_dist(list(db.query("SELECT * FROM device_quality")), "komoot")
-    assert a["n"] == 8 and a["n_implausible"] == 1 and a["level"] == "mäßig" and "5,0 % kürzer als die Komoot-Strecke" in a["text"]
+    assert a["n"] == 8 and a["n_implausible"] == 1 and a["level"] == "mäßig" and "5,0\u00a0% kürzer als die Komoot-Strecke" in a["text"]
 
 
 def test_job_without_zepp_access_still_measures_local(dem):
@@ -333,7 +333,7 @@ def _seed_api(dem):
 
 def test_api_quality_per_device_with_words_thresholds_and_channels(dem):
     c, d = _seed_api(dem)
-    for i in range(3):                                                                       # Kanäle: Tempo bei 3 von 7 (43 %), Temperatur bei 1 von 7 (14 % = zu selten)
+    for i in range(3):                                                                       # Kanäle: Tempo bei 3 von 7 (43\u00a0%), Temperatur bei 1 von 7 (14\u00a0% = zu selten)
         metrics.store(f"z{T0 + i * 10000}", {"v": 1, "src": "zepp", "device": "x", "t0": T0, "t": [0, 1, 2, 3, 4, 5], "series": {"speed": [1.0] * 6, "temp": [5.0] * 6 if i == 0 else [None] * 6}})
     r = c.get("/api/devices/quality")
     assert r.status_code == 200
@@ -478,7 +478,7 @@ def test_table_creation_is_additive_and_never_dropped():
 
 # ---------------------------------------------------------------- 3.16.1 „Als geprüft markieren“
 def _gap_tour(c, d):
-    """Die unauffällige 7. Tour fällt nur wegen Lücken/Pausen auf (28 %) – so wie bei einer Rast auf dem Betriebsausflug."""
+    """Die unauffällige 7. Tour fällt nur wegen Lücken/Pausen auf (28\u00a0%) – so wie bei einer Rast auf dem Betriebsausflug."""
     tid = f"z{T0 + 6 * 10000}"
     db.execute("UPDATE device_quality SET gps_gap_pct=28, gps_jumps=0 WHERE tour_id=?", (tid,))
     return tid

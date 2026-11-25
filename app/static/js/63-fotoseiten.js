@@ -48,7 +48,7 @@ Object.assign(window.SL_WT, {
         withPh = TOURS.filter(t => t.photos > 0), land = [...new Set(withPh.map(t => t.g_country).filter(Boolean))], ys = d.years || [],
         tile = {
           fotos: [nf(d.count, 0), d.count === 1 ? "Foto" : "Fotos", d.undated ? `${nf(d.undated, 0)} ohne Aufnahmezeit` : ""],
-          zugeordnet: [nf(d.assigned, 0), "Einer Tour zugeordnet", `${Math.round((d.assigned / d.count) * 100)} %`],
+          zugeordnet: [nf(d.assigned, 0), "Einer Tour zugeordnet", `${Math.round((d.assigned / d.count) * 100)}\u00a0%`],
           touren: withPh.length ? [nf(withPh.length, 0), withPh.length === 1 ? "Tour mit Fotos" : "Touren mit Fotos"] : null,
           jahre: ys.length ? [ys.length === 1 ? String(ys[0]) : `${Math.min(...ys)}–${Math.max(...ys)}`, ys.length === 1 ? "Jahr" : "Jahre", ys.length > 1 ? `${ys.length} Jahre mit Fotos` : ""] : null,
           orte: land.length ? [String(land.length), land.length === 1 ? "Land" : "Länder", land.slice(0, 3).join(", ") + (land.length > 3 ? " …" : "")] : null,

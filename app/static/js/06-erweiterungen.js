@@ -42,7 +42,7 @@ VIEWS.search = async (_, q) => {
     `<div class="sec mt0"><h2>Suche: „${esc(q.get("q") || "")}“</h2><span class="sub">${a.length} Touren, ${nf(
       a.reduce((c, t) => c + t.km, 0),
       0
-    )} km</span></div>
+    )}\u00a0km</span></div>
    <div class="tl">${a.slice(0, 200).map(tourRow).join("") || `<div class="empty">Keine Treffer. Gesucht wird in Name, Notiz, Sportart, Datum, Monat und Region (Land, Bundesland, Landkreis, Ort).</div>`}</div>`;
 };
 
@@ -90,7 +90,7 @@ function goalNote(g, v, u, frac, proj, yr, cy) {
   const y0 = new Date(cy, 0, 1),
     days = (new Date(cy + 1, 0, 1) - y0) / 864e5,
     rate = v / (frac * days); // pro Tag bisher
-  let s = ` · Prognose zum Jahresende: ${nf(proj, 0)} ${u} (${nf((proj / g.target) * 100, 0)} %)`;
+  let s = ` · Prognose zum Jahresende: ${nf(proj, 0)} ${u} (${nf((proj / g.target) * 100, 0)}\u00a0%)`;
   if (rate > 0) {
     const d = (g.target - v) / rate,
       when = new Date(Date.now() + d * 864e5);
@@ -135,7 +135,7 @@ VIEWS.records = async (_, q) => {
     allSp = sportOrder(present);                                                 // 3.60.1: dieselbe Auswahl wie Karte und Statistik
   if (fs && !allSp.includes(fs)) fs = "";
   const T = fs ? TOURS.filter(t => (isSg(fs) ? sgMatch(t.sport, [fs]) : t.sport === fs)) : TOURS;
-  const chips = `<div class="row g6 mn4-0-18 fxw">${sportFilterHtml(present, fs ? [fs] : [], (k, l, x) => `<a class="chip${x.on ? " on" : ""}" href="#/records?s=${encodeURIComponent(k)}"${x.title ? ` title="${esc(x.title)}"` : ""}>${x.all ? "" : `<i class="sw" style="background:${x.color}"></i>`}${esc(l)}</a>`)}</div>`;      // 3.61.0: eine Darstellung für alle Sportart-Filter
+  const chips = `<div class="row g6 mn4-0-18 fxw">${sportFilterHtml(present, fs ? [fs] : [], (k, l, x) => `<a class="chip${x.on ? " on" : ""}" href="#/records?s=${encodeURIComponent(k)}"${x.title ? ` title="${esc(x.title)}" aria-label="${esc(x.title)}"` : ""}>${x.all ? "" : `<i class="sw" style="background:${x.color}"></i>`}${esc(l)}</a>`)}</div>`;      // 3.61.0: eine Darstellung für alle Sportart-Filter
   const sum = (a, f) => a.reduce((c, t) => c + f(t), 0),
     km = sum(T, t => t.km),
     up = sum(T, t => t.up_m || 0),
@@ -205,10 +205,10 @@ VIEWS.records = async (_, q) => {
         return `<div class="r" style="display:block"><div><i class="sw" style="background:${sCol(s)}"></i><b style="font:600 20px var(--d)"${isSg(s) ? ` title="${esc(sgTitle(s))}"` : ""}>${isSg(s) ? esc(sName(s)) : sName(s)}</b> <span class="mut">· ${a.length} Touren, ${nf(
           sum(a, t => t.km),
           0
-        )} km, ${nf(
+        )}\u00a0km, ${nf(
           sum(a, t => t.up_m || 0),
           0
-        )} m</span></div>
+        )}\u00a0m</span></div>
        <small>Längste: <a href="#/tour/${l.id}">${fmtKm(l.km)}</a> · Größter Aufstieg: <a href="#/tour/${u.id}">${fmtHm(u.up_m)}</a>${f ? ` · Schnellste: <a href="#/tour/${f.id}">${fmtTempo(f.km / f.h)}</a>` : ""}</small></div>`;
       })
       .join("")}</div></div></div>`;
@@ -250,7 +250,7 @@ VIEWS.recap = async name => {
   await pdfPhotoLoad();
   const days = new Set(sel.map(t => t.date.slice(0, 10))).size,
     ph = await api(`/api/photos?year=${Y}&random=true&limit=${Math.max(12, PDFP.n)}`).catch(() => []);
-  const dl = (a, b) => (b ? `${a >= b ? "+" : "−"}${nf((Math.abs(a - b) / b) * 100, 0)} % gegenüber ${Y - 1}` : "");
+  const dl = (a, b) => (b ? `${a >= b ? "+" : "−"}${nf((Math.abs(a - b) / b) * 100, 0)}\u00a0% gegenüber ${Y - 1}` : "");
   $("#main").innerHTML =
     `<div class="recap"><div class="noprint row mb10"><a class="back" href="#/dash?y=${Y}">‹ Übersicht</a><span class="sp"></span>${pdfPhotoBar()}${pdfBtn()}<button class="btn ghost sm" data-act="print">Drucken</button></div>
    <div class="rhero"><div class="k">Mein Tourenjahr</div><h1>${Y}</h1><div class="rs"><span><b>${nf(sel.length, 0)}</b> Touren</span><span><b>${fmtKm(km, {summe: true})}</b> Strecke</span><span><b>${fmtHm(up)}</b> Aufstieg</span><span><b>${fmtDauer(h * 3600, {summe: true})}</b> Dauer</span><span><b>${days}</b> aktive Tage</span></div>
@@ -263,7 +263,7 @@ VIEWS.recap = async name => {
      .filter(Boolean)
      .join("")}</div></div>
    <div class="grid g2 mt34"><div class="panel"><h2>Strecke pro Monat</h2>${barChart(mm, MON, {ghost: pm, ghostLabel: Y - 1})}<div class="mut fs14">Stärkster Monat: ${MONL[bm]} mit ${fmtKm(mm[bm], {d: 0})}</div></div>
-    <div class="panel"><h2>Sportarten</h2><div class="stack">${sp.map(([s, v]) => `<div style="width:${(v / km) * 100}%;background:${sCol(s)}"></div>`).join("")}</div><div class="rows mt10">${sp.map(([s, v]) => `<div class="r"><span><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${fmtKm(v, {d: 0})}, ${nf((v / km) * 100, 0)} %</span></div>`).join("")}</div></div></div>
+    <div class="panel"><h2>Sportarten</h2><div class="stack">${sp.map(([s, v]) => `<div style="width:${(v / km) * 100}%;background:${sCol(s)}"></div>`).join("")}</div><div class="rows mt10">${sp.map(([s, v]) => `<div class="r"><span${isSg(s) ? ` title="${esc(sgTitle(s))}"` : ""}><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut rv">${fmtKm(v, {d: 0})}, ${fmtPct((v / km) * 100)}</span></div>`).join("")}</div></div></div>
    <div class="panel gap"><h2>Die fünf stärksten Touren</h2><div class="tl">${top.map(tourRow).join("")}</div><div class="mut mt10">Größter Aufstieg: <a href="#/tour/${steep.id}">${esc(steep.name)}</a> (${fmtHm(steep.up_m)})</div></div>
    ${placePanel}
    ${ph.length ? `<div class="panel gap"><div class="row"><h2>Fotos des Jahres</h2><span class="sp"></span><a class="btn sm noprint" target="_blank" href="slideshow.html?year=${Y}">Diashow</a></div><div class="thumbs" id="rph">${ph.map((p, i) => `<div class="th"><img loading="lazy" decoding="async" src="${picSrc(p, 400)}" data-i="${i}"></div>`).join("")}</div></div>` : ""}</div>`;

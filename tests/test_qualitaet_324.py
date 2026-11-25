@@ -26,6 +26,6 @@ def test_service_worker_version_und_hinweise():
     sw = (ST / "sw.js").read_text(encoding="utf-8")
     assert 'const V = "mt-v147"' in sw
     from app import config
-    assert config.VERSION.startswith("3.61.2 · Meine Touren")
+    assert config.VERSION.startswith("3.61.3 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.24.1.md").read_text(encoding="utf-8")
     assert notes.startswith("# 3.24.1") and "2:60" in notes

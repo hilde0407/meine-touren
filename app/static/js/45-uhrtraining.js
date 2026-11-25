@@ -65,7 +65,7 @@ function uhrHeights(w) {
 function uhrZones(z) {
   if (!z || !z.length) return "";
   const bar = z.map((x, i) => `<span class="uz${(i % UHR_ZC.length) + 1}" data-f="${Math.max(x.sekunden, 0.001)}" title="Zone ${x.zone}: ${uhrMin(x.sekunden)}"></span>`).join("");
-  const leg = z.map((x, i) => `<span class="nw"><i class="br2 mr5 utsw uz${(i % UHR_ZC.length) + 1}"></i><span>Zone</span> ${x.zone}: ${uhrMin(x.sekunden)} (${Math.round(x.anteil * 100)} %) <span class="mut">· <span>bis</span> ${x.bis_bpm} bpm</span></span>`).join("");
+  const leg = z.map((x, i) => `<span class="nw"><i class="br2 mr5 utsw uz${(i % UHR_ZC.length) + 1}"></i><span>Zone</span> ${x.zone}: ${uhrMin(x.sekunden)} (${Math.round(x.anteil * 100)}\u00a0%) <span class="mut">· <span>bis</span> ${x.bis_bpm}\u00a0bpm</span></span>`).join("");
   return `<div class="uth">Pulszonen laut Uhr</div><div class="br6 ovh m12-0-8 fx h12" role="img" aria-label="Pulszonen laut Uhr">${bar}</div><div class="mut g6-16 fxw fx hrleg">${leg}</div>`;
 }
 
@@ -79,7 +79,7 @@ function uhrSplits(sp) {
   const row = (lab, cells) => `<div class="utl">${lab}</div>` + cells.join("");
   const title = s =>
     (s.strecke_m < 1000 ? `Letztes Teilstück (${fmtKm(s.strecke_m / 1000)}): ${metPace(s.min_km)} min/km` : `Kilometer ${s.km}: ${metPace(s.min_km)} min/km`) +
-    (s.puls != null ? `, Puls ${s.puls} bpm` : "") + (s.schritte != null ? `, ${s.schritte} Schritte/min` : "");
+    (s.puls != null ? `, Puls ${s.puls}\u00a0bpm` : "") + (s.schritte != null ? `, ${s.schritte} Schritte/min` : "");
   h += row("", sp.map(s => `<div class="utv">${metPace(s.min_km)}</div>`));
   h += row(`<span>min/km</span>`, sp.map(s => `<div class="utc${s.strecke_m < 1000 ? " part" : ""}" title="${esc(title(s))}" tabindex="0" role="img" aria-label="${esc(title(s))}"><i data-h="${Math.max(3, (s.min_km / mx) * 100).toFixed(1)}"></i></div>`));
   h += row(`<span>Kilometer</span>`, sp.map(s => `<div class="utk">${s.strecke_m < 1000 ? fmtKm(s.strecke_m / 1000) : s.km}</div>`));
@@ -108,8 +108,8 @@ function uhrFatigue(e) {
       `<div class="mut hrnote utfat"><span>Bergauf-Anteil nicht herausgerechnet:</span> <span>Die Hälften unterscheiden sich stark im Aufstieg.</span> <span>Erste Hälfte ${fmtHm(a.auf)} bergauf, zweite Hälfte ${fmtHm(b.auf)} bergauf.</span></div>`, false);
   }
   const p = e.tempo_pct,
-    tempo = p === 0 ? "Tempo unverändert" : p > 0 ? `Tempo ${nf(p, 0)} % langsamer` : `Tempo ${nf(-p, 0)} % schneller`,
-    key = `<b>Zweite Hälfte:</b> <span>${tempo}</span>${e.puls_diff != null ? ` · <span>Puls ${uhrSign(e.puls_diff)} bpm</span>` : ""}`,
+    tempo = p === 0 ? "Tempo unverändert" : p > 0 ? `Tempo ${nf(p, 0)}\u00a0% langsamer` : `Tempo ${nf(-p, 0)}\u00a0% schneller`,
+    key = `<b>Zweite Hälfte:</b> <span>${tempo}</span>${e.puls_diff != null ? ` · <span>Puls ${uhrSign(e.puls_diff)}\u00a0bpm</span>` : ""}`,
     body = `<div class="utfat">${UHR_ERM[e.stufe]}${e.puls === "steigt" ? ` <span>Der Puls stieg im Verlauf an.</span>` : e.puls === "sinkt" ? ` <span>Der Puls sank im Verlauf.</span>` : ""}</div>` +
       `<div class="mut hrnote utfat">${cmp}. <span>Die Einordnung in Worten beruht auf groben Schwellen (3, 8 und 15 %).</span>${e.hoehen_geprueft ? "" : " <span>Höhenunterschiede der Hälften konnten nicht geprüft werden (keine Höhendaten).</span>"}</div>`;
   return trFold("uhr_erm", "Ermüdungsverlauf", key, body, false);

@@ -83,7 +83,8 @@ def pg():
 
 
 def call(pg, lang, fn, *args):
-    return pg.evaluate("([l, fn, a]) => { window.LANG = l; return window.__f[fn](...a); }", [lang, fn, list(args)])
+    r = pg.evaluate("([l, fn, a]) => { window.LANG = l; return window.__f[fn](...a); }", [lang, fn, list(args)])
+    return r.replace("\u00a0", " ") if isinstance(r, str) else r
 
 
 @pytest.mark.parametrize("lang,n,exp", [

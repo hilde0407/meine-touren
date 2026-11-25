@@ -403,6 +403,10 @@ html.mob .atabs button{white-space:nowrap;flex:none}
 /* Handy/App: Zeilen mit Bezeichnung und Wert untereinander, wenn der Wert lang ist */
 html.mob .rows .r{flex-wrap:wrap}
 html.mob .rows .r>:first-child{flex:1 1 55%;min-width:0}
+/* 3.61.3 Wert-Spalte rechts („756 km, 68 %“, „13,1 km“): nie umbrechen, nie schrumpfen – die lange Beschriftung links (z. B. „Wandern (gesamt) = Wandern + Bergsteigen + …“) bricht stattdessen um */
+.rows .r>.rv,.rows .r>b{flex:none;white-space:nowrap}
+.rows .r>.rv{text-align:right}
+.rows .r>:first-child:not(:only-child){min-width:0;overflow-wrap:anywhere}
 /* Handy/App: Pfeile der Startseiten-Diashow verdecken die Überschrift nicht */
 html.mob .hnav{top:14px;transform:none;width:30px;height:36px;font-size:24px;background:#0b1d1e99}
 html.mob .hnav.r{right:10px}html.mob .hnav:not(.r){left:auto;right:46px}

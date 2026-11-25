@@ -101,7 +101,7 @@ async function homeView() {
     if (t.has_hr)
       api(`/api/tours/${encodeURIComponent(t.id)}/hr`)
         .then(h => {
-          if (my === tok && h && h.n && $("#hlhr")) $("#hlhr").textContent = `Ø ${h.avg} bpm, max ${h.max}`;
+          if (my === tok && h && h.n && $("#hlhr")) $("#hlhr").textContent = `Ø ${h.avg}\u00a0bpm, max ${h.max}`;
         })
         .catch(() => {});
   };

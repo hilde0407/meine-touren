@@ -66,7 +66,7 @@ const fmtDauerTeile = (s, o = {}) => {
 };
 const fmtDauer = (s, o = {}) => {
   const p = fmtDauerTeile(s, o);
-  return o.einheit === false ? p.v : `${p.v} ${p.u}`;
+  return o.einheit === false ? p.v : `${p.v}\u00a0${p.u}`;
 };
 
 /* Dauer für Kennzahl-Kacheln: Zahl und Einheit getrennt gesetzt („1:55<span class="u">Std.</span>“) */
@@ -82,10 +82,10 @@ const fmtSignWert = (v, u) => `<span class="sv">${v}<span class="su">${u}</span>
 const fmtKm = (km, o = {}) => {
   const k = Number(km) || 0,
     d = o.d != null ? o.d : o.summe && Math.abs(k) >= 100 ? 0 : 1;
-  return fmtZahl(k, d) + (o.einheit === false ? "" : " km");
+  return fmtZahl(k, d) + (o.einheit === false ? "" : "\u00a0km");
 };
 /* Höhe / Aufstieg / Abstieg in Metern, ganze Zahl. o.pfeil: „↑ 300 m“ (auf) bzw. „↓“ (ab) für Listen und Karten */
-const fmtHm = (m, o = {}) => (o.pfeil ? o.pfeil + " " : "") + fmtZahl(m, 0) + (o.einheit === false ? "" : " m");
+const fmtHm = (m, o = {}) => (o.pfeil ? o.pfeil + "\u00a0" : "") + fmtZahl(m, 0) + (o.einheit === false ? "" : "\u00a0m");
 const fmtAuf = m => fmtHm(m, {pfeil: "↑"});
 const fmtAb = m => fmtHm(m, {pfeil: "↓"});
 /* Anteil 0…1 als ganze Prozent (3.53.0): abgerundet, damit „100 %“ nur bei vollständig erscheint; Englisch ohne Leerzeichen („42%“), sonst mit schmalem Leerzeichen */
@@ -93,18 +93,20 @@ const fmtProzent = p => {
   const n = Math.max(0, Math.min(100, Math.floor(100 * (Number(p) || 0) + 1e-9)));
   return FMT_LG() === "en" ? n + "%" : fmtZahl(n, 0) + "\u202f%";
 };
+/* 3.61.3 Prozentwert als Zahl (nicht Anteil 0…1): fmtPct(68) -> „68 %“ mit geschütztem Leerzeichen (U+00A0), damit „%“ nie allein in eine neue Zeile rutscht; en ohne Leerzeichen („68%“) */
+const fmtPct = (n, d = 0) => fmtZahl(n, d) + (FMT_LG() === "en" ? "%" : "\u00a0%");
 /* Dateigröße in Bytes: „12,3 MB“ (ab 1 GB „1,2 GB“, unter 100 kB ganze „kB“); französisch mit Go/Mo/ko. Eine Funktion für alle Größenangaben (3.46.0). */
 const FMT_BYTE = {de: ["kB", "MB", "GB"], en: ["kB", "MB", "GB"], fr: ["ko", "Mo", "Go"], es: ["kB", "MB", "GB"]};
 const fmtGroesse = n => {
   const b = Math.max(0, Number(n) || 0),
     U = FMT_BYTE[FMT_LG()];
-  return b >= 1e9 ? `${fmtZahl(b / 1e9, 1)} ${U[2]}` : b >= 1e5 ? `${fmtZahl(b / 1e6, 1)} ${U[1]}` : `${Math.max(1, Math.round(b / 1e3))} ${U[0]}`;
+  return b >= 1e9 ? `${fmtZahl(b / 1e9, 1)}\u00a0${U[2]}` : b >= 1e5 ? `${fmtZahl(b / 1e6, 1)}\u00a0${U[1]}` : `${Math.max(1, Math.round(b / 1e3))}\u00a0${U[0]}`;
 };
 /* Tempo (km/h) und Pace (min/km; nur dort, wo ausdrücklich „Pace“ steht) */
-const fmtTempo = (kmh, o = {}) => fmtZahl(kmh, o.d != null ? o.d : 1) + " km/h";
+const fmtTempo = (kmh, o = {}) => fmtZahl(kmh, o.d != null ? o.d : 1) + "\u00a0km/h";
 const fmtPace = minProKm => {
   const t = Math.max(0, Math.round((+minProKm || 0) * 60));
-  return `${Math.floor(t / 60)}:${fmtPad2(t % 60)} min/km`;
+  return `${Math.floor(t / 60)}:${fmtPad2(t % 60)}\u00a0min/km`;
 };
 
 /* Datum und Uhrzeit. x = ISO-Text („2026-11-18“, „2026-11-18T03:43:00“ – ohne Zeitzonenumrechnung), Date, oder Sekunden seit 1970 (Zahl) */

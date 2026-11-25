@@ -25,7 +25,7 @@ function trackFixDialog(id, done) {
     const initS = a.photos ? a.photos.last - a.photos.first : a.timing.est_s || a.dur_s;
     b.className = "";
     b.innerHTML = `
-     <p class="mut fs14 mt0">Gesucht wird nach <b>Ausreißern</b> (Punkte, die mit unmöglichem Tempo vom Weg wegspringen) und nach <b>schnellen Abschnitten</b> (dauerhaft über ${lim} km/h, z. B. Seilbahn, Bus oder Auto) sowie nach <b>GPS-Zittern</b>, das die Strecke künstlich verlängert. Das Original bleibt erhalten und lässt sich zurückholen.</p>
+     <p class="mut fs14 mt0">Gesucht wird nach <b>Ausreißern</b> (Punkte, die mit unmöglichem Tempo vom Weg wegspringen) und nach <b>schnellen Abschnitten</b> (dauerhaft über ${lim}\u00a0km/h, z. B. Seilbahn, Bus oder Auto) sowie nach <b>GPS-Zittern</b>, das die Strecke künstlich verlängert. Das Original bleibt erhalten und lässt sich zurückholen.</p>
      <div id="tfm" class="br6 m8-0" style="height:280px"></div>
      ${a.fixed ? `<p class="ok">✓ Bereits korrigiert: ${a.applied.spikes} Ausreißer entfernt, ${fmtAnzahl(a.applied.excluded, "Abschnitt", "Abschnitte")} herausgerechnet (Strecke vorher ${fmtKm(a.dist_km)}, jetzt ${fmtKm(a.now_km)}). Die Liste unten zeigt, was vom Original aus gefunden wird.</p>` : ""}
      ${none && !a.timing.uniform ? `<p class="ok">✓ Im Track wurde nichts Auffälliges gefunden.</p><div id="tfack" class="panel p10-14 m10-0" hidden></div>` : ""}
@@ -42,7 +42,7 @@ function trackFixDialog(id, done) {
           f => `<label class="r cp g8 aic" style="display:flex"><input type="checkbox" class="cb" data-f="${f.id}"><span>${a.has_time ? clock(f.t0) + " Uhr · " : ""}${fmtKm(f.m / 1000)} in ${fmtMin(f.s)}<small class="mut"> · Ø ${fmtTempo(f.avg)}, bis ${fmtTempo(f.max, {d: 0})}</small></span></label>`
         )
         .join("")}</div>` : ""}
-     ${a.jitter_m >= 200 && a.jitter_m >= a.raw_m * 0.03 ? `<label class="chk"><input type="checkbox" id="tfj"> <b>GPS-Zittern glätten:</b> der Track ist durch Messrauschen etwa ${fmtKm(a.jitter_m / 1000)} (${Math.round((a.jitter_m / a.raw_m) * 100)} %) zu lang. Die Strecke wird entsprechend verringert, der Weg bleibt unverändert.</label>` : ""}
+     ${a.jitter_m >= 200 && a.jitter_m >= a.raw_m * 0.03 ? `<label class="chk"><input type="checkbox" id="tfj"> <b>GPS-Zittern glätten:</b> der Track ist durch Messrauschen etwa ${fmtKm(a.jitter_m / 1000)} (${Math.round((a.jitter_m / a.raw_m) * 100)}\u00a0%) zu lang. Die Strecke wird entsprechend verringert, der Weg bleibt unverändert.</label>` : ""}
      <p id="tfp" class="panel p10-14 m14-0-0 fs14"></p>
      ${!a.has_time ? `<p class="mut fs13">Dieser Track hat keine Zeitstempel – schnelle Abschnitte lassen sich daher nicht erkennen.</p>` : ""}
      <div id="tfer" class="bad"></div><div class="uifoot"><button class="btn ghost" id="tfno">Schließen</button>${a.fixed ? `<button class="btn alt" id="tfre">Original wiederherstellen</button>` : ""}${none && !a.fixed && !a.timing.uniform ? "" : `<button class="btn" id="tfok">${a.fixed ? "Erneut anwenden" : "Korrigieren"}</button>`}</div>`;
@@ -59,7 +59,7 @@ function trackFixDialog(id, done) {
       });
       if (b.querySelector("#tfj")?.checked) d -= a.jitter_m;
       const v = (km, sec) => (sec > 0 ? nf(km / (sec / 3600), 1) : "–");
-      b.querySelector("#tfp").innerHTML = `Original: <b>${fmtKm(a.dist_km)}</b> in ${fmtMin(a.dur_s)} (Ø ${v(a.dist_km, a.dur_s)} km/h)<br>Nach der Korrektur: <b>${fmtKm(Math.max(0, d) / 1000)}</b> in ${fmtMin(Math.max(0, s))} (Ø ${v(Math.max(0, d) / 1000, s)} km/h)`;
+      b.querySelector("#tfp").innerHTML = `Original: <b>${fmtKm(a.dist_km)}</b> in ${fmtMin(a.dur_s)} (Ø ${v(a.dist_km, a.dur_s)}\u00a0km/h)<br>Nach der Korrektur: <b>${fmtKm(Math.max(0, d) / 1000)}</b> in ${fmtMin(Math.max(0, s))} (Ø ${v(Math.max(0, d) / 1000, s)}\u00a0km/h)`;
     };
     const ph = b.querySelector("#tfph");
     if (ph)

@@ -118,20 +118,21 @@ def test_beschriftung_name_gleich_aktivitaeten(pw, app):
     try:
         pg.goto(app + "/#/stats")
         chip = pg.locator('#sch [data-s="sgrp:rad"]')
-        expect(chip).to_have_text("Rad fahren = Radtour + Rennrad + Mountainbike + …", timeout=TL)
+        expect(chip).to_have_text("Rad fahren", timeout=TL)
+        assert chip.get_attribute("aria-label") == chip.get_attribute("title")
         assert chip.get_attribute("title") == "Rad fahren = Radtour + Rennrad + Mountainbike + Gravelbike"
-        expect(pg.locator('#sch [data-s="sgrp:berg"]')).to_have_text("Bergwandern = Wandern + Bergsteigen")
+        expect(pg.locator('#sch [data-s="sgrp:berg"]')).to_have_text("Bergwandern")
         assert pg.locator('#sch [data-s="sgrp:berg"]').get_attribute("title") == "Bergwandern = Wandern + Bergsteigen"
-        expect(pg.locator('[data-st="sportarten"] .rows, #stc-sportarten .rows').first).to_contain_text("Rad fahren = Radtour + Rennrad + Mountainbike + …")
+        expect(pg.locator('[data-st="sportarten"] .rows, #stc-sportarten .rows').first).to_contain_text("Rad fahren")
         # Ziel-Auswahl und Zielname
         opt = pg.locator('.zlsp [data-sp="sgrp:rad"]')                                  # 3.61.0: Muster „Zuweisen“ (Knöpfe statt Auswahlfeld)
         if opt.count():
-            assert opt.text_content() == "Rad fahren = Radtour + Rennrad + Mountainbike + …" and opt.get_attribute("title").endswith("+ Gravelbike")
-        assert pg.evaluate("() => goalSportName('sgrp:berg')") == "Bergwandern = Wandern + Bergsteigen"
+            assert opt.text_content() == "Rad fahren" and opt.get_attribute("title").endswith("+ Gravelbike")
+        assert pg.evaluate("() => goalSportName('sgrp:berg')") == "Bergwandern"
         # Rekorde
         pg.goto(app + "/#/records?s=")
         a = pg.locator('a.chip[href="#/records?s=sgrp%3Arad"]')
-        expect(a).to_contain_text("Rad fahren = Radtour + Rennrad + Mountainbike + …", timeout=TL)
+        expect(a).to_contain_text("Rad fahren", timeout=TL)
         assert a.get_attribute("title") == "Rad fahren = Radtour + Rennrad + Mountainbike + Gravelbike"
         assert not errs, errs
     finally:
@@ -143,7 +144,8 @@ def test_englisch(pw, app):
     b, pg, errs = _page(pw, app, lang="en", w=390)
     try:
         pg.goto(app + "/#/stats")
-        expect(pg.locator('#sch [data-s="sgrp:berg"]')).to_have_text("Bergwandern = Hiking + Mountaineering", timeout=TL)
+        expect(pg.locator('#sch [data-s="sgrp:berg"]')).to_have_text("Bergwandern", timeout=TL)
+        assert pg.locator('#sch [data-s="sgrp:berg"]').get_attribute("title") == "Bergwandern = Hiking + Mountaineering"
         pg.goto(app + "/#/admin?tab=sportarten")
         pg.wait_for_selector("#sgp .sgg", timeout=TL)
         quiet(pg, 3000)

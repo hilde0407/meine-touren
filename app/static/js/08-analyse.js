@@ -128,7 +128,7 @@ async function anaRun(id) {
         L.polyline(
           c.slice(sg.a, sg.b + 1).map(p => [p[0], p[1]]),
           {color: (typeof sportGrp === "function" && (sportGrp(t.sport) === "ski" || isSnowshoe(t))) && Math.abs(sg.g) >= STEEP30 ? "#7e22ce" : grCol(sg.g), weight: 7, opacity: 0.95}
-        ).bindTooltip(`${nf(sg.g, 0)} % Steigung`)
+        ).bindTooltip(`${nf(sg.g, 0)}\u00a0% Steigung`)
       )
     ).addTo(map);
     return true;
@@ -140,7 +140,7 @@ async function anaRun(id) {
       L.layerGroup(
         A.pauses.map(p =>
           L.circleMarker([p.lat, p.lng], {radius: 9, color: "#fff", weight: 2, fillColor: "#7b61c9", fillOpacity: 1}).bindTooltip(
-            `Pause ${fmtDauer(p.dur)}, ${nf(p.t / 60000, 0)} Min. nach dem Start`
+            `Pause ${fmtDauer(p.dur)}, ${nf(p.t / 60000, 0)}\u00a0Min. nach dem Start`
           )
         )
       ).addTo(map)

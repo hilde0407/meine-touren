@@ -16,7 +16,7 @@ const slClock = m => {
   const r = Math.round(m);
   return `${pad2(Math.floor(r / 60) % 24)}:${pad2(r % 60)}`;
 };
-const slSignPct = p => `${p >= 0 ? "+" : "−"}${Math.abs(Math.round(p))} %`;
+const slSignPct = p => `${p >= 0 ? "+" : "−"}${Math.abs(Math.round(p))}\u00a0%`;
 const slFmtN = n => nf(n, n >= 10 ? 0 : 1);
 /* Bezugsgrößen der Spaß-Vergleiche: [Kennung, Name, Wert in m bzw. kcal] */
 const SL_FUN = {
@@ -62,7 +62,7 @@ Object.assign(window.SL_WT, {
         const p = d.anteile[k] * 100;
         return `<li><span class="slhn">${name}<small class="mut">${rng}</small></span>${slBr(p, "slc" + i)}<b>${p > 0 && p < 1 ? "unter 1 %" : Math.round(p) + " %"}</b></li>`;
       }).join("")}</ul><p class="mut slcap">Anteil an der Strecke von ${fmtKm(d.dist_m / 1000)}, Steigung über 50 m geglättet.</p>`;
-      slBadge(c, `${Math.round(up * 100)} % bergauf`);
+      slBadge(c, `${Math.round(up * 100)}\u00a0% bergauf`);
     },
   },
   bewegung: {
@@ -74,11 +74,11 @@ Object.assign(window.SL_WT, {
       if (!d || d.status !== "ok") return slWhy(b, d);
       const tot = d.gesamt_s || 1, pct = Math.round((d.bewegung_s / tot) * 100),
         rects = d.abschnitte.map(([k, a, e]) => `<rect class="${k === "p" ? "slps" : "slmv"}" x="${((a / tot) * 1000).toFixed(1)}" y="${k === "p" ? 9 : 0}" width="${Math.max(1.5, ((e - a) / tot) * 1000).toFixed(1)}" height="${k === "p" ? 10 : 28}"/>`).join("");
-      b.innerHTML = `<svg class="slstrip" viewBox="0 0 1000 28" preserveAspectRatio="none" role="img" aria-label="${esc(`Zeitstreifen: ${pct} % in Bewegung, ${100 - pct} % Pause`)}">${rects}</svg>` +
+      b.innerHTML = `<svg class="slstrip" viewBox="0 0 1000 28" preserveAspectRatio="none" role="img" aria-label="${esc(`Zeitstreifen: ${pct}\u00a0% in Bewegung, ${100 - pct}\u00a0% Pause`)}">${rects}</svg>` +
         `<div class="slxl sb" aria-hidden="true"><span>0:00</span><span>${fmtDauer(tot, {summe: true})}</span></div>` +
-        slTiles([[fmtDauer(d.bewegung_s, {summe: true}), "In Bewegung", `${pct} %`], [d.pause_s >= 60 ? fmtDauer(d.pause_s, {summe: true}) : "keine", "Pause", d.pause_s >= 60 ? `${100 - pct} %` : ""]]) +
+        slTiles([[fmtDauer(d.bewegung_s, {summe: true}), "In Bewegung", `${pct}\u00a0%`], [d.pause_s >= 60 ? fmtDauer(d.pause_s, {summe: true}) : "keine", "Pause", d.pause_s >= 60 ? `${100 - pct}\u00a0%` : ""]]) +
         (d.pause_s < 60 ? '<p class="mut slcap">Keine nennenswerten Pausen aufgezeichnet.</p>' : '<p class="mut slcap">Pause: Tempo unter 0,3 km/h.</p>');
-      slBadge(c, `${pct} % in Bewegung`);
+      slBadge(c, `${pct}\u00a0% in Bewegung`);
     },
   },
   durchschnitt: {
@@ -164,7 +164,7 @@ Object.assign(window.SL_WT, {
       const tiles = [d.nach_s != null ? [fmtDauer(d.nach_s, {summe: true}), "Erreicht nach"] : null, d.bei_m != null ? [fmtKm(d.bei_m / 1000), "Bei Kilometer"] : null, [slHm(d.tief_m), "Tiefster Punkt"], [slHm(d.hoch_m - d.tief_m), "Höhenunterschied"]].filter(Boolean),
         sh = d.ueber_anteil != null ? Math.round(d.ueber_anteil * 100) : null;
       b.innerHTML = `<div class="slsign"><span>Höchster Punkt</span><b>${slHm(d.hoch_m)}</b></div>${slTiles(tiles)}` +
-        (sh != null ? `<div class="slr1"><span>Anteil der Strecke über ${fmtHm(ab)}</span><b>${sh} %</b></div>${slBr(sh, "slc5")}` : "");
+        (sh != null ? `<div class="slr1"><span>Anteil der Strecke über ${fmtHm(ab)}</span><b>${sh}\u00a0%</b></div>${slBr(sh, "slc5")}` : "");
       slBadge(c, slHm(d.hoch_m));
     },
   },
@@ -324,7 +324,7 @@ const PLAN_WORDS = {km: ["länger als geplant", "kürzer als geplant"], up: ["me
 function planErgDiff(k, v) {
   if (v == null) return '<span class="pld mut"><span>ohne Angabe</span></span>';
   if (Math.abs(v) < PLAN_TOL[k]) return '<span class="pld"><span aria-hidden="true">=</span> <span>wie geplant</span></span>';
-  const num = k === "km" ? `${nSigned(v, 1)} km` : k === "up" || k === "down" ? `${nSigned(v, 0)} m` : null;
+  const num = k === "km" ? `${nSigned(v, 1)}\u00a0km` : k === "up" || k === "down" ? `${nSigned(v, 0)}\u00a0m` : null;
   return `<span class="pld"><span aria-hidden="true">${v > 0 ? "↑" : "↓"}</span> ` +
     (num ? `<b>${num}</b>` : `<b>${v < 0 ? "−" : "+"}${fmtDauer(Math.abs(v) * 3600)}</b>`) + ` <small class="mut">${PLAN_WORDS[k][v > 0 ? 0 : 1]}</small></span>`;
 }

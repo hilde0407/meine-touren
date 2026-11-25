@@ -106,7 +106,7 @@ function photoChain(map, t, coords, ph) {
       h = Math.floor(a / 3600),
       m = Math.floor((a % 3600) / 60),
       s = a % 60;
-    return delta ? `Zeitversatz: <b>${delta < 0 ? "−" : "+"}${h ? h + " Std. " : ""}${m} Min. ${s} Sek.</b>` : "Noch nichts verschoben";
+    return delta ? `Zeitversatz: <b>${delta < 0 ? "−" : "+"}${h ? h + " Std. " : ""}${m}\u00a0Min. ${s} Sek.</b>` : "Noch nichts verschoben";
   };
   const show = () => {
     bar.innerHTML = `<b>Fotos ausrichten:</b> Ziehe ein Foto auf der Karte an die Stelle der Strecke, an der du sicher bist, dass es dort aufgenommen wurde. Alle anderen Fotos wandern wie auf einer Perlenkette im gleichen zeitlichen Abstand mit.

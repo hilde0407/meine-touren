@@ -201,11 +201,11 @@ def run(api=None, tile_max=None, cap=None):
         up1 += r["up_m"] or 0
         db.execute("INSERT OR REPLACE INTO quality_batch(batch_id,tour_id,device_id,method,ts,orig_up,orig_down,new_up,new_down,state) VALUES(?,?,?,?,?,?,?,?,?,'done')",
                    (bid, tid, did, method, int(time.time()), r["orig_up"], r["orig_down"], r["up_m"], r["down_m"]))
-        log(f"  Korrigiert: {tid}: Aufstieg {round(r['orig_up'] or 0)} m → {round(r['up_m'])} m")
+        log(f"  Korrigiert: {tid}: Aufstieg {round(r['orig_up'] or 0)}\u00a0m → {round(r['up_m'])}\u00a0m")
         if method == "zepp":
             time.sleep(0.2)
     progress(f"Höhe {ok} von {len(todo)} korrigiert", len(todo) - after, len(todo))
-    log(f"Korrigiert: {ok} Touren, Aufstieg zusammen {round(up0)} m → {round(up1)} m ({round(up1 - up0):+d} m)"
+    log(f"Korrigiert: {ok} Touren, Aufstieg zusammen {round(up0)}\u00a0m → {round(up1)}\u00a0m ({round(up1 - up0):+d}\u00a0m)"
         + (f"; {skipped} übersprungen" if skipped else "") + (f"; {failed} nicht möglich" if failed else "")
         + (f"; {later} weitere folgen beim nächsten Start (Obergrenze {cap} je Lauf)" if later else "")
         + (f"; {after} nach dem Abbruch offen" if after else ""))

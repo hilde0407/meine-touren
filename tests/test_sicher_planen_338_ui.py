@@ -165,7 +165,7 @@ def test_plan_check_karte_desktop_hell_dunkel_mobil(pw, app):
             pg.evaluate("() => { document.querySelector('#pcheck').open = true; }")
             expect(pg.locator("#pcsum")).to_contain_text("Etwas mehr als gewohnt", timeout=TL)
             body = pg.locator("#pcb")
-            expect(body).to_contain_text(re.compile(r"Deine längste Tour der letzten 12 Monate: 17,0 km mit 1\.000 m; diese: 19,\d km mit 800 m"), timeout=TL)
+            expect(body).to_contain_text(re.compile(r"Deine längste Tour der letzten 12 Monate: 17,0\s+km mit 1\.000\s+m; diese: 19,\d\s+km mit 800\s+m"), timeout=TL)
             expect(body).to_contain_text("Länger als deine längste Tour (+12 %)")
             expect(body).to_contain_text("Reine Gehzeit ohne Pausen")
             assert "▲" in pg.inner_text("#pcheck")                                                # Symbol zusätzlich zur Farbe

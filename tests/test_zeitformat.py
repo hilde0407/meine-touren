@@ -8,7 +8,7 @@ CASES = [(10799, "3:00"), (3599, "1:00"), (3600, "1:00"), (0, "0:00"), (59.6 * 6
 
 @pytest.mark.parametrize("h,exp", [(s / 3600, e) for s, e in CASES])
 def test_pdf_hm(h, exp):
-    assert pdfgen._hm(h) == exp + " Std."              # 3.61.0: Einheit „Std.“ wie in der Oberfläche (Leitfaden 2.10)
+    assert pdfgen._hm(h) == exp + "\u00a0Std."              # 3.61.0: Einheit „Std.“ wie in der Oberfläche (Leitfaden 2.10)
 
 
 def test_pdf_splits_round_seconds():

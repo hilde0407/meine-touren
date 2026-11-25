@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 SRC = Path(__file__).resolve().parent.parent / "app" / "static" / "js" / "01-format.js"
-NAMES = "fmtZahl, fmtDauer, fmtDauerTeile, fmtDauerHtml, fmtKm, fmtHm, fmtAuf, fmtAb, fmtTempo, fmtPace, fmtDatum, fmtDatumKurz, fmtUhrzeit, fmtMonat, fmtTagKurz, fmtZeitraum"
+NAMES = "fmtZahl, fmtDauer, fmtDauerTeile, fmtDauerHtml, fmtKm, fmtHm, fmtAuf, fmtAb, fmtTempo, fmtPace, fmtDatum, fmtDatumKurz, fmtUhrzeit, fmtMonat, fmtTagKurz, fmtZeitraum, fmtPct"
 
 
 @pytest.fixture(scope="module")
@@ -21,7 +21,21 @@ def pg():
 
 
 def call(pg, lang, fn, *args):
+    r = pg.evaluate("([l, fn, a]) => { window.LANG = l; return window.__f[fn](...a); }", [lang, fn, list(args)])
+    return r.replace("\u00a0", " ") if isinstance(r, str) else r       # 3.61.3: Zahl und Einheit stehen mit geschütztem Leerzeichen; die Erwartungen unten schreiben ein normales
+
+
+def raw(pg, lang, fn, *args):
     return pg.evaluate("([l, fn, a]) => { window.LANG = l; return window.__f[fn](...a); }", [lang, fn, list(args)])
+
+
+def test_zahl_und_einheit_nie_getrennt(pg):
+    """3.61.3: zwischen Zahl und Einheit steht U+00A0 (kein normales Leerzeichen), damit „%“ und „km“ nie allein in eine neue Zeile rutschen."""
+    assert raw(pg, "de", "fmtKm", 756) == "756,0\u00a0km" and raw(pg, "de", "fmtHm", 571) == "571\u00a0m" and raw(pg, "de", "fmtAuf", 300) == "↑\u00a0300\u00a0m"
+    assert raw(pg, "de", "fmtDauer", 6900) == "1:55\u00a0Std." and raw(pg, "de", "fmtTempo", 4.5) == "4,5\u00a0km/h"
+    assert raw(pg, "de", "fmtPct", 68.4) == "68\u00a0%" and raw(pg, "de", "fmtPct", 1.26, 1) == "1,3\u00a0%" and raw(pg, "en", "fmtPct", 68) == "68%"
+    for fn, a in (("fmtKm", 756), ("fmtHm", 5), ("fmtDauer", 5000), ("fmtTempo", 3), ("fmtPace", 6), ("fmtPct", 5)):
+        assert " " not in raw(pg, "de", fn, a), fn
 
 
 @pytest.mark.parametrize("lang,s,exp", [

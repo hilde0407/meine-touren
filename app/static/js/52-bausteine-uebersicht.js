@@ -50,12 +50,12 @@ function zlBar(g, yr, cy, now, ed) {
   if (zlWeek(g)) {
     const v = zlWeekVal(g, now), p = Math.min(100, (v / g.target) * 100), u = GM[g.metric][0], rest = 6 - ((now.getDay() + 6) % 7);
     return `<div class="goal zlw"><div class="gh"><b>${zlName(g)}</b><span>${nf(v, g.metric === "count" ? 0 : g.metric === "hours" || g.target < 50 ? 1 : 0)} / ${nf(g.target, 0)} ${u}${del}</span></div>${slBr(p, v >= g.target ? "kzfull" : "")}` +
-      `<div class="gs">${nf(p, 0)} %${v >= g.target ? ` · <span class="ok">Wochenziel erreicht ✓</span>` : ` · ${rest === 0 ? "Heute ist der letzte Tag der Woche." : rest === 1 ? "Noch 1 Tag in dieser Woche." : `Noch ${rest} Tage in dieser Woche.`}`}</div></div>`;
+      `<div class="gs">${nf(p, 0)}\u00a0%${v >= g.target ? ` · <span class="ok">Wochenziel erreicht ✓</span>` : ` · ${rest === 0 ? "Heute ist der letzte Tag der Woche." : rest === 1 ? "Noch 1 Tag in dieser Woche." : `Noch ${rest} Tage in dieser Woche.`}`}</div></div>`;
   }
   const frac = yr === cy ? Math.max(0, (now - new Date(cy, 0, 1)) / (new Date(cy + 1, 0, 1) - new Date(cy, 0, 1))) : yr > cy ? 0 : 1,
     v = goalVal(g, TOURS), p = Math.min(100, (v / g.target) * 100), u = GM[g.metric][0], proj = frac > 0.02 && frac < 1 ? v / frac : null;
   return `<div class="goal"><div class="gh"><b>${zlName(g)}</b><span>${nf(v, 0)} / ${nf(g.target, 0)} ${u}${del}</span></div>${slBr(p, v >= g.target ? "kzfull" : "")}` +
-    `<div class="gs">${nf(p, 0)} %${goalNote(g, v, u, frac, proj, yr, cy)}</div></div>`;
+    `<div class="gs">${nf(p, 0)}\u00a0%${goalNote(g, v, u, frac, proj, yr, cy)}</div></div>`;
 }
 function zlRing(g, yr, cy, now) {
   const wk = zlWeek(g), val = wk ? zlWeekVal(g, now) : goalVal(g, TOURS), goal = Math.max(1e-9, g.target), u = GM[g.metric][0] || (g.metric === "count" ? "Touren" : ""),
@@ -71,10 +71,10 @@ function zlRing(g, yr, cy, now) {
     fc = yr === cy && doy >= 14 ? val / tf : null;
     need = fc != null && fc >= goal ? "Auf Kurs: Bei diesem Tempo erreichst du dein Ziel." : yr === cy ? `Dafür brauchst du noch ${nf((goal - val) / left, dec)} ${u} pro Woche.` : "";
   }
-  const pct = Math.round(frac * 100), yp = Math.round(tf * 100), lbl = wk ? `Die Woche ist zu ${yp} % vorbei` : `Das Jahr ist zu ${yp} % vorbei`;
-  return `<div class="slgoal"><div class="slring" role="img" aria-label="${esc(`Ring: ${pct} % des Ziels erreicht, ${lbl}`)}"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">` +
+  const pct = Math.round(frac * 100), yp = Math.round(tf * 100), lbl = wk ? `Die Woche ist zu ${yp}\u00a0% vorbei` : `Das Jahr ist zu ${yp}\u00a0% vorbei`;
+  return `<div class="slgoal"><div class="slring" role="img" aria-label="${esc(`Ring: ${pct}\u00a0% des Ziels erreicht, ${lbl}`)}"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">` +
     `<circle class="t" cx="50" cy="50" r="42"/><circle class="f${frac >= 1 ? " done" : ""}" cx="50" cy="50" r="42" stroke-dasharray="${(C1 * slClamp(frac, 0, 1)).toFixed(1)} ${C1}" transform="rotate(-90 50 50)"/>` +
-    `<circle class="t2" cx="50" cy="50" r="31"/><circle class="g" cx="50" cy="50" r="31" stroke-dasharray="${(C2 * slClamp(tf, 0, 1)).toFixed(1)} ${C2}" transform="rotate(-90 50 50)"/></svg><div class="slrc"><b>${pct} %</b></div></div>` +
+    `<circle class="t2" cx="50" cy="50" r="31"/><circle class="g" cx="50" cy="50" r="31" stroke-dasharray="${(C2 * slClamp(tf, 0, 1)).toFixed(1)} ${C2}" transform="rotate(-90 50 50)"/></svg><div class="slrc"><b>${pct}\u00a0%</b></div></div>` +
     `<div class="slgt"><p class="zlrn">${zlName(g)}</p><p class="slcmp">${nf(val, dec)} von ${nf(goal, 0)} ${u}</p><p class="mut slcmpn">${frac >= 1 ? `Das sind ${nf(val - goal, dec)} ${u} über dem Ziel.` : `Noch ${nf(goal - val, dec)} ${u}`}</p>` +
     (fc != null ? `<p class="slfc">Prognose zum Jahresende: ${nf(fc, 0)} ${u}</p>` : "") + `<p class="mut slcmpn">${frac >= 1 ? "Das Ziel ist erreicht." : val > 0 ? need : wk ? "Noch keine Tour in dieser Woche." : "Noch keine Tour in diesem Jahr."}</p>` +
     `<ul class="sllg"><li><i class="slsq slbf"></i>Ziel</li><li><i class="slsq slyr"></i>${lbl}</li></ul></div></div>`;
@@ -83,8 +83,8 @@ function zlRing(g, yr, cy, now) {
 async function zlWarn(c, b, cfg) {
   const arts = cfg.zeit === "jahr" ? ["ziel"] : cfg.zeit === "woche" ? ["woche"] : ["ziel", "woche"], sch = cfg.schwelle ?? 10,
     cond = `<p class="hnphc">${esc(cfg.zeit === "woche" ? "Wird nur angezeigt, wenn ein Wochenziel am Samstag oder Sonntag noch offen ist."
-      : cfg.zeit === "jahr" ? `Wird nur angezeigt, wenn die Prognose zum Jahresende um mehr als ${hnNum(sch)} % unter einem deiner Jahresziele liegt.`
-        : `Wird nur angezeigt, wenn ein Ziel in Gefahr ist: Die Prognose zum Jahresende liegt um mehr als ${hnNum(sch)} % unter einem Jahresziel, oder ein Wochenziel ist am Samstag oder Sonntag noch offen.`)}</p>` +
+      : cfg.zeit === "jahr" ? `Wird nur angezeigt, wenn die Prognose zum Jahresende um mehr als ${hnNum(sch)}\u00a0% unter einem deiner Jahresziele liegt.`
+        : `Wird nur angezeigt, wenn ein Ziel in Gefahr ist: Die Prognose zum Jahresende liegt um mehr als ${hnNum(sch)}\u00a0% unter einem Jahresziel, oder ein Wochenziel ist am Samstag oder Sonntag noch offen.`)}</p>` +
       `<p class="mut hnphs">${esc("Voraussetzung: ein Ziel in der Statistik unter „Ziele“; die Prognose eines Jahresziels gibt es ab dem 14. Tag des Jahres.")}</p>`;
   c.dataset.hn = "lade";
   let d;
@@ -359,7 +359,7 @@ Object.assign(window.SL_WT, {
         return s;
       }).join("");
       b.innerHTML = `<div class="slgoal"><div class="slring slsd"><svg viewBox="0 0 100 100" role="img" aria-label="Ringdiagramm der Sportarten" focusable="false"><circle class="t" cx="50" cy="50" r="34"/>${segs}</svg><div class="slrc"><b>${fmt(tot)}</b>${cfg.metric === "km" || cfg.metric === "time" ? "" : '<small class="mut">Touren</small>'}</div></div>` +
-        `<ul class="slleg">${L.map(g => `<li><i class="slsq slsg slsg-${g.cl}"></i><span>${g.name}</span><b>${Math.round((g.v / tot) * 100)} %</b><span class="mut">${fmt(g.v)}</span></li>`).join("")}</ul></div>`;
+        `<ul class="slleg">${L.map(g => `<li><i class="slsq slsg slsg-${g.cl}"></i><span>${g.name}</span><b>${Math.round((g.v / tot) * 100)}\u00a0%</b><span class="mut">${fmt(g.v)}</span></li>`).join("")}</ul></div>`;
       slBadge(c, L[0].name);
     },
   },
@@ -459,7 +459,7 @@ Object.assign(window.SL_WT, {
         const lim = g.limit_km, cls = g.status === "over" ? "bad" : g.status === "soon" ? "warn" : "", pct = lim ? Math.round((g.km / lim) * 100) : null,
           ic = g.status === "over" ? '<span class="slwi bad" aria-hidden="true">×</span>' : g.status === "soon" ? '<span class="slwi warn" aria-hidden="true">!</span>' : "",
           line = !lim ? "Ohne Limit" : g.status === "over" ? (g.km > lim ? `Limit überschritten um ${slKm(g.km - lim)}: Zeit für einen Wechsel` : "Limit erreicht: Zeit für einen Wechsel") : g.status === "soon" ? `Bald fällig: noch ${slKm(lim - g.km)}` : `Noch ${slKm(lim - g.km)}`;
-        return `<li${cls ? ` class="slgw gw-${cls}"` : ""}><div class="slr1"><span>${ic}${esc(g.name)}</span><b>${lim ? `${nf(g.km, 0)} von ${slKm(lim)} (${pct} %)` : slKm(g.km)}</b></div>${slBr(lim ? (g.km / lim) * 100 : 0, cls)}` +
+        return `<li${cls ? ` class="slgw gw-${cls}"` : ""}><div class="slr1"><span>${ic}${esc(g.name)}</span><b>${lim ? `${nf(g.km, 0)} von ${slKm(lim)} (${pct}\u00a0%)` : slKm(g.km)}</b></div>${slBr(lim ? (g.km / lim) * 100 : 0, cls)}` +
           `<p class="mut slr2">${line}</p></li>`;
       });
       b.innerHTML = slRows(rows) + '<p><a href="#/places">Ausrüstung verwalten ›</a></p>';
@@ -481,7 +481,7 @@ Object.assign(window.SL_WT, {
           vals = [p.km != null ? slKm(p.km) : "", p.up ? slHm(p.up) : "", p.est_h ? fmtDauer(p.est_h * 3600, {summe: true}) : ""].filter(Boolean).join(" · ");
         if (!done) return `<li>${nm}<span class="mut">${vals}</span></li>`;
         const cmp = t && p.est_h && t.h ? `<span>geplant ${hmm(p.est_h)}</span> · <span>gelaufen ${hmm(t.h)} (${hmSigned(t.h - p.est_h)})</span>`
-          : t && p.km && t.km ? `<span>Strecke: geplant ${fmtKm(p.km)}, gelaufen ${fmtKm(t.km)} (${nSigned(t.km - p.km, 1)} km)</span>` : "";
+          : t && p.km && t.km ? `<span>Strecke: geplant ${fmtKm(p.km)}, gelaufen ${fmtKm(t.km)} (${nSigned(t.km - p.km, 1)}\u00a0km)</span>` : "";
         return `<li class="slgone">${nm}<span class="mut"><span aria-hidden="true">✓</span> ${t && t.start_ts ? `gegangen am ${esc(planDate(t.start_ts))}` : "gegangen"}</span>${cmp ? `<small class="mut slgcmp">${cmp}</small>` : ""}</li>`;
       };
       b.innerHTML = `<ul class="sllist">${[...L.filter(p => p.status !== "gegangen"), ...L.filter(p => p.status === "gegangen")].slice(0, 5).map(row).join("")}</ul>` + (can ? '<p><a href="#/plan">Tour planen ›</a></p>' : "");
@@ -963,7 +963,7 @@ function slYearShell(it) {
     title = (cfg.title || "").trim() || (R.kind === "12m" ? "Deine letzten 12 Monate" : R.kind === "90d" ? "Deine letzten 90 Tage" : R.kind === "all" ? "Deine Touren insgesamt" : R.kind === "c" ? "Dein Zeitraum" : `Dein Jahr ${R.year}`),
     now_ = flVal(list, bm), was = prev ? flVal(prev, bm) : 0, up = now_ >= was,
     cmpTxt = was > 0 && now_ > 0 && cfg.compare !== false && R.prev
-      ? `${up ? "+" : "−"}${nf((Math.abs(now_ - was) / was) * 100, 0)} % gegenüber ` + (R.kind === "year" ? `${R.year - 1} bis heute` : R.kind === "y" ? String(R.year - 1) : R.kind === "12m" ? "den 12 Monaten davor" : "den 90 Tagen davor")
+      ? `${up ? "+" : "−"}${nf((Math.abs(now_ - was) / was) * 100, 0)}\u00a0% gegenüber ` + (R.kind === "year" ? `${R.year - 1} bis heute` : R.kind === "y" ? String(R.year - 1) : R.kind === "12m" ? "den 12 Monaten davor" : "den 90 Tagen davor")
       : "",
     kz = ms.map(m => `<div class="hyn"><b>${FL_MET[m].fmt(flVal(list, m))}</b><span>${m === "count" ? "Touren" : FL_MET[m].name}</span></div>`).join(""),
     sec = document.createElement("section");

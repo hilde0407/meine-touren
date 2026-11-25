@@ -13,7 +13,7 @@ Eine zentrale Stelle für alle Auswertungen (Server; die Oberfläche hat dieselb
     load()             die Gruppen des Benutzers ([] = jede Aktivität einzeln)
     key(sport)         Sportart -> Schlüssel der Auswertung („sgrp:<id>“ für Mitglieder einer Gruppe, sonst die Sportart)
     name(key)          Anzeigename eines Schlüssels (Gruppenname bzw. deutscher Sportname)
-    label(key)         3.60.1 Beschriftung einer Gruppe in Aufteilungen: „<Name> = A + B + C“ (ab 4 Mitgliedern „… + …“), sonst wie name()
+    label(key)         3.61.3 Beschriftung in Anzeigen: nur der Gruppenname (titel(key): „<Name> = A + B + C“ für Tooltips), sonst wie name()
     namens_kollision(n)  3.60.1: Gruppenname gleich dem Namen einer Aktivität (4 Sprachen, ohne Groß-/Kleinschreibung und Leerzeichen)? Neue Namen werden abgelehnt,
                        bestehende Gruppen bleiben (die Verwaltung zeigt einen Hinweis und verlangt beim Speichern einen anderen Namen).
     expand(liste)      Filterliste (Sportarten und/oder „sgrp:<id>“) -> Menge der Sportarten; None = alle (leer, oder nur gelöschte Gruppen)
@@ -233,14 +233,20 @@ def name(k, gruppen=None):
 
 
 def label(k, gruppen=None):
-    """3.60.1: Beschriftung eines Schlüssels in Aufteilungen: Gruppe „<Name> = A + B + C“ (mehr als drei Mitglieder: „<Name> = A + B + C + …“), sonst der Sportname."""
+    """3.61.3 „Gruppenname reicht“: Beschriftung eines Schlüssels in Anzeigen: bei einer Gruppe nur ihr Name, sonst der Sportname. Die Zusammensetzung („Name = A + B + C“) liefert titel()."""
     from .stats import SPORT_DE
     if isinstance(k, str) and k.startswith(PREFIX):
         g = next((g for g in (load() if gruppen is None else gruppen) if PREFIX + g["id"] == k), None)
-        if not g:
-            return k
-        m = [SPORT_DE.get(s, s) for s in g["sports"]]
-        return f"{g['name']} = " + " + ".join(m[:3] + (["…"] if len(m) > 3 else []))
+        return g["name"] if g else k
+    return SPORT_DE.get(k, k)
+
+
+def titel(k, gruppen=None):
+    """Tooltip einer Gruppe: „<Name> = A + B + C“ (alle Mitglieder); sonst wie label()."""
+    from .stats import SPORT_DE
+    if isinstance(k, str) and k.startswith(PREFIX):
+        g = next((g for g in (load() if gruppen is None else gruppen) if PREFIX + g["id"] == k), None)
+        return f"{g['name']} = " + " + ".join(SPORT_DE.get(s, s) for s in g["sports"]) if g else k
     return SPORT_DE.get(k, k)
 
 

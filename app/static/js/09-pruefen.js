@@ -24,7 +24,7 @@ VIEWS.check = async () => {
     <div class="row"><button class="btn" id="sugall">Vorschläge für die nächsten 10 laden</button><label class="chk m0"><input type="checkbox" id="rkomall"> auch bei Komoot umbenennen</label><span id="sugm" class="mut"></span></div>
     <div class="rows" id="nml">${r.default_names
       .map(
-        t => `<div class="r nm" data-id="${t.id}" style="display:block"><div class="mut fs13">${fmtDatumKurz(BY[t.id]?.date || "0000-00-00")} · ${esc(sName(t.sport))} · ${t.km} km · <a href="#/tour/${t.id}">öffnen</a></div>
+        t => `<div class="r nm" data-id="${t.id}" style="display:block"><div class="mut fs13">${fmtDatumKurz(BY[t.id]?.date || "0000-00-00")} · ${esc(sName(t.sport))} · ${t.km}\u00a0km · <a href="#/tour/${t.id}">öffnen</a></div>
       <div class="row m4-0"><input class="nin fx1 mnw220" value="${esc(t.name)}"><button class="btn alt sm" data-sug="${t.id}">💡</button><button class="btn sm" data-save="${t.id}">Speichern</button></div><div class="chips sugs"></div></div>`
       )
       .join("")}</div>`

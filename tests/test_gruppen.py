@@ -192,11 +192,11 @@ def test_standard_sections_match_the_user_interface():
 
 def test_version_and_files_360():
     from app import config
-    assert config.VERSION.startswith("3.61.2 · Meine Touren")
+    assert config.VERSION.startswith("3.61.3 · Meine Touren")
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("js/65-zeitraum.js") < html.index("js/66-gruppen.js") < html.index("js/67-verlauf.js") < html.index("js/68-layoutcode.js") < html.index("js/39-sw.js")
     assert 'const V = "mt-v147"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.61.2"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.61.3"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
     notes = (ROOT / "docs" / "versionen" / "3.36.0.md").read_text(encoding="utf-8")
     assert notes.startswith("# 3.36.0") and "Rückgängig" in notes and "Gruppen" in notes and "Layoutcode" in notes and "Handy" in notes
     assert "3.36.0" in (ROOT / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")

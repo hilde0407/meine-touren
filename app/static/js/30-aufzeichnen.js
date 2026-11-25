@@ -177,12 +177,12 @@ const recGpsLive = st => {
   if (st.fix_age_s < 0) return ["search", "Suche GPS …"];
   if (st.fix_age_s > 30) return ["warn", `Kein GPS-Signal seit ${st.fix_age_s < 120 ? st.fix_age_s + " s" : Math.round(st.fix_age_s / 60) + " min"}`];
   if (!(st.fix_acc_m > 0)) return ["ok", "GPS bereit"];
-  return st.fix_acc_m > 25 ? ["warn", `GPS ungenau, ±${nf(st.fix_acc_m, 0)} m`] : ["ok", `GPS ±${nf(st.fix_acc_m, 0)} m`];
+  return st.fix_acc_m > 25 ? ["warn", `GPS ungenau, ±${nf(st.fix_acc_m, 0)}\u00a0m`] : ["ok", `GPS ±${nf(st.fix_acc_m, 0)}\u00a0m`];
 };
 const recGpsIdle = g => {
   if (g.perm === false) return ["bad", "Standort-Berechtigung fehlt"];
   if (g.on === false) return ["bad", "GPS ist ausgeschaltet"];
-  if (g.acc > 0) return g.acc > 25 ? ["warn", `GPS ungenau, ±${nf(g.acc, 0)} m`] : ["ok", `GPS bereit, ±${nf(g.acc, 0)} m`];
+  if (g.acc > 0) return g.acc > 25 ? ["warn", `GPS ungenau, ±${nf(g.acc, 0)}\u00a0m`] : ["ok", `GPS bereit, ±${nf(g.acc, 0)}\u00a0m`];
   return g.watch ? ["search", "Suche GPS …"] : ["", "GPS ist eingeschaltet"];
 };
 
@@ -440,7 +440,7 @@ function recWeather() {
   if (!ev.length) { box.hidden = true; return; }
   const txt = e => {
     const w = recWhen(e.in_h || 0);
-    return ({thunder: `⚠ Gewittergefahr ${w}`, rain: `⚠ Starkregen ${w}`, wind: `⚠ Sturmböen bis ${e.val} km/h ${w}`, snow: `⚠ Schnee oder Frost ${w}`, cold: `⚠ Temperatursturz um ${e.val} Grad ${w}`})[e.kind] || "";
+    return ({thunder: `⚠ Gewittergefahr ${w}`, rain: `⚠ Starkregen ${w}`, wind: `⚠ Sturmböen bis ${e.val}\u00a0km/h ${w}`, snow: `⚠ Schnee oder Frost ${w}`, cold: `⚠ Temperatursturz um ${e.val} Grad ${w}`})[e.kind] || "";
   };
   box.hidden = false;
   box.dataset.l = o.level === "danger" ? "danger" : "warn";
@@ -476,7 +476,7 @@ function recLive(st) {
     let upLeft = 0; for (let i = Math.max(1, ie); i < pr.e.length; i++) if (pr.e[i] > pr.e[i - 1] + 0.5) upLeft += pr.e[i] - pr.e[i - 1];
     prof = `<svg viewBox="0 0 ${W} ${H}" class="recprof" role="img" aria-label="Höhenprofil der Route"><polyline points="${pts}" fill="none" stroke="var(--bars)" stroke-width="2"/>` +
       `<line x1="${X(prog).toFixed(1)}" x2="${X(prog).toFixed(1)}" y1="0" y2="${H}" stroke="#2f6bd9" stroke-width="2"/><circle cx="${X(prog).toFixed(1)}" cy="${Y(pr.e[ie]).toFixed(1)}" r="4" fill="#2f6bd9"/></svg>` +
-      `<div class="mut fs13">${pr.e[ie]} m · noch ↑ ${Math.round(upLeft)} m · höchster Punkt ${hi} m</div>`;
+      `<div class="mut fs13">${pr.e[ie]}\u00a0m · noch ↑ ${Math.round(upLeft)}\u00a0m · höchster Punkt ${hi}\u00a0m</div>`;
   }
   box.innerHTML = `${nxt}<div class="row g16 jcc mt6"><span>Ziel in <b>${fmtKm(rest / 1000)}</b></span><span>Ankunft ca. <b>${hh} Uhr</b></span></div>` +
     `<div class="recprog"><div style="width:${Math.min(100, (prog / ri.total_m) * 100).toFixed(0)}%"></div></div>${prof}`;
@@ -1050,7 +1050,7 @@ VIEWS.apptest = async () => {
       ${ck(D.gps_on, "GPS ist eingeschaltet", "GPS ist ausgeschaltet", "In den Android-Schnellmenüs „Standort“ einschalten.")}
       ${ck(D.notif_perm, "Benachrichtigungen erlaubt", "Benachrichtigungen blockiert", "Die Aufzeichnung zeigt eine Dauer-Benachrichtigung; ohne Erlaubnis beendet Android sie früher.")}
       ${ck(D.battery_free, "Akku-Optimierung für die App aus", "Akku-Optimierung ist aktiv", "Android kann die Aufzeichnung im Hintergrund beenden. Unten „Akku-Einstellungen“ öffnen und die App ausnehmen.")}
-      <div class="r"><span>Aufzeichnung: <b>${esc(st.state || "-")}</b>${st.count ? ` · ${st.count} Punkte` : ""}${st.fix_age_s >= 0 ? ` · letzter Fix vor ${st.fix_age_s} s (±${st.fix_acc_m} m)` : ""}</span></div>
+      <div class="r"><span>Aufzeichnung: <b>${esc(st.state || "-")}</b>${st.count ? ` · ${st.count} Punkte` : ""}${st.fix_age_s >= 0 ? ` · letzter Fix vor ${st.fix_age_s} s (±${st.fix_acc_m}\u00a0m)` : ""}</span></div>
     </div>
     <div class="row g8 mt12 fxw">
       <button class="btn" id="atgps">GPS-Test (15 s)</button><button class="btn alt" id="atperm">Berechtigung anfragen</button><button class="btn alt" id="atbat">Akku-Einstellungen</button></div>
@@ -1082,8 +1082,8 @@ VIEWS.apptest = async () => {
       A.discardRecording();
       recBkMark(recBk().map(b => b.file).filter(f => !vorher.includes(f)));      // die Sicherung des Tests ist keine Aufzeichnung, die noch gesendet werden müsste
       const ok = s.count > 0;
-      A.appLog(`GPS-Test: ${s.count} Punkte, Fix-Alter ${s.fix_age_s} s, Genauigkeit ${s.fix_acc_m} m`);
-      await draw(ok ? `<b>✓ GPS-Test bestanden:</b> ${s.count} Punkte aufgezeichnet, Genauigkeit ca. ${s.fix_acc_m} m.` : '<b class="bad">✗ Kein GPS-Punkt empfangen.</b> Im Freien wiederholen; GPS und Berechtigung prüfen.');
+      A.appLog(`GPS-Test: ${s.count} Punkte, Fix-Alter ${s.fix_age_s} s, Genauigkeit ${s.fix_acc_m}\u00a0m`);
+      await draw(ok ? `<b>✓ GPS-Test bestanden:</b> ${s.count} Punkte aufgezeichnet, Genauigkeit ca. ${s.fix_acc_m}\u00a0m.` : '<b class="bad">✗ Kein GPS-Punkt empfangen.</b> Im Freien wiederholen; GPS und Berechtigung prüfen.');
     };
   };
   await draw();

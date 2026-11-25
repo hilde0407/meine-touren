@@ -122,20 +122,20 @@ function kzTrend(cfg, d, e) {
   const o = d.vorher, dir = o && o.dir;
   if (!o || !dir) return `<p class="mut kzsub">${o ? "Im Vergleichszeitraum gibt es keinen Wert." : "Für diesen Zeitraum gibt es keinen Vergleich."}</p>`;
   const sg = dir === "auf" ? "+" : dir === "ab" ? "−" : "±", ar = dir === "auf" ? "↑" : dir === "ab" ? "↓" : "→", wort = dir === "auf" ? "Zunahme:" : dir === "ab" ? "Rückgang:" : "Unverändert:";
-  const pc = o.pct != null ? `${sg}${nf(Math.abs(o.pct), 1)} %` : "", df = o.diff != null && dir !== "gleich" ? `${sg}${kzNum(Math.abs(o.diff), e)} ${kzUnitText(e, Math.abs(o.diff))}`.trim() : "";
+  const pc = o.pct != null ? `${sg}${nf(Math.abs(o.pct), 1)}\u00a0%` : "", df = o.diff != null && dir !== "gleich" ? `${sg}${kzNum(Math.abs(o.diff), e)} ${kzUnitText(e, Math.abs(o.diff))}`.trim() : "";
   return `<p class="kzvgl kztr"><span class="slsr">${wort}</span><b class="kzd kz-${dir}"><span aria-hidden="true">${ar}</span> ${esc(pc || df || "0")}</b>${pc && df ? ` <span class="kzdf">(${esc(df)})</span>` : ""} <span class="mut">${kzVglLab(cfg)}</span></p>` +
     (o.wert != null ? `<p class="mut kzvv"><span>Vorher</span> ${esc(kzNum(o.wert, e))} <span>${esc(kzUnitText(e, o.wert))}</span> <span>(${fmtDatumKurz(o.von)} – ${fmtDatumKurz(o.bis)})</span></p>` : "");
 }
 function kzZiel(d, e, v) {
   const z = d.ziel, p = z.pct, full = p >= 100, goal = `${kzNum(z.ziel, e)} ${kzUnitText(e, z.ziel)}`.trim(), rest = Math.max(0, z.ziel - (v == null ? 0 : v)), pl = full ? null : z.plan;
   const rt = `${kzNum(rest, e)} ${kzUnitText(e, rest)}`.trim();
-  const vt = kzT(`${nf(p, 0)} % von ${goal}`) + (full ? ", " + kzT("✓ Ziel erreicht") : ", " + kzT(`Noch ${rt} bis zum Ziel`)) + (pl ? ", " + kzT({voraus: "Über dem Soll", im_plan: "Im Soll", zurueck: "Unter dem Soll"}[pl]) : "");
+  const vt = kzT(`${nf(p, 0)}\u00a0% von ${goal}`) + (full ? ", " + kzT("✓ Ziel erreicht") : ", " + kzT(`Noch ${rt} bis zum Ziel`)) + (pl ? ", " + kzT({voraus: "Über dem Soll", im_plan: "Im Soll", zurueck: "Unter dem Soll"}[pl]) : "");
   let h = `<div class="kzgoal" role="group" aria-label="Ziel">${kzBar(p, pl ? z.soll_pct : null, full, "Ziel", vt)}` +
-    `<p class="kzgt"><b>${nf(p, 0)} % von</b> <span>${esc(goal)}</span>${full ? ' <span class="kzok">✓ Ziel erreicht</span>' : ""}</p>`;
+    `<p class="kzgt"><b>${nf(p, 0)}\u00a0% von</b> <span>${esc(goal)}</span>${full ? ' <span class="kzok">✓ Ziel erreicht</span>' : ""}</p>`;
   if (!full) h += `<p class="mut kzrest">Noch ${esc(rt)} bis zum Ziel</p>`;
   if (pl) {
     const nm = {voraus: ["▲", "Über dem Soll"], im_plan: ["✓", "Im Soll"], zurueck: ["▼", "Unter dem Soll"]}[pl];
-    h += `<p class="kzplan"><b class="kzpl"><span aria-hidden="true">${nm[0]}</span> ${nm[1]}</b> <span class="mut">Soll bis heute: ${esc(`${kzNum(z.soll, e)} ${kzUnitText(e, z.soll)}`.trim())} (${nf(z.soll_pct, 0)} %)</span></p>`;
+    h += `<p class="kzplan"><b class="kzpl"><span aria-hidden="true">${nm[0]}</span> ${nm[1]}</b> <span class="mut">Soll bis heute: ${esc(`${kzNum(z.soll, e)} ${kzUnitText(e, z.soll)}`.trim())} (${nf(z.soll_pct, 0)}\u00a0%)</span></p>`;
   }
   return h + "</div>";
 }

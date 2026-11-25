@@ -246,7 +246,7 @@ let assignDialog = function (sp, done) {
     const off = Math.round(t.start_ts + (+$("#am").value || 0) * 60 - first.taken_ts);
     const a = Math.abs(off),
       [h, mi] = hmParts(a);
-    $("#ap").textContent = `Zeitversatz: ${off < 0 ? "−" : "+"}${h > 23 ? Math.floor(h / 24) + " Tage " + (h % 24) : h} Std. ${mi} Min.`;
+    $("#ap").textContent = `Zeitversatz: ${off < 0 ? "−" : "+"}${h > 23 ? Math.floor(h / 24) + " Tage " + (h % 24) : h}\u00a0Std. ${mi}\u00a0Min.`;
   };
   ["at", "as", "am", "asc"].forEach(i => ($("#" + i).oninput = upd));
   upd();
@@ -566,7 +566,7 @@ function photoImportModal(o = {}) {
         d.options.forEach((p, j) =>
           ch.push({
             v: "o" + j,
-            t: `${p.name} · ${p.start} · ${p.matched} von ${d.n} passen${p.shift_s ? ` · Zeit ${shiftTxt(p.shift_s)}${p.by_gps ? " (per GPS)" : ""}` : ""}${p.gap_min ? ` · nächstes Foto ${p.gap_min} min außerhalb` : ""}${p.dist_km != null ? ` · ${p.dist_km} km vom Aufnahmeort` : ""}`,
+            t: `${p.name} · ${p.start} · ${p.matched} von ${d.n} passen${p.shift_s ? ` · Zeit ${shiftTxt(p.shift_s)}${p.by_gps ? " (per GPS)" : ""}` : ""}${p.gap_min ? ` · nächstes Foto ${p.gap_min} min außerhalb` : ""}${p.dist_km != null ? ` · ${p.dist_km}\u00a0km vom Aufnahmeort` : ""}`,
           })
         );
         ch.push({v: "none", t: "Ohne Tour importieren (erscheint unter „Ohne Tour“)"});
