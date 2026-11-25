@@ -1,4 +1,5 @@
-/* Mobile Tour-Ansicht: die vielen Einzelknöpfe werden zu zwei klaren Menüs („Teilen & Senden“, „Bearbeiten“) zusammengefasst.
+/* Mobile Tour-Ansicht: die vielen Einzelknöpfe werden zu Menüs („Ansehen“, „Bearbeiten“, „Teilen & Export“) zusammengefasst.
+   3.61.0: dieselben Namen und dieselbe Reihenfolge wie die Knopfleiste am Computer (Leitfaden 2.8); Punkte, die einen Dialog öffnen, enden auf „ …“; Löschen zuletzt (rot).
    Die ursprünglichen Knöpfe bleiben im Dokument (nur ausgeblendet); das Menü löst sie aus – so bleibt jede Funktion unverändert. */
 const TACT = [
   {
@@ -10,35 +11,35 @@ const TACT = [
     ],
   },
   {
-    key: "share", icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7h14v-7"/></svg>`, label: "Teilen & Export", title: "Teilen & Export",
-    items: [
-      ["-", "Senden und Links"],
-      ["esnd", "Link senden", "Du wählst, was der Link zeigt – und sendest ihn an WhatsApp, Signal, E-Mail …"],
-      ["eshow", "Diashow senden", "Fotos als Diashow – ohne Benutzerkonto ansehbar"],
-      ["shr", "Diashow-Link", "Link zur Foto-Diashow dieser Tour"],
-      ["eshr", "Links verwalten", "Erzeugte Links ansehen, kopieren, widerrufen"],
-      ["-", "Datei"],
-      ["egpx", "GPX-Datei laden", "Strecke als GPX herunterladen"],
-      ["ekpk", "Komoot-Paket …", "GPX mit Pins und Notiz, ausgewählte Fotos – zum Selbst-Hochladen"],
-    ],
-  },
-  {
     key: "edit", icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>`, label: "Bearbeiten", title: "Tour bearbeiten",
     items: [
       ["-", "Beschriften"],
-      ["ren", "Umbenennen", ""],
-      ["etag", "Tags & Alben", "Schlagworte vergeben"],
-      ["esport", "Sportart ändern", "Alle Sportarten, Favoriten zuerst"],
-      ["-", "Strecke und Höhen"],
-      ["etc", "Streckenfarbe", "Farbe und Breite auf der Karte"],
-      ["efix", "Höhen korrigieren", "Mit Geländemodell neu berechnen"],
-      ["ezepp", "Höhe aus Uhr abgleichen (Zepp)", "Barometrische Höhe der Uhr übernehmen"],
+      ["ren", "Umbenennen …", ""],
+      ["etag", "Schlagwörter & Alben …", "Schlagwörter vergeben und Alben bilden"],
+      ["esport", "Sportart ändern …", "Favoriten-Sportarten zuerst, dann alle übrigen"],
+      ["-", "Strecke und Höhe"],
+      ["etc", "Streckenfarbe …", "Farbe und Breite auf der Karte"],
+      ["efix", "Höhe korrigieren …", "aus dem Geländemodell"],
+      ["ezepp", "Höhe korrigieren (aus der Uhr) …", "aus der barometrischen Höhe der Uhr (Zepp)"],
       ["etfix", "Track korrigieren", "Fehlpunkte und Pausen bereinigen"],
-      ["-", "Abgleich und Upload"],
-      ["eup", "Hochladen", "Zu Strava, Komoot … senden"],
-      ["ksync", "Mit Komoot abgleichen", "Daten und Track neu laden"],
-      ["-", "Entfernen"],
-      ["edel", "Tour löschen", "Aus Meine Touren entfernen", "danger"],
+      ["-", "Hochladen und Abgleich"],
+      ["eup", "Hochladen …", "Zu Strava, Komoot … senden"],
+      ["ksync", "Mit Komoot abgleichen", "Daten und Strecke neu von Komoot holen"],
+      ["-", "Löschen"],
+      ["edel", "Löschen …", "Tour aus Meine Touren löschen", "danger"],
+    ],
+  },
+  {
+    key: "share", icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7h14v-7"/></svg>`, label: "Teilen & Export", title: "Teilen & Exportieren",
+    items: [
+      ["-", "Senden und Links"],
+      ["esnd", "Link senden …", "Du wählst, was der Link zeigt – und sendest ihn an WhatsApp, Signal, E-Mail …"],
+      ["eshow", "Diashow senden …", "Fotos als Diashow – ohne Benutzerkonto ansehbar"],
+      ["shr", "Diashow-Link", "Link zur Foto-Diashow dieser Tour"],
+      ["eshr", "Links verwalten …", "Erzeugte Links ansehen, kopieren, widerrufen"],
+      ["-", "Exportieren"],
+      ["egpx", "Als GPX exportieren", "Strecke als GPX-Datei herunterladen"],
+      ["ekpk", "Komoot-Paket …", "GPX mit Pins und Notiz, ausgewählte Fotos – zum Selbst-Hochladen"],
     ],
   },
 ];
@@ -95,18 +96,20 @@ VIEWS.tour = async id => {
   setup34();
   sport34(id);
 };
-/* 3.59.0 „Sportart ändern“ (Tour bearbeiten): alle Aktivitäten des Katalogs, Favoriten zuerst (sportOptions, 01-grundlagen.js); gilt als eigene Wahl (bleibt beim Komoot-Abgleich) */
+/* 3.59.0 „Sportart ändern“ (Tour bearbeiten): alle Sportarten des Katalogs, Favoriten-Sportarten zuerst (3.61.0: sportWahlHtml, 01-grundlagen.js); gilt als eigene Wahl (bleibt beim Komoot-Abgleich) */
 function sport34(id) {
   const b = $("#esport"), t = BY[id];
   if (!b || !t || (typeof isViewer === "function" && isViewer())) return;
   b.onclick = () => {
-    const cur = sNorm(t.sport);                                                 // 3.60.0: entfernte Aktivität (z. B. „golf“) -> ihr Rückfall ist vorgewählt
-    const m = uiModal(`<h3>Sportart ändern</h3><div class="field"><label for="espsel">Sportart</label><select id="espsel">${sportOptions(cur)}</select></div>
+    const n = sNorm(t.sport), cur = SPORT[n] ? n : t.sport;                    // 3.60.0: entfernte Sportart (z. B. „golf“) -> ihr Rückfall ist vorgewählt; ein fremder Schlüssel bleibt wählbar
+    /* 3.61.0: Muster „Zuweisen“ (sportWahlHtml): Favoriten-Sportarten zuerst, dann „Mehr …“ nach Kategorien; Hauptaktion „Speichern“ */
+    const m = uiModal(`<h3>Sportart ändern</h3>${sportWahlHtml(cur, {id: "espsel", moreId: "espmore"})}
       ${t.source !== "local" ? '<label class="chk"><input type="checkbox" id="espko"> auch bei Komoot ändern</label>' : ""}<p class="bad" id="esperr" role="alert"></p>
-      <div class="uifoot"><button class="btn ghost" id="espx">Abbrechen</button><button class="btn" id="espok">Übernehmen</button></div>`);
+      <div class="uifoot"><button class="btn ghost" id="espx">Abbrechen</button><button class="btn" id="espok">Speichern</button></div>`);
     const sel = m.querySelector("#espsel");
-    if (!SPORT[cur]) sel.insertAdjacentHTML("afterbegin", `<option value="${esc(t.sport)}" selected>${esc(sName(t.sport))}</option>`);
-    sel.focus();
+    sportWahlBind(m);
+    const first = m.querySelector('.spwahl [aria-checked="true"]') || m.querySelector(".spwahl [data-sp]");
+    if (first && first.offsetParent) first.focus();
     m.querySelector("#espx").onclick = () => m.remove();
     m.querySelector("#espok").onclick = async e => {
       e.currentTarget.disabled = true;
@@ -116,7 +119,7 @@ function sport34(id) {
         await loadTours();
         route();
       } catch (er) {
-        m.querySelector("#esperr").textContent = er.message || String(er);
+        m.querySelector("#esperr").textContent = "Speichern nicht möglich: " + (er.message || String(er));
         e.currentTarget.disabled = false;
       }
     };

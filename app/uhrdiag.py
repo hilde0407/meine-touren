@@ -111,7 +111,7 @@ FIT_MSG = {0: "file_id", 2: "device_settings", 3: "user_profile", 7: "zones_targ
            78: "hrv", 101: "length", 103: "monitoring_info", 132: "hr", 216: "time_in_zone"}
 # (Nachricht, Feld) -> (Name, Klartext, Skalierung, Einheit); nur sicher bekannte Felder
 FIT_F = {
-    (20, 0): ("position_lat", "GPS-Position (Breite)", 1, ""), (20, 1): ("position_long", "GPS-Position (Länge)", 1, ""),
+    (20, 0): ("position_lat", "GPS-Position (Breitengrad)", 1, ""), (20, 1): ("position_long", "GPS-Position (Längengrad)", 1, ""),
     (20, 2): ("altitude", "Höhe", 5, "m"), (20, 78): ("enhanced_altitude", "Höhe (genau)", 5, "m"),
     (20, 3): ("heart_rate", "Puls", 1, "bpm"), (20, 4): ("cadence", "Kadenz", 1, "1/min"), (20, 53): ("fractional_cadence", "Kadenz (Bruchteil)", 128, ""),
     (20, 5): ("distance", "Strecke seit Start", 100, "m"), (20, 6): ("speed", "Geschwindigkeit", 1000, "m/s"),
@@ -121,7 +121,7 @@ FIT_F = {
     (20, 91): ("absolute_pressure", "Luftdruck", 1, "Pa"), (20, 99): ("respiration_rate", "Atemfrequenz", 1, "1/min"),
     (20, 108): ("enhanced_respiration_rate", "Atemfrequenz (genau)", 100, "1/min"), (20, 253): ("timestamp", "Zeitstempel", 1, ""),
     (18, 2): ("start_time", "Start der Sitzung", 1, ""), (18, 5): ("sport", "Sportart", 1, ""), (18, 6): ("sub_sport", "Unter-Sportart", 1, ""),
-    (18, 7): ("total_elapsed_time", "Gesamtzeit", 1000, "s"), (18, 8): ("total_timer_time", "Zeit in Bewegung", 1000, "s"),
+    (18, 7): ("total_elapsed_time", "Dauer", 1000, "s"), (18, 8): ("total_timer_time", "Bewegungszeit", 1000, "s"),
     (18, 9): ("total_distance", "Gesamtstrecke", 100, "m"), (18, 11): ("total_calories", "Kalorien", 1, "kcal"),
     (18, 14): ("avg_speed", "Ø Geschwindigkeit", 1000, "m/s"), (18, 15): ("max_speed", "Höchstgeschwindigkeit", 1000, "m/s"),
     (18, 16): ("avg_heart_rate", "Ø Puls", 1, "bpm"), (18, 17): ("max_heart_rate", "Höchster Puls", 1, "bpm"),
@@ -478,7 +478,7 @@ def _one(t, zc, fits, zepp_ok):
     g = _gpx_fields(t["id"])
     src.append(_src("gpx", "ok", g[0], points=g[1]) if g and g[1] else _src("gpx", "keine_datei", hint="Zu dieser Tour ist keine GPX-Spur gespeichert (zum Beispiel Komoot-Touren ohne Datei)."))
     sf = _sidecar_fields(t["id"])
-    src.append(_src("sidecar", "ok", sf) if sf is not None else _src("sidecar", "keine_datei", hint="Noch keine Messwert-Datei (Verwaltung → „Messwerte nachladen“)."))
+    src.append(_src("sidecar", "ok", sf) if sf is not None else _src("sidecar", "keine_datei", hint="Noch keine Messwert-Datei (Verwaltung → Touren holen → Zepp-Import „Messwerte holen“)."))
     return src
 
 

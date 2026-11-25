@@ -5,7 +5,7 @@ Bausteine: kennzahlen (Touren, Strecke, Aufstieg, Stunden, Tage, Monatssäulen),
 Der Server liefert nur Gewähltes aus; Fotos sind nur abrufbar, wenn „fotos“ gewählt ist und das Foto zur ausgewählten Bestenliste gehört.
 
 Datenschutz: Nie Teil des Links sind Notizen, Wegpunkte, Strecken und Koordinaten (auch keine Start- oder Heimatorte), Ortsnamen aus der Geokodierung, Uhr-Rohdaten, Puls, Gerät, Ausrüstung.
-Die Heatmap ist ein Kalender (Tag → km), keine Karte. Rekorde nennen nur Tourname und Datum der Tour.
+Die Heatmap ist ein Kalender (Tag → km), keine Karte. Bestwerte nennen nur Tourname und Datum der Tour.
 """
 from datetime import date, datetime, timedelta
 

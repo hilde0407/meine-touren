@@ -127,7 +127,7 @@ def import_paths(paths, portals_=(), dry_run=False):
         try:
             for name, text, kind in fitfile.iter_expand(str(path)):
                 tot["files"] += 1
-                jobs.progress(f"{tot['files']} Datei(en) gelesen")
+                jobs.progress(f"{tot['files']} {'Datei' if tot['files'] == 1 else 'Dateien'} gelesen")
                 if kind == "bad":
                     tot["bad"] += 1; continue
                 if kind == "nogps":
@@ -252,7 +252,7 @@ def _garmin_client():
     g = garmin_module()
     tok = db.get("garmin_tokens")
     if not tok:
-        raise DeviceError("Garmin ist nicht verbunden (Verwaltung → Garmin).")
+        raise DeviceError("Garmin ist nicht verbunden (Verwaltung → Touren holen → Garmin, Suunto & andere Uhren).")
     cl = g.Garmin()
     try:
         cl.login(tok)
@@ -404,7 +404,7 @@ def suunto_exchange(code, redirect):
 def _su_access():
     t = suunto_tokens()
     if not t:
-        raise DeviceError("Suunto ist nicht verbunden (Verwaltung → Suunto).")
+        raise DeviceError("Suunto ist nicht verbunden (Verwaltung → Touren holen → Garmin, Suunto & andere Uhren).")
     if t.get("expires_at", 0) < time.time() and t.get("refresh_token"):
         t = _su_token({"grant_type": "refresh_token", "refresh_token": t["refresh_token"]})
     return t["access_token"]
@@ -446,7 +446,7 @@ def suunto_sync(limit=None):
         time.sleep(0.5)
     if limit:
         new = new[:limit]
-    log(f"Suunto: {len(new)} neue Workouts")
+    log(f"Suunto: {len(new)} neue Touren")
     tot = {"imported": 0, "dup": 0, "nogps": 0, "error": 0}
     for i in range(0, len(new), 20):
         entries = []
@@ -456,7 +456,7 @@ def suunto_sync(limit=None):
             try:
                 data = _su_get(f"/v2/workout/exportFit/{urllib.parse.quote(key, safe='')}", raw=True)
             except DeviceError as e:
-                log(f"  Workout {key}: {e}")
+                log(f"  Suunto-Tour {key}: {e}")
                 tot["error"] += 1
                 if "bremst" in str(e):
                     break

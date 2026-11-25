@@ -2,6 +2,14 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.61.0 – Pflegedurchgang: einheitliche Begriffe und Bedienlogik
+
+- Ein Wort je Sache nach dem Leitfaden (docs/LEITFADEN-BEGRIFFE.md): Bestwerte, Schlagwörter, aufzeichnen, Dauer/Bewegungszeit, aktive Tage, Aufstieg, geplante Tour/„im Soll“, holen/importieren/abgleichen, „Höhe korrigieren“, „Als GPX exportieren“, Baustein/Bausteingruppe/Statistik-Gruppe, Ansichten, Sicherung, „Gesamte Zeit“, „Alle Sportarten“, „Verbindung trennen“ – in Oberfläche, Meldungen, PDFs, vier Sprachen und Handbuch
+- Verwaltung: Reiter „Allgemein“ statt „Übersicht“ (`?tab=uebersicht` bleibt gültig), Heimatort speichert sofort, Wegangaben „Verwaltung → Reiter → Bereich“; Reiterleiste ohne senkrechtes Scrollen, am Computer vollständig sichtbar
+- Dialoge mit benannter Hauptaktion (kein „OK/Übernehmen/Anwenden“), eigene Eingabedialoge statt Browser-Fenster, „Standard wiederherstellen“ überall, Rückmeldungen „… gespeichert“ / „… nicht möglich: …“
+- Sportart wählen in zwei Mustern mit je einer Funktion: Filtern (Alle Sportarten, Statistik-Gruppen, Kategorien – auch Tourenliste) und Zuweisen (Favoriten-Sportarten, „Mehr …“ – Sportart ändern, Ziele, Planung, Aufzeichnen)
+- Tour-Aktionen in Knopfleiste und Handy-Menü mit gleichen Namen und Reihenfolge; Datumseingaben als TT.MM.JJJJ; Test gegen entfallene Begriffe
+
 ## Version 3.60.1 – Statistik-Gruppen eindeutig benannt, Karte mit Kategorien und eigenen Farben, Begriff „Sportart“
 
 - Ein Gruppenname darf nicht wie eine Sportart heißen (alle vier Sprachen, ohne Groß-/Kleinschreibung und Leerzeichen); bestehende Gruppen mit solchem Namen zählen weiter, die Verwaltung bittet ums Umbenennen

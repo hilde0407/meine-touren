@@ -470,7 +470,7 @@ def api_workouts_adopt(body: dict):
 JOBS = {
     "refresh": ("Komoot aktualisieren", lambda dry: sync.refresh_all()),
     "tours": ("Komoot-Touren laden", lambda dry: (sync.refresh_tours(), photos.assign_all())),
-    "routes": ("Routen laden", lambda dry: routes.fetch_missing(sync._komoot())),
+    "routes": ("Fehlende Strecken holen", lambda dry: routes.fetch_missing(sync._komoot())),
     "geo": ("Regionen bestimmen", lambda dry: extras.geo_fill()),
     "peaks": ("Gipfel bestimmen", lambda dry: more.peaks_fill()),
     "weather": ("Wetter laden", lambda dry: more2.weather_fill()),
@@ -482,8 +482,8 @@ JOBS = {
     "dev-match": ("Touren den Zepp-Uhren zuordnen", lambda dry: mydevices.match_all()),
     "dev-quality": ("Genauigkeit der Uhren auswerten", lambda dry: devquality.run()),
     "dev-quality-fix": (devbatch.LABEL, lambda dry: devbatch.run()),
-    "uhr-alle": ("Uhr-Daten aller Touren laden", lambda dry: uhrtraining.load_all(dry=dry)),
-    "elev-zepp": ("Höhe aus Zepp-Uhr abgleichen", lambda dry: elev.zepp_fix_all()),
+    "uhr-alle": ("Uhr-Daten aller Touren holen", lambda dry: uhrtraining.load_all(dry=dry)),
+    "elev-zepp": ("Höhe korrigieren (aus der Uhr)", lambda dry: elev.zepp_fix_all()),
     "export": ("Zepp-Import (ohne Upload)", lambda dry: sync.export_zepp_lauf()),
     "garmin-import": ("Garmin-Import", lambda dry: devices.garmin_sync_lauf()),         # 3.31.0: Import-Knopf je nach Uhr (Übersicht); die Verwaltung nutzt weiter POST /api/garmin/sync
     "suunto-import": ("Suunto-Import", lambda dry: devices.suunto_sync_lauf()),

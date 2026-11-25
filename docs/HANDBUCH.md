@@ -24,7 +24,7 @@ Dieses Handbuch erklärt Schritt für Schritt, wie du mit **Meine Touren** arbei
 8. [Die Karte](#k8)
 9. [Reisen und Mehrtagestouren](#k9)
 10. [Fotos und Diashow](#k10)
-11. [Statistik, Rekorde, Puls und Auswertung](#k11)
+11. [Statistik, Bestwerte, Puls und Auswertung](#k11)
 12. [Der Jahresrückblick](#k12)
 13. [Seiten anpassen: Bausteine, Ansichten, Vorlagen, eigene Kennzahlen](#k13)
 14. [Freigabe und Teilen](#k14)
@@ -41,14 +41,14 @@ Dieses Handbuch erklärt Schritt für Schritt, wie du mit **Meine Touren** arbei
 
 ## 1. Einführung und Überblick
 
-**Zweck:** Meine Touren ist dein **privates Tourenarchiv zum Selbsthosten**. Wanderungen, Radtouren, Läufe und andere Aktivitäten liegen bei dir – auf deinem Rechner, Server oder NAS – mit Karte, Höhenprofil, Statistik und Fotos. Es gibt keine Cloud, in der deine Daten liegen müssen.
+**Zweck:** Meine Touren ist dein **privates Tourenarchiv zum Selbsthosten**. Wanderungen, Radtouren, Läufe und andere Touren liegen bei dir – auf deinem Rechner, Server oder NAS – mit Karte, Höhenprofil, Statistik und Fotos. Es gibt keine Cloud, in der deine Daten liegen müssen.
 
 **Was die App kann (Auswahl):**
 
 * Touren aus Dateien (GPX, FIT, TCX, ZIP) und aus Zepp, Garmin, Suunto und anderen Uhren übernehmen, dazu Komoot-Touren. Strava und Komoot kannst du auch zum Hochladen nutzen – aber nur, wenn du das ausdrücklich willst.
 * Jede Tour mit Karte, Höhenprofil, Fotos entlang der Strecke, Pulsverlauf, Geschwindigkeit, Tourblatt (PDF) und 3D-Flug.
 * Fotos automatisch über die Aufnahmezeit den Touren zuordnen, Diashow, Erinnerungen.
-* Statistik, Rekorde, Pulszonen, Jahresziele, Jahresrückblick.
+* Statistik, Bestwerte, Pulszonen, Jahresziele, Jahresrückblick.
 * Reisen und Mehrtagestouren werden erkannt und bekommen eine eigene Seite samt Reisebericht.
 * **Alle Seiten sind anpassbar** („Seite anpassen“): Bausteine verschieben, ausblenden, in der Breite ändern, hinzufügen; mehrere Ansichten und Vorlagen; eigene Kennzahlen.
 * Teilen per Link ohne Konto – du bestimmst, was gezeigt wird, und kannst jeden Link widerrufen.
@@ -220,7 +220,7 @@ Unter **Zepp-Import (optional)** holst du GPS-Trainings aus deinem Zepp-Konto (a
 2. Trage E-Mail und Passwort ein (nur wenn dein Konto ein Zepp-Passwort hat) oder ein **Token** (für Mi-, Google- und Apple-Konten). Für das Token gibt es dort eine Anleitung mit einem Lesezeichen, das du in die Lesezeichenleiste ziehst.
 3. Speichere die Einstellungen und klicke auf **Zepp-Import starten**.
 
-Weitere Knöpfe im selben Bereich: **Aufstieg neu berechnen**, **Puls nachladen**, **Touren den Uhren zuordnen**, **Messwerte nachladen**, **Höhe aus Uhr abgleichen**. Der Zepp-Token wird täglich mitgeprüft.
+Weitere Knöpfe im selben Bereich: **Aufstieg neu berechnen**, **Puls nachladen**, **Touren den Uhren zuordnen**, **Messwerte holen**, **Höhe korrigieren (aus der Uhr)**. Der Zepp-Token wird täglich mitgeprüft.
 
 ### 4.3 Garmin- und Suunto-Konto (experimentell)
 
@@ -295,14 +295,14 @@ Fotos kommen separat – siehe [Kapitel 10](#k10).
 Von oben nach unten (in der Standardeinstellung):
 
 1. **Zuletzt unterwegs:** die letzte Tour mit Strecke, Aufstieg, Dauer und – wenn vorhanden – dem Puls. Mit den Pfeilen blätterst du durch die jüngsten Touren. **Tour ansehen** öffnet das Tourdetail, **3D-Flug** fliegt die Strecke im Gelände ab.
-2. **Dein Jahr 2026:** Touren, Kilometer, Höhenmeter und Stunden mit Monatssäulen und Vergleich zum Vorjahr bis zum selben Tag („–17 % gegenüber 2025 bis heute“). Darunter stehen deine Jahresziele mit Fortschritt (z. B. „243 / 400 km“). **Zur Statistik** führt weiter.
+2. **Dein Jahr 2026:** Touren, Strecke, Aufstieg und Dauer mit Monatssäulen und Vergleich zum Vorjahr bis zum selben Tag („–17 % gegenüber 2025 bis heute“). Darunter stehen deine Jahresziele mit Fortschritt (z. B. „243 / 400 km“). **Zur Statistik** führt weiter.
 3. **Touren holen:** der Import-Bereich ([Abschnitt 4.5](#k4)).
 4. **Zuletzt unterwegs:** Kacheln der letzten Touren; **Alle 27 Touren** öffnet die Liste.
 5. **Erinnerungen:** eine Auswahl deiner Fotos mit Link **Zufalls-Diashow**.
 
 Über **Seite anpassen** und **Ansichten** gestaltest du die Übersicht selbst ([Kapitel 13](#k13)).
 
-**Ab 3.54.0** behält der Browser die Bilder der Übersicht (Kopfbereich, „Zuletzt unterwegs“, „An diesem Tag“, Erinnerungen, „Zuletzt aufgenommene Fotos“, „Wiederentdecken“): Beim nächsten Öffnen oder Neuladen erscheinen sie sofort, ohne erneut beim Server nachzufragen. Die **zufälligen** Erinnerungen und die Tour bei **Wiederentdecken** bleiben deshalb in diesem Browser-Tab bis zum nächsten Tag dieselben; neue Fotos holst du mit **Neu mischen** (falls in den Einstellungen der Kachel eingeschaltet) bzw. **Andere Tour**.
+**Ab 3.54.0** behält der Browser die Bilder der Übersicht (Kopfbereich, „Zuletzt unterwegs“, „An diesem Tag“, Erinnerungen, „Zuletzt aufgenommene Fotos“, „Wiederentdecken“): Beim nächsten Öffnen oder Neuladen erscheinen sie sofort, ohne erneut beim Server nachzufragen. Die **zufälligen** Erinnerungen und die Tour bei **Wiederentdecken** bleiben deshalb in diesem Browser-Tab bis zum nächsten Tag dieselben; neue Fotos holst du mit **Neu mischen** (falls in den Einstellungen des Bausteins eingeschaltet) bzw. **Andere Tour**.
 
 ### Zeitraum der Seite
 
@@ -328,7 +328,7 @@ In den Einstellungen eines Bausteins steht unter **Zeitraum der Seite verwenden*
 
 *Abbildung 10: Die Übersicht (siehe auch Abbildung 1).*
 
-**Hinweis-Bausteine:** Im Katalog gibt es Bausteine, die sich nur zeigen, wenn es einen Anlass gibt – etwa „Meilenstein erreicht“, „Lange Pause“, „Rekord-Tour“, „Erholungshinweis“ oder „Datensicherung“. Ist nichts los, sind sie unsichtbar und brauchen keinen Platz. Ab 3.45.0 ist die Warnung „Ziel in Gefahr“ eine Darstellung des Bausteins **Ziele** („Nur Warnung“); der Baustein zeigt deine Ziele sonst als Balken oder Ring. Rekorde und Top-Touren sind der Baustein **Bestwerte** (Anzahl 1, 3, 5 oder 10).
+**Hinweis-Bausteine:** Im Katalog gibt es Bausteine, die sich nur zeigen, wenn es einen Anlass gibt – etwa „Meilenstein erreicht“, „Lange Pause“, „Neuer Bestwert“, „Erholungshinweis“ oder „Datensicherung“. Ist nichts los, sind sie unsichtbar und brauchen keinen Platz. Ab 3.45.0 ist die Warnung „Ziel in Gefahr“ eine Darstellung des Bausteins **Ziele** („Nur Warnung“); der Baustein zeigt deine Ziele sonst als Balken oder Ring. Bestwerte und Top-Touren sind der Baustein **Bestwerte** (Anzahl 1, 3, 5 oder 10).
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -338,29 +338,29 @@ In den Einstellungen eines Bausteins steht unter **Zeitraum der Seite verwenden*
 
 ## 6. Touren-Liste, Filter und Suche
 
-**Zweck:** Alle Aktivitäten in einer sortier- und filterbaren Liste.
+**Zweck:** Alle Touren in einer sortier- und filterbaren Liste.
 
 **Schritt für Schritt:**
 
 1. Klicke in der Menüleiste auf **Touren**.
-2. Jede Zeile zeigt Streckenform, Name, Datum, Sportart, Fotos, Bewertung sowie Kilometer, Höhenmeter („m auf“) und Dauer („Std.“). Ein Klick öffnet die Tour.
+2. Jede Zeile zeigt Streckenform, Name, Datum, Sportart, Fotos, Bewertung sowie Strecke („km“), Aufstieg („m“) und Dauer („Std.“). Ein Klick öffnet die Tour.
    **Ab 3.52.0** steht vorn ein **Foto der Tour** (Touren ohne Fotos zeigen weiter die Streckenform in der Farbe der Sportart). Gewählt wird ein Foto mit deinen Sternen, sonst eines aus der Mitte der Tour, das nicht als unscharf oder abgelehnt bekannt ist; dieselbe Tour zeigt immer dasselbe Foto, bis sich ihre Fotos ändern. Die Bilder bleiben im Browser: beim nächsten Öffnen der Liste wird nichts nachgeladen. Abschalten lässt sich das je Gerät unter **Konto & Freigaben → Darstellung** oder am Handy unter **Mehr → Darstellung** („Fotos in der Tourenliste“).
 3. Oben filterst du:
    * **Name suchen** – Textfeld,
-   * **Alle Jahre**, **Alle Sportarten**,
+   * **Gesamte Zeit** (oder ein Jahr), **Alle Sportarten** (dann die Statistik-Gruppen und die Sportarten nach Kategorien),
    * Zeitraum im Jahr: **Ganzjährig**, **Sommerhalbjahr (Mai–Okt)** oder Winterhalbjahr,
    * **Alle Bewertungen** (ab ★★★★★, ★★★★ …),
-   * **Alle Regionen**, **Alle Tags**,
+   * **Alle Regionen**, **Alle Schlagwörter**,
    * Sortierung: **Neueste zuerst**, Älteste zuerst, Längste Strecke und weitere.
 4. **Tour planen** öffnet die Tourplanung (Voraussetzung: die Funktion ist unter *Verwaltung → Hochladen & Planen* eingeschaltet).
 
 **Planen (ab 3.38.0):**
 
-* **Machbarkeit:** Unter dem Höhenprofil vergleicht eine einklappbare Karte die geplante Strecke mit deinen Touren der letzten 12 Monate (gleiche Sportart): „✓ Im gewohnten Rahmen“, „▲ Etwas mehr als gewohnt“ oder „⚠ Deutlich mehr als bisher“, immer mit Zahlen (z. B. „Deine längste Tour der letzten 12 Monate: 19,2 km mit 1.100 m; diese: 22,0 km mit 1.400 m“). Bei weniger als 6 passenden Touren steht ehrlich „Zu wenig eigene Touren für eine persönliche Einschätzung“. Die Karte nennt die **Gesamtzeit inkl. Pausen** (dieselbe Zahl wie oben) und, für Wandern und Laufen, die **reine Gehzeit ohne Pausen** nach deinem Steigungstempo.
+* **Machbarkeit:** Unter dem Höhenprofil vergleicht eine einklappbare Karte die geplante Strecke mit deinen Touren der letzten 12 Monate (gleiche Sportart): „✓ Im gewohnten Rahmen“, „▲ Etwas mehr als gewohnt“ oder „⚠ Deutlich mehr als bisher“, immer mit Zahlen (z. B. „Deine längste Tour der letzten 12 Monate: 19,2 km mit 1.100 m; diese: 22,0 km mit 1.400 m“). Bei weniger als 6 passenden Touren steht ehrlich „Zu wenig eigene Touren für eine persönliche Einschätzung“. Die Karte nennt die **Dauer inkl. Pausen** (dieselbe Zahl wie oben) und, für Wandern und Laufen, die **reine Gehzeit ohne Pausen** nach deinem Steigungstempo.
 * **Notizen & Quellen (ab 3.47.0):** Ein einklappbarer Abschnitt auf der Planseite: eine mehrzeilige **Notiz** (bis 4.000 Zeichen), die **Herkunft** des Plans (eigene Planung, Komoot, Outdooractive, Wanderführer, Sonstiges, dazu ein Freitext wie Buchtitel und Seite) und eine Liste von **Links** (Titel, Adresse, Art: Wanderführer, Karte/Route, Wetter/Lawinenbericht, Hütte/Unterkunft, Sonstiges; bis zu 20). Erlaubt sind nur Adressen mit http:// oder https://; sie öffnen in einem neuen Tab und werden **nie automatisch abgerufen** oder als Vorschau geladen. Alles wird mit „Plan speichern“ gesichert; die Planliste zeigt „Notiz“ und „n Links“ als kleine Marken.
-* **Passt die Tour zu mir? (ab 3.47.0):** Ein weiterer einklappbarer Abschnitt für gespeicherte Pläne. **Form:** Strecke, Aufstieg und geschätzte Gesamtzeit gegen deine Touren derselben Sportart der letzten 12 Monate („kürzer/ähnlich/länger als deine üblichen“ im Verhältnis zum Median, dazu „länger als x % deiner Touren“ und der Vergleich mit deiner längsten bzw. höchsten Tour; über 120 % davon steht ein Hinweis). Bei weniger als 5 Vergleichstouren steht „Zu wenig Vergleichstouren“, nie ein Platzhalter. Die Trainingsbelastung der letzten 4 Wochen steht nur dabei, wenn genug Uhr-Werte vorliegen. **Tageslicht:** Mit Datum (leer = heute), Startzeit (leer = 09:00) und Pausenpuffer (leer = 20 %) rechnet die App Sonnenaufgang und -untergang am Startpunkt und die geschätzte Rückkehr (Start + Dauer + Puffer): „Rückkehr vor Sonnenuntergang mit 1:20 Std. Reserve“ (ab 60 Minuten), „Knapp“ (unter 60 Minuten) oder „nach Sonnenuntergang“. Darunter stehen deine gespeicherten Links der Art Wetter/Lawinenbericht. **Das ist Orientierung, keine Sicherheitsgarantie:** Wetter, Lawinenlage und Gelände musst du selbst prüfen; Dämmerung ist keine Sicherheitsaussage.
-* **Status und gelaufene Tour:** Jeder gespeicherte Plan hat einen Status (geplant, gegangen, verworfen). Deckt eine gelaufene Tour den Plan zu mindestens 80 % ab, schlägt die Liste „Gelaufen am … vorschlagen“ vor; erst **Bestätigen** verknüpft (nie automatisch). Verknüpfte Pläne zeigen „geplant 2:00 Std. · gelaufen 1:42 Std. (−0:18)“ sowie Strecke und Aufstieg mit Differenz; **Verknüpfung lösen** nimmt sie zurück.
-* **Baustein „Geplante Touren“ (Übersicht):** Zeigt nur offene Pläne (Status „geplant“) mit Länge, Höhenmetern und geschätzter Dauer; gegangene und verworfene Pläne sind ausgeblendet. In den Einstellungen des Bausteins lässt sich **„Gegangene Pläne auch zeigen“** einschalten (Standard: aus): Dann stehen gegangene Pläne mit „✓ gegangen am …“ und dem Vergleich „geplant … · gelaufen … (±…)“ darunter, nach den offenen. Verworfene Pläne erscheinen nie. Gibt es keinen offenen Plan, steht dort „Keine offenen Pläne.“
+* **Passt die Tour zu mir? (ab 3.47.0):** Ein weiterer einklappbarer Abschnitt für gespeicherte geplante Touren. **Form:** Strecke, Aufstieg und geschätzte Dauer gegen deine Touren derselben Sportart der letzten 12 Monate („kürzer/ähnlich/länger als deine üblichen“ im Verhältnis zum Median, dazu „länger als x % deiner Touren“ und der Vergleich mit deiner längsten bzw. höchsten Tour; über 120 % davon steht ein Hinweis). Bei weniger als 5 Vergleichstouren steht „Zu wenig Vergleichstouren“, nie ein Platzhalter. Die Trainingsbelastung der letzten 4 Wochen steht nur dabei, wenn genug Uhr-Werte vorliegen. **Tageslicht:** Mit Datum (leer = heute), Startzeit (leer = 09:00) und Pausenpuffer (leer = 20 %) rechnet die App Sonnenaufgang und -untergang am Startpunkt und die geschätzte Rückkehr (Start + Dauer + Puffer): „Rückkehr vor Sonnenuntergang mit 1:20 Std. Reserve“ (ab 60 Minuten), „Knapp“ (unter 60 Minuten) oder „nach Sonnenuntergang“. Darunter stehen deine gespeicherten Links der Art Wetter/Lawinenbericht. **Das ist Orientierung, keine Sicherheitsgarantie:** Wetter, Lawinenlage und Gelände musst du selbst prüfen; Dämmerung ist keine Sicherheitsaussage.
+* **Status und gelaufene Tour:** Jeder gespeicherte Plan hat einen Status (geplant, gegangen, verworfen). Deckt eine gelaufene Tour den Plan zu mindestens 80 % ab, schlägt die Liste „Gelaufen am … vorschlagen“ vor; erst **Bestätigen** verknüpft (nie automatisch). Verknüpfte geplante Touren zeigen „geplant 2:00 Std. · gelaufen 1:42 Std. (−0:18)“ sowie Strecke und Aufstieg mit Differenz; **Verknüpfung lösen** nimmt sie zurück.
+* **Baustein „Geplante Touren“ (Übersicht):** Zeigt nur offene geplante Touren (Status „geplant“) mit Strecke, Aufstieg und geschätzter Dauer; gegangene und verworfene geplante Touren sind ausgeblendet. In den Einstellungen des Bausteins lässt sich **„Gegangene geplante Touren auch zeigen“** einschalten (Standard: aus): Dann stehen gegangene geplante Touren mit „✓ gegangen am …“ und dem Vergleich „geplant … · gelaufen … (±…)“ darunter, nach den offenen. Verworfene geplante Touren erscheinen nie. Gibt es keinen offenen Plan, steht dort „Keine offenen geplanten Touren.“
 
 ![Touren-Liste](handbuch/bilder/02-touren-liste.png)
 
@@ -372,7 +372,7 @@ In den Einstellungen eines Bausteins steht unter **Zeitraum der Seite verwenden*
 
 ### Die Suche
 
-Das Suchfeld ganz oben („Suchen … ( / )“) durchsucht Tournamen, Notizen, Sportart, Datum, Monat, Jahr, Orte, Landkreis, Bundesland, Land und Tags. Drücke die Taste **/**, um es sofort anzuspringen.
+Das Suchfeld ganz oben („Suchen … ( / )“) durchsucht Tournamen, Notizen, Sportart, Datum, Monat, Jahr, Orte, Landkreis, Bundesland, Land und Schlagwörter. Drücke die Taste **/**, um es sofort anzuspringen.
 
 Die Suche ist **akzent- und apostroph-unabhängig**: „reunion“ findet „Réunion“, „strasse“ findet „Straße“, „munstertal“ findet „Münstertal“. Das gilt für das Suchfeld der Kopfzeile, den Namensfilter der Liste, die Auswertung nach Regionen und die Bausteine-Suche in „Seite anpassen“.
 
@@ -398,10 +398,10 @@ Die Suche ist **akzent- und apostroph-unabhängig**: „reunion“ findet „Ré
 
 Oben stehen Sportart, Datum und Name. Rechts oben gehst du mit **Vorherige** und **Nächste** durch die Touren. Darunter:
 
-* drei Knöpfe: **Ansehen**, **Teilen & Export**, **Bearbeiten** (Abschnitt 7.7),
+* drei Knöpfe: **Ansehen**, **Bearbeiten**, **Teilen & Export** (Abschnitt 7.7),
 * eine Marke wie „lokal gespeichert“,
 * ein Feld **Notiz zur Tour** (Wetter, Begleitung, Einkehr …) – du tippst, es wird gespeichert,
-* **Tags** und – bei Mehrtagestouren – ein Hinweis mit Link zur Gesamtansicht,
+* **Schlagwörter** und – bei Mehrtagestouren – ein Hinweis mit Link zur Gesamtansicht,
 * **Meine Bewertung** mit fünf Sternen (das ✕ löscht sie),
 * die **Kennzahlen**: Strecke, Aufstieg, Abstieg, Dauer, Tempo im Schnitt, Höchster Punkt, Neuland.
 
@@ -411,7 +411,7 @@ Oben stehen Sportart, Datum und Name. Rechts oben gehst du mit **Vorherige** und
 
 ### 7.2 Karte
 
-Der Abschnitt **Karte** zeigt die Strecke mit Start (grün) und Ziel (rot) und Fotos als Marker. Darüber stehen Gehzeit, Pausen, Steigrate und steilster Abschnitt. Mit **+/−** zoomst du, mit dem Schichten-Symbol wechselst du die Kartenart, und **Steigung** färbt die Strecke nach Steilheit.
+Der Baustein **Karte** zeigt die Strecke mit Start (grün) und Ziel (rot) und Fotos als Marker. Darüber stehen Gehzeit, Pausen, Steigrate und steilster Abschnitt. Mit **+/−** zoomst du, mit dem Schichten-Symbol wechselst du die Kartenart, und **Steigung** färbt die Strecke nach Steilheit.
 
 ![Karte der Tour](handbuch/bilder/06-tour-karte.png)
 
@@ -427,7 +427,7 @@ Das **Höhenprofil** zeigt die Höhe über der Strecke. Die **gelben Punkte** si
 
 ### 7.4 Puls
 
-Der Abschnitt **Herzfrequenz** erscheint, wenn das Gerät den Puls geliefert hat: Durchschnitt, Maximum, Minimum, Verlauf und die **Pulszonen** Z1 bis Z5 (Sehr leicht, Leicht, Moderat, Hart, Maximal) mit den Zeiten je Zone. Die Zonen richten sich nach deinem Maximalpuls (Standard 185 bpm; einstellbar unter *Verwaltung → Übersicht → Heimatort und Puls*).
+Der Baustein **Herzfrequenz** erscheint, wenn das Gerät den Puls geliefert hat: Durchschnitt, Maximum, Minimum, Verlauf und die **Pulszonen** Z1 bis Z5 (Sehr leicht, Leicht, Moderat, Hart, Maximal) mit den Zeiten je Zone. Die Zonen richten sich nach deinem Maximalpuls (Standard 185 bpm; einstellbar unter *Verwaltung → Allgemein → Heimatort und Puls*).
 
 ![Herzfrequenz mit Pulszonen](handbuch/bilder/08-tour-puls.png)
 
@@ -443,7 +443,7 @@ Unter **Auswertung dieser Tour** findest du **Analyse** (Bewegungszeit, Pausen),
 
 ### 7.6 Fotos der Tour
 
-Der Abschnitt **Fotos** zeigt zuerst einen **Foto-Streifen** mit den besten (höchstens 12) Fotos der Tour in Aufnahmereihenfolge – nach Sternen und Schärfe gewählt, sonst gleichmäßig über die Tour verteilt; am Handy wischst du ihn zur Seite. Ein Tipp auf ein Foto öffnet das Vollbild, dort blätterst du durch alle Fotos. **Alle … Fotos** öffnet das volle Raster mit Uhrzeit (es lädt beim Herunterscrollen in Blöcken nach), **Weniger zeigen** schließt es wieder. Einmal gesehene Fotos lädt die App nicht erneut. Die Knöpfe:
+Der Baustein **Fotos** zeigt zuerst einen **Foto-Streifen** mit den besten (höchstens 12) Fotos der Tour in Aufnahmereihenfolge – nach Sternen und Schärfe gewählt, sonst gleichmäßig über die Tour verteilt; am Handy wischst du ihn zur Seite. Ein Tipp auf ein Foto öffnet das Vollbild, dort blätterst du durch alle Fotos. **Alle … Fotos** öffnet das volle Raster mit Uhrzeit (es lädt beim Herunterscrollen in Blöcken nach), **Weniger zeigen** schließt es wieder. Einmal gesehene Fotos lädt die App nicht erneut. Die Knöpfe:
 
 * **Fotos bearbeiten**,
 * **Fotos hinzufügen …**,
@@ -491,7 +491,7 @@ Ob eine Maus oder ein Touchpad benutzt wird, erkennt die App an der Art der Bewe
 
 > **3D-Flug:** Er braucht WebGL im Browser sowie Gelände- und Kartendaten aus dem Internet. In der Umgebung, in der die Bilder dieses Handbuchs entstanden sind, gab es diese Daten nicht; deshalb ist hier kein Bild des 3D-Flugs abgebildet.
 
-**Teilen & Export** bietet **Link senden**, **Diashow senden**, **Diashow-Link**, **Links verwalten** und **GPX-Datei laden** (Strecke als GPX herunterladen). Mehr in [Kapitel 14](#k14).
+**Teilen & Export** bietet **Link senden**, **Diashow senden**, **Diashow-Link**, **Links verwalten …** sowie unter „Exportieren“ **Als GPX exportieren** (Strecke als GPX-Datei herunterladen) und **Komoot-Paket …**. Mehr in [Kapitel 14](#k14).
 
 ![Menü „Teilen & Export“](handbuch/bilder/11-menue-teilen.png)
 
@@ -499,9 +499,9 @@ Ob eine Maus oder ein Touchpad benutzt wird, erkennt die App an der Art der Bewe
 
 **Bearbeiten** bietet:
 
-* **Umbenennen**, **Tags & Alben** (Schlagworte), **Sportart ändern** (alle Sportarten, Favoriten zuerst; gilt auch nach dem Komoot-Abgleich, auf Wunsch auch bei Komoot geändert – ab 3.59.0),
+* **Umbenennen**, **Schlagwörter & Alben …**, **Sportart ändern** (alle Sportarten, Favoriten-Sportarten zuerst, dann „Mehr …“ nach Kategorien; gilt auch nach dem Komoot-Abgleich, auf Wunsch auch bei Komoot geändert – ab 3.59.0),
 * **Streckenfarbe** (Farbe und Breite auf der Karte),
-* **Höhen korrigieren** (mit Geländemodell neu berechnen), **Höhe aus Uhr abgleichen (Zepp)**,
+* **Höhe korrigieren …** (aus dem Geländemodell), **Höhe korrigieren (aus der Uhr) …** (Zepp),
 * **Track korrigieren** (Fehlpunkte und Pausen bereinigen; das Original bleibt erhalten),
 * **Hochladen** (zu Strava, Komoot … – nur auf deinen Wunsch),
 * **Tour löschen** (rot, abgesetzt; entfernt die Tour nur aus Meine Touren).
@@ -531,8 +531,8 @@ Auch das Tourdetail besteht aus Bausteinen. Unter den Kennzahlen stehen **Seite 
 Oben schwebt eine Leiste mit Bedienelementen:
 
 * **Standort** – zeigt deine Position (Browser fragt nach Erlaubnis),
-* **Alle Jahre** – Jahr wählen, daneben die Zahl der Touren,
-* **Sportarten** – ein- und ausschalten, nach Kategorien (Zu Fuß, Rad, Winter, Wasser, Outdoor und Sonstige) in der Reihenfolge des Katalogs, nur Sportarten mit Touren. Jede Sportart hat ihre eigene Farbe (Punkt am Knopf, Legende und Strecke gleich; ab 3.60.1). Dazu deine **Statistik-Gruppen** als Knöpfe „Name = A + B + …“: ein Klick schaltet alle Sportarten der Gruppe an oder aus. Statistik, Rekorde und die Sportartfilter der Bausteine bieten dieselbe Auswahl,
+* **Gesamte Zeit** – oder ein Jahr wählen, daneben die Zahl der Touren,
+* **Sportarten** – ein- und ausschalten, nach Kategorien (Zu Fuß, Rad, Winter, Wasser, Outdoor und Sonstige) in der Reihenfolge des Katalogs, nur Sportarten mit Touren. Jede Sportart hat ihre eigene Farbe (Punkt am Knopf, Legende und Strecke gleich; ab 3.60.1). Dazu deine **Statistik-Gruppen** als Knöpfe „Name = A + B + …“: ein Klick schaltet alle Sportarten der Gruppe an oder aus. Statistik, Bestwerte und die Sportartfilter der Bausteine bieten dieselbe Auswahl,
 * **Strecken**, **Heatmap**, **Fotos** – Darstellungsarten: Strecken einzeln, Heatmap (Häufigkeit), Fotos als Marker (bei Fotos ohne eigenen Aufnahmeort wird die Position aus der Aufnahmezeit berechnet und blasser gezeigt),
 * **Touren im Ausschnitt** – listet die Touren des gerade sichtbaren Kartenausschnitts in einem Fenster über allen Bedienfeldern. Es gibt immer nur ein Fenster; **Esc** oder **Schließen** schließt es und bringt den Fokus zurück auf den Knopf.
 
@@ -569,16 +569,16 @@ Auch die Karte ist eine anpassbare Seite (**Seite anpassen**, [Kapitel 13](#k13)
 ### 9.1 Wann ist etwas eine Reise?
 
 * **Reise:** Touren **weit weg von zu Hause** (mehr als etwa 60 km) an **mindestens vier Tagen** am Stück. Wochenend- und Kurzausflüge erscheinen hier nicht; sie bleiben normale Touren.
-* **Heimatort:** Die App erkennt ihn selbst aus deinen Touren. Du kannst ihn unter *Verwaltung → Übersicht → Heimatort und Puls* festlegen (Ort oder Adresse suchen, „Suchen“, Treffer anklicken, „Einstellungen speichern“). Touren in der Nähe zählen dann nie als Reise.
+* **Heimatort:** Die App erkennt ihn selbst aus deinen Touren. Du kannst ihn unter *Verwaltung → Allgemein → Heimatort und Puls* festlegen (Ort oder Adresse suchen, „Suchen“, Treffer anklicken, „Einstellungen speichern“). Touren in der Nähe zählen dann nie als Reise.
 * **Mehrtagestour:** Tourenreihen mit Namen wie „… Tag 3“ oder „… Etappe 2“ werden zusammengefasst. Mit **＋ Mehrtagestour bilden …** legst du eine selbst an.
 
 ### 9.2 Die Reisen-Übersicht
 
-Menü **Reisen**. Die Seite besteht aus den Abschnitten **Mehrtagestouren**, **Reisen**, **Alben und Tags** und (zugeklappt) **Entfernte Reisen**. Jede Reise ist eine Kachel mit Zeitraum, Zahl der Touren, Kilometern und Höhenmetern.
+Menü **Reisen**. Die Seite besteht aus den Bausteinen **Mehrtagestouren**, **Reisen**, **Schlagwörter & Alben** und (zugeklappt) **Entfernte Reisen**. Jede Reise ist eine Kachel mit Zeitraum, Zahl der Touren, Strecke und Aufstieg.
 
 ![Reisen-Übersicht](handbuch/bilder/29-reisen.png)
 
-*Abbildung 29: Die Reisen-Übersicht mit der Mehrtagestour „Dolomiten“, der Reise „Dolomiten-Hüttenweg“ und den Tags in der eigenen Karte „Alben und Tags“.*
+*Abbildung 29: Die Reisen-Übersicht mit der Mehrtagestour „Dolomiten“, der Reise „Dolomiten-Hüttenweg“ und den Schlagwörtern im Baustein „Schlagwörter & Alben“.*
 
 ### 9.3 Die Reise-Seite
 
@@ -607,7 +607,7 @@ Oben stehen **Reisebericht (PDF)**, **Senden**, **Reise bearbeiten** (Name und Z
 
 ### 9.5 Reisen anpassen
 
-Reise-Seite und Reisen-Übersicht sind wie alle Seiten anpassbar ([Kapitel 13](#k13)): Jeder Abschnitt ist ein Baustein, den du verschieben, ausblenden, einklappen und in der Breite ändern kannst. Der Kopf mit Titel, Zeitraum und Aktionen lässt sich verschieben, aber nicht ausblenden. In der Übersicht sind Mehrtagestouren, Reisen, Alben und Tags sowie „Entfernte Reisen“ (standardmäßig zugeklappt) Bausteine. Zusätzliche Bausteine: Reise-Kennzahlen, Kilometer je Tag, Reise-Diashow, Reisen-Kennzahlen und Reisen je Jahr; dazu gibt es fünf Vorlagen. Das Layout gilt für alle Reisen.
+Reise-Seite und Reisen-Übersicht sind wie alle Seiten anpassbar ([Kapitel 13](#k13)): Jeder Teil der Seite ist ein Baustein, den du verschieben, ausblenden, einklappen und in der Breite ändern kannst. Der Kopf mit Titel, Zeitraum und Aktionen lässt sich verschieben, aber nicht ausblenden. In der Übersicht sind Mehrtagestouren, Reisen, Schlagwörter & Alben sowie „Entfernte Reisen“ (standardmäßig zugeklappt) Bausteine. Zusätzliche Bausteine: Reise-Kennzahlen, Kilometer je Tag, Reise-Diashow, Reisen-Kennzahlen und Reisen je Jahr; dazu gibt es fünf Vorlagen. Das Layout gilt für alle Reisen.
 
 ![Reise-Seite im Bearbeitungsmodus](handbuch/bilder/30b-reise-seite-anpassen.png)
 
@@ -634,7 +634,7 @@ Reise-Seite und Reisen-Übersicht sind wie alle Seiten anpassbar ([Kapitel 13](#
 
 Die Bilder werden **im Browser verkleinert**, nur die kleinen Dateien gehen über das Netz; Originale werden nie verändert.
 
-**Weitere Wege** (Verwaltung → Fotos): der **Foto-Eingang** – Fotos einfach in den Eingangsordner kopieren (scp, rsync oder SMB-Freigabe); sie werden automatisch verkleinert, mit Aufnahmezeit übernommen und Touren zugeordnet (Prüfung alle 5 Minuten). Dazu **Bibliothek neu einlesen** und SMB-Ordner bzw. ein Mac-Skript.
+**Weitere Wege** (Verwaltung → Fotos): der **Foto-Eingang** – Fotos einfach in den Eingangsordner kopieren (scp, rsync oder SMB-Freigabe); sie werden automatisch verkleinert, mit Aufnahmezeit übernommen und Touren zugeordnet (Prüfung alle 5 Minuten). Dazu **Bibliothek neu durchsuchen** und SMB-Ordner bzw. ein Mac-Skript.
 
 ![Verwaltung, Reiter „Fotos“](handbuch/bilder/41-verwaltung-fotos.png)
 
@@ -680,13 +680,13 @@ Die Diashow läuft im Vollbild: automatischer Wechsel (3, 5 oder 8 Sekunden), un
 
 ### 10.5 Erinnerungen
 
-Die Kachel **Erinnerungen** (Übersicht und Statistik) zeigt Fotos aus deinem Archiv. Über **Seite anpassen → Erinnerungen → Einstellungen** (Zahnrad) legst du fest:
+Der Baustein **Erinnerungen** (Übersicht und Statistik) zeigt Fotos aus deinem Archiv. Über **Seite anpassen → Erinnerungen → Einstellungen** (Zahnrad) legst du fest:
 
 * **Welche Fotos:** zufällig, beste Fotos, „an diesem Tag in früheren Jahren“ oder neueste; optional nach Sportart und Zeitraum gefiltert; 3, 6, 9 oder 12 Stück.
 * **Darstellung:** Raster, Streifen (seitlich wischen) oder Einzelbild-Show (blättert selbst).
 * **Anzeige:** Titel, Bildunterschrift, „Neu mischen“, Link „Diashow starten“.
 
-Die Kachel lässt sich mehrfach mit unterschiedlichen Einstellungen hinzufügen.
+Der Baustein lässt sich mehrfach mit unterschiedlichen Einstellungen hinzufügen.
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -694,9 +694,9 @@ Die Kachel lässt sich mehrfach mit unterschiedlichen Einstellungen hinzufügen.
 
 <a id="k11"></a>
 
-## 11. Statistik, Rekorde, Puls und Auswertung
+## 11. Statistik, Bestwerte, Puls und Auswertung
 
-**Zweck:** Zahlen und Diagramme über alle deine Touren. Menü **Statistik**, vier Reiter: **Übersicht**, **Auswertung**, **Rekorde**, **Puls**.
+**Zweck:** Zahlen und Diagramme über alle deine Touren. Menü **Statistik**, vier Reiter: **Übersicht**, **Auswertung**, **Bestwerte**, **Puls**.
 
 ### 11.1 Übersicht
 
@@ -709,9 +709,9 @@ Oben steht der **globale Filter**, der für alle Bausteine der Seite gilt:
 Daneben **Jahresrückblick 2026** ([Kapitel 12](#k12)). Die Bausteine:
 
 * **Kennzahlen** (Touren, Strecke, Aufstieg, Unterwegs, pro Tour im Schnitt),
-* **Ziele** – ein Ziel anlegen: **Ziel hinzufügen**, Zeitraum (Ziel für das Jahr oder für jede Woche, ab 3.45.0), Messgröße (Kilometer, Höhenmeter, Touren, Stunden), Sportart, **Zielwert**, **Speichern**. Nur hier werden Ziele gepflegt; der Baustein „Ziele“ zeigt sie auf anderen Seiten. Die App zeigt Fortschritt, Prognose zum Jahresende und ob du im Plan liegst,
+* **Ziele** – ein Ziel anlegen: **Ziel hinzufügen**, Zeitraum (Ziel für das Jahr oder für jede Woche, ab 3.45.0), Messgröße (Strecke, Aufstieg, Touren, Dauer), Sportart, **Zielwert**, **Speichern**. Nur hier werden Ziele gepflegt; der Baustein „Ziele“ zeigt sie auf anderen Seiten. Die App zeigt Fortschritt, Prognose zum Jahresende und ob du im Soll liegst,
 * **Kilometer pro Jahr** (ein Klick auf einen Balken öffnet das Jahr) und **Kilometer im Jahresverlauf** (mit Vorjahreslinie),
-* **Sportarten**, **Bestwerte** (Baustein, Anzahl einstellbar), **Aktivität im Jahr** (Kalender-Heatmap),
+* **Sportarten**, **Bestwerte** (Baustein, Anzahl einstellbar), **Touren im Jahr** (Kalender-Heatmap),
 * **Dein typisches Tempo** (bergauf, eben, bergab; mit **Schätzen** für eine Tour, die du planst),
 * **Erinnerungen**.
 
@@ -721,19 +721,19 @@ Daneben **Jahresrückblick 2026** ([Kapitel 12](#k12)). Die Bausteine:
 
 ### 11.2 Auswertung
 
-Die Auswertung zeigt Orte, Gipfel, Leistung, Wetter und Neuland: **Häufigste Startorte** (braucht „Regionen bestimmen“ in der Verwaltung), **Gipfel & Pässe** („Gipfel bestimmen“), **Wanderführer-Fortschritt**, **Leistung über die Jahre** (Tempo, Höhenmeter pro Stunde), **Wetter** („Wetter für alle Touren laden“) und **Neuland** (Anteil der Strecke, der auf keiner früheren Tour lag; „Größte Entdeckungen“). Einige Abschnitte sind leer, bis du die genannten Auswertungen gestartet hast – sie brauchen Internet (Ortsnamen, Gipfel, Wetter).
+Die Auswertung zeigt Orte, Gipfel, Leistung, Wetter und Neuland: **Häufigste Startorte** (braucht „Regionen bestimmen“ in der Verwaltung), **Gipfel & Pässe** („Gipfel bestimmen“), **Wanderführer-Fortschritt**, **Leistung über die Jahre** (Tempo, Aufstieg pro Stunde), **Wetter** („Wetter für alle Touren laden“) und **Neuland** (Anteil der Strecke, der auf keiner früheren Tour lag; „Größte Entdeckungen“). Einige Bausteine sind leer, bis du die genannten Auswertungen gestartet hast – sie brauchen Internet (Ortsnamen, Gipfel, Wetter).
 
 ![Statistik, Auswertung](handbuch/bilder/24-statistik-auswertung.png)
 
-*Abbildung 39: Auswertung. In dieser Demo wurden Regionen, Gipfel und Wetter noch nicht bestimmt; die Abschnitte bieten deshalb die entsprechenden Knöpfe an.*
+*Abbildung 39: Auswertung. In dieser Demo wurden Regionen, Gipfel und Wetter noch nicht bestimmt; die Bausteine bieten deshalb die entsprechenden Knöpfe an.*
 
-### 11.3 Rekorde
+### 11.3 Bestwerte
 
-Rekorde mit Vergleichen („um die Erde“, „Mount Everest bergauf“), **Bestwerte gesamt** (längste Strecke, meiste Höhenmeter, längste Dauer), **Höchste Punkte**, **Nach Wochentag** und **Je Sportart**. Oben wählst du die Sportart.
+Bestwerte mit Vergleichen („um die Erde“, „Mount Everest bergauf“), **Bestwerte gesamt** (längste Strecke, größter Aufstieg, längste Dauer), **Höchste Punkte**, **Nach Wochentag** und **Je Sportart**. Oben wählst du die Sportart.
 
-![Statistik, Rekorde](handbuch/bilder/25-statistik-rekorde.png)
+![Statistik, Bestwerte](handbuch/bilder/25-statistik-rekorde.png)
 
-*Abbildung 40: Rekorde.*
+*Abbildung 40: Bestwerte.*
 
 ### 11.4 Puls
 
@@ -755,10 +755,10 @@ Die Statistik besteht aus Bausteinen wie die anderen Seiten: **Seite anpassen** 
 
 **Jede Sportart zählt einzeln.** Die Statistik fasst nichts von sich aus zusammen – auch nicht Wandern und Bergsteigen oder die Radarten. Wer Sportarten gemeinsam sehen will, legt eine **Statistik-Gruppe** an: **Verwaltung → Sportarten → Statistik-Gruppen** (bis 3.59.0 „Statistik: Sportarten zusammenfassen“ in der Übersicht).
 
-* Jede Gruppe hat einen **Namen** (1–30 Zeichen; ab 3.60.1 darf der Gruppenname nicht wie eine Sportart heißen – etwa „Wandern“ oder „Hiking“, ohne Rücksicht auf Groß-/Kleinschreibung und Leerzeichen. Eine ältere Gruppe mit solchem Namen zählt weiter, zeigt aber „Name wie eine Sportart – bitte umbenennen“ und lässt sich erst mit einem anderen Namen speichern) und mindestens **zwei Sportarten** (nach Kategorien zum Ankreuzen). Eine Sportart kann nur in einer Gruppe sein; ist sie schon in einer anderen, ist sie ausgegraut und zeigt „in „…““. Höchstens acht Gruppen. **Gruppe hinzufügen**, **🗑 Löschen**, **Gruppen speichern** (Rückmeldung „Gespeichert ✓“).
+* Jede Gruppe hat einen **Namen** (1–30 Zeichen; ab 3.60.1 darf der Gruppenname nicht wie eine Sportart heißen – etwa „Wandern“ oder „Hiking“, ohne Rücksicht auf Groß-/Kleinschreibung und Leerzeichen. Eine ältere Gruppe mit solchem Namen zählt weiter, zeigt aber „Name wie eine Sportart – bitte umbenennen“ und lässt sich erst mit einem anderen Namen speichern) und mindestens **zwei Sportarten** (nach Kategorien zum Ankreuzen). Eine Sportart kann nur in einer Gruppe sein; ist sie schon in einer anderen, ist sie ausgegraut und zeigt „in „…““. Höchstens acht Gruppen. **Gruppe hinzufügen**, **🗑 Löschen**, **Speichern** (Rückmeldung „Statistik-Gruppen gespeichert – gelten ab sofort in der Statistik“).
 * **Vorschläge** mit einem Klick: „Wandern und Bergsteigen“ (Wandern, Bergsteigen, Schneeschuhwandern), „Rad (alle)“, „Ski (alle)“ (Ski alpin, Skitour, Langlauf). Sie werden nie automatisch angelegt; gespeichert wird erst mit „Gruppen speichern“.
-* **Wirkung:** Im Sportartfilter der Statistik und der Bausteine steht jede Gruppe als eigener Eintrag „Name = Sportart + Sportart“ (ab 3.60.1, z. B. „Bergwandern = Wandern + Bergsteigen“; bei mehr als drei Sportarten „… + …“, die vollständige Liste zeigt der Tooltip); die einzelnen Sportarten bleiben wählbar. So beschriftet erscheint die Gruppe auch bei Zielen, in den Aufteilungen und im Jahresrückblick. Die Aufteilungen nach Sportart – Abschnitt „Sportarten“, Sportarten-Verteilung, Rekorde „Je Sportart“, Jahresrückblick (auch als Link) – zeigen die Gruppe als eine Zeile. Bei **Ziele → Ziel hinzufügen** sind die Gruppen wählbar.
-* **Was bleibt:** Die Touren, ihre Sportart, der Abgleich mit Komoot und Zepp, Export, Tourenliste und Einzelansichten bleiben unverändert. Ältere Ziele wie „Alle Rad-Sportarten“ zählen weiter. Wird eine Gruppe gelöscht, zeigen gespeicherte Filter wieder alle Sportarten; ein Ziel für die Gruppe zählt alle Sportarten („(Gruppe gelöscht)“). Gruppen und Favoriten gehören zur Datensicherung. Frühere Sportarten fallen aus Gruppen und Favoriten beim Laden still heraus.
+* **Wirkung:** Im Sportartfilter der Statistik und der Bausteine steht jede Gruppe als eigener Eintrag „Name = Sportart + Sportart“ (ab 3.60.1, z. B. „Bergwandern = Wandern + Bergsteigen“; bei mehr als drei Sportarten „… + …“, die vollständige Liste zeigt der Tooltip); die einzelnen Sportarten bleiben wählbar. So beschriftet erscheint die Gruppe auch bei Zielen, in den Aufteilungen und im Jahresrückblick. Die Aufteilungen nach Sportart – Baustein „Sportarten“, Sportarten-Verteilung, Bestwerte „Je Sportart“, Jahresrückblick (auch als Link) – zeigen die Gruppe als eine Zeile. Bei **Ziele → Ziel hinzufügen** sind die Gruppen wählbar.
+* **Was bleibt:** Die Touren, ihre Sportart, der Abgleich mit Komoot und Zepp, Export, Tourenliste und Einzelansichten bleiben unverändert. Ältere Ziele wie „Alle Rad-Sportarten“ zählen weiter. Wird eine Gruppe gelöscht, zeigen gespeicherte Filter wieder alle Sportarten; ein Ziel für die Gruppe zählt alle Sportarten („(Statistik-Gruppe gelöscht)“). Statistik-Gruppen und Favoriten-Sportarten gehören zur Sicherung. Frühere Sportarten fallen aus Statistik-Gruppen und Favoriten-Sportarten beim Laden still heraus.
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -772,7 +772,7 @@ Die Statistik besteht aus Bausteinen wie die anderen Seiten: **Seite anpassen** 
 
 **Öffnen:** Statistik → Knopf **Jahresrückblick 2026** (Jahr passt sich an). Die Seite zeigt:
 
-* das Jahr groß, darunter Touren, Kilometer, Höhenmeter, Stunden, Tage unterwegs und den Vergleich zum Vorjahr,
+* das Jahr groß, darunter Touren, Strecke, Aufstieg, Dauer, aktive Tage und den Vergleich zum Vorjahr,
 * **Kilometer pro Monat** (stärkster Monat hervorgehoben) und **Sportarten**,
 * **Die fünf stärksten Touren**,
 * **Fotos des Jahres** mit Knopf **Diashow**.
@@ -787,7 +787,7 @@ Oben: **‹ Übersicht**, „Fotos im PDF“ (mit Anzahl), **PDF herunterladen**
 
 1. **Als Link teilen** anklicken.
 2. **Jahr** und **Sportart** (alle oder nur eine, z. B. Wandern) wählen.
-3. Unter **Was wird gezeigt?** auswählen: **Kennzahlen**, **Rekorde**, **Heatmap** (Kalender, kein Kartenbild), **Beste Fotos**. Die Zeile „Dieser Link zeigt: …“ fasst es zusammen.
+3. Unter **Was wird gezeigt?** auswählen: **Kennzahlen**, **Bestwerte**, **Heatmap** (Kalender, kein Kartenbild), **Beste Fotos**. Die Zeile „Dieser Link zeigt: …“ fasst es zusammen.
 4. **Link gültig** wählen (z. B. 30 Tage).
 5. **Link erstellen.** Der Link lässt sich ohne Konto öffnen und sauber als PDF speichern oder drucken („Drucken / Als PDF speichern“ auf der Seite).
 
@@ -795,7 +795,7 @@ Oben: **‹ Übersicht**, „Fotos im PDF“ (mit Anzahl), **PDF herunterladen**
 
 *Abbildung 43: „Jahresrückblick teilen“. Was du nicht wählst, schickt der Server gar nicht erst mit.*
 
-**Was nie geteilt wird:** Strecken und Koordinaten (auch keine Start- oder Heimatorte, keine Ortsnamen), Notizen, Wegpunkte, Puls, Wetter, Uhr-Rohdaten, Gerät und Ausrüstung. Rekorde nennen nur Tourname und Datum – darauf weist der Dialog hin.
+**Was nie geteilt wird:** Strecken und Koordinaten (auch keine Start- oder Heimatorte, keine Ortsnamen), Notizen, Wegpunkte, Puls, Wetter, Uhr-Rohdaten, Gerät und Ausrüstung. Bestwerte nennen nur Tourname und Datum – darauf weist der Dialog hin.
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -849,15 +849,15 @@ Bausteine gelten nicht nur für eine Seite: „Dein Jahr“ kannst du z. B. auch
 Mit einer eigenen Kennzahl rechnest du selbst aus, was du wissen willst – ohne Programmieren.
 
 1. **Seite anpassen → Baustein hinzufügen → Eigene Kennzahlen → Erstellen** (Übersicht und Statistik).
-2. Optional: **Mit einer Vorlage starten**, z. B. „Höhenmeter je km“, „Touren pro Monat“, „Längste Wanderung“, „Ziel: 1000 km im Jahr“, „Durchschnittstempo“, „Größter Aufstieg“.
+2. Optional: **Mit einer Vorlage starten**, z. B. „Aufstieg je km“, „Touren pro Monat“, „Längste Wanderung“, „Ziel: 1000 km im Jahr“, „Durchschnittstempo“, „Größter Aufstieg“.
 3. **Name und Symbol** vergeben (Emoji, optional).
-4. **Was wird gerechnet?** – **Messgröße** (Anzahl Touren, Strecke, Aufstieg, Abstieg, Dauer, Gehzeit, Durchschnittspuls, Höchstpuls, Geschwindigkeit, Steigung, Höhenmeter je Kilometer) und **Rechenart** (Summe, Durchschnitt, Maximum, Minimum, Anzahl, Rekord mit Tourname, Durchschnitt pro Monat). Optional **Formel: durch eine zweite Kennzahl teilen**, z. B. Aufstieg geteilt durch Strecke.
+4. **Was wird gerechnet?** – **Messgröße** (Anzahl Touren, Strecke, Aufstieg, Abstieg, Dauer, Gehzeit, Durchschnittspuls, Höchstpuls, Geschwindigkeit, Steigung, Aufstieg je Kilometer) und **Rechenart** (Summe, Durchschnitt, Maximum, Minimum, Anzahl, Bestwert mit Tourname, Durchschnitt pro Monat). Optional **Formel: durch eine zweite Kennzahl teilen**, z. B. Aufstieg geteilt durch Strecke.
 5. **Filter:** Sportart, Zeitraum (Laufendes Jahr, Letzte 12 Monate, Letzte 90 Tage, Gesamte Zeit, Bestimmtes Jahr, Eigener Bereich), Schlagwort, Mindeststrecke.
 6. **Anzeige** – vier einklappbare Gruppen:
-   * **Ziel:** ein Zielwert (z. B. 1000 km im Jahr) erzeugt einen Fortschrittsbalken mit Prozent und dem Rest bis zum Ziel. Mit **„Im Plan?“** vergleicht die Kachel deinen Stand mit einem gleichmäßigen Soll (Tag des Jahres bzw. Anteil deines Bereichs) und sagt in Worten **Vor dem Plan**, **Im Plan** oder **Hinter dem Plan**; eine dünne Marke im Balken zeigt das Soll. Es gibt keine Warnfarbe, jede Aussage steht als Text. Das Soll gibt es für Summe und Anzahl ohne Formel bei laufendem Jahr, bestimmtem Jahr und eigenem Bereich.
+   * **Ziel:** ein Zielwert (z. B. 1000 km im Jahr) erzeugt einen Fortschrittsbalken mit Prozent und dem Rest bis zum Ziel. Mit **„Im Soll?“** vergleicht der Baustein deinen Stand mit einem gleichmäßigen Soll (Tag des Jahres bzw. Anteil deines Bereichs) und sagt in Worten **Vor dem Plan**, **Im Plan** oder **Hinter dem Plan**; eine dünne Marke im Balken zeigt das Soll. Es gibt keine Warnfarbe, jede Aussage steht als Text. Das Soll gibt es für Summe und Anzahl ohne Formel bei laufendem Jahr, bestimmtem Jahr und eigenem Bereich.
    * **Vergleich:** zeigt einen Pfeil (**↑ ↓ →**) mit Prozent und Differenz, zum Beispiel „↑ +23,1 % (+15 km)“. Du wählst, womit verglichen wird: **Zeitraum davor**, **Vorjahr** (gleicher Zeitraum bis zum selben Tag) oder **Vormonat** (einen Monat früher). Der Pfeil bewertet nichts: Ob mehr gut ist, hängt von der Kennzahl ab. Für „Gesamte Zeit“ gibt es keinen Vergleich.
    * **Verlauf:** eine kleine Grafik der Wochen- (bis 98 Tage), Monats- oder Jahreswerte als **Linie (Sparkline)**, als **Säulen** oder **Aus**.
-   * **Antippen:** Tippst du auf die Kachel oder auf „Touren anzeigen ›“, öffnet sich die Tourenliste mit den Filtern der Kennzahl (Sportart, Zeitraum, Schlagwort, Mindeststrecke); bei einem Rekord öffnet sich die Rekordtour. Oben in der Liste steht, was gefiltert ist, mit „Filter aufheben“. Lässt sich etwas nicht genau abbilden (z. B. nur Touren mit Pulsdaten), steht ein Hinweis dabei.
+   * **Antippen:** Tippst du auf den Baustein oder auf „Touren anzeigen ›“, öffnet sich die Tourenliste mit den Filtern der Kennzahl (Sportart, Zeitraum, Schlagwort, Mindeststrecke); bei einem Bestwert öffnet sich die Tour mit dem Bestwert. Oben in der Liste steht, was gefiltert ist, mit „Filter aufheben“. Lässt sich etwas nicht genau abbilden (z. B. nur Touren mit Pulsdaten), steht ein Hinweis dabei.
 7. Die **Vorschau** oben zeigt Wert, Trend, Verlauf und Ziel sofort. **Hinzufügen** übernimmt die Kennzahl als Baustein.
 
 Es zählen nur Touren, die die jeweilige Angabe haben (z. B. Puls); fehlende Angaben werden nie als 0 gerechnet.
@@ -866,9 +866,9 @@ Es zählen nur Touren, die die jeweilige Angabe haben (z. B. Puls); fehlende Ang
 
 *Abbildung 47: „Eigene Kennzahl erstellen“ mit den Startvorlagen.*
 
-![Eigene Kennzahl aus der Vorlage „Höhenmeter je km“](handbuch/bilder/35-eigene-kennzahl-vorlage.png)
+![Eigene Kennzahl aus der Vorlage „Aufstieg je km“](handbuch/bilder/35-eigene-kennzahl-vorlage.png)
 
-*Abbildung 48: Die Vorlage „Höhenmeter je km“: Vorschau (36,7 m/km, Vergleich zum Vorjahr), Name, Messgröße, Formel.*
+*Abbildung 48: Die Vorlage „Aufstieg je km“: Vorschau (36,7 m/km, Vergleich zum Vorjahr), Name, Messgröße, Formel.*
 
 ![Eigene Kennzahl, untere Hälfte des Dialogs](handbuch/bilder/35b-eigene-kennzahl-unten.png)
 
@@ -884,7 +884,7 @@ Es zählen nur Touren, die die jeweilige Angabe haben (z. B. Puls); fehlende Ang
 
 ![Übersicht mit drei eigenen Kennzahlen: Jahresziel, Wanderkilometer, Längste Wanderung](handbuch/bilder/34b-eigene-kennzahl-karten.png)
 
-*Abbildung 52: So sehen eigene Kennzahlen auf der Übersicht aus: Jahresziel mit Trend, Sparkline, Fortschrittsbalken und „Hinter dem Plan“, Wanderkilometer mit Säulen und die Rekord-Kennzahl „Längste Wanderung“.*
+*Abbildung 52: So sehen eigene Kennzahlen auf der Übersicht aus: Jahresziel mit Trend, Sparkline, Fortschrittsbalken und „Hinter dem Plan“, Wanderkilometer mit Säulen und die Bestwert-Kennzahl „Längste Wanderung“.*
 
 ### 13.4 Ansichten
 
@@ -918,13 +918,13 @@ Eine **Ansicht** ist eine gespeicherte Anordnung der Seite, z. B. „Wandern“,
 
 ### 13.8 Bausteine duplizieren, Rückgängig und Wiederholen
 
-**Duplizieren:** In der Kopfzeile eines Bausteins (bei schmalen Bausteinen im Menü „⋯“) legt **Duplizieren** eine Kopie mit denselben Einstellungen direkt dahinter an. Sie heißt „… (Kopie)“, bekommt den Fokus und steht in derselben Gruppe wie das Original. Das gibt es nur bei Bausteinen, die mehrfach vorkommen dürfen (im Katalog erkennst du sie daran, dass „Noch einmal hinzufügen“ möglich ist) und nicht für feste Abschnitte der Seite. Je Seite sind höchstens 40 Bausteine möglich; ist das Limit erreicht, sagt dir ein Hinweis, warum nichts passiert.
+**Duplizieren:** In der Kopfzeile eines Bausteins (bei schmalen Bausteinen im Menü „⋯“) legt **Duplizieren** eine Kopie mit denselben Einstellungen direkt dahinter an. Sie heißt „… (Kopie)“, bekommt den Fokus und steht in derselben Gruppe wie das Original. Das gibt es nur bei Bausteinen, die mehrfach vorkommen dürfen (im Katalog erkennst du sie daran, dass „Noch einmal hinzufügen“ möglich ist) und nicht für feste Bausteine der Seite. Je Seite sind höchstens 40 Bausteine möglich; ist das Limit erreicht, sagt dir ein Hinweis, warum nichts passiert.
 
 **Rückgängig und Wiederholen:** Die Knöpfe **Rückgängig** und **Wiederholen** in der Leiste (auf dem Handy mit Text, Pfeilsymbol) nehmen die letzten Änderungen zurück bzw. stellen sie wieder her: verschieben, Breite, ausblenden, hinzufügen, entfernen, duplizieren, Einstellungen, Gruppen, Handy-Anordnung und „Standard wiederherstellen“. Mit der Tastatur: **Strg+Z** (Mac: **Cmd+Z**) und **Strg+Umschalt+Z** (auch Strg+Y). Die Kürzel gelten nur im Bearbeitungsmodus und nicht in Eingabefeldern oder Dialogen. Es werden die letzten 50 Schritte gemerkt; **Fertig**, **Verwerfen**, das Verlassen der Seite und der Wechsel der Ansicht beginnen einen neuen Verlauf. Vorlesehilfen hören jeden Schritt („Rückgängig: …“). Ein ausgegrauter Knopf bedeutet: nichts mehr da.
 
 ### 13.9 Gruppen
 
-Eine **Gruppe** bündelt mehrere Bausteine zu einem einklappbaren Abschnitt mit eigenem Titel, z. B. „Rückblick“ oder „Training“.
+Eine **Gruppe** bündelt mehrere Bausteine unter einer einklappbaren Überschrift mit eigenem Titel, z. B. „Rückblick“ oder „Training“.
 
 1. Im Bearbeitungsmodus im Menü eines Bausteins **In Gruppe …** wählen, dann **In eine neue Gruppe** oder eine bestehende Gruppe. Oder den Baustein am Griff **über eine Gruppe ziehen** (die Gruppe zeigt, dass er hineinkommt); aus der Gruppe heraus ziehst du ihn auf dieselbe Weise.
 2. In der Kopfzeile der Gruppe: **Umbenennen** (Titel bis 60 Zeichen; ohne Titel heißt sie „Gruppe 1“ usw.), **Standardmäßig offen**, **↑ ↓** (die Gruppe wandert als ein Block) und **Gruppe lösen** (die Bausteine bleiben auf der Seite).
@@ -984,7 +984,7 @@ Drei Bausteine der Übersicht (und der Statistik) helfen beim Blick auf Rhythmus
 
 <img src="handbuch/bilder/59-belastung-wochenansicht.png" width="420" alt="Belastung und Erholung in der Wochenansicht">
 
-*Abbildung 60: „Belastung und Erholung“ in der Wochenansicht (8 Wochen, Ausschnitt): Belastungsbalken, Tage mit Tour (gefüllt) und Ruhetage (leer), „Ruhewoche“ und „Belastung ohne Angabe“.*
+*Abbildung 60: „Belastung und Erholung“ in der Wochenansicht (8 Wochen, Ausschnitt): Belastungsbalken, aktive Tage (gefüllt) und Ruhetage (leer), „Ruhewoche“ und „Belastung ohne Angabe“.*
 
 <img src="handbuch/bilder/60-ausruestung-warnung.png" width="520" alt="Baustein Ausrüstung mit Warnzeichen">
 
@@ -1060,37 +1060,42 @@ Damit Empfänger ohne Konto einen Link öffnen können, muss deine Installation 
 
 | Reiter | Inhalt |
 |---|---|
-| **Übersicht** | Zustand, Updates, Heimatort und Puls, Protokoll, Entwicklermodus |
-| **Sportarten** | Sportarten-Katalog, Favoriten für „Tour aufnehmen“, Statistik-Gruppen (ab 3.60.0) |
+| **Allgemein** (bis 3.60.1 „Übersicht“) | Zustand, Updates, Heimatort und Puls, Protokoll, Entwicklermodus |
+| **Sportarten** | Sportarten-Katalog, Favoriten-Sportarten (für „Tour aufzeichnen“), Statistik-Gruppen (ab 3.60.0) |
 | **Touren holen** | Meine Geräte, Komoot, Zepp, Garmin/Suunto/andere Uhren, Wanderführer ([Kapitel 4](#k4)) |
 | **Hochladen & Planen** | Strava und Komoot (Upload), Tourplanung |
-| **Fotos** | Fotobibliothek, Import, Foto-Eingang, Bildeinstellungen |
+| **Fotos** | Fotobibliothek, Import, Foto-Eingang, Fotoeinstellungen |
 | **Automatik & Meldungen** | tägliche Aktualisierung, Benachrichtigung (Webhook/ntfy), E-Mail-Versand |
 | **Handy & App** | Standort teilen, App auf dem Startbildschirm, Android-App |
 | **Sicherung & Zugang** | Sicherung, Umzugspaket, Zugriffsschutz, Offline-Nutzung |
 | **Prüfen & Aufräumen** | auffällige Touren, Aufräumen (eigene Seite) |
 
-Die Verwaltung wird **Administratoren** angezeigt. Jeder Bereich ist eine gleich gestaltete Karte (Überschrift, kurze Erklärung, Inhalt). **Einstellungen speichern** am Ende jedes Reiters speichert die Eingaben; die Abschnitte im Reiter **Sportarten** haben eigene Knöpfe zum Speichern.
+Die Verwaltung wird **Administratoren** angezeigt. Jeder Bereich ist eine gleich gestaltete Karte (Überschrift, kurze Erklärung, Inhalt). **Einstellungen speichern** am Ende jedes Reiters speichert die Eingabefelder; die Bereiche im Reiter **Sportarten** haben eigene Knöpfe **Speichern**. Was sofort gespeichert wird, ist so gekennzeichnet: der **Heimatort** (Auswahl aus der Suche oder ✕), **Standort teilen** (Auswahl) und alle Schalter. Die Adresse `#/admin?tab=allgemein` ist neu; `?tab=uebersicht` führt weiter zum Reiter „Allgemein“.
 
-### 15.1 Übersicht: Zustand, Updates, Heimatort
+### 15.1 Allgemein: Zustand, Updates, Heimatort
 
-* **Zustand:** Haken oder Warnzeichen für Komoot-Zugang, letztes Backup, Datenbank, freien Speicher, Touren ohne Strecke und Fotos ohne Tour.
+* **Zustand:** Haken oder Warnzeichen für Komoot-Zugang, letzte Sicherung, Datenbank, freien Speicher, Touren ohne Strecke und Fotos ohne Tour.
 * **Updates:** zeigt die installierte und die neueste Version auf GitHub. **Jetzt prüfen** fragt sofort nach; „Regelmäßig (alle 6 Stunden) auf neue Versionen prüfen“ kannst du einschalten. Administratoren installieren neue Versionen auf den meisten Installationen per Knopfdruck; bei Docker nennt die App nur den Befehl. Vor jedem Update gibt es automatisch eine Sicherung.
 * **Protokoll:** Meldungen der Hintergrundarbeiten.
-* **Heimatort und Puls:** Heimatort suchen und festlegen; **Maximalpuls (bpm)** für die Pulszonen (leer = 185 bzw. der höchste gemessene Wert).
+* **Heimatort und Puls:** Heimatort suchen und wählen (wird sofort gespeichert); **Maximalpuls (bpm)** für die Pulszonen (leer = 185 bzw. der höchste gemessene Wert).
 * **Entwicklermodus:** blendet Ansichten zur Fehlersuche ein (Selbsttest, vollständiges Protokoll …). Im Alltag nicht nötig.
 
 ### 15.1a Sportarten: Katalog, Favoriten, Statistik-Gruppen (ab 3.60.0)
 
-Verwaltung → **Sportarten** (`#/admin?tab=sportarten`; die ältere Adresse `?tab=aktivitaeten` führt ebenfalls dorthin) hat drei Abschnitte:
+Verwaltung → **Sportarten** (`#/admin?tab=sportarten`; die ältere Adresse `?tab=aktivitaeten` führt ebenfalls dorthin) hat drei Bereiche:
 
 * **Sportarten-Katalog** (nur lesen): die 29 Sportarten nach Kategorien mit Symbol und Kartenfarbe. Aufgeklappt darunter **Frühere Sportarten**: was es seit 3.60.0 nicht mehr gibt, wie es jetzt zählt und wie viele deiner Touren betroffen sind.
-* **Favoriten für „Tour aufnehmen“:** Stern ☆/★ wählt bis zu 12 Sportarten, ↑/↓ ordnet sie, **Vorgabe wiederherstellen** setzt Wandern, Laufen, Radtour, Skitour, Mountainbike. Beim Aufzeichnen und Planen stehen sie zuerst, alle übrigen unter „Mehr …“; die zuletzt benutzte ist vorgewählt. **Favoriten speichern** übernimmt.
+* **Favoriten-Sportarten (für „Tour aufzeichnen“):** Stern ☆/★ wählt bis zu 12 Sportarten, ↑/↓ ordnet sie, **Standard wiederherstellen** (mit Rückfrage, speichert sofort) setzt Wandern, Laufen, Radtour, Skitour, Mountainbike. Beim Aufzeichnen und Planen stehen sie zuerst, alle übrigen unter „Mehr …“; die zuletzt benutzte ist vorgewählt. **Speichern** übernimmt die Auswahl.
 * **Statistik-Gruppen:** welche Sportarten die Statistik gemeinsam zählt; Vorschläge nur per Klick ([Abschnitt 11.6](#k11)).
 
-![Verwaltung, Reiter „Übersicht“](handbuch/bilder/37-verwaltung-uebersicht.png)
+**Sportart wählen – zwei feste Muster (ab 3.61.0):**
 
-*Abbildung 65: „Übersicht“: Zustand, Updates, Protokoll, Heimatort und Puls. Der gelbe Hinweis oben erscheint nur im Demo-Modus.*
+* **Filtern** (Statistik, Bestwerte, Karte, Tourenliste, Sportart-Filter der Bausteine): zuerst **Alle Sportarten**, dann deine **Statistik-Gruppen**, dann die Sportarten mit Touren in der Reihenfolge des Katalogs mit Kategorie-Überschrift; der Farbpunkt ist die Streckenfarbe. Die Tourenliste zeigt dieselbe Reihenfolge in ihrem Auswahlfeld.
+* **Zuweisen** (**Sportart ändern …** an einer Tour, **Ziel hinzufügen**, **Tour planen**, **Aufzeichnen**): zuerst die **Favoriten-Sportarten** als Knöpfe, darunter **Mehr …** mit allen übrigen Sportarten nach Kategorien. Vorgewählt ist die aktuelle bzw. zuletzt benutzte Sportart.
+
+![Verwaltung, Reiter „Allgemein“](handbuch/bilder/37-verwaltung-uebersicht.png)
+
+*Abbildung 65: „Allgemein“ (im Bild noch „Übersicht“): Zustand, Updates, Protokoll, Heimatort und Puls. Der gelbe Hinweis oben erscheint nur im Demo-Modus.*
 
 ### 15.2 Hochladen & Planen
 
@@ -1107,7 +1112,7 @@ Siehe [Abschnitt 10.1](#k10).
 ### 15.4 Automatik & Meldungen
 
 * **Täglich aktualisieren** (Komoot, Routen, Fotos) an oder aus, dazu die Uhrzeit.
-* **Benachrichtigung (optional):** Trage eine Webhook-Adresse ein (z. B. ntfy oder Gotify). Bei Warnungen (Zepp-Token, Backup, Job-Fehler, Speicher) wird dort eine Textnachricht abgeliefert; optional auch bei neuen Touren. **Testnachricht senden** prüft die Adresse.
+* **Benachrichtigung (optional):** Trage eine Webhook-Adresse ein (z. B. ntfy oder Gotify). Bei Warnungen (Zepp-Token, Sicherung, Job-Fehler, Speicher) wird dort eine Textnachricht abgeliefert; optional auch bei neuen Touren. **Testnachricht senden** prüft die Adresse.
 * **E-Mail-Versand:** SMTP-Zugang für „Passwort vergessen“ und Zwei-Faktor-Hinweise.
 
 ### 15.5 Handy & App
@@ -1120,9 +1125,9 @@ Siehe [Abschnitt 10.1](#k10).
 
 ### 15.6 Sicherung & Zugang
 
-* **Sicherung:** Täglich um 03:40 Uhr wird die Datenbank (Touren, Notizen, Ziele, Zuordnungen) gesichert, die letzten 14 bleiben erhalten. **Backup jetzt herunterladen** und **Jetzt sichern** (oben) legen sofort eine an. Passwörter und Tokens sind im Download nicht enthalten; **Fotos und Routen sind nicht enthalten** – sichere diese Ordner zusätzlich. Wiederherstellen: `meine-touren-restore <Datei>` auf dem Server.
+* **Sicherung:** Täglich um 03:40 Uhr wird die Datenbank (Touren, Notizen, Ziele, Zuordnungen) gesichert, die letzten 14 bleiben erhalten. **Sicherung jetzt herunterladen** und **Jetzt sichern** (oben) legen sofort eine an. Passwörter und Tokens sind im Download nicht enthalten; **Fotos und Routen sind nicht enthalten** – sichere diese Ordner zusätzlich. Wiederherstellen: `meine-touren-restore <Datei>` auf dem Server.
 * **Sicherung prüfen (ab 3.38.0):** Eine Sicherung wird erst nach dem Schreiben geprüft (freier Platz vorher, ZIP und Datenbank danach) und dann erst umbenannt; schlägt sie fehl, steht der Grund hier („Letzte Sicherung fehlgeschlagen: …“) und die bisherigen Sicherungen bleiben erhalten. **Letzte Sicherung prüfen** öffnet die neueste Sicherung in einem temporären Ordner, prüft die Datenbank und zeigt „Zuletzt geprüft: …, in Ordnung“ mit der Zahl der Touren, Tracks und Layouts. Deine Daten werden dabei nicht verändert; eine Wiederherstellung findet nicht statt. **Nicht in der Tagessicherung:** die Fotodateien und der Zwischenspeicher sowie der Schlüssel für gespeicherte Zugangsdaten (`secret.key`) – nach einer Wiederherstellung auf einem neuen Rechner müssen diese Zugangsdaten neu eingegeben werden. Das Umzugspaket enthält beides. Als überfällig gilt eine Sicherung nach 36 Stunden.
-* **Sicherung zurückspielen (ab 3.40.0, nur Administratoren):** Klappe **Sicherung zurückspielen** auf. Wähle eine Sicherung aus der Liste (neueste zuerst) oder lade eine ZIP-Datei hoch und tippe auf **Sicherung prüfen …**. Die Prüfung ändert nichts: Sie zeigt, von wann die Sicherung ist, zu wem sie gehört und wie viele Touren, Strecken, Reisen, geplante Touren und Seitenlayouts sie enthält – daneben die Zahlen von heute. Ersetzt werden Touren, Notizen, Ziele, Pläne, Seitenlayouts und Einstellungen; alles, was seit der Sicherung dazukam, geht verloren. Nicht enthalten und unverändert bleiben Fotodateien, Zwischenspeicher, der Schlüssel `secret.key`, Benutzer und Passwörter. Setze das Häkchen „Ich habe verstanden, dass der heutige Stand ersetzt wird“ und tippe auf **Jetzt zurückspielen**. Vorher sichert die App den heutigen Stand von selbst; diese Sicherheitskopie steht danach mit dem Zusatz „Sicherheitskopie vor einer Wiederherstellung“ in derselben Liste – damit machst du den Schritt auf demselben Weg rückgängig. Geht beim Zurückspielen etwas schief, holt die App den vorherigen Stand selbst zurück. Ein Umzugspaket oder die Sicherung eines anderen Benutzers lässt sich hier nicht zurückspielen; dafür bleibt `meine-touren-restore <Datei>` auf dem Server.
+* **Sicherung zurückspielen (ab 3.40.0, nur Administratoren):** Klappe **Sicherung zurückspielen** auf. Wähle eine Sicherung aus der Liste (neueste zuerst) oder lade eine ZIP-Datei hoch und tippe auf **Sicherung prüfen …**. Die Prüfung ändert nichts: Sie zeigt, von wann die Sicherung ist, zu wem sie gehört und wie viele Touren, Strecken, Reisen, geplante Touren und Ansichten sie enthält – daneben die Zahlen von heute. Ersetzt werden Touren, Notizen, Ziele, geplante Touren, Ansichten und Einstellungen; alles, was seit der Sicherung dazukam, geht verloren. Nicht enthalten und unverändert bleiben Fotodateien, Zwischenspeicher, der Schlüssel `secret.key`, Benutzer und Passwörter. Setze das Häkchen „Ich habe verstanden, dass der heutige Stand ersetzt wird“ und tippe auf **Jetzt zurückspielen**. Vorher sichert die App den heutigen Stand von selbst; diese Sicherheitskopie steht danach mit dem Zusatz „Sicherheitskopie vor einer Wiederherstellung“ in derselben Liste – damit machst du den Schritt auf demselben Weg rückgängig. Geht beim Zurückspielen etwas schief, holt die App den vorherigen Stand selbst zurück. Ein Umzugspaket oder die Sicherung eines anderen Benutzers lässt sich hier nicht zurückspielen; dafür bleibt `meine-touren-restore <Datei>` auf dem Server.
 * **Umzug auf einen neuen Server:** **Umzugspaket erstellen** enthält alles (alle Benutzer, Touren, Fotos, Strecken, Freigabelinks, gespeicherte Zugangsdaten samt Schlüssel). Das Paket enthält Passwörter und Schlüssel – gut aufbewahren; es kann groß werden.
 * **Zugriffsschutz:** Ohne Benutzerverwaltung kannst du die Oberfläche mit einem Passwort schützen („Passwort setzen“, der Browser fragt danach; Benutzername beliebig). Besser ist die Benutzerverwaltung ([Kapitel 3](#k3)).
 * **Offline-Nutzung:** **Für Offline vorbereiten** lädt die letzten 8 Touren mit Strecke, einigen Fotos und den Kartenkacheln auf dieses Gerät; **Alle Touren offline (Daten und Strecken)** lädt alle Strecken.
@@ -1135,7 +1140,7 @@ Siehe [Abschnitt 10.1](#k10).
 
 Hier findest du auffällige Touren (zum Beispiel unplausible Tempi) und Aufräum-Werkzeuge. Touren, die nur wegen Lücken oder Pausen auffallen, kannst du als **geprüft** markieren.
 
-**Läufe von der Uhr (ab 3.50.0):** Läufe der Zepp-Uhr sind „Laufen“, nicht mehr „Wandern“. Was sicher zugeordnet werden konnte, hat die App beim Update selbst umgestellt. Touren, die von Komoot stammen oder nur über Startzeit und Länge zu einem Lauf der Uhr passen, stehen hier: **Auf Laufen umstellen** (einzeln) oder **Alle … auf Laufen umstellen** (mit Rückfrage). Der Abschnitt erscheint nur, wenn es solche Touren gibt.
+**Läufe von der Uhr (ab 3.50.0):** Läufe der Zepp-Uhr sind „Laufen“, nicht mehr „Wandern“. Was sicher zugeordnet werden konnte, hat die App beim Update selbst umgestellt. Touren, die von Komoot stammen oder nur über Startzeit und Länge zu einem Lauf der Uhr passen, stehen hier: **Auf Laufen umstellen** (einzeln) oder **Alle … auf Laufen umstellen** (mit Rückfrage). Der Bereich erscheint nur, wenn es solche Touren gibt.
 
 **Schneeschuh (ab 3.59.0 wieder eigene Sportart):** 3.50.0 hatte Schneeschuhtouren zu Wanderungen mit dem Schlagwort **„Schneeschuh“** gemacht. Solche Touren bleiben, wie sie sind, bis du unter Prüfen → **Schneeschuh-Touren** auf **„Schneeschuh-Touren als Schneeschuh führen“** klickst; **„Zurücknehmen“** macht das rückgängig, das Schlagwort bleibt. Neue Schneeschuhtouren sind gleich Schneeschuh. Steilheit über 30° und die Sicherheitsnotiz gibt es bei Schneeschuh und bei Touren mit dem Schlagwort.
 
@@ -1246,13 +1251,13 @@ Läufe der Zepp-Uhr sind in beiden Apps „Laufen“ (seit 3.50.0). Seit 3.59.0 
 
 ### 18.2 Tipps
 
-* **Jahresziele** setzen (Statistik → Ziele): Prognose und „im Plan“ motivieren.
+* **Jahresziele** setzen (Statistik → Ziele): Prognose und „im Soll“ motivieren.
 * **Notiz und Bewertung** direkt in der Tour eintragen – sie sind später auch in Suche und Filter nutzbar.
-* **Tags** ordnen Touren zu Alben (Bearbeiten → Tags & Alben).
+* **Schlagwörter** ordnen Touren zu Alben (Bearbeiten → Schlagwörter & Alben …).
 * **Ansichten** nutzen: eine Ansicht für „Wandern“, eine für „Rad“, eine kompakte fürs Handy.
 * **Neuland** zeigt dir, wie viel einer Tour wirklich neu war.
 * **Auffällige Touren** (Seilbahn, Auto) bereinigt „Track korrigieren“; das Original lässt sich wiederherstellen.
-* **Backup prüfen:** Der Zustand in der Verwaltung zeigt, wann die letzte Sicherung war. Fotos und Routen sind nicht in der Sicherung – sichere sie zusätzlich.
+* **Sicherung prüfen:** Der Zustand in der Verwaltung zeigt, wann die letzte Sicherung war. Fotos und Routen sind nicht in der Sicherung – sichere sie zusätzlich.
 
 ### 18.3 Fehlersuche
 
@@ -1260,10 +1265,10 @@ Läufe der Zepp-Uhr sind in beiden Apps „Laufen“ (seit 3.50.0). Seit 3.59.0 
 |---|---|
 | **Die Karte ist grau.** | Die Kartenkacheln kommen aus dem Internet. Prüfe die Verbindung des Servers und des Browsers. Offline helfen vorbereitete Touren („Für Offline vorbereiten“). |
 | **Ein Foto liegt bei keiner Tour.** | Die Aufnahmezeit passt nicht (falsche Kamerauhr, Zeitzone). Im Tourdetail **Zeit per GPS prüfen**, oder auf der Fotos-Seite **Fotos zuordnen**. Fotos mehr als 10 km neben der Strecke werden nicht zugeordnet. |
-| **Eine Reise fehlt.** | Reisen brauchen mindestens vier Tage weit weg von zu Hause. Prüfe den **Heimatort** (Verwaltung → Übersicht). Mit **＋ Mehrtagestour bilden …** legst du eine von Hand an. |
+| **Eine Reise fehlt.** | Reisen brauchen mindestens vier Tage weit weg von zu Hause. Prüfe den **Heimatort** (Verwaltung → Allgemein). Mit **＋ Mehrtagestour bilden …** legst du eine von Hand an. |
 | **Zepp-Import bricht ab.** | Der Token kann abgelaufen sein. In der Verwaltung unter „Zepp-Zugang / Token holen“ neu holen. Zepp und Komoot haben keine offizielle Schnittstelle. |
 | **„Garmin-Konto: Nicht verfügbar“.** | Das Zusatzpaket fehlt. Nutze den Dateiweg (Kapitel 4). |
-| **Statistik „Auswertung“ ist leer.** | Regionen, Gipfel oder Wetter müssen erst bestimmt werden (Knöpfe in den Abschnitten). Sie brauchen Internet. |
+| **Statistik „Auswertung“ ist leer.** | Regionen, Gipfel oder Wetter müssen erst bestimmt werden (Knöpfe in den Bausteinen). Sie brauchen Internet. |
 | **Pulszonen wirken falsch.** | Maximalpuls in der Verwaltung (Heimatort und Puls) eintragen. |
 | **Das Teilen-Menü der Android-App fehlt in der Web-App.** | Installation als App braucht HTTPS. Siehe Kapitel 16. |
 | **Ein Link zeigt „nicht mehr gültig“.** | Er ist abgelaufen oder widerrufen. Erzeuge einen neuen oder verlängere ihn unter „Laufzeit ändern …“. |
@@ -1332,13 +1337,13 @@ Läufe der Zepp-Uhr sind in beiden Apps „Laufen“ (seit 3.50.0). Seit 3.59.0 
 |---|---|
 | **Ansicht** | Eine gespeicherte Anordnung einer anpassbaren Seite (z. B. „Wandern“). |
 | **Layoutcode** | Kurzer Text, der eine Ansicht beschreibt und sich per Nachricht weitergeben lässt (beginnt mit `MTA1.`). |
-| **Gruppe** | Mehrere Bausteine als einklappbarer Abschnitt mit eigenem Titel. |
+| **Bausteingruppe** | Mehrere Bausteine unter einer einklappbaren Überschrift mit eigenem Titel. |
 | **Zeitraum der Seite** | Gemeinsamer Zeitraum für alle Bausteine der Übersicht mit Zeitbezug; die Leiste ist standardmäßig ausgeblendet und lässt sich über Seite anpassen einblenden. |
-| **Baustein** | Ein Abschnitt einer Seite, den du verschieben, ausblenden, einklappen und in der Breite ändern kannst. |
+| **Baustein** | Ein Teil einer Seite, den du verschieben, ausblenden, einklappen und in der Breite ändern kannst. |
 | **BRouter** | Routing-Dienst für die Tourplanung. |
-| **Eigene Kennzahl** | Ein von dir zusammengestellter Wert (z. B. Höhenmeter je km). |
+| **Eigene Kennzahl** | Ein von dir zusammengestellter Wert (z. B. Aufstieg je km). |
 | **Erzählung** | Die Tour als Zeitleiste mit Start, Fotos und Ziel. |
-| **FIT / GPX / TCX** | Dateiformate für aufgezeichnete Aktivitäten. |
+| **FIT / GPX / TCX** | Dateiformate für aufgezeichnete Touren. |
 | **Foto-Eingang** | Ordner, in dem abgelegte Fotos automatisch übernommen werden. |
 | **Funnel** | Tailscale-Funktion, die die App im Internet öffentlich erreichbar macht. |
 | **Heatmap** | Darstellung, wo (Karte) oder wann (Kalender) du am häufigsten unterwegs warst. |

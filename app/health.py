@@ -45,11 +45,11 @@ def health():
         checks.append({"name": name, "ok": ok, "detail": detail, "hint": hint})
 
     em = db.get("komoot_email") and db.get("komoot_password")
-    add("Komoot-Zugang", bool(em), "gespeichert" if em else "fehlt", "" if em else "Verwaltung → Komoot: E-Mail und Passwort eintragen")
+    add("Komoot-Zugang", bool(em), "gespeichert" if em else "fehlt", "" if em else "Verwaltung → Touren holen → Komoot: E-Mail und Passwort eintragen")
     nb = extras.newest_backup()
     age = (time.time() - nb.stat().st_mtime) / 3600 if nb else None
     add("Letzte Sicherung", age is not None and age < config.BACKUP_WARN_S / 3600, f"vor {age:.0f} h" if age is not None else "noch keines",
-        "" if age is not None and age < config.BACKUP_WARN_S / 3600 else "Verwaltung → Sicherung: jetzt sichern")
+        "" if age is not None and age < config.BACKUP_WARN_S / 3600 else "Verwaltung → Sicherung & Zugang → Sicherung: jetzt sichern")
     p = config.DB_PATH
     size = p.stat().st_size / 1e6 if p.exists() else 0
     add("Datenbank", True, f"{size:.0f} MB")
@@ -61,7 +61,7 @@ def health():
         pass
     n = db.one("SELECT COUNT(*) n FROM tours")["n"]
     no_route = sum(1 for t in db.query("SELECT id FROM tours") if not routes.path_full(t["id"]).exists())
-    add("Touren ohne Strecke", no_route == 0, f"{no_route} von {n}", "" if no_route == 0 else "Verwaltung → „Routen laden“")
+    add("Touren ohne Strecke", no_route == 0, f"{no_route} von {n}", "" if no_route == 0 else "Verwaltung → Touren holen → Komoot „Fehlende Strecken holen“")
     r = db.one("SELECT COUNT(*) n, SUM(tour_id IS NULL) o FROM photos")
     o = r["o"] or 0
     add("Fotos ohne Tour", True, f"{o} von {r['n'] or 0}", "")

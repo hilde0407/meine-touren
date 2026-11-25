@@ -169,7 +169,7 @@ def test_ziele_werden_in_der_statistik_gepflegt(pw, app):
     pg = _open(pw, app, route="#/stats", sel="#tlw-ziele")
     try:
         expect(pg.locator("#tlw-ziele .slnone")).to_contain_text(f"Noch kein Ziel für {YEAR}", timeout=T)
-        pg.locator("#tlw-ziele .zladd summary").click()
+        pg.locator("#tlw-ziele .zladd > summary").click()
         pg.select_option("#gper", "week")
         pg.select_option("#gm", "count")
         pg.fill("#gt", "3")
@@ -177,7 +177,7 @@ def test_ziele_werden_in_der_statistik_gepflegt(pw, app):
         expect(pg.locator("#tlw-ziele .goal.zlw")).to_have_count(1, timeout=T)
         expect(pg.locator("#tlw-ziele .goal.zlw .gh b")).to_have_text("Touren pro Woche", timeout=T)
         assert [(g["period"], g["year"], g["target"]) for g in _req(app, "/api/goals")] == [("week", 0, 3.0)]
-        pg.locator("#tlw-ziele .zladd summary").click()
+        pg.locator("#tlw-ziele .zladd > summary").click()
         pg.fill("#gt", "500")
         pg.locator("#gadd").click()
         expect(pg.locator("#tlw-ziele .goal")).to_have_count(2, timeout=T)
@@ -346,7 +346,7 @@ def test_neue_bausteine_responsiv_hell_dunkel(pw, app, width, scheme):
             pg.wait_for_selector("#tlw-ziele .zladd", timeout=TL)
             settled(pg)
             assert pg.evaluate("() => document.documentElement.scrollWidth <= window.innerWidth + 1")
-            pg.locator("#tlw-ziele .zladd summary").click()
+            pg.locator("#tlw-ziele .zladd > summary").click()
             box = pg.locator("#gt").bounding_box()
             assert box and box["x"] >= 0 and box["x"] + box["width"] <= width + 1
             if os.environ.get("TS_SHOTS"):

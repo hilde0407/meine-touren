@@ -506,7 +506,7 @@ function recIdleHtml(A, st, g, sel) {
   if (open || recUp.bk)
     later += `<div class="rechint" id="rbk" role="status"><span><b id="rbkt"></b> <span id="rbks"></span></span><span class="rechb"><button class="btn" id="rbkup">Jetzt hochladen</button><a class="btn alt" id="rbkview" hidden>Tour ansehen</a></span></div>`;
   if (photos)
-    later += hint("rhph", "Fotos warten auf den Upload", `${photos} Foto(s) aus früheren Aufzeichnungen liegen noch auf dem Handy (sie sind auch in der Galerie).`, '<span class="rechb"><button class="btn" id="rphup">Jetzt hochladen</button><span id="rphupm" class="mut"></span></span>');
+    later += hint("rhph", "Fotos warten auf den Upload", `${fmtAnzahl(photos, "Foto", "Fotos")} aus früheren Aufzeichnungen liegen noch auf dem Handy (sie sind auch in der Galerie).`, '<span class="rechb"><button class="btn" id="rphup">Jetzt hochladen</button><span id="rphupm" class="mut"></span></span>');
   const route = recHas("setRoute")
     ? `<div class="recroute"><label class="reclbl" for="rroute">Route mit Sprachansagen</label><select id="rroute"><option value="">Keine – frei aufzeichnen</option></select>
         <div id="rrinfo" class="mut fs13"></div></div>`
@@ -515,15 +515,14 @@ function recIdleHtml(A, st, g, sel) {
   return `<div class="rec" data-s="idle"><div class="sec mt0"><h2>Aufzeichnen</h2></div>
     <p class="recgps" id="rgps" data-q="${q}" role="status"><span class="rgi" aria-hidden="true"></span><span id="rgpst">${txt}</span></p>
     ${hints}
-    <div class="recsports" role="radiogroup" aria-label="Sportart">${sports.map(([k, l]) => `<button type="button" class="recsp" role="radio" aria-checked="${k === cur}" data-sp="${k}">${l}</button>`).join("")}</div>
-    <details class="recset recmore" id="rspm"${sports.some(x => x[0] === cur) ? "" : " open"}><summary>Mehr …</summary><div class="recsetb">${SPORT_CAT.map(([id, l, ks]) => `<div class="recf"><span class="reclbl" id="rspc-${id}">${esc(l)}</span><div class="recsports" role="radiogroup" aria-labelledby="rspc-${id}">${ks.filter(k => !sports.some(x => x[0] === k)).map(k => `<button type="button" class="recspx" role="radio" aria-checked="${k === cur}" data-sp="${k}"><span aria-hidden="true">${sIcon(k)}</span> <span>${esc(sName(k))}</span></button>`).join("")}</div></div>`).join("")}</div></details>
+    ${sportWahlHtml(cur, {favs: sports.map(x => x[0]), label: recLabel, moreId: "rspm"})}
     <button type="button" class="recstart" id="rstart"><span class="rsd" aria-hidden="true"></span><span>Aufzeichnung starten</span></button>
     <p class="recnote mut">Läuft auch bei ausgeschaltetem Bildschirm weiter.</p>
     ${route}
     ${later ? `<div class="reclater">${later}</div>` : ""}
     <details class="recset" id="rset"><summary>Einstellungen der Aufzeichnung</summary><div class="recsetb">
       <div class="recf"><label class="reclbl" for="rname">Name der Tour (optional)</label><input id="rname" maxlength="120" placeholder="wird sonst automatisch vergeben" autocomplete="off"></div>
-      ${recHas("takePhoto") ? `<div class="recf"><label class="reclbl" for="rphm">Fotos während der Aufzeichnung</label><select id="rphm"><option value="now">Sofort auf den Server laden</option><option value="end">Gesammelt am Ende laden</option></select></div>` : ""}
+      ${recHas("takePhoto") ? `<div class="recf"><label class="reclbl" for="rphm">Fotos während der Aufzeichnung</label><select id="rphm"><option value="now">Sofort hochladen</option><option value="end">Gesammelt am Ende hochladen</option></select></div>` : ""}
       ${recHas("setWeather") ? `<div class="recf"><label class="chk rectog"><input type="checkbox" id="rwxon" ${A.weatherOn() ? "checked" : ""}> <span>Wetterwarnung unterwegs<small class="mut">Gewitter, Starkregen, Sturm, Kälteeinbruch</small></span></label></div>` : ""}
       <div class="recf"><span class="reclbl" id="rlhl">Live-Standort für einen Kontakt</span><div class="recpair"><select id="rlh" aria-labelledby="rlhl"><option value="3">3 Stunden</option><option value="12" selected>12 Stunden</option><option value="24">24 Stunden</option><option value="72">3 Tage</option></select><button type="button" class="btn alt" id="rlink">Link teilen</button></div><div id="rlmsg" class="mut fs13" role="status"></div></div>
       <div class="recf"><span class="reclbl">Startseite der App</span>${recStartChoice()}<small class="mut"><span>Gilt auf diesem Handy.</span> <span>Läuft eine Aufzeichnung, öffnet die App immer diese Seite.</span></small></div>
@@ -541,7 +540,7 @@ function recLiveHtml(A, st) {
     ri = recRouteInfo(),
     cell = (id, label) => `<div><b id="${id}">${v[id]}</b><span>${label}</span></div>`;
   return `<div class="rec" data-s="${s}"><h2 class="recsr">Aufzeichnen</h2>
-    <div class="recstate" id="rstate" role="status"><span class="rsdot" aria-hidden="true">${s === "paused" ? REC_SVG.pause : ""}</span><b id="rstt">${s === "paused" ? "Pausiert" : "Aufnahme läuft"}</b><span class="rsg" id="rgps" data-q="${q}"><span class="rgi" aria-hidden="true"></span><span id="rgpst">${txt}</span></span>${s === "paused" ? '<span class="rsp">Es wird nichts aufgezeichnet, bis du fortsetzt.</span>' : ""}</div>
+    <div class="recstate" id="rstate" role="status"><span class="rsdot" aria-hidden="true">${s === "paused" ? REC_SVG.pause : ""}</span><b id="rstt">${s === "paused" ? "Pausiert" : "Aufzeichnung läuft"}</b><span class="rsg" id="rgps" data-q="${q}"><span class="rgi" aria-hidden="true"></span><span id="rgpst">${txt}</span></span>${s === "paused" ? '<span class="rsp">Es wird nichts aufgezeichnet, bis du fortsetzt.</span>' : ""}</div>
     <div class="recbig"><div class="rbt" id="rt" role="timer" aria-label="Dauer">${v.rt}</div><div class="rbd" aria-label="Strecke"><span id="rd">${v.rd}</span><small>km</small></div></div>
     <div class="recrow">${cell("ru", "Aufstieg m")}${cell("ralt", "Höhe m")}${cell("rspd", "Tempo km/h")}</div>
     <div id="rlive" class="reclive" hidden></div>
@@ -552,7 +551,7 @@ function recLiveHtml(A, st) {
       ${recHas("takePhoto") || recHas("addWaypoint") ? `<div class="recpair">${recHas("takePhoto") ? `<button type="button" class="recb" id="rphoto">${REC_SVG.cam}<span>Foto</span></button>` : ""}${recHas("addWaypoint") ? `<button type="button" class="recb" id="rwpb">${REC_SVG.pin}<span>Wegpunkt</span></button>` : ""}</div>` : ""}
       <div class="recpair">${s === "paused" ? `<button type="button" class="recb big go" id="rres">${REC_SVG.play}<span>Fortsetzen</span></button>` : `<button type="button" class="recb big" id="rpause">${REC_SVG.pause}<span data-notr>${recT("Pausieren")}</span></button>`}<button type="button" class="recb big stop" id="rstop">${REC_SVG.stop}<span>Beenden</span></button></div>
     </div>
-    <p class="recinfo mut"><span id="rwpm">${st.wps ? `📍 ${st.wps} Wegpunkt(e) gesetzt` : ""}</span> <span id="rphinfo"></span></p>
+    <p class="recinfo mut"><span id="rwpm">${st.wps ? `📍 ${fmtAnzahl(st.wps, "Wegpunkt", "Wegpunkte")} gesetzt` : ""}</span> <span id="rphinfo"></span></p>
     <details class="recset" id="rmore"${recLs("mt_rec_more") === "1" ? " open" : ""}><summary>Weitere Werte</summary><div class="recrow four">${cell("rdn", "Abstieg m")}${cell("rmax", "Höchster Punkt m")}${cell("ravg", "Ø km/h")}${cell("racc", "GPS ± m")}</div></details></div>`;
 }
 
@@ -564,7 +563,7 @@ function recDoneHtml(A, st) {
     <div class="recrow sum">${cell(`${fmtKm((sum.dist_m || 0) / 1000, {einheit: false})}<small>km</small>`, "Strecke")}${cell(fmtDauerHtml(sum.active_s || 0).replace('<span class="u">', "<small>").replace("</span>", "</small>"), "Dauer")}${cell(`${fmtHm(sum.up_m || 0, {einheit: false})}<small>m</small>`, "Aufstieg")}</div>
     <div class="recf"><label class="reclbl" for="rname">Name der Tour</label><input id="rname" maxlength="120" value="${esc(st.state === "finished" ? st.name || "" : recUp.sent || "")}" placeholder="leer lassen = automatisch" autocomplete="off" enterkeyhint="done"><div id="rnamem" class="mut fs13" role="status"></div></div>
     <div class="recup" id="rup" role="status" aria-live="polite"><span class="rupi" aria-hidden="true"></span><span><b id="rupt"></b><span id="rups"></span></span></div>
-    ${pend ? `<p class="mut fs13" id="rphn">📷 ${pend} Foto(s) werden mit hochgeladen.</p>` : ""}
+    ${pend ? `<p class="mut fs13" id="rphn">📷 ${fmtAnzahl(pend, "Foto wird", "Fotos werden")} mit hochgeladen.</p>` : ""}
     <div class="recact"><button type="button" class="recb big go" id="rview" hidden>Tour ansehen</button><button type="button" class="recb" id="rretry" hidden>Jetzt erneut versuchen</button>
       <button type="button" class="recb" id="rnew" hidden>Neue Aufzeichnung</button><button type="button" class="recb" id="rlater" hidden>Später senden, neue Aufzeichnung</button><button type="button" class="recb quiet" id="rdrop" hidden>Verwerfen</button></div></div>`;
 }
@@ -580,7 +579,7 @@ function recDoneFill() {
   /* je Satz ein eigenes Element: so findet die Übersetzung auch Sätze mit Platzhaltern */
   const T = {
     uploading: ["Wird hochgeladen …", [recUp.msg || "Die Tour wird auf deinen Server geladen."]],
-    saved: ["Gespeichert", ["Die Tour ist auf deinem Server.", recUp.dev && recUp.dev.new ? `Dieses Handy ist jetzt unter „Meine Geräte“ als „${recUp.dev.name}“ angemeldet.` : "", recUp.left ? `${recUp.left} Foto(s) konnten nicht hochgeladen werden und bleiben auf dem Handy (Aufzeichnen → „Fotos hochladen“).` : ""]],
+    saved: ["Tour gespeichert", ["Die Tour ist auf deinem Server.", recUp.dev && recUp.dev.new ? `Dieses Handy ist jetzt unter „Meine Geräte“ als „${recUp.dev.name}“ angemeldet.` : "", recUp.left ? `${fmtAnzahl(recUp.left, "Foto konnte", "Fotos konnten")} nicht hochgeladen werden und bleiben auf dem Handy (Aufzeichnen → „Fotos hochladen“).` : ""]],
     waiting: ["Wartet auf Netz – wird später gesendet", recUp.msg ? [recUp.msg] : ["Die Aufzeichnung bleibt sicher auf dem Handy.", "Sobald der Server erreichbar ist, wird sie von selbst hochgeladen."]],
     error: ["Speichern nicht möglich", [recUp.msg || ""]],
   }[p];
@@ -609,7 +608,7 @@ function recBkFill() {
     const k = +b.split(":")[1];
     t = recPlural(k, "1 Aufzeichnung hochgeladen.", "{} Aufzeichnungen hochgeladen.");
     sub = n ? recPlural(n, "1 weitere wartet noch.", "{} weitere warten noch.") : "";
-  } else if (b.startsWith("err:")) sub = "Speichern fehlgeschlagen: " + b.slice(4);
+  } else if (b.startsWith("err:")) sub = "Speichern nicht möglich: " + b.slice(4);
   else if (b === "wait") sub = "Der Server ist gerade nicht erreichbar – später erneut versuchen.";
   set("#rbkt", t);
   set("#rbks", sub);
@@ -696,7 +695,7 @@ VIEWS.record = async () => {
     const save = note => {
       const ok = A.addWaypoint(note);
       m.remove();
-      if ($("#rwpm")) $("#rwpm").innerHTML = ok ? `✓ „${esc(note || "Wegpunkt")}“ gespeichert · ${recStatus().wps || 1} Wegpunkt(e)` : '<span class="bad">Noch keine Position – kurz warten, bis das GPS einen Standort hat.</span>';
+      if ($("#rwpm")) $("#rwpm").innerHTML = ok ? `✓ „${esc(note || "Wegpunkt")}“ gespeichert · ${fmtAnzahl(recStatus().wps || 1, "Wegpunkt", "Wegpunkte")}` : '<span class="bad">Noch keine Position – kurz warten, bis das GPS einen Standort hat.</span>';
     };
     m.querySelectorAll("[data-wp]").forEach(b => (b.onclick = () => save(b.dataset.wp)));
     m.querySelector("#rwps").onclick = () => save(m.querySelector("#rwpt").value.trim());
@@ -783,7 +782,7 @@ VIEWS.record = async () => {
           location.hash = "#/tour/" + r.id;
         } else if ($("#bkmsg")) {
           b.disabled = false;
-          $("#bkmsg").innerHTML = `<span class="bad">Speichern fehlgeschlagen: ${esc(r.err || "Server nicht erreichbar")}</span>`;
+          $("#bkmsg").innerHTML = `<span class="bad">Speichern nicht möglich: ${esc(r.err || "Server nicht erreichbar")}</span>`;
         }
       };
     });
@@ -818,7 +817,7 @@ VIEWS.record = async () => {
           if ($("#rroute") === sel) loaded(recRouteInfo());
         } catch (e) {
           sel.value = "";
-          info.innerHTML = `<span class="bad">Route konnte nicht geladen werden: ${esc(e.message)}</span>`;
+          info.innerHTML = `<span class="bad">Route laden nicht möglich: ${esc(e.message)}</span>`;
         }
       };
     }
@@ -868,7 +867,7 @@ VIEWS.record = async () => {
     const photoInfo = () => {
       if (!$("#rphinfo") || !recHas("photoInfo")) return;
       const pi = recPhotoInfo(),
-        t = pi.taken || pi.pending ? `${pi.taken || 0} Foto(s) aufgenommen` + (pi.pending ? ` · ${pi.pending} warten auf den Upload${pi.error ? " (" + pi.error + ")" : ""}` : "") : "";
+        t = pi.taken || pi.pending ? `${fmtAnzahl(pi.taken || 0, "Foto", "Fotos")} aufgenommen` + (pi.pending ? ` · ${pi.pending} warten auf den Upload${pi.error ? " (" + pi.error + ")" : ""}` : "") : "";
       if ($("#rphinfo").dataset.t !== t) ($("#rphinfo").dataset.t = t), ($("#rphinfo").textContent = t);
     };
     upd();
@@ -1011,7 +1010,7 @@ VIEWS.admin = async (...a) => {
   $("#appbox").insertAdjacentHTML(
     "beforeend",
     `<h3 class="m14-0-4">Push-Meldungen</h3><p class="mut fs13">${
-      m ? "Neue Touren und Warnungen kommen als echte Handy-Meldung, wenn die kostenlose <b>ntfy</b>-App das Thema abonniert hat." : "Trage unter Verwaltung → „Benachrichtigung“ eine ntfy-Adresse ein (z. B. https://ntfy.sh/mein-thema), dann lässt sich das hier mit einem Tipp abonnieren."
+      m ? "Neue Touren und Warnungen kommen als echte Handy-Meldung, wenn die kostenlose <b>ntfy</b>-App das Thema abonniert hat." : "Trage unter Verwaltung → Automatik & Meldungen → Benachrichtigung eine ntfy-Adresse ein (z. B. https://ntfy.sh/mein-thema), dann lässt sich das hier mit einem Tipp abonnieren."
     }</p><div class="row g8"><button class="btn alt" id="apush"${m ? "" : " disabled"}>In ntfy abonnieren</button><button class="btn alt" id="apushget">ntfy-App holen</button></div>`
   );
   if ($("#apush") && m) $("#apush").onclick = () => A.openUrl(`ntfy://${m[2]}/${m[3]}${m[1] === "http" ? "?secure=false" : ""}`);

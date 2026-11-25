@@ -166,7 +166,7 @@ def test_section_content_and_order(pw, apps):
         assert c.locator(".utc").count() == 6 and c.locator(".utc.part").count() == 1 and "Tempo je Kilometer" in t
         assert "10:50" in c.locator(".utv").first.inner_text() and "0,4 km" in t and "Puls (bpm)" in t and "Schritte/min" in t
         assert "21" in t and "°C Temperatur" in t and "74" in t and "% Luftfeuchte" in t and "Wetter laut Uhr" in t
-        assert "nicht mit Garmin vergleichbar" in t and "Von Zepp neu laden" in t
+        assert "nicht mit Garmin vergleichbar" in t and "Neu von Zepp holen" in t
         for bad in ("-1", "-274", "-361", "2004831", "avg_pace", "NaN", "undefined", "null"):
             assert bad not in t, bad
         assert "title" in c.locator(".utc").first.evaluate("e => Object.keys(e.attributes).map(a => e.attributes[a].name).join()") and "Kilometer 1: 10:50 min/km, Puls 112 bpm, 112 Schritte/min" == c.locator(".utc").first.get_attribute("title")
@@ -211,7 +211,7 @@ def test_reload_button_updates_values(pw, apps):
         pg.click("#utneu")
         pg.wait_for_selector("#utmsg:has-text('Neu von Zepp geladen')", timeout=15000)
         pg.wait_for_function("() => { const b = document.querySelector('#utneu'); return !!b && !b.disabled && document.querySelectorAll('#uhrcard .utc').length === 13; }", timeout=15000)       # Karte nach dem Neuladen neu gezeichnet
-        assert k.inner_text() == "999" and pg.locator(".utc").count() == 13 and pg.locator("#utneu").inner_text() == "Von Zepp neu laden"
+        assert k.inner_text() == "999" and pg.locator(".utc").count() == 13 and pg.locator("#utneu").inner_text() == "Neu von Zepp holen"
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()

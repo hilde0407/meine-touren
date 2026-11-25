@@ -153,7 +153,7 @@ async function favLoad() {
 /* Auswahlfeld einer Sportart: Favoriten zuerst, dann alle Aktivitäten nach Kategorien (Planung u. a.) */
 function sportOptions(sel) {
   const o = s => `<option value="${s}"${s === sel ? " selected" : ""}>${esc(sName(s))}</option>`;
-  return `<optgroup label="Favoriten">${FAV.map(o).join("")}</optgroup>` + SPORT_CAT.map(([, l, ks]) => `<optgroup label="${esc(l)}">${ks.filter(s => !FAV.includes(s)).map(o).join("")}</optgroup>`).join("");
+  return `<optgroup label="Favoriten-Sportarten">${FAV.map(o).join("")}</optgroup>` + SPORT_CAT.map(([, l, ks]) => `<optgroup label="${esc(l)}">${ks.filter(s => !FAV.includes(s)).map(o).join("")}</optgroup>`).join("");
 }
 /* 3.50.0 legte Schneeschuh mit Wandern zusammen; seit 3.59.0 ist Schneeschuh wieder eine eigene Sportart.
    3.60.0 Rückfall (wie gpxtools.RUECKFALL; ein Test prüft, dass beide gleich sind): Schlüssel, die 3.59.0 im Katalog hatte und die nicht mehr angeboten werden.
@@ -256,6 +256,77 @@ const sportOrder = keys => {
   const a = sportAuswahl(keys);
   return a.groups.map(g => g[0]).concat(a.cats.flatMap(c => c[2]));
 };
+/* 3.61.0 Sportart FILTERN – eine Darstellung für Statistik, Bestwerte, Karte, Baustein-Filter und Tourenliste (Leitfaden 2.6, Muster „Filtern“):
+   zuerst „Alle Sportarten“, dann die Statistik-Gruppen, dann die Sportarten mit Touren in Katalog-Reihenfolge mit Kategorie-Überschrift; Farbpunkt = Streckenfarbe.
+     sportFilterHtml(keys, sel, mk, o) -> HTML. mk(key, label, {title, color, on, all}) baut das Bedienelement der Seite (Chip, Häkchen, Link);
+       o.all === false: ohne „Alle Sportarten“ (Karte: dort ist jede Sportart ein Schalter); o.wrap(id, label, html): Abschnitt je Kategorie (Standard: Überschrift + Elemente)
+     sportFilterOptions(keys, sel) -> <option>/<optgroup> in derselben Reihenfolge für ein Auswahlfeld (Tourenliste: kompakte Filterzeile) */
+function sportFilterHtml(keys, sel, mk, o = {}) {
+  sel = (sel || []).filter(Boolean);
+  const A = sportAuswahl(keys, sel),
+    on = k => sel.includes(k),
+    wrap = o.wrap || ((id, l, h) => `<span class="spkat" id="spk-${id}">${esc(l)}</span>${h}`);
+  return (o.all === false ? "" : mk("", "Alle Sportarten", {on: !sel.length, all: true})) +
+    (A.groups.length ? wrap("sg", "Statistik-Gruppen", A.groups.map(([k, l, t]) => mk(k, l, {title: t, color: sCol(k), on: on(k)})).join("")) : "") +
+    A.cats.map(([id, l, ks]) => wrap(id, l, ks.map(k => mk(k, sName(k), {color: sCol(k), on: on(k)})).join(""))).join("");
+}
+function sportFilterOptions(keys, sel = "") {
+  const A = sportAuswahl(keys, sel && !isSg(sel) ? [sel] : []),
+    opt = (k, l, t) => `<option value="${esc(k)}"${k === sel ? " selected" : ""}${t ? ` title="${esc(t)}"` : ""}>${esc(l)}</option>`;
+  return opt("", "Alle Sportarten") +
+    (A.groups.length ? `<optgroup label="Statistik-Gruppen">${A.groups.map(([k, l, t]) => opt(k, l, t)).join("")}</optgroup>` : "") +
+    A.cats.map(([, l, ks]) => `<optgroup label="${esc(l)}">${ks.map(k => opt(k, sName(k))).join("")}</optgroup>`).join("");
+}
+/* 3.61.0 Sportart ZUWEISEN – eine Auswahl für „Sportart ändern“ (Tour), Ziele, Planung und Aufzeichnen (Leitfaden 2.6, Muster „Zuweisen“):
+   die Favoriten-Sportarten als Knöpfe zuerst, darunter „Mehr …“ mit allen übrigen Sportarten nach Kategorien; die übergebene (aktuelle bzw. zuletzt benutzte) ist gewählt.
+     sportWahlHtml(cur, o) -> HTML. o.id: verstecktes Feld mit dem Wert (input type=hidden, für Formulare und Tests); o.favs: Reihenfolge der Knöpfe (Standard FAV);
+       o.label(k): Beschriftung eines Favoriten-Knopfs (Aufzeichnen: „Wanderung“ statt „Wandern“); o.extra: [[Schlüssel, Beschriftung, Tooltip]] vor den Favoriten (Ziele: „Alle Sportarten“, Statistik-Gruppen)
+     sportWahlBind(root, onPick) -> Klicks: Knopf wählen, verstecktes Feld setzen, onPick(Schlüssel) */
+function sportWahlHtml(cur, o = {}) {
+  const favs = (o.favs || (FAV && FAV.length ? FAV : FAV_DEF)).filter(k => SPORT[k]),
+    lbl = o.label || (k => sName(k)),
+    extra = (o.extra || []).slice(),
+    known = k => favs.includes(k) || extra.some(x => x[0] === k) || SPORT_CAT.some(c => c[2].includes(k));
+  if (cur && !known(cur)) extra.push([cur, sName(cur), ""]);                     // z. B. ein Schlüssel von Komoot, den der Katalog nicht kennt: bleibt wählbar
+  const b = (k, l, cls, t) => `<button type="button" class="${cls}" role="radio" aria-checked="${k === cur}" data-sp="${esc(k)}"${t ? ` title="${esc(t)}"` : ""}>${cls === "recspx" ? `<span aria-hidden="true">${sIcon(k)}</span> <span>${esc(l)}</span>` : esc(l)}</button>`,
+    inMore = SPORT_CAT.some(([, , ks]) => ks.includes(cur) && !favs.includes(cur));
+  return `<div class="spwahl"${o.id ? ` data-for="${o.id}"` : ""}>` +
+    `<div class="recsports" role="radiogroup" aria-label="${esc(o.aria || "Sportart")}">${extra.map(([k, l, t]) => b(k, l, "recsp", t)).join("")}${favs.map(k => b(k, lbl(k), "recsp")).join("")}</div>` +
+    `<details class="recset recmore"${o.moreId ? ` id="${o.moreId}"` : ""}${inMore ? " open" : ""}><summary>Mehr …</summary><div class="recsetb">${SPORT_CAT.map(([id, l, ks]) => {
+      const rest = ks.filter(k => !favs.includes(k));
+      return rest.length ? `<div class="recf"><span class="reclbl" id="spw-${o.id || "x"}-${id}">${esc(l)}</span><div class="recsports" role="radiogroup" aria-labelledby="spw-${o.id || "x"}-${id}">${rest.map(k => b(k, sName(k), "recspx")).join("")}</div></div>` : "";
+    }).join("")}</div></details>` +
+    (o.id ? `<input type="hidden" id="${o.id}" value="${esc(cur || "")}">` : "") + `</div>`;
+}
+function sportWahlBind(root, onPick) {
+  (root || document).querySelectorAll(".spwahl").forEach(w => {
+    w.addEventListener("click", e => {
+      const x = e.target.closest("[data-sp]");
+      if (!x || !w.contains(x)) return;
+      w.querySelectorAll("[data-sp]").forEach(y => y.setAttribute("aria-checked", y === x ? "true" : "false"));
+      const h = w.dataset.for && w.querySelector("#" + w.dataset.for);
+      if (h) {
+        h.value = x.dataset.sp;
+        h.dispatchEvent(new Event("change", {bubbles: true}));
+      }
+      if (typeof onPick === "function") onPick(x.dataset.sp);
+    });
+  });
+}
+/* Wert einer Zuweisen-Auswahl von außen setzen (z. B. beim Laden einer geplanten Tour) */
+function sportWahlSet(id, k) {
+  const h = document.getElementById(id), w = h && h.closest(".spwahl");
+  if (!w) return;
+  h.value = k || "";
+  let hit = null;
+  w.querySelectorAll("[data-sp]").forEach(y => {
+    const on = y.dataset.sp === h.value;
+    y.setAttribute("aria-checked", on ? "true" : "false");
+    if (on) hit = y;
+  });
+  const more = w.querySelector(".recmore");
+  if (hit && more && more.contains(hit)) more.open = true;
+}
 /* Schlüssel einer gespeicherten Auswahl, den es nicht mehr gibt (gelöschte Gruppe), fällt weg */
 const sgClean = l => (Array.isArray(l) ? l : []).filter(k => !isSg(k) || sgById(k));
 async function sgLoad() {
@@ -526,7 +597,13 @@ document.addEventListener("keydown", e => {
   const u = document.getElementById("umenu");
   if (u) u.focus();
 });
+/* 3.61.0 Adressen mit deutschen Namen der Seiten (Leitfaden 1: „Bestwerte“ statt „Rekorde“): führen auf die gewohnte Seite; die bisherigen Adressen bleiben gültig */
+const ROUTE_ALIAS = {bestwerte: "records", rekorde: "records"};
 async function route() {
+  {
+    const m = /^#\/?([^/?]+)(.*)$/.exec(location.hash || "");
+    if (m && ROUTE_ALIAS[m[1]]) history.replaceState(null, "", "#/" + ROUTE_ALIAS[m[1]] + m[2]);
+  }
   const [path, qs] = (location.hash || "#/dash").replace(/^#\/?/, "").split("?");
   const [k0 = "dash", name, sub] = path.split("/");
   const k = k0 === "tour" && sub === "auswertung" ? "tourauswertung" : k0;      // #/tour/<id>/auswertung = Unterseite der Tour (3.16.0)

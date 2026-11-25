@@ -87,6 +87,6 @@ def test_oberflaeche_ohne_unversionierte_bilder():
 
 def test_service_worker():
     sw = (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'const V = "mt-v146"' in sw and 'PICS = "mt-pics-v2"' in sw and "const PICMAX = 2000" in sw
+    assert 'const V = "mt-v147"' in sw and 'PICS = "mt-pics-v2"' in sw and "const PICMAX = 2000" in sw
     assert "trim(PICS, 1200)" not in sw and sw.count("trim(PICS, PICMAX)") == 2
     assert 'p.startsWith("/pic/") && u.searchParams.get("v")' in sw and "s <= 600" in sw

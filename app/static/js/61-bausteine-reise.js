@@ -27,7 +27,7 @@ const rsLabels = (labels, max = 10) => {
 Object.assign(window.SL_WT, {
   rkennzahl: {
     fam: "reise", cat: "reise", icon: "met", name: "Reise-Kennzahlen", title: () => "Reise-Kennzahlen", multi: true, w: "halb", seiten: ["reise"], defaults: {values: RK_DEF},
-    desc: "Die wichtigsten Zahlen dieser Reise als Kacheln: Reisetage, Touren, Strecke, Aufstieg, Abstieg, Zeit unterwegs und Länder. Welche Kacheln erscheinen, wählst du in den Einstellungen.",
+    desc: "Die wichtigsten Zahlen dieser Reise als Kacheln: Reisetage, Touren, Strecke, Aufstieg, Abstieg, Dauer und Länder. Welche Kacheln erscheinen, wählst du in den Einstellungen.",
     fields: [{k: "values", kind: "checks", label: "Angezeigte Werte", min: 1, def: RK_DEF, options: RK_VALUES}, {kind: "title"}],
     preview: () => slPvTiles([["6", "Reisetage"], ["212 km", "Strecke"], ["3 100 m", "Aufstieg"]]),
     render(c, b, cfg, {reise}) {
@@ -58,7 +58,7 @@ Object.assign(window.SL_WT, {
         best = v.indexOf(Math.max(...v)), avg = slSum(v, x => x) / (v.filter(x => x > 0).length || 1),
         lab = keys.map(k => `${+k.slice(8, 10)}.${+k.slice(5, 7)}.`);
       b.innerHTML = slCols(v, {hl: best, avg, label: `Säulendiagramm: ${name}, am stärksten am ${fmtDatumKurz(keys[best])} mit ${fmt(v[best])}`, labels: rsLabels(lab), cls: "slsm rscol"}) +
-        `<p class="slcmp">Stärkster Tag: ${fmtDatumKurz(keys[best])}</p><p class="mut slcmpn">${fmt(v[best])}; im Schnitt der Tage mit Touren ${fmt(avg)} (gestrichelte Linie).</p>`;
+        `<p class="slcmp">Stärkster Tag: ${fmtDatumKurz(keys[best])}</p><p class="mut slcmpn">${fmt(v[best])}; im Schnitt der aktiven Tage ${fmt(avg)} (gestrichelte Linie).</p>`;
       slBadge(c, fmt(v[best]));
     },
   },

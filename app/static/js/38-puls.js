@@ -83,7 +83,7 @@ function pulsCard(t) {
         `<svg viewBox="0 0 ${W} ${H}" class="w100 ha">${g}${bridge}<path d="${line}" fill="none" stroke="#c0504d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>` +
         `<div class="br6 ovh m12-0-8 fx h12">${bar}</div>` +
         `<div class="mut g6-16 fxw fx hrleg">${leg}</div>` +
-        `<div class="mut mt8 hrnote">Zonen nach ${h.hrmax} bpm Maximalpuls (einstellbar in der Verwaltung).</div>`;
+        `<div class="mut mt8 hrnote">Zonen nach ${h.hrmax} bpm Maximalpuls (einstellbar unter Verwaltung → Allgemein → Heimatort und Puls).</div>`;
       prof.after(d);
     })
     .catch(() => {});
@@ -183,14 +183,14 @@ VIEWS.pulse = async (_, q) => {
     zbar = `<div class="zbar">${zs.map((s, i) => `<span style="flex:${Math.max(s, 0.001)};background:${HR_ZC[i]}" title="Z${i + 1} ${HR_ZN[i]}: ${fmtDauer(s)}"></span>`).join("")}</div>
       <div class="mut zleg">${zs.map((s, i) => `<span><i style="background:${HR_ZC[i]}"></i>Z${i + 1} ${HR_ZN[i]}: ${fmtDauer(s)} (${Math.round((s / (tot || 1)) * 100)} %)</span>`).join("")}</div>`;
   main.innerHTML = `<div class="sec mt0"><h2>Puls</h2><span class="sub">${nf(sel.length, 0)} Touren mit Herzfrequenz</span></div>
-    <div class="chips mb12"><a class="chip ${Y ? "" : "on"}" href="#/pulse">Alle Jahre</a>${ys.map(y => `<a class="chip ${Y === y ? "on" : ""}" href="#/pulse?y=${y}">${y}</a>`).join("")}</div>
+    <div class="chips mb12"><a class="chip ${Y ? "" : "on"}" href="#/pulse">Gesamte Zeit</a>${ys.map(y => `<a class="chip ${Y === y ? "on" : ""}" href="#/pulse?y=${y}">${y}</a>`).join("")}</div>
     <div class="figs"><div class="fig"><div class="v">${nf(hh(tot), 0)}<span class="u">h</span></div><div class="l">mit Pulsmessung</div></div>
       <div class="fig"><div class="v">${avg}<span class="u">bpm</span></div><div class="l">Puls im Schnitt</div></div>
       <div class="fig"><div class="v">${top.max}<span class="u">bpm</span></div><div class="l">höchster Puls${top.t ? ` – <a href="#/tour/${top.id}">${esc(top.t.name)}</a>` : ""}</div></div>
       <div class="fig"><div class="v">${Math.round(((zs[3] + zs[4]) / (tot || 1)) * 100)}<span class="u">%</span></div><div class="l">der Zeit in Zone 4 und 5</div></div></div>
     <div class="panel gap"><h2>Zeit in den Pulszonen</h2>${zbar}
       <svg class="chart" viewBox="0 0 ${W} ${H}">${bars}</svg>
-      <div class="mut fs13">Zonen nach ${r.hrmax} bpm Maximalpuls (einstellbar in der Verwaltung). ${Y ? "Je Monat." : "Je Jahr."}</div></div>
+      <div class="mut fs13">Zonen nach ${r.hrmax} bpm Maximalpuls (einstellbar unter Verwaltung → Allgemein → Heimatort und Puls). ${Y ? "Je Monat." : "Je Jahr."}</div></div>
     <div class="panel gap"><h2>Durchschnittspuls je Tour</h2><svg class="chart" viewBox="0 0 ${W} ${H}">${dots}</svg><div class="mut fs13">Ein Punkt je Tour, eingefärbt nach Sportart. Antippen öffnet die Tour.</div></div>
     <div class="panel gap"><h2>Die anstrengendsten Touren</h2><div class="rows">${hard.map(x => `<a class="r" href="#/tour/${x.id}"><span>${esc(x.t.name)} <span class="mut">${fmtDatumKurz(x.t.date)}</span></span><b>${Math.round(x.hs * 100)} %</b><span class="mut">in Zone 4–5, Ø ${x.avg} bpm</span></a>`).join("")}</div></div>`;
   statTabs("pulse");

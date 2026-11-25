@@ -107,13 +107,13 @@ def test_verwaltung_gruppen_anlegen_vorschlaege_und_speichern(pw, clean):
         quiet(pg, 4000)
         sec = pg.locator("#sgp")
         expect(sec.locator("h2")).to_have_text("Statistik-Gruppen")
-        expect(sec.locator(".sgnone")).to_have_text("Keine Gruppen: Die Statistik zählt jede Sportart einzeln.")
+        expect(sec.locator(".sgnone")).to_have_text("Keine Statistik-Gruppen: Die Statistik zählt jede Sportart einzeln.")
         assert sec.locator(".sgg").count() == 0
         assert sec.locator(".sgsug:visible").all_inner_texts() == ["Vorschlag: Wandern und Bergsteigen", "Vorschlag: Rad (alle)", "Vorschlag: Ski (alle)"]
         # Vorschlag „Rad (alle)“: MTB herauslösen (per Tastatur), danach ist MTB in einer neuen Gruppe frei
         sec.locator('.sgsug[data-v="bike"]').click()
         expect(sec.locator(".sgg")).to_have_count(1)
-        expect(sec.locator("#sgok")).to_contain_text("Vorschlag übernommen")
+        expect(sec.locator("#sgok")).to_contain_text("Vorschlag eingetragen")
         assert sec.locator('.sgsug[data-v="bike"]').is_hidden()
         assert sec.locator("#sgn0").input_value() == "Rad (alle)" and sec.locator("#sgc0_mtb_easy").is_checked() and sec.locator("#sgc0_e_mtb").is_checked()
         assert sec.locator(".sgg").first.locator(".sgcl").all_inner_texts() == ["Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor und Sonstige"]
@@ -132,10 +132,10 @@ def test_verwaltung_gruppen_anlegen_vorschlaege_und_speichern(pw, clean):
         assert pg.evaluate("() => document.activeElement.id") == "sgn0"
         # Prüfung im Browser: zu wenige Sportarten
         sec.locator("#sgsave").click()
-        expect(sec.locator("#sgerr")).to_have_text("„Gelände“: Eine Gruppe braucht mindestens 2 Sportarten.")
+        expect(sec.locator("#sgerr")).to_have_text("„Gelände“: Eine Statistik-Gruppe braucht mindestens 2 Sportarten.")
         sec.locator("#sgc1_climbing").check()
         sec.locator("#sgsave").click()
-        expect(sec.locator("#sgok")).to_have_text("Gespeichert ✓ – gilt ab sofort in der Statistik.", timeout=TL)
+        expect(sec.locator("#sgok")).to_have_text("Statistik-Gruppen gespeichert – gelten ab sofort in der Statistik", timeout=TL)
         d = _get(url)
         assert [g["name"] for g in d["gruppen"]] == ["Rad", "Gelände"] and d["gruppen"][0]["id"] == "bike" and "mtb" not in d["gruppen"][0]["sports"]
         # Vorschlag „Wandern und Bergtouren“ und Löschen
@@ -169,14 +169,14 @@ def test_verwaltung_favoriten(pw, clean):
         pg.keyboard.press("Enter")
         assert sec.locator(".favn").all_inner_texts() == ["Wandern", "Radtour", "Kajak / Kanu", "Skitour", "Mountainbike"]
         sec.locator("#favsave").click()
-        expect(sec.locator("#favok")).to_have_text("Gespeichert ✓", timeout=TL)
+        expect(sec.locator("#favok")).to_have_text("Favoriten-Sportarten gespeichert", timeout=TL)
         fav = json.loads(urllib.request.urlopen(url + "/api/aktivitaeten/favoriten", timeout=10).read())["favoriten"]
         assert fav == ["hike", "touringbicycle", "kayak", "skitour", "mtb"]
         # Planung bietet die Favoriten zuerst an
         pg.goto(url + "/#/plan")
-        pg.wait_for_selector("#ps", timeout=TL)
-        assert pg.eval_on_selector_all("#ps optgroup", "l => l.map(x => x.label)") == ["Favoriten", "Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor und Sonstige"]
-        assert pg.eval_on_selector_all("#ps optgroup:first-child option", "l => l.map(x => x.value)") == fav and pg.input_value("#ps") == "hike"
+        pg.wait_for_selector("#ps", state="attached", timeout=TL)                     # 3.61.0: Muster „Zuweisen“ (Favoriten-Knöpfe, „Mehr …“ nach Kategorien)
+        assert pg.eval_on_selector_all(".plsp .recmore .reclbl", "l => l.map(x => x.textContent)") == ["Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor und Sonstige"]
+        assert pg.eval_on_selector_all(".plsp .spwahl > .recsports .recsp", "l => l.map(x => x.dataset.sp)") == fav and pg.input_value("#ps") == "hike"
         assert not errs, errs
     finally:
         rq = urllib.request.Request(url + "/api/aktivitaeten/favoriten", data=json.dumps({"favoriten": ["hike", "jogging", "touringbicycle", "skitour", "mtb"]}).encode(),
@@ -251,8 +251,8 @@ def test_englisch_und_handy(pw, clean):
         _admin(pg, url)
         sec = pg.locator("#sgp")
         expect(sec.locator("h2")).to_have_text("Statistics groups")
-        expect(sec.locator("#sgsave")).to_have_text("Save groups")
-        expect(sec.locator("#sgadd")).to_have_text("Add group")
+        expect(sec.locator("#sgsave")).to_have_text("Save")
+        expect(sec.locator("#sgadd")).to_have_text("Add statistics group")
         assert pg.evaluate("() => document.documentElement.scrollWidth <= window.innerWidth + 1")
         box = sec.bounding_box()
         assert box["x"] >= 0 and box["x"] + box["width"] <= 391
@@ -272,10 +272,12 @@ def test_tour_sportart_aendern_alle_aktivitaeten(pw, clean):
         quiet(pg, 3000)
         pg.locator('.tact-bar [data-g="edit"]').click()
         pg.locator('.tactl [data-e="esport"]').click()
-        pg.wait_for_selector("#espsel", timeout=TL)
-        assert pg.eval_on_selector_all("#espsel optgroup", "l => l.map(x => x.label)") == ["Favoriten", "Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor und Sonstige"]
-        assert pg.input_value("#espsel") == "touringbicycle" and pg.locator("#espsel option").count() == 29
-        pg.select_option("#espsel", "mtb_easy")
+        pg.wait_for_selector("#espsel", state="attached", timeout=TL)                 # 3.61.0: Muster „Zuweisen“
+        assert pg.eval_on_selector_all(".uibox .recmore .reclbl", "l => l.map(x => x.textContent)") == ["Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor und Sonstige"]
+        assert pg.input_value("#espsel") == "touringbicycle" and pg.locator(".uibox .spwahl [data-sp]").count() == 29
+        pg.locator("#espmore summary").click()
+        pg.locator('.uibox [data-sp="mtb_easy"]').click()
+        assert pg.input_value("#espsel") == "mtb_easy"
         pg.locator("#espok").click()
         pg.wait_for_selector("#espsel", state="detached", timeout=TL)
         assert _sport(url, "r1") == "mtb_easy"

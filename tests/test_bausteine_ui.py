@@ -418,7 +418,7 @@ def test_dash_config_number_field_goal_and_ring(pw, app):
         pg.wait_for_function("() => document.querySelector('.slerr').textContent.length > 5", timeout=T)
         pg.locator(".slform input[type=number]").fill("20")
         pg.get_by_role("button", name="Speichern", exact=True).click()
-        pg.wait_for_function("() => document.getElementById('slsaved').textContent.trim() === 'Gespeichert'", timeout=T)
+        pg.wait_for_function("() => document.getElementById('slsaved').textContent.trim() === 'Ansicht gespeichert'", timeout=T)
         assert _api(app, "uebersicht")["layout"]["widgets"][0]["cfg"]["schwelle"] == 20
         assert not pg.errors, pg.errors
     finally:
@@ -489,7 +489,7 @@ def test_empty_states_dash_widgets(pw, app):
         r = pg.evaluate(EMPTY, [NEW_DASH, "r3", True])
         bad = {k: v for k, v in r.items() if not v or v.startswith("FEHLER") or "Wird geladen" in v}
         assert not bad, bad
-        assert r["uhrenzeit"].startswith("Noch kein Gerät") and r["ausruestung"] == "Noch keine Ausrüstung angelegt." and r["geplant"].startswith("Keine offenen Pläne")
+        assert r["uhrenzeit"].startswith("Noch kein Gerät") and r["ausruestung"] == "Noch keine Ausrüstung angelegt." and r["geplant"].startswith("Keine offenen geplanten Touren")
         assert r["heatmap"] == "Noch keine Touren." and r["ziele"].startswith("Noch kein Ziel für")
         assert r["orte"].startswith("Noch keine Regionen bestimmt") and r["rueckblick"].startswith("Im Jahr ")
         assert not pg.errors, pg.errors

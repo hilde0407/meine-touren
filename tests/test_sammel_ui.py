@@ -472,7 +472,7 @@ def test_card_shows_last_batch_with_undo_and_viewer_sees_no_buttons(pw, app_url)
         t = sec.inner_text()
         assert "3 Touren korrigiert (Höhe aus dem Geländemodell), Aufstieg zusammen −450 m." in t and "Nur dieser Lauf wird zurückgenommen" in t
         assert sec.locator(".dvundo").get_attribute("data-batch") == "b1"
-        assert c.locator("button.dvbatch").inner_text().strip() == "Alle auffälligen Höhen korrigieren …"
+        assert c.locator("button.dvbatch").inner_text().strip() == "Höhe aller auffälligen Touren korrigieren …"
         # Betrachter: JS-Rolle simulieren – weder Sammel-Korrektur noch Auswerten noch Rückgängig
         pg.evaluate("ME.user = Object.assign({}, ME.user, {role: 'viewer'})")
         pg.evaluate("document.querySelectorAll('#devsec .dvcard').forEach(e => e.setAttribute('data-alt', '1'))")        # alte Karten markieren: neue (ohne Marke) abwarten

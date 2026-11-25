@@ -117,7 +117,7 @@ VIEWS.dash = async (_, q) => {
     <div class="panel" data-st="sportarten" data-badge="${esc(sports.length ? `${sName(sports[0][0])} ${nf((sports[0][1] / tot) * 100, 0)} %` : "")}"><h2>Sportarten</h2><div class="stack">${sports.map(([s, v]) => `<div style="width:${(v / tot) * 100}%;background:${sCol(s)}" title="${sName(s)}"></div>`).join("")}</div>
       <div class="rows mt10">${sports.map(([s, v]) => `<div class="r"><span${isSg(s) ? ` title="${esc(sgTitle(s))}"` : ""}><i class="sw" style="background:${sCol(s)}"></i>${sName(s)}</span><span class="mut">${fmtKm(v, {d: 0})}, ${nf((v / tot) * 100, 0)} %</span></div>`).join("")}</div></div>
     </div>
-  <div class="panel gap" data-st="heat" data-badge="${esc(`${Object.keys(byDay).length} Tage mit Touren`)}"><h2>Aktivität im Jahr ${hy}</h2>${heat(hy, byDay)}</div>
+  <div class="panel gap" data-st="heat" data-badge="${esc(`${Object.keys(byDay).length} Aktive Tage`)}"><h2>Touren im Jahr ${hy}</h2>${heat(hy, byDay)}</div>
   ${otd.length ? `<div data-st="tag" data-badge="${esc(otd.length === 1 ? "1 Tour" : otd.length + " Touren")}"><div class="sec"><h2>An diesem Tag</h2><span class="sub">in früheren Jahren</span></div><div class="tl">${otd.map(tourRow).join("")}</div></div>` : ""}
   <div data-st="erinn"><div class="sec" id="memh"><h2>Erinnerungen</h2><span class="sub" id="memsub"></span></div><div id="mem" class="thumbs"></div></div></div>`;
   stFilterBind(F);
@@ -244,10 +244,11 @@ function tourRow(t) {
 /* 3.60.1 Sportarten der Karte (#ms): dieselbe Auswahl wie Statistik und Baustein-Filter (sportAuswahl, 01-grundlagen.js) – nach Kategorien in Katalog-Reihenfolge,
    nur Sportarten mit Touren, dazu die Statistik-Gruppen (ein Klick schaltet alle Mitglieder). Abgewählt ist, was mapOff() liefert (nur Chips mit data-s). */
 function mapSportChips() {
-  const A = sportAuswahl(TOURS.map(t => t.sport));
-  const chip = s => `<button type="button" class="chip on" data-s="${esc(s)}" aria-pressed="true"><i style="background:${sCol(s)}"></i>${esc(sName(s))}</button>`;
-  return A.cats.map(([id, l, ks]) => `<div class="mscat" role="group" aria-labelledby="msc-${id}"><span class="mscl" id="msc-${id}">${esc(l)}</span>${ks.map(chip).join("")}</div>`).join("") +
-    (A.groups.length ? `<div class="mscat" role="group" aria-labelledby="msc-sg"><span class="mscl" id="msc-sg">Statistik-Gruppen</span>${A.groups.map(([k, l, t]) => `<button type="button" class="chip on msg" data-g="${esc(k)}" aria-pressed="true" title="${esc(t)}"><i style="background:${sCol(k)}"></i>${esc(l)}</button>`).join("")}</div>` : "");
+  /* 3.61.0: dieselbe Darstellung wie alle Sportart-Filter (sportFilterHtml): Statistik-Gruppen zuerst, dann die Kategorien; ohne „Alle Sportarten“ (jede Sportart ist ein Schalter) */
+  return sportFilterHtml(TOURS.map(t => t.sport), [], (k, l, x) => isSg(k)
+    ? `<button type="button" class="chip on msg" data-g="${esc(k)}" aria-pressed="true" title="${esc(x.title)}"><i style="background:${x.color}"></i>${esc(l)}</button>`
+    : `<button type="button" class="chip on" data-s="${esc(k)}" aria-pressed="true"><i style="background:${x.color}"></i>${esc(l)}</button>`,
+  {all: false, wrap: (id, l, h) => `<div class="mscat" role="group" aria-labelledby="msc-${id}"><span class="mscl" id="msc-${id}">${esc(l)}</span>${h}</div>`});
 }
 const mapOff = () => new Set([...document.querySelectorAll("#ms .chip[data-s]:not(.on)")].map(c => c.dataset.s));
 /* Gruppen-Chip: an, solange alle vorhandenen Mitglieder an sind */
@@ -264,7 +265,7 @@ VIEWS.map = async () => {
     ys = years();
   $("#main").className = "wide";
   $("#main").innerHTML = `<div class="mapbox"><div id="bigmap"></div><div class="mapui">
-    <div class="box"><select id="my"><option value="0">Alle Jahre</option>${ys.map(y => `<option>${y}</option>`).join("")}</select><span id="mc" class="cnt"></span></div>
+    <div class="box"><select id="my"><option value="0">Gesamte Zeit</option>${ys.map(y => `<option>${y}</option>`).join("")}</select><span id="mc" class="cnt"></span></div>
     <div class="box" id="ms">${mapSportChips()}</div><div class="box" id="mn" style="display:none"></div></div></div>`;
   map = mkMap("bigmap", {layers: true, leaflet: {preferCanvas: true}});
   const grp = L.layerGroup().addTo(map),
@@ -369,7 +370,7 @@ VIEWS.map = async () => {
     );
     if (!$("#mn")) return;
     if (fail) {
-      $("#mn").textContent = `${fail} Strecken nicht lokal vorhanden – in der Verwaltung „Routen laden“ (Komoot-Zugang nötig)`;
+      $("#mn").textContent = `${fail} Strecken nicht lokal vorhanden – unter Verwaltung → Touren holen → Komoot „Fehlende Strecken holen“ (Komoot-Zugang nötig)`;
       need.forEach(x => busy.add(x.t.id));
     } else $("#mn").style.display = "none";
   };
@@ -456,7 +457,7 @@ function tourXfBar(x) {
   else if (x.von) c.push(`ab ${fmtDatumKurz(x.von)}`);
   else if (x.bis) c.push(`bis ${fmtDatumKurz(x.bis)}`);
   if (x.tag) c.push(`Schlagwort „${x.tag}“`);
-  if (x.minkm) c.push(`mindestens ${nf(x.minkm, x.minkm % 1 ? 1 : 0)} km`);
+  if (x.minkm) c.push(`mindestens ${fmtKm(x.minkm, {d: x.minkm % 1 ? 1 : 0})}`);
   return `<div class="kzxf" role="status"><p class="kzxt"><b>Touren der Kennzahl „${esc(x.kz)}“</b> <a href="#/tours">Filter aufheben</a></p>` +
     `${c.length ? `<p class="kzxc">${c.map(i => `<span class="kzchip">${esc(i)}</span>`).join(" ")}</p>` : ""}${x.hn ? `<p class="mut kzxh">${XF_HN[x.hn]}</p>` : ""}</div>`;
 }
@@ -466,12 +467,12 @@ VIEWS.tours = async (_name, qp) => {
   const ys = years(),
     sp = [...new Set(TOURS.map(t => t.sport))];
   $("#main").innerHTML = `<div class="sec mt0"><h2>Alle Touren</h2><span class="sub" id="cnt"></span></div>
-   ${xf ? tourXfBar(xf) : ""}<div class="filters" id="flt"><input id="q" placeholder="Name suchen" class="mnw230"><span class="fxtra"><select id="fy"><option value="0">Alle Jahre</option>${ys.map(y => `<option>${y}</option>`).join("")}</select></span>
-   <select id="fs"><option value="">Alle Sportarten</option>${sp.map(s => `<option value="${s}">${sName(s)}</option>`).join("")}</select>
+   ${xf ? tourXfBar(xf) : ""}<div class="filters" id="flt"><input id="q" placeholder="Name suchen" class="mnw230"><span class="fxtra"><select id="fy"><option value="0">Gesamte Zeit</option>${ys.map(y => `<option>${y}</option>`).join("")}</select></span>
+   <select id="fs" aria-label="Sportart">${sportFilterOptions(sp)}</select>
    <span class="fxtra"><select id="fz" title="Jahreszeit"><option value="">Ganzjährig</option><option value="sommer">Sommerhalbjahr (Mai–Okt)</option><option value="winter">Winterhalbjahr (Nov–Apr)</option></select>
    <select id="fb" title="Meine Bewertung"><option value="">Alle Bewertungen</option><option value="5">★★★★★</option><option value="4">ab ★★★★</option><option value="3">ab ★★★</option></select>
    <select id="fr" title="Region"><option value="">Alle Regionen</option>${regionOpts()}</select>
-   <select id="ft" title="Tag / Album"><option value="">Alle Tags</option>${allTags()
+   <select id="ft" title="Schlagwort / Album"><option value="">Alle Schlagwörter</option>${allTags()
      .map(x => `<option value="${esc(x)}">${esc(x)}</option>`)
      .join("")}</select></span>
    <select id="so"><option value="date">Neueste zuerst</option><option value="old">Älteste zuerst</option><option value="km">Längste Strecke</option><option value="up">Größter Aufstieg</option><option value="h">Längste Dauer</option></select>
@@ -549,7 +550,7 @@ VIEWS.tours = async (_name, qp) => {
         (!y || t.y === y) &&
         (!sz || seasonOf(t.date) === sz) &&
         (!sb || (t.stars || 0) >= sb) &&
-        (!s || t.sport === s) &&
+        (!s || sgMatch(t.sport, [s])) &&
         inRegion(t, rg) &&
         (!tg || (t.tags || "").split("|").includes(tg)) &&
         (!q.trim() || smatch(t.name, q)) &&

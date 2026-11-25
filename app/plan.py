@@ -179,7 +179,7 @@ def api_plan_vorschlaege():
 
 def _plan_or_404(pid):
     if not db.one("SELECT 1 FROM plans WHERE id=?", (pid,)):
-        raise HTTPException(404, "Plan nicht gefunden")
+        raise HTTPException(404, "Geplante Tour nicht gefunden")
 
 
 @router.post("/api/plans/{pid}/tour")
@@ -218,7 +218,7 @@ def api_plan_status(pid: int, body: dict):
 def api_plan_get(pid: int):
     r = db.one("SELECT * FROM plans WHERE id=?", (pid,))
     if not r:
-        raise HTTPException(404, "Plan nicht gefunden")
+        raise HTTPException(404, "Geplante Tour nicht gefunden")
     r["pts"] = json.loads(r["pts"])
     try:
         r["wps"] = json.loads(r["wps"]) if r.get("wps") else None
@@ -235,7 +235,7 @@ def api_plan_hilfe(pid: int, datum: str = None, start: str = None, puffer: str =
     datum/start/puffer (auch leer = Standard) überschreiben nur für diese Antwort die gespeicherten Werte. Nur lesend; gespeicherte Links werden nie abgerufen."""
     r = db.one("SELECT * FROM plans WHERE id=?", (pid,))
     if not r:
-        raise HTTPException(404, "Plan nicht gefunden")
+        raise HTTPException(404, "Geplante Tour nicht gefunden")
     kw = {}
     try:
         if datum is not None:
@@ -253,7 +253,7 @@ def api_plan_hilfe(pid: int, datum: str = None, start: str = None, puffer: str =
 def api_plan_save(body: dict):
     pts = _pts(body.get("pts"))
     if len(pts) < 2:
-        raise HTTPException(400, "Der Plan braucht mindestens zwei Punkte")
+        raise HTTPException(400, "Die geplante Tour braucht mindestens zwei Punkte")
     if len(pts) > MAXPTS:
         step = len(pts) / MAXPTS
         pts = [pts[int(i * step)] for i in range(MAXPTS)] + [pts[-1]]

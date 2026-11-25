@@ -1,6 +1,6 @@
 """Belastung und Erholung: die Trainingsbelastung laut Uhr (exercise_load aus den Zusatzdateien <Tour>.uhr.json) je Woche und Monat.
 
-Rein lesend: Es werden nur Zusatzdateien gelesen, die schon vorhanden sind (beim Öffnen einer Tour oder durch den Job „Uhr-Daten aller Touren laden“ gespeichert).
+Rein lesend: Es werden nur Zusatzdateien gelesen, die schon vorhanden sind (beim Öffnen einer Tour oder durch den Job „Uhr-Daten aller Touren holen“ gespeichert).
 Kein Zepp-Abruf.
 
 Grundsatz „ohne Angabe“: Eine Tour ohne Uhr-Wert zählt NIE als 0. Eine Woche/ein Monat mit Touren, aber ohne einen einzigen Uhr-Wert hat keine Belastung (None).

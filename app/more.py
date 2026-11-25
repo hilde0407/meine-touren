@@ -357,10 +357,10 @@ def api_health():
         w.append({"level": "warn", "text": "Noch keine Touren: Komoot-Zugang eintragen oder GPX-Dateien bzw. Zepp-Trainings importieren (Verwaltung)."})
     z = db.get("zepp_state") or ""
     if z.startswith("fail"):
-        w.append({"level": "warn", "text": "Zepp-Token ist abgelaufen oder ungültig (Verwaltung → Zepp)."})
+        w.append({"level": "warn", "text": "Zepp-Token ist abgelaufen oder ungültig (Verwaltung → Touren holen → Zepp-Import)."})
     st = jobs.get_state()
     if st.get("ok") is False and st.get("finished") and time.time() - st["finished"] < 3 * 86400:
-        w.append({"level": "warn", "text": f"Letzter Job „{st.get('running') or 'unbekannt'}“ ist fehlgeschlagen (Verwaltung → Protokoll)."})
+        w.append({"level": "warn", "text": f"Letzter Job „{st.get('running') or 'unbekannt'}“ ist fehlgeschlagen (Verwaltung → Allgemein → Protokoll)."})
     nb = extras.newest_backup()
     err = db.get("backup_err")
     if err:

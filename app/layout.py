@@ -6,7 +6,7 @@ Das Layout einer Seite gilt für alle Reisen gleich (je Benutzer, nicht je Reise
 Jeder Benutzer hat eine eigene Datenbank (app/ctx.py); die Tabelle `user_layout` ist daher je Benutzer getrennt, eine Spalte „user“ ist nicht nötig.
 Dokument (JSON-Objekt, alle Felder optional):
   order    [id]            Reihenfolge der Abschnitte dieser Seite
-  hidden   [id]            ausgeblendete Abschnitte
+  hidden   [id]            ausgeblendete Bausteine
   closed   [id] / open [id] Abschnitte, die standardmäßig zu bzw. (abweichend vom Standard) offen sind
   page     {id: "haupt"|"auswertung"}  Abschnitte, die auf der anderen Seite der Tour liegen
   widgets  [{id, type, cfg}]  hinzugefügte Bausteine mit ihrer Konfiguration
@@ -18,7 +18,7 @@ Seiteneignung (3.20.0): Bausteine der Übersicht dürfen auch auf der Tourseite 
 die Dokumente „uebersicht“ und „statistik“ lehnen sie ab. 3.22.0: Bausteine der Statistik (STATISTIK_ONLY) stehen nur im Dokument „statistik“; die Bausteine der Übersicht dürfen auch dort stehen.
 Unbekannte Typen (neuere Version) bleiben überall erlaubt.
 Erinnerungen (3.32.0, Typ „erinn“, als Standard-Abschnitt der Übersicht unter cfg.erinn und als hinzugefügter Baustein): streng geprüfte Konfiguration, andere Felder sind nicht erlaubt:
-  mode random|best|day|recent (Auswahl der Fotos)   n 3|6|9|12 (Anzahl)   view grid|strip|show (Darstellung)   ratio sq|43|169|orig (Seitenverhältnis)   size s|m|l (Größe der Bilder)
+  mode random|best|day|recent (Auswahl der Fotos)   n 3|6|9|12 (Anzahl)   view grid|strip|show (Darstellung)   ratio sq|43|169|orig (Seitenverhältnis)   size s|m|l (Größe der Fotos)
   height k|n|h (Höhe der Einzelbild-Show)   tempo 3|5|8|12 (Sekunden je Bild)   caption / shuffle / link  Ja-Nein (Bildunterschrift, Knopf „Neu mischen“, Link „Diashow starten“)
   sports, range, yr, title wie üblich. Gespeichert werden nur Abweichungen vom Standard (ohne cfg: 6 zufällige Fotos als Raster, mit Link zur Diashow).
 Hinweis-Bausteine (3.23.0, „Alarm-Bausteine“: erscheinen nur, wenn etwas los ist; Typen hnmeilenstein, hnauffaellig, hnpause, hnrekord, hnerholung, hnsicherung und die Sammel-Variante „hinweise“):
@@ -420,7 +420,7 @@ def _cfg(v, typ=None):
         if k in KNOWN:
             out[k] = _known(k, x)
             continue
-        if typ == "geplant" and k == "gegangen":          # 3.38.1: „Gegangene Pläne auch zeigen“ (Baustein „Geplante Touren“), nur Ja/Nein
+        if typ == "geplant" and k == "gegangen":          # 3.38.1: „Gegangene geplante Touren auch zeigen“ (Baustein „Geplante Touren“), nur Ja/Nein
             if not isinstance(x, bool):
                 raise HTTPException(400, "Ungültiger Wert für „gegangen“ in der Konfiguration")
             out[k] = x
@@ -443,42 +443,42 @@ def _groups(v, key, wids):
     if not isinstance(v, list) or len(v) > MAX_GROUPS:
         raise HTTPException(400, f"„groups“ muss eine Liste mit höchstens {MAX_GROUPS} Gruppen sein")
     if v and key == "karte":
-        raise HTTPException(400, "Auf der Karte gibt es keine Gruppen")
+        raise HTTPException(400, "Auf der Karte gibt es keine Bausteingruppen")
     gids, used, out = set(), set(), []
     for g in v:
         if not isinstance(g, dict) or set(g) - {"id", "title", "ids", "closed"}:
-            raise HTTPException(400, "Ungültige Gruppe")
+            raise HTTPException(400, "Ungültige Bausteingruppe")
         i = g.get("id")
         if not isinstance(i, str) or not GROUP_ID_RE.match(i):
-            raise HTTPException(400, "Ungültige Kennung einer Gruppe (erlaubt: grp plus 2 bis 12 Kleinbuchstaben oder Ziffern)")
+            raise HTTPException(400, "Ungültige Kennung einer Bausteingruppe (erlaubt: grp plus 2 bis 12 Kleinbuchstaben oder Ziffern)")
         if i in gids:
-            raise HTTPException(400, "Doppelte Kennung einer Gruppe")
+            raise HTTPException(400, "Doppelte Kennung einer Bausteingruppe")
         gids.add(i)
     for g in v:
         t = g.get("title", "")
         if not isinstance(t, str) or re.search(r"[\x00-\x1f\x7f<>]", t) or len(t.strip()) > MAX_GROUP_TITLE:
-            raise HTTPException(400, f"Der Titel einer Gruppe darf höchstens {MAX_GROUP_TITLE} Zeichen lang sein (ohne Steuer- und Spitzklammern)")
+            raise HTTPException(400, f"Der Titel einer Bausteingruppe darf höchstens {MAX_GROUP_TITLE} Zeichen lang sein (ohne Steuer- und Spitzklammern)")
         ids = g.get("ids")
         if not isinstance(ids, list) or not 1 <= len(ids) <= MAX_GROUP_MEMBERS:
-            raise HTTPException(400, f"Eine Gruppe enthält 1 bis {MAX_GROUP_MEMBERS} Abschnitte")
+            raise HTTPException(400, f"Eine Bausteingruppe enthält 1 bis {MAX_GROUP_MEMBERS} Bausteine")
         mem = []
         for x in ids:
             if not isinstance(x, str) or not ID_RE.match(x):
-                raise HTTPException(400, "Ungültige Kennung in einer Gruppe")
+                raise HTTPException(400, "Ungültige Kennung in einer Bausteingruppe")
             if x in gids:
-                raise HTTPException(400, "Gruppen lassen sich nicht verschachteln")
+                raise HTTPException(400, "Bausteingruppen lassen sich nicht verschachteln")
             if x in GROUP_NEVER:
-                raise HTTPException(400, "Dieser Abschnitt bleibt immer sichtbar und lässt sich nicht gruppieren")
+                raise HTTPException(400, "Dieser Baustein bleibt immer sichtbar und lässt sich nicht gruppieren")
             if x in used or x in mem:
-                raise HTTPException(400, "Ein Abschnitt steht in höchstens einer Gruppe")
+                raise HTTPException(400, "Ein Baustein steht in höchstens einer Bausteingruppe")
             if x not in STD_IDS.get(key, ()) and x not in wids and key != "tour-auswertung":
-                raise HTTPException(400, "Eine Gruppe verweist auf einen Abschnitt oder Baustein, den es auf dieser Seite nicht gibt")
+                raise HTTPException(400, "Eine Bausteingruppe verweist auf einen Baustein, den es auf dieser Seite nicht gibt")
             mem.append(x)
         used.update(mem)
         o = {"id": g["id"], "title": " ".join(t.split()), "ids": mem}
         if "closed" in g:
             if not isinstance(g["closed"], bool):
-                raise HTTPException(400, "„closed“ einer Gruppe muss true oder false sein")
+                raise HTTPException(400, "„closed“ einer Bausteingruppe muss true oder false sein")
             if g["closed"]:
                 o["closed"] = True
         out.append(o)

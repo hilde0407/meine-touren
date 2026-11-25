@@ -17,7 +17,7 @@ const slGrpDefs = (fam, page) => {
 };
 const slGrpOf = id => slGrpList().find(g => g.ids.includes(id)) || null;
 const slGrpHas = (gid, id) => slGrpList().some(g => g.id === gid && g.ids.includes(id));
-const slGrpName = g => g.title || `Gruppe ${slGrpList().indexOf(g) + 1}`;
+const slGrpName = g => g.title || `Bausteingruppe ${slGrpList().indexOf(g) + 1}`;
 const slGrpOk = it => !!it && !it.must && !it.own && SL.fam !== "karte";
 const slGrpCan = id => slGrpOk(slItems(SL.fam).find(i => i.id === id));
 const slGrpNewId = () => {
@@ -103,12 +103,12 @@ document.addEventListener("toggle", e => {
 const slGrpCount = n => (n === 1 ? "1 Baustein" : `${n} Bausteine`);
 function slGrpStrip(g, i, n) {
   const nm = esc(slGrpName(g));
-  return `<span class="slgtag">Gruppe</span><span class="slnm" title="${nm}">${nm}</span><span class="slbs">` +
-    `<button type="button" class="slb" data-a="gname" aria-haspopup="dialog" aria-label="Gruppe umbenennen: ${nm}">Umbenennen</button>` +
+  return `<span class="slgtag">Bausteingruppe</span><span class="slnm" title="${nm}">${nm}</span><span class="slbs">` +
+    `<button type="button" class="slb" data-a="gname" aria-haspopup="dialog" aria-label="Bausteingruppe umbenennen: ${nm}">Umbenennen</button>` +
     `<label class="slsw"><input type="checkbox" data-a="gopen"${g.closed ? "" : " checked"}><span>Standardmäßig offen</span></label>` +
-    `<button type="button" class="slb" data-a="gup" aria-label="Gruppe nach oben: ${nm}" title="Gruppe nach oben">↑</button>` +
-    `<button type="button" class="slb" data-a="gdown" aria-label="Gruppe nach unten: ${nm}" title="Gruppe nach unten">↓</button>` +
-    `<button type="button" class="slb slrm" data-a="gdel" aria-label="Gruppe lösen: ${nm}" title="Die Gruppe auflösen, die Bausteine bleiben auf der Seite">Gruppe lösen</button></span>`;
+    `<button type="button" class="slb" data-a="gup" aria-label="Bausteingruppe nach oben: ${nm}" title="Bausteingruppe nach oben">↑</button>` +
+    `<button type="button" class="slb" data-a="gdown" aria-label="Bausteingruppe nach unten: ${nm}" title="Bausteingruppe nach unten">↓</button>` +
+    `<button type="button" class="slb slrm" data-a="gdel" aria-label="Bausteingruppe lösen: ${nm}" title="Die Bausteingruppe auflösen, die Bausteine bleiben auf der Seite">Bausteingruppe lösen</button></span>`;
 }
 /* Element einer Gruppe bauen bzw. aktualisieren; die Mitglieder (ps) werden hineingestellt */
 function slGrpBlock(root, g, ps, edit) {
@@ -145,7 +145,7 @@ function slGrpBlock(root, g, ps, edit) {
     }
     if (st.dataset.sig !== sig) {
       st.dataset.sig = sig;
-      st.setAttribute("aria-label", `Gruppe: ${slGrpName(g)}`);
+      st.setAttribute("aria-label", `Bausteingruppe: ${slGrpName(g)}`);
       st.innerHTML = slGrpStrip(g, i, all.length);
     }
   }
@@ -172,25 +172,25 @@ function slGrpAssign(id, gid) {
   const d = slDocOf(SL.page);
   let target = gid, msg;
   if (gid === "new") {
-    if ((d.groups || []).length >= SL_GMAX) return uiAlert(`Es sind höchstens ${SL_GMAX} Gruppen je Seite möglich.`);
+    if ((d.groups || []).length >= SL_GMAX) return uiAlert(`Es sind höchstens ${SL_GMAX} Bausteingruppen je Seite möglich.`);
     slGrpSet(id, null);
     target = slGrpNewId();
     (d.groups = d.groups || []).push({id: target, title: "", ids: [id]});
-    msg = `${slTitle(id)}: neue Gruppe angelegt`;
+    msg = `${slTitle(id)}: neue Bausteingruppe angelegt`;
   } else if (gid) {
     const g = (d.groups || []).find(x => x.id === gid);
     if (!g) return;
-    if (g.ids.length >= SL_GMEM && !g.ids.includes(id)) return uiAlert(`Eine Gruppe kann höchstens ${SL_GMEM} Bausteine enthalten.`);
+    if (g.ids.length >= SL_GMEM && !g.ids.includes(id)) return uiAlert(`Eine Bausteingruppe kann höchstens ${SL_GMEM} Bausteine enthalten.`);
     slGrpSet(id, gid);
     const ord = slOrder(SL.fam, SL.page).map(i => i.id).filter(x => x !== id), last = ord.map((x, i) => (g.ids.includes(x) ? i : -1)).filter(i => i >= 0).pop();
     ord.splice(last === undefined ? ord.length : last + 1, 0, id);
     const cur = slDocOf(SL.page);
     if (slMobEff()) (cur.mob = cur.mob || {}).order = ord;
     else cur.order = ord;
-    msg = `${slTitle(id)}: jetzt in der Gruppe „${slGrpName(g)}“`;
+    msg = `${slTitle(id)}: jetzt in der Bausteingruppe „${slGrpName(g)}“`;
   } else {
     if (!slGrpSet(id, null)) return;
-    msg = `${slTitle(id)}: aus der Gruppe gelöst`;
+    msg = `${slTitle(id)}: aus der Bausteingruppe gelöst`;
   }
   slTouch(SL_PAGE_KEY[SL.page]);
   SL.focus = {id, a: "grip"};
@@ -205,12 +205,12 @@ function slGrpUngroup(id) {
 function slGrpDialog(id) {
   if (!slGrpCan(id)) return;
   const cur = slGrpOf(id), list = slGrpList();
-  slModal("Gruppe wählen", (body, close) => {
-    body.innerHTML = `<p class="mut slcatin">Eine Gruppe bündelt mehrere Bausteine zu einem einklappbaren Abschnitt. „${esc(slTitle(id))}“ soll:</p><ul class="slgl">` +
-      list.map(g => `<li><button type="button" class="btn ghost sm" data-g="${esc(g.id)}"${cur === g ? ' aria-current="true" disabled' : ""}>In Gruppe „${esc(slGrpName(g))}“${cur === g ? " (aktuell)" : ""}</button></li>`).join("") +
-      `<li><button type="button" class="btn sm" data-g="new"${list.length >= SL_GMAX ? " disabled" : ""}>In eine neue Gruppe</button></li>` +
-      (cur ? `<li><button type="button" class="btn ghost sm" data-g="">Aus Gruppe lösen</button></li>` : "") +
-      `</ul>` + (list.length >= SL_GMAX ? `<p class="mut">Es sind höchstens ${SL_GMAX} Gruppen je Seite möglich.</p>` : "") +
+  slModal("Bausteingruppe wählen", (body, close) => {
+    body.innerHTML = `<p class="mut slcatin">Eine Bausteingruppe bündelt mehrere Bausteine unter einer einklappbaren Überschrift. „${esc(slTitle(id))}“ soll:</p><ul class="slgl">` +
+      list.map(g => `<li><button type="button" class="btn ghost sm" data-g="${esc(g.id)}"${cur === g ? ' aria-current="true" disabled' : ""}>In Bausteingruppe „${esc(slGrpName(g))}“${cur === g ? " (aktuell)" : ""}</button></li>`).join("") +
+      `<li><button type="button" class="btn sm" data-g="new"${list.length >= SL_GMAX ? " disabled" : ""}>In eine neue Bausteingruppe</button></li>` +
+      (cur ? `<li><button type="button" class="btn ghost sm" data-g="">Aus Bausteingruppe lösen</button></li>` : "") +
+      `</ul>` + (list.length >= SL_GMAX ? `<p class="mut">Es sind höchstens ${SL_GMAX} Bausteingruppen je Seite möglich.</p>` : "") +
       `<div class="uifoot"><button type="button" class="btn ghost" data-close>Abbrechen</button></div>`;
     body.onclick = e => {
       if (e.target.closest("[data-close]")) return close();
@@ -224,8 +224,8 @@ function slGrpDialog(id) {
 function slGrpRename(gid) {
   const g = slGrpList().find(x => x.id === gid);
   if (!g) return;
-  slModal("Gruppe umbenennen", (body, close) => {
-    body.innerHTML = `<form class="slform" novalidate><div class="slfs"><label for="slgname">Titel der Gruppe</label><input id="slgname" type="text" maxlength="${SL_GTITLE}" autocomplete="off" value="${esc(g.title || "")}" placeholder="Gruppe" aria-describedby="slgerr"><p class="slerr" id="slgerr" role="alert"></p></div>` +
+  slModal("Bausteingruppe umbenennen", (body, close) => {
+    body.innerHTML = `<form class="slform" novalidate><div class="slfs"><label for="slgname">Titel der Bausteingruppe</label><input id="slgname" type="text" maxlength="${SL_GTITLE}" autocomplete="off" value="${esc(g.title || "")}" placeholder="Bausteingruppe" aria-describedby="slgerr"><p class="slerr" id="slgerr" role="alert"></p></div>` +
       `<div class="uifoot"><button type="button" class="btn ghost" data-close>Abbrechen</button><button type="submit" class="btn">Speichern</button></div></form>`;
     const f = body.querySelector("form"), inp = f.querySelector("input");
     inp.select();
@@ -239,7 +239,7 @@ function slGrpRename(gid) {
       close();
       g.title = t.slice(0, SL_GTITLE);
       slTouch(SL_PAGE_KEY[SL.page]);
-      slGrpFinish(gid, "gname", `Gruppe umbenannt in „${slGrpName(g)}“`);
+      slGrpFinish(gid, "gname", `Bausteingruppe umbenannt in „${slGrpName(g)}“`);
     };
     f.onclick = e => e.target.closest("[data-close]") && close();
   });
@@ -277,7 +277,7 @@ function slGrpAction(b) {
     slTouch(SL_PAGE_KEY[SL.page]);
     SL.focus = {id: SL.present[0] || "", a: "grip", ps: true};
     slApply();
-    slLive(`Gruppe „${nm}“ gelöst, die Bausteine bleiben auf der Seite`);
+    slLive(`Bausteingruppe „${nm}“ gelöst, die Bausteine bleiben auf der Seite`);
   }
 }
 document.addEventListener("change", e => {
@@ -300,7 +300,7 @@ document.addEventListener("change", e => {
 const slDevHtml = () =>
   `<span class="slbdv" id="slbdv" role="group" aria-label="Anordnung für"><span class="slbdl">Anordnung für</span>` +
   `<button type="button" class="slb slbdb" data-a="dev" data-d="desk" aria-pressed="true">Computer</button><button type="button" class="slb slbdb" data-a="dev" data-d="mob" aria-pressed="false">Handy</button></span>` +
-  `<button type="button" class="slb" data-a="mobreset" hidden>Handy-Anordnung zurücksetzen</button>` +
+  `<button type="button" class="slb" data-a="mobreset" hidden>Handy-Anordnung: Standard wiederherstellen</button>` +
   `<span class="slsr" id="slmobinfo" role="status" aria-live="polite"></span><p class="mut slbn" id="slbn" hidden></p>`;
 const slHasMob = () => slKeys(SL.fam).some(k => SL.docs[k] && SL.docs[k].mob && Object.keys(SL.docs[k].mob).length);
 function slDevSync() {
@@ -330,7 +330,7 @@ function slMobReset() {
   slKeys(SL.fam).forEach(k => SL.docs[k] && delete SL.docs[k].mob);
   slTouch(...slKeys(SL.fam));
   slApply();
-  slLive("Handy-Anordnung zurückgesetzt, es gilt wieder die Computer-Reihenfolge");
+  slLive("Handy-Anordnung: Standard wiederhergestellt, es gilt wieder die Computer-Reihenfolge");
 }
 /* Wechselt der Bildschirm zwischen Desktop und Handy (Fenstergröße, Einstellung „Ansicht“), wird die Seite neu eingeordnet */
 if (typeof MutationObserver === "function") {

@@ -19,7 +19,7 @@ const FL_MET = {
   count: {name: "Touren", unit: "Touren", f: () => 1, fmt: v => nf(v, 0)},
   km: {name: "Strecke", unit: "km", f: t => t.km, fmt: v => fmtKm(v, {summe: true})},
   up: {name: "Aufstieg", unit: "m", f: t => t.up_m || 0, fmt: v => fmtHm(v)},
-  h: {name: "Zeit unterwegs", unit: "Std.", f: t => t.h, fmt: v => fmtDauer(v * 3600, {summe: true})},
+  h: {name: "Dauer", unit: "Std.", f: t => t.h, fmt: v => fmtDauer(v * 3600, {summe: true})},
 };
 const flVal = (list, m) => list.reduce((x, t) => x + FL_MET[m].f(t), 0);
 const flDayAdd = (iso, n) => new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10) + n)).toISOString().slice(0, 10);
@@ -104,14 +104,12 @@ function flField(f, cfg, i) {
   const id = "slf" + i;
   if (f.kind === "sports") {
     const sel = sNormList(cfg.sports);
+    /* 3.61.0: dieselbe Darstellung wie alle Sportart-Filter (sportFilterHtml, 01-grundlagen.js) – „Alle Sportarten“, Statistik-Gruppen, Kategorien */
     return `<fieldset class="slfs flsp"><legend>${esc(f.label || "Sportart")}</legend><div class="flchips">` +
-      `<label class="flchip"><input type="checkbox" data-all${sel.length ? "" : " checked"}><span>Alle</span></label>` +
-      (() => {
-        const A = sportAuswahl(TOURS.map(t => t.sport), sel),
-          ch = (v, l) => `<label class="flchip"${isSg(v) ? ` title="${esc(sgTitle(v))}"` : ""}><input type="checkbox" name="f${i}" value="${esc(v)}"${sel.includes(v) ? " checked" : ""}><span>${esc(l)}</span></label>`;
-        return (A.groups.length ? `<span class="flcat">Statistik-Gruppen</span>` + A.groups.map(([v, l]) => ch(v, l)).join("") : "") +
-          A.cats.map(([, l, ks]) => `<span class="flcat">${esc(l)}</span>` + ks.map(k => ch(k, sName(k))).join("")).join("");
-      })() +
+      sportFilterHtml(TOURS.map(t => t.sport), sel, (v, l, x) => x.all
+        ? `<label class="flchip"><input type="checkbox" data-all${x.on ? " checked" : ""}><span>Alle Sportarten</span></label>`
+        : `<label class="flchip"${x.title ? ` title="${esc(x.title)}"` : ""}><input type="checkbox" name="f${i}" value="${esc(v)}"${x.on ? " checked" : ""}><span>${esc(l)}</span></label>`,
+      {wrap: (id, l, h) => `<span class="flcat">${esc(l)}</span>${h}`}) +
       `</div></fieldset>`;
   }
   if (f.kind === "range") {

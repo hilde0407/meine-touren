@@ -43,7 +43,7 @@ def refresh_tours(k=None):
         for p in (routes.path_full(tid), routes.path_small(tid)):
             p.unlink(missing_ok=True)
     if changed:
-        log(f"Komoot: {len(changed)} Tour(en) mit geänderter Strecke – Routen werden neu geladen")
+        log(f"Komoot: {len(changed)} {'Tour' if len(changed) == 1 else 'Touren'} mit geänderter Strecke – Strecken werden neu geholt")
     with db.cur() as c:
         c.execute("DELETE FROM tours WHERE COALESCE(source,'komoot')='komoot'")   # lokale Touren bleiben unangetastet
         c.executemany(
@@ -236,13 +236,13 @@ def export_zepp(limit=None):
             except Exception as e:  # noqa
                 log(f"  {r['trackid']}: lokale Übernahme fehlgeschlagen: {e}")
         photos.assign_all()
-        log(f"Zepp: {n_ad} Training(s) als lokale Tour übernommen")
+        log(f"Zepp: {n_ad} {'Training' if n_ad == 1 else 'Trainings'} als Tour geholt")
     log(f"Zepp: {n_gps} GPS-Dateien geschrieben nach {config.EXPORT_DIR} (es wird nichts hochgeladen)")
     try:
         from . import puls
         puls.backfill_hr(api)                                 # passende vorhandene Touren (auch Komoot/Datei) um den Puls ergänzen
     except Exception as e:  # noqa
-        log(f"Puls abgleichen fehlgeschlagen: {e}")
+        log(f"Puls holen nicht möglich: {e}")
     return {"gesamt": len(summaries), "neu": len(new), "gps": n_gps, "ohne_gps": n_nogps, "uebernommen": n_ad, "fehler": n_err}
 
 

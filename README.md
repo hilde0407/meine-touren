@@ -9,7 +9,7 @@
 ## Highlights (Stand Version 3.33.0)
 
 * **Seiten selbst gestalten:** Tourseite, Übersicht, Statistik, Reise-Seite und Reisen-Übersicht bestehen aus **Bausteinen** („Seite anpassen“): verschieben, ausblenden, einklappen, Breite wählen, Bausteine aus einem Katalog hinzufügen, **Ansichten** und **Vorlagen** (z. B. „Wandern“, „Rad“, „Kompakt“), Export und Import. Ohne Anpassung sieht alles aus wie gewohnt.
-* **Eigene Kennzahlen** ohne Programmierung, Hinweis-Bausteine (nur bei Anlass), die **Erinnerungen-Kachel** und ein globaler Filter (Aktivität, Zeitraum) in der Statistik.
+* **Eigene Kennzahlen** ohne Programmierung, Hinweis-Bausteine (nur bei Anlass), die **Erinnerungen-Kachel** und ein globaler Filter (Sportart, Zeitraum) in der Statistik.
 * **Teilen:** Freigegebene Links an einem Ort verwalten, Tour-Links in einer **gewählten Ansicht** (z. B. nur Karte und Fotos), **Jahresrückblick als teilbare Seite**, **Diashow-Links** für Tour, Jahr oder Sammlung (Vollbild, ohne Konto, widerrufbar).
 * **Uhren und Messwerte:** Zepp-, Garmin- und Suunto-Import (der Import-Knopf auf der Übersicht passt sich den verbundenen Konten an), Messwerte, „Meine Geräte“ mit Genauigkeit, Training laut Uhr, Belastung und Tempo nach Steigung.
 * **Suche ohne Akzente:** „reunion“ findet „Réunion“, „strasse“ findet „Straße“.
@@ -24,7 +24,7 @@ Alle Bilder stammen aus dem **Demo-Modus** (`MT_DEMO=1 python3 -m app.demo`), er
 | ![Übersicht](docs/bilder/uebersicht.png) **Übersicht** – letzte Tour, Dein Jahr, Erinnerungen | ![Seite anpassen](docs/bilder/bausteine-bearbeiten.png) **Seite anpassen** – Bausteine verschieben, ausblenden, Breite wählen |
 | ![Touren](docs/bilder/touren.png) **Touren** – Liste mit Filtern und Streckenform | ![Tourdetail](docs/bilder/tour-ganz.png) **Tourdetail** – Höhenprofil mit Foto-Punkten |
 | ![Karte](docs/bilder/karte.png) **Karte** – alle Touren auf einen Blick | ![Statistik](docs/bilder/statistik.png) **Statistik** – Bausteine mit globalem Filter |
-| ![Rekorde](docs/bilder/rekorde.png) **Rekorde** (Statistik → Rekorde) | ![Jahresrückblick](docs/bilder/jahresrueckblick.png) **Jahresrückblick** – auch als Link teilbar |
+| ![Bestwerte](docs/bilder/rekorde.png) **Bestwerte** (Statistik → Bestwerte) | ![Jahresrückblick](docs/bilder/jahresrueckblick.png) **Jahresrückblick** – auch als Link teilbar |
 | ![Reisen](docs/bilder/reisen.png) **Reisen** – automatisch erkannt, anpassbar | ![Reise](docs/bilder/reise.png) **Reise** – Kennzahlen, Karte, Fotos, Touren |
 | ![Tourblatt](docs/bilder/tourblatt.png) **Tourblatt** – druckbares Blatt einer Tour | ![Verwaltung](docs/bilder/verwaltung.png) **Verwaltung** – übersichtlich in Reitern |
 
@@ -74,7 +74,7 @@ Hinweise: Ein eigener BRouter-Server (Routenplanung) und das Einbinden von SMB-F
 
 * **Übersicht, Karte, Touren:** letzte Tour mit Karte und Fotos (zum Durchzappen), „Dein Jahr“ mit Vorjahresvergleich, Erinnerungen und „An diesem Tag“; alle Touren auf einer Karte; Tourseite mit Höhenprofil, Fotos an der Strecke, 3D-Flug und Diashow; Streckenfarbe frei wählbar.
 * **Anpassbare Seiten (ab 3.17):** Tourseite, Übersicht, Statistik, Reise-Seite und Reisen-Übersicht über „Seite anpassen“ gestalten: Bausteine aus einem Katalog (je Seite passende), Raster mit wählbarer Breite, mehrere benannte **Ansichten**, fertige **Vorlagen**, Export/Import als Datei. Bausteine lassen sich einstellen (Aktivität, Zeitraum, Kennzahlen, Titel); **eigene Kennzahlen** und Hinweis-Bausteine (nur bei Anlass) gibt es dazu.
-* **Statistik:** Übersicht, Auswertung (Tempo, Wetter, Neuland), Rekorde und Puls mit globalem Filter; Jahresrückblick, auch als Link teilbar und druckbar.
+* **Statistik:** Übersicht, Auswertung (Tempo, Wetter, Neuland), Bestwerte und Puls mit globalem Filter; Jahresrückblick, auch als Link teilbar und druckbar.
 * **Lokale Strecken:** Karten und Tourdetails arbeiten nur mit gespeicherten Daten. Original-GPX lokaler Touren liegen im Datenordner und sind im Backup.
 * **Import:** Zepp-Trainings (GPS als GPX), **Garmin, Suunto und andere Uhren** (FIT/GPX/TCX/ZIP, Garmin-Konto) mit einem Import-Knopf auf der Übersicht bzw. in der Kopfzeile, Komoot-Touren und -Strecken, Fotos (Browser-Upload mit Verkleinerung, Eingangsordner, SMB, Mac-Skript).
 * **Uhren und Messwerte:** Messwerte der Geräte (Puls, Frequenz, Leistung …, nur was das Gerät lieferte), „Meine Geräte“ mit Genauigkeit, Training laut Uhr, Belastung und Tempo nach Steigung, Vergleich ähnlicher Touren.
@@ -98,10 +98,10 @@ Hinweise: Ein eigener BRouter-Server (Routenplanung) und das Einbinden von SMB-F
 3. *Verwaltung → Upload-Portale → Strava*: eigene Strava-App anlegen (strava.com/settings/api), Client-ID/-Secret eintragen, „Mit Strava verbinden“.
 4. Fotos: *Verwaltung → Fotos → „Ordner auswählen und hochladen …“* (im Browser verkleinert) oder `mac/fotos_senden.sh`.
 
-## Daten, Backup, Update
+## Daten, Sicherung, Update
 
 * Pro Benutzer: `/var/lib/meine-touren/users/<Kennung>/` (Datenbank `komoot_hub.sqlite` – historischer Dateiname, Strecken, Fotos, `tracks/`). Gemeinsam: `system.sqlite` (Benutzer, Anmeldungen, Freigaben), `tilecache/`.
-* Backups: `/var/backups/meine-touren/<Kennung>/…zip` (Datenbank + lokale GPX + System-Datenbank; Fotos nicht). Für einen Serverumzug: Verwaltung → „Umzugspaket erstellen“ (alles inkl. Fotos und Schlüssel). Wiederherstellen: `meine-touren-restore <datei.zip>`.
+* Sicherungen: `/var/backups/meine-touren/<Kennung>/…zip` (Datenbank + lokale GPX + System-Datenbank; Fotos nicht). Für einen Serverumzug: Verwaltung → „Umzugspaket erstellen“ (alles inkl. Fotos und Schlüssel). Wiederherstellen: `meine-touren-restore <datei.zip>`.
 * **Sicherung zurückspielen (ab 3.40.0):** Administratoren können eine Tagessicherung auch in der Oberfläche zurückspielen: Verwaltung → Sicherung & Zugang → „Sicherung zurückspielen“. Sicherung des Servers wählen oder ZIP hochladen, das Ergebnis der Prüfung ansehen (Zahlen der Sicherung gegenüber heute), bestätigen. Vorher legt die App automatisch eine Sicherheitskopie des heutigen Stands an (in derselben Liste, „vor-wiederherstellung“), mit der sich der Schritt genauso rückgängig machen lässt. Ersetzt werden nur die eigenen Daten (Datenbank); Fotodateien, Zwischenspeicher, `secret.key` und die Benutzer bleiben, wie sie sind. Umzugspakete und Sicherungen anderer Benutzer weiterhin mit `meine-touren-restore`.
 * **Bestehende Installation unter dem alten Namen „komoot-hub“** bleibt mit ihren Pfaden und Befehlen (`komoot-hub-update` …) erhalten; die Skripte erkennen das selbst.
 
@@ -281,7 +281,7 @@ Die App prüft alle 6 Stunden auf GitHub, ob eine neuere Version veröffentlicht
 
 ## Verwaltung → Zustand
 
-Die Verwaltung zeigt oben eine Zustandsprüfung (Komoot-Zugang, Backup, Datenbankgröße, freier Speicher, Touren ohne Strecke, Fotos ohne Tour) und – siehe unten – auf neuere Versionen auf GitHub.
+Die Verwaltung zeigt oben eine Zustandsprüfung (Komoot-Zugang, Sicherung, Datenbankgröße, freier Speicher, Touren ohne Strecke, Fotos ohne Tour) und – siehe unten – auf neuere Versionen auf GitHub.
 
 ## Zugangsdaten verschlüsselt
 
@@ -300,7 +300,7 @@ bash deploy/brouter/install-brouter.sh                 # Standard: Deutschland/A
 bash deploy/brouter/install-brouter.sh E5_N45 W20_N25  # oder eigene 5°×5°-Kacheln
 ```
 
-Das Skript installiert Java, lädt BRouter 1.7.7 und die Kartenkacheln (je ca. 100–400 MB, nur die, die du brauchst – Kachelname = untere linke Ecke, z. B. `W20_N25` für die Kanaren) und richtet den Dienst `brouter` auf Port 17777 ein. Danach unter Verwaltung → „Routenplanung“ eintragen: `http://<Server-IP>:17777/brouter`. Weitere Kacheln später mit `install-brouter.sh --nur-kacheln …`. Es verlassen dann keine Koordinaten mehr das Heimnetz.
+Das Skript installiert Java, lädt BRouter 1.7.7 und die Kartenkacheln (je ca. 100–400 MB, nur die, die du brauchst – Kachelname = untere linke Ecke, z. B. `W20_N25` für die Kanaren) und richtet den Dienst `brouter` auf Port 17777 ein. Danach unter Verwaltung → Hochladen & Planen → Tourplanung eintragen: `http://<Server-IP>:17777/brouter`. Weitere Kacheln später mit `install-brouter.sh --nur-kacheln …`. Es verlassen dann keine Koordinaten mehr das Heimnetz.
 
 ## Für Entwickler
 
@@ -310,4 +310,5 @@ Das Skript installiert Java, lädt BRouter 1.7.7 und die Kartenkacheln (je ca. 1
   `wanderfuehrer.py` (Buchtouren erkennen), `selbsttest.py` (Prüfung ohne Änderung), `photos.py`, `pdfgen.py`, `trackfix.py`, `security.py`, `users_api.py`.
   `extras.py`, `more.py` und `more2.py` sind historisch gewachsene Sammelstellen, aus denen Stück für Stück eigene Module herausgelöst werden;
   die gewohnten Namen bleiben dort über `__getattr__` erreichbar, damit nichts bricht.
+- **Texte und Bedienung:** verbindlich ist der Leitfaden [docs/LEITFADEN-BEGRIFFE.md](docs/LEITFADEN-BEGRIFFE.md) (ein Wort je Sache, zehn Bedienregeln; gilt auch für Mein Tourentagebuch). `tests/test_begriffe_361.py` sucht die entfallenen Wörter in allen sichtbaren Texten und im Handbuch.
 - Tests: `python scripts/test.py` (schneller Kern; volle Suite mit `--voll` oder `python -m pytest -q tests`) – darunter Browsertests mit Playwright (`pip install -r requirements-dev.txt && python -m playwright install chromium`), die jede Ansicht mit Beispieldaten öffnen und auf JavaScript-Fehler prüfen. Helfer, Regeln gegen wacklige Tests und Stresstest: [tests/README.md](tests/README.md).

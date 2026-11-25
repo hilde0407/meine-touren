@@ -71,7 +71,7 @@ def backfill_hr(api=None):
         if (sc.exists() and len(_sc_load(sc)) >= 5) or (gf.exists() and "gpxtpx:hr" in gf.read_text(encoding="utf-8", errors="ignore")):
             continue
         todo.append((s, t, gf))
-    log(f"Puls abgleichen: {len(todo)} Touren mit passendem Zepp-Training, aber ohne Puls")
+    log(f"Puls holen: {len(todo)} Touren mit passendem Zepp-Training, aber ohne Puls")
     done = 0
     for i, (s, t, gf) in enumerate(todo, 1):
         jobs.progress(f"Puls {i}/{len(todo)}")
@@ -94,7 +94,7 @@ def backfill_hr(api=None):
         except Exception as e:  # noqa
             log(f"  {t['id']}: {e}")
         time.sleep(0.2)
-    log(f"Puls abgleichen: {done} Touren ergänzt")
+    log(f"Puls holen: {done} Touren ergänzt")
 
 
 def _series(tour_id):

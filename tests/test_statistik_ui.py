@@ -103,7 +103,7 @@ def test_default_layout_is_unchanged_and_sections_fold(pw, app):
         assert secs[:7] == STD and secs[-1] == "erinn" or secs[-1] == "tag" or "erinn" not in secs, secs
         assert pg.locator("#slopen").is_visible() and pg.locator(".slit").count() == 0 and pg.locator("#slbar").count() == 0
         # alle bisherigen Steuerungen sind da
-        assert pg.locator(".years button").count() == 1 + len(pg.evaluate("years()")) and pg.locator(".years button.on").inner_text() == "Gesamt"
+        assert pg.locator(".years button").count() == 1 + len(pg.evaluate("years()")) and pg.locator(".years button.on").inner_text() == "Gesamte Zeit"        # 3.61.0: Leitfaden 2.7
         assert pg.locator("#sch [data-s='']").inner_text() == "Alle Sportarten" and pg.locator("#sch [data-s]").count() == 1 + 3
         assert pg.locator("#tlsb-kpi .fig").count() == 5 and pg.locator("#tls-kmmonat .chart").count() == 1 and pg.locator("#tls-kmverlauf .chart").count() == 1
         expect(pg.locator("#tlw-bestwerte .utile")).to_have_count(5, timeout=T)                  # 3.45.0: Abschnitt „Bestwerte“ ist der Baustein (Strecke, Aufstieg, Dauer, Tempo, Monat)
@@ -111,7 +111,7 @@ def test_default_layout_is_unchanged_and_sections_fold(pw, app):
         assert pg.locator("#stf h2").inner_text() == "Alle Touren" and _vals(pg)["n"] == "10 Touren"
         # Köpfe mit Kurzaussage, Aufbau wie bei den anderen Abschnitten (tlCard)
         assert "10 Touren" in pg.locator("#tlk-kpi").inner_text() and "km" in pg.locator("#tlk-kpi").inner_text()
-        assert "287 km" in pg.locator("#tlk-kmmonat").inner_text() and "Tage mit Touren" in pg.locator("#tlk-heat").inner_text()
+        assert "287 km" in pg.locator("#tlk-kmmonat").inner_text() and "Aktive Tage" in pg.locator("#tlk-heat").inner_text()
         assert pg.locator("#stx .stn").count() == 0                                           # ohne Filter kein Hinweis
         # einklappbar, Zustand bleibt nach Neuladen
         d = pg.locator("#tls-kmmonat")
@@ -495,7 +495,7 @@ def test_edit_bar_marker_discard_restores_save_as_new_keeps_original_and_done_co
         pg.wait_for_function("() => document.getElementById('slchg').hidden", timeout=T)
         pg.wait_for_function("o => JSON.stringify([...document.querySelectorAll('#stx .slit')].map(e => e.dataset.sl)) === JSON.stringify(o)", arg=order0, timeout=T)
         pg.wait_for_function("() => !SL.dirty.size", timeout=T)
-        pg.wait_for_function("() => document.getElementById('slsaved').textContent.trim() === 'Gespeichert' || document.getElementById('slsaved').textContent.trim() === 'Verworfen'", timeout=T)
+        pg.wait_for_function("() => document.getElementById('slsaved').textContent.trim() === 'Ansicht gespeichert' || document.getElementById('slsaved').textContent.trim() === 'Verworfen'", timeout=T)
         assert _server(app) is None or "order" not in _server(app)
         # Als neue Ansicht speichern: Original bleibt auf dem Stand von vor dem Bearbeiten
         pg.locator('.slit[data-sl="kmverlauf"] [data-a=w][data-w="voll"]').click()

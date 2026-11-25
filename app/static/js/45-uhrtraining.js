@@ -152,7 +152,7 @@ async function uhrCard(t) {
       (u.werte && Object.keys(u.werte).length ? `<div class="utiles">${uhrTiles(u.werte)}</div>` : "") +
       uhrHeights(u.werte || {}) + uhrZones(u.pulszonen) + uhrSplits(u.splits) + uhrFatigue(u.ermuedung) + uhrWeather(u.wetter) +
       (u.hinweise && u.hinweise.length ? `<ul class="mut hrnote utnotes">${u.hinweise.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "") +
-      `<div class="utfoot">${typeof isViewer === "function" && isViewer() ? "" : `<button class="btn alt sm" id="utneu" ${busy ? "disabled" : ""}>${busy ? "Lade von Zepp …" : "Von Zepp neu laden"}</button>`}<span class="mut hrnote" id="utmsg" role="status">${esc(msg)}</span></div>`;
+      `<div class="utfoot">${typeof isViewer === "function" && isViewer() ? "" : `<button class="btn alt sm" id="utneu" ${busy ? "disabled" : ""}>${busy ? "Lade von Zepp …" : "Neu von Zepp holen"}</button>`}<span class="mut hrnote" id="utmsg" role="status">${esc(msg)}</span></div>`;
     trBind(d);
     d.querySelectorAll("[data-f]").forEach(e => (e.style.flex = e.dataset.f));
     d.querySelectorAll("[data-h]").forEach(e => (e.style.height = e.dataset.h + "%"));

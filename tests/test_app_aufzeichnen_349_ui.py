@@ -346,7 +346,7 @@ def test_laeuft_grosse_ziffern_und_pausiert(pw, app):
     try:
         pg.wait_for_selector("#rstop", timeout=T)
         assert pg.get_attribute(".rec", "data-s") == "recording"
-        expect(pg.locator("#rstt")).to_have_text("Aufnahme läuft", timeout=T)
+        expect(pg.locator("#rstt")).to_have_text("Aufzeichnung läuft", timeout=T)
         expect(pg.locator("#rgpst")).to_have_text("GPS ±5 m", timeout=T)
         assert pg.inner_text("#rd") == "8,46" and pg.inner_text("#ru") == "612" and pg.inner_text("#ralt") == "1.534" and pg.inner_text("#rspd") == "4,5"
         assert pg.inner_text("#rt").startswith("2:34:1")
@@ -446,7 +446,7 @@ def test_beenden_rueckfrage_hochladen_und_geraet(pw, app):
         # fertig: Zusammenfassung, Name, Zustand in Worten – das Hochladen beginnt von selbst
         pg.wait_for_selector("#rup", timeout=T)
         pg.wait_for_selector('#rup[data-p="saved"]', timeout=T)
-        expect(pg.locator("#rupt")).to_have_text("Gespeichert", timeout=T)
+        expect(pg.locator("#rupt")).to_have_text("Tour gespeichert", timeout=T)
         expect(pg.locator("#rups")).to_contain_text("als „Meine Touren App · Pixel 8“ angemeldet", timeout=T)
         assert "8,5" in pg.inner_text(".recrow.sum") and "2:34" in pg.inner_text(".recrow.sum") and "612" in pg.inner_text(".recrow.sum")
         for sel, vis in (("#rview", True), ("#rnew", True), ("#rretry", False), ("#rlater", False), ("#rdrop", False)):
@@ -650,11 +650,11 @@ def test_breiten_hell_dunkel(pw, app, width, scheme):
 
 
 @pytest.mark.parametrize("lang,words", [
-    ("en", {"start": "Start recording", "tab": "Record", "gps": "GPS is switched on", "set": "Recording settings", "run": "Recording", "pause": "Pause", "stop": "Stop", "ask": "Stop the recording?", "keep": "Keep recording",
+    ("en", {"start": "Start recording", "tab": "Record", "gps": "GPS is switched on", "set": "Recording settings", "run": "Recording in progress", "pause": "Pause", "stop": "Stop", "ask": "Stop the recording?", "keep": "Keep recording",
             "wait": "Waiting for network – will be sent later", "retry": "Try again now", "paused": "Paused", "resume": "Resume", "tabrun": "Running"}),
     ("fr", {"start": "Démarrer l’enregistrement", "tab": "Enregistrer", "gps": "Le GPS est activé", "set": "Réglages de l’enregistrement", "run": "Enregistrement en cours", "pause": "Pause", "stop": "Arrêter",
             "ask": "Arrêter l’enregistrement ?", "keep": "Continuer l’enregistrement", "wait": "En attente de réseau – sera envoyé plus tard", "retry": "Réessayer maintenant", "paused": "En pause", "resume": "Reprendre", "tabrun": "En cours"}),
-    ("es", {"start": "Iniciar grabación", "tab": "Grabar", "gps": "El GPS está activado", "set": "Ajustes de la grabación", "run": "Grabando", "pause": "Pausar", "stop": "Detener", "ask": "¿Detener la grabación?",
+    ("es", {"start": "Iniciar grabación", "tab": "Grabar", "gps": "El GPS está activado", "set": "Ajustes de la grabación", "run": "Grabación en curso", "pause": "Pausar", "stop": "Detener", "ask": "¿Detener la grabación?",
             "keep": "Seguir grabando", "wait": "Esperando red: se enviará más tarde", "retry": "Reintentar ahora", "paused": "En pausa", "resume": "Reanudar", "tabrun": "En curso"}),
 ])
 def test_sprachen(pw, app, lang, words):

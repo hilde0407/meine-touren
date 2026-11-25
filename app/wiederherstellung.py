@@ -193,7 +193,7 @@ def zahlen(strecken=None):
 def _erstellt(z, pfad, upload):
     """Zeitpunkt der Sicherung: aus INFO.txt, sonst Zeitstempel der Datenbank im ZIP, sonst (Dateien des Servers) die Änderungszeit."""
     try:
-        m = re.search(r"Backup (\S+)", z.read("INFO.txt").decode("utf-8", "replace"))
+        m = re.search(r"(?:Backup|Sicherung) (\S+)", z.read("INFO.txt").decode("utf-8", "replace"))
         if m:
             return int(datetime.fromisoformat(m.group(1)).timestamp())
     except (KeyError, ValueError, OSError):

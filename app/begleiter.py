@@ -89,7 +89,7 @@ def ensure():
 async def api_live_link(request: Request):
     ensure()
     if (db.get("live_mode") or "off") == "off":
-        raise HTTPException(403, "Die Standort-Freigabe ist ausgeschaltet (Verwaltung → Standort teilen)")
+        raise HTTPException(403, "Die Standort-Freigabe ist ausgeschaltet (Verwaltung → Handy & App → Standort teilen)")
     try:
         d = await request.json()
     except Exception:  # noqa

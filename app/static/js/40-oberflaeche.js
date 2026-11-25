@@ -56,7 +56,7 @@ function statTabs(cur) {
   if (!main || main.querySelector(".segtabs") || main.querySelector(".empty")) return;
   const inner = cur === "stats" ? main.querySelector(".inner") : null,
     wb = inner ? null : main.querySelector(":scope > .warnbar");
-  (wb || inner || main).insertAdjacentHTML(wb ? "afterend" : "afterbegin", `<div class="segtabs" role="tablist"><a role="tab" href="#/stats" class="${cur === "stats" ? "on" : ""}">Übersicht</a><a role="tab" href="#/places" class="${cur === "places" ? "on" : ""}">Orte & Ausrüstung</a><a role="tab" href="#/records" class="${cur === "records" ? "on" : ""}">Rekorde</a>${TOURS.some(t => t.has_hr) ? `<a role="tab" href="#/pulse" class="${cur === "pulse" ? "on" : ""}">Puls</a>` : ""}</div>`);
+  (wb || inner || main).insertAdjacentHTML(wb ? "afterend" : "afterbegin", `<div class="segtabs" role="tablist"><a role="tab" href="#/stats" class="${cur === "stats" ? "on" : ""}">Übersicht</a><a role="tab" href="#/places" class="${cur === "places" ? "on" : ""}">Orte & Ausrüstung</a><a role="tab" href="#/records" class="${cur === "records" ? "on" : ""}">Bestwerte</a>${TOURS.some(t => t.has_hr) ? `<a role="tab" href="#/pulse" class="${cur === "pulse" ? "on" : ""}">Puls</a>` : ""}</div>`);
 }
 {
   const p0 = VIEWS.places,
@@ -80,6 +80,7 @@ const DEV_PANELS = ["Selbsttest", "Verlorene App-Aufzeichnungen"];
     const tabs = $("#atabs");
     if (!tabs || tabs.querySelector(".atlink")) return;
     tabs.insertAdjacentHTML("beforeend", `<a class="atlink" href="#/check">Prüfen &amp; Aufräumen</a>`);
+    if (typeof admTabsView === "function") admTabsView(tabs);                   // 3.61.0: Verlauf am Rand neu prüfen
     document.querySelectorAll("#main .panel").forEach(p => {
       const t = ((p.querySelector(":scope > h2") || {}).textContent || "").trim();
       if (DEV_PANELS.some(k => t.startsWith(k))) p.dataset.dev = "1";
@@ -87,7 +88,7 @@ const DEV_PANELS = ["Selbsttest", "Verlorene App-Aufzeichnungen"];
     });
     const zt = $("#ztest");
     if (zt) zt.dataset.dev = "1";
-    const host = document.querySelector('.atab[data-t="uebersicht"] .gbody');
+    const host = document.querySelector('.atab[data-t="allgemein"] .gbody');
     if (host && !$("#dbgsw")) {
       host.insertAdjacentHTML(
         "beforeend",
@@ -112,7 +113,7 @@ const DEV_PANELS = ["Selbsttest", "Verlorene App-Aufzeichnungen"];
   if (t0)
     VIEWS.apptest = async (...a) => {
       if (!dbgOn()) {
-        $("#main").innerHTML = `<div class="empty"><h2>Nur im Entwicklermodus</h2><p class="mut">Den App-Test schaltest du in der Verwaltung unter „Übersicht → Entwicklermodus“ ein.</p><a class="btn" href="#/admin">Zur Verwaltung</a></div>`;
+        $("#main").innerHTML = `<div class="empty"><h2>Nur im Entwicklermodus</h2><p class="mut">Den App-Test schaltest du unter Verwaltung → Allgemein → Entwicklermodus ein.</p><a class="btn" href="#/admin">Zur Verwaltung</a></div>`;
         return;
       }
       await t0(...a);

@@ -1,5 +1,5 @@
 /* =====================  Erweiterungen  ===================== */
-NAV.splice(3, 0, ["records", "Rekorde"]);
+NAV.splice(3, 0, ["records", "Bestwerte"]);
 $("#nav").innerHTML = NAV.map(([k, l]) => `<a href="#/${k}" data-k="${k}">${l}</a>`).join("");
 {
   const gs = document.createElement("input");
@@ -47,7 +47,7 @@ VIEWS.search = async (_, q) => {
 };
 
 /* ---- Ziele (Übersicht) ---- */
-const GM = {km: ["km", "Strecke"], up: ["m", "Aufstieg"], count: ["", "Touren"], hours: [FMT_E[FMT_LG()].h, "Zeit unterwegs"]};
+const GM = {km: ["km", "Strecke"], up: ["m", "Aufstieg"], count: ["", "Touren"], hours: [FMT_E[FMT_LG()].h, "Dauer"]};
 const GOAL_GRP = {"grp:bike": ["Alle Rad-Sportarten", "bike"], "grp:ski": ["Alle Ski-Sportarten", "ski"], "grp:foot": ["Zu Fuß (Wandern, Bergtour, Schneeschuh)", "foot"], "grp:run": ["Laufen und Langlauf", "run"]};
 /* 3.59.0 Sportarten eines Ziels (null = alle), wie stat_gruppen.ziel_sportarten (Server): „grp:<id>“ (ältere Ziele „Alle Rad-Sportarten“ …) = die eigene Statistik-Gruppe
    mit dieser Kennung, sonst die Aktivitäten-Familie (SPORT_GRP, 24-sport.js); „sgrp:<id>“ = eigene Gruppe (gelöscht: alle Sportarten); sonst die Sportart */
@@ -68,7 +68,7 @@ const goalSportName = s => {
   if (s && (s.startsWith("grp:") || isSg(s))) {
     const g = SGRP.find(x => x.id === s.split(":")[1]);
     if (g) return sgLabel(SG_PRE + g.id);                                  // 3.60.1: „<Name> = A + B + …“ wie in Filtern und Aufteilungen
-    if (isSg(s)) return "(Gruppe gelöscht)";
+    if (isSg(s)) return "(Statistik-Gruppe gelöscht)";
   }
   return GOAL_GRP[s] ? GOAL_GRP[s][0] : sName(s);
 };
@@ -101,7 +101,7 @@ function goalNote(g, v, u, frac, proj, yr, cy) {
     }
   }
   else s += ` · <span class="bad">noch kein Fortschritt – Ziel wird so verfehlt</span>`;
-  return s + (v < g.target * frac ? ` · <span class="bad">${nf(g.target * frac - v, 0)} ${u} hinter dem Plan</span>` : ` · <span class="ok">im Plan</span>`);
+  return s + (v < g.target * frac ? ` · <span class="bad">${nf(g.target * frac - v, 0)} ${u} unter dem Soll</span>` : ` · <span class="ok">im Soll</span>`);
 }
 const _dash = VIEWS.dash;
 VIEWS.dash = async (n, q) => {
@@ -135,7 +135,7 @@ VIEWS.records = async (_, q) => {
     allSp = sportOrder(present);                                                 // 3.60.1: dieselbe Auswahl wie Karte und Statistik
   if (fs && !allSp.includes(fs)) fs = "";
   const T = fs ? TOURS.filter(t => (isSg(fs) ? sgMatch(t.sport, [fs]) : t.sport === fs)) : TOURS;
-  const chips = `<div class="row g6 mn4-0-18 fxw"><a class="chip${fs ? "" : " on"}" href="#/records?s=">Alle Sportarten</a>${allSp.map(x => `<a class="chip${fs === x ? " on" : ""}" href="#/records?s=${encodeURIComponent(x)}"${isSg(x) ? ` title="${esc(sgTitle(x))}"` : ""}><i class="sw" style="background:${sCol(x)}"></i>${isSg(x) ? esc(sgLabel(x)) : sName(x)}</a>`).join("")}</div>`;
+  const chips = `<div class="row g6 mn4-0-18 fxw">${sportFilterHtml(present, fs ? [fs] : [], (k, l, x) => `<a class="chip${x.on ? " on" : ""}" href="#/records?s=${encodeURIComponent(k)}"${x.title ? ` title="${esc(x.title)}"` : ""}>${x.all ? "" : `<i class="sw" style="background:${x.color}"></i>`}${esc(l)}</a>`)}</div>`;      // 3.61.0: eine Darstellung für alle Sportart-Filter
   const sum = (a, f) => a.reduce((c, t) => c + f(t), 0),
     km = sum(T, t => t.km),
     up = sum(T, t => t.up_m || 0),
@@ -174,14 +174,14 @@ VIEWS.records = async (_, q) => {
     .filter(a => !fs || (BY[a.id] && (isSg(fs) ? sgMatch(BY[a.id].sport, [fs]) : BY[a.id].sport === fs)))
     .slice(0, 8);
   $("#main").innerHTML =
-    `<div class="sec mt0"><h2>Rekorde</h2><span class="sub">${nf(T.length, 0)} Touren seit ${T[T.length - 1].y}${fs ? " · " + sName(fs) : ""}</span></div>${chips}
+    `<div class="sec mt0"><h2>Bestwerte</h2><span class="sub">${nf(T.length, 0)} Touren seit ${T[T.length - 1].y}${fs ? " · " + sName(fs) : ""}</span></div>${chips}
    <div class="figs"><div class="fig"><div class="v">${nf(km / 40075, 2)}<span class="u">×</span></div><div class="l">um die Erde (${fmtKm(km, {d: 0})})</div></div>
     <div class="fig"><div class="v">${nf(up / 8849, 1)}<span class="u">×</span></div><div class="l">Mount Everest bergauf (${fmtHm(up)})</div></div>
     <div class="fig"><div class="v">${nf(h / 24, 1)}<span class="u">Tage</span></div><div class="l">unterwegs (${fmtDauer(h * 3600, {summe: true})})</div></div>
-    <div class="fig"><div class="v">${nf(dayN, 0)}</div><div class="l">Tage mit Touren</div></div>
+    <div class="fig"><div class="v">${nf(dayN, 0)}</div><div class="l">Aktive Tage</div></div>
     <div class="fig"><div class="v">${longest}<span class="u">Wochen</span></div><div class="l">längste Serie · aktuell ${cur}</div></div></div>
    <div class="grid g2 mt36">
-    <div class="panel"><h2>Rekorde gesamt</h2><div class="rows">${lnk(
+    <div class="panel"><h2>Bestwerte gesamt</h2><div class="rows">${lnk(
       best(T, t => t.km),
       ["Längste Strecke", fmtKm(best(T, t => t.km).km)]
     )}${lnk(
@@ -191,7 +191,7 @@ VIEWS.records = async (_, q) => {
       best(T, t => t.h),
       ["Längste Dauer", fmtDauer(best(T, t => t.h).h * 3600)]
     )}</div></div>
-    <div class="panel"><h2>Höchste Punkte</h2><div class="rows">${alts.length ? alts.map(a => (BY[a.id] ? `<div class="r"><span><a href="#/tour/${a.id}">${esc(BY[a.id].name)}</a><small>${fmtDatumKurz(BY[a.id].date)}</small></span><b>${fmtHm(a.alt)}</b></div>` : "")).join("") : `<div class="mut">Sobald die Strecken geladen sind („Routen laden“ in der Verwaltung), erscheinen hier die höchsten Punkte.</div>`}</div></div>
+    <div class="panel"><h2>Höchste Punkte</h2><div class="rows">${alts.length ? alts.map(a => (BY[a.id] ? `<div class="r"><span><a href="#/tour/${a.id}">${esc(BY[a.id].name)}</a><small>${fmtDatumKurz(BY[a.id].date)}</small></span><b>${fmtHm(a.alt)}</b></div>` : "")).join("") : `<div class="mut">Sobald die Strecken da sind (Verwaltung → Touren holen → Komoot „Fehlende Strecken holen“), erscheinen hier die höchsten Punkte.</div>`}</div></div>
     <div class="panel"><h2>Nach Wochentag</h2>${barChart(wd, ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"])}</div>
     <div class="panel"><h2>Je Sportart</h2><div class="rows">${sports
       .map(s => {
@@ -253,7 +253,7 @@ VIEWS.recap = async name => {
   const dl = (a, b) => (b ? `${a >= b ? "+" : "−"}${nf((Math.abs(a - b) / b) * 100, 0)} % gegenüber ${Y - 1}` : "");
   $("#main").innerHTML =
     `<div class="recap"><div class="noprint row mb10"><a class="back" href="#/dash?y=${Y}">‹ Übersicht</a><span class="sp"></span>${pdfPhotoBar()}${pdfBtn()}<button class="btn ghost sm" data-act="print">Drucken</button></div>
-   <div class="rhero"><div class="k">Mein Tourenjahr</div><h1>${Y}</h1><div class="rs"><span><b>${nf(sel.length, 0)}</b> Touren</span><span><b>${fmtKm(km, {summe: true})}</b> Strecke</span><span><b>${fmtHm(up)}</b> Aufstieg</span><span><b>${fmtDauer(h * 3600, {summe: true})}</b> unterwegs</span><span><b>${days}</b> Tage unterwegs</span></div>
+   <div class="rhero"><div class="k">Mein Tourenjahr</div><h1>${Y}</h1><div class="rs"><span><b>${nf(sel.length, 0)}</b> Touren</span><span><b>${fmtKm(km, {summe: true})}</b> Strecke</span><span><b>${fmtHm(up)}</b> Aufstieg</span><span><b>${fmtDauer(h * 3600, {summe: true})}</b> Dauer</span><span><b>${days}</b> aktive Tage</span></div>
    <div class="rd">${[
      dl(
        km,
@@ -296,9 +296,9 @@ VIEWS.tour = async id => {
       const u = new URL(`slideshow.html?tour=${id}`, location.href).href;
       try {
         await navigator.clipboard.writeText(u);
-        $("#shr").textContent = "✓ Link kopiert";
+        $("#shr").textContent = "Link kopiert";
       } catch (e) {
-        prompt("Link zur Diashow:", u);
+        uiLink("Link zur Diashow", u);
       }
     };
   r.insertAdjacentHTML(
@@ -313,7 +313,7 @@ VIEWS.tour = async id => {
         body: JSON.stringify({note: $("#note").value}),
       });
       t.note = $("#note").value.trim();
-      if ($("#notes")) $("#notes").textContent = "gespeichert ✓";
+      if ($("#notes")) $("#notes").textContent = "Notiz gespeichert";
     } catch (e) {
       if ($("#notes")) $("#notes").innerHTML = `<span class="bad">${esc(e.message)}</span>`;
     }
@@ -325,7 +325,7 @@ VIEWS.tour = async id => {
 const isAdmin = () => !ME.users_enabled || (ME.user && ME.user.role === "admin");
 async function installUpdate(u, say) {
   if (
-    !await uiConfirm(`Version ${u.latest} jetzt installieren?\n\nVorher wird eine Sicherung aller Daten angelegt. Die Seite ist während der Installation kurz nicht erreichbar.`)
+    !await uiConfirm({title: `Version ${u.latest} installieren?`, ok: "Installieren", text: `Vorher wird eine Sicherung aller Daten angelegt. Die Seite ist während der Installation kurz nicht erreichbar.`})
   )
     return;
   const before = u.current;
@@ -358,7 +358,7 @@ async function installUpdate(u, say) {
       say(`<span class="ok">Version ${esc(v.split(" ")[0])} ist installiert ✓ – Seite wird neu geladen …</span>`);
       return setTimeout(() => location.reload(), 1500);
     }
-    if (s && s.state === "error") return say(`<span class="bad">Update fehlgeschlagen: ${esc(s.message || "unbekannter Fehler")}</span>`);
+    if (s && s.state === "error") return say(`<span class="bad">Update nicht möglich: ${esc(s.message || "unbekannter Fehler")}</span>`);
     if (Date.now() - t0 > 6 * 60000)
       return say(
         `<span class="bad">Das dauert ungewöhnlich lange. Bitte im Container <code>journalctl -u ${esc(u.command.split("-update")[0])}-update</code> ansehen.</span>`
@@ -391,7 +391,7 @@ async function updatePanel() {
        : ""
    }
    ${swField("update_check", "Regelmäßig (alle 6 Stunden) auf neue Versionen prüfen", "", "mt8")}
-   ${u.status && u.status.state === "error" ? `<p class="bad fs13">Letztes Update fehlgeschlagen: ${esc(u.status.message || "")}</p>` : ""}</div>`;
+   ${u.status && u.status.state === "error" ? `<p class="bad fs13">Letztes Update nicht möglich: ${esc(u.status.message || "")}</p>` : ""}</div>`;
   const sel = b.querySelector('[data-k="update_check"]');
   if (sel) sel.checked = !!u.enabled;
   const uc = b.querySelector("#ucheck");

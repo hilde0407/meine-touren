@@ -138,17 +138,17 @@ def pruefen(raw, known=None):
     out, used_sp, used_id, names = [], {}, set(), set()
     for n, g in enumerate(raw, 1):
         if not isinstance(g, dict):
-            raise HTTPException(400, f"Gruppe {n}: ungültiger Eintrag")
+            raise HTTPException(400, f"Statistik-Gruppe {n}: ungültiger Eintrag")
         name = g.get("name")
         name = re.sub(r"\s+", " ", name).strip() if isinstance(name, str) else ""
         if not 1 <= len(name) <= NAME_MAX:
-            raise HTTPException(400, f"Gruppe {n}: Der Name muss 1 bis {NAME_MAX} Zeichen lang sein")
+            raise HTTPException(400, f"Statistik-Gruppe {n}: Der Name muss 1 bis {NAME_MAX} Zeichen lang sein")
         if BAD_CHARS.search(name):
-            raise HTTPException(400, f"Gruppe {n}: Der Name darf die Zeichen < > & \" nicht enthalten")
+            raise HTTPException(400, f"Statistik-Gruppe {n}: Der Name darf die Zeichen < > & \" nicht enthalten")
         if namens_kollision(name):                                           # 3.60.1: „Wandern = Wandern + …“ neben „Wandern“ wäre verwirrend
-            raise HTTPException(400, f"Gruppe {n}: „{name}“ heißt schon eine Sportart – bitte einen anderen Gruppennamen wählen")
+            raise HTTPException(400, f"Statistik-Gruppe {n}: „{name}“ heißt schon eine Sportart – bitte einen anderen Gruppennamen wählen")
         if name.casefold() in names:
-            raise HTTPException(400, f"Zwei Gruppen heißen „{name}“")
+            raise HTTPException(400, f"Zwei Statistik-Gruppen heißen „{name}“")
         names.add(name.casefold())
         sports = g.get("sports")
         if not isinstance(sports, list) or len(sports) > 40:
@@ -165,10 +165,10 @@ def pruefen(raw, known=None):
             if s in sp:
                 continue
             if s in used_sp:
-                raise HTTPException(400, f"Eine Sportart kann nur in einer Gruppe sein („{s}“ ist schon in „{used_sp[s]}“)")
+                raise HTTPException(400, f"Eine Sportart kann nur in einer Statistik-Gruppe sein („{s}“ ist schon in „{used_sp[s]}“)")
             sp.append(s)
         if len(sp) < MIN_SPORTS:
-            raise HTTPException(400, f"„{name}“: Eine Gruppe braucht mindestens {MIN_SPORTS} Sportarten")
+            raise HTTPException(400, f"„{name}“: Eine Statistik-Gruppe braucht mindestens {MIN_SPORTS} Sportarten")
         gid = g.get("id")
         if not (isinstance(gid, str) and ID_RE.match(gid)) or gid in used_id:
             gid = _neue_id(used_id)

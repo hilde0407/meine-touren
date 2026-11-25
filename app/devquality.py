@@ -671,7 +671,7 @@ def _suggestions(tid, flags, dev_kind, fix):
     if "height" in kinds:
         out.append({"action": "elev-dem", "label": "Höhe aus Geländemodell neu berechnen", "method": "POST", "url": f"/api/tours/{tid}/elev-fix", "undo": f"/api/tours/{tid}/elev-restore"})
         if dev_kind == "zepp":
-            out.append({"action": "elev-zepp", "label": "Höhe aus Uhr (Zepp) abgleichen", "method": "POST", "url": f"/api/tours/{tid}/elev-zepp", "undo": f"/api/tours/{tid}/elev-restore"})
+            out.append({"action": "elev-zepp", "label": "Höhe korrigieren (aus der Uhr, Zepp)", "method": "POST", "url": f"/api/tours/{tid}/elev-zepp", "undo": f"/api/tours/{tid}/elev-restore"})
     if kinds & {"gps_jumps", "gps_gaps"}:
         out.append({"action": "trackfix", "label": "GPS-Track bereinigen …", "tour": tid})
     if "dist" in kinds or "dist_implausible" in kinds:
@@ -717,7 +717,7 @@ def payload():
         fl = [open_flags(r, r["tour_id"] in fh, r["tour_id"] in fg, _ak(am, r["tour_id"])) for r in rows]
         flagged = sum(1 for f in fl if f)
         n_acked = sum(1 for r in rows if r["tour_id"] in am)             # „Als geprüft markiert“ (3.16.1): nicht in `flagged`, aber zum Zurücknehmen sichtbar
-        flagged_h = sum(1 for f in fl if any(x["kind"] == "height" for x in f))            # für „Alle auffälligen Höhen korrigieren …“
+        flagged_h = sum(1 for f in fl if any(x["kind"] == "height" for x in f))            # für „Höhe aller auffälligen Touren korrigieren …“
         ids = [tid for tid in mine.get(d["id"], []) if tours[tid]["start_ts"]]       # so viele Touren wertet der Job für dieses Gerät aus
         have = {r["tour_id"]: r for r in rows}
         n_done = sum(1 for tid in ids if tid in have and have[tid]["h_state"] not in ("pending", "no_dem"))
@@ -725,7 +725,7 @@ def payload():
                 "n_detail": sum(1 for r in rows if r["h_state"] == "ok" and r["h_src"] in ("track", "zepp")), "n_summary": sum(1 for r in rows if r["h_state"] == "ok" and r["h_src"] == "summary")}
         tips = []
         if parts["height"]["level"] in ("mäßig", "auffällig"):
-            tips.append({"kind": "height", "text": "Bei einzelnen Touren lässt sich die Höhe aus dem Geländemodell neu berechnen oder mit der Uhr abgleichen (Liste „Auffällige Touren“). Jede Änderung ist wiederherstellbar."})
+            tips.append({"kind": "height", "text": "Bei einzelnen Touren lässt sich die Höhe aus dem Geländemodell oder aus der Uhr korrigieren (Liste „Auffällige Touren“). Jede Änderung ist wiederherstellbar."})
         if parts["gps"]["level"] in ("mäßig", "auffällig"):
             tips.append({"kind": "gps", "text": "Bei Touren mit GPS-Sprüngen hilft „GPS-Track bereinigen“. Das Original bleibt erhalten."})
         if parts["dist"]["level"] in ("mäßig", "auffällig") and parts["dist"].get("median") is not None:

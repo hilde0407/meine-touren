@@ -229,7 +229,7 @@ def test_oberflaeche_nutzt_den_rueckfall_an_einer_stelle():
     assert [k for k, _ in re.findall(r'\["(\w+)", "([^"]+)"\]', v.split("const KAT_FRUEHER = [", 1)[1].split("];", 1)[0])] == ENTFERNT_359
     st = (JS / "13-start.js").read_text(encoding="utf-8")
     assert re.findall(r'^  \["(\w+)", "', st.split("const ADM_TABS = [", 1)[1].split("];", 1)[0], re.M) == [
-        "uebersicht", "sportarten", "quellen", "weitergabe", "fotos", "auto", "handy", "sicher"]
+        "allgemein", "sportarten", "quellen", "weitergabe", "fotos", "auto", "handy", "sicher"]
 
 
 def test_version_texte_und_dateien():

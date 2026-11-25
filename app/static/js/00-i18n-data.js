@@ -1,7 +1,7 @@
 /* Übersetzungen Französisch und Spanisch: Zeilen „deutsch|übersetzung“ (siehe 00-i18n.js) */
 window.I18N = {
 fr: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Pas encore d’objectif pour 2026. Fixez-en un, par exemple 1000 km de randonnée.
-Aktivität im Jahr 2026|Activité en 2026
+Touren im Jahr 2026|Parcours en 2026
 Neuere Tour (←)|Parcours plus récent (←)
 Ältere Tour (→)|Parcours plus ancien (→)
 Ältere Tour|Parcours plus ancien
@@ -17,20 +17,21 @@ Längste:|Plus long :
 · Größter Aufstieg:|· Plus grand dénivelé positif :
 Größter Aufstieg:|Plus grand dénivelé positif :
 gegenüber|par rapport à
-Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Gruppen legst du mit Tags an.|Aucun voyage détecté (il faut au moins deux parcours consécutifs à plus de 60 km de votre point de départ habituel). Créez vos propres groupes avec des tags.
-in der Tour über „🏷 Tags“ vergeben|à attribuer dans le parcours via « 🏷 Tags »
-Noch keine Regionen bestimmt: Verwaltung → „Regionen bestimmen“.|Aucune région déterminée : Administration → « Déterminer les régions ».
-Noch keine Wanderführer hinterlegt: Verwaltung → „Wanderführer“ (GPX-Dateien hochladen).|Aucun guide de randonnée enregistré : Administration → « Guides de randonnée » (téléverser des fichiers GPX).
+Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Alben legst du mit Schlagwörtern an.|Aucun voyage détecté (il faut au moins deux parcours consécutifs à plus de 60 km de votre point de départ habituel). Créez vos propres groupes avec des tags.
+in der Tour über „🏷 Schlagwörter & Alben“ vergeben|à attribuer dans le parcours via « 🏷 Tags »
+Noch keine Regionen bestimmt: Verwaltung → Touren holen → Komoot „Regionen bestimmen“.|Aucune région déterminée : Administration → « Déterminer les régions ».
+Noch keine Wanderführer hinterlegt: Verwaltung → Touren holen → Wanderführer (GPX-Dateien hochladen).|Aucun guide de randonnée enregistré : Administration → « Guides de randonnée » (téléverser des fichiers GPX).
 nur Jahre mit mindestens 2 Touren der Sportart|uniquement les années avec au moins 2 parcours du sport
 Bei welcher Temperatur bist du unterwegs?|À quelle température partez-vous ?
 unter 0 °|sous 0 °
 über 30 °|au-dessus de 30 °
 Anteil der Strecke, der auf keiner früheren Tour lag|Part du tracé ne figurant sur aucun parcours antérieur
+Bausteingruppe wählen|Choisir un groupe de blocs
 Gruppe wählen|Choisir un groupe
 ausgewählt|sélectionné(s)
 Einer Tour zuordnen …|Associer à un parcours …
 Aufnahmezeit der gewählten Fotos verschieben, z. B. Zeitzone einer Reise korrigieren|Décaler l’heure de prise de vue des photos sélectionnées, p. ex. pour corriger le fuseau horaire d’un voyage
-Fehlende Strecken: Verwaltung → „Routen laden“. Fehlende Regionen: „Regionen bestimmen“.|Tracés manquants : Administration → « Charger les tracés ». Régions manquantes : « Déterminer les régions ».
+Fehlende Strecken: Verwaltung → Touren holen → Komoot „Fehlende Strecken holen“. Fehlende Regionen: dort „Regionen bestimmen“.|Tracés manquants : Administration → « Charger les tracés ». Régions manquantes : « Déterminer les régions ».
 Mögliche Ursache:|Cause possible :
 – „🧹 Track korrigieren“ hilft dabei.|– « 🧹 Corriger le tracé » peut aider.
 Der Track selbst ist unauffällig – wahrscheinlich ist nur die Sportart falsch.|Le tracé lui-même est normal – c’est probablement seulement le sport qui est faux.
@@ -45,7 +46,7 @@ Garmin, Suunto & andere Uhren|Garmin, Suunto et autres montres
 Touren und Fotos in die App holen|Importer parcours et photos dans l’application
 Weitere Wege (SMB-Ordner, Mac-Skript)|Autres méthodes (dossier SMB, script Mac)
 (Ordner nicht gefunden)|(dossier introuvable)
-Längste Bildseite (Pixel)|Plus grand côté de l’image (pixels)
+Längste Seite eines Fotos (Pixel)|Plus grand côté de l’image (pixels)
 JPEG-Qualität (1–95)|Qualité JPEG (1–95)
 Zuordnung: Toleranz vor/nach der Tour (Min.)|Association : tolérance avant/après le parcours (min)
 Automatik & Benachrichtigung|Automatisation et notification
@@ -62,7 +63,7 @@ Einrichten …|Configurer …
 Touren zum Vergleichen nicht gefunden|Parcours à comparer introuvables
 ‹ Alle Touren|‹ Tous les parcours
 ⬇ GPX|⬇ GPX
-⛰ Höhen korrigieren|⛰ Corriger l’altitude
+⛰ Höhe korrigieren|⛰ Corriger l’altitude
 Steigung (Anteil der Strecke)|Pente (part du tracé)
 📍 Fotos ausrichten|📍 Aligner les photos
 Andere Tour …|Autre parcours …
@@ -78,11 +79,11 @@ Ein Foto auf die richtige Stelle der Strecke ziehen – die anderen wandern zeit
 Aus den Fotos übernehmen|Reprendre depuis les photos
 Zeit aus den Foto-Positionen ableiten|Déduire l’heure des positions des photos
 Nach der Korrektur:|Après la correction :
-Mit Schlagworten wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).|Avec des mots-clés comme « Vacances Réunion 2026 » ou « Rother Taunus », un album avec sa propre page est créé (carte, totaux, photos, vol 3D).
+Mit Schlagwörtern wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).|Avec des tags comme « Vacances Réunion 2026 » ou « Rother Taunus », un album avec sa propre page est créé (carte, totaux, photos, vol 3D).
 Anfang und Ende (300 m) ausblenden – schützt deinen Wohnort|Masquer le début et la fin (300 m) – protège votre domicile
 weiße Umrandung (besser sichtbar auf Satellit/Topo)|contour blanc (plus visible sur satellite/topo)
 Zugang fehlt (Verwaltung)|Accès manquant (Administration)
-nicht verbunden (Verwaltung → Portale)|non connecté (Administration → Portails)
+nicht verbunden (Verwaltung → Hochladen & Planen → Portale)|non connecté (Administration → Portails)
 Mehrtagestouren|Parcours de plusieurs jours
 erkannt an Namen wie „… Tag 3“ oder „… Etappe 2“|détectés d’après des noms comme « … Jour 3 » ou « … Étape 2 »
 Gesamtansicht|Vue d’ensemble
@@ -111,7 +112,7 @@ Aufstieg|Dénivelé positif
 Abstieg|Dénivelé négatif
 Std.|h
 Min.|min
-Trennen|Déconnecter
+Verbindung trennen|Déconnecter
 Konto & Freigaben|Compte et partages
 Tempo|Allure
 Noch keine Touren|Aucun parcours pour l’instant
@@ -227,7 +228,7 @@ Komoot aktualisieren|Actualiser Komoot
 Nur Touren|Parcours uniquement
 Strecken lokal sichern|Enregistrer les tracés localement
 Regionen bestimmen|Déterminer les régions
-Bibliothek neu einlesen|Relire la bibliothèque
+Bibliothek neu durchsuchen|Relire la bibliothèque
 Fotos aus Ordner übernehmen|Importer les photos d’un dossier
 Fotos importieren …|Importer des photos …
 Bildeinstellungen|Réglages des images
@@ -244,17 +245,17 @@ Dateien importieren|Importer des fichiers
 Verbinden|Connecter
 ✓ verbunden|✓ connecté
 Automatik|Automatisation
-Täglich aktualisieren (Komoot, Routen, Fotos)|Actualiser chaque jour (Komoot, tracés, photos)
+Täglich aktualisieren (Komoot, Strecken, Fotos)|Actualiser chaque jour (Komoot, tracés, photos)
 Protokoll|Journal
 Einstellungen speichern|Enregistrer les réglages
 Token funktioniert ✓|Le jeton fonctionne ✓
 Ziel hinzufügen|Ajouter un objectif
 alle Sportarten|tous les sports
 Alle Sportarten|Tous les sports
-Rekorde|Records
-Tage mit Touren|Jours avec parcours
+Bestwerte|Records
+Aktive Tage|Jours actifs
 Wochen|Semaines
-Rekorde gesamt|Records globaux
+Bestwerte gesamt|Records globaux
 Höchste Punkte|Points les plus hauts
 Nach Wochentag|Par jour de la semaine
 Je Sportart|Par sport
@@ -329,8 +330,8 @@ Gipfel & Pässe|Sommets et cols
 Noch keine Gipfel bestimmt.|Aucun sommet déterminé pour l’instant.
 Wanderführer-Fortschritt|Progression des guides de randonnée
 offen|ouvert
-Tags & Alben|Tags et albums
-Noch keine Tags|Aucun tag pour l’instant
+Schlagwörter & Alben|Tags et albums
+Noch keine Schlagwörter|Aucun tag pour l’instant
 Tour teilen|Partager le parcours
 Fotos mitsenden|Joindre les photos
 Link erstellen|Créer un lien
@@ -341,7 +342,7 @@ Noch kein Link.|Pas encore de lien.
 Karte offline speichern|Enregistrer la carte hors ligne
 Keine Fotos.|Aucune photo.
 Alben & Tags|Albums et tags
-Noch keine Tags vergeben.|Aucun tag attribué pour l’instant.
+Noch keine Schlagwörter vergeben.|Aucun tag attribué pour l’instant.
 Leistung über die Jahre|Performance au fil des ans
 Aufstieg pro Stunde|Dénivelé positif par heure
 Wetter|Météo
@@ -510,7 +511,7 @@ der Strecke über 30°|du parcours à plus de 30°
 Gehzeit|Temps de marche
 Steigrate|Vitesse ascensionnelle
 Pace in Bewegung|Allure en mouvement
-Zeit in Bewegung|Temps en mouvement
+Bewegungszeit|Temps en mouvement
 ⛰ Steigung|⛰ Pente
 Strecke nach Steigung einfärben|Colorer le tracé selon la pente
 über 30°|plus de 30°
@@ -554,13 +555,14 @@ Meine Bewertung:|Ma note :
 Meine Bewertung|Ma note
 Alle Bewertungen|Toutes les notes
 Sicherheit|Sécurité
-– Lawinenlage, Gruppe, Notfallausrüstung (nur Notiz)|– risque d’avalanche, groupe, matériel de secours (note seulement)
+– Lawinenlage, Begleitung, Notfallausrüstung (nur Notiz)|– risque d’avalanche, groupe, matériel de secours (note seulement)
 Lawinenwarnstufe (laut Lagebericht des Tages)|Niveau de danger d’avalanche (selon le bulletin du jour)
 gering|faible
 mäßig|limité
 erheblich|marqué
 groß|fort
 sehr groß|très fort
+Bausteingruppe|Groupe de blocs
 Gruppe|Groupe
 Schneedecke, Gefahrenstellen, Umkehrpunkt …|Manteau neigeux, dangers, point de demi-tour …
 Reine Dokumentation – ersetzt keinen Lawinenlagebericht.|Simple documentation – ne remplace pas un bulletin d’avalanche.
@@ -589,8 +591,8 @@ Das Passwort braucht mindestens 6 Zeichen.|Le mot de passe doit comporter au moi
 Tour planen|Planifier une sortie
 🗺 Tour planen|🗺 Planifier une sortie
 🗺 Planen|🗺 Planifier
-Punkte in die Karte klicken oder eine GPX-Datei laden – Länge, Aufstieg und Zeit nach deinem Tempo|Cliquez des points sur la carte ou chargez un fichier GPX – longueur, dénivelé positif et durée selon votre rythme
-Name der Planung|Nom de la planification
+Punkte in die Karte klicken oder eine GPX-Datei laden – Strecke, Aufstieg und Dauer nach deinem Tempo|Cliquez des points sur la carte ou chargez un fichier GPX – longueur, dénivelé positif et durée selon votre rythme
+Name der geplanten Tour|Nom de la planification
 GPX laden …|Charger un GPX …
 Aus Wanderführer laden …|Charger depuis un guide …
 ↶ Letzten Punkt entfernen|↶ Supprimer le dernier point
@@ -601,7 +603,7 @@ Notiz zur Planung|Note sur la planification
 Plan speichern|Enregistrer le plan
 ⬇ Als GPX herunterladen|⬇ Télécharger en GPX
 Gespeicherte Pläne|Plans enregistrés
-Gespeicherte Planungen erscheinen hier.|Les plans enregistrés apparaissent ici.
+Gespeicherte geplante Touren erscheinen hier.|Les parcours planifiés enregistrés apparaissent ici.
 Geschätzte Zeit|Durée estimée
 Höchster Punkt|Point culminant
 Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.|Durée selon des valeurs par défaut – avec plus de sorties de ce sport dans vos archives, l’estimation devient personnelle.
@@ -646,7 +648,7 @@ Auf dem Handy|Sur le téléphone
 App installieren|Installer l’application
 Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen sind erst mit Verbindung möglich.|Hors ligne – les dernières données consultées sont affichées. Enregistrer et téléverser nécessitent une connexion.`,
 es: `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|Aún no hay objetivo para 2026. Fija uno, por ejemplo 1000 km de senderismo.
-Aktivität im Jahr 2026|Actividad en 2026
+Touren im Jahr 2026|Rutas en 2026
 Neuere Tour (←)|Ruta más reciente (←)
 Ältere Tour (→)|Ruta más antigua (→)
 Ältere Tour|Ruta más antigua
@@ -662,20 +664,21 @@ Längste:|Más larga:
 · Größter Aufstieg:|· Mayor desnivel positivo:
 Größter Aufstieg:|Mayor desnivel positivo:
 gegenüber|respecto a
-Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Gruppen legst du mit Tags an.|No se detectó ningún viaje (hacen falta al menos dos rutas seguidas a más de 60 km de tu punto de salida habitual). Crea tus propios grupos con etiquetas.
-in der Tour über „🏷 Tags“ vergeben|se asignan en la ruta con «🏷 Etiquetas»
-Noch keine Regionen bestimmt: Verwaltung → „Regionen bestimmen“.|Aún no se han determinado regiones: Administración → «Determinar regiones».
-Noch keine Wanderführer hinterlegt: Verwaltung → „Wanderführer“ (GPX-Dateien hochladen).|Aún no hay guías de senderismo: Administración → «Guías de senderismo» (sube archivos GPX).
+Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Alben legst du mit Schlagwörtern an.|No se detectó ningún viaje (hacen falta al menos dos rutas seguidas a más de 60 km de tu punto de salida habitual). Crea tus propios grupos con etiquetas.
+in der Tour über „🏷 Schlagwörter & Alben“ vergeben|se asignan en la ruta con «🏷 Etiquetas»
+Noch keine Regionen bestimmt: Verwaltung → Touren holen → Komoot „Regionen bestimmen“.|Aún no se han determinado regiones: Administración → «Determinar regiones».
+Noch keine Wanderführer hinterlegt: Verwaltung → Touren holen → Wanderführer (GPX-Dateien hochladen).|Aún no hay guías de senderismo: Administración → «Guías de senderismo» (sube archivos GPX).
 nur Jahre mit mindestens 2 Touren der Sportart|solo años con al menos 2 rutas del deporte
 Bei welcher Temperatur bist du unterwegs?|¿A qué temperatura sales?
 unter 0 °|por debajo de 0 °
 über 30 °|por encima de 30 °
 Anteil der Strecke, der auf keiner früheren Tour lag|Parte del trazado que no estaba en ninguna ruta anterior
+Bausteingruppe wählen|Elegir grupo de bloques
 Gruppe wählen|Elegir grupo
 ausgewählt|seleccionado(s)
 Einer Tour zuordnen …|Asignar a una ruta …
 Aufnahmezeit der gewählten Fotos verschieben, z. B. Zeitzone einer Reise korrigieren|Desplazar la hora de captura de las fotos seleccionadas, p. ej. para corregir la zona horaria de un viaje
-Fehlende Strecken: Verwaltung → „Routen laden“. Fehlende Regionen: „Regionen bestimmen“.|Trazados que faltan: Administración → «Cargar trazados». Regiones que faltan: «Determinar regiones».
+Fehlende Strecken: Verwaltung → Touren holen → Komoot „Fehlende Strecken holen“. Fehlende Regionen: dort „Regionen bestimmen“.|Trazados que faltan: Administración → «Cargar trazados». Regiones que faltan: «Determinar regiones».
 Mögliche Ursache:|Posible causa:
 – „🧹 Track korrigieren“ hilft dabei.|– «🧹 Corregir el trazado» puede ayudar.
 Der Track selbst ist unauffällig – wahrscheinlich ist nur die Sportart falsch.|El trazado en sí es normal; probablemente solo el deporte es incorrecto.
@@ -690,7 +693,7 @@ Garmin, Suunto & andere Uhren|Garmin, Suunto y otros relojes
 Touren und Fotos in die App holen|Traer rutas y fotos a la aplicación
 Weitere Wege (SMB-Ordner, Mac-Skript)|Otras vías (carpeta SMB, script de Mac)
 (Ordner nicht gefunden)|(carpeta no encontrada)
-Längste Bildseite (Pixel)|Lado más largo de la imagen (píxeles)
+Längste Seite eines Fotos (Pixel)|Lado más largo de la imagen (píxeles)
 JPEG-Qualität (1–95)|Calidad JPEG (1–95)
 Zuordnung: Toleranz vor/nach der Tour (Min.)|Asignación: tolerancia antes/después de la ruta (min)
 Automatik & Benachrichtigung|Automatización y avisos
@@ -707,7 +710,7 @@ Einrichten …|Configurar …
 Touren zum Vergleichen nicht gefunden|No se encontraron rutas para comparar
 ‹ Alle Touren|‹ Todas las rutas
 ⬇ GPX|⬇ GPX
-⛰ Höhen korrigieren|⛰ Corregir altitudes
+⛰ Höhe korrigieren|⛰ Corregir la altitud
 Steigung (Anteil der Strecke)|Pendiente (parte del trazado)
 📍 Fotos ausrichten|📍 Alinear fotos
 Andere Tour …|Otra ruta …
@@ -723,11 +726,11 @@ Ein Foto auf die richtige Stelle der Strecke ziehen – die anderen wandern zeit
 Aus den Fotos übernehmen|Tomar de las fotos
 Zeit aus den Foto-Positionen ableiten|Deducir la hora de las posiciones de las fotos
 Nach der Korrektur:|Tras la corrección:
-Mit Schlagworten wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).|Con etiquetas como «Vacaciones Reunión 2026» o «Rother Taunus» se crea un álbum con página propia (mapa, totales, fotos, vuelo 3D).
+Mit Schlagwörtern wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).|Con etiquetas como «Vacaciones Reunión 2026» o «Rother Taunus» se crea un álbum con página propia (mapa, totales, fotos, vuelo 3D).
 Anfang und Ende (300 m) ausblenden – schützt deinen Wohnort|Ocultar inicio y final (300 m): protege tu domicilio
 weiße Umrandung (besser sichtbar auf Satellit/Topo)|borde blanco (más visible en satélite/topo)
 Zugang fehlt (Verwaltung)|Falta el acceso (Administración)
-nicht verbunden (Verwaltung → Portale)|no conectado (Administración → Portales)
+nicht verbunden (Verwaltung → Hochladen & Planen → Portale)|no conectado (Administración → Portales)
 Mehrtagestouren|Rutas de varios días
 erkannt an Namen wie „… Tag 3“ oder „… Etappe 2“|detectadas por nombres como «… Día 3» o «… Etapa 2»
 Gesamtansicht|Vista general
@@ -756,7 +759,7 @@ Aufstieg|Desnivel positivo
 Abstieg|Desnivel negativo
 Std.|h
 Min.|min
-Trennen|Desconectar
+Verbindung trennen|Desconectar
 Konto & Freigaben|Cuenta y accesos compartidos
 Tempo|Ritmo
 Noch keine Touren|Aún no hay rutas
@@ -872,7 +875,7 @@ Komoot aktualisieren|Actualizar Komoot
 Nur Touren|Solo rutas
 Strecken lokal sichern|Guardar trazados localmente
 Regionen bestimmen|Determinar regiones
-Bibliothek neu einlesen|Releer la biblioteca
+Bibliothek neu durchsuchen|Releer la biblioteca
 Fotos aus Ordner übernehmen|Importar fotos de una carpeta
 Fotos importieren …|Importar fotos …
 Bildeinstellungen|Ajustes de imagen
@@ -889,17 +892,17 @@ Dateien importieren|Importar archivos
 Verbinden|Conectar
 ✓ verbunden|✓ conectado
 Automatik|Automatización
-Täglich aktualisieren (Komoot, Routen, Fotos)|Actualizar a diario (Komoot, trazados, fotos)
+Täglich aktualisieren (Komoot, Strecken, Fotos)|Actualizar a diario (Komoot, trazados, fotos)
 Protokoll|Registro
 Einstellungen speichern|Guardar ajustes
 Token funktioniert ✓|El token funciona ✓
 Ziel hinzufügen|Añadir objetivo
 alle Sportarten|todos los deportes
 Alle Sportarten|Todos los deportes
-Rekorde|Récords
-Tage mit Touren|Días con rutas
+Bestwerte|Récords
+Aktive Tage|Días activos
 Wochen|Semanas
-Rekorde gesamt|Récords totales
+Bestwerte gesamt|Récords totales
 Höchste Punkte|Puntos más altos
 Nach Wochentag|Por día de la semana
 Je Sportart|Por deporte
@@ -974,8 +977,8 @@ Gipfel & Pässe|Cumbres y puertos
 Noch keine Gipfel bestimmt.|Aún no se han determinado cumbres.
 Wanderführer-Fortschritt|Progreso de las guías de senderismo
 offen|pendiente
-Tags & Alben|Etiquetas y álbumes
-Noch keine Tags|Aún no hay etiquetas
+Schlagwörter & Alben|Etiquetas y álbumes
+Noch keine Schlagwörter|Aún no hay etiquetas
 Tour teilen|Compartir ruta
 Fotos mitsenden|Incluir las fotos
 Link erstellen|Crear enlace
@@ -986,7 +989,7 @@ Noch kein Link.|Aún no hay enlace.
 Karte offline speichern|Guardar el mapa sin conexión
 Keine Fotos.|Sin fotos.
 Alben & Tags|Álbumes y etiquetas
-Noch keine Tags vergeben.|Aún no se han asignado etiquetas.
+Noch keine Schlagwörter vergeben.|Aún no se han asignado etiquetas.
 Leistung über die Jahre|Rendimiento a lo largo de los años
 Aufstieg pro Stunde|Desnivel positivo por hora
 Wetter|Tiempo
@@ -1155,7 +1158,7 @@ der Strecke über 30°|del recorrido a más de 30°
 Gehzeit|Tiempo de marcha
 Steigrate|Ritmo de ascenso
 Pace in Bewegung|Ritmo en movimiento
-Zeit in Bewegung|Tiempo en movimiento
+Bewegungszeit|Tiempo en movimiento
 ⛰ Steigung|⛰ Pendiente
 Strecke nach Steigung einfärben|Colorear el recorrido según la pendiente
 über 30°|más de 30°
@@ -1199,13 +1202,14 @@ Meine Bewertung:|Mi valoración:
 Meine Bewertung|Mi valoración
 Alle Bewertungen|Todas las valoraciones
 Sicherheit|Seguridad
-– Lawinenlage, Gruppe, Notfallausrüstung (nur Notiz)|– peligro de aludes, grupo, equipo de emergencia (solo nota)
+– Lawinenlage, Begleitung, Notfallausrüstung (nur Notiz)|– peligro de aludes, grupo, equipo de emergencia (solo nota)
 Lawinenwarnstufe (laut Lagebericht des Tages)|Nivel de peligro de aludes (según el boletín del día)
 gering|débil
 mäßig|moderado
 erheblich|notable
 groß|fuerte
 sehr groß|muy fuerte
+Bausteingruppe|Grupo de bloques
 Gruppe|Grupo
 Schneedecke, Gefahrenstellen, Umkehrpunkt …|Manto nival, peligros, punto de retorno …
 Reine Dokumentation – ersetzt keinen Lawinenlagebericht.|Solo documentación: no sustituye un boletín de aludes.
@@ -1234,8 +1238,8 @@ Das Passwort braucht mindestens 6 Zeichen.|La contraseña necesita al menos 6 ca
 Tour planen|Planificar una ruta
 🗺 Tour planen|🗺 Planificar una ruta
 🗺 Planen|🗺 Planificar
-Punkte in die Karte klicken oder eine GPX-Datei laden – Länge, Aufstieg und Zeit nach deinem Tempo|Haz clic en el mapa o carga un GPX: longitud, desnivel positivo y tiempo según tu ritmo
-Name der Planung|Nombre de la planificación
+Punkte in die Karte klicken oder eine GPX-Datei laden – Strecke, Aufstieg und Dauer nach deinem Tempo|Haz clic en el mapa o carga un GPX: longitud, desnivel positivo y tiempo según tu ritmo
+Name der geplanten Tour|Nombre de la planificación
 GPX laden …|Cargar GPX …
 Aus Wanderführer laden …|Cargar desde una guía …
 ↶ Letzten Punkt entfernen|↶ Quitar el último punto
@@ -1246,7 +1250,7 @@ Notiz zur Planung|Nota sobre la planificación
 Plan speichern|Guardar plan
 ⬇ Als GPX herunterladen|⬇ Descargar como GPX
 Gespeicherte Pläne|Planes guardados
-Gespeicherte Planungen erscheinen hier.|Los planes guardados aparecen aquí.
+Gespeicherte geplante Touren erscheinen hier.|Los rutas planificadas guardados aparecen aquí.
 Geschätzte Zeit|Tiempo estimado
 Höchster Punkt|Punto más alto
 Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.|Tiempo según valores estándar: con más rutas de este deporte en tu archivo, la estimación será personal.

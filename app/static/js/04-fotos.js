@@ -46,13 +46,13 @@ VIEWS.photos = async (_, q) => {
   PHINFO = await api("/api/photo-info");
   if (!PHINFO.count) {
     $("#main").innerHTML =
-      `<div class="empty"><h2>Noch keine Fotos</h2><p>Importiere einen Ordner mit Bildern – sie werden nach Aufnahmezeit und Aufnahmeort deinen Touren zugeordnet.</p><p><button class="btn" id="pimp">Fotos importieren …</button></p></div>`;
+      `<div class="empty"><h2>Noch keine Fotos</h2><p>Importiere einen Ordner mit Fotos – sie werden nach Aufnahmezeit und Aufnahmeort deinen Touren zugeordnet.</p><p><button class="btn" id="pimp">Fotos importieren …</button></p></div>`;
     $("#pimp").onclick = () => photoImportModal();
     return;
   }
   const Y = +(q.get("y") || PHINFO.years[0]);
   $("#main").innerHTML =
-    `<div class="sec mt0"><h2>Fotos</h2><span class="sub">${nf(PHINFO.count, 0)} Bilder, ${nf(PHINFO.assigned, 0)} einer Tour zugeordnet</span>${PHINFO.undated ? `<span class="chip" style="cursor:default;background:#f6e3b4;color:#5a4300" title="Diese Fotos enthalten keine Aufnahmezeit im Bild. Es wird das Dateidatum benutzt (meist der Exportzeitpunkt); sie werden deshalb nicht automatisch einer Tour zugeordnet. Mit dem Foto-Zeit-Abgleich (mac/foto_zeit_abgleich.py) lässt sich die echte Zeit aus den RAW-Originalen nachtragen.">⚠ ${nf(PHINFO.undated, 0)} ohne Aufnahmezeit</span>` : ""}<span class="sp"></span><button class="btn" id="pimp">Fotos importieren …</button><a class="btn alt" target="_blank" href="slideshow.html?year=${Y}">Diashow ${Y}</a><a class="btn ghost" target="_blank" href="slideshow.html?random=1">Zufall</a></div>
+    `<div class="sec mt0"><h2>Fotos</h2><span class="sub">${nf(PHINFO.count, 0)} Bilder, ${nf(PHINFO.assigned, 0)} einer Tour zugeordnet</span>${PHINFO.undated ? `<span class="chip" style="cursor:default;background:#f6e3b4;color:#5a4300" title="Diese Fotos enthalten keine Aufnahmezeit im Foto. Es wird das Dateidatum benutzt (meist der Exportzeitpunkt); sie werden deshalb nicht automatisch einer Tour zugeordnet. Mit dem Foto-Zeit-Abgleich (mac/foto_zeit_abgleich.py) lässt sich die echte Zeit aus den RAW-Originalen nachtragen.">⚠ ${nf(PHINFO.undated, 0)} ohne Aufnahmezeit</span>` : ""}<span class="sp"></span><button class="btn" id="pimp">Fotos importieren …</button><a class="btn alt" target="_blank" href="slideshow.html?year=${Y}">Diashow ${Y}</a><a class="btn ghost" target="_blank" href="slideshow.html?random=1">Zufall</a></div>
    <div class="years">${PHINFO.years.map(y => `<button data-y="${y}" class="${y === Y ? "on" : ""}">${y}</button>`).join("")}</div><div id="pg" class="mt26"></div>`;
   $("#pimp").onclick = () => photoImportModal();
   $(".years").onclick = e => e.target.dataset.y && (location.hash = `#/photos?y=${e.target.dataset.y}`);
@@ -160,7 +160,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
     if (a === "shift") return shiftDialog(ids.map(i => ph.find(p => p.id === i)).filter(Boolean), () => route());
     if (a === "del") {
       if (
-        !await uiConfirm({text: `${ids.length} Foto(s) endgültig löschen?\n\nGelöscht wird die Kopie in Meine Touren (nicht dein Original auf dem Rechner). Die Fotos werden beim nächsten Import nicht erneut übernommen.`, danger: true, ok: "Löschen"})
+        !await uiConfirm({text: `${fmtAnzahl(ids.length, "Foto", "Fotos")} endgültig löschen?\n\nGelöscht wird die Kopie in Meine Touren (nicht dein Original auf dem Rechner). Die Fotos werden beim nächsten Import nicht erneut übernommen.`, danger: true, ok: "Löschen"})
       )
         return;
       await api("/api/photo-delete", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({ids})});
@@ -169,7 +169,7 @@ function photoSelect(ph, Y, o = {box: "#pg", anchor: ".sec .sp"}) {
     }
     if (a === "rm") {
       if (
-        !await uiConfirm({text: `${ids.length} Foto(s) aus dieser Tour entfernen?\n\nSie werden keiner Tour mehr zugeordnet (auch nicht automatisch) und erscheinen unter „Fotos“ bei „Ohne Tour“.`, danger: true, ok: "Entfernen"})
+        !await uiConfirm({text: `${fmtAnzahl(ids.length, "Foto", "Fotos")} aus dieser Tour entfernen?\n\nSie werden keiner Tour mehr zugeordnet (auch nicht automatisch) und erscheinen unter „Fotos“ bei „Ohne Tour“.`, danger: true, ok: "Entfernen"})
       )
         return;
       await api("/api/photo-unassign", {
@@ -429,7 +429,7 @@ function photoImportModal(o = {}) {
   m.noClose = () => busy;
   q(".uibox").classList.add("pimbox");
   const close = async () => {
-    if (busy && !(await uiConfirm({title: "Import abbrechen?", text: "Der Import läuft noch. Wirklich abbrechen?", ok: "Abbrechen", cancel: "Weiterlaufen lassen", danger: true}))) return;
+    if (busy && !(await uiConfirm({title: "Import beenden?", text: "Der Import läuft noch. Bereits importierte Fotos bleiben in der Bibliothek.", ok: "Import beenden", cancel: "Weiterlaufen lassen", danger: true}))) return;
     stop = true;
     m.remove();
     if (/^#\/(photos|tour|admin)/.test(location.hash))
@@ -485,7 +485,7 @@ function photoImportModal(o = {}) {
         heic = pi.heic ? 0 : all.filter(f => /\.hei[cf]$/i.test(f.name)).length;
       if (!files.length) {
         busy = false;
-        body(`<p>Es wurden keine JPG-, PNG- oder WebP-Bilder gefunden${heic ? ` (${heic} HEIC-Bilder: dieser Server kann sie nicht umwandeln – bitte als JPG exportieren oder auf dem Server <code>pip install pillow-heif</code> ausführen)` : ""}.</p><div class="row"><button class="btn" id="pback">Zurück</button></div>`);
+        body(`<p>Es wurden keine JPG-, PNG- oder WebP-Fotos gefunden${heic ? ` (${heic} HEIC-Fotos: dieser Server kann sie nicht umwandeln – bitte als JPG exportieren oder auf dem Server <code>pip install pillow-heif</code> ausführen)` : ""}.</p><div class="row"><button class="btn" id="pback">Zurück</button></div>`);
         q("#pback").onclick = start;
         return;
       }
@@ -536,7 +536,7 @@ function photoImportModal(o = {}) {
       const info = {total: files.length, dup: files.length - fresh.length - deleted, deleted, other, heic, nodate, all};
       if (!fresh.length) {
         busy = false;
-        body(`<p><b>Nichts zu importieren:</b> ${info.dup ? `${info.dup} Bilder sind schon in der Bibliothek` : ""}${info.dup && deleted ? " und " : ""}${deleted ? `${deleted} Bilder hast du früher gelöscht – sie werden deshalb nicht erneut übernommen` : ""}.</p>
+        body(`<p><b>Nichts zu importieren:</b> ${info.dup ? `${info.dup} Fotos sind schon in der Bibliothek` : ""}${info.dup && deleted ? " und " : ""}${deleted ? `${deleted} Fotos hast du früher gelöscht – sie werden deshalb nicht erneut übernommen` : ""}.</p>
           <div class="uifoot"><button class="btn ghost" id="pcx">Schließen</button><button class="btn alt" id="pback">Anderen Ordner wählen</button>${deleted ? `<button class="btn" id="pre">Die ${deleted} gelöschten Fotos erneut importieren</button>` : ""}</div>`);
         if (deleted) q("#pre").onclick = () => analyse(all, true);
         q("#pback").onclick = start;
@@ -577,7 +577,7 @@ function photoImportModal(o = {}) {
         return {d, ch, def};
       });
     q("#pih").textContent = o.tour ? `Fotos zu „${o.tour.name}“ hinzufügen` : "Fotos importieren";
-    body(`<p>${info.total} Bilder gefunden, davon <b>${fresh.length}</b> zu importieren${info.dup ? ` (${info.dup} schon vorhanden)` : ""}${info.deleted ? ` · <a href="#" id="pre">${info.deleted} früher gelöschte ebenfalls importieren</a>` : ""}.${info.nodate ? ` <span class="mut">${info.nodate} ohne Aufnahmezeit im Bild – dort gilt das Dateidatum.</span>` : ""}${info.heic ? ` <span class="mut">${info.heic} HEIC-Bilder werden übersprungen (Server ohne pillow-heif; bitte als JPG exportieren).</span>` : ""}</p>
+    body(`<p>${info.total} Fotos gefunden, davon <b>${fresh.length}</b> zu importieren${info.dup ? ` (${info.dup} schon vorhanden)` : ""}${info.deleted ? ` · <a href="#" id="pre">${info.deleted} früher gelöschte ebenfalls importieren</a>` : ""}.${info.nodate ? ` <span class="mut">${info.nodate} ohne Aufnahmezeit im Foto – dort gilt das Dateidatum.</span>` : ""}${info.heic ? ` <span class="mut">${info.heic} HEIC-Fotos werden übersprungen (Server ohne pillow-heif; bitte als JPG exportieren).</span>` : ""}</p>
       <p class="mut fs14">So werden die Fotos nach Aufnahmetag zugeordnet. Pro Tag kannst du die Auswahl ändern.</p>
       ${rows
         .map(
@@ -802,7 +802,7 @@ function photoImportModal(o = {}) {
     );
     const sum = `${done} importiert${dup ? `, ${dup} doppelt (schon vorhanden)` : ""}${skipped ? `, ${skipped} ohne passende Strecke übersprungen` : ""}${fail ? `, ${fail} Fehler` : ""}${stop ? " – abgebrochen" : ""}`;
     if (!q("#ptxt")) return;
-    q("#ptxt").textContent = `${sum}. Bibliothek wird eingelesen …`;
+    q("#ptxt").textContent = `${sum}. Bibliothek wird durchsucht …`;
     const sleep = ms => new Promise(r => setTimeout(r, ms));
     let started = false;
     for (let i = 0; i < 30 && !started; i++) {
@@ -820,7 +820,7 @@ function photoImportModal(o = {}) {
         if (!q("#ptxt")) return;
         const j = await api("/api/jobs").catch(() => null);
         if (j && j.running) {
-          q("#ptxt").textContent = `${sum}. Bibliothek wird eingelesen … ${j.progress || ""}`;
+          q("#ptxt").textContent = `${sum}. Bibliothek wird durchsucht … ${j.progress || ""}`;
           continue;
         }
         break;
@@ -829,7 +829,7 @@ function photoImportModal(o = {}) {
     PHINFO = await api("/api/photo-info").catch(() => PHINFO);
     const gain = PHINFO ? PHINFO.assigned - before : 0;
     q("#pih").textContent = ok ? "Import abgeschlossen" : "Import fast abgeschlossen";
-    body(`<p>${ok ? "✓" : "⚠"} <b>${sum}.</b></p>${failed.length ? `<details open><summary>${failed.length} Foto${failed.length > 1 ? "s" : ""} konnte${failed.length > 1 ? "n" : ""} nicht importiert werden</summary><ul class="fs14 ova m6-0" style="max-height:200px">${failed.slice(0, 200).map(x => `<li><b>${esc(x.name)}</b> – ${esc(x.reason)}</li>`).join("")}${failed.length > 200 ? `<li>… und ${failed.length - 200} weitere</li>` : ""}</ul></details>` : ""}${ok ? `<p>${gain > 0 ? `<b>${gain}</b> Fotos wurden Touren zugeordnet.` : "Es wurden keine Fotos automatisch einer Tour zugeordnet."}${PHINFO && PHINFO.count - PHINFO.assigned > 0 ? ` ${nf(PHINFO.count - PHINFO.assigned, 0)} Fotos sind „ohne Tour“ – unter Fotos → „Fotos zuordnen“ lassen sie sich Touren zuweisen, in der Tour per „Zeit per GPS prüfen“ korrigieren.` : ""}</p>` : `<p>Das Einlesen konnte nicht gestartet werden – bitte in der Verwaltung „Bibliothek neu einlesen“ ausführen.</p>`}
+    body(`<p>${ok ? "✓" : "⚠"} <b>${sum}.</b></p>${failed.length ? `<details open><summary>${failed.length} Foto${failed.length > 1 ? "s" : ""} konnte${failed.length > 1 ? "n" : ""} nicht importiert werden</summary><ul class="fs14 ova m6-0" style="max-height:200px">${failed.slice(0, 200).map(x => `<li><b>${esc(x.name)}</b> – ${esc(x.reason)}</li>`).join("")}${failed.length > 200 ? `<li>… und ${failed.length - 200} weitere</li>` : ""}</ul></details>` : ""}${ok ? `<p>${gain > 0 ? `<b>${gain}</b> Fotos wurden Touren zugeordnet.` : "Es wurden keine Fotos automatisch einer Tour zugeordnet."}${PHINFO && PHINFO.count - PHINFO.assigned > 0 ? ` ${nf(PHINFO.count - PHINFO.assigned, 0)} Fotos sind „ohne Tour“ – unter Fotos → „Fotos zuordnen“ lassen sie sich Touren zuweisen, in der Tour per „Zeit per GPS prüfen“ korrigieren.` : ""}</p>` : `<p>Das Durchsuchen der Bibliothek konnte nicht starten – bitte unter Verwaltung → Fotos → Fotos „Bibliothek neu durchsuchen“ ausführen.</p>`}
       <div class="uifoot"><button class="btn ghost" id="pcx">Schließen</button><a class="btn" href="#/photos" id="pgo">Fotos ansehen</a></div>`);
     q("#pcx").onclick = close;
     q("#pgo").onclick = () => {
@@ -850,10 +850,10 @@ const s_max = () => document.querySelector('[data-k="photo_max_side"]')?.value,
 /* Zeit der Fotos per Aufnahmeort mit der Strecke abgleichen (Kamerauhr falsch gestellt) */
 async function gpsAlign(t) {
   const r = await api(`/api/photo-offset?tour_id=${encodeURIComponent(t.id)}`);
-  if (!r.ok) return uiAlert("Zeitabgleich nicht möglich:\n\n" + r.reason);
+  if (!r.ok) return uiAlert("Zeiten prüfen nicht möglich:\n\n" + r.reason);
   if (r.aligned) return uiAlert(`Die Zeiten der Fotos passen zur Strecke (${r.n} von ${r.of} Fotos mit Aufnahmeort geprüft).`);
   if (
-    !await uiConfirm(`Die Kamerauhr scheint ${shiftTxt(Math.abs(r.delta_s)).replace("+", "")} ${r.delta_s > 0 ? "nachzugehen" : "vorzugehen"}.\n\nAus dem Aufnahmeort von ${r.n} von ${r.of} Fotos ergibt sich eine Korrektur von ${shiftTxt(r.delta_s)}. Die Fotos aus diesem Zeitraum werden korrigiert und dieser Tour zugeordnet.\n\nÜbernehmen?`)
+    !await uiConfirm({title: "Zeiten der Fotos korrigieren?", ok: "Korrigieren", text: `Die Kamerauhr scheint ${shiftTxt(Math.abs(r.delta_s)).replace("+", "")} ${r.delta_s > 0 ? "nachzugehen" : "vorzugehen"}.\n\nAus dem Aufnahmeort von ${r.n} von ${r.of} Fotos ergibt sich eine Korrektur von ${shiftTxt(r.delta_s)}. Die Fotos aus diesem Zeitraum werden korrigiert und dieser Tour zugeordnet.`})
   )
     return;
   await api("/api/photo-offset", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({tour_id: t.id, delta_s: r.delta_s, ids: r.ids})});

@@ -90,7 +90,7 @@ def test_width_switch_changes_layout_and_is_saved_and_reload_keeps_it(pw, app):
         assert b['.slit[data-sl="wp"]']["y"] > b['.slit[data-sl="puls"]']["y"] + 50                    # jetzt untereinander
         pg.locator('.slit[data-sl="puls"] .slw[data-w="halb"]').click()                                # zurück auf den Standard: nichts mehr gespeichert
         pg.wait_for_function("() => document.querySelector('.slit[data-sl=\"puls\"]').classList.contains('w-halb')", timeout=T)
-        pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Gespeichert'; }", timeout=T)
+        pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Ansicht gespeichert'; }", timeout=T)
         assert "w" not in _server(app, "tour-haupt")
         pg.locator('.slit[data-sl="wp"] .slw[data-w="drittel"]').click()
         pg.wait_for_function("() => document.querySelector('.slit[data-sl=\"wp\"]').dataset.cw === 'drittel'", timeout=T)

@@ -90,7 +90,7 @@ const zrAware = it => {
 };
 const zrMob = () => document.documentElement.classList.contains("mob");
 /* Kurzform für den Chip der Werkzeugzeile (Handy): „Zeitraum: 2025“ */
-const zrShort = F => (!F ? "Je Baustein" : F.kind === "y" ? String(F.yr) : F.kind === "all" ? "Alle" : stRange(F).label);
+const zrShort = F => (!F ? "Je Baustein" : F.kind === "y" ? String(F.yr) : F.kind === "all" ? "Gesamte Zeit" : stRange(F).label);
 const zrLabel = F => (!F ? "Jeder Baustein zeigt seinen eigenen Zeitraum" : F.kind === "y" ? `Das Jahr ${F.yr}` : F.kind === "all" ? "Alle Touren, gesamte Zeit" : stRange(F).label);
 /* Zeitraum setzen (F = null: zurück auf den gespeicherten bzw. keinen) */
 function zrSet(fam, F, focus) {
@@ -143,7 +143,7 @@ SLF.uebersicht = {
 function zrHtml(fam, F, open, chip, help) {
   const cy = new Date().getFullYear(), ys = years(), on = {all: F && F.kind === "all", year: F && F.kind === "y" && F.yr === cy, "12m": F && F.kind === "12m", prev: F && F.kind === "y" && F.yr === cy - 1, c: F && F.kind === "c"},
     other = F && F.kind === "y" && F.yr !== cy && F.yr !== cy - 1 ? F.yr : 0, yl = [...new Set(ys.concat(other ? [other] : []))].sort((a, b) => b - a),
-    chips = [["all", "Alle"], ["year", "Dieses Jahr"], ["12m", "Letzte 12 Monate"], ["prev", "Vorjahr"]];
+    chips = [["all", "Gesamte Zeit"], ["year", "Laufendes Jahr"], ["12m", "Letzte 12 Monate"], ["prev", "Vorjahr"]];
   return (chip ? "" : `<div class="zrhead"><button type="button" class="zrtog" aria-expanded="${open}" aria-controls="zrbody"><span class="zrt">Zeitraum der Seite</span><span class="zrl">${esc(zrLabel(F))}</span></button>` +
     `<button type="button" class="btn ghost sm zrreset" data-zr="reset"${F ? "" : " hidden"}>Zurücksetzen</button>` +
     `<button type="button" class="btn ghost sm zrinfo" data-zr="help" aria-expanded="${!!help}" aria-controls="zrhelp"><span aria-hidden="true">ⓘ</span> Hilfe</button></div>` + `<div class="zrhelp" id="zrhelp"${help ? "" : " hidden"}>${zrHelpHtml()}</div>`) +
@@ -152,7 +152,7 @@ function zrHtml(fam, F, open, chip, help) {
     `<button type="button" class="chip${on.c ? " on" : ""}" data-zr="c" aria-pressed="${!!on.c}" aria-controls="zrvon">Von–bis …</button>` +
     (chip ? `<button type="button" class="chip zrreset" data-zr="reset"${F ? "" : " hidden"}>Zurücksetzen</button><button type="button" class="chip zrinfo" data-zr="help" aria-expanded="${!!help}" aria-controls="zrhelp"><span aria-hidden="true">ⓘ</span> Hilfe</button>` : "") + `</div>` +
     (chip ? `<div class="zrhelp" id="zrhelp"${help ? "" : " hidden"}>${zrHelpHtml()}</div>` : "") +
-    `<form class="stfc zrform" id="zrvon"${F && F.kind === "c" ? "" : " hidden"} novalidate><label>Von <input type="date" name="von" value="${F ? F.von : ""}"></label><label>Bis <input type="date" name="bis" value="${F ? F.bis : ""}"></label><button class="btn sm" type="submit">Übernehmen</button><span class="stfe" role="alert"></span></form>` +
+    `<form class="stfc zrform" id="zrvon"${F && F.kind === "c" ? "" : " hidden"} novalidate><label>Von <input type="date" name="von" value="${F ? F.von : ""}"></label><label>Bis <input type="date" name="bis" value="${F ? F.bis : ""}"></label><button class="btn sm" type="submit">Anzeigen</button><span class="stfe" role="alert"></span></form>` +
     `<p class="mut zrhint">Gilt für alle Bausteine mit Zeitbezug. Ein Baustein behält seinen eigenen Zeitraum, wenn du in seinen Einstellungen „Zeitraum der Seite verwenden“ abschaltest.</p></div>`;
 }
 const zrSig = (F, open, chip, help) => JSON.stringify([F && zrDocOf(F), open, years().join(","), new Date().getFullYear(), chip, !!help]);

@@ -99,7 +99,7 @@ function rnFrame() {
   const trips = window.RS_TRIPS || [];
   b = card("reisen", "Reisen", trips.length === 1 ? "1 Reise" : trips.length ? `${trips.length} Reisen` : "", true);
   b.appendChild(document.getElementById("tr"));
-  b = card("alben", "Alben und Tags", "", true);
+  b = card("alben", "Schlagwörter & Alben", "", true);
   if (alb) {
     const h = alb.querySelector(":scope > .sec .sub");
     if (h) b.insertAdjacentHTML("beforeend", `<p class="mut rnhint">${esc(h.textContent)}</p>`);

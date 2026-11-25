@@ -32,6 +32,22 @@ const FMT_E = {   // Einheiten je Sprache: Stunde, Minute
 };
 const fmtPad2 = n => String(n).padStart(2, "0");
 
+/* 3.61.0 Anzahl mit ausgeschriebener Mehrzahl statt „Foto(s)“ (Leitfaden 2.10): fmtAnzahl(3, "Foto", "Fotos") -> „3 Fotos“, fmtAnzahl(1, …) -> „1 Foto“ */
+const fmtAnzahl = (n, eins, viele) => (+n === 1 ? "1 " + eins : fmtZahl(+n || 0, 0) + " " + viele);
+/* 3.61.0 Datum in Texteingaben als TT.MM.JJJJ (gespeichert wird weiter JJJJ-MM-TT): fmtDatumFeld("2024-01-31") -> „31.01.2024“; fmtDatumLesen("31.1.2024") -> „2024-01-31“
+   (leer bleibt leer; ein schon im ISO-Format eingegebenes Datum gilt auch; Unlesbares -> null) */
+const fmtDatumFeld = iso => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || "").trim());
+  return m ? `${m[3]}.${m[2]}.${m[1]}` : String(iso || "");
+};
+const fmtDatumLesen = t => {
+  t = String(t || "").trim();
+  if (!t) return "";
+  let m = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(t);
+  if (m) return `${m[3]}-${fmtPad2(m[2])}-${fmtPad2(m[1])}`;
+  m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
+  return m ? t : null;
+};
 /* Zahl mit Nachkommastellen im Format der Sprache */
 const fmtZahl = (n, d = 1) => {
   const v = Number(n ?? 0);

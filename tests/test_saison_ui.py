@@ -261,7 +261,7 @@ def test_belastung_einstellung_ansicht_im_dialog(pw, app):
         pg.locator(".sldlg .flchip", has_text=re.compile(r"^12 Wochen$")).click()
         save_dialog(pg)
         expect(pg.locator('[data-wid="b1"] .slwk')).to_have_count(12, timeout=15000)
-        pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Gespeichert'; }", timeout=T)
+        pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Ansicht gespeichert'; }", timeout=T)
         cfg = _api(app, "uebersicht")["layout"]["widgets"][0]["cfg"]
         assert cfg == {"view": "wochen", "weeks": 12}, cfg
         assert not pg.errors, pg.errors

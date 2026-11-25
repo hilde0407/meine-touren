@@ -171,10 +171,10 @@ def test_plan_check_karte_desktop_hell_dunkel_mobil(pw, app):
             assert "▲" in pg.inner_text("#pcheck")                                                # Symbol zusätzlich zur Farbe
             # eine Zeitzahl: Kennzahl oben und Karte zeigen dasselbe
             top = pg.evaluate("() => { const l = [...document.querySelectorAll('#pf .fig')].find(f => /Geschätzte Zeit/.test(f.innerText)); return l.querySelector('.v').innerText.replace(/Std\\./, '').trim(); }")
-            assert f"Geschätzte Gesamtzeit inkl. Pausen: {top} Std. (wie oben)" in pg.inner_text("#pcb")
+            assert f"Geschätzte Dauer inkl. Pausen: {top} Std. (wie oben)" in pg.inner_text("#pcb")
             # aria
             assert pg.get_attribute("#pcb", "aria-live") == "polite" and pg.get_attribute("#pcb", "role") == "status"
-            assert pg.get_attribute("#pn", "aria-label") == "Name der Planung" and pg.get_attribute("#ps", "aria-label") == "Sportart"
+            assert pg.get_attribute("#pn", "aria-label") == "Name der geplanten Tour" and pg.get_attribute(".plsp .recsports", "aria-label") == "Sportart"   # 3.61.0: Muster „Zuweisen“
             assert pg.get_attribute("#pm", "aria-label")
             # Einklappen
             pg.evaluate("() => { document.querySelector('#pcheck').open = false; }")
@@ -216,7 +216,7 @@ def test_plan_check_stufen_zu_wenig_und_englisch(pw, app):
         expect(pg.locator("#pcb")).to_contain_text("Your longest tour of the last 12 months")
         txt = pg.inner_text("#pcheck")
         assert "Deine" not in txt and "Machbarkeit" not in txt
-        assert pg.get_attribute("#pn", "aria-label") == "Name of the plan"
+        assert pg.get_attribute("#pn", "aria-label") == "Name of the planned tour"
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()

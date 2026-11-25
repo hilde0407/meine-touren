@@ -40,12 +40,12 @@ def test_tile_goal_trend_sparkline_accessible(pw, app):
         assert "500" in bar.get_attribute("aria-valuetext") and "%" in bar.get_attribute("aria-valuetext")
         expect(t.locator(".kzgt")).to_contain_text("% von", timeout=T)
         expect(t.locator(".kzrest")).to_contain_text("bis zum Ziel", timeout=T)
-        expect(t.locator(".kzplan")).to_contain_text("Plan", timeout=T)                          # Vor dem / Im / Hinter dem Plan: immer als Text
+        expect(t.locator(".kzplan")).to_contain_text("Soll", timeout=T)                          # Vor dem / Im / Hinter dem Plan: immer als Text
         expect(t.locator(".kzplan")).to_contain_text("Soll bis heute", timeout=T)
         assert t.locator(".kzsoll").count() == 1
         # Trend: Pfeil plus Text für Vorlesehilfen, neutrale Farbe
         expect(t.locator(".kztr")).to_contain_text("gegenüber dem selben Zeitraum im Vorjahr", timeout=T)
-        assert t.locator(".kztr .slsr").inner_text().strip() in ("Anstieg:", "Rückgang:", "Unverändert:")
+        assert t.locator(".kztr .slsr").inner_text().strip() in ("Zunahme:", "Rückgang:", "Unverändert:")
         assert t.locator(".kztr .kzd span[aria-hidden]").inner_text().strip() in ("↑", "↓", "→")
         assert pg.evaluate("() => getComputedStyle(document.querySelector('#tlw-k1 .kzd')).color === getComputedStyle(document.querySelector('#tlw-k1 .kzval')).color")
         # Sparkline als Linie (SVG) mit Beschriftung, Säulen nur bei „saeulen“
@@ -81,7 +81,7 @@ def test_tap_opens_tours_with_filters_record_and_honest_hint(pw, app):
         # Rekord: direkt die Rekordtour
         pg.goto(f"{app}/#/stats")
         pg.wait_for_selector("#stx #tlw-k4 .kzgo a", timeout=T)
-        expect(pg.locator("#tlw-k4 .kzgo a")).to_contain_text("Rekordtour öffnen", timeout=T)
+        expect(pg.locator("#tlw-k4 .kzgo a")).to_contain_text("Tour mit dem Bestwert öffnen", timeout=T)
         pg.locator("#tlw-k4 .kzmain").click()
         pg.wait_for_function("() => /^#\\/tour\\/[^?]+$/.test(location.hash)", timeout=T)
         # nicht abbildbar (Puls): ehrlicher Hinweis in Kachel und Liste

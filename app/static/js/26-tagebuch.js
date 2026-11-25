@@ -78,11 +78,11 @@ VIEWS.tour = async (...a) => {
       if (s && !$("#safety")) {
         anchor.insertAdjacentHTML(
           "afterend",
-          `<details class="panel m0-0-18" id="safety" ${s.set ? "open" : ""}><summary><b>Sicherheit</b> <span class="mut">– Lawinenlage, Gruppe, Notfallausrüstung (nur Notiz)</span></summary>
+          `<details class="panel m0-0-18" id="safety" ${s.set ? "open" : ""}><summary><b>Sicherheit</b> <span class="mut">– Lawinenlage, Begleitung, Notfallausrüstung (nur Notiz)</span></summary>
            <div class="mut m8-0-2">Lawinenwarnstufe (laut Lagebericht des Tages)</div>
            <div class="lvl" id="slvl">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-l="${n}" style="${n <= 2 ? "color:#000;" : n > 3 ? "color:#000;" : ""}border-left:10px solid ${AVAL[n][0]}" title="${AVAL[n][1]}">${n} <small>${AVAL[n][1]}</small></button>`).join("")}</div>
            <div class="chips m8-0" id="sgear">${SAFE_GEAR.map(([k, l]) => `<label class="chip ${s.gear.includes(k) ? "on" : ""} cp"><input type="checkbox" value="${k}" ${s.gear.includes(k) ? "checked" : ""} hidden>${l}</label>`).join("")}</div>
-           <label>Gruppe<input id="sgrp" maxlength="200" value="${esc(s.grp)}" placeholder="z. B. zu dritt: Anna, Ben, ich"></label>
+           <label>Begleitung<input id="sgrp" maxlength="200" value="${esc(s.grp)}" placeholder="z. B. zu dritt: Anna, Ben, ich"></label>
            <label>Notiz<textarea id="snote" rows="2" maxlength="1000" placeholder="Schneedecke, Gefahrenstellen, Umkehrpunkt …">${esc(s.note)}</textarea></label>
            <div class="row"><button class="btn sm" id="ssave">Speichern</button><span id="smsg" class="mut"></span><span class="sp"></span><span class="mut fs13">Reine Dokumentation – ersetzt keinen Lawinenlagebericht.</span></div></details>`
         );
@@ -100,7 +100,7 @@ VIEWS.tour = async (...a) => {
         $("#ssave").onclick = async () => {
           try {
             await api(`/api/tours/${encodeURIComponent(t.id)}/safety`, post26({level: lvl, grp: $("#sgrp").value, note: $("#snote").value, gear: [...$("#sgear").querySelectorAll("input:checked")].map(i => i.value)}));
-            $("#smsg").textContent = "gespeichert ✓";
+            $("#smsg").textContent = "Sicherheit gespeichert";
           } catch (e) {
             $("#smsg").innerHTML = `<span class="bad">${esc(e.message)}</span>`;
           }
@@ -129,7 +129,7 @@ function showCompare(t) {
       const cc = tlCard("cmpseg", {sec: "cmp", key: "tl_cmp", icon: "cmp", title: "Vergleich dieser Strecke", def: false, badge: `diese Tour: ${rank}. schnellste von ${L.length}${best.id === t.id ? " 🏆" : ""}`});
       tlBody(cc).innerHTML = L.map(
         x => `<div class="cmprow ${x.id === t.id ? "me" : ""}"><a href="#/tour/${x.id}">${fmtDatumKurz(x.date)}</a><div class="cmpbar"><i style="width:${(x.h / mx) * 100}%${x.id === best.id ? ";background:#d98a1f" : ""}"></i></div><span>${hm(x.h)} · ${fmtTempo(x.km / x.h)}${x.id === best.id ? " 🏆" : ""}</span></div>`
-      ).join("") + `<div class="mut fs13 mt6">Gesamtdauer inkl. Pausen. Bestzeit: ${fmtDatumKurz(best.date)} mit ${hm(best.h)}.</div>`;
+      ).join("") + `<div class="mut fs13 mt6">Dauer inkl. Pausen. Bestzeit: ${fmtDatumKurz(best.date)} mit ${hm(best.h)}.</div>`;
       anc.after(cc);
     }
   }

@@ -1,4 +1,4 @@
-"""3.38.1 Baustein „Geplante Touren“ (Oberfläche, Chromium): nur offene Pläne, Einstellung „Gegangene Pläne auch zeigen“, Soll/Ist, Leer-Zustand, Englisch, 390 px.
+"""3.38.1 Baustein „Geplante Touren“ (Oberfläche, Chromium): nur offene Pläne, Einstellung „Gegangene geplante Touren auch zeigen“, Soll/Ist, Leer-Zustand, Englisch, 390 px.
 Synchronisation nur über wait_for_function (Pfeilfunktionen) und expect(..., timeout=15000); keine festen Pausen. Mit TS_SHOTS=<Ordner> werden Screenshots abgelegt."""
 import json
 import os
@@ -167,12 +167,12 @@ def test_einstellung_im_dialog_speichern_und_wieder_ausschalten(pw, app):
         pg.wait_for_selector('.sldlg [role="dialog"] form', timeout=TL)
         box = pg.locator('.sldlg input[type=checkbox]')
         expect(box).to_have_count(1, timeout=TL)
-        assert pg.locator(".sldlg label.slck").inner_text() == "Gegangene Pläne auch zeigen" and not box.is_checked()      # Standard: aus
+        assert pg.locator(".sldlg label.slck").inner_text() == "Gegangene geplante Touren auch zeigen" and not box.is_checked()      # Standard: aus
         box.check()
         pg.get_by_role("button", name="Speichern", exact=True).click()
         pg.wait_for_function("() => !document.querySelector('.sldlg')", timeout=TL)
         pg.wait_for_function("() => document.querySelectorAll('[data-wtype=\"geplant\"] .sllist li').length === 3", timeout=TL)
-        pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Gespeichert'; }", timeout=TL)
+        pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Ansicht gespeichert'; }", timeout=TL)
         with urllib.request.urlopen(f"{app}/api/layout/uebersicht", timeout=10) as r:
             assert json.loads(r.read())["layout"]["widgets"][0]["cfg"] == {"gegangen": True}
         # wieder ausschalten: Standard wird nicht gespeichert
@@ -187,7 +187,7 @@ def test_einstellung_im_dialog_speichern_und_wieder_ausschalten(pw, app):
         pg.get_by_role("button", name="Speichern", exact=True).click()
         pg.wait_for_function("() => !document.querySelector('.sldlg')", timeout=TL)
         pg.wait_for_function("() => document.querySelectorAll('[data-wtype=\"geplant\"] .sllist li').length === 2", timeout=TL)
-        pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Gespeichert'; }", timeout=TL)
+        pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Ansicht gespeichert'; }", timeout=TL)
         with urllib.request.urlopen(f"{app}/api/layout/uebersicht", timeout=10) as r:
             assert json.loads(r.read())["layout"]["widgets"][0]["cfg"] == {}
         assert not pg.errors, pg.errors
@@ -202,7 +202,7 @@ def test_leer_zustand_freundlich(pw, app):
         pg.route("**/api/bausteine/geplant*", lambda r: r.fulfill(json=[]))
         pg.goto(f"{app}/#/dash")
         loc = pg.locator('[data-wtype="geplant"] .slnone')
-        expect(loc).to_have_text("Keine offenen Pläne.", timeout=TL)
+        expect(loc).to_have_text("Keine offenen geplanten Touren.", timeout=TL)
         assert pg.locator('[data-wtype="geplant"] a[href="#/plan"]').count() == 1
     finally:
         pg.browser_.close()
@@ -219,7 +219,7 @@ def test_englisch(pw, app):
         assert "gegangen" not in t and "gelaufen" not in t and "geplant" not in t
         pg.route("**/api/bausteine/geplant*", lambda r: r.fulfill(json=[]))
         pg.reload()
-        expect(pg.locator('[data-wtype="geplant"] .slnone')).to_have_text("No open plans.", timeout=TL)
+        expect(pg.locator('[data-wtype="geplant"] .slnone')).to_have_text("No open planned tours.", timeout=TL)
     finally:
         pg.browser_.close()
 

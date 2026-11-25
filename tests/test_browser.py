@@ -362,9 +362,9 @@ def test_admin_tabs(page):
     page.evaluate("localStorage.removeItem('admtab')")
     page.goto(base + "#/admin"); quiet(page, 2500)
     tabs = page.evaluate("[...document.querySelectorAll('#atabs button')].map(b => b.textContent)")
-    assert tabs == ["Übersicht", "Sportarten", "Touren holen", "Hochladen & Planen", "Fotos", "Automatik & Meldungen", "Handy & App", "Sicherung & Zugang"], tabs
+    assert tabs == ["Allgemein", "Sportarten", "Touren holen", "Hochladen & Planen", "Fotos", "Automatik & Meldungen", "Handy & App", "Sicherung & Zugang"], tabs
     vis = lambda: page.evaluate("[...document.querySelectorAll('.atab')].filter(s => s.style.display !== 'none').map(s => s.dataset.t)")
-    assert vis() == ["uebersicht"]
+    assert vis() == ["allgemein"]
     for t, word in (("sportarten", "Sportarten-Katalog"), ("quellen", "Komoot"), ("weitergabe", "Portale"), ("fotos", "Fotos importieren"), ("auto", "Automatik"), ("handy", "Auf dem Handy"), ("sicher", "Sicherung")):
         page.click(f"#atabs [data-t={t}]")
         assert vis() == [t] and word in page.inner_text(f".atab[data-t={t}]"), (t, word)
@@ -525,7 +525,7 @@ def test_goal_sport_groups(page):
     r = page.evaluate("""() => { const y = TOURS[0].y; return ['grp:foot', 'grp:bike', 'grp:ski', 'hike', ''].map(s => goalVal({year: y, sport: s, metric: 'count'}, TOURS)); }""")
     assert r[0] + r[1] + r[2] >= 1 and r[4] >= r[3]
     page.goto(base + "#/stats"); quiet(page, 1500)
-    opts = page.evaluate("[...document.querySelectorAll('#gsp option')].map(o => o.textContent).join('|')")
+    opts = page.evaluate("[...document.querySelectorAll('.zlsp [data-sp]')].map(o => o.textContent).join('|')")     # 3.61.0: Favoriten-Sportarten und „Mehr …“
     assert opts.count("Alle Rad-Sportarten") == 0 and "Kajak / Kanu" in opts and "Schneeschuh" in opts     # 3.59.0: keine festen Gruppen mehr (ältere Ziele „grp:…“ zählen weiter), alle Aktivitäten
     assert not page.errors, page.errors
 
@@ -969,12 +969,12 @@ def test_admin_tabs_uniform(page):
     base = page.url.split("#")[0]
     page.goto(base + "#/admin?tab=uebersicht"); page.reload(); quiet(page, 1800)
     tabs = page.evaluate("[...document.querySelectorAll('#atabs button')].map(b=>b.textContent)")
-    assert tabs == ["Übersicht", "Sportarten", "Touren holen", "Hochladen & Planen", "Fotos", "Automatik & Meldungen", "Handy & App", "Sicherung & Zugang"]
+    assert tabs == ["Allgemein", "Sportarten", "Touren holen", "Hochladen & Planen", "Fotos", "Automatik & Meldungen", "Handy & App", "Sicherung & Zugang"]
     where = page.evaluate("Object.fromEntries([...document.querySelectorAll('.atab')].map(s=>[s.dataset.t,[...s.querySelectorAll(':scope > .gbody > *')].map(c=>(c.querySelector('h2')||{}).textContent||'').map(t=>t.trim().split(' ')[0])]))")
-    assert "Zustand" in where["uebersicht"] and "Updates" in where["uebersicht"] and "Komoot" in where["quellen"]
+    assert "Zustand" in where["allgemein"] and "Updates" in where["allgemein"] and "Komoot" in where["quellen"]
     assert "Portale" in where["weitergabe"] and "Tourplanung" in where["weitergabe"] and "Standort" in where["handy"]
     assert "Zugriffsschutz" in where["sicher"] and "Sicherung" in where["sicher"]
-    assert where["sportarten"] == ["Sportarten-Katalog", "Favoriten", "Statistik-Gruppen"] and "Heimatort" in where["uebersicht"]
+    assert where["sportarten"] == ["Sportarten-Katalog", "Favoriten-Sportarten", "Statistik-Gruppen"] and "Heimatort" in where["allgemein"]
     # gleiche Gestaltung: gleiche Schriftgröße der Kartentitel und gleicher Kartenrand
     sizes = page.evaluate("[...document.querySelectorAll('.atab .gbody > * > h2, .atab .gbody > * > .panel > h2')].map(h=>getComputedStyle(h).fontSize)")
     assert len(set(sizes)) == 1, sizes
@@ -1090,17 +1090,17 @@ def test_nav_statistik_und_entwicklermodus(page, app_url):
     keys = page.evaluate("() => [...document.querySelectorAll('#nav a')].map(a => a.dataset.k).filter(k => k !== 'record')")      # (die gemeinsame Seite trägt aus früheren Tests die App-Attrappe: „Aufzeichnen“ steht dann vorn)
     assert keys[:6] == ["dash", "map", "tours", "trips", "photos", "stats"] and "check" not in keys and "admin" not in keys
     page.evaluate("() => location.hash = '#/records'"); quiet(page, 1200)
-    assert page.locator(".segtabs a.on").inner_text() == "Rekorde"
+    assert page.locator(".segtabs a.on").inner_text() == "Bestwerte"
     assert page.locator('#nav a[data-k="stats"]').get_attribute("class") == "on"
     page.locator(".segtabs a", has_text="Orte & Ausrüstung").click(); quiet(page, 1200)
     assert page.locator(".segtabs a.on").inner_text() == "Orte & Ausrüstung"
     page.locator("#hadm").click(); quiet(page, 1800)
     assert page.locator("#atabs .atlink").count() == 1
     assert not page.locator("#stest").is_visible()                     # Selbsttest: nur im Entwicklermodus
-    page.locator('#atabs [data-t="uebersicht"]').click()
+    page.locator('#atabs [data-t="allgemein"]').click()
     page.locator("#dbgsw").check(); page.wait_for_timeout(2500)        # lädt neu
     page.evaluate("() => location.hash = '#/admin'"); quiet(page, 1800)
-    page.locator('#atabs [data-t="uebersicht"]').click()
+    page.locator('#atabs [data-t="allgemein"]').click()
     assert page.locator("#stest").is_visible()
     page.locator("#atabs .atlink").click(); quiet(page, 1200)
     assert "Prüfen" in page.locator("#main h1, #main h2").first.inner_text() and page.locator(".backl").count() == 1

@@ -82,7 +82,7 @@ def _lerp(x, x0, x1, y0, y1):
 
 
 def _moving(rows):
-    """Bewegungszeit je Punkt (s) und die Pausen [(von_s, bis_s)] in Gesamtzeit; nur mit Zeitstempeln. None, wenn die Zeit fehlt oder nicht vorwärts läuft."""
+    """Bewegungszeit je Punkt (s) und die Pausen [(von_s, bis_s)] in Dauer; nur mit Zeitstempeln. None, wenn die Zeit fehlt oder nicht vorwärts läuft."""
     ts = [r for r in rows if r[2] is not None]
     if len(ts) < max(10, 0.8 * len(rows)):
         return None
@@ -575,7 +575,7 @@ def statistik_auswertung(sport="", zeitraum_="all", jahr=0, von_="", bis_="", we
     out["wochentage"] = {k: [round(x, 3) for x in v] for k, v in wd.items()}
     out["laengen"] = {"grenzen": list(LAENGEN), "anzahl": laengen}
     f = WERTE[wert]
-    # Tempo nur für Touren mit sinnvoller Länge und Dauer (wie „Rekorde“ der Oberfläche: mindestens 3 km und 30 Minuten)
+    # Tempo nur für Touren mit sinnvoller Länge und Dauer (wie „Bestwerte“ der Oberfläche: mindestens 3 km und 30 Minuten)
     pool = [r for r in rows if wert != "tempo" or ((r["dist_m"] or 0) >= 3000 and (r["dur_s"] or 0) >= 1800)]
     pool.sort(key=lambda r: (-f(r), r["start_ts"], r["id"]))
     out["wert"] = wert

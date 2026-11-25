@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.61.0](3.61.0.md) – Pflegedurchgang: einheitliche Begriffe (Bestwerte, Schlagwörter, aufzeichnen, Dauer, holen/importieren …) und Bedienlogik (Dialoge, Speichern, Rückmeldungen, Sportart filtern/zuweisen), Verwaltungsreiter „Allgemein“
 - [3.60.1](3.60.1.md) – Statistik-Gruppen: kein Gruppenname wie eine Sportart, Beschriftung „Name = A + B + …“; Karte mit Kategorien, Gruppen und eigener Farbe je Sportart; Begriff „Sportart“
 - [3.60.0](3.60.0.md) – Endgültiger Sportarten-Katalog (29 Sportarten, Rückfall für entfernte), Verwaltung neu geordnet mit Reiter „Sportarten“
 - [3.59.0](3.59.0.md) – Sportarten-Katalog (48 Sportarten), Schneeschuh wieder eigene Sportart, keine festen Zusammenfassungen mehr, eigene Statistik-Gruppen, Favoriten-Sportarten

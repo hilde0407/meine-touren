@@ -53,7 +53,7 @@ function slBelWochen(c, b, d, said, nw, mon, now) {
   b.innerHTML = `<p class="slcmp">${said || "Für einen Vergleich liegen noch zu wenige Wochen mit Uhr-Daten vor"}</p>` +
     `<p class="mut slcmpn">In ${nw} Wochen: ${rest === 1 ? "1 Ruhetag" : rest + " Ruhetage"} bei ${tours === 1 ? "1 Tour" : tours + " Touren"} (im Schnitt ${nf((rest / days) * 7, 1)} Ruhetage je Woche).</p>` +
     (d.daten_insgesamt ? "" : '<p class="mut slcmpn">Noch keine Uhr-Daten: Die Belastung stammt aus den Trainingsdaten der Uhr.</p>') +
-    `<ul class="slrows slwks">${li.join("")}</ul><p class="mut slcmpn slwleg">Balken: Belastung laut Uhr. Punkte: Tage mit Tour (gefüllt) und Ruhetage (leer), Montag bis Sonntag.</p><p><a href="#/places">Mehr in der Auswertung ›</a></p>`;
+    `<ul class="slrows slwks">${li.join("")}</ul><p class="mut slcmpn slwleg">Balken: Belastung laut Uhr. Punkte: aktive Tage (gefüllt) und Ruhetage (leer), Montag bis Sonntag.</p><p><a href="#/places">Mehr in der Auswertung ›</a></p>`;
   slBadge(c, rest === 1 ? "1 Ruhetag" : `${rest} Ruhetage`);
 }
 const slClamp = (x, a = 0, b = 100) => Math.max(a, Math.min(b, x));

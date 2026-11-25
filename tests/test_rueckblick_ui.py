@@ -43,7 +43,7 @@ def test_dialog_auswahl_und_link(pw, app):
         pg.goto(f"{app}/#/recap/{_year(app)}")
         expect(pg.locator("#rcshare")).to_be_visible(timeout=T)
         pg.locator("#rcshare").click()
-        expect(pg.locator(".rbdlg [data-rb=sum]")).to_have_text("Kennzahlen, Rekorde, Heatmap, Beste Fotos", timeout=T)
+        expect(pg.locator(".rbdlg [data-rb=sum]")).to_have_text("Kennzahlen, Bestwerte, Heatmap, Beste Fotos", timeout=T)
         assert pg.locator(".rbdlg [data-rb=year]").input_value() == str(_year(app)) and pg.locator(".rbdlg [data-rb=sport] option").count() >= 2
         pg.locator(".rbdlg [data-b=rekorde]").uncheck()
         expect(pg.locator(".rbdlg [data-rb=sum]")).to_have_text("Kennzahlen, Heatmap, Beste Fotos", timeout=T)
@@ -136,7 +136,7 @@ def test_link_liste_zeigt_typ_und_aendert_auswahl(pw, app):
         assert pg.locator(".rbdlg [data-rb=year]").count() == 0 and pg.locator(".rbdlg [data-rb=days]").count() == 0
         pg.locator(".rbdlg [data-b=rekorde]").check()
         pg.locator(".uifoot .btn", has_text="Speichern").click()
-        expect(pg.locator(f"[data-t='{tok}'] [data-zeigt]")).to_have_text("Zeigt: Kennzahlen, Rekorde, Heatmap", timeout=T)
+        expect(pg.locator(f"[data-t='{tok}'] [data-zeigt]")).to_have_text("Zeigt: Kennzahlen, Bestwerte, Heatmap", timeout=T)
         assert _get(app, "/api/shares")[1 if _get(app, "/api/shares")[0]["token"] == alt else 0]["blocks"] == ["kennzahlen", "rekorde", "heatmap"]
         assert "rek" in _get(app, "/api/public/" + tok)
         assert not pg.errors, pg.errors

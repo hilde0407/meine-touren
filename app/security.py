@@ -42,7 +42,7 @@ def mail_ready():
 def send_mail(to, subject, body):
     """Sendet eine Textmail über den eingerichteten SMTP-Server; wirft RuntimeError mit lesbarer Meldung."""
     if not mail_ready():
-        raise RuntimeError("Der E-Mail-Versand ist noch nicht eingerichtet (Verwaltung → Automatik & Meldungen)")
+        raise RuntimeError("Der E-Mail-Versand ist noch nicht eingerichtet (Verwaltung → Automatik & Meldungen → E-Mail-Versand)")
     host, mode = conf("smtp_host"), conf("smtp_mode", "starttls")
     port = int(conf("smtp_port") or (465 if mode == "ssl" else 587 if mode == "starttls" else 25))
     m = EmailMessage()

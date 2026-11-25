@@ -10,7 +10,7 @@ function codesBox(codes) {
   m.querySelector("#cdc").onclick = async e => {
     try {
       await navigator.clipboard.writeText(txt);
-      e.target.textContent = "✓ Kopiert";
+      e.target.textContent = "Link kopiert";
     } catch (x) {}
   };
   m.querySelector("#cdx").onclick = () => m.remove();
@@ -91,7 +91,7 @@ VIEWS.account = async (...a) => {
   $("#emb").onclick = async () => {
     try {
       await post35("/api/me/email", {email: $("#em1").value, password: $("#em2").value});
-      $("#emm").textContent = "✓ Gespeichert";
+      $("#emm").textContent = "E-Mail-Adresse gespeichert";
       ME.user.email = $("#em1").value;
       $("#em2").value = "";
     } catch (e) {
@@ -149,7 +149,7 @@ VIEWS.admin = async (...a) => {
   $("#ml_s").onclick = async () => {
     try {
       await save();
-      $("#ml_x").textContent = "✓ Gespeichert";
+      $("#ml_x").textContent = "E-Mail-Versand gespeichert";
     } catch (e) {
       $("#ml_x").textContent = e.message;
     }

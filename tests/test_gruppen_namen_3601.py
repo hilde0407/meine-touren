@@ -92,22 +92,23 @@ def test_oberflaeche_quelltext():
     v = (JS / "05-verwaltung.js").read_text(encoding="utf-8")
     assert "Name wie eine Sportart – bitte umbenennen" in v and "sgNameClash(" in v
     i18n = (JS / "00-i18n-neu.js").read_text(encoding="utf-8")
-    for k in ("Name wie eine Sportart – bitte umbenennen || ", "Gruppe {}: „{}“ heißt schon eine Sportart – bitte einen anderen Gruppennamen wählen || "):
+    for k in ("Name wie eine Sportart – bitte umbenennen || ", "Statistik-Gruppe {}: „{}“ heißt schon eine Sportart – bitte einen anderen Gruppennamen wählen || "):
         assert k in i18n
     for f in ("56-statistik.js", "06-erweiterungen.js", "53-filter.js", "52-bausteine-uebersicht.js", "02-uebersicht.js"):
-        assert "sgTitle(" in (JS / f).read_text(encoding="utf-8"), f
+        src = (JS / f).read_text(encoding="utf-8")
+        assert "sgTitle(" in src or "sportFilterHtml(" in src or "sportFilterOptions(" in src, f      # 3.61.0: Filter über sportFilterHtml (Tooltip aus sportAuswahl)
 
 
 def test_version_texte_und_dateien():
-    assert config.VERSION.startswith("3.60.1 · Meine Touren")
+    assert config.VERSION.startswith("3.61.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.60.1.md").read_text(encoding="utf-8")
     assert notes.startswith("# 3.60.1") and "heißt schon eine Sportart" in notes and " = " in notes
     assert "3.60.1" in (ROOT / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")
     assert "Version 3.60.1" in (ROOT / "docs" / "VERSIONSVERLAUF.md").read_text(encoding="utf-8")
     hb = (ROOT / "docs" / "HANDBUCH.md").read_text(encoding="utf-8")
     assert "(zusammengefasst)" not in hb and "Name = Sportart + Sportart" in hb
-    assert 'const V = "mt-v146"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.60.1"' in (JS / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v147"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.61.0"' in (JS / "54-ansichten.js").read_text(encoding="utf-8")
     assert re.search(r"Gruppenname.*Sportart", hb)
 
 
@@ -149,6 +150,7 @@ def test_eigene_kartenfarbe_je_sportart_deutlich_verschieden():
         assert d >= (15 if kat[a] == kat[b] else 12), (a, b, round(d, 1))                  # z. B. Radtour, Mountainbike und E-Bike nicht mehr fast gleich
     g = (JS / "01-grundlagen.js").read_text(encoding="utf-8")
     assert 'cssv("--sp-" + k)' in g and "function sportAuswahl" in g and "const sportOrder" in g
-    for f, needle in (("02-uebersicht.js", "sportAuswahl("), ("53-filter.js", "sportAuswahl("), ("56-statistik.js", "sportOrder("), ("06-erweiterungen.js", "sportOrder("),
+    assert "function sportFilterHtml" in g and "sportAuswahl(keys, sel)" in g                    # 3.61.0: die gemeinsame Darstellung baut auf sportAuswahl auf
+    for f, needle in (("02-uebersicht.js", "sportFilterHtml("), ("53-filter.js", "sportFilterHtml("), ("56-statistik.js", "sportOrder("), ("06-erweiterungen.js", "sportOrder("),
                       ("64-kartenseite.js", "sportOrder(")):
         assert needle in (JS / f).read_text(encoding="utf-8"), f

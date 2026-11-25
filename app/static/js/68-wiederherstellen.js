@@ -4,7 +4,7 @@
    Der Server spielt nur zurück, was er unmittelbar vorher geprüft hat (Token aus der Vorprüfung). Kein window.confirm.
    Texte stehen deutsch im Markup und werden von der Übersetzungsschicht (00-i18n.js, Zeilen in 00-i18n-neu.js) ersetzt; Zahlen und Namen stehen in eigenen Elementen. */
 const rsAlter = h => (h == null ? "" : h < 1 ? "(weniger als eine Stunde alt)" : h < 48 ? `(vor ${Math.round(h)} Stunden)` : `(vor ${Math.round(h / 24)} Tagen)`);
-const RS_ZEILEN = [["touren", "Touren"], ["strecken", "Strecken (GPX-Dateien)"], ["reisen", "Reisen"], ["plaene", "Geplante Touren"], ["layouts", "Seitenlayouts"]];
+const RS_ZEILEN = [["touren", "Touren"], ["strecken", "Strecken (GPX-Dateien)"], ["reisen", "Reisen"], ["plaene", "Geplante Touren"], ["layouts", "Ansichten"]];
 const rsZahl = v => (v == null ? "–" : String(v));
 
 function rsTabelle(kopfA, a, kopfB, b) {
@@ -32,7 +32,7 @@ function rsDialog(v, trigger, onDone) {
     ${v.sicherheitskopie ? `<p class="rshin"><span aria-hidden="true">ℹ</span> <span>Das ist eine Sicherheitskopie, die vor einem früheren Zurückspielen angelegt wurde.</span></p>` : ""}
     ${rsTabelle("In der Sicherung", z.sicherung, "Heute", z.jetzt)}
     <h3>Das wird ersetzt</h3>
-    <p>Touren, Notizen, Ziele, geplante Touren, Seitenlayouts und Einstellungen. Alles, was seit dieser Sicherung dazugekommen ist oder geändert wurde, geht verloren.</p>
+    <p>Touren, Notizen, Ziele, geplante Touren, Ansichten und Einstellungen. Alles, was seit dieser Sicherung dazugekommen ist oder geändert wurde, geht verloren.</p>
     <h3>Das bleibt, wie es ist</h3>
     <ul class="rsul"><li>Fotodateien – sie sind nicht in der Sicherung.</li><li>Zwischenspeicher (geladene Strecken, Vorschaubilder).</li><li>Der Schlüssel für gespeicherte Zugangsdaten (secret.key).</li><li>Benutzer, Passwörter und Anmeldungen.</li><li>Vorhandene Strecken-Dateien: Fehlende werden ergänzt, keine wird überschrieben.</li></ul>
     ${v.zugangsdaten === "bleiben" ? `<p class="rshin"><span aria-hidden="true">ℹ</span> <span>Die Sicherung enthält keine Zugangsdaten. Die heute gespeicherten bleiben erhalten.</span></p>` : ""}
@@ -98,7 +98,7 @@ async function rsInit() {
   slot.dataset.init = "1";
   slot.innerHTML = `<details class="rsd" id="rsd"><summary>Sicherung zurückspielen</summary>
    <div class="rsb">
-    <p class="mut">Setzt deine Touren, Notizen, Pläne und Einstellungen auf den Stand einer Sicherung zurück. Die Sicherung wird zuerst geprüft, und der heutige Stand wird vorher automatisch gesichert.</p>
+    <p class="mut">Setzt deine Touren, Notizen, geplante Touren und Einstellungen auf den Stand einer Sicherung zurück. Die Sicherung wird zuerst geprüft, und der heutige Stand wird vorher automatisch gesichert.</p>
     <fieldset class="rsl"><legend>Sicherung auf diesem Server</legend><div id="rsls" class="rsls"><span class="mut">Lade …</span></div></fieldset>
     <div class="rsup"><label for="rsf">Oder eine Sicherungsdatei (ZIP) hochladen</label><input type="file" id="rsf" accept=".zip,application/zip"><small class="mut" id="rsmax"></small></div>
     <div class="row g8"><button class="btn alt" id="rsgo" type="button" disabled>Sicherung prüfen …</button><span id="rsmsg" class="mut" role="status" aria-live="polite"></span></div>

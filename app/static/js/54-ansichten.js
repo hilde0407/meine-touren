@@ -2,7 +2,7 @@
    Daten und Auswahl-Logik stehen in 49-seitenlayout.js (Behälter SL.store, slResolve, slPack); hier: Auswahl in der Kopfzeile, Verwaltung (Dialog), Vorlagen, Export und Import.
    Tourseite: Hauptseite und Auswertung sind zwei Schlüssel; jede Änderung an den Ansichten (anlegen, umbenennen, löschen, Standard, Regeln) wird in beiden geführt
    (slAlign), der Inhalt bleibt je Schlüssel eigen. Die Vorgabe der Anzeige: von Hand gewählt (diese Sitzung) vor Regel „Sportart → Ansicht“ (beim Öffnen einer Tour) vor Standardansicht. */
-const SL_APPV = "3.60.1";
+const SL_APPV = "3.61.0";
 const SL_EXPORT_FORMAT = "meine-touren-ansicht";
 const SL_MAXFILE = 200000;
 const slVm = fam => slMaster(fam).views;
@@ -471,8 +471,8 @@ function slImportDialog(fam, done, preset) {
       const L = r.layouts || {}, st = r.stats || {}, types = new Set(Object.values(st).flatMap(s => s.types || [])), unknown = [...types].filter(t => !window.SL_WT[t]),
         nWid = Object.values(st).reduce((n, s) => n + (s.widgets || 0), 0), nHid = Object.values(st).reduce((n, s) => n + (s.hidden || 0), 0),
         nGrp = Object.values(st).reduce((n, s) => n + (s.groups || 0), 0), hasMob = Object.values(st).some(s => s.mob);
-      res.innerHTML = `<div class="slimpok"><h3>${isCode ? "Code geprüft" : "Datei geprüft"}</h3><p>Ansicht „<b class="slimpn"></b>“ für die ${slFamName(fam)}: ${nWid === 1 ? "1 Baustein" : nWid + " Bausteine"}, ${nHid === 1 ? "1 ausgeblendeter Abschnitt" : nHid + " ausgeblendete Abschnitte"}.</p>` +
-        (nGrp || hasMob ? `<ul class="slimpx">${nGrp ? `<li>${nGrp === 1 ? "1 Gruppe" : nGrp + " Gruppen"}</li>` : ""}${hasMob ? "<li>Eigene Handy-Anordnung</li>" : ""}</ul>` : "") +
+      res.innerHTML = `<div class="slimpok"><h3>${isCode ? "Code geprüft" : "Datei geprüft"}</h3><p>Ansicht „<b class="slimpn"></b>“ für die ${slFamName(fam)}: ${nWid === 1 ? "1 Baustein" : nWid + " Bausteine"}, ${nHid === 1 ? "1 ausgeblendeter Baustein" : nHid + " ausgeblendete Bausteine"}.</p>` +
+        (nGrp || hasMob ? `<ul class="slimpx">${nGrp ? `<li>${nGrp === 1 ? "1 Bausteingruppe" : nGrp + " Bausteingruppen"}</li>` : ""}${hasMob ? "<li>Eigene Handy-Anordnung</li>" : ""}</ul>` : "") +
         ((r.ignored || []).length ? `<p class="mut">Ignoriert:</p><ul class="mut">${r.ignored.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "") +
         (unknown.length ? `<p class="mut">${unknown.length === 1 ? "1 Baustein-Typ ist" : unknown.length + " Baustein-Typen sind"} in dieser Version nicht bekannt und werden nicht angezeigt.</p>` : "") +
         `<div class="slfs"><label for="slimpname">Name der neuen Ansicht</label><input id="slimpname" type="text" maxlength="40" autocomplete="off"><p class="mut slimphint" id="slimphint"></p></div>` +

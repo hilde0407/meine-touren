@@ -103,7 +103,7 @@ function sportFigs(t, m) {
     if (mov) f.push([fmtMS(m.tMove / km), "min/km", "Pace in Bewegung"]);
     pause();
   } else {
-    if (mov) f.push(H(m.tMove, "Zeit in Bewegung"));
+    if (mov) f.push(H(m.tMove, "Bewegungszeit"));
     pause();
   }
   return f;

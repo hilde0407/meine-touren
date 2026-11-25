@@ -31,7 +31,7 @@ const HN = {pending: new Map(), focus: null};
 const hnPl = (n, one, many) => (n === 1 ? one : many);
 const hnTours = n => (n === 1 ? "1 Tour" : `${nf(n, 0)} Touren`);
 const hnVal = (m, x) => (m === "km" ? `${fmtKm(x, {d: 0})}` : m === "up" ? `${fmtHm(x)}` : m === "hours" ? fmtDauer(x * 3600, {summe: true}) : hnTours(Math.round(x)));
-const hnMetric = {km: "Strecke", up: "Aufstieg", count: "Touren", hours: "Zeit unterwegs"};
+const hnMetric = {km: "Strecke", up: "Aufstieg", count: "Touren", hours: "Dauer"};
 const hnNum = x => nf(x, x % 1 ? 1 : 0);
 const hnNow = () => Math.floor(Date.now() / 1000);
 const hnSnoozeTs = (cfg, art) => {
@@ -121,7 +121,7 @@ const HN_ART = {
     badge: h => (h.daten.tage === 1 ? "1 Tag" : `${nf(h.daten.tage, 0)} Tage`),
   },
   rekord: {
-    name: "Rekord-Tour", icon: "trophy", wtype: "hnrekord", seiten: ["uebersicht", "statistik"], defaults: {tage: 7, ausblenden: 7},
+    name: "Neuer Bestwert", icon: "trophy", wtype: "hnrekord", seiten: ["uebersicht", "statistik"], defaults: {tage: 7, ausblenden: 7},
     desc: "Erscheint nur, wenn du kürzlich deine längste Tour, deinen größten Aufstieg oder dein schnellstes Tempo aller Zeiten erreicht hast.",
     sample: ["info", "Längste Tour 32,4 km"],
     fields: [{k: "tage", kind: "number", label: "Zeitraum in Tagen (so lange bleibt der Hinweis)", min: 1, max: 365, step: 1, int: true}, {kind: "sports"}],
@@ -129,7 +129,7 @@ const HN_ART = {
       : `Wird nur angezeigt, wenn du in den letzten ${nf(c.tage ?? 7, 0)} Tagen deine längste Tour, deinen größten Aufstieg oder das schnellste Tempo aller Zeiten erreicht hast.`, "Voraussetzung: mindestens 5 Touren."],
     body: h => hnRows(h.daten.rekorde.map(r => `<li><b>${r.metrik === "km" ? `${fmtKm(r.wert)}` : r.metrik === "hm" ? `${fmtHm(r.wert)}` : `${fmtTempo(r.wert)}`}</b><span>${r.metrik === "km" ? "Längste Tour" : r.metrik === "hm" ? "Größter Aufstieg" : "Schnellstes Tempo"}</span> ${hnTour(r)} <span class="mut">${fmtDatumKurz(r.datum)}</span></li>`)),
     link: () => "",
-    badge: h => (h.daten.rekorde.length === 1 ? "1 Rekord" : `${h.daten.rekorde.length} Rekorde`),
+    badge: h => (h.daten.rekorde.length === 1 ? "1 Bestwert" : `${h.daten.rekorde.length} Bestwerte`),
   },
   woche: {                                                                     // 3.45.0: nur noch als Art (Sammel-Baustein, Baustein „Ziele“); die Ziele kommen aus der Statistik
     name: "Wochenziel", icon: "cal", wtype: "", seiten: ["uebersicht"], defaults: {ausblenden: 7},
@@ -139,7 +139,7 @@ const HN_ART = {
       const L = h.daten.ziele || [h.daten];
       return L.map(d => {
         const dec = x => (d.einheit === "km" || d.einheit === "hours" ? (x % 1 ? 1 : 0) : 0),
-          u = x => (d.einheit === "km" ? `${nf(x, dec(x))} km` : d.einheit === "up" ? fmtHm(x) : d.einheit === "hours" ? fmtDauer(x * 3600, {summe: true}) : hnTours(Math.round(x))),
+          u = x => (d.einheit === "km" ? fmtKm(x, {d: dec(x)}) : d.einheit === "up" ? fmtHm(x) : d.einheit === "hours" ? fmtDauer(x * 3600, {summe: true}) : hnTours(Math.round(x))),
           pct = d.ziel > 0 ? Math.min(100, (d.ist / d.ziel) * 100) : 0, nm = d.sport ? ` <span class="mut">${esc(goalSportName(d.sport))}</span>` : "",
           left = d.tage_rest === 0 ? "Heute ist der letzte Tag der Woche." : d.tage_rest === 1 ? "Noch 1 Tag in dieser Woche." : `Noch ${d.tage_rest} Tage in dieser Woche.`;
         return `<p class="hnt">${d.erreicht ? `Wochenziel erreicht: ${u(d.ist)} von ${u(d.ziel)}.` : `Wochenziel offen: noch ${u(d.rest)} (bisher ${nf(d.ist, d.einheit === "km" || d.einheit === "hours" ? 1 : 0)} von ${u(d.ziel)}).`}${nm}</p>` +
@@ -163,7 +163,7 @@ const HN_ART = {
     badge: h => `${h.daten.abweichung_pct > 0 ? "+" : ""}${h.daten.abweichung_pct} %`,
   },
   sicherung: {
-    name: "Datensicherung", icon: "shield", wtype: "hnsicherung", seiten: ["uebersicht"], defaults: {tage: 7, ausblenden: 7},
+    name: "Sicherung", icon: "shield", wtype: "hnsicherung", seiten: ["uebersicht"], defaults: {tage: 7, ausblenden: 7},
     desc: "Erscheint nur, wenn die letzte Sicherung deiner Daten zu alt ist, fehlt oder fehlgeschlagen ist.",
     sample: ["hinweis", "Die letzte Sicherung ist 9 Tage alt."],
     fields: [{k: "tage", kind: "number", label: "Hinweis, wenn die letzte Sicherung so viele Tage alt ist", min: 1, max: 365, step: 1, int: true}],
@@ -270,8 +270,8 @@ const HN_FIELD_AUS = {k: "ausblenden", kind: "radio", num: true, def: 7, label: 
 window.SL_WT.hinweise = {
   fam: "uebersicht", cat: "hinweise", icon: "bell", name: "Hinweise", title: () => "Hinweise", multi: true, hinweis: true, sammel: true, w: "voll", seiten: ["uebersicht", "statistik"],
   defaults: {arten: HN_SAMMEL.slice(), ausblenden: 7}, kurz: cfg => flParts(cfg, null),
-  desc: "Alle gerade aktiven Hinweise gebündelt in einer Liste: Jahresziel, Meilenstein, Auffälligkeiten, Pause, Rekord, Wochenziel, Erholung, Sicherung. Nur sichtbar, wenn mindestens einer aktiv ist. Ziele und Wochenziele legst du in der Statistik unter „Ziele“ fest.",
-  fields: [{k: "arten", kind: "checks", def: HN_SAMMEL, label: "Berücksichtigte Hinweise", min: 1, options: HN_ARTEN.map(a => [a, HN_ART[a].name])}, {kind: "sports", label: "Sportart (für Ziele, Pause, Rekord, Meilenstein und Wochenziel)"},
+  desc: "Alle gerade aktiven Hinweise gebündelt in einer Liste: Jahresziel, Meilenstein, Auffälligkeiten, Pause, Bestwert, Wochenziel, Erholung, Sicherung. Nur sichtbar, wenn mindestens einer aktiv ist. Ziele und Wochenziele legst du in der Statistik unter „Ziele“ fest.",
+  fields: [{k: "arten", kind: "checks", def: HN_SAMMEL, label: "Berücksichtigte Hinweise", min: 1, options: HN_ARTEN.map(a => [a, HN_ART[a].name])}, {kind: "sports", label: "Sportart (für Ziele, Pause, Bestwert, Meilenstein und Wochenziel)"},
     {kind: "title"}, HN_FIELD_AUS],
   preview: () => slPrev(`<div class="hnpv2"><div class="hnbox hn-warnung hnpv">${hnIcon("warnung")}<div class="hnmain"><p class="hnlbl">${HN_STUFE.warnung[0]}</p><p class="hnt">${esc(HN_ART.ziel.name)}</p></div></div>` +
     `<div class="hnbox hn-info hnpv">${hnIcon("info")}<div class="hnmain"><p class="hnlbl">${HN_STUFE.info[0]}</p><p class="hnt">${esc(HN_ART.meilenstein.name)}</p></div></div></div>`),

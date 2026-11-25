@@ -1,4 +1,4 @@
-"""Zusatzfunktionen: Backup, Notizen, Ziele, GPX-Export, Rekorde."""
+"""Zusatzfunktionen: Backup, Notizen, Ziele, GPX-Export, Bestwerte."""
 import io
 import os
 import re
@@ -84,7 +84,7 @@ def _write_zip(fileobj, td, strip_secrets):
         if not strip_secrets:
             for g, n in _backup_files():
                 z.write(g, n)
-        z.writestr("INFO.txt", f"Meine Touren Backup {datetime.now(TZ).isoformat()}\nWiederherstellen: deploy/restore.sh <datei.zip>\n")
+        z.writestr("INFO.txt", f"Meine Touren Sicherung {datetime.now(TZ).isoformat()}\nWiederherstellen: deploy/restore.sh <datei.zip>\n")
 
 
 def make_backup(dest_dir=None, strip_secrets=False, keep=14, kennung=""):
@@ -297,7 +297,7 @@ def api_gpx(tour_id: str):
     return Response(text, media_type="application/gpx+xml", headers={"Content-Disposition": f'attachment; filename="{fn}.gpx"'})
 
 
-# ---------- Rekorde: höchste Punkte aus den gespeicherten Strecken ----------
+# ---------- Bestwerte: höchste Punkte aus den gespeicherten Strecken ----------
 _alt_cache = {}
 
 

@@ -81,9 +81,9 @@ VIEWS.tour = async id => {
   const t = BY[id],
     old = $("#eshr");
   if (!t || !old || $("#esnd")) return;
-  old.insertAdjacentHTML("beforebegin", `<button class="btn sm" id="esnd" title="Link zur Tour an WhatsApp, Signal, E-Mail … senden">Senden</button> `);
+  old.insertAdjacentHTML("beforebegin", `<button class="btn sm" id="esnd" title="Link zur Tour an WhatsApp, Signal, E-Mail … senden">Link senden …</button> `);
   {
-    $("#esnd").insertAdjacentHTML("afterend", ` <button class="btn sm" id="eshow" title="Diashow der Fotos als Link senden – ohne Benutzerkonto ansehbar">Diashow senden</button>`);
+    $("#esnd").insertAdjacentHTML("afterend", ` <button class="btn sm" id="eshow" title="Diashow der Fotos als Link senden – ohne Benutzerkonto ansehbar">Diashow senden …</button>`);
     $("#eshow").onclick = async () => {
       const keep = k => { try { return localStorage.getItem("mt_show_" + k); } catch (e) { return null; } };
       const m = uiModal(`<h3>Diashow senden</h3><p class="mut fs14">Erzeugt einen Link, den man <b>ohne Benutzerkonto</b> öffnen kann. Es werden nur die Fotos dieser Tour gezeigt.</p>
@@ -102,7 +102,7 @@ VIEWS.tour = async id => {
         b.disabled = true;
         try {
           const n = (await api(`/api/photos?tour_id=${encodeURIComponent(t.id)}`).catch(() => null)) || [];
-          if (Array.isArray(n) && !n.filter(x => x.manual !== 2).length && !await uiConfirm("Zu dieser Tour wurden keine Fotos gefunden. Trotzdem Link erstellen?")) { b.disabled = false; return; }
+          if (Array.isArray(n) && !n.filter(x => x.manual !== 2).length && !await uiConfirm({title: "Keine Fotos gefunden", text: "Zu dieser Tour wurden keine Fotos gefunden. Trotzdem Link erstellen?", ok: "Link erstellen"})) { b.disabled = false; return; }
           const s = await api(`/api/tours/${encodeURIComponent(t.id)}/share`, {
             method: "POST",
             headers: {"content-type": "application/json"},
@@ -112,7 +112,7 @@ VIEWS.tour = async id => {
           await shareOut(t.name, `Diashow: ${t.name} (${fmtDatum(t.date)})`, location.origin + s.url);
         } catch (e) {
           b.disabled = false;
-          uiAlert("Link konnte nicht erstellt werden: " + e.message);
+          uiAlert("Link erstellen nicht möglich: " + e.message);
         }
       };
     };
@@ -130,7 +130,7 @@ VIEWS.tour = async id => {
       });
       await shareOut(t.name, tourShareText(t), location.origin + s.url);
     } catch (e) {
-      uiAlert("Link konnte nicht erstellt werden: " + e.message);
+      uiAlert("Link erstellen nicht möglich: " + e.message);
     } finally {
       b.disabled = false;
     }

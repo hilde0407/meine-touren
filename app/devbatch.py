@@ -1,4 +1,4 @@
-"""Sammel-Korrektur der Höhen (3.13.0): „Alle auffälligen Höhen korrigieren …“ in der Genauigkeit einer Gerätekarte.
+"""Sammel-Korrektur der Höhen (3.13.0): „Höhe aller auffälligen Touren korrigieren …“ in der Genauigkeit einer Gerätekarte.
 
 Ablauf (nichts davon läuft von selbst):
 1. Vorschau (GET …/quality/fix-preview, nur Lesen): Touren des Geräts mit OFFENER Höhen-Auffälligkeit, je Tour Aufstieg laut Uhr, laut Gelände und der
@@ -23,7 +23,7 @@ from .jobs import log, progress
 
 router = APIRouter()
 
-LABEL = "Auffällige Höhen korrigieren"
+LABEL = "Höhe auffälliger Touren korrigieren"
 BATCH_DEFAULT, BATCH_MAX = 100, 1000
 FAIL_STREAK = 5                      # so viele Netz-/Zepp-Fehler in Folge: sauber abbrechen (Rest bleibt offen, erneut starten)
 _REQ = {}                            # Benutzer -> {"batch", "device", "method", "tours"} (nur im Speicher: ein abgebrochener Lauf wird einfach neu angefordert)

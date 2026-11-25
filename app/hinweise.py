@@ -50,8 +50,8 @@ ARTEN = ("ziel", "meilenstein", "auffaellig", "pause", "rekord", "woche", "erhol
 STUFEN = ("info", "hinweis", "warnung")
 SPORT_RE = re.compile(r"^[A-Za-z0-9_]{1,40}$")
 MIN_TAGE_ZIEL = 14                       # Prognose erst ab dem 14. Tag des Jahres (wie der Baustein „Jahresziel“)
-MIN_REKORD = 5                           # Rekorde erst ab so vielen Touren
-TEMPO_MIN_M, TEMPO_MIN_S = 3000, 1800    # Tempo-Rekord: mindestens 3 km und 30 Minuten (wie „Rekorde“ der Oberfläche)
+MIN_REKORD = 5                           # Bestwerte erst ab so vielen Touren
+TEMPO_MIN_M, TEMPO_MIN_S = 3000, 1800    # Tempo-Bestwert: mindestens 3 km und 30 Minuten (wie „Bestwerte“ der Oberfläche)
 CACHE_S = 30
 from .gpxtools import FAMILIE as SPORT_GRP        # 3.59.0: Aktivitäten-Familien (intern; ältere Ziele „grp:…“, Planung) – keine Statistik-Gruppen
 GOAL_GRP = {"grp:bike": "bike", "grp:ski": "ski", "grp:foot": "foot", "grp:run": "run"}      # wie GOAL_GRP in 06-erweiterungen.js

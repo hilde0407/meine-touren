@@ -122,7 +122,7 @@ def _edit(pg):
 
 
 def _saved(pg):
-    pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Gespeichert'; }", timeout=T)
+    pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Ansicht gespeichert'; }", timeout=T)
 
 
 def _wait_order(pg, expect, fn=UNITS):
@@ -403,8 +403,8 @@ def test_restore_default_asks_and_resets_everything(pw, app):
         pg.locator(".uidlg").get_by_role("button", name="Standard wiederherstellen").click()
         pg.wait_for_function("() => !document.querySelector('.uidlg') && !document.querySelector('[data-wtype=notiz]')", timeout=T)
         _wait_order(pg, ["map", "prof", "puls", "wp", "sum", "photos"])
-        pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && (s.textContent === 'Gespeichert' || s.textContent === 'Standard wiederhergestellt'); }", timeout=T)
-        pg.wait_for_function("() => document.getElementById('slsaved').textContent === 'Gespeichert'", timeout=T)
+        pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && (s.textContent === 'Ansicht gespeichert' || s.textContent === 'Standard wiederhergestellt'); }", timeout=T)
+        pg.wait_for_function("() => document.getElementById('slsaved').textContent === 'Ansicht gespeichert'", timeout=T)
         assert _server(app, "tour-haupt") is None and _server(app, "tour-auswertung") is None
         assert not pg.errors, pg.errors
     finally:

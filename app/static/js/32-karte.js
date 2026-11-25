@@ -124,7 +124,7 @@ VIEWS.admin = async (...a) => {
     cur = cfg.live_mode || "off",
     box = `<div class="panel" id="livebox"><h2>Standort teilen</h2>
     <p class="mut fs13">Zeigt Betrachtern (und dir selbst auf der Karte) deine zuletzt gemeldete Position. Die Android-App meldet sie während einer Aufzeichnung alle 30 Sekunden; mit „Immer“ auch die Ortungstaste auf der Karte. Es wird nur die letzte Position gespeichert, nicht der Verlauf.</p>
-    <div class="row g8"><select id="livem"><option value="off">Aus</option><option value="rec">Nur während einer Aufzeichnung</option><option value="on">Immer, wenn die Karte meinen Standort zeigt</option></select><button class="btn alt" id="livex">Letzten Standort löschen</button><span id="livemsg" class="mut"></span></div></div>`,
+    <p class="mut fs13 m0-0-6">Die Auswahl wird sofort gespeichert („Einstellungen speichern“ ist dafür nicht nötig).</p><div class="row g8"><select id="livem" aria-label="Standort teilen"><option value="off">Aus</option><option value="rec">Nur während einer Aufzeichnung</option><option value="on">Immer, wenn die Karte meinen Standort zeigt</option></select><button class="btn alt" id="livex">Letzten Standort löschen</button><span id="livemsg" class="mut"></span></div></div>`,
     body = document.querySelector('.atab[data-t="handy"] .gbody');
   if (body) body.insertAdjacentHTML("beforeend", box);
   else if ($("#save")) $("#save").closest(".row").insertAdjacentHTML("beforebegin", box);
@@ -136,7 +136,7 @@ VIEWS.admin = async (...a) => {
       $("#rescuem").textContent = "Suche …";
       try {
         const r = await api("/api/record/rescue", {method: "POST"});
-        $("#rescuem").textContent = r.imported.length ? `${r.imported.length} Tour(en) übernommen: ${r.imported.map(x => x.name + " (" + x.km + " km)").join(", ")}` : "Nichts Verlorenes gefunden.";
+        $("#rescuem").textContent = r.imported.length ? `${fmtAnzahl(r.imported.length, "Tour", "Touren")} gefunden und gespeichert: ${r.imported.map(x => x.name + " (" + x.km + " km)").join(", ")}` : "Nichts Verlorenes gefunden.";
         if (r.imported.length) loadTours().catch(() => {});
       } catch (e) {
         $("#rescuem").textContent = e.message;
@@ -146,10 +146,13 @@ VIEWS.admin = async (...a) => {
   $("#livem").onchange = async () => {
     try {
       await api("/api/settings", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({live_mode: $("#livem").value})});
-      $("#livemsg").textContent = "Gespeichert.";
+      $("#livemsg").textContent = "Live-Modus gespeichert";
     } catch (e) {
-      $("#livemsg").textContent = e.message;
+      $("#livemsg").textContent = "Speichern nicht möglich: " + e.message;
     }
   };
-  $("#livex").onclick = () => api("/api/live", {method: "DELETE"}).then(() => ($("#livemsg").textContent = "Gelöscht."));
+  $("#livex").onclick = async () => {
+    if (!(await uiConfirm({title: "Letzten Standort löschen?", text: "Die zuletzt gemeldete Position wird gelöscht; Betrachter sehen sie nicht mehr. Ein Verlauf wird ohnehin nicht gespeichert.", ok: "Löschen", danger: true}))) return;
+    api("/api/live", {method: "DELETE"}).then(() => ($("#livemsg").textContent = "Letzter Standort gelöscht")).catch(e => ($("#livemsg").textContent = "Löschen nicht möglich: " + e.message));
+  };
 };

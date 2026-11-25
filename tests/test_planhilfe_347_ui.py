@@ -197,7 +197,7 @@ def test_abschnitte_desktop_mobil_hell_dunkel(pw, app):
             expect(body).to_contain_text("Orientierung, keine Sicherheitsgarantie.")
             expect(body).to_contain_text("Wetter, Lawinenlage und Gelände selbst prüfen.")
             expect(body).to_contain_text("Sonnenaufgang")
-            expect(body).to_contain_text("Geschätzte Gesamtzeit")                          # Form-Zeilen mit Zahlen
+            expect(body).to_contain_text("Geschätzte Dauer")                          # Form-Zeilen mit Zahlen
             expect(body).to_contain_text("Strecke 19,0 km")
             w = body.locator("a[href^='https://lawine.example/']")
             expect(w).to_have_count(1)
@@ -249,7 +249,7 @@ def test_entscheidungshilfe_datum_start_puffer(pw, app):
         p = _req(app, f"/api/plans/{pid}")
         assert (p["plan_start"], p["puffer_pct"], p["plan_datum"]) == ("20:00", 50, "2026-06-21")
         pg.fill("#php", "150")                                                                   # ungültig: Meldung statt Scheinwerte
-        expect(pg.locator("#phb")).to_contain_text("konnte nicht berechnet werden", timeout=TL)
+        expect(pg.locator("#phb")).to_contain_text("nicht möglich", timeout=TL)
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()

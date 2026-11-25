@@ -4,9 +4,9 @@ Quelle: Trainingszusammenfassung aus dem Zepp-Verlauf (api.history()) und – ei
 Zuordnung Tour ↔ Training wie überall (devquality.match_unique = mydevices.match_summaries). Das Ergebnis liegt je Tour dauerhaft in
 tracks/<id>.uhr.json (nur ausgewählte Felder, keine Koordinaten/Kennungen): Der Abschnitt funktioniert danach ohne Zepp-Zugang, und Seitenaufrufe
 belasten Zepp nicht. Der Verlauf wird höchstens alle 10 Minuten neu geladen (Zwischenspeicher im Speicher).
-Der Job „Uhr-Daten aller Touren laden“ (load_all, 3.12.0) schreibt dieselben Zusatzdateien für alle zugeordneten Zepp-Touren aus EINEM Verlauf – ohne Detail-Abrufe.
+Der Job „Uhr-Daten aller Touren holen“ (load_all, 3.12.0) schreibt dieselben Zusatzdateien für alle zugeordneten Zepp-Touren aus EINEM Verlauf – ohne Detail-Abrufe.
 Solche Dateien tragen "detail": false und "detail_offen": true; die Kilometerwerte werden beim ersten Öffnen der Tour nachgeholt (danach "detail_offen": false,
-auch wenn das Detail fehlschlug – „Von Zepp neu laden“ versucht es erneut). Ein erneutes Laden überschreibt nie schon vorhandene Kilometerwerte mit „nichts“.
+auch wenn das Detail fehlschlug – „Neu von Zepp holen“ versucht es erneut). Ein erneutes Laden überschreibt nie schon vorhandene Kilometerwerte mit „nichts“.
 
 Grundsatz: Es wird nur gezeigt, was die Uhr geliefert hat UND plausibel ist. Platzhalter (-1, -274, -361, -2 004 831 …) und Unsinn erscheinen nie.
 Deutungen, die nicht belegt sind (Skalen und Spalten), sind unten als ANNAHME gekennzeichnet und werden mit Gegenproben abgesichert:
@@ -64,7 +64,7 @@ HINT = {
     "splits": "Kilometerwerte: Kilometer-Nr., Zeit und Puls je Kilometer laut Uhr; die Spalten sind von Zepp nicht dokumentiert und wurden gegen Dauer und Strecke geprüft.",
     "hoehe": "Der Aufstieg laut Uhr kann vom Aufstieg der Tour abweichen (andere Messung und Glättung).",
     "wetter": "Wetter laut Uhr (Temperatur und Luftfeuchte); die Deutung der Felder ist nicht von Zepp dokumentiert.",
-    "detail": "Die Kilometerwerte konnten nicht geladen werden – „Von Zepp neu laden“ versucht es erneut.",
+    "detail": "Die Kilometerwerte konnten nicht geladen werden – „Neu von Zepp holen“ versucht es erneut.",
     "detail_offen": "Die Kilometerwerte werden beim ersten Öffnen der Tour von Zepp geladen.",
 }
 
@@ -431,7 +431,7 @@ def fetch(tid, t):
     except Exception:  # noqa
         if old and old.get("detail"):                 # Detail schlug jetzt fehl, war aber schon da: die vorhandenen Kilometerwerte bleiben
             data["kilo_pace"], data["detail"] = old.get("kilo_pace"), True
-        # sonst: Zusammenfassung bleibt nutzbar; „Von Zepp neu laden“ versucht das Detail erneut
+        # sonst: Zusammenfassung bleibt nutzbar; „Neu von Zepp holen“ versucht das Detail erneut
     store(tid, data)
     return data, "ok"
 
@@ -475,7 +475,7 @@ def antwort(tid, data, status, meldung=""):
 
 # ------------------------------------------------------------------------------------------------ Job: alle Touren
 def load_all(api=None, dry=False, max_new=None):
-    """Job „Uhr-Daten aller Touren laden“: den Zepp-Verlauf EINMAL laden und für alle zugeordneten Zepp-Touren, die noch keine Zusatzdatei haben, die Zusammenfassung
+    """Job „Uhr-Daten aller Touren holen“: den Zepp-Verlauf EINMAL laden und für alle zugeordneten Zepp-Touren, die noch keine Zusatzdatei haben, die Zusammenfassung
     speichern (mit store(), wie beim Öffnen einer Tour) – ohne Detail-Abrufe. Vorhandene Zusatzdateien bleiben unberührt (idempotent, auch solche mit Kilometerwerten).
     Obergrenze je Lauf: Einstellung uhr_alle_max (Standard 1000, 1–5000). Zugangsdaten und Fehlertexte aus Zepp werden nicht protokolliert."""
     from .jobs import log, progress
@@ -549,7 +549,7 @@ def api_get(tour_id: str, request: Request):
 
 @router.post("/api/tours/{tour_id}/uhr-training/neu")
 def api_reload(tour_id: str):
-    """Von Zepp neu laden (Verlauf frisch, Detail erneut). Bei einem Fehler bleiben die bisherigen Werte erhalten."""
+    """Neu von Zepp holen (Verlauf frisch, Detail erneut). Bei einem Fehler bleiben die bisherigen Werte erhalten."""
     t = _tour(tour_id)
     if not t:
         raise HTTPException(404, "Tour nicht gefunden")

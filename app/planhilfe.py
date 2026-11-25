@@ -287,7 +287,7 @@ def hilfe(plan, datum=_K, start=_K, puffer=_K, now_ts=None, tours=None):
     km, up, est = plan.get("km"), plan.get("up"), plan.get("est_h")
     dauer = est
     dauer_quelle = "plan" if est else None
-    if not dauer and km and km > 0:                          # ohne gespeicherte Gesamtzeit: reine Gehzeit aus dem Steigungstempo (nur Wandern/Laufen), ausdrücklich so benannt
+    if not dauer and km and km > 0:                          # ohne gespeicherte Dauer: reine Gehzeit aus dem Steigungstempo (nur Wandern/Laufen), ausdrücklich so benannt
         g = plan_check._gehzeit(plan.get("sport") or "hike", km, up, plan.get("down"))
         if g:
             dauer, dauer_quelle = g["sekunden"] / 3600.0, "gehzeit"

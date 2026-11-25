@@ -63,7 +63,7 @@ const pic = p => `/pic/${p.id}?size=2000${p.v ? `&v=${p.v}` : ""}`;          // 
       const j = await r.json(), url = location.origin + j.url, title = j.title || (list[0] || {}).tour_name || document.title, hinweis = !q.get("tour");   // Jahr/alle: Tournamen stehen im Link (ein Name kann einen Ort verraten)
       if (navigator.share) { try { await navigator.share({title, url}); } catch (err) { /* abgebrochen */ } if (hinweis) note("Tournamen sind im Link sichtbar"); }
       else { await navigator.clipboard.writeText(url); note(hinweis ? "Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar)" : "Link kopiert (24 Stunden gültig, ohne Konto ansehbar)"); }
-    } catch (err) { note("Link konnte nicht erstellt werden: " + err.message); }
+    } catch (err) { note("Link erstellen nicht möglich: " + err.message); }
     bshr.disabled = false;
   };
   // Wischen: links/rechts = nächstes/vorheriges Foto; Tippen: linkes Drittel zurück, rechtes Drittel weiter, Mitte zeigt die Bedienelemente

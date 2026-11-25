@@ -19,7 +19,7 @@ TL = 15000
 
 # Reiterkennung -> Karten (Kennung: #id oder deutscher Titel der Überschrift)
 ERWARTET = {
-    "uebersicht": ["#hlt", "#upd", "Selbsttest", "Protokoll", "#homep", "Entwicklermodus"],
+    "allgemein": ["#hlt", "#upd", "Selbsttest", "Protokoll", "#homep", "Entwicklermodus"],
     "sportarten": ["#katp", "#favp", "#sgp"],                                       # 3.60.0: eigener Reiter (Katalog, Favoriten, Statistik-Gruppen); 3.60.1 „Sportarten“
     "quellen": ["#devsec", "Komoot (optional)", "Zepp-Import (optional)", "Garmin, Suunto & andere Uhren (Import)", "Wanderführer (z. B. Rother)"],
     "weitergabe": ["Portale (Upload)", "#brpanel"],
@@ -119,12 +119,54 @@ def test_sicherung_englisch_sichtbar_im_reiter_sicherung(pw, app):
         tab = pg.locator('.atab[data-t="sicher"]')
         expect(tab).to_be_visible(timeout=TL)
         expect(tab.locator('h2[data-de="Sicherung"]')).to_have_text("Backup", timeout=TL)
-        expect(pg.locator('.atab[data-t="uebersicht"]')).to_be_hidden(timeout=TL)
-        assert pg.locator('.atab[data-t="uebersicht"] h2[data-de="Sicherung"]').count() == 0
+        expect(pg.locator('.atab[data-t="allgemein"]')).to_be_hidden(timeout=TL)
+        assert pg.locator('.atab[data-t="allgemein"] h2[data-de="Sicherung"]').count() == 0
         d = os.environ.get("TS_SHOTS")
         if d:
             Path(d).mkdir(parents=True, exist_ok=True)
             tab.scroll_into_view_if_needed()
             pg.screenshot(path=str(Path(d) / "verwaltung-en-sicherung.png"), full_page=False, timeout=60000)
+    finally:
+        pg.browser_.close()
+
+
+# 3.61.0 Reiterleiste: nie senkrecht scrollbar; am Computer (1500 px) alle Reiter samt „Prüfen & Aufräumen“ ohne Scrollen sichtbar (notfalls zweite Zeile);
+# am Handy (390 px) waagerecht wischbar mit Verlauf am Rand, der aktive Reiter ist in Sicht. Dieselbe Regel für alle waagerechten Leisten der Seite.
+LEISTE = """() => { const n = document.querySelector('#atabs'), r = n.getBoundingClientRect(), last = n.lastElementChild.getBoundingClientRect(),
+  on = n.querySelector('button.on').getBoundingClientRect(), cs = getComputedStyle(n);
+  const bars = [...document.querySelectorAll('nav, .chips, .segtabs, .years, .tlchips, .atabs')].filter(e => e.offsetParent !== null)
+    .filter(e => e.scrollHeight > e.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(e).overflowY)).map(e => e.className || e.tagName);
+  return {sh: n.scrollHeight, ch: n.clientHeight, sw: n.scrollWidth, cw: n.clientWidth, oy: cs.overflowY, lastIn: last.right <= r.right + 1 && last.left >= r.left - 1,
+    lastText: n.lastElementChild.textContent.trim(), onIn: on.left >= r.left - 1 && on.right <= r.right + 1, end: n.hasAttribute('data-end'),
+    mask: cs.maskImage || cs.webkitMaskImage || 'none', bars}; }"""
+
+
+@pytest.mark.parametrize("lang", ["de", "fr"])
+def test_reiterleiste_computer_alles_sichtbar(pw, app, lang):
+    pg = _admin(pw, app, lang, "allgemein", width=1500, height=900)
+    try:
+        pg.wait_for_function("() => !!document.querySelector('#atabs .atlink')", timeout=TL)
+        r = pg.evaluate(LEISTE)
+        assert r["sh"] <= r["ch"] + 1, r                                         # kein senkrechtes Scrollen
+        assert r["sw"] <= r["cw"] + 1 and r["lastIn"], r                         # alles sichtbar, auch „Prüfen & Aufräumen“
+        assert r["bars"] == [], r
+        assert not pg.errors, pg.errors
+    finally:
+        pg.browser_.close()
+
+
+def test_reiterleiste_handy_wischen(pw, app):
+    pg = _admin(pw, app, "de", "sicher", width=390, height=800)
+    try:
+        pg.wait_for_function("() => !!document.querySelector('#atabs .atlink')", timeout=TL)
+        r = pg.evaluate(LEISTE)
+        assert r["sh"] <= r["ch"] + 1 and r["oy"] == "hidden", r                # waagerecht wischen, nie senkrecht
+        assert r["sw"] > r["cw"] and r["onIn"], r                                # der aktive Reiter („Sicherung & Zugang“) ist in Sicht gerollt
+        assert r["bars"] == [], r
+        pg.evaluate("() => { const n = document.querySelector('#atabs'); n.scrollLeft = 0; n.dispatchEvent(new Event('scroll')); }")
+        r = pg.evaluate(LEISTE)
+        assert not r["end"] and r["mask"] != "none", r                           # Verlauf am Rand: es geht weiter
+        pg.evaluate("() => { const n = document.querySelector('#atabs'); n.scrollLeft = n.scrollWidth; n.dispatchEvent(new Event('scroll')); }")
+        pg.wait_for_function("() => document.querySelector('#atabs').hasAttribute('data-end')", timeout=TL)
     finally:
         pg.browser_.close()

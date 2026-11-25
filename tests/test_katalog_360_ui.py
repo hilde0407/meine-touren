@@ -101,7 +101,7 @@ def test_reiter_aktivitaeten_drei_abschnitte_und_altdaten(pw, app):
         expect(tab).to_be_visible()
         expect(pg.locator('#atabs [data-t="sportarten"]')).to_have_attribute("aria-selected", "true")
         assert tab.locator(":scope > .gbody > *").evaluate_all("l => l.map(e => e.id)") == ["katp", "favp", "sgp"]
-        assert tab.locator(".gbody > * > h2").all_inner_texts() == ["Sportarten-Katalog", "Favoriten für „Tour aufnehmen“", "Statistik-Gruppen"]
+        assert tab.locator(".gbody > * > h2").all_inner_texts() == ["Sportarten-Katalog", "Favoriten-Sportarten", "Statistik-Gruppen"]
         # einheitliche Optik: gleiche Kartenränder und Überschriftengröße, gleiche Kategorie-Beschriftung in allen drei Abschnitten
         st = pg.evaluate("""() => [...document.querySelectorAll('.atab[data-t=sportarten] .gbody > *')].map(c => [getComputedStyle(c).borderTopWidth, getComputedStyle(c).borderRadius,
             getComputedStyle(c.querySelector(':scope > h2')).fontSize])""")
@@ -120,15 +120,20 @@ def test_reiter_aktivitaeten_drei_abschnitte_und_altdaten(pw, app):
         # Favoriten: entfernte Schlüssel still weg, Reihenfolge bleibt
         assert pg.locator("#favp .favn").all_inner_texts() == ["Wandern", "Rafting"]
         assert pg.locator("#favp .favst").count() == 29
-        pg.locator("#favstd").click()
+        pg.locator("#favstd").click()                                                       # 3.61.0: „Standard wiederherstellen“ fragt nach und speichert gleich
+        pg.locator(".uidlg .uifoot button", has_text="Standard wiederherstellen").click()
+        expect(pg.locator("#favok")).to_have_text("Standard wiederhergestellt", timeout=TL)
         assert pg.locator("#favp .favn").all_inner_texts() == ["Wandern", "Laufen", "Radtour", "Skitour", "Mountainbike"]
+        rq = urllib.request.Request(app + "/api/aktivitaeten/favoriten", data=json.dumps({"favoriten": ["hike", "rafting"]}).encode(), method="PUT",
+                                    headers={"content-type": "application/json"})                    # Ausgangszustand für die folgenden Tests (gespeichert ist jetzt der Standard)
+        urllib.request.urlopen(rq, timeout=10).read()
         # Statistik-Gruppen: „Gehen“ ohne Gassigehen, „Nass“ (nur entfernte) entfällt
         assert pg.locator("#sgp .sgg").count() == 1 and pg.locator("#sgn0").input_value() == "Gehen"
         assert pg.locator("#sgc0_hike").is_checked() and pg.locator("#sgc0_walk").is_checked() and pg.locator("#sgc0_dogwalk").count() == 0
         # die Abschnitte speichern selbst: keine zweite Speichern-Leiste auf diesem Reiter, auf den anderen schon
         assert not pg.locator("#save").is_visible()
-        pg.click('#atabs [data-t="uebersicht"]')
-        assert pg.locator("#save").is_visible() and pg.locator('.atab[data-t="uebersicht"] #homep').count() == 1
+        pg.click('#atabs [data-t="allgemein"]')
+        assert pg.locator("#save").is_visible() and pg.locator('.atab[data-t="allgemein"] #homep').count() == 1
         assert not errs, errs
     finally:
         b.close()
@@ -158,8 +163,9 @@ def test_anzeige_statistik_und_sportart_aendern_mit_rueckfall(pw, app):
         quiet(pg, 3000)
         pg.locator('.tact-bar [data-g="edit"]').click()
         pg.locator('.tactl [data-e="esport"]').click()
-        pg.wait_for_selector("#espsel", timeout=TL)
-        assert pg.input_value("#espsel") == "other" and pg.locator("#espsel option").count() == 29
+        pg.wait_for_selector("#espsel", state="attached", timeout=TL)                 # 3.61.0: Muster „Zuweisen“ – verstecktes Feld, Knöpfe für alle 29 Sportarten
+        assert pg.input_value("#espsel") == "other" and pg.locator(".spwahl [data-sp]").count() == 29
+        assert pg.locator('.spwahl [data-sp="other"]').get_attribute("aria-checked") == "true"
         pg.locator("#espx").click()
         assert _tours(app)["g1"] == "golf"
         assert not errs, errs
@@ -172,7 +178,7 @@ def test_englisch_ohne_deutsche_reste_und_390px(pw, app):
     try:
         _aktivitaeten(pg, app)
         expect(pg.locator('#atabs [data-t="sportarten"]')).to_have_text("Sports")
-        assert pg.locator(".atab[data-t=sportarten] .gbody > * > h2").all_inner_texts() == ["Sports catalogue", "Favourites for “Record a tour”", "Statistics groups"]
+        assert pg.locator(".atab[data-t=sportarten] .gbody > * > h2").all_inner_texts() == ["Sports catalogue", "Favourite sports", "Statistics groups"]
         assert pg.locator('#katp .katit[data-k="mountaineering"] .katn').inner_text() == "Mountaineering"
         assert pg.locator("#katp .sgcl").all_inner_texts()[-1] == "Outdoor and other"
         rest = pg.evaluate(SCAN, ['.atab[data-t="sportarten"]', DE])

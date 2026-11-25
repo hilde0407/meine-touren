@@ -68,7 +68,7 @@ def test_karte_mit_verknuepfung_zahlen_symbole_linien_und_link(pw, app):
     try:
         expect(pg.locator(CARD)).to_be_visible(timeout=T)
         c = pg.locator(CARD)
-        expect(c.locator("summary h3")).to_have_text("Plan und Ergebnis", timeout=T)
+        expect(c.locator("summary h3")).to_have_text("Planung und Ergebnis", timeout=T)
         # 3.55.0: Geplant / Gelaufen als zwei Spalten, je vier Kennzahlen; die Abweichung steht beim gelaufenen Wert
         expect(c.locator(".pe-ist .pek")).to_have_count(4, timeout=T)
         pl = [r.inner_text() for r in c.locator(".pe-plan .pek").all()]
@@ -121,7 +121,7 @@ def test_katalog_zeigt_den_baustein_auch_ohne_verknuepfung(pw, app):
         pg.locator("#slopen").click()
         pg.wait_for_selector("#slbar", timeout=T)
         pg.locator("[data-a='add']").first.click()
-        card = pg.locator(".slcard", has_text="Plan und Ergebnis")
+        card = pg.locator(".slcard", has_text="Planung und Ergebnis")
         expect(card).to_have_count(1, timeout=T)
         expect(card.locator("[data-add='planergebnis']")).to_be_visible(timeout=T)
         assert "Erscheint nur bei Touren" in card.inner_text()

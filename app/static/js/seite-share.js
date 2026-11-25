@@ -18,7 +18,7 @@ fetch("/api/public/" + tok).then(r => { if (!r.ok) throw 0; return r.json(); }).
   document.title = t.name; document.getElementById("h").textContent = t.name;
   document.getElementById("k").textContent = fmtDatum(t.date, {wochentag: true});
   const B = document.getElementById("b"), sec = (id, title, inner) => B.insertAdjacentHTML("beforeend", `<section class="blk" id="${id}">${title ? `<h2>${title}</h2>` : ""}${inner}</section>`);
-  if (has(t, "zahlen", t.km)) sec("bz", "", `<div class="figs">${[[nf(t.km) + " km", "Strecke"], [nf(t.up_m, 0) + " m", "Aufstieg"], [nf(t.down_m, 0) + " m", "Abstieg"], [nf(t.h) + " h", "Dauer"]].map(x => `<div class="fig"><b>${x[0]}</b><span>${x[1]}</span></div>`).join("")}</div>`);
+  if (has(t, "zahlen", t.km)) sec("bz", "", `<div class="figs">${[[fmtKm(t.km), "Strecke"], [fmtHm(t.up_m), "Aufstieg"], [fmtHm(t.down_m), "Abstieg"], [fmtDauer(t.h * 3600), "Dauer"]].map(x => `<div class="fig"><b>${x[0]}</b><span>${x[1]}</span></div>`).join("")}</div>`);
   if (has(t, "karte", t.coords)) {
     sec("bk", "", `<div id="m" role="img" aria-label="Karte der Tour"></div>`);
     const m = L.map("m"); L.tileLayer("/tiles/osm/{z}/{x}/{y}", {maxZoom: 18, attribution: "© OpenStreetMap"}).addTo(m);

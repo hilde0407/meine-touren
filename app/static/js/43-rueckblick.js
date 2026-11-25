@@ -1,6 +1,6 @@
 /* =====================  3.26.0 Jahresrückblick als teilbare Seite: Dialog „Was wird gezeigt?“, Link, PDF (Druckansicht der öffentlichen Seite)  =====================
    Server: app/rueckblick.py (POST /api/rueckblick/share). Öffentliche Seite: rueckblick.html + seite-rueckblick.js. Link-Liste: 42-freigaben.js. */
-const RB_BLOCKS = [["kennzahlen", "Kennzahlen"], ["rekorde", "Rekorde"], ["heatmap", "Heatmap"], ["fotos", "Beste Fotos"]];
+const RB_BLOCKS = [["kennzahlen", "Kennzahlen"], ["rekorde", "Bestwerte"], ["heatmap", "Heatmap"], ["fotos", "Beste Fotos"]];
 const RB_ALL = RB_BLOCKS.map(b => b[0]);
 const rbTL = x => (typeof window.TL === "function" ? window.TL(x) : x);
 const rbLabel = bl => (bl && bl.length ? RB_BLOCKS.filter(b => bl.includes(b[0])).map(b => rbTL(b[1])).join(", ") : "–");
@@ -20,7 +20,7 @@ async function rbDialog({year, sport, blocks, edit}) {
     <label class="shrsel">Sportart<select data-rb="sport"></select></label></div>`}
     <fieldset class="shrfs"><legend>Was wird gezeigt?</legend><div class="flchips">${RB_BLOCKS.map(b => `<label class="flchip"><input type="checkbox" data-b="${b[0]}"> ${b[1]}</label>`).join("")}</div></fieldset>
     <p class="shrsum" role="status" aria-live="polite"><b>Dieser Link zeigt:</b> <span data-rb="sum"></span></p>
-    <p class="shrnote mut fs13">Rekorde nennen Tourname und Datum. Strecken, Startorte, Notizen, Wegpunkte und Uhr-Daten sind nie Teil eines Links.</p>
+    <p class="shrnote mut fs13">Bestwerte nennen Tourname und Datum. Strecken, Startorte, Notizen, Wegpunkte und Uhr-Daten sind nie Teil eines Links.</p>
     <p class="shrwarn fs14" data-rb="none" hidden>Bitte mindestens einen Inhalt wählen.</p>
     ${edit ? "" : `<label class="shrsel">Link gültig<select data-rb="days"><option value="7">7 Tage</option><option value="30">30 Tage</option><option value="0">Unbegrenzt (bis ich ihn widerrufe)</option></select></label>`}
   </div>`;
@@ -62,14 +62,14 @@ function rbResult(s, name) {
   const u = location.origin + s.url;
   return uiAlert({
     title: "Link ist bereit", ok: "Fertig",
-    html: `<div class="rbres"><p class="mut fs14">${esc(name)} – jeder mit diesem Link kann den Rückblick ansehen, ohne Konto.</p>
+    html: `<div class="rbres"><p class="mut fs14">${esc(name)} – jeder mit diesem Link kann den Jahresrückblick ansehen, ohne Konto.</p>
       <input readonly class="w100" value="${esc(u)}" data-rb="url" aria-label="Link">
       <div class="row wrap mt8"><button type="button" class="btn sm" data-rb="cp">Kopieren</button>${shareCanNative() ? `<button type="button" class="btn alt sm" data-rb="sh">Senden</button>` : ""}
       <a class="btn alt sm" data-rb="open" href="${esc(u)}" target="_blank" rel="noopener">Öffnen</a><a class="btn alt sm" data-rb="pdf" href="${esc(u)}?print=1" target="_blank" rel="noopener">Als PDF speichern</a></div>
       <p class="mut fs13">„Als PDF speichern“ öffnet die Seite und startet den Druckdialog – dort „Als PDF speichern“ wählen.</p></div>`,
     onOpen: box => {
       const q = s => box.querySelector(s);
-      q('[data-rb="cp"]').onclick = async e => { try { await navigator.clipboard.writeText(u); e.target.textContent = rbTL("✓ Kopiert"); } catch (err) { q('[data-rb="url"]').select(); } };
+      q('[data-rb="cp"]').onclick = async e => { try { await navigator.clipboard.writeText(u); e.target.textContent = rbTL("Link kopiert"); } catch (err) { q('[data-rb="url"]').select(); } };
       const sh = q('[data-rb="sh"]');
       if (sh) sh.onclick = () => shareOut(name, name, u);
     },
@@ -83,7 +83,7 @@ async function rbCreate(year, sport) {
     const s = await api("/api/rueckblick/share", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(pick)});
     await rbResult(s, s.title);
   } catch (e) {
-    uiAlert("Link konnte nicht erstellt werden: " + e.message);
+    uiAlert("Link erstellen nicht möglich: " + e.message);
   }
 }
 
@@ -94,6 +94,6 @@ if (_recap43)
     await _recap43(y);
     const row = document.querySelector(".recap .noprint.row");
     if (!row || $("#rcshare")) return;
-    row.insertAdjacentHTML("beforeend", `<button class="btn sm" id="rcshare" title="Rückblick als Link ohne Konto teilen oder als PDF speichern">Als Link teilen</button>`);
+    row.insertAdjacentHTML("beforeend", `<button class="btn sm" id="rcshare" title="Jahresrückblick als Link ohne Konto teilen oder als PDF exportieren">Als Link teilen</button>`);
     $("#rcshare").onclick = () => rbCreate(+y || years()[0], "");
   };

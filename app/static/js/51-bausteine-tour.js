@@ -108,7 +108,7 @@ Object.assign(window.SL_WT, {
             `<div class="slr2 mut"><span>Median ${fmt(med)}</span><span class="slpct">${slSignPct(pct)}</span></div></li>`;
         }).filter(Boolean);
       if (!rows.length) return slNote(b, "Für die gewählten Werte liegen bei dieser Tour keine Daten vor.");
-      b.innerHTML = `<ul class="slrows">${rows.join("")}</ul><p class="mut slcap">Der senkrechte Strich zeigt den Median deiner ${others.length} anderen Touren (${basis === "sport" ? `Sportart: ${esc(sName(t.sport))}` : basis === "year" ? `Jahr: ${t.y}` : "alle Sportarten"}).</p>`;
+      b.innerHTML = `<ul class="slrows">${rows.join("")}</ul><p class="mut slcap">Der senkrechte Strich zeigt den Median deiner ${others.length} anderen Touren (${basis === "sport" ? `Sportart: ${esc(sName(t.sport))}` : basis === "year" ? `Jahr: ${t.y}` : "Alle Sportarten"}).</p>`;
       const km = pace(t) ? M.pace : M.km;
       slBadge(c, `${km[0]} ${slSignPct(((km[1] - slMedian(km[2])) / slMedian(km[2])) * 100)}`);
     },
@@ -239,7 +239,7 @@ Object.assign(window.SL_WT, {
         },
         line = d.h.slice(1).map((_, i) => `<path class="slpl slcl${cls(i)}" d="M${X(i)} ${Y(i)}L${X(i + 1)} ${Y(i + 1)}"/>`).join(""),
         area = `M0 120${d.h.map((_, i) => `L${X(i)} ${Y(i)}`).join("")}L600 120Z`,
-        label = `Höhenprofil, tiefster Punkt ${slHm(lo)}, höchster Punkt ${slHm(hi)}, Länge ${fmtKm(dm / 1000)}`;
+        label = `Höhenprofil, tiefster Punkt ${slHm(lo)}, höchster Punkt ${slHm(hi)}, Strecke ${fmtKm(dm / 1000)}`;
       b.innerHTML = `<svg class="slprof" viewBox="0 0 600 120" preserveAspectRatio="none" role="img" aria-label="${esc(label)}"><path class="slpa" d="${area}"/>${line}</svg>` +
         `<div class="slxl sb" aria-hidden="true"><span>0 km</span><span>${slHm(lo)} bis ${slHm(hi)}</span><span>${fmtKm(dm / 1000)}</span></div>` +
         `<ul class="sllg"><li><i class="slsq slc1"></i>bergab</li><li><i class="slsq slc3"></i>eben</li><li><i class="slsq slc5"></i>bergauf</li></ul>`;
@@ -400,20 +400,20 @@ function planErgMap(b, d) {
 }
 function planErgPaint(c, b, d, t) {
   const can = typeof isViewer === "function" ? !isViewer() : true, D = d.diff, hasLine = (d.plan_linie || []).length > 1 || (d.tour_linie || []).length > 1;
-  b.innerHTML = `<div class="pewrap pe-s-${peSport((t && t.sport) || d.plan.sport)}" role="group" aria-label="Plan und Ergebnis im Vergleich">` +
+  b.innerHTML = `<div class="pewrap pe-s-${peSport((t && t.sport) || d.plan.sport)}" role="group" aria-label="Planung und Ergebnis im Vergleich">` +
     `<div class="pecols">${planErgCol("pl", d, t, can)}${planErgCol("is", d, t, can)}</div>` +
     (hasLine ? `<div class="pemap" role="region" aria-label="Karte: geplante Linie gestrichelt, gelaufene Linie durchgezogen"></div>` : "") +
     `<ul class="plleg peleg"><li>${peSw("pl")}<span>Geplant (gestrichelt)</span></li><li>${peSw("is")}<span>Gelaufen (durchgezogen)</span></li>` +
     (hasLine ? `<li><i class="pedot pedot-s" aria-hidden="true"></i><span>Start</span></li><li><i class="pedot pedot-z" aria-hidden="true"></i><span>Ziel</span></li>` : "") + "</ul>" +
     `<p class="mut slcap">Dauer: einschließlich Pausen; geplante Dauer nach deinem persönlichen Tempo.</p>` +
-    (can ? `<div class="plact pebtns"><a class="btn alt sm" data-a="plan" href="#/plan/${d.plan.id}">Zum Plan ›</a><button type="button" class="btn alt sm" data-a="unlink">Verknüpfung lösen</button></div>` : "") + "</div>";
+    (can ? `<div class="plact pebtns"><a class="btn alt sm" data-a="plan" href="#/plan/${d.plan.id}">Zur Planung ›</a><button type="button" class="btn alt sm" data-a="unlink">Verknüpfung lösen</button></div>` : "") + "</div>";
   planErgMap(b, d);
   const first = [["km", D.km], ["h", D.h]].find(([, v]) => v != null);
   slBadge(c, !first ? "" : Math.abs(first[1]) < PLAN_TOL[first[0]] ? "wie geplant" : `${first[1] > 0 ? "↑" : "↓"} ${first[0] === "km" ? nSigned(first[1], 1) + " km" : (first[1] < 0 ? "−" : "+") + fmtDauer(Math.abs(first[1]) * 3600)}`);
   const ub = b.querySelector('[data-a="unlink"]');
   if (ub)
     ub.onclick = async () => {
-      if (!(await uiConfirm({title: "Verknüpfung lösen?", text: `Der Plan „${d.plan.name || "Ohne Namen"}“ bleibt erhalten, ist aber nicht mehr mit dieser Tour verknüpft und steht wieder als „geplant“ in deiner Planliste.`, ok: "Verknüpfung lösen", cancel: "Abbrechen"}))) return;
+      if (!(await uiConfirm({title: "Verknüpfung lösen?", text: `Die geplante Tour „${d.plan.name || "Ohne Namen"}“ bleibt erhalten, ist aber nicht mehr mit dieser Tour verknüpft und steht wieder als „geplant“ in deiner Planliste.`, ok: "Verknüpfung lösen", cancel: "Abbrechen"}))) return;
       ub.disabled = true;
       try {
         await api(`/api/plans/${d.plan.id}/tour`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({tour_id: null})});
@@ -425,7 +425,7 @@ function planErgPaint(c, b, d, t) {
       delete PLAN_OF[t.id];
       planErgMap(b, {});
       c.dataset.hn = "aus";
-      slNote(b, "Zu dieser Tour gibt es keine verknüpfte Planung. Der Baustein erscheint nur bei Touren mit verknüpftem Plan.");
+      slNote(b, "Zu dieser Tour gibt es keine verknüpfte Planung. Der Baustein erscheint nur bei Touren mit verknüpfter Planung.");
       slBadge(c, "");
       if (typeof tlRefresh === "function") tlRefresh();
       planErgLoad(t).catch(() => {});                                                               // ohne Plan: gegebenenfalls „Wie ist es gelaufen?“
@@ -443,7 +443,7 @@ function planErgLoad(t) {
 
 Object.assign(window.SL_WT, {
   planergebnis: {
-    fam: "tour", cat: "plan", icon: "map", name: "Plan und Ergebnis", title: () => (planErgModus() === "rueckblick" ? "Wie ist es gelaufen?" : "Plan und Ergebnis"), defaults: {},
+    fam: "tour", cat: "plan", icon: "map", name: "Planung und Ergebnis", title: () => (planErgModus() === "rueckblick" ? "Wie ist es gelaufen?" : "Planung und Ergebnis"), defaults: {},
     desc: "Wie die Tour im Vergleich zur verknüpften Planung ausgefallen ist: Geplant und Gelaufen nebeneinander mit Strecke, Aufstieg, Abstieg und Dauer samt Abweichung, beide Strecken übereinander auf der Karte (geplant gestrichelt), Link zum Plan. Ohne Plan zeigt der Baustein „Wie ist es gelaufen?“: Dauer, Strecke, Aufstieg und Tempo gegenüber deinen Touren derselben Sportart der letzten 12 Monate und den ähnlichen Touren (ab 5 Vergleichstouren). Erscheint nur bei Touren, die mit einem Plan verknüpft sind.",
     preview: () => slPrev('<svg viewBox="0 0 120 40" class="slpvs" aria-hidden="true"><polyline class="plpl" fill="none" points="6,32 30,12 56,26 84,8 112,20"/><polyline class="plis" fill="none" points="6,34 32,16 58,30 86,12 112,24"/></svg><p class="slcmp">Plan 12,0 km · Ergebnis 12,6 km (↑ +0,6 km)</p>'),
     async render(c, b, cfg, {t}) {
@@ -452,7 +452,7 @@ Object.assign(window.SL_WT, {
       if (!d) {
         c.dataset.hn = "aus";
         planErgMap(b, {});
-        return slNote(b, "Zu dieser Tour gibt es weder einen verknüpften Plan noch genug Vergleichstouren (mindestens 5). Der Baustein erscheint nur bei Touren mit Plan oder genug Vergleichstouren.");
+        return slNote(b, "Zu dieser Tour gibt es weder eine verknüpfte Planung noch genug Vergleichstouren (mindestens 5). Der Baustein erscheint nur bei Touren mit Planung oder genug Vergleichstouren.");
       }
       c.dataset.hn = "an";
       if (d.modus === "rueckblick") {

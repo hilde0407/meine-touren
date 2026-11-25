@@ -25,7 +25,7 @@ VIEWS.links = async () => {
     const list = all.filter(x => flt === "all" || (flt === "show" && kind(x) === "show") || (flt === "tour" && kind(x) === "tour") || (flt === "rb" && kind(x) === "rb") || (flt === "dead" && dead(x)));
     const chip = (k, l, n) => `<button class="btn sm ${flt === k ? "" : "alt"}" data-f="${k}">${l} (${n})</button>`;
     el.className = "";
-    el.innerHTML = `<div class="row wrap mb12">${chip("all", "Alle", all.length)}${chip("show", "Diashows", shows)}${chip("tour", "Tourlinks", all.length - shows - rbs)}${chip("rb", "Rückblicke", rbs)}${chip("dead", "Abgelaufen", exp)}
+    el.innerHTML = `<div class="row wrap mb12">${chip("all", "Alle", all.length)}${chip("show", "Diashows", shows)}${chip("tour", "Tourlinks", all.length - shows - rbs)}${chip("rb", "Jahresrückblicke", rbs)}${chip("dead", "Abgelaufen", exp)}
       ${exp ? `<button class="btn alt sm" id="lkpurge" title="Alle abgelaufenen Links endgültig entfernen">Abgelaufene entfernen</button>` : ""}</div>
       ${
         list.length
@@ -51,7 +51,7 @@ VIEWS.links = async () => {
                   </div></div>`;
               })
               .join("")
-          : `<p class="mut">${all.length ? "Keine Links in dieser Auswahl." : "Noch keine Links freigegeben. In einer Tour findest du „Senden“ und „Diashow senden“, im Jahresrückblick „Als Link teilen“."}</p>`
+          : `<p class="mut">${all.length ? "Keine Links in dieser Auswahl." : "Noch keine Links freigegeben. In einer Tour findest du „Link senden“ und „Diashow senden“, im Jahresrückblick „Als Link teilen“."}</p>`
       }
       <p class="mut fs13">Widerrufene und abgelaufene Links zeigen sofort „nicht mehr gültig“. Einen Link zu verlängern geht auch nachträglich.</p>`;
     el.querySelectorAll("[data-f]").forEach(b => (b.onclick = () => { flt = b.dataset.f; draw(); }));
@@ -61,7 +61,7 @@ VIEWS.links = async () => {
       await load();
     };
     el.querySelectorAll("[data-cp]").forEach(b => (b.onclick = async () => {
-      try { await navigator.clipboard.writeText(b.dataset.cp); b.textContent = "✓ Kopiert"; } catch (e) { b.closest(".panel").querySelector("input").select(); }
+      try { await navigator.clipboard.writeText(b.dataset.cp); b.textContent = "Link kopiert"; } catch (e) { b.closest(".panel").querySelector("input").select(); }
     }));
     el.querySelectorAll("[data-sh]").forEach(b => (b.onclick = () => shareOut(b.dataset.n || "Meine Touren", b.dataset.n || "", b.dataset.sh)));
     el.querySelectorAll("[data-d]").forEach(s => (s.onchange = () => s.value !== "" && patch(s, {days: +s.value})));
@@ -69,7 +69,7 @@ VIEWS.links = async () => {
       const x = all.find(y => y.token === tok(b));
       const pick = await (kind(x) === "rb" ? rbDialog({edit: true, blocks: x.blocks}) : shrDialog({edit: true, blocks: x.blocks, hasPhotos: undefined}));
       if (!pick) return;
-      try { await patch(b, {blocks: pick.blocks}); } catch (e) { uiAlert("Auswahl konnte nicht gespeichert werden: " + e.message); }
+      try { await patch(b, {blocks: pick.blocks}); } catch (e) { uiAlert("Auswahl speichern nicht möglich: " + e.message); }
     }));
     el.querySelectorAll("[data-c]").forEach(b => (b.onclick = () => patch(b, {comments: +b.dataset.c})));
     el.querySelectorAll("[data-rv]").forEach(b => (b.onclick = async () => {

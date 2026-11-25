@@ -11,7 +11,7 @@ VIEWS.trip = async id => {
      <p class="mut fs14">Name und Zeitraum der automatisch erkannten Reise. Ein anderer Zeitraum nimmt alle Touren dieser Tage auf (auch solche, die nicht weit von zu Hause waren) bzw. lässt Touren außerhalb weg.</p>
      <div class="field"><label>Name</label><input id="tn" maxlength="120" value="${esc(tr.region)}" class="w100"></div>
      <div class="row g8 aic mt8"><label>Von <input id="tf" type="date" value="${tr.start}"></label><label>bis <input id="tt" type="date" value="${tr.end}"></label></div>
-     <div id="ter" class="bad"></div><div class="uifoot">${tr.edited ? `<button class="btn alt" id="trs" title="Zurück zu Name und Zeitraum, wie sie erkannt wurden">Zurücksetzen</button><span class="sp"></span>` : ""}<button class="btn ghost" id="tno">Abbrechen</button><button class="btn" id="tok">Speichern</button></div>`);
+     <div id="ter" class="bad"></div><div class="uifoot">${tr.edited ? `<button class="btn alt" id="trs" title="Zurück zu Name und Zeitraum, wie sie erkannt wurden">Standard wiederherstellen</button><span class="sp"></span>` : ""}<button class="btn ghost" id="tno">Abbrechen</button><button class="btn" id="tok">Speichern</button></div>`);
     const send = async body => {
       try {
         await api(`/api/trips/${encodeURIComponent(id)}/edit`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(body)});
@@ -24,7 +24,7 @@ VIEWS.trip = async id => {
     m.querySelector("#tno").onclick = () => m.remove();
     m.querySelector("#tok").onclick = () => send({name: m.querySelector("#tn").value, start: m.querySelector("#tf").value, end: m.querySelector("#tt").value});
     const rs = m.querySelector("#trs");
-    if (rs) rs.onclick = () => send({});
+    if (rs) rs.onclick = async () => { if (await uiConfirm({title: "Standard wiederherstellen?", text: "Name und Zeitraum der Reise werden wieder so, wie sie erkannt wurden.", ok: "Standard wiederherstellen"})) send({}); };
   };
 };
 
@@ -90,9 +90,9 @@ VIEWS.trip = async id => {
   const b = $("#tredit");
   if (b && !$("#trpdf")) b.insertAdjacentHTML("beforebegin", `<a class="btn alt sm" id="trpdf" href="#/tripsheet/${encodeURIComponent(id)}" title="Reisebericht mit Karte, Statistik und Fotos – als PDF herunterladbar">Reisebericht (PDF)</a> `);
   if (b && !$("#trhide")) {
-    b.insertAdjacentHTML("afterend", ` <button class="btn alt sm" id="trhide" title="Diese Gruppe ist keine Reise (z. B. ein Tagesausflug) – aus der Liste entfernen. Die Touren bleiben erhalten.">Keine Reise</button>`);
+    b.insertAdjacentHTML("afterend", ` <button class="btn alt sm" id="trhide" title="Diese Touren sind keine Reise (z. B. ein Tagesausflug) – aus der Liste entfernen. Die Touren bleiben erhalten.">Keine Reise</button>`);
     $("#trhide").onclick = async () => {
-      if (!await uiConfirm({text: "Diese Gruppe aus den Reisen entfernen? Die Touren selbst bleiben unverändert, die Reise lässt sich später unter „Reisen“ wiederherstellen.", danger: true, ok: "Entfernen"})) return;
+      if (!await uiConfirm({text: "Diese Touren aus den Reisen entfernen? Die Touren selbst bleiben unverändert, die Reise lässt sich später unter „Reisen“ wiederherstellen.", danger: true, ok: "Entfernen"})) return;
       await api(`/api/trips/${encodeURIComponent(id)}/hide`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({hide: true})});
       location.hash = "#/trips";
     };

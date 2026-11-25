@@ -148,7 +148,7 @@ def test_409_vom_server_zeigt_verstaendliche_meldung(pw, app, clean):
         _ready(pg)
         expect(pg.locator("#tlw-zepp .zpt")).to_contain_text("Noch kein Import gestartet.", timeout=T)
         pg.locator("#tlw-zepp button.zpb").click()
-        expect(pg.locator("#tlw-zepp .zpt")).to_contain_text("Der Import konnte nicht gestartet werden:", timeout=T)
+        expect(pg.locator("#tlw-zepp .zpt")).to_contain_text("Import starten nicht möglich:", timeout=T)
         expect(pg.locator("#tlw-zepp button.zpb")).to_be_enabled(timeout=T)
         assert fake.posts == 1
     finally:
@@ -231,7 +231,7 @@ def test_katalog_fuegt_baustein_hinzu_wenn_standard_ausgeblendet(pw, app, clean)
         _catalog(pg)
         pg.locator('[data-add="zeppimport"]').click()
         pg.wait_for_selector('[data-wtype="zeppimport"] button.zpb', timeout=T)
-        pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Gespeichert'; }", timeout=T)
+        pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Ansicht gespeichert'; }", timeout=T)
         assert [x["type"] for x in _api(app, "uebersicht")["layout"]["widgets"]] == ["zeppimport"]
         _catalog(pg)
         assert pg.locator('[data-add="zeppimport"]').is_disabled()
@@ -355,7 +355,7 @@ def _glast(**kw):
 
 
 def _gespeichert(pg):
-    pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Gespeichert'; }", timeout=T)
+    pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Ansicht gespeichert'; }", timeout=T)
 
 
 def test_eine_quelle_garmin_beschriftung_start_und_ergebnis(pw, app, clean):

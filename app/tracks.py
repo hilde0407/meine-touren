@@ -74,7 +74,7 @@ def gpx_for(tid):
     t = db.one("SELECT * FROM tours WHERE id=?", (tid,))
     pts = routes.load(tid)
     if not t or not pts or len(pts) < 2:
-        raise RuntimeError("Für diese Tour liegt keine Strecke lokal vor (zuerst „Routen laden“ bzw. mit Komoot abgleichen)")
+        raise RuntimeError("Für diese Tour liegt keine Strecke lokal vor (zuerst Verwaltung → Touren holen → Komoot „Fehlende Strecken holen“ bzw. mit Komoot abgleichen)")
     start = t["start_ts"] or int(time.time())
     end = t["end_ts"] or start
     n = len(pts)

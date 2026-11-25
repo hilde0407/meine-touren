@@ -1,7 +1,7 @@
 """Ähnliche Touren im Vergleich (3.14.0): frühere und spätere Wiederholungen derselben Strecke mit Dauer, Strecke, Aufstieg und Tempo.
 
 Welche Touren dieselbe Strecke gehen, entscheidet allein die vorhandene Wiederholungserkennung (app/wiederholungen.py, api_repeats) – hier wird nichts
-neu erkannt. Dieses Modul liest nur die Kennzahlen der gefundenen Touren aus der Datenbank, rechnet das Durchschnittstempo (Strecke / Gesamtzeit),
+neu erkannt. Dieses Modul liest nur die Kennzahlen der gefundenen Touren aus der Datenbank, rechnet das Durchschnittstempo (Strecke / Dauer),
 die Abweichung jeder Wiederholung zur gewählten Tour und eine Kurzaussage („schneller als 4 von 6 früheren Läufen“, „bestes Tempo bisher“).
 
 Fehlt bei einer Tour Zeit oder Strecke, bleibt ihr Tempo leer (None, nie 0): Sie wird aufgelistet, zählt aber im Vergleich nicht mit.

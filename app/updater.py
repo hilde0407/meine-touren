@@ -104,7 +104,7 @@ def backup_all():
             except Exception as e:  # noqa
                 _BACKUP_FAILS.append(f"{u or 'Hauptbenutzer'}: {e}")
     for f in _BACKUP_FAILS:
-        _LOG.warning("Sicherung vor dem Update fehlgeschlagen: %s", f)
+        _LOG.warning("Sicherung vor dem Update nicht möglich: %s", f)
     return n
 
 
@@ -204,6 +204,6 @@ def api_update_install(body: dict, request: Request):
         install_local(ver)
     except Exception as e:  # noqa
         _set_status("error", ver, str(e)[:300])
-        raise HTTPException(502, f"Update fehlgeschlagen: {e}")
+        raise HTTPException(502, f"Update nicht möglich: {e}")
     restart_soon()
     return {"ok": True, "mode": m, "backups": n, "backup_fehler": backup_failures()}

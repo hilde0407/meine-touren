@@ -33,7 +33,7 @@ const SL_REG = {
     {id: "prof", w: "voll", title: "Höhenprofil", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_prof"]},
     {id: "puls", w: "halb", title: "Herzfrequenz", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_puls"]},
     {id: "wp", w: "halb", title: "Wegpunkte", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_wp"]},
-    {id: "planist", w: "voll", title: "Plan und Ergebnis", page: "haupt", group: "route", build: "planergebnis", def: true, when: () => typeof planErgHas === "function" && planErgHas(), ckeys: ["tl_w_planist"]},        // 3.39.0: Soll/Ist, nur mit verknüpftem Plan (when)
+    {id: "planist", w: "voll", title: "Planung und Ergebnis", page: "haupt", group: "route", build: "planergebnis", def: true, when: () => typeof planErgHas === "function" && planErgHas(), ckeys: ["tl_w_planist"]},        // 3.39.0: Soll/Ist, nur mit verknüpftem Plan (when)
     {id: "sum", w: "voll", title: "Einstieg in die Auswertung", page: "haupt", group: "sum", own: true, fixed: true, must: true, plain: true, ws: ["voll"]},
     {id: "photos", w: "voll", title: "Fotos", page: "haupt", group: "more", def: true, fixed: true, ckeys: ["tl_photos"]},
     {id: "geraet", w: "voll", title: "Gerät: Messwerte und Training laut Uhr", page: "auswertung", group: "rec", def: true, fixed: true, ckeys: ["tl_met", "tl_uhr"], ws: ["voll"]},
@@ -60,7 +60,7 @@ const SL_REG = {
     {id: "kmverlauf", w: "halb", title: "Strecke im Jahresverlauf", page: "statistik", def: true, ckeys: ["st_kmverlauf"]},
     {id: "sportarten", w: "halb", title: "Sportarten", page: "statistik", def: true, ckeys: ["st_sportarten"]},
     {id: "bestwerte", w: "halb", title: "Bestwerte", page: "statistik", build: "bestwerte", def: true, ckeys: ["tl_w_bestwerte"]},         // 3.45.0: Baustein „Bestwerte“ (vorher eigener Abschnitt „Rekorde“)
-    {id: "heat", w: "voll", title: "Aktivität im Jahr", page: "statistik", def: true, ckeys: ["st_heat"]},
+    {id: "heat", w: "voll", title: "Touren im Jahr", page: "statistik", def: true, ckeys: ["st_heat"]},
     {id: "bl", w: "voll", title: "Belastung und Erholung", page: "statistik", plain: true},
     {id: "tp", w: "voll", title: "Dein typisches Tempo", page: "statistik", plain: true},
     {id: "tag", w: "voll", title: "An diesem Tag", page: "statistik", def: true, ckeys: ["st_tag"]},
@@ -81,7 +81,7 @@ SL_REG.reise = [
 SL_REG.reisen = [
   {id: "serien", w: "voll", title: "Mehrtagestouren", page: "reisen", def: true, ckeys: ["rn_serien"]},
   {id: "reisen", w: "voll", title: "Reisen", page: "reisen", def: true, ckeys: ["rn_reisen"]},
-  {id: "alben", w: "voll", title: "Alben und Tags", page: "reisen", def: true, ckeys: ["rn_alben"]},
+  {id: "alben", w: "voll", title: "Schlagwörter & Alben", page: "reisen", def: true, ckeys: ["rn_alben"]},
   {id: "entfernt", w: "voll", title: "Entfernte Reisen", page: "reisen", def: false, ckeys: ["rn_entfernt"]},
 ];
 const SL_EL = {
@@ -338,7 +338,7 @@ function slStatus(text, bad) {
   const s = document.getElementById("slsaved");
   if (!s) return;
   s.textContent = text;
-  s.dataset.state = bad ? "bad" : text === "Gespeichert" ? "ok" : "busy";
+  s.dataset.state = bad ? "bad" : text === "Ansicht gespeichert" ? "ok" : "busy";
 }
 /* Layout der angezeigten Ansicht in den Behälter übernehmen (vor dem Speichern und vor jeder Änderung der Ansichten) */
 function slSync(k) {
@@ -359,7 +359,7 @@ function slTouch(...keys) {
     SL.rev[k] = (SL.rev[k] || 0) + 1;
     slWriteCache(k, slStore(k));
   });
-  slStatus("Speichert …");
+  slStatus("Ansicht wird gespeichert …");
   slChg();
   clearTimeout(SL.timer);
   SL.timer = setTimeout(slFlush, 500);
@@ -382,7 +382,7 @@ async function slFlush() {
     SL.busy.delete(k);
   }
   if (SL.dirty.size) return ok;                                           // inzwischen weitere Änderungen: der nächste Lauf meldet
-  slStatus(ok ? "Gespeichert" : "Nicht gespeichert – nur auf diesem Gerät gemerkt", !ok);
+  slStatus(ok ? "Ansicht gespeichert" : "Speichern nicht möglich: nur auf diesem Gerät gemerkt", !ok);
   return ok;
 }
 const slDocOf = page => SL.docs[SL_PAGE_KEY[page]] || (SL.docs[SL_PAGE_KEY[page]] = {v: 1});
@@ -472,7 +472,7 @@ function slMove(id, beforeId, grp) {
   slSaveOrder(cur);
   slApply();
   const n = cur.length, g = slGrpOf(id);
-  slLive(`${slTitle(id)}: Position ${cur.indexOf(id) + 1} von ${n}` + (gch ? (g ? `, in Gruppe „${slGrpName(g)}“` : ", ohne Gruppe") : ""));
+  slLive(`${slTitle(id)}: Position ${cur.indexOf(id) + 1} von ${n}` + (gch ? (g ? `, in Bausteingruppe „${slGrpName(g)}“` : ", ohne Bausteingruppe") : ""));
 }
 function slStep(id, d) {
   const ord = SL.present.length ? SL.present.slice() : slOrder(SL.fam, SL.page).map(i => i.id),
@@ -484,7 +484,7 @@ function slStep(id, d) {
     slGrpSet(id, null);
     slSaveOrder(slOrder(SL.fam, SL.page).map(x => x.id));
     slApply();
-    slLive(`${slTitle(id)}: aus der Gruppe „${slGrpName(g)}“ gelöst`);
+    slLive(`${slTitle(id)}: aus der Bausteingruppe „${slGrpName(g)}“ gelöst`);
     return;
   }
   if (j < 0 || j >= ord.length) {
@@ -695,20 +695,20 @@ async function slReset() {
   const ok = await uiConfirm({
     title: "Standard wiederherstellen?",
     text: slMaster(SL.fam).views.length > 1
-      ? "Alles in dieser Ansicht wird auf den Standard zurückgesetzt: Reihenfolge, ausgeblendete Abschnitte und alle hinzugefügten Bausteine. Andere Ansichten bleiben unverändert."
+      ? "Alles in dieser Ansicht wird auf den Standard zurückgesetzt: Reihenfolge, ausgeblendete und alle hinzugefügten Bausteine. Andere Ansichten bleiben unverändert."
       : SL.fam === "tour"
-      ? "Reihenfolge, ausgeblendete Abschnitte, Seitenzuordnung und alle hinzugefügten Bausteine der Tourseite (Hauptseite und Auswertung) werden zurückgesetzt."
+      ? "Reihenfolge, ausgeblendete Bausteine, Seitenzuordnung und alle hinzugefügten Bausteine der Tourseite (Hauptseite und Auswertung) werden zurückgesetzt."
       : SL.fam === "statistik"
-      ? "Reihenfolge, Breiten, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Statistik werden zurückgesetzt. Der Filter oben bleibt, wie er ist."
+      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Statistik werden zurückgesetzt. Der Filter oben bleibt, wie er ist."
       : SL.fam === "reise"
-      ? "Reihenfolge, Breiten, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Reise-Seite werden zurückgesetzt. Das gilt für alle Reisen."
+      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Reise-Seite werden zurückgesetzt. Das gilt für alle Reisen."
       : SL.fam === "reisen"
-      ? "Reihenfolge, Breiten, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Reisen-Übersicht werden zurückgesetzt."
+      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Reisen-Übersicht werden zurückgesetzt."
       : SL.fam === "fotos"
-      ? "Reihenfolge, Breiten, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Fotos-Seite werden zurückgesetzt."
+      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Fotos-Seite werden zurückgesetzt."
       : SL.fam === "karte"
       ? "Reihenfolge, Breite der Karte, ausgeblendete Bedienfelder und alle hinzugefügten Bausteine der Karte werden zurückgesetzt."
-      : "Reihenfolge, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Übersicht werden zurückgesetzt.",
+      : "Reihenfolge, ausgeblendete und alle hinzugefügten Bausteine der Übersicht werden zurückgesetzt.",
     ok: "Standard wiederherstellen",
     danger: true,
   });
@@ -901,7 +901,7 @@ function slStripHtml(p, idx, n) {
   if (SL.fam === "tour" && !it.fixed) mo += `<button type="button" class="slb" data-a="page" >${other}</button>`;
   if ((it.widget || it.build) && slFieldsOf(window.SL_WT[it.wtype]).length) mo += `<button type="button" class="slb slcfgb" data-a="cfg" aria-haspopup="dialog" title="Einstellungen dieses Bausteins">${slIcon.gear}<span>Einstellungen</span></button>`;
   if (it.widget && slCanDup(window.SL_WT[it.wtype])) mo += `<button type="button" class="slb slmx" data-a="dup" aria-label="Duplizieren: ${nm}" title="Eine Kopie mit denselben Einstellungen direkt dahinter anlegen">Duplizieren</button>`;
-  if (slGrpOk(it)) mo += `<button type="button" class="slb slmx" data-a="grp" aria-haspopup="dialog">${slGrpOf(it.id) ? "Gruppe wechseln …" : "In Gruppe …"}</button>` + (slGrpOf(it.id) ? `<button type="button" class="slb slmx" data-a="ungrp">Aus Gruppe lösen</button>` : "");
+  if (slGrpOk(it)) mo += `<button type="button" class="slb slmx" data-a="grp" aria-haspopup="dialog">${slGrpOf(it.id) ? "Bausteingruppe wechseln …" : "In Bausteingruppe …"}</button>` + (slGrpOf(it.id) ? `<button type="button" class="slb slmx" data-a="ungrp">Aus Bausteingruppe lösen</button>` : "");
   if (it.widget) mo += `<button type="button" class="slb slrm" data-a="del" >Entfernen</button>`;
   if (mo) h += `<button type="button" class="slb slmorebtn" data-a="more" aria-haspopup="true" aria-expanded="false" aria-label="Weitere Aktionen" title="Weitere Aktionen">⋯</button><span class="slmo">${mo}</span>`;
   if (it.must) h += `<span class="slmust">bleibt immer sichtbar</span>`;
@@ -1030,7 +1030,7 @@ function slPlace(root) {
         const mb = s.querySelector(".slmorebtn");
         if (mb) mb.setAttribute("aria-expanded", SL.mopen === p.it.id ? "true" : "false");
       }
-      if (!w.querySelector(":scope > .slempty")) s.insertAdjacentHTML("afterend", '<p class="slempty mut">Gerade leer: Dieser Abschnitt erscheint, sobald es etwas zu zeigen gibt.</p>');
+      if (!w.querySelector(":scope > .slempty")) s.insertAdjacentHTML("afterend", '<p class="slempty mut">Gerade leer: Dieser Baustein erscheint, sobald es etwas zu zeigen gibt.</p>');
     });
   root.querySelectorAll(".slit").forEach(w => !w.querySelector(":scope > :not(.slst):not(.slempty)") && w.remove());
   if (edit && SL.focus) {
@@ -1098,7 +1098,7 @@ function slSubNote(root, pres) {
     p.hidden = moved;
     let n = e.querySelector(".slmoved");
     if (moved && !n) {
-      e.insertAdjacentHTML("afterbegin", '<h2 class="slmoved">Hier gibt es nichts anzuzeigen</h2><p class="mut slmoved">Abschnitte, die du auf die Hauptseite gelegt hast, findest du dort. Mit „Seite anpassen“ lassen sie sich zurückholen.</p>');
+      e.insertAdjacentHTML("afterbegin", '<h2 class="slmoved">Hier gibt es nichts anzuzeigen</h2><p class="mut slmoved">Bausteine, die du auf die Hauptseite gelegt hast, findest du dort. Mit „Seite anpassen“ lassen sie sich zurückholen.</p>');
     } else if (!moved && n) e.querySelectorAll(".slmoved").forEach(x => x.remove());
   }
 }
@@ -1240,7 +1240,7 @@ function slEdit(on, announce, keepMsg) {
   if (on && keepMsg && SL.msg) slStatus(SL.msg.text);
   SL.focus = on ? {id: SL.present[0] || "", a: "grip", ps: true} : null;
   slApply();
-  if (on) slLive("Seite anpassen ist an. Abschnitte ziehen oder mit den Pfeiltasten verschieben.");
+  if (on) slLive("Seite anpassen ist an. Bausteine ziehen oder mit den Pfeiltasten verschieben.");
   else {
     const snap = SL.snap;
     SL.snap = null;

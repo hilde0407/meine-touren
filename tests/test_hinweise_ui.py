@@ -223,7 +223,7 @@ def test_collective_widget_list_snooze_focus_and_gear(pw, app):
     try:
         _wait_state(pg, "hs", "an")
         names = pg.locator("#tlw-hs .hnti").all_inner_texts()
-        assert names == ["Jahresziel in Gefahr", "Meilenstein erreicht", "Neue Auffälligkeiten", "Rekord-Tour"], names
+        assert names == ["Jahresziel in Gefahr", "Meilenstein erreicht", "Neue Auffälligkeiten", "Neuer Bestwert"], names
         assert pg.locator("#tlw-hs .hnbox").count() == 4 and pg.locator("#tlw-hs .hnbox[role=alert]").count() == 1
         _shot(pg, "hinweise-sammel-hell.png")
         pg.locator("#tlw-hs .hnsn").first.click()

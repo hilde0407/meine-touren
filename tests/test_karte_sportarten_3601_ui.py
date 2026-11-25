@@ -89,7 +89,7 @@ def test_karte_kategorien_gruppen_und_farben(pw, app):
         pg.goto(app + "/#/map")
         pg.wait_for_selector("#ms .chip[data-s]", timeout=TL)
         quiet(pg, 3000)
-        assert pg.eval_on_selector_all("#ms .mscl", "l => l.map(x => x.textContent)") == ["Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor und Sonstige", "Statistik-Gruppen"]
+        assert pg.eval_on_selector_all("#ms .mscl", "l => l.map(x => x.textContent)") == ["Statistik-Gruppen", "Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor und Sonstige"]   # 3.61.0: Gruppen zuerst (Leitfaden 2.6)
         assert pg.eval_on_selector_all("#ms .chip[data-s]", "l => l.map(x => x.dataset.s)") == ORDER                # nur vorhandene, Katalog-Reihenfolge, „golf“ als Sonstiges
         g = pg.locator('#ms .chip[data-g="sgrp:rad"]')
         assert g.inner_text().strip() == "Rad fahren = Radtour + Mountainbike + E-Bike" and g.get_attribute("title") == "Rad fahren = Radtour + Mountainbike + E-Bike"
@@ -138,7 +138,7 @@ def test_karte_englisch(pw, app):
         pg.goto(app + "/#/map")
         pg.wait_for_selector("#ms .chip[data-s]", timeout=TL)
         quiet(pg, 3000)
-        assert pg.eval_on_selector_all("#ms .mscl", "l => l.map(x => x.textContent)")[:2] == ["On foot", "Bike"]
+        assert pg.eval_on_selector_all("#ms .mscl", "l => l.map(x => x.textContent)")[:3] == ["Statistics groups", "On foot", "Bike"]
         assert pg.locator('#ms .chip[data-g="sgrp:rad"]').inner_text().strip() == "Rad fahren = Bike ride + Mountain bike + E-bike"
         assert not errs, errs
     finally:

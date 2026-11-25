@@ -49,6 +49,8 @@ Eine Stichprobe soll schnell sein (eine vorhandene Datei mit ohnehin gestartetem
 * `test_core.py` – Testumgebung der Server-Tests (`fresh`-Fixture; `DATA_DIR`/`PHOTOS_DIR` je xdist-Worker eigen).
 * Browsertests starten ihren Server als Unterprozess auf einem freien Port (`port 0`) mit eigenem `DATA_DIR` unter `tmp_path_factory`; nie feste Ports oder feste Pfade verwenden.
 
+* `test_begriffe_361.py` – Begriffe und Bedienlogik nach [docs/LEITFADEN-BEGRIFFE.md](../docs/LEITFADEN-BEGRIFFE.md): die entfallenen Wörter dürfen in sichtbaren Texten und im Handbuch nicht wieder auftauchen. Neue Ausnahmen nur mit Grund in `AUSNAHMEN`.
+
 ## Hilfen (`tests/helpers_ui.py`)
 
 | Hilfe | Wofür |

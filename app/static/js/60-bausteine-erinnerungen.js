@@ -310,12 +310,12 @@ function erForm(cfg, trip) {
     `<details class="erdt" open><summary>Welche Fotos</summary>` + erRadio("er-mode", "Auswahl", trip ? ER_MODES.filter(m => m[0] !== "day") : ER_MODES, c.mode) + erRadio("er-n", "Anzahl", ER_N.map(x => [x, String(x)]), c.n) +
     (trip ? `<p class="mut erhint">Es sind immer die Fotos aus dem Zeitraum der Reise.</p>` : `<details class="erdt erdt2"${filt ? " open" : ""}><summary>Filter: Sportart und Zeitraum</summary>${flField({kind: "sports"}, cfg, 0)}${flField({kind: "range", def: "all"}, cfg, 1)}</details>`) + `</details>` +
     `<details class="erdt" open><summary>Darstellung</summary>` + erRadio("er-view", "Art der Darstellung", ER_VIEWS, c.view) + erRadio("er-ratio", "Seitenverhältnis der Kacheln", ER_RATIOS, c.ratio) +
-    `<p class="mut erhint" data-for="show">In der Einzelbild-Show bestimmt die Höhe die Form; „Originalformat“ zeigt das ganze Bild ohne Zuschnitt.</p>` +
-    erRadio("er-size", "Größe der Bilder", ER_SIZES, c.size, ' data-for="grid strip"') + erRadio("er-height", "Höhe der Show", ER_HEIGHTS, c.height, ' data-for="show"') +
-    erRadio("er-tempo", "Tempo (Sekunden je Bild)", ER_TEMPO.map(x => [x, `${x} s`]), c.tempo, ' data-for="show"') + `</details>` +
+    `<p class="mut erhint" data-for="show">In der Einzelbild-Show bestimmt die Höhe die Form; „Originalformat“ zeigt das ganze Foto ohne Zuschnitt.</p>` +
+    erRadio("er-size", "Größe der Fotos", ER_SIZES, c.size, ' data-for="grid strip"') + erRadio("er-height", "Höhe der Show", ER_HEIGHTS, c.height, ' data-for="show"') +
+    erRadio("er-tempo", "Tempo (Sekunden je Foto)", ER_TEMPO.map(x => [x, `${x} s`]), c.tempo, ' data-for="show"') + `</details>` +
     `<details class="erdt" open><summary>Anzeige</summary>` + erCheck("er-caption", "Bildunterschrift (Tourname und Datum)", c.caption) +
     erCheck("er-shuffle", "Knopf „Neu mischen“ (zieht neue Zufallsfotos, sonst mischt er die Reihenfolge)", c.shuffle) + erCheck("er-link", "Link „Diashow starten“", c.link) + `</details>` +
-    `<p class="slerr ererr" role="alert"></p><div class="uifoot"><button type="button" class="btn ghost erreset" title="Alle Einstellungen dieser Kachel auf den Standard setzen">Standardwerte</button><button type="button" class="btn ghost" data-close>Abbrechen</button><button type="submit" class="btn">Speichern</button></div></form>`;
+    `<p class="slerr ererr" role="alert"></p><div class="uifoot"><button type="button" class="btn ghost erreset" title="Alle Einstellungen dieses Bausteins auf den Standard setzen (gespeichert wird erst mit „Speichern“)">Standard wiederherstellen</button><button type="button" class="btn ghost" data-close>Abbrechen</button><button type="submit" class="btn">Speichern</button></div></form>`;
 }
 /* Formular → Einstellung (nur Abweichungen vom Standard; was zur gewählten Darstellung nicht gehört, wird nicht gespeichert) */
 function erRead(form) {

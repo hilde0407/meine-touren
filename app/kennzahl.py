@@ -64,7 +64,7 @@ MESS = {
     "hmkm": {"unit": "m_km", "ratio": True, "aggs": ("avg", "max", "min", "count", "record"), "min_km": 1.0, "min_h": 0.0},
 }
 AGGS = ("sum", "avg", "max", "min", "count", "record", "monat")
-FORMEL_AGGS = ("sum", "avg", "max", "min", "count")          # in einer Formel: weder Rekord (hat eine Tour dabei) noch „pro Monat“
+FORMEL_AGGS = ("sum", "avg", "max", "min", "count")          # in einer Formel: weder Bestwert (hat eine Tour dabei) noch „pro Monat“
 SPORT_RE = re.compile(r"^[A-Za-z0-9_]{1,40}$")
 BAD_TEXT = re.compile(r"[\x00-\x1f\x7f<>]")
 
@@ -117,7 +117,7 @@ def clean_cfg(v):
     if "durch" in v:
         out["durch"] = _operand(v["durch"], "durch", FORMEL_AGGS)
         if out["agg"] not in FORMEL_AGGS:
-            raise _bad("In einer Formel sind Rekord und „pro Monat“ nicht möglich")
+            raise _bad("In einer Formel sind Bestwert und „pro Monat“ nicht möglich")
         op = v.get("op", "div")
         if op not in OPS:
             raise _bad("Unbekannte Rechenart der Formel")

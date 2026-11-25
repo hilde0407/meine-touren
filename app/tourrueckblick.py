@@ -1,6 +1,6 @@
 """Rückblick pro Tour „Wie ist es gelaufen?“ (3.48.0): Einordnung einer gelaufenen Tour OHNE verknüpften Plan.
 
-Kein eigener Baustein (Modul tourrueckblick, weil app/rueckblick.py der teilbare Jahresrückblick ist): die Daten gehören zum bestehenden Tour-Baustein „Plan und Ergebnis“ (51-bausteine-tour.js). Hat die Tour einen verknüpften Plan, bleibt allein Plan und Ergebnis
+Kein eigener Baustein (Modul tourrueckblick, weil app/rueckblick.py der teilbare Jahresrückblick ist): die Daten gehören zum bestehenden Tour-Baustein „Planung und Ergebnis“ (51-bausteine-tour.js). Hat die Tour einen verknüpften Plan, bleibt allein Planung und Ergebnis
 maßgeblich (status "hat_plan", nichts wird doppelt gezeigt). Sonst werden Dauer, Strecke, Aufstieg und Tempo der Tour eingeordnet gegenüber
 
 * den eigenen Touren derselben Sportgruppe in den 12 Monaten vor dieser Tour (ohne sie selbst), und
@@ -58,7 +58,7 @@ def rueckblick(tour_id, now=None):
     if not t:
         raise HTTPException(404, "Tour nicht gefunden")
     if db.one("SELECT 1 x FROM plans WHERE tour_id=? LIMIT 1", (t["id"],)):
-        return {"status": "hat_plan"}                                                      # Plan und Ergebnis ist maßgeblich
+        return {"status": "hat_plan"}                                                      # Planung und Ergebnis ist maßgeblich
     if not t["start_ts"]:
         return {"status": "zu_wenig", "min_n": MIN_N}
     lo = t["start_ts"] - MONATE * 30.4375 * 86400

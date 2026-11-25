@@ -54,7 +54,7 @@ def app(tmp_path_factory):
 OV = "() => [...document.querySelectorAll('main.home > section, main.home > .hcols > section, main.home > .tlw, main.home > .hcols > .tlw')].filter(e => !e.hidden && !e.classList.contains('sl-off') && e.id !== 'zrbar').map(e => e.dataset.wtype || e.id)"
 GEAR = '.slit[data-sl="jahr"] [data-a="cfg"]'
 NUMS = "(sel) => [...document.querySelectorAll(sel + ' .hyn b')].map(e => e.textContent.trim())"
-SAVED = "() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Gespeichert'; }"
+SAVED = "() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Ansicht gespeichert'; }"
 DOC = "() => JSON.stringify([document.getElementById('slsaved') && document.getElementById('slsaved').textContent, SL.docs.uebersicht])"
 YEAR = datetime.now().year
 ROOT = Path(__file__).resolve().parent.parent
@@ -133,7 +133,7 @@ def test_dein_jahr_default_block_is_the_old_block(pw, app):
         assert pg.locator("main.home .slit").count() == 0 and pg.locator("#hyear .flk").count() == 0       # ohne Anpassung kein Kurztext, kein Rahmen
         assert pg.locator("#hyear h2").inner_text() == f"Dein Jahr {YEAR}"
         assert pg.locator("#hyear a.hmore").inner_text() == "Zur Statistik" and pg.locator("#hyear a.hmore").get_attribute("href") == "#/stats"
-        assert pg.locator("#hyear .hyn span").all_inner_texts() == ["Touren", "Strecke", "Aufstieg", "Zeit unterwegs"]
+        assert pg.locator("#hyear .hyn span").all_inner_texts() == ["Touren", "Strecke", "Aufstieg", "Dauer"]
         wait_nums(pg, "#hyear", calc(rows, frm=f"{YEAR}-01-01"))
         assert pg.locator("#hyear .hym > div").count() == 12 and pg.locator("#hyear .hym .cur").count() == 1
         assert pg.locator("#hyear .hym .cur span").inner_text() == "N"                                          # November: laufender Monat hervorgehoben
@@ -183,17 +183,17 @@ def test_gear_opens_dialog_filter_by_activity_changes_values_and_survives_reload
         assert box.get_attribute("aria-modal") == "true" and "Einstellungen: Dein Jahr" in box.locator("h2").inner_text()
         assert pg.evaluate("() => !!document.activeElement.closest('[role=dialog]')")                          # Fokus im Dialog
         labels = pg.locator(".sldlg .flsp .flchip").all_inner_texts()
-        assert labels[0] == "Alle" and {"Wandern", "Mountainbike", "Radtour", "Laufen"} <= set(labels)                   # Sportarten des Nutzers
-        assert chip(pg, "Alle").locator("input").is_checked() and not chip(pg, "Wandern").locator("input").is_checked()
+        assert labels[0] == "Alle Sportarten" and {"Wandern", "Mountainbike", "Radtour", "Laufen"} <= set(labels)                   # Sportarten des Nutzers
+        assert chip(pg, "Alle Sportarten").locator("input").is_checked() and not chip(pg, "Wandern").locator("input").is_checked()
         assert pg.locator(".sldlg select.flsel").input_value() == "year"                                        # Zeitraum: laufendes Jahr
         assert [o for o in pg.locator(".sldlg select.flsel option").all_inner_texts()][:4] == ["Laufendes Jahr", "Letzte 12 Monate", "Letzte 90 Tage", "Gesamte Zeit"]
         assert str(YEAR) in pg.locator(".sldlg select.flsel optgroup option").all_inner_texts()
         assert pg.locator('.sldlg input[type=checkbox][name]:not([data-all])').count() >= 4
         _shot(pg, "dialog-dein-jahr-hell.png", full=False)
         chip(pg, "Wandern").click()                                                                             # „Alle“ und Einzelauswahl schließen sich aus
-        assert not chip(pg, "Alle").locator("input").is_checked() and chip(pg, "Wandern").locator("input").is_checked()
+        assert not chip(pg, "Alle Sportarten").locator("input").is_checked() and chip(pg, "Wandern").locator("input").is_checked()
         chip(pg, "Wandern").click()
-        assert chip(pg, "Alle").locator("input").is_checked()                                                   # ohne Auswahl gilt wieder „Alle“
+        assert chip(pg, "Alle Sportarten").locator("input").is_checked()                                                   # ohne Auswahl gilt wieder „Alle“
         chip(pg, "Wandern").click()
         save_dialog(pg)
         exp = calc(rows, ["hike"], frm=f"{YEAR}-01-01")
@@ -217,7 +217,7 @@ def test_gear_opens_dialog_filter_by_activity_changes_values_and_survives_reload
         # Zurück auf „Alle“: die Konfiguration entfällt ganz
         _edit(pg)
         open_gear(pg)
-        chip(pg, "Alle").click()
+        chip(pg, "Alle Sportarten").click()
         save_dialog(pg)
         pg.wait_for_function("() => !document.querySelector('#hyear .flk')", timeout=T)
         wait_nums(pg, "#hyear", calc(rows, frm=f"{YEAR}-01-01"))
@@ -386,12 +386,12 @@ def test_other_widgets_honour_activity_range_and_count(pw, app):
         assert pg.locator("#tlw-wh svg.slheat rect").count() >= 300 and pg.locator("#tlw-wh .flk").inner_text() == "Wandern"
         assert pg.locator("#tlw-ww .flk").inner_text() == f"Wandern, {YEAR - 1}"
         assert pg.locator("#tlw-wg .flk").inner_text() == "Letzte 12 Monate" and pg.locator("#tlw-wg circle.slsg").count() >= 1
-        assert pg.locator("#tlw-wk .tlt").inner_text() == f"Jahres-Rückblick {YEAR - 1}" and pg.locator("#tlw-wo .tlt").inner_text() == f"Jahres-Rückblick {YEAR - 1}"      # neue und ältere Einstellung
+        assert pg.locator("#tlw-wk .tlt").inner_text() == f"Jahresrückblick {YEAR - 1}" and pg.locator("#tlw-wo .tlt").inner_text() == f"Jahresrückblick {YEAR - 1}"      # neue und ältere Einstellung
         assert pg.locator("#tlw-wk .flk").inner_text() == f"Wandern, {YEAR - 1}" and pg.locator("#tlw-wo .flk").count() == 0
         km_hike = sum(t["dist_m"] for t in rows if t["sport"] == "hike" and t["date"][:4] == str(YEAR)) / 1000
         assert f"von 500 km" in pg.locator("#tlw-wz .slgt").inner_text() and pg.locator("#tlw-wz .flk").inner_text() == "Wandern"
         assert abs(int(re.search(r"([\d.]+) von 500", pg.locator("#tlw-wz .slgt").inner_text()).group(1).replace(".", "")) - km_hike) <= 0.5 + 1e-6
-        assert pg.locator("#tlw-wv .utile").count() == 2 and pg.locator("#tlw-wv .utile span").all_inner_texts() == ["Zeit unterwegs", "Touren"]
+        assert pg.locator("#tlw-wv .utile").count() == 2 and pg.locator("#tlw-wv .utile span").all_inner_texts() == ["Dauer", "Touren"]
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -405,7 +405,7 @@ def test_tour_average_comparison_basis(pw, app):
     pg = _tour(pw, app)
     try:
         pg.wait_for_function(READY2, arg=["wd1", "wd2", "wd3"], timeout=T)
-        assert "alle Sportarten" in pg.locator("#tlw-wd1 .slcap").inner_text() and pg.locator("#tlw-wd1 .flk").inner_text() == "Alle Touren"
+        assert "Alle Sportarten" in pg.locator("#tlw-wd1 .slcap").inner_text() and pg.locator("#tlw-wd1 .flk").inner_text() == "Alle Touren"
         assert "Jahr:" in pg.locator("#tlw-wd2 .slcap").inner_text() and pg.locator("#tlw-wd2 .flk").inner_text() == "Touren dieses Jahres"
         assert "Sportart:" in pg.locator("#tlw-wd3 .slcap").inner_text() and pg.locator("#tlw-wd3 .flk").count() == 0         # Standard wie bisher
         n = lambda i: int(re.search(r"deiner (\d+) anderen", pg.locator(f"#tlw-wd{i} .slcap").inner_text()).group(1))  # noqa: E731
@@ -416,7 +416,7 @@ def test_tour_average_comparison_basis(pw, app):
         assert pg.locator('.sldlg .flchip input[type=radio]').count() == 3 and pg.locator(".sldlg .flchip", has_text="Gleiche Sportart").locator("input").is_checked()
         pg.locator(".sldlg .flchip", has_text="Allen Touren").click()
         save_dialog(pg)
-        pg.wait_for_function("() => /alle Sportarten/.test(document.querySelector('#tlw-wd3 .slcap')?.textContent || '')", timeout=T)
+        pg.wait_for_function("() => /Alle Sportarten/.test(document.querySelector('#tlw-wd3 .slcap')?.textContent || '')", timeout=T)
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()

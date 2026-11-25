@@ -22,7 +22,7 @@ function heat(h) {
     const len = new Date(Date.UTC(h.year, m + 1, 0)).getUTCDate(), wd = (h.wd0 + doy - 1) % 7;
     const cells = [];
     for (let d = 1; d <= len; d++, doy++) {
-      const v = per[doy] || 0, l = lvl(v), lab = fmtTagMonat(FMT_LG(), d, m + 1, h.year, true) + (v ? ": " + nf(v) + " km" : "");
+      const v = per[doy] || 0, l = lvl(v), lab = fmtTagMonat(FMT_LG(), d, m + 1, h.year, true) + (v ? ": " + fmtKm(v) : "");
       cells.push(`<i class="${l ? "l" + l : ""}" title="${esc(lab)}"${d === 1 && wd ? ` data-first style="grid-row-start:${wd + 1}"` : ""}></i>`);
     }
     months.push(`<div class="mo"><h3>${esc(mon(h.year, m, "long"))}</h3><div class="cal" role="img" aria-label="${esc(mon(h.year, m, "long"))}">${cells.join("")}</div></div>`);
@@ -33,9 +33,9 @@ function heat(h) {
 const REC = {weit: "Längste Tour", hoch: "Größter Aufstieg", lang: "Längste Dauer"};
 function recs(t) {
   return `<div class="recs">${t.rek.map(r => {
-    if (r.k === "monat") return `<div class="rec"><div class="l">Stärkster Monat</div><b>${esc(mon(t.year, r.month - 1, "long"))}</b><div class="w"><span>${nf(r.v)} km</span></div></div>`;
+    if (r.k === "monat") return `<div class="rec"><div class="l">Stärkster Monat</div><b>${esc(mon(t.year, r.month - 1, "long"))}</b><div class="w"><span>${fmtKm(r.v)}</span></div></div>`;
     if (r.k === "serie") return `<div class="rec"><div class="l">Längste Serie</div><b>${r.v} ${r.v === 1 ? "Tag" : "Tage"}</b><div class="w"><span>Tage in Folge unterwegs</span></div></div>`;
-    const v = r.u === "km" ? nf(r.v) + " km" : r.u === "m" ? nf(r.v, 0) + " m" : nf(r.v) + " h";
+    const v = r.u === "km" ? fmtKm(r.v) : r.u === "m" ? fmtHm(r.v) : fmtDauer(r.v * 3600, {summe: true});
     return `<div class="rec"><div class="l">${REC[r.k]}</div><b>${v}</b><div class="w">${esc(r.name)} <span>${esc(fmtDatum(r.date))}</span></div></div>`;
   }).join("")}</div>`;
 }
@@ -55,12 +55,12 @@ fetch("/api/public/" + tok).then(r => { if (!r.ok) throw 0; return r.json(); }).
     };
     const fig = (v, l) => `<div class="fig"><b>${v}</b><span>${l}</span></div>`;
     const d = kz.prev_km ? (kz.km - kz.prev_km) / kz.prev_km * 100 : null;
-    sec("bz", "Dein Jahr", `<div class="figs">${fig(nf(kz.count, 0), kz.count === 1 ? "Tour" : "Touren")}${fig(nf(kz.km, 0) + " km", "Strecke")}${fig(nf(kz.up_m, 0) + " m", "Aufstieg")}${fig(nf(kz.h, 0) + " h", "Stunden")}${fig(nf(kz.days, 0), "Tage unterwegs")}</div>
+    sec("bz", "Dein Jahr", `<div class="figs">${fig(nf(kz.count, 0), kz.count === 1 ? "Tour" : "Touren")}${fig(fmtKm(kz.km, {d: 0}), "Strecke")}${fig(fmtHm(kz.up_m), "Aufstieg")}${fig(fmtDauer(kz.h * 3600, {summe: true}), "Dauer")}${fig(nf(kz.days, 0), "Aktive Tage")}</div>
       ${d != null ? `<p class="cmp"><b>${d >= 0 ? "+" : "−"}${nf(Math.abs(d), 0)} %</b> <span>gegenüber ${t.year - 1}</span></p>` : ""}
       <div class="panel"><h3>Strecke pro Monat</h3>${monthBars(t, kz)}</div>
       ${kz.sports && kz.sports.length > 1 ? `<div class="panel"><h3>Sportarten</h3><ul class="sp">${kz.sports.map(s => `<li><span${s.mitglieder ? ` title="${esc(rbGrp(s, true))}"` : ""}>${esc(s.mitglieder ? rbGrp(s) : s.name)}</span><b>${nf(s.km, 0)} km</b></li>`).join("")}</ul></div>` : ""}`);
   }
-  if (t.rek && t.rek.length) sec("br", "Rekorde", recs(t));
+  if (t.rek && t.rek.length) sec("br", "Bestwerte", recs(t));
   if (t.heat) sec("bh", "Heatmap", heat(t.heat));
   if (t.photos && t.photos.length) {
     sec("bf", "Beste Fotos", `<div class="ph" id="p">${t.photos.map(id => `<img alt="Foto vergrößern" tabindex="0" role="button" src="/pub/${tok}/photo/${id}?size=500" data-id="${id}">`).join("")}</div>`);

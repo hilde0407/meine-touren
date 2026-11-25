@@ -309,7 +309,7 @@ VIEWS.account = async () => {
         headers: {"content-type": "application/json"},
         body: JSON.stringify({old: $("#pw0").value, new: $("#pw1").value}),
       });
-      $("#pwm").textContent = "✓ Geändert";
+      $("#pwm").textContent = "Passwort geändert";
       $("#pw0").value = $("#pw1").value = "";
     } catch (e) {
       $("#pwm").textContent = e.message;
@@ -353,16 +353,17 @@ VIEWS.account = async () => {
     );
   document.querySelectorAll("[data-up]").forEach(
     b =>
-      (b.onclick = () => {
-        const p = prompt("Neues Passwort für diesen Benutzer (mind. 8 Zeichen):");
+      (b.onclick = async () => {
+        const u = us.find(x => x.uid === b.dataset.up),
+          p = await uiPrompt({title: `Neues Passwort für ${u ? u.name : "diesen Benutzer"}`, label: "Neues Passwort (mindestens 8 Zeichen)", type: "password", min: 8, ok: "Passwort speichern"});
         if (p) patch(b.dataset.up, {password: p});
       })
   );
   document.querySelectorAll("[data-um]").forEach(
     b =>
-      (b.onclick = () => {
+      (b.onclick = async () => {
         const u = us.find(x => x.uid === b.dataset.um),
-          e = prompt(`E-Mail-Adresse für ${u.name}:`, u.email || "");
+          e = await uiPrompt({title: `E-Mail-Adresse für ${u.name}`, label: "E-Mail-Adresse (leer = keine)", type: "email", value: u.email || "", ok: "Speichern"});
         if (e !== null) patch(b.dataset.um, {email: e});
       })
   );
@@ -427,7 +428,7 @@ VIEWS.shared = async () => {
             ([
               tid,
               ps,
-            ]) => `<div class="pgroup"><div class="ph"><h3>${esc(tid ? o.tours[tid] || "Tour" : "Ohne Tour")}</h3><span>${ps.length} Fotos</span><button class="btn alt sm" data-grp="${oi}|${esc(tid)}">Übernehmen</button></div>
+            ]) => `<div class="pgroup"><div class="ph"><h3>${esc(tid ? o.tours[tid] || "Tour" : "Ohne Tour")}</h3><span>${ps.length} Fotos</span><button class="btn alt sm" data-grp="${oi}|${esc(tid)}">Fotos übernehmen</button></div>
       <div class="thumbs" data-g="${oi}|${esc(tid)}">${ps.map((p, i) => `<img loading="lazy" src="/spic/${esc(o.owner)}/${p.id}?size=300" data-i="${i}" title="${fmtDatumKurz(p.taken_ts, {zeit: true})}">`).join("")}</div></div>`
           )
           .join("")

@@ -276,8 +276,8 @@ def test_groups_create_assign_rename_default_state_and_server(pw, app):
         _to_group(pg, "wk1", "new")
         pg.wait_for_function("() => document.querySelectorAll('#main .slgrp').length === 1", timeout=T)
         assert _groups(pg) == [["", "wk1", False]]
-        expect(pg.locator(".slgrp .slgt")).to_have_text("Gruppe 1", timeout=T)
-        _to_group(pg, "wk2", "Gruppe 1")
+        expect(pg.locator(".slgrp .slgt")).to_have_text("Bausteingruppe 1", timeout=T)
+        _to_group(pg, "wk2", "Bausteingruppe 1")
         pg.wait_for_function("() => document.querySelectorAll('#main .slgrp .slit').length === 2", timeout=T)
         assert _groups(pg) == [["", "wk1,wk2", False]]
         _order_is(pg, ["zuletzt", "wk1", "wk2", "wk3"])
@@ -322,7 +322,7 @@ def test_groups_ungroup_keyboard_dissolve_move_and_undo(pw, app):
         _grip("wk2").focus()
         pg.keyboard.press("ArrowDown")
         pg.wait_for_function("() => SL.docs.uebersicht.groups[0].ids.join() === 'wk1'", timeout=T)
-        expect(_live(pg)).to_contain_text("aus der Gruppe", timeout=T)
+        expect(_live(pg)).to_contain_text("aus der Bausteingruppe", timeout=T)
         _order_is(pg, ["zuletzt", "wk1", "wk2", "wk3"])
         # Menü: wieder hinein, dann „Aus Gruppe lösen“
         _to_group(pg, "wk3", "Block")
@@ -335,7 +335,7 @@ def test_groups_ungroup_keyboard_dissolve_move_and_undo(pw, app):
         assert set(_strips(pg)) >= {"wk1", "wk2", "wk3"}
         pg.keyboard.press("Control+z")
         pg.wait_for_function("() => SL.docs.uebersicht.groups && SL.docs.uebersicht.groups[0].ids.join() === 'wk1' && !!document.querySelector('.slgrp')", timeout=T)
-        # Mitglied entfernen: auch aus der Gruppe (die leere Gruppe verschwindet)
+        # Mitglied entfernen: auch aus der Bausteingruppe (die leere Gruppe verschwindet)
         _btn(pg, "wk1", "del").click()
         pg.locator(".uibox button:has-text('Entfernen')").click()
         pg.wait_for_function("() => !SL.docs.uebersicht.groups", timeout=T)
@@ -387,7 +387,7 @@ def test_group_template_and_group_survives_export_and_import_of_a_view(pw, app):
         pg.locator("#slbar [data-a=views]").click()
         pg.wait_for_selector(".slvws .slvr", timeout=T)
         pg.locator(".slvws").get_by_role("button", name="Aus Vorlage …", exact=True).click()
-        pg.get_by_role("button", name="Mit Gruppe: Als neue Ansicht übernehmen", exact=True).click()
+        pg.get_by_role("button", name="Mit Bausteingruppe: Als neue Ansicht übernehmen", exact=True).click()
         pg.wait_for_function("() => SL.docs.uebersicht && SL.docs.uebersicht.groups && SL.docs.uebersicht.groups[0].title === 'Rückblick' && SL.docs.uebersicht.groups[0].ids.length === 3", timeout=T)
         pg.wait_for_function("() => document.querySelectorAll('#main .slgrp .slit').length === 3", timeout=T)
         doc = pg.evaluate("() => slExportDoc('uebersicht', SL.view.uebersicht)")
@@ -517,7 +517,7 @@ def test_import_code_checked_by_server_and_bad_codes_rejected(pw, app):
         assert pg.evaluate("slMaster('uebersicht').views.length") == 1                                       # nichts übernommen
         pg.fill("#slimpcode", "  https://x.example/#/layoutcode/" + _mk({"widgets": [W("wk1")], "groups": [{"id": "grpaa1", "title": "Fremd", "ids": ["wk1", "tag"]}], "mob": {"order": ["tag"]}}, name="Von Oma") + " ")
         pg.get_by_role("button", name="Code prüfen", exact=True).click()
-        expect(pg.locator(".slimpok")).to_contain_text("1 Gruppe", timeout=T)
+        expect(pg.locator(".slimpok")).to_contain_text("1 Bausteingruppe", timeout=T)
         expect(pg.locator(".slimpok")).to_contain_text("Eigene Handy-Anordnung", timeout=T)
         pg.get_by_role("button", name="Als neue Ansicht importieren", exact=True).click()
         pg.wait_for_function("() => slViewName('uebersicht', SL.view.uebersicht) === 'Von Oma'", timeout=T)
@@ -588,18 +588,18 @@ GL = {"widgets": [W("wk1", title="Meine Woche"), W("wk2", period="month"), W("wk
 
 
 def test_new_strings_are_translated(pw, app):
-    for loc, want in (("en-US", ["Undo", "Redo", "Arrangement for", "Phone", "Dissolve group", "Rename"]), ("fr-FR", ["Annuler", "Rétablir", "Disposition pour", "Téléphone"]),
+    for loc, want in (("en-US", ["Undo", "Redo", "Arrangement for", "Phone", "Dissolve widget group", "Rename"]), ("fr-FR", ["Annuler", "Rétablir", "Disposition pour", "Téléphone"]),
                       ("es-ES", ["Deshacer", "Rehacer", "Disposición para", "Móvil"])):
         pg = _page(pw, app, GL, locale=loc)
         try:
             _edit(pg)
             pg.wait_for_function("(w) => w.every(x => document.body.innerText.includes(x))", arg=want[:4], timeout=T)
             if loc == "en-US":
-                expect(pg.locator(".slgst [data-a=gdel]")).to_have_text("Dissolve group", timeout=T)
+                expect(pg.locator(".slgst [data-a=gdel]")).to_have_text("Dissolve widget group", timeout=T)
                 expect(pg.locator("#slbar [data-a=undo]")).to_contain_text("Undo", timeout=T)
                 pg.locator('.slit[data-sl="wk3"] [data-a=grp]').click()
-                expect(pg.locator(".sldlg h2")).to_have_text("Choose group", timeout=T)
-                expect(pg.locator(".slgl [data-g=new]")).to_have_text("Into a new group", timeout=T)
+                expect(pg.locator(".sldlg h2")).to_have_text("Choose widget group", timeout=T)
+                expect(pg.locator(".slgl [data-g=new]")).to_have_text("Into a new widget group", timeout=T)
             assert not pg.errors, pg.errors
         finally:
             pg.browser_.close()

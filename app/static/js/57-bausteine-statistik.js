@@ -40,7 +40,7 @@ Object.assign(window.SL_WT, {
   },
   stentwicklung: {
     fam: "statistik", cat: "statistik", icon: "trend", name: "Entwicklung", title: cfg => (cfg.metric === "km" ? "Entwicklung der Strecke" : "Entwicklung des Tempos"), multi: true, defaults: {metric: "pace"}, filter: {range: "all"}, w: "halb", seiten: ["statistik"],
-    desc: "Wie sich dein Tempo (km/h) oder die Länge deiner Touren (km pro Tour) über die Zeit entwickelt, als Linie je Monat (bei langen Zeiträumen je Jahr) mit gestrichelter Trend-Linie.",
+    desc: "Wie sich dein Tempo (km/h) oder die Strecke deiner Touren (km pro Tour) über die Zeit entwickelt, als Linie je Monat (bei langen Zeiträumen je Jahr) mit gestrichelter Trend-Linie.",
     fields: [{k: "metric", kind: "radio", def: "pace", label: "Linie zeigt", options: [["pace", "Tempo (km/h)"], ["km", "Strecke pro Tour (km)"]]}, ...ST_FIELDS],
     preview: () => slPvLine([34, 30, 32, 24, 26, 18, 20, 12]),
     render(c, b, cfg) {
@@ -85,7 +85,7 @@ Object.assign(window.SL_WT, {
       });
       const best = n.indexOf(Math.max(...n));
       b.innerHTML = slCols(n, {hl: best, label: `Histogramm der Streckenlängen in Kilometern, die meisten Touren (${n[best]}) liegen bei ${ST_LENL[best]} km`, labels: ST_LENL.map(l => l.replace("unter ", "<").replace("über ", ">")), cls: "slsm"}) +
-        `<p class="slcmp">Meist ${ST_LENL[best]} km</p><p class="mut slcmpn">${n[best] === 1 ? "1 Tour" : n[best] + " Touren"} von ${A.length} liegen in dieser Klasse; die Länge zählt in Kilometern.</p>`;
+        `<p class="slcmp">Meist ${ST_LENL[best]} km</p><p class="mut slcmpn">${n[best] === 1 ? "1 Tour" : n[best] + " Touren"} von ${A.length} liegen in dieser Klasse; die Strecke zählt in Kilometern.</p>`;
       slBadge(c, `${ST_LENL[best]} km`);
     },
   },

@@ -82,8 +82,8 @@ VIEWS.story = async id => {
     try {
       const r = await api(`/api/tours/${encodeURIComponent(id)}/share`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({show: true, trim: true, days: 30, comments: true})});
       const u = location.origin + r.url;
-      try { await navigator.clipboard.writeText(u); $("#sshare").textContent = "✓ Link kopiert (30 Tage)"; } catch (e) { prompt("Link zur Diashow:", u); }
-    } catch (e) { uiAlert("Link konnte nicht erstellt werden: " + e.message); }
+      try { await navigator.clipboard.writeText(u); $("#sshare").textContent = "Link kopiert (30 Tage)"; } catch (e) { uiLink("Link zur Diashow", u); }
+    } catch (e) { uiAlert("Link erstellen nicht möglich: " + e.message); }
   };
   map = mkMap("sm", {layers: true});
   if (co.length > 1) {

@@ -21,7 +21,7 @@ const dvPeriod = g => {
   return [a ? `seit ${a}` : "", b ? `bis ${b}` : "aktuell"].filter(Boolean);
 };
 /* „Das liefert diese Uhr“: Kanäle, die bei mindestens 20 % der Touren des Geräts vorkommen (aus den Messwert-Zusatzdateien) */
-const dvGives = q => (!q || !q.n_tours ? "" : `<span class="dvsub dvgive"><b>Das liefert diese Uhr:</b> ${q.channels.length ? q.channels.map(c => `<span class="dvch" title="bei ${c.share} % der Touren">${esc(c.label)}</span>`).join(" ") : `<span class="mut">noch keine Messwerte erkannt (Verwaltung → „Messwerte nachladen“)</span>`}</span>`);
+const dvGives = q => (!q || !q.n_tours ? "" : `<span class="dvsub dvgive"><b>Das liefert diese Uhr:</b> ${q.channels.length ? q.channels.map(c => `<span class="dvch" title="bei ${c.share} % der Touren">${esc(c.label)}</span>`).join(" ") : `<span class="mut">noch keine Messwerte erkannt (Verwaltung → Touren holen → Zepp-Import „Messwerte holen“)</span>`}</span>`);
 /* 3.49.0 – von der Android-App angemeldetes Gerät: Android- und App-Version, letzte Aufzeichnung */
 const dvAppInfo = g => {
   if (!g.app) return "";
@@ -88,7 +88,7 @@ function devForm(dv, g, done) {
   $("#dvfile").onchange = e => {
     const f = e.target.files[0];
     if (!f) return;
-    if (f.size > 8 * 1048576) return ($("#dverr").textContent = "Das Bild ist zu groß (höchstens 8 MB).");
+    if (f.size > 8 * 1048576) return ($("#dverr").textContent = "Das Foto ist zu groß (höchstens 8 MB).");
     $("#dverr").textContent = "";
     if (st.url) URL.revokeObjectURL(st.url);
     st.file = f; st.del = false; st.url = URL.createObjectURL(f);
@@ -185,7 +185,7 @@ function devZepp(dv, done) {
   const m = dvBox(`<h2>Geräte aus Zepp ermitteln</h2><p class="dvlead">Zepp merkt sich bei jedem Training, von welchem Gerät es kam. Daraus lässt sich ablesen, welche Uhren du hattest und wann.</p><div id="zbody"><span class="dvspin"></span><span>Zepp-Verlauf wird gelesen – das kann bei vielen Trainings eine Weile dauern …</span></div>`);
   const body = $("#zbody");
   const fail = msg => {
-    body.innerHTML = `<p class="bad">${esc(msg)}</p><p class="mut">Zugangsdaten bzw. Token prüfst du in der Verwaltung beim Zepp-Import.</p><div class="dvfoot"><button class="btn ghost" id="zclose">Schließen</button></div>`;
+    body.innerHTML = `<p class="bad">${esc(msg)}</p><p class="mut">Zugangsdaten bzw. Token prüfst du unter Verwaltung → Touren holen → Zepp-Import.</p><div class="dvfoot"><button class="btn ghost" id="zclose">Schließen</button></div>`;
     $("#zclose").onclick = () => m.remove();
   };
   api("/api/devices/zepp-probe", {method: "POST"}).then(res => {
@@ -310,7 +310,7 @@ function dvQBody(q, g, viewer) {
   const bat = g.batch && !viewer ? dvSec("batch", "Sammel-Korrektur", g.batch.n_done ? `<span class="dvqs ok">${g.batch.n_done}</span>` : `<span class="dvqs none">zurückgenommen</span>`,
     `<p class="dvbatchl">${g.batch.n_done ? `Letzter Sammel-Lauf am ${esc(dvQTime(g.batch.ts))}: ${g.batch.n_done} ${g.batch.n_done === 1 ? "Tour" : "Touren"} korrigiert (${g.batch.method === "zepp" ? "Höhe von der Uhr" : "Höhe aus dem Geländemodell"}), Aufstieg zusammen ${g.batch.delta_up > 0 ? "+" : g.batch.delta_up < 0 ? "−" : ""}${fmtHm(Math.abs(g.batch.delta_up))}.` : `Der letzte Sammel-Lauf vom ${esc(dvQTime(g.batch.ts))} ist zurückgenommen.`}</p>
      ${g.batch.n_done ? `<button class="btn alt sm dvundo" type="button" data-batch="${esc(g.batch.id)}">Alles rückgängig machen</button><span class="dvh">Nur dieser Lauf wird zurückgenommen; Touren, die du inzwischen selbst geändert hast, bleiben unberührt.</span>` : ""}`, true) : "";
-  const batchBtn = !viewer && g.flagged_height ? `<div class="dvbatchbar"><button class="btn sm dvbatch" type="button">Alle auffälligen Höhen korrigieren …</button><span class="dvh">Du siehst vorher eine Liste und entscheidest, was geändert wird.</span></div>` : "";
+  const batchBtn = !viewer && g.flagged_height ? `<div class="dvbatchbar"><button class="btn sm dvbatch" type="button">Höhe aller auffälligen Touren korrigieren …</button><span class="dvh">Du siehst vorher eine Liste und entscheidest, was geändert wird.</span></div>` : "";
   return `<div class="dvqv ${cls}"><b>${esc(v.label)}</b>${g.period ? `<span class="mut"> · ${esc(dvDay(g.period.from))} bis ${esc(dvDay(g.period.to))}</span>` : ""}</div>
     <ul class="dvfind">${v.findings.map(f => `<li>${esc(f)}</li>`).join("")}</ul>
     <div class="dvkpi">${tiles}</div>
@@ -352,7 +352,7 @@ async function dvQBad(box, g, viewer, again) {
       : `<button class="btn alt sm" type="button" data-i="${i}">Korrektur vorschlagen</button><button class="btn ghost sm" type="button" data-ack="${esc(t.id)}">Als geprüft markieren</button>`;
     const ak = r.acked || [];
     host.innerHTML = (r.tours.length ? `<ul class="dvbadul">${r.tours.map((t, i) => `<li><div class="dvbt"><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${esc(dvDay(t.day))}</span></div>
-        <div class="dvchips">${t.flags.map(f => `<span class="dvc fl ${f.kind === "dist_implausible" || f.kind === "gps_jumps" ? "bad" : "warn"}">${esc(DVQ_FLAG(f))}</span>`).join("")}${t.fixed ? `<span class="dvc">${t.fixed === "zepp" ? "Höhe aus Uhr übernommen" : "Höhe aus Gelände übernommen"}</span>` : ""}</div>
+        <div class="dvchips">${t.flags.map(f => `<span class="dvc fl ${f.kind === "dist_implausible" || f.kind === "gps_jumps" ? "bad" : "warn"}">${esc(DVQ_FLAG(f))}</span>`).join("")}${t.fixed ? `<span class="dvc">${t.fixed === "zepp" ? "Höhe aus der Uhr korrigiert" : "Höhe aus Gelände übernommen"}</span>` : ""}</div>
         ${act(t, i)}</li>`).join("")}</ul>${r.total > r.tours.length ? `<p class="mut">Gezeigt werden die ${r.tours.length} auffälligsten von ${r.total}.</p>` : ""}` : `<p class="mut">Keine auffälligen Touren.</p>`)
       + (ak.length ? `<details class="dvack"><summary>Als geprüft markiert (${ak.length})</summary><ul class="dvbadul">${ak.map(t => `<li><div class="dvbt"><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${esc(dvDay(t.day))}</span></div>${viewer ? "" : `<button class="btn ghost sm" type="button" data-unack="${esc(t.id)}">Zurücknehmen</button>`}</li>`).join("")}</ul></details>` : "");
     host.querySelectorAll("button[data-i]").forEach(b => (b.onclick = () => dvSuggest(r.tours[+b.dataset.i], g, again)));
@@ -407,7 +407,7 @@ function dvSuggest(t, g, again) {
         $("#dvsundo").onclick = async () => {
           try { await api(s.undo, {method: "POST"}); changed = true; MET_CACHE.clear(); await loadTours().catch(() => {}); res.textContent = "Zurückgenommen: das Original ist wieder da."; } catch (e) { res.innerHTML = `<span class="bad">${esc(e.message)}</span>`; }
         };
-      } else res.textContent = "Erledigt.";
+      } else res.textContent = "Höhe korrigiert";
       res.insertAdjacentHTML("beforeend", `<p class="mut">Die Kennzahlen der Uhr ändern sich erst beim nächsten „Genauigkeit auswerten“.</p>`);
     } catch (e) {
       b.disabled = false;
@@ -490,7 +490,7 @@ async function dvQRun(root, btn, again) {
 /* ---------- Sammel-Korrektur der Höhen: Vorschau → Bestätigung → Hintergrundjob → „Alles rückgängig machen“ ---------- */
 const dvSigned = v => (v > 0 ? "+" : v < 0 ? "−" : "") + fmtHm(Math.abs(v));
 async function dvBatch(g, again) {
-  const m = dvBox(`<h2>Auffällige Höhen korrigieren</h2><p class="dvlead">${esc(g.name)}</p><div id="bxbody" aria-live="polite"><p class="mut"><span class="dvspin"></span>Liste wird geladen …</p></div>`);
+  const m = dvBox(`<h2>Höhe auffälliger Touren korrigieren</h2><p class="dvlead">${esc(g.name)}</p><div id="bxbody" aria-live="polite"><p class="mut"><span class="dvspin"></span>Liste wird geladen …</p></div>`);
   m.querySelector(".uibox").classList.add("dvbatchbox");
   const body = $("#bxbody", m);
   let changed = false;
@@ -699,13 +699,13 @@ async function devPanel() {
   const empty = `<div class="dvempty"><span class="dvav">${dvIcon("zepp")}</span><h3>Noch kein Gerät angelegt</h3>
       <p>Lege deine Uhren und Handys an, damit bei jeder Tour steht, womit sie aufgezeichnet wurde.</p>
       ${viewer ? "" : `<div class="row"><button class="btn" id="dvzepp">Gerät aus Zepp ermitteln</button><button class="btn alt" id="dvnew2">Gerät von Hand anlegen</button></div>`}</div>`;
-  root.innerHTML = `<div class="dvhead"><h2>Meine Geräte</h2><span class="sp"></span>${viewer || !dv.devices.length ? "" : `${mc && mc.total ? `<button class="btn ghost sm" id="dvall" title="Alle ${mc.total} von Hand gesetzten Zuordnungen zurücknehmen; danach entscheidet die Automatik (Art, Zepp-Kennung, Datum)">Alle Handzuordnungen zurücksetzen</button>` : ""}<button class="btn alt sm" id="dvmatch" title="Alle Touren mit passendem Zepp-Training dem richtigen Gerät zuordnen">Touren automatisch zuordnen</button>${qa ? `<button class="btn alt sm dvqrun" id="dvqall" title="Vergleicht, was die Uhren gemessen haben, mit Strecke, Geländemodell und GPS-Spur. Verändert keine Tour.">Genauigkeit auswerten</button>` : ""}<button class="btn alt sm" id="dvzepp">Geräte aus Zepp ermitteln</button><button class="btn sm" id="dvnew">+ Gerät anlegen</button>`}</div>
+  root.innerHTML = `<div class="dvhead"><h2>Meine Geräte</h2><span class="sp"></span>${viewer || !dv.devices.length ? "" : `${mc && mc.total ? `<button class="btn ghost sm" id="dvall" title="Alle ${mc.total} von Hand gesetzten Zuordnungen zurücknehmen; danach entscheidet die Automatik (Art, Zepp-Kennung, Datum)">Standard wiederherstellen</button>` : ""}<button class="btn alt sm" id="dvmatch" title="Alle Touren mit passendem Zepp-Training dem richtigen Gerät zuordnen">Touren automatisch zuordnen</button>${qa ? `<button class="btn alt sm dvqrun" id="dvqall" title="Vergleicht, was die Uhren gemessen haben, mit Strecke, Geländemodell und GPS-Spur. Verändert keine Tour.">Genauigkeit auswerten</button>` : ""}<button class="btn alt sm" id="dvzepp">Geräte aus Zepp ermitteln</button><button class="btn sm" id="dvnew">+ Gerät anlegen</button>`}</div>
     <p class="mut dvintro">Deine Aufnahmegeräte mit eigenem Namen. Der Name erscheint bei jeder Tour als „Quelle“; welche Messwerte eine Tour zeigt, richtet sich nach dem, was das Gerät wirklich geliefert hat.</p>
     ${qa && qa.progress && qa.progress.total && qa.computed_at ? `<div class="dvstat ${qa.progress.open ? "warn" : ""}" id="dvqstat" role="status"><div class="dvstatt"><b>${qa.progress.open ? dvOpenText(qa.progress.open) : "Alle Touren sind ausgewertet."}</b><span class="mut">Zuletzt ausgewertet am ${esc(dvQTime(qa.computed_at))}, ${qa.progress.done} von ${qa.progress.total} Touren.</span>${qa.progress.n_summary ? `<span class="mut">${qa.progress.n_detail} mit Detail (genau), ${qa.progress.n_summary} nur Zusammenfassung (grob).</span>` : ""}${dvBar(qa.progress.done, qa.progress.total, "Fortschritt der Auswertung")}</div>${viewer || !qa.progress.open ? "" : `<button class="btn sm dvqrun" type="button">Weiter auswerten</button>`}</div>` : ""}
     ${mc && mc.redundant && !viewer ? `<div class="dvhint" id="dvred"><span><b>${mc.redundant} ${mc.redundant === 1 ? "Tour steht" : "Touren stehen"} als „von Hand zugeordnet“, entspr${mc.redundant === 1 ? "icht" : "echen"} aber der automatischen Zuordnung</b><span class="mut">Die Zuordnung ändert sich dabei nicht – nur der Zusatz „von Hand“ entfällt, und künftige Änderungen (z. B. neues Gerät, geänderter Zeitraum) wirken wieder automatisch.</span></span>
       <button class="btn sm" id="dvredok">Auf automatisch umstellen</button></div>` : ""}
-    ${mc && mc.outside && !viewer ? `<div class="dvhint" id="dvmc"><span><b>${mc.outside} von Hand gesetzte ${mc.outside === 1 ? "Zuordnung widerspricht" : "Zuordnungen widersprechen"} dem Zeitraum ihres Geräts</b><span class="mut">${Object.entries(mc.by_device).map(([n, k]) => `${esc(n)}: ${k}`).join(" · ")} – die Touren liegen vor „seit“ bzw. nach „bis“ des Geräts. Zurücksetzen übergibt sie wieder der automatischen Zuordnung (Zepp-Kennung und Datum); andere von Hand gesetzte Zuordnungen bleiben.</span></span>
-      <button class="btn sm" id="dvmcok">Zurücksetzen</button></div>` : ""}
+    ${mc && mc.outside && !viewer ? `<div class="dvhint" id="dvmc"><span><b>${mc.outside} von Hand gesetzte ${mc.outside === 1 ? "Zuordnung widerspricht" : "Zuordnungen widersprechen"} dem Zeitraum ihres Geräts</b><span class="mut">${Object.entries(mc.by_device).map(([n, k]) => `${esc(n)}: ${k}`).join(" · ")} – die Touren liegen vor „seit“ bzw. nach „bis“ des Geräts. „Standard wiederherstellen“ übergibt sie wieder der automatischen Zuordnung (Zepp-Kennung und Datum); andere von Hand gesetzte Zuordnungen bleiben.</span></span>
+      <button class="btn sm" id="dvmcok">Standard wiederherstellen</button></div>` : ""}
     ${sugs.map(s => `<div class="dvhint" data-sug="${esc(s.kind)}"><span><b>${esc(s.label)}: ${s.n} ${s.n === 1 ? "Tour" : "Touren"} ohne Gerät</b><span class="mut">Möchtest du dafür ein Gerät anlegen? Es wird nichts ohne deine Bestätigung angelegt.</span></span>
       <button class="btn sm" data-sy="${esc(s.kind)}" data-nm="${esc(s.name)}">Gerät anlegen …</button><button class="btn ghost sm" data-sn="${esc(s.kind)}">Nicht jetzt</button></div>`).join("")}
     ${dv.devices.length ? `<div class="dvlist">${dv.devices.map(card).join("")}</div>` : empty}`;
@@ -714,12 +714,12 @@ async function devPanel() {
   if (bz) bz.onclick = () => devZepp(dv, again);
   const ab = $("#dvall");
   if (ab) ab.onclick = async () => {
-    if (!(await uiConfirm({title: "Alle Handzuordnungen zurücksetzen?", ok: "Zurücksetzen", danger: true, text: `Alle ${mc.total} von Hand gesetzten Zuordnungen zurücksetzen? Danach entscheidet die automatische Zuordnung (Art, Zepp-Kennung, Datum). Bewusst gesetzte Geräte gehen dabei verloren.`}))) return;
+    if (!(await uiConfirm({title: "Standard wiederherstellen?", ok: "Standard wiederherstellen", danger: true, text: `Alle ${mc.total} von Hand gesetzten Zuordnungen werden aufgehoben. Danach entscheidet die automatische Zuordnung (Art, Zepp-Kennung, Datum). Bewusst gesetzte Geräte gehen dabei verloren.`}))) return;
     ab.disabled = true;
     try {
       const r = await api("/api/devices/reset-manual", METJ({mode: "all"}));
       MET_CACHE.clear();
-      if ((await uiConfirm({title: "Jetzt automatisch zuordnen?", ok: "Zuordnen", cancel: "Später", text: `${r.reset} Zuordnungen zurückgesetzt. Jetzt alle Touren automatisch den Uhren zuordnen?`})) && $("#dvmatch")) { $("#dvmatch").click(); return; }
+      if ((await uiConfirm({title: "Jetzt automatisch zuordnen?", ok: "Zuordnen", cancel: "Später", text: `${r.reset} Zuordnungen aufgehoben. Jetzt alle Touren automatisch den Uhren zuordnen?`})) && $("#dvmatch")) { $("#dvmatch").click(); return; }
       await loadTours().catch(() => {});
     } catch (e) { await uiAlert({title: "Nicht möglich", text: e.message}); }
     again();
@@ -732,11 +732,12 @@ async function devPanel() {
   };
   const mcb = $("#dvmcok");
   if (mcb) mcb.onclick = async () => {
+    if (!(await uiConfirm({title: "Standard wiederherstellen?", ok: "Standard wiederherstellen", text: "Die widersprechenden Handzuordnungen werden aufgehoben; diese Touren ordnet wieder die Automatik zu (Zepp-Kennung und Datum). Andere von Hand gesetzte Zuordnungen bleiben."}))) return;
     mcb.disabled = true;
     try {
       const r = await api("/api/devices/reset-manual", METJ({mode: "outside"}));
       MET_CACHE.clear();
-      if ((await uiConfirm({title: "Jetzt automatisch zuordnen?", ok: "Zuordnen", cancel: "Später", text: `${r.reset} Zuordnungen zurückgesetzt. Jetzt alle Touren automatisch den Uhren zuordnen?`})) && $("#dvmatch")) { $("#dvmatch").click(); return; }
+      if ((await uiConfirm({title: "Jetzt automatisch zuordnen?", ok: "Zuordnen", cancel: "Später", text: `${r.reset} Zuordnungen aufgehoben. Jetzt alle Touren automatisch den Uhren zuordnen?`})) && $("#dvmatch")) { $("#dvmatch").click(); return; }
       await loadTours().catch(() => {});
     } catch (e) { await uiAlert({title: "Nicht möglich", text: e.message}); }
     again();

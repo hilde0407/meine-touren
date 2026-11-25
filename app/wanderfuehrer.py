@@ -1,6 +1,6 @@
 """Wanderführer (z. B. Rother): Tourtitel aus eigenen GPX-Downloads erkennen.
 
-Ein Buch liegt als ZIP mit GPX-Dateien vor. Daraus merkt sich die App Name, Länge und
+Ein Buch liegt als ZIP mit GPX-Dateien vor. Daraus merkt sich die App Name, Strecke und
 Streckenverlauf jeder Buchtour und erkennt später, welche eigene Tour dazu passt.
 """
 import hashlib

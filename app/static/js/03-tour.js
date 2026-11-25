@@ -72,7 +72,7 @@ async function uploadDialog(t) {
         ? "Die Tour stammt von Komoot"
         : !p.connected
           ? p.id === "strava"
-            ? "nicht verbunden (Verwaltung → Portale)"
+            ? "nicht verbunden (Verwaltung → Hochladen & Planen → Portale)"
             : "Zugang fehlt (Verwaltung)"
           : done
             ? UPST[s.status] +
@@ -186,7 +186,7 @@ VIEWS.tourauswertung = async id => {
    <div class="tlsubhead"><span class="tlsubeb">Detaillierte Auswertung</span>
    <h1 class="tlsubt">${esc(t.name)}</h1>
    <p class="tlsubfig"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span>${fmtDatum(t.date)}</span> <span>${fmtKm(t.km)}</span> <span>${fmtAuf(t.up_m)}</span> <span>${hm}</span>${t.h ? ` <span>${fmtTempo(t.km / t.h)}</span>` : ""}</p></div>
-   <nav class="tlnav" id="tlnav" aria-label="Abschnitte dieser Auswertung" hidden></nav>
+   <nav class="tlnav" id="tlnav" aria-label="Bausteine dieser Auswertung" hidden></nav>
    <p class="mut tlload" id="tlload" role="status">Auswertung wird geladen …</p>
    <div class="tlx tlsub" id="tl" data-tid="${esc(String(t.id))}"><div id="tlsubanc" hidden></div>
    <section class="tlg" id="tlg-rec" aria-labelledby="tlgh-rec" hidden><h2 class="tlgh" id="tlgh-rec">Aufzeichnung</h2><div class="tlgb" id="tlgb-rec"></div></section>
@@ -289,7 +289,7 @@ VIEWS.tour = async id => {
     `<div class="row"><a class="back" href="${window._from || "#/tours"}">${window._from ? (window._from.startsWith("#/trip/") ? "‹ Zurück zur Reise" : "‹ Zurück zum Album") : "‹ Alle Touren"}</a><span class="sp"></span>${pv ? `<a class="btn ghost sm" href="#/tour/${pv.id}">Vorherige</a>` : ""}${nx ? `<a class="btn ghost sm" href="#/tour/${nx.id}">Nächste</a>` : ""}</div>
    <div class="mt18"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span class="mut ml8">${fmtDatum(t.date, {zeit: true})}</span>${t.g_country ? `<span class="mut ml8">· ${esc([t.g_place, t.g_state, t.g_country].filter(Boolean).join(", "))}</span>` : ""}</div>
    <h1 class="m10-0-18" style="font-size:clamp(34px,5vw,56px)"><span id="tname">${esc(t.name)}</span> <button class="btn ghost sm vam fs15" id="ren" title="Tour umbenennen">✎ Umbenennen</button></h1>
-   <div class="row mn6-0-14">${t.source === "local" ? `<span class="tag" style="background:var(--yellow);color:#000" title="Diese Tour liegt nur lokal vor (Strecke als GPX im Datenordner)">lokal gespeichert</span>` : `<button class="btn ghost sm" id="ksync" title="Daten und GPS-Track neu von Komoot laden">⟳ Mit Komoot abgleichen</button>`}<button class="btn ghost sm" id="eup" title="Zu Komoot, Strava … hochladen">⬆ Hochladen</button><a class="btn ghost sm" id="egpx" href="/api/tours/${encodeURIComponent(t.id)}/gpx" title="Strecke als GPX-Datei herunterladen">⬇ GPX</a><button class="btn ghost sm" id="ekpk" title="GPX mit Pins und Notiz, Anleitung und ausgewählte Fotos als ZIP – zum Selbst-Hochladen in Komoot">📦 Komoot-Paket</button><button class="btn ghost sm" id="edel" title="Tour löschen">🗑 Löschen</button><button class="btn ghost sm" id="etag" title="Schlagworte / Alben">🏷 Tags</button><button class="btn ghost sm" id="esport" title="Sportart der Tour ändern">Sportart ändern</button><button class="btn ghost sm" id="eshr" title="Öffentlichen Link erzeugen">🔗 Teilen</button><button class="btn ghost sm" id="etc" title="Farbe und Breite der Strecke">🎨 Streckenfarbe</button><button class="btn ghost sm" id="efix" title="Höhen mit Geländemodell neu berechnen"></button><button class="btn ghost sm" id="ezepp" title="Auf-/Abstieg aus der barometrischen Höhe der Zepp-Uhr übernehmen">⌚ Höhe aus Uhr abgleichen (Zepp)</button><span id="ksm" class="mut fs14"></span></div><div id="upst" class="chips mn4-0-10"></div><div id="tagl" class="chips mn4-0-12"></div><div id="ewarn"></div>
+   <div class="row mn6-0-14">${t.source === "local" ? `<span class="tag" style="background:var(--yellow);color:#000" title="Diese Tour liegt nur lokal vor (Strecke als GPX im Datenordner)">lokal gespeichert</span>` : `<button class="btn ghost sm" id="ksync" title="Daten und Strecke neu von Komoot holen">⟳ Mit Komoot abgleichen</button>`}<button class="btn ghost sm" id="etag" title="Schlagwörter vergeben und Alben bilden">🏷 Schlagwörter & Alben …</button><button class="btn ghost sm" id="esport" title="Sportart der Tour ändern">Sportart ändern …</button><button class="btn ghost sm" id="etc" title="Farbe und Breite der Strecke">🎨 Streckenfarbe …</button><button class="btn ghost sm" id="efix" title="Höhen mit Geländemodell neu berechnen"></button><button class="btn ghost sm" id="ezepp" title="Auf-/Abstieg aus der barometrischen Höhe der Zepp-Uhr übernehmen">⌚ Höhe korrigieren (aus der Uhr) …</button><button class="btn ghost sm" id="eup" title="Zu Komoot, Strava … hochladen">⬆ Hochladen …</button><button class="btn ghost sm" id="eshr" title="Erzeugte Links ansehen, kopieren, widerrufen">🔗 Links verwalten …</button><a class="btn ghost sm" id="egpx" href="/api/tours/${encodeURIComponent(t.id)}/gpx" title="Strecke als GPX-Datei herunterladen">⬇ Als GPX exportieren</a><button class="btn ghost sm" id="ekpk" title="GPX mit Pins und Notiz, Anleitung und ausgewählte Fotos als ZIP – zum Selbst-Hochladen in Komoot">📦 Komoot-Paket …</button><button class="btn ghost sm tdel" id="edel" title="Tour löschen">🗑 Löschen …</button><span id="ksm" class="mut fs14"></span></div><div id="upst" class="chips mn4-0-10"></div><div id="tagl" class="chips mn4-0-12"></div><div id="ewarn"></div>
    <div class="figs"><div class="fig"><div class="v">${fmtKm(t.km, {einheit: false})}<span class="u">km</span></div><div class="l">Strecke</div></div><div class="fig"><div class="v">${nf(t.up_m, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div></div>
    <div class="fig"><div class="v">${nf(t.down_m, 0)}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${fmtDauerTeile(t.h * 3600).v}<span class="u">${fmtDauerTeile(t.h * 3600).u}</span></div><div class="l">Dauer</div></div>
    <div class="fig"><div class="v">${t.h ? nf(t.km / t.h, 1) : "–"}<span class="u">km/h</span></div><div class="l">Tempo im Schnitt</div></div><div id="kmax" class="fig" style="display:none"><div class="v" id="kmaxv"></div><div class="l">Höchster Punkt</div></div></div>
@@ -428,7 +428,7 @@ VIEWS.tour = async id => {
   if ($("#edel") && t.source !== "local")
     $("#edel").onclick = () => {
       // Tour von Komoot: nur hier entfernen (kommt beim Abgleich nicht wieder) oder auch bei Komoot endgültig löschen
-      const m = uiModal(`<h3>Tour löschen?</h3><p>„${esc(t.name)}“ (${fmtKm(t.km)}) wird aus Meine Touren entfernt – mit Strecke, Notizen und Tags. Zugeordnete Fotos bleiben erhalten.</p>
+      const m = uiModal(`<h3>Tour löschen?</h3><p>„${esc(t.name)}“ (${fmtKm(t.km)}) wird aus Meine Touren entfernt – mit Strecke, Notizen und Schlagwörtern. Zugeordnete Fotos bleiben erhalten.</p>
         <label class="chk"><input type="checkbox" id="dk"> <b>auch bei Komoot endgültig löschen</b> <span class="mut">(lässt sich nicht rückgängig machen)</span></label>
         <p class="mut fs13">Ohne Häkchen bleibt die Tour bei Komoot und wird beim nächsten Abgleich nicht wieder übernommen.</p>
         <div id="dm" class="mut"></div><div class="uifoot"><button class="btn ghost" id="dx">Abbrechen</button><button class="btn alt uidanger" data-danger id="dok">Löschen</button></div>`);
@@ -490,7 +490,7 @@ VIEWS.tour = async id => {
       w = $("#ewarn"),
       fixed = t.fix_up != null,
       sus = !fixed && t.km > 0.5 && (t.up_m || 0) > 120 * t.km && t.up_m > 400;
-    b.textContent = fixed ? "⛰ Höhenkorrektur zurücknehmen" : "⛰ Höhen korrigieren";
+    b.textContent = fixed ? "⛰ Höhenkorrektur zurücknehmen" : "⛰ Höhe korrigieren";
     const z = $("#ezepp");
     if (z) {
       z.onclick = async () => {
@@ -510,14 +510,14 @@ VIEWS.tour = async id => {
         } catch (e) {
           z.disabled = b.disabled = false;
           $("#ksm").textContent = "";
-          uiAlert("Höhenabgleich fehlgeschlagen: " + e.message);
+          uiAlert("Höhe korrigieren nicht möglich: " + e.message);
         }
       };
     }
     if (fixed)
       w.innerHTML = `<div class="panel mb14 p12-16">${t.fix_src === "zepp" ? `Höhen aus der Zepp-Uhr übernommen (Komoot/GPS meldete ${fmtHm(t.fix_up)} Aufstieg).` : `Höhen mit Geländemodell korrigiert (Komoot/GPS meldete ${fmtHm(t.fix_up)} Aufstieg).`}</div>`;
     else if (sus)
-      w.innerHTML = `<div class="panel mb14 p12-16" style="border-left:4px solid var(--yellow)"><b>Auffällige Höhendaten:</b> ${fmtHm(t.up_m)} Aufstieg auf ${fmtKm(t.km)} sind unwahrscheinlich. Mit „Höhen korrigieren“ werden sie aus dem Geländemodell berechnet.</div>`;
+      w.innerHTML = `<div class="panel mb14 p12-16" style="border-left:4px solid var(--yellow)"><b>Auffällige Höhendaten:</b> ${fmtHm(t.up_m)} Aufstieg auf ${fmtKm(t.km)} sind unwahrscheinlich. Mit „Höhe korrigieren“ werden sie aus dem Geländemodell berechnet.</div>`;
     b.onclick = async () => {
       b.disabled = true;
       $("#ksm").textContent = fixed ? "Stelle Original wieder her …" : "Berechne Höhen aus Geländedaten …";
@@ -526,7 +526,7 @@ VIEWS.tour = async id => {
         else {
           const r = await api(`/api/tours/${encodeURIComponent(t.id)}/elev-fix`, {method: "POST"});
           if (
-            !(await uiConfirm({title: "Neu berechnete Höhen übernehmen?", ok: "Übernehmen", cancel: "Original behalten",
+            !(await uiConfirm({title: "Neu berechnete Höhe speichern?", ok: "Speichern", cancel: "Original behalten",
               text: `Neu berechnet: ${fmtHm(r.up_m)} Aufstieg, ${fmtHm(r.down_m)} Abstieg (vorher ${fmtHm(r.orig_up)} / ${fmtHm(r.orig_down)}).`}))
           )
             await api(`/api/tours/${encodeURIComponent(t.id)}/elev-restore`, {method: "POST"});
@@ -536,7 +536,7 @@ VIEWS.tour = async id => {
       } catch (e) {
         b.disabled = false;
         $("#ksm").textContent = "";
-        uiAlert("Höhenkorrektur fehlgeschlagen: " + e.message);
+        uiAlert("Höhe korrigieren nicht möglich: " + e.message);
       }
     };
   })();
@@ -637,7 +637,7 @@ VIEWS.tour = async id => {
         close();
         if (kom && !r.komoot) uiAlert("Hier umbenannt, aber bei Komoot hat es nicht geklappt:\n" + r.warning);
       } catch (e) {
-        uiAlert("Umbenennen fehlgeschlagen: " + e.message);
+        uiAlert("Umbenennen nicht möglich: " + e.message);
       }
     };
   };

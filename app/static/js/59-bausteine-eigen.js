@@ -13,7 +13,7 @@ const KZ_ALLE = ["sum", "avg", "max", "min", "count", "record", "monat"];
 const KZ_OK = {touren: ["sum", "count", "monat"], km: KZ_ALLE, hm: KZ_ALLE, abstieg: KZ_ALLE, dauer: KZ_ALLE, gehzeit: KZ_ALLE, puls: KZ_PULS, pulsmax: KZ_PULS, tempo: ["avg", "max", "min", "count", "record"], steigung: ["avg", "max", "min", "count", "record"], hmkm: ["avg", "max", "min", "count", "record"]};
 const KZ_RATIO = ["tempo", "steigung", "hmkm"];
 const KZ_FORMEL = ["sum", "avg", "max", "min", "count"];
-const KZ_AGG = {sum: "Summe", avg: "Durchschnitt", max: "Maximum (größter Wert)", min: "Minimum (kleinster Wert)", count: "Anzahl (Touren mit dieser Angabe)", record: "Rekord mit Tourname", monat: "Durchschnitt pro Monat"};
+const KZ_AGG = {sum: "Summe", avg: "Durchschnitt", max: "Maximum (größter Wert)", min: "Minimum (kleinster Wert)", count: "Anzahl (Touren mit dieser Angabe)", record: "Bestwert mit Tourname", monat: "Durchschnitt pro Monat"};
 const KZ_RANGES = [["year", "Laufendes Jahr"], ["12m", "Letzte 12 Monate"], ["90d", "Letzte 90 Tage"], ["all", "Gesamte Zeit"], ["y", "Bestimmtes Jahr"], ["c", "Eigener Bereich"]];
 const KZ_SYMS = ["🥾", "🚴", "⛰️", "⏱️", "📈", "🏆", "🎯", "🔥", "🌲", "☀️"];
 const KZ_UNIT = {touren: "touren", km: "km", hm: "m", abstieg: "m", dauer: "h", gehzeit: "h", puls: "bpm", pulsmax: "bpm", tempo: "kmh", steigung: "pct", hmkm: "m_km"};
@@ -24,7 +24,7 @@ const KZ_TPL = [
   {name: "Aufstieg je km", desc: "Wie steil deine Touren im Schnitt sind: Aufstieg geteilt durch Strecke.", cfg: {title: "Aufstieg je km", symbol: "⛰️", mess: "hm", agg: "sum", durch: {mess: "km", agg: "sum"}, op: "div", range: "year", vgl: true, spark: "linie", touren: true}},
   {name: "Touren pro Monat", desc: "Wie oft du im Schnitt pro Monat unterwegs bist.", cfg: {title: "Touren pro Monat", symbol: "📅", mess: "touren", agg: "monat", range: "12m", vgl: true, spark: "linie", touren: true}},
   {name: "Längste Wanderung", desc: "Deine längste Wanderung mit Name und Datum der Tour.", cfg: {title: "Längste Wanderung", symbol: "🥾", mess: "km", agg: "record", sports: ["hike"], range: "all", spark: "aus", touren: true}},
-  {name: "Ziel: 1000 km im Jahr", desc: "Fortschrittsbalken für dein Jahresziel in Kilometern, mit Rest, Vorjahresvergleich und „Im Plan?“.", cfg: {title: "1000 km im Jahr", symbol: "🎯", mess: "km", agg: "sum", range: "year", ziel: 1000, plan: true, vgl: true, vglart: "jahr", spark: "linie", touren: true}},
+  {name: "Ziel: 1000 km im Jahr", desc: "Fortschrittsbalken für dein Jahresziel in Kilometern, mit Rest, Vorjahresvergleich und „Im Soll?“.", cfg: {title: "1000 km im Jahr", symbol: "🎯", mess: "km", agg: "sum", range: "year", ziel: 1000, plan: true, vgl: true, vglart: "jahr", spark: "linie", touren: true}},
   {name: "Durchschnittstempo", desc: "Deine mittlere Geschwindigkeit der letzten 12 Monate.", cfg: {title: "Durchschnittstempo", symbol: "⚡", mess: "tempo", agg: "avg", range: "12m", vgl: true, spark: "linie", touren: true}},
   {name: "Größter Aufstieg", desc: "Die Tour mit dem größten Aufstieg.", cfg: {title: "Größter Aufstieg", symbol: "🏔️", mess: "hm", agg: "record", range: "all", spark: "aus", touren: true}},
 ];
@@ -62,7 +62,7 @@ function kzKurz(cfg) {
   if (s.length) s.length <= 2 ? s.forEach(x => out.push(sName(x))) : out.push(`${s.length} Sportarten`);
   out.push(flRange(cfg, "year").label);
   if (cfg.tag) out.push(`„${cfg.tag}“`);
-  if (cfg.minkm) out.push(`≥ ${nf(cfg.minkm, cfg.minkm % 1 ? 1 : 0)} km`);
+  if (cfg.minkm) out.push(`≥ ${fmtKm(cfg.minkm, {d: cfg.minkm % 1 ? 1 : 0})}`);
   return out;
 }
 const kzCount = () => Object.values(SL.docs).reduce((n, d) => n + ((d && d.widgets) || []).filter(w => w.type === KZ_TYPE).length, 0);
@@ -121,7 +121,7 @@ const KZ_HN = {a: "Die Liste zeigt alle Touren im Zeitraum, auch solche ohne die
 function kzTrend(cfg, d, e) {
   const o = d.vorher, dir = o && o.dir;
   if (!o || !dir) return `<p class="mut kzsub">${o ? "Im Vergleichszeitraum gibt es keinen Wert." : "Für diesen Zeitraum gibt es keinen Vergleich."}</p>`;
-  const sg = dir === "auf" ? "+" : dir === "ab" ? "−" : "±", ar = dir === "auf" ? "↑" : dir === "ab" ? "↓" : "→", wort = dir === "auf" ? "Anstieg:" : dir === "ab" ? "Rückgang:" : "Unverändert:";
+  const sg = dir === "auf" ? "+" : dir === "ab" ? "−" : "±", ar = dir === "auf" ? "↑" : dir === "ab" ? "↓" : "→", wort = dir === "auf" ? "Zunahme:" : dir === "ab" ? "Rückgang:" : "Unverändert:";
   const pc = o.pct != null ? `${sg}${nf(Math.abs(o.pct), 1)} %` : "", df = o.diff != null && dir !== "gleich" ? `${sg}${kzNum(Math.abs(o.diff), e)} ${kzUnitText(e, Math.abs(o.diff))}`.trim() : "";
   return `<p class="kzvgl kztr"><span class="slsr">${wort}</span><b class="kzd kz-${dir}"><span aria-hidden="true">${ar}</span> ${esc(pc || df || "0")}</b>${pc && df ? ` <span class="kzdf">(${esc(df)})</span>` : ""} <span class="mut">${kzVglLab(cfg)}</span></p>` +
     (o.wert != null ? `<p class="mut kzvv"><span>Vorher</span> ${esc(kzNum(o.wert, e))} <span>${esc(kzUnitText(e, o.wert))}</span> <span>(${fmtDatumKurz(o.von)} – ${fmtDatumKurz(o.bis)})</span></p>` : "");
@@ -129,12 +129,12 @@ function kzTrend(cfg, d, e) {
 function kzZiel(d, e, v) {
   const z = d.ziel, p = z.pct, full = p >= 100, goal = `${kzNum(z.ziel, e)} ${kzUnitText(e, z.ziel)}`.trim(), rest = Math.max(0, z.ziel - (v == null ? 0 : v)), pl = full ? null : z.plan;
   const rt = `${kzNum(rest, e)} ${kzUnitText(e, rest)}`.trim();
-  const vt = kzT(`${nf(p, 0)} % von ${goal}`) + (full ? ", " + kzT("✓ Ziel erreicht") : ", " + kzT(`Noch ${rt} bis zum Ziel`)) + (pl ? ", " + kzT({voraus: "Vor dem Plan", im_plan: "Im Plan", zurueck: "Hinter dem Plan"}[pl]) : "");
+  const vt = kzT(`${nf(p, 0)} % von ${goal}`) + (full ? ", " + kzT("✓ Ziel erreicht") : ", " + kzT(`Noch ${rt} bis zum Ziel`)) + (pl ? ", " + kzT({voraus: "Über dem Soll", im_plan: "Im Soll", zurueck: "Unter dem Soll"}[pl]) : "");
   let h = `<div class="kzgoal" role="group" aria-label="Ziel">${kzBar(p, pl ? z.soll_pct : null, full, "Ziel", vt)}` +
     `<p class="kzgt"><b>${nf(p, 0)} % von</b> <span>${esc(goal)}</span>${full ? ' <span class="kzok">✓ Ziel erreicht</span>' : ""}</p>`;
   if (!full) h += `<p class="mut kzrest">Noch ${esc(rt)} bis zum Ziel</p>`;
   if (pl) {
-    const nm = {voraus: ["▲", "Vor dem Plan"], im_plan: ["✓", "Im Plan"], zurueck: ["▼", "Hinter dem Plan"]}[pl];
+    const nm = {voraus: ["▲", "Über dem Soll"], im_plan: ["✓", "Im Soll"], zurueck: ["▼", "Unter dem Soll"]}[pl];
     h += `<p class="kzplan"><b class="kzpl"><span aria-hidden="true">${nm[0]}</span> ${nm[1]}</b> <span class="mut">Soll bis heute: ${esc(`${kzNum(z.soll, e)} ${kzUnitText(e, z.soll)}`.trim())} (${nf(z.soll_pct, 0)} %)</span></p>`;
   }
   return h + "</div>";
@@ -146,7 +146,7 @@ function kzHtml(cfg, d, o = {}) {
   let h = `<div class="kz"${go && !o.vorschau ? ` data-go="${esc(go.href)}"` : ""}><p class="kzmain">${sym}<b class="kzval">${esc(kzNum(v, e))}</b>${un ? `<span class="kzun">${esc(un)}</span>` : ""}</p>`;
   if (v == null) h += `<p class="mut kzsub">${d.n ? "Für diese Rechenart fehlen Angaben in den Touren." : "Im Zeitraum gibt es keine passenden Touren."}</p>`;
   if (d.offen) h += `<p class="mut kzsub">${d.offen === 1 ? "Für 1 Tour wird die Gehzeit noch berechnet. Öffne die Seite später erneut." : `Für ${d.offen} Touren wird die Gehzeit noch berechnet. Öffne die Seite später erneut.`}</p>`;
-  if (d.rekord) h += `<p class="kzsub"><span class="mut">Rekord-Tour</span> <a href="#/tour/${slEnc(d.rekord.id)}">${esc(d.rekord.name || "Tour")}</a> <span class="mut">${fmtDatumKurz(d.rekord.datum)}</span></p>`;
+  if (d.rekord) h += `<p class="kzsub"><span class="mut">Tour mit dem Bestwert</span> <a href="#/tour/${slEnc(d.rekord.id)}">${esc(d.rekord.name || "Tour")}</a> <span class="mut">${fmtDatumKurz(d.rekord.datum)}</span></p>`;
   if (cfg.vgl) h += kzTrend(cfg, d, e);
   const w = (d.reihe && d.reihe.werte) || [], mode = cfg.spark || "saeulen";
   if (mode !== "aus" && w.length > 1 && w.some(x => x)) {
@@ -158,8 +158,8 @@ function kzHtml(cfg, d, o = {}) {
   }
   if (d.ziel) h += kzZiel(d, e, v);
   if (go) {
-    h += o.vorschau ? `<p class="mut kzgo">${go.rec ? "Antippen öffnet die Rekordtour" : "Antippen öffnet die Touren"}</p>`
-      : `<p class="kzgo"><a href="${esc(go.href)}">${go.rec ? "Rekordtour öffnen" : "Touren anzeigen"} ›</a></p>${go.hn ? `<p class="mut kzhn">${KZ_HN[go.hn]}</p>` : ""}`;
+    h += o.vorschau ? `<p class="mut kzgo">${go.rec ? "Antippen öffnet die Tour mit dem Bestwert" : "Antippen öffnet die Touren"}</p>`
+      : `<p class="kzgo"><a href="${esc(go.href)}">${go.rec ? "Tour mit dem Bestwert öffnen" : "Touren anzeigen"} ›</a></p>${go.hn ? `<p class="mut kzhn">${KZ_HN[go.hn]}</p>` : ""}`;
     if (o.vorschau && go.hn) h += `<p class="mut kzhn">${KZ_HN[go.hn]}</p>`;
   }
   return h + "</div>";
@@ -205,13 +205,13 @@ function kzForm(cfg) {
     `<div><label for="kz-minkm">Mindeststrecke in km (optional)</label><input id="kz-minkm" type="number" inputmode="decimal" min="0" max="1000" step="any"></div></div></fieldset>` +
     `<fieldset class="slfs kzfs"><legend>Anzeige</legend>` +
     `<details class="kzdet" open><summary>Ziel</summary><div class="kzdb"><div class="kzrow kzrow2"><div><label for="kz-ziel">Ziel (optional)</label><input id="kz-ziel" type="number" inputmode="decimal" min="0" step="any"></div><p class="mut kzzu" id="kz-zu"></p></div>` +
-    `<label class="slck kzck"><input type="checkbox" id="kz-plan"><span>Mit einem gleichmäßigen Soll vergleichen („Im Plan?“)</span></label><p class="mut kzhint kzplh"></p></div></details>` +
+    `<label class="slck kzck"><input type="checkbox" id="kz-plan"><span>Mit einem gleichmäßigen Soll vergleichen („Im Soll?“)</span></label><p class="mut kzhint kzplh"></p></div></details>` +
     `<details class="kzdet" open><summary>Vergleich</summary><div class="kzdb"><label class="slck kzck"><input type="checkbox" id="kz-vgl"><span>Mit einem früheren Zeitraum vergleichen (Pfeil und ±&nbsp;%)</span></label>` +
     `<div class="kzvga"><label for="kz-vglart">Vergleichen mit</label><select id="kz-vglart" class="flsel">${kzOpts(KZ_VGLART, "davor")}</select></div><p class="mut kzhint kzvh" hidden>Für „Gesamte Zeit“ gibt es keinen Vergleichszeitraum.</p></div></details>` +
-    `<details class="kzdet" open><summary>Verlauf</summary><div class="kzdb"><label for="kz-spark">Verlauf in der Kachel</label><select id="kz-spark" class="flsel">${kzOpts(KZ_SPARK, "linie")}</select>` +
+    `<details class="kzdet" open><summary>Verlauf</summary><div class="kzdb"><label for="kz-spark">Verlauf im Baustein</label><select id="kz-spark" class="flsel">${kzOpts(KZ_SPARK, "linie")}</select>` +
     `<p class="mut kzhint">Zeigt Wochen-, Monats- oder Jahreswerte des Zeitraums als kleine Grafik.</p></div></details>` +
     `<details class="kzdet" open><summary>Antippen</summary><div class="kzdb"><label class="slck kzck"><input type="checkbox" id="kz-touren"><span>Antippen öffnet die zugehörigen Touren</span></label>` +
-    `<p class="mut kzhint">Die Tourenliste wird nach Sportart, Zeitraum, Schlagwort und Mindeststrecke gefiltert, bei einem Rekord öffnet sich die Rekordtour. Was sich in der Liste nicht abbilden lässt, steht als Hinweis dabei.</p></div></details></fieldset>` +
+    `<p class="mut kzhint">Die Tourenliste wird nach Sportart, Zeitraum, Schlagwort und Mindeststrecke gefiltert, bei einem Bestwert öffnet sich die Tour mit dem Bestwert. Was sich in der Liste nicht abbilden lässt, steht als Hinweis dabei.</p></div></details></fieldset>` +
     `<p class="slerr kzerr" role="alert"></p><div class="uifoot"><button type="button" class="btn ghost" data-close>Abbrechen</button><button type="submit" class="btn">${cfg.mess ? "Speichern" : "Hinzufügen"}</button></div></form>`;
 }
 /* Einstellung → Formular (auch beim Übernehmen einer Vorlage) */
@@ -393,7 +393,7 @@ Object.assign(window.SL_WT, {
     fields: [{kind: "eigen"}], zeit: true, kurz: kzKurz, neu: () => kzDialog(null, {}), dialog: (id, cfg) => kzDialog(id, cfg),
     grenze: () => (kzCount() >= KZ_MAX ? `Es sind höchstens ${KZ_MAX} eigene Kennzahlen möglich.` : ""),
     dup: cfg => ({...cfg, title: `${String(cfg.title || "").slice(0, 50)} (${kzT("Kopie")})`}),
-    desc: "Stelle selbst zusammen, was du wissen willst: Messgröße, Rechenart, Filter, Vergleich mit Vorjahr oder Vormonat, Ziel mit Fortschrittsbalken und „Im Plan?“, Sparkline, Antippen zu den Touren oder eine Formel wie Aufstieg je km. Ohne Programmieren, mit Vorlagen zum Start.",
+    desc: "Stelle selbst zusammen, was du wissen willst: Messgröße, Rechenart, Filter, Vergleich mit Vorjahr oder Vormonat, Ziel mit Fortschrittsbalken und „Im Soll?“, Sparkline, Antippen zu den Touren oder eine Formel wie Aufstieg je km. Ohne Programmieren, mit Vorlagen zum Start.",
     preview: () => slPrev(`<div class="kz kzpvx"><p class="kzmain"><span class="kzsy">🎯</span><b class="kzval">762</b><span class="kzun">km</span></p>${slBr(76)}</div>`),
     render: (c, b, cfg) => kzRender(c, b, cfg),
   },

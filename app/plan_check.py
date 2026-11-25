@@ -3,7 +3,7 @@
 Check: vergleicht eine geplante Strecke (km, Aufstieg, Abstieg, Sportart) mit den eigenen Touren der letzten 12 Monate derselben Sportgruppe.
 Drei Stufen (gewohnt / etwas mehr / deutlich mehr) und ehrliche Meldung bei zu wenig Touren (< MIN_TOUREN). Fehlende Werte („ohne Angabe“) zählen nie als 0.
 
-Zeit: Die Planseite zeigt die Gesamtzeit inkl. Pausen (eigene Regression a·km + b·Hm über die Archiv-Touren, im Browser). Dieser Check liefert zusätzlich
+Zeit: Die Planseite zeigt die Dauer inkl. Pausen (eigene Regression a·km + b·Hm über die Archiv-Touren, im Browser). Dieser Check liefert zusätzlich
 die reine Gehzeit ohne Pausen aus dem Steigungstempo (steigung.py, nur Wandern/Laufen). Beide Zahlen sind in der Oberfläche ausdrücklich so beschriftet.
 
 Verknüpfung: Vorschlag, welche gelaufene Tour einen Plan überdeckt (>= 80 % der Planpunkte liegen höchstens 100 m neben der gelaufenen Strecke);

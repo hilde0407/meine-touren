@@ -1,5 +1,5 @@
 "use strict";
-/* Heimatort in der Verwaltung: Ort suchen und übernehmen. Er dient dazu, Touren zu Hause von Reisen zu unterscheiden. */
+/* Heimatort in der Verwaltung: Ort suchen und wählen (wird sofort gespeichert). Er dient dazu, Touren zu Hause von Reisen zu unterscheiden. */
 const _admH = VIEWS.admin;
 VIEWS.admin = async (...a) => {
   await _admH(...a);
@@ -9,16 +9,23 @@ VIEWS.admin = async (...a) => {
   const row = sv.parentElement;
   row.insertAdjacentHTML("beforebegin", `<div class="panel gap" id="homep"><h2>Heimatort und Puls</h2>
     <p class="mut fs14 m0-0-8">Touren in der Nähe (bis etwa 60 km) zählen nicht als Reise. Leer lassen, dann erkennt die App den Heimatort aus deinen Touren.</p>
-    <div class="field"><label>Heimatort</label><div class="row g6"><input id="hsq" placeholder="Ort oder Adresse suchen …" value="${esc(s.home_name || "")}" class="fx1"><button class="btn sm" id="hsb">Suchen</button><button class="btn alt sm" id="hsc" title="Heimatort entfernen">✕</button></div></div>
+    <div class="field"><label>Heimatort <span class="mut fs13">(wird sofort gespeichert)</span></label><div class="row g6"><input id="hsq" placeholder="Ort oder Adresse suchen …" value="${esc(s.home_name || "")}" class="fx1"><button class="btn sm" id="hsb">Suchen</button><button class="btn alt sm" id="hsc" title="Heimatort entfernen">✕</button></div></div>
     <div id="hsr"></div>
     <input type="hidden" data-k="home_name" id="hn" value="${esc(s.home_name || "")}"><input type="hidden" data-k="home_lat" id="hla" value="${esc(s.home_lat || "")}"><input type="hidden" data-k="home_lng" id="hlo" value="${esc(s.home_lng || "")}">
     <div class="field mt14"><label>Maximalpuls (bpm) für die Pulszonen</label><input type="number" min="100" max="230" data-k="hr_max" value="${esc(s.hr_max || "")}" placeholder="leer = 185 bzw. höchster gemessener Wert" class="mw320"></div>
-    <div class="mut fs13" id="hst">${s.home_lat ? `📍 ${esc(s.home_name || "")} (${(+s.home_lat).toFixed(3)}, ${(+s.home_lng).toFixed(3)}) – zum Übernehmen unten „Einstellungen speichern“` : "Noch kein Heimatort eingetragen."}</div></div>`);
-  const pick = (name, la, lo) => {
+    <div class="mut fs13" id="hst">${s.home_lat ? `📍 ${esc(s.home_name || "")} (${nf(+s.home_lat, 3)}, ${nf(+s.home_lng, 3)})` : "Noch kein Heimatort eingetragen."}</div></div>`);
+  /* 3.61.0: Auswahl und Entfernen speichern sofort (Leitfaden 2.4: Auswahlen speichern sofort) – kein Umweg über „Einstellungen speichern“ mehr */
+  const store = async (name, la, lo, ok) => {
     $("#hn").value = name; $("#hla").value = la; $("#hlo").value = lo; $("#hsq").value = name;
-    $("#hst").textContent = `📍 ${name} (${nf(+la, 3)}, ${nf(+lo, 3)}) – zum Übernehmen unten „Einstellungen speichern“`;
     $("#hsr").innerHTML = "";
+    try {
+      await api("/api/settings", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({home_name: name, home_lat: la, home_lng: lo})});
+      $("#hst").textContent = ok;
+    } catch (e) {
+      $("#hst").textContent = "Speichern nicht möglich: " + (e.message || e);
+    }
   };
+  const pick = (name, la, lo) => store(name, la, lo, `📍 ${name} (${nf(+la, 3)}, ${nf(+lo, 3)}) – Heimatort gespeichert`);
   const search = async () => {
     const q = $("#hsq").value.trim();
     if (q.length < 2) return;
@@ -31,5 +38,5 @@ VIEWS.admin = async (...a) => {
   };
   $("#hsb").onclick = search;
   $("#hsq").onkeydown = ev => { if (ev.key === "Enter") { ev.preventDefault(); search(); } };
-  $("#hsc").onclick = () => { $("#hn").value = $("#hla").value = $("#hlo").value = ""; $("#hsq").value = ""; $("#hsr").innerHTML = ""; $("#hst").textContent = "Heimatort entfernt – zum Übernehmen unten „Einstellungen speichern“"; };
+  $("#hsc").onclick = () => store("", "", "", "Heimatort entfernt");
 };

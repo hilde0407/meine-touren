@@ -46,7 +46,7 @@
 
   const D = {};
   const EN = `Noch kein Ziel für 2026. Setze dir eines, zum Beispiel 1000 km Wandern.|No goal for 2026 yet. Set one, for example 1000 km of hiking.
-Aktivität im Jahr 2026|Activity in 2026
+Touren im Jahr 2026|Tours in 2026
 Neuere Tour (←)|Newer tour (←)
 Ältere Tour (→)|Older tour (→)
 Ältere Tour|Older tour
@@ -62,20 +62,21 @@ Längste:|Longest:
 · Größter Aufstieg:|· Greatest ascent:
 Größter Aufstieg:|Greatest ascent:
 gegenüber|compared with
-Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Gruppen legst du mit Tags an.|No trips detected (at least two tours in a row, more than 60 km from your usual starting point, are needed). Create your own groups with tags.
-in der Tour über „🏷 Tags“ vergeben|assign in the tour via “🏷 Tags”
-Noch keine Regionen bestimmt: Verwaltung → „Regionen bestimmen“.|No regions determined yet: Admin → “Determine regions”.
-Noch keine Wanderführer hinterlegt: Verwaltung → „Wanderführer“ (GPX-Dateien hochladen).|No hiking guides stored yet: Admin → “Hiking guides” (upload GPX files).
+Keine Reisen erkannt (es braucht mindestens zwei Touren am Stück, über 60 km von deinem üblichen Startort entfernt). Eigene Alben legst du mit Schlagwörtern an.|No trips detected (at least two tours in a row, more than 60 km from your usual starting point, are needed). Create your own groups with tags.
+in der Tour über „🏷 Schlagwörter & Alben“ vergeben|assign in the tour via “🏷 Tags”
+Noch keine Regionen bestimmt: Verwaltung → Touren holen → Komoot „Regionen bestimmen“.|No regions determined yet: Admin → “Determine regions”.
+Noch keine Wanderführer hinterlegt: Verwaltung → Touren holen → Wanderführer (GPX-Dateien hochladen).|No hiking guides stored yet: Admin → “Hiking guides” (upload GPX files).
 nur Jahre mit mindestens 2 Touren der Sportart|only years with at least 2 tours of the sport
 Bei welcher Temperatur bist du unterwegs?|At what temperature do you go out?
 unter 0 °|below 0 °
 über 30 °|above 30 °
 Anteil der Strecke, der auf keiner früheren Tour lag|Share of the route not covered by any earlier tour
+Bausteingruppe wählen|Choose widget group
 Gruppe wählen|Choose group
 ausgewählt|selected
 Einer Tour zuordnen …|Assign to a tour …
 Aufnahmezeit der gewählten Fotos verschieben, z. B. Zeitzone einer Reise korrigieren|Shift the capture time of the selected photos, e.g. to correct the time zone of a trip
-Fehlende Strecken: Verwaltung → „Routen laden“. Fehlende Regionen: „Regionen bestimmen“.|Missing tracks: Admin → “Load routes”. Missing regions: “Determine regions”.
+Fehlende Strecken: Verwaltung → Touren holen → Komoot „Fehlende Strecken holen“. Fehlende Regionen: dort „Regionen bestimmen“.|Missing tracks: Admin → “Load routes”. Missing regions: “Determine regions”.
 Mögliche Ursache:|Possible cause:
 – „🧹 Track korrigieren“ hilft dabei.|– “🧹 Fix track” can help.
 Der Track selbst ist unauffällig – wahrscheinlich ist nur die Sportart falsch.|The track itself looks fine – probably only the sport is wrong.
@@ -90,7 +91,7 @@ Garmin, Suunto & andere Uhren|Garmin, Suunto & other watches
 Touren und Fotos in die App holen|Bring tours and photos into the app
 Weitere Wege (SMB-Ordner, Mac-Skript)|More ways (SMB folder, Mac script)
 (Ordner nicht gefunden)|(folder not found)
-Längste Bildseite (Pixel)|Longest image side (pixels)
+Längste Seite eines Fotos (Pixel)|Longest image side (pixels)
 JPEG-Qualität (1–95)|JPEG quality (1–95)
 Zuordnung: Toleranz vor/nach der Tour (Min.)|Assignment: tolerance before/after the tour (min)
 Automatik & Benachrichtigung|Automation & notification
@@ -107,7 +108,7 @@ Einrichten …|Set up …
 Touren zum Vergleichen nicht gefunden|Tours to compare not found
 ‹ Alle Touren|‹ All tours
 ⬇ GPX|⬇ GPX
-⛰ Höhen korrigieren|⛰ Fix elevation
+⛰ Höhe korrigieren|⛰ Fix elevation
 Steigung (Anteil der Strecke)|Gradient (share of the route)
 📍 Fotos ausrichten|📍 Align photos
 Andere Tour …|Other tour …
@@ -123,11 +124,11 @@ Ein Foto auf die richtige Stelle der Strecke ziehen – die anderen wandern zeit
 Aus den Fotos übernehmen|Take from the photos
 Zeit aus den Foto-Positionen ableiten|Derive time from the photo positions
 Nach der Korrektur:|After the correction:
-Mit Schlagworten wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).|Tags such as “Holiday Réunion 2026” or “Rother Taunus” create an album with its own page (map, totals, photos, 3D flight).
+Mit Schlagwörtern wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).|Tags such as “Holiday Réunion 2026” or “Rother Taunus” create an album with its own page (map, totals, photos, 3D flight).
 Anfang und Ende (300 m) ausblenden – schützt deinen Wohnort|Hide start and end (300 m) – protects your home location
 weiße Umrandung (besser sichtbar auf Satellit/Topo)|white outline (more visible on satellite/topo)
 Zugang fehlt (Verwaltung)|Access missing (Admin)
-nicht verbunden (Verwaltung → Portale)|not connected (Admin → Portals)
+nicht verbunden (Verwaltung → Hochladen & Planen → Portale)|not connected (Admin → Portals)
 Mehrtagestouren|Multi-day tours
 erkannt an Namen wie „… Tag 3“ oder „… Etappe 2“|detected from names like “… Day 3” or “… Stage 2”
 Gesamtansicht|Overall view
@@ -156,7 +157,7 @@ Aufstieg|Ascent
 Abstieg|Descent
 Std.|h
 Min.|min
-Trennen|Disconnect
+Verbindung trennen|Disconnect
 Konto & Freigaben|Account & sharing
 Tempo|Pace
 Noch keine Touren|No tours yet
@@ -272,7 +273,7 @@ Komoot aktualisieren|Update Komoot
 Nur Touren|Tours only
 Strecken lokal sichern|Save tracks locally
 Regionen bestimmen|Determine regions
-Bibliothek neu einlesen|Rescan library
+Bibliothek neu durchsuchen|Rescan library
 Fotos aus Ordner übernehmen|Import photos from folder
 Fotos importieren …|Import photos …
 Bildeinstellungen|Image settings
@@ -298,17 +299,17 @@ Woher deine Touren kommen: Komoot, Zepp, Uhren und Dateien, dazu Wanderführer.|
 Wohin Touren hochgeladen werden dürfen (nur auf deinen Wunsch) und wie Touren geplant werden.|Where tours may be uploaded (only on your request) and how tours are planned.
 Android-App, Standort teilen und die App auf dem Startbildschirm.|Android app, location sharing and the app on your home screen.
 Protokoll anzeigen|Show log
-Täglich aktualisieren (Komoot, Routen, Fotos)|Update daily (Komoot, routes, photos)
+Täglich aktualisieren (Komoot, Strecken, Fotos)|Update daily (Komoot, routes, photos)
 Protokoll|Log
 Einstellungen speichern|Save settings
 Token funktioniert ✓|Token works ✓
 Ziel hinzufügen|Add goal
 alle Sportarten|all sports
 Alle Sportarten|All sports
-Rekorde|Records
-Tage mit Touren|Days with tours
+Bestwerte|Records
+Aktive Tage|Active days
 Wochen|Weeks
-Rekorde gesamt|Overall records
+Bestwerte gesamt|Overall records
 Höchste Punkte|Highest points
 Nach Wochentag|By weekday
 Je Sportart|By sport
@@ -383,8 +384,8 @@ Gipfel & Pässe|Peaks & passes
 Noch keine Gipfel bestimmt.|No peaks determined yet.
 Wanderführer-Fortschritt|Guidebook progress
 offen|open
-Tags & Alben|Tags & albums
-Noch keine Tags|No tags yet
+Schlagwörter & Alben|Tags & albums
+Noch keine Schlagwörter|No tags yet
 Tour teilen|Share tour
 Fotos mitsenden|Include photos
 Link erstellen|Create link
@@ -395,7 +396,7 @@ Noch kein Link.|No link yet.
 Karte offline speichern|Save map offline
 Keine Fotos.|No photos.
 Alben & Tags|Albums & tags
-Noch keine Tags vergeben.|No tags assigned yet.
+Noch keine Schlagwörter vergeben.|No tags assigned yet.
 Leistung über die Jahre|Performance over the years
 Aufstieg pro Stunde|Ascent per hour
 Wetter|Weather
@@ -562,7 +563,7 @@ der Strecke über 30°|of the route over 30°
 Gehzeit|Walking time
 Steigrate|Climb rate
 Pace in Bewegung|Pace while moving
-Zeit in Bewegung|Time moving
+Bewegungszeit|Time moving
 ⛰ Steigung|⛰ Slope
 Strecke nach Steigung einfärben|Colour the route by slope
 über 30°|over 30°
@@ -606,13 +607,14 @@ Meine Bewertung:|My rating:
 Meine Bewertung|My rating
 Alle Bewertungen|All ratings
 Sicherheit|Safety
-– Lawinenlage, Gruppe, Notfallausrüstung (nur Notiz)|– avalanche conditions, group, emergency gear (note only)
+– Lawinenlage, Begleitung, Notfallausrüstung (nur Notiz)|– avalanche conditions, company, emergency gear (note only)
 Lawinenwarnstufe (laut Lagebericht des Tages)|Avalanche danger level (per the day’s bulletin)
 gering|low
 mäßig|moderate
 erheblich|considerable
 groß|high
 sehr groß|very high
+Bausteingruppe|Widget group
 Gruppe|Group
 Schneedecke, Gefahrenstellen, Umkehrpunkt …|Snowpack, hazards, turning point …
 Reine Dokumentation – ersetzt keinen Lawinenlagebericht.|Documentation only – does not replace an avalanche bulletin.
@@ -641,8 +643,8 @@ Das Passwort braucht mindestens 6 Zeichen.|The password needs at least 6 charact
 Tour planen|Plan a tour
 🗺 Tour planen|🗺 Plan a tour
 🗺 Planen|🗺 Plan
-Punkte in die Karte klicken oder eine GPX-Datei laden – Länge, Aufstieg und Zeit nach deinem Tempo|Click points on the map or load a GPX file – length, ascent and time based on your own pace
-Name der Planung|Name of the plan
+Punkte in die Karte klicken oder eine GPX-Datei laden – Strecke, Aufstieg und Dauer nach deinem Tempo|Click points on the map or load a GPX file – length, ascent and time based on your own pace
+Name der geplanten Tour|Name of the planned tour
 GPX laden …|Load GPX …
 Aus Wanderführer laden …|Load from hiking guide …
 ↶ Letzten Punkt entfernen|↶ Remove last point
@@ -653,7 +655,7 @@ Notiz zur Planung|Note on the plan
 Plan speichern|Save plan
 ⬇ Als GPX herunterladen|⬇ Download as GPX
 Gespeicherte Pläne|Saved plans
-Gespeicherte Planungen erscheinen hier.|Saved plans will appear here.
+Gespeicherte geplante Touren erscheinen hier.|Saved planned tours will appear here.
 Geschätzte Zeit|Estimated time
 Höchster Punkt|Highest point
 Zeit nach Standardwerten – sobald du mehr Touren dieser Sportart im Archiv hast, wird die Schätzung persönlich.|Time based on default values – with more tours of this sport in your archive the estimate becomes personal.

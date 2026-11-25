@@ -74,7 +74,7 @@ def _tok_post(data):
 def strava_access():
     t = strava_tokens()
     if not t.get("refresh_token"):
-        raise PortalError("Strava ist nicht verbunden (Verwaltung → Portale)")
+        raise PortalError("Strava ist nicht verbunden (Verwaltung → Hochladen & Planen → Portale)")
     if t.get("expires_at", 0) < time.time() + 90:
         t = _tok_post({"grant_type": "refresh_token", "refresh_token": t["refresh_token"]})
     return t["access_token"]
@@ -336,7 +336,7 @@ def upload_tour(tid, portal, gpx=None, force=False, dry_run=False, with_notes=No
     if dry_run:
         return "would_upload", "", ""
     if portal == "strava" and not strava_connected():
-        raise PortalError("Strava ist nicht verbunden (Verwaltung → Portale)")
+        raise PortalError("Strava ist nicht verbunden (Verwaltung → Hochladen & Planen → Portale)")
     gpx = gpx or tracks.gpx_for(tid)
     name = t["name"] or tid
     sport = sende_sport(t["sport"])               # 3.60.0: entfernte Aktivitäten als Rückfall (Gassigehen -> Spazieren, SUP -> Kajak, sonst Sonstiges)

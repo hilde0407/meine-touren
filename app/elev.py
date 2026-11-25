@@ -318,7 +318,7 @@ def zepp_fix_all(api=None):
             continue
         seen.add(t["id"])
         todo.append((s, t))
-    jobs.log(f"Höhe abgleichen: {len(todo)} Touren mit passendem Zepp-Training")
+    jobs.log(f"Höhe korrigieren: {len(todo)} Touren mit passendem Zepp-Training")
     done = 0
     for i, (s, t) in enumerate(todo, 1):
         jobs.progress(f"Höhe {i}/{len(todo)}")
@@ -329,7 +329,7 @@ def zepp_fix_all(api=None):
         except Exception as e:  # noqa
             jobs.log(f"  {t['id']}: {e}")
         time.sleep(0.2)
-    jobs.log(f"Höhe abgleichen: {done} Touren abgeglichen")
+    jobs.log(f"Höhe korrigieren: {done} Touren korrigiert")
     return done
 
 

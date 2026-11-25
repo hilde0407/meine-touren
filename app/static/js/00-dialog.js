@@ -1,6 +1,6 @@
 /* Einheitliche Dialoge statt confirm()/alert() (3.13.0).
    uiConfirm({title, text, ok, cancel, danger, html, onOpen(box, okButton)})  -> Promise<boolean>
-   uiAlert({title, text, ok})                          -> Promise<void>
+   uiAlert({title, text, ok})                          -> Promise<void>   (Knopf „Schließen“; uiConfirm ohne ok: „Bestätigen“ – besser die Aktion nennen)
    Auch mit einem einfachen Text als Argument aufrufbar. Tastatur: Tab bleibt im Dialog, Esc = Abbrechen, Enter = Bestätigen (bei „danger“ nie von selbst:
    der Fokus startet dort auf „Abbrechen“). Der Hintergrund ist inert, der Fokus geht danach an den Auslöser zurück. Mehrere Aufrufe werden nacheinander gezeigt.
    Texte werden über die Übersetzungsschicht geleitet (TL) und als Text eingefügt (kein HTML, außer dem ausdrücklich gesetzten `html`, das der Aufrufer selbst escapen muss). */
@@ -13,7 +13,7 @@
     o = o && typeof o === "object" && ("text" in o || "html" in o || "title" in o) ? Object.assign({}, o) : {text: o == null ? "" : String(o)};
     o.kind = kind;
     if (o.title == null) o.title = kind === "alert" ? "Hinweis" : o.danger ? "Bist du sicher?" : "Bitte bestätigen";
-    if (o.ok == null) o.ok = "OK";
+    if (o.ok == null) o.ok = kind === "alert" ? "Schließen" : "Bestätigen";        // 3.61.0: kein „OK“ – Aufrufer nennen die Hauptaktion selbst (Leitfaden 2.1)
     if (o.cancel == null) o.cancel = "Abbrechen";
     return o;
   };
@@ -162,4 +162,24 @@
 
   window.uiConfirm = o => open(o, "confirm");
   window.uiAlert = o => open(o, "alert");
+
+  /* 3.61.0 Eingabe statt prompt() (Leitfaden 2.1: keine Browser-Fenster): ein Feld, „Abbrechen“ links, die benannte Hauptaktion rechts; Enter im Feld bestätigt.
+       uiPrompt({title, label, value, type, ok, hint, min}) -> Promise<string|null>   (null = abgebrochen; min = Mindestlänge, sonst bleibt der Knopf aus) */
+  window.uiPrompt = p => {
+    p = Object.assign({title: "Eingabe", label: "", value: "", type: "text", ok: "Speichern", hint: "", min: 0}, p || {});
+    let inp = null;
+    const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"})[c]);
+    const html = `<label class="uiplbl">${esc(T(p.label))}<input class="uipin" type="${p.type === "password" ? "password" : p.type === "email" ? "email" : "text"}" value="${esc(p.value)}" autocomplete="${p.type === "password" ? "new-password" : "off"}"></label>${p.hint ? `<p class="mut fs13">${esc(T(p.hint))}</p>` : ""}`;
+    return open({title: p.title, html, ok: p.ok, onOpen: (box, bOk) => {
+      inp = box.querySelector(".uipin");
+      const chk = () => (bOk.disabled = inp.value.length < (p.min || 0));
+      inp.addEventListener("input", chk);
+      inp.addEventListener("keydown", e => { if (e.key === "Enter" && !bOk.disabled) { e.preventDefault(); bOk.click(); } });
+      chk();
+      setTimeout(() => { inp.focus(); inp.select(); }, 0);
+    }}, "confirm").then(ok => (ok && inp ? inp.value : null));
+  };
+  /* Link zeigen, wenn das Kopieren in die Zwischenablage nicht geht (statt prompt("Link …", url)): Feld zum Markieren, Knopf „Schließen“ */
+  window.uiLink = (title, url) => open({title, html: `<input class="uipin" readonly value="${String(url).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"})[c])}">`, ok: "Schließen",
+    onOpen: box => setTimeout(() => { const i = box.querySelector(".uipin"); i.focus(); i.select(); }, 0)}, "alert");
 })();

@@ -229,7 +229,7 @@ def test_dialog_modes_save_and_take_effect(pw, app):
     click_gear(pg, GEAR)
     pg.wait_for_selector('.sldlg form.erform', timeout=T)
     radio(pg, "er-mode", "recent")
-    pg.get_by_role("button", name="Standardwerte").click()                                          # Standardwerte im Formular, noch nichts gespeichert
+    pg.locator(".sldlg .erreset").click()                                          # Standardwerte im Formular, noch nichts gespeichert
     pg.wait_for_function("() => document.querySelector('.sldlg input[name=er-mode]:checked').value === 'random' && document.querySelector('.sldlg input[name=er-n]:checked').value === '6'", timeout=T)
     radio(pg, "er-mode", "recent")
     radio(pg, "er-n", 9)
@@ -275,7 +275,7 @@ def test_settings_persist_after_reload_and_reset_restores_default(pw, app):
     close(pg)
 
 
-SAVED = "() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Gespeichert'; }"
+SAVED = "() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Ansicht gespeichert'; }"
 
 
 # ------------------------------------------------------------------  Darstellung, Seitenverhältnis, Größe  ------------------------------------------------------------------
@@ -529,9 +529,9 @@ def test_dialog_390_fits_and_is_touchable(pw, app, scheme):
     assert pg.evaluate("() => ({page: document.documentElement.scrollWidth - window.innerWidth, box: (b => b.scrollWidth - b.clientWidth)(document.querySelector('.sldlg .slbox'))})") == {"page": 0, "box": 0}
     assert pg.evaluate("() => [...document.querySelectorAll('.sldlg .flchip, .sldlg summary, .sldlg .uifoot .btn')].filter(e => e.offsetParent).every(e => e.getBoundingClientRect().height >= 40 && e.getBoundingClientRect().right <= window.innerWidth)")
     radio(pg, "er-view", "show")                                                                  # Felder der Darstellung wechseln mit
-    assert pg.evaluate("() => [...document.querySelectorAll('.sldlg [data-for]')].filter(e => !e.hidden).map(e => e.querySelector('legend') ? e.querySelector('legend').textContent : 'hinweis')") == ["hinweis", "Höhe der Show", "Tempo (Sekunden je Bild)"]
+    assert pg.evaluate("() => [...document.querySelectorAll('.sldlg [data-for]')].filter(e => !e.hidden).map(e => e.querySelector('legend') ? e.querySelector('legend').textContent : 'hinweis')") == ["hinweis", "Höhe der Show", "Tempo (Sekunden je Foto)"]
     radio(pg, "er-view", "grid")
-    assert pg.evaluate("() => [...document.querySelectorAll('.sldlg [data-for]')].filter(e => !e.hidden).map(e => e.querySelector('legend').textContent)") == ["Größe der Bilder"]
+    assert pg.evaluate("() => [...document.querySelectorAll('.sldlg [data-for]')].filter(e => !e.hidden).map(e => e.querySelector('legend').textContent)") == ["Größe der Fotos"]
     if os.environ.get("TS_SHOTS"):
         Path(os.environ["TS_SHOTS"]).mkdir(parents=True, exist_ok=True)
         pg.screenshot(path=str(Path(os.environ["TS_SHOTS"]) / f"erinnerungen-dialog-390-{scheme}.png"))

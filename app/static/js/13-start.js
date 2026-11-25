@@ -27,12 +27,12 @@ async function boot() {
 }
 
 /* ---- Verwaltung: nach Aufgaben geordnet in Reitern (statt einer langen Seite) ----
-   3.60.0 Gliederung: Übersicht (Zustand und Grundeinstellungen) · Sportarten (Katalog, Favoriten, Statistik-Gruppen; 3.60.1: Begriff „Sportart“, Schlüssel „sportarten“,
+   3.60.0 Gliederung: Allgemein (3.61.0, vorher „Übersicht“; Zustand und Grundeinstellungen) · Sportarten (Katalog, Favoriten, Statistik-Gruppen; 3.60.1: Begriff „Sportart“, Schlüssel „sportarten“,
    die Adresse ?tab=aktivitaeten aus 3.60.0 bleibt als Alias) · Touren holen · Hochladen & Planen · Fotos ·
    Automatik & Meldungen · Handy & App · Sicherung & Zugang. Jeder Bereich ist eine gleich gestaltete Karte (Titel h2, Erklärung, Inhalt; Unterabschnitte h3). */
 const ADM_TABS = [
-  ["uebersicht", "Übersicht", "Zustand der App, Updates, Heimatort und Puls sowie Protokoll und Fehlersuche.", ["#hlt", "#upd", "#homep", "Protokoll", "Selbsttest"]],
-  ["sportarten", "Sportarten", "Welche Sportarten es gibt, welche beim Aufnehmen einer Tour zuerst erscheinen und wie die Statistik sie zusammenfasst.", ["#katp", "#favp", "#sgp"]],
+  ["allgemein", "Allgemein", "Zustand der App, Updates, Heimatort und Puls sowie Protokoll und Fehlersuche.", ["#hlt", "#upd", "#homep", "Protokoll", "Selbsttest"]],
+  ["sportarten", "Sportarten", "Welche Sportarten es gibt, welche beim Aufzeichnen einer Tour zuerst erscheinen und wie die Statistik sie zusammenfasst.", ["#katp", "#favp", "#sgp"]],
   ["quellen", "Touren holen", "Woher deine Touren kommen: Komoot, Zepp, Uhren und Dateien, dazu Wanderführer.", ["Komoot", "Zepp-Import", "Garmin", "Wanderführer"]],
   ["weitergabe", "Hochladen & Planen", "Wohin Touren hochgeladen werden dürfen (nur auf deinen Wunsch) und wie Touren geplant werden.", ["Portale", "Tourplanung"]],
   ["fotos", "Fotos", "Fotobibliothek, Import und Eingangsordner.", ["Fotos", "Foto-Eingang"]],
@@ -40,7 +40,7 @@ const ADM_TABS = [
   ["handy", "Handy & App", "Android-App, Standort teilen und die App auf dem Startbildschirm.", ["Android-App", "Standort teilen", "Verlorene", "Auf dem Handy"]],
   ["sicher", "Sicherung & Zugang", "Sicherungen, Zugriffsschutz und Offline-Nutzung.", ["Sicherung", "Zugriffsschutz", "Offline-Nutzung"]],
 ];
-const ADM_TAB_ALIAS = {aktivitaeten: "sportarten"};                        // ältere Links und gemerkter Reiter aus 3.60.0
+const ADM_TAB_ALIAS = {aktivitaeten: "sportarten", uebersicht: "allgemein"};   // ältere Links und gemerkter Reiter (3.60.0 „aktivitaeten“; bis 3.60.1 hieß „Allgemein“ „Übersicht“)
 const _admG = VIEWS.admin;
 VIEWS.admin = async (...a) => {
   await _admG(...a);
@@ -92,12 +92,13 @@ VIEWS.admin = async (...a) => {
   } catch (e) {}
   const show = id => {
     if (ADM_TAB_ALIAS[id]) id = ADM_TAB_ALIAS[id];
-    if (!ADM_TABS.some(t => t[0] === id)) id = "uebersicht";
+    if (!ADM_TABS.some(t => t[0] === id)) id = "allgemein";
     nav.querySelectorAll("button").forEach(b => {
       b.classList.toggle("on", b.dataset.t === id);
       b.setAttribute("aria-selected", b.dataset.t === id ? "true" : "false");
     });
     secs.forEach(sec => (sec.style.display = sec.dataset.t === id ? "" : "none"));
+    admTabsView(nav);
     anchor.style.display = id === "sportarten" ? "none" : "";            // 3.60.0: die Abschnitte „Sportarten“ speichern mit eigenen Knöpfen – keine zweite Speichern-Leiste
     try {
       localStorage.setItem("admtab", id);
@@ -106,9 +107,18 @@ VIEWS.admin = async (...a) => {
     if (!hq || /^tab=/.test(hq)) history.replaceState(null, "", "#/admin?tab=" + id);   // ohne Neuaufbau der Seite
   };
   nav.onclick = e => e.target.dataset.t && show(e.target.dataset.t);
+  nav.addEventListener("scroll", () => admTabsEnd(nav), {passive: true});
+  window.addEventListener("resize", () => nav.isConnected && admTabsView(nav));
   show(tab);
 };
 
+/* 3.61.0 Reiterleiste: am Handy waagerecht wischbar – der aktive Reiter wird in Sicht gerollt, data-end blendet den Verlauf am rechten Rand aus, wenn nichts mehr folgt */
+const admTabsEnd = nav => nav.toggleAttribute("data-end", nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 4);
+function admTabsView(nav) {
+  const on = nav.querySelector("button.on");
+  if (on && nav.scrollWidth > nav.clientWidth + 1) nav.scrollLeft = Math.max(0, on.offsetLeft - (nav.clientWidth - on.offsetWidth) / 2);
+  admTabsEnd(nav);
+}
 /* ---- Warnbanner (Gesundheitscheck) und Hinweis auf neue Version (nur Administratoren) ---- */
 let _hl = {t: 0, v: []},
   _up = {t: 0, v: null};

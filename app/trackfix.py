@@ -185,7 +185,7 @@ def analyse(tid):
     fx = db.one("SELECT * FROM track_fix WHERE id=?", (tid,))
     pts = _load(tid, fixed=bool(fx))
     if not pts or len(pts) < 5:
-        raise RuntimeError("Für diese Tour liegt keine Strecke vor (Verwaltung → „Routen laden“).")
+        raise RuntimeError("Für diese Tour liegt keine Strecke vor (Verwaltung → Touren holen → Komoot „Fehlende Strecken holen“).")
     peak, sustain = LIMITS[kind(t["sport"])]
     has_t = pts[0][3] is not None and pts[-1][3] is not None
     bad = find_spikes(pts, peak)

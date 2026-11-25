@@ -149,7 +149,7 @@ def test_period_bar_chips_address_storage_and_reset(pw, app):
         bar = pg.locator("#zrbar")
         expect(bar).to_be_visible(timeout=15000)
         assert "Jeder Baustein zeigt seinen eigenen Zeitraum" in bar.inner_text() and bar.locator(".zrreset").is_hidden()
-        for lab in ("Alle", "Dieses Jahr", "Letzte 12 Monate", "Vorjahr"):
+        for lab in ("Gesamte Zeit", "Laufendes Jahr", "Letzte 12 Monate", "Vorjahr"):          # 3.61.0: Leitfaden 2.7
             assert bar.get_by_role("button", name=lab, exact=True).count() == 1
         # Vorjahr: Adresse, Beschriftung, Zurücksetzen sichtbar, Aufbau der Seite bleibt
         bar.get_by_role("button", name="Vorjahr", exact=True).click()

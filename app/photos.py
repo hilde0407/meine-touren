@@ -82,7 +82,7 @@ def to_jpeg_bytes(data, max_side=None, quality=None):
             im.save(out, "JPEG", quality=quality, optimize=True)
     except Exception as e:  # noqa
         if data[4:12] in (b"ftypheic", b"ftypheix", b"ftypmif1", b"ftypheim", b"ftyphevc") and not heic_supported():
-            raise ValueError("HEIC-Bilder werden auf diesem Server nicht unterstützt (pip install pillow-heif)")
+            raise ValueError("HEIC-Fotos werden auf diesem Server nicht unterstützt (pip install pillow-heif)")
         raise ValueError("Kein gültiges Bild")
     return out.getvalue()
 

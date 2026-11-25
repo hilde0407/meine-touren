@@ -220,7 +220,7 @@ function blSection(host) {
     <label class="blsel"><span class="mut">Zeitraum</span> <select id="blrange">${BL_RANGES.map(r => `<option value="${r[0]}"${r[0] === BL.range ? " selected" : ""}>${r[1]}</option>`).join("")}</select></label></div>
     <div id="blbody" class="mut" role="status">Wird geladen …</div>
     <div id="blhint"></div>
-    <div class="utfoot"><button class="btn alt sm" id="bljob" hidden>Uhr-Daten aller Touren laden</button><span class="mut hrnote" id="bljobm" role="status"></span></div></div></div></details>`;
+    <div class="utfoot"><button class="btn alt sm" id="bljob" hidden>Uhr-Daten aller Touren holen</button><span class="mut hrnote" id="bljobm" role="status"></span></div></div></div></details>`;
   host.after(d);
   trBind(d);
   const set = () => d.querySelectorAll(".blctl [data-m]").forEach(b => {
@@ -263,7 +263,7 @@ async function tpDraw(root) {
   if (!root.isConnected) return;
   const sel = root.querySelector("#tpyear");
   if (!sel.dataset.ok) {
-    sel.innerHTML = `<option value="0">Alle Jahre</option>` + d.jahre.map(y => `<option value="${y}">${y}</option>`).join("");
+    sel.innerHTML = `<option value="0">Gesamte Zeit</option>` + d.jahre.map(y => `<option value="${y}">${y}</option>`).join("");
     sel.dataset.ok = "1";
   }
   sel.value = String(BL.jahr);
@@ -303,7 +303,7 @@ function tpSection(host) {
   d.id = "tpsec";
   d.innerHTML = `<details class="agrp trf trsec" data-trf="tp_sec"${trOpen("tp_sec", false) ? " open" : ""}><summary><span class="gt">Dein typisches Tempo</span><span class="gs">bergauf, eben, bergab</span><span class="trfk" id="tpkey"></span></summary><div class="gbody"><div class="panel" id="tppanel">
     <div class="row blctl"><div class="chips" role="group" aria-label="Sportart"><button class="chip on" data-s="wandern" aria-pressed="true">Wandern</button><button class="chip" data-s="laufen" aria-pressed="false">Laufen</button></div>
-    <label class="blsel"><span class="mut">Jahr</span> <select id="tpyear"><option value="0">Alle Jahre</option></select></label></div>
+    <label class="blsel"><span class="mut">Jahr</span> <select id="tpyear"><option value="0">Gesamte Zeit</option></select></label></div>
     <div id="tpbody" class="mut" role="status">Wird geladen …</div>
     <div class="uth">Gehzeit schätzen</div>
     <form class="tpform" id="tpform" novalidate><label>Strecke (km)<input id="tpkm" inputmode="decimal" autocomplete="off" placeholder="z. B. 12,5"></label><label>Aufstieg (m)<input id="tpup" inputmode="numeric" autocomplete="off" placeholder="0"></label><label>Abstieg (m)<input id="tpdown" inputmode="numeric" autocomplete="off" placeholder="0"></label><button class="btn" type="submit">Schätzen</button></form>

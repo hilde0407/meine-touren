@@ -7,7 +7,7 @@ VIEWS.places = async (...a) => {
   box.className = "";
   const mx = Math.max(1, ...p.starts.map(s => s.n));
   box.innerHTML = `<div class="grid g2">
-   <div class="panel"><h2>Häufigste Startorte</h2>${p.starts.length ? `<div class="rows">${p.starts.map(s => `<div class="r"><span><a href="#/search?q=${encodeURIComponent(s.place)}">${esc(s.place)}</a><small>${esc(s.state || "")} · ${fmtKm(s.km, {d: 0})}</small></span><b>${s.n}×</b></div>`).join("")}</div>` : '<p class="mut">Noch keine Regionen bestimmt: Verwaltung → „Regionen bestimmen“.</p>'}</div>
+   <div class="panel"><h2>Häufigste Startorte</h2>${p.starts.length ? `<div class="rows">${p.starts.map(s => `<div class="r"><span><a href="#/search?q=${encodeURIComponent(s.place)}">${esc(s.place)}</a><small>${esc(s.state || "")} · ${fmtKm(s.km, {d: 0})}</small></span><b>${s.n}×</b></div>`).join("")}</div>` : '<p class="mut">Noch keine Regionen bestimmt: Verwaltung → Touren holen → Komoot „Regionen bestimmen“.</p>'}</div>
    <div class="panel"><h2>Gipfel &amp; Pässe</h2>${
      p.peaks.length
        ? `<div class="rows">${p.peaks
@@ -23,7 +23,7 @@ VIEWS.places = async (...a) => {
    }
     <div class="row mt12"><button class="btn alt" id="pkb">Gipfel bestimmen${p.pending_peaks ? ` (${p.pending_peaks} Touren offen)` : ""}</button><span id="pkm" class="mut"></span></div></div></div>
    <div class="sec"><h2>Wanderführer-Fortschritt</h2>${gp.length ? `<span class="sub">${gfSum(gp)}</span>` : ""}</div>
-   ${gp.length ? '<div id="gfx"></div>' : '<p class="mut">Noch keine Wanderführer hinterlegt: Verwaltung → „Wanderführer“ (GPX-Dateien hochladen).</p>'}`;
+   ${gp.length ? '<div id="gfx"></div>' : '<p class="mut">Noch keine Wanderführer hinterlegt: Verwaltung → Touren holen → Wanderführer (GPX-Dateien hochladen).</p>'}`;
   if (gp.length) gfMount($("#gfx"), gp, a[1]);
   $("#pkb").onclick = async e => {
     e.target.disabled = true;
@@ -95,7 +95,7 @@ VIEWS.tour = async (id, q) => {
   $("#etag").onclick = () => {
     let cur = (t.tags || "").split("|").filter(Boolean);
     const m =
-      uiModal(`<h3>Tags &amp; Alben</h3><p class="mut fs14">Mit Schlagworten wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).</p>
+      uiModal(`<h3>Schlagwörter &amp; Alben</h3><p class="mut fs14">Mit Schlagwörtern wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).</p>
       <div id="tgc" class="chips"></div><input id="tgi" list="tgl" placeholder="Neuer Tag + Enter" class="w100 mt10"><datalist id="tgl">${allTags()
         .map(x => `<option value="${esc(x)}">`)
         .join("")}</datalist>
@@ -103,7 +103,7 @@ VIEWS.tour = async (id, q) => {
     const draw = () => {
       m.querySelector("#tgc").innerHTML =
         cur.map((x, i) => `<button class="chip on" data-i="${i}" title="Entfernen">${esc(x)} ×</button>`).join("") ||
-        '<span class="mut">Noch keine Tags</span>';
+        '<span class="mut">Noch keine Schlagwörter</span>';
       m.querySelectorAll("[data-i]").forEach(
         b =>
           (b.onclick = () => {
@@ -186,7 +186,7 @@ VIEWS.tour = async (id, q) => {
             try {
               await api("/api/share/" + encodeURIComponent(x.token), {method: "PATCH", headers: {"content-type": "application/json"}, body: JSON.stringify({blocks: pick.blocks})});
             } catch (e) {
-              uiAlert("Auswahl konnte nicht gespeichert werden: " + e.message);
+              uiAlert("Auswahl speichern nicht möglich: " + e.message);
             }
             list();
           })
@@ -202,7 +202,7 @@ VIEWS.tour = async (id, q) => {
           body: JSON.stringify({blocks: pick.blocks, trim: pick.trim, days: pick.days}),
         });
       } catch (e) {
-        uiAlert("Link konnte nicht erstellt werden: " + e.message);
+        uiAlert("Link erstellen nicht möglich: " + e.message);
       }
       list();
     };
@@ -321,11 +321,11 @@ VIEWS.trips = async () => {
   $("#tr").innerHTML =
     (tr.length
       ? `<div class="otdg">${tr.map(x => `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(${picSrc({id: x.photo, v: x.photo_v}, 500)})` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${fmtDatumKurz(x.start)}${x.end !== x.start ? " – " + fmtDatumKurz(x.end) : ""}</span><small>${x.tours.length} Touren · ${fmtKm(x.km, {d: 0})} · ${fmtHm(x.up_m)}</small></a>`).join("")}</div>`
-      : '<p class="mut">Keine Reisen erkannt (es braucht Touren an mindestens 4 Tagen am Stück, über 60 km von deinem üblichen Startort entfernt – Wochenendausflüge zählen nicht). Eigene Gruppen legst du mit Tags an.</p>') +
-    `<div id="rnalb"><div class="sec"><h2>Alben &amp; Tags</h2><span class="sub">in der Tour über „🏷 Tags“ vergeben</span></div>` +
+      : '<p class="mut">Keine Reisen erkannt (es braucht Touren an mindestens 4 Tagen am Stück, über 60 km von deinem üblichen Startort entfernt – Wochenendausflüge zählen nicht). Eigene Alben legst du mit Schlagwörtern an.</p>') +
+    `<div id="rnalb"><div class="sec"><h2>Schlagwörter &amp; Alben</h2><span class="sub">in der Tour über „🏷 Schlagwörter & Alben“ vergeben</span></div>` +
     (tg.length
       ? `<div class="otdg">${tg.map(x => `<a class="otd" href="#/album/${encodeURIComponent(x.tag)}"${x.photo ? ` style="background-image:linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(${picSrc({id: x.photo, v: x.photo_v}, 500)})"` : ""}><b>🏷 ${esc(x.tag)}</b><small>${x.n} Touren · ${fmtKm(x.km, {d: 0})}</small></a>`).join("")}</div>`
-      : '<p class="mut">Noch keine Tags vergeben.</p>') + "</div>";
+      : '<p class="mut">Noch keine Schlagwörter vergeben.</p>') + "</div>";
 };
 VIEWS.trip = async id => {
   const tr = (await api("/api/trips")).find(x => x.id === id);
@@ -438,7 +438,7 @@ VIEWS.places = async (...a) => {
        <div class="r"><span><a href="#/tour/${wet.id}">Nasseste Tour</a><small>${esc(wet.name)}</small></span><b>${nf(wet.precip, 1)} mm</b></div>`
          : '<div class="mut">Noch keine Wetterdaten.</div>'
      }</div>
-       <div class="row mt12"><button class="btn alt" id="wxb">Wetter für alle Touren laden${wx.missing ? ` (${wx.missing} offen)` : ""}</button><span id="wxm" class="mut"></span></div></div></div>`;
+       <div class="row mt12"><button class="btn alt" id="wxb">Wetter für alle Touren holen${wx.missing ? ` (${wx.missing} offen)` : ""}</button><span id="wxm" class="mut"></span></div></div></div>`;
   }
   if (ng && Object.keys(ng.years).length) {
     const mxy = Math.max(1, ...Object.values(ng.years).map(v => v.km)),
@@ -479,9 +479,9 @@ VIEWS.check = async (...a) => {
   body.insertAdjacentHTML(
     "beforeend",
     `<div class="panel gap"><h2>Umbenennen nach Regeln</h2><p class="mut">Wähle Touren aus, lege eine Regel fest, prüfe die Vorschau und wende sie an.</p>
-   <div class="filters"><input id="rn_q" placeholder="Name enthält …"><select id="rn_r"><option value="">Alle Regionen</option>${regionOpts()}</select><select id="rn_s"><option value="">Alle Sportarten</option>${[...new Set(TOURS.map(t => t.sport))].map(s => `<option value="${s}">${sName(s)}</option>`).join("")}</select></div>
+   <div class="filters"><input id="rn_q" placeholder="Name enthält …"><select id="rn_r"><option value="">Alle Regionen</option>${regionOpts()}</select><select id="rn_s" aria-label="Sportart">${sportFilterOptions(TOURS.map(t => t.sport))}</select></div>
    <div class="filters"><select id="rn_a"><option value="pre">Vorsilbe hinzufügen</option><option value="suf">Nachsilbe hinzufügen</option><option value="rep">Text ersetzen (Suchen → Ersetzen)</option><option value="date">Datum und Uhrzeit am Ende entfernen</option></select><input id="rn_x" placeholder="Text / Suchen"><input id="rn_y" placeholder="Ersetzen durch"></div>
-   <div class="row"><label class="chk m0"><input type="checkbox" id="rn_k"> auch bei Komoot umbenennen</label><button class="btn alt" id="rn_p">Vorschau</button><button class="btn" id="rn_go" disabled>Anwenden</button><span id="rn_m" class="mut"></span></div><div class="rows mt10" id="rn_l"></div></div>`
+   <div class="row"><label class="chk m0"><input type="checkbox" id="rn_k"> auch bei Komoot umbenennen</label><button class="btn alt" id="rn_p">Vorschau</button><button class="btn" id="rn_go" disabled>Umbenennen</button><span id="rn_m" class="mut"></span></div><div class="rows mt10" id="rn_l"></div></div>`
   );
   let plan = [];
   const calc = () => {
@@ -491,7 +491,7 @@ VIEWS.check = async (...a) => {
       act = $("#rn_a").value,
       x = $("#rn_x").value,
       y = $("#rn_y").value;
-    plan = TOURS.filter(t => (!q.trim() || smatch(t.name, q)) && (!r || inRegion(t, r)) && (!s || t.sport === s))
+    plan = TOURS.filter(t => (!q.trim() || smatch(t.name, q)) && (!r || inRegion(t, r)) && (!s || sgMatch(t.sport, [s])))
       .map(t => {
         let n = t.name;
         if (act === "pre") n = x + n;
@@ -512,7 +512,7 @@ VIEWS.check = async (...a) => {
   };
   $("#rn_p").onclick = calc;
   $("#rn_go").onclick = async e => {
-    if (!await uiConfirm(`${plan.length} Touren umbenennen${$("#rn_k").checked ? " (auch bei Komoot)" : ""}?`)) return;
+    if (!await uiConfirm({title: `${plan.length} Touren umbenennen?`, ok: "Umbenennen", text: $("#rn_k").checked ? "Die Namen werden auch bei Komoot geändert." : "Die Namen werden nur in Meine Touren geändert."})) return;
     e.target.disabled = true;
     let n = 0,
       bad = 0;
@@ -565,7 +565,7 @@ VIEWS.admin = async (...a) => {
 const GF_BLOCK = 60;
 const GF = {f: "", o: "", q: "", lim: {}, books: [], covers: {}};
 const GF_FILTER = [["", "Alle"], ["offen", "Offen"], ["gewandert", "Gewandert"]];
-const GF_ORDER = [["", "Buchreihenfolge"], ["laenge", "Nach Länge"], ["zuletzt", "Zuletzt gewandert"]];
+const GF_ORDER = [["", "Buchreihenfolge"], ["laenge", "Nach Strecke"], ["zuletzt", "Zuletzt gewandert"]];
 const GF_BOOK_ICON = `<svg viewBox="0 0 24 24" class="gfico" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5zM5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 7h6M9 10h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 const gfSum = gp => {
   const d = gp.reduce((c, b) => c + b.done, 0),

@@ -774,7 +774,7 @@ def notify_check():
         from . import health
         u = health.update_check()
         if u.get("newer"):
-            w.append(f"Neue Version {u['latest']} von Meine Touren verfügbar (installiert: {u['current']}) – Verwaltung → Update.")
+            w.append(f"Neue Version {u['latest']} von Meine Touren verfügbar (installiert: {u['current']}) – Verwaltung → Allgemein → Updates.")
     h = hashlib.md5("|".join(w).encode()).hexdigest() if w else ""
     if h == (db.get("notify_last") or ""):
         return False
@@ -803,7 +803,7 @@ async def api_live_set(request: Request):
     mode = db.get("live_mode") or "off"
     src = "rec" if d.get("source") == "rec" else "manual"
     if mode == "off":
-        raise HTTPException(403, "Die Standort-Freigabe ist ausgeschaltet (Verwaltung → Standort teilen)")
+        raise HTTPException(403, "Die Standort-Freigabe ist ausgeschaltet (Verwaltung → Handy & App → Standort teilen)")
     try:
         lat, lon = float(d["lat"]), float(d["lon"])
     except (KeyError, TypeError, ValueError):

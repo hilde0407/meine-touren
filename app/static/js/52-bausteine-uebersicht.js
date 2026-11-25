@@ -112,11 +112,12 @@ function zlForm(yr, prev) {
   return (prev.length ? `<p><button type="button" class="btn sm alt" id="gcopy">Ziele aus ${yr - 1} übernehmen (${prev.length})</button></p>` : "") +
     `<details class="zladd"><summary>Ziel hinzufügen</summary><div class="row mt8 zlrow"><label class="slsr" for="gper">Zeitraum</label><select id="gper"><option value="year">Ziel für ${yr}</option><option value="week">Ziel für jede Woche</option></select>` +
     `<label class="slsr" for="gm">Messgröße</label><select id="gm">${Object.entries(GM).map(([k, v]) => `<option value="${k}">${v[1]}</option>`).join("")}</select>` +
-    `<label class="slsr" for="gsp">Sportart</label><select id="gsp"><option value="">alle Sportarten</option>${goalSportOptions().map(([k, l]) => `<option value="${esc(k)}"${isSg(k) ? ` title="${esc(sgTitle(k))}"` : ""}>${esc(l)}</option>`).join("")}</select>` +
+    `<div class="zlsp"><span class="slsr">Sportart</span>${sportWahlHtml("", {id: "gsp", moreId: "gspmore", extra: [["", "Alle Sportarten", ""]].concat(SGRP.map(g => [SG_PRE + g.id, sgLabel(SG_PRE + g.id), sgTitle(SG_PRE + g.id)]))})}</div>` +   // 3.61.0: Muster „Zuweisen“
     `<label class="slsr" for="gt">Zielwert</label><input id="gt" type="number" min="1" inputmode="decimal" placeholder="Zielwert"><button type="button" class="btn sm" id="gadd">Speichern</button></div><p class="slerr" role="alert"></p></details>`;
 }
 function zlBind(b, yr, prev) {
   const post = g => api("/api/goals", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(g)});
+  sportWahlBind(b);
   b.onclick = async e => {
     const x = e.target.closest(".gx"), cp = e.target.closest("#gcopy"), add = e.target.closest("#gadd");
     if (x && (await uiConfirm({text: "Ziel löschen?", danger: true, ok: "Löschen"}))) {
@@ -185,7 +186,7 @@ Object.assign(window.SL_WT, {
   },
   serie: {
     fam: "uebersicht", cat: "zahlen", icon: "heart", name: "Wochen-Serie", title: () => "Wochen-Serie", filter: {range: null}, fields: [{kind: "sports"}, {kind: "title"}],
-    desc: "Wie viele Wochen in Folge du mindestens eine Tour gemacht hast, dein Rekord und die letzten 26 Wochen als Punktreihe.",
+    desc: "Wie viele Wochen in Folge du mindestens eine Tour gemacht hast, dein Bestwert und die letzten 26 Wochen als Punktreihe.",
     preview: () => slPrev('<svg viewBox="0 0 156 14" class="slpvs" aria-hidden="true">' + [1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1].map((o, i) => `<rect class="${o ? "slhb" : "slhz"}" x="${i * 12}" y="2" width="10" height="10" rx="3"/>`).join("") + "</svg>"),
     render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
@@ -203,7 +204,7 @@ Object.assign(window.SL_WT, {
       });
       const last = Array.from({length: 26}, (_, i) => set.has(cur - 25 + i)), n26 = last.filter(Boolean).length, wk = n => (n === 1 ? "1 Woche" : `${n} Wochen`),
         dots = last.map((o, i) => `<rect class="${o ? "slhb" : "slhz"}" x="${i * 12}" y="2" width="10" height="10" rx="3"/>`).join("");
-      b.innerHTML = slTiles([[wk(s), "Aktuelle Serie"], [wk(rec), "Rekord", s >= rec && s > 0 ? "gerade erreicht" : ""], [`${n26} von 26`, "Wochen mit Tour", "in den letzten 26 Wochen"]]) +
+      b.innerHTML = slTiles([[wk(s), "Aktuelle Serie"], [wk(rec), "Bestwert", s >= rec && s > 0 ? "gerade erreicht" : ""], [`${n26} von 26`, "Wochen mit Tour", "in den letzten 26 Wochen"]]) +
         `<svg class="slpts" viewBox="0 0 312 14" preserveAspectRatio="xMinYMid meet" role="img" aria-label="${esc(`Letzte 26 Wochen: ${n26} Wochen mit mindestens einer Tour`)}">${dots}</svg>` +
         `<p class="mut slcap">${!set.has(cur) && s > 0 ? "Diese Woche fehlt noch eine Tour, damit die Serie weiterläuft." : "Eine Woche zählt, wenn sie mindestens eine Tour enthält (Montag bis Sonntag)."}</p>`;
       slBadge(c, wk(s));
@@ -244,8 +245,8 @@ Object.assign(window.SL_WT, {
           rects += `<rect class="slh${l}" x="${w * 12}" y="${r * 12}" width="10" height="10" rx="2">${e ? `<title>${ds} · ${e.n === 1 ? "1 Tour" : e.n + " Touren"} · ${fmtKm(e.km)}</title>` : ""}</rect>`;
         }
       }
-      b.innerHTML = `<div class="slmos" aria-hidden="true">${mos}</div><svg class="slheat" viewBox="0 0 636 82" role="img" aria-label="${esc(`Kalender der letzten 52 Wochen: ${days} Tage mit Touren`)}">${rects}</svg>` +
-        `<div class="slhl2"><span class="mut">${days} Tage mit Touren in den letzten 12 Monaten</span><span class="sllgh mut" aria-hidden="true">weniger ${[0, 1, 2, 3, 4].map(i => `<svg viewBox="0 0 10 10" width="12" height="12"><rect class="slh${i}" width="10" height="10" rx="2"/></svg>`).join("")} mehr</span></div>`;
+      b.innerHTML = `<div class="slmos" aria-hidden="true">${mos}</div><svg class="slheat" viewBox="0 0 636 82" role="img" aria-label="${esc(`Kalender der letzten 52 Wochen: ${days} Aktive Tage`)}">${rects}</svg>` +
+        `<div class="slhl2"><span class="mut">${days} Aktive Tage in den letzten 12 Monaten</span><span class="sllgh mut" aria-hidden="true">weniger ${[0, 1, 2, 3, 4].map(i => `<svg viewBox="0 0 10 10" width="12" height="12"><rect class="slh${i}" width="10" height="10" rx="2"/></svg>`).join("")} mehr</span></div>`;
       slPos(b);
       slBadge(c, `${days} Tage`);
     },
@@ -337,7 +338,7 @@ Object.assign(window.SL_WT, {
   sportarten: {
     fam: "uebersicht", cat: "grafik", icon: "map", name: "Sportarten-Verteilung", title: () => "Sportarten-Verteilung", defaults: {metric: "count"}, filter: {range: "all"},
     desc: "Welche Sportarten du wie oft machst, als Ring mit Legende, nach Anzahl der Touren, Kilometern oder Zeit.",
-    fields: [{k: "metric", kind: "radio", def: "count", label: "Verteilung nach", options: [["count", "Anzahl der Touren"], ["km", "Strecke"], ["time", "Zeit unterwegs"]]}, {kind: "range", def: "all"}, {kind: "title"}],
+    fields: [{k: "metric", kind: "radio", def: "count", label: "Verteilung nach", options: [["count", "Anzahl der Touren"], ["km", "Strecke"], ["time", "Dauer"]]}, {kind: "range", def: "all"}, {kind: "title"}],
     preview: () => slPvDonut([[0.5, "slsg slsg-hike"], [0.28, "slsg slsg-bike"], [0.14, "slsg slsg-ski"], [0.08, "slsg slsg-other"]]),
     render(c, b, cfg) {
       if (!TOURS.length) return slNote(b, "Noch keine Touren.");
@@ -416,7 +417,7 @@ Object.assign(window.SL_WT, {
         g.km += t.km;
       });
       const L = Object.values(G).sort((x, y) => y.n - x.n || y.km - x.km).slice(0, 8);
-      if (!L.length) return slNote(b, "Noch keine Regionen bestimmt: Verwaltung → „Regionen bestimmen“.");
+      if (!L.length) return slNote(b, "Noch keine Regionen bestimmt: Verwaltung → Touren holen → Komoot „Regionen bestimmen“.");
       b.innerHTML = slRows(L.map(g => `<li><div class="slr1"><span>${esc(g.k)}</span><b>${g.n === 1 ? "1 Tour" : g.n + " Touren"}</b></div>${slBr((g.n / L[0].n) * 100)}<p class="mut slr2">${slKm(g.km)}</p></li>`)) +
         (miss ? `<p class="mut slcap">${miss === 1 ? "1 Tour ohne Ortsangabe" : miss + " Touren ohne Ortsangabe"}</p>` : "");
       slBadge(c, esc(L[0].k));
@@ -428,7 +429,7 @@ Object.assign(window.SL_WT, {
     preview: () => slPrev('<svg viewBox="0 0 120 34" class="slpvs" aria-hidden="true"><rect class="slhz" x="0" y="2" width="120" height="8" rx="4"/><rect class="slhb" x="4" y="2" width="56" height="8" rx="4"/><rect class="slhz" x="0" y="14" width="120" height="8" rx="4"/><rect class="slhb" x="50" y="14" width="70" height="8" rx="4"/><rect class="slhz" x="0" y="26" width="120" height="8" rx="4"/><rect class="slhb" x="30" y="26" width="40" height="8" rx="4"/></svg>'),
     async render(c, b) {
       const d = await slGet("/api/my-devices"), devs = d && d.devices ? d.devices : [];
-      if (!devs.length) return slNote(b, "Noch kein Gerät angelegt – in der Verwaltung unter „Meine Geräte“.");
+      if (!devs.length) return slNote(b, "Noch kein Gerät angelegt – unter Verwaltung → Touren holen → Meine Geräte.");
       const kind = k => ((d.kinds || []).find(x => x.kind === k) || {}).label || "",
         today = slIso(new Date()), ts = Date.parse, rows = [];
       devs.forEach(v => {
@@ -468,12 +469,12 @@ Object.assign(window.SL_WT, {
   },
   geplant: {
     fam: "uebersicht", cat: "plan", icon: "map", name: "Geplante Touren", title: () => "Geplante Touren", defaults: {},
-    desc: "Die offenen Pläne (noch nicht gegangen) mit Länge, Aufstieg und geschätzter Dauer, mit Link zur Planung. Auf Wunsch auch gegangene Pläne mit dem Vergleich von geplanter und gelaufener Zeit. Verworfene Pläne erscheinen nie.",
-    fields: [{k: "gegangen", kind: "bool", label: "Gegangene Pläne auch zeigen"}],
+    desc: "Die offenen geplanten Touren (noch nicht gegangen) mit Strecke, Aufstieg und geschätzter Dauer, mit Link zur Planung. Auf Wunsch auch gegangene geplante Touren mit dem Vergleich von geplanter und gelaufener Zeit. Verworfene geplante Touren erscheinen nie.",
+    fields: [{k: "gegangen", kind: "bool", label: "Gegangene geplante Touren auch zeigen"}],
     preview: () => slPrev('<ul class="sllist"><li><b>Gipfelweg</b><span>8,0 km · 900 m</span></li><li><b>Rund um den See</b><span>12,5 km</span></li></ul>'),
     async render(c, b, cfg) {
       const mit = !!(cfg && cfg.gegangen === true), L = await slGet("/api/bausteine/geplant" + (mit ? "?gegangen=1" : "")), can = typeof isViewer === "function" ? !isViewer() : true;
-      if (!L || !L.length) return (b.innerHTML = `<p class="mut slnone">Keine offenen Pläne.</p>${can ? '<p><a href="#/plan">Tour planen ›</a></p>' : ""}`);
+      if (!L || !L.length) return (b.innerHTML = `<p class="mut slnone">Keine offenen geplanten Touren.</p>${can ? '<p><a href="#/plan">Tour planen ›</a></p>' : ""}`);
       const row = p => {
         const done = p.status === "gegangen", t = done ? p.tour : null,
           nm = can ? `<a href="#/plan/${p.id}">${esc(p.name || "Ohne Namen")}</a>` : `<b>${esc(p.name || "Ohne Namen")}</b>`,
@@ -485,7 +486,7 @@ Object.assign(window.SL_WT, {
       };
       b.innerHTML = `<ul class="sllist">${[...L.filter(p => p.status !== "gegangen"), ...L.filter(p => p.status === "gegangen")].slice(0, 5).map(row).join("")}</ul>` + (can ? '<p><a href="#/plan">Tour planen ›</a></p>' : "");
       const open = L.filter(p => p.status !== "gegangen").length;
-      slBadge(c, open === 1 ? "1 Plan" : open ? `${open} Pläne` : "");
+      slBadge(c, open === 1 ? "1 geplante Tour" : open ? `${open} geplante Touren` : "");
     },
   },
   /* Schlüssel bleibt „zeppimport“ (gespeicherte Layouts und Ansichten); seit 3.31.0 der Baustein „Touren holen“. 3.48.0: Einstellung „Darstellung“ Karte oder Nur Knopf
@@ -514,8 +515,8 @@ Object.assign(window.SL_WT, {
     },
   },
   rueckblick: {
-    fam: "uebersicht", cat: "rueck", icon: "trend", name: "Jahres-Rückblick", title: cfg => `Jahres-Rückblick ${slRbRange(cfg).year}`, multi: true, defaults: {}, filter: {range: "year"},
-    desc: "Das Jahr in einer Kachel: Touren, Strecke und Aufstieg, die Monate als Säulen, die längste und die höchste Tour.",
+    fam: "uebersicht", cat: "rueck", icon: "trend", name: "Jahresrückblick", title: cfg => `Jahresrückblick ${slRbRange(cfg).year}`, multi: true, defaults: {}, filter: {range: "year"},
+    desc: "Das Jahr in einem Baustein: Touren, Strecke und Aufstieg, die Monate als Säulen, die längste und die höchste Tour.",
     fields: [{kind: "range", opts: ["year", "y"], def: "year", label: "Jahr"}, {kind: "sports"}, {kind: "title"}],
     preview: () => slPvBars([8, 14, 20, 30, 26, 34, 28, 22, 14, 12, 6, 4]),
     render(c, b, cfg) {
@@ -579,7 +580,7 @@ function ziStatus(s) {                                                          
     if (last.ohne_gps) l.push(ziN(last.ohne_gps, "1 ohne GPS-Daten vermerkt", "{} ohne GPS-Daten vermerkt"));
     if (last.fehler) l.push(ziN(last.fehler, "1 konnte nicht geladen werden", "{} konnten nicht geladen werden"));
     rows.push(`<p class="zpm zpok">${esc(`Letzter Lauf: ${ziWhen(last.ts)}`)}</p><ul class="zpl">${l.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`);
-    if (zepp && last.gps && !last.uebernommen) rows.push(`<p class="zpm"><a href="${ZI_ADMIN}">Neue Trainings in der Verwaltung übernehmen ›</a></p>`);
+    if (zepp && last.gps && !last.uebernommen) rows.push(`<p class="zpm"><a href="${ZI_ADMIN}">Neue Zepp-Trainings holen (Verwaltung → Touren holen) ›</a></p>`);
     return rows;
   }
   const why = zepp
@@ -614,7 +615,7 @@ function ziPaintKnopf(c) {
   const m = ziMode(), mine = ziMine(), other = ziRun() && !mine, run = ziBusy(), rows = [];
   let btn = "", bad = false;
   if (other) rows.push(`<p class="zpm">${esc(`Es läuft gerade ein anderer Vorgang: ${ZI.job.running}`)}</p>`);
-  else if (ZI.err) rows.push(`<p class="zpm zpbad">${esc(`Der Import konnte nicht gestartet werden: ${ZI.err}`)}</p>`);
+  else if (ZI.err) rows.push(`<p class="zpm zpbad">${esc(`Import starten nicht möglich: ${ZI.err}`)}</p>`);
   const ic = '<i class="zpic" aria-hidden="true">⟳</i>', lnk = `<p class="zpm"><a href="${ZI_ADMIN}">Zugang in der Verwaltung prüfen ›</a></p>`;
   if (m.t === "load" || m.t === "err") {
     btn = `<button type="button" class="btn zpb" disabled><span>Touren holen</span></button>`;
@@ -659,7 +660,7 @@ function ziPaint(c) {
   const m = ziMode(), mine = ziMine(), other = ziRun() && !mine, run = ziBusy(), glob = [];
   let html = "", bad = false;
   if (other) glob.push(`<p class="zpm">${esc(`Es läuft gerade ein anderer Vorgang: ${ZI.job.running}`)}</p>`);
-  else if (ZI.err) glob.push(`<p class="zpm zpbad">${esc(`Der Import konnte nicht gestartet werden: ${ZI.err}`)}</p>`);
+  else if (ZI.err) glob.push(`<p class="zpm zpbad">${esc(`Import starten nicht möglich: ${ZI.err}`)}</p>`);
   if (m.t === "load" || m.t === "err") {
     html = `<div class="zpi"><button type="button" class="btn zpb" disabled><span>Touren holen</span></button><div class="zpt" role="status" aria-live="polite"><p class="zpm">${m.t === "load" ? "Status wird geladen …" : "Der Status konnte nicht geladen werden."}</p></div></div>`;
   } else if (m.t === "one") {

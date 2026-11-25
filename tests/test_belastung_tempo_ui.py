@@ -234,7 +234,7 @@ def test_stats_pending_zepp_tours_show_hint_and_job_button(pw, apps):
     try:
         pg.wait_for_selector("#bljob:not([hidden])", timeout=15000)
         t = pg.locator("#blsec").inner_text()
-        assert "Für 3 Zepp-Touren liegen noch keine Uhr-Werte vor." in t and "Uhr-Daten aller Touren laden" in t
+        assert "Für 3 Zepp-Touren liegen noch keine Uhr-Werte vor." in t and "Uhr-Daten aller Touren holen" in t
         assert pg.locator("#blsec .blbar, #blsec .blpart").count() == 0                  # nichts als 0 gezeichnet
         pg.locator("#blsec details[data-trf='bl_hint'] summary").click()
         pg.wait_for_function("() => (document.querySelector('#blsec') || {innerText: ''}).innerText.includes('beim ersten Öffnen einer Tour gespeichert')", timeout=15000)

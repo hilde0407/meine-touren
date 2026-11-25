@@ -94,7 +94,7 @@ def test_bestehende_gruppe_mit_aktivitaetsnamen_hinweis_und_umbenennen(pw, app):
         assert sec.locator("#sgw0").is_visible() and sec.locator("#sgw1").is_hidden() and sec.locator("#sgn0").get_attribute("aria-invalid") == "true"
         # Speichern verlangt einen anderen Namen (Fokus ins Feld), nichts wird gespeichert
         sec.locator("#sgsave").click()
-        expect(sec.locator("#sgerr")).to_have_text("Gruppe 1: „Wandern“ heißt schon eine Sportart – bitte einen anderen Gruppennamen wählen")
+        expect(sec.locator("#sgerr")).to_have_text("Statistik-Gruppe 1: „Wandern“ heißt schon eine Sportart – bitte einen anderen Gruppennamen wählen")
         assert pg.evaluate("() => document.activeElement.id") == "sgn0" and _gruppen(app) == ALT
         # Hinweis beim Tippen: auch andere Schreibweisen und Sprachen
         sec.locator("#sgn1").fill(" mountain BIKE ")
@@ -105,7 +105,7 @@ def test_bestehende_gruppe_mit_aktivitaetsnamen_hinweis_und_umbenennen(pw, app):
         expect(sec.locator("#sgw0")).to_be_hidden()
         assert sec.locator("#sgn0").get_attribute("aria-invalid") is None
         sec.locator("#sgsave").click()
-        expect(sec.locator("#sgok")).to_have_text("Gespeichert ✓ – gilt ab sofort in der Statistik.", timeout=TL)
+        expect(sec.locator("#sgok")).to_have_text("Statistik-Gruppen gespeichert – gelten ab sofort in der Statistik", timeout=TL)
         assert [g["name"] for g in _gruppen(app)] == ["Wandern und Berg", "Rad fahren"] and [g["id"] for g in _gruppen(app)] == ["wan", "rad"]
         assert not errs, errs
     finally:
@@ -124,7 +124,7 @@ def test_beschriftung_name_gleich_aktivitaeten(pw, app):
         assert pg.locator('#sch [data-s="sgrp:berg"]').get_attribute("title") == "Bergwandern = Wandern + Bergsteigen"
         expect(pg.locator('[data-st="sportarten"] .rows, #stc-sportarten .rows').first).to_contain_text("Rad fahren = Radtour + Rennrad + Mountainbike + …")
         # Ziel-Auswahl und Zielname
-        opt = pg.locator('#gsp option[value="sgrp:rad"]')
+        opt = pg.locator('.zlsp [data-sp="sgrp:rad"]')                                  # 3.61.0: Muster „Zuweisen“ (Knöpfe statt Auswahlfeld)
         if opt.count():
             assert opt.text_content() == "Rad fahren = Radtour + Rennrad + Mountainbike + …" and opt.get_attribute("title").endswith("+ Gravelbike")
         assert pg.evaluate("() => goalSportName('sgrp:berg')") == "Bergwandern = Wandern + Bergsteigen"
@@ -150,7 +150,7 @@ def test_englisch(pw, app):
         pg.locator("#sgn0").fill("Hiking")
         expect(pg.locator("#sgw0")).to_have_text("Same name as a sport – please rename")
         pg.locator("#sgsave").click()
-        expect(pg.locator("#sgerr")).to_have_text("Group 1: “Hiking” is already the name of a sport – please choose a different group name", timeout=TL)
+        expect(pg.locator("#sgerr")).to_have_text("Statistics group 1: “Hiking” is already the name of a sport – please choose a different group name", timeout=TL)
         assert pg.evaluate("() => document.documentElement.scrollWidth <= window.innerWidth + 1")
         assert not errs, errs
     finally:

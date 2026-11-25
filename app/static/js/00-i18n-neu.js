@@ -1,9 +1,8 @@
 /* Übersetzungen (neu): Zeilen „deutsch || englisch || französisch || spanisch“ – siehe 00-i18n.js. „{}“ = Platzhalter (wird übernommen und selbst übersetzt). */
-window.I18N_NEU = `Aktivität im Jahr {} || Activity in {} || Activité en {} || Actividad en {}
+window.I18N_NEU = `Touren im Jahr {} || Tours in {} || Parcours en {} || Rutas en {}
 {}, {} km, {} m auf || {}, {} km, {} m ascent || {}, {} km, {} m de montée || {}, {} km, {} m de subida
 Strecken werden geladen ({}) … || Loading tracks ({}) … || Chargement des tracés ({}) … || Cargando trazados ({}) …
 Strecken werden geladen ({}/{}) … || Loading tracks ({}/{}) … || Chargement des tracés ({}/{}) … || Cargando trazados ({}/{}) …
-{} Strecken nicht lokal vorhanden – in der Verwaltung „Routen laden“ (Komoot-Zugang nötig) || {} tracks not available locally – use “Load routes” in Admin (Komoot access required) || {} tracés non disponibles en local – utilisez « Charger les itinéraires » dans l’administration (accès Komoot requis) || {} trazados no disponibles en local: usa «Cargar rutas» en Administración (se necesita acceso a Komoot)
 (Strecken werden beim Hineinzoomen nachgeladen) || (Tracks are loaded as you zoom in) || (Les tracés se chargent au fur et à mesure du zoom) || (Los trazados se cargan al acercar el zoom)
 bei Komoot vorhanden || available on Komoot || présent sur Komoot || ya está en Komoot
 dort schon vorhanden || already there || déjà présent || ya está allí
@@ -14,13 +13,12 @@ Die Tour stammt von Komoot || This tour comes from Komoot || Ce parcours provien
 „hochgeladen“ = vom Portal angenommen und geprüft; bei Komoot erscheint die Tour in der Tourenliste bzw. unter „Geplant“. || “uploaded” = accepted and checked by the portal; on Komoot the tour appears in the tour list or under “Planned”. || « envoyé » = accepté et vérifié par le portail ; sur Komoot, le parcours apparaît dans la liste des parcours ou sous « Planifié ». || «subida» = aceptada y comprobada por el portal; en Komoot la ruta aparece en la lista de rutas o en «Planificadas».
 Wird hochgeladen … (Strava kann bis zu 50 s brauchen) || Uploading … (Strava can take up to 50 s) || Envoi en cours … (Strava peut mettre jusqu’à 50 s) || Subiendo … (Strava puede tardar hasta 50 s)
 Tour nicht gefunden || Tour not found || Parcours introuvable || Ruta no encontrada
-Daten und GPS-Track neu von Komoot laden || Reload data and GPS track from Komoot || Recharger les données et la trace GPS depuis Komoot || Volver a cargar datos y track GPS desde Komoot
 Lokale Tour „{}“ samt gespeicherter Strecke löschen? Bereits hochgeladene Kopien bei Komoot/Strava bleiben bestehen. || Delete local tour “{}” together with its saved track? Copies already uploaded to Komoot/Strava will remain. || Supprimer le parcours local « {} » avec son tracé enregistré ? Les copies déjà envoyées vers Komoot/Strava restent en place. || ¿Eliminar la ruta local «{}» junto con su trazado guardado? Las copias ya subidas a Komoot/Strava se conservan.
 Lade von Komoot … || Loading from Komoot … || Chargement depuis Komoot … || Cargando desde Komoot …
 ⛰ Höhenkorrektur zurücknehmen || ⛰ Undo elevation correction || ⛰ Annuler la correction d’altitude || ⛰ Deshacer la corrección de altitud
 Höhen mit Geländemodell korrigiert (Komoot/GPS meldete {} m Aufstieg). || Elevations corrected with the terrain model (Komoot/GPS reported {} m ascent). || Altitudes corrigées avec le modèle de terrain (Komoot/GPS indiquait {} m de dénivelé positif). || Altitudes corregidas con el modelo del terreno (Komoot/GPS indicaba {} m de desnivel positivo).
 Auffällige Höhendaten: || Suspicious elevation data: || Données d’altitude suspectes : || Datos de altitud sospechosos:
-{} m Aufstieg auf {} km sind unwahrscheinlich. Mit „Höhen korrigieren“ werden sie aus dem Geländemodell berechnet. || {} m ascent over {} km is unlikely. “Correct elevations” recalculates them from the terrain model. || {} m de dénivelé positif sur {} km est peu probable. « Corriger les altitudes » les recalcule à partir du modèle de terrain. || {} m de desnivel positivo en {} km es poco probable. «Corregir altitudes» los calcula de nuevo con el modelo del terreno.
+{} m Aufstieg auf {} km sind unwahrscheinlich. Mit „Höhe korrigieren“ werden sie aus dem Geländemodell berechnet. || {} m ascent over {} km is unlikely. “Correct elevation” recalculates them from the terrain model. || {} m de dénivelé positif sur {} km est peu probable. « Corriger l’altitude » les recalcule à partir du modèle de terrain. || {} m de desnivel positivo en {} km es poco probable. «Corregir la altitud» los calcula de nuevo con el modelo del terreno.
 Berechne Höhen aus Geländedaten … || Calculating elevations from terrain data … || Calcul des altitudes à partir des données de terrain … || Calculando altitudes a partir de datos del terreno …
 Neu berechnet: {} m Aufstieg, {} m Abstieg (vorher {} m / {} m). OK = übernehmen, Abbrechen = Original behalten || Recalculated: {} m ascent, {} m descent (before: {} m / {} m). OK = apply, Cancel = keep the original || Recalculé : {} m de dénivelé positif, {} m de dénivelé négatif (avant : {} m / {} m). OK = appliquer, Annuler = garder l’original || Recalculado: {} m de desnivel positivo, {} m de desnivel negativo (antes: {} m / {} m). Aceptar = aplicar, Cancelar = conservar el original
 Höhenkorrektur fehlgeschlagen: || Elevation correction failed: || La correction d’altitude a échoué : || La corrección de altitud ha fallado:
@@ -42,10 +40,10 @@ Die Strecke hat keine Zeitangaben || The track has no time stamps || Le tracé n
 {} Foto{} importieren || Import {} photo{} || Importer {} photo{} || Importar {} foto{}
 Nichts ausgewählt || Nothing selected || Rien de sélectionné || Nada seleccionado
 Verbindung zum Server unterbrochen || Connection to the server lost || Connexion au serveur interrompue || Conexión con el servidor interrumpida
-{}. Bibliothek wird eingelesen … || {}. Reading the library … || {}. Lecture de la bibliothèque … || {}. Leyendo la biblioteca …
-{}. Bibliothek wird eingelesen … {} || {}. Reading the library … {} || {}. Lecture de la bibliothèque … {} || {}. Leyendo la biblioteca … {}
+{}. Bibliothek wird durchsucht … || {}. Reading the library … || {}. Lecture de la bibliothèque … || {}. Leyendo la biblioteca …
+{}. Bibliothek wird durchsucht … {} || {}. Reading the library … {} || {}. Lecture de la bibliothèque … {} || {}. Leyendo la biblioteca … {}
 … und {} weitere || … and {} more || … et {} autres || … y {} más
-Zeitabgleich nicht möglich: || Time comparison not possible: || Comparaison des heures impossible : || No es posible comparar las horas:
+Zeiten prüfen nicht möglich: || Time comparison not possible: || Comparaison des heures impossible : || No es posible comparar las horas:
 lokal übernommen || imported locally || importé en local || importado en local
 noch nicht übernommen || not yet imported || pas encore importé || aún no importado
 bereits in Komoot || already on Komoot || déjà sur Komoot || ya está en Komoot
@@ -89,8 +87,7 @@ Suunto gibt seine Cloud-Schnittstelle nur an Firmen und Organisationen, nicht an
 hat, trägt ihn hier ein. Alle anderen nutzen den Dateiweg oben. || has, enter it here. Everyone else uses the file route above. || , saisissez-le ici. Tous les autres utilisent la voie par fichiers ci-dessus. || , introdúcelo aquí. Todos los demás usan la vía de archivos de arriba.
 Zugangsdaten der Suunto API Zone || Suunto API Zone credentials || Identifiants Suunto API Zone || Credenciales de Suunto API Zone
 Weiterleitungsadresse (in der API Zone eintragen): || Redirect address (enter it in the API Zone): || Adresse de redirection (à saisir dans l’API Zone) : || Dirección de redirección (introdúcela en la API Zone):
-Nur Workouts ab Datum (JJJJ-MM-TT, leer = alle) || Only workouts from date (YYYY-MM-DD, empty = all) || Uniquement les entraînements depuis la date (AAAA-MM-JJ, vide = tous) || Solo entrenamientos desde la fecha (AAAA-MM-DD, vacío = todos)
-Neue Workouts täglich automatisch übernehmen || Import new workouts automatically every day || Importer automatiquement les nouveaux entraînements chaque jour || Importar automáticamente los entrenamientos nuevos cada día
+Nur Touren ab Datum (JJJJ-MM-TT, leer = alle) || Only workouts from date (YYYY-MM-DD, empty = all) || Uniquement les entraînements depuis la date (AAAA-MM-JJ, vide = tous) || Solo entrenamientos desde la fecha (AAAA-MM-DD, vacío = todos)
 Bitte den Knopf mit der Maus in die Lesezeichenleiste ziehen, nicht anklicken. || Please drag the button to the bookmarks bar with the mouse; do not click it. || Faites glisser le bouton vers la barre de favoris avec la souris ; ne cliquez pas dessus. || Arrastra el botón con el ratón a la barra de marcadores; no hagas clic en él.
 Bitte zuerst Trainings auswählen. || Please select workouts first. || Veuillez d’abord sélectionner des entraînements. || Selecciona primero algunos entrenamientos.
 {} Training(s) lokal übernehmen und zu {} hochladen? || Import {} workout(s) locally and upload to {}? || Importer {} entraînement(s) en local et les envoyer vers {} ? || ¿Importar {} entrenamiento(s) en local y subirlos a {}?
@@ -100,11 +97,10 @@ Garmin hat einen Code geschickt – bitte oben eintragen. || Garmin has sent a c
 zuletzt: Fehler || last: error || dernier : erreur || último: error
 · Prognose zum Jahresende: {} ({} %) || · Forecast for year end: {} ({} %) || · Prévision pour la fin de l’année : {} ({} %) || · Previsión a fin de año: {} ({} %)
 · Ziel voraussichtlich am {} || · Goal expected on {} || · Objectif prévu le {} || · Meta prevista para el {}
-{} hinter dem Plan || {} behind plan || {} de retard sur le plan || {} por detrás del plan
+{} unter dem Soll || {} below target || {} sous l’objectif || {} por debajo del objetivo
 im Plan || on plan || dans les temps || según lo previsto
 Ziele aus {} übernehmen ({}) || Take over goals from {} ({}) || Reprendre les objectifs de {} ({}) || Copiar las metas de {} ({})
 Ziel löschen? || Delete goal? || Supprimer l’objectif ? || ¿Eliminar la meta?
-Jahresrückblick {} || Year in review {} || Bilan de l’année {} || Resumen del año {}
 um die Erde ({} km) || around the Earth ({} km) || autour de la Terre ({} km) || alrededor de la Tierra ({} km)
 längste Serie · aktuell {} || longest streak · current {} || plus longue série · actuelle {} || racha más larga · actual {}
 {} % gegenüber {} || {} % compared with {} || {} % par rapport à {} || {} % respecto a {}
@@ -113,7 +109,6 @@ Link zur Foto-Diashow dieser Tour kopieren || Copy link to the photo slideshow o
 ✓ Link kopiert || ✓ Link copied || ✓ Lien copié || ✓ Enlace copiado
 Link zur Diashow: || Link to the slideshow: || Lien vers le diaporama : || Enlace a la presentación:
 Notiz zur Tour (Wetter, Begleitung, Einkehr …) || Notes on the tour (weather, company, stops …) || Notes sur le parcours (météo, compagnie, étape gourmande …) || Notas sobre la ruta (tiempo, compañía, paradas …)
-gespeichert ✓ || saved ✓ || enregistré ✓ || guardado ✓
 Version {} jetzt installieren? Vorher wird eine Sicherung aller Daten angelegt. Die Seite ist während der Installation kurz nicht erreichbar. || Install version {} now? A backup of all data is made first. The site is briefly unavailable during installation. || Installer la version {} maintenant ? Une sauvegarde de toutes les données est faite au préalable. Le site est brièvement inaccessible pendant l’installation. || ¿Instalar ahora la versión {}? Antes se hace una copia de seguridad de todos los datos. El sitio no estará disponible unos instantes durante la instalación.
 Sicherung wird angelegt … || Creating backup … || Création de la sauvegarde … || Creando copia de seguridad …
 Version wird installiert … (dauert etwa ein bis zwei Minuten) || Installing version … (takes about one to two minutes) || Installation de la version … (environ une à deux minutes) || Instalando la versión … (tarda uno o dos minutos)
@@ -145,7 +140,7 @@ Prüft Komoot-Zugang, Strecken, Zepp-Token, Internet-Dienste (Karten, Wetter, H�
 Prüfe … (kann bis zu einer Minute dauern) || Checking … (can take up to a minute) || Vérification … (peut durer jusqu’à une minute) || Comprobando … (puede tardar hasta un minuto)
 {}. letzte Tour || {}. latest tour || {}ᵉ dernier parcours || {}.ª ruta más reciente
 Prüfen Aufräumen || Check Clean up || Vérifier Nettoyer || Revisar Limpiar
-{} – gleiche Zeit, Startort und Länge || {} – same time, start location and length || {} – même heure, même lieu de départ et même longueur || {}: misma hora, lugar de salida y longitud
+{} – gleiche Zeit, Startort und Strecke || {} – same time, start location and length || {} – même heure, même lieu de départ et même longueur || {}: misma hora, lugar de salida y longitud
 {} m Aufstieg auf {} km || {} m ascent over {} km || {} m de dénivelé positif sur {} km || {} m de desnivel positivo en {} km
 „{}“ wirklich auch bei Komoot endgültig löschen? || Really delete “{}” permanently on Komoot as well? || Supprimer vraiment « {} » aussi définitivement sur Komoot ? || ¿Eliminar de verdad «{}» también de forma definitiva en Komoot?
 Wird gelöscht … || Deleting … || Suppression … || Eliminando …
@@ -196,7 +191,6 @@ einzelne Tour || single tour || parcours unique || una sola ruta
 Zum Benutzer machen || Make user || Passer en utilisateur || Convertir en usuario
 E-Mail ändern || Change e-mail || Modifier l’e-mail || Cambiar correo
 Passwort (mind. 8 Zeichen) || Password (at least 8 characters) || Mot de passe (8 caractères minimum) || Contraseña (mínimo 8 caracteres)
-✓ Geändert || ✓ Changed || ✓ Modifié || ✓ Cambiado
 Neues Passwort für diesen Benutzer (mind. 8 Zeichen): || New password for this user (at least 8 characters): || Nouveau mot de passe pour cet utilisateur (8 caractères minimum) : || Contraseña nueva para este usuario (mínimo 8 caracteres):
 E-Mail-Adresse für {}: || E-mail address for {}: || Adresse e-mail de {} : || Correo electrónico de {}:
 Zwei-Faktor-Anmeldung von „{}“ ausschalten? Der Benutzer kann sie danach neu einrichten. || Switch off two-factor sign-in for “{}”? The user can set it up again afterwards. || Désactiver l’authentification à deux facteurs de « {} » ? L’utilisateur pourra la reconfigurer ensuite. || ¿Desactivar la verificación en dos pasos de «{}»? El usuario podrá volver a configurarla después.
@@ -224,7 +218,6 @@ Auswahl nicht möglich: || Selection not possible: || Sélection impossible : ||
 gegangen – diese Tour war das || times – this tour was the || fois – ce parcours était le || veces: esta ruta fue la
 Gelöscht werden nur die Kopien in der Fotobibliothek dieser App – || Only the copies in this app’s photo library are deleted – || Seules les copies de la photothèque de cette application sont supprimées – || Solo se eliminan las copias de la biblioteca de fotos de esta aplicación:
 – diese Tour: {}. schnellste von {} || – this tour: {}. fastest of {} || – ce parcours : {}ᵉ plus rapide sur {} || – esta ruta: {}.ª más rápida de {}
-Gesamtdauer inkl. Pausen. Bestzeit: {} mit {}. || Total duration including breaks. Best time: {} with {}. || Durée totale pauses comprises. Meilleur temps : {} avec {}. || Duración total con pausas. Mejor tiempo: {} con {}.
 Klick auf die Karte setzt einen Punkt, Rechtsklick auf einen Punkt entfernt ihn. Ein Klick auf einen Abschnitt wählt ihn aus – dort lassen sich || A click on the map sets a point, a right-click on a point removes it. A click on a section selects it – there you can || Un clic sur la carte place un point, un clic droit sur un point le supprime. Un clic sur une section la sélectionne – vous pouvez y || Un clic en el mapa coloca un punto y un clic derecho sobre un punto lo quita. Un clic en un tramo lo selecciona: allí puedes
 anzeigen. Gestrichelt = gerade Linie (kein Weg gefunden oder „Wegen folgen“ aus). || show. Dashed = straight line (no path found or “Follow paths” off). || afficher. Pointillé = ligne droite (aucun chemin trouvé ou « Suivre les chemins » désactivé). || mostrar. Discontinua = línea recta (no se encontró camino o «Seguir caminos» está desactivado).
 Geschätzte Zeit ({}–{}) || Estimated time ({}–{}) || Durée estimée ({}–{}) || Tiempo estimado ({}–{})
@@ -233,7 +226,7 @@ Kein Weg über das Routing gefunden ({}) – dort wird eine gerade Linie gezeich
 Zu viele Punkte ({}) zum Verbinden über Wege – höchstens {}. Leere die Planung oder setze weniger Punkte. || Too many points ({}) to connect along paths – at most {}. Clear the plan or set fewer points. || Trop de points ({}) pour les relier par des chemins – {} au maximum. Videz la planification ou placez moins de points. || Demasiados puntos ({}) para conectarlos por caminos: como máximo {}. Vacía la planificación o coloca menos puntos.
 In der Datei wurde keine Strecke gefunden. || No track was found in the file. || Aucun tracé n’a été trouvé dans le fichier. || No se encontró ningún trazado en el archivo.
 Bitte zuerst eine Strecke planen. || Please plan a route first. || Veuillez d’abord planifier un itinéraire. || Planifica primero una ruta.
-Diesen Plan löschen? || Delete this plan? || Supprimer cette planification ? || ¿Eliminar esta planificación?
+Diese geplante Tour löschen? || Delete this planned tour? || Supprimer ce parcours planifié ? || ¿Eliminar esta ruta planificada?
 Die Planung verbindet deine Punkte über Wege aus OpenStreetMap. Dafür braucht es einen Routing-Dienst (BRouter). Wähle, wo er läuft: || Planning connects your points along paths from OpenStreetMap. This needs a routing service (BRouter). Choose where it runs: || La planification relie vos points par des chemins d’OpenStreetMap. Pour cela, il faut un service de routage (BRouter). Choisissez où il s’exécute : || La planificación une tus puntos por caminos de OpenStreetMap. Para ello hace falta un servicio de rutas (BRouter). Elige dónde se ejecuta:
 Nichts zu installieren. Die Koordinaten der geplanten Punkte werden an brouter.de gesendet. || Nothing to install. The coordinates of the planned points are sent to brouter.de. || Rien à installer. Les coordonnées des points planifiés sont envoyées à brouter.de. || No hay que instalar nada. Las coordenadas de los puntos planificados se envían a brouter.de.
 Kostenlos, privat und schnell. Einmalig installieren (siehe unten), die Adresse ist dann || Free, private and fast. Install once (see below), the address is then || Gratuit, privé et rapide. À installer une seule fois (voir ci-dessous), l’adresse est alors || Gratis, privado y rápido. Se instala una sola vez (ver abajo); la dirección es entonces
@@ -258,7 +251,7 @@ Wird gespeichert … || Saving … || Enregistrement … || Guardando …
 · {} km · {} Abbiegungen. Die Ansagen beginnen, sobald du auf der Route bist. || · {} km · {} turns. Voice guidance starts as soon as you are on the route. || · {} km · {} virages. Le guidage vocal commence dès que vous êtes sur l’itinéraire. || · {} km · {} giros. La guía por voz empieza en cuanto estés en la ruta.
 Keine Route – freie Aufzeichnung. || No route – free recording. || Pas d’itinéraire – enregistrement libre. || Sin ruta: grabación libre.
 Die Ansagen beginnen, sobald du auf der Route bist. || Voice guidance starts as soon as you are on the route. || Le guidage vocal commence dès que vous êtes sur l’itinéraire. || La guía por voz empieza en cuanto estés en la ruta.
-Route konnte nicht geladen werden: {} || The route could not be loaded: {} || L’itinéraire n’a pas pu être chargé : {} || No se pudo cargar la ruta: {}
+Route laden nicht möglich: {} || The route could not be loaded: {} || L’itinéraire n’a pas pu être chargé : {} || No se pudo cargar la ruta: {}
 Aufzeichnung wirklich verwerfen? || Really discard the recording? || Vraiment abandonner l’enregistrement ? || ¿Descartar de verdad la grabación?
 {} Foto(s) aufgenommen || {} photo(s) taken || {} photo(s) prise(s) || {} foto(s) tomada(s)
 · {} warten auf den Upload{} || · {} waiting for upload{} || · {} en attente d’envoi{} || · {} esperando a subirse{}
@@ -303,7 +296,7 @@ Höhen korrigieren || Correct elevations || Corriger les altitudes || Corregir a
 Mit Geländemodell neu berechnen || Recalculate with terrain model || Recalculer avec le modèle de terrain || Recalcular con el modelo del terreno
 Fehlpunkte und Pausen bereinigen || Clean up stray points and pauses || Nettoyer les points aberrants et les pauses || Limpiar puntos erróneos y pausas
 Zu Strava, Komoot … senden || Send to Strava, Komoot … || Envoyer vers Strava, Komoot … || Enviar a Strava, Komoot …
-Daten und Track neu laden || Reload data and track || Recharger les données et le tracé || Volver a cargar datos y trazado
+Daten und Strecke neu von Komoot holen || Fetch data and track again from Komoot || Récupérer à nouveau les données et le tracé depuis Komoot || Obtener de nuevo datos y trazado de Komoot
 Tour löschen || Delete tour || Supprimer le parcours || Eliminar ruta
 Lokale Tour entfernen || Remove local tour || Retirer le parcours local || Quitar ruta local
 Aus Meine Touren entfernen || Remove from Meine Touren || Retirer de Meine Touren || Quitar de Meine Touren
@@ -326,9 +319,7 @@ Passwort {} || Password {} || Mot de passe {} || Contraseña {}
 Testmail an mich senden || Send me a test e-mail || M’envoyer un e-mail de test || Enviarme un correo de prueba
 ✓ Testmail an || ✓ Test e-mail to || ✓ E-mail de test envoyé à || ✓ Correo de prueba a
 Konto: || Account: || Compte : || Cuenta:
-Neues Passwort (mindestens 8 Zeichen) || New password (at least 8 characters) || Nouveau mot de passe (8 caractères minimum) || Nueva contraseña (mínimo 8 caracteres)
 Passwort wiederholen || Repeat password || Répéter le mot de passe || Repetir contraseña
-Passwort speichern || Save password || Enregistrer le mot de passe || Guardar contraseña
 Das hat nicht geklappt. || That did not work. || Cela n’a pas fonctionné. || No ha funcionado.
 Dein Passwort wurde geändert. || Your password has been changed. || Votre mot de passe a été modifié. || Tu contraseña ha sido cambiada.
 Du kannst dich jetzt mit dem neuen Passwort anmelden.{} || You can now sign in with the new password.{} || Vous pouvez maintenant vous connecter avec le nouveau mot de passe.{} || Ya puedes iniciar sesión con la contraseña nueva.{}
@@ -341,7 +332,7 @@ Tipp: Teilen ▸ „Zum Home-Bildschirm“ – dann öffnet die App ohne Leiste.
 Zustand der App, Updates, Selbsttest und Protokoll. || State of the app, updates, self-test and log. || État de l’application, mises à jour, autotest et journal. || Estado de la aplicación, actualizaciones, autodiagnóstico y registro.
 Android-App, Standort teilen und die App auf dem Startbildschirm. || Android app, sharing your location and the app on the home screen. || Application Android, partage de la position et application sur l’écran d’accueil. || Aplicación de Android, compartir la ubicación y la aplicación en la pantalla de inicio.
 Zu dieser Tour gibt es noch keine Fotos. || There are no photos for this tour yet. || Il n’y a pas encore de photos pour ce parcours. || Todavía no hay fotos de esta ruta.
-Diese Fotos enthalten keine Aufnahmezeit im Bild. Es wird das Dateidatum benutzt (meist der Exportzeitpunkt); sie werden deshalb nicht automatisch einer Tour zugeordnet. Mit dem Foto-Zeit-Abgleich (mac/foto_zeit_abgleich.py) lässt sich die echte Zeit aus den RAW-Originalen nachtragen. || These photos contain no capture time. The file date is used (usually the export time), so they are not assigned to a tour automatically. With the photo time comparison (mac/foto_zeit_abgleich.py) the real time can be added from the RAW originals. || Ces photos ne contiennent pas d’heure de prise de vue. La date du fichier est utilisée (en général l’heure d’export) ; elles ne sont donc pas associées automatiquement à un parcours. Avec le script de comparaison des heures (mac/foto_zeit_abgleich.py), l’heure réelle peut être ajoutée à partir des originaux RAW. || Estas fotos no contienen hora de captura. Se usa la fecha del archivo (normalmente la de exportación), por eso no se asignan automáticamente a una ruta. Con la comparación de horas de fotos (mac/foto_zeit_abgleich.py) se puede añadir la hora real a partir de los originales RAW.
+Diese Fotos enthalten keine Aufnahmezeit im Foto. Es wird das Dateidatum benutzt (meist der Exportzeitpunkt); sie werden deshalb nicht automatisch einer Tour zugeordnet. Mit dem Foto-Zeit-Abgleich (mac/foto_zeit_abgleich.py) lässt sich die echte Zeit aus den RAW-Originalen nachtragen. || These photos contain no capture time. The file date is used (usually the export time), so they are not assigned to a tour automatically. With the photo time comparison (mac/foto_zeit_abgleich.py) the real time can be added from the RAW originals. || Ces photos ne contiennent pas d’heure de prise de vue. La date du fichier est utilisée (en général l’heure d’export) ; elles ne sont donc pas associées automatiquement à un parcours. Avec le script de comparaison des heures (mac/foto_zeit_abgleich.py), l’heure réelle peut être ajoutée à partir des originaux RAW. || Estas fotos no contienen hora de captura. Se usa la fecha del archivo (normalmente la de exportación), por eso no se asignan automáticamente a una ruta. Con la comparación de horas de fotos (mac/foto_zeit_abgleich.py) se puede añadir la hora real a partir de los originales RAW.
 Fotos auswählen: Klick auf ein Foto wählt dieses und alle späteren des Tages, mit Umschalttaste dieses und alle früheren; danach einzelne Fotos per Klick an- oder abwählen || Selecting photos: a click selects that photo and all later ones of the day, with the Shift key that photo and all earlier ones; afterwards click single photos to add or remove them || Sélection des photos : un clic sélectionne cette photo et toutes les suivantes du jour, avec la touche Maj celle-ci et toutes les précédentes ; ensuite, cliquez sur des photos individuelles pour les ajouter ou les retirer || Seleccionar fotos: un clic selecciona esa foto y todas las posteriores del día; con la tecla Mayús, esa y todas las anteriores; después, haz clic en fotos sueltas para añadirlas o quitarlas
 Fotos bearbeiten || Edit photos || Modifier les photos || Editar fotos
 {} Foto(s) aus dieser Tour entfernen? Sie werden keiner Tour mehr zugeordnet (auch nicht automatisch) und erscheinen unter „Fotos“ bei „Ohne Tour“. || Remove {} photo(s) from this tour? They will no longer be assigned to any tour (not even automatically) and appear under “Photos” in “No tour”. || Retirer {} photo(s) de ce parcours ? Elles ne seront plus associées à aucun parcours (même pas automatiquement) et apparaîtront sous « Photos » dans « Sans parcours ». || ¿Quitar {} foto(s) de esta ruta? Ya no se asignarán a ninguna ruta (ni siquiera automáticamente) y aparecerán en «Fotos», en «Sin ruta».
@@ -385,7 +376,6 @@ Fotos werden hochgeladen … ({} übrig) || Uploading photos … ({} left) || En
 {} Foto(s) konnten nicht hochgeladen werden und bleiben auf dem Handy (Aufzeichnen → „Fotos hochladen“). || {} photo(s) could not be uploaded and stay on the phone (Record → “Upload photos”). || {} photo(s) n’ont pas pu être envoyées et restent sur le téléphone (Enregistrer → « Envoyer les photos »). || No se pudieron subir {} foto(s); se quedan en el móvil (Grabar → «Subir fotos»).
 öffnen kann. Es werden nur die Fotos dieser Tour gezeigt. || can open. Only the photos of this tour are shown. || peut ouvrir. Seules les photos de ce parcours sont affichées. || pueda abrir. Solo se muestran las fotos de esta ruta.
 Alle Fotos || All photos || Toutes les photos || Todas las fotos
-Zu dieser Tour wurden keine Fotos gefunden. Trotzdem Link erstellen? || No photos were found for this tour. Create the link anyway? || Aucune photo trouvée pour ce parcours. Créer quand même le lien ? || No se encontraron fotos de esta ruta. ¿Crear el enlace de todos modos?
 Fotos als Diashow – ohne Benutzerkonto ansehbar || Photos as a slideshow – viewable without a user account || Photos en diaporama – consultable sans compte utilisateur || Fotos como presentación: se pueden ver sin cuenta de usuario
 Druckbare Seite mit Karte, Profil und Fotos || Printable page with map, profile and photos || Page imprimable avec carte, profil et photos || Página imprimible con mapa, perfil y fotos
 Zu dieser Tour gibt es keine Fotos. || There are no photos for this tour. || Il n’y a pas de photos pour ce tour. || No hay fotos de esta ruta.
@@ -400,13 +390,13 @@ Fertige PDF-Datei herunterladen || Download the finished PDF file || Télécharg
 {}: {} km || {}: {} km || {} : {} km || {}: {} km
 Die fünf stärksten Touren || The five strongest tours || Les cinq meilleurs parcours || Las cinco rutas más fuertes
 automatisch erkannt: Touren weit weg von zu Hause an mindestens {} Tagen || detected automatically: tours far from home on at least {} days || détectés automatiquement : parcours loin de chez vous sur au moins {} jours || detectados automáticamente: rutas lejos de casa durante al menos {} días
-Keine Reisen erkannt (es braucht Touren an mindestens {} Tagen am Stück, über 60 km von deinem üblichen Startort entfernt – Wochenendausflüge zählen nicht). Eigene Gruppen legst du mit Tags an. || No trips detected (tours on at least {} days in a row, more than 60 km from your usual starting point, are needed – weekend outings do not count). Create your own groups with tags. || Aucun voyage détecté (il faut des parcours sur au moins {} jours d’affilée, à plus de 60 km de votre point de départ habituel – les sorties de week-end ne comptent pas). Créez vos propres groupes avec des tags. || No se detectó ningún viaje (se necesitan rutas durante al menos {} días seguidos, a más de 60 km de tu punto de salida habitual; las excursiones de fin de semana no cuentan). Crea tus propios grupos con etiquetas.
-Diese Tour planen: Länge, Aufstieg und Zeit nach deinem Tempo || Plan this tour: length, ascent and time at your pace || Planifier ce parcours : longueur, dénivelé positif et durée selon votre rythme || Planificar esta ruta: longitud, desnivel positivo y tiempo según tu ritmo
+Keine Reisen erkannt (es braucht Touren an mindestens {} Tagen am Stück, über 60 km von deinem üblichen Startort entfernt – Wochenendausflüge zählen nicht). Eigene Alben legst du mit Schlagwörtern an. || No trips detected (tours on at least {} days in a row, more than 60 km from your usual starting point, are needed – weekend outings do not count). Create your own groups with tags. || Aucun voyage détecté (il faut des parcours sur au moins {} jours d’affilée, à plus de 60 km de votre point de départ habituel – les sorties de week-end ne comptent pas). Créez vos propres groupes avec des tags. || No se detectó ningún viaje (se necesitan rutas durante al menos {} días seguidos, a más de 60 km de tu punto de salida habitual; las excursiones de fin de semana no cuentan). Crea tus propios grupos con etiquetas.
+Diese Tour planen: Strecke, Aufstieg und Dauer nach deinem Tempo || Plan this tour: length, ascent and time at your pace || Planifier ce parcours : longueur, dénivelé positif et durée selon votre rythme || Planificar esta ruta: longitud, desnivel positivo y tiempo según tu ritmo
 {} Touren mit Wetterdaten || {} tours with weather data || {} parcours avec données météo || {} rutas con datos meteorológicos
-Wetter für alle Touren laden ({} offen) || Load weather for all tours ({} open) || Charger la météo de tous les parcours ({} en attente) || Cargar el tiempo de todas las rutas ({} pendientes)
+Wetter für alle Touren holen ({} offen) || Load weather for all tours ({} open) || Charger la météo de tous les parcours ({} en attente) || Cargar el tiempo de todas las rutas ({} pendientes)
 Noch nichts angelegt. Lege zum Beispiel dein Rad oder deine Wanderschuhe an und wähle die Sportart – dann zählt die App die Kilometer automatisch mit. || Nothing set up yet. For example, add your bike or your hiking boots and choose the sport – the app then counts the distance automatically. || Rien n’a encore été créé. Ajoutez par exemple votre vélo ou vos chaussures de randonnée et choisissez le sport – l’application compte alors la distance automatiquement. || Aún no hay nada creado. Añade, por ejemplo, tu bici o tus botas de senderismo y elige el deporte: la aplicación contará la distancia automáticamente.
 Foto anklicken: dieses und alle späteren des Tages · mit ⇧ Umschalttaste: dieses und alle früheren || Click a photo: this and all later ones of the day · with ⇧ Shift: this and all earlier ones || Cliquez sur une photo : celle-ci et toutes les suivantes du jour · avec ⇧ Maj : celle-ci et toutes les précédentes || Haz clic en una foto: esa y todas las posteriores del día · con ⇧ Mayús: esa y todas las anteriores
-Fehlaufzeichnungen (fast keine Strecke) und Touren, deren Tempo nicht zur Sportart passt. Sie zählen in Rekorden und Statistiken mit. Du kannst die Sportart ändern (bleibt auch nach dem Komoot-Abgleich) oder die Tour ausblenden (Daten bleiben erhalten, jederzeit wieder einblendbar). || Faulty recordings (almost no track) and tours whose pace does not fit the sport. They count in records and statistics. You can change the sport (it stays after the Komoot comparison) or hide the tour (data is kept, can be shown again at any time). || Enregistrements défectueux (presque aucun tracé) et parcours dont le rythme ne correspond pas au sport. Ils comptent dans les records et statistiques. Vous pouvez changer le sport (il est conservé après la comparaison avec Komoot) ou masquer le parcours (les données sont conservées, réaffichage possible à tout moment). || Grabaciones erróneas (casi sin trazado) y rutas cuyo ritmo no encaja con el deporte. Cuentan en récords y estadísticas. Puedes cambiar el deporte (se conserva tras la comparación con Komoot) u ocultar la ruta (los datos se conservan y se puede volver a mostrar en cualquier momento).
+Fehlaufzeichnungen (fast keine Strecke) und Touren, deren Tempo nicht zur Sportart passt. Sie zählen in Bestwerten und Statistiken mit. Du kannst die Sportart ändern (bleibt auch nach dem Komoot-Abgleich) oder die Tour ausblenden (Daten bleiben erhalten, jederzeit wieder einblendbar). || Faulty recordings (almost no track) and tours whose pace does not fit the sport. They count in records and statistics. You can change the sport (it stays after the Komoot comparison) or hide the tour (data is kept, can be shown again at any time). || Enregistrements défectueux (presque aucun tracé) et parcours dont le rythme ne correspond pas au sport. Ils comptent dans les records et statistiques. Vous pouvez changer le sport (il est conservé après la comparaison avec Komoot) ou masquer le parcours (les données sont conservées, réaffichage possible à tout moment). || Grabaciones erróneas (casi sin trazado) y rutas cuyo ritmo no encaja con el deporte. Cuentan en récords y estadísticas. Puedes cambiar el deporte (se conserva tras la comparación con Komoot) u ocultar la ruta (los datos se conservan y se puede volver a mostrar en cualquier momento).
 Fehlaufzeichnung? nur {} m in {} min || Faulty recording? only {} m in {} min || Enregistrement défectueux ? seulement {} m en {} min || ¿Grabación errónea? solo {} m en {} min
 auch bei Komoot || also on Komoot || aussi sur Komoot || también en Komoot
 Ausreißer im Track entfernen, Seilbahn-/Autofahrten herausrechnen || Remove outliers from the track, calculate out cable car/car rides || Supprimer les valeurs aberrantes du tracé, exclure les trajets en téléphérique/voiture || Quitar valores atípicos del trazado y descontar trayectos en teleférico o coche
@@ -421,7 +411,6 @@ Betrachter (nur ansehen) || Viewer (view only) || Lecteur (consultation seule) |
 Dessen Touren, Fotos und Standort sieht der Betrachter || The viewer sees this user’s tours, photos and location || Le lecteur voit les parcours, photos et la position de cet utilisateur || El espectador ve las rutas, fotos y ubicación de este usuario
 Jeder Benutzer hat eigene Touren, Fotos, Notizen, Ziele und sein eigenes Komoot-Konto (Verwaltung). Fotos aus einem Ordner || Every user has their own tours, photos, notes, goals and their own Komoot account (Admin). Photos from a folder || Chaque utilisateur a ses propres parcours, photos, notes, objectifs et son propre compte Komoot (administration). Les photos d’un dossier || Cada usuario tiene sus propias rutas, fotos, notas, metas y su propia cuenta de Komoot (Administración). Las fotos de una carpeta
 werden dem jeweiligen Benutzer zugeordnet. || are assigned to the respective user. || sont attribuées à l’utilisateur concerné. || se asignan al usuario correspondiente.
-Strecke als GPX-Datei herunterladen || Download track as a GPX file || Télécharger le tracé en fichier GPX || Descargar el trazado como archivo GPX
 Link zur Tour an WhatsApp, Signal, E-Mail … senden || Send a link to the tour to WhatsApp, Signal, e-mail … || Envoyer un lien vers le parcours par WhatsApp, Signal, e-mail … || Enviar un enlace a la ruta por WhatsApp, Signal, correo …
 Diashow der Fotos als Link senden – ohne Benutzerkonto ansehbar || Send the photo slideshow as a link – viewable without a user account || Envoyer le diaporama photo sous forme de lien – consultable sans compte utilisateur || Enviar la presentación de fotos como enlace: se puede ver sin cuenta de usuario
 Fotos dieser Tour für andere Benutzer freigeben || Share the photos of this tour with other users || Partager les photos de ce parcours avec d’autres utilisateurs || Compartir las fotos de esta ruta con otros usuarios
@@ -434,14 +423,13 @@ Mit Meine Touren geteilt || Shared with Meine Touren || Partagé avec Meine Tour
 Das Aufzeichnen funktioniert nur in der Android-App „Meine Touren“ (siehe README → Android-App). || Recording only works in the Android app “Meine Touren” (see README → Android app). || L’enregistrement ne fonctionne que dans l’application Android « Meine Touren » (voir README → Application Android). || La grabación solo funciona en la aplicación de Android «Meine Touren» (ver README → Aplicación de Android).
 Version: {} · Meine Touren ({}) || Version: {} · Meine Touren ({}) || Version : {} · Meine Touren ({}) || Versión: {} · Meine Touren ({})
 – bitte prüfen || – please check || – à vérifier || – por favor, revisa
-fehlt – Verwaltung → Komoot: E-Mail und Passwort eintragen || missing – Admin → Komoot: enter e-mail and password || manquant – Administration → Komoot : saisir l’e-mail et le mot de passe || falta – Administración → Komoot: introduce correo y contraseña
-noch keines – Verwaltung → Sicherung: jetzt sichern || none yet – Admin → Backup: back up now || aucune pour l’instant – Administration → Sauvegarde : sauvegarder maintenant || ninguna todavía – Administración → Copia de seguridad: guardar ahora
-{} von {} – Verwaltung → „Routen laden“ || {} of {} – Admin → “Load routes” || {} sur {} – Administration → « Charger les itinéraires » || {} de {} – Administración → «Cargar rutas»
+fehlt – Verwaltung → Touren holen → Komoot: E-Mail und Passwort eintragen || missing – Admin → Komoot: enter e-mail and password || manquant – Administration → Komoot : saisir l’e-mail et le mot de passe || falta – Administración → Komoot: introduce correo y contraseña
+noch keines – Verwaltung → Sicherung & Zugang → Sicherung: jetzt sichern || none yet – Admin → Backup: back up now || aucune pour l’instant – Administration → Sauvegarde : sauvegarder maintenant || ninguna todavía – Administración → Copia de seguridad: guardar ahora
+{} von {} – Verwaltung → Touren holen → Komoot „Fehlende Strecken holen“ || {} of {} – Admin → “Load routes” || {} sur {} – Administration → « Charger les itinéraires » || {} de {} – Administración → «Cargar rutas»
 ✓ Fotos ohne Tour || ✓ Photos without a tour || ✓ Photos sans parcours || ✓ Fotos sin ruta
-{} Touren (davon {} nur lokal) · {} Strecken lokal gespeichert. Karten und Tourdetails nutzen immer die lokal gespeicherten Strecken; Komoot wird nur zum Laden und Hochladen gebraucht. || {} tours ({} of them local only) · {} tracks stored locally. Maps and tour details always use the locally stored tracks; Komoot is only needed for loading and uploading. || {} parcours (dont {} en local uniquement) · {} tracés enregistrés en local. Les cartes et les détails des parcours utilisent toujours les tracés enregistrés en local ; Komoot n’est nécessaire que pour le chargement et l’envoi. || {} rutas ({} solo en local) · {} trazados guardados en local. Los mapas y los detalles de las rutas usan siempre los trazados guardados en local; Komoot solo hace falta para cargar y subir.
-Fehlende Strecken von Komoot lokal speichern || Store missing tracks from Komoot locally || Enregistrer en local les tracés manquants depuis Komoot || Guardar en local los trazados que faltan de Komoot
+{} Touren (davon {} nur lokal) · {} Strecken lokal gespeichert. Karten und Tourdetails nutzen immer die lokal gespeicherten Strecken; Komoot wird nur zum Holen und Hochladen gebraucht. || {} tours ({} of them local only) · {} tracks stored locally. Maps and tour details always use the locally stored tracks; Komoot is only needed for loading and uploading. || {} parcours (dont {} en local uniquement) · {} tracés enregistrés en local. Les cartes et les détails des parcours utilisent toujours les tracés enregistrés en local ; Komoot n’est nécessaire que pour le chargement et l’envoi. || {} rutas ({} solo en local) · {} trazados guardados en local. Los mapas y los detalles de las rutas usan siempre los trazados guardados en local; Komoot solo hace falta para cargar y subir.
 Land, Bundesland und Ort jeder Tour per OpenStreetMap bestimmen (für Suche und Filter) || Determine country, state and place of each tour via OpenStreetMap (for search and filters) || Déterminer le pays, la région et le lieu de chaque parcours via OpenStreetMap (pour la recherche et les filtres) || Determinar el país, la región y el lugar de cada ruta mediante OpenStreetMap (para búsqueda y filtros)
-„Aktualisieren“ lädt neue Touren und deren Strecken von Komoot und liest die Fotos ein. Es wird || “Update” loads new tours and their tracks from Komoot and reads in the photos. It is || « Actualiser » charge les nouveaux parcours et leurs tracés depuis Komoot et lit les photos. Cela est || «Actualizar» carga las rutas nuevas y sus trazados desde Komoot y lee las fotos. Se
+„Komoot aktualisieren“ holt neue Touren und deren Strecken von Komoot und durchsucht die Fotobibliothek. Es wird || “Update” loads new tours and their tracks from Komoot and reads in the photos. It is || « Actualiser » charge les nouveaux parcours et leurs tracés depuis Komoot et lit les photos. Cela est || «Actualizar» carga las rutas nuevas y sus trazados desde Komoot y lee las fotos. Se
 Komoot-Passwort || Komoot password || Mot de passe Komoot || Contraseña de Komoot
 nur || only || uniquement || solo
 Falsche Höhenwerte (z. B. Platzhalter) aus bereits importierten Touren entfernen und Auf-/Abstieg neu berechnen || Remove wrong elevation values (e.g. placeholders) from already imported tours and recalculate ascent/descent || Supprimer les altitudes erronées (p. ex. valeurs fictives) des parcours déjà importés et recalculer dénivelé positif/négatif || Quitar valores de altitud erróneos (p. ej. marcadores) de las rutas ya importadas y recalcular desnivel positivo/negativo
@@ -515,12 +503,12 @@ Das alte Passwort stimmt nicht || The old password is incorrect || L’ancien mo
 Datum bitte als JJJJ-MM-TT angeben || Please enter the date as YYYY-MM-DD || Veuillez saisir la date au format AAAA-MM-JJ || Indica la fecha como AAAA-MM-DD
 Der Code stimmt nicht – prüfe die Uhrzeit des Handys und versuche es noch einmal || The code is incorrect – check the time on your phone and try again || Le code est incorrect – vérifiez l’heure de votre téléphone et réessayez || El código es incorrecto: comprueba la hora del móvil e inténtalo de nuevo
 Der Code stimmt nicht || The code is incorrect || Le code est incorrect || El código es incorrecto
-Der Plan braucht mindestens zwei Punkte || The plan needs at least two points || Le plan nécessite au moins deux points || El plan necesita al menos dos puntos
+Die geplante Tour braucht mindestens zwei Punkte || The planned tour needs at least two points || Le parcours planifié nécessite au moins deux points || La ruta planificada necesita al menos dos puntos
 Der Port muss eine Zahl sein || The port must be a number || Le port doit être un nombre || El puerto debe ser un número
 Die Adresse muss mit http:// oder https:// beginnen || The address must start with http:// or https:// || L’adresse doit commencer par http:// ou https:// || La dirección debe empezar por http:// o https://
 Die Anmeldung ist abgelaufen – bitte noch einmal mit Name und Passwort beginnen || The sign-in has expired – please start again with name and password || La connexion a expiré – veuillez recommencer avec le nom et le mot de passe || El inicio de sesión ha caducado: empieza de nuevo con el nombre y la contraseña
 Die Sicherung konnte nicht geschrieben werden: {} || The backup could not be written: {} || La sauvegarde n’a pas pu être écrite : {} || No se pudo escribir la copia de seguridad: {}
-Die Standort-Freigabe ist ausgeschaltet (Verwaltung → Standort teilen) || Location sharing is turned off (Admin → Share location) || Le partage de position est désactivé (Administration → Partager la position) || El uso compartido de la ubicación está desactivado (Administración → Compartir ubicación)
+Die Standort-Freigabe ist ausgeschaltet (Verwaltung → Handy & App → Standort teilen) || Location sharing is turned off (Admin → Share location) || Le partage de position est désactivé (Administration → Partager la position) || El uso compartido de la ubicación está desactivado (Administración → Compartir ubicación)
 Die Tour ist ausgeblendet – bitte zuerst unter Prüfen wieder einblenden. || The tour is hidden – please unhide it under Review first. || Le parcours est masqué – veuillez d’abord le réafficher sous Vérifier. || La ruta está oculta: vuelve a mostrarla primero en Revisar.
 Die Tourplanung ist in den Einstellungen ausgeschaltet || Tour planning is turned off in the settings || La planification de parcours est désactivée dans les réglages || La planificación de rutas está desactivada en los ajustes
 Die Zwei-Faktor-Anmeldung ist schon eingeschaltet || Two-factor sign-in is already turned on || L’authentification à deux facteurs est déjà activée || El inicio de sesión en dos pasos ya está activado
@@ -552,7 +540,7 @@ Name und mindestens eine Tour nötig || A name and at least one tour are require
 Nicht ausgeblendet || Not hidden || Non masqué || No oculta
 Noch keine Touren geladen || No tours loaded yet || Aucun parcours chargé pour l’instant || Aún no se han cargado rutas
 Nur für Administratoren || Administrators only || Réservé aux administrateurs || Solo para administradores
-Plan nicht gefunden || Plan not found || Plan introuvable || Plan no encontrado
+Geplante Tour nicht gefunden || Plan not found || Plan introuvable || Plan no encontrado
 Position fehlt || Position missing || Position manquante || Falta la posición
 Start und Ziel angeben || Specify start and destination || Indiquez le départ et l’arrivée || Indica el inicio y el destino
 Strecke nicht lokal vorhanden und kein Komoot-Zugang eingetragen || Track not available locally and no Komoot access entered || Tracé non disponible localement et aucun accès Komoot renseigné || Recorrido no disponible en local y sin acceso a Komoot configurado
@@ -582,22 +570,22 @@ Zu viele Versuche || Too many attempts || Trop de tentatives || Demasiados inten
 Automatische Installation ist hier nicht eingerichtet. Im Container ausführen: {} || Automatic installation is not set up here. Run in the container: {} || L’installation automatique n’est pas configurée ici. À exécuter dans le conteneur : {} || La instalación automática no está configurada aquí. Ejecuta en el contenedor: {}
 Geländemodell nicht erreichbar: {} || Terrain model not reachable: {} || Modèle de terrain inaccessible : {} || Modelo de terreno no accesible: {}
 Routing-Dienst nicht erreichbar: {} || Routing service not reachable: {} || Service d’itinéraires inaccessible : {} || Servicio de rutas no accesible: {}
-Update fehlgeschlagen: {} || Update failed: {} || Échec de la mise à jour : {} || Error en la actualización: {}
+Update nicht möglich: {} || Update failed: {} || Échec de la mise à jour : {} || Error en la actualización: {}
 Komoot-Zugang || Komoot access || Accès Komoot || Acceso a Komoot
 gespeichert || saved || enregistré || guardado
 fehlt || missing || manquant || falta
-Verwaltung → Komoot: E-Mail und Passwort eintragen || Admin → Komoot: enter email and password || Administration → Komoot : saisir l’e-mail et le mot de passe || Administración → Komoot: introduce el correo y la contraseña
+Verwaltung → Touren holen → Komoot: E-Mail und Passwort eintragen || Admin → Komoot: enter email and password || Administration → Komoot : saisir l’e-mail et le mot de passe || Administración → Komoot: introduce el correo y la contraseña
 Letzte Sicherung || Last backup || Dernière sauvegarde || Última copia de seguridad
 vor {} h || {} h ago || il y a {} h || hace {} h
 noch keines || none yet || aucune pour l’instant || todavía ninguna
-Verwaltung → Sicherung: jetzt sichern || Admin → Backup: back up now || Administration → Sauvegarde : sauvegarder maintenant || Administración → Copia de seguridad: hacer copia ahora
+Verwaltung → Sicherung & Zugang → Sicherung: jetzt sichern || Admin → Backup: back up now || Administration → Sauvegarde : sauvegarder maintenant || Administración → Copia de seguridad: hacer copia ahora
 Datenbank || Database || Base de données || Base de datos
 {} MB || {} MB || {} Mo || {} MB
 Freier Speicher || Free storage || Espace libre || Espacio libre
 Weniger als 2 GB frei – Platz schaffen || Less than 2 GB free – free up some space || Moins de 2 Go libres – libérez de l’espace || Menos de 2 GB libres: libera espacio
 Touren ohne Strecke || Tours without a track || Parcours sans tracé || Rutas sin recorrido
 {} von {} || {} of {} || {} sur {} || {} de {}
-Verwaltung → „Routen laden“ || Admin → “Load routes” || Administration → « Charger les itinéraires » || Administración → «Cargar rutas»
+Verwaltung → Touren holen → Komoot „Fehlende Strecken holen“ || Admin → “Load routes” || Administration → « Charger les itinéraires » || Administración → «Cargar rutas»
 Fotos ohne Tour || Photos without a tour || Photos sans parcours || Fotos sin ruta
 Sicherungsfehler || Backup error || Erreur de sauvegarde || Error de copia de seguridad
 Sicherungsordner prüfen || Check the backup folder || Vérifiez le dossier de sauvegarde || Comprueba la carpeta de copias
@@ -684,7 +672,6 @@ Entwicklermodus || Developer mode || Mode développeur || Modo desarrollador
 Entwickleransichten anzeigen || Show developer views || Afficher les vues développeur || Mostrar vistas de desarrollador
 Blendet Ansichten ein, die nur zur Fehlersuche gebraucht werden: Selbsttest, vollständiges Protokoll, App-Test, Suche nach verlorenen Aufzeichnungen und Token-Test. || Shows views that are only needed for troubleshooting: self-test, full log, app test, search for lost recordings and token test. || Affiche les vues utiles uniquement au dépannage : autotest, journal complet, test de l'appli, recherche d'enregistrements perdus et test du jeton. || Muestra vistas que solo se necesitan para diagnosticar fallos: autotest, registro completo, prueba de la app, búsqueda de grabaciones perdidas y prueba del token.
 Nur im Entwicklermodus || Developer mode only || Uniquement en mode développeur || Solo en modo desarrollador
-Den App-Test schaltest du in der Verwaltung unter „Übersicht → Entwicklermodus“ ein. || Enable the app test in Admin under "Overview → Developer mode". || Activez le test de l'appli dans l'administration sous « Aperçu → Mode développeur ». || Activa la prueba de la app en Administración, en «Resumen → Modo desarrollador».
 Zur Verwaltung || Go to administration || Vers l'administration || Ir a administración
 Prüfen & Aufräumen || Check & clean up || Vérifier et nettoyer || Revisar y limpiar
 ‹ Verwaltung || ‹ Admin || ‹ Administration || ‹ Administración
@@ -701,7 +688,7 @@ Neuere Tour || Newer tour || Sortie plus récente || Ruta más reciente
 Strecke pro Monat || Distance per month || Distance par mois || Distancia por mes
 Keine Messwerte (Pause) || No readings (pause) || Aucune mesure (pause) || Sin datos (pausa)
 Höhe aus Uhr abgleichen (Zepp) || Match elevation with watch (Zepp) || Rapprocher l’altitude de la montre (Zepp) || Ajustar altitud con el reloj (Zepp)
-⌚ Höhe aus Uhr abgleichen (Zepp) || ⌚ Match elevation with watch (Zepp) || ⌚ Rapprocher l’altitude de la montre (Zepp) || ⌚ Ajustar altitud con el reloj (Zepp)
+⌚ Höhe korrigieren (aus der Uhr) || ⌚ Correct elevation (from the watch) (Zepp) || ⌚ Rapprocher l’altitude de la montre (Zepp) || ⌚ Ajustar altitud con el reloj (Zepp)
 Höhe aus Uhr abgleichen || Match elevation with watch || Rapprocher l’altitude de la montre || Ajustar altitud con el reloj
 Barometrische Höhe der Uhr übernehmen || Use the watch’s barometric elevation || Reprendre l’altitude barométrique de la montre || Usar la altitud barométrica del reloj
 Gleiche Höhe mit der Uhr ab … || Matching elevation with the watch … || Rapprochement de l’altitude avec la montre … || Ajustando la altitud con el reloj …
@@ -717,7 +704,7 @@ Gerät dieser Tour || Device of this tour || Appareil de ce parcours || Disposit
 Gerät dieser Tour ändern || Change the device of this tour || Changer l’appareil de ce parcours || Cambiar el dispositivo de esta ruta
 automatisch (nach Art der Quelle und Datum) || automatic (by type of source and date) || automatique (selon le type de source et la date) || automático (según el tipo de fuente y la fecha)
 Noch kein Gerät angelegt. || No device added yet. || Aucun appareil ajouté pour l’instant. || Aún no hay ningún dispositivo.
-Noch kein Gerät angelegt – in der Verwaltung unter „Meine Geräte“. || No device added yet – see “My devices” in Admin. || Aucun appareil ajouté – voir « Mes appareils » dans l’administration. || Aún no hay dispositivos: consulta «Mis dispositivos» en Administración.
+Noch kein Gerät angelegt – unter Verwaltung → Touren holen → Meine Geräte. || No device added yet – see “My devices” in Admin. || Aucun appareil ajouté – voir « Mes appareils » dans l’administration. || Aún no hay dispositivos: consulta «Mis dispositivos» en Administración.
 + Neues Gerät || + New device || + Nouvel appareil || + Nuevo dispositivo
 Neues Gerät || New device || Nouvel appareil || Nuevo dispositivo
 Gerät bearbeiten || Edit device || Modifier l’appareil || Editar dispositivo
@@ -795,7 +782,7 @@ Deaktivierte Geräte behalten ihre Touren, ihre Messwerte werden aber eingeklapp
 Erweitert || Advanced || Avancé || Avanzado
 Zepp-Kennung || Zepp identifier || Identifiant Zepp || Identificador de Zepp
 So meldet sich die Uhr in der Zepp-Cloud. Mit Kennung werden Touren dieser Uhr auch dann richtig zugeordnet, wenn sich die Zeiträume überschneiden. Am einfachsten über „Geräte aus Zepp ermitteln“ eintragen lassen. || This is how the watch identifies itself in the Zepp cloud. With an identifier, tours from this watch are assigned correctly even if time periods overlap. Easiest is to let “Detect devices from Zepp” fill it in. || C’est ainsi que la montre s’identifie dans le cloud Zepp. Avec l’identifiant, les parcours de cette montre sont attribués correctement même si les périodes se chevauchent. Le plus simple : laisser « Détecter les appareils depuis Zepp » le renseigner. || Así se identifica el reloj en la nube de Zepp. Con el identificador, las rutas de este reloj se asignan bien aunque los periodos se solapen. Lo más fácil es dejar que «Detectar dispositivos desde Zepp» lo rellene.
-Das Bild ist zu groß (höchstens 8 MB). || The image is too large (8 MB at most). || L’image est trop volumineuse (8 Mo au maximum). || La imagen es demasiado grande (8 MB como máximo).
+Das Foto ist zu groß (höchstens 8 MB). || The image is too large (8 MB at most). || L’image est trop volumineuse (8 Mo au maximum). || La imagen es demasiado grande (8 MB como máximo).
 Touren zuordnen || Assign tours || Attribuer des parcours || Asignar rutas
 Alle Touren zwischen zwei Daten gehören ab jetzt fest zu diesem Gerät. Das ist nützlich, wenn die automatische Zuordnung nicht stimmt – zum Beispiel weil du die Uhr zwischendurch gewechselt hast. || All tours between two dates now belong firmly to this device. Useful when the automatic assignment is wrong – for example because you switched watches in between. || Tous les parcours entre deux dates appartiennent désormais à cet appareil. Utile quand l’attribution automatique est fausse – par exemple si vous avez changé de montre entre-temps. || Todas las rutas entre dos fechas pasan a pertenecer a este dispositivo. Útil cuando la asignación automática no es correcta, por ejemplo si cambiaste de reloj entremedias.
 Du kannst das jederzeit bei einzelnen Touren ändern („Quelle“ → „Ändern“ → „Automatisch“). || You can change this for single tours at any time (“Source” → “Change” → “Automatic”). || Vous pouvez le modifier à tout moment pour chaque parcours (« Source » → « Modifier » → « Automatique »). || Puedes cambiarlo en cualquier momento para cada ruta («Fuente» → «Cambiar» → «Automático»).
@@ -811,7 +798,7 @@ Automatisch || Automatic || Automatique || Automático
 nach Art der Quelle und Datum || by type of source and date || selon le type de source et la date || según el tipo de fuente y la fecha
 Zepp merkt sich bei jedem Training, von welchem Gerät es kam. Daraus lässt sich ablesen, welche Uhren du hattest und wann. || Zepp remembers which device each workout came from. That shows which watches you had and when. || Zepp retient de quel appareil provient chaque entraînement. On peut en déduire quelles montres vous avez eues et quand. || Zepp guarda de qué dispositivo procede cada entrenamiento. Así se ve qué relojes tuviste y cuándo.
 Zepp-Verlauf wird gelesen – das kann bei vielen Trainings eine Weile dauern … || Reading the Zepp history – this can take a while with many workouts … || Lecture de l’historique Zepp – cela peut prendre un moment s’il y a beaucoup d’entraînements … || Leyendo el historial de Zepp: puede tardar un rato si hay muchos entrenamientos …
-Zugangsdaten bzw. Token prüfst du in der Verwaltung beim Zepp-Import. || Check your login details or token in Admin under the Zepp import. || Vérifiez vos identifiants ou le jeton dans l’administration, sous l’import Zepp. || Comprueba tus datos de acceso o el token en Administración, en la importación de Zepp.
+Zugangsdaten bzw. Token prüfst du unter Verwaltung → Touren holen → Zepp-Import. || Check your login details or token in Admin under the Zepp import. || Vérifiez vos identifiants ou le jeton dans l’administration, sous l’import Zepp. || Comprueba tus datos de acceso o el token en Administración, en la importación de Zepp.
 Zepp hat keine Trainings mit Quellenkennung gemeldet. || Zepp reported no workouts with a source identifier. || Zepp n’a signalé aucun entraînement avec identifiant de source. || Zepp no ha informado de entrenamientos con identificador de origen.
 Zepp meldet {} Trainings von einer Quelle. || Zepp reports {} workouts from one source. || Zepp signale {} entraînements d’une seule source. || Zepp informa de {} entrenamientos de un solo origen.
 Zepp meldet {} Trainings von {} Quellen. || Zepp reports {} workouts from {} sources. || Zepp signale {} entraînements de {} sources. || Zepp informa de {} entrenamientos de {} orígenes.
@@ -834,7 +821,7 @@ Genauigkeit || Accuracy || Précision || Precisión
 noch nicht ausgewertet || not evaluated yet || pas encore évalué || aún sin evaluar
 Genauigkeit auswerten || Evaluate accuracy || Évaluer la précision || Evaluar la precisión
 Das liefert diese Uhr: || What this watch provides: || Ce que fournit cette montre : || Lo que ofrece este reloj:
-noch keine Messwerte erkannt (Verwaltung → „Messwerte nachladen“) || no measurements detected yet (Admin → “Load measurements”) || aucune mesure détectée pour l’instant (Administration → « Recharger les mesures ») || aún no se han detectado mediciones (Administración → «Cargar mediciones»)
+noch keine Messwerte erkannt (Verwaltung → Touren holen → Zepp-Import „Messwerte holen“) || no measurements detected yet (Admin → “Load measurements”) || aucune mesure détectée pour l’instant (Administration → « Recharger les mesures ») || aún no se han detectado mediciones (Administración → «Cargar mediciones»)
 Noch nicht ausgewertet. || Not evaluated yet. || Pas encore évalué. || Aún sin evaluar.
 Die App vergleicht, was die Uhr gemessen hat, mit der Strecke der Tour, dem Geländemodell und der gespeicherten GPS-Spur. Dafür braucht sie: || The app compares what the watch measured with the tour’s distance, the terrain model and the stored GPS track. For this it needs: || L’application compare ce que la montre a mesuré avec la distance du parcours, le modèle de terrain et la trace GPS enregistrée. Pour cela, il lui faut : || La app compara lo que midió el reloj con la distancia de la ruta, el modelo de terreno y el track GPS guardado. Para ello necesita:
 Touren, die dieser Uhr zugeordnet sind (aktuell: {}). || Tours assigned to this watch (currently: {}). || Parcours attribués à cette montre (actuellement : {}). || Rutas asignadas a este reloj (ahora: {}).
@@ -879,7 +866,7 @@ Aufstieg {} m laut Uhr, {} m laut Gelände || Ascent {} m per watch, {} m per te
 {} GPS-Sprünge || {} GPS jumps || {} sauts GPS || {} saltos GPS
 {} % Lücken oder Pausen || {} % gaps or pauses || {} % de trous ou de pauses || {} % de huecos o pausas
 {} % Puls unplausibel || {} % heart rate implausible || {} % de pouls invraisemblable || {} % de pulso inverosímil
-Höhe aus Uhr übernommen || Elevation taken from watch || Dénivelé repris de la montre || Desnivel tomado del reloj
+Höhe aus der Uhr korrigiert || Elevation taken from watch || Dénivelé repris de la montre || Desnivel tomado del reloj
 Höhe aus Gelände übernommen || Elevation taken from terrain || Dénivelé repris du terrain || Desnivel tomado del terreno
 Es passiert nichts, bevor du es bestätigst. Strecke und Zeit der Tour werden hier nicht geändert. || Nothing happens until you confirm. Distance and time of the tour are not changed here. || Rien ne se passe avant votre confirmation. La distance et la durée du parcours ne sont pas modifiées ici. || No ocurre nada hasta que lo confirmes. Aquí no se cambian la distancia ni el tiempo de la ruta.
 Rechnet Auf- und Abstieg aus dem Geländemodell neu (Kartendaten werden bei Bedarf aus dem Internet geladen). Das Original bleibt gespeichert. || Recalculates ascent and descent from the terrain model (map data is downloaded from the internet if needed). The original stays saved. || Recalcule le dénivelé positif et le dénivelé négatif à partir du modèle de terrain (les données cartographiques sont téléchargées si nécessaire). L’original reste conservé. || Recalcula el desnivel positivo y el desnivel negativo con el modelo de terreno (los datos del mapa se descargan de internet si hace falta). El original queda guardado.
@@ -893,7 +880,6 @@ Wird ausgeführt … || Running … || Exécution … || Ejecutando …
 Aufstieg {} m, Abstieg {} m (vorher {} m / {} m). || Ascent {} m, descent {} m (before: {} m / {} m). || Dénivelé positif {} m, dénivelé négatif {} m (avant : {} m / {} m). || Desnivel positivo {} m, desnivel negativo {} m (antes: {} m / {} m).
 Rückgängig machen || Undo || Annuler || Deshacer
 Zurückgenommen: das Original ist wieder da. || Reverted: the original is back. || Annulé : l’original est de retour. || Revertido: el original está de vuelta.
-Erledigt. || Done. || Terminé. || Hecho.
 Die Kennzahlen der Uhr ändern sich erst beim nächsten „Genauigkeit auswerten“. || The watch’s figures only change at the next “Evaluate accuracy”. || Les chiffres de la montre ne changent qu’à la prochaine « Évaluation de la précision ». || Las cifras del reloj solo cambian en la próxima «Evaluar la precisión».
 Wird gestartet … || Starting … || Démarrage … || Iniciando …
 Läuft … || Running … || En cours … || En curso …
@@ -917,13 +903,13 @@ Die GPS-Spur ist sauber (nur bei {} % der Touren Sprünge). || The GPS track is 
 Bei {} % der Touren springt die GPS-Spur (unmögliches Tempo). || In {} % of tours the GPS track jumps (impossible speed). || Dans {} % des parcours, la trace GPS saute (vitesse impossible). || En el {} % de las rutas el track GPS salta (velocidad imposible).
 Der Puls ist plausibel (nur bei {} % der Touren Aussetzer). || The heart rate is plausible (dropouts in only {} % of tours). || Le pouls est plausible (interruptions dans seulement {} % des parcours). || El pulso es plausible (interrupciones solo en el {} % de las rutas).
 Bei {} % der Touren hat der Puls Aussetzer oder unmögliche Werte. || In {} % of tours the heart rate has dropouts or impossible values. || Dans {} % des parcours, le pouls présente des interruptions ou des valeurs impossibles. || En el {} % de las rutas el pulso tiene interrupciones o valores imposibles.
-Bei einzelnen Touren lässt sich die Höhe aus dem Geländemodell neu berechnen oder mit der Uhr abgleichen (Liste „Auffällige Touren“). || For individual tours the elevation can be recalculated from the terrain model or matched with the watch (list “Conspicuous tours”). || Pour certains parcours, le dénivelé peut être recalculé à partir du modèle de terrain ou rapproché de la montre (liste « Parcours remarquables »). || En rutas concretas se puede recalcular el desnivel con el modelo de terreno o ajustarlo con el reloj (lista «Rutas llamativas»).
+Bei einzelnen Touren lässt sich die Höhe aus dem Geländemodell oder aus der Uhr korrigieren (Liste „Auffällige Touren“). || For individual tours the elevation can be recalculated from the terrain model or matched with the watch (list “Conspicuous tours”). || Pour certains parcours, le dénivelé peut être recalculé à partir du modèle de terrain ou rapproché de la montre (liste « Parcours remarquables »). || En rutas concretas se puede recalcular el desnivel con el modelo de terreno o ajustarlo con el reloj (lista «Rutas llamativas»).
 Jede Änderung ist wiederherstellbar. || Every change can be restored. || Chaque modification est réversible. || Cada cambio se puede restaurar.
 Bei Touren mit GPS-Sprüngen hilft „GPS-Track bereinigen“. || For tours with GPS jumps, “Clean GPS track” helps. || Pour les parcours avec des sauts GPS, « Nettoyer la trace GPS » aide. || En rutas con saltos GPS ayuda «Limpiar track GPS».
 Das Original bleibt erhalten. || The original is kept. || L’original est conservé. || El original se conserva.
 Für Vergleiche der Strecken bitte beachten – die Strecke wird nicht geändert. || Please keep this in mind when comparing distances – the distance is not changed. || À garder en tête pour comparer les distances – la distance n’est pas modifiée. || Tenlo en cuenta al comparar distancias: la distancia no se modifica.
 Höhe aus Geländemodell neu berechnen || Recalculate elevation from terrain model || Recalculer le dénivelé à partir du modèle de terrain || Recalcular el desnivel con el modelo de terreno
-Höhe aus Uhr (Zepp) abgleichen || Match elevation with watch (Zepp) || Rapprocher le dénivelé de la montre (Zepp) || Ajustar el desnivel con el reloj (Zepp)
+Höhe korrigieren (aus der Uhr, Zepp) || Correct elevation (from the watch) (Zepp) || Corriger l’altitude (depuis la montre) (Zepp) || Corregir la altitud (del reloj) (Zepp)
 GPS-Track bereinigen … || Clean GPS track … || Nettoyer la trace GPS … || Limpiar track GPS …
 Nur ein Hinweis: die Strecke wird nicht verändert. || Just a note: the distance is not changed. || Simple remarque : la distance n’est pas modifiée. || Solo una nota: la distancia no se modifica.
 Was liefert diese Uhr? || What does this watch deliver? || Que fournit cette montre ? || ¿Qué datos entrega este reloj?
@@ -998,7 +984,7 @@ Diesem Gerät sind noch keine Touren zugeordnet. || No tours are assigned to thi
 Keine FIT-Originaldatei zu dieser Tour gefunden (gesucht wird in Eingang und Export). || No original FIT file found for this tour (searched in inbox and export). || Aucun fichier FIT d’origine trouvé pour ce parcours (recherche dans la boîte de réception et l’export). || No se encontró ningún archivo FIT original para esta ruta (se busca en la bandeja de entrada y en la exportación).
 Beim Import wird die FIT-Datei in eine GPX-Spur umgewandelt – ihre Messwerte stehen unter „GPX-Spur“. || On import the FIT file is converted into a GPX track – its measurements are listed under “GPX track”. || À l’import, le fichier FIT est converti en trace GPX – ses mesures figurent sous « Trace GPX ». || Al importar, el archivo FIT se convierte en un track GPX; sus medidas aparecen en «Track GPX».
 Zu dieser Tour ist keine GPX-Spur gespeichert (zum Beispiel Komoot-Touren ohne Datei). || No GPX track is stored for this tour (for example Komoot tours without a file). || Aucune trace GPX n’est enregistrée pour ce parcours (par exemple les parcours Komoot sans fichier). || No hay un track GPX guardado para esta ruta (por ejemplo, rutas de Komoot sin archivo).
-Noch keine Messwert-Datei (Verwaltung → „Messwerte nachladen“). || No measurement file yet (Admin → “Reload measurements”). || Pas encore de fichier de mesures (Administration → « Recharger les mesures »). || Aún no hay archivo de medidas (Administración → «Recargar medidas»).
+Noch keine Messwert-Datei (Verwaltung → Touren holen → Zepp-Import „Messwerte holen“). || No measurement file yet (Admin → “Reload measurements”). || Pas encore de fichier de mesures (Administration → « Recharger les mesures »). || Aún no hay archivo de medidas (Administración → «Recargar medidas»).
 vermutlich: {} || probably: {} || probablement : {} || probablemente: {}
 unbekannte Erweiterung der Spur – wird nicht ausgewertet || unknown track extension – not evaluated || extension de trace inconnue – non exploitée || extensión de track desconocida: no se evalúa
 wird aus der Spur gelesen || read from the track || lu depuis la trace || se lee del track
@@ -1026,8 +1012,8 @@ Tempo (Minuten je km) || Pace (minutes per km) || Allure (minutes par km) || Rit
 Kadenz/Schrittfrequenz || Cadence/step rate || Cadence/fréquence de pas || Cadencia/frecuencia de paso
 Höhe bzw. Aufstieg || Elevation or ascent || Altitude ou dénivelé || Altitud o desnivel
 Schwimmen || Swimming || Natation || Natación
-GPS-Position (Breite) || GPS position (latitude) || Position GPS (latitude) || Posición GPS (latitud)
-GPS-Position (Länge) || GPS position (longitude) || Position GPS (longitude) || Posición GPS (longitud)
+GPS-Position (Breitengrad) || GPS position (latitude) || Position GPS (latitude) || Posición GPS (latitud)
+GPS-Position (Längengrad) || GPS position (longitude) || Position GPS (longitude) || Posición GPS (longitud)
 Höhe (genau) || Elevation (precise) || Altitude (précise) || Altitud (precisa)
 Kadenz || Cadence || Cadence || Cadencia
 Kadenz (Bruchteil) || Cadence (fraction) || Cadence (fraction) || Cadencia (fracción)
@@ -1038,8 +1024,7 @@ Zeitstempel || Timestamp || Horodatage || Marca de tiempo
 Start der Sitzung || Start of the session || Début de la session || Inicio de la sesión
 Sportart || Sport || Sport || Deporte
 Unter-Sportart || Sub-sport || Sous-sport || Subdeporte
-Gesamtzeit || Total time || Temps total || Tiempo total
-Zeit in Bewegung || Moving time || Temps en mouvement || Tiempo en movimiento
+Bewegungszeit || Moving time || Temps en mouvement || Tiempo en movimiento
 Gesamtstrecke || Total distance || Distance totale || Distancia total
 Ø Geschwindigkeit || Avg. speed || Vitesse moy. || Velocidad media
 Höchstgeschwindigkeit || Top speed || Vitesse maximale || Velocidad máxima
@@ -1085,7 +1070,7 @@ Wetter laut Uhr || Weather according to the watch || Météo selon la montre || 
 °C Temperatur || °C temperature || °C température || °C temperatura
 % Luftfeuchte || % humidity || % d’humidité || % de humedad
 geladen am || loaded on || chargé le || cargado el
-Von Zepp neu laden || Reload from Zepp || Recharger depuis Zepp || Volver a cargar desde Zepp
+Neu von Zepp holen || Reload from Zepp || Recharger depuis Zepp || Volver a cargar desde Zepp
 Lade von Zepp … || Loading from Zepp … || Chargement depuis Zepp … || Cargando desde Zepp …
 Neu von Zepp geladen. || Reloaded from Zepp. || Rechargé depuis Zepp. || Vuelto a cargar desde Zepp.
 Trainingseffekt: Skala laut Zepp (Rohwert in Zehnteln gelesen, 26 = 2,6) – nicht mit Garmin vergleichbar. || Training effect: Zepp scale (raw value read in tenths, 26 = 2.6) – not comparable with Garmin. || Effet d’entraînement : échelle Zepp (valeur brute lue en dixièmes, 26 = 2,6) – non comparable à Garmin. || Efecto de entrenamiento: escala de Zepp (valor bruto leído en décimas, 26 = 2,6) – no comparable con Garmin.
@@ -1094,7 +1079,7 @@ Pulszonen: Zeiten und Obergrenzen laut Uhr, so gedeutet – die Summe der Zonenz
 Kilometerwerte: Kilometer-Nr., Zeit und Puls je Kilometer laut Uhr; die Spalten sind von Zepp nicht dokumentiert und wurden gegen Dauer und Strecke geprüft. || Kilometre values: kilometre number, time and heart rate per kilometre according to the watch; Zepp does not document the columns, so they were checked against duration and distance. || Valeurs au kilomètre : numéro du kilomètre, temps et fréquence cardiaque par kilomètre selon la montre ; Zepp ne documente pas ces colonnes, elles ont été vérifiées par rapport à la durée et à la distance. || Valores por kilómetro: número de kilómetro, tiempo y frecuencia cardíaca por kilómetro según el reloj; Zepp no documenta las columnas, por eso se comprobaron con la duración y la distancia.
 Der Aufstieg laut Uhr kann vom Aufstieg der Tour abweichen (andere Messung und Glättung). || Ascent according to the watch may differ from the tour’s elevation (different measurement and smoothing). || Le dénivelé selon la montre peut différer de celui du parcours (mesure et lissage différents). || El desnivel según el reloj puede diferir del de la ruta (otra medición y otro suavizado).
 Wetter laut Uhr (Temperatur und Luftfeuchte); die Deutung der Felder ist nicht von Zepp dokumentiert. || Weather according to the watch (temperature and humidity); Zepp does not document how the fields are to be read. || Météo selon la montre (température et humidité) ; Zepp ne documente pas l’interprétation des champs. || Tiempo según el reloj (temperatura y humedad); Zepp no documenta cómo interpretar los campos.
-Die Kilometerwerte konnten nicht geladen werden – „Von Zepp neu laden“ versucht es erneut. || The kilometre values could not be loaded – “Reload from Zepp” tries again. || Les valeurs au kilomètre n’ont pas pu être chargées – « Recharger depuis Zepp » réessaie. || No se pudieron cargar los valores por kilómetro: «Volver a cargar desde Zepp» lo intenta de nuevo.
+Die Kilometerwerte konnten nicht geladen werden – „Neu von Zepp holen“ versucht es erneut. || The kilometre values could not be loaded – “Reload from Zepp” tries again. || Les valeurs au kilomètre n’ont pas pu être chargées – « Recharger depuis Zepp » réessaie. || No se pudieron cargar los valores por kilómetro: «Volver a cargar desde Zepp» lo intenta de nuevo.
 Es ist kein Zepp-Zugang eingerichtet (Einstellungen → Zepp). Gespeicherte Werte bleiben sichtbar. || No Zepp access is set up (Settings → Zepp). Saved values remain visible. || Aucun accès Zepp n’est configuré (Réglages → Zepp). Les valeurs enregistrées restent visibles. || No hay acceso a Zepp configurado (Ajustes → Zepp). Los valores guardados siguen visibles.
 Zepp ist gerade nicht erreichbar oder die Zugangsdaten stimmen nicht. Gespeicherte Werte bleiben sichtbar. || Zepp is currently unreachable or the login details are wrong. Saved values remain visible. || Zepp est actuellement inaccessible ou les identifiants sont incorrects. Les valeurs enregistrées restent visibles. || Zepp no está disponible ahora o los datos de acceso son incorrectos. Los valores guardados siguen visibles.
 Zu dieser Tour wurde im Zepp-Verlauf kein passendes Training gefunden. || No matching training was found in the Zepp history for this tour. || Aucun entraînement correspondant n’a été trouvé dans l’historique Zepp pour ce parcours. || No se encontró ningún entrenamiento que coincida en el historial de Zepp para esta ruta.
@@ -1160,7 +1145,7 @@ Keine Touren im gewählten Zeitraum. || No tours in the selected period. || Aucu
 Zepp-Werte werden beim ersten Öffnen einer Tour gespeichert. || Zepp values are saved when a tour is opened for the first time. || Les valeurs Zepp sont enregistrées à la première ouverture d’un parcours. || Los valores de Zepp se guardan al abrir una ruta por primera vez.
 Für {} Zepp-Touren liegen noch keine Uhr-Werte vor. || There are no watch values yet for {} Zepp tours. || Il n’y a pas encore de valeurs de la montre pour {} parcours Zepp. || Aún no hay valores del reloj para {} rutas de Zepp.
 Belastung: Skala laut Zepp, nicht mit Garmin oder Suunto vergleichbar. || Load: scale according to Zepp, not comparable with Garmin or Suunto. || Charge : échelle selon Zepp, non comparable avec Garmin ou Suunto. || Carga: escala según Zepp, no comparable con Garmin o Suunto.
-Uhr-Daten aller Touren laden || Load watch data of all tours || Charger les données de la montre de tous les parcours || Cargar los datos del reloj de todas las rutas
+Uhr-Daten aller Touren holen || Load watch data of all tours || Charger les données de la montre de tous les parcours || Cargar los datos del reloj de todas las rutas
 Dein typisches Tempo || Your typical pace || Votre allure typique || Tu ritmo habitual
 bergauf, eben, bergab || uphill, flat, downhill || en montée, à plat, en descente || cuesta arriba, llano, cuesta abajo
 Bergauf || Uphill || Montée || Cuesta arriba
@@ -1224,20 +1209,18 @@ OK || OK || OK || OK
 Ja, ausführen || Yes, do it || Oui, exécuter || Sí, ejecutar
 Löschen || Delete || Supprimer || Eliminar
 Entfernen || Remove || Retirer || Quitar
-Trennen || Disconnect || Déconnecter || Desconectar
+Verbindung trennen || Disconnect || Déconnecter || Desconectar
 Verwerfen || Discard || Abandonner || Descartar
 Widerrufen || Revoke || Révoquer || Revocar
 Aufheben || Remove protection || Désactiver || Desactivar
 Ausschalten || Turn off || Désactiver || Desactivar
 Zurücknehmen || Undo || Annuler || Deshacer
 Zurücksetzen || Reset || Réinitialiser || Restablecer
-Original behalten || Keep the original || Garder l’original || Conservar el original
 Neu berechnete Höhen übernehmen? || Apply the recalculated elevations? || Appliquer les altitudes recalculées ? || ¿Aplicar las altitudes recalculadas?
 Neu berechnet: {} m Aufstieg, {} m Abstieg (vorher {} m / {} m). || Recalculated: {} m ascent, {} m descent (before: {} m / {} m). || Recalculé : {} m de dénivelé positif, {} m de dénivelé négatif (avant : {} m / {} m). || Recalculado: {} m de desnivel positivo, {} m de desnivel negativo (antes: {} m / {} m).
 Benutzer und Daten löschen || Delete user and data || Supprimer l’utilisateur et les données || Eliminar usuario y datos
 Der Benutzer UND alle seine Touren, Fotos und Daten werden unwiderruflich gelöscht. || The user AND all their tours, photos and data will be deleted irreversibly. || L’utilisateur ET tous ses parcours, photos et données seront supprimés définitivement. || El usuario Y todas sus rutas, fotos y datos se eliminarán de forma irreversible.
 Import abbrechen? || Cancel the import? || Annuler l’import ? || ¿Cancelar la importación?
-Weiterlaufen lassen || Let it run || Laisser continuer || Dejar que siga
 Zeitkorrektur ebenfalls zurücksetzen? || Reset the time correction as well? || Réinitialiser aussi la correction d’heure ? || ¿Restablecer también la corrección de hora?
 Zuordnung lösen und Zeitkorrektur zurücksetzen || Unassign and reset the time correction || Dissocier et réinitialiser la correction d’heure || Desasignar y restablecer la corrección de hora
 Nur Zuordnung lösen || Only unassign || Dissocier seulement || Solo desasignar
@@ -1251,7 +1234,7 @@ Jetzt automatisch zuordnen? || Assign automatically now? || Associer automatique
 Zuordnen || Assign || Associer || Asignar
 Später || Later || Plus tard || Más tarde
 Höhe aus Geländemodell neu berechnen? || Recalculate elevation from the terrain model? || Recalculer l’altitude à partir du modèle de terrain ? || ¿Recalcular la altitud con el modelo del terreno?
-Höhe aus Uhr (Zepp) abgleichen? || Match elevation with the watch (Zepp)? || Aligner l’altitude sur la montre (Zepp) ? || ¿Ajustar la altitud con el reloj (Zepp)?
+Höhe korrigieren (aus der Uhr, Zepp)? || Correct elevation (from the watch) (Zepp)? || Corriger l’altitude (depuis la montre) (Zepp) ? || ¿Corregir la altitud (del reloj) (Zepp)?
 Höhenkorrektur zurücknehmen? || Undo the elevation correction? || Annuler la correction d’altitude ? || ¿Deshacer la corrección de altitud?
 Ausführen || Run || Exécuter || Ejecutar
 Fortschritt || Progress || Progression || Progreso
@@ -1292,9 +1275,9 @@ Höhe aus dem Geländemodell || elevation from the terrain model || altitude du 
 Der letzte Sammel-Lauf vom {} ist zurückgenommen. || The last bulk run from {} has been undone. || La dernière correction groupée du {} a été annulée. || La última corrección en bloque del {} se ha deshecho.
 Alles rückgängig machen || Undo everything || Tout annuler || Deshacerlo todo
 Nur dieser Lauf wird zurückgenommen; Touren, die du inzwischen selbst geändert hast, bleiben unberührt. || Only this run is undone; tours you have changed yourself in the meantime are left untouched. || Seule cette exécution est annulée ; les parcours que tu as modifiés entre-temps ne sont pas touchés. || Solo se deshace esta ejecución; las rutas que hayas cambiado mientras tanto no se tocan.
-Alle auffälligen Höhen korrigieren … || Correct all conspicuous elevations … || Corriger toutes les altitudes suspectes … || Corregir todas las altitudes llamativas …
+Höhe aller auffälligen Touren korrigieren … || Correct all conspicuous elevations … || Corriger toutes les altitudes suspectes … || Corregir todas las altitudes llamativas …
 Du siehst vorher eine Liste und entscheidest, was geändert wird. || You see a list first and decide what is changed. || Tu vois d’abord une liste et tu décides ce qui est modifié. || Primero ves una lista y decides qué se cambia.
-Auffällige Höhen korrigieren || Correct conspicuous elevations || Corriger les altitudes suspectes || Corregir altitudes llamativas
+Höhe auffälliger Touren korrigieren || Correct conspicuous elevations || Corriger les altitudes suspectes || Corregir altitudes llamativas
 Liste wird geladen … || Loading the list … || Chargement de la liste … || Cargando la lista …
 Keine Tour mit offener Höhen-Auffälligkeit. Hier gibt es nichts zu korrigieren. || No tour with an open elevation anomaly. Nothing to correct here. || Aucun parcours avec une anomalie d’altitude ouverte. Rien à corriger ici. || Ninguna ruta con una anomalía de altitud abierta. Aquí no hay nada que corregir.
 Du siehst zuerst, was sich ändern würde. || First you see what would change. || Tu vois d’abord ce qui changerait. || Primero ves lo que cambiaría.
@@ -1320,7 +1303,6 @@ Aufstieg aller gewählten Touren von {} m auf etwa {} m. Der genaue Wert wird be
 In einem Lauf werden höchstens {} Touren korrigiert; der Rest bleibt offen und lässt sich danach mit einem neuen Start erledigen. || At most {} tours are corrected per run; the rest stays open and can be done afterwards with a new start. || Au plus {} parcours sont corrigés par exécution ; le reste reste ouvert et peut être traité ensuite par un nouveau lancement. || En cada ejecución se corrigen como máximo {} rutas; el resto queda abierto y se puede hacer después con un nuevo inicio.
 Keine Tour ausgewählt. || No tour selected. || Aucun parcours sélectionné. || Ninguna ruta seleccionada.
 Korrigieren … || Correct … || Corriger … || Corregir …
-Korrigieren || Correct || Corriger || Corregir
 {} Touren korrigieren? || Correct {} tours? || Corriger {} parcours ? || ¿Corregir {} rutas?
 {} Tour korrigieren? || Correct {} tour? || Corriger {} parcours ? || ¿Corregir {} ruta?
 Methode: {}. || Method: {}. || Méthode : {}. || Método: {}.
@@ -1406,10 +1388,8 @@ Ein Drittel || One third || Un tiers || Un tercio
 Seite anpassen || Customize page || Personnaliser la page || Personalizar la página
 Baustein hinzufügen || Add widget || Ajouter un bloc || Añadir un bloque
 Standard wiederherstellen || Restore default || Rétablir les réglages par défaut || Restaurar valores predeterminados
-Standard wiederherstellen? || Restore default? || Rétablir les réglages par défaut ? || ¿Restaurar los valores predeterminados?
-Standard wiederhergestellt || Default restored || Réglages par défaut rétablis || Valores predeterminados restaurados
-Reihenfolge, ausgeblendete Abschnitte, Seitenzuordnung und alle hinzugefügten Bausteine der Tourseite (Hauptseite und Auswertung) werden zurückgesetzt. || Order, hidden sections, page assignment and all added widgets of the tour page (main page and evaluation) will be reset. || L’ordre, les sections masquées, l’affectation des pages et tous les blocs ajoutés de la page du parcours (page principale et évaluation) seront réinitialisés. || Se restablecerán el orden, las secciones ocultas, la asignación de páginas y todos los bloques añadidos de la página de la ruta (página principal y evaluación).
-Reihenfolge, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Übersicht werden zurückgesetzt. || Order, hidden sections and all added widgets of the overview will be reset. || L’ordre, les sections masquées et tous les blocs ajoutés de l’aperçu seront réinitialisés. || Se restablecerán el orden, las secciones ocultas y todos los bloques añadidos de la vista general.
+Reihenfolge, ausgeblendete Bausteine, Seitenzuordnung und alle hinzugefügten Bausteine der Tourseite (Hauptseite und Auswertung) werden zurückgesetzt. || Order, hidden sections, page assignment and all added widgets of the tour page (main page and evaluation) will be reset. || L’ordre, les sections masquées, l’affectation des pages et tous les blocs ajoutés de la page du parcours (page principale et évaluation) seront réinitialisés. || Se restablecerán el orden, las secciones ocultas, la asignación de páginas y todos los bloques añadidos de la página de la ruta (página principal y evaluación).
+Reihenfolge, ausgeblendete und alle hinzugefügten Bausteine der Übersicht werden zurückgesetzt. || Order, hidden sections and all added widgets of the overview will be reset. || L’ordre, les sections masquées et tous les blocs ajoutés de l’aperçu seront réinitialisés. || Se restablecerán el orden, las secciones ocultas y todos los bloques añadidos de la vista general.
 Zum Verschieben ziehen oder Pfeil hoch bzw. Pfeil runter drücken. || Drag to move or press Arrow up or Arrow down. || Faites glisser pour déplacer ou appuyez sur la flèche haut ou bas. || Arrastre para mover o pulse la flecha arriba o abajo.
 Zum Verschieben ziehen, oder Pfeil hoch und Pfeil runter drücken || Drag to move, or press Arrow up and Arrow down || Faites glisser pour déplacer, ou appuyez sur la flèche haut et bas || Arrastre para mover, o pulse la flecha arriba y abajo
 Nach oben || Move up || Vers le haut || Hacia arriba
@@ -1421,7 +1401,6 @@ Auf Auswertungsseite || To evaluation page || Vers la page d’évaluation || A 
 Auf Hauptseite || To main page || Vers la page principale || A la página principal
 bleibt immer sichtbar || always visible || toujours visible || siempre visible
 Speichert … || Saving … || Enregistrement … || Guardando …
-Gespeichert || Saved || Enregistré || Guardado
 Nicht gespeichert – nur auf diesem Gerät gemerkt || Not saved – remembered on this device only || Non enregistré – mémorisé sur cet appareil uniquement || No guardado: solo recordado en este dispositivo
 {}: Position {} von {} || {}: position {} of {} || {} : position {} sur {} || {}: posición {} de {}
 {}: ganz oben || {}: at the very top || {} : tout en haut || {}: arriba del todo
@@ -1433,7 +1412,7 @@ Nicht gespeichert – nur auf diesem Gerät gemerkt || Not saved – remembered 
 {}: liegt jetzt auf der Hauptseite || {}: is now on the main page || {} : se trouve maintenant sur la page principale || {}: ahora está en la página principal
 {}: liegt jetzt auf der Auswertungsseite || {}: is now on the evaluation page || {} : se trouve maintenant sur la page d’évaluation || {}: ahora está en la página de evaluación
 Baustein „{}“ hinzugefügt || Widget “{}” added || Bloc « {} » ajouté || Bloque «{}» añadido
-Seite anpassen ist an. Abschnitte ziehen oder mit den Pfeiltasten verschieben. || Customize page is on. Drag sections or move them with the arrow keys. || La personnalisation de la page est activée. Faites glisser les sections ou déplacez-les avec les flèches. || La personalización de la página está activada. Arrastre las secciones o muévalas con las flechas.
+Seite anpassen ist an. Bausteine ziehen oder mit den Pfeiltasten verschieben. || Customize page is on. Drag sections or move them with the arrow keys. || La personnalisation de la page est activée. Faites glisser les sections ou déplacez-les avec les flèches. || La personalización de la página está activada. Arrastre las secciones o muévalas con las flechas.
 Baustein entfernen? || Remove widget? || Supprimer le bloc ? || ¿Quitar el bloque?
 „{}“ wird von dieser Seite entfernt. || “{}” will be removed from this page. || « {} » sera retiré de cette page. || «{}» se quitará de esta página.
 Es sind höchstens 40 Bausteine möglich. || At most 40 widgets are possible. || 40 blocs au maximum sont possibles. || Se admiten como máximo 40 bloques.
@@ -1446,7 +1425,7 @@ Angezeigte Werte || Values shown || Valeurs affichées || Valores mostrados
 Text der Notiz || Text of the note || Texte de la note || Texto de la nota
 Bausteine || Widgets || Blocs || Bloques
 Hier gibt es nichts anzuzeigen || There is nothing to show here || Il n’y a rien à afficher ici || No hay nada que mostrar aquí
-Abschnitte, die du auf die Hauptseite gelegt hast, findest du dort. Mit „Seite anpassen“ lassen sie sich zurückholen. || Sections you moved to the main page are found there. “Customize page” lets you bring them back. || Les sections que vous avez placées sur la page principale s’y trouvent. « Personnaliser la page » permet de les ramener. || Las secciones que ha movido a la página principal están allí. Con «Personalizar la página» puede devolverlas.
+Bausteine, die du auf die Hauptseite gelegt hast, findest du dort. Mit „Seite anpassen“ lassen sie sich zurückholen. || Sections you moved to the main page are found there. “Customize page” lets you bring them back. || Les sections que vous avez placées sur la page principale s’y trouvent. « Personnaliser la page » permet de les ramener. || Las secciones que ha movido a la página principal están allí. Con «Personalizar la página» puede devolverlas.
 Gerät: Messwerte und Training laut Uhr || Device: readings and training according to the watch || Appareil : mesures et entraînement selon la montre || Dispositivo: mediciones y entrenamiento según el reloj
 Einstieg in die Auswertung || Entry to the evaluation || Accès à l’évaluation || Acceso a la evaluación
 Zuletzt unterwegs (Aufmacher) || Last out (headline) || Dernière sortie (à la une) || Última salida (destacado)
@@ -1667,6 +1646,7 @@ Die drei besten Fotos der Tour groß, ausgewählt nach deiner Bewertung und der 
 Ausgewählt nach Bewertung und Schärfe. || Chosen by rating and sharpness. || Choisies selon la note et la netteté. || Elegidas según la valoración y la nitidez.
 Mini-Höhenprofil || Mini elevation profile || Mini profil altimétrique || Mini perfil de altitud
 Das Höhenprofil kompakt, die Linie nach Steigung eingefärbt: bergab, eben, bergauf. || The elevation profile in compact form, the line coloured by gradient: downhill, flat, uphill. || Le profil altimétrique en compact, la ligne colorée selon la pente : descente, plat, montée. || El perfil de altitud compacto, con la línea coloreada según la pendiente: bajada, llano, subida.
+Höhenprofil, tiefster Punkt {}, höchster Punkt {}, Strecke {} || Elevation profile, lowest point {}, highest point {}, length {} || Profil altimétrique, point le plus bas {}, point le plus haut {}, longueur {} || Perfil de altitud, punto más bajo {}, punto más alto {}, longitud {}
 Höhenprofil, tiefster Punkt {}, höchster Punkt {}, Länge {} || Elevation profile, lowest point {}, highest point {}, length {} || Profil altimétrique, point le plus bas {}, point le plus haut {}, longueur {} || Perfil de altitud, punto más bajo {}, punto más alto {}, longitud {}
 höchster Punkt {} m || highest point {} m || point culminant {} m || punto más alto {} m
 Vorheriges Foto || Previous photo || Photo précédente || Foto anterior
@@ -1704,11 +1684,11 @@ Ziel || Goal || Objectif || Objetivo
 Das Jahr ist zu {} % vorbei || The year is {} % over || L’année est écoulée à {} % || El año ha transcurrido en un {} %
 Ring: {} % des Jahresziels erreicht, das Jahr ist zu {} % vorbei || Ring: {} % of the annual goal reached, the year is {} % over || Anneau : {} % de l’objectif annuel atteint, l’année est écoulée à {} % || Anillo: {} % del objetivo anual alcanzado, el año ha transcurrido en un {} %
 Wochen-Serie || Weekly streak || Série hebdomadaire || Racha semanal
-Wie viele Wochen in Folge du mindestens eine Tour gemacht hast, dein Rekord und die letzten 26 Wochen als Punktreihe. || How many weeks in a row you did at least one tour, your record and the last 26 weeks as a row of dots. || Combien de semaines de suite vous avez fait au moins un parcours, votre record et les 26 dernières semaines en rangée de points. || Cuántas semanas seguidas hiciste al menos una ruta, tu récord y las últimas 26 semanas como hilera de puntos.
+Wie viele Wochen in Folge du mindestens eine Tour gemacht hast, dein Bestwert und die letzten 26 Wochen als Punktreihe. || How many weeks in a row you did at least one tour, your record and the last 26 weeks as a row of dots. || Combien de semaines de suite vous avez fait au moins un parcours, votre record et les 26 dernières semaines en rangée de points. || Cuántas semanas seguidas hiciste al menos una ruta, tu récord y las últimas 26 semanas como hilera de puntos.
 1 Woche || 1 week || 1 semaine || 1 semana
 {} Wochen || {} weeks || {} semaines || {} semanas
 Aktuelle Serie || Current streak || Série en cours || Racha actual
-Rekord || Record || Record || Récord
+Bestwert || Record || Record || Récord
 gerade erreicht || just reached || tout juste atteint || recién alcanzado
 Wochen mit Tour || Weeks with a tour || Semaines avec parcours || Semanas con ruta
 in den letzten 26 Wochen || in the last 26 weeks || sur les 26 dernières semaines || en las últimas 26 semanas
@@ -1718,8 +1698,8 @@ Eine Woche zählt, wenn sie mindestens eine Tour enthält (Montag bis Sonntag). 
 Kalender-Heatmap || Calendar heatmap || Carte thermique du calendrier || Mapa de calor del calendario
 Die letzten 52 Wochen als Kalenderfläche: je dunkler ein Tag, desto mehr Kilometer (oder Touren) an diesem Tag. || The last 52 weeks as a calendar grid: the darker a day, the more kilometres (or tours) on that day. || Les 52 dernières semaines en grille de calendrier : plus un jour est foncé, plus il compte de kilomètres (ou de parcours). || Las últimas 52 semanas como cuadrícula de calendario: cuanto más oscuro el día, más kilómetros (o rutas) ese día.
 Färben nach || Colour by || Colorer selon || Colorear según
-Kalender der letzten 52 Wochen: {} Tage mit Touren || Calendar of the last 52 weeks: {} days with tours || Calendrier des 52 dernières semaines : {} jours avec parcours || Calendario de las últimas 52 semanas: {} días con rutas
-{} Tage mit Touren in den letzten 12 Monaten || {} days with tours in the last 12 months || {} jours avec parcours au cours des 12 derniers mois || {} días con rutas en los últimos 12 meses
+Kalender der letzten 52 Wochen: {} Aktive Tage || Calendar of the last 52 weeks: {} active days || Calendrier des 52 dernières semaines : {} jours actifs || Calendario de las últimas 52 semanas: {} días activos
+{} Aktive Tage in den letzten 12 Monaten || {} active days in the last 12 months || {} jours actifs au cours des 12 derniers mois || {} días activos en los últimos 12 meses
 weniger || less || moins || menos
 mehr || more || plus || más
 {} Tage || {} days || {} jours || {} días
@@ -1772,7 +1752,7 @@ Dafür braucht es mindestens drei Touren. || This needs at least three tours. ||
 Sportarten-Verteilung || Sports distribution || Répartition des sports || Distribución de deportes
 Welche Sportarten du wie oft machst, als Ring mit Legende, nach Anzahl der Touren, Kilometern oder Zeit. || Which sports you do and how often, as a ring with a legend, by number of tours, distance or time. || Quels sports vous pratiquez et à quelle fréquence, en anneau avec légende, selon le nombre de parcours, la distance ou le temps. || Qué deportes practicas y con qué frecuencia, como anillo con leyenda, según número de rutas, distancia o tiempo.
 Verteilung nach || Distribution by || Répartition selon || Distribución según
-Zeit unterwegs || Time on the move || Temps en déplacement || Tiempo en marcha
+Dauer || Duration || Durée || Duración
 E-Bike || E-bike || Vélo électrique || Bici eléctrica
 Ski || Skiing || Ski || Esquí
 Ringdiagramm der Sportarten || Ring chart of sports || Diagramme en anneau des sports || Gráfico de anillo de los deportes
@@ -1819,13 +1799,12 @@ Die zuletzt geplanten Touren mit Länge, Aufstieg und geschätzter Dauer, mit Li
 Keine geplanten Touren. || No planned tours. || Aucun parcours planifié. || Ninguna ruta planificada.
 Tour planen › || Plan a tour › || Planifier un parcours › || Planificar una ruta ›
 Ohne Namen || Unnamed || Sans nom || Sin nombre
-1 Plan || 1 plan || 1 plan || 1 plan
 {} Pläne || {} plans || {} plans || {} planes
 Gipfelweg || Summit trail || Chemin du sommet || Camino a la cumbre
 Rund um den See || Around the lake || Tour du lac || Alrededor del lago
-Jahres-Rückblick || Year in review || Rétrospective de l’année || Resumen del año
+Jahresrückblick || Year in review || Rétrospective de l’année || Resumen del año
 Rückblick {} || Look back {} || Rétrospective {} || Retrospectiva {}
-Das Jahr in einer Kachel: Touren, Strecke und Aufstieg, die Monate als Säulen, die längste und die höchste Tour. || The year in one tile: tours, distance and ascent, the months as columns, the longest and the highest tour. || L’année en une tuile : parcours, distance et dénivelé, les mois en colonnes, le plus long et le plus haut parcours. || El año en un mosaico: rutas, distancia y desnivel, los meses como columnas, la ruta más larga y la más alta.
+Das Jahr in einem Baustein: Touren, Strecke und Aufstieg, die Monate als Säulen, die längste und die höchste Tour. || The year in one tile: tours, distance and ascent, the months as columns, the longest and the highest tour. || L’année en une tuile : parcours, distance et dénivelé, les mois en colonnes, le plus long et le plus haut parcours. || El año en un mosaico: rutas, distancia y desnivel, los meses como columnas, la ruta más larga y la más alta.
 Jahr || Year || Année || Año
 Dieses Jahr || This year || Cette année || Este año
 Letztes Jahr || Last year || L’année dernière || El año pasado
@@ -1881,7 +1860,6 @@ Die zuletzt gemachten Touren (3 bis 10, wählbar, auch nur einer Sportart) als L
 Touren, Strecke, Aufstieg und Stunden mit Monatssäulen und Vorjahresvergleich, wählbar nach Sportart und Zeitraum. In der Übersicht steht „Dein Jahr“ schon; hier kannst du weitere mit anderem Filter hinzufügen. || Tours, distance, ascent and hours with monthly columns and a comparison with the previous year, selectable by sport and period. “Your year” is already on the overview; here you can add more with a different filter. || Parcours, distance, dénivelé positif et heures avec colonnes mensuelles et comparaison avec l’année précédente, au choix par sport et période. « Votre année » figure déjà dans l’aperçu ; vous pouvez en ajouter d’autres avec un autre filtre. || Rutas, distancia, desnivel positivo y horas con columnas mensuales y comparación con el año anterior, a elegir por deporte y periodo. «Tu año» ya está en el resumen; aquí puedes añadir más con otro filtro.
 Mit diesem Filter gab es dafür zu wenige Touren. || There were too few tours for this with this filter. || Il y avait trop peu de parcours pour cela avec ce filtre. || Con este filtro hubo muy pocas rutas para esto.
 Ansicht || View || Vue || Vista
-Ansichten || Views || Vues || Vistas
 Ansicht: {} || View: {} || Vue : {} || Vista: {}
 Automatisch ({}) || Automatic ({}) || Automatique ({}) || Automática ({})
 Eine Ansicht ist eine gespeicherte Anordnung dieser Seite ({}). Die Standardansicht erscheint, wenn nichts anderes gewählt ist. || A view is a saved arrangement of this page ({}). The default view appears when nothing else is chosen. || Une vue est une disposition enregistrée de cette page ({}). La vue par défaut s’affiche quand rien d’autre n’est choisi. || Una vista es una disposición guardada de esta página ({}). La vista predeterminada aparece cuando no se elige otra.
@@ -1896,10 +1874,8 @@ Duplizieren: {} || Duplicate: {} || Dupliquer : {} || Duplicar: {}
 Als Standard festlegen: {} || Set as default: {} || Définir par défaut : {} || Establecer como predeterminada: {}
 Exportieren: {} || Export: {} || Exporter : {} || Exportar: {}
 Löschen: {} || Delete: {} || Supprimer : {} || Eliminar: {}
-Anzeigen || Show || Afficher || Mostrar
 Duplizieren || Duplicate || Dupliquer || Duplicar
 Als Standard festlegen || Set as default || Définir par défaut || Establecer como predeterminada
-Exportieren || Export || Exporter || Exportar
 Neue Ansicht || New view || Nouvelle vue || Nueva vista
 Aus Vorlage … || From template … || À partir d’un modèle … || Desde una plantilla …
 Importieren … || Import … || Importer … || Importar …
@@ -1923,7 +1899,6 @@ Ansicht „{}“ || View “{}” || Vue « {} » || Vista «{}»
 Ansicht löschen? || Delete view? || Supprimer la vue ? || ¿Eliminar la vista?
 Die Ansicht „{}“ wird gelöscht. Das lässt sich nicht rückgängig machen. Tipp: Mit „Exportieren“ kannst du sie vorher sichern. || The view “{}” will be deleted. This cannot be undone. Tip: use “Export” to back it up first. || La vue « {} » sera supprimée. Cette action est irréversible. Astuce : sauvegardez-la d’abord avec « Exporter ». || Se eliminará la vista «{}». No se puede deshacer. Consejo: guárdala antes con «Exportar».
 Ansicht umbenennen || Rename view || Renommer la vue || Renombrar vista
-Umbenennen || Rename || Renommer || Renombrar
 Anlegen || Create || Créer || Crear
 Name der Ansicht || Name of the view || Nom de la vue || Nombre de la vista
 Bitte einen Namen eingeben. || Please enter a name. || Veuillez saisir un nom. || Introduce un nombre.
@@ -1941,9 +1916,8 @@ Training || Training || Entraînement || Entrenamiento
 Kompakt || Compact || Compact || Compacto
 Wandern || Hiking || Randonnée || Senderismo
 Radtour / Training || Bike tour / training || Sortie vélo / entraînement || Ruta en bici / entrenamiento
-Für alle, die gern draußen sind: dein Jahresziel, Meilensteine, die Kalender-Heatmap, die letzten Touren und deine Rekorde. || For everyone who loves being outdoors: your yearly goal, milestones, the calendar heatmap, recent tours and your records. || Pour tous ceux qui aiment être dehors : votre objectif annuel, les jalons, la carte de chaleur du calendrier, les derniers parcours et vos records. || Para quienes disfrutan al aire libre: tu objetivo anual, hitos, el mapa de calor del calendario, las últimas rutas y tus récords.
+Für alle, die gern draußen sind: dein Jahresziel, Meilensteine, die Kalender-Heatmap, die letzten Touren und deine Bestwerte. || For everyone who loves being outdoors: your yearly goal, milestones, the calendar heatmap, recent tours and your records. || Pour tous ceux qui aiment être dehors : votre objectif annuel, les jalons, la carte de chaleur du calendrier, les derniers parcours et vos records. || Para quienes disfrutan al aire libre: tu objetivo anual, hitos, el mapa de calor del calendario, las últimas rutas y tus récords.
 Für den Blick auf Form und Regelmäßigkeit: Belastung und Erholung, Wochen-Serie, diese Woche, Sportarten und der Jahresvergleich. || For a view of fitness and regularity: load and recovery, weekly streak, this week, sports and the year comparison. || Pour suivre forme et régularité : charge et récupération, série de semaines, cette semaine, sports et comparaison annuelle. || Para ver forma y regularidad: carga y recuperación, racha semanal, esta semana, deportes y comparación anual.
-Für den Blick zurück: Dein Jahr, der Jahres-Rückblick, Heute vor X Jahren, Wiederentdecken und deine Rekorde. || For looking back: Your year, the year review, X years ago today, Rediscover and your records. || Pour regarder en arrière : Votre année, la rétrospective annuelle, Il y a X ans aujourd’hui, Redécouvrir et vos records. || Para mirar atrás: Tu año, el resumen del año, Hace X años hoy, Redescubrir y tus récords.
 Wenig auf einen Blick: vier Bausteine in halber Breite, auf dem Handy untereinander. || Little at a glance: four blocks at half width, stacked on a phone. || Peu d’éléments en un coup d’œil : quatre blocs en demi-largeur, empilés sur téléphone. || Poco de un vistazo: cuatro bloques a media anchura, apilados en el móvil.
 Für Wanderungen: Karte und Höhenprofil, die Gipfel-Tafel, Tageslicht, Wetter und die Fotos der Tour. || For hikes: map and elevation profile, the summit table, daylight, weather and the photos of the tour. || Pour les randonnées : carte et profil d’altitude, tableau des sommets, lumière du jour, météo et photos du parcours. || Para excursiones: mapa y perfil de altitud, tabla de cumbres, luz diurna, tiempo y las fotos de la ruta.
 Für Rad und Training: Karte und Profil, Kilometer-Splits, Steigungs-Verteilung, Puls-Zonen, Bewegung und Pause und der Vergleich mit früheren Touren. || For cycling and training: map and profile, kilometre splits, gradient distribution, heart-rate zones, moving and resting time and the comparison with earlier tours. || Pour le vélo et l’entraînement : carte et profil, temps par kilomètre, répartition des pentes, zones de fréquence cardiaque, mouvement et pauses et comparaison avec des parcours précédents. || Para bici y entrenamiento: mapa y perfil, parciales por kilómetro, distribución de pendientes, zonas de pulso, movimiento y pausa y la comparación con rutas anteriores.
@@ -1968,7 +1942,7 @@ Die Datei ist kein gültiges JSON. || The file is not valid JSON. || Le fichier 
 Die Prüfung ist nicht möglich (keine Verbindung zum Server?). Es wurde nichts übernommen. || The check is not possible (no connection to the server?). Nothing was adopted. || La vérification est impossible (pas de connexion au serveur ?). Rien n’a été repris. || No se puede comprobar (¿sin conexión con el servidor?). No se ha adoptado nada.
 Diese Datei gehört zur Tourseite. Öffne dort „Seite anpassen“ → „Ansichten“, um sie zu importieren. || This file belongs to the tour page. Open “Customize page” → “Views” there to import it. || Ce fichier appartient à la page du parcours. Ouvrez-y « Personnaliser la page » → « Vues » pour l’importer. || Este archivo pertenece a la página de la ruta. Abre allí «Personalizar página» → «Vistas» para importarlo.
 Diese Datei gehört zur Übersicht. Öffne dort „Seite anpassen“ → „Ansichten“, um sie zu importieren. || This file belongs to the overview. Open “Customize page” → “Views” there to import it. || Ce fichier appartient à l’aperçu. Ouvrez-y « Personnaliser la page » → « Vues » pour l’importer. || Este archivo pertenece al resumen. Abre allí «Personalizar página» → «Vistas» para importarlo.
-Alles in dieser Ansicht wird auf den Standard zurückgesetzt: Reihenfolge, ausgeblendete Abschnitte und alle hinzugefügten Bausteine. Andere Ansichten bleiben unverändert. || Everything in this view is reset to the default: order, hidden sections and all added blocks. Other views stay unchanged. || Tout dans cette vue est rétabli par défaut : ordre, sections masquées et tous les blocs ajoutés. Les autres vues restent inchangées. || Todo en esta vista vuelve al estándar: orden, secciones ocultas y todos los bloques añadidos. Las demás vistas no cambian.
+Alles in dieser Ansicht wird auf den Standard zurückgesetzt: Reihenfolge, ausgeblendete und alle hinzugefügten Bausteine. Andere Ansichten bleiben unverändert. || Everything in this view is reset to the default: order, hidden sections and all added blocks. Other views stay unchanged. || Tout dans cette vue est rétabli par défaut : ordre, sections masquées et tous les blocs ajoutés. Les autres vues restent inchangées. || Todo en esta vista vuelve al estándar: orden, secciones ocultas y todos los bloques añadidos. Las demás vistas no cambian.
 Filter der Statistik || Statistics filter || Filtre des statistiques || Filtro de las estadísticas
 Zeitraum: Jahr || Period: year || Période : année || Periodo: año
 Zeitraum: weitere || Period: more || Période : autres || Periodo: más
@@ -1984,8 +1958,8 @@ Zeitraum gilt hier nicht || Period does not apply here || La période ne s’app
 Zeitraum gilt hier nur als Jahr || Period applies here as a year only || La période ne s’applique ici qu’en année || El periodo solo se aplica aquí como año
 Ziele || Goals || Objectifs || Objetivos
 Strecke pro Monat oder Jahr || Distance per month or year || Distance par mois ou par année || Distancia por mes o año
-Bestwerte || Best values || Meilleures valeurs || Mejores valores
-Aktivität im Jahr || Activity in the year || Activité dans l’année || Actividad en el año
+Bestwerte || Records || Records || Récords
+Touren im Jahr || Tours in the year || Activité dans l’année || Rutas en el año
 Monatsvergleich || Month comparison || Comparaison des mois || Comparación de meses
 Entwicklung || Trend over time || Évolution || Evolución
 Streckenlängen || Route lengths || Longueurs des parcours || Longitudes de las rutas
@@ -1999,7 +1973,7 @@ Gilt der Filter oben auf der Seite, sind Sportart und Zeitraum hier nicht einste
 Noch kein Ziel || No goal yet || Pas encore d’objectif || Aún sin objetivo
 1 Ziel || 1 goal || 1 objectif || 1 objetivo
 {} Ziele || {} goals || {} objectifs || {} objetivos
-{} Tage mit Touren || {} days with tours || {} jours avec sorties || {} días con rutas
+{} Aktive Tage || {} active days || {} jours avec sorties || {} días activos
 Stärkster Monat: {} || Strongest month: {} || Mois le plus fort : {} || Mes más fuerte: {}
 Längste Tour {} km || Longest tour {} km || Plus longue sortie {} km || Ruta más larga {} km
 Das Jahr {} || The year {} || L’année {} || El año {}
@@ -2019,14 +1993,14 @@ Trend: steigend || Trend: rising || Tendance : à la hausse || Tendencia: al alz
 Trend: fallend || Trend: falling || Tendance : à la baisse || Tendencia: a la baja
 Trend: gleichbleibend || Trend: steady || Tendance : stable || Tendencia: estable
 Welche Monate des Jahres am stärksten sind: zwölf Säulen von Januar bis Dezember, nach Strecke, Aufstieg, Dauer oder Anzahl der Touren, mit dem stärksten Monat hervorgehoben. || Which months of the year are strongest: twelve bars from January to December, by distance, ascent, hours or number of tours, with the strongest month highlighted. || Les mois les plus forts de l’année : douze barres de janvier à décembre, selon la distance, le dénivelé, les heures ou le nombre de sorties, avec le mois le plus fort mis en évidence. || Qué meses del año son los más fuertes: doce barras de enero a diciembre, según distancia, desnivel positivo, horas o número de rutas, con el mes más fuerte resaltado.
-Wie sich dein Tempo (km/h) oder die Länge deiner Touren (km pro Tour) über die Zeit entwickelt, als Linie je Monat (bei langen Zeiträumen je Jahr) mit gestrichelter Trend-Linie. || How your pace (km/h) or the length of your tours (km per tour) develops over time, as a line per month (per year for long periods) with a dashed trend line. || Comment évoluent votre allure (km/h) ou la longueur de vos sorties (km par sortie) dans le temps, en ligne par mois (par année pour les longues périodes) avec une ligne de tendance en pointillés. || Cómo evolucionan tu ritmo (km/h) o la longitud de tus rutas (km por ruta) con el tiempo, como línea por mes (por año en periodos largos) con una línea de tendencia discontinua.
+Wie sich dein Tempo (km/h) oder die Strecke deiner Touren (km pro Tour) über die Zeit entwickelt, als Linie je Monat (bei langen Zeiträumen je Jahr) mit gestrichelter Trend-Linie. || How your pace (km/h) or the length of your tours (km per tour) develops over time, as a line per month (per year for long periods) with a dashed trend line. || Comment évoluent votre allure (km/h) ou la longueur de vos sorties (km par sortie) dans le temps, en ligne par mois (par année pour les longues périodes) avec une ligne de tendance en pointillés. || Cómo evolucionan tu ritmo (km/h) o la longitud de tus rutas (km por ruta) con el tiempo, como línea por mes (por año en periodos largos) con una línea de tendencia discontinua.
 Wie lang deine Touren sind: ein Histogramm der Strecken in Klassen von unter 5 bis über 50 Kilometer. || How long your tours are: a histogram of distances in classes from under 5 to over 50 kilometres. || La longueur de vos sorties : un histogramme des distances par classes, de moins de 5 à plus de 50 kilomètres. || Cuánto duran tus rutas: un histograma de distancias en clases de menos de 5 a más de 50 kilómetros.
 Wie sich dein Aufstieg im Lauf eines Jahres aufsummiert, als Linie, dazu das Vorjahr gestrichelt. Gezeigt wird das gewählte Jahr, sonst das jüngste Jahr mit Touren. || How your ascent adds up over a year, as a line, with the previous year dashed. The chosen year is shown, otherwise the most recent year with tours. || Comment votre dénivelé s’additionne au fil d’une année, en ligne, avec l’année précédente en pointillés. L’année choisie est affichée, sinon la plus récente avec des sorties. || Cómo se acumula tu desnivel a lo largo de un año, como línea, con el año anterior discontinuo. Se muestra el año elegido; si no, el más reciente con rutas.
 Deine besten Touren als Liste mit Link: nach Strecke, Aufstieg, Dauer oder Tempo, drei bis zehn Einträge. || Your best tours as a list with links: by distance, ascent, duration or pace, three to ten entries. || Vos meilleures sorties en liste avec lien : selon la distance, le dénivelé, la durée ou l’allure, de trois à dix entrées. || Tus mejores rutas como lista con enlace: por distancia, desnivel positivo, duración o ritmo, de tres a diez entradas.
 Für den Blick auf ein Jahr: Kennzahlen, Monate, Aufstieg im Jahresverlauf, die besten Touren und die Kalender-Heatmap. || For looking at a year: key figures, months, ascent over the year, the best tours and the calendar heatmap. || Pour regarder une année : chiffres clés, mois, dénivelé positif au fil de l’année, meilleures sorties et carte thermique du calendrier. || Para ver un año: cifras clave, meses, desnivel positivo a lo largo del año, las mejores rutas y el mapa de calor del calendario.
 Für den Blick auf Form und Entwicklung: Belastung und Erholung, dein typisches Tempo, die Entwicklung deines Tempos, der Monatsvergleich und die Streckenlängen. || For looking at form and progress: load and recovery, your typical pace, how your pace develops, the month comparison and the route lengths. || Pour regarder la forme et l’évolution : charge et récupération, votre allure typique, l’évolution de votre allure, la comparaison des mois et les longueurs de parcours. || Para ver la forma y la evolución: carga y recuperación, tu ritmo típico, la evolución de tu ritmo, la comparación de meses y las longitudes de ruta.
 Wenig auf einen Blick: Kennzahlen ganz oben, darunter vier Bausteine in halber Breite, auf dem Handy untereinander. || Little at a glance: key figures at the top, below them four blocks at half width, stacked on a phone. || Peu d’éléments en un coup d’œil : chiffres clés en haut, dessous quatre blocs en demi-largeur, empilés sur téléphone. || Poco de un vistazo: cifras clave arriba y debajo cuatro bloques a media anchura, apilados en el móvil.
-Reihenfolge, Breiten, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Statistik werden zurückgesetzt. Der Filter oben bleibt, wie er ist. || Order, widths, hidden sections and all added blocks of the statistics are reset. The filter at the top stays as it is. || L’ordre, les largeurs, les sections masquées et tous les blocs ajoutés des statistiques sont réinitialisés. Le filtre en haut reste tel quel. || Se restablecen el orden, los anchos, las secciones ocultas y todos los bloques añadidos de las estadísticas. El filtro de arriba se mantiene.
+Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Statistik werden zurückgesetzt. Der Filter oben bleibt, wie er ist. || Order, widths, hidden sections and all added blocks of the statistics are reset. The filter at the top stays as it is. || L’ordre, les largeurs, les sections masquées et tous les blocs ajoutés des statistiques sont réinitialisés. Le filtre en haut reste tel quel. || Se restablecen el orden, los anchos, las secciones ocultas y todos los bloques añadidos de las estadísticas. El filtro de arriba se mantiene.
 Diese Datei gehört zur Statistik. Öffne dort „Seite anpassen“ → „Ansichten“, um sie zu importieren. || This file belongs to the statistics. Open “Customize page” → “Views” there to import it. || Ce fichier appartient aux statistiques. Ouvrez-y « Personnaliser la page » → « Vues » pour l’importer. || Este archivo pertenece a las estadísticas. Abre allí «Personalizar página» → «Vistas» para importarlo.
 Ungespeicherte Änderungen || Unsaved changes || Modifications non enregistrées || Cambios sin guardar
 Als neue Ansicht speichern … || Save as new view … || Enregistrer comme nouvelle vue … || Guardar como vista nueva …
@@ -2041,7 +2015,6 @@ Verworfen || Discarded || Abandonné || Descartado
 Als neue Ansicht „{}“ gespeichert || Saved as new view “{}” || Enregistré comme nouvelle vue « {} » || Guardado como vista nueva «{}»
 geändert || changed || modifié || modificado
 Ansicht speichern || Save view || Enregistrer la vue || Guardar vista
-Ansicht gespeichert || View saved || Vue enregistrée || Vista guardada
 Änderung am Filter verworfen || Filter change discarded || Modification du filtre abandonnée || Cambio del filtro descartado
 In dieser Ansicht speichern || Save in this view || Enregistrer dans cette vue || Guardar en esta vista
 Der Filter (Sportart und Zeitraum) gehört zur Ansicht „{}“. Er ist noch nicht gespeichert. || The filter (sport and period) belongs to the view “{}”. It is not saved yet. || Le filtre (sport et période) fait partie de la vue « {} ». Il n'est pas encore enregistré. || El filtro (deporte y periodo) pertenece a la vista «{}». Todavía no está guardado.
@@ -2082,14 +2055,14 @@ Wird nur angezeigt, wenn seit mindestens {} Tagen keine Tour mehr gemacht wurde.
 Seit 1 Tag keine Tour. || No tour for 1 day. || Aucun parcours depuis 1 jour. || Ninguna ruta desde hace 1 día.
 Seit {} Tagen keine Tour. || No tour for {} days. || Aucun parcours depuis {} jours. || Ninguna ruta desde hace {} días.
 Letzte Tour: || Last tour: || Dernier parcours : || Última ruta:
-Rekord-Tour || Record tour || Parcours record || Ruta récord
+Bestwert-Tour || Record tour || Parcours record || Ruta récord
 Erscheint nur, wenn du kürzlich deine längste Tour, deinen größten Aufstieg oder dein schnellstes Tempo aller Zeiten erreicht hast. || Only appears when you have recently reached your longest tour, most ascent or fastest pace of all time. || N’apparaît que si vous avez récemment atteint votre plus longue sortie, le plus de dénivelé ou votre allure la plus rapide de tous les temps. || Solo aparece si has alcanzado hace poco tu ruta más larga, el mayor desnivel o tu ritmo más rápido de todos los tiempos.
 Zeitraum in Tagen (so lange bleibt der Hinweis) || Period in days (how long the notice stays) || Période en jours (durée d’affichage) || Periodo en días (cuánto tiempo permanece el aviso)
 Wird nur angezeigt, wenn du heute oder gestern deine längste Tour, deinen größten Aufstieg oder das schnellste Tempo aller Zeiten erreicht hast. || Only shown if you reached your longest tour, most ascent or fastest pace of all time today or yesterday. || Affiché uniquement si vous avez atteint aujourd’hui ou hier votre plus longue sortie, le plus de dénivelé ou votre allure la plus rapide de tous les temps. || Solo se muestra si hoy o ayer alcanzaste tu ruta más larga, el mayor desnivel o tu ritmo más rápido de todos los tiempos.
 Wird nur angezeigt, wenn du in den letzten {} Tagen deine längste Tour, deinen größten Aufstieg oder das schnellste Tempo aller Zeiten erreicht hast. || Only shown if you reached your longest tour, most ascent or fastest pace of all time in the last {} days. || Affiché uniquement si vous avez atteint au cours des {} derniers jours votre plus longue sortie, le plus de dénivelé ou votre allure la plus rapide de tous les temps. || Solo se muestra si en los últimos {} días alcanzaste tu ruta más larga, el mayor desnivel o tu ritmo más rápido de todos los tiempos.
 Voraussetzung: mindestens 5 Touren. || Requirement: at least 5 tours. || Condition : au moins 5 parcours. || Requisito: al menos 5 rutas.
-1 Rekord || 1 record || 1 record || 1 récord
-{} Rekorde || {} records || {} records || {} récords
+1 Bestwert || 1 record || 1 record || 1 récord
+{} Bestwerte || {} records || {} records || {} récords
 Wochenziel || Weekly goal || Objectif hebdomadaire || Objetivo semanal
 Zeigt, ob du dein Wochenziel in Kilometern oder Touren erreicht hast oder wie viel noch fehlt, mit Fortschrittsbalken. Ohne gesetztes Ziel ist der Baustein unsichtbar. || Shows whether you have reached your weekly goal in kilometres or tours, or how much is still missing, with a progress bar. Without a goal the block is invisible. || Indique si vous avez atteint votre objectif hebdomadaire en kilomètres ou en parcours, ou ce qu’il manque encore, avec une barre de progression. Sans objectif défini, le bloc est invisible. || Muestra si has alcanzado tu objetivo semanal en kilómetros o rutas, o cuánto falta, con barra de progreso. Sin objetivo definido, el bloque es invisible.
 Wochenziel (0 = kein Ziel) || Weekly goal (0 = no goal) || Objectif hebdomadaire (0 = aucun objectif) || Objetivo semanal (0 = sin objetivo)
@@ -2113,7 +2086,7 @@ Wird nur angezeigt, wenn deine Belastung laut Uhr über dem Üblichen liegt und 
 Voraussetzung: Trainingsdaten der Uhr. || Requirement: training data from the watch. || Condition : données d’entraînement de la montre. || Requisito: datos de entrenamiento del reloj.
 Die Belastung stammt aus den Trainingsdaten deiner Uhr und ist keine medizinische Empfehlung. || The load comes from your watch’s training data and is not a medical recommendation. || La charge provient des données d’entraînement de votre montre et ne constitue pas une recommandation médicale. || La carga procede de los datos de entrenamiento de tu reloj y no es una recomendación médica.
 Mehr in der Statistik › || More in the statistics › || Plus dans les statistiques › || Más en las estadísticas ›
-Datensicherung || Data backup || Sauvegarde des données || Copia de seguridad de los datos
+Sicherung || Backup || Sauvegarde || Copia de seguridad
 Erscheint nur, wenn die letzte Sicherung deiner Daten zu alt ist, fehlt oder fehlgeschlagen ist. || Only appears when the latest backup of your data is too old, missing or has failed. || N’apparaît que si la dernière sauvegarde de vos données est trop ancienne, manque ou a échoué. || Solo aparece si la última copia de seguridad de tus datos es demasiado antigua, falta o ha fallado.
 Hinweis, wenn die letzte Sicherung so viele Tage alt ist || Notice when the latest backup is this many days old || Remarque lorsque la dernière sauvegarde a ce nombre de jours || Aviso cuando la última copia tenga este número de días
 Wird nur angezeigt, wenn die letzte Sicherung mindestens einen Tag alt ist, fehlt oder fehlgeschlagen ist. || Only shown if the latest backup is at least one day old, missing or has failed. || Affiché uniquement si la dernière sauvegarde date d’au moins un jour, manque ou a échoué. || Solo se muestra si la última copia tiene al menos un día, falta o ha fallado.
@@ -2124,9 +2097,9 @@ Die letzte Sicherung ist 1 Tag alt. || The latest backup is 1 day old. || La der
 Die letzte Sicherung ist {} Tage alt. || The latest backup is {} days old. || La dernière sauvegarde date de {} jours. || La última copia tiene {} días.
 Letzte Sicherung: {} || Latest backup: {} || Dernière sauvegarde : {} || Última copia: {}
 Zur Sicherung › || To backup › || Vers la sauvegarde › || A la copia de seguridad ›
-Alle gerade aktiven Hinweise gebündelt in einer Liste: Jahresziel, Meilenstein, Auffälligkeiten, Pause, Rekord, Wochenziel, Erholung, Sicherung. Nur sichtbar, wenn mindestens einer aktiv ist. Empfohlen für den Alltag. || All currently active notices bundled in one list: annual goal, milestone, anomalies, break, record, weekly goal, recovery, backup. Only visible when at least one is active. Recommended for everyday use. || Tous les avis actuellement actifs réunis dans une liste : objectif annuel, étape, anomalies, pause, record, objectif hebdomadaire, récupération, sauvegarde. Visible uniquement si au moins un est actif. Recommandé au quotidien. || Todos los avisos activos reunidos en una lista: objetivo anual, hito, anomalías, pausa, récord, objetivo semanal, recuperación, copia de seguridad. Solo visible si hay al menos uno activo. Recomendado para el día a día.
+Alle gerade aktiven Hinweise gebündelt in einer Liste: Jahresziel, Meilenstein, Auffälligkeiten, Pause, Bestwert, Wochenziel, Erholung, Sicherung. Nur sichtbar, wenn mindestens einer aktiv ist. Empfohlen für den Alltag. || All currently active notices bundled in one list: annual goal, milestone, anomalies, break, record, weekly goal, recovery, backup. Only visible when at least one is active. Recommended for everyday use. || Tous les avis actuellement actifs réunis dans une liste : objectif annuel, étape, anomalies, pause, record, objectif hebdomadaire, récupération, sauvegarde. Visible uniquement si au moins un est actif. Recommandé au quotidien. || Todos los avisos activos reunidos en una lista: objetivo anual, hito, anomalías, pausa, récord, objetivo semanal, recuperación, copia de seguridad. Solo visible si hay al menos uno activo. Recomendado para el día a día.
 Berücksichtigte Hinweise || Notices to include || Remarques prises en compte || Avisos que se tienen en cuenta
-Sportart (für Ziele, Pause, Rekord, Meilenstein und Wochenziel) || Sport (for goals, break, record, milestone and weekly goal) || Sport (pour les objectifs, la pause, le record, l’étape et l’objectif hebdomadaire) || Deporte (para objetivos, pausa, récord, hito y objetivo semanal)
+Sportart (für Ziele, Pause, Bestwert, Meilenstein und Wochenziel) || Sport (for goals, break, record, milestone and weekly goal) || Sport (pour les objectifs, la pause, le record, l’étape et l’objectif hebdomadaire) || Deporte (para objetivos, pausa, récord, hito y objetivo semanal)
 Wochenziel in || Weekly goal in || Objectif hebdomadaire en || Objetivo semanal en
 Wird nur angezeigt, wenn mindestens einer der gewählten Hinweise aktiv ist: {}. || Only shown if at least one of the selected notices is active: {}. || Affiché uniquement si au moins un des avis sélectionnés est actif : {}. || Solo se muestra si al menos uno de los avisos elegidos está activo: {}.
 1 Hinweis || 1 notice || 1 remarque || 1 aviso
@@ -2147,7 +2120,7 @@ Mit Hinweisen || With notices || Avec avis || Con avisos
 Für den Alltag mit Erinnerungen: oben der Baustein „Hinweise“, der nur erscheint, wenn etwas los ist, darunter Dein Jahr, diese Woche, die letzten Touren, Jahresziel und Meilensteine. || For everyday use with reminders: the “Notices” block on top, which only appears when something is going on, below it Your year, this week, the latest tours, annual goal and milestones. || Pour le quotidien avec des rappels : en haut le bloc « Remarques », qui n’apparaît que lorsqu’il y a quelque chose à signaler, puis Votre année, cette semaine, les derniers parcours, l’objectif annuel et les étapes. || Para el día a día con recordatorios: arriba el bloque «Avisos», que solo aparece cuando pasa algo, y debajo Tu año, esta semana, las últimas rutas, el objetivo anual y los hitos.
 Weitere Aktionen || More actions || Autres actions || Más acciones
 + Baustein || + Block || + Bloc || + Bloque
-Gerade leer: Dieser Abschnitt erscheint, sobald es etwas zu zeigen gibt. || Empty for now: this section appears as soon as there is something to show. || Vide pour le moment : cette section apparaît dès qu’il y a quelque chose à afficher. || Vacío por ahora: esta sección aparece en cuanto haya algo que mostrar.
+Gerade leer: Dieser Baustein erscheint, sobald es etwas zu zeigen gibt. || Empty for now: this section appears as soon as there is something to show. || Vide pour le moment : cette section apparaît dès qu’il y a quelque chose à afficher. || Vacío por ahora: esta sección aparece en cuanto haya algo que mostrar.
 Voreinstellung || Preset || Préréglage || Ajuste predefinido
 Komplett || Complete || Complet || Completo
 Nur Karte und Fotos || Map and photos only || Carte et photos seulement || Solo mapa y fotos
@@ -2170,26 +2143,24 @@ Auswahl ändern || Change selection || Modifier la sélection || Cambiar la sele
 Zeigt: || Shows: || Affiche : || Muestra:
 Tourlink || Tour link || Lien de parcours || Enlace de ruta
 Wind || Wind || Vent || Viento
-Auswahl konnte nicht gespeichert werden: {} || Selection could not be saved: {} || La sélection n’a pas pu être enregistrée : {} || No se pudo guardar la selección: {}
-Noch keine Links freigegeben. In einer Tour findest du „Senden“ und „Diashow senden“. || No links shared yet. In a tour you will find “Send” and “Send slideshow”. || Aucun lien partagé pour l’instant. Dans un parcours, vous trouverez « Envoyer » et « Envoyer le diaporama ». || Aún no hay enlaces compartidos. En una ruta encontrarás «Enviar» y «Enviar pase de fotos».
+Noch keine Links freigegeben. In einer Tour findest du „Link senden“ und „Diashow senden“. || No links shared yet. In a tour you will find “Send” and “Send slideshow”. || Aucun lien partagé pour l’instant. Dans un parcours, vous trouverez « Envoyer » et « Envoyer le diaporama ». || Aún no hay enlaces compartidos. En una ruta encontrarás «Enviar» y «Enviar pase de fotos».
 öffnen kann – du wählst, was er zeigt (Karte, Höhenprofil, Fotos …). Er funktioniert nur, wenn dein Server von außen erreichbar ist, z. B. per VPN oder Reverse-Proxy. || can open – you choose what it shows (map, elevation profile, photos …). It only works if your server is reachable from outside, e.g. via VPN or reverse proxy. || peut ouvrir – vous choisissez ce qu’il montre (carte, profil d’altitude, photos …). Cela ne fonctionne que si votre serveur est joignable de l’extérieur, p. ex. par VPN ou reverse proxy. || puede abrir; tú eliges qué muestra (mapa, perfil de altitud, fotos …). Solo funciona si tu servidor es accesible desde fuera, p. ej. por VPN o proxy inverso.
 Neuen Link erstellen … || Create new link … || Créer un nouveau lien … || Crear un enlace nuevo …
 Du wählst, was der Link zeigt – und sendest ihn an WhatsApp, Signal, E-Mail … || You choose what the link shows – and send it to WhatsApp, Signal, e-mail … || Vous choisissez ce que le lien montre – et l’envoyez à WhatsApp, Signal, e-mail … || Eliges qué muestra el enlace y lo envías a WhatsApp, Signal, correo …
 Jahresrückblick teilen || Share year in review || Partager le bilan de l’année || Compartir el resumen del año
 Erzeugt eine Seite mit deinem Tourenjahr, die man ohne Benutzerkonto öffnen und als PDF speichern kann. Was du nicht wählst, schickt der Server gar nicht erst mit. || Creates a page with your year in tours that anyone can open without an account and save as PDF. What you do not choose is never sent by the server. || Crée une page avec votre année de sorties, que l’on peut ouvrir sans compte et enregistrer en PDF. Ce que vous ne choisissez pas n’est jamais envoyé par le serveur. || Crea una página con tu año de rutas que se puede abrir sin cuenta y guardar como PDF. Lo que no elijas, el servidor ni siquiera lo envía.
 Beste Fotos || Best photos || Meilleures photos || Mejores fotos
-Rekorde nennen Tourname und Datum. Strecken, Startorte, Notizen, Wegpunkte und Uhr-Daten sind nie Teil eines Links. || Records show tour name and date. Routes, start places, notes, waypoints and watch data are never part of a link. || Les records indiquent le nom et la date du parcours. Tracés, lieux de départ, notes, points de passage et données de la montre ne font jamais partie d’un lien. || Los récords muestran el nombre y la fecha de la ruta. Los trazados, lugares de salida, notas, puntos de paso y datos del reloj nunca forman parte de un enlace.
+Bestwerte nennen Tourname und Datum. Strecken, Startorte, Notizen, Wegpunkte und Uhr-Daten sind nie Teil eines Links. || Records show tour name and date. Routes, start places, notes, waypoints and watch data are never part of a link. || Les records indiquent le nom et la date du parcours. Tracés, lieux de départ, notes, points de passage et données de la montre ne font jamais partie d’un lien. || Los récords muestran el nombre y la fecha de la ruta. Los trazados, lugares de salida, notas, puntos de paso y datos del reloj nunca forman parte de un enlace.
 Als Link teilen || Share as link || Partager par lien || Compartir como enlace
 Rückblick als Link ohne Konto teilen oder als PDF speichern || Share the review as a link without an account or save it as PDF || Partager le bilan par lien sans compte ou l’enregistrer en PDF || Compartir el resumen como enlace sin cuenta o guardarlo como PDF
 Link ist bereit || Link is ready || Le lien est prêt || El enlace está listo
-{} – jeder mit diesem Link kann den Rückblick ansehen, ohne Konto. || {} – anyone with this link can view the review, no account needed. || {} – toute personne disposant de ce lien peut voir le bilan, sans compte. || {}: cualquiera con este enlace puede ver el resumen, sin cuenta.
+{} – jeder mit diesem Link kann den Jahresrückblick ansehen, ohne Konto. || {} – anyone with this link can view the review, no account needed. || {} – toute personne disposant de ce lien peut voir le bilan, sans compte. || {}: cualquiera con este enlace puede ver el resumen, sin cuenta.
 Senden || Send || Envoyer || Enviar
 Öffnen || Open || Ouvrir || Abrir
 Als PDF speichern || Save as PDF || Enregistrer en PDF || Guardar como PDF
 „Als PDF speichern“ öffnet die Seite und startet den Druckdialog – dort „Als PDF speichern“ wählen. || “Save as PDF” opens the page and starts the print dialog – choose “Save as PDF” there. || « Enregistrer en PDF » ouvre la page et lance la boîte d’impression – y choisir « Enregistrer en PDF ». || «Guardar como PDF» abre la página e inicia el diálogo de impresión; allí elige «Guardar como PDF».
 PDF || PDF || PDF || PDF
 Seite öffnen und den Druckdialog starten – dort als PDF speichern || Open the page and start the print dialog – save as PDF there || Ouvrir la page et lancer l’impression – y enregistrer en PDF || Abrir la página e iniciar la impresión; allí guardar como PDF
-✓ Kopiert || ✓ Copied || ✓ Copié || ✓ Copiado
 Rückblicke || Reviews || Bilans || Resúmenes
 Sportarten || Sports || Sports || Deportes
 Längste Serie || Longest streak || Plus longue série || Racha más larga
@@ -2199,7 +2170,7 @@ Foto vergrößern || Enlarge photo || Agrandir la photo || Ampliar foto
 Drucken / Als PDF speichern || Print / Save as PDF || Imprimer / Enregistrer en PDF || Imprimir / Guardar como PDF
 mehr Kilometer || more kilometres || plus de kilomètres || más kilómetros
 gegenüber {} || compared with {} || par rapport à {} || respecto a {}
-Noch keine Links freigegeben. In einer Tour findest du „Senden“ und „Diashow senden“, im Jahresrückblick „Als Link teilen“. || No links shared yet. In a tour you will find “Send” and “Send slideshow”, in the year in review “Share as link”. || Aucun lien partagé pour l’instant. Dans un parcours, vous trouverez « Envoyer » et « Envoyer le diaporama », dans le bilan de l’année « Partager par lien ». || Aún no hay enlaces compartidos. En una ruta encontrarás «Enviar» y «Enviar pase de fotos», en el resumen del año «Compartir como enlace».
+Noch keine Links freigegeben. In einer Tour findest du „Link senden“ und „Diashow senden“, im Jahresrückblick „Als Link teilen“. || No links shared yet. In a tour you will find “Send” and “Send slideshow”, in the year in review “Share as link”. || Aucun lien partagé pour l’instant. Dans un parcours, vous trouverez « Envoyer » et « Envoyer le diaporama », dans le bilan de l’année « Partager par lien ». || Aún no hay enlaces compartidos. En una ruta encontrarás «Enviar» y «Enviar pase de fotos», en el resumen del año «Compartir como enlace».
 Eigene Kennzahl || Custom metric || Indicateur personnalisé || Indicador propio
 Eigene Kennzahlen || Custom metrics || Indicateurs personnalisés || Indicadores propios
 Eigene Kennzahl erstellen || Create custom metric || Créer un indicateur personnalisé || Crear indicador propio
@@ -2217,7 +2188,7 @@ Durchschnitt || Average || Moyenne || Media
 Maximum (größter Wert) || Maximum (largest value) || Maximum (valeur la plus grande) || Máximo (valor más alto)
 Minimum (kleinster Wert) || Minimum (smallest value) || Minimum (valeur la plus petite) || Mínimo (valor más bajo)
 Anzahl (Touren mit dieser Angabe) || Count (tours with this value) || Nombre (parcours avec cette donnée) || Cantidad (rutas con este dato)
-Rekord mit Tourname || Record with tour name || Record avec nom du parcours || Récord con nombre de la ruta
+Bestwert mit Tourname || Record with tour name || Record avec nom du parcours || Récord con nombre de la ruta
 Durchschnitt pro Monat || Average per month || Moyenne par mois || Media por mes
 Durchschnitt (gewichtet) || Average (weighted) || Moyenne (pondérée) || Media (ponderada)
 Summe (Anzahl der Touren) || Sum (number of tours) || Somme (nombre de parcours) || Suma (número de rutas)
@@ -2251,7 +2222,7 @@ B: Messgröße || B: measure || B : grandeur || B: magnitud
 B: Rechenart || B: calculation || B : calcul || B: cálculo
 A ist die Messgröße und Rechenart oben, zum Beispiel Aufstieg (Summe) ÷ Strecke (Summe) = Aufstieg je km. || A is the measure and calculation above, for example ascent (sum) ÷ distance (sum) = ascent per km. || A est la grandeur et le calcul ci-dessus, par exemple dénivelé (somme) ÷ distance (somme) = dénivelé positif par km. || A es la magnitud y el cálculo de arriba, por ejemplo desnivel (suma) ÷ distancia (suma) = desnivel positivo por km.
 Filter || Filter || Filtre || Filtro
-Schlagwort (optional) || Keyword (optional) || Mot-clé (facultatif) || Palabra clave (opcional)
+Schlagwort (optional) || Tag (optional) || Tag (facultatif) || Etiqueta (opcional)
 Mindeststrecke in km (optional) || Minimum distance in km (optional) || Distance minimale en km (facultatif) || Distancia mínima en km (opcional)
 Mit dem Zeitraum davor vergleichen (± %) || Compare with the previous period (± %) || Comparer avec la période précédente (± %) || Comparar con el periodo anterior (± %)
 Für „Gesamte Zeit“ gibt es keinen Vergleichszeitraum. || There is no comparison period for “All time”. || Il n’y a pas de période de comparaison pour « Toute la période ». || No hay periodo de comparación para «Todo el tiempo».
@@ -2315,7 +2286,7 @@ Der Status konnte nicht geladen werden. || The status could not be loaded. || L�
 Noch kein Import gestartet. || No import started yet. || Aucun import lancé pour l’instant. || Aún no se ha iniciado ninguna importación.
 Für den Import fehlt noch der Zepp-Zugang. Trage ihn in der Verwaltung ein. || The Zepp access needed for the import is still missing. Enter it in Admin. || L’accès Zepp nécessaire à l’import manque encore. Saisissez-le dans l’administration. || Aún falta el acceso a Zepp necesario para la importación. Introdúcelo en la administración.
 Es läuft gerade ein anderer Vorgang: {} || Another task is running right now: {} || Une autre tâche est en cours : {} || Ahora mismo se está ejecutando otra tarea: {}
-Der Import konnte nicht gestartet werden: {} || The import could not be started: {} || L’import n’a pas pu être lancé : {} || No se pudo iniciar la importación: {}
+Import starten nicht möglich: {} || The import could not be started: {} || L’import n’a pas pu être lancé : {} || No se pudo iniciar la importación: {}
 Letzter Lauf: {} || Last run: {} || Dernier passage : {} || Última ejecución: {}
 Keine neuen Trainings. || No new workouts. || Aucun nouvel entraînement. || No hay entrenamientos nuevos.
 1 neues Training gefunden || 1 new workout found || 1 nouvel entraînement trouvé || 1 entrenamiento nuevo encontrado
@@ -2326,7 +2297,7 @@ Keine neuen Trainings. || No new workouts. || Aucun nouvel entraînement. || No 
 {} ohne GPS-Daten vermerkt || {} noted without GPS data || {} notés sans données GPS || {} anotados sin datos GPS
 1 konnte nicht geladen werden || 1 could not be loaded || 1 n’a pas pu être chargé || 1 no se pudo cargar
 {} konnten nicht geladen werden || {} could not be loaded || {} n’ont pas pu être chargés || {} no se pudieron cargar
-Neue Trainings in der Verwaltung übernehmen › || Adopt new workouts in Admin › || Reprendre les nouveaux entraînements dans l’administration › || Adoptar los entrenamientos nuevos en la administración ›
+Neue Zepp-Trainings holen (Verwaltung → Touren holen) › || Adopt new workouts in Admin › || Reprendre les nouveaux entraînements dans l’administration › || Adoptar los entrenamientos nuevos en la administración ›
 Der Zepp-Zugang fehlt. || The Zepp access is missing. || L’accès Zepp manque. || Falta el acceso a Zepp.
 Zepp hat die Anmeldung abgelehnt. Hole in der Verwaltung ein neues Token. || Zepp rejected the sign-in. Get a new token in Admin. || Zepp a refusé la connexion. Obtenez un nouveau jeton dans l’administration. || Zepp rechazó el inicio de sesión. Obtén un token nuevo en la administración.
 Zepp war nicht erreichbar. Prüfe die Internetverbindung und versuche es noch einmal. || Zepp could not be reached. Check your internet connection and try again. || Zepp était injoignable. Vérifiez la connexion Internet et réessayez. || No se pudo contactar con Zepp. Comprueba la conexión a Internet e inténtalo de nuevo.
@@ -2397,15 +2368,15 @@ Auswahl || Selection || Sélection || Selección
 Filter: Sportart und Zeitraum || Filter: sport and period || Filtre : sport et période || Filtro: deporte y período
 Darstellung || Display || Affichage || Presentación
 Seitenverhältnis der Kacheln || Aspect ratio of the tiles || Format des vignettes || Proporción de las miniaturas
-In der Einzelbild-Show bestimmt die Höhe die Form; „Originalformat“ zeigt das ganze Bild ohne Zuschnitt. || In the single-photo show the height sets the shape; “Original format” shows the whole photo without cropping. || Dans le diaporama photo par photo, la hauteur détermine la forme ; « Format d’origine » affiche la photo entière sans recadrage. || En el pase de una foto la altura determina la forma; «Formato original» muestra la foto entera sin recortar.
-Größe der Bilder || Size of the photos || Taille des photos || Tamaño de las fotos
+In der Einzelbild-Show bestimmt die Höhe die Form; „Originalformat“ zeigt das ganze Foto ohne Zuschnitt. || In the single-photo show the height sets the shape; “Original format” shows the whole photo without cropping. || Dans le diaporama photo par photo, la hauteur détermine la forme ; « Format d’origine » affiche la photo entière sans recadrage. || En el pase de una foto la altura determina la forma; «Formato original» muestra la foto entera sin recortar.
+Größe der Fotos || Size of the photos || Taille des photos || Tamaño de las fotos
 Höhe der Show || Height of the show || Hauteur du diaporama || Altura del pase
-Tempo (Sekunden je Bild) || Speed (seconds per photo) || Rythme (secondes par photo) || Ritmo (segundos por foto)
+Tempo (Sekunden je Foto) || Speed (seconds per photo) || Rythme (secondes par photo) || Ritmo (segundos por foto)
 Bildunterschrift (Tourname und Datum) || Caption (tour name and date) || Légende (nom du parcours et date) || Pie de foto (nombre de la ruta y fecha)
 Knopf „Neu mischen“ (zieht neue Zufallsfotos, sonst mischt er die Reihenfolge) || “Shuffle again” button (draws new random photos, otherwise reshuffles the order) || Bouton « Mélanger à nouveau » (tire de nouvelles photos au hasard, sinon mélange l’ordre) || Botón «Volver a mezclar» (saca nuevas fotos al azar; si no, mezcla el orden)
 Link „Diashow starten“ || “Start slideshow” link || Lien « Lancer le diaporama » || Enlace «Iniciar presentación»
 Standardwerte || Defaults || Valeurs par défaut || Valores predeterminados
-Alle Einstellungen dieser Kachel auf den Standard setzen || Reset all settings of this tile to the defaults || Remettre tous les réglages de cette vignette par défaut || Restablecer todos los ajustes de esta ficha a los valores predeterminados
+Alle Einstellungen dieses Bausteins auf den Standard setzen || Reset all settings of this tile to the defaults || Remettre tous les réglages de cette vignette par défaut || Restablecer todos los ajustes de esta ficha a los valores predeterminados
 Keine Fotos mit diesen Einstellungen. || No photos with these settings. || Aucune photo avec ces réglages. || No hay fotos con estos ajustes.
 Fotos, seitlich scrollbar || Photos, scrollable sideways || Photos, défilement latéral || Fotos, desplazables hacia los lados
 Anhalten || Stop || Arrêter || Detener
@@ -2424,7 +2395,7 @@ Reisen je Jahr || Trips per year || Voyages par an || Viajes por año
 Reisetage je Jahr || Trip days per year || Jours de voyage par an || Días de viaje por año
 Dieser Baustein gehört auf die Seite einer Reise. || This block belongs on a trip’s page. || Ce bloc a sa place sur la page d’un voyage. || Este bloque va en la página de un viaje.
 Reise-Kennzahlen || Trip key figures || Chiffres clés du voyage || Cifras clave del viaje
-Die wichtigsten Zahlen dieser Reise als Kacheln: Reisetage, Touren, Strecke, Aufstieg, Abstieg, Zeit unterwegs und Länder. Welche Kacheln erscheinen, wählst du in den Einstellungen. || The key numbers of this trip as tiles: trip days, tours, distance, ascent, descent, time on the move and countries. You choose which tiles appear in the settings. || Les chiffres essentiels de ce voyage en vignettes : jours de voyage, parcours, distance, dénivelé positif, dénivelé négatif, temps en route et pays. Vous choisissez les vignettes affichées dans les réglages. || Las cifras principales de este viaje como fichas: días de viaje, rutas, distancia, desnivel positivo, desnivel negativo, tiempo en marcha y países. En los ajustes eliges qué fichas aparecen.
+Die wichtigsten Zahlen dieser Reise als Kacheln: Reisetage, Touren, Strecke, Aufstieg, Abstieg, Dauer und Länder. Welche Kacheln erscheinen, wählst du in den Einstellungen. || The key numbers of this trip as tiles: trip days, tours, distance, ascent, descent, duration and countries. You choose which tiles appear in the settings. || Les chiffres essentiels de ce voyage en vignettes : jours de voyage, parcours, distance, dénivelé positif, dénivelé négatif, temps en route et pays. Vous choisissez les vignettes affichées dans les réglages. || Las cifras principales de este viaje como fichas: días de viaje, rutas, distancia, desnivel positivo, desnivel negativo, duración y países. En los ajustes eliges qué fichas aparecen.
 an {} Tagen mit Touren || on {} days with tours || sur {} jours avec parcours || en {} días con rutas
 Für die gewählten Werte liegen bei dieser Reise keine Daten vor. || There is no data for the selected values on this trip. || Il n’y a pas de données pour les valeurs choisies sur ce voyage. || No hay datos de los valores elegidos en este viaje.
 {} km · 1 Tag || {} km · 1 day || {} km · 1 jour || {} km · 1 día
@@ -2433,7 +2404,7 @@ Ein Säulendiagramm über die Tage der Reise: wie viele Kilometer (oder Aufstieg
 Diese Reise hat keine Touren. || This trip has no tours. || Ce voyage n’a pas de parcours. || Este viaje no tiene rutas.
 Säulendiagramm: {}, am stärksten am {} mit {} || Bar chart: {}, strongest on {} with {} || Diagramme en barres : {}, le plus fort le {} avec {} || Gráfico de barras: {}, más fuerte el {} con {}
 Stärkster Tag: {} || Strongest day: {} || Jour le plus fort : {} || Día más fuerte: {}
-{}; im Schnitt der Tage mit Touren {} (gestrichelte Linie). || {}; on average over days with tours {} (dashed line). || {} ; en moyenne sur les jours avec parcours {} (ligne en pointillés). || {}; de media en los días con rutas {} (línea discontinua).
+{}; im Schnitt der aktiven Tage {} (gestrichelte Linie). || {}; on average over active days {} (dashed line). || {} ; en moyenne sur les jours actifs {} (ligne en pointillés). || {}; de media en los días activos {} (línea discontinua).
 Reise-Diashow || Trip slideshow || Diaporama du voyage || Presentación del viaje
 Fotos der Reise || Photos of the trip || Photos du voyage || Fotos del viaje
 Die Fotos aus dem Zeitraum dieser Reise als Einzelbild-Show, Raster oder Streifen, mit Link zur Vollbild-Diashow. Das ist der Baustein „Erinnerungen“, eingeschränkt auf diese Reise: Auswahl, Anzahl, Darstellung und Bildgröße stellst du in den Einstellungen ein. || The photos from the period of this trip as a single-photo show, grid or strip, with a link to the full-screen slideshow. This is the “Memories” block, limited to this trip: you set selection, number, display and photo size in the settings. || Les photos de la période de ce voyage en diaporama photo par photo, grille ou bandeau, avec un lien vers le diaporama plein écran. C’est le bloc « Souvenirs », limité à ce voyage : sélection, nombre, affichage et taille des photos se règlent dans les réglages. || Las fotos del período de este viaje como pase de una foto, cuadrícula o tira, con un enlace a la presentación a pantalla completa. Es el bloque «Recuerdos», limitado a este viaje: la selección, el número, la presentación y el tamaño de las fotos se ajustan en los ajustes.
@@ -2463,14 +2434,14 @@ Für den Blick auf alle Reisen: Kennzahlen und Reisen je Jahr nebeneinander, dar
 1 Sportart || 1 sport || 1 sport || 1 deporte
 {} erkannt || {} detected || {} détectés || {} detectadas
 erkannt an Namen wie „… Tag 3“ oder „… Etappe 2“ || recognised by names like “… Day 3” or “… Stage 2” || reconnu à des noms comme « … Jour 3 » ou « … Étape 2 » || reconocido por nombres como «… Día 3» o «… Etapa 2»
-Alben und Tags || Albums and tags || Albums et tags || Álbumes y etiquetas
+Schlagwörter & Alben || Tags & albums || Tags et albums || Etiquetas y álbumes
 Entfernte Reisen || Removed trips || Voyages supprimés || Viajes eliminados
 Kopf: Titel, Zeitraum und Aktionen || Header: title, period and actions || En-tête : titre, période et actions || Cabecera: título, período y acciones
 3D-Flug und Offline-Karte || 3D flight and offline map || Vol 3D et carte hors ligne || Vuelo 3D y mapa sin conexión
 Reise-Seite || Trip page || Page du voyage || Página del viaje
 Reisen-Übersicht || Trips overview || Aperçu des voyages || Resumen de viajes
-Reihenfolge, Breiten, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Reise-Seite werden zurückgesetzt. Das gilt für alle Reisen. || Order, widths, hidden sections and all added blocks of the trip page will be reset. This applies to all trips. || L’ordre, les largeurs, les sections masquées et tous les blocs ajoutés de la page du voyage seront réinitialisés. Cela vaut pour tous les voyages. || Se restablecerán el orden, los anchos, las secciones ocultas y todos los bloques añadidos de la página del viaje. Esto vale para todos los viajes.
-Reihenfolge, Breiten, ausgeblendete Abschnitte und alle hinzugefügten Bausteine der Reisen-Übersicht werden zurückgesetzt. || Order, widths, hidden sections and all added blocks of the trips overview will be reset. || L’ordre, les largeurs, les sections masquées et tous les blocs ajoutés de l’aperçu des voyages seront réinitialisés. || Se restablecerán el orden, los anchos, las secciones ocultas y todos los bloques añadidos del resumen de viajes.
+Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Reise-Seite werden zurückgesetzt. Das gilt für alle Reisen. || Order, widths, hidden sections and all added blocks of the trip page will be reset. This applies to all trips. || L’ordre, les largeurs, les sections masquées et tous les blocs ajoutés de la page du voyage seront réinitialisés. Cela vaut pour tous les voyages. || Se restablecerán el orden, los anchos, las secciones ocultas y todos los bloques añadidos de la página del viaje. Esto vale para todos los viajes.
+Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Reisen-Übersicht werden zurückgesetzt. || Order, widths, hidden sections and all added blocks of the trips overview will be reset. || L’ordre, les largeurs, les sections masquées et tous les blocs ajoutés de l’aperçu des voyages seront réinitialisés. || Se restablecerán el orden, los anchos, las secciones ocultas y todos los bloques añadidos del resumen de viajes.
 Alle Touren, gesamte Zeit || All tours, entire period || Tous les parcours, toute la période || Todas las rutas, todo el período
 Anzahl der Jahre || Number of years || Nombre d’années || Número de años
 Ausschnitt || Map section || Zone affichée || Zona visible
@@ -2530,18 +2501,18 @@ Zählen || Count || Compter || Contar
 gegenüber dem selben Zeitraum im Vorjahr || compared with the same period last year || par rapport à la même période de l’année précédente || respecto al mismo periodo del año anterior
 gegenüber dem Zeitraum einen Monat früher || compared with the period one month earlier || par rapport à la période un mois plus tôt || respecto al periodo de un mes antes
 Verlauf je Woche von {} bis {}, höchster Wert {} ({}) || Trend per week from {} to {}, highest value {} ({}) || Évolution par semaine de {} à {}, valeur maximale {} ({}) || Evolución por semana de {} a {}, valor máximo {} ({})
-Anstieg: || Increase: || Hausse : || Aumento:
+Zunahme: || Increase: || Hausse : || Aumento:
 Rückgang: || Decrease: || Baisse : || Descenso:
 Unverändert: || Unchanged: || Inchangé : || Sin cambios:
 Noch {} bis zum Ziel || {} to go to the goal || Encore {} pour atteindre l’objectif || Faltan {} para el objetivo
-Vor dem Plan || Ahead of plan || En avance sur le plan || Por delante del plan
-Im Plan || On plan || Dans le plan || Según lo previsto
-Hinter dem Plan || Behind plan || En retard sur le plan || Por detrás del plan
+Über dem Soll || Above target || Au-dessus de l’objectif || Por encima del objetivo
+Im Soll || On target || Dans l’objectif || En el objetivo
+Unter dem Soll || Below target || Sous l’objectif || Por debajo del objetivo
 Soll bis heute: {} ({} %) || Target to date: {} ({} %) || Objectif à ce jour : {} ({} %) || Previsto hasta hoy: {} ({} %)
 {} % von {} || {} % of {} || {} % de {} || {} % de {}
-Antippen öffnet die Rekordtour || Tapping opens the record tour || Appuyer ouvre le parcours record || Al tocar se abre la ruta récord
+Antippen öffnet die Tour mit dem Bestwert || Tapping opens the record tour || Appuyer ouvre le parcours record || Al tocar se abre la ruta récord
 Antippen öffnet die Touren || Tapping opens the tours || Appuyer ouvre les parcours || Al tocar se abren las rutas
-Rekordtour öffnen › || Open record tour › || Ouvrir le parcours record › || Abrir la ruta récord ›
+Tour mit dem Bestwert öffnen › || Open record tour › || Ouvrir le parcours record › || Abrir la ruta récord ›
 Touren anzeigen › || Show tours › || Afficher les parcours › || Mostrar las rutas ›
 Die Liste zeigt alle Touren im Zeitraum, auch solche ohne die nötige Angabe (zum Beispiel ohne Pulsdaten). || The list shows all tours in the period, including those without the required data (for example without heart rate data). || La liste affiche tous les parcours de la période, y compris ceux sans la donnée nécessaire (par exemple sans données de fréquence cardiaque). || La lista muestra todas las rutas del periodo, también las que no tienen el dato necesario (por ejemplo, sin datos de pulso).
 Die Liste zeigt alle Touren im Zeitraum, auch solche, die für diese Kennzahl zu kurz sind. || The list shows all tours in the period, including those that are too short for this metric. || La liste affiche tous les parcours de la période, y compris ceux qui sont trop courts pour cet indicateur. || La lista muestra todas las rutas del periodo, también las que son demasiado cortas para este indicador.
@@ -2553,28 +2524,28 @@ Säulen || Columns || Colonnes || Columnas
 Aus || Off || Désactivé || Desactivado
 Verlauf || Trend || Évolution || Evolución
 Antippen || Tapping || Appui || Al tocar
-Mit einem gleichmäßigen Soll vergleichen („Im Plan?“) || Compare with an even target (“On plan?”) || Comparer avec un objectif linéaire (« Dans le plan ? ») || Comparar con un objetivo uniforme («¿Según lo previsto?»)
+Mit einem gleichmäßigen Soll vergleichen („Im Soll?“) || Compare with an even target (“On target?”) || Comparer avec un objectif linéaire (« Dans l’objectif ? ») || Comparar con un objetivo uniforme («¿En el objetivo?»)
 Mit einem früheren Zeitraum vergleichen (Pfeil und ± %) || Compare with an earlier period (arrow and ± %) || Comparer avec une période antérieure (flèche et ± %) || Comparar con un periodo anterior (flecha y ± %)
-Verlauf in der Kachel || Trend in the tile || Évolution dans la tuile || Evolución en la tarjeta
+Verlauf im Baustein || Trend in the tile || Évolution dans la tuile || Evolución en la tarjeta
 Zeigt Wochen-, Monats- oder Jahreswerte des Zeitraums als kleine Grafik. || Shows weekly, monthly or yearly values of the period as a small chart. || Affiche les valeurs hebdomadaires, mensuelles ou annuelles de la période sous forme de petit graphique. || Muestra los valores semanales, mensuales o anuales del periodo como un pequeño gráfico.
 Antippen öffnet die zugehörigen Touren || Tapping opens the matching tours || Appuyer ouvre les parcours correspondants || Al tocar se abren las rutas correspondientes
-Die Tourenliste wird nach Sportart, Zeitraum, Schlagwort und Mindeststrecke gefiltert, bei einem Rekord öffnet sich die Rekordtour. Was sich in der Liste nicht abbilden lässt, steht als Hinweis dabei. || The tour list is filtered by sport, period, keyword and minimum distance; for a record, the record tour opens. Whatever cannot be reproduced in the list is noted as a hint. || La liste des parcours est filtrée par sport, période, mot-clé et distance minimale ; pour un record, le parcours record s’ouvre. Ce qui ne peut pas être reproduit dans la liste est indiqué sous forme de remarque. || La lista de rutas se filtra por deporte, periodo, palabra clave y distancia mínima; en un récord se abre la ruta récord. Lo que no se pueda reproducir en la lista aparece como aviso.
+Die Tourenliste wird nach Sportart, Zeitraum, Schlagwort und Mindeststrecke gefiltert, bei einem Bestwert öffnet sich die Tour mit dem Bestwert. Was sich in der Liste nicht abbilden lässt, steht als Hinweis dabei. || The tour list is filtered by sport, period, tag and minimum distance; for a record, the record tour opens. Whatever cannot be reproduced in the list is noted as a hint. || La liste des parcours est filtrée par sport, période, tag et distance minimale ; pour un record, le parcours record s’ouvre. Ce qui ne peut pas être reproduit dans la liste est indiqué sous forme de remarque. || La lista de rutas se filtra por deporte, periodo, etiqueta y distancia mínima; en un récord se abre la ruta récord. Lo que no se pueda reproducir en la lista aparece como aviso.
 Das Soll gibt es nur für Summe oder Anzahl ohne Formel, bei laufendem Jahr, bestimmtem Jahr oder eigenem Bereich. || The target is only available for sum or count without a formula, for the current year, a specific year or a custom range. || L’objectif linéaire n’existe que pour une somme ou un nombre sans formule, pour l’année en cours, une année précise ou une plage personnalisée. || El objetivo uniforme solo existe para suma o recuento sin fórmula, con el año actual, un año concreto o un rango propio.
 Zuerst ein Ziel eintragen. || Enter a goal first. || Saisissez d’abord un objectif. || Introduce primero un objetivo.
-Fortschrittsbalken für dein Jahresziel in Kilometern, mit Rest, Vorjahresvergleich und „Im Plan?“. || Progress bar for your yearly goal in kilometres, with remainder, comparison with last year and “On plan?”. || Barre de progression pour votre objectif annuel en kilomètres, avec le reste, la comparaison avec l’année précédente et « Dans le plan ? ». || Barra de progreso para tu objetivo anual en kilómetros, con el resto, la comparación con el año anterior y «¿Según lo previsto?».
-Stelle selbst zusammen, was du wissen willst: Messgröße, Rechenart, Filter, Vergleich mit Vorjahr oder Vormonat, Ziel mit Fortschrittsbalken und „Im Plan?“, Sparkline, Antippen zu den Touren oder eine Formel wie Aufstieg je km. Ohne Programmieren, mit Vorlagen zum Start. || Put together what you want to know yourself: measure, calculation, filters, comparison with the previous year or month, goal with progress bar and “On plan?”, sparkline, tap through to the tours or a formula such as ascent per km. No programming, with templates to start. || Composez vous-même ce que vous voulez savoir : grandeur, calcul, filtres, comparaison avec l’année ou le mois précédent, objectif avec barre de progression et « Dans le plan ? », sparkline, accès aux parcours d’un appui ou formule comme les m de dénivelé positif par km. Sans programmation, avec des modèles pour démarrer. || Elabora tú mismo lo que quieres saber: magnitud, cálculo, filtros, comparación con el año o el mes anterior, objetivo con barra de progreso y «¿Según lo previsto?», sparkline, acceso a las rutas al tocar o una fórmula como metros de desnivel positivo por km. Sin programar, con plantillas para empezar.
+Fortschrittsbalken für dein Jahresziel in Kilometern, mit Rest, Vorjahresvergleich und „Im Soll?“. || Progress bar for your yearly goal in kilometres, with remainder, comparison with last year and “On target?”. || Barre de progression pour votre objectif annuel en kilomètres, avec le reste, la comparaison avec l’année précédente et « Dans l’objectif ? ». || Barra de progreso para tu objetivo anual en kilómetros, con el resto, la comparación con el año anterior y «¿En el objetivo?».
+Stelle selbst zusammen, was du wissen willst: Messgröße, Rechenart, Filter, Vergleich mit Vorjahr oder Vormonat, Ziel mit Fortschrittsbalken und „Im Soll?“, Sparkline, Antippen zu den Touren oder eine Formel wie Aufstieg je km. Ohne Programmieren, mit Vorlagen zum Start. || Put together what you want to know yourself: measure, calculation, filters, comparison with the previous year or month, goal with progress bar and “On target?”, sparkline, tap through to the tours or a formula such as ascent per km. No programming, with templates to start. || Composez vous-même ce que vous voulez savoir : grandeur, calcul, filtres, comparaison avec l’année ou le mois précédent, objectif avec barre de progression et « Dans l’objectif ? », sparkline, accès aux parcours d’un appui ou formule comme les m de dénivelé positif par km. Sans programmation, avec des modèles pour démarrer. || Elabora tú mismo lo que quieres saber: magnitud, cálculo, filtros, comparación con el año o el mes anterior, objetivo con barra de progreso y «¿En el objetivo?», sparkline, acceso a las rutas al tocar o una fórmula como metros de desnivel positivo por km. Sin programar, con plantillas para empezar.
 Touren der Kennzahl „{}“ || Tours of the metric “{}” || Parcours de l’indicateur « {} » || Rutas del indicador «{}»
 Filter aufheben || Remove filter || Supprimer le filtre || Quitar el filtro
 ab {} || from {} || à partir du {} || desde {}
-Schlagwort „{}“ || Keyword “{}” || Mot-clé « {} » || Palabra clave «{}»
+Schlagwort „{}“ || Tag “{}” || Tag « {} » || Etiqueta «{}»
 mindestens {} km || at least {} km || au moins {} km || al menos {} km
 Eine Kopie mit denselben Einstellungen direkt dahinter anlegen || Create a copy with the same settings right behind it || Créer une copie avec les mêmes réglages juste derrière || Crear una copia con los mismos ajustes justo detrás
-In Gruppe … || Into group … || Dans un groupe … || A un grupo …
-Gruppe wechseln … || Change group … || Changer de groupe … || Cambiar de grupo …
-Aus Gruppe lösen || Remove from group || Retirer du groupe || Quitar del grupo
-{}: Position {} von {}, in Gruppe „{}“ || {}: position {} of {}, in group “{}” || {} : position {} sur {}, dans le groupe « {} » || {}: posición {} de {}, en el grupo «{}»
-{}: Position {} von {}, ohne Gruppe || {}: position {} of {}, no group || {} : position {} sur {}, sans groupe || {}: posición {} de {}, sin grupo
-{}: aus der Gruppe „{}“ gelöst || {}: removed from group “{}” || {} : retiré du groupe « {} » || {}: quitado del grupo «{}»
+In Bausteingruppe … || Into widget group … || Dans un groupe de blocs … || A un grupo de bloques …
+Bausteingruppe wechseln … || Change widget group … || Changer de groupe de blocs … || Cambiar de grupo de bloques …
+Aus Bausteingruppe lösen || Remove from widget group || Retirer du groupe de blocs || Quitar del grupo de bloques
+{}: Position {} von {}, in Bausteingruppe „{}“ || {}: position {} of {}, in widget group “{}” || {} : position {} sur {}, dans le groupe de blocs « {} » || {}: posición {} de {}, en el grupo de bloques «{}»
+{}: Position {} von {}, ohne Bausteingruppe || {}: position {} of {}, no widget group || {} : position {} sur {}, sans groupe de blocs || {}: posición {} de {}, sin grupo de bloques
+{}: aus der Bausteingruppe „{}“ gelöst || {}: removed from widget group “{}” || {} : retiré du groupe de blocs « {} » || {}: quitado del grupo de bloques «{}»
 Baustein „{}“ entfernt || Widget “{}” removed || Bloc « {} » retiré || Bloque «{}» quitado
 {}: Einstellungen geändert || {}: settings changed || {} : réglages modifiés || {}: ajustes cambiados
 Anordnung für || Arrangement for || Disposition pour || Disposición para
@@ -2593,34 +2564,38 @@ Rückgängig: {} || Undone: {} || Annulé : {} || Deshecho: {}
 Wiederholt: {} || Redone: {} || Rétabli : {} || Rehecho: {}
 Nichts zum Rückgängigmachen || Nothing to undo || Rien à annuler || Nada que deshacer
 Nichts zum Wiederholen || Nothing to redo || Rien à rétablir || Nada que rehacer
+Bausteingruppe || Widget group || Groupe de blocs || Grupo de bloques
 Gruppe || Group || Groupe || Grupo
 Gruppe {} || Group {} || Groupe {} || Grupo {}
 {} Gruppen || {} groups || {} groupes || {} grupos
-1 Gruppe || 1 group || 1 groupe || 1 grupo
+1 Bausteingruppe || 1 widget group || 1 groupe de blocs || 1 grupo de bloques
 Eigene Handy-Anordnung || Own phone arrangement || Disposition propre au téléphone || Disposición propia para el móvil
+Bausteingruppe: {} || Widget group: {} || Groupe de blocs : {} || Grupo de bloques: {}
 Gruppe: {} || Group: {} || Groupe : {} || Grupo: {}
-Gruppe umbenennen: {} || Rename group: {} || Renommer le groupe : {} || Renombrar grupo: {}
-Gruppe nach oben || Move group up || Monter le groupe || Subir el grupo
-Gruppe nach unten || Move group down || Descendre le groupe || Bajar el grupo
-Gruppe nach oben: {} || Move group up: {} || Monter le groupe : {} || Subir el grupo: {}
-Gruppe nach unten: {} || Move group down: {} || Descendre le groupe : {} || Bajar el grupo: {}
-Gruppe lösen || Dissolve group || Dissoudre le groupe || Disolver grupo
-Gruppe lösen: {} || Dissolve group: {} || Dissoudre le groupe : {} || Disolver grupo: {}
-Die Gruppe auflösen, die Bausteine bleiben auf der Seite || Dissolve the group, the widgets stay on the page || Dissoudre le groupe, les blocs restent sur la page || Disolver el grupo; los bloques se quedan en la página
-Es sind höchstens {} Gruppen je Seite möglich. || At most {} groups per page are possible. || {} groupes au maximum par page sont possibles. || Se admiten como máximo {} grupos por página.
-Eine Gruppe kann höchstens {} Bausteine enthalten. || A group can contain at most {} widgets. || Un groupe peut contenir {} blocs au maximum. || Un grupo puede contener como máximo {} bloques.
-{}: neue Gruppe angelegt || {}: new group created || {} : nouveau groupe créé || {}: grupo nuevo creado
-{}: jetzt in der Gruppe „{}“ || {}: now in group “{}” || {} : maintenant dans le groupe « {} » || {}: ahora en el grupo «{}»
-{}: aus der Gruppe gelöst || {}: removed from the group || {} : retiré du groupe || {}: quitado del grupo
+Bausteingruppe umbenennen: {} || Rename widget group: {} || Renommer le groupe de blocs : {} || Renombrar grupo de bloques: {}
+Bausteingruppe nach oben || Move widget group up || Monter le groupe de blocs || Subir el grupo de bloques
+Bausteingruppe nach unten || Move widget group down || Descendre le groupe de blocs || Bajar el grupo de bloques
+Bausteingruppe nach oben: {} || Move widget group up: {} || Monter le groupe de blocs : {} || Subir el grupo de bloques: {}
+Bausteingruppe nach unten: {} || Move widget group down: {} || Descendre le groupe de blocs : {} || Bajar el grupo de bloques: {}
+Bausteingruppe lösen || Dissolve widget group || Dissoudre le groupe de blocs || Disolver grupo de bloques
+Bausteingruppe lösen: {} || Dissolve widget group: {} || Dissoudre le groupe de blocs : {} || Disolver grupo de bloques: {}
+Die Bausteingruppe auflösen, die Bausteine bleiben auf der Seite || Dissolve the widget group, the widgets stay on the page || Dissoudre le groupe de blocs, les blocs restent sur la page || Disolver el grupo de bloques; los bloques se quedan en la página
+Es sind höchstens {} Bausteingruppen je Seite möglich. || At most {} widget groups per page are possible. || {} groupes de blocs au maximum par page sont possibles. || Se admiten como máximo {} grupos de bloques por página.
+Eine Bausteingruppe kann höchstens {} Bausteine enthalten. || A widget group can contain at most {} widgets. || Un groupe de blocs peut contenir {} blocs au maximum. || Un grupo de bloques puede contener como máximo {} bloques.
+{}: neue Bausteingruppe angelegt || {}: new widget group created || {} : nouveau groupe de blocs créé || {}: grupo de bloques nuevo creado
+{}: jetzt in der Bausteingruppe „{}“ || {}: now in widget group “{}” || {} : maintenant dans le groupe de blocs « {} » || {}: ahora en el grupo de bloques «{}»
+{}: aus der Bausteingruppe gelöst || {}: removed from the widget group || {} : retiré du groupe de blocs || {}: quitado del grupo de bloques
+Bausteingruppe wählen || Choose widget group || Choisir un groupe de blocs || Elegir grupo de bloques
 Gruppe wählen || Choose group || Choisir un groupe || Elegir grupo
-Eine Gruppe bündelt mehrere Bausteine zu einem einklappbaren Abschnitt. „{}“ soll: || A group bundles several widgets into one collapsible section. “{}” should go: || Un groupe réunit plusieurs blocs en une section repliable. « {} » doit être placé : || Un grupo reúne varios bloques en una sección plegable. «{}» debe ir:
-In Gruppe „{}“ || Into group “{}” || Dans le groupe « {} » || Al grupo «{}»
-In Gruppe „{}“ (aktuell) || Into group “{}” (current) || Dans le groupe « {} » (actuel) || Al grupo «{}» (actual)
-In eine neue Gruppe || Into a new group || Dans un nouveau groupe || A un grupo nuevo
-Gruppe umbenennen || Rename group || Renommer le groupe || Renombrar grupo
-Titel der Gruppe || Title of the group || Titre du groupe || Título del grupo
+Eine Bausteingruppe bündelt mehrere Bausteine unter einer einklappbaren Überschrift. „{}“ soll: || A widget group bundles several widgets into one collapsible section. “{}” should go: || Un groupe de blocs réunit plusieurs blocs en une section repliable. « {} » doit être placé : || Un grupo de bloques reúne varios bloques en una sección plegable. «{}» debe ir:
+In Bausteingruppe „{}“ || Into widget group “{}” || Dans le groupe de blocs « {} » || Al grupo de bloques «{}»
+In Bausteingruppe „{}“ (aktuell) || Into widget group “{}” (current) || Dans le groupe de blocs « {} » (actuel) || Al grupo de bloques «{}» (actual)
+In eine neue Bausteingruppe || Into a new widget group || Dans un nouveau groupe de blocs || A un grupo de bloques nuevo
+Bausteingruppe umbenennen || Rename widget group || Renommer le groupe de blocs || Renombrar grupo de bloques
+Titel der Bausteingruppe || Title of the widget group || Titre du groupe de blocs || Título del grupo de bloques
 Spitze Klammern sind im Titel nicht erlaubt. || Angle brackets are not allowed in the title. || Les chevrons ne sont pas autorisés dans le titre. || No se permiten corchetes angulares en el título.
-Gruppe umbenannt in „{}“ || Group renamed to “{}” || Groupe renommé en « {} » || Grupo renombrado a «{}»
+Bausteingruppe umbenannt in „{}“ || Widget group renamed to “{}” || Groupe de blocs renommé en « {} » || Grupo de bloques renombrado a «{}»
+Bausteingruppe „{}“ gelöst, die Bausteine bleiben auf der Seite || Widget group “{}” dissolved, the widgets stay on the page || Groupe de blocs « {} » dissous, les blocs restent sur la page || Grupo de bloques «{}» disuelto; los bloques se quedan en la página
 Gruppe „{}“ gelöst, die Bausteine bleiben auf der Seite || Group “{}” dissolved, the widgets stay on the page || Groupe « {} » dissous, les blocs restent sur la page || Grupo «{}» disuelto; los bloques se quedan en la página
 Handy: eigene Anordnung. Änderungen gelten nur für schmale Bildschirme. || Phone: own arrangement. Changes only apply to narrow screens. || Téléphone : disposition propre. Les modifications ne valent que pour les écrans étroits. || Móvil: disposición propia. Los cambios solo valen para pantallas estrechas.
 Handy: noch keine eigene Anordnung, es gilt die Computer-Reihenfolge. Die erste Änderung hier legt eine Handy-Anordnung an. || Phone: no own arrangement yet, the computer order applies. The first change here creates a phone arrangement. || Téléphone : pas encore de disposition propre, l’ordre de l’ordinateur s’applique. La première modification crée une disposition téléphone. || Móvil: aún no hay disposición propia, vale el orden del ordenador. El primer cambio aquí crea una disposición para el móvil.
@@ -2646,7 +2621,6 @@ Der Link wäre sehr lang. Manche Programme kürzen so lange Links, dann den Code
 Code kopieren || Copy code || Copier le code || Copiar código
 Link kopieren || Copy link || Copier le lien || Copiar enlace
 Code kopiert || Code copied || Code copié || Código copiado
-Link kopiert || Link copied || Lien copié || Enlace copiado
 Kopieren nicht möglich: Der Code ist markiert, bitte mit Strg+C kopieren. || Copying is not possible: the code is selected, please copy it with Ctrl+C. || Copie impossible : le code est sélectionné, copie-le avec Ctrl+C. || No se puede copiar: el código está seleccionado, cópialo con Ctrl+C.
 Kopieren nicht möglich: Bitte den Code markieren und mit Strg+C kopieren. || Copying is not possible: please select the code and copy it with Ctrl+C. || Copie impossible : sélectionne le code et copie-le avec Ctrl+C. || No se puede copiar: selecciona el código y cópialo con Ctrl+C.
 Mit diesem Zugang lassen sich keine Ansichten importieren. || Views cannot be imported with this access. || Avec cet accès, il est impossible d’importer des vues. || Con este acceso no se pueden importar vistas.
@@ -2657,12 +2631,12 @@ Der Ansichtscode ist zu lang für eine Ansicht. || The view code is too long for
 Der Ansichtscode enthält ungültige Zeichen oder ist unvollständig. || The view code contains invalid characters or is incomplete. || Le code de vue contient des caractères invalides ou est incomplet. || El código de vista contiene caracteres no válidos o está incompleto.
 Der Ansichtscode ist beschädigt oder unvollständig. || The view code is damaged or incomplete. || Le code de vue est endommagé ou incomplet. || El código de vista está dañado o incompleto.
 Kein Ansichtscode || No view code || Pas de code de vue || Sin código de vista
-Gruppen lassen sich nicht verschachteln || Groups cannot be nested || Les groupes ne peuvent pas être imbriqués || Los grupos no se pueden anidar
-Ein Abschnitt steht in höchstens einer Gruppe || A section belongs to at most one group || Une section appartient à un seul groupe au plus || Una sección pertenece como máximo a un grupo
-Dieser Abschnitt bleibt immer sichtbar und lässt sich nicht gruppieren || This section always stays visible and cannot be grouped || Cette section reste toujours visible et ne peut pas être groupée || Esta sección siempre permanece visible y no se puede agrupar
-Auf der Karte gibt es keine Gruppen || The map has no groups || La carte n’a pas de groupes || El mapa no tiene grupos
+Bausteingruppen lassen sich nicht verschachteln || Widget groups cannot be nested || Les groupes de blocs ne peuvent pas être imbriqués || Los grupos de bloques no se pueden anidar
+Ein Baustein steht in höchstens einer Bausteingruppe || A section belongs to at most one widget group || Une section appartient à un seul groupe de blocs au plus || Una sección pertenece como máximo a un grupo de bloques
+Dieser Baustein bleibt immer sichtbar und lässt sich nicht gruppieren || This section always stays visible and cannot be grouped || Cette section reste toujours visible et ne peut pas être groupée || Esta sección siempre permanece visible y no se puede agrupar
+Auf der Karte gibt es keine Bausteingruppen || The map has no widget groups || La carte n’a pas de groupes de blocs || El mapa no tiene grupos de bloques
 Auf der Karte gibt es keine eigene Handy-Anordnung || The map has no own phone arrangement || La carte n’a pas de disposition propre au téléphone || El mapa no tiene disposición propia para el móvil
-Eine Gruppe verweist auf einen Abschnitt oder Baustein, den es auf dieser Seite nicht gibt || A group refers to a section or widget that does not exist on this page || Un groupe renvoie à une section ou à un bloc qui n’existe pas sur cette page || Un grupo remite a una sección o bloque que no existe en esta página
+Eine Bausteingruppe verweist auf einen Baustein, den es auf dieser Seite nicht gibt || A widget group refers to a section or widget that does not exist on this page || Un groupe de blocs renvoie à une section ou à un bloc qui n’existe pas sur cette page || Un grupo de bloques remite a una sección o bloque que no existe en esta página
 Wie viel Belastung die letzten vier Wochen laut Uhr hatten, verglichen mit dem Schnitt davor, mit Wochenbalken. Als Wochenansicht: je Woche die Belastung laut Uhr, die Touren und die Ruhetage dazu. || How much load the last four weeks had according to the watch, compared with the average before, with weekly bars. As a weekly view: the load per week according to the watch, plus the tours and rest days. || Quelle charge ont eu les quatre dernières semaines selon la montre, comparée à la moyenne précédente, avec des barres par semaine. En vue hebdomadaire : la charge de chaque semaine selon la montre, avec les sorties et les jours de repos. || Cuánta carga tuvieron las últimas cuatro semanas según el reloj, comparada con la media anterior, con barras semanales. En vista semanal: la carga de cada semana según el reloj, junto con las rutas y los días de descanso.
 Kompakt (Vergleich mit Wochenbalken) || Compact (comparison with weekly bars) || Compacte (comparaison avec barres par semaine) || Compacta (comparación con barras semanales)
 Wochenansicht mit Ruhetagen || Weekly view with rest days || Vue hebdomadaire avec jours de repos || Vista semanal con días de descanso
@@ -2677,7 +2651,7 @@ Belastung ohne Angabe || Load not specified || Charge non indiquée || Carga sin
 1 Ruhetag || 1 rest day || 1 jour de repos || 1 día de descanso
 {} Ruhetage || {} rest days || {} jours de repos || {} días de descanso
 In {} Wochen: {} bei {} (im Schnitt {} Ruhetage je Woche). || In {} weeks: {} with {} (on average {} rest days per week). || Sur {} semaines : {} pour {} (en moyenne {} jours de repos par semaine). || En {} semanas: {} con {} (de media {} días de descanso por semana).
-Balken: Belastung laut Uhr. Punkte: Tage mit Tour (gefüllt) und Ruhetage (leer), Montag bis Sonntag. || Bars: load according to the watch. Dots: days with a tour (filled) and rest days (empty), Monday to Sunday. || Barres : charge selon la montre. Points : jours avec parcours (pleins) et jours de repos (vides), du lundi au dimanche. || Barras: carga según el reloj. Puntos: días con ruta (rellenos) y días de descanso (vacíos), de lunes a domingo.
+Balken: Belastung laut Uhr. Punkte: aktive Tage (gefüllt) und Ruhetage (leer), Montag bis Sonntag. || Bars: load according to the watch. Dots: active days (filled) and rest days (empty), Monday to Sunday. || Barres : charge selon la montre. Points : jours actifs (pleins) et jours de repos (vides), du lundi au dimanche. || Barras: carga según el reloj. Puntos: días activos (rellenos) y días de descanso (vacíos), de lunes a domingo.
 Limit überschritten um {}: Zeit für einen Wechsel || Limit exceeded by {}: time for a replacement || Limite dépassée de {} : il est temps de remplacer || Límite superado en {}: toca cambiarlo
 Limit erreicht: Zeit für einen Wechsel || Limit reached: time for a replacement || Limite atteinte : il est temps de remplacer || Límite alcanzado: toca cambiarlo
 Jahreszeiten und Wetter || Seasons and weather || Saisons et météo || Estaciones y tiempo
@@ -2747,18 +2721,18 @@ Dein größter Aufstieg der letzten {} Monate: {} m auf {} km; diese: {} m || Yo
 Länger als deine längste Tour (+{} %) || Longer than your longest tour (+{} %) || Plus long que votre plus long parcours (+{} %) || Más larga que tu ruta más larga (+{} %)
 Mehr Aufstieg als deine bisher höchste Tour (+{} %) || More ascent than your highest tour so far (+{} %) || Plus de dénivelé positif que votre parcours le plus haut jusqu’ici (+{} %) || Más desnivel positivo que tu ruta más alta hasta ahora (+{} %)
 Länger als diese Strecke: {} von {} Touren || Longer than this route: {} of {} tours || Plus longs que ce tracé : {} parcours sur {} || Más largas que este trazado: {} de {} rutas
-Ähnlich lange Touren (±25 % der Länge): {} in den letzten {} Monaten || Tours of similar length (±25 % of the length): {} in the last {} months || Parcours de longueur comparable (±25 % de la longueur) : {} au cours des {} derniers mois || Rutas de longitud similar (±25 % de la longitud): {} en los últimos {} meses
-Mittlere Gesamtzeit dieser Touren: {} Std. || Average total time of these tours: {} h || Durée totale moyenne de ces parcours : {} h || Tiempo total medio de estas rutas: {} h
+Ähnlich lange Touren (±25 % der Strecke): {} in den letzten {} Monaten || Tours of similar length (±25 % of the length): {} in the last {} months || Parcours de longueur comparable (±25 % de la longueur) : {} au cours des {} derniers mois || Rutas de longitud similar (±25 % de la longitud): {} en los últimos {} meses
+Mittlere Dauer dieser Touren: {} Std. || Average total time of these tours: {} h || Durée totale moyenne de ces parcours : {} h || Tiempo total medio de estas rutas: {} h
 Mittlerer Aufstieg dieser Touren: {} m || Average ascent of these tours: {} m || Dénivelé positif moyen de ces parcours : {} m || Desnivel positivo medio de estas rutas: {} m
 Höchster Punkt dieser Strecke: {} m; höchster Punkt deiner Touren der letzten {} Monate: {} m || Highest point of this route: {} m; highest point of your tours of the last {} months: {} m || Point culminant de ce tracé : {} m ; point culminant de vos parcours des {} derniers mois : {} m || Punto más alto de este trazado: {} m; punto más alto de tus rutas de los últimos {} meses: {} m
-Geschätzte Gesamtzeit inkl. Pausen: {} Std. (wie oben) || Estimated total time incl. breaks: {} h (as above) || Durée totale estimée pauses comprises : {} h (comme ci-dessus) || Tiempo total estimado con pausas: {} h (como arriba)
+Geschätzte Dauer inkl. Pausen: {} Std. (wie oben) || Estimated total time incl. breaks: {} h (as above) || Durée totale estimée pauses comprises : {} h (comme ci-dessus) || Tiempo total estimado con pausas: {} h (como arriba)
 Reine Gehzeit ohne Pausen: ca. {} Std. || Walking time only, without breaks: approx. {} h || Temps de marche seul, sans pauses : env. {} h || Solo tiempo de marcha, sin pausas: aprox. {} h
 (nach deinem Steigungstempo) || (based on your pace by slope) || (d’après votre allure selon la pente) || (según tu ritmo por pendiente)
 (teilweise nach deinem Steigungstempo) || (partly based on your pace by slope) || (en partie d’après votre allure selon la pente) || (en parte según tu ritmo por pendiente)
 (nach Standardwerten (Naismith)) || (based on standard values (Naismith)) || (d’après les valeurs standard (Naismith)) || (según valores estándar (Naismith))
 Grundlage: {} Touren dieser Sportart der letzten {} Monate. || Basis: {} tours of this sport from the last {} months. || Base : {} parcours de ce sport des {} derniers mois. || Base: {} rutas de este deporte de los últimos {} meses.
 Vergleich mit deinen Touren wird berechnet … || Comparing with your tours … || Comparaison avec vos parcours en cours … || Comparando con tus rutas …
-Der Vergleich konnte nicht berechnet werden: {} || The comparison could not be calculated: {} || La comparaison n’a pas pu être calculée : {} || No se pudo calcular la comparación: {}
+Vergleich nicht möglich: {} || The comparison could not be calculated: {} || La comparaison n’a pas pu être calculée : {} || No se pudo calcular la comparación: {}
 Geschätzte Zeit inkl. Pausen ({}–{}) || Estimated time incl. breaks ({}–{}) || Durée estimée pauses comprises ({}–{}) || Tiempo estimado con pausas ({}–{})
 geplant {} Std. || planned {} h || prévu {} h || previsto {} h
 gelaufen {} Std. ({}) || walked {} h ({}) || parcouru {} h ({}) || recorrido {} h ({})
@@ -2769,7 +2743,6 @@ geplant || planned || prévu || previsto
 gegangen || done || fait || hecho
 verworfen || discarded || abandonné || descartado
 Gelaufen am {} vorschlagen: || Suggest as walked on {}: || Proposer comme parcouru le {} : || Proponer como recorrida el {}:
-Bestätigen || Confirm || Confirmer || Confirmar
 Nicht passend || Not a match || Ne correspond pas || No coincide
 Tour ansehen || View tour || Voir le parcours || Ver la ruta
 Verknüpfung lösen || Remove link || Supprimer le lien || Quitar el vínculo
@@ -2778,7 +2751,6 @@ Status: {} || Status: {} || Statut : {} || Estado: {}
 Verknüpfung bestätigen: {} || Confirm link: {} || Confirmer le lien : {} || Confirmar el vínculo: {}
 Verknüpfung lösen: {} || Remove link: {} || Supprimer le lien : {} || Quitar el vínculo: {}
 Zur gelaufenen Tour: {} || To the walked tour: {} || Vers le parcours effectué : {} || A la ruta recorrida: {}
-Plan löschen: {} || Delete plan: {} || Supprimer le plan : {} || Eliminar plan: {}
 Karte zur Planung: Klick setzt einen Punkt || Map for planning: a click sets a point || Carte de planification : un clic place un point || Mapa de planificación: un clic fija un punto
 Kennzahlen der Planung || Figures of the plan || Chiffres clés de la planification || Cifras de la planificación
 Höhenprofil der Planung || Elevation profile of the plan || Profil altimétrique de la planification || Perfil de altitud de la planificación
@@ -2786,18 +2758,18 @@ Aus Wanderführer laden || Load from guidebook || Charger depuis un guide de ran
 Sportart || Sport || Sport || Deporte
 Portale || Portals || Portails || Portales
 (Upload) || (upload) || (téléversement) || (subida)
-Keine offenen Pläne. || No open plans. || Aucun plan ouvert. || No hay planes abiertos.
-Gegangene Pläne auch zeigen || Also show plans already walked || Afficher aussi les plans déjà parcourus || Mostrar también los planes ya recorridos
+Keine offenen geplanten Touren. || No open planned tours. || Aucun plan ouvert. || No hay rutas planificadas abiertos.
+Gegangene geplante Touren auch zeigen || Also show planned tours already walked || Afficher aussi les parcours planifiés déjà parcourus || Mostrar también los rutas planificadas ya recorridos
 gegangen am {} || walked on {} || parcouru le {} || recorrido el {}
-Die offenen Pläne (noch nicht gegangen) mit Länge, Aufstieg und geschätzter Dauer, mit Link zur Planung. Auf Wunsch auch gegangene Pläne mit dem Vergleich von geplanter und gelaufener Zeit. Verworfene Pläne erscheinen nie. || The open plans (not yet walked) with length, ascent and estimated duration, with a link to the planner. If you like, also plans already walked, comparing planned and walked time. Discarded plans never appear. || Les plans ouverts (pas encore parcourus) avec longueur, dénivelé positif et durée estimée, avec un lien vers la planification. Sur demande, aussi les plans déjà parcourus, avec la comparaison entre durée prévue et durée réelle. Les plans abandonnés n'apparaissent jamais. || Los planes abiertos (aún sin recorrer) con longitud, desnivel positivo y duración estimada, con enlace a la planificación. Si quieres, también los planes ya recorridos, con la comparación entre el tiempo previsto y el real. Los planes descartados nunca aparecen.
+Die offenen geplanten Touren (noch nicht gegangen) mit Strecke, Aufstieg und geschätzter Dauer, mit Link zur Planung. Auf Wunsch auch gegangene geplante Touren mit dem Vergleich von geplanter und gelaufener Zeit. Verworfene geplante Touren erscheinen nie. || The open planned tours (not yet walked) with length, ascent and estimated duration, with a link to the planner. If you like, also planned tours already walked, comparing planned and walked time. Discarded planned tours never appear. || Les parcours planifiés ouverts (pas encore parcourus) avec longueur, dénivelé positif et durée estimée, avec un lien vers la planification. Sur demande, aussi les parcours planifiés déjà parcourus, avec la comparaison entre durée prévue et durée réelle. Les parcours planifiés abandonnés n'apparaissent jamais. || Los rutas planificadas abiertos (aún sin recorrer) con longitud, desnivel positivo y duración estimada, con enlace a la planificación. Si quieres, también los rutas planificadas ya recorridos, con la comparación entre el tiempo previsto y el real. Los rutas planificadas descartados nunca aparecen.
 Heimatort und Puls || Home location and heart rate || Lieu de résidence et fréquence cardiaque || Lugar de residencia y pulso
 Maximalpuls (bpm) für die Pulszonen || Maximum heart rate (bpm) for the heart-rate zones || Fréquence cardiaque maximale (bpm) pour les zones de fréquence cardiaque || Pulso máximo (ppm) para las zonas de pulso
 Touren den Uhren zuordnen || Assign tours to watches || Associer les parcours aux montres || Asignar rutas a los relojes
 Heatmap: zeichnet alle Touren in einer Farbe übereinander – häufig begangene Wege leuchten stärker. Ersetzt die farbigen Tracklinien (Knopf 'Strecken' ändert deren Farbe und Breite). || Heatmap: draws all tours on top of each other in one colour – frequently walked paths glow brighter. Replaces the coloured track lines (the 'Tracks' button changes their colour and width). || Carte de chaleur : superpose tous les parcours dans une seule couleur – les chemins très fréquentés ressortent davantage. Remplace les tracés colorés (le bouton « Tracés » modifie leur couleur et leur largeur). || Mapa de calor: superpone todas las rutas en un solo color; los caminos más frecuentes brillan más. Sustituye las líneas de color de los trazados (el botón «Trazados» cambia su color y grosor).
 Keine Touren in diesem Ausschnitt. Zoome heraus oder verschiebe die Karte. || No tours in this area. Zoom out or move the map. || Aucun parcours dans cette zone. Dézoomez ou déplacez la carte. || No hay rutas en esta zona. Aleja el zoom o mueve el mapa.
 Noch keine Touren: Komoot-Zugang eintragen oder GPX-Dateien bzw. Zepp-Trainings importieren (Verwaltung). || No tours yet: enter your Komoot access or import GPX files or Zepp workouts (Admin). || Aucun parcours pour l’instant : saisissez votre accès Komoot ou importez des fichiers GPX ou des entraînements Zepp (administration). || Aún no hay rutas: introduce tu acceso a Komoot o importa archivos GPX o entrenamientos de Zepp (administración).
-Zepp-Token ist abgelaufen oder ungültig (Verwaltung → Zepp). || The Zepp token has expired or is invalid (Admin → Zepp). || Le jeton Zepp a expiré ou n’est pas valide (administration → Zepp). || El token de Zepp ha caducado o no es válido (administración → Zepp).
-Letzter Job „{}“ ist fehlgeschlagen (Verwaltung → Protokoll). || Last job “{}” failed (Admin → Log). || Le dernier travail « {} » a échoué (administration → journal). || El último trabajo «{}» ha fallado (administración → registro).
+Zepp-Token ist abgelaufen oder ungültig (Verwaltung → Touren holen → Zepp-Import). || The Zepp token has expired or is invalid (Admin → Zepp). || Le jeton Zepp a expiré ou n’est pas valide (administration → Zepp). || El token de Zepp ha caducado o no es válido (administración → Zepp).
+Letzter Job „{}“ ist fehlgeschlagen (Verwaltung → Allgemein → Protokoll). || Last job “{}” failed (Admin → Log). || Le dernier travail « {} » a échoué (administration → journal). || El último trabajo «{}» ha fallado (administración → registro).
 Die Sicherung kann nicht geschrieben werden: {} || Backup cannot be written: {} || La sauvegarde ne peut pas être écrite : {} || No se puede escribir la copia de seguridad: {}
 Es gibt noch keine Sicherung – das erste wird automatisch angelegt (nachts), oder jetzt sofort: || There is no backup yet – the first one is created automatically (at night), or right now: || Il n’y a pas encore de sauvegarde – la première sera créée automatiquement (la nuit), ou tout de suite : || Todavía no hay ninguna copia de seguridad: la primera se crea automáticamente (por la noche) o ahora mismo:
 Die letzte Sicherung ist älter als 36 Stunden. || The last backup is more than 36 hours old. || La dernière sauvegarde date de plus de 36 heures. || La última copia de seguridad tiene más de 36 horas.
@@ -2818,9 +2790,9 @@ auf || on || sur || en
 Herzfrequenz für bereits importierte Zepp-Touren aus der Zepp-Cloud nachladen (Touren bleiben unverändert) || Reload heart rate for already imported Zepp tours from the Zepp cloud (tours remain unchanged) || Recharger la fréquence cardiaque des parcours Zepp déjà importés depuis le cloud Zepp (les parcours restent inchangés) || Volver a cargar el pulso de las rutas de Zepp ya importadas desde la nube de Zepp (las rutas no se modifican)
 Alle Touren, zu denen es ein Zepp-Training gibt (auch Komoot- und Datei-Touren), als mit der Uhr aufgezeichnet markieren und dem passenden Gerät zuordnen. Von Hand zugeordnete Touren bleiben unverändert. || Mark all tours for which a Zepp workout exists (including Komoot and file tours) as recorded with the watch and assign them to the matching device. Tours assigned by hand remain unchanged. || Marquer tous les parcours pour lesquels il existe un entraînement Zepp (y compris les parcours Komoot et fichiers) comme enregistrés avec la montre et les associer à l’appareil correspondant. Les parcours associés à la main restent inchangés. || Marcar todas las rutas para las que existe un entrenamiento de Zepp (también las de Komoot y de archivos) como grabadas con el reloj y asignarlas al dispositivo correspondiente. Las rutas asignadas a mano no se modifican.
 Messwerte (Tempo, Kadenz, Leistung, Temperatur …) für bereits importierte Touren aus der Zepp-Cloud bzw. aus Original-Dateien im Eingang/Export nachladen. Vorhandene Daten bleiben unverändert. || Reload measurements (pace, cadence, power, temperature …) for already imported tours from the Zepp cloud or from original files in the inbox/export. Existing data remains unchanged. || Recharger les mesures (allure, cadence, puissance, température …) des parcours déjà importés depuis le cloud Zepp ou depuis les fichiers d’origine dans la boîte de réception/l’export. Les données existantes restent inchangées. || Volver a cargar las mediciones (ritmo, cadencia, potencia, temperatura …) de las rutas ya importadas desde la nube de Zepp o desde los archivos originales de la bandeja de entrada/exportación. Los datos existentes no se modifican.
-Plan und Ergebnis || Plan and result || Plan et résultat || Plan y resultado
-Plan und Ergebnis im Vergleich || Plan and result compared || Plan et résultat comparés || Plan y resultado comparados
-Wie die Tour im Vergleich zur verknüpften Planung ausgefallen ist: Strecke, Aufstieg und Zeit als Plan und Ergebnis mit Unterschied (↑ ↓ =), die geplante Linie gestrichelt über der gelaufenen, Link zum Plan. Erscheint nur bei Touren, die mit einem Plan verknüpft sind. || How the tour turned out compared with the linked plan: distance, ascent and time as plan and result with the difference (↑ ↓ =), the planned line dashed over the walked one, link to the plan. Appears only for tours linked to a plan. || Comment le parcours s’est déroulé par rapport au plan associé : distance, dénivelé positif et durée en plan et résultat avec l’écart (↑ ↓ =), la ligne prévue en pointillés sur la ligne parcourue, lien vers le plan. N’apparaît que pour les parcours associés à un plan. || Cómo salió la ruta frente al plan vinculado: distancia, desnivel positivo y tiempo como plan y resultado con la diferencia (↑ ↓ =), la línea planificada discontinua sobre la recorrida, enlace al plan. Solo aparece en rutas vinculadas a un plan.
+Planung und Ergebnis || Plan and result || Plan et résultat || Plan y resultado
+Planung und Ergebnis im Vergleich || Plan and result compared || Plan et résultat comparés || Plan y resultado comparados
+Wie die Tour im Vergleich zur verknüpften Planung ausgefallen ist: Strecke, Aufstieg und Zeit als Planung und Ergebnis mit Unterschied (↑ ↓ =), die geplante Linie gestrichelt über der gelaufenen, Link zum Plan. Erscheint nur bei Touren, die mit einem Plan verknüpft sind. || How the tour turned out compared with the linked plan: distance, ascent and time as plan and result with the difference (↑ ↓ =), the planned line dashed over the walked one, link to the plan. Appears only for tours linked to a plan. || Comment le parcours s’est déroulé par rapport au plan associé : distance, dénivelé positif et durée en plan et résultat avec l’écart (↑ ↓ =), la ligne prévue en pointillés sur la ligne parcourue, lien vers le plan. N’apparaît que pour les parcours associés à un plan. || Cómo salió la ruta frente al plan vinculado: distancia, desnivel positivo y tiempo como plan y resultado con la diferencia (↑ ↓ =), la línea planificada discontinua sobre la recorrida, enlace al plan. Solo aparece en rutas vinculadas a un plan.
 Zeit gesamt || Total time || Durée totale || Tiempo total
 Plan || Plan || Plan || Plan
 Ergebnis || Result || Résultat || Resultado
@@ -2830,10 +2802,10 @@ mehr Aufstieg als geplant || more ascent than planned || plus de dénivelé posi
 weniger Aufstieg als geplant || less ascent than planned || moins de dénivelé positif que prévu || menos desnivel positivo de lo planificado
 wie geplant || as planned || comme prévu || como se planificó
 ohne Angabe || not specified || non renseigné || sin datos
-Zum Plan › || To the plan › || Vers le plan › || Al plan ›
+Zur Planung › || To the plan › || Vers le plan › || Al plan ›
 Verknüpfung lösen? || Remove the link? || Supprimer l’association ? || ¿Quitar el vínculo?
-Der Plan „{}“ bleibt erhalten, ist aber nicht mehr mit dieser Tour verknüpft und steht wieder als „geplant“ in deiner Planliste. || The plan “{}” is kept, but is no longer linked to this tour and appears again as “planned” in your plan list. || Le plan « {} » est conservé, mais n’est plus associé à ce parcours et réapparaît comme « prévu » dans votre liste de plans. || El plan «{}» se conserva, pero ya no está vinculado a esta ruta y vuelve a aparecer como «planificado» en tu lista de planes.
-Zu dieser Tour gibt es keine verknüpfte Planung. Der Baustein erscheint nur bei Touren mit verknüpftem Plan. || This tour has no linked plan. The block appears only for tours with a linked plan. || Ce parcours n’a pas de plan associé. Le bloc n’apparaît que pour les parcours avec un plan associé. || Esta ruta no tiene un plan vinculado. El bloque solo aparece en rutas con un plan vinculado.
+Die geplante Tour „{}“ bleibt erhalten, ist aber nicht mehr mit dieser Tour verknüpft und steht wieder als „geplant“ in deiner Planliste. || the planned tour “{}” is kept, but is no longer linked to this tour and appears again as “planned” in your plan list. || Le plan « {} » est conservé, mais n’est plus associé à ce parcours et réapparaît comme « prévu » dans votre liste de parcours planifiés. || El plan «{}» se conserva, pero ya no está vinculado a esta ruta y vuelve a aparecer como «planificado» en tu lista de rutas planificadas.
+Zu dieser Tour gibt es keine verknüpfte Planung. Der Baustein erscheint nur bei Touren mit verknüpfter Planung. || This tour has no linked plan. The block appears only for tours with a linked plan. || Ce parcours n’a pas de plan associé. Le bloc n’apparaît que pour les parcours avec un plan associé. || Esta ruta no tiene un plan vinculado. El bloque solo aparece en rutas con un plan vinculado.
 Zeit gesamt: einschließlich Pausen; geplante Zeit nach deinem persönlichen Tempo. || Total time: including breaks; planned time based on your personal pace. || Durée totale : pauses comprises ; durée prévue selon votre rythme personnel. || Tiempo total: incluidas las pausas; el tiempo planificado se basa en tu ritmo personal.
 Plan (gestrichelt) || Plan (dashed) || Plan (en pointillés) || Plan (discontinuo)
 Ergebnis (durchgezogen) || Result (solid) || Résultat (trait plein) || Resultado (continuo)
@@ -2851,7 +2823,7 @@ Wie die Tour im Vergleich zur verknüpften Planung ausgefallen ist: Geplant und 
 Karte: geplante Linie gestrichelt, gelaufene Linie durchgezogen (die gelaufene Linie liegt nicht vor) || Map: planned line dashed, walked line solid (the walked line is not available) || Carte : ligne prévue en pointillés, ligne parcourue en trait plein (la ligne parcourue n’est pas disponible) || Mapa: línea planificada discontinua, línea recorrida continua (no hay línea recorrida)
 Karte: geplante Linie gestrichelt, gelaufene Linie durchgezogen (die geplante Linie liegt nicht vor) || Map: planned line dashed, walked line solid (the planned line is not available) || Carte : ligne prévue en pointillés, ligne parcourue en trait plein (la ligne prévue n’est pas disponible) || Mapa: línea planificada discontinua, línea recorrida continua (no hay línea planificada)
 Sicherung zurückspielen || Restore a backup || Restaurer une sauvegarde || Restaurar una copia de seguridad
-Setzt deine Touren, Notizen, Pläne und Einstellungen auf den Stand einer Sicherung zurück. Die Sicherung wird zuerst geprüft, und der heutige Stand wird vorher automatisch gesichert. || Puts your tours, notes, plans and settings back to the state of a backup. The backup is checked first, and today’s state is saved automatically beforehand. || Remet vos parcours, notes, plans et réglages dans l’état d’une sauvegarde. La sauvegarde est d’abord vérifiée, et l’état actuel est enregistré automatiquement au préalable. || Devuelve tus rutas, notas, planes y ajustes al estado de una copia de seguridad. Primero se comprueba la copia y antes se guarda automáticamente el estado actual.
+Setzt deine Touren, Notizen, geplante Touren und Einstellungen auf den Stand einer Sicherung zurück. Die Sicherung wird zuerst geprüft, und der heutige Stand wird vorher automatisch gesichert. || Puts your tours, notes, planned tours and settings back to the state of a backup. The backup is checked first, and today’s state is saved automatically beforehand. || Remet vos parcours, notes, parcours planifiés et réglages dans l’état d’une sauvegarde. La sauvegarde est d’abord vérifiée, et l’état actuel est enregistré automatiquement au préalable. || Devuelve tus rutas, notas, rutas planificadas y ajustes al estado de una copia de seguridad. Primero se comprueba la copia y antes se guarda automáticamente el estado actual.
 Sicherung auf diesem Server || Backup on this server || Sauvegarde sur ce serveur || Copia de seguridad en este servidor
 Oder eine Sicherungsdatei (ZIP) hochladen || Or upload a backup file (ZIP) || Ou envoyer un fichier de sauvegarde (ZIP) || O subir un archivo de copia de seguridad (ZIP)
 Sicherung prüfen … || Check backup … || Vérifier la sauvegarde … || Comprobar la copia …
@@ -2867,9 +2839,9 @@ Die Sicherung nennt keinen Benutzer. Sie wird in dein Konto zurückgespielt. || 
 Das ist eine Sicherheitskopie, die vor einem früheren Zurückspielen angelegt wurde. || This is a safety copy that was made before an earlier restore. || Il s’agit d’une copie de sécurité créée avant une restauration précédente. || Esta es una copia de seguridad creada antes de una restauración anterior.
 In der Sicherung || In the backup || Dans la sauvegarde || En la copia
 Strecken (GPX-Dateien) || Tracks (GPX files) || Tracés (fichiers GPX) || Trazados (archivos GPX)
-Seitenlayouts || Page layouts || Mises en page || Diseños de página
+Ansichten || Views || Vues || Vistas
 Das wird ersetzt || This will be replaced || Ce qui sera remplacé || Esto se sustituirá
-Touren, Notizen, Ziele, geplante Touren, Seitenlayouts und Einstellungen. Alles, was seit dieser Sicherung dazugekommen ist oder geändert wurde, geht verloren. || Tours, notes, goals, planned tours, page layouts and settings. Everything added or changed since this backup will be lost. || Parcours, notes, objectifs, parcours planifiés, mises en page et réglages. Tout ce qui a été ajouté ou modifié depuis cette sauvegarde sera perdu. || Rutas, notas, objetivos, rutas planificadas, diseños de página y ajustes. Todo lo añadido o modificado desde esta copia se perderá.
+Touren, Notizen, Ziele, geplante Touren, Ansichten und Einstellungen. Alles, was seit dieser Sicherung dazugekommen ist oder geändert wurde, geht verloren. || Tours, notes, goals, planned tours, page layouts and settings. Everything added or changed since this backup will be lost. || Parcours, notes, objectifs, parcours planifiés, mises en page et réglages. Tout ce qui a été ajouté ou modifié depuis cette sauvegarde sera perdu. || Rutas, notas, objetivos, rutas planificadas, diseños de página y ajustes. Todo lo añadido o modificado desde esta copia se perderá.
 Das bleibt, wie es ist || This stays as it is || Ce qui reste inchangé || Esto se queda como está
 Fotodateien – sie sind nicht in der Sicherung. || Photo files – they are not part of the backup. || Les fichiers photo – ils ne font pas partie de la sauvegarde. || Los archivos de fotos: no forman parte de la copia.
 Zwischenspeicher (geladene Strecken, Vorschaubilder). || Cache (downloaded tracks, thumbnails). || Le cache (tracés téléchargés, miniatures). || La caché (trazados descargados, miniaturas).
@@ -3047,16 +3019,14 @@ Voraussetzung: ein Ziel in der Statistik unter „Ziele“; die Prognose eines J
 Wird nur angezeigt, wenn ein Wochenziel gesetzt ist (Statistik → Ziele). || Only shown when a weekly goal is set (Statistics → Goals). || N’apparaît que si un objectif hebdomadaire est défini (Statistiques → Objectifs). || Solo se muestra si hay un objetivo semanal (Estadísticas → Objetivos).
 Deine Ziele aus der Statistik (zum Beispiel 1000 km im Jahr oder 3 Touren pro Woche) mit Stand und Prognose – als Balken, als Ring oder nur als Warnung, wenn ein Ziel in Gefahr ist. Angelegt und gelöscht werden Ziele in der Statistik unter „Ziele“. || Your goals from Statistics (for example 1000 km a year or 3 tours a week) with progress and forecast – as bars, as a ring or only as a warning when a goal is at risk. Goals are created and deleted in Statistics under “Goals”. || Tes objectifs des statistiques (par exemple 1000 km par an ou 3 parcours par semaine) avec avancement et prévision – en barres, en anneau ou seulement en alerte quand un objectif est menacé. Les objectifs se créent et se suppriment dans Statistiques sous « Objectifs ». || Tus objetivos de Estadísticas (por ejemplo 1000 km al año o 3 rutas por semana) con progreso y previsión: como barras, como anillo o solo como aviso cuando un objetivo está en riesgo. Los objetivos se crean y eliminan en Estadísticas, en «Objetivos».
 Anzahl je Wert || Number per value || Nombre par valeur || Número por valor
-1 (nur der Bestwert) || 1 (best value only) || 1 (meilleure valeur seulement) || 1 (solo el mejor valor)
+1 (nur der Bestwert) || 1 (record only) || 1 (record seulement) || 1 (solo el récord)
 Werte || Values || Valeurs || Valores
-Nach Strecke || By distance || Par distance || Por distancia
 Nach Aufstieg || By ascent || Par montée || Por subida
 Nach Dauer || By duration || Par durée || Por duración
 Nach Tempo || By pace || Par allure || Por ritmo
 Stärkste Monate || Strongest months || Meilleurs mois || Meses más fuertes
 Top {} || Top {} || Top {} || Top {}
-Deine Bestwerte mit Link zur Tour: längste Tour, größter Aufstieg, längste Dauer, schnellstes Tempo und stärkster Monat – als Kacheln mit dem Bestwert oder als Rangliste der besten 3, 5 oder 10. || Your best values with a link to the tour: longest tour, biggest ascent, longest duration, fastest pace and strongest month – as tiles with the best value or as a ranking of the best 3, 5 or 10. || Tes meilleures valeurs avec lien vers le parcours : plus long parcours, plus grande montée, plus longue durée, allure la plus rapide et meilleur mois – en tuiles avec la meilleure valeur ou en classement des 3, 5 ou 10 meilleurs. || Tus mejores valores con enlace a la ruta: ruta más larga, mayor subida, mayor duración, ritmo más rápido y mes más fuerte, como fichas con el mejor valor o como clasificación de los 3, 5 o 10 mejores.
-Allgemein || General || Général || General
+Deine Bestwerte mit Link zur Tour: längste Tour, größter Aufstieg, längste Dauer, schnellstes Tempo und stärkster Monat – als Kacheln mit dem Bestwert oder als Rangliste der besten 3, 5 oder 10. || Your records with a link to the tour: longest tour, biggest ascent, longest duration, fastest pace and strongest month – as tiles with the record or as a ranking of the best 3, 5 or 10. || Tes records avec lien vers le parcours : plus long parcours, plus grande montée, plus longue durée, allure la plus rapide et meilleur mois – en tuiles avec la record ou en classement des 3, 5 ou 10 meilleurs. || Tus récords con enlace a la ruta: ruta más larga, mayor subida, mayor duración, ritmo más rápido y mes más fuerte, como fichas con el récord o como clasificación de los 3, 5 o 10 mejores.
 Allgemein (nicht zu dieser Tour) || General (not about this tour) || Général (pas sur ce parcours) || General (no sobre esta ruta)
 Diese Bausteine zeigen nichts zu dieser Tour, sondern deine Touren insgesamt (wie auf der Übersicht). || These blocks show nothing about this tour, but all your tours (as on the overview). || Ces blocs ne montrent rien sur ce parcours, mais l’ensemble de tes parcours (comme sur l’aperçu). || Estos bloques no muestran nada de esta ruta, sino todas tus rutas (como en la vista general).
 Platz auf dieser Strecke || Rank on this route || Place sur ce tracé || Puesto en este recorrido
@@ -3066,16 +3036,16 @@ Touren holen (nur Knopf) || Fetch tours (button only) || Récupérer les parcour
 Legende der Sportarten || Legend of sports || Légende des sports || Leyenda de deportes
 Neueste Touren || Newest tours || Parcours les plus récents || Rutas más recientes
 Belastung im Wochenvergleich || Load compared by week || Charge comparée par semaine || Carga comparada por semana
-Jahres-Rückblick {} || Year review {} || Rétrospective annuelle {} || Resumen del año {}
+Jahresrückblick {} || Year review {} || Rétrospective annuelle {} || Resumen del año {}
 Durchschnittstempo bergauf, auf ebenem Weg und bergab als drei Kacheln, aus der Steigung der Strecke. || Average speed uphill, on the flat and downhill as three tiles, from the gradient of the route. || Allure moyenne en montée, sur le plat et en descente en trois tuiles, d’après la pente du tracé. || Ritmo medio en subida, en llano y en bajada como tres fichas, a partir de la pendiente del recorrido.
 In einer Zeile: „Platz x von y“ unter allen Touren auf derselben Strecke, nach Tempo, mit Link zur Auswertung. || In one line: “rank x of y” among all tours on the same route, by pace, with a link to the analysis. || Sur une ligne : « place x sur y » parmi tous les parcours sur le même tracé, par allure, avec lien vers l’analyse. || En una línea: «puesto x de y» entre todas las rutas del mismo recorrido, por ritmo, con enlace al análisis.
 Wetter am Tag der Tour als Kacheln in einer Zeile: Himmel, Temperatur, Niederschlag, Wind. || Weather on the day of the tour as tiles in one line: sky, temperature, precipitation, wind. || Météo du jour du parcours en tuiles sur une ligne : ciel, température, précipitations, vent. || El tiempo del día de la ruta como fichas en una línea: cielo, temperatura, precipitación, viento.
 Der höchste Punkt der Tour als Wegweiser-Tafel, wann du ihn erreicht hast und wie viel der Strecke über einer wählbaren Höhe lag. || The highest point of the tour as a signpost, when you reached it and how much of the route was above a selectable altitude. || Le point le plus haut du parcours en panneau indicateur, quand tu l’as atteint et quelle part du tracé était au-dessus d’une altitude au choix. || El punto más alto de la ruta como señal indicadora, cuándo lo alcanzaste y qué parte del recorrido estuvo por encima de una altitud elegible.
-Für alle, die gern draußen sind: deine Ziele als Ring, Meilensteine, die Kalender-Heatmap, die neuesten Touren und deine Bestwerte. || For everyone who loves being outdoors: your goals as a ring, milestones, the calendar heatmap, the newest tours and your best values. || Pour tous ceux qui aiment être dehors : tes objectifs en anneau, les jalons, la carte de chaleur du calendrier, les parcours les plus récents et tes meilleures valeurs. || Para quienes disfrutan al aire libre: tus objetivos como anillo, hitos, el mapa de calor del calendario, las rutas más recientes y tus mejores valores.
-Für den Blick zurück: Dein Jahr, der Jahres-Rückblick, Heute vor X Jahren, Wiederentdecken und deine Bestwerte. || For looking back: Your year, the year review, X years ago today, Rediscover and your best values. || Pour regarder en arrière : Votre année, la rétrospective annuelle, Il y a X ans aujourd’hui, Redécouvrir et tes meilleures valeurs. || Para mirar atrás: Tu año, el resumen del año, Hace X años hoy, Redescubrir y tus mejores valores.
+Für alle, die gern draußen sind: deine Ziele als Ring, Meilensteine, die Kalender-Heatmap, die neuesten Touren und deine Bestwerte. || For everyone who loves being outdoors: your goals as a ring, milestones, the calendar heatmap, the newest tours and your records. || Pour tous ceux qui aiment être dehors : tes objectifs en anneau, les jalons, la carte de chaleur du calendrier, les parcours les plus récents et tes records. || Para quienes disfrutan al aire libre: tus objetivos como anillo, hitos, el mapa de calor del calendario, las rutas más recientes y tus récords.
+Für den Blick zurück: Dein Jahr, der Jahresrückblick, Heute vor X Jahren, Wiederentdecken und deine Bestwerte. || For looking back: Your year, the year review, X years ago today, Rediscover and your records. || Pour regarder en arrière : Votre année, la rétrospective annuelle, Il y a X ans aujourd’hui, Redécouvrir et tes records. || Para mirar atrás: Tu año, el resumen del año, Hace X años hoy, Redescubrir y tus récords.
 Für den Alltag mit Erinnerungen: oben der Baustein „Hinweise“, der nur erscheint, wenn etwas los ist, darunter Dein Jahr, diese Woche, die neuesten Touren, deine Ziele und Meilensteine. || For everyday use with reminders: at the top the “Notices” block, which only appears when something is going on, below it Your year, this week, the newest tours, your goals and milestones. || Pour le quotidien avec rappels : en haut le bloc « Indications », qui n’apparaît que s’il se passe quelque chose, en dessous Votre année, cette semaine, les parcours les plus récents, tes objectifs et jalons. || Para el día a día con recordatorios: arriba el bloque «Avisos», que solo aparece cuando pasa algo, debajo Tu año, esta semana, las rutas más recientes, tus objetivos e hitos.
-Oben Dein Jahr, diese Woche und die neuesten Touren, darunter die einklappbare Gruppe „Rückblick“ mit Jahres-Rückblick, Heute vor X Jahren und deinen Bestwerten. || At the top Your year, this week and the newest tours, below them the collapsible group “Look back” with the year review, X years ago today and your best values. || En haut Votre année, cette semaine et les parcours les plus récents, en dessous le groupe repliable « Rétrospective » avec la rétrospective annuelle, Il y a X ans aujourd’hui et tes meilleures valeurs. || Arriba Tu año, esta semana y las rutas más recientes, debajo el grupo plegable «Retrospectiva» con el resumen del año, Hace X años hoy y tus mejores valores.
-Alle gerade aktiven Hinweise gebündelt in einer Liste: Jahresziel, Meilenstein, Auffälligkeiten, Pause, Rekord, Wochenziel, Erholung, Sicherung. Nur sichtbar, wenn mindestens einer aktiv ist. Ziele und Wochenziele legst du in der Statistik unter „Ziele“ fest. || All currently active notices bundled in one list: yearly goal, milestone, anomalies, break, record, weekly goal, recovery, backup. Only visible when at least one is active. You set goals and weekly goals in Statistics under “Goals”. || Toutes les indications actives regroupées dans une liste : objectif annuel, jalon, anomalies, pause, record, objectif hebdomadaire, récupération, sauvegarde. Visible seulement si au moins une est active. Tu définis les objectifs et objectifs hebdomadaires dans Statistiques sous « Objectifs ». || Todos los avisos activos reunidos en una lista: objetivo anual, hito, anomalías, pausa, récord, objetivo semanal, recuperación, copia de seguridad. Solo visible si hay al menos uno activo. Los objetivos y objetivos semanales se fijan en Estadísticas, en «Objetivos».
+Oben Dein Jahr, diese Woche und die neuesten Touren, darunter die einklappbare Bausteingruppe „Rückblick“ mit Jahresrückblick, Heute vor X Jahren und deinen Bestwerten. || At the top Your year, this week and the newest tours, below them the collapsible widget group “Look back” with the year review, X years ago today and your records. || En haut Votre année, cette semaine et les parcours les plus récents, en dessous le groupe de blocs repliable « Rétrospective » avec la rétrospective annuelle, Il y a X ans aujourd’hui et tes records. || Arriba Tu año, esta semana y las rutas más recientes, debajo el grupo de bloques plegable «Retrospectiva» con el resumen del año, Hace X años hoy y tus récords.
+Alle gerade aktiven Hinweise gebündelt in einer Liste: Jahresziel, Meilenstein, Auffälligkeiten, Pause, Bestwert, Wochenziel, Erholung, Sicherung. Nur sichtbar, wenn mindestens einer aktiv ist. Ziele und Wochenziele legst du in der Statistik unter „Ziele“ fest. || All currently active notices bundled in one list: yearly goal, milestone, anomalies, break, record, weekly goal, recovery, backup. Only visible when at least one is active. You set goals and weekly goals in Statistics under “Goals”. || Toutes les indications actives regroupées dans une liste : objectif annuel, jalon, anomalies, pause, record, objectif hebdomadaire, récupération, sauvegarde. Visible seulement si au moins une est active. Tu définis les objectifs et objectifs hebdomadaires dans Statistiques sous « Objectifs ». || Todos los avisos activos reunidos en una lista: objetivo anual, hito, anomalías, pausa, récord, objetivo semanal, recuperación, copia de seguridad. Solo visible si hay al menos uno activo. Los objetivos y objetivos semanales se fijan en Estadísticas, en «Objetivos».
 Passt die Tour zu mir? || Does this tour suit me? || Cette sortie me convient-elle ? || ¿Me conviene esta ruta?
 Datum || Date || Date || Fecha
 Startzeit || Start time || Heure de départ || Hora de salida
@@ -3107,7 +3077,7 @@ Bitte eine Adresse mit http:// oder https:// eingeben. || Please enter an addres
 Die Adresse ist ungültig oder zu lang. || The address is invalid or too long. || L’adresse est invalide ou trop longue. || La dirección no es válida o es demasiado larga.
 Links werden mit „Plan speichern“ gesichert und nie automatisch aufgerufen oder als Vorschau geladen. Erlaubt sind nur Adressen mit http:// oder https://. || Links are saved with “Save plan” and are never opened automatically or loaded as a preview. Only addresses starting with http:// or https:// are allowed. || Les liens sont enregistrés avec « Enregistrer le plan » et ne sont jamais ouverts automatiquement ni chargés en aperçu. Seules les adresses commençant par http:// ou https:// sont autorisées. || Los enlaces se guardan con «Guardar plan» y nunca se abren automáticamente ni se cargan como vista previa. Solo se permiten direcciones que empiecen por http:// o https://.
 Speichere die Planung, dann erscheint hier die Entscheidungshilfe. || Save the plan and the decision aid will appear here. || Enregistrez le plan, l’aide à la décision apparaîtra alors ici. || Guarda la planificación y aquí aparecerá la ayuda para decidir.
-Die Entscheidungshilfe konnte nicht berechnet werden: {} || The decision aid could not be calculated: {} || L’aide à la décision n’a pas pu être calculée : {} || No se pudo calcular la ayuda para decidir: {}
+Entscheidungshilfe nicht möglich: {} || The decision aid could not be calculated: {} || L’aide à la décision n’a pas pu être calculée : {} || No se pudo calcular la ayuda para decidir: {}
 Form || Fitness || Forme || Forma
 Form: zu wenig Vergleichstouren || Fitness: too few comparison tours || Forme : trop peu de parcours de comparaison || Forma: muy pocas rutas de comparación
 Form: deutlich über deinem Maximum || Fitness: clearly above your maximum || Forme : nettement au-dessus de votre maximum || Forma: claramente por encima de tu máximo
@@ -3128,12 +3098,12 @@ Mehr Aufstieg als {} % deiner Touren dieser Sportart || More ascent than {} % of
 Etwa so viel Aufstieg wie bei deiner höchsten Tour ({}) || About as much ascent as on your highest tour ({}) || À peu près autant de dénivelé positif que sur votre parcours le plus haut ({}) || Casi el mismo desnivel positivo que en tu ruta más alta ({})
 Mehr Aufstieg als bei deiner höchsten Tour ({}): {} || More ascent than on your highest tour ({}): {} || Plus de dénivelé positif que sur votre parcours le plus haut ({}) : {} || Más desnivel positivo que en tu ruta más alta ({}): {}
 Aufstieg deutlich über deinem bisherigen Maximum (mehr als 120 %) || Ascent clearly above your previous maximum (more than 120 %) || Dénivelé positif nettement au-dessus de votre maximum actuel (plus de 120 %) || Desnivel positivo claramente por encima de tu máximo anterior (más del 120 %)
-Geschätzte Gesamtzeit {}: kürzer als bei deinen üblichen Touren (Median {}) || Estimated total time {}: shorter than on your usual tours (median {}) || Durée totale estimée {} : plus courte que sur vos parcours habituels (médiane {}) || Tiempo total estimado {}: más corto que en tus rutas habituales (mediana {})
-Geschätzte Gesamtzeit {}: ähnlich wie bei deinen üblichen Touren (Median {}) || Estimated total time {}: similar to your usual tours (median {}) || Durée totale estimée {} : semblable à vos parcours habituels (médiane {}) || Tiempo total estimado {}: similar al de tus rutas habituales (mediana {})
-Geschätzte Gesamtzeit {}: länger als bei deinen üblichen Touren (Median {}) || Estimated total time {}: longer than on your usual tours (median {}) || Durée totale estimée {} : plus longue que sur vos parcours habituels (médiane {}) || Tiempo total estimado {}: más largo que en tus rutas habituales (mediana {})
-Länger als {} % deiner Touren dieser Sportart (Gesamtzeit) || Longer than {} % of your tours of this sport (total time) || Plus longue que {} % de vos parcours de ce sport (durée totale) || Más larga que el {} % de tus rutas de este deporte (tiempo total)
+Geschätzte Dauer {}: kürzer als bei deinen üblichen Touren (Median {}) || Estimated total time {}: shorter than on your usual tours (median {}) || Durée totale estimée {} : plus courte que sur vos parcours habituels (médiane {}) || Tiempo total estimado {}: más corto que en tus rutas habituales (mediana {})
+Geschätzte Dauer {}: ähnlich wie bei deinen üblichen Touren (Median {}) || Estimated total time {}: similar to your usual tours (median {}) || Durée totale estimée {} : semblable à vos parcours habituels (médiane {}) || Tiempo total estimado {}: similar al de tus rutas habituales (mediana {})
+Geschätzte Dauer {}: länger als bei deinen üblichen Touren (Median {}) || Estimated total time {}: longer than on your usual tours (median {}) || Durée totale estimée {} : plus longue que sur vos parcours habituels (médiane {}) || Tiempo total estimado {}: más largo que en tus rutas habituales (mediana {})
+Länger als {} % deiner Touren dieser Sportart (Dauer) || Longer than {} % of your tours of this sport (total time) || Plus longue que {} % de vos parcours de ce sport (durée totale) || Más larga que el {} % de tus rutas de este deporte (tiempo total)
 Etwa so lange wie deine längste Tour ({}) || About as long as your longest tour ({}) || À peu près aussi longue que votre plus long parcours ({}) || Casi tan larga como tu ruta más larga ({})
-Geschätzte Gesamtzeit deutlich über deinem bisherigen Maximum (mehr als 120 %) || Estimated total time clearly above your previous maximum (more than 120 %) || Durée totale estimée nettement au-dessus de votre maximum actuel (plus de 120 %) || Tiempo total estimado claramente por encima de tu máximo anterior (más del 120 %)
+Geschätzte Dauer deutlich über deinem bisherigen Maximum (mehr als 120 %) || Estimated total time clearly above your previous maximum (more than 120 %) || Durée totale estimée nettement au-dessus de votre maximum actuel (plus de 120 %) || Tiempo total estimado claramente por encima de tu máximo anterior (más del 120 %)
 Trainingsbelastung der letzten 4 Wochen: deutlich höher als davor ({}) || Training load of the last 4 weeks: clearly higher than before ({}) || Charge d’entraînement des 4 dernières semaines : nettement plus élevée qu’avant ({}) || Carga de entrenamiento de las últimas 4 semanas: claramente mayor que antes ({})
 Trainingsbelastung der letzten 4 Wochen: höher als davor ({}) || Training load of the last 4 weeks: higher than before ({}) || Charge d’entraînement des 4 dernières semaines : plus élevée qu’avant ({}) || Carga de entrenamiento de las últimas 4 semanas: mayor que antes ({})
 Trainingsbelastung der letzten 4 Wochen: ähnlich wie davor ({}) || Training load of the last 4 weeks: similar to before ({}) || Charge d’entraînement des 4 dernières semaines : semblable à avant ({}) || Carga de entrenamiento de las últimas 4 semanas: similar a la de antes ({})
@@ -3155,7 +3125,7 @@ Die Sonne geht an diesem Tag am Startpunkt nicht unter (Polartag). || The sun do
 Die Sonne geht an diesem Tag am Startpunkt nicht auf (Polarnacht). || The sun does not rise at the start point on this day (polar night). || Le soleil ne se lève pas ce jour-là au point de départ (nuit polaire). || El sol no sale ese día en el punto de salida (noche polar).
 Start {}, geschätzte Dauer {}, Puffer {} ({} %): Rückkehr gegen {} || Start {}, estimated duration {}, buffer {} ({} %): back at about {} || Départ {}, durée estimée {}, marge {} ({} %) : retour vers {} || Salida {}, duración estimada {}, margen {} ({} %): regreso hacia las {}
 Start {}, geschätzte Dauer {}, Puffer {} ({} %): Rückkehr gegen {} am Folgetag || Start {}, estimated duration {}, buffer {} ({} %): back at about {} the next day || Départ {}, durée estimée {}, marge {} ({} %) : retour vers {} le lendemain || Salida {}, duración estimada {}, margen {} ({} %): regreso hacia las {} del día siguiente
-Die Dauer ist die reine Gehzeit ohne Pausen (für diesen Plan ist keine Gesamtzeit gespeichert). || The duration is walking time only, without breaks (no total time is saved for this plan). || La durée est le temps de marche seul, sans pauses (aucune durée totale n’est enregistrée pour ce plan). || La duración es solo el tiempo de marcha, sin pausas (no hay tiempo total guardado para este plan).
+Die Dauer ist die reine Gehzeit ohne Pausen (für diese geplante Tour ist keine Dauer mit Pausen gespeichert). || The duration is walking time only, without breaks (no total time is saved for this planned tour). || La durée est le temps de marche seul, sans pauses (aucune durée totale n’est enregistrée pour ce parcours planifié). || La duración es solo el tiempo de marcha, sin pausas (no hay tiempo total guardado para esta ruta planificada).
 Uhrzeiten in der Zeitzone {}; der Sonnenstand ist auf etwa 2 Minuten genau gerechnet. Dämmerung ist keine Sicherheitsaussage. || Times are in the time zone {}; the position of the sun is calculated to within about 2 minutes. Twilight is not a safety statement. || Les heures sont dans le fuseau horaire {} ; la position du soleil est calculée à environ 2 minutes près. Le crépuscule n’est pas une garantie de sécurité. || Las horas están en la zona horaria {}; la posición del sol se calcula con una precisión de unos 2 minutos. El crepúsculo no es una garantía de seguridad.
 Orientierung, keine Sicherheitsgarantie. || Guidance, not a safety guarantee. || À titre indicatif, pas une garantie de sécurité. || Orientación, no una garantía de seguridad.
 Wetter, Lawinenlage und Gelände selbst prüfen. || Check weather, avalanche conditions and terrain yourself. || Vérifiez vous-même la météo, le risque d’avalanche et le terrain. || Comprueba tú mismo el tiempo, el riesgo de aludes y el terreno.
@@ -3186,11 +3156,10 @@ Dein {}. Besuch dieser Strecke || Your visit number {} to this route || Votre {}
 ({} Läufe insgesamt) || ({} runs in total) || ({} parcours au total) || ({} recorridos en total)
 {}. Besuch || Visit {} || Passage {} || Visita {}
 Üblich = Median der Vergleichstouren. Unter 80 % davon gilt als kürzer, weniger oder langsamer, über 125 % als länger, mehr oder schneller. Tempo = Strecke geteilt durch die gesamte Dauer. || Usual = median of the comparison tours. Below 80 % of it counts as shorter, less or slower, above 125 % as longer, more or faster. Pace = distance divided by total time. || Habituel = médiane des sorties de comparaison. En dessous de 80 % : plus court, moins ou plus lent ; au-dessus de 125 % : plus long, plus ou plus rapide. Tempo = distance divisée par la durée totale. || Habitual = mediana de las rutas de comparación. Por debajo del 80 % cuenta como más corto, menos o más lento, por encima del 125 % como más largo, más o más rápido. Ritmo = distancia dividida por el tiempo total.
-Zu dieser Tour gibt es weder einen verknüpften Plan noch genug Vergleichstouren (mindestens 5). Der Baustein erscheint nur bei Touren mit Plan oder genug Vergleichstouren. || This tour has neither a linked plan nor enough comparison tours (at least 5). The block only appears for tours with a plan or enough comparison tours. || Cette sortie n’a ni plan lié ni assez de sorties de comparaison (au moins 5). Le bloc n’apparaît que pour les sorties avec plan ou assez de sorties de comparaison. || Esta ruta no tiene ni un plan vinculado ni suficientes rutas de comparación (al menos 5). El bloque solo aparece en rutas con plan o con suficientes rutas de comparación.
+Zu dieser Tour gibt es weder eine verknüpfte Planung noch genug Vergleichstouren (mindestens 5). Der Baustein erscheint nur bei Touren mit Planung oder genug Vergleichstouren. || This tour has neither a linked plan nor enough comparison tours (at least 5). The block only appears for tours with a plan or enough comparison tours. || Cette sortie n’a ni plan lié ni assez de sorties de comparaison (au moins 5). Le bloc n’apparaît que pour les sorties avec plan ou assez de sorties de comparaison. || Esta ruta no tiene ni un plan vinculado ni suficientes rutas de comparación (al menos 5). El bloque solo aparece en rutas con plan o con suficientes rutas de comparación.
 Aufzeichnen || Record || Enregistrer || Grabar
 Läuft || Running || En cours || En curso
 Pausiert || Paused || En pause || En pausa
-Aufzeichnung läuft || Recording in progress || Enregistrement en cours || Grabación en curso
 Aufzeichnung pausiert || Recording paused || Enregistrement en pause || Grabación en pausa
 Aufzeichnung wartet auf das Hochladen || Recording is waiting to be uploaded || L’enregistrement attend d’être envoyé || La grabación está pendiente de subirse
 Startseite der App || App start page || Page d’accueil de l’application || Página de inicio de la aplicación
@@ -3224,8 +3193,6 @@ Einstellungen der Aufzeichnung || Recording settings || Réglages de l’enregis
 Name der Tour (optional) || Tour name (optional) || Nom du parcours (facultatif) || Nombre de la ruta (opcional)
 wird sonst automatisch vergeben || otherwise assigned automatically || sinon attribué automatiquement || si no, se asigna automáticamente
 Fotos während der Aufzeichnung || Photos during the recording || Photos pendant l’enregistrement || Fotos durante la grabación
-Sofort auf den Server laden || Upload to the server immediately || Envoyer tout de suite sur le serveur || Subir al servidor de inmediato
-Gesammelt am Ende laden || Upload all together at the end || Envoyer toutes ensemble à la fin || Subir todas juntas al final
 Wetterwarnung unterwegs || Weather warning on the way || Alerte météo en route || Aviso meteorológico en ruta
 Gewitter, Starkregen, Sturm, Kälteeinbruch || Thunderstorms, heavy rain, storm, cold snap || Orages, fortes pluies, tempête, coup de froid || Tormentas, lluvia intensa, temporal, ola de frío
 Live-Standort für einen Kontakt || Live location for a contact || Position en direct pour un contact || Ubicación en directo para un contacto
@@ -3244,7 +3211,6 @@ Noch nicht angemeldet || Not registered yet || Pas encore enregistré || Aún no
 Wird beim ersten Hochladen angemeldet und erscheint dann unter „Meine Geräte“. || It is registered with the first upload and then appears under “My devices”. || Il sera enregistré lors du premier envoi et apparaîtra ensuite sous « Mes appareils ». || Se registra con la primera subida y luego aparece en «Mis dispositivos».
 Nicht prüfbar || Cannot be checked || Vérification impossible || No se puede comprobar
 Der Server ist gerade nicht erreichbar. || The server cannot be reached right now. || Le serveur est injoignable pour le moment. || Ahora mismo no se puede acceder al servidor.
-Aufnahme läuft || Recording || Enregistrement en cours || Grabando
 Es wird nichts aufgezeichnet, bis du fortsetzt. || Nothing is recorded until you resume. || Rien n’est enregistré tant que vous n’avez pas repris. || No se graba nada hasta que reanudes.
 Ansagen || Voice guidance || Guidage vocal || Indicaciones por voz
 Testansage || Test announcement || Annonce de test || Anuncio de prueba
@@ -3322,7 +3288,7 @@ Gewandert || Hiked || Randonnés || Recorridas
 Buch oder Tour suchen || Search guide or tour || Rechercher un guide ou un parcours || Buscar guía o ruta
 Reihenfolge der Touren im Buch || Order of tours in the guide || Ordre des parcours dans le guide || Orden de las rutas en la guía
 Buchreihenfolge || Guide order || Ordre du guide || Orden de la guía
-Nach Länge || By length || Par longueur || Por longitud
+Nach Strecke || By distance || Par distance || Por distancia
 Zuletzt gewandert || Last hiked || Randonnés récemment || Recorridas recientemente
 Anteil gewandert: {} || Share hiked: {} || Part randonnée : {} || Parte recorrida: {}
 offen: {} || open: {} || à faire : {} || pendientes: {}
@@ -3415,26 +3381,26 @@ Meine Touren ändert eine vorhandene Tour nicht von selbst: || Meine Touren does
 „Bei Komoot auf privat setzen“ oder in Komoot ändern. || use “Make private on Komoot” or change it in Komoot. || utilisez « Rendre privé sur Komoot » ou modifiez-le dans Komoot. || usa «Hacer privada en Komoot» o cámbialo en Komoot.
 Komoot kannte die Tour schon. || Komoot already had this tour. || Komoot connaissait déjà ce parcours. || Komoot ya tenía esta ruta.
 Statistik: Sportarten zusammenfassen || Statistics: combine sports || Statistiques : regrouper des sports || Estadísticas: agrupar deportes
+Bausteingruppe {} || Widget group {} || Groupe de blocs {} || Grupo de bloques {}
+Statistik-Gruppe {} || Statistics group {} || Groupe de statistiques {} || Grupo de estadísticas {}
 Gruppe {} || Group {} || Groupe {} || Grupo {}
+Bausteingruppe „{}“ löschen || Delete widget group “{}” || Supprimer le groupe de blocs « {} » || Eliminar el grupo de bloques «{}»
 Gruppe „{}“ löschen || Delete group “{}” || Supprimer le groupe « {} » || Eliminar el grupo «{}»
-Sportarten der Gruppe „{}“ || Sports in group “{}” || Sports du groupe « {} » || Deportes del grupo «{}»
 in „{}“ || in “{}” || dans « {} » || en «{}»
 Gruppe hinzufügen || Add group || Ajouter un groupe || Añadir grupo
 Höchstens {} Gruppen. || At most {} groups. || {} groupes au maximum. || Como máximo {} grupos.
 Gruppen speichern || Save groups || Enregistrer les groupes || Guardar grupos
-Vorschlag übernommen – zum Übernehmen „Gruppen speichern“. || Suggestion added – click “Save groups” to apply it. || Suggestion reprise – cliquez sur « Enregistrer les groupes » pour l’appliquer. || Sugerencia añadida: pulsa «Guardar grupos» para aplicarla.
+Statistik-Gruppe {}: Bitte einen Namen mit 1 bis {} Zeichen eingeben. || Statistics group {}: please enter a name with 1 to {} characters. || Groupe de statistiques {} : veuillez saisir un nom de 1 à {} caractères. || Grupo de estadísticas {}: introduce un nombre de 1 a {} caracteres.
 Gruppe {}: Bitte einen Namen mit 1 bis {} Zeichen eingeben. || Group {}: please enter a name with 1 to {} characters. || Groupe {} : veuillez saisir un nom de 1 à {} caractères. || Grupo {}: introduce un nombre de 1 a {} caracteres.
-„{}“: Eine Gruppe braucht mindestens 2 Sportarten. || “{}”: a group needs at least 2 sports. || « {} » : un groupe doit contenir au moins 2 sports. || «{}»: un grupo necesita al menos 2 deportes.
-Gespeichert ✓ – gilt ab sofort in der Statistik. || Saved ✓ – applies to the statistics right away. || Enregistré ✓ – s’applique immédiatement aux statistiques. || Guardado ✓: se aplica de inmediato en las estadísticas.
 {} (zusammengefasst) || {} (combined) || {} (regroupé) || {} (agrupado)
-(Gruppe gelöscht) || (group deleted) || (groupe supprimé) || (grupo eliminado)
 Zu Fuß || On foot || À pied || A pie
 Rad || Bike || Vélo || Bici
 Höchstens {} Gruppen || At most {} groups || {} groupes au maximum || Como máximo {} grupos
+Statistik-Gruppe {}: Der Name muss 1 bis {} Zeichen lang sein || Statistics group {}: the name must be 1 to {} characters long || Groupe de statistiques {} : le nom doit comporter de 1 à {} caractères || Grupo de estadísticas {}: el nombre debe tener de 1 a {} caracteres
 Gruppe {}: Der Name muss 1 bis {} Zeichen lang sein || Group {}: the name must be 1 to {} characters long || Groupe {} : le nom doit comporter de 1 à {} caractères || Grupo {}: el nombre debe tener de 1 a {} caracteres
-Zwei Gruppen heißen „{}“ || Two groups are called “{}” || Deux groupes s’appellent « {} » || Dos grupos se llaman «{}»
-„{}“: Eine Gruppe braucht mindestens {} Sportarten || “{}”: a group needs at least {} sports || « {} » : un groupe doit contenir au moins {} sports || «{}»: un grupo necesita al menos {} deportes
-Eine Sportart kann nur in einer Gruppe sein („{}“ ist schon in „{}“) || A sport can only be in one group (“{}” is already in “{}”) || Un sport ne peut appartenir qu’à un seul groupe (« {} » est déjà dans « {} ») || Un deporte solo puede estar en un grupo («{}» ya está en «{}»)
+Zwei Statistik-Gruppen heißen „{}“ || Two statistics groups are called “{}” || Deux groupes de statistiques s’appellent « {} » || Dos grupos de estadísticas se llaman «{}»
+„{}“: Eine Statistik-Gruppe braucht mindestens {} Sportarten || “{}”: a statistics group needs at least {} sports || « {} » : un groupe de statistiques doit contenir au moins {} sports || «{}»: un grupo de estadísticas necesita al menos {} deportes
+Eine Sportart kann nur in einer Bausteingruppe sein („{}“ ist schon in „{}“) || A sport can only be in one widget group (“{}” is already in “{}”) || Un sport ne peut appartenir qu’à un seul groupe de blocs (« {} » est déjà dans « {} ») || Un deporte solo puede estar en un grupo de bloques («{}» ya está en «{}»)
 Diese Statistik-Gruppe gibt es nicht (mehr) || This statistics group does not exist (any more) || Ce groupe de statistiques n’existe pas (ou plus) || Este grupo de estadísticas no existe (o ya no existe)
 MTB || MTB || VTT || BTT
 Klettern || Climbing || Escalade || Escalada
@@ -3450,17 +3416,15 @@ Golf || Golf || Golf || Golf
 Wasser || Water || Eau || Agua
 Favoriten || Favourites || Favoris || Favoritos
 Mehr … || More … || Plus … || Más …
-Gespeichert ✓ || Saved ✓ || Enregistré ✓ || Guardado ✓
-Ohne Gruppen zählt die Statistik jede Sportart einzeln. Wenn du Sportarten gemeinsam sehen möchtest – zum Beispiel Wandern, Bergsteigen und Schneeschuhwandern –, lege hier eine Gruppe an. Jede Gruppe ist im Sportartfilter als eigener Eintrag „Name = Sportart + Sportart“ wählbar, und die Aufteilungen nach Sportart (Sportarten, Bestwerte, Jahresrückblick) zeigen sie als eine Zeile. Die Touren und ihre Sportart bleiben unverändert. || Without groups, the statistics count each sport separately. If you want to see sports together – for example hiking, mountaineering and snowshoeing – create a group here. Each group can be picked as its own entry “Name = sport + sport” in the sport filter, and breakdowns by sport (sports, personal bests, year in review) show it as one row. The tours and their sport stay unchanged. || Sans groupe, les statistiques comptent chaque sport séparément. Pour voir des sports ensemble – par exemple randonnée, alpinisme et raquettes –, créez ici un groupe. Chaque groupe peut être choisi comme entrée à part « Nom = sport + sport » dans le filtre de sport, et les répartitions par sport (sports, records, bilan de l’année) l’affichent sur une seule ligne. Les parcours et leur sport restent inchangés. || Sin grupos, las estadísticas cuentan cada deporte por separado. Si quieres ver deportes juntos, por ejemplo senderismo, montañismo y raquetas, crea aquí un grupo. Cada grupo se puede elegir como entrada propia «Nombre = deporte + deporte» en el filtro de deporte, y los desgloses por deporte (deportes, mejores marcas, resumen del año) lo muestran en una sola fila. Las rutas y su deporte no cambian.
+Gespeichert || Saved || Enregistré || Guardado
+Ohne Statistik-Gruppen zählt die Statistik jede Sportart einzeln. Wenn du Sportarten gemeinsam sehen möchtest – zum Beispiel Wandern, Bergsteigen und Schneeschuhwandern –, lege hier eine Statistik-Gruppe an. Jede Statistik-Gruppe ist im Sportartfilter als eigener Eintrag „Name = Sportart + Sportart“ wählbar, und die Aufteilungen nach Sportart (Sportarten, Bestwerte, Jahresrückblick) zeigen sie als eine Zeile. Die Touren und ihre Sportart bleiben unverändert. || Without statistics groups, the statistics count each sport separately. If you want to see sports together – for example hiking, mountaineering and snowshoeing – create a statistics group here. Each statistics group can be picked as its own entry “Name = sport + sport” in the sport filter, and breakdowns by sport (sports, personal bests, year in review) show it as one row. The tours and their sport stay unchanged. || Sans groupe de statistiques, les statistiques comptent chaque sport séparément. Pour voir des sports ensemble – par exemple randonnée, alpinisme et raquettes –, créez ici un groupe de statistiques. Chaque groupe de statistiques peut être choisi comme entrée à part « Nom = sport + sport » dans le filtre de sport, et les répartitions par sport (sports, records, bilan de l’année) l’affichent sur une seule ligne. Les parcours et leur sport restent inchangés. || Sin grupos de estadísticas, las estadísticas cuentan cada deporte por separado. Si quieres ver deportes juntos, por ejemplo senderismo, montañismo y raquetas, crea aquí un grupo de estadísticas. Cada grupo de estadísticas se puede elegir como entrada propia «Nombre = deporte + deporte» en el filtro de deporte, y los desgloses por deporte (deportes, mejores marcas, resumen del año) lo muestran en una sola fila. Las rutas y su deporte no cambian.
 Keine Gruppen: Die Statistik zählt jede Sportart einzeln. || No groups: the statistics count each sport separately. || Aucun groupe : les statistiques comptent chaque sport séparément. || Sin grupos: las estadísticas cuentan cada deporte por separado.
-Vorschläge (ein Klick legt die Gruppe an, gespeichert wird erst mit „Gruppen speichern“): || Suggestions (one click creates the group; it is saved only with “Save groups”): || Suggestions (un clic crée le groupe ; il n’est enregistré qu’avec « Enregistrer les groupes ») : || Sugerencias (un clic crea el grupo; se guarda solo con «Guardar grupos»):
+Vorschläge (ein Klick legt die Bausteingruppe an, gespeichert wird erst mit „Gruppen speichern“): || Suggestions (one click creates the widget group; it is saved only with “Save widget groups”): || Suggestions (un clic crée le groupe de blocs ; il n’est enregistré qu’avec « Enregistrer les groupes de blocs ») : || Sugerencias (un clic crea el grupo de bloques; se guarda solo con «Guardar grupos de bloques»):
 Vorschlag: {} || Suggestion: {} || Suggestion : {} || Sugerencia: {}
 Wandern und Bergtouren || Hiking and mountain tours || Randonnée et courses en montagne || Senderismo y rutas de montaña
 Rad (alle) || Cycling (all) || Vélo (tous) || Bici (todas)
 Ski (alle) || Skiing (all) || Ski (tous) || Esquí (todos)
 Weitere aus deinen Touren || Others from your tours || Autres issus de vos parcours || Otras de tus rutas
-Favoriten-Sportarten || Favourite sports || Sports favoris || Deportes favoritos
-Deine Favoriten bietet Meine Touren zuerst an, wenn du eine Tour aufnimmst oder planst; alle übrigen Sportarten stehen dort unter „Mehr …“. || Meine Touren offers your favourites first when you record or plan a tour; all other sports are listed there under “More …”. || Meine Touren propose d’abord vos favoris lorsque vous enregistrez ou planifiez un parcours ; tous les autres sports se trouvent sous « Plus … ». || Meine Touren ofrece primero tus favoritos al grabar o planificar una ruta; los demás deportes están en «Más …».
 Reihenfolge der Favoriten || Order of favourites || Ordre des favoris || Orden de las favoritas
 {} nach oben || Move {} up || Monter {} || Subir {}
 {} nach unten || Move {} down || Descendre {} || Bajar {}
@@ -3474,18 +3438,18 @@ Bitte mindestens eine Favoriten-Sportart wählen || Please choose at least one f
 Unbekannte Sportart || Unknown sport || Sport inconnu || Deporte desconocido
 Schneeschuh-Touren || Snowshoe tours || Sorties en raquettes || Rutas con raquetas
 Schneeschuh ist wieder eine eigene Sportart. || Snowshoeing is a sport of its own again. || La raquette est de nouveau un sport à part entière. || Las raquetas vuelven a ser un deporte propio.
-1 Tour heißt noch „Wandern“ und trägt das Schlagwort „Schneeschuh“. || 1 tour is still called “Hiking” and has the tag “Schneeschuh”. || 1 parcours s’appelle encore « Randonnée » et porte le mot-clé « Schneeschuh ». || 1 ruta todavía se llama «Senderismo» y lleva la etiqueta «Schneeschuh».
-{} Touren heißen noch „Wandern“ und tragen das Schlagwort „Schneeschuh“. || {} tours are still called “Hiking” and have the tag “Schneeschuh”. || {} parcours s’appellent encore « Randonnée » et portent le mot-clé « Schneeschuh ». || {} rutas todavía se llaman «Senderismo» y llevan la etiqueta «Schneeschuh».
-Als Schneeschuh geführt, zählen sie in der Statistik als Schneeschuh und nicht mehr als Wandern; wer beides zusammen sehen will, legt in der Verwaltung eine Statistik-Gruppe an. Das Schlagwort bleibt. || Listed as snowshoeing, they count as snowshoeing in the statistics and no longer as hiking; to see both together, create a statistics group in Admin. The tag stays. || Classés en raquettes, ils comptent comme raquettes dans les statistiques et non plus comme randonnée ; pour voir les deux ensemble, créez un groupe de statistiques dans l’administration. Le mot-clé reste. || Como raquetas cuentan como raquetas en las estadísticas y ya no como senderismo; para ver ambos juntos, crea un grupo de estadísticas en Administración. La etiqueta se mantiene.
+1 Tour heißt noch „Wandern“ und trägt das Schlagwort „Schneeschuh“. || 1 tour is still called “Hiking” and has the tag “Schneeschuh”. || 1 parcours s’appelle encore « Randonnée » et porte le tag « Schneeschuh ». || 1 ruta todavía se llama «Senderismo» y lleva la etiqueta «Schneeschuh».
+{} Touren heißen noch „Wandern“ und tragen das Schlagwort „Schneeschuh“. || {} tours are still called “Hiking” and have the tag “Schneeschuh”. || {} parcours s’appellent encore « Randonnée » et portent le tag « Schneeschuh ». || {} rutas todavía se llaman «Senderismo» y llevan la etiqueta «Schneeschuh».
+Als Schneeschuh geführt, zählen sie in der Statistik als Schneeschuh und nicht mehr als Wandern; wer beides zusammen sehen will, legt in der Verwaltung eine Statistik-Gruppe an. Das Schlagwort bleibt. || Listed as snowshoeing, they count as snowshoeing in the statistics and no longer as hiking; to see both together, create a statistics group in Admin. The tag stays. || Classés en raquettes, ils comptent comme raquettes dans les statistiques et non plus comme randonnée ; pour voir les deux ensemble, créez un groupe de statistiques dans l’administration. Le tag reste. || Como raquetas cuentan como raquetas en las estadísticas y ya no como senderismo; para ver ambos juntos, crea un grupo de estadísticas en Administración. La etiqueta se mantiene.
 Schneeschuh-Touren als Schneeschuh führen ({}) || List snowshoe tours as snowshoeing ({}) || Classer les sorties en raquettes comme raquettes ({}) || Registrar las rutas con raquetas como raquetas ({})
 Zurücknehmen ({}) || Undo ({}) || Annuler ({}) || Deshacer ({})
 {} Touren als „Schneeschuh“ führen? Das lässt sich hier wieder zurücknehmen. || List {} tours as “Snowshoe”? You can undo this here. || Classer {} parcours comme « Raquettes » ? Vous pourrez l’annuler ici. || ¿Registrar {} rutas como «Raquetas»? Se puede deshacer aquí.
 Als Schneeschuh führen || List as snowshoeing || Classer comme raquettes || Registrar como raquetas
-Die als Schneeschuh geführten Touren wieder als Wandern führen? Das Schlagwort „Schneeschuh“ bleibt. || List the tours marked as snowshoeing as hiking again? The tag “Schneeschuh” stays. || Classer de nouveau en randonnée les parcours classés en raquettes ? Le mot-clé « Schneeschuh » reste. || ¿Volver a registrar como senderismo las rutas marcadas como raquetas? La etiqueta «Schneeschuh» se mantiene.
+Die als Schneeschuh geführten Touren wieder als Wandern führen? Das Schlagwort „Schneeschuh“ bleibt. || List the tours marked as snowshoeing as hiking again? The tag “Schneeschuh” stays. || Classer de nouveau en randonnée les parcours classés en raquettes ? Le tag « Schneeschuh » reste. || ¿Volver a registrar como senderismo las rutas marcadas como raquetas? La etiqueta «Schneeschuh» se mantiene.
 1 Tour zurückgenommen. || 1 tour reverted. || 1 parcours rétabli. || 1 ruta revertida.
 {} Touren zurückgenommen. || {} tours reverted. || {} parcours rétablis. || {} rutas revertidas.
 Sportart der Tour ändern || Change the tour’s sport || Changer le sport du parcours || Cambiar el deporte de la ruta
-Alle Sportarten, Favoriten zuerst || All sports, favourites first || Tous les sports, favoris en premier || Todos los deportes, favoritos primero
+Favoriten-Sportarten zuerst, dann alle übrigen || All sports, favourite sports first || Tous les sports, sports favoris en premier || Todos los deportes, deportes favoritos primero
 auch bei Komoot ändern || change on Komoot too || modifier aussi sur Komoot || cambiar también en Komoot
 Spazieren/Gehen || Walking || Marche || Caminar
 Gassigehen || Dog walking || Promenade du chien || Paseo con perro
@@ -3528,12 +3492,12 @@ Outdoor und Sonstige || Outdoor and other || Plein air et autres || Aire libre y
 Wandern und Bergsteigen || Hiking and mountaineering || Randonnée et alpinisme || Senderismo y montañismo
 Aktivitäten || Activities || Activités || Actividades
 Sportarten-Katalog || Sports catalogue || Catalogue des sports || Catálogo de deportes
-Favoriten für „Tour aufnehmen“ || Favourites for “Record a tour” || Favoris pour « Enregistrer un parcours » || Favoritas para «Grabar una ruta»
+Favoriten-Sportarten || Favourite sports || Sports favoris || Deportes favoritos
 Statistik-Gruppen || Statistics groups || Groupes de statistiques || Grupos de estadísticas
 Frühere Sportarten || Former sports || Anciens sports || Deportes anteriores
 Zustand der App, Updates, Heimatort und Puls sowie Protokoll und Fehlersuche. || App status, updates, home location and heart rate, plus log and troubleshooting. || État de l’application, mises à jour, domicile et fréquence cardiaque, ainsi que journal et dépannage. || Estado de la aplicación, actualizaciones, ubicación de casa y pulso, además de registro y diagnóstico de errores.
-Welche Sportarten es gibt, welche beim Aufnehmen einer Tour zuerst erscheinen und wie die Statistik sie zusammenfasst. || Which sports exist, which appear first when you record a tour, and how the statistics group them. || Les sports disponibles, ceux qui apparaissent en premier lors de l’enregistrement d’un parcours et la façon dont les statistiques les regroupent. || Qué deportes hay, cuáles aparecen primero al grabar una ruta y cómo los agrupan las estadísticas.
-Diese Sportarten bietet Meine Touren überall an – beim Aufnehmen, Importieren und Planen, in Filtern und in der Statistik. Symbol und Farbe erscheinen in Listen und auf der Karte. || Meine Touren offers these sports everywhere – when recording, importing and planning, in filters and in the statistics. Icon and colour appear in lists and on the map. || Meine Touren propose ces sports partout – à l’enregistrement, à l’import et à la planification, dans les filtres et les statistiques. Le symbole et la couleur apparaissent dans les listes et sur la carte. || Meine Touren ofrece estos deportes en todas partes: al grabar, importar y planificar, en los filtros y en las estadísticas. El símbolo y el color aparecen en las listas y en el mapa.
+Welche Sportarten es gibt, welche beim Aufzeichnen einer Tour zuerst erscheinen und wie die Statistik sie zusammenfasst. || Which sports exist, which appear first when you record a tour, and how the statistics group them. || Les sports disponibles, ceux qui apparaissent en premier lors de l’enregistrement d’un parcours et la façon dont les statistiques les regroupent. || Qué deportes hay, cuáles aparecen primero al grabar una ruta y cómo los agrupan las estadísticas.
+Diese Sportarten bietet Meine Touren überall an – beim Aufzeichnen, Importieren und Planen, in Filtern und in der Statistik. Symbol und Farbe erscheinen in Listen und auf der Karte. || Meine Touren offers these sports everywhere – when recording, importing and planning, in filters and in the statistics. Icon and colour appear in lists and on the map. || Meine Touren propose ces sports partout – à l’enregistrement, à l’import et à la planification, dans les filtres et les statistiques. Le symbole et la couleur apparaissent dans les listes et sur la carte. || Meine Touren ofrece estos deportes en todas partes: al grabar, importar y planificar, en los filtros y en las estadísticas. El símbolo y el color aparecen en las listas y en el mapa.
 Diese Sportarten gibt es nicht mehr. Touren damit bleiben unverändert; angezeigt, gefiltert und gezählt werden sie wie die Sportart rechts. Mit „Sportart ändern“ (Tour bearbeiten) kannst du sie jederzeit umstellen. || These sports no longer exist. Tours with them stay unchanged; they are shown, filtered and counted like the sport on the right. You can switch them at any time with “Change sport” (edit tour). || Ces sports n’existent plus. Les parcours concernés restent inchangés ; ils sont affichés, filtrés et comptés comme le sport de droite. Vous pouvez les modifier à tout moment avec « Changer le sport » (modifier le parcours). || Estos deportes ya no existen. Las rutas con ellos no cambian; se muestran, filtran y cuentan como el deporte de la derecha. Puedes cambiarlos en cualquier momento con «Cambiar deporte» (editar ruta).
 Laufen || Running || Course || Correr
 Radtour || Bike ride || Sortie à vélo || Ruta en bici
@@ -3541,5 +3505,193 @@ Rennrad || Road bike || Vélo de route || Bici de carretera
 Mountainbike || Mountain bike || VTT || Bici de montaña
 Name wie eine Sportart – bitte umbenennen || Same name as a sport – please rename || Même nom qu’un sport – veuillez renommer || Mismo nombre que un deporte: cámbialo
 „{}“ heißt schon eine Sportart – bitte einen anderen Gruppennamen wählen || “{}” is already the name of a sport – please choose a different group name || « {} » est déjà le nom d’un sport – veuillez choisir un autre nom de groupe || «{}» ya es el nombre de un deporte: elige otro nombre para el grupo
+Statistik-Gruppe {}: „{}“ heißt schon eine Sportart – bitte einen anderen Gruppennamen wählen || Statistics group {}: “{}” is already the name of a sport – please choose a different group name || Groupe de statistiques {} : « {} » est déjà le nom d’un sport – veuillez choisir un autre nom de groupe || Grupo de estadísticas {}: «{}» ya es el nombre de un deporte: elige otro nombre para el grupo de bloques
 Gruppe {}: „{}“ heißt schon eine Sportart – bitte einen anderen Gruppennamen wählen || Group {}: “{}” is already the name of a sport – please choose a different group name || Groupe {} : « {} » est déjà le nom d’un sport – veuillez choisir un autre nom de groupe || Grupo {}: «{}» ya es el nombre de un deporte: elige otro nombre para el grupo
+Schlagwort / Album || Tag / album || Tag / album || Etiqueta / álbum
+Alle Schlagwörter || All tags || Tous les tags || Todas las etiquetas
+Bausteine dieser Auswertung || Widgets of this analysis || Blocs de cette analyse || Bloques de este análisis
+Schlagwörter vergeben und Alben bilden || Assign tags and build albums || Attribuer des tags et créer des albums || Asignar etiquetas y crear álbumes
+🏷 Schlagwörter & Alben … || 🏷 Tags & albums … || 🏷 Tags et albums … || 🏷 Etiquetas y álbumes …
+Schlagwörter & Alben … || Tags & albums … || Tags et albums … || Etiquetas y álbumes …
+Sportart ändern … || Change sport … || Changer de sport … || Cambiar deporte …
+🎨 Streckenfarbe … || 🎨 Track colour … || 🎨 Couleur du tracé … || 🎨 Color del trazado …
+Streckenfarbe … || Track colour … || Couleur du tracé … || Color del trazado …
+⛰ Höhe korrigieren || ⛰ Correct elevation || ⛰ Corriger l’altitude || ⛰ Corregir la altitud
+⌚ Höhe korrigieren (aus der Uhr) … || ⌚ Correct elevation (from the watch) … || ⌚ Corriger l’altitude (depuis la montre) … || ⌚ Corregir la altitud (del reloj) …
+Höhe korrigieren … || Correct elevation … || Corriger l’altitude … || Corregir la altitud …
+Höhe korrigieren (aus der Uhr) … || Correct elevation (from the watch) … || Corriger l’altitude (depuis la montre) … || Corregir la altitud (del reloj) …
+Höhe korrigieren (aus der Uhr) || Correct elevation (from the watch) || Corriger l’altitude (depuis la montre) || Corregir la altitud (del reloj)
+aus dem Geländemodell || from the terrain model || à partir du modèle de terrain || a partir del modelo del terreno
+aus der barometrischen Höhe der Uhr (Zepp) || from the watch’s barometric altitude (Zepp) || à partir de l’altitude barométrique de la montre (Zepp) || a partir de la altitud barométrica del reloj (Zepp)
+⬆ Hochladen … || ⬆ Upload … || ⬆ Envoyer … || ⬆ Subir …
+Hochladen … || Upload … || Envoyer … || Subir …
+🔗 Links verwalten … || 🔗 Manage links … || 🔗 Gérer les liens … || 🔗 Gestionar enlaces …
+Links verwalten … || Manage links … || Gérer les liens … || Gestionar enlaces …
+⬇ Als GPX exportieren || ⬇ Export as GPX || ⬇ Exporter en GPX || ⬇ Exportar como GPX
+Als GPX exportieren || Export as GPX || Exporter en GPX || Exportar como GPX
+Strecke als GPX-Datei herunterladen || Download the track as a GPX file || Télécharger le tracé en fichier GPX || Descargar el trazado como archivo GPX
+📦 Komoot-Paket … || 📦 Komoot package … || 📦 Paquet Komoot … || 📦 Paquete Komoot …
+🗑 Löschen … || 🗑 Delete … || 🗑 Supprimer … || 🗑 Eliminar …
+Tour aus Meine Touren löschen || Delete the tour from Meine Touren || Supprimer le parcours de Meine Touren || Eliminar la ruta de Meine Touren
+Umbenennen … || Rename … || Renommer … || Renombrar …
+Hochladen und Abgleich || Upload and sync || Envoi et synchronisation || Subida y sincronización
+Teilen & Exportieren || Share & export || Partager et exporter || Compartir y exportar
+Exportieren || Export || Exporter || Exportar
+Link senden … || Send link … || Envoyer le lien … || Enviar enlace …
+Diashow senden … || Send slideshow … || Envoyer le diaporama … || Enviar presentación …
+Erzeugte Links ansehen, kopieren, widerrufen || View, copy and revoke the links you created || Voir, copier et révoquer les liens créés || Ver, copiar y revocar los enlaces creados
+Höhe korrigieren nicht möglich: || Correcting the elevation is not possible: || Impossible de corriger l’altitude : || No se puede corregir la altitud:
+Neu berechnete Höhe speichern? || Save the recalculated elevation? || Enregistrer l’altitude recalculée ? || ¿Guardar la altitud recalculada?
+Original behalten || Keep original || Garder l’original || Conservar el original
+Umbenennen nicht möglich: || Renaming is not possible: || Impossible de renommer : || No se puede renombrar:
+Import beenden? || Stop the import? || Arrêter l’importation ? || ¿Detener la importación?
+Der Import läuft noch. Bereits importierte Fotos bleiben in der Bibliothek. || The import is still running. Photos already imported stay in the library. || L’importation est encore en cours. Les photos déjà importées restent dans la bibliothèque. || La importación sigue en curso. Las fotos ya importadas se quedan en la biblioteca.
+Import beenden || Stop import || Arrêter l’importation || Detener importación
+Weiterlaufen lassen || Keep running || Laisser continuer || Dejar que continúe
+Es wurden keine JPG-, PNG- oder WebP-Fotos gefunden || No JPG, PNG or WebP photos were found || Aucune photo JPG, PNG ou WebP trouvée || No se encontraron fotos JPG, PNG o WebP
+{} Fotos sind schon in der Bibliothek || {} photos are already in the library || {} photos sont déjà dans la bibliothèque || {} fotos ya están en la biblioteca
+{} Fotos gefunden, davon {} zu importieren || {} photos found, {} of them to import || {} photos trouvées, dont {} à importer || {} fotos encontradas, {} para importar
+HEIC-Fotos werden übersprungen (Server ohne pillow-heif; bitte als JPG exportieren). || HEIC photos are skipped (server without pillow-heif; please export as JPG). || Les photos HEIC sont ignorées (serveur sans pillow-heif ; veuillez exporter en JPG). || Las fotos HEIC se omiten (servidor sin pillow-heif; exporta como JPG).
+Zeiten der Fotos korrigieren? || Correct the photo times? || Corriger l’heure des photos ? || ¿Corregir la hora de las fotos?
+Korrigieren || Correct || Corriger || Corregir
+{} endgültig löschen? || Delete {} permanently? || Supprimer définitivement {} ? || ¿Eliminar {} definitivamente?
+{} aus dieser Tour entfernen? || Remove {} from this tour? || Retirer {} de ce parcours ? || ¿Quitar {} de esta ruta?
+Puls holen || Fetch heart rate || Récupérer le pouls || Obtener pulso
+Messwerte holen || Fetch measurements || Récupérer les mesures || Obtener mediciones
+Fehlende Strecken holen || Fetch missing tracks || Récupérer les tracés manquants || Obtener trazados que faltan
+Holen || Fetch || Récupérer || Obtener
+Holen und hochladen || Fetch and upload || Récupérer et envoyer || Obtener y subir
+Holen und hochladen? || Fetch and upload? || Récupérer et envoyer ? || ¿Obtener y subir?
+{} als Touren holen und zu {} hochladen? || Fetch {} as tours and upload to {}? || Récupérer {} comme parcours et envoyer vers {} ? || ¿Obtener {} como rutas y subir a {}?
+1 Zepp-Training || 1 Zepp workout || 1 entraînement Zepp || 1 entrenamiento de Zepp
+{} Zepp-Trainings || {} Zepp workouts || {} entraînements Zepp || {} entrenamientos de Zepp
+Importieren und hochladen? || Import and upload? || Importer et envoyer ? || ¿Importar y subir?
+Importieren und hochladen || Import and upload || Importer et envoyer || Importar y subir
+Dateien als Touren importieren und zu {} hochladen? || Import files as tours and upload to {}? || Importer les fichiers comme parcours et envoyer vers {} ? || ¿Importar archivos como rutas y subir a {}?
+Bitte mindestens ein Portal ankreuzen – oder „Holen“ wählen. || Please tick at least one portal – or choose “Fetch”. || Veuillez cocher au moins un portail – ou choisir « Récupérer ». || Marca al menos un portal o elige «Obtener».
+Nur Touren ab Datum (TT.MM.JJJJ, leer = alle) || Only tours from date (DD.MM.YYYY, empty = all) || Uniquement les parcours à partir du (JJ.MM.AAAA, vide = tous) || Solo rutas desde la fecha (DD.MM.AAAA, vacío = todas)
+Neue Touren täglich automatisch holen || Fetch new tours automatically every day || Récupérer automatiquement les nouveaux parcours chaque jour || Obtener rutas nuevas automáticamente cada día
+Datum bitte als TT.MM.JJJJ eingeben ({}) || Please enter the date as DD.MM.YYYY ({}) || Veuillez saisir la date au format JJ.MM.AAAA ({}) || Introduce la fecha como DD.MM.AAAA ({})
+Einstellungen gespeichert || Settings saved || Réglages enregistrés || Ajustes guardados
+Speichern nicht möglich: {} || Saving is not possible: {} || Impossible d’enregistrer : {} || No se puede guardar: {}
+Statistik-Gruppe „{}“ || Statistics group “{}” || Groupe de statistiques « {} » || Grupo de estadísticas «{}»
+Statistik-Gruppe „{}“ löschen || Delete statistics group “{}” || Supprimer le groupe de statistiques « {} » || Eliminar el grupo de estadísticas «{}»
+Sportarten der Statistik-Gruppe „{}“ || Sports of the statistics group “{}” || Sports du groupe de statistiques « {} » || Deportes del grupo de estadísticas «{}»
+Keine Statistik-Gruppen: Die Statistik zählt jede Sportart einzeln. || No statistics groups: the statistics count each sport separately. || Aucun groupe de statistiques : les statistiques comptent chaque sport séparément. || Sin grupos de estadísticas: las estadísticas cuentan cada deporte por separado.
+Statistik-Gruppe hinzufügen || Add statistics group || Ajouter un groupe de statistiques || Añadir grupo de estadísticas
+Vorschläge (ein Klick legt die Statistik-Gruppe an, gespeichert wird erst mit „Speichern“): || Suggestions (one click creates the statistics group; it is only saved with “Save”): || Suggestions (un clic crée le groupe de statistiques ; l’enregistrement se fait avec « Enregistrer ») : || Sugerencias (un clic crea el grupo de estadísticas; se guarda solo con «Guardar»):
+„{}“: Eine Statistik-Gruppe braucht mindestens 2 Sportarten. || “{}”: a statistics group needs at least 2 sports. || « {} » : un groupe de statistiques nécessite au moins 2 sports. || «{}»: un grupo de estadísticas necesita al menos 2 deportes.
+Vorschlag eingetragen – gespeichert wird mit „Speichern“. || Suggestion entered – it is saved with “Save”. || Suggestion ajoutée – l’enregistrement se fait avec « Enregistrer ». || Sugerencia añadida: se guarda con «Guardar».
+Statistik-Gruppen gespeichert – gelten ab sofort in der Statistik || Statistics groups saved – they apply to the statistics right away || Groupes de statistiques enregistrés – ils s’appliquent immédiatement aux statistiques || Grupos de estadísticas guardados: se aplican de inmediato en las estadísticas
+Reihenfolge der Favoriten-Sportarten || Order of the favourite sports || Ordre des sports favoris || Orden de los deportes favoritos
+Die Favoriten-Sportarten werden wieder: {}. || The favourite sports will be reset to: {}. || Les sports favoris redeviennent : {}. || Los deportes favoritos vuelven a ser: {}.
+Favoriten-Sportarten gespeichert || Favourite sports saved || Sports favoris enregistrés || Deportes favoritos guardados
+Standard wiederhergestellt || Default restored || Valeurs par défaut rétablies || Valores predeterminados restaurados
+Höchstens {} Favoriten-Sportarten. || At most {} favourite sports. || {} sports favoris au maximum. || Como máximo {} deportes favoritos.
+Für „Tour aufzeichnen“: Diese Sportarten stehen dort zuerst – ebenso beim Planen, bei „Sportart ändern“ und bei Zielen. Alle übrigen Sportarten findest du dort unter „Mehr …“. || For “Record a tour”: these sports come first there – as well as when planning, in “Change sport” and for goals. All other sports are under “More …”. || Pour « Enregistrer un parcours » : ces sports apparaissent en premier – de même pour la planification, « Changer de sport » et les objectifs. Tous les autres sports se trouvent sous « Plus … ». || Para «Grabar una ruta»: estos deportes aparecen primero, igual que al planificar, en «Cambiar deporte» y en los objetivos. Los demás deportes están en «Más …».
+(Statistik-Gruppe gelöscht) || (statistics group deleted) || (groupe de statistiques supprimé) || (grupo de estadísticas eliminado)
+im Soll || on target || dans l’objectif || en el objetivo
+Sobald die Strecken da sind (Verwaltung → Touren holen → Komoot „Fehlende Strecken holen“), erscheinen hier die höchsten Punkte. || As soon as the tracks are there (Admin → Fetch tours → Komoot “Fetch missing tracks”), the highest points appear here. || Dès que les tracés sont là (Administration → Récupérer des parcours → Komoot « Récupérer les tracés manquants »), les points les plus hauts apparaissent ici. || En cuanto estén los trazados (Administración → Obtener rutas → Komoot «Obtener trazados que faltan»), aquí aparecen los puntos más altos.
+{} Strecken nicht lokal vorhanden – unter Verwaltung → Touren holen → Komoot „Fehlende Strecken holen“ (Komoot-Zugang nötig) || {} tracks not available locally – use Admin → Fetch tours → Komoot “Fetch missing tracks” (Komoot access required) || {} tracés non disponibles en local – Administration → Récupérer des parcours → Komoot « Récupérer les tracés manquants » (accès Komoot requis) || {} trazados no disponibles en local: Administración → Obtener rutas → Komoot «Obtener trazados que faltan» (se necesita acceso a Komoot)
+Link zur Diashow || Link to the slideshow || Lien vers le diaporama || Enlace a la presentación
+Letztes Update nicht möglich: || Last update not possible: || Dernière mise à jour impossible : || Última actualización no posible:
+Update nicht möglich: || Update not possible: || Mise à jour impossible : || Actualización no posible:
+Version {} installieren? || Install version {}? || Installer la version {} ? || ¿Instalar la versión {}?
+Installieren || Install || Installer || Instalar
+Vorher wird eine Sicherung aller Daten angelegt. Die Seite ist während der Installation kurz nicht erreichbar. || A backup of all data is created first. The page is briefly unavailable during the installation. || Une sauvegarde de toutes les données est d’abord créée. La page est brièvement indisponible pendant l’installation. || Antes se crea una copia de seguridad de todos los datos. La página no estará disponible brevemente durante la instalación.
+Link erstellen nicht möglich: || Creating the link is not possible: || Impossible de créer le lien : || No se puede crear el enlace:
+Link erstellen nicht möglich: {} || Creating the link is not possible: {} || Impossible de créer le lien : {} || No se puede crear el enlace: {}
+Auswahl speichern nicht möglich: {} || Saving the selection is not possible: {} || Impossible d’enregistrer la sélection : {} || No se puede guardar la selección: {}
+{} Touren umbenennen? || Rename {} tours? || Renommer {} parcours ? || ¿Renombrar {} rutas?
+Die Namen werden auch bei Komoot geändert. || The names are also changed on Komoot. || Les noms sont aussi modifiés sur Komoot. || Los nombres también se cambian en Komoot.
+Die Namen werden nur in Meine Touren geändert. || The names are only changed in Meine Touren. || Les noms ne sont modifiés que dans Meine Touren. || Los nombres solo se cambian en Meine Touren.
+Neues Passwort für {} || New password for {} || Nouveau mot de passe pour {} || Nueva contraseña para {}
+Neues Passwort (mindestens 8 Zeichen) || New password (at least 8 characters) || Nouveau mot de passe (au moins 8 caractères) || Nueva contraseña (al menos 8 caracteres)
+Passwort speichern || Save password || Enregistrer le mot de passe || Guardar contraseña
+E-Mail-Adresse für {} || E-mail address for {} || Adresse e-mail pour {} || Correo electrónico para {}
+E-Mail-Adresse (leer = keine) || E-mail address (empty = none) || Adresse e-mail (vide = aucune) || Correo electrónico (vacío = ninguno)
+Bestätigen || Confirm || Confirmer || Confirmar
+Fotos übernehmen || Take over photos || Reprendre les photos || Adoptar fotos
+Passwort geändert || Password changed || Mot de passe modifié || Contraseña cambiada
+Link kopiert || Link copied || Lien copié || Enlace copiado
+Link kopiert (30 Tage) || Link copied (30 days) || Lien copié (30 jours) || Enlace copiado (30 días)
+{} herausgerechnet (Strecke vorher {}) || {} excluded (distance before {}) || {} exclus (distance avant {}) || {} excluidos (distancia antes {})
+{} Abschnitt || {} section || {} section || {} tramo
+{} Abschnitte || {} sections || {} sections || {} tramos
+Sicherheit gespeichert || Safety saved || Sécurité enregistrée || Seguridad guardada
+Notiz gespeichert || Note saved || Note enregistrée || Nota guardada
+Geplante Tour gespeichert || Planned tour saved || Parcours planifié enregistré || Ruta planificada guardada
+Die Tourplanung ist ausgeschaltet. Du kannst sie unter Verwaltung → Hochladen & Planen → Tourplanung wieder einschalten. || Tour planning is switched off. You can switch it on again under Admin → Upload & plan → Tour planning. || La planification est désactivée. Vous pouvez la réactiver sous Administration → Envoyer et planifier → Planification. || La planificación está desactivada. Puedes volver a activarla en Administración → Subir y planificar → Planificación de rutas.
+Punkte in die Karte klicken – sie werden über bekannte Wege verbunden – oder eine GPX-Datei importieren || Click points on the map – they are joined along known paths – or import a GPX file || Cliquez des points sur la carte – ils sont reliés par des chemins connus – ou importez un fichier GPX || Haz clic en puntos del mapa (se unen por caminos conocidos) o importa un archivo GPX
+GPX importieren … || Import GPX … || Importer un GPX … || Importar GPX …
+Aus Wanderführer wählen || Choose from a hiking guide || Choisir dans un guide de randonnée || Elegir de una guía de senderismo
+Aus Wanderführer wählen … || Choose from a hiking guide … || Choisir dans un guide de randonnée … || Elegir de una guía de senderismo …
+Name der geplanten Tour || Name of the planned tour || Nom du parcours planifié || Nombre de la ruta planificada
+Gespeicherte geplante Touren || Saved planned tours || Parcours planifiés enregistrés || Rutas planificadas guardadas
+Gespeicherte geplante Touren erscheinen hier. || Saved planned tours appear here. || Les parcours planifiés enregistrés apparaissent ici. || Las rutas planificadas guardadas aparecen aquí.
+{} geplante Touren || {} planned tours || {} parcours planifiés || {} rutas planificadas
+1 geplante Tour || 1 planned tour || 1 parcours planifié || 1 ruta planificada
+Geplante Tour: {} || Planned tour: {} || Parcours planifié : {} || Ruta planificada: {}
+Geplante Tour löschen || Delete planned tour || Supprimer le parcours planifié || Eliminar ruta planificada
+Geplante Tour löschen: {} || Delete planned tour: {} || Supprimer le parcours planifié : {} || Eliminar ruta planificada: {}
+Zeit nach deinem Tempo aus {} ähnlichen Touren (im Schnitt {}, Dauer inklusive Pausen). || Time based on your pace from {} similar tours (average {}, duration including breaks). || Temps selon votre rythme à partir de {} parcours similaires (en moyenne {}, durée pauses comprises). || Tiempo según tu ritmo a partir de {} rutas similares (de media {}, duración con pausas).
+Standard wiederherstellen? || Restore default? || Rétablir les réglages par défaut ? || ¿Restaurar valores predeterminados?
+Name und Zeitraum der Reise werden wieder so, wie sie erkannt wurden. || Name and period of the trip are reset to how they were detected. || Le nom et la période du voyage redeviennent tels qu’ils ont été détectés. || El nombre y el periodo del viaje vuelven a ser como se detectaron.
+Tour gespeichert || Tour saved || Parcours enregistré || Ruta guardada
+{} Foto konnte nicht hochgeladen werden und bleibt auf dem Handy (Aufzeichnen → „Fotos hochladen“). || {} photo could not be uploaded and stays on the phone (Record → “Upload photos”). || {} photo n’a pas pu être envoyée et reste sur le téléphone (Enregistrer → « Envoyer les photos »). || {} foto no se pudo subir y se queda en el móvil (Grabar → «Subir fotos»).
+{} Fotos konnten nicht hochgeladen werden und bleiben auf dem Handy (Aufzeichnen → „Fotos hochladen“). || {} photos could not be uploaded and stay on the phone (Record → “Upload photos”). || {} photos n’ont pas pu être envoyées et restent sur le téléphone (Enregistrer → « Envoyer les photos »). || {} fotos no se pudieron subir y se quedan en el móvil (Grabar → «Subir fotos»).
+Sofort hochladen || Upload immediately || Envoyer immédiatement || Subir inmediatamente
+Gesammelt am Ende hochladen || Upload all at the end || Envoyer tout à la fin || Subir todo al final
+Aufzeichnung läuft || Recording in progress || Enregistrement en cours || Grabación en curso
+Trage unter Verwaltung → Automatik & Meldungen → Benachrichtigung eine ntfy-Adresse ein (z. B. https://ntfy.sh/mein-thema), dann lässt sich das hier mit einem Tipp abonnieren. || Enter an ntfy address under Admin → Automation & notifications → Notification (e.g. https://ntfy.sh/my-topic), then you can subscribe here with one tap. || Saisissez une adresse ntfy sous Administration → Automatisation et notifications → Notification (p. ex. https://ntfy.sh/mon-sujet), vous pourrez alors vous abonner ici d’un geste. || Introduce una dirección ntfy en Administración → Automatización y avisos → Notificación (p. ej. https://ntfy.sh/mi-tema) y podrás suscribirte aquí con un toque.
+Keine Fotos gefunden || No photos found || Aucune photo trouvée || No se encontraron fotos
+Zu dieser Tour wurden keine Fotos gefunden. Trotzdem Link erstellen? || No photos were found for this tour. Create the link anyway? || Aucune photo trouvée pour ce parcours. Créer le lien quand même ? || No se encontraron fotos para esta ruta. ¿Crear el enlace de todos modos?
+Link erstellen || Create link || Créer le lien || Crear enlace
+Die Auswahl wird sofort gespeichert („Einstellungen speichern“ ist dafür nicht nötig). || The choice is saved immediately (“Save settings” is not needed for it). || Le choix est enregistré immédiatement (« Enregistrer les réglages » n’est pas nécessaire). || La selección se guarda de inmediato (no hace falta «Guardar ajustes»).
+{} gefunden und gespeichert: {} || {} found and saved: {} || {} trouvé(s) et enregistré(s) : {} || {} encontrada(s) y guardada(s): {}
+Live-Modus gespeichert || Live mode saved || Mode en direct enregistré || Modo en directo guardado
+Letzten Standort löschen? || Delete the last location? || Supprimer la dernière position ? || ¿Eliminar la última ubicación?
+Die zuletzt gemeldete Position wird gelöscht; Betrachter sehen sie nicht mehr. Ein Verlauf wird ohnehin nicht gespeichert. || The last reported position is deleted; viewers no longer see it. A history is not stored anyway. || La dernière position signalée est supprimée ; les observateurs ne la voient plus. Aucun historique n’est enregistré de toute façon. || Se elimina la última posición comunicada; los observadores ya no la ven. De todos modos no se guarda ningún historial.
+Letzter Standort gelöscht || Last location deleted || Dernière position supprimée || Última ubicación eliminada
+Löschen nicht möglich: {} || Deleting is not possible: {} || Impossible de supprimer : {} || No se puede eliminar: {}
+E-Mail-Adresse gespeichert || E-mail address saved || Adresse e-mail enregistrée || Correo electrónico guardado
+E-Mail-Versand gespeichert || E-mail sending saved || Envoi d’e-mails enregistré || Envío de correo guardado
+Heimatort (wird sofort gespeichert) || Home location (saved immediately) || Lieu de résidence (enregistré immédiatement) || Lugar de residencia (se guarda de inmediato)
+(wird sofort gespeichert) || (saved immediately) || (enregistré immédiatement) || (se guarda de inmediato)
+Heimatort entfernt || Home location removed || Lieu de résidence supprimé || Lugar de residencia eliminado
+📍 {} ({}, {}) – Heimatort gespeichert || 📍 {} ({}, {}) – home location saved || 📍 {} ({}, {}) – lieu de résidence enregistré || 📍 {} ({}, {}) – lugar de residencia guardado
+Zonen nach {} bpm Maximalpuls (einstellbar unter Verwaltung → Allgemein → Heimatort und Puls). || Zones based on {} bpm maximum heart rate (adjustable under Admin → General → Home location and heart rate). || Zones selon une fréquence cardiaque maximale de {} bpm (réglable sous Administration → Général → Lieu de résidence et pouls). || Zonas según {} lpm de pulso máximo (ajustable en Administración → General → Lugar de residencia y pulso).
+Den App-Test schaltest du unter Verwaltung → Allgemein → Entwicklermodus ein. || Enable the app test under Admin → General → Developer mode. || Activez le test de l’application sous Administration → Général → Mode développeur. || Activa la prueba de la app en Administración → General → Modo de desarrollador.
+{} Zuordnungen aufgehoben. Jetzt alle Touren automatisch den Uhren zuordnen? || {} assignments removed. Assign all tours to the watches automatically now? || {} attributions supprimées. Attribuer maintenant automatiquement tous les parcours aux montres ? || {} asignaciones eliminadas. ¿Asignar ahora todas las rutas a los relojes automáticamente?
+Die widersprechenden Handzuordnungen werden aufgehoben; diese Touren ordnet wieder die Automatik zu (Zepp-Kennung und Datum). Andere von Hand gesetzte Zuordnungen bleiben. || The conflicting manual assignments are removed; these tours are assigned automatically again (Zepp ID and date). Other manual assignments stay. || Les attributions manuelles contradictoires sont supprimées ; ces parcours sont de nouveau attribués automatiquement (identifiant Zepp et date). Les autres attributions manuelles restent. || Se eliminan las asignaciones manuales contradictorias; estas rutas vuelven a asignarse automáticamente (identificador Zepp y fecha). Las demás asignaciones manuales se mantienen.
+Höhe korrigiert || Elevation corrected || Altitude corrigée || Altitud corregida
+Ansicht wird gespeichert … || Saving view … || Enregistrement de la vue … || Guardando vista …
+Ansicht gespeichert || View saved || Vue enregistrée || Vista guardada
+Speichern nicht möglich: nur auf diesem Gerät gemerkt || Saving is not possible: only remembered on this device || Impossible d’enregistrer : mémorisé seulement sur cet appareil || No se puede guardar: solo se recuerda en este dispositivo
+1 ausgeblendeter Baustein || 1 hidden widget || 1 bloc masqué || 1 bloque oculto
+{} ausgeblendete Bausteine || {} hidden widgets || {} blocs masqués || {} bloques ocultos
+Mit Bausteingruppe || With widget group || Avec groupe de blocs || Con grupo de bloques
+Meist {} km || Mostly {} km || Le plus souvent {} km || Sobre todo {} km
+Tour mit dem Bestwert || Tour with the record || Parcours du record || Ruta del récord
+Tour mit dem Bestwert öffnen || Open the tour with the record || Ouvrir le parcours du record || Abrir la ruta del récord
+Alle Einstellungen dieses Bausteins auf den Standard setzen (gespeichert wird erst mit „Speichern“) || Reset all settings of this widget to the default (saved only with “Save”) || Rétablir tous les réglages de ce bloc par défaut (enregistré seulement avec « Enregistrer ») || Restablecer todos los ajustes de este bloque (se guarda solo con «Guardar»)
+Handy-Anordnung: Standard wiederherstellen || Phone layout: restore default || Disposition mobile : rétablir par défaut || Disposición del móvil: restaurar predeterminado
+Handy-Anordnung: Standard wiederhergestellt, es gilt wieder die Computer-Reihenfolge || Phone layout: default restored, the computer order applies again || Disposition mobile : rétablie par défaut, l’ordre de l’ordinateur s’applique de nouveau || Disposición del móvil: restaurada; vuelve a valer el orden del ordenador
+Allgemein || General || Général || General
+Touren im Jahr {} || Tours in {} || Parcours en {} || Rutas en {}
+Neuer Bestwert || New record || Nouveau record || Nuevo récord
+Fehlende Strecken von Komoot holen und lokal speichern || Fetch missing tracks from Komoot and store them locally || Récupérer les tracés manquants depuis Komoot et les enregistrer en local || Obtener de Komoot los trazados que faltan y guardarlos en local
+„Komoot aktualisieren“ holt neue Touren und deren Strecken von Komoot und durchsucht die Fotobibliothek. Es wird nichts zu Komoot hochgeladen. || “Update Komoot” fetches new tours and their tracks from Komoot and searches the photo library. Nothing is uploaded to Komoot. || « Mettre à jour Komoot » récupère les nouveaux parcours et leurs tracés depuis Komoot et parcourt la photothèque. Rien n’est envoyé vers Komoot. || «Actualizar Komoot» obtiene rutas nuevas y sus trazados de Komoot y revisa la fototeca. No se sube nada a Komoot.
+Bibliothek neu durchsuchen || Search library again || Parcourir à nouveau la bibliothèque || Volver a revisar la biblioteca
+Fotoeinstellungen || Photo settings || Réglages des photos || Ajustes de fotos
+Längste Seite eines Fotos (Pixel) || Longest side of a photo (pixels) || Plus grand côté d’une photo (pixels) || Lado más largo de una foto (píxeles)
+Diashow: Sekunden pro Foto || Slideshow: seconds per photo || Diaporama : secondes par photo || Presentación: segundos por foto
+Anzeigen || Show || Afficher || Mostrar
+Umbenennen || Rename || Renommer || Renombrar
+Dauer inkl. Pausen. Bestzeit: {} mit {}. || Duration including breaks. Best time: {} with {}. || Durée pauses comprises. Meilleur temps : {} avec {}. || Duración con pausas. Mejor tiempo: {} con {}.
+Begleitung || Company || Compagnie || Compañía
+Diese Touren sind keine Reise (z. B. ein Tagesausflug) – aus der Liste entfernen. Die Touren bleiben erhalten. || These tours are not a trip (e.g. a day trip) – remove from the list. The tours are kept. || Ces parcours ne sont pas un voyage (p. ex. une excursion d’une journée) – retirer de la liste. Les parcours sont conservés. || Estas rutas no son un viaje (p. ej. una excursión de un día): quitarlas de la lista. Las rutas se conservan.
+Diese Touren aus den Reisen entfernen? Die Touren selbst bleiben unverändert, die Reise lässt sich später unter „Reisen“ wiederherstellen. || Remove these tours from the trips? The tours themselves stay unchanged; the trip can be restored later under “Trips”. || Retirer ces parcours des voyages ? Les parcours eux-mêmes restent inchangés ; le voyage peut être rétabli plus tard sous « Voyages ». || ¿Quitar estas rutas de los viajes? Las rutas no cambian; el viaje se puede restaurar más tarde en «Viajes».
+{} Statistik-Gruppen. || {} statistics groups. || {} groupes de statistiques. || {} grupos de estadísticas.
+Höchstens {} Statistik-Gruppen. || At most {} statistics groups. || {} groupes de statistiques au maximum. || Como máximo {} grupos de estadísticas.
 `;

@@ -15,8 +15,8 @@ VIEWS.check = async () => {
     <div class="r"><span>Auffälliger Aufstieg</span><b class="${r.suspicious.length ? "bad" : ""}">${r.suspicious.length}</b></div>
     <div class="r"><span>Noch mit Standardname</span><b>${r.default_names.length}</b></div>
     <div class="r"><span>Ohne gespeicherte Strecke / ohne Region / ohne Fotos</span><b>${G.no_route} / ${G.no_region} / ${G.no_photos}</b></div></div>
-    <p class="mut fs13">Fehlende Strecken: Verwaltung → „Routen laden“. Fehlende Regionen: „Regionen bestimmen“.</p></div>
-   <div class="panel gap"><h2>Mögliche Duplikate</h2>${r.duplicates.length ? `<div class="rows">${r.duplicates.map(d => `<div class="r db">${nm(d.a)}${d.a_local ? ` <button class="btn alt sm" data-del="${d.a}">lokal löschen</button>` : ""}<br>${nm(d.b)}${d.b_local ? ` <button class="btn alt sm" data-del="${d.b}">lokal löschen</button>` : ""}<small class="mut">${BY[d.a] ? fmtDatumKurz(BY[d.a].date) : ""} – gleiche Zeit, Startort und Länge</small></div>`).join("")}</div><p class="mut fs13">Lokale Touren (Zepp/GPX) lassen sich hier löschen, die Komoot-Tour nicht. Bei Komoot-Touren die Tour dort entfernen und „Komoot aktualisieren“ ausführen.</p>` : '<p class="ok">✓ Keine Duplikate gefunden.</p>'}</div>
+    <p class="mut fs13">Fehlende Strecken: Verwaltung → Touren holen → Komoot „Fehlende Strecken holen“. Fehlende Regionen: dort „Regionen bestimmen“.</p></div>
+   <div class="panel gap"><h2>Mögliche Duplikate</h2>${r.duplicates.length ? `<div class="rows">${r.duplicates.map(d => `<div class="r db">${nm(d.a)}${d.a_local ? ` <button class="btn alt sm" data-del="${d.a}">lokal löschen</button>` : ""}<br>${nm(d.b)}${d.b_local ? ` <button class="btn alt sm" data-del="${d.b}">lokal löschen</button>` : ""}<small class="mut">${BY[d.a] ? fmtDatumKurz(BY[d.a].date) : ""} – gleiche Zeit, Startort und Strecke</small></div>`).join("")}</div><p class="mut fs13">Lokale Touren (Zepp/GPX) lassen sich hier löschen, die Komoot-Tour nicht. Bei Komoot-Touren die Tour dort entfernen und „Komoot aktualisieren“ ausführen.</p>` : '<p class="ok">✓ Keine Duplikate gefunden.</p>'}</div>
    <div class="panel gap"><h2>Auffälliger Aufstieg</h2>${r.suspicious.length ? `<div class="row"><button class="btn" id="fixall">Alle ${r.suspicious.length} korrigieren</button><span id="fixm" class="mut"></span></div><div class="rows" id="fixl">${r.suspicious.map(t => `<div class="r" data-id="${t.id}"><span>${nm(t.id)}<small class="bad">${fmtHm(t.up_m)} Aufstieg auf ${fmtKm(t.km)}</small></span><button class="btn alt sm" data-fix="${t.id}">Korrigieren</button></div>`).join("")}</div>` : '<p class="ok">✓ Keine auffälligen Höhen.</p>'}</div>
    <div class="panel gap"><h2>Namen vergeben</h2>${
      r.default_names.length
@@ -44,7 +44,7 @@ VIEWS.check = async () => {
     first.insertAdjacentHTML(
       "afterend",
       `<div class="panel gap" id="impl"><h2>Unplausible Touren</h2>
-      <p class="mut">Fehlaufzeichnungen (fast keine Strecke) und Touren, deren Tempo nicht zur Sportart passt. Sie zählen in Rekorden und Statistiken mit. Du kannst die Sportart ändern (bleibt auch nach dem Komoot-Abgleich) oder die Tour ausblenden (Daten bleiben erhalten, jederzeit wieder einblendbar).</p>
+      <p class="mut">Fehlaufzeichnungen (fast keine Strecke) und Touren, deren Tempo nicht zur Sportart passt. Sie zählen in Bestwerten und Statistiken mit. Du kannst die Sportart ändern (bleibt auch nach dem Komoot-Abgleich) oder die Tour ausblenden (Daten bleiben erhalten, jederzeit wieder einblendbar).</p>
       ${
         im.length
           ? `<div class="rows">${im
@@ -78,7 +78,7 @@ VIEWS.check = async () => {
           (b.onclick = () => {
             const row = b.closest("[data-id]"),
               d = row.dataset;
-            const m = uiModal(`<h3>Tour löschen?</h3><p>„${esc(d.name)}“ (${fmtKm(+d.km)}) wird aus Meine Touren entfernt – mit Strecke, Notizen und Tags. Zugeordnete Fotos bleiben erhalten.</p>
+            const m = uiModal(`<h3>Tour löschen?</h3><p>„${esc(d.name)}“ (${fmtKm(+d.km)}) wird aus Meine Touren entfernt – mit Strecke, Notizen und Schlagwörtern. Zugeordnete Fotos bleiben erhalten.</p>
         ${d.onk ? `<label class="chk"><input type="checkbox" id="dk"> <b>auch bei Komoot endgültig löschen</b> <span class="mut">(lässt sich nicht rückgängig machen)</span></label>` : ""}
         ${!d.local && d.onk ? `<p class="mut fs13">Ohne Häkchen bleibt die Tour bei Komoot und wird beim nächsten Abgleich nicht wieder übernommen.</p>` : ""}
         <div id="dm" class="mut"></div><div class="uifoot"><button class="btn ghost" id="dx">Abbrechen</button><button class="btn alt uidanger" data-danger id="dok">Löschen</button></div>`);
@@ -265,7 +265,7 @@ VIEWS.check = async () => {
           if (BY[b.dataset.save]) BY[b.dataset.save].name = nn;
         } catch (e) {
           b.disabled = false;
-          uiAlert("Umbenennen fehlgeschlagen: " + e.message);
+          uiAlert("Umbenennen nicht möglich: " + e.message);
         }
       })
   );
