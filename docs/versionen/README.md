@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.61.2](3.61.2.md) – Handy-Übersicht bei großer Systemschrift: „Seite anpassen“ nie abgeschnitten, Kennzahl-Kacheln mit Wert und Einheit in einer Zeile
 - [3.61.1](3.61.1.md) – Sportart-Auswahl am Handy kompakt (nur Gruppenname, Blatt mit Chips statt langer Liste); Reiter der Verwaltung am Computer in einer Zeile
 - [3.61.0](3.61.0.md) – Pflegedurchgang: einheitliche Begriffe (Bestwerte, Schlagwörter, aufzeichnen, Dauer, holen/importieren …) und Bedienlogik (Dialoge, Speichern, Rückmeldungen, Sportart filtern/zuweisen), Verwaltungsreiter „Allgemein“
 - [3.60.1](3.60.1.md) – Statistik-Gruppen: kein Gruppenname wie eine Sportart, Beschriftung „Name = A + B + …“; Karte mit Kategorien, Gruppen und eigener Farbe je Sportart; Begriff „Sportart“

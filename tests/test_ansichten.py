@@ -146,7 +146,7 @@ def test_viewer_and_users_are_separated():
 
 def test_version_notes_and_files():
     from app import config
-    assert config.VERSION.startswith("3.61.1 · Meine Touren")
+    assert config.VERSION.startswith("3.61.2 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.21.0.md").read_text(encoding="utf-8")
     assert "Ansichten" in notes and "Vorlagen" in notes and "Export" in notes and "/api/layout/check" in notes and "54-ansichten.js" in notes
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")

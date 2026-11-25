@@ -95,7 +95,7 @@ VIEWS.dash = async (_, q) => {
     <div class="k">Letzte Tour, ${sName(last.sport)}</div><h1>${esc(last.name)}</h1><div class="w">${fmtDatum(last.date, {zeit: true})}</div>
     ${ph.length ? `<div class="thumbrow">${ph.map((p, i) => `<img loading="lazy" decoding="async" src="${picSrc(p, 300)}" data-i="${i}">`).join("")}</div>` : ""}
     <div class="btns"><a class="btn" href="#/tour/${last.id}">Tour ansehen</a>${last.photos ? `<a class="btn alt c-white" target="_blank" href="slideshow.html?tour=${last.id}">Diashow</a>` : ""}</div></div>
-    <div class="signs"><div class="sign">${fmtKm(last.km)}<small>Strecke</small></div><div class="sign l">${fmtHm(last.up_m)}<small>Aufstieg</small></div><div class="sign">${fmtDauer(last.h * 3600)}<small>Dauer</small></div></div></div></section>
+    <div class="signs"><div class="sign">${fmtSignWert(fmtKm(last.km, {einheit: false}), "km")}<small>Strecke</small></div><div class="sign l">${fmtSignWert(fmtHm(last.up_m, {einheit: false}), "m")}<small>Aufstieg</small></div><div class="sign">${(p => fmtSignWert(p.v, p.u))(fmtDauerTeile(last.h * 3600))}<small>Dauer</small></div></div></div></section>
   <div class="inner">
   ${stFilterBar(F, R, sel.length, yearAll)}
   <div class="figs" data-st="kpi" data-badge="${esc(`${nf(sel.length, 0)} Touren · ${fmtKm(km, {d: 0})}`)}">

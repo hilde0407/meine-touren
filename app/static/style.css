@@ -2087,12 +2087,20 @@ html.mob .mapui.mfo .kapw:not([data-kp=standort]):not(.kapedit)>.box{flex:1 1 10
 html.mob .mapui.mfo .kapw:not([data-kp=standort])>.kapt:not([hidden]){flex:1 1 100%;order:5}
 html.mob .mapui.mfo .kapw[data-kp=stil]>.box{position:static}
 html.mob .mapbox .tpanel{bottom:calc(53px + 86px + env(safe-area-inset-bottom))}
-/* 3.44.0 Übersicht am Handy: Zepp-Schnellknopf allein in der ersten Zeile, „Seite anpassen“ und „Ansichten“ gleich breit nebeneinander in der zweiten (ohne Zepp-Knopf bleiben die zwei wie gehabt) */
+/* 3.44.0 Übersicht am Handy: Zepp-Schnellknopf allein in der ersten Zeile, „Seite anpassen“ und „Ansichten“ nebeneinander in der zweiten.
+   3.61.2: Die Knöpfe sind nicht mehr zwingend gleich breit (das schnitt „Seite anpassen“ bei großer Systemschrift ab): jeder Knopf ist so breit wie sein Text (nowrap), die Reste teilen sie sich;
+   passen sie nicht mehr in eine Zeile, bekommt jeder Knopf eine eigene volle Zeile. Nie Ellipsis oder Abschneiden. */
 @media (max-width:700px){
   .slopen:has(#slzepp:not([hidden])) #slzepp{margin-right:100%}
-  .slopen:has(#slzepp:not([hidden])) #slopen,.slopen:has(#slzepp:not([hidden])) #slviews{flex:1 1 0;min-width:0;justify-content:center;white-space:nowrap}
-  .slopen:has(#slzepp:not([hidden])) .slbt{overflow:hidden;text-overflow:ellipsis}
+  .slopen:has(#slzepp:not([hidden])) #slopen,.slopen:has(#slzepp:not([hidden])) #slviews{flex:1 1 auto;min-width:0;max-width:100%;justify-content:center;white-space:nowrap}
 }
+html.mob .slopen .btn:not(#slzepp) .slbt:not([class*=sr]){overflow:visible;text-overflow:clip;white-space:nowrap}
+html.mob .slopen #slzepp{flex:0 0 auto;max-width:100%;white-space:normal;text-align:left}
+/* 3.61.2 Kennzahl-Kacheln (gelbe Schilder): Wert und Einheit („13,1 km“) bleiben in einer Zeile, die Einheit klein dahinter; passen die Kacheln bei großer Schrift nicht nebeneinander, rücken sie in die nächste Zeile */
+.sign .sv{white-space:nowrap}.sign .su{font-size:.62em;font-weight:600;margin-left:.2em;opacity:.8}
+html.mob .signs,html.mob .hli .signs{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+html.mob .hli .sign,html.mob .hli .sign.l{flex:1 1 auto;max-width:100%;min-width:0;box-sizing:border-box;padding:7px 12px}
+html.mob .sign small{white-space:nowrap}
 /* 3.44.0 Fitness-Einordnung */
 .ftkopf{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 16px;margin:0 0 4px}
 .ftgross{margin:0;font-size:16px}.ftz{font:700 44px/1 var(--d);font-variant-numeric:tabular-nums}

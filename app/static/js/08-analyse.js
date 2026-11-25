@@ -382,7 +382,7 @@ VIEWS.dash = async (...a) => {
     h1.textContent = t.name;
     w.textContent = `${fmtDatum(t.date, {zeit: true})}`;
     btns.innerHTML = `<a class="btn" href="#/tour/${t.id}">Tour ansehen</a>${t.photos ? `<a class="btn alt c-white" target="_blank" href="slideshow.html?tour=${t.id}">Diashow</a>` : ""}`;
-    signs.innerHTML = `<div class="sign">${fmtKm(t.km)}<small>Strecke</small></div><div class="sign l">${fmtHm(t.up_m)}<small>Aufstieg</small></div><div class="sign">${fmtDauer(t.h * 3600)}<small>Dauer</small></div>`;
+    signs.innerHTML = `<div class="sign">${fmtSignWert(fmtKm(t.km, {einheit: false}), "km")}<small>Strecke</small></div><div class="sign l">${fmtSignWert(fmtHm(t.up_m, {einheit: false}), "m")}<small>Aufstieg</small></div><div class="sign">${(p => fmtSignWert(p.v, p.u))(fmtDauerTeile(t.h * 3600))}<small>Dauer</small></div>`;
     $("#hcnt").textContent = `${i + 1} / ${N}`;
     const old = hero.querySelector(".thumbrow");
     if (old) old.remove();

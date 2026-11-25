@@ -100,7 +100,7 @@ def test_oberflaeche_quelltext():
 
 
 def test_version_texte_und_dateien():
-    assert config.VERSION.startswith("3.61.1 · Meine Touren")
+    assert config.VERSION.startswith("3.61.2 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.60.1.md").read_text(encoding="utf-8")
     assert notes.startswith("# 3.60.1") and "heißt schon eine Sportart" in notes and " = " in notes
     assert "3.60.1" in (ROOT / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")
@@ -108,7 +108,7 @@ def test_version_texte_und_dateien():
     hb = (ROOT / "docs" / "HANDBUCH.md").read_text(encoding="utf-8")
     assert "(zusammengefasst)" not in hb and "Name = Sportart + Sportart" in hb
     assert 'const V = "mt-v147"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.61.1"' in (JS / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.61.2"' in (JS / "54-ansichten.js").read_text(encoding="utf-8")
     assert re.search(r"Gruppenname.*Sportart", hb)
 
 

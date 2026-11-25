@@ -75,6 +75,9 @@ const fmtDauerHtml = (s, o = {}) => {
   return `${p.v}<span class="u">${p.u}</span>`;
 };
 
+/* Kennzahl-Kachel (Aufmacher „Zuletzt unterwegs“, Tour-Kopf): Wert und Einheit in einem Stück, die Einheit klein dahinter (3.61.2: bricht auch bei großer Systemschrift nicht in zwei Zeilen) */
+const fmtSignWert = (v, u) => `<span class="sv">${v}<span class="su">${u}</span></span>`;
+
 /* Strecke. km = Kilometer. Standard: eine Nachkommastelle; o.summe: ab 100 km ganzzahlig; o.d: feste Stellenzahl; o.einheit=false: ohne „km“ */
 const fmtKm = (km, o = {}) => {
   const k = Number(km) || 0,

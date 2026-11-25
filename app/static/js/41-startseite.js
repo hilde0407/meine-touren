@@ -76,7 +76,7 @@ async function homeView() {
         <div class="hlk">${cur ? `${cur + 1}. letzte Tour` : "Zuletzt unterwegs"}<span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span></div>
         <h1>${esc(t.name)}</h1>
         <div class="hlw">${fmtDatum(t.date, {zeit: true})}</div>
-        <div class="signs"><div class="sign">${fmtKm(t.km)}<small>Strecke</small></div><div class="sign l">${fmtHm(t.up_m || 0)}<small>Aufstieg</small></div><div class="sign">${fmtDauer(t.h * 3600)}<small>Dauer</small></div></div>
+        <div class="signs"><div class="sign">${fmtSignWert(fmtKm(t.km, {einheit: false}), "km")}<small>Strecke</small></div><div class="sign l">${fmtSignWert(fmtHm(t.up_m || 0, {einheit: false}), "m")}<small>Aufstieg</small></div><div class="sign">${(p => fmtSignWert(p.v, p.u))(fmtDauerTeile(t.h * 3600))}<small>Dauer</small></div></div>
         <div class="hlx" id="hlx">${t.has_hr ? `<span><span class="hrt">❤</span> <span id="hlhr">Puls aufgezeichnet</span></span>` : ""}${t.stars ? `<span class="stars">${"★".repeat(t.stars)}</span>` : ""}</div>
         <div class="btns"><a class="btn" href="#/tour/${t.id}">Tour ansehen</a>${t.photos ? `<a class="btn alt" href="#/story/${t.id}">Erzählung</a>` : ""}<a class="btn alt" href="#/flight/${encodeURIComponent(t.id)}">3D-Flug</a></div>
         ${N > 1 ? `<div class="hlnav"><button id="hprev" aria-label="Neuere Tour" title="Neuere Tour">‹</button><span>${cur + 1} / ${N}</span><button id="hnext" aria-label="Ältere Tour" title="Ältere Tour">›</button></div>` : ""}
