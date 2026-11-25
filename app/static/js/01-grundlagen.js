@@ -98,30 +98,132 @@ const fmtMS = s => {
 const nf = fmtZahl;      // Zahl im Format der Sprache (01-format.js)
 const MON = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
 const MONL = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
-const SPORT = {
-  hike: ["Wandern", "--hike"],
-  touringbicycle: ["Radtour", "--bike"],
-  e_touringbicycle: ["E-Bike", "--ebike"],
-  racebike: ["Rennrad", "--bike"],
-  mtb: ["MTB", "--bike"],
-  jogging: ["Laufen", "--run"],
-  skialpin: ["Skifahren", "--ski"],
-  skitour: ["Skitour", "--ski"],
-  nordic: ["Langlauf", "--ski"],
-  mountaineering: ["Bergtour", "--hike"],
-  nordicwalking: ["Nordic Walking", "--hike"],
-};
-/* 3.50.0: zusammengelegte Sportarten (wie app/gpxtools.py MERGE): Schneeschuh zählt als Wandern und trägt das Schlagwort „Schneeschuh“.
-   Ältere gespeicherte Filter, Ansichten und Antworten mit „snowshoe“ werden beim Lesen umgesetzt. */
-const SPORT_ALIAS = {snowshoe: "hike"};
+/* 3.59.0 Aktivitäten-Katalog – EINE Tabelle (wie CATALOG in app/gpxtools.py; ein Test prüft, dass beide gleich sind). Quelle: Liste der Amazfit Balance 2,
+   Auswahl der Aktivitäten mit Strecke/Ort. Vorhandene Schlüssel bleiben (Komoot-Kennungen wie touringbicycle, e_mtb, mtb_easy = Gravel, skaten = Inline);
+   Schneeschuh ist wieder eine eigene Sportart. Eine weitere Aktivität = eine Zeile hier und in CATALOG (+ Übersetzung des Namens in 00-i18n-neu.js).
+     [Schlüssel, Kategorie, Name, Kartenfarbe (CSS-Variable), Symbol]
+   Daraus: SPORT (Schlüssel -> [Name, Farbe, Symbol]) und SPORT_CAT (Kategorien mit ihren Aktivitäten, für Favoriten, „Mehr …“, Auswahlfelder und Statistik-Gruppen). */
+const SPORT_KAT = [["fuss", "Zu Fuß"], ["rad", "Rad"], ["winter", "Winter"], ["wasser", "Wasser"], ["sonst", "Outdoor & Sonstige"]];
+const SPORT_TABLE = [
+  ["hike", "fuss", "Wandern", "--hike", "🥾"],
+  ["walk", "fuss", "Spazieren/Gehen", "--hike", "🚶"],
+  ["dogwalk", "fuss", "Gassigehen", "--hike", "🐕"],
+  ["mountaineering", "fuss", "Bergtour", "--hike", "⛰️"],
+  ["climbing", "fuss", "Klettern", "--hike", "🧗"],
+  ["nordicwalking", "fuss", "Nordic Walking", "--hike", "🦯"],
+  ["snowshoe", "fuss", "Schneeschuh", "--snow", "❄️"],
+  ["jogging", "fuss", "Laufen", "--run", "🏃"],
+  ["trailrun", "fuss", "Trailrunning", "--run", "🏞️"],
+  ["orienteering", "fuss", "Orientierungslauf", "--run", "🧭"],
+  ["touringbicycle", "rad", "Radtour", "--bike", "🚲"],
+  ["commute", "rad", "Radpendeln", "--bike", "🚲"],
+  ["racebike", "rad", "Rennrad", "--bike", "🚴"],
+  ["mtb", "rad", "MTB", "--bike", "🚵"],
+  ["mtb_easy", "rad", "Gravelbike", "--bike", "🚲"],
+  ["cyclocross", "rad", "Cyclocross", "--bike", "🚴"],
+  ["bmx", "rad", "BMX", "--bike", "🚲"],
+  ["e_touringbicycle", "rad", "E-Bike", "--ebike", "⚡"],
+  ["e_mtb", "rad", "E-Mountainbike", "--ebike", "⚡"],
+  ["skialpin", "winter", "Skifahren", "--ski", "⛷️"],
+  ["skitour", "winter", "Skitour", "--ski", "🎿"],
+  ["nordic", "winter", "Langlauf", "--ski", "🎿"],
+  ["snowboard", "winter", "Snowboard", "--ski", "🏂"],
+  ["sled", "winter", "Rodeln/Bob", "--snow", "🛷"],
+  ["iceskate", "winter", "Eislaufen", "--snow", "⛸️"],
+  ["snowmobile", "winter", "Schneemobil", "--snow", "🛷"],
+  ["swim", "wasser", "Freiwasserschwimmen", "--water", "🏊"],
+  ["snorkel", "wasser", "Schnorcheln", "--water", "🤿"],
+  ["kayak", "wasser", "Kajak/Kanu", "--water", "🛶"],
+  ["sup", "wasser", "Paddleboarding/SUP", "--water", "🏄"],
+  ["rowing", "wasser", "Rudern", "--water", "🚣"],
+  ["dragonboat", "wasser", "Drachenboot", "--water", "🐉"],
+  ["sailing", "wasser", "Segeln", "--water", "⛵"],
+  ["boat", "wasser", "Bootfahren", "--water", "🚤"],
+  ["waterski", "wasser", "Wasserski", "--water", "🎿"],
+  ["surf", "wasser", "Wellenreiten", "--water", "🏄"],
+  ["kitesurf", "wasser", "Kitesurfen", "--water", "🪁"],
+  ["wakesurf", "wasser", "Wakesurfen", "--water", "🏄"],
+  ["skateboard", "sonst", "Skateboard", "--other", "🛹"],
+  ["skaten", "sonst", "Rollschuh/Inline", "--other", "🛼"],
+  ["horse", "sonst", "Reiten", "--other", "🐎"],
+  ["fishing", "sonst", "Angeln", "--other", "🎣"],
+  ["hunting", "sonst", "Jagen", "--other", "🦌"],
+  ["archery", "sonst", "Bogenschießen", "--other", "🏹"],
+  ["golf", "sonst", "Golf", "--other", "⛳"],
+  ["atv", "sonst", "Quad/ATV", "--other", "🏍️"],
+  ["motorbike", "sonst", "Offroad-Motorrad", "--other", "🏍️"],
+  ["other", "sonst", "Sonstiges", "--other", "📍"],
+];
+const SPORT = Object.fromEntries(SPORT_TABLE.map(([k, , n, c, i]) => [k, [n, c, i]]));
+const SPORT_CAT = SPORT_KAT.map(([id, l]) => [id, l, SPORT_TABLE.filter(r => r[1] === id).map(r => r[0])]);
+const sIcon = s => (SPORT[s] || [0, 0, "📍"])[2];
+/* 3.59.0 Favoriten-Aktivitäten (Verwaltung, GET/PUT /api/aktivitaeten/favoriten, je Benutzer): werden beim Aufnehmen einer Tour zuerst angeboten */
+const FAV_DEF = ["hike", "jogging", "touringbicycle", "skitour", "mtb"];
+let FAV = FAV_DEF.slice();
+async function favLoad() {
+  try {
+    const d = await api("/api/aktivitaeten/favoriten");
+    if (Array.isArray(d && d.favoriten) && d.favoriten.length) FAV = d.favoriten.filter(k => SPORT[k]);
+  } catch (e) {}
+}
+/* Auswahlfeld einer Sportart: Favoriten zuerst, dann alle Aktivitäten nach Kategorien (Planung u. a.) */
+function sportOptions(sel) {
+  const o = s => `<option value="${s}"${s === sel ? " selected" : ""}>${esc(sName(s))}</option>`;
+  return `<optgroup label="Favoriten">${FAV.map(o).join("")}</optgroup>` + SPORT_CAT.map(([, l, ks]) => `<optgroup label="${esc(l)}">${ks.filter(s => !FAV.includes(s)).map(o).join("")}</optgroup>`).join("");
+}
+/* 3.50.0 legte Schneeschuh mit Wandern zusammen; seit 3.59.0 ist Schneeschuh wieder eine eigene Sportart – nichts wird mehr umgesetzt (sNorm bleibt für ältere Aufrufer). */
+const SPORT_ALIAS = {};
 const SCHNEESCHUH = "Schneeschuh";
 const sNorm = s => SPORT_ALIAS[s] || s;
 const sNormList = l => [...new Set((Array.isArray(l) ? l : []).map(sNorm))];
 const tourTags = t => (Array.isArray(t && t.tags) ? t.tags : String((t && t.tags) || "").split("|")).map(x => String(x).trim()).filter(Boolean);
 const isSnowshoe = t => !!t && (t.sport === "snowshoe" || tourTags(t).includes(SCHNEESCHUH));
-const sName = s => (SPORT[sNorm(s)] || [s || "Sonstiges"])[0];
+/* 3.59.0 Statistik-Gruppen (Verwaltung → „Statistik: Aktivitäten zusammenfassen“, GET/PUT /api/stats/gruppen, app/stat_gruppen.py): mehrere Sportarten zählen in der
+   Auswertung als eine („Bergwandern“ = Wandern + Bergtour). Rein eine Auswertungs-Gruppierung – Touren und ihre Sportart bleiben, wie sie sind. Die eine Stelle für alle Auswertungen:
+     sgKey(s)        Sportart -> Schlüssel der Auswertung („sgrp:<id>“ für Mitglieder einer Gruppe, sonst die Sportart)
+     sgExpand(l)     Filterliste (Sportarten und/oder „sgrp:<id>“) -> Sportarten; null = alle (leer oder nur gelöschte Gruppen: nie ein Fehler, sondern „alle“)
+     sgMatch(s, l)   Filter passt          sgPlain(l)  Filterliste mit aufgelösten Gruppen (für Adressen, die keine Gruppen kennen)
+     sgOptions(sp)   Auswahl für Filter und Ziele: [Schlüssel, Beschriftung] je Gruppe mit vorhandenen Sportarten („<Name> (zusammengefasst)“)
+   sName/sCol kennen die Schlüssel der Gruppen (Gruppenname, Farbe der ersten Sportart).
+   Ohne eigene Gruppen (Standard) zählt jede Aktivität einzeln; feste Zusammenfassungen gibt es nicht mehr (SPORT_GRP in 24-sport.js sind interne Familien). */
+let SGRP = [];
+const SG_PRE = "sgrp:";
+const isSg = k => typeof k === "string" && k.startsWith(SG_PRE);
+const sgById = k => SGRP.find(g => SG_PRE + g.id === k) || null;
+const sgOf = s => {
+  const n = sNorm(s);
+  return SGRP.find(g => g.sports.includes(n)) || null;
+};
+const sgKey = s => {
+  const g = SGRP.length ? sgOf(s) : null;
+  return g ? SG_PRE + g.id : sNorm(s);
+};
+function sgExpand(l) {
+  const out = [];
+  (Array.isArray(l) ? l : []).forEach(k => {
+    if (isSg(k)) (sgById(k) || {sports: []}).sports.forEach(s => !out.includes(s) && out.push(s));
+    else if (k && !out.includes(sNorm(k))) out.push(sNorm(k));
+  });
+  return out.length ? out : null;
+}
+const sgMatch = (s, l) => {
+  const e = sgExpand(l);
+  return !e || e.includes(sNorm(s));
+};
+const sgPlain = l => sgExpand(l) || [];
+const sgLabel = k => `${sName(k)} (zusammengefasst)`;
+const sgOptions = (present = null) => SGRP.filter(g => !present || g.sports.some(s => present.includes(s))).map(g => [SG_PRE + g.id, sgLabel(SG_PRE + g.id)]);
+/* Schlüssel einer gespeicherten Auswahl, den es nicht mehr gibt (gelöschte Gruppe), fällt weg */
+const sgClean = l => (Array.isArray(l) ? l : []).filter(k => !isSg(k) || sgById(k));
+async function sgLoad() {
+  try {
+    const d = await api("/api/stats/gruppen");
+    SGRP = Array.isArray(d && d.gruppen) ? d.gruppen.filter(g => g && g.id && Array.isArray(g.sports)) : [];
+  } catch (e) {}                                                            // offline oder alter Server: ohne Gruppen (wie bisher)
+}
+const sName = s => (isSg(s) ? (sgById(s) || {name: "–"}).name : (SPORT[sNorm(s)] || [s || "Sonstiges"])[0]);
 const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const sCol = s => cssv((SPORT[sNorm(s)] || [0, "--other"])[1]);
+const sCol = s => (isSg(s) ? sCol((sgById(s) || {sports: [""]}).sports[0]) : cssv((SPORT[sNorm(s)] || [0, "--other"])[1]));
 /* ---- Streckenfarbe (pro Gerät gemerkt) ---- */
 const TS = (() => {
   let s = {};
@@ -336,7 +438,9 @@ async function loadTours() {
       pre = await p;
     } catch (e) {}
   }
+  const gp = Promise.all([sgLoad(), favLoad()]);   // 3.59.0: Statistik-Gruppen und Favoriten parallel zur Tourenliste
   TOURS = pre || (await api("/api/tours"));
+  await gp;
   if (pre && window.noTrAdd) window.noTrAdd("/api/tours", pre);
   TOURS.forEach(t => {
     t.y = +t.date.slice(0, 4);

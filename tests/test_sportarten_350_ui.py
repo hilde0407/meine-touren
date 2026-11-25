@@ -1,5 +1,5 @@
-"""3.50.0 – Laufen und Schneeschuh in der Oberfläche (Browser, Chromium): Prüfen → „Läufe von der Uhr“ (einzeln und gesammelt, mit Rückfrage), keine Sportart „Schneeschuh“
-mehr in Auswahl und Statistik, ältere Filter mit „snowshoe“ zählen als Wandern, Schneeschuh-Schlagwort behält Steilheit und Sicherheitsnotiz, 390 px hell/dunkel, vier Sprachen.
+"""3.50.0 – Laufen und Schneeschuh in der Oberfläche (Browser, Chromium): Prüfen → „Läufe von der Uhr“ (einzeln und gesammelt, mit Rückfrage), Steilheit und
+Sicherheitsnotiz bei Schneeschuh, 390 px hell/dunkel, vier Sprachen. 3.59.0: Schneeschuh ist wieder eine eigene Sportart (in Auswahl, Filter und Statistik).
 Screenshots mit TS_SHOTS=<Ordner>."""
 import os
 import socket
@@ -95,9 +95,9 @@ def _page(pw, app, route, width=1280, scheme="light"):
     return pg
 
 
-def test_schneeschuh_beim_start_zu_wandern(app):
-    assert _q(app, "SELECT sport FROM tours WHERE id='s1'") == [("hike",)]
-    assert _q(app, "SELECT tag FROM tour_tags WHERE id='s1'") == [("Schneeschuh",)]
+def test_schneeschuh_bleibt_beim_start_schneeschuh(app):
+    assert _q(app, "SELECT sport FROM tours WHERE id='s1'") == [("snowshoe",)]
+    assert _q(app, "SELECT tag FROM tour_tags WHERE id='s1'") == []
 
 
 def test_pruefen_laeufe_von_der_uhr(pw, app):
@@ -131,18 +131,18 @@ def test_pruefen_laeufe_von_der_uhr(pw, app):
     pg.browser_.close()
 
 
-def test_keine_sportart_schneeschuh_und_alte_filter(pw, app):
+def test_sportart_schneeschuh_in_filter_und_auswahl(pw, app):
     pg = _page(pw, app, "#/stats?s=snowshoe")
     pg.wait_for_selector("#sch", timeout=T)
     on = pg.eval_on_selector_all("#sch .chip.on", "l => l.map(x => x.textContent.trim())")
-    assert on == ["Wandern"]                                                     # alter Filter „snowshoe“ = Wandern
+    assert on == ["Schneeschuh"]
     chips = pg.eval_on_selector_all("#sch .chip", "l => l.map(x => x.dataset.s)")
-    assert "snowshoe" not in chips and "jogging" in chips
+    assert "snowshoe" in chips and "jogging" in chips
     r = pg.evaluate("""() => ({name: sName('snowshoe'), col: sCol('snowshoe') === sCol('hike'), keys: Object.keys(SPORT), grp: sportGrp('snowshoe'),
         fl: flSport({sport: 'hike'}, {sports: ['snowshoe']}), fl2: flSport({sport: 'jogging'}, {sports: ['snowshoe']}),
         sn: isSnowshoe({sport: 'hike', tags: 'Gipfel|Schneeschuh'}), sn2: isSnowshoe({sport: 'hike', tags: ''}), sn3: isSnowshoe({sport: 'hike', tags: ['Schneeschuh']})})""")
-    assert r == {"name": "Wandern", "col": True, "keys": r["keys"], "grp": "foot", "fl": True, "fl2": False, "sn": True, "sn2": False, "sn3": True}
-    assert "snowshoe" not in r["keys"] and "jogging" in r["keys"]
+    assert r == {"name": "Schneeschuh", "col": False, "keys": r["keys"], "grp": "foot", "fl": False, "fl2": False, "sn": True, "sn2": False, "sn3": True}
+    assert "snowshoe" in r["keys"] and "jogging" in r["keys"] and "kayak" in r["keys"]
     assert not pg.errors
     pg.browser_.close()
 
@@ -151,7 +151,7 @@ def test_schneeschuh_tour_behaelt_steilheit_und_sicherheit(pw, app):
     pg = _page(pw, app, "#/tour/s1")
     expect(pg.locator("#sfigs")).to_contain_text("der Strecke über 30°", timeout=T)
     expect(pg.locator("#safety")).to_have_count(1, timeout=T)
-    expect(pg.locator(".tlsubfig .tag, .mt18 .tag").first).to_have_text("Wandern")
+    expect(pg.locator(".tlsubfig .tag, .mt18 .tag").first).to_have_text("Schneeschuh")
     pg.goto(app["url"] + "/#/tour/h1")
     pg.wait_for_function("() => location.hash === '#/tour/h1' && !!document.querySelector('#sfigs')", timeout=T)
     quiet(pg, 3000)
@@ -183,7 +183,7 @@ def test_pruefen_mobil(pw, app, scheme):
     pg.wait_for_selector("#sch", timeout=T)
     settled(pg)
     chips = pg.eval_on_selector_all("#sch .chip", "l => l.map(x => x.textContent.trim())")
-    assert "Laufen" in chips and "Schneeschuh" not in chips
+    assert "Laufen" in chips and "Schneeschuh" in chips                          # 3.59.0: Schneeschuh ist wieder eigene Sportart
     assert pg.evaluate("() => document.documentElement.scrollWidth <= window.innerWidth + 1")
     if d:
         pg.locator("#sch").screenshot(path=str(Path(d) / f"statistik-sportarten-390-{scheme}.png"))

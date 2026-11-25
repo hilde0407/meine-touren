@@ -27,7 +27,7 @@
   // Eigene Namen (Tour-, Reise-, Gerätenamen, Tags …) werden nie übersetzt oder verändert: api() meldet jede Antwort hier an.
   const NT = new Set();
   let NTL = null;
-  const NT_SKIP = /^\/api\/(settings|status|me|bausteine|zustand|selftest|update|update-check|tiles|users|grants|portals|jobs|layout|login|logout)\b/;
+  const NT_SKIP = /^\/api\/(settings|status|me|bausteine|stats\/gruppen|zustand|selftest|update|update-check|tiles|users|grants|portals|jobs|layout|login|logout)\b/;
   window.noTrAdd = (u, data) => {
     if (lang === "de" || NT_SKIP.test(String(u))) return;
     const add = v => { v = String(v).trim(); if (v.length >= 2 && v.length <= 160 && !NT.has(v)) { NT.add(v); NTL = null; } };

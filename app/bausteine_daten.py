@@ -464,9 +464,8 @@ def _filter(sport, zeitraum_, jahr, von, bis, heute):
     """Gemeinsame Prüfung der Filterparameter -> (Sportarten, Jahr, von, bis, vorher)."""
     if zeitraum_ not in ZEITRAEUME:
         raise HTTPException(400, "Unbekannter Zeitraum")
-    sports = [x for x in (sport or "").split(",") if x != ""]
-    if len(sports) > 20 or not all(_SPORT.match(x) for x in sports):
-        raise HTTPException(400, "Ungültige Sportart")
+    from . import stat_gruppen
+    sports = stat_gruppen.plain(stat_gruppen.filter_liste(sport))         # 3.59.0: Statistik-Gruppen („sgrp:<id>“) zu ihren Sportarten auflösen; gelöschte Gruppe = alle
     if jahr and not 1970 <= jahr <= 2100:
         raise HTTPException(400, "Ungültiges Jahr")
     jahr = jahr or heute.year

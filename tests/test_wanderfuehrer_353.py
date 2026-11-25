@@ -197,7 +197,7 @@ def test_oberflaeche_service_worker_und_rechte_liste():
     assert main.VIEWER_GET.match("/api/guides/progress") and main.VIEWER_GET.match("/api/guides/cover")
     assert not main.VIEWER_GET.match("/api/guides") and not main.VIEWER_GET.match("/api/guides/book:x")
     sw = (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'const V = "mt-v143"' in sw and 'p === "/api/guides/cover" && u.searchParams.get("v")' in sw
+    assert 'const V = "mt-v144"' in sw and 'p === "/api/guides/cover" && u.searchParams.get("v")' in sw
     js = (ROOT / "app" / "static" / "js" / "10-auswertung.js").read_text(encoding="utf-8")
     assert "const GF_BLOCK = 60" in js and "createImageBitmap" in js and "400 / Math.max" in js
     assert "https://" not in js.split("3.53.0 Wanderführer übersichtlich")[1]                # nichts aus dem Netz (Titelbilder wählt der Benutzer selbst)

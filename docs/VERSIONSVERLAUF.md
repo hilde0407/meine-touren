@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.59.0 – Aktivitäten-Katalog, Schneeschuh, Statistik-Gruppen, Favoriten
+
+- **Achtung:** Keine festen Zusammenfassungen mehr – die Statistik zählt jede Aktivität einzeln. Zusammenfassen über Verwaltung → Übersicht → „Statistik: Aktivitäten zusammenfassen“ (Ein-Klick-Vorschläge, nie automatisch); ältere Ziele „Alle Rad-Sportarten“ usw. zählen weiter
+- 48 Aktivitäten in fünf Kategorien (Zu Fuß, Rad, Winter, Wasser, Sonstige) mit Symbol, Kartenfarbe und vier Sprachen
+- Schneeschuh ist wieder eine eigene Sportart; bestehende Wandern-Touren mit Schlagwort „Schneeschuh“ stellt Prüfen auf Wunsch um (rückgängig machbar)
+- Favoriten-Aktivitäten (Verwaltung): beim Aufzeichnen und Planen zuerst angeboten, „Mehr …“ mit allen Kategorien
+
 ## Version 3.58.0 – Komoot: Upload immer privat, Notiz und Pins, Komoot-Paket
 
 - **Achtung:** Komoot gibt hochgeladenen Touren zuerst die Standard-Sichtbarkeit des Kontos. Steht sie auf „Jeder“, waren frühere Uploads öffentlich – unter Verwaltung → Hochladen & Planen → „Sichtbarkeit bei Komoot prüfen …“ nachsehen

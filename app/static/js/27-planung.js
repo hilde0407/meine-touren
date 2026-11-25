@@ -324,6 +324,14 @@ const PLAN_PROFILE = s => ({racebike: "fastbike", mtb: "mtb"}[s] || (sportGrp(s)
 const PLAN_MAXROUTED = 40; // so viele Punkte werden höchstens über Wege verbunden (jeder Abschnitt ist eine Anfrage)
 const ALT_COL = ["#e8590c", "#1c7ed6", "#9c36b5", "#2b8a3e"];
 
+/* 3.59.0: zuletzt gewählte Sportart der Planung vorwählen (je Gerät), sonst der erste Favorit */
+const planLastSport = () => {
+  let s = "";
+  try {
+    s = localStorage.getItem("mt_plan_sport") || "";
+  } catch (e) {}
+  return SPORT[s] ? s : FAV[0] || "hike";
+};
 VIEWS.plan = async (pid, q) => {
   const P = {id: null, links: [], wp: [], rt: true, alt: {}, segs: {}, pend: {}, sel: null, stored: null, ele: null, dense: null, up: null, down: null, max: null, warned: false};
   $("#main").className = "";
@@ -332,12 +340,11 @@ VIEWS.plan = async (pid, q) => {
     return;
   }
   const [plans, guides] = await Promise.all([api("/api/plans").catch(() => []), api("/api/guides").catch(() => [])]);
-  const sports = Object.keys(SPORT);
   let SUG = {};
   const planRow = p => planRowHtml(p, SUG[p.id]);
   $("#main").innerHTML = `<div class="row"><a class="back" href="#/tours">‹ Alle Touren</a></div>
    <div class="sec"><h2>Tour planen</h2><span class="sub">Punkte in die Karte klicken – sie werden über bekannte Wege verbunden – oder eine GPX-Datei laden</span></div>
-   <div class="row g8 fxw"><input id="pn" placeholder="Name der Planung" aria-label="Name der Planung" maxlength="120" class="mnw230"><select id="ps" aria-label="Sportart">${sports.map(s => `<option value="${s}" ${s === "hike" ? "selected" : ""}>${sName(s)}</option>`).join("")}</select>
+   <div class="row g8 fxw"><input id="pn" placeholder="Name der Planung" aria-label="Name der Planung" maxlength="120" class="mnw230"><select id="ps" aria-label="Sportart">${sportOptions(planLastSport())}</select>
     <label class="chip on cp" title="Verbindet die Punkte über Wege und Straßen aus OpenStreetMap (BRouter). Aus: gerade Linien."><input type="checkbox" id="prt" checked hidden>Wegen folgen</label>
     <label class="btn alt sm cp">GPX laden …<input type="file" id="pg" accept=".gpx,application/gpx+xml,text/xml" hidden></label>
     ${guides.length ? `<select id="pgd" class="mw260" aria-label="Aus Wanderführer laden"><option value="">Aus Wanderführer laden …</option>${guides.map(g => `<option value="${g.id}">${esc(g.book ? g.book + " – " : "")}${esc(g.title)}</option>`).join("")}</select>` : ""}
@@ -670,6 +677,9 @@ VIEWS.plan = async (pid, q) => {
     fit();
   };
   $("#ps").onchange = () => {
+    try {
+      localStorage.setItem("mt_plan_sport", $("#ps").value);
+    } catch (e) {}
     changed();
   };
   $("#prt").onchange = e => {

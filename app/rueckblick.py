@@ -31,7 +31,10 @@ def ref(year, sport=""):
 def parse(tour_id):
     """'rb:2025:hike' -> (2025, 'hike'); 'rb:2025' -> (2025, '')."""
     p = tour_id[len(PREFIX):].split(":", 1)
-    return int(p[0]), (gpxtools.norm(p[1])[0] if len(p) > 1 else "")      # 3.50.0: ältere Links „snowshoe“ = Wandern
+    y, sp = int(p[0]), (gpxtools.norm(p[1])[0] if len(p) > 1 else "")
+    if sp == "snowshoe" and not tours(y, sp):              # Links von vor 3.50.0 („snowshoe“), deren Touren noch Wandern mit Schlagwort sind: wie bisher Wandern
+        sp = "hike"
+    return y, sp
 
 
 def normalize(blocks):
@@ -117,10 +120,12 @@ def _kennzahlen(ts, year, sport):
     prev = tours(year - 1, sport)
     out["prev_km"] = round(sum((t["dist_m"] or 0) for t in prev) / 1000, 1) if prev else None
     if not sport:
-        by = {}
+        from . import stat_gruppen
+        gr, by = stat_gruppen.load(), {}                                # 3.59.0: Sportarten einer Statistik-Gruppe zählen als eine Zeile mit dem Gruppennamen
         for t in ts:
-            by[t["sport"] or "other"] = by.get(t["sport"] or "other", 0) + (t["dist_m"] or 0) / 1000
-        out["sports"] = [{"sport": k, "name": stats.SPORT_DE.get(k, k), "km": round(v, 1)} for k, v in sorted(by.items(), key=lambda kv: -kv[1])]
+            k = stat_gruppen.key(t["sport"], gr) if t["sport"] else "other"
+            by[k] = by.get(k, 0) + (t["dist_m"] or 0) / 1000
+        out["sports"] = [{"sport": k, "name": stat_gruppen.name(k, gr), "km": round(v, 1)} for k, v in sorted(by.items(), key=lambda kv: -kv[1])]
     return out
 
 

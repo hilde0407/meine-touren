@@ -1,4 +1,5 @@
-"""3.50.0: Laufen als eigene Sportart (Zepp-Typ 1/8), Schneeschuh zählt als Wandern (Schlagwort „Schneeschuh“), Umzug bestehender Daten."""
+"""3.50.0: Laufen als eigene Sportart (Zepp-Typ 1/8), Umzug bestehender Daten.
+3.59.0: Schneeschuh ist wieder eine eigene Sportart – nichts wird mehr zusammengelegt (auch nicht beim Öffnen älterer Datenbanken); die Tests sind darauf umgestellt."""
 import json
 import sys
 import time
@@ -43,27 +44,26 @@ def test_zepp_zuordnung_und_alias():
     z = gpxtools.ZEPP_SPORT
     assert z[1] == "jogging" and z[8] == "jogging"
     assert all(z[k] == "hike" for k in (6, 7, 13, 15, 22))
-    assert z[178] == "snowshoe" and gpxtools.norm("snowshoe") == ("hike", "Schneeschuh")
+    assert z[178] == "snowshoe" and gpxtools.norm("snowshoe") == ("snowshoe", None)
     assert gpxtools.ALIAS["running"] == "jogging" and gpxtools.ALIAS["type_1"] == "jogging" and gpxtools.ALIAS["walking"] == "hike"
-    assert "snowshoe" not in gpxtools.LABEL and gpxtools.known("snowshoe") and gpxtools.known("jogging")
+    assert "snowshoe" in gpxtools.LABEL and gpxtools.known("snowshoe") and gpxtools.known("jogging")
     assert gpxtools.norm("jogging") == ("jogging", None) and gpxtools.norm("") == ("", None)
 
 
 def test_convert_schneeschuh_und_laufen():
     g = gpx("Workout--2026-01-10--10-00-00.gpx")
     c = gpxtools.convert(g.replace("<type>hiking</type>", "<type>snowshoe</type>"), "a.gpx")
-    assert c["sport"] == "hike" and c["tags"] == ["Schneeschuh"] and c["name"].startswith("Schneeschuhwanderung")
-    assert "<type>hike</type>" in c["gpx"]
+    assert c["sport"] == "snowshoe" and c["tags"] == [] and c["name"].startswith("Schneeschuhwanderung")
     c = gpxtools.convert(g.replace("<type>hiking</type>", "<type>running</type>"), "a.gpx")
     assert c["sport"] == "jogging" and c["tags"] == []
     c = gpxtools.convert(g, "a.gpx")
     assert c["sport"] == "hike" and c["tags"] == []
 
 
-def test_adopt_schneeschuh_bekommt_schlagwort(fresh):
+def test_adopt_schneeschuh_bleibt_schneeschuh(fresh):
     g = gpx("Workout--2026-01-11--10-00-00.gpx")
     t, _ = tracks.adopt(g, "a.gpx", sport="snowshoe")
-    assert t["sport"] == "hike" and _tags(t["id"]) == ["Schneeschuh"]
+    assert t["sport"] == "snowshoe" and _tags(t["id"]) == []
     tracks.add_tag(t["id"], "Schneeschuh")
     assert _tags(t["id"]) == ["Schneeschuh"]                              # nie doppelt
 
@@ -74,7 +74,7 @@ def test_aufzeichnung_schneeschuh(fresh):
     r = c.post("/api/record/upload", json={"gpx": g, "sport": "snowshoe", "name": "Winter"})
     assert r.status_code == 200, r.text
     tid = r.json()["id"]
-    assert db.one("SELECT sport FROM tours WHERE id=?", (tid,))["sport"] == "hike" and _tags(tid) == ["Schneeschuh"]
+    assert db.one("SELECT sport FROM tours WHERE id=?", (tid,))["sport"] == "snowshoe" and _tags(tid) == []
     r = c.post("/api/record/upload", json={"gpx": gpx("Workout--2026-01-13--10-00-00.gpx"), "sport": "jogging"})
     assert db.one("SELECT sport FROM tours WHERE id=?", (r.json()["id"],))["sport"] == "jogging"
 
@@ -82,17 +82,17 @@ def test_aufzeichnung_schneeschuh(fresh):
 def test_sportart_aendern_schneeschuh_alter_client(fresh):
     _tour("a")
     r = _client().post("/api/tours/a/sport", json={"sport": "snowshoe"})
-    assert r.status_code == 200 and r.json()["sport"] == "hike"
-    assert db.one("SELECT sport FROM tours WHERE id='a'")["sport"] == "hike" and db.one("SELECT sport FROM tour_sport WHERE id='a'")["sport"] == "hike"
-    assert _tags("a") == ["Schneeschuh"]
+    assert r.status_code == 200 and r.json()["sport"] == "snowshoe"
+    assert db.one("SELECT sport FROM tours WHERE id='a'")["sport"] == "snowshoe" and db.one("SELECT sport FROM tour_sport WHERE id='a'")["sport"] == "snowshoe"
+    assert _tags("a") == []
 
 
 def test_ziel_plan_ausruestung_speichern_normalisiert(fresh):
     c = _client()
     assert c.post("/api/goals", json={"year": 2026, "sport": "snowshoe", "metric": "km", "target": 100}).status_code == 200
-    assert db.one("SELECT sport FROM goals")["sport"] == "hike"
+    assert db.one("SELECT sport FROM goals")["sport"] == "snowshoe"
     assert c.post("/api/gear", json={"name": "Schuhe", "kind": "Schuhe", "sports": ["snowshoe", "hike", "jogging"]}).status_code == 200
-    assert db.one("SELECT sports FROM gear")["sports"] == "hike,jogging"
+    assert db.one("SELECT sports FROM gear")["sports"] == "snowshoe,hike,jogging"
 
 
 def test_zepp_uebernahme_alter_exportdatei_wird_lauf(fresh, tmp_path):
@@ -135,32 +135,25 @@ def _alter_stand():
     _workout(107, 1, komoot_id="z107")
 
 
-def test_umzug_stellt_um_und_ist_idempotent(fresh):
+def test_umzug_legt_schneeschuh_nicht_mehr_zusammen_stellt_laeufe_um_und_ist_idempotent(fresh):
+    """3.59.0: Eine Datenbank im Stand vor 3.50.0 (z. B. aus einer alten Sicherung): Schneeschuh bleibt Schneeschuh, nur die sicheren Läufe werden umgestellt."""
     _alter_stand()
     _reopen()
     sp = {r["id"]: r["sport"] for r in db.query("SELECT id,sport FROM tours")}
-    assert sp["s1"] == sp["s2"] == sp["s3"] == "hike"
+    assert sp["s1"] == sp["s2"] == "snowshoe" and sp["s3"] == "hike"
+    assert db.one("SELECT sport FROM tour_sport WHERE id='s3'")["sport"] == "snowshoe"
     assert sp["z101"] == "jogging"
     assert sp["z102"] == "hike" and sp["k103"] == "hike" and sp["k104"] == "hike" and sp["z105"] == "hike" and sp["z107"] == "touringbicycle"
-    assert _tags("s1") == ["Schneeschuh"] and _tags("s2") == ["Schneeschuh"] and _tags("s3") == ["Schneeschuh"]
-    assert db.one("SELECT sport FROM tour_sport WHERE id='s3'")["sport"] == "hike"
-    assert db.one("SELECT sport FROM plans")["sport"] == "hike"
-    goals = sorted((g["sport"], g["metric"], g["target"]) for g in db.query("SELECT * FROM goals"))
-    assert goals == [("hike", "km", 50), ("hike", "up", 30000)]                       # doppeltes Höhenmeter-Ziel: das Wandern-Ziel gilt
-    assert db.one("SELECT sports FROM gear")["sports"] == "hike"
-    assert json.loads(db.one("SELECT js FROM tour_hidden")["js"])["sport"] == "hike"
+    assert _tags("s1") == [] and _tags("s2") == ["Schneeschuh"]
+    assert db.one("SELECT sport FROM plans")["sport"] == "snowshoe"
+    assert sorted(g["sport"] for g in db.query("SELECT * FROM goals")) == ["hike", "snowshoe", "snowshoe"]
+    assert db.one("SELECT sports FROM gear")["sports"] == "snowshoe,hike"
+    assert json.loads(db.one("SELECT js FROM tour_hidden")["js"])["sport"] == "snowshoe"
     assert db.one("SELECT sport FROM workouts WHERE trackid=106")["sport"] == "jogging"
-    assert db.one("SELECT sport FROM workouts WHERE trackid=105")["sport"] == "hike"
     info = sport_umzug.info()
-    assert info["laufen"] == 1 and info["schneeschuh"] == 3 and info["plaene"] == 1 and info["ziele"] == 2 and info["ausruestung"] == 1
-    kopie = Path(str(config.DB_PATH) + sport_umzug.KOPIE)
-    assert kopie.exists()
-    import sqlite3
-    k = sqlite3.connect(str(kopie))
-    assert k.execute("SELECT COUNT(*) FROM tours WHERE sport='snowshoe'").fetchone()[0] == 2      # Kopie = Stand vor dem Umzug
-    k.close()
+    assert info["laufen"] == 1 and info["schneeschuh"] == 0
+    assert db.get(sport_umzug.FLAG_SNOW)                                                 # Schutz-Merker gesetzt
     n_log = db.one("SELECT COUNT(*) n FROM sport_log")["n"]
-    assert n_log >= 8
     _reopen()                                                                            # zweiter Lauf: nichts mehr zu tun
     assert db.one("SELECT COUNT(*) n FROM sport_log")["n"] == n_log and sport_umzug.info() == info
     assert {r["id"]: r["sport"] for r in db.query("SELECT id,sport FROM tours")} == sp
@@ -204,18 +197,19 @@ class _K:
         return [dict(t) for t in self._t]
 
 
-def test_komoot_abgleich_schneeschuh_einmal_schlagwort(fresh):
+def test_komoot_abgleich_schneeschuh(fresh):
+    """3.59.0: Neue Komoot-Schneeschuhtouren bleiben Schneeschuh; eine von 3.50.0 zusammengelegte Tour bleibt still Wandern (bis „als Schneeschuh führen“)."""
     t = {"id": "777", "name": "Schneeschuh Hörnle", "sport": "snowshoe", "start_ts": T0, "end_ts": T0 + 7200, "dist_m": 7000, "dur_s": 7200,
          "up_m": 400, "down_m": 400, "lat": 47.6, "lng": 11.0, "status": "tour_recorded"}
-    sync.refresh_tours(_K([t]))
-    assert db.one("SELECT sport FROM tours WHERE id='777'")["sport"] == "hike" and _tags("777") == ["Schneeschuh"]
-    db.execute("DELETE FROM tour_tags WHERE id='777'")                                 # Schlagwort von Hand entfernt
-    sync.refresh_tours(_K([t]))
-    assert db.one("SELECT sport FROM tours WHERE id='777'")["sport"] == "hike" and _tags("777") == []
+    alt = dict(t, id="778", start_ts=T0 + 86400, end_ts=T0 + 86400 + 7200)
+    db.execute("INSERT INTO sport_merged(id,orig,ts) VALUES('778','snowshoe',0)")
+    sync.refresh_tours(_K([t, alt]))
+    assert db.one("SELECT sport FROM tours WHERE id='777'")["sport"] == "snowshoe" and _tags("777") == []
+    assert db.one("SELECT sport FROM tours WHERE id='778'")["sport"] == "hike"
 
 
 def test_tourenliste_fuer_das_tagebuch(fresh):
-    """Das Tagebuch liest GET /api/tours: dieselben Felder wie bisher, keine Sportart „snowshoe“, das Schlagwort steht in „tags“."""
+    """Das Tagebuch liest GET /api/tours: dieselben Felder wie bisher; 3.59.0: Schneeschuh kommt wieder als „snowshoe“."""
     _tour("s1", "snowshoe")
     _tour("r1", "jogging", T0 + 5000)
     db.execute("DELETE FROM settings WHERE k=?", (sport_umzug.FLAG,))
@@ -223,13 +217,12 @@ def test_tourenliste_fuer_das_tagebuch(fresh):
     rows = {t["id"]: t for t in _client().get("/api/tours").json()}
     for k in ("id", "name", "sport", "start_ts", "end_ts", "dist_m", "dur_s", "up_m", "down_m", "source", "note", "stars", "tags", "date", "sport_de"):
         assert k in rows["s1"], k
-    assert rows["s1"]["sport"] == "hike" and rows["s1"]["tags"] == "Schneeschuh" and rows["s1"]["sport_de"] == "Wandern"
+    assert rows["s1"]["sport"] == "snowshoe" and rows["s1"]["sport_de"] == "Schneeschuh"
     assert rows["r1"]["sport"] == "jogging" and rows["r1"]["sport_de"] == "Laufen"
-    assert all(t["sport"] != "snowshoe" for t in rows.values())
 
 
-def test_wanderstatistik_zaehlt_schneeschuh_nicht_laeufe(fresh):
-    """Abgleich mit dem Tagebuch: Wandern = Wandern + Schneeschuh, ohne die Läufe der Uhr."""
+def test_wanderstatistik_ohne_schneeschuh_und_laeufe(fresh):
+    """3.59.0: Wandern zählt nur Wandern (Schneeschuh ist eigene Sportart), ohne die Läufe der Uhr."""
     db.execute("DELETE FROM settings WHERE k=?", (sport_umzug.FLAG,))
     for i in range(3):
         _tour(f"h{i}", "hike", T0 + i * 86400, dist=10000)
@@ -238,13 +231,14 @@ def test_wanderstatistik_zaehlt_schneeschuh_nicht_laeufe(fresh):
     _workout(301, 1, komoot_id="z301")
     _reopen()
     hike = db.query("SELECT dist_m FROM tours WHERE sport='hike'")
-    assert len(hike) == 4 and sum(t["dist_m"] for t in hike) == 36000
+    assert len(hike) == 3 and sum(t["dist_m"] for t in hike) == 30000 and db.one("SELECT COUNT(*) n FROM tours WHERE sport='snowshoe'")["n"] == 1
     assert db.one("SELECT COUNT(*) n FROM tours WHERE sport='jogging'")["n"] == 1
 
 
 def test_hochladen_wandern_mit_schneeschuh_geht_als_schneeschuh(fresh, monkeypatch):
     from app import portals
-    t, _ = tracks.adopt(gpx("Workout--2026-01-20--10-00-00.gpx"), "a.gpx", sport="snowshoe")
+    t, _ = tracks.adopt(gpx("Workout--2026-01-20--10-00-00.gpx"), "a.gpx")
+    tracks.add_tag(t["id"], "Schneeschuh")                                           # Wandern mit Schlagwort (von 3.50.0 zusammengelegt)
     u, _ = tracks.adopt(gpx("Workout--2026-01-21--10-00-00.gpx"), "b.gpx")
     seen = []
     monkeypatch.setattr(portals, "komoot_upload", lambda g, sport, name, **kw: (seen.append(sport), ("created", "1"))[1])
@@ -253,7 +247,7 @@ def test_hochladen_wandern_mit_schneeschuh_geht_als_schneeschuh(fresh, monkeypat
     assert seen == ["snowshoe", "hike"]
 
 
-def test_alte_rueckblick_und_diashow_links_zeigen_wandern():
+def test_alte_rueckblick_und_diashow_links_zeigen_wandern(fresh):
     from app import diashow_link, rueckblick
     assert rueckblick.parse("rb:2026:snowshoe") == (2026, "hike") and rueckblick.parse("rb:2026:jogging") == (2026, "jogging")
     assert diashow_link.parse("ds:2026:snowshoe") == (2026, "hike") and diashow_link.parse("ds:all") == (0, "")

@@ -31,19 +31,7 @@ VIEWS.check = async () => {
        : '<p class="ok">✓ Alle Touren haben einen eigenen Namen.</p>'
    }</div>`;
   {
-    const SP = [
-      "hike",
-      "touringbicycle",
-      "e_touringbicycle",
-      "racebike",
-      "mtb",
-      "jogging",
-      "skialpin",
-      "mountaineering",
-      "nordic",
-      "nordicwalking",
-      "skitour",
-    ];
+    const SP = Object.keys(SPORT);                  // 3.59.0: alle Aktivitäten des Katalogs (01-grundlagen.js)
     const im = r.implausible || [],
       hd = r.hidden || [];
     const first = body.querySelector(".panel");
@@ -351,4 +339,50 @@ VIEWS.check = async (...a) => {
     if (!(await uiConfirm({text: `Alle ${k.length} Touren auf „Laufen“ umstellen? Die Sportart gilt dann als von dir gewählt und bleibt auch nach dem Komoot-Abgleich.`, ok: "Umstellen"}))) return;
     go(k.map(t => t.id), b);
   };
+};
+
+/* 3.59.0: Schneeschuh ist wieder eine eigene Sportart. Touren, die 3.50.0 zu „Wandern“ mit dem Schlagwort „Schneeschuh“ zusammengelegt hat, bleiben so, bis du sie hier
+   „als Schneeschuh führst“ (nie von selbst). Das lässt sich zurücknehmen; das Schlagwort bleibt in beiden Fällen (app/sport_umzug.py). Erscheint nur, wenn es etwas zu tun gibt. */
+const _check359 = VIEWS.check;
+VIEWS.check = async (...a) => {
+  await _check359(...a);
+  if (!$("#chb") || $("#schnee")) return;
+  let r;
+  try {
+    r = await api("/api/schneeschuh");
+  } catch (e) {
+    return;
+  }
+  const k = (r && r.kandidaten) || [], n = (r && r.umgestellt) || 0, anker = $("#zlauf") || $("#impl") || $("#chb .panel");
+  if ((!k.length && !n) || !anker || $("#schnee")) return;
+  anker.insertAdjacentHTML(
+    "afterend",
+    `<div class="panel gap" id="schnee"><h2>Schneeschuh-Touren</h2>
+    <p class="mut"><span>Schneeschuh ist wieder eine eigene Sportart.</span> ${k.length ? `<span>${k.length === 1 ? "1 Tour heißt noch „Wandern“ und trägt das Schlagwort „Schneeschuh“." : `${k.length} Touren heißen noch „Wandern“ und tragen das Schlagwort „Schneeschuh“.`}</span> ` : ""}<span>Als Schneeschuh geführt, zählen sie in der Statistik als Schneeschuh und nicht mehr als Wandern; wer beides zusammen sehen will, legt in der Verwaltung eine Statistik-Gruppe an. Das Schlagwort bleibt.</span></p>
+    <div class="row">${k.length ? `<button class="btn" id="snall">Schneeschuh-Touren als Schneeschuh führen (${k.length})</button>` : ""}${n ? `<button class="btn alt" id="snback">Zurücknehmen (${n})</button>` : ""}<span id="snm" class="mut" role="status"></span></div></div>`
+  );
+  const done = async (u, b, msg) => {
+    b.disabled = true;
+    try {
+      const x = await api(u, {method: "POST", headers: {"content-type": "application/json"}, body: "{}"});
+      $("#snm").textContent = msg(x.n);
+      await loadTours();
+      route();
+    } catch (e) {
+      uiAlert(e.message);
+      b.disabled = false;
+    }
+  };
+  if ($("#snall"))
+    $("#snall").onclick = async e => {
+      const b = e.currentTarget;
+      if (!(await uiConfirm({text: `${k.length} Touren als „Schneeschuh“ führen? Das lässt sich hier wieder zurücknehmen.`, ok: "Als Schneeschuh führen"}))) return;
+      done("/api/schneeschuh/umstellen", b, x => (x === 1 ? "1 Tour umgestellt." : `${x} Touren umgestellt.`));
+    };
+  if ($("#snback"))
+    $("#snback").onclick = async e => {
+      const b = e.currentTarget;
+      if (!(await uiConfirm({text: "Die als Schneeschuh geführten Touren wieder als Wandern führen? Das Schlagwort „Schneeschuh“ bleibt.", ok: "Zurücknehmen"}))) return;
+      done("/api/schneeschuh/zuruecknehmen", b, x => (x === 1 ? "1 Tour zurückgenommen." : `${x} Touren zurückgenommen.`));
+    };
 };

@@ -246,8 +246,11 @@ def api_goal_add(body: dict):
     metric = body.get("metric", "km")
     if metric not in METRICS or not target > 0 or target > 1e7:
         raise HTTPException(400, "Ungültiges Ziel")
-    from . import gpxtools
-    db.execute("INSERT INTO goals(year,sport,metric,target,period) VALUES(?,?,?,?,?)", (year, gpxtools.norm(body.get("sport") or "")[0], metric, target, period))   # 3.50.0: Schneeschuh -> Wandern
+    from . import gpxtools, stat_gruppen
+    sport = gpxtools.norm(body.get("sport") or "")[0]
+    if sport.startswith(stat_gruppen.PREFIX) and not any(stat_gruppen.PREFIX + g["id"] == sport for g in stat_gruppen.load()):   # 3.59.0: Ziel für eine Statistik-Gruppe
+        raise HTTPException(400, "Diese Statistik-Gruppe gibt es nicht (mehr)")
+    db.execute("INSERT INTO goals(year,sport,metric,target,period) VALUES(?,?,?,?,?)", (year, sport, metric, target, period))   # 3.59.0: Schneeschuh bleibt Schneeschuh
     return {"ok": True}
 
 

@@ -4,11 +4,7 @@ from datetime import datetime
 from . import db
 from .gpxtools import TZ
 
-SPORT_DE = {
-    "hike": "Wandern", "touringbicycle": "Radtour", "e_touringbicycle": "E-Bike", "racebike": "Rennrad",
-    "mtb": "MTB", "jogging": "Laufen", "skialpin": "Skifahren", "snowshoe": "Schneeschuh",
-    "mountaineering": "Bergtour", "nordic": "Langlauf", "nordicwalking": "Nordic Walking", "skitour": "Skitour",
-}
+from .gpxtools import SPORT_NAME as SPORT_DE        # 3.59.0: Namen aus dem Aktivitäten-Katalog (app/gpxtools.py)
 
 
 def local(ts):

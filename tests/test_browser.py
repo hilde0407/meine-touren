@@ -525,7 +525,8 @@ def test_goal_sport_groups(page):
     r = page.evaluate("""() => { const y = TOURS[0].y; return ['grp:foot', 'grp:bike', 'grp:ski', 'hike', ''].map(s => goalVal({year: y, sport: s, metric: 'count'}, TOURS)); }""")
     assert r[0] + r[1] + r[2] >= 1 and r[4] >= r[3]
     page.goto(base + "#/stats"); quiet(page, 1500)
-    assert page.evaluate("[...document.querySelectorAll('#gsp option')].map(o => o.textContent).join('|')").count("Alle Rad-Sportarten") == 1
+    opts = page.evaluate("[...document.querySelectorAll('#gsp option')].map(o => o.textContent).join('|')")
+    assert opts.count("Alle Rad-Sportarten") == 0 and "Kajak/Kanu" in opts and "Schneeschuh" in opts     # 3.59.0: keine festen Gruppen mehr (ältere Ziele „grp:…“ zählen weiter), alle Aktivitäten
     assert not page.errors, page.errors
 
 

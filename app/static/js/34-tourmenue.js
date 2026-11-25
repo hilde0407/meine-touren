@@ -28,6 +28,7 @@ const TACT = [
       ["-", "Beschriften"],
       ["ren", "Umbenennen", ""],
       ["etag", "Tags & Alben", "Schlagworte vergeben"],
+      ["esport", "Sportart ändern", "Alle Aktivitäten, Favoriten zuerst"],
       ["-", "Strecke und Höhen"],
       ["etc", "Streckenfarbe", "Farbe und Breite auf der Karte"],
       ["efix", "Höhen korrigieren", "Mit Geländemodell neu berechnen"],
@@ -92,4 +93,31 @@ VIEWS.tour = async id => {
     mo.disconnect();
   }
   setup34();
+  sport34(id);
 };
+/* 3.59.0 „Sportart ändern“ (Tour bearbeiten): alle Aktivitäten des Katalogs, Favoriten zuerst (sportOptions, 01-grundlagen.js); gilt als eigene Wahl (bleibt beim Komoot-Abgleich) */
+function sport34(id) {
+  const b = $("#esport"), t = BY[id];
+  if (!b || !t || (typeof isViewer === "function" && isViewer())) return;
+  b.onclick = () => {
+    const m = uiModal(`<h3>Sportart ändern</h3><div class="field"><label for="espsel">Sportart</label><select id="espsel">${sportOptions(t.sport)}</select></div>
+      ${t.source !== "local" ? '<label class="chk"><input type="checkbox" id="espko"> auch bei Komoot ändern</label>' : ""}<p class="bad" id="esperr" role="alert"></p>
+      <div class="uifoot"><button class="btn ghost" id="espx">Abbrechen</button><button class="btn" id="espok">Übernehmen</button></div>`);
+    const sel = m.querySelector("#espsel");
+    if (!SPORT[t.sport]) sel.insertAdjacentHTML("afterbegin", `<option value="${esc(t.sport)}" selected>${esc(sName(t.sport))}</option>`);
+    sel.focus();
+    m.querySelector("#espx").onclick = () => m.remove();
+    m.querySelector("#espok").onclick = async e => {
+      e.currentTarget.disabled = true;
+      try {
+        await api(`/api/tours/${encodeURIComponent(id)}/sport`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({sport: sel.value, komoot: !!(m.querySelector("#espko") || {}).checked})});
+        m.remove();
+        await loadTours();
+        route();
+      } catch (er) {
+        m.querySelector("#esperr").textContent = er.message || String(er);
+        e.currentTarget.disabled = false;
+      }
+    };
+  };
+}

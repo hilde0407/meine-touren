@@ -49,8 +49,34 @@ VIEWS.search = async (_, q) => {
 /* ---- Ziele (Übersicht) ---- */
 const GM = {km: ["km", "Strecke"], up: ["m", "Aufstieg"], count: ["", "Touren"], hours: [FMT_E[FMT_LG()].h, "Zeit unterwegs"]};
 const GOAL_GRP = {"grp:bike": ["Alle Rad-Sportarten", "bike"], "grp:ski": ["Alle Ski-Sportarten", "ski"], "grp:foot": ["Zu Fuß (Wandern, Bergtour, Schneeschuh)", "foot"], "grp:run": ["Laufen und Langlauf", "run"]};
-const goalSport = (g, t) => !g.sport || (GOAL_GRP[g.sport] ? SPORT_GRP[GOAL_GRP[g.sport][1]].includes(t.sport) : t.sport === g.sport);
-const goalSportName = s => (GOAL_GRP[s] ? GOAL_GRP[s][0] : sName(s));
+/* 3.59.0 Sportarten eines Ziels (null = alle), wie stat_gruppen.ziel_sportarten (Server): „grp:<id>“ (ältere Ziele „Alle Rad-Sportarten“ …) = die eigene Statistik-Gruppe
+   mit dieser Kennung, sonst die Aktivitäten-Familie (SPORT_GRP, 24-sport.js); „sgrp:<id>“ = eigene Gruppe (gelöscht: alle Sportarten); sonst die Sportart */
+function goalSports(s) {
+  if (!s) return null;
+  if (s.startsWith("grp:") || isSg(s)) {
+    const id = s.split(":")[1], g = SGRP.find(x => x.id === id);
+    if (g) return g.sports;
+    return s.startsWith("grp:") && SPORT_GRP[id] ? SPORT_GRP[id] : null;
+  }
+  return [sNorm(s)];
+}
+const goalSport = (g, t) => {
+  const sp = goalSports(g.sport);
+  return !sp || sp.includes(sNorm(t.sport));
+};
+const goalSportName = s => {
+  if (s && (s.startsWith("grp:") || isSg(s))) {
+    const g = SGRP.find(x => x.id === s.split(":")[1]);
+    if (g) return g.name;
+    if (isSg(s)) return "(Gruppe gelöscht)";
+  }
+  return GOAL_GRP[s] ? GOAL_GRP[s][0] : sName(s);
+};
+/* Auswahl der Sportart eines Ziels: die eigenen Statistik-Gruppen, dann jede Aktivität (vorhandene zuerst, dann alle übrigen des Katalogs). Feste Gruppen gibt es nicht mehr. */
+function goalSportOptions() {
+  const have = [...new Set(TOURS.map(t => sNorm(t.sport)))], sp = have.concat(Object.keys(SPORT).filter(s => !have.includes(s)));
+  return SGRP.map(g => [SG_PRE + g.id, sgLabel(SG_PRE + g.id)]).concat(sp.map(s => [s, sName(s)]));
+}
 const goalVal = (g, T) =>
   T.filter(t => t.y === g.year && goalSport(g, t)).reduce(
     (c, t) => c + (g.metric === "km" ? t.km : g.metric === "up" ? t.up_m || 0 : g.metric === "hours" ? t.h : 1),
@@ -104,19 +130,20 @@ VIEWS.records = async (_, q) => {
     if (!q || !q.has("s")) fs = sessionStorage.getItem("rec_s") || "";
     sessionStorage.setItem("rec_s", fs);
   } catch (e) {}
-  const allSp = [...new Set(TOURS.map(t => t.sport))].sort(
-    (a, b) => TOURS.filter(t => t.sport === b).length - TOURS.filter(t => t.sport === a).length
-  );
+  /* 3.59.0: Statistik-Gruppen als eigener Eintrag (Auswahl) und als eine Zeile in „Je Sportart“ (sgKey/sgMatch, 01-grundlagen.js) */
+  const nOf = x => TOURS.filter(t => (isSg(x) ? sgKey(t.sport) === x : t.sport === x)).length,
+    present = [...new Set(TOURS.map(t => t.sport))],
+    allSp = sgOptions(present.map(sNorm)).map(o => o[0]).concat(present).sort((a, b) => nOf(b) - nOf(a) || isSg(b) - isSg(a));
   if (fs && !allSp.includes(fs)) fs = "";
-  const T = fs ? TOURS.filter(t => t.sport === fs) : TOURS;
-  const chips = `<div class="row g6 mn4-0-18 fxw"><a class="chip${fs ? "" : " on"}" href="#/records?s=">Alle Sportarten</a>${allSp.map(x => `<a class="chip${fs === x ? " on" : ""}" href="#/records?s=${x}"><i class="sw" style="background:${sCol(x)}"></i>${sName(x)}</a>`).join("")}</div>`;
+  const T = fs ? TOURS.filter(t => (isSg(fs) ? sgMatch(t.sport, [fs]) : t.sport === fs)) : TOURS;
+  const chips = `<div class="row g6 mn4-0-18 fxw"><a class="chip${fs ? "" : " on"}" href="#/records?s=">Alle Sportarten</a>${allSp.map(x => `<a class="chip${fs === x ? " on" : ""}" href="#/records?s=${encodeURIComponent(x)}"><i class="sw" style="background:${sCol(x)}"></i>${isSg(x) ? esc(sgLabel(x)) : sName(x)}</a>`).join("")}</div>`;
   const sum = (a, f) => a.reduce((c, t) => c + f(t), 0),
     km = sum(T, t => t.km),
     up = sum(T, t => t.up_m || 0),
     h = sum(T, t => t.h);
   const best = (a, f) => a.reduce((b, t) => (b == null || f(t) > f(b) ? t : b), null);
-  const sports = [...new Set(T.map(t => t.sport))].sort(
-    (a, b) => T.filter(t => t.sport === b).length - T.filter(t => t.sport === a).length
+  const sports = [...new Set(T.map(t => sgKey(t.sport)))].sort(
+    (a, b) => T.filter(t => sgKey(t.sport) === b).length - T.filter(t => sgKey(t.sport) === a).length
   );
   const lnk = (t, v) =>
     t
@@ -145,7 +172,7 @@ VIEWS.records = async (_, q) => {
     wd = Array(7).fill(0);
   T.forEach(t => wd[(new Date(t.date.slice(0, 10) + "T12:00:00").getDay() + 6) % 7]++);
   const alts = (await api(`/api/records/altitude?limit=${fs ? 60 : 8}`).catch(() => []))
-    .filter(a => !fs || (BY[a.id] && BY[a.id].sport === fs))
+    .filter(a => !fs || (BY[a.id] && (isSg(fs) ? sgMatch(BY[a.id].sport, [fs]) : BY[a.id].sport === fs)))
     .slice(0, 8);
   $("#main").innerHTML =
     `<div class="sec mt0"><h2>Rekorde</h2><span class="sub">${nf(T.length, 0)} Touren seit ${T[T.length - 1].y}${fs ? " · " + sName(fs) : ""}</span></div>${chips}
@@ -169,14 +196,14 @@ VIEWS.records = async (_, q) => {
     <div class="panel"><h2>Nach Wochentag</h2>${barChart(wd, ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"])}</div>
     <div class="panel"><h2>Je Sportart</h2><div class="rows">${sports
       .map(s => {
-        const a = T.filter(t => t.sport === s),
+        const a = T.filter(t => sgKey(t.sport) === s),
           l = best(a, t => t.km),
           u = best(a, t => t.up_m || 0),
           f = best(
             a.filter(t => t.km >= 3 && t.h > 0),
             t => t.km / t.h
           );
-        return `<div class="r" style="display:block"><div><i class="sw" style="background:${sCol(s)}"></i><b style="font:600 20px var(--d)">${sName(s)}</b> <span class="mut">· ${a.length} Touren, ${nf(
+        return `<div class="r" style="display:block"><div><i class="sw" style="background:${sCol(s)}"></i><b style="font:600 20px var(--d)">${isSg(s) ? esc(sName(s)) : sName(s)}</b> <span class="mut">· ${a.length} Touren, ${nf(
           sum(a, t => t.km),
           0
         )} km, ${nf(
@@ -206,7 +233,7 @@ VIEWS.recap = async name => {
   sel.forEach(t => (mm[t.m - 1] += t.km));
   prev.forEach(t => (pm[t.m - 1] += t.km));
   const bySport = {};
-  sel.forEach(t => (bySport[t.sport] = (bySport[t.sport] || 0) + t.km));
+  sel.forEach(t => (bySport[sgKey(t.sport)] = (bySport[sgKey(t.sport)] || 0) + t.km));         // 3.59.0: Statistik-Gruppen als eine Zeile
   const sp = Object.entries(bySport).sort((a, b) => b[1] - a[1]);
   const eff = sel.filter(t => t.sport !== "skialpin") /* Liftabfahrten sagen nichts über die Leistung */,
     pool = eff.length ? eff : sel,

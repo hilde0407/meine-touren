@@ -16,7 +16,21 @@ STRAVA_SPORT = {
     "hike": "Hike", "mountaineering": "Hike", "jogging": "Run", "touringbicycle": "Ride", "e_touringbicycle": "EBikeRide",
     "racebike": "Ride", "mtb": "MountainBikeRide", "skialpin": "AlpineSki", "skitour": "BackcountrySki",
     "snowshoe": "Snowshoe", "nordic": "NordicSki", "nordicwalking": "Walk",
+    # 3.59.0 neue Aktivitäten (Strava „sport_type“)
+    "walk": "Walk", "dogwalk": "Walk", "climbing": "RockClimbing", "trailrun": "TrailRun", "orienteering": "Run",
+    "commute": "Ride", "mtb_easy": "GravelRide", "cyclocross": "Ride", "bmx": "Ride", "e_mtb": "EMountainBikeRide",
+    "snowboard": "Snowboard", "sled": "Workout", "iceskate": "IceSkate", "snowmobile": "Workout",
+    "swim": "Swim", "snorkel": "Swim", "kayak": "Kayaking", "sup": "StandUpPaddling", "rowing": "Rowing", "dragonboat": "Canoeing", "sailing": "Sail",
+    "boat": "Workout", "waterski": "Workout", "surf": "Surfing", "kitesurf": "Kitesurf", "wakesurf": "Surfing",
+    "skateboard": "Skateboard", "skaten": "InlineSkate", "horse": "Workout", "fishing": "Workout", "hunting": "Workout", "archery": "Workout", "golf": "Golf",
+    "atv": "Workout", "motorbike": "Workout", "other": "Workout",
 }
+# 3.59.0: Aktivitäten, die Komoot nicht kennt, gehen mit einer ähnlichen Komoot-Sportart hin (Komoot-Kennungen e_mtb, mtb_easy, climbing, snowboard, sled, skaten
+# gehen unverändert); alles ohne Entsprechung als Wandern
+KOMOOT_SPORT = {"walk": "hike", "dogwalk": "hike", "trailrun": "jogging", "orienteering": "jogging", "commute": "touringbicycle", "cyclocross": "racebike", "bmx": "mtb",
+                "iceskate": "skaten", "skateboard": "skaten"}
+KOMOOT_SPORT.update({k: "hike" for k in ("snowmobile", "swim", "snorkel", "kayak", "sup", "rowing", "dragonboat", "sailing", "boat", "waterski", "surf", "kitesurf",
+                                        "wakesurf", "horse", "fishing", "hunting", "archery", "golf", "atv", "motorbike", "other")})
 PORTALS = {"komoot": "Komoot", "strava": "Strava"}
 
 
@@ -325,7 +339,7 @@ def upload_tour(tid, portal, gpx=None, force=False, dry_run=False, with_notes=No
     gpx = gpx or tracks.gpx_for(tid)
     name = t["name"] or tid
     sport = t["sport"] or "hike"
-    if sport == "hike" and db.one("SELECT 1 x FROM tour_tags WHERE id=? AND tag=?", (tid, gpxtools.MERGE["snowshoe"][1])):
+    if sport == "hike" and db.one("SELECT 1 x FROM tour_tags WHERE id=? AND tag=?", (tid, gpxtools.SCHNEESCHUH_TAG)):
         sport = "snowshoe"                     # 3.50.0: Wandern mit Schlagwort „Schneeschuh“ geht als Schneeschuhwanderung zu Komoot/Strava
     kinfo = {}
     try:
@@ -333,7 +347,7 @@ def upload_tour(tid, portal, gpx=None, force=False, dry_run=False, with_notes=No
             wn = with_notes_enabled() if with_notes is None else bool(with_notes)
             send, nw, nn = upload_copy(tid, gpx, wn)
             info.update(wegpunkte=nw, notiz=nn)
-            st, rid = komoot_upload(send, sport, name, info=kinfo)
+            st, rid = komoot_upload(send, KOMOOT_SPORT.get(sport, sport), name, info=kinfo)
             st = "created" if st == "created" else "duplicate"
         else:
             st, rid = strava_upload(gpx, sport, name, f"meine-touren-{tid}")

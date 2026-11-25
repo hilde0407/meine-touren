@@ -107,7 +107,7 @@ function kzBar(p, soll, full, label, text) {
 function kzGo(cfg, d) {
   if (d.rekord) return {href: `#/tour/${slEnc(d.rekord.id)}`, rec: true, hn: ""};
   const q = [], A = ["hm", "abstieg", "dauer", "gehzeit", "puls", "pulsmax"], V = ["tempo", "steigung", "hmkm"], ms = [cfg.mess, cfg.durch && cfg.durch.mess];
-  if ((cfg.sports || []).length) q.push("sp=" + slEnc(cfg.sports.join(",")));
+  if (sgPlain(cfg.sports || []).length) q.push("sp=" + slEnc(sgPlain(cfg.sports).join(",")));         // 3.59.0: die Tourenliste kennt keine Statistik-Gruppen
   if (d.von) q.push("von=" + d.von);
   if (d.von && d.bis) q.push("bis=" + d.bis);
   if (cfg.tag) q.push("tag=" + slEnc(cfg.tag));

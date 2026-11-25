@@ -2,6 +2,7 @@
    3.49.0: In der App steht das Aufzeichnen im Mittelpunkt – mittiger Reiter in der Tab-Leiste (mit Zustand), Startseite der App, neu geordnete Aufzeichnungsseite
    (bereit / läuft / pausiert / fertig), automatisches Hochladen nach dem Beenden. Die App meldet sich beim Hochladen als Aufzeichnungsgerät an (deviceInfo).
    Jede neue Brückenmethode wird per typeof abgefragt: ältere installierte APKs funktionieren mit dieser Seite weiter. */
+/* Beschriftung der Tasten (Tätigkeit statt Sportart); 3.59.0: angeboten werden die Favoriten-Aktivitäten (Verwaltung, FAV in 01-grundlagen.js), alle übrigen unter „Mehr …“ */
 const REC_SPORTS = [
   ["hike", "Wanderung"],
   ["mountaineering", "Bergtour"],
@@ -185,16 +186,18 @@ const recGpsIdle = g => {
   return g.watch ? ["search", "Suche GPS …"] : ["", "GPS ist eingeschaltet"];
 };
 
-/* ---- Sportart: zuletzt genutzte zuerst (je Gerät gemerkt) ---- */
+/* ---- Sportart: die Favoriten, zuletzt genutzte zuerst (je Gerät gemerkt); eine zuletzt genutzte Aktivität außerhalb der Favoriten steht vorn dabei ---- */
+const recLabel = k => (REC_SPORTS.find(x => x[0] === k) || [k, sName(k)])[1];
 const recSportOrder = () => {
   let last = [];
   try {
     last = JSON.parse(recLs("mt_rec_sports") || "[]");
   } catch (e) {}
   if (!Array.isArray(last)) last = [];
-  const known = REC_SPORTS.map(x => x[0]),
-    first = last.filter((k, i) => known.includes(k) && last.indexOf(k) === i);
-  return [...first, ...known.filter(k => !first.includes(k))].map(k => REC_SPORTS.find(x => x[0] === k));
+  const fav = (FAV && FAV.length ? FAV : FAV_DEF).filter(k => SPORT[k]),
+    first = last.filter((k, i) => fav.includes(k) && last.indexOf(k) === i),
+    extra = SPORT[last[0]] && !fav.includes(last[0]) ? [last[0]] : [];
+  return [...extra, ...first, ...fav.filter(k => !first.includes(k))].map(k => [k, recLabel(k)]);
 };
 const recSportUsed = k => {
   const o = recSportOrder().map(x => x[0]);
@@ -513,6 +516,7 @@ function recIdleHtml(A, st, g, sel) {
     <p class="recgps" id="rgps" data-q="${q}" role="status"><span class="rgi" aria-hidden="true"></span><span id="rgpst">${txt}</span></p>
     ${hints}
     <div class="recsports" role="radiogroup" aria-label="Sportart">${sports.map(([k, l]) => `<button type="button" class="recsp" role="radio" aria-checked="${k === cur}" data-sp="${k}">${l}</button>`).join("")}</div>
+    <details class="recset recmore" id="rspm"${sports.some(x => x[0] === cur) ? "" : " open"}><summary>Mehr …</summary><div class="recsetb">${SPORT_CAT.map(([id, l, ks]) => `<div class="recf"><span class="reclbl" id="rspc-${id}">${esc(l)}</span><div class="recsports" role="radiogroup" aria-labelledby="rspc-${id}">${ks.filter(k => !sports.some(x => x[0] === k)).map(k => `<button type="button" class="recspx" role="radio" aria-checked="${k === cur}" data-sp="${k}"><span aria-hidden="true">${sIcon(k)}</span> <span>${esc(sName(k))}</span></button>`).join("")}</div></div>`).join("")}</div></details>
     <button type="button" class="recstart" id="rstart"><span class="rsd" aria-hidden="true"></span><span>Aufzeichnung starten</span></button>
     <p class="recnote mut">Läuft auch bei ausgeschaltetem Bildschirm weiter.</p>
     ${route}
@@ -719,11 +723,11 @@ VIEWS.record = async () => {
   const wireIdle = () => {
     if ($("#rname")) $("#rname").value = draft;
     if ($("#rset")) $("#rset").open = setOpen;
-    document.querySelectorAll(".recsp").forEach(
+    document.querySelectorAll(".recsp, .recspx").forEach(
       b =>
         (b.onclick = () => {
           sel = b.dataset.sp;
-          document.querySelectorAll(".recsp").forEach(x => x.setAttribute("aria-checked", x === b ? "true" : "false"));
+          document.querySelectorAll(".recsp, .recspx").forEach(x => x.setAttribute("aria-checked", x === b ? "true" : "false"));
         })
     );
     on("#rstart", () => {

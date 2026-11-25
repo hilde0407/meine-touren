@@ -126,7 +126,8 @@ def clean_cfg(v):
         raise _bad("„op“ gehört nur zu einer Formel")
     if "sports" in v:
         s = v["sports"]
-        if not isinstance(s, list) or len(s) > 20 or not all(isinstance(i, str) and SPORT_RE.match(i) for i in s):
+        from .stat_gruppen import FILTER_RE                                # 3.59.0: auch eine Statistik-Gruppe „sgrp:<id>“
+        if not isinstance(s, list) or len(s) > 20 or not all(isinstance(i, str) and FILTER_RE.match(i) for i in s):
             raise _bad("Ungültige Sportart")
         if s:
             out["sports"] = list(dict.fromkeys(s))
@@ -211,7 +212,8 @@ def _rows(cfg):
     if cfg.get("tag"):
         sql += " AND EXISTS (SELECT 1 FROM tour_tags x WHERE x.id=t.id AND x.tag=? COLLATE NOCASE)"
         par.append(cfg["tag"])
-    sports, minkm, rows = cfg.get("sports") or [], cfg.get("minkm") or 0, []
+    from . import stat_gruppen
+    sports, minkm, rows = stat_gruppen.plain(cfg.get("sports") or []), cfg.get("minkm") or 0, []      # 3.59.0: Gruppen aufgelöst; gelöschte Gruppe = alle
     for r in db.query(sql, tuple(par)):
         if sports and r["sport"] not in sports:
             continue

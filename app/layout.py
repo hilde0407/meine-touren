@@ -111,6 +111,7 @@ MAX_TEXT = 600                    # längster Text in der Konfiguration eines Ba
 MAX_BYTES = 24000
 MAX_SPORTS = 20
 SPORT_RE = re.compile(r"^[A-Za-z0-9_]{1,40}$")
+SPORT_FILTER_RE = re.compile(r"^(?:sgrp:[a-z0-9]{1,12}|[A-Za-z0-9_]{1,40})$")     # 3.59.0: im Sportartfilter auch eine Statistik-Gruppe (wie stat_gruppen.FILTER_RE)
 RANGES = ("year", "y", "12m", "90d", "all")
 METRICS = ("count", "km", "up", "h")
 BASES = ("sport", "all", "year")
@@ -162,7 +163,7 @@ def _known(k, x):
     """Strenge Prüfung der gemeinsamen Filterfelder (3.19.0); gibt den bereinigten Wert zurück."""
     bad = HTTPException(400, f"Ungültiger Wert für „{k}“ in der Konfiguration")
     if k == "sports":
-        if not isinstance(x, list) or len(x) > MAX_SPORTS or not all(isinstance(i, str) and SPORT_RE.match(i) for i in x):
+        if not isinstance(x, list) or len(x) > MAX_SPORTS or not all(isinstance(i, str) and SPORT_FILTER_RE.match(i) for i in x):
             raise bad
         return list(dict.fromkeys(x))
     if k == "range":

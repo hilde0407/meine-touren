@@ -12,11 +12,11 @@ const slAgo = iso => {
   const n = new Date(), mo = (n.getFullYear() - +iso.slice(0, 4)) * 12 + n.getMonth() - (+iso.slice(5, 7) - 1) - (n.getDate() < +iso.slice(8, 10) ? 1 : 0), y = Math.floor(mo / 12);
   return y >= 1 ? (y === 1 ? "vor 1 Jahr" : `vor ${y} Jahren`) : mo <= 1 ? "vor 1 Monat" : `vor ${mo} Monaten`;
 };
-const SL_SPG = {                                                                  // Sportart → Gruppe [Name, Farb-Klasse]
-  hike: ["Wandern", "hike"], mountaineering: ["Wandern", "hike"], nordicwalking: ["Wandern", "hike"], touringbicycle: ["Rad", "bike"], racebike: ["Rad", "bike"], mtb: ["Rad", "bike"],
-  e_touringbicycle: ["E-Bike", "ebike"], jogging: ["Laufen", "run"], skialpin: ["Ski", "ski"], skitour: ["Ski", "ski"], nordic: ["Ski", "ski"], snowshoe: ["Wandern", "hike"],
+/* 3.59.0: jede Aktivität einzeln (Name und Farbe aus SPORT); eigene Statistik-Gruppen als ein Eintrag (Gruppenname, Farbe der ersten Sportart). SL_SPG gilt nicht mehr. */
+const slGroup = s => {
+  const k = sgKey(s), f = x => (SPORT[x] ? SPORT[x][1].slice(2) : "other");
+  return isSg(k) ? [esc(sName(k)), f(sgById(k).sports[0])] : [esc(sName(s)), f(sNorm(s))];
 };
-const slGroup = s => SL_SPG[s] || ["Sonstiges", "other"];
 const slRows = list => `<ul class="slrows">${list.join("")}</ul>`;
 
 /* Jahres-Rückblick: bis 3.18.0 „Dieses/Letztes Jahr“ (cfg.year), seit 3.19.0 wie die übrigen Bausteine (range year | y + yr); die ältere Einstellung gilt weiter */
@@ -31,9 +31,9 @@ const slRbRange = cfg => flRange(cfg.range || cfg.yr ? cfg : cfg.year === "last"
 const ZL_VIEW = [["balken", "Balken"], ["ring", "Ring"], ["warnung", "Nur Warnung, wenn ein Ziel in Gefahr ist"]];
 const ZL_ZEIT = [["alle", "Jahres- und Wochenziele"], ["jahr", "Nur Jahresziele"], ["woche", "Nur Wochenziele"]];
 const zlWeek = g => g && g.period === "week";
-const zlSports = g => (!g.sport ? null : GOAL_GRP[g.sport] ? SPORT_GRP[GOAL_GRP[g.sport][1]] || [] : [g.sport]);
+const zlSports = g => goalSports(g.sport);                                     // 3.59.0: zentrale Regel (06-erweiterungen.js), auch Statistik-Gruppen
 const zlFits = (g, cfg) => {
-  const want = cfg.sports || [], sp = zlSports(g);
+  const want = sgPlain(cfg.sports || []), sp = zlSports(g);
   return !want.length || sp === null || sp.some(s => want.includes(s));
 };
 const zlMon = (now = new Date()) => new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
@@ -109,11 +109,10 @@ async function zlWarn(c, b, cfg) {
 }
 /* Pflege der Ziele (nur als Abschnitt „Ziele“ der Statistik): Ziel hinzufügen (Jahr oder Woche), löschen, aus dem Vorjahr übernehmen */
 function zlForm(yr, prev) {
-  const sp = [...new Set(TOURS.map(t => t.sport))];
   return (prev.length ? `<p><button type="button" class="btn sm alt" id="gcopy">Ziele aus ${yr - 1} übernehmen (${prev.length})</button></p>` : "") +
     `<details class="zladd"><summary>Ziel hinzufügen</summary><div class="row mt8 zlrow"><label class="slsr" for="gper">Zeitraum</label><select id="gper"><option value="year">Ziel für ${yr}</option><option value="week">Ziel für jede Woche</option></select>` +
     `<label class="slsr" for="gm">Messgröße</label><select id="gm">${Object.entries(GM).map(([k, v]) => `<option value="${k}">${v[1]}</option>`).join("")}</select>` +
-    `<label class="slsr" for="gsp">Sportart</label><select id="gsp"><option value="">alle Sportarten</option>${Object.entries(GOAL_GRP).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join("")}${sp.map(s => `<option value="${s}">${sName(s)}</option>`).join("")}</select>` +
+    `<label class="slsr" for="gsp">Sportart</label><select id="gsp"><option value="">alle Sportarten</option>${goalSportOptions().map(([k, l]) => `<option value="${esc(k)}">${esc(l)}</option>`).join("")}</select>` +
     `<label class="slsr" for="gt">Zielwert</label><input id="gt" type="number" min="1" inputmode="decimal" placeholder="Zielwert"><button type="button" class="btn sm" id="gadd">Speichern</button></div><p class="slerr" role="alert"></p></details>`;
 }
 function zlBind(b, yr, prev) {
@@ -124,7 +123,7 @@ function zlBind(b, yr, prev) {
       await api(`/api/goals/${x.dataset.g}`, {method: "DELETE"});
       route();
     } else if (cp) {
-      for (const g of prev) await post({year: yr, metric: g.metric, sport: g.sport, target: g.target});
+      for (const g of prev.filter(g => !isSg(g.sport) || sgById(g.sport))) await post({year: yr, metric: g.metric, sport: g.sport, target: g.target});     // 3.59.0: Ziel einer gelöschten Gruppe nicht übernehmen
       route();
     } else if (add) {
       const t = parseFloat(String(b.querySelector("#gt").value).replace(",", ".")), er = b.querySelector(".zladd .slerr");

@@ -16,7 +16,7 @@ VIEWS.dash = async (_, q) => {
     Y = F.kind === "y" ? F.yr : 0,
     SP = F.sports,
     inR = R.kind === "all" ? () => true : t => flIn(t, R);
-  const A = SP.length ? TOURS.filter(t => SP.includes(t.sport)) : TOURS,
+  const A = SP.length ? TOURS.filter(t => sgMatch(t.sport, SP)) : TOURS,          // 3.59.0: auch Statistik-Gruppen („sgrp:<id>“, 01-grundlagen.js)
     yearAll = TOURS.filter(inR),
     sel = A.filter(inR);
   const last = TOURS[0],
@@ -60,7 +60,7 @@ VIEWS.dash = async (_, q) => {
     bestK = mkm.indexOf(Math.max(...mkm)),
     bestKL = monthly && mkm[bestK] > 0 ? (Y ? MONL[bestK] : `${MONL[mser[bestK] % 12]} ${Math.floor(mser[bestK] / 12)}`) : "";
   const bySport = {};
-  yearAll.forEach(t => (bySport[t.sport] = (bySport[t.sport] || 0) + t.km));
+  yearAll.forEach(t => (bySport[sgKey(t.sport)] = (bySport[sgKey(t.sport)] || 0) + t.km));     // 3.59.0: Mitglieder einer Statistik-Gruppe als eine Zeile
   const sports = Object.entries(bySport).sort((a, b) => b[1] - a[1]),
     tot = sum(yearAll, t => t.km) || 1;
   const hy = Y || (R.kind === "all" ? ys[0] : +R.to.slice(0, 4)),

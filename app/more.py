@@ -9,7 +9,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 
-from . import config, db, elev, extras, jobs, memo, routes
+from . import config, db, elev, extras, gpxtools, jobs, memo, routes
 
 router = APIRouter()
 DEFAULT_NAME = re.compile(r"\d{2}\.\d{2}\.\d{4}")
@@ -36,9 +36,8 @@ def duplicates(tours):
     return out
 
 
-WALK = ("hike", "nordicwalking", "snowshoe", "mountaineering")
-SPORT_OK = {"hike", "touringbicycle", "e_touringbicycle", "racebike", "mtb", "e_mtb", "jogging", "skialpin", "snowshoe", "mountaineering",   # „snowshoe“: ältere Clients, wird zu Wandern + Schlagwort
-            "nordic", "nordicwalking", "skitour", "other"}
+WALK = ("hike", "nordicwalking", "snowshoe", "mountaineering", "walk", "dogwalk")
+SPORT_OK = set(gpxtools.LABEL)                       # 3.59.0: alle Aktivitäten des Katalogs (app/gpxtools.py), Schneeschuh ist wieder eigene Sportart
 
 
 def implausible(tours):
@@ -52,9 +51,9 @@ def implausible(tours):
             why = f"Fehlaufzeichnung? nur {d:.0f} m" + (f" in {s // 60:.0f} min" if s else "")
         elif t["sport"] in WALK and v > 8:
             why, sug = f"{v:.1f} km/h – zu schnell für {t['sport'] == 'hike' and 'Wandern' or 'diese Sportart'}", "jogging" if v <= 16 else "touringbicycle"   # 3.50.0: bis 16 km/h eher ein Lauf
-        elif t["sport"] == "jogging" and v > 22:
+        elif t["sport"] in ("jogging", "trailrun", "orienteering") and v > 22:
             why, sug = f"{v:.1f} km/h – zu schnell zum Laufen", "touringbicycle"
-        elif t["sport"] in ("touringbicycle", "racebike", "mtb") and 0 < v < 4 and d > 2000:
+        elif t["sport"] in ("touringbicycle", "racebike", "mtb", "mtb_easy", "commute", "cyclocross") and 0 < v < 4 and d > 2000:
             why, sug = f"{v:.1f} km/h – sehr langsam für Rad", "hike"
         if why:
             why = re.sub(r"(\d)\.(\d)", r"\1,\2", why)
@@ -79,13 +78,13 @@ def api_set_sport(tour_id: str, body: dict):
         kid = tour_id if t["source"] != "local" else (portals.status_of(tour_id).get("komoot") or {}).get("remote_id")
         if kid:
             try:
-                sync._komoot().set_sport(kid, sp); msg = "auch bei Komoot geändert"
+                sync._komoot().set_sport(kid, portals.KOMOOT_SPORT.get(sp, sp)); msg = "auch bei Komoot geändert"      # 3.59.0: Aktivitäten ohne Komoot-Kennung ähnlich abbilden
             except Exception as e:  # noqa
                 raise HTTPException(502, str(e))
         else:
             msg = "bei Komoot nicht vorhanden – nur hier geändert"
     from . import sport_umzug
-    sp = sport_umzug.set_sport(tour_id, sp)          # 3.50.0: „snowshoe“ -> Wandern + Schlagwort „Schneeschuh“
+    sp = sport_umzug.set_sport(tour_id, sp)          # 3.59.0: „snowshoe“ bleibt Schneeschuh (nichts wird mehr zusammengelegt)
     return {"ok": True, "komoot": msg, "sport": sp}
 
 

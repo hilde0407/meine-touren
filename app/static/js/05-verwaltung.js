@@ -104,12 +104,16 @@ VIEWS.admin = async (_, q) => {
       <div class="field"><label>Nur Workouts ab Datum (JJJJ-MM-TT, leer = alle)</label><input data-k="suunto_since" value="${esc(s.suunto_since)}"></div>
       ${swField("suunto_auto", "Neue Workouts täglich automatisch übernehmen")}
       <div class="row"><button class="btn" id="sunconn">${su.connected ? "Neu verbinden" : "Mit Suunto verbinden"}</button>${su.connected ? `<button class="btn" id="sunsync">Jetzt importieren</button><button class="btn alt" id="sundis">Trennen</button>` : ""}<span id="sunres"></span></div></details></div></div></div>
+  <div class="panel gap sgp" id="favp"><h2>Favoriten-Aktivitäten</h2><div id="favbody"><p class="mut">Wird geladen …</p></div></div>
+  <div class="panel gap sgp" id="sgp"><h2>Statistik: Aktivitäten zusammenfassen</h2><div id="sgbody"><p class="mut">Wird geladen …</p></div></div>
   <div class="grid g2 mt40">
    <div class="panel"><h2>Automatik</h2>${swField("auto_sync", "Täglich aktualisieren (Komoot, Routen, Fotos)")}${f("auto_sync_hour", "Uhrzeit (Stunde)", "number")}</div>
    <div class="panel"><h2>Protokoll</h2><div class="pre" id="log">–</div></div></div>
   <div class="row mt34"><button class="btn" id="save">Einstellungen speichern</button><span id="ok" class="ok"></span></div>`;
   ["auto_sync", "garmin_auto", "suunto_auto", "zepp_auto_adopt", "komoot_with_notes"].forEach(k => swSet(k, s[k]));
   if ($("#kvchk")) $("#kvchk").onclick = () => komootVisDialog();
+  sgAdmin($("#sgbody"));
+  favAdmin($("#favbody"));
   const run = async (u, o) => {
     try {
       await api(u, o);
@@ -373,4 +377,190 @@ async function komootVisDialog() {
     render();
   };
   render();
+}
+
+/* 3.59.0 Statistik-Gruppen bearbeiten (Verwaltung → Übersicht): welche Aktivitäten die Statistik gemeinsam zählt – jeder entscheidet selbst. Ohne Gruppen zählt jede
+   Aktivität einzeln. Speichern über PUT /api/stats/gruppen (app/stat_gruppen.py prüft und bereinigt: höchstens 8 Gruppen, Name 1–30 Zeichen, mindestens 2 Sportarten,
+   jede Sportart in höchstens einer Gruppe). Die Vorschläge (Wandern + Bergtour + Schneeschuh, alle Rad-Arten, alle Ski-Arten) übernimmt nur ein Klick – nie automatisch. */
+async function sgAdmin(box) {
+  if (!box) return;
+  let d;
+  try {
+    d = await api("/api/stats/gruppen");
+  } catch (e) {
+    box.innerHTML = `<p class="mut">${esc(e.message || "Fehler")}</p>`;
+    return;
+  }
+  const MAX = d.max || 8, NMAX = d.name_max || 30, VOR = d.vorschlaege || [];
+  let G = (d.gruppen || []).map(g => ({id: g.id, name: g.name, sports: g.sports.slice()})), msg = "", err = "";
+  const ALL = SPORT_CAT.flatMap(c => c[2]).concat((d.sportarten || []).filter(s => !SPORT[s]));
+  const owner = (s, i) => G.findIndex((g, j) => j !== i && g.sports.includes(s));
+  const canSug = v => G.length < MAX && !G.some(g => g.id === v.id) && v.sports.every(s => owner(s, -1) < 0);
+  const chip = (g, i, s) => {
+    const o = owner(s, i), id = `sgc${i}_${s}`;
+    return `<label class="flchip sgchip${o >= 0 ? " sgoff" : ""}" for="${id}"><input type="checkbox" id="${id}" data-g="${i}" value="${esc(s)}"${g.sports.includes(s) ? " checked" : ""}${o >= 0 ? " disabled" : ""}><span>${esc(sName(s))}</span>${o >= 0 ? `<small class="sgin">in „${esc(G[o].name || "…")}“</small>` : ""}</label>`;
+  };
+  const cats = (g, i) => SPORT_CAT.map(([id, l, ks]) => `<div class="sgcat"><span class="sgcl" id="sgcl${i}_${id}">${esc(l)}</span><div class="flchips sgchips" role="group" aria-labelledby="sgcl${i}_${id}">${ks.map(s => chip(g, i, s)).join("")}</div></div>`).join("") +
+    (ALL.some(s => !SPORT[s]) ? `<div class="sgcat"><span class="sgcl">Weitere aus deinen Touren</span><div class="flchips sgchips">${ALL.filter(s => !SPORT[s]).map(s => chip(g, i, s)).join("")}</div></div>` : "");
+  const draw = (focus = "") => {
+    box.innerHTML = `<p class="mut">Ohne Gruppen zählt die Statistik jede Aktivität einzeln. Wenn du Aktivitäten gemeinsam sehen möchtest – zum Beispiel Wandern, Bergtour und Schneeschuh –, lege hier eine Gruppe an. Jede Gruppe ist im Sportartfilter als eigener Eintrag wählbar, und die Aufteilungen nach Sportart (Sportarten, Bestwerte, Jahresrückblick) zeigen sie als eine Zeile. Die Touren und ihre Sportart bleiben unverändert.</p>
+      <div class="sglist">${G.map((g, i) => `<fieldset class="sgg" data-i="${i}"><legend class="slsr">${esc(`Gruppe ${i + 1}`)}</legend>
+        <div class="row g6 sgrow"><label class="sgnl" for="sgn${i}">Name</label><input id="sgn${i}" class="sgn fx1" data-i="${i}" maxlength="${NMAX}" value="${esc(g.name)}" autocomplete="off"><button type="button" class="btn ghost sm sgdel" data-i="${i}" aria-label="${esc(`Gruppe „${g.name}“ löschen`)}">🗑 Löschen</button></div>
+        <div class="sgcats" role="group" aria-label="${esc(`Sportarten der Gruppe „${g.name}“`)}">${cats(g, i)}</div></fieldset>`).join("") || '<p class="mut sgnone">Keine Gruppen: Die Statistik zählt jede Aktivität einzeln.</p>'}</div>
+      <div class="row mt10 sgbtns"><button type="button" class="btn alt sm" id="sgadd"${G.length >= MAX ? " disabled" : ""}>Gruppe hinzufügen</button></div>
+      <div class="sgvor"><span class="mut fs13">Vorschläge (ein Klick legt die Gruppe an, gespeichert wird erst mit „Gruppen speichern“):</span><div class="row g6 mt6">${VOR.map(v => `<button type="button" class="btn alt sm sgsug" data-v="${esc(v.id)}"${canSug(v) ? "" : " hidden"}>${esc(`Vorschlag: ${v.name}`)}</button>`).join("")}</div></div>
+      ${G.length >= MAX ? `<p class="mut fs13">${esc(`Höchstens ${MAX} Gruppen.`)}</p>` : ""}
+      <div class="row mt10"><button type="button" class="btn" id="sgsave">Gruppen speichern</button><span class="ok" id="sgok" role="status">${esc(msg)}</span></div>
+      <p class="bad sgerr" id="sgerr" role="alert">${esc(err)}</p>`;
+    msg = err = "";
+    if (focus) {
+      const f = box.querySelector(focus);
+      if (f) f.focus();
+    }
+  };
+  /* Häkchen und Namen ändern nichts am Aufbau: nur Sperren und Hinweise „in …“ der übrigen Gruppen nachziehen (der Fokus bleibt, wo er ist) */
+  const sync = () => {
+    box.querySelectorAll(".sgchip input").forEach(x => {
+      const i = +x.dataset.g, o = owner(x.value, i), lab = x.closest("label");
+      x.disabled = o >= 0;
+      lab.classList.toggle("sgoff", o >= 0);
+      let sm = lab.querySelector(".sgin");
+      if (o >= 0 && !sm) lab.insertAdjacentHTML("beforeend", '<small class="sgin"></small>');
+      if (o < 0 && sm) sm.remove();
+      sm = lab.querySelector(".sgin");
+      if (sm) sm.textContent = `in „${G[o].name || "…"}“`;
+    });
+    box.querySelectorAll(".sgg").forEach(f => {
+      const i = +f.dataset.i, nm = G[i].name;
+      f.querySelector(".sgdel").setAttribute("aria-label", `Gruppe „${nm}“ löschen`);
+      f.querySelector(".sgcats").setAttribute("aria-label", `Sportarten der Gruppe „${nm}“`);
+    });
+    box.querySelectorAll(".sgsug").forEach(b => (b.hidden = !canSug(VOR.find(v => v.id === b.dataset.v))));
+  };
+  box.addEventListener("input", e => {
+    const n = e.target.closest(".sgn");
+    if (!n) return;
+    G[+n.dataset.i].name = n.value;
+    sync();
+  });
+  box.addEventListener("change", e => {
+    const x = e.target.closest(".sgchip input");
+    if (!x) return;
+    const g = G[+x.dataset.g];
+    g.sports = x.checked ? g.sports.concat([x.value]).filter((s, k, a) => a.indexOf(s) === k) : g.sports.filter(s => s !== x.value);
+    sync();
+  });
+  box.addEventListener("click", async e => {
+    const del = e.target.closest(".sgdel"), b = e.target.closest("button");
+    if (del) {
+      const i = +del.dataset.i;
+      G.splice(i, 1);
+      return draw(G.length ? `#sgn${Math.min(i, G.length - 1)}` : "#sgadd");
+    }
+    if (!b) return;
+    if (b.id === "sgadd" && G.length < MAX) {
+      G.push({id: "", name: "", sports: []});
+      return draw(`#sgn${G.length - 1}`);
+    }
+    if (b.classList.contains("sgsug")) {
+      const v = VOR.find(x => x.id === b.dataset.v);
+      if (!v || !canSug(v)) return;
+      G.push({id: v.id, name: v.name, sports: v.sports.slice()});
+      msg = "Vorschlag übernommen – zum Übernehmen „Gruppen speichern“.";
+      return draw("#sgsave");
+    }
+    if (b.id === "sgsave") {
+      const bad = G.findIndex(g => !g.name.trim() || g.name.trim().length > NMAX), few = G.findIndex(g => g.sports.length < 2);
+      const er = box.querySelector("#sgerr");
+      box.querySelector("#sgok").textContent = "";
+      if (bad >= 0) {
+        er.textContent = `Gruppe ${bad + 1}: Bitte einen Namen mit 1 bis ${NMAX} Zeichen eingeben.`;
+        return box.querySelector(`#sgn${bad}`).focus();
+      }
+      if (few >= 0) {
+        er.textContent = `„${G[few].name.trim()}“: Eine Gruppe braucht mindestens 2 Sportarten.`;
+        return (box.querySelector(`.sgg[data-i="${few}"] .sgchip input:not([disabled])`) || box.querySelector(`#sgn${few}`)).focus();
+      }
+      b.disabled = true;
+      try {
+        const r = await api("/api/stats/gruppen", {method: "PUT", headers: {"content-type": "application/json"}, body: JSON.stringify({gruppen: G.map(g => ({id: g.id, name: g.name.trim(), sports: g.sports}))})});
+        G = r.gruppen.map(g => ({id: g.id, name: g.name, sports: g.sports.slice()}));
+        await sgLoad();
+        msg = "Gespeichert ✓ – gilt ab sofort in der Statistik.";
+      } catch (x) {
+        err = x.message || String(x);
+      }
+      draw("#sgsave");
+    }
+  });
+  draw();
+}
+
+/* 3.59.0 Favoriten-Aktivitäten (Verwaltung → Übersicht): Stern wählt, Pfeile ordnen (höchstens 12). Die Favoriten erscheinen zuerst, wo eine Tour aufgenommen oder
+   angelegt wird (Aufzeichnen, Planung); alle übrigen stehen dort unter „Mehr …“. Speichern über PUT /api/aktivitaeten/favoriten (app/aktivitaeten.py). */
+async function favAdmin(box) {
+  if (!box) return;
+  let d;
+  try {
+    d = await api("/api/aktivitaeten/favoriten");
+  } catch (e) {
+    box.innerHTML = `<p class="mut">${esc(e.message || "Fehler")}</p>`;
+    return;
+  }
+  const MAX = d.max || 12;
+  let F = (d.favoriten || FAV_DEF).filter(k => SPORT[k]), msg = "", err = "";
+  const draw = (focus = "") => {
+    box.innerHTML = `<p class="mut">Deine Favoriten bietet Meine Touren zuerst an, wenn du eine Tour aufnimmst oder planst; alle übrigen Aktivitäten stehen dort unter „Mehr …“.</p>
+      <ol class="favlist" aria-label="Reihenfolge der Favoriten">${F.map((k, i) => `<li><span aria-hidden="true">${sIcon(k)}</span> <span class="favn">${esc(sName(k))}</span>
+        <button type="button" class="btn ghost sm favup" data-k="${k}"${i ? "" : " disabled"} aria-label="${esc(`${sName(k)} nach oben`)}">↑</button><button type="button" class="btn ghost sm favdn" data-k="${k}"${i < F.length - 1 ? "" : " disabled"} aria-label="${esc(`${sName(k)} nach unten`)}">↓</button></li>`).join("")}</ol>
+      ${SPORT_CAT.map(([id, l, ks]) => `<div class="sgcat"><span class="sgcl" id="favc-${id}">${esc(l)}</span><div class="flchips favchips" role="group" aria-labelledby="favc-${id}">${ks.map(k => `<button type="button" class="flchip favst" data-k="${k}" aria-pressed="${F.includes(k)}"${!F.includes(k) && F.length >= MAX ? " disabled" : ""}><span aria-hidden="true">${F.includes(k) ? "★" : "☆"}</span> <span>${esc(sName(k))}</span></button>`).join("")}</div></div>`).join("")}
+      ${F.length >= MAX ? `<p class="mut fs13">${esc(`Höchstens ${MAX} Favoriten.`)}</p>` : ""}
+      <div class="row mt10"><button type="button" class="btn" id="favsave">Favoriten speichern</button><button type="button" class="btn ghost" id="favstd">Vorgabe wiederherstellen</button><span class="ok" id="favok" role="status">${esc(msg)}</span></div>
+      <p class="bad sgerr" id="faverr" role="alert">${esc(err)}</p>`;
+    msg = err = "";
+    if (focus) {
+      const f = box.querySelector(focus);
+      if (f && !f.disabled) f.focus();
+    }
+  };
+  box.addEventListener("click", async e => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const k = b.dataset.k, i = F.indexOf(k);
+    if (b.classList.contains("favst")) {
+      if (i >= 0) F.splice(i, 1);
+      else if (F.length < MAX) F.push(k);
+      return draw(`.favst[data-k="${k}"]`);
+    }
+    if (b.classList.contains("favup") && i > 0) {
+      [F[i - 1], F[i]] = [F[i], F[i - 1]];
+      return draw(`.favup[data-k="${k}"]`);
+    }
+    if (b.classList.contains("favdn") && i >= 0 && i < F.length - 1) {
+      [F[i + 1], F[i]] = [F[i], F[i + 1]];
+      return draw(`.favdn[data-k="${k}"]`);
+    }
+    if (b.id === "favstd") {
+      F = (d.standard || FAV_DEF).slice();
+      msg = "Vorgabe übernommen – zum Übernehmen „Favoriten speichern“.";
+      return draw("#favsave");
+    }
+    if (b.id === "favsave") {
+      if (!F.length) {
+        box.querySelector("#faverr").textContent = "Bitte mindestens eine Favoriten-Aktivität wählen.";
+        return;
+      }
+      b.disabled = true;
+      try {
+        const r = await api("/api/aktivitaeten/favoriten", {method: "PUT", headers: {"content-type": "application/json"}, body: JSON.stringify({favoriten: F})});
+        F = r.favoriten.slice();
+        FAV = F.slice();
+        msg = "Gespeichert ✓";
+      } catch (x) {
+        err = x.message || String(x);
+      }
+      draw("#favsave");
+    }
+  });
+  draw();
 }

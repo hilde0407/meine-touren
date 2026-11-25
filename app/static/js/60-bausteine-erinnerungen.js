@@ -51,7 +51,7 @@ function erUrl(cfg, fix) {
     u.set("day", erMd());
     u.set("before", String(new Date().getFullYear()));
   }
-  if (cfg && cfg.sports && cfg.sports.length) u.set("sport", cfg.sports.join(","));
+  if (cfg && cfg.sports && cfg.sports.length && sgPlain(cfg.sports).length) u.set("sport", sgPlain(cfg.sports).join(","));      // 3.59.0: Fotos und Diashow kennen keine Statistik-Gruppen: aufgelöst
   if (cfg && cfg.range && cfg.range !== "all") {
     const R = flRange(cfg, "all");
     if (R.from) u.set("date_from", R.from);
@@ -73,7 +73,7 @@ function erSlideUrl(cfg, fix) {
     u.set("day", erMd());
     u.set("before", String(new Date().getFullYear()));
   }
-  if (cfg && cfg.sports && cfg.sports.length) u.set("sport", cfg.sports.join(","));
+  if (cfg && cfg.sports && cfg.sports.length && sgPlain(cfg.sports).length) u.set("sport", sgPlain(cfg.sports).join(","));      // 3.59.0: Fotos und Diashow kennen keine Statistik-Gruppen: aufgelöst
   if (cfg && cfg.range && cfg.range !== "all") {
     const R = flRange(cfg, "all");
     if (R.kind === "y") u.set("year", String(R.year));

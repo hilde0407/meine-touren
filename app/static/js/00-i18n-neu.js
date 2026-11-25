@@ -3414,4 +3414,104 @@ Komoot kannte die Tour schon – sie ist dort ÖFFENTLICH. || Komoot already had
 Meine Touren ändert eine vorhandene Tour nicht von selbst: || Meine Touren does not change an existing tour on its own: || Meine Touren ne modifie pas un parcours existant de lui-même : || Meine Touren no cambia por sí sola una ruta existente:
 „Bei Komoot auf privat setzen“ oder in Komoot ändern. || use “Make private on Komoot” or change it in Komoot. || utilisez « Rendre privé sur Komoot » ou modifiez-le dans Komoot. || usa «Hacer privada en Komoot» o cámbialo en Komoot.
 Komoot kannte die Tour schon. || Komoot already had this tour. || Komoot connaissait déjà ce parcours. || Komoot ya tenía esta ruta.
+Statistik: Aktivitäten zusammenfassen || Statistics: combine activities || Statistiques : regrouper des activités || Estadísticas: agrupar actividades
+Gruppe {} || Group {} || Groupe {} || Grupo {}
+Gruppe „{}“ löschen || Delete group “{}” || Supprimer le groupe « {} » || Eliminar el grupo «{}»
+Sportarten der Gruppe „{}“ || Sports in group “{}” || Sports du groupe « {} » || Deportes del grupo «{}»
+in „{}“ || in “{}” || dans « {} » || en «{}»
+Gruppe hinzufügen || Add group || Ajouter un groupe || Añadir grupo
+Höchstens {} Gruppen. || At most {} groups. || {} groupes au maximum. || Como máximo {} grupos.
+Gruppen speichern || Save groups || Enregistrer les groupes || Guardar grupos
+Vorschlag übernommen – zum Übernehmen „Gruppen speichern“. || Suggestion added – click “Save groups” to apply it. || Suggestion reprise – cliquez sur « Enregistrer les groupes » pour l’appliquer. || Sugerencia añadida: pulsa «Guardar grupos» para aplicarla.
+Gruppe {}: Bitte einen Namen mit 1 bis {} Zeichen eingeben. || Group {}: please enter a name with 1 to {} characters. || Groupe {} : veuillez saisir un nom de 1 à {} caractères. || Grupo {}: introduce un nombre de 1 a {} caracteres.
+„{}“: Eine Gruppe braucht mindestens 2 Sportarten. || “{}”: a group needs at least 2 sports. || « {} » : un groupe doit contenir au moins 2 sports. || «{}»: un grupo necesita al menos 2 deportes.
+Gespeichert ✓ – gilt ab sofort in der Statistik. || Saved ✓ – applies to the statistics right away. || Enregistré ✓ – s’applique immédiatement aux statistiques. || Guardado ✓: se aplica de inmediato en las estadísticas.
+{} (zusammengefasst) || {} (combined) || {} (regroupé) || {} (agrupado)
+(Gruppe gelöscht) || (group deleted) || (groupe supprimé) || (grupo eliminado)
+Zu Fuß || On foot || À pied || A pie
+Rad || Bike || Vélo || Bici
+Höchstens {} Gruppen || At most {} groups || {} groupes au maximum || Como máximo {} grupos
+Gruppe {}: Der Name muss 1 bis {} Zeichen lang sein || Group {}: the name must be 1 to {} characters long || Groupe {} : le nom doit comporter de 1 à {} caractères || Grupo {}: el nombre debe tener de 1 a {} caracteres
+Zwei Gruppen heißen „{}“ || Two groups are called “{}” || Deux groupes s’appellent « {} » || Dos grupos se llaman «{}»
+„{}“: Eine Gruppe braucht mindestens {} Sportarten || “{}”: a group needs at least {} sports || « {} » : un groupe doit contenir au moins {} sports || «{}»: un grupo necesita al menos {} deportes
+Eine Sportart kann nur in einer Gruppe sein („{}“ ist schon in „{}“) || A sport can only be in one group (“{}” is already in “{}”) || Un sport ne peut appartenir qu’à un seul groupe (« {} » est déjà dans « {} ») || Un deporte solo puede estar en un grupo («{}» ya está en «{}»)
+Diese Statistik-Gruppe gibt es nicht (mehr) || This statistics group does not exist (any more) || Ce groupe de statistiques n’existe pas (ou plus) || Este grupo de estadísticas no existe (o ya no existe)
+MTB || MTB || VTT || BTT
+Klettern || Climbing || Escalade || Escalada
+Trailrunning || Trail running || Trail || Trail running
+Gravelbike || Gravel bike || Gravel || Gravel
+E-Mountainbike || E-mountain bike || VTT électrique || BTT eléctrica
+Snowboard || Snowboard || Snowboard || Snowboard
+Eislaufen || Ice skating || Patin à glace || Patinaje sobre hielo
+Rudern || Rowing || Aviron || Remo
+Segeln || Sailing || Voile || Vela
+Reiten || Horse riding || Équitation || Equitación
+Golf || Golf || Golf || Golf
+Wasser || Water || Eau || Agua
+Favoriten || Favourites || Favoris || Favoritos
+Mehr … || More … || Plus … || Más …
+Gespeichert ✓ || Saved ✓ || Enregistré ✓ || Guardado ✓
+Ohne Gruppen zählt die Statistik jede Aktivität einzeln. Wenn du Aktivitäten gemeinsam sehen möchtest – zum Beispiel Wandern, Bergtour und Schneeschuh –, lege hier eine Gruppe an. Jede Gruppe ist im Sportartfilter als eigener Eintrag wählbar, und die Aufteilungen nach Sportart (Sportarten, Bestwerte, Jahresrückblick) zeigen sie als eine Zeile. Die Touren und ihre Sportart bleiben unverändert. || Without groups, the statistics count each activity separately. If you want to see activities together – for example hiking, mountain tours and snowshoeing – create a group here. Each group can be picked as its own entry in the sport filter, and breakdowns by sport (sports, personal bests, year in review) show it as one row. The tours and their sport stay unchanged. || Sans groupe, les statistiques comptent chaque activité séparément. Pour voir des activités ensemble – par exemple randonnée, course en montagne et raquettes –, créez ici un groupe. Chaque groupe peut être choisi comme entrée à part dans le filtre de sport, et les répartitions par sport (sports, records, bilan de l’année) l’affichent sur une seule ligne. Les parcours et leur sport restent inchangés. || Sin grupos, las estadísticas cuentan cada actividad por separado. Si quieres ver actividades juntas, por ejemplo senderismo, ruta de montaña y raquetas, crea aquí un grupo. Cada grupo se puede elegir como entrada propia en el filtro de deporte, y los desgloses por deporte (deportes, mejores marcas, resumen del año) lo muestran en una sola fila. Las rutas y su deporte no cambian.
+Keine Gruppen: Die Statistik zählt jede Aktivität einzeln. || No groups: the statistics count each activity separately. || Aucun groupe : les statistiques comptent chaque activité séparément. || Sin grupos: las estadísticas cuentan cada actividad por separado.
+Vorschläge (ein Klick legt die Gruppe an, gespeichert wird erst mit „Gruppen speichern“): || Suggestions (one click creates the group; it is saved only with “Save groups”): || Suggestions (un clic crée le groupe ; il n’est enregistré qu’avec « Enregistrer les groupes ») : || Sugerencias (un clic crea el grupo; se guarda solo con «Guardar grupos»):
+Vorschlag: {} || Suggestion: {} || Suggestion : {} || Sugerencia: {}
+Wandern und Bergtouren || Hiking and mountain tours || Randonnée et courses en montagne || Senderismo y rutas de montaña
+Rad (alle) || Cycling (all) || Vélo (tous) || Bici (todas)
+Ski (alle) || Skiing (all) || Ski (tous) || Esquí (todos)
+Weitere aus deinen Touren || Others from your tours || Autres issus de vos parcours || Otras de tus rutas
+Favoriten-Aktivitäten || Favourite activities || Activités favorites || Actividades favoritas
+Deine Favoriten bietet Meine Touren zuerst an, wenn du eine Tour aufnimmst oder planst; alle übrigen Aktivitäten stehen dort unter „Mehr …“. || Meine Touren offers your favourites first when you record or plan a tour; all other activities are listed there under “More …”. || Meine Touren propose d’abord vos favoris lorsque vous enregistrez ou planifiez un parcours ; toutes les autres activités se trouvent sous « Plus … ». || Meine Touren ofrece primero tus favoritas al grabar o planificar una ruta; las demás actividades están en «Más …».
+Reihenfolge der Favoriten || Order of favourites || Ordre des favoris || Orden de las favoritas
+{} nach oben || Move {} up || Monter {} || Subir {}
+{} nach unten || Move {} down || Descendre {} || Bajar {}
+Höchstens {} Favoriten. || At most {} favourites. || {} favoris au maximum. || Como máximo {} favoritas.
+Höchstens {} Favoriten || At most {} favourites || {} favoris au maximum || Como máximo {} favoritas
+Favoriten speichern || Save favourites || Enregistrer les favoris || Guardar favoritas
+Vorgabe wiederherstellen || Restore preset || Rétablir le préréglage || Restaurar la preselección
+Vorgabe übernommen – zum Übernehmen „Favoriten speichern“. || Preset restored – click “Save favourites” to apply it. || Préréglage repris – cliquez sur « Enregistrer les favoris » pour l’appliquer. || Preselección restaurada: pulsa «Guardar favoritas» para aplicarla.
+Bitte mindestens eine Favoriten-Aktivität wählen. || Please choose at least one favourite activity. || Veuillez choisir au moins une activité favorite. || Elige al menos una actividad favorita.
+Bitte mindestens eine Favoriten-Aktivität wählen || Please choose at least one favourite activity || Veuillez choisir au moins une activité favorite || Elige al menos una actividad favorita
+Unbekannte Aktivität || Unknown activity || Activité inconnue || Actividad desconocida
+Schneeschuh-Touren || Snowshoe tours || Sorties en raquettes || Rutas con raquetas
+Schneeschuh ist wieder eine eigene Sportart. || Snowshoeing is a sport of its own again. || La raquette est de nouveau un sport à part entière. || Las raquetas vuelven a ser un deporte propio.
+1 Tour heißt noch „Wandern“ und trägt das Schlagwort „Schneeschuh“. || 1 tour is still called “Hiking” and has the tag “Schneeschuh”. || 1 parcours s’appelle encore « Randonnée » et porte le mot-clé « Schneeschuh ». || 1 ruta todavía se llama «Senderismo» y lleva la etiqueta «Schneeschuh».
+{} Touren heißen noch „Wandern“ und tragen das Schlagwort „Schneeschuh“. || {} tours are still called “Hiking” and have the tag “Schneeschuh”. || {} parcours s’appellent encore « Randonnée » et portent le mot-clé « Schneeschuh ». || {} rutas todavía se llaman «Senderismo» y llevan la etiqueta «Schneeschuh».
+Als Schneeschuh geführt, zählen sie in der Statistik als Schneeschuh und nicht mehr als Wandern; wer beides zusammen sehen will, legt in der Verwaltung eine Statistik-Gruppe an. Das Schlagwort bleibt. || Listed as snowshoeing, they count as snowshoeing in the statistics and no longer as hiking; to see both together, create a statistics group in Admin. The tag stays. || Classés en raquettes, ils comptent comme raquettes dans les statistiques et non plus comme randonnée ; pour voir les deux ensemble, créez un groupe de statistiques dans l’administration. Le mot-clé reste. || Como raquetas cuentan como raquetas en las estadísticas y ya no como senderismo; para ver ambos juntos, crea un grupo de estadísticas en Administración. La etiqueta se mantiene.
+Schneeschuh-Touren als Schneeschuh führen ({}) || List snowshoe tours as snowshoeing ({}) || Classer les sorties en raquettes comme raquettes ({}) || Registrar las rutas con raquetas como raquetas ({})
+Zurücknehmen ({}) || Undo ({}) || Annuler ({}) || Deshacer ({})
+{} Touren als „Schneeschuh“ führen? Das lässt sich hier wieder zurücknehmen. || List {} tours as “Snowshoe”? You can undo this here. || Classer {} parcours comme « Raquettes » ? Vous pourrez l’annuler ici. || ¿Registrar {} rutas como «Raquetas»? Se puede deshacer aquí.
+Als Schneeschuh führen || List as snowshoeing || Classer comme raquettes || Registrar como raquetas
+Die als Schneeschuh geführten Touren wieder als Wandern führen? Das Schlagwort „Schneeschuh“ bleibt. || List the tours marked as snowshoeing as hiking again? The tag “Schneeschuh” stays. || Classer de nouveau en randonnée les parcours classés en raquettes ? Le mot-clé « Schneeschuh » reste. || ¿Volver a registrar como senderismo las rutas marcadas como raquetas? La etiqueta «Schneeschuh» se mantiene.
+1 Tour zurückgenommen. || 1 tour reverted. || 1 parcours rétabli. || 1 ruta revertida.
+{} Touren zurückgenommen. || {} tours reverted. || {} parcours rétablis. || {} rutas revertidas.
+Sportart der Tour ändern || Change the tour’s sport || Changer le sport du parcours || Cambiar el deporte de la ruta
+Alle Aktivitäten, Favoriten zuerst || All activities, favourites first || Toutes les activités, favoris en premier || Todas las actividades, favoritas primero
+auch bei Komoot ändern || change on Komoot too || modifier aussi sur Komoot || cambiar también en Komoot
+Spazieren/Gehen || Walking || Marche || Caminar
+Gassigehen || Dog walking || Promenade du chien || Paseo con perro
+Orientierungslauf || Orienteering || Course d’orientation || Orientación
+Radpendeln || Bike commuting || Vélotaf || Bici al trabajo
+Cyclocross || Cyclocross || Cyclo-cross || Ciclocrós
+BMX || BMX || BMX || BMX
+Rodeln/Bob || Sledging/bobsleigh || Luge/bobsleigh || Trineo/bobsleigh
+Schneemobil || Snowmobile || Motoneige || Moto de nieve
+Freiwasserschwimmen || Open water swimming || Nage en eau libre || Natación en aguas abiertas
+Schnorcheln || Snorkelling || Plongée avec tuba || Esnórquel
+Kajak/Kanu || Kayak/canoe || Kayak/canoë || Kayak/canoa
+Paddleboarding/SUP || Paddleboarding/SUP || Paddle/SUP || Paddle surf/SUP
+Drachenboot || Dragon boat || Bateau-dragon || Barco dragón
+Bootfahren || Boating || Bateau || Navegación
+Wasserski || Water skiing || Ski nautique || Esquí acuático
+Wellenreiten || Surfing || Surf || Surf
+Kitesurfen || Kitesurfing || Kitesurf || Kitesurf
+Wakesurfen || Wakesurfing || Wakesurf || Wakesurf
+Skateboard || Skateboard || Skateboard || Monopatín
+Rollschuh/Inline || Roller/inline skating || Roller || Patines/en línea
+Angeln || Fishing || Pêche || Pesca
+Jagen || Hunting || Chasse || Caza
+Bogenschießen || Archery || Tir à l’arc || Tiro con arco
+Quad/ATV || Quad/ATV || Quad || Quad
+Offroad-Motorrad || Off-road motorbike || Moto tout-terrain || Moto todoterreno
+Outdoor & Sonstige || Outdoor & other || Plein air & autres || Aire libre y otros
+Nordic Walking || Nordic walking || Marche nordique || Marcha nórdica
 `;

@@ -9,7 +9,7 @@ from . import config
 
 TZ = ZoneInfo(config.TZ_NAME)
 
-# Zepp-Sporttyp -> Komoot-Sportart (3.50.0: Laufen ist eigene Sportart wie im Tagebuch; Schneeschuh zählt als Wandern, siehe MERGE)
+# Zepp-Sporttyp -> Komoot-Sportart (3.50.0: Laufen ist eigene Sportart wie im Tagebuch; 3.59.0: 178 ist wieder Schneeschuh)
 #   1 Laufen draußen, 8 Laufband -> jogging · 6/7 Gehen, 13, 15, 22 -> hike · 9 Rad · 43/105 Ski alpin · 178 Schneeschuh (-> hike + Schlagwort) · 206 E-Bike
 ZEPP_SPORT = {
     1: "jogging", 6: "hike", 7: "hike", 8: "jogging", 9: "touringbicycle", 13: "hike", 15: "hike", 22: "hike",
@@ -22,14 +22,44 @@ ALIAS = {
     "type_13": "hike", "type_15": "hike", "type_22": "hike", "type_43": "skialpin", "type_105": "skialpin",
     "type_178": "snowshoe", "type_206": "e_touringbicycle",
 }
-LABEL = {
-    "hike": "Wanderung", "mountaineering": "Bergtour", "jogging": "Lauf",
-    "touringbicycle": "Radtour", "e_touringbicycle": "E-Bike-Tour", "racebike": "Rennradtour",
-    "mtb": "MTB-Tour", "skialpin": "Skifahren", "skitour": "Skitour",
-    "nordic": "Langlauf", "nordicwalking": "Nordic Walking",
+# 3.59.0 Aktivitäten-Katalog – EINE Tabelle (wie SPORT_TABLE in 01-grundlagen.js; tests/test_stat_gruppen_359.py prüft, dass beide gleich sind).
+# Quelle: Liste der Amazfit Balance 2 (Auswahl: Aktivitäten mit Strecke/Ort). Vorhandene Schlüssel bleiben (auch Komoot-Kennungen wie touringbicycle, e_mtb,
+# mtb_easy = Gravel, skaten = Inline); neue Aktivitäten haben eigene Schlüssel. Eine weitere Aktivität = eine Zeile hier und eine in SPORT_TABLE (+ Übersetzung).
+#   (Schlüssel, Name der Sportart, Vorgabename einer Tour, Kategorie)
+KATEGORIEN = [("fuss", "Zu Fuß"), ("rad", "Rad"), ("winter", "Winter"), ("wasser", "Wasser"), ("sonst", "Outdoor & Sonstige")]
+CATALOG = [
+    ("hike", "Wandern", "Wanderung", "fuss"), ("walk", "Spazieren/Gehen", "Spaziergang", "fuss"), ("dogwalk", "Gassigehen", "Gassirunde", "fuss"),
+    ("mountaineering", "Bergtour", "Bergtour", "fuss"), ("climbing", "Klettern", "Klettertour", "fuss"), ("nordicwalking", "Nordic Walking", "Nordic Walking", "fuss"),
+    ("snowshoe", "Schneeschuh", "Schneeschuhwanderung", "fuss"), ("jogging", "Laufen", "Lauf", "fuss"), ("trailrun", "Trailrunning", "Trailrun", "fuss"),
+    ("orienteering", "Orientierungslauf", "Orientierungslauf", "fuss"),
+    ("touringbicycle", "Radtour", "Radtour", "rad"), ("commute", "Radpendeln", "Radpendeln", "rad"), ("racebike", "Rennrad", "Rennradtour", "rad"),
+    ("mtb", "MTB", "MTB-Tour", "rad"), ("mtb_easy", "Gravelbike", "Gravel-Tour", "rad"), ("cyclocross", "Cyclocross", "Cyclocross", "rad"), ("bmx", "BMX", "BMX", "rad"),
+    ("e_touringbicycle", "E-Bike", "E-Bike-Tour", "rad"), ("e_mtb", "E-Mountainbike", "E-MTB-Tour", "rad"),
+    ("skialpin", "Skifahren", "Skifahren", "winter"), ("skitour", "Skitour", "Skitour", "winter"), ("nordic", "Langlauf", "Langlauf", "winter"),
+    ("snowboard", "Snowboard", "Snowboard", "winter"), ("sled", "Rodeln/Bob", "Rodeltour", "winter"), ("iceskate", "Eislaufen", "Eislaufen", "winter"),
+    ("snowmobile", "Schneemobil", "Schneemobil-Tour", "winter"),
+    ("swim", "Freiwasserschwimmen", "Schwimmen", "wasser"), ("snorkel", "Schnorcheln", "Schnorcheln", "wasser"), ("kayak", "Kajak/Kanu", "Paddeltour", "wasser"),
+    ("sup", "Paddleboarding/SUP", "SUP-Tour", "wasser"), ("rowing", "Rudern", "Rudertour", "wasser"), ("dragonboat", "Drachenboot", "Drachenboot", "wasser"),
+    ("sailing", "Segeln", "Segeltour", "wasser"), ("boat", "Bootfahren", "Bootstour", "wasser"), ("waterski", "Wasserski", "Wasserski", "wasser"),
+    ("surf", "Wellenreiten", "Wellenreiten", "wasser"), ("kitesurf", "Kitesurfen", "Kitesurfen", "wasser"), ("wakesurf", "Wakesurfen", "Wakesurfen", "wasser"),
+    ("skateboard", "Skateboard", "Skateboard", "sonst"), ("skaten", "Rollschuh/Inline", "Inlinetour", "sonst"), ("horse", "Reiten", "Ausritt", "sonst"),
+    ("fishing", "Angeln", "Angeln", "sonst"), ("hunting", "Jagen", "Jagd", "sonst"), ("archery", "Bogenschießen", "Bogenschießen", "sonst"),
+    ("golf", "Golf", "Golfrunde", "sonst"), ("atv", "Quad/ATV", "Quad-Tour", "sonst"), ("motorbike", "Offroad-Motorrad", "Motorradtour", "sonst"),
+    ("other", "Sonstiges", "Tour", "sonst"),
+]
+LABEL = {k: tour for k, _, tour, _ in CATALOG}                  # Vorgabename einer importierten Tour je Sportart
+SPORT_NAME = {k: n for k, n, _, _ in CATALOG}                   # Name der Sportart (deutsch)
+# Aktivitäten-Familien (intern, für Tempo-Schätzung, Planung, Steilheit und ältere Ziele „grp:…“) – NICHT die Statistik-Gruppen (app/stat_gruppen.py, je Benutzer)
+FAMILIE = {
+    "foot": ("hike", "mountaineering", "nordicwalking", "snowshoe", "walk", "climbing", "dogwalk"),
+    "bike": ("touringbicycle", "e_touringbicycle", "racebike", "mtb", "mtb_easy", "e_mtb", "commute", "cyclocross", "bmx"),
+    "ski": ("skitour", "skialpin", "snowboard"),
+    "run": ("jogging", "nordic", "trailrun", "orienteering"),
 }
-# 3.50.0: zusammengelegte Sportarten – alte Kennung -> (Sportart, Schlagwort). Schneeschuhwandern zählt als Wandern (wie im Tagebuch), bleibt über das Schlagwort auffindbar.
-MERGE = {"snowshoe": ("hike", "Schneeschuh")}
+# 3.50.0 legte Schneeschuh mit Wandern zusammen (Wandern + Schlagwort). Seit 3.59.0 ist Schneeschuh wieder eine eigene Sportart: nichts wird mehr zusammengelegt.
+# Touren, die 3.50.0 umgestellt hat, bleiben Wandern mit Schlagwort, bis du sie unter Prüfen „als Schneeschuh führst“ (app/sport_umzug.py).
+MERGE = {}
+SCHNEESCHUH_TAG = "Schneeschuh"
 NAME_RAW = {"snowshoe": "Schneeschuhwanderung"}   # Vorgabename einer importierten Tour, deren Quelle Schneeschuh meldet
 
 

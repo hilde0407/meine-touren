@@ -33,7 +33,10 @@ def ref(year, sport=""):
 def parse(tour_id):
     """'ds:2025:hike' -> (2025, 'hike'); 'ds:all' -> (0, '')."""
     p = tour_id[len(PREFIX):].split(":", 1)
-    return (0 if p[0] == "all" else int(p[0])), (gpxtools.norm(p[1])[0] if len(p) > 1 else "")      # 3.50.0: ältere Links „snowshoe“ = Wandern
+    y, sp = (0 if p[0] == "all" else int(p[0])), (gpxtools.norm(p[1])[0] if len(p) > 1 else "")
+    if sp == "snowshoe" and not db.one("SELECT 1 x FROM tours WHERE sport='snowshoe' LIMIT 1"):    # Links von vor 3.50.0, Touren noch Wandern mit Schlagwort: wie bisher Wandern
+        sp = "hike"
+    return y, sp
 
 
 def title(year, sport=""):

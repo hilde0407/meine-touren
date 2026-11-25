@@ -9,7 +9,7 @@
    und lässt die Abschnitte unverändert, deren Daten nicht nach Sportart oder Zeitraum zu trennen sind (Uhr-Belastung, Tempo-Rechner, Erinnerungen). Ein Baustein mit eigenem Filter
    (Einstellungen → „Globalen Filter verwenden“ aus, Feld „eigen“) behält seine Einstellung. */
 const ST = {F: {sports: [], kind: "all", yr: 0, von: "", bis: ""}, focus: "", base: null};
-const ST_SPORT = /^[A-Za-z0-9_]{1,40}$/, ST_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const ST_SPORT = /^(?:sgrp:[a-z0-9]{1,12}|[A-Za-z0-9_]{1,40})$/, ST_DATE = /^\d{4}-\d{2}-\d{2}$/;
 /* Fähigkeit der festen Abschnitte: s = Sportart, r = Zeitraum (1 = ja, "y" = nur als Jahr, 0 = nein) */
 const ST_CAP = {
   kpi: {s: 1, r: 1}, kmmonat: {s: 1, r: 1}, kmverlauf: {s: 1, r: 1}, sportarten: {s: 0, r: 1}, heat: {s: 1, r: 1},          // 3.45.0: „Ziele“ und „Bestwerte“ sind Bausteine (Filter über ihr Schema)
@@ -22,7 +22,7 @@ const ST_ICON = {kpi: "met", kmmonat: "met", kmverlauf: "trend", sportarten: "ma
 const ST_DEF = () => ({sports: [], kind: "all", yr: 0, von: "", bis: ""});
 function stFromDoc(d) {
   if (!d || typeof d !== "object") return ST_DEF();
-  const r = d.range, sp = sNormList((Array.isArray(d.sports) ? d.sports : []).filter(x => ST_SPORT.test(x))).slice(0, 20);      // 3.50.0: „snowshoe“ = Wandern
+  const r = d.range, sp = sgClean(sNormList((Array.isArray(d.sports) ? d.sports : []).filter(x => ST_SPORT.test(x)))).slice(0, 20);      // 3.59.0: gelöschte Gruppe fällt weg
   if (r === "y" && d.yr >= 1970) return {sports: sp, kind: "y", yr: +d.yr, von: "", bis: ""};
   if (r === "12m" || r === "90d") return {sports: sp, kind: r, yr: 0, von: "", bis: ""};
   if (r === "year") return {sports: sp, kind: "y", yr: new Date().getFullYear(), von: "", bis: ""};
@@ -83,7 +83,7 @@ function stFilter(q) {
   const has = q && q.get && ["y", "z", "s", "von", "bis"].some(k => q.has(k));
   if (!has && ST.base) return ST.base;
   const g = k => (q && q.get && q.get(k)) || "",
-    sports = sNormList(g("s").split(",").filter(x => ST_SPORT.test(x))).slice(0, 20),
+    sports = sgClean(sNormList(g("s").split(",").filter(x => ST_SPORT.test(x)))).slice(0, 20),
     y = +g("y"), z = g("z"), von = g("von"), bis = g("bis");
   let kind = "all", yr = 0;
   if (y >= 1970 && y <= 2100) {
@@ -106,13 +106,16 @@ function stHash(F) {
   if (F.sports.length) p.push("s=" + F.sports.map(encodeURIComponent).join(","));
   return "#/stats" + (p.length ? "?" + p.join("&") : "");
 }
-const stSportsTxt = F => (F.sports.length <= 2 ? F.sports.map(sName).join(" und ") : `${F.sports.length} Sportarten`);
+const stSportsTxt = F => (F.sports.length <= 2 ? F.sports.map(sName).join(" und ") : `${F.sports.length} Sportarten`);      // Gruppen mit ihrem Namen (sName kennt „sgrp:<id>“)
 
 /* ---------- Filterleiste (oben auf der Seite; nutzt flRange/flIn aus 53-filter.js) ---------- */
 function stFilterBar(F, R, n, inRange) {
   const ys = years(), cy = new Date().getFullYear(), km = {};
-  inRange.forEach(t => (km[t.sport] = (km[t.sport] || 0) + t.km));
-  const sports = Object.keys(km).sort((a, b) => km[b] - km[a]);
+  inRange.forEach(t => {
+    km[t.sport] = (km[t.sport] || 0) + t.km;
+    if (isSg(sgKey(t.sport))) km[sgKey(t.sport)] = (km[sgKey(t.sport)] || 0) + t.km;            // 3.59.0: jede Statistik-Gruppe als eigener Eintrag (zusätzlich zu ihren Sportarten)
+  });
+  const sports = Object.keys(km).sort((a, b) => km[b] - km[a] || isSg(b) - isSg(a));
   F.sports.forEach(s => !sports.includes(s) && sports.push(s));
   const title = (F.kind === "y" ? "Das Jahr " + F.yr : F.kind === "all" ? "Alle Touren" : R.label) + (F.sports.length ? ", " + stSportsTxt(F) : ""),
     Z = [["year", "Laufendes Jahr", F.kind === "y" && F.yr === cy], ["12m", "Letzte 12 Monate", F.kind === "12m"], ["90d", "Letzte 90 Tage", F.kind === "90d"], ["prev", "Vorjahr", F.kind === "y" && F.yr === cy - 1], ["c", "Von–bis …", F.kind === "c"]],
@@ -122,7 +125,7 @@ function stFilterBar(F, R, n, inRange) {
   <div class="years" role="group" aria-label="Zeitraum: Jahr"><button type="button" data-y="0" aria-pressed="${F.kind === "all"}" class="${F.kind === "all" ? "on" : ""}">Gesamt</button>${ys.map(y => `<button type="button" data-y="${y}" aria-pressed="${F.kind === "y" && F.yr === y}" class="${F.kind === "y" && F.yr === y ? "on" : ""}">${y}</button>`).join("")}</div>
   <div class="chips mt14 stz" role="group" aria-label="Zeitraum: weitere">${Z.map(([k, l, on]) => `<button type="button" class="chip${on ? " on" : ""}" data-z="${k}" aria-pressed="${on}"${k === "c" ? ' aria-controls="stfc"' : ""}>${l}</button>`).join("")}</div>
   <form class="stfc" id="stfc"${F.kind === "c" ? "" : " hidden"} novalidate><label>Von <input type="date" name="von" value="${F.von}"></label><label>Bis <input type="date" name="bis" value="${F.bis}"></label><button class="btn sm" type="submit">Übernehmen</button><span class="stfe" role="alert"></span></form>
-  <div class="chips mt14" id="sch" role="group" aria-label="Sportart"><button type="button" class="chip ${F.sports.length ? "" : "on"}" data-s="" aria-pressed="${!F.sports.length}">Alle Sportarten</button>${sports.map(s => `<button type="button" class="chip ${F.sports.includes(s) ? "on" : ""}" data-s="${esc(s)}" aria-pressed="${F.sports.includes(s)}"><i style="background:${sCol(s)}"></i>${sName(s)}</button>`).join("")}</div>
+  <div class="chips mt14" id="sch" role="group" aria-label="Sportart"><button type="button" class="chip ${F.sports.length ? "" : "on"}" data-s="" aria-pressed="${!F.sports.length}">Alle Sportarten</button>${sports.map(s => `<button type="button" class="chip ${F.sports.includes(s) ? "on" : ""}" data-s="${esc(s)}" aria-pressed="${F.sports.includes(s)}"><i style="background:${sCol(s)}"></i>${isSg(s) ? esc(sgLabel(s)) : sName(s)}</button>`).join("")}</div>
   ${stDefault(F) || (!stDirty() && !stDefault(stSaved())) ? "" : `<p class="stfs mut"><span>Filter aktiv: ${esc(sum)}.</span> <a href="#/stats" id="stfr">${stDirty() ? "Auf den gespeicherten Filter zurücksetzen" : "Filter zurücksetzen"}</a></p>`}</section>`;
 }
 function stFilterBind(F) {

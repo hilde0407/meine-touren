@@ -74,7 +74,7 @@ def api_gear_save(body: dict):
     if not name:
         raise HTTPException(400, "Bitte einen Namen eingeben")
     kind = body.get("kind") if body.get("kind") in KINDS else "Sonstiges"
-    sports = ",".join(dict.fromkeys(gpxtools.norm(s)[0] for s in (body.get("sports") or []) if isinstance(s, str) and s.replace("_", "").isalnum()))   # 3.50.0: Schneeschuh -> Wandern
+    sports = ",".join(dict.fromkeys(gpxtools.norm(s)[0] for s in (body.get("sports") or []) if isinstance(s, str) and s.replace("_", "").isalnum()))   # 3.59.0: Schneeschuh bleibt Schneeschuh
     try:
         lim = float(body.get("limit_km") or 0) or None
     except (TypeError, ValueError):

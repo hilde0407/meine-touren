@@ -10,7 +10,7 @@ import time
 
 from . import config, db, routes, tracks
 
-WALK = ("hike", "nordicwalking", "snowshoe", "mountaineering")
+WALK = ("hike", "nordicwalking", "snowshoe", "mountaineering", "walk", "dogwalk")
 # (Spitzentempo in km/h für Sprung-Erkennung, Dauertempo in km/h für „schneller Abschnitt“)
 LIMITS = {"walk": (22, 12), "run": (35, 22), "bike": (90, 50), "other": (150, 60)}
 
@@ -19,9 +19,9 @@ def kind(sport):
     s = sport or "hike"
     if s in WALK:
         return "walk"
-    if s in ("jogging", "nordic"):
+    if s in ("jogging", "nordic", "trailrun", "orienteering"):
         return "run"
-    if s in ("touringbicycle", "e_touringbicycle", "racebike", "mtb", "e_mtb"):
+    if s in ("touringbicycle", "e_touringbicycle", "racebike", "mtb", "e_mtb", "mtb_easy", "commute", "cyclocross", "bmx"):
         return "bike"
     return "other"
 

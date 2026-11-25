@@ -6,7 +6,7 @@
 @font-face{font-family:"Barlow Semi Condensed";font-weight:600;font-display:swap;src:url(vendor/fonts/barlow-semi-condensed-latin-600-normal.woff2) format("woff2")}
 @font-face{font-family:"Barlow Semi Condensed";font-weight:700;font-display:swap;src:url(vendor/fonts/barlow-semi-condensed-latin-700-normal.woff2) format("woff2")}
 :root{--bg:#e9ede7;--surface:#f6f8f3;--ink:#0e2a2b;--mut:#5b6f6c;--rule:#c9d3cc;--soft:#dbe3dc;--forest:#0e2a2b;--yellow:#f2c230;--yellow-ink:#241d00;--bars:#17494a;--accent2:#d0652a;
---hike:#2f8f5f;--bike:#d0792a;--ebike:#c9a21c;--ski:#3b7fb0;--snow:#7a5fb0;--run:#c0504d;--other:#78857f;
+--hike:#2f8f5f;--bike:#d0792a;--ebike:#c9a21c;--ski:#3b7fb0;--snow:#7a5fb0;--run:#c0504d;--other:#78857f;--water:#1f8aa8;
 --d:"Barlow Semi Condensed","Barlow",system-ui,sans-serif;--b:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;--r:6px}
 @media (prefers-color-scheme:dark){:root{--bg:#0b1718;--surface:#10272a;--ink:#e3ece8;--mut:#8aa5a1;--rule:#25403f;--soft:#183234;--forest:#071314;--bars:#6fb5a5;--yellow-ink:#241d00}}
 *{box-sizing:border-box}html{scroll-behavior:smooth}
@@ -2379,3 +2379,30 @@ html.mob .fig .v{font-size:min(24px,23cqw)}html.mob .figs.sm .fig .v{font-size:m
 .kvlist .btn.sm{min-height:36px}
 .kvdet>summary{font-weight:600}
 @media (max-width:420px){.kpgrid{grid-template-columns:repeat(3,minmax(0,1fr))}.kvlist li{gap:4px 8px}}
+/* 3.59.0 Statistik-Gruppen in der Verwaltung */
+.sgp .sglist{display:grid;gap:12px;margin-top:10px}
+.sgg{margin:0;padding:12px;border:1.5px solid var(--rule);border-radius:12px;min-width:0}
+.sgrow{align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.sgrow .sgn{min-width:0;max-width:360px;min-height:40px}
+.sgnl{font-weight:600}
+.sgchip{flex-direction:column;align-items:flex-start;justify-content:center}
+.sgchip.sgoff{opacity:.5;cursor:not-allowed;border-style:dashed}
+.sgchip.sgoff input{cursor:not-allowed}
+.sgchip .sgin{font:400 12px var(--b);opacity:.85}
+.sgstate{margin:6px 0 0}
+.sgerr:empty{display:none}
+@media (max-width:420px){.sgg{padding:10px}.sgrow .sgn{max-width:none;flex-basis:100%}}
+/* 3.59.0 Aktivitäten-Katalog: Farben für Wasser und Schnee in Ring und Plan/Ergebnis */
+.slsg-water{--sg:var(--water)}.pe-s-water{--pe-ist:var(--water)}.pe-s-snow{--pe-ist:var(--snow)}
+/* 3.59.0 Aufzeichnen: weitere Aktivitäten unter „Mehr …“ */
+.recspx{min-height:48px;padding:4px 6px;border:1.5px solid color-mix(in srgb,var(--ink) 20%,transparent);border-radius:var(--r);background:var(--card);color:var(--ink);font:500 15px var(--d);cursor:pointer;overflow-wrap:anywhere}
+.recspx[aria-checked=true]{background:var(--yellow);border-color:var(--yellow);color:var(--yellow-ink);font-weight:700}
+.recmore .recsports{margin:4px 0 0}
+/* 3.59.0 Statistik-Gruppen nach Kategorien, Favoriten-Aktivitäten */
+.sgcat{margin:8px 0 0}.sgcl{display:block;font:600 13px var(--b);color:var(--mut);margin:0 0 4px}
+.sgvor{margin-top:12px}
+.favlist{margin:10px 0;padding-left:24px;display:grid;gap:4px}
+.favlist li{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.favlist .favn{flex:1 1 auto;min-width:0;font-weight:600}
+.favlist .btn.sm{min-width:40px;min-height:40px}
+.favst[aria-pressed=true]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.favst:disabled{opacity:.5;cursor:not-allowed}

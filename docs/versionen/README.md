@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.59.0](3.59.0.md) – Aktivitäten-Katalog (48 Aktivitäten), Schneeschuh wieder eigene Sportart, keine festen Zusammenfassungen mehr, eigene Statistik-Gruppen, Favoriten-Aktivitäten
 - [3.58.0](3.58.0.md) – Komoot: Upload immer privat (gesetzt und geprüft), Notiz und Pins mitsenden, Rückprüfung früherer Uploads, Komoot-Paket zum Selbst-Hochladen
 - [3.57.0](3.57.0.md) – Notizen, Fotos und Videos mit Mein Tourentagebuch abgleichen: neue Schnittstelle (Server-Seite), Notizen werden zusammengeführt
 - [3.56.0](3.56.0.md) – Wanderführer für Mein Tourentagebuch: neue Schnittstelle `/api/guides/export` (auch für Betrachter)

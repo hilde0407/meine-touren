@@ -283,7 +283,7 @@ def test_bereit_start_sportart_gps(pw, app):
         r = pg.evaluate("""() => { const b = document.querySelector('#rstart').getBoundingClientRect(); return {w: b.width, h: b.height, bottom: b.bottom, ih: innerHeight, tab: document.querySelector('#tabbar').getBoundingClientRect().top,
           fs: parseFloat(getComputedStyle(document.querySelector('#rstart')).fontSize)}; }""")
         assert r["h"] >= 88 and r["w"] >= 340 and r["fs"] >= 30 and r["bottom"] <= r["tab"], r        # ein großer Start-Knopf, ohne Rollen erreichbar
-        assert pg.locator(".recsp").count() == 9 and pg.locator('.recsp[aria-checked="true"]').count() == 1
+        assert pg.locator(".recsp").count() == 5 and pg.locator('.recsp[aria-checked="true"]').count() == 1          # 3.59.0: die Favoriten-Aktivitäten (Vorgabe: 5), alle übrigen unter „Mehr …“
         assert pg.evaluate("() => document.querySelector('.recsp').dataset.sp") == "hike"
         assert _small_targets(pg) == []
         for hint in ("#rhperm", "#rhbat", "#rhgps", "#rhnotif", "#rbk", "#rhph"):          # Hinweise nur, wenn nötig
@@ -818,3 +818,37 @@ def test_app_seiten_ohne_bruecke_und_inhalt():
         for lang in ("de:{", "en:{", "fr:{", "es:{"):
             assert lang in src, (name, lang)
         assert ' onclick="' not in src and "eval(" not in src, name          # keine Inline-Handler im Markup
+
+
+def test_favoriten_und_mehr_359(pw, app):
+    """3.59.0: angeboten werden die Favoriten-Aktivitäten (Verwaltung), alle übrigen nach Kategorien unter „Mehr …“; eine dort gewählte Aktivität steht beim nächsten Mal vorn."""
+    def put(fav):
+        rq = urllib.request.Request(app + "/api/aktivitaeten/favoriten", data=json.dumps({"favoriten": fav}).encode(), method="PUT", headers={"content-type": "application/json"})
+        urllib.request.urlopen(rq, timeout=10).read()
+    put(["kayak", "snowshoe"])
+    pg = _open(pw, app, geo=True)
+    try:
+        pg.wait_for_selector("#rstart", timeout=T)
+        assert pg.eval_on_selector_all(".recsp", "l => l.map(x => x.dataset.sp)") == ["kayak", "snowshoe"]
+        expect(pg.locator('.recsp[data-sp="kayak"]')).to_have_text("Kajak/Kanu")
+        assert not pg.evaluate("() => document.querySelector('#rspm').open")
+        open_details(pg, "#rspm")
+        cats = pg.eval_on_selector_all("#rspm .reclbl", "l => l.map(x => x.textContent)")
+        assert cats == ["Zu Fuß", "Rad", "Winter", "Wasser", "Outdoor & Sonstige"]
+        assert pg.locator('#rspm .recspx[data-sp="kayak"]').count() == 0 and pg.locator('#rspm .recspx[data-sp="skitour"]').count() == 1
+        pg.locator('#rspm .recspx[data-sp="mtb_easy"]').click()
+        expect(pg.locator('#rspm .recspx[data-sp="mtb_easy"]')).to_have_attribute("aria-checked", "true", timeout=T)
+        assert pg.locator('.recsp[aria-checked="true"]').count() == 0
+        pg.locator("#rstart").click()
+        pg.wait_for_selector("#rstop", timeout=T)
+        assert any(c.startswith("start:mtb_easy:") for c in pg.evaluate("() => window._calls"))
+        _state(pg, state="idle")
+        pg.wait_for_selector("#rstart", timeout=T)
+        assert pg.eval_on_selector_all(".recsp", "l => l.map(x => x.dataset.sp)") == ["mtb_easy", "kayak", "snowshoe"]       # zuletzt benutzt: vorn und vorgewählt
+        expect(pg.locator(".recsp").first).to_have_attribute("aria-checked", "true")
+        assert _small_targets(pg) == []
+        _no_hscroll(pg)
+        assert not pg.errors, pg.errors
+    finally:
+        put(["hike", "jogging", "touringbicycle", "skitour", "mtb"])
+        pg.browser_.close()

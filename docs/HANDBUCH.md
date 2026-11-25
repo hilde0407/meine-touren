@@ -499,7 +499,7 @@ Ob eine Maus oder ein Touchpad benutzt wird, erkennt die App an der Art der Bewe
 
 **Bearbeiten** bietet:
 
-* **Umbenennen**, **Tags & Alben** (Schlagworte),
+* **Umbenennen**, **Tags & Alben** (Schlagworte), **Sportart ändern** (alle Aktivitäten, Favoriten zuerst; gilt auch nach dem Komoot-Abgleich, auf Wunsch auch bei Komoot geändert – ab 3.59.0),
 * **Streckenfarbe** (Farbe und Breite auf der Karte),
 * **Höhen korrigieren** (mit Geländemodell neu berechnen), **Höhe aus Uhr abgleichen (Zepp)**,
 * **Track korrigieren** (Fehlpunkte und Pausen bereinigen; das Original bleibt erhalten),
@@ -746,6 +746,17 @@ Wenn deine Touren Pulsdaten haben: **Zeit in den Pulszonen** je Jahr, **Durchsch
 ### 11.5 Statistik anpassen
 
 Die Statistik besteht aus Bausteinen wie die anderen Seiten: **Seite anpassen** und **Ansichten** ([Kapitel 13](#k13)). Neuere Bausteine wie „Jahreszeiten und Wetter“, die Wochenansicht von „Belastung und Erholung“ und „Ausrüstung“ stehen in [Abschnitt 13.12](#k13).
+
+### 11.6 Aktivitäten und Statistik-Gruppen (ab 3.59.0)
+
+**Aktivitäten:** Meine Touren kennt 48 Aktivitäten in fünf Kategorien – **Zu Fuß** (Wandern, Spazieren/Gehen, Gassigehen, Bergtour, Klettern, Nordic Walking, Schneeschuh, Laufen, Trailrunning, Orientierungslauf), **Rad** (Radtour, Radpendeln, Rennrad, MTB, Gravelbike, Cyclocross, BMX, E-Bike, E-Mountainbike), **Winter** (Skifahren, Skitour, Langlauf, Snowboard, Rodeln/Bob, Eislaufen, Schneemobil), **Wasser** (Freiwasserschwimmen, Schnorcheln, Kajak/Kanu, Paddleboarding/SUP, Rudern, Drachenboot, Segeln, Bootfahren, Wasserski, Wellenreiten, Kitesurfen, Wakesurfen) und **Outdoor & Sonstige** (Skateboard, Rollschuh/Inline, Reiten, Angeln, Jagen, Bogenschießen, Golf, Quad/ATV, Offroad-Motorrad, Sonstiges). Jede hat ein Symbol und eine Kartenfarbe und ist überall wählbar, wo eine Sportart gewählt wird.
+
+**Jede Aktivität zählt einzeln.** Die Statistik fasst nichts von sich aus zusammen – auch nicht Wandern und Bergtour oder die Radarten. Wer Aktivitäten gemeinsam sehen will, legt eine **Statistik-Gruppe** an: **Verwaltung → Übersicht → Statistik: Aktivitäten zusammenfassen**.
+
+* Jede Gruppe hat einen **Namen** (1–30 Zeichen) und mindestens **zwei Aktivitäten** (nach Kategorien zum Ankreuzen). Eine Aktivität kann nur in einer Gruppe sein; ist sie schon in einer anderen, ist sie ausgegraut und zeigt „in „…““. Höchstens acht Gruppen. **Gruppe hinzufügen**, **🗑 Löschen**, **Gruppen speichern** (Rückmeldung „Gespeichert ✓“).
+* **Vorschläge** mit einem Klick: „Wandern und Bergtouren“ (Wandern, Bergtour, Schneeschuh), „Rad (alle)“, „Ski (alle)“ (Skifahren, Skitour, Langlauf). Sie werden nie automatisch angelegt; gespeichert wird erst mit „Gruppen speichern“.
+* **Wirkung:** Im Sportartfilter der Statistik und der Bausteine steht jede Gruppe als eigener Eintrag „Name (zusammengefasst)“; die einzelnen Aktivitäten bleiben wählbar. Die Aufteilungen nach Sportart – Abschnitt „Sportarten“, Sportarten-Verteilung, Rekorde „Je Sportart“, Jahresrückblick (auch als Link) – zeigen die Gruppe als eine Zeile. Bei **Ziele → Ziel hinzufügen** sind die Gruppen wählbar.
+* **Was bleibt:** Die Touren, ihre Sportart, der Abgleich mit Komoot und Zepp, Export, Tourenliste und Einzelansichten bleiben unverändert. Ältere Ziele wie „Alle Rad-Sportarten“ zählen weiter. Wird eine Gruppe gelöscht, zeigen gespeicherte Filter wieder alle Sportarten; ein Ziel für die Gruppe zählt alle Sportarten („(Gruppe gelöscht)“). Gruppen und Favoriten gehören zur Datensicherung.
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -1063,6 +1074,8 @@ Die Verwaltung wird **Administratoren** angezeigt. **Einstellungen speichern** a
 * **Zustand:** Haken oder Warnzeichen für Komoot-Zugang, letztes Backup, Datenbank, freien Speicher, Touren ohne Strecke und Fotos ohne Tour.
 * **Updates:** zeigt die installierte und die neueste Version auf GitHub. **Jetzt prüfen** fragt sofort nach; „Regelmäßig (alle 6 Stunden) auf neue Versionen prüfen“ kannst du einschalten. Administratoren installieren neue Versionen auf den meisten Installationen per Knopfdruck; bei Docker nennt die App nur den Befehl. Vor jedem Update gibt es automatisch eine Sicherung.
 * **Protokoll:** Meldungen der Hintergrundarbeiten.
+* **Favoriten-Aktivitäten:** Stern ☆/★ wählt bis zu 12 Aktivitäten, ↑/↓ ordnet sie (Vorgabe: Wandern, Laufen, Radtour, Skitour, MTB). Beim Aufzeichnen und Planen stehen sie zuerst, alle übrigen unter „Mehr …“; die zuletzt benutzte ist vorgewählt.
+* **Statistik: Aktivitäten zusammenfassen:** welche Aktivitäten die Statistik gemeinsam zählt ([Abschnitt 11.6](#k11)).
 * **Heimatort und Puls:** Heimatort suchen und festlegen; **Maximalpuls (bpm)** für die Pulszonen (leer = 185 bzw. der höchste gemessene Wert).
 * **Entwicklermodus:** blendet Ansichten zur Fehlersuche ein (Selbsttest, vollständiges Protokoll …). Im Alltag nicht nötig.
 
@@ -1115,7 +1128,7 @@ Hier findest du auffällige Touren (zum Beispiel unplausible Tempi) und Aufräum
 
 **Läufe von der Uhr (ab 3.50.0):** Läufe der Zepp-Uhr sind „Laufen“, nicht mehr „Wandern“. Was sicher zugeordnet werden konnte, hat die App beim Update selbst umgestellt. Touren, die von Komoot stammen oder nur über Startzeit und Länge zu einem Lauf der Uhr passen, stehen hier: **Auf Laufen umstellen** (einzeln) oder **Alle … auf Laufen umstellen** (mit Rückfrage). Der Abschnitt erscheint nur, wenn es solche Touren gibt.
 
-**Schneeschuh (ab 3.50.0):** Schneeschuhtouren sind Wanderungen mit dem Schlagwort **„Schneeschuh“** – sie zählen in Statistik und Zielen als Wandern, wie im Tourentagebuch. Steilheit über 30° und die Sicherheitsnotiz gibt es weiterhin bei Touren mit diesem Schlagwort.
+**Schneeschuh (ab 3.59.0 wieder eigene Sportart):** 3.50.0 hatte Schneeschuhtouren zu Wanderungen mit dem Schlagwort **„Schneeschuh“** gemacht. Solche Touren bleiben, wie sie sind, bis du unter Prüfen → **Schneeschuh-Touren** auf **„Schneeschuh-Touren als Schneeschuh führen“** klickst; **„Zurücknehmen“** macht das rückgängig, das Schlagwort bleibt. Neue Schneeschuhtouren sind gleich Schneeschuh. Steilheit über 30° und die Sicherheitsnotiz gibt es bei Schneeschuh und bei Touren mit dem Schlagwort.
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -1129,7 +1142,7 @@ Hier findest du auffällige Touren (zum Beispiel unplausible Tempi) und Aufräum
 
 **Was sie bietet:**
 
-* **GPS-Aufzeichnung** im Hintergrund (auch bei ausgeschaltetem Bildschirm). Das Aufzeichnen steht in der App im Mittelpunkt: **Aufzeichnen** ist der runde Reiter in der Mitte der Tab-Leiste und die Startseite der App (umstellbar auf „Übersicht“ unter *Einstellungen der Aufzeichnung*). Der Reiter zeigt auf jeder Seite, ob eine Aufzeichnung läuft (rot, mit Zeit), pausiert ist oder auf das Hochladen wartet.
+* **GPS-Aufzeichnung** im Hintergrund (auch bei ausgeschaltetem Bildschirm). Das Aufzeichnen steht in der App im Mittelpunkt: **Aufzeichnen** ist der runde Reiter in der Mitte der Tab-Leiste und die Startseite der App (umstellbar auf „Übersicht“ unter *Einstellungen der Aufzeichnung*). Der Reiter zeigt auf jeder Seite, ob eine Aufzeichnung läuft (rot, mit Zeit), pausiert ist oder auf das Hochladen wartet. Zur Wahl stehen deine **Favoriten-Aktivitäten** (Verwaltung → Übersicht), die zuletzt benutzte vorn und vorgewählt; **Mehr …** zeigt alle übrigen Aktivitäten nach Kategorien (ab 3.59.0).
   * **Bereit:** Sportart antippen (die zuletzt genutzte steht vorn), GPS-Zustand ablesen („GPS bereit, ±5 m“), **Aufzeichnung starten**. Route mit Sprachansagen wählst du direkt darunter; Name, Fotomodus, Wetterwarnung und Live-Standort-Link liegen unter **Einstellungen der Aufzeichnung**.
   * **Unterwegs:** Zeit und Strecke groß, darunter Aufstieg, Höhe und Tempo, Karte mit Spur; **Foto** und **Wegpunkt** als kleinere Knöpfe, **Pausieren** und **Beenden** groß am unteren Rand. **Beenden** fragt nach („Weiter aufzeichnen“ / „Beenden“).
   * **Fertig:** Die Tour wird von selbst hochgeladen; danach **Tour ansehen**. Ohne Netz steht dort „Wartet auf Netz – wird später gesendet“: Die Aufzeichnung bleibt auf dem Handy und wird gesendet, sobald der Server erreichbar ist. Mit **Später senden, neue Aufzeichnung** kannst du sofort weiter aufzeichnen (die App behält die letzten 10 Aufzeichnungen als Sicherung).
@@ -1198,7 +1211,7 @@ Laut Projektbeschreibung kann sie unter anderem: Touren mit Karte und Höhenprof
 
 **Notizen, Fotos und Videos abgleichen (ab 3.57.0):** Meine Touren hat die Gegenstelle dafür, dass das Tagebuch Notizen und Fotos einer verbundenen Tour in **beide Richtungen** abgleicht – nur wenn du in der App auf den Knopf tippst, und vorher zeigt die App, was neu ist. **Notizen** werden zusammengeführt, nie überschrieben: Hat sich die Notiz hier seit dem letzten Abgleich nicht geändert, übernimmt Meine Touren die Fassung aus der App. Wurde sie an beiden Stellen geändert, bleiben beide stehen – die Fassung aus der App wird unten mit der Trennzeile „——— Aus Mein Tourentagebuch, Datum Uhrzeit ———“ angehängt. Ein leerer Text aus der App löscht nichts. Eine Notiz darf jetzt bis zu 20 000 Zeichen lang sein. **Fotos** aus der App landen verkleinert (wie alle Fotos, Vorgabe 2200 Pixel) in deiner Fotobibliothek im Ordner `tagebuch/`, fest der Tour zugeordnet, mit Aufnahmezeit und Aufnahmeort. Schon vorhandene Fotos erkennt Meine Touren (gleiche Datei, gleiche Kennung aus der App, gleiches Bild zur gleichen Zeit oder gleicher Name zur gleichen Zeit) und legt sie nicht doppelt an. Ein Foto, das du hier gelöscht hast, kommt beim nächsten Abgleich nicht von selbst zurück. In die App gehen Fotos verkleinert. **Videos** gehen nur, wenn du sie in der App für eine Tour ausdrücklich auswählst: höchstens 200 MB je Video und 1 GB je Tour. Sie liegen im Datenordner deines Kontos und gehören zum Umzugspaket, aber nicht zur täglichen Datenbanksicherung. In der Weboberfläche von Meine Touren werden Videos (noch) nicht angezeigt. **Rechte:** Ein **Betrachter**-Konto darf Notiz, Fotos und Videos einer Tour lesen (wie bisher Tour und Fotos), aber nichts senden. Jedes Konto sieht nur seine eigenen Touren. Die Schnittstelle ist in den [Versionshinweisen 3.57.0](versionen/3.57.0.md) beschrieben.
 
-Beide Apps ordnen die Sportarten seit 3.50.0 gleich zu: Läufe der Zepp-Uhr sind „Laufen“, Schneeschuhwandern zählt als „Wandern“ (Schlagwort „Schneeschuh“). Nordic Walking ist hier eine eigene Sportart, im Tagebuch zählt es als Wandern.
+Läufe der Zepp-Uhr sind in beiden Apps „Laufen“ (seit 3.50.0). Seit 3.59.0 ist Schneeschuh in Meine Touren wieder eine eigene Sportart; das Tagebuch sendet Schneeschuh als „snowshoe“. Nordic Walking ist hier eine eigene Sportart, im Tagebuch zählt es als Wandern. Wer Aktivitäten gemeinsam zählen will, legt eine Statistik-Gruppe an ([Abschnitt 11.6](#k11)).
 
 [↑ Inhaltsverzeichnis](#inhalt)
 

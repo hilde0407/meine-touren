@@ -1,5 +1,11 @@
 """Sportarten-Umzug 3.50.0: „Laufen“ von der Uhr und Schneeschuh als Wandern (wie im Schwesterprojekt „Mein Tourentagebuch“).
 
+3.59.0: Schneeschuh ist wieder eine eigene Sportart. Das Zusammenlegen (Punkt 1 unten) läuft NICHT mehr – auch nicht für Datenbanken aus älteren Sicherungen
+(Merker FLAG_SNOW in den Einstellungen, gesetzt beim ersten Öffnen mit 3.59.0). Touren, die 3.50.0 zusammengelegt hat (Wandern + Schlagwort „Schneeschuh“),
+bleiben, wie sie sind, bis du sie unter Prüfen „als Schneeschuh führst“ (POST /api/schneeschuh/umstellen); das lässt sich zurücknehmen
+(POST /api/schneeschuh/zuruecknehmen, Tabelle snow_convert merkt sich die vorherige eigene Wahl). Das Schlagwort bleibt in beiden Fällen. Der Komoot-Abgleich
+stellt eine zusammengelegte Tour nicht still zurück auf Schneeschuh.
+
 1. Schneeschuh zählt als Wandern. Die Sportart „snowshoe“ gibt es nicht mehr; Touren, Pläne, Ziele, Ausrüstung, eigene Sportarten (tour_sport), ausgeblendete Touren
    und Zepp-Trainings werden auf „hike“ umgestellt. Jede Tour bekommt dabei einmal das Schlagwort „Schneeschuh“ (nur wenn sie es noch nicht hat; die Tabelle
    sport_merged merkt sich, dass es schon geschehen ist – entfernt man das Schlagwort, kommt es beim nächsten Komoot-Abgleich nicht wieder).
@@ -28,7 +34,8 @@ router = APIRouter()
 FLAG = "sport_umzug_350"
 KOPIE = ".vor-3.50.0.sqlite"
 ALT = "snowshoe"
-NEU, TAG = gpxtools.MERGE[ALT]
+NEU, TAG = "hike", gpxtools.SCHNEESCHUH_TAG
+FLAG_SNOW = "schneeschuh_eigen_359"           # 3.59.0: Schneeschuh nicht mehr zusammenlegen (Schutz, auch für zurückgespielte Sicherungen)
 LAUFEN = "jogging"
 _ZT = ",".join(str(z) for z in gpxtools.ZEPP_LAUFEN)
 
@@ -36,6 +43,7 @@ _ZT = ",".join(str(z) for z in gpxtools.ZEPP_LAUFEN)
 def tables(conn):
     conn.execute("CREATE TABLE IF NOT EXISTS sport_merged (id TEXT PRIMARY KEY, orig TEXT, ts INTEGER)")   # Touren, deren Sportart zusammengelegt wurde (Schlagwort schon vergeben)
     conn.execute("CREATE TABLE IF NOT EXISTS sport_log (n INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, tab TEXT, id TEXT, alt TEXT, neu TEXT, grund TEXT)")   # Protokoll des Umzugs
+    conn.execute("CREATE TABLE IF NOT EXISTS snow_convert (id TEXT PRIMARY KEY, prev TEXT, ts INTEGER)")   # 3.59.0: „als Schneeschuh geführt“ (prev = vorherige eigene Sportart oder NULL)
 
 
 def _has(conn, tab, col="sport"):
@@ -157,8 +165,11 @@ def _snow(conn, now):
 def migrate(conn):
     """Beim Öffnen einer Datenbank (db.migrate). Gibt die Zusammenfassung zurück oder None, wenn nichts zu tun war."""
     tables(conn)
+    if not conn.execute("SELECT 1 FROM settings WHERE k=?", (FLAG_SNOW,)).fetchone():
+        conn.execute("INSERT OR REPLACE INTO settings(k,v) VALUES(?,?)", (FLAG_SNOW, json.dumps({"ts": int(time.time())})))
+        conn.commit()
     done = conn.execute("SELECT v FROM settings WHERE k=?", (FLAG,)).fetchone()
-    snow = _snow_pending(conn)
+    snow = False                                      # 3.59.0: Schneeschuh wird nie mehr zusammengelegt (früher: _snow_pending(conn))
     lauf = [] if done else zepp_sicher(conn)
     if done and not snow:
         return None
@@ -190,14 +201,16 @@ def migrate(conn):
 
 
 def merge_komoot(tours):
-    """Komoot-Abgleich: zusammengelegte Sportarten der geladenen Touren umsetzen (vor dem Speichern). Gibt die Kennungen der umgestellten Touren zurück."""
-    out = []
+    """Komoot-Abgleich (3.59.0): Schneeschuh bleibt Schneeschuh – außer bei Touren, die 3.50.0 zu Wandern zusammengelegt hat und die du noch nicht
+    „als Schneeschuh führst“: die bleiben still Wandern (mit Schlagwort). Gibt die Kennungen zurück, die ein Schlagwort brauchen (keine mehr)."""
+    try:
+        alt = {r["id"] for r in db.query("SELECT id FROM sport_merged")} - {r["id"] for r in db.query("SELECT id FROM tour_sport")}
+    except Exception:  # noqa
+        alt = set()
     for t in tours:
-        sp, tag = gpxtools.norm(t.get("sport"))
-        if tag:
-            t["sport"] = sp
-            out.append(str(t["id"]))
-    return out
+        if t.get("sport") == ALT and str(t["id"]) in alt:
+            t["sport"] = NEU
+    return []
 
 
 def tag_merged(ids):
@@ -260,6 +273,59 @@ def api_status():
     d = info()
     return {"umzug": {k: d.get(k) for k in ("ts", "laufen", "schneeschuh", "plaene", "ziele", "ausruestung")} if d else None,
             "kandidaten": kandidaten()}
+
+
+# ------------------------------------------------------------------------------------------------ 3.59.0 Schneeschuh-Touren als Schneeschuh führen
+def schnee_kandidaten():
+    """Touren „Wandern“ mit dem Schlagwort „Schneeschuh“ (meist von 3.50.0 zusammengelegt)."""
+    return db.query("SELECT t.id, t.name, t.start_ts, t.dist_m FROM tours t WHERE t.sport=? AND EXISTS (SELECT 1 FROM tour_tags x WHERE x.id=t.id AND x.tag=?) "
+                    "ORDER BY t.start_ts DESC", (NEU, TAG))
+
+
+@router.get("/api/schneeschuh")
+def api_schnee():
+    k = schnee_kandidaten()
+    return {"kandidaten": [{"id": r["id"], "name": r["name"] or "", "start_ts": r["start_ts"], "km": round((r["dist_m"] or 0) / 1000, 2)} for r in k],
+            "umgestellt": db.one("SELECT COUNT(*) n FROM snow_convert")["n"]}
+
+
+@router.post("/api/schneeschuh/umstellen")
+def api_schnee_umstellen(body: dict = None):
+    """Gewählte (oder alle) Kandidaten als Schneeschuh führen; gilt als eigene Wahl. Das Schlagwort bleibt."""
+    ids = (body or {}).get("ids") if isinstance(body, dict) else None
+    erlaubt = [r["id"] for r in schnee_kandidaten()]
+    if ids is not None:
+        if not isinstance(ids, list) or len(ids) > 5000:
+            raise HTTPException(400, "Ungültige Auswahl")
+        want = {str(x) for x in ids}
+        erlaubt = [i for i in erlaubt if i in want]
+    now, n = int(time.time()), 0
+    for tid in erlaubt:
+        prev = db.one("SELECT sport FROM tour_sport WHERE id=?", (tid,))
+        db.execute("INSERT OR REPLACE INTO snow_convert(id,prev,ts) VALUES(?,?,?)", (tid, prev["sport"] if prev else None, now))
+        set_sport(tid, ALT)
+        db.execute("INSERT INTO sport_log(ts,tab,id,alt,neu,grund) VALUES(?,?,?,?,?,?)", (now, "tours", tid, NEU, ALT, "Prüfen: als Schneeschuh führen"))
+        n += 1
+    return {"ok": True, "n": n}
+
+
+@router.post("/api/schneeschuh/zuruecknehmen")
+def api_schnee_zurueck():
+    """Alle mit „als Schneeschuh führen“ umgestellten Touren wieder wie vorher (Wandern bzw. die frühere eigene Wahl); Touren, deren Sportart seitdem von Hand
+    geändert wurde, bleiben."""
+    now, n = int(time.time()), 0
+    for r in db.query("SELECT id, prev FROM snow_convert"):
+        cur = db.one("SELECT sport FROM tour_sport WHERE id=?", (r["id"],))
+        if cur and cur["sport"] == ALT:
+            if r["prev"]:
+                db.execute("UPDATE tour_sport SET sport=? WHERE id=?", (r["prev"], r["id"]))
+            else:
+                db.execute("DELETE FROM tour_sport WHERE id=?", (r["id"],))
+            db.execute("UPDATE tours SET sport=? WHERE id=?", (r["prev"] or NEU, r["id"]))
+            db.execute("INSERT INTO sport_log(ts,tab,id,alt,neu,grund) VALUES(?,?,?,?,?,?)", (now, "tours", r["id"], ALT, r["prev"] or NEU, "Prüfen: Schneeschuh zurückgenommen"))
+            n += 1
+        db.execute("DELETE FROM snow_convert WHERE id=?", (r["id"],))
+    return {"ok": True, "n": n}
 
 
 @router.post("/api/sport-umzug/laufen")

@@ -164,10 +164,10 @@ def migrate(conn):
     if "period" not in {r["name"] for r in conn.execute("PRAGMA table_info(goals)")}:
         conn.execute("ALTER TABLE goals ADD COLUMN period TEXT DEFAULT 'year'")     # 3.45.0: Zeitraum eines Ziels: year (Jahresziel) | week (Wochenziel, dann year = 0)
     conn.commit()
-    try:                                                                          # 3.50.0: Laufen von der Uhr, Schneeschuh zählt als Wandern (Kopie der Datenbank vorher)
+    try:                                                                          # 3.50.0: Laufen von der Uhr (3.59.0: Schneeschuh wird nicht mehr zusammengelegt)
         from . import sport_umzug
         sport_umzug.migrate(conn)
-    except Exception as e:                                                        # nie das Öffnen verhindern; die Oberfläche zeigt „snowshoe“ ohnehin als Wandern
+    except Exception as e:                                                        # nie das Öffnen verhindern
         conn.rollback()
         try:                                                                      # Grund merken (Fehlersuche), der Umzug wird beim nächsten Öffnen erneut versucht
             conn.execute("INSERT OR REPLACE INTO settings(k,v) VALUES('sport_umzug_fehler',?)", (str(e)[:300],))

@@ -1,9 +1,12 @@
 /* =====================  Sportart-Kennzahlen, Steigung auf der Karte, Jahreszeit der Wunschliste  ===================== */
+/* Aktivitäten-Familien (intern, wie gpxtools.FAMILIE): Tempo-Kennzahlen, Steilheit, Planung (Tempo aus ähnlichen Touren, Routing-Profil) und ältere Ziele „grp:…“.
+   3.59.0: KEINE Zusammenfassung in der Statistik mehr – dafür gibt es die eigenen Statistik-Gruppen (01-grundlagen.js, sgKey). Neue Aktivitäten sind ergänzt;
+   Schneeschuh ist wieder eigene Sportart und gehört zur Familie „Zu Fuß“ (so zählen ältere Ziele „Zu Fuß (Wandern, Bergtour, Schneeschuh)“ wie bisher). */
 const SPORT_GRP = {
-  bike: ["touringbicycle", "e_touringbicycle", "racebike", "mtb"],
-  ski: ["skitour", "skialpin"],
-  foot: ["hike", "mountaineering", "nordicwalking"],      // 3.50.0: Schneeschuh ist Wandern (Schlagwort „Schneeschuh“, isSnowshoe)
-  run: ["jogging", "nordic"],
+  bike: ["touringbicycle", "e_touringbicycle", "racebike", "mtb", "mtb_easy", "e_mtb", "commute", "cyclocross", "bmx"],
+  ski: ["skitour", "skialpin", "snowboard"],
+  foot: ["hike", "mountaineering", "nordicwalking", "snowshoe", "walk", "climbing", "dogwalk"],
+  run: ["jogging", "nordic", "trailrun", "orienteering"],
 };
 const sportGrp = s => Object.keys(SPORT_GRP).find(k => SPORT_GRP[k].includes(sNorm(s))) || "other";
 const STEEP30 = 58; // 30° Hangneigung entsprechen ≈ 58 % Steigung

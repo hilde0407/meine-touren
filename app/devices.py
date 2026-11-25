@@ -83,7 +83,7 @@ def ingest(src, entries, portals_=()):
             if tid and e:
                 if e[3]:
                     db.execute("UPDATE tours SET name=? WHERE id=?", (e[3], tid))
-                sp, tag = gpxtools.norm(e[4])                     # 3.50.0: Schneeschuh -> Wandern + Schlagwort
+                sp, tag = gpxtools.norm(e[4])                     # 3.59.0: Schneeschuh bleibt Schneeschuh
                 if sp and sp in gpxtools.LABEL:
                     db.execute("UPDATE tours SET sport=? WHERE id=?", (sp, tid))
                     if tag:

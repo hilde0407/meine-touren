@@ -28,7 +28,7 @@ async function boot() {
 
 /* ---- Verwaltung: nach Aufgaben geordnet in Reitern (statt einer langen Seite) ---- */
 const ADM_TABS = [
-  ["uebersicht", "Übersicht", "Zustand der App, Updates, Selbsttest und Protokoll.", ["#hlt", "#upd", "Selbsttest", "Protokoll"]],
+  ["uebersicht", "Übersicht", "Zustand der App, Updates, Selbsttest und Protokoll.", ["#hlt", "#upd", "Favoriten", "Statistik", "Selbsttest", "Protokoll"]],
   ["quellen", "Touren holen", "Woher deine Touren kommen: Komoot, Zepp, Uhren und Dateien, dazu Wanderführer.", ["Komoot", "Zepp-Import", "Garmin", "Wanderführer"]],
   ["weitergabe", "Hochladen & Planen", "Wohin Touren hochgeladen werden dürfen (nur auf deinen Wunsch) und wie Touren geplant werden.", ["Portale", "Tourplanung"]],
   ["fotos", "Fotos", "Fotobibliothek, Import und Eingangsordner.", ["Fotos", "Foto-Eingang"]],

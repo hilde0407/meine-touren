@@ -53,8 +53,7 @@ MIN_TAGE_ZIEL = 14                       # Prognose erst ab dem 14. Tag des Jahr
 MIN_REKORD = 5                           # Rekorde erst ab so vielen Touren
 TEMPO_MIN_M, TEMPO_MIN_S = 3000, 1800    # Tempo-Rekord: mindestens 3 km und 30 Minuten (wie „Rekorde“ der Oberfläche)
 CACHE_S = 30
-SPORT_GRP = {"bike": ("touringbicycle", "e_touringbicycle", "racebike", "mtb"), "ski": ("skitour", "skialpin"),
-             "foot": ("hike", "mountaineering", "nordicwalking", "snowshoe"), "run": ("jogging", "nordic")}
+from .gpxtools import FAMILIE as SPORT_GRP        # 3.59.0: Aktivitäten-Familien (intern; ältere Ziele „grp:…“, Planung) – keine Statistik-Gruppen
 GOAL_GRP = {"grp:bike": "bike", "grp:ski": "ski", "grp:foot": "foot", "grp:run": "run"}      # wie GOAL_GRP in 06-erweiterungen.js
 DEFAULTS = {"ziel_schwelle": 10, "meilenstein_tage": 7, "auffaellig_min": 1, "pause_tage": 14, "rekord_tage": 7, "woche_ziel": 0, "woche_einheit": "km",
             "erholung_stufe": "deutlich_mehr", "sicherung_tage": 7}
@@ -83,9 +82,8 @@ def check(arten="", sport="", ziel_schwelle=None, meilenstein_tage=None, auffael
     ar = [x for x in (arten or "").split(",") if x != ""]
     if any(x not in ARTEN for x in ar):
         raise HTTPException(400, "Unbekannte Hinweisart (erlaubt: " + ", ".join(ARTEN) + ")")
-    sp = [x for x in (sport or "").split(",") if x != ""]
-    if len(sp) > 20 or not all(SPORT_RE.match(x) for x in sp):
-        raise HTTPException(400, "Ungültige Sportart")
+    from . import stat_gruppen
+    sp = stat_gruppen.plain(stat_gruppen.filter_liste(sport))              # 3.59.0: Statistik-Gruppen zu ihren Sportarten auflösen (gelöschte Gruppe = alle)
     if woche_einheit not in ("", "km", "touren"):
         raise HTTPException(400, "„woche_einheit“ muss km oder touren sein")
     if erholung_stufe not in ("", "mehr", "deutlich_mehr"):
@@ -114,7 +112,8 @@ def _ziel_sportarten(s):
     """Sportarten, die ein Ziel betrifft: None = alle."""
     if not s:
         return None
-    return set(SPORT_GRP[GOAL_GRP[s]]) if s in GOAL_GRP else {s}
+    from . import stat_gruppen                                          # 3.59.0: Standard- und eigene Statistik-Gruppen (grp:… / sgrp:…) an einer Stelle
+    return stat_gruppen.ziel_sportarten(s)
 
 
 def _ziel_wert(g, rows):

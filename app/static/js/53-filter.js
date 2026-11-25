@@ -27,7 +27,7 @@ const flYearBack = (iso, n = 1) => {
   const y = +iso.slice(0, 4) - n, m = +iso.slice(5, 7);
   return `${y}-${pad2(m)}-${pad2(Math.min(+iso.slice(8, 10), new Date(Date.UTC(y, m, 0)).getUTCDate()))}`;
 };
-const flSport = (t, cfg) => !(cfg && cfg.sports && cfg.sports.length) || sNormList(cfg.sports).includes(sNorm(t.sport));      // 3.50.0: „snowshoe“ = Wandern
+const flSport = (t, cfg) => !(cfg && cfg.sports && cfg.sports.length) || sgMatch(t.sport, sNormList(cfg.sports));      // 3.59.0: Statistik-Gruppen (01-grundlagen.js); Schneeschuh ist wieder eigene Sportart
 const flIn = (t, r) => {
   const d = t.date.slice(0, 10);
   return (!r.from || d >= r.from) && d <= r.to;
@@ -65,8 +65,8 @@ function flSportOptions(sel = []) {
   const n = {};
   TOURS.forEach(t => t.sport && (n[sNorm(t.sport)] = (n[sNorm(t.sport)] || 0) + 1));
   const keys = Object.keys(n).sort((a, b) => n[b] - n[a] || sName(a).localeCompare(sName(b)));
-  sel.forEach(s => !keys.includes(s) && keys.push(s));
-  return keys.map(k => [k, sName(k)]);
+  sel.forEach(s => !keys.includes(s) && !isSg(s) && keys.push(s));
+  return sgOptions(keys).concat(keys.map(k => [k, sName(k)]));                  // 3.59.0: jede Statistik-Gruppe als eigener Eintrag „<Name> (zusammengefasst)“
 }
 const flYears = () => {
   const ys = new Set(TOURS.map(t => t.y));
