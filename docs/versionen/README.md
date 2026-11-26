@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.61.4](3.61.4.md) – 3D-Flug flüssiger auf dem Handy: Darstellung Flüssig/Normal/Schön, gedrosselte Linie und Kopfzeile, Fotos als Kartenebene (keine readPixels-Bremse), Kamera als Funktion der Position
 - [3.61.3](3.61.3.md) – Zahl und Einheit nie getrennt (geschütztes Leerzeichen, Wert-Spalte ohne Umbruch); Statistik-Gruppen in Anzeigen nur mit Namen
 - [3.61.2](3.61.2.md) – Handy-Übersicht bei großer Systemschrift: „Seite anpassen“ nie abgeschnitten, Kennzahl-Kacheln mit Wert und Einheit in einer Zeile
 - [3.61.1](3.61.1.md) – Sportart-Auswahl am Handy kompakt (nur Gruppenname, Blatt mit Chips statt langer Liste); Reiter der Verwaltung am Computer in einer Zeile

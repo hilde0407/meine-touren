@@ -476,6 +476,8 @@ Der Baustein **Fotos** zeigt zuerst einen **Foto-Streifen** mit den besten (höc
 
 *Abbildung 23: Das Tourblatt – oben die Knöpfe „PDF herunterladen“ und „Drucken“.*
 
+**3D-Flug: Darstellung (ab 3.61.4)** – im Bedienfeld unten wählst du **Darstellung: Flüssig / Normal / Schön**. Am Handy gilt „Flüssig“ (weniger Bildpunkte und Höhendaten, ruhiger Flug), am Computer „Schön“ wie bisher. Läuft der Flug auf deinem Gerät zu langsam, schaltet er von selbst eine Stufe herunter und zeigt kurz „Flug vereinfacht“; deine Wahl bleibt gespeichert und gilt je Gerät. Die Höhendaten einer neuen Stufe gelten ab dem nächsten Flug.
+
 **3D-Flug: Steuerung in der freien Kamera (ab 3.40.0)** – im Modus „Kamera folgt“ bleibt alles wie bisher; jede eigene Bewegung wechselt in die freie Kamera.
 
 Rechts auf der Flugkarte steht immer eine **Bedienleiste**: Kompass (Nadel zeigt nach Norden und wird mit der Neigung flacher; ein Tipp stellt **Norden / Draufsicht** ein), **nach links / rechts drehen**, **flacher / steiler neigen** und die Voreinstellungen **Von oben**, **Schräg** und **Hinter der Tour**. Gedreht wird um den aktuellen Punkt der Tour, nicht um die Bildmitte. Das **?** zeigt die Hilfe mit allen Belegungen; beim ersten Wechsel in die freie Kamera erscheint einmal ein kurzer Hinweis.

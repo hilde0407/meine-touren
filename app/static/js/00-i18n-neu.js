@@ -3694,4 +3694,9 @@ Diese Touren sind keine Reise (z. B. ein Tagesausflug) – aus der Liste entfern
 Diese Touren aus den Reisen entfernen? Die Touren selbst bleiben unverändert, die Reise lässt sich später unter „Reisen“ wiederherstellen. || Remove these tours from the trips? The tours themselves stay unchanged; the trip can be restored later under “Trips”. || Retirer ces parcours des voyages ? Les parcours eux-mêmes restent inchangés ; le voyage peut être rétabli plus tard sous « Voyages ». || ¿Quitar estas rutas de los viajes? Las rutas no cambian; el viaje se puede restaurar más tarde en «Viajes».
 {} Statistik-Gruppen. || {} statistics groups. || {} groupes de statistiques. || {} grupos de estadísticas.
 Höchstens {} Statistik-Gruppen. || At most {} statistics groups. || {} groupes de statistiques au maximum. || Como máximo {} grupos de estadísticas.
+3D-Flug: Darstellung || 3D flight: display quality || Vol 3D : qualité d’affichage || Vuelo 3D: calidad de imagen
+Darstellung: Flüssig || Display: smooth || Affichage : fluide || Imagen: fluida
+Darstellung: Normal || Display: normal || Affichage : normal || Imagen: normal
+Darstellung: Schön || Display: detailed || Affichage : détaillé || Imagen: detallada
+Flug vereinfacht || Flight simplified || Vol simplifié || Vuelo simplificado
 `;
