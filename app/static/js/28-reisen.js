@@ -102,6 +102,19 @@ VIEWS.trip = async id => {
   const cur = (await api("/api/trips").catch(() => [])).find(x => x.id === id);
   const gk = document.querySelector("#main [data-rs=kopf] > .mut"), gx = cur && cur.area && Gebiete.nach[cur.area];                 // 3.65.0: das Gebiet der Reise (Name der erkannten Reise) als Sprung zu den Touren dort
   if (gk && gx && !gk.querySelector(".rsgeb")) gk.insertAdjacentHTML("beforeend", ` · <span class="rsgeb">Gebiet: <a class="gblink" href="#/tours?g=${encodeURIComponent(gx.id)}" title="Alle Touren in diesem Gebiet">${esc(gx.name)}</a></span>`);
+  const hk = document.querySelector("#main [data-rs=kopf]");                            // 3.68.0: auffällige Reise (mehrere Länder, weit auseinander, viele Gebiete): dezenter Hinweis mit Weg zum Bearbeiten, nie blockierend
+  if (hk && cur && !hk.querySelector(".trhint")) {
+    const af = tripAuffaellig(tripAuswahlInfo((cur.tours || []).map(i => BY[i]).filter(Boolean)));
+    if (af) {
+      const txt = af.art === "laender" ? `Diese Reise liegt in ${af.n} Ländern (${af.namen}).` : af.art === "fern" ? `Diese Reise erstreckt sich über bis zu ${fmtZahl(af.km, 0)} km.` : `Diese Reise liegt in ${af.n} Gebieten (${af.namen}).`;
+      hk.insertAdjacentHTML("beforeend", `<p class="trhint mut fs14" role="note"><span aria-hidden="true">ⓘ</span> <span>${esc(txt)}</span> <span>Wirklich eine Reise?</span>${$("#tredit") ? ' <a href="#" class="trhedit" title="Name, Zeitraum und Touren dieser Reise ändern">Reise bearbeiten</a>' : ""}</p>`);
+      const le = hk.querySelector(".trhedit");
+      if (le) le.onclick = e => {
+        e.preventDefault();
+        $("#tredit").click();
+      };
+    }
+  }
   if (b && cur && cur.custom && !$("#trdel")) {                                          // 3.63.0: eigene Reise: Löschen (mit Rückfrage) statt „Keine Reise“
     b.insertAdjacentHTML("afterend", ` <button class="btn alt sm" id="trdel" title="Diese eigene Reise löschen. Die Touren bleiben erhalten.">Löschen</button>`);
     $("#trdel").onclick = async () => {
@@ -144,6 +157,14 @@ function tripAuswahlInfo(ts) {                                                  
   for (let i = 1; i < days.length; i++) { const d = Math.round((Date.parse(days[i]) - Date.parse(days[i - 1])) / 864e5); if (d > TRIP_LUECKE_TAGE) luecken.push({von: days[i - 1], bis: days[i], tage: d}); }
   return {n: ts.length, von: days[0] || "", bis: days[days.length - 1] || "", geb, laender: [...ld], fern: Math.round(fern), luecken};
 }
+/* 3.68.0: auffällig = „wirklich eine Reise?“ – eine Prüfung mit den Schwellen für den Dialog „Reise erstellen“ und den Hinweis auf der Seite einer Reise: mehrere Länder > Abstand über 300 km > mehr als 2 Gebiete.
+   Gibt null oder {art: "laender" | "fern" | "gebiete", n, namen, km} zurück (info = tripAuswahlInfo); der Wortlaut steht an der jeweiligen Stelle. */
+function tripAuffaellig(i) {
+  if (i.laender.length > 1) return {art: "laender", n: i.laender.length, namen: i.laender.slice(0, 4).join(", "), km: i.fern};
+  if (i.fern > TRIP_FERN_KM) return {art: "fern", n: 0, namen: "", km: i.fern};
+  if (i.geb.length > TRIP_GEB_MAX) return {art: "gebiete", n: i.geb.length, namen: i.geb.slice(0, 4).join(", "), km: i.fern};
+  return null;
+}
 function tripZeitraumText(von, bis) {                                            // „17.09.–21.11.“ (Jahr nur, wenn nicht das laufende Jahr oder zwei Jahre)
   if (!von) return "";
   const lg = FMT_LG(), cut = s => s.replace(/[./]\d{4}$/, lg === "de" ? "." : ""), y = new Date().getFullYear(), same = von.slice(0, 4) === bis.slice(0, 4);
@@ -179,9 +200,8 @@ async function tripDialog(tr) {
   const summe = () => {
     const ts = [...sel].map(i => BY[i]).filter(Boolean), i = tripAuswahlInfo(ts), w = [];
     q("#tcc").innerHTML = ts.length ? `<b>${ts.length === 1 ? "1 Tour" : `${ts.length} Touren`}</b> · ${esc(tripZeitraumText(i.von, i.bis))}${i.geb.length ? " · " + esc(i.geb.slice(0, 4).join(", ") + (i.geb.length > 4 ? ` und ${i.geb.length - 4} weitere` : "")) : ""}` : "0 Touren gewählt";
-    if (i.laender.length > 1) w.push(`Die Touren liegen in ${i.laender.length} Ländern (${i.laender.slice(0, 4).join(", ")}) – wirklich eine Reise?`);
-    else if (i.fern > TRIP_FERN_KM) w.push(`Die Touren liegen bis zu ${fmtZahl(i.fern, 0)} km auseinander – wirklich eine Reise?`);
-    else if (i.geb.length > TRIP_GEB_MAX) w.push(`Die Touren liegen in ${i.geb.length} Gebieten – wirklich eine Reise?`);
+    const af = tripAuffaellig(i);
+    if (af) w.push(af.art === "laender" ? `Die Touren liegen in ${af.n} Ländern (${af.namen}) – wirklich eine Reise?` : af.art === "fern" ? `Die Touren liegen bis zu ${fmtZahl(af.km, 0)} km auseinander – wirklich eine Reise?` : `Die Touren liegen in ${af.n} Gebieten – wirklich eine Reise?`);
     if (i.luecken.length) { const l = i.luecken.reduce((a, b) => (b.tage > a.tage ? b : a)); w.push(`Zwischen ${fmtDatumKurz(l.von)} und ${fmtDatumKurz(l.bis)} liegen ${l.tage} Tage ohne gewählte Tour${i.luecken.length > 1 ? ` (insgesamt ${i.luecken.length} Lücken über ${TRIP_LUECKE_TAGE} Tage)` : ""}.`); }
     const aus = ts.filter(t => erkannt[t.id]), von = [...new Set(aus.map(t => erkannt[t.id]))];
     if (aus.length) w.push(`${aus.length === 1 ? "1 Tour gehört" : `${aus.length} Touren gehören`} zu ${von.length === 1 ? `der Reise „${von[0]}“` : `${von.length} anderen Reisen`} und ${aus.length === 1 ? "wechselt" : "wechseln"} beim Speichern in diese Reise.`);

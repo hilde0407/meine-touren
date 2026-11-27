@@ -493,7 +493,7 @@ Object.assign(window.SL_WT, {
      (der frühere Baustein „Touren holen (nur Knopf)“, Kennung holenknopf, wird über SL_ALIAS / app/baustein_umzug.py darauf abgebildet). */
   zeppimport: {
     fam: "uebersicht", cat: "quellen", icon: "watch", name: "Touren holen", title: () => "Touren holen", defaults: {}, filter: {range: null},
-    desc: "Startet den Import deiner Touren aus dem Konto deiner Uhr (Zepp, Garmin oder Suunto) mit einem Tipp, zeigt den Fortschritt und wie der letzte Lauf ausging. Bei mehreren Konten gibt es je Konto eine Zeile und „Alle holen“. Fehlt die Verbindung, führt ein Knopf zur Einrichtung. Als „Nur Knopf“ bleibt ein einziger Knopf (bei mehreren Konten mit kleinem Menü) mit Statuszeile, für alle, die ihn lieber im Raster haben als in der Kopfzeile. Für Betrachter unsichtbar.",
+    desc: "Startet den Import deiner Touren aus dem Konto deiner Uhr (Zepp, Garmin oder Suunto) mit einem Tipp, zeigt den Fortschritt und wie der letzte Lauf ausging. Bei mehreren Konten gibt es je Konto eine Zeile und „Alle Touren holen“. Fehlt die Verbindung, führt ein Knopf zur Einrichtung. Als „Nur Knopf“ bleibt ein einziger Knopf (bei mehreren Konten mit kleinem Menü) mit Statuszeile, für alle, die ihn lieber im Raster haben als in der Kopfzeile. Für Betrachter unsichtbar.",
     fields: [{k: "view", kind: "radio", def: "karte", label: "Darstellung", options: [["karte", "Karte mit Fortschritt"], ["knopf", "Nur Knopf"]]}],
     preview: () => slPrev('<span class="zpi-pv"><b>Touren holen</b></span>'),
     render(c, b, cfg) {
@@ -539,7 +539,7 @@ Object.assign(window.SL_WT, {
 
 /* =====================  3.30.0 Zepp-Import, seit 3.31.0 „Touren holen“ je nach Uhr  =====================
    Ein Zustand für alle Karten dieses Typs (ZI): Job-Stand aus GET /api/jobs, Quellen und letzte Läufe aus GET /api/import-quellen (Zepp, Garmin, Suunto; dazu Marken aus „Meine Geräte“).
-   Eine verbundene Quelle: Knopf „<Marke>-Import starten“. Mehrere: je Quelle eine Zeile plus „Alle holen“ (nacheinander, nie parallel; der Server lässt ohnehin nur einen Job zu).
+   Eine verbundene Quelle: Knopf „<Marke>-Import starten“. Mehrere: je Quelle eine Zeile plus „Alle Touren holen“ (nacheinander, nie parallel; der Server lässt ohnehin nur einen Job zu).
    Keine Quelle: „<Marke> einrichten“ bzw. Hinweis auf den Dateiimport (Polar, Handy, Anderes haben keinen Konto-Import). Solange ein Lauf läuft, fragt die Karte alle 1,5 s nach;
    danach werden die Touren neu geladen. Kein Doppelstart: Knöpfe gesperrt, solange irgendein Job läuft. */
 const ZI_JOBS = {zepp: ["Zepp-Import (ohne Upload)", "export"], garmin: ["Garmin-Import", "garmin-import"], suunto: ["Suunto-Import", "suunto-import"]};     // Art -> [Jobname im Server, Schlüssel in POST /api/jobs/<Schlüssel>]
@@ -672,7 +672,7 @@ function ziPaint(c) {
     if (m.fb.length) html += ziFileRows(m.fb).join("");
   } else if (m.t === "many") {
     bad = !run && m.acc.some(s => s.letzter && !s.letzter.ok);
-    html = `<div class="zpq"><button type="button" class="btn ghost zpall" data-a="all"${run || other ? " disabled" : ""}${run ? ' aria-busy="true"' : ""}><i class="zpic" aria-hidden="true">⟳</i><span>Alle holen</span></button>${glob.length ? `<div class="zpt" role="status" aria-live="polite">${glob.join("")}</div>` : ""}` +
+    html = `<div class="zpq"><button type="button" class="btn ghost zpall" data-a="all"${run || other ? " disabled" : ""}${run ? ' aria-busy="true"' : ""}><i class="zpic" aria-hidden="true">⟳</i><span>Alle Touren holen</span></button>${glob.length ? `<div class="zpt" role="status" aria-live="polite">${glob.join("")}</div>` : ""}` +
       m.acc.map(s => `<section class="zpsrc" aria-label="${esc(s.label)}"><h3 class="zph">${esc(s.label)}</h3>${ziSrc(s, m, other)}</section>`).join("") + ziFileRows(m.fb).join("") + "</div>";
   } else if (m.t === "setup") {
     const msg = !m.brand ? (m.kb.length ? `Du hast mehrere Uhren angelegt, aber noch kein Konto verbunden. Verbinde in der Verwaltung: ${m.kb.map(x => x.label).join(", ")}.` : "Noch keine Quelle eingerichtet. Verbinde in der Verwaltung dein Zepp-, Garmin- oder Suunto-Konto oder importiere Tourendateien.")
@@ -700,9 +700,9 @@ const ziPaintAll = () => {
     else ZI.quick.delete(q);
   });
 };
-/* ---- Menü bei mehreren Quellen (Schnell-Knopf und Baustein „Touren-Knopf“): ein Eintrag je Quelle plus „Alle holen“; schließt bei Klick außerhalb, Escape und Tab ---- */
+/* ---- Menü bei mehreren Quellen (Schnell-Knopf und Baustein „Touren-Knopf“): ein Eintrag je Quelle plus „Alle Touren holen“; schließt bei Klick außerhalb, Escape und Tab ---- */
 const ziMenuOf = a => (a && a.nextElementSibling && a.nextElementSibling.classList.contains("zpmenu") ? a.nextElementSibling : null);
-const ziItems = () => ziAcc().map(s => `<button type="button" role="menuitem" class="zpmi" data-k="${s.kind}"><span>${esc(`${s.label}-Import starten`)}</span></button>`).join("") + '<button type="button" role="menuitem" class="zpmi zpmall" data-k="alle"><span>Alle holen</span></button>';
+const ziItems = () => ziAcc().map(s => `<button type="button" role="menuitem" class="zpmi" data-k="${s.kind}"><span>${esc(`${s.label}-Import starten`)}</span></button>`).join("") + '<button type="button" role="menuitem" class="zpmi zpmall" data-k="alle"><span>Alle Touren holen</span></button>';
 function ziWireMenu(m) {
   m.onclick = e => {
     const k = e.target.closest("[data-k]");
@@ -869,7 +869,7 @@ async function ziTick() {
       if (/^#?\/?(dash)?$/.test(location.hash)) await route();
     } catch (e) {}
   }
-  if (!ziRun() && !ZI.busy && ZI.queue.length) return ziStart(ZI.queue.shift(), true);         // „Alle holen“: die nächste Quelle erst, wenn die vorige fertig ist
+  if (!ziRun() && !ZI.busy && ZI.queue.length) return ziStart(ZI.queue.shift(), true);         // „Alle Touren holen“: die nächste Quelle erst, wenn die vorige fertig ist
   if ((ZI.cards.size || ZI.quick.size) && (ziRun() || ZI.busy || ZI.watch || ZI.queue.length)) ZI.tm = setTimeout(ziTick, 1500);
 }
 async function ziStart(kind, queued) {

@@ -31,7 +31,7 @@ def test_tabelle_konsistent():
     assert len(ids) == len(set(ids)) and len(ids) >= 300
     assert {x["typ"] for x in liste} == {"gebirge", "tal", "insel", "kueste", "region"}
     assert all(x["eltern"] in ids for x in liste if x["eltern"])
-    assert sum(1 for x in liste if not x["eigen"]) == 12                      # reine Oberbegriffe (Alpen, Kanaren, Azoren, …)
+    assert sum(1 for x in liste if not x["eigen"]) == 13                      # reine Oberbegriffe (Alpen, Kanaren, Azoren, Niedere Tauern, …)
 
 
 def test_boxen_und_vielecke_gueltig():
@@ -48,7 +48,7 @@ def test_jedes_gebiet_hat_einen_pruefpunkt():
     mit = {p[0] for p in PUNKTE if not p[4]}
     # reine Oberbegriffe zählen über ihre Kinder; alle anderen brauchen mindestens einen bekannten Punkt
     fehlt = [i for i in r if i not in mit]
-    assert set(fehlt) <= {"alpen", "elbsandstein", "karpaten", "tatra", "skandinavien", "hawaii", "patagonien", "neuseeland", "madeira-archipel", "balearen"}, fehlt
+    assert set(fehlt) <= {"alpen", "elbsandstein", "karpaten", "tatra", "skandinavien", "hawaii", "patagonien", "neuseeland", "madeira-archipel", "balearen", "niedere-tauern"}, fehlt
 
 
 def test_bekannte_punkte_liegen_im_gebiet_und_nachbarn_nicht():

@@ -44,6 +44,11 @@ engadin | St. Moritz 46.50,9.84 ; Scuol 46.80,10.30 ; Pontresina 46.49,9.90
 zentralschweiz | Luzern 47.05,8.31 ; Engelberg 46.82,8.41 ; Altdorf 46.88,8.64
 appenzell | Säntis 47.25,9.34 ; Appenzell 47.33,9.41
 suedtirol | Bozen 46.50,11.35 ; Meran 46.67,11.16 ; Brixen 46.72,11.66 ; Bruneck 46.80,11.94 ; Sterzing 46.89,11.43 ; Toblach 46.73,12.22 ; St. Ulrich 46.57,11.67 ; Sulden 46.52,10.58 ; Schlanders 46.63,10.77 ; Kaltern 46.40,11.24 ; Sexten 46.70,12.36
+schladminger | Schladming 47.39,13.69 ; Haus im Ennstal 47.37,13.53 ; Rohrmoos 47.36,13.70
+radstaedter | Obertauern 47.25,13.56
+maltatal | Malta 46.98,13.37
+gailtaler | Greifenburg 46.75,13.18
+sierra-nieves | Yunquera 36.74,-4.94 ; Tolox 36.69,-4.89
 trentino | Trient 46.07,11.12 ; Rovereto 45.89,11.04 ; Riva 45.89,10.84 ; Madonna di Campiglio 46.23,10.83 ; Cles 46.36,11.03 ; Fiera di Primiero 46.17,11.82
 dolomiten | Seiser Alm 46.54,11.62 ; Cortina 46.54,12.14 ; Drei Zinnen 46.62,12.30
 brenta | Madonna di Campiglio 46.23,10.83 ; Molveno 46.14,10.96
@@ -313,6 +318,11 @@ neuseeland-sued | Queenstown -45.03,168.66 ; Mount Cook -43.59,170.14 ; Milford 
 NEG = """
 !suedtirol | Trient 46.07,11.12 ; Cortina 46.54,12.14 ; Madonna di Campiglio 46.23,10.83 ; Moena 46.38,11.66 ; Innsbruck 47.26,11.39 ; Verona 45.44,10.99
 !trentino | Bozen 46.50,11.35 ; Meran 46.67,11.16 ; Verona 45.44,10.99 ; Belluno 46.14,12.22
+!schladminger | Ramsau am Dachstein 47.42,13.64 ; Radstadt 47.38,13.46 ; Liezen 47.57,14.24
+!maltatal | Spittal an der Drau 46.80,13.49 ; Gmünd in Kärnten 46.91,13.53
+!gailtaler | Kötschach-Mauthen 46.66,13.00
+!sierra-nieves | Ronda 36.74,-5.17 ; Málaga 36.72,-4.42
+!suedtirol | Sillian 46.746,12.417 ; Innervillgraten 46.78,12.37 ; Kartitsch 46.74,12.50 ; Rabbi 46.40,10.85
 !lungau | Radstadt 47.38,13.46 ; Schladming 47.39,13.69 ; Salzburg 47.80,13.04
 !pinzgau | Kitzbühel 47.45,12.39 ; Salzburg 47.80,13.04
 !wallis | Chamonix 45.92,6.87 ; Interlaken 46.69,7.86 ; Domodossola 46.11,8.29 ; Bern 46.95,7.45

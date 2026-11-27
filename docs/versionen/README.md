@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.68.0](3.68.0.md) – Südtirol nur Provinz Bozen, neue Gebiete (Tauern, Maltatal, Gailtal, Sierra de las Nieves), Hinweis bei ungewöhnlichen Reisen, Baustein „Vor einem Jahr in dieser Gegend“, Gebiet-Filter bei den Fotos, „Alle Touren holen“
 - [3.67.0](3.67.0.md) – „Reise erstellen“: Touren nach Tag/Gebiet gruppiert, nichts vorgewählt, Zeitraum markieren, Gruppenkopf, Summenzeile mit Warnungen, „in Reise X“
 - [3.66.0](3.66.0.md) – Seiten anpassen: „Entfernen“ statt Ausblenden, zwei Wege beim Zurücksetzen, Werkseinstellung für alle Seiten
 - [3.65.0](3.65.0.md) – Gebiete: Link in der Regionszeile, Übersicht und Seite je Gebiet, eigene Gebiete (Suche über OpenStreetMap)

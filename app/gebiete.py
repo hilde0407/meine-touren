@@ -40,7 +40,7 @@ def fold(s):
 
 
 def _kreis(s):
-    return re.sub(r"^(landkreis|bezirk|kreis|provinz|provincia|stadt|kreisfreie|region)(di|von|de)?", "", fold(s))
+    return re.sub(r"^(autonome)?(landkreis|bezirk|kreis|provinz|provincia|stadt|kreisfreie|region)(autonoma)?(di|von|de)?", "", fold(s))
 
 
 def _in_box(b, la, ln):
@@ -80,6 +80,7 @@ def _basis():
     by = {}
     for x in daten:
         x["kreise"] = [_kreis(c) for c in x["county"]]
+        x["nkreise"] = [_kreis(c) for c in x.get("nichtKreis") or []]
         x["quelle"] = "eingebaut"
         _ableiten(x)
         by[x["id"]] = x
@@ -96,7 +97,7 @@ def _eigen_zeile(e):
     """Ein eigenes Gebiet (id, name, typ, süd, west, nord, ost) als Eintrag der Tabelle: ein Rechteck, kein Elternteil, kein Bezirk, Tiefe 99 – so rechnet auch Gebiete.setEigene im Browser."""
     gid, name, typ, s, w, n, o = e
     return _ableiten({"id": gid, "name": name, "typ": typ, "eltern": None, "boxen": [[s, w, n, o]], "poly": [], "alias": [], "county": [], "nicht": [], "in": None, "prio": 0, "anz": True,
-                      "kreise": [], "quelle": "eigen", "tiefe": EIGEN_TIEFE})
+                      "kreise": [], "nkreise": [], "quelle": "eigen", "tiefe": EIGEN_TIEFE})
 
 
 @lru_cache(maxsize=16)
@@ -133,6 +134,8 @@ def _flaeche(x, la, ln):
 
 
 def _trifft(by, x, la, ln, kr):
+    if kr and kr in x["nkreise"]:                  # 3.68.0: der Bezirk der Tour liegt sicher nicht im Gebiet (wie `trifft` im Browser)
+        return False
     ok = False
     if la is not None and x["hull"]:
         ok = _flaeche(x, la, ln) and (not x["in"] or _flaeche(by[x["in"]], la, ln))
@@ -142,7 +145,7 @@ def _trifft(by, x, la, ln, kr):
         return False
     for n in x["nicht"]:
         if isinstance(n, str):
-            if _flaeche(by[n], la, ln):
+            if _flaeche(by[n], la, ln) and not (kr and kr in by[n]["nkreise"]):
                 return False
         elif la is not None and _in_box(n, la, ln):
             return False

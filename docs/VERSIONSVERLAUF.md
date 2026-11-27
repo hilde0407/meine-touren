@@ -2,6 +2,14 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.68.0 – Gebiete korrigiert, Hinweis bei Reisen, „Vor einem Jahr in dieser Gegend“, Gebiet-Filter bei Fotos
+
+- **Südtirol** ist nur noch die Provinz Bozen (Sillian, Innervillgraten, Rabbi nicht mehr); neue Gebiete: Niedere Tauern, Schladminger und Radstädter Tauern, Maltatal, Gailtaler/Karnische Alpen, Sierra de las Nieves; Kirchdorf in Tirol im Wilden Kaiser
+- Bestehende Reise in mehreren Ländern, weit auseinander oder in mehr als zwei Gebieten: ruhiger Hinweis „Wirklich eine Reise?“ mit Link **Reise bearbeiten** (gleiche Prüfung wie beim Erstellen)
+- Neuer Baustein **Vor einem Jahr in dieser Gegend** (Übersicht und Gebietsseite): Touren früherer Jahre im selben Gebiet, ± 1 Monat, Neu mischen, leer = unsichtbar
+- Fotos-Seite: Filter **Gebiet** (wie in der Tourenliste, `#/photos?g=…`); Fotos ohne Tour haben kein Gebiet
+- „Alle holen“ heißt **Alle Touren holen**
+
 ## Version 3.67.0 – „Reise erstellen“: Touren einfach auswählen
 
 - Der Auswahldialog ist neu: **nichts mehr vorgewählt** (vorher die Touren der letzten 7 Tage, und jede Erweiterung des Zeitraums wählte still alle neuen Tage mit – so kamen 8 Touren von den Kanaren in eine Reise „Rostock“); Touren **nach Tag oder Gebiet gruppiert, neueste zuerst**, je Zeile Datum, Name, Ort/Gebiet, Strecke

@@ -50,14 +50,26 @@ VIEWS.photos = async (_, q) => {
     $("#pimp").onclick = () => photoImportModal();
     return;
   }
-  const Y = +(q.get("y") || PHINFO.years[0]);
+  /* 3.68.0 Filter „Gebiet“ (wie in der Tourenliste: Auswahlfeld mit Blatt, Adresse ?g=<Kennung>): die Fotos der Touren, die im Gebiet liegen (Gebiete.von der Tour; ein Foto ohne Tour hat kein Gebiet).
+     Ohne gewähltes Jahr öffnet die Seite das neueste Jahr, in dem es dort Fotos gibt; Jahre ohne Fotos im Gebiet sind blasser. */
+  const gl = gebietListe(), G = gl.some(x => x.id === q.get("g")) ? q.get("g") : "", GX = G && Gebiete.nach[G],
+    gy = G ? new Set(TOURS.filter(t => t.photos > 0 && inGebiet(t, G)).map(t => t.y)) : null,
+    Y = +(q.get("y") || (G && PHINFO.years.find(y => gy.has(y))) || PHINFO.years[0]),
+    gq = G ? `&g=${encodeURIComponent(G)}` : "";
   $("#main").innerHTML =
-    `<div class="sec mt0"><h2>Fotos</h2><span class="sub">${nf(PHINFO.count, 0)} Bilder, ${nf(PHINFO.assigned, 0)} einer Tour zugeordnet</span>${PHINFO.undated ? `<span class="chip" style="cursor:default;background:#f6e3b4;color:#5a4300" title="Diese Fotos enthalten keine Aufnahmezeit im Foto. Es wird das Dateidatum benutzt (meist der Exportzeitpunkt); sie werden deshalb nicht automatisch einer Tour zugeordnet. Mit dem Foto-Zeit-Abgleich (mac/foto_zeit_abgleich.py) lässt sich die echte Zeit aus den RAW-Originalen nachtragen.">⚠ ${nf(PHINFO.undated, 0)} ohne Aufnahmezeit</span>` : ""}<span class="sp"></span><button class="btn" id="pimp">Fotos importieren …</button><a class="btn alt" target="_blank" href="slideshow.html?year=${Y}">Diashow ${Y}</a><a class="btn ghost" target="_blank" href="slideshow.html?random=1">Zufall</a></div>
-   <div class="years">${PHINFO.years.map(y => `<button data-y="${y}" class="${y === Y ? "on" : ""}">${y}</button>`).join("")}</div><div id="pg" class="mt26"></div>`;
+    `<div class="sec mt0"><h2>Fotos</h2><span class="sub">${nf(PHINFO.count, 0)} Bilder, ${nf(PHINFO.assigned, 0)} einer Tour zugeordnet</span>${PHINFO.undated ? `<span class="chip" style="cursor:default;background:#f6e3b4;color:#5a4300" title="Diese Fotos enthalten keine Aufnahmezeit im Foto. Es wird das Dateidatum benutzt (meist der Exportzeitpunkt); sie werden deshalb nicht automatisch einer Tour zugeordnet. Mit dem Foto-Zeit-Abgleich (mac/foto_zeit_abgleich.py) lässt sich die echte Zeit aus den RAW-Originalen nachtragen.">⚠ ${nf(PHINFO.undated, 0)} ohne Aufnahmezeit</span>` : ""}<span class="sp"></span><button class="btn" id="pimp">Fotos importieren …</button><a class="btn alt" target="_blank" href="slideshow.html?year=${Y}">Diashow ${Y}</a><a class="btn ghost" target="_blank" href="slideshow.html?random=1">Zufall</a>${gl.length ? `<div class="filters pgflt" id="pgfl"><select data-gsheet id="pgg" title="Gebiet" aria-label="Gebiet">${gebietOpts(G)}</select>${G ? `<a class="gblink" id="pggsee" href="#/area/${encodeURIComponent(G)}">Gebiet ansehen ›</a>` : ""}</div>` : ""}</div>
+   <div class="years">${PHINFO.years.map(y => `<button data-y="${y}" class="${y === Y ? "on" : ""}${gy && !gy.has(y) ? " pgoff" : ""}"${gy && !gy.has(y) ? ' title="Keine Fotos in diesem Gebiet"' : ""}>${y}</button>`).join("")}</div><div id="pg" class="mt26"></div>`;
   $("#pimp").onclick = () => photoImportModal();
-  $(".years").onclick = e => e.target.dataset.y && (location.hash = `#/photos?y=${e.target.dataset.y}`);
-  const ph = await api(`/api/photos?year=${Y}&limit=4000`);
+  $(".years").onclick = e => e.target.dataset.y && (location.hash = `#/photos?y=${e.target.dataset.y}${gq}`);
+  const pgg = $("#pgg");
+  if (pgg) pgg.onchange = () => (location.hash = `#/photos?y=${Y}${pgg.value ? "&g=" + encodeURIComponent(pgg.value) : ""}`);
+  let ph = await api(`/api/photos?year=${Y}&limit=4000`);
+  if (G) ph = ph.filter(p => BY[p.tour_id] && inGebiet(BY[p.tour_id], G));
   PH_LIST = ph;
+  if (G && !ph.length) {
+    $("#pg").innerHTML = `<p class="mut pgnone" role="status">Im Jahr ${Y} gibt es keine Fotos in ${esc(GX ? GX.name : "diesem Gebiet")}. Fotos ohne Tour haben kein Gebiet. <a href="#/photos?y=${Y}">Alle Gebiete</a></p>`;
+    return;
+  }
   const groups = new Map();
   ph.forEach(p => {
     const k = p.tour_id || "-";

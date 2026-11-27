@@ -443,3 +443,59 @@ Object.assign(window.SL_WT, {
     preview: () => slPrev('<div class="slpvf" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'),
   },
 });
+
+/* =====================  3.68.0 „Vor einem Jahr in dieser Gegend“ (Typ vorjahr)  =====================
+   Touren aus früheren Jahren im selben Gebiet, die in der Jahreszeit von heute lagen (± 1 Monat). Gerechnet wird aus den geladenen Touren (TOURS, Gebiete.von); es gibt keine neue Abfrage.
+   Gebiet: auf der Gebietsseite das Gebiet der Seite; in der Übersicht das genaueste Gebiet der neuesten Tour (Gebiete.anzeige), wenn sie höchstens 60 Tage zurückliegt („diese Gegend“ = dort, wo du zuletzt warst).
+   Nicht zu verwechseln mit „Heute vor X Jahren“ (genau dieses Datum, überall) und den Erinnerungen (Fotos). Leer = der Baustein ist unsichtbar (data-hn, wie die Hinweis-Bausteine; im Bearbeitungsmodus ein Platzhalter).
+   Einstellung: n 3 | 5 | 8 (Anzahl, Standard 5) und title. „Neu mischen“ (nur wenn es mehr Treffer als Zeilen gibt) zieht eine neue Auswahl. */
+const VJ_TAGE = 31, VJ_RECENT_TAGE = 60, VJ_N = [3, 5, 8];
+const vjAbstand = (t, now) => {                                                                  // Abstand der Jahreszeit in Tagen (ohne Jahr, rund um den Jahreswechsel kürzester Weg)
+  const a = Date.UTC(2001, +t.date.slice(5, 7) - 1, +t.date.slice(8, 10)), b = Date.UTC(2001, now.getMonth(), now.getDate()), d = Math.abs(a - b) / 864e5;
+  return Math.min(d, 365 - d);
+};
+function vjGebiet(reise) {
+  if (reise && reise.fam === "gebiet" && reise.gebiet) return {id: reise.gebiet.id, name: reise.gebiet.name, hier: true};
+  const t = TOURS.filter(x => x.date && x.start_ts).sort((a, z) => z.start_ts - a.start_ts).find(x => Gebiete.anzeige(x));
+  if (!t || Date.now() - t.start_ts * 1000 > VJ_RECENT_TAGE * 864e5) return null;
+  const g = Gebiete.anzeige(t);
+  return {id: g.id, name: g.name, hier: false};
+}
+/* Treffer: Touren des Gebiets aus früheren Jahren in der Jahreszeit von heute, die zur Jahreszeit passendsten zuerst (dann das jüngere Jahr) */
+function vjTreffer(g, now = new Date()) {
+  const cy = now.getFullYear();
+  return TOURS.filter(t => t.date && t.y < cy && inGebiet(t, g.id)).map(t => ({t, d: vjAbstand(t, now)})).filter(x => x.d <= VJ_TAGE).sort((a, z) => a.d - z.d || z.t.y - a.t.y).map(x => x.t);
+}
+window.SL_WT.vorjahr = {
+  fam: "uebersicht", cat: "rueck", icon: "cmp", name: "Vor einem Jahr in dieser Gegend", title: () => "Vor einem Jahr in dieser Gegend", w: "halb", seiten: ["uebersicht", "gebiet"], defaults: {n: 5},
+  desc: "Touren aus früheren Jahren in dem Gebiet, in dem du zuletzt unterwegs warst (auf der Seite eines Gebiets: in diesem Gebiet), und zwar um diese Jahreszeit (einen Monat davor oder danach). Mit „Neu mischen“ siehst du andere. Gibt es nichts, ist der Baustein unsichtbar. „Heute vor X Jahren“ zeigt dagegen genau dieses Datum an jedem Ort.",
+  fields: [{k: "n", kind: "radio", num: true, def: 5, label: "Anzahl", options: [[3, "3"], [5, "5"], [8, "8"]]}, {kind: "title"}],
+  preview: () => slPrev('<ul class="sllist"><li><b>Vor 2 Jahren</b><span>Seeufer-Runde, 8,1 km</span></li><li><b>Vor 3 Jahren</b><span>Küstenweg, 12,4 km</span></li></ul>'),
+  render(c, b, cfg, ctx) {
+    const g = vjGebiet(ctx && ctx.reise), all = g ? vjTreffer(g) : [], n = VJ_N.includes(+cfg.n) ? +cfg.n : 5, cy = new Date().getFullYear();
+    if (!all.length) {
+      b.innerHTML = `<p class="mut slnone"><span>${g ? (g.hier ? "Aus früheren Jahren gibt es um diese Jahreszeit keine Tour in diesem Gebiet." : `Aus früheren Jahren gibt es um diese Jahreszeit keine Tour in ${esc(g.name)}.`) : "Sobald du in einem bekannten Gebiet unterwegs warst, siehst du hier, was du dort in früheren Jahren um diese Jahreszeit gemacht hast."}</span> <span>Der Baustein ist dann unsichtbar.</span></p>`;
+      slBadge(c, "");
+      return hnState(c, "aus");
+    }
+    let shown = all.slice(0, n);
+    const paint = () => {
+      const rows = shown.slice().sort((a, z) => z.y - a.y || a.start_ts - z.start_ts);
+      b.innerHTML = (all.length > n ? '<div class="rsdh vjbar"><button type="button" class="btn ghost sm ernew vjnew">Neu mischen</button></div>' : "") +
+        `<p class="mut vjinfo">${g.hier ? "" : `<a class="gblink" href="#/tours?g=${encodeURIComponent(g.id)}" title="Alle Touren in diesem Gebiet">${esc(g.name)}</a>`}<span>Um diese Jahreszeit (± 1 Monat)</span></p>` +
+        `<ul class="sllist">${rows.map(t => `<li><b>${cy - t.y === 1 ? "Vor 1 Jahr" : "Vor " + (cy - t.y) + " Jahren"}</b><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${fmtDatumKurz(t.date)} · ${fmtKm(t.km)}</span></li>`).join("")}</ul>`;
+      const nb = b.querySelector(".vjnew");
+      if (nb) nb.onclick = () => {
+        let l = shown;
+        for (let k = 0; k < 5 && erSame(l, shown); k++) l = all.slice().sort(() => Math.random() - 0.5).slice(0, n);       // sichtbar anders als vorher (soweit es Treffer genug gibt)
+        shown = l;
+        paint();
+        const x = b.querySelector(".vjnew");
+        if (x) x.focus();
+      };
+    };
+    paint();
+    slBadge(c, all.length === 1 ? "1 Tour" : `${all.length} Touren`);
+    hnState(c, "an");
+  },
+};

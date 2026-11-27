@@ -274,7 +274,7 @@ def test_katalog_der_uebersicht_und_der_statistik(pw, app, width, scheme):
         assert names.count("Ziele") == 1 and names.count("Bestwerte") == 1
         for n in ("Jahresziel", "Jahresziel in Gefahr", "Wochenziel", "Rekorde", "Top-Touren"):
             assert n not in names, n
-        assert len(names) == 33
+        assert len(names) == 34
         _shot(pg, f"uebersicht-katalog-{sfx}.png", full=False)
         press_until_gone(pg, "Escape", ".slcat")
         pg.goto(f"{app}/#/stats")

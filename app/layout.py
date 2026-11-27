@@ -107,6 +107,9 @@ KARTE_TYPEN = frozenset(("kzahlen", "kliste", "klegende"))
 # 3.65.0: Bausteine der Gebiete-Seiten (static/js/68-gebiete.js): Übersicht „gebiete“: gbzahlen (Kennzahlen aller Gebiete); ein Gebiet „gebiet“: gfotos („Fotos“ des Gebiets, Fotos der Touren dort) und gmonate („Beste Monate“ bzw. Jahre)
 GEBIETE_TYPEN = frozenset(("gbzahlen",))
 GEBIET_TYPEN = frozenset(("gfotos", "gmonate"))
+# 3.68.0: „Vor einem Jahr in dieser Gegend“ (Typ vorjahr, static/js/60-bausteine-erinnerungen.js): Touren früherer Jahre im selben Gebiet um diese Jahreszeit; Standard-Abschnitt der Übersicht und der Gebietsseite, nur dort.
+# Konfiguration wie bei „Neueste Touren“ (n 1–10, title; die Oberfläche bietet 3, 5 und 8 an)
+VORJAHR_TYPE = "vorjahr"
 SEITEN_TYPEN = {"reise": REISE_TYPEN, "serie": REISE_TYPEN, "reisen": REISEN_TYPEN, "gebiete": GEBIETE_TYPEN, "gebiet": GEBIET_TYPEN, "fotos": FOTO_TYPEN, "karte": KARTE_TYPEN}          # Seitenschlüssel -> Bausteine, die nur dort stehen dürfen
 ALLE_SEITEN_TYPEN = REISE_TYPEN | REISEN_TYPEN | FOTO_TYPEN | KARTE_TYPEN | GEBIETE_TYPEN | GEBIET_TYPEN
 HINWEIS_ARTEN = ("ziel", "meilenstein", "auffaellig", "pause", "rekord", "woche", "erholung", "sicherung")
@@ -141,13 +144,13 @@ GROUP_NEVER = frozenset(("sum", "kopf"))                      # Pflicht-Abschnit
 _TOUR_STD = ("map", "prof", "puls", "wp", "planist", "sum", "photos", "geraet", "wx", "ana", "steig", "aehn", "cmp")
 STD_IDS = {
     "tour-haupt": frozenset(_TOUR_STD), "tour-auswertung": frozenset(_TOUR_STD),
-    "uebersicht": frozenset(("aufmacher", "jahr", "zepp", "zuletzt", "tag", "erinn")),
+    "uebersicht": frozenset(("aufmacher", "jahr", "zepp", "zuletzt", "tag", "erinn", "vorjahr")),                 # 3.68.0: vorjahr
     "statistik": frozenset(("kpi", "ziele", "kmmonat", "kmverlauf", "sportarten", "bestwerte", "heat", "bl", "tp", "tag", "erinn")),
     "reise": frozenset(("kopf", "kennzahlen", "stat", "flug", "karte", "fotos", "touren")),
     "serie": frozenset(("kopf", "kennzahlen", "stat", "flug", "karte", "fotos", "touren")),             # 3.63.0: Mehrtagestour, gleiche Abschnitte wie die Reise
     "reisen": frozenset(("serien", "reisen", "alben", "entfernt")),
     "gebiete": frozenset(("kopf", "liste")),                                                           # 3.65.0
-    "gebiet": frozenset(("kopf", "kennzahlen", "karte", "monate", "fotos", "reisen", "touren")),
+    "gebiet": frozenset(("kopf", "kennzahlen", "karte", "monate", "fotos", "vorjahr", "reisen", "touren")),            # 3.68.0: vorjahr
     "fotos": frozenset(("kopf", "jahre", "raster")),
     "karte": frozenset(),
 }
@@ -566,6 +569,8 @@ def clean(doc, key=None, goals=None):
                 raise HTTPException(400, "Hinweis-Bausteine gibt es nur auf der Übersicht und der Statistik")
             if x["type"] in HINWEIS_NUR_UEBERSICHT and key == "statistik":
                 raise HTTPException(400, "Dieser Hinweis-Baustein gibt es nur auf der Übersicht")
+            if x["type"] == VORJAHR_TYPE and key not in (None, "uebersicht", "gebiet"):
+                raise HTTPException(400, "Der Baustein „Vor einem Jahr in dieser Gegend“ gibt es nur auf der Übersicht und auf der Seite eines Gebiets")
             if x["type"] == kennzahl.TYPE and key in ("tour-haupt", "tour-auswertung"):
                 raise HTTPException(400, "Eigene Kennzahlen gibt es nur auf der Übersicht und der Statistik")
             seen.add(x["id"])

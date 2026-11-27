@@ -288,7 +288,7 @@ def test_layout_schluessel_und_standardabschnitte():
     import re
     from app import layout
     assert "gebiete" in layout.KEYS and "gebiet" in layout.KEYS and "gebiete" in layout.NEUE_SEITEN and "gebiet" in layout.NEUE_SEITEN
-    assert layout.STD_IDS["gebiete"] == frozenset(("kopf", "liste")) and layout.STD_IDS["gebiet"] == frozenset(("kopf", "kennzahlen", "karte", "monate", "fotos", "reisen", "touren"))
+    assert layout.STD_IDS["gebiete"] == frozenset(("kopf", "liste")) and layout.STD_IDS["gebiet"] == frozenset(("kopf", "kennzahlen", "karte", "monate", "fotos", "vorjahr", "reisen", "touren"))
     js = ROOT / "app" / "static" / "js"
     src = (js / "68-gebiete.js").read_text(encoding="utf-8")
     for key in ("gebiete", "gebiet"):
@@ -312,8 +312,8 @@ def test_layout_dokumente_pruefen():
 
 def test_version_und_dateien_365():
     from app import config
-    assert config.VERSION.startswith("3.67.0 · Meine Touren")
+    assert config.VERSION.startswith("3.68.0 · Meine Touren")
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert "js/68-gebiete.js" in html
-    assert 'const V = "mt-v157"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.67.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v158"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.68.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")

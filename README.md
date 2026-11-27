@@ -9,6 +9,7 @@
 ## Highlights (Stand Version 3.33.0)
 
 * **Seiten selbst gestalten:** Tourseite, Übersicht, Statistik, Reise-Seite und Reisen-Übersicht bestehen aus **Bausteinen** („Seite anpassen“): verschieben, entfernen, einklappen, Breite wählen, Bausteine aus einem Katalog hinzufügen, **Ansichten** und **Vorlagen** (z. B. „Wandern“, „Rad“, „Kompakt“), Export und Import. Ohne Anpassung sieht alles aus wie gewohnt.
+* **Gebiete (neu in 3.68.0 ergänzt):** Südtirol meint nur die Provinz Bozen, neue Gebiete in den Tauern und im Gailtal, Filter **Gebiet** auch bei den Fotos, Baustein **Vor einem Jahr in dieser Gegend** und ein Hinweis bei Reisen, die über mehrere Länder oder Gebiete gehen (Einzelheiten: [docs/versionen/3.68.0.md](docs/versionen/3.68.0.md)).
 * **Eigene Kennzahlen** ohne Programmierung, Hinweis-Bausteine (nur bei Anlass), die **Erinnerungen-Kachel** und ein globaler Filter (Sportart, Zeitraum) in der Statistik.
 * **Teilen:** Freigegebene Links an einem Ort verwalten, Tour-Links in einer **gewählten Ansicht** (z. B. nur Karte und Fotos), **Jahresrückblick als teilbare Seite**, **Diashow-Links** für Tour, Jahr oder Sammlung (Vollbild, ohne Konto, widerrufbar).
 * **Uhren und Messwerte:** Zepp-, Garmin- und Suunto-Import (der Import-Knopf auf der Übersicht passt sich den verbundenen Konten an), Messwerte, „Meine Geräte“ mit Genauigkeit, Training laut Uhr, Belastung und Tempo nach Steigung.

@@ -314,7 +314,7 @@ def test_columns_follow_the_width_of_the_tile(pw, app):
     """Breite über das Raster: Kachel neben Nachbarn gleicher Zeile (sonst füllt das Raster den Rest auf), Spalten der Fotos nach der echten Breite."""
     cols = {}
     for w in ("voll", "zweidrittel", "halb", "drittel"):
-        extra = {"hidden": ["tag"], "order": ["aufmacher", "jahr", "zepp", "zuletzt", "erinn", "wp1", "wp2"], "widgets": [{"id": "wp1", "type": "periode"}, {"id": "wp2", "type": "serie"}],
+        extra = {"hidden": ["tag", "vorjahr"], "order": ["aufmacher", "jahr", "zepp", "zuletzt", "erinn", "wp1", "wp2"], "widgets": [{"id": "wp1", "type": "periode"}, {"id": "wp2", "type": "serie"}],
                  "w": {"wp2": "drittel", **ROWMATES[w]}}
         pg = show(pw, app, {"n": 12, "size": "m"}, w=w, extra=extra)
         assert pg.locator(f"#hmemsec.w-{w}").count() == 1

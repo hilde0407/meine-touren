@@ -106,7 +106,7 @@ def test_duplicate_widget_copy_after_original_with_focus_and_limits(pw, app):
         _edit(pg)
         assert _btn(pg, "zuletzt", "dup").count() == 0 and _btn(pg, "jahr", "dup").count() == 0          # feste Abschnitte: kein Duplizieren
         _btn(pg, "wk1", "dup").click()
-        pg.wait_for_function("() => document.querySelectorAll('.slit').length === 8", timeout=T)
+        pg.wait_for_function("() => document.querySelectorAll('.slit').length === 9", timeout=T)
         ids = _strips(pg)
         i = ids.index("wk1")
         new = ids[i + 1]

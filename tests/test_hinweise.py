@@ -421,11 +421,11 @@ def test_layout_hint_viewer_cannot_write_and_users_are_separate():
 
 def test_version_notes_and_script_order():
     from app import config as cfg
-    assert cfg.VERSION.startswith("3.67.0 · Meine Touren")
+    assert cfg.VERSION.startswith("3.68.0 · Meine Touren")
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("js/57-bausteine-statistik.js") < html.index("js/58-bausteine-hinweise.js") < html.index("js/39-sw.js")
     notes = (ROOT / "docs" / "versionen" / "3.23.0.md").read_text(encoding="utf-8")
     assert "Hinweis-Bausteine" in notes and "/api/bausteine/hinweise" in notes
     for name in ("Jahresziel in Gefahr", "Meilenstein erreicht", "Neue Auffälligkeiten", "Lange Pause", "Rekord-Tour", "Wochenziel", "Erholung", "Sicherung", "Mit Hinweisen"):
         assert name in notes, name
-    assert "mt-v157" in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert "mt-v158" in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")

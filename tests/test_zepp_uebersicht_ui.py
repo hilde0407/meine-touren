@@ -411,7 +411,7 @@ def test_mehrere_quellen_zeilen_alle_holen_nacheinander(pw, app, clean):
         expect(card.locator(".zpsrc")).to_have_count(3, timeout=T)
         assert card.locator(".zpsrc .zph").all_inner_texts() == ["Zepp", "Garmin", "Suunto"]
         expect(card.locator('button.zpb[data-k="garmin"]')).to_contain_text("Garmin-Import starten", timeout=T)
-        expect(card.locator(".zpall")).to_contain_text("Alle holen", timeout=T)
+        expect(card.locator(".zpall")).to_contain_text("Alle Touren holen", timeout=T)
         assert card.locator(".zpall").bounding_box()["height"] >= 44
         card.locator(".zpall").click()
         expect(card.locator('button.zpb[data-k="zepp"]')).to_contain_text("Import läuft", timeout=T)
@@ -444,7 +444,7 @@ def test_mehrere_quellen_schnellknopf_menue(pw, app, clean):
         q.click()
         expect(menu).to_be_visible(timeout=T)
         assert q.get_attribute("aria-expanded") == "true"
-        assert menu.locator("[role=menuitem]").all_inner_texts() == ["Zepp-Import starten", "Garmin-Import starten", "Alle holen"]
+        assert menu.locator("[role=menuitem]").all_inner_texts() == ["Zepp-Import starten", "Garmin-Import starten", "Alle Touren holen"]
         assert all(i.bounding_box()["height"] >= 44 for i in menu.locator("[role=menuitem]").all())
         pg.wait_for_function("() => document.activeElement && document.activeElement.classList.contains('zpmi')", timeout=T)       # Fokus im Menü
         pg.keyboard.press("ArrowDown")
@@ -613,7 +613,7 @@ def test_baustein_touren_knopf_mehrere_quellen_menue_und_einrichten(pw, app, cle
         mb.click()
         menu = w.locator(".zpmenu")
         expect(menu).to_be_visible(timeout=T)
-        assert menu.locator("[role=menuitem]").all_inner_texts() == ["Zepp-Import starten", "Garmin-Import starten", "Alle holen"]
+        assert menu.locator("[role=menuitem]").all_inner_texts() == ["Zepp-Import starten", "Garmin-Import starten", "Alle Touren holen"]
         pg.keyboard.press("Escape")
         expect(menu).to_be_hidden(timeout=T)
         mb.click()

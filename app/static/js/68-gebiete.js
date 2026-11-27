@@ -69,6 +69,7 @@ SL_REG.gebiet = [
   {id: "karte", w: "voll", title: "Karte", page: "gebiet", def: true, ckeys: ["gd_karte"]},
   {id: "monate", w: "voll", title: "Beste Monate", page: "gebiet", build: "gmonate", defcfg: {view: "monate", metric: "count"}, def: true, ckeys: ["gd_monate"]},
   {id: "fotos", w: "voll", title: "Fotos", page: "gebiet", build: "gfotos", defcfg: SL_FOTOS_DEF, def: true, ckeys: ["gd_fotos"]},
+  {id: "vorjahr", w: "halb", title: "Vor einem Jahr in dieser Gegend", page: "gebiet", build: "vorjahr", def: true, ckeys: ["gd_vorjahr"]},                // 3.68.0: Touren früherer Jahre in diesem Gebiet um diese Jahreszeit (60-bausteine-erinnerungen.js)
   {id: "reisen", w: "voll", title: "Reisen", page: "gebiet", def: true, ckeys: ["gd_reisen"]},
   {id: "touren", w: "voll", title: "Touren", page: "gebiet", def: true, ckeys: ["gd_touren"]},
 ];

@@ -17,7 +17,8 @@
      opt.poly    [[[lat, lng], …], …] einfache Vielecke (zusätzlich zu den Rechtecken)
      opt.alias   weitere Suchwörter (deutsch, Landessprache, englisch)
      opt.county  Bezirke/Landkreise (g_county), die das Gebiet sicher beschreiben („Bezirk“, „Landkreis“, „Provinz“ am Anfang zählt nicht)
-     opt.nicht   Ausschluss: Rechtecke [lat0, lng0, lat1, lng1] oder die Kennung eines anderen Gebiets (dessen Fläche)
+     opt.nicht   Ausschluss: Rechtecke [lat0, lng0, lat1, lng1] oder die Kennung eines anderen Gebiets (dessen Fläche, es sei denn, dessen nichtKreis nennt den Bezirk der Tour)
+     opt.nichtKreis  Bezirke/Landkreise (g_county), in denen das Gebiet nie liegt (3.68.0): trifft sonst die Koordinate, zählt die Tour trotzdem nicht (z. B. Südtirol nie in „Bezirk Lienz“ oder „Provinz Trient“)
      opt.in      zusätzlich muss die Koordinate auch in der Fläche dieses Gebiets liegen (Unterteilung eines Vielecks durch Rechtecke)
      opt.prio    Gleichstand bei der Anzeige: höhere Zahl gewinnt
      opt.anz     true: auch ein Gebiet vom Typ „region“ darf in der Regionszeile erscheinen (sonst nur Gebirge, Täler, Inseln, Küsten)
@@ -27,7 +28,7 @@ const Gebiete = (() => {
   const GEB = "gebirge", TAL = "tal", INS = "insel", KUE = "kueste", REG = "region";
   const L = [];
   const g = (id, name, typ, eltern, boxen, o = {}) => {
-    L.push({id, name, typ, eltern: eltern || null, boxen: boxen || [], poly: o.poly || [], alias: o.alias || [], county: o.county || [], nicht: o.nicht || [], in: o.in || null, prio: o.prio || 0, anz: o.anz === true});
+    L.push({id, name, typ, eltern: eltern || null, boxen: boxen || [], poly: o.poly || [], alias: o.alias || [], county: o.county || [], nicht: o.nicht || [], nichtKreis: o.nichtKreis || [], in: o.in || null, prio: o.prio || 0, anz: o.anz === true});
   };
 
   /* ===================== Alpen: Österreich ===================== */
@@ -44,13 +45,20 @@ const Gebiete = (() => {
   g("montafon", "Montafon", TAL, "alpen", [[46.82, 9.78, 47.15, 10.10]], {alias: ["Silvretta", "Schruns"]});
   g("kaunertal", "Kaunertal", TAL, "alpen", [[46.80, 10.58, 47.08, 10.78]], {alias: ["Kaunertaler Gletscher", "Gepatschhaus"]});
   g("kitzbueheler", "Kitzbüheler Alpen", GEB, "alpen", [[47.28, 12.00, 47.56, 12.65]], {alias: ["Kitzbühel", "Kitzbuehel", "Brixental", "Wildschönau", "Saalbach"]});
-  g("wilder-kaiser", "Wilder Kaiser", GEB, "alpen", [[47.50, 12.17, 47.64, 12.38]], {alias: ["Kaisergebirge", "Ellmau", "Kaiser"]});
+  g("wilder-kaiser", "Wilder Kaiser", GEB, "alpen", [[47.50, 12.17, 47.64, 12.47]], {alias: ["Kaisergebirge", "Ellmau", "Kaiser", "Kaiserwinkl", "Kirchdorf in Tirol", "St. Johann in Tirol", "Going"]});        // 3.68.0: bis 12.47 E: Kirchdorf in Tirol und St. Johann am Ostrand des Kaisers (vorher nur Kitzbüheler Alpen)
   g("karwendel", "Karwendel", GEB, "alpen", [[47.28, 11.18, 47.56, 11.78]], {alias: ["Karwendelgebirge", "Achensee", "Scharnitz", "Hinterriß"]});
   g("dachstein", "Dachstein", GEB, "alpen", [[47.38, 13.45, 47.58, 13.80]], {alias: ["Dachsteingebirge", "Hallstatt", "Gosau", "Ramsau am Dachstein"]});
   g("hochkoenig", "Hochkönig", GEB, "alpen", [[47.33, 12.85, 47.48, 13.15]], {alias: ["Hochkoenig", "Maria Alm", "Dienten"]});
   g("hohetauern", "Hohe Tauern", GEB, "alpen", [[46.85, 12.10, 47.35, 13.35]], {alias: ["Nationalpark Hohe Tauern", "Hohen Tauern"]});
   g("glockner", "Großglockner", GEB, "hohetauern", [[46.95, 12.60, 47.20, 12.95]], {alias: ["Grossglockner", "Glockner", "Kals", "Heiligenblut", "Pasterze"]});
   g("venediger", "Venedigergruppe", GEB, "hohetauern", [[46.95, 12.15, 47.24, 12.55]], {alias: ["Venediger", "Großvenediger", "Prägraten", "Krimmler Tauern"]});
+  /* 3.68.0 Niedere Tauern (Oberbegriff) mit Schladminger und Radstädter Tauern; Maltatal (Ankogel-/Hochalmgruppe, Kärnten); Gailtaler Alpen (nördlich des Gailtals) */
+  g("niedere-tauern", "Niedere Tauern", GEB, "alpen", [], {alias: ["Niedere Tauern Steiermark"]});
+  g("schladminger", "Schladminger Tauern", GEB, "niedere-tauern", [[47.25, 13.50, 47.47, 14.20]], {alias: ["Schladming", "Haus im Ennstal", "Aich", "Rohrmoos", "Untertal", "Planai", "Irdning-Donnersbachtal", "Donnersbachtal", "Giglachsee", "Hochwurzen"],
+                                                                  nicht: [[47.405, 13.45, 47.47, 13.66]]});          // nicht: Ramsau am Dachstein bleibt beim Dachstein
+  g("radstaedter", "Radstädter Tauern", GEB, "niedere-tauern", [[47.20, 13.45, 47.32, 13.65]], {alias: ["Radstaedter Tauern", "Obertauern", "Untertauern", "Radstädter Tauernpass"]});
+  g("maltatal", "Maltatal", TAL, "hohetauern", [[46.95, 13.30, 47.10, 13.60]], {alias: ["Malta", "Kölnbreinsperre", "Koelnbreinsperre", "Maltatal Kärnten", "Hochalmspitze", "Maltaberg"]});
+  g("gailtaler", "Gailtaler Alpen", GEB, "alpen", [[46.68, 13.05, 46.82, 13.70]], {alias: ["Gailtaler Alpen Kärnten", "Kleblach-Lind", "Lind im Drautal", "Oberdrautal", "Reißkofel", "Dobratsch", "Greifenburg"]});
   g("nockberge", "Nockberge", GEB, "alpen", [[46.75, 13.70, 47.00, 14.10]], {alias: ["Nockalm", "Nockalmstraße", "Bad Kleinkirchheim", "Turracher Höhe"]});
   g("gesaeuse", "Gesäuse", GEB, "alpen", [[47.48, 14.45, 47.68, 14.75]], {alias: ["Gesaeuse", "Nationalpark Gesäuse", "Admont", "Johnsbach"]});
   g("hochschwab", "Hochschwab", GEB, "alpen", [[47.50, 14.95, 47.72, 15.40]], {alias: ["Hochschwabgruppe", "Aflenz"]});
@@ -83,10 +91,12 @@ const Gebiete = (() => {
 
   /* ===================== Alpen: Italien, Frankreich, Slowenien ===================== */
   g("suedtirol", "Südtirol", REG, "alpen", [], {poly: [[[46.87, 10.50], [46.78, 10.72], [46.77, 10.85], [46.83, 10.95], [46.91, 11.09], [46.96, 11.15], [47.00, 11.30], [47.00, 11.52], [47.00, 11.75], [47.03, 11.95],
-                                                         [47.08, 12.12], [46.95, 12.20], [46.80, 12.37], [46.70, 12.45], [46.65, 12.43], [46.62, 12.34], [46.58, 12.20], [46.57, 12.05], [46.52, 11.99],
+                                                         [47.08, 12.12], [46.95, 12.20], [46.85, 12.27], [46.80, 12.29], [46.77, 12.33], [46.745, 12.37], [46.70, 12.45], [46.65, 12.43], [46.62, 12.34], [46.58, 12.20], [46.57, 12.05], [46.52, 11.99],
                                                          [46.50, 11.88], [46.49, 11.80], [46.50, 11.76], [46.47, 11.65], [46.41, 11.58], [46.36, 11.55], [46.30, 11.40], [46.24, 11.22], [46.30, 11.15],
                                                          [46.43, 11.19], [46.51, 11.07], [46.47, 10.95], [46.45, 10.80], [46.45, 10.62], [46.51, 10.54], [46.55, 10.46], [46.65, 10.38], [46.78, 10.40]]],
-                                      alias: ["Alto Adige", "South Tyrol", "Sudtirol", "Provinz Bozen", "Bolzano"], county: ["Bozen", "Bolzano", "Bolzano - Bozen", "Südtirol", "Alto Adige"], anz: true});
+                                      alias: ["Alto Adige", "South Tyrol", "Sudtirol", "Provinz Bozen", "Bolzano"], county: ["Bozen", "Bolzano", "Bolzano - Bozen", "Bozen - Südtirol", "Südtirol", "Alto Adige"], anz: true,
+                                      /* 3.68.0: nur die Provinz Bozen. Osttirol (Sillian, Innervillgraten: Bezirk Lienz) und das Val di Rabbi (Trentino) liegen am Rand des Vielecks; bei Touren mit Bezirk entscheidet er, sonst nur die Koordinate */
+                                      nichtKreis: ["Lienz", "Trient", "Trento", "Belluno", "Sondrio", "Landeck", "Imst", "Innsbruck-Land", "Schwaz", "Engiadina Bassa/Val Müstair"]});
   g("trentino", "Trentino", REG, "alpen", [], {poly: [[[46.50, 10.60], [46.50, 11.95], [46.20, 11.95], [46.00, 11.78], [45.95, 11.40], [45.78, 11.20], [45.68, 11.00], [45.80, 10.75], [45.85, 10.62],
                                                         [46.05, 10.50], [46.20, 10.55], [46.30, 10.62]]],
                                      alias: ["Provinz Trient", "Trient", "Trento"], county: ["Trient", "Trento"], nicht: ["suedtirol"], anz: true});
@@ -225,6 +235,7 @@ const Gebiete = (() => {
   g("montserrat", "Montserrat", GEB, null, [[41.55, 1.75, 41.67, 1.92]], {alias: ["Montserrat-Gebirge", "Monistrol de Montserrat"]});
   g("montseny", "Montseny", GEB, null, [[41.70, 2.30, 41.90, 2.55]], {alias: ["Massís del Montseny", "Turó de l'Home", "Viladrau"]});
   g("cazorla", "Sierra de Cazorla", GEB, null, [[37.75, -3.10, 38.40, -2.45]], {alias: ["Cazorla", "Sierras de Cazorla, Segura y Las Villas", "Segura de la Sierra", "Cazorla Natural Park"]});
+  g("sierra-nieves", "Sierra de las Nieves", GEB, null, [[36.58, -5.10, 36.80, -4.85]], {alias: ["Sierra de las Nieves Nationalpark", "Parque Nacional Sierra de las Nieves", "Yunquera", "Tolox", "El Burgo", "Istán", "Parauta", "Torrecilla", "Málaga Hinterland"]});
   g("caminito", "Caminito del Rey", TAL, null, [[36.88, -4.85, 36.98, -4.70]], {alias: ["El Caminito del Rey", "Desfiladero de los Gaitanes", "El Chorro", "Ardales"]});
   g("cabo-de-gata", "Cabo de Gata", KUE, null, [[36.70, -2.30, 37.00, -1.85]], {alias: ["Cabo de Gata-Níjar", "Parque Natural Cabo de Gata", "San José", "Las Negras"]});
   g("grazalema", "Sierra de Grazalema", GEB, null, [[36.65, -5.50, 36.95, -5.20]], {alias: ["Grazalema", "Zahara de la Sierra", "Pinsapar"]});
@@ -409,7 +420,7 @@ const Gebiete = (() => {
   L.forEach(x => { BY[x.id] = x; });
   const fold = s => String(s == null ? "" : s).toLowerCase().replace(/ß/g, "ss").replace(/[æ]/g, "ae").replace(/[œ]/g, "oe").replace(/[øð]/g, "o").replace(/[đ]/g, "d").replace(/[łŀ]/g, "l").replace(/ı/g, "i")
     .replace(/þ/g, "th").normalize("NFD").replace(/\p{M}/gu, "").replace(/[^a-z0-9]+/g, "");
-  const kreis = s => fold(s).replace(/^(landkreis|bezirk|kreis|provinz|provincia|stadt|kreisfreie|region)(di|von|de)?/, "");
+  const kreis = s => fold(s).replace(/^(autonome)?(landkreis|bezirk|kreis|provinz|provincia|stadt|kreisfreie|region)(autonoma)?(di|von|de)?/, "");
   const okLL = (a, b) => typeof a === "number" && typeof b === "number" && isFinite(a) && isFinite(b) && Math.abs(a) <= 90 && Math.abs(b) <= 180 && !(a === 0 && b === 0);
   const inBox = (b, la, ln) => la >= b[0] && la <= b[2] && ln >= b[1] && ln <= b[3];
   const inPoly = (ring, la, ln) => {                                   // Strahlverfahren (Rand zählt je nach Lage mal zu, mal nicht – genügt für Näherungen)
@@ -426,6 +437,7 @@ const Gebiete = (() => {
     x.hull = all.length ? [Math.min(...all.map(b => b[0])), Math.min(...all.map(b => b[1])), Math.max(...all.map(b => b[2])), Math.max(...all.map(b => b[3]))] : null;
     x.flaeche = all.reduce((s, b) => s + (b[2] - b[0]) * (b[3] - b[1]), 0) || 1e9;
     x.kreise = x.county.map(kreis);
+    x.nkreise = x.nichtKreis.map(kreis);
     x.eigen = x.boxen.length > 0 || x.poly.length > 0 || x.county.length > 0;      // reine Oberbegriffe gelten nur über ihre Kinder
   });
   const tiefe = x => { let n = 0; for (let e = x.eltern && BY[x.eltern]; e && n < 10; e = e.eltern && BY[e.eltern]) n++; return n; };
@@ -436,11 +448,12 @@ const Gebiete = (() => {
   /** Liegt die Koordinate in der Fläche des Gebiets (Rechtecke/Vielecke, ohne Bezirk, ohne Ausschluss)? */
   const flaeche = (x, la, ln) => !!x.hull && inBox(x.hull, la, ln) && (x.boxen.some(b => inBox(b, la, ln)) || x.poly.some(r => inPoly(r, la, ln)));
   const trifft = (x, la, ln, kr) => {
+    if (kr && x.nkreise.includes(kr)) return false;                          // 3.68.0: der Bezirk der Tour liegt sicher nicht im Gebiet (Koordinaten am Rand täuschen sich leicht)
     let ok = false;
     if (la != null && x.hull) ok = flaeche(x, la, ln) && (!x.in || flaeche(BY[x.in], la, ln));
     if (!ok && kr && x.kreise.includes(kr)) ok = true;
     if (!ok) return false;
-    return !x.nicht.some(n => (typeof n === "string" ? flaeche(BY[n], la, ln) : la != null && inBox(n, la, ln)));
+    return !x.nicht.some(n => (typeof n === "string" ? flaeche(BY[n], la, ln) && !(kr && BY[n].nkreise.includes(kr)) : la != null && inBox(n, la, ln)));      // Fläche des anderen Gebiets, außer sein Bezirk-Ausschluss (nichtKreis) greift: „Provinz Trient“ liegt nie in Südtirol
   };
   const cache = new Map();
   /** Gebiete einer Tour, spezifischste zuerst: [{id, name, typ, eltern}]. Mehrfachzuordnung gewollt; Eltern werden mitgeführt. Nur Koordinate (t.lat/t.lng), Bezirk als zusätzliche Möglichkeit. */
@@ -557,7 +570,7 @@ const Gebiete = (() => {
     for (const e of Array.isArray(liste) ? liste : []) {
       const b = e && e.box, ok = Array.isArray(b) && b.length === 4 && b.every(v => typeof v === "number" && isFinite(v)) && b[0] < b[2] && b[1] < b[3] && Math.abs(b[0]) <= 90 && Math.abs(b[2]) <= 90 && Math.abs(b[1]) <= 180 && Math.abs(b[3]) <= 180;
       if (!ok || !e.id || BY[e.id] || ![GEB, TAL, INS, KUE, REG].includes(e.typ) || !e.name) continue;
-      const x = {id: e.id, name: String(e.name), typ: e.typ, eltern: null, boxen: [b.slice()], poly: [], alias: [], county: [], nicht: [], in: null, prio: 0, anz: true, kreise: [], quelle: "eigen", tiefe: 99, land: e.land || ""};
+      const x = {id: e.id, name: String(e.name), typ: e.typ, eltern: null, boxen: [b.slice()], poly: [], alias: [], county: [], nicht: [], in: null, prio: 0, anz: true, kreise: [], nkreise: [], nichtKreis: [], quelle: "eigen", tiefe: 99, land: e.land || ""};
       x.hull = b.slice();
       x.flaeche = (b[2] - b[0]) * (b[3] - b[1]) || 1e9;
       x.eigen = true;
