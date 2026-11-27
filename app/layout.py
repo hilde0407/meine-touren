@@ -1,7 +1,7 @@
 """Seite anpassen (3.17.0): gespeicherte Anordnung der Abschnitte und Bausteine je Seite.
 
 Schlüssel: „tour-haupt“ (Tourseite), „tour-auswertung“ (Unterseite Auswertung), „uebersicht“ (Übersicht), „statistik“ (Statistik, 3.22.0),
-„reise“ (Reise-Detailseite #/trip/<id>, 3.33.0), „reisen“ (Reisen-Übersicht #/trips, 3.33.0), „fotos“ (Fotos-Seite #/photos, 3.34.0) und „karte“ (Gesamtkarte #/map, 3.34.0).
+„reise“ (Reise-Detailseite #/trip/<id>, 3.33.0), „serie“ (Mehrtagestour #/series/<id>, 3.63.0: dieselben Bausteine wie „reise“), „reisen“ (Reisen-Übersicht #/trips, 3.33.0), „fotos“ (Fotos-Seite #/photos, 3.34.0) und „karte“ (Gesamtkarte #/map, 3.34.0).
 Das Layout einer Seite gilt für alle Reisen gleich (je Benutzer, nicht je Reise).
 Jeder Benutzer hat eine eigene Datenbank (app/ctx.py); die Tabelle `user_layout` ist daher je Benutzer getrennt, eine Spalte „user“ ist nicht nötig.
 Dokument (JSON-Objekt, alle Felder optional):
@@ -39,7 +39,7 @@ Ansichten (3.21.0): Ein Dokument je Seitenschlüssel kann statt des Layouts auch
   Tourseite: Hauptseite und Auswertung sind zwei Schlüssel; die Ansichten (Kennungen, Namen, active, rules) werden von der Oberfläche in beiden Dokumenten gleich geführt,
   der Inhalt (layout) steht je Schlüssel für sich. Maßgeblich für Namen, Standardansicht und Regeln ist „tour-haupt“.
   POST /api/layout/check prüft eine Export-Datei (Ansicht als JSON) mit denselben Regeln wie beim Speichern und liefert das bereinigte Ergebnis oder klare Fehler.
-Reisen (3.33.0): Bausteine der Reise-Detailseite (REISE_TYPEN: rkennzahl, rdiashow, rkmtag) stehen nur im Dokument „reise“, die der Reisen-Übersicht (REISEN_TYPEN: rnzahlen, rnjahre) nur in „reisen“.
+Reisen (3.33.0): Bausteine der Reise-Detailseite (REISE_TYPEN: rkennzahl, rdiashow, rkmtag) stehen nur in den Dokumenten „reise“ und „serie“, die der Reisen-Übersicht (REISEN_TYPEN: rnzahlen, rnjahre) nur in „reisen“.
 Alle Bausteine anderer Seiten, die dort bekannt sind (Tour-, Statistik-, Hinweis-Bausteine, eigene Kennzahl, Erinnerungen), werden dort abgelehnt; unbekannte Typen (neuere Version) bleiben erlaubt.
 Ihre Konfiguration wird streng geprüft (REISE_CFG: nur diese Felder, feste Auswahllisten). „rdiashow“ nimmt die Felder der Erinnerungen (mode, n, view, ratio, size, height, tempo, caption, shuffle, link, title), aber keine Filter:
 den Zeitraum der Reise setzt die Oberfläche. 3.62.0: „rdiashow“ heißt in der Oberfläche „Fotos“ (mode all|best|random|recent); der feste Abschnitt „fotos“ der Reise ist derselbe Baustein, seine Einstellung steht unter cfg.fotos (ohne Eintrag: mode all). Regeln nach Sportart (rules) gibt es nur auf der Tourseite.
@@ -76,8 +76,8 @@ from . import baustein_umzug as umzug, db, kennzahl
 
 router = APIRouter()
 
-KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik", "reise", "reisen", "fotos", "karte")
-NEUE_SEITEN = ("uebersicht", "statistik", "reise", "reisen", "fotos", "karte")                 # Seiten mit genau einem Dokument (ohne Regeln nach Sportart)
+KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik", "reise", "serie", "reisen", "fotos", "karte")
+NEUE_SEITEN = ("uebersicht", "statistik", "reise", "serie", "reisen", "fotos", "karte")           # Seiten mit genau einem Dokument (ohne Regeln nach Sportart); 3.63.0: „serie“ = Seite einer Mehrtagestour (#/series/<id>)
 FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg", "w", "filter", "kopf", "groups", "mob", "zrbar"}
 WIDTHS = ("voll", "zweidrittel", "halb", "drittel")
 # Bausteine, die eine Tour brauchen (Typkennungen wie in static/js/50-bausteine.js und 51-bausteine-tour.js, fam "tour"): nicht in der Übersicht
@@ -99,7 +99,7 @@ REISE_NUM = {"fjahre": {"n": (5, 8, 12)}, "kliste": {"n": (5, 10, 20)}}
 # 3.34.0: Bausteine der Fotos-Seite und der Karte (Typkennungen wie in static/js/63-fotoseiten.js und 64-kartenseite.js)
 FOTO_TYPEN = frozenset(("fkennzahl", "fjahre"))
 KARTE_TYPEN = frozenset(("kzahlen", "kliste", "klegende"))
-SEITEN_TYPEN = {"reise": REISE_TYPEN, "reisen": REISEN_TYPEN, "fotos": FOTO_TYPEN, "karte": KARTE_TYPEN}          # Seitenschlüssel -> Bausteine, die nur dort stehen dürfen
+SEITEN_TYPEN = {"reise": REISE_TYPEN, "serie": REISE_TYPEN, "reisen": REISEN_TYPEN, "fotos": FOTO_TYPEN, "karte": KARTE_TYPEN}          # Seitenschlüssel -> Bausteine, die nur dort stehen dürfen
 ALLE_SEITEN_TYPEN = REISE_TYPEN | REISEN_TYPEN | FOTO_TYPEN | KARTE_TYPEN
 HINWEIS_ARTEN = ("ziel", "meilenstein", "auffaellig", "pause", "rekord", "woche", "erholung", "sicherung")
 SNOOZE_RE = re.compile(r"^([a-z]{3,12}):(\d{1,11})$")
@@ -136,6 +136,7 @@ STD_IDS = {
     "uebersicht": frozenset(("aufmacher", "jahr", "zepp", "zuletzt", "tag", "erinn")),
     "statistik": frozenset(("kpi", "ziele", "kmmonat", "kmverlauf", "sportarten", "bestwerte", "heat", "bl", "tp", "tag", "erinn")),
     "reise": frozenset(("kopf", "kennzahlen", "stat", "flug", "karte", "fotos", "touren")),
+    "serie": frozenset(("kopf", "kennzahlen", "stat", "flug", "karte", "fotos", "touren")),             # 3.63.0: Mehrtagestour, gleiche Abschnitte wie die Reise
     "reisen": frozenset(("serien", "reisen", "alben", "entfernt")),
     "fotos": frozenset(("kopf", "jahre", "raster")),
     "karte": frozenset(),
@@ -589,7 +590,7 @@ def clean(doc, key=None, goals=None):
         if not isinstance(c, dict) or len(c) > 10 or not all(isinstance(k, str) and ID_RE.match(k) for k in c):
             raise HTTPException(400, "„cfg“ muss ein Objekt mit höchstens 10 Einträgen sein")
         sec = {ERINN_TYPE: ERINN_TYPE, "ziele": umzug.ZIELE, "bestwerte": umzug.BESTWERTE} if key in (None, "statistik") else {ERINN_TYPE: ERINN_TYPE}     # 3.45.0: Abschnitte „Ziele“ und „Bestwerte“ der Statistik sind Bausteine
-        if key in (None, "reise"):
+        if key in (None, "reise", "serie"):
             sec["fotos"] = "rdiashow"                       # 3.62.0: der Abschnitt „Fotos“ der Reise ist der Baustein „Fotos“ (Typ rdiashow, Vorgabe „Alle“)
         out["cfg"] = {k: _cfg(x, sec.get(k)) for k, x in c.items()}
     if len(json.dumps(out, ensure_ascii=False)) > MAX_BYTES:
@@ -683,7 +684,7 @@ def check_export(doc):
         return res
     page = doc.get("page")
     if page not in ("tour",) + NEUE_SEITEN:
-        errors.append("Die Datei nennt keine gültige Seite (erlaubt: tour, uebersicht, statistik, reise, reisen, fotos, karte).")
+        errors.append("Die Datei nennt keine gültige Seite (erlaubt: tour, uebersicht, statistik, reise, serie, reisen, fotos, karte).")
         return res
     res["page"] = page
     try:

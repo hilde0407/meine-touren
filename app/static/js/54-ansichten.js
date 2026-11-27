@@ -2,7 +2,7 @@
    Daten und Auswahl-Logik stehen in 49-seitenlayout.js (Behälter SL.store, slResolve, slPack); hier: Auswahl in der Kopfzeile, Verwaltung (Dialog), Vorlagen, Export und Import.
    Tourseite: Hauptseite und Auswertung sind zwei Schlüssel; jede Änderung an den Ansichten (anlegen, umbenennen, löschen, Standard, Regeln) wird in beiden geführt
    (slAlign), der Inhalt bleibt je Schlüssel eigen. Die Vorgabe der Anzeige: von Hand gewählt (diese Sitzung) vor Regel „Sportart → Ansicht“ (beim Öffnen einer Tour) vor Standardansicht. */
-const SL_APPV = "3.62.2";
+const SL_APPV = "3.63.0";
 const SL_EXPORT_FORMAT = "meine-touren-ansicht";
 const SL_MAXFILE = 200000;
 const slVm = fam => slMaster(fam).views;
@@ -69,7 +69,7 @@ const slLayoutsOf = (fam, id) => {
 
 /* ---------- Auswahl in der Kopfzeile ---------- */
 function slApplyOpen(fam) {                                           // „Standardmäßig offen“ der gewählten Ansicht gilt auch für schon gebaute Abschnitte
-  if (fam !== "tour" && fam !== "reise" && fam !== "reisen") return;          // 3.33.0: auch die Karten der Reisen-Seiten (Zustand „mt_trf_…“)
+  if (fam !== "tour" && fam !== "reise" && fam !== "serie" && fam !== "reisen") return;          // 3.33.0: auch die Karten der Reisen-Seiten (Zustand „mt_trf_…“)
   slItems(fam).forEach(it => {
     if (it.widget) return;
     (it.ckeys || []).forEach(k => {
@@ -269,7 +269,7 @@ function slVLine(t) {
   }
   slLive(t);
 }
-const slFamName = f => ({tour: "Tourseite", uebersicht: "Übersicht", statistik: "Statistik", reise: "Reise-Seite", reisen: "Reisen-Übersicht", fotos: "Fotos-Seite", karte: "Karte"})[f] || f;
+const slFamName = f => ({tour: "Tourseite", uebersicht: "Übersicht", statistik: "Statistik", reise: "Reise-Seite", serie: "Mehrtagestour-Seite", reisen: "Reisen-Übersicht", fotos: "Fotos-Seite", karte: "Karte"})[f] || f;
 const slSports = () => [...new Set([...(typeof TOURS !== "undefined" ? TOURS : []).map(t => t.sport), ...Object.keys(slMaster("tour").rules || {})])].filter(s => s && /^[A-Za-z0-9_]{1,40}$/.test(s)).sort((a, b) => sName(a).localeCompare(sName(b), "de"));
 function slViewsDialog() {
   const fam = SL.fam, famLabel = slFamName(fam);

@@ -2,6 +2,7 @@
 import hashlib
 from pathlib import Path
 import json
+import re
 import secrets
 import statistics
 import threading
@@ -181,9 +182,144 @@ def _apply_trip_edits(trips):
     return sorted(trips, key=lambda x: x["start"], reverse=True)
 
 
+# ---------- Eigene Reisen (3.63.0) ----------
+# Tabelle trip_custom(id, name, start, end, tours, created): tours = JSON-Liste der gewählten Touren; leer = alle Touren von start bis end. Eigene Reisen haben Vorrang:
+# eine Tour gehört zu höchstens einer Reise, sie verschwindet aus den automatisch erkannten Reisen (die Kennung der erkannten Reise bleibt, damit Name, Zeitraum und „entfernt“ gelten);
+# wird die eigene Reise gelöscht, ist die Tour wieder in der erkannten Reise. Eigene Reisen unterliegen weder der Mindestzahl an Tagen noch dem Entfernen (sie werden gelöscht).
+CUSTOM_PREFIX = "eigen-"
+MAX_CUSTOM_TOURS = 2000
+
+
+def _day(t):
+    return datetime.fromtimestamp(t["start_ts"], tz=TZ).date().isoformat()
+
+
+def _trip_stats(g):
+    """Felder einer Reise aus ihren Touren (Zeilen mit id, start_ts, dist_m, up_m, dur_s)."""
+    days = {_day(x) for x in g}
+    d0, d1 = min(days), max(days)
+    return {"start": d0, "end": d1, "days": (datetime.fromisoformat(d1) - datetime.fromisoformat(d0)).days + 1, "tours": [x["id"] for x in g], "km": round(sum(x["dist_m"] or 0 for x in g) / 1000, 1),
+            "up_m": round(sum(x["up_m"] or 0 for x in g)), "h": round(sum(x["dur_s"] or 0 for x in g) / 3600, 1)}
+
+
+def _tours_rows(ids=None):
+    if ids is None:
+        return db.query("SELECT id, name, start_ts, dist_m, up_m, dur_s FROM tours WHERE start_ts IS NOT NULL ORDER BY start_ts")
+    ids = list(ids)
+    return db.query("SELECT id, name, start_ts, dist_m, up_m, dur_s FROM tours WHERE start_ts IS NOT NULL AND id IN (%s) ORDER BY start_ts" % ",".join("?" * len(ids)), tuple(ids)) if ids else []
+
+
+def custom_trips():
+    """Alle eigenen Reisen als Reise-Einträge (Touren, die es nicht mehr gibt, fallen weg; ohne Touren erscheint die Reise nicht)."""
+    out = []
+    for r in db.query("SELECT * FROM trip_custom ORDER BY created, id"):
+        try:
+            ids = json.loads(r["tours"] or "[]")
+        except ValueError:
+            ids = []
+        if ids:
+            g = _tours_rows(ids)
+        else:
+            g = [x for x in _tours_rows() if (not r["start"] or _day(x) >= r["start"]) and (not r["end"] or _day(x) <= r["end"])]
+        if not g:
+            continue
+        out.append({"id": r["id"], "region": r["name"], "base_region": r["name"], "country": None, "short": False, "custom": True, "sel": bool(ids), "range_start": r["start"] or "", "range_end": r["end"] or "", **_trip_stats(g)})
+    return out
+
+
+def _apply_custom(trips):
+    """Eigene Reisen über die erkannten legen (Vorrang bei den enthaltenen Touren, keine Doppelungen) und alles nach Beginn sortieren."""
+    own = custom_trips()
+    if not own:
+        return trips
+    taken = {i for c in own for i in c["tours"]}
+    out = []
+    for t in trips:
+        if not taken.intersection(t["tours"]):
+            out.append(t)
+            continue
+        rest = [i for i in t["tours"] if i not in taken]
+        g = _tours_rows(rest)
+        if not g:
+            continue
+        t.update(_trip_stats(g))
+        t["trimmed"] = True
+        out.append(t)
+    return sorted(out + own, key=lambda x: x["start"], reverse=True)
+
+
+def all_trips():
+    """Alle Reisen (erkannte mit eigenen Namen/Zeiträumen, dazu die eigenen) – eine Quelle für Liste, Reise-Seite, Suche, PDF und Zählung."""
+    return _apply_custom(_apply_trip_edits(build_trips()))
+
+
+def _date(d, what):
+    d = (d or "").strip()
+    if d:
+        try:
+            datetime.fromisoformat(d)
+        except ValueError:
+            raise HTTPException(400, "Datum bitte als JJJJ-MM-TT angeben")
+    return d
+
+
+def _custom_clean(body, own_id=None):
+    name = re.sub(r"\s+", " ", str(body.get("name") or "")).strip()[:120]
+    if not name:
+        raise HTTPException(400, "Bitte einen Namen für die Reise eingeben")
+    d0, d1 = _date(body.get("start"), "start"), _date(body.get("end"), "end")
+    if d0 and d1 and d0 > d1:
+        raise HTTPException(400, "Das Ende liegt vor dem Beginn")
+    ids = body.get("tours") or []
+    if not isinstance(ids, list) or len(ids) > MAX_CUSTOM_TOURS:
+        raise HTTPException(400, "„tours“ muss eine Liste von Touren sein")
+    ids = list(dict.fromkeys(str(i) for i in ids))
+    if ids:
+        have = {r["id"] for r in _tours_rows(ids)}
+        if len(have) != len(ids):
+            raise HTTPException(400, "Eine der gewählten Touren gibt es nicht (mehr)")
+        g = _tours_rows(ids)
+    elif d0 and d1:
+        g = [x for x in _tours_rows() if d0 <= _day(x) <= d1]
+    else:
+        raise HTTPException(400, "Bitte Touren wählen oder einen Zeitraum angeben")
+    if not g:
+        raise HTTPException(400, "In diesem Zeitraum gibt es keine Touren")
+    mine = {x["id"] for x in g}
+    for c in custom_trips():
+        if c["id"] != own_id and mine.intersection(c["tours"]):
+            t = next(x for x in g if x["id"] in c["tours"])
+            raise HTTPException(400, f"Die Tour „{t['name']}“ gehört schon zur Reise „{c['region']}“")
+    return name, d0, d1, ids
+
+
+@router.post("/api/trips")
+def api_trip_create(body: dict):
+    """Eigene Reise anlegen: {name, tours: [Tour-IDs]} und/oder {start, end}; ohne Touren gehören alle Touren des Zeitraums dazu."""
+    name, d0, d1, ids = _custom_clean(body)
+    tid = CUSTOM_PREFIX + secrets.token_hex(4)
+    db.execute("INSERT INTO trip_custom(id,name,start,end,tours,created) VALUES(?,?,?,?,?,?)", (tid, name, d0, d1, json.dumps(ids), int(time.time())))
+    return {"ok": True, "id": tid}
+
+
+@router.delete("/api/trips/{trip_id}")
+def api_trip_delete(trip_id: str):
+    """Eigene Reise löschen. Die Touren bleiben unverändert (sie gehören danach wieder zur erkannten Reise, falls es eine gibt)."""
+    if not db.one("SELECT 1 x FROM trip_custom WHERE id=?", (trip_id,)):
+        raise HTTPException(404, "Eigene Reise nicht gefunden")
+    db.execute("DELETE FROM trip_custom WHERE id=?", (trip_id,))
+    return {"ok": True}
+
+
 @router.post("/api/trips/{trip_id}/edit")
 def api_trip_edit(trip_id: str, body: dict):
-    """Name und/oder Zeitraum einer Reise ändern. Leer lassen = automatische Werte; alles leer = zurücksetzen."""
+    """Name und/oder Zeitraum einer Reise ändern. Leer lassen = automatische Werte; alles leer = zurücksetzen.
+    Eigene Reise: Name (Pflicht), Zeitraum und Touren neu setzen. Der Name einer erkannten Reise bleibt nie leer (Rückfall auf den automatischen Namen); eine Reise, die nur durch ihre Bearbeitung
+    sichtbar ist (unter der Mindestzahl an Tagen), bleibt es auch nach dem Zurücksetzen."""
+    if db.one("SELECT 1 x FROM trip_custom WHERE id=?", (trip_id,)):
+        name, d0, d1, ids = _custom_clean(body, trip_id)
+        db.execute("UPDATE trip_custom SET name=?, start=?, end=?, tours=? WHERE id=?", (name, d0, d1, json.dumps(ids), trip_id))
+        return {"ok": True}
     if not any(t["id"] == trip_id for t in build_trips()):
         raise HTTPException(404, "Reise nicht gefunden")
     name = (body.get("name") or "").strip()[:120]
@@ -203,16 +339,21 @@ def api_trip_edit(trip_id: str, body: dict):
         d0 = ""
     if d1 == auto["end"]:
         d1 = ""
+    keep = False
+    if not (name or d0 or d1) and auto["days"] < max(2, db.get_int("trip_min_days", TRIP_MIN_DAYS)):
+        name, keep = auto["region"], True                          # sonst verschwände die Reise, die nur durch ihren eigenen Namen in der Liste stand
     if name or d0 or d1:
         db.execute("INSERT OR REPLACE INTO trip_edit(id,name,start,end) VALUES(?,?,?,?)", (trip_id, name, d0, d1))
     else:
         db.execute("DELETE FROM trip_edit WHERE id=?", (trip_id,))
-    return {"ok": True}
+    return {"ok": True, "bleibt": keep}
 
 
 @router.post("/api/trips/{trip_id}/hide")
 def api_trip_hide(trip_id: str, body: dict):
     """Eine erkannte Reise aus der Liste entfernen (hide=true) oder wiederherstellen (hide=false). Touren bleiben unverändert."""
+    if db.one("SELECT 1 x FROM trip_custom WHERE id=?", (trip_id,)):
+        raise HTTPException(400, "Eine eigene Reise wird gelöscht, nicht entfernt")
     if not any(t["id"] == trip_id for t in build_trips()):
         raise HTTPException(404, "Reise nicht gefunden")
     if body.get("hide", True):
@@ -226,8 +367,10 @@ def api_trip_hide(trip_id: str, body: dict):
 def api_trips(hidden: int = 0):
     hid = {r["id"] for r in db.query("SELECT id FROM trip_hidden")}
     mind = max(2, db.get_int("trip_min_days", TRIP_MIN_DAYS))
-    # Nur echte Reisen: kürzere Ausflüge (z. B. Wochenende) bleiben draußen, außer man hat die Reise selbst bearbeitet
-    out = [t for t in _apply_trip_edits(build_trips()) if (t["id"] in hid) == bool(hidden) and (t["days"] >= mind or t.get("edited"))]
+    # Nur echte Reisen: kürzere Ausflüge (z. B. Wochenende) bleiben draußen, außer man hat die Reise selbst bearbeitet oder eine eigene Reise hat ihr Touren genommen (trimmed: sie war eine Reise und bleibt es); eigene Reisen sind immer dabei
+    out = [t for t in all_trips() if t.get("custom") or ((t["id"] in hid) == bool(hidden) and (t["days"] >= mind or t.get("edited") or t.get("trimmed")))]
+    if hidden:
+        out = [t for t in out if not t.get("custom")]
     for t in out:
         _with_cover(t, t["tours"])
     return out

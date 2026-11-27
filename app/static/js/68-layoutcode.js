@@ -105,9 +105,13 @@ VIEWS.layoutcode = async name => {
   const code = String(name || ""), main = document.getElementById("main"), page = slCodePage(code);
   let hash = SL_CODE_PAGES[page] || "";
   if (page === "tour" && TOURS.length) hash = "#/tour/" + encodeURIComponent(TOURS[0].id);
+  if (page === "serie" && typeof seriesList === "function") {                                  // 3.63.0: Seite einer Mehrtagestour: die neueste öffnen, der Import öffnet sich dort
+    const l = seriesList();
+    if (l.length) hash = "#/series/" + l[0].id;
+  }
   if (!slCan() || !hash) {
-    main.innerHTML = `<div class="card"><h2>Ansichtscode</h2><p>${!slCan() ? "Mit diesem Zugang lassen sich keine Ansichten importieren." : page === "reise" ? "Dieser Code gehört zu einer Reise-Seite. Öffne eine Reise, der Import öffnet sich dort." : "Dieser Code kann nicht geöffnet werden."}</p></div>`;
-    if (slCan() && page === "reise") SL.codePending = {code, page, fam: "reise"};
+    main.innerHTML = `<div class="card"><h2>Ansichtscode</h2><p>${!slCan() ? "Mit diesem Zugang lassen sich keine Ansichten importieren." : page === "reise" ? "Dieser Code gehört zu einer Reise-Seite. Öffne eine Reise, der Import öffnet sich dort." : page === "serie" ? "Dieser Code gehört zu einer Mehrtagestour-Seite. Öffne eine Mehrtagestour, der Import öffnet sich dort." : "Dieser Code kann nicht geöffnet werden."}</p></div>`;
+    if (slCan() && (page === "reise" || page === "serie")) SL.codePending = {code, page, fam: page};
     return;
   }
   SL.codePending = {code, page, fam: page === "tour" ? "tour" : page};

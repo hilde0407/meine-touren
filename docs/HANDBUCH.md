@@ -1,6 +1,6 @@
 # Meine Touren – Handbuch
 
-**Für Anwenderinnen und Anwender · Stand: Version 3.61.4**
+**Für Anwenderinnen und Anwender · Stand: Version 3.63.0**
 
 Dieses Handbuch erklärt Schritt für Schritt, wie du mit **Meine Touren** arbeitest: Touren holen und importieren, ansehen, auswerten, mit Fotos verbinden, die Seiten nach deinem Geschmack gestalten und Links sicher teilen. Es richtet sich an Menschen, die die App benutzen – nicht an Entwickler.
 
@@ -577,6 +577,7 @@ Auch die Karte ist eine anpassbare Seite (**Seite anpassen**, [Kapitel 13](#k13)
 * **Reise:** Touren **weit weg von zu Hause** (mehr als etwa 60 km) an **mindestens vier Tagen** am Stück. Wochenend- und Kurzausflüge erscheinen hier nicht; sie bleiben normale Touren.
 * **Heimatort:** Die App erkennt ihn selbst aus deinen Touren. Du kannst ihn unter *Verwaltung → Allgemein → Heimatort und Puls* festlegen (Ort oder Adresse suchen, „Suchen“, Treffer anklicken, „Einstellungen speichern“). Touren in der Nähe zählen dann nie als Reise.
 * **Mehrtagestour:** Tourenreihen mit Namen wie „… Tag 3“ oder „… Etappe 2“ werden zusammengefasst. Mit **＋ Mehrtagestour bilden …** legst du eine selbst an.
+* **Eigene Reise (ab 3.63.0):** Fehlt eine Reise oder soll sie anders zugeschnitten sein (zum Beispiel ein Kurzurlaub an der Ostsee), erstellst du sie selbst: Menü **Reisen** → im Baustein **Reisen** auf **＋ Reise erstellen …**. Vergib einen **Namen**, wähle den **Zeitraum** (die Touren dieser Tage sind vorgewählt) und hake die Touren ab, die dazugehören; mit dem Suchfeld, **Alle** und **Keine** geht das auch bei langen Listen schnell. **Speichern** öffnet die neue Reise. Sie erscheint wie eine erkannte Reise in der Liste, in der Suche, im Reisebericht (PDF) und in der Diashow. Eine Tour gehört zu höchstens einer Reise: **Touren einer eigenen Reise zählen nicht mehr zur automatisch erkannten Reise** (diese wird entsprechend kürzer; sind alle Touren in der eigenen Reise, verschwindet sie). Löschst du die eigene Reise, gehören die Touren wieder zur erkannten. In einer anderen eigenen Reise liegende Touren sind im Dialog gesperrt.
 
 ### 9.2 Die Reisen-Übersicht
 
@@ -597,11 +598,17 @@ Ein Klick auf die Reise öffnet die Seite mit:
 * **Fotos** der Reise,
 * **Touren** (Liste der Etappen).
 
-Oben stehen **Reisebericht (PDF)**, **Senden**, **Reise bearbeiten** (Name und Zeitraum ändern) und **Keine Reise** (aus der Liste entfernen; die Touren bleiben). Die automatisch erkannte Region heißt zunächst „Reise“ oder wie das Bundesland; mit „Reise bearbeiten“ gibst du ihr einen eigenen Namen wie hier „Dolomiten-Hüttenweg“.
+Oben stehen **Reisebericht (PDF)**, **Senden**, **Reise bearbeiten** (Name und Zeitraum ändern; bei einer eigenen Reise auch die Touren) und **Keine Reise** (aus der Liste entfernen; die Touren bleiben; wiederherstellen kannst du sie in der Reisenliste, siehe unten). Eine eigene Reise hat statt „Keine Reise“ den Knopf **Löschen** (mit Rückfrage; die Touren bleiben). **Der Name einer Reise bleibt nie leer:** Leerst du ihn und klickst **Speichern**, setzt die App den automatischen Namen ein und die Reise bleibt in der Liste. Eine Reise unter vier Tagen, die nur durch ihren eigenen Namen in der Liste steht, verschwindet auch beim „Standard wiederherstellen“ nicht. Die automatisch erkannte Region heißt zunächst „Reise“ oder wie das Bundesland; mit „Reise bearbeiten“ gibst du ihr einen eigenen Namen wie hier „Dolomiten-Hüttenweg“.
 
 ![Reise-Seite](handbuch/bilder/30-reise-seite.png)
 
 *Abbildung 30: Die Reise-Seite „Dolomiten-Hüttenweg“ (fünf Tage, 80 km).*
+
+**Entfernte Reisen wiederherstellen:** Hast du Reisen mit **Keine Reise** entfernt, steht in der Reisenliste neben **＋ Reise erstellen …** der Hinweis „n entfernte Reisen – wiederherstellen …“. Er öffnet eine Liste mit **Wiederherstellen** je Reise (dieselben Reisen stehen im zugeklappten Baustein „Entfernte Reisen“).
+
+### 9.3a Die Seite einer Mehrtagestour (ab 3.63.0)
+
+Ein Klick auf eine Mehrtagestour (Menü **Reisen** → Baustein **Mehrtagestouren**) öffnet ihre Seite. Sie ist **genauso anpassbar wie die Reise-Seite** (**Seite anpassen** oben rechts, **Ansichten**, Vorlagen **Kompakt**, **Mit Fotos**, **Tag für Tag**) und hat ein eigenes Layout, das für alle Mehrtagestouren gleich gilt. Ohne Anpassung sieht sie aus wie bisher: Kopf mit **Mehrtagestour umbenennen**, **Kennzahlen**, **Statistik nach Sportart**, **3D-Flug und Offline-Karte**, **Karte**, **Fotos** und die **Etappen** – neu ist der Baustein **Fotos**. Er zeigt die Fotos vom ersten bis zum letzten Tag der Mehrtagestour: **Alle** (Vorgabe) · **Beste** · **Zufällig** · **Neueste**, dazu **Diashow starten**, **Diashow teilen** (Link ohne Konto, 24 Stunden gültig, höchstens die besten 300 Fotos; er nennt nur den Zeitraum, nie den Namen) und **Neu mischen**. Es sind alle Fotos dieses Zeitraums, auch solche von anderen Touren an denselben Tagen. Zusätzlich gibt es die Bausteine **Reise-Kennzahlen** und **Strecke je Tag**.
 
 ### 9.4 Das Reiseblatt
 
@@ -613,7 +620,7 @@ Oben stehen **Reisebericht (PDF)**, **Senden**, **Reise bearbeiten** (Name und Z
 
 ### 9.5 Reisen anpassen
 
-Reise-Seite und Reisen-Übersicht sind wie alle Seiten anpassbar ([Kapitel 13](#k13)): Jeder Teil der Seite ist ein Baustein, den du verschieben, ausblenden, einklappen und in der Breite ändern kannst. Der Kopf mit Titel, Zeitraum und Aktionen lässt sich verschieben, aber nicht ausblenden. In der Übersicht sind Mehrtagestouren, Reisen, Schlagwörter & Alben sowie „Entfernte Reisen“ (standardmäßig zugeklappt) Bausteine. Zusätzliche Bausteine: Reise-Kennzahlen, Kilometer je Tag, weitere „Fotos“-Bausteine (mehrfach einfügbar), Reisen-Kennzahlen und Reisen je Jahr; dazu gibt es fünf Vorlagen. Das Layout gilt für alle Reisen.
+Reise-Seite und Reisen-Übersicht sind wie alle Seiten anpassbar ([Kapitel 13](#k13)): Jeder Teil der Seite ist ein Baustein, den du verschieben, ausblenden, einklappen und in der Breite ändern kannst. Der Kopf mit Titel, Zeitraum und Aktionen lässt sich verschieben, aber nicht ausblenden. In der Übersicht sind Mehrtagestouren, Reisen, Schlagwörter & Alben sowie „Entfernte Reisen“ (standardmäßig zugeklappt) Bausteine. Die Seite einer Mehrtagestour (9.3a) nutzt dieselben Bausteine. Zusätzliche Bausteine: Reise-Kennzahlen, Kilometer je Tag, weitere „Fotos“-Bausteine (mehrfach einfügbar), Reisen-Kennzahlen und Reisen je Jahr; dazu gibt es fünf Vorlagen. Das Layout gilt für alle Reisen.
 
 ![Reise-Seite im Bearbeitungsmodus](handbuch/bilder/30b-reise-seite-anpassen.png)
 
@@ -1280,7 +1287,7 @@ Läufe der Zepp-Uhr sind in beiden Apps „Laufen“ (seit 3.50.0). Seit 3.59.0 
 |---|---|
 | **Die Karte ist grau.** | Die Kartenkacheln kommen aus dem Internet. Prüfe die Verbindung des Servers und des Browsers. Offline helfen vorbereitete Touren („Für Offline vorbereiten“). |
 | **Ein Foto liegt bei keiner Tour.** | Die Aufnahmezeit passt nicht (falsche Kamerauhr, Zeitzone). Im Tourdetail **Zeit per GPS prüfen**, oder auf der Fotos-Seite **Fotos zuordnen**. Fotos mehr als 10 km neben der Strecke werden nicht zugeordnet. |
-| **Eine Reise fehlt.** | Reisen brauchen mindestens vier Tage weit weg von zu Hause. Prüfe den **Heimatort** (Verwaltung → Allgemein). Mit **＋ Mehrtagestour bilden …** legst du eine von Hand an. |
+| **Eine Reise fehlt.** | Reisen brauchen mindestens vier Tage weit weg von zu Hause. Prüfe den **Heimatort** (Verwaltung → Allgemein). Mit **＋ Mehrtagestour bilden …** oder **＋ Reise erstellen …** legst du eine von Hand an. |
 | **Zepp-Import bricht ab.** | Der Token kann abgelaufen sein. In der Verwaltung unter „Zepp-Zugang / Token holen“ neu holen. Zepp und Komoot haben keine offizielle Schnittstelle. |
 | **„Garmin-Konto: Nicht verfügbar“.** | Das Zusatzpaket fehlt. Nutze den Dateiweg (Kapitel 4). |
 | **Statistik „Auswertung“ ist leer.** | Regionen, Gipfel oder Wetter müssen erst bestimmt werden (Knöpfe in den Bausteinen). Sie brauchen Internet. |
@@ -1367,7 +1374,7 @@ Läufe der Zepp-Uhr sind in beiden Apps „Laufen“ (seit 3.50.0). Seit 3.59.0 
 | **Neuland** | Anteil einer Tour, der auf keiner früheren Tour lag. |
 | **Perlenkette** | Ausrichten von Fotos: Ein Foto wird verschoben, die anderen folgen im Zeitabstand. |
 | **Pulszonen (Z1–Z5)** | Bereiche der Herzfrequenz in Prozent des Maximalpulses. |
-| **Reise** | Touren weit weg von zu Hause an mindestens vier Tagen am Stück. |
+| **Reise** | Touren weit weg von zu Hause an mindestens vier Tagen am Stück – oder eine selbst erstellte Reise (Name, Zeitraum, gewählte Touren). |
 | **Tailscale / Tailnet** | Privates Netz deiner Geräte, über das du die App von unterwegs erreichst. |
 | **Tourblatt / Reiseblatt** | Druckbare Seite einer Tour bzw. Reise (PDF). |
 | **Umzugspaket** | Vollständige Sicherung samt Fotos und Schlüsseln für den Umzug auf einen neuen Server. |

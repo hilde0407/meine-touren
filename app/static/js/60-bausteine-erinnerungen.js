@@ -103,6 +103,7 @@ async function erShareRange(btn, fix, cfg, nAll) {
     clearTimeout(note._t);
     note._t = setTimeout(() => { note.textContent = ""; }, 6000);
   };
+  const nn = fix.noun || "Reise";                                                             // 3.63.0: „Mehrtagestour“ auf der Seite einer Mehrtagestour
   btn.disabled = true;
   try {
     const best = erCfg(cfg).mode === "best" ? 60 : 0,                                          // wie „Diashow starten“ (slideshow.html?best=60); sonst (auch „Alle“) die besten bis MAX_PHOTOS (300) des Servers
@@ -111,10 +112,10 @@ async function erShareRange(btn, fix, cfg, nAll) {
     const j = await r.json(), url = location.origin + j.url, title = (fix.name ? "Diashow " + fix.name : j.title);
     if (navigator.share) {
       try { await navigator.share({title, url}); } catch (e) { /* abgebrochen */ }
-      say(nAll > ER_SHARE_MAX ? `Tournamen sind im Link sichtbar; er enthält nur die besten ${ER_SHARE_MAX} der ${nAll} Fotos der Reise` : nAll ? `Tournamen sind im Link sichtbar; er enthält die besten bis zu ${ER_SHARE_MAX} Fotos der Reise` : "Tournamen sind im Link sichtbar");
+      say(nAll > ER_SHARE_MAX ? `Tournamen sind im Link sichtbar; er enthält nur die besten ${ER_SHARE_MAX} der ${nAll} Fotos der ${nn}` : nAll ? `Tournamen sind im Link sichtbar; er enthält die besten bis zu ${ER_SHARE_MAX} Fotos der ${nn}` : "Tournamen sind im Link sichtbar");
     } else {
       await navigator.clipboard.writeText(url);
-      say(nAll > ER_SHARE_MAX ? `Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar; enthält nur die besten ${ER_SHARE_MAX} der ${nAll} Fotos der Reise)` : nAll ? `Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar; enthält die besten bis zu ${ER_SHARE_MAX} Fotos der Reise)` : "Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar)");
+      say(nAll > ER_SHARE_MAX ? `Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar; enthält nur die besten ${ER_SHARE_MAX} der ${nAll} Fotos der ${nn})` : nAll ? `Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar; enthält die besten bis zu ${ER_SHARE_MAX} Fotos der ${nn})` : "Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar)");
     }
   } catch (e) {
     say("Link erstellen nicht möglich: " + e.message);

@@ -621,7 +621,7 @@ def Paragraph_small(text, S):
 # ---------- Reisebericht ----------
 def _trip(trip_id):
     from . import more2
-    return next((x for x in more2._apply_trip_edits(more2.build_trips()) if x["id"] == trip_id), None)
+    return next((x for x in more2.all_trips() if x["id"] == trip_id), None)
 
 
 @router.get("/api/trips/{trip_id}/pdf")

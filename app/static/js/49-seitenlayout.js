@@ -11,9 +11,9 @@
    3.20.0 Raster: jeder Abschnitt hat eine Breite (voll, zweidrittel, halb, drittel; Dokumentfeld w, Standard je Eintrag/Typ: Feld w der Registry), das Raster selbst ist CSS (style.css „3.20.0“),
    hier werden nur die Klassen gesetzt (.slcell .w-…) und Zeilenreste aufgefüllt (slRaster). Seiteneignung: Typ.seiten (Standard: Tour-Bausteine nur „tour“, Übersichts-Bausteine „uebersicht“ und „tour“). */
 window.SL_WT = window.SL_WT || {};
-const SL_PAGE_KEY = {haupt: "tour-haupt", auswertung: "tour-auswertung", uebersicht: "uebersicht", statistik: "statistik", reise: "reise", reisen: "reisen", fotos: "fotos", karte: "karte"};
+const SL_PAGE_KEY = {haupt: "tour-haupt", auswertung: "tour-auswertung", uebersicht: "uebersicht", statistik: "statistik", reise: "reise", serie: "serie", reisen: "reisen", fotos: "fotos", karte: "karte"};
 const slKey1 = fam => (fam === "tour" ? "tour-haupt" : fam);                                  // Schlüssel des (ersten) Dokuments einer Seitenfamilie
-const SL_ONE = ["uebersicht", "statistik", "reise", "reisen", "fotos", "karte"];                    // Seiten mit genau einem Dokument (3.33.0: Reise-Detailseite „reise“ und Reisen-Übersicht „reisen“; 3.34.0: Fotos „fotos“ und Gesamtkarte „karte“)
+const SL_ONE = ["uebersicht", "statistik", "reise", "serie", "reisen", "fotos", "karte"];                    // Seiten mit genau einem Dokument (3.33.0: Reise-Detailseite „reise“ und Reisen-Übersicht „reisen“; 3.34.0: Fotos „fotos“ und Gesamtkarte „karte“)
 const slFamOf = k => (SL_ONE.includes(k) ? k : "tour");
 const SL_W = {d: {voll: 12, zweidrittel: 8, halb: 6, drittel: 4}, t: {voll: 12, zweidrittel: 12, halb: 6, drittel: 6}};            // Spalten je Breite: Desktop (ab 900 px) und Tablet
 const SL_WALL = ["voll", "zweidrittel", "halb", "drittel"];
@@ -22,7 +22,7 @@ const SL_WCLS = SL_WALL.map(k => "w-" + k);
 const slTypeW = T => (T && SL_W.d[T.w] ? T.w : "voll");
 const slSeiten = T => (T && T.seiten) || (T && T.fam === "tour" ? ["tour"] : ["uebersicht", "tour"]);
 const slFits = (T, fam) => !!T && slSeiten(T).includes(fam);
-const SL_ROOT = {statistik: "stx", reise: "trx", reisen: "rsx", fotos: "fox", karte: "kax"};
+const SL_ROOT = {statistik: "stx", reise: "trx", serie: "srx", reisen: "rsx", fotos: "fox", karte: "kax"};
 const slOneRoot = fam => document.getElementById(SL_ROOT[fam] || "rsx");          // Wurzel des Rasters einer Seite mit einem Dokument (Übersicht: main.home)
 const SL_GROUPS = {route: "Streckenverlauf", rec: "Aufzeichnung", eval: "Auswertung dieser Tour", more: "Fotos zur Tour", bst: "Bausteine"};
 /* Registry: Standardseite, Gruppe, Standard „offen“ (def), fixed = kann nur auf dieser Seite stehen (wird von der Tourseite selbst aufgebaut),
@@ -79,6 +79,17 @@ SL_REG.reise = [
   {id: "fotos", w: "voll", title: "Fotos", page: "reise", build: "rdiashow", defcfg: SL_FOTOS_DEF, def: true, ckeys: ["rs_fotos"]},        // 3.62.0: der Abschnitt „Fotos“ ist der Baustein „Fotos“ (Typ rdiashow) mit „Alle“; Id, Position, Breite, Sichtbarkeit und Auf-/Zu-Zustand bleiben wie bisher
   {id: "touren", w: "voll", title: "Touren", page: "reise", def: true, ckeys: ["rs_touren"]},
 ];
+/* 3.63.0 Mehrtagestour (#/series/<id>): dieselben Abschnitte wie die Reise (Kopf, Kennzahlen, Statistik, Flug, Karte, Fotos, Touren), eigenes Layout (Schlüssel „serie“, für alle Mehrtagestouren gleich),
+   eigene Zustandsschlüssel (se_…); die Bausteine sind die der Reise (61-bausteine-reise.js: seiten enthält auch „serie“). Aufbau: 62-reiseseiten.js (rsFrame mit fam „serie“), Ansicht: 15-etappen.js. */
+SL_REG.serie = [
+  {id: "kopf", w: "voll", title: "Kopf: Titel, Zeitraum und Aktionen", page: "serie", plain: true, must: true, ws: ["voll"]},
+  {id: "kennzahlen", w: "voll", title: "Kennzahlen", page: "serie", def: true, ckeys: ["se_kennzahlen"]},
+  {id: "stat", w: "voll", title: "Statistik nach Sportart", page: "serie", def: true, ckeys: ["se_stat"]},
+  {id: "flug", w: "voll", title: "3D-Flug und Offline-Karte", page: "serie", def: true, ckeys: ["se_flug"]},
+  {id: "karte", w: "voll", title: "Karte", page: "serie", def: true, ckeys: ["se_karte"]},
+  {id: "fotos", w: "voll", title: "Fotos", page: "serie", build: "rdiashow", defcfg: SL_FOTOS_DEF, def: true, ckeys: ["se_fotos"]},
+  {id: "touren", w: "voll", title: "Etappen", page: "serie", def: true, ckeys: ["se_touren"]},
+];
 SL_REG.reisen = [
   {id: "serien", w: "voll", title: "Mehrtagestouren", page: "reisen", def: true, ckeys: ["rn_serien"]},
   {id: "reisen", w: "voll", title: "Reisen", page: "reisen", def: true, ckeys: ["rn_reisen"]},
@@ -91,6 +102,7 @@ const SL_EL = {
     geraet: () => $("#tlrec"), wx: () => tlSec("wx"), ana: () => $("#anacard"), steig: () => $("#steigcard"), aehn: () => $("#aehncard"), cmp: () => $("#cmpseg"),
   },
   reise: Object.fromEntries(["kopf", "kennzahlen", "stat", "flug", "karte", "touren"].map(id => [id, () => (id === "kopf" ? document.getElementById("rs-kopf") : document.getElementById("rsc-" + id))])),
+  serie: Object.fromEntries(["kopf", "kennzahlen", "stat", "flug", "karte", "touren"].map(id => [id, () => (id === "kopf" ? document.getElementById("rs-kopf") : document.getElementById("rsc-" + id))])),
   reisen: Object.fromEntries(["serien", "reisen", "alben", "entfernt"].map(id => [id, () => document.getElementById("rnc-" + id)])),
   uebersicht: {aufmacher: () => $("#hlast"), jahr: () => $("#hyear"), zuletzt: () => $("#hrecent"), tag: () => $("#htag"), erinn: () => $("#hmemsec")},
   statistik: Object.fromEntries(["kpi", "kmmonat", "kmverlauf", "sportarten", "heat", "tag", "erinn"].map(id => [id, () => document.getElementById("stc-" + id)]).concat([["bl", () => $("#blsec")], ["tp", () => $("#tpsec")]])),
@@ -703,6 +715,8 @@ async function slReset() {
       ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Statistik werden zurückgesetzt. Der Filter oben bleibt, wie er ist."
       : SL.fam === "reise"
       ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Reise-Seite werden zurückgesetzt. Das gilt für alle Reisen."
+      : SL.fam === "serie"
+      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Mehrtagestour-Seite werden zurückgesetzt. Das gilt für alle Mehrtagestouren."
       : SL.fam === "reisen"
       ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Reisen-Übersicht werden zurückgesetzt."
       : SL.fam === "fotos"
@@ -931,7 +945,7 @@ function slRegroup(pres) {
 }
 function slPlace(root) {
   const main = root.matches && root.matches("main.home"),
-    one = {stx: "statistik", trx: "reise", rsx: "reisen", fox: "fotos", kax: "karte"}[root.id],
+    one = {stx: "statistik", trx: "reise", srx: "serie", rsx: "reisen", fox: "fotos", kax: "karte"}[root.id],
     fam = one || (main ? "uebersicht" : "tour"),
     page = one || (main ? "uebersicht" : root.classList.contains("tlsub") ? "auswertung" : "haupt");
   SL.fam = fam;

@@ -39,13 +39,14 @@ function rsWatchMap() {
     });
   }).observe(el);
 }
-/* Reise-Detailseite: Abschnitte aus collView() in Karten stecken und einordnen (läuft synchron, vor dem Zeichnen der Karte) */
+/* Reise-Detailseite: Abschnitte aus collView() in Karten stecken und einordnen (läuft synchron, vor dem Zeichnen der Karte).
+   3.63.0: Dasselbe für die Seite einer Mehrtagestour (tr.serie, Familie „serie“, Wurzel #srx, eigene Zustandsschlüssel se_…, Liste heißt „Etappen“). */
 function rsFrame(tr, ts, days) {
-  const main = document.getElementById("main");
-  if (!main || document.getElementById("trx")) return;
-  window.RS_CUR = {tr, ts, days};
+  const main = document.getElementById("main"), fam = tr.serie ? "serie" : "reise", root = SL_ROOT[fam], kp = fam === "serie" ? "se_" : "rs_";
+  if (!main || document.getElementById(root)) return;
+  window.RS_CUR = {tr, ts, days, fam};
   const host = document.createElement("div");
-  host.id = "trx";
+  host.id = root;
   host.className = "stx";
   host.dataset.trip = tr.id;
   const kopf = main.querySelector('[data-rs="kopf"]');
@@ -55,7 +56,7 @@ function rsFrame(tr, ts, days) {
     host.appendChild(kopf);
   }
   const km = ts.reduce((a, t) => a + t.km, 0);
-  SL_REG.reise.forEach(reg => {
+  SL_REG[fam].forEach(reg => {
     if (reg.id === "kopf") return;
     const e = main.querySelector(`:scope > [data-rs="${reg.id}"]`);
     if (!e) return;
@@ -66,9 +67,9 @@ function rsFrame(tr, ts, days) {
     const badge = {
       kennzahlen: `${ts.length} Touren · ${fmtKm(km, {d: 0})}`,
       stat: (n => (n === 1 ? "1 Sportart" : `${n} Sportarten`))(e.querySelectorAll("tbody tr").length),
-      touren: `${ts.length} Touren`,
+      touren: fam === "serie" ? (ts.length === 1 ? "1 Etappe" : `${ts.length} Etappen`) : `${ts.length} Touren`,
     }[reg.id] || "";
-    const c = tlCard("rsc-" + reg.id, {sec: reg.id, key: "rs_" + reg.id, icon: RS_ICON[reg.id], title: esc(reg.title), badge: esc(badge), def: true, bodyCls: reg.id === "karte" ? "tlmap" : "stb rsb"});
+    const c = tlCard("rsc-" + reg.id, {sec: reg.id, key: kp + reg.id, icon: RS_ICON[reg.id], title: esc(reg.title), badge: esc(badge), def: true, bodyCls: reg.id === "karte" ? "tlmap" : "stb rsb"});
     tlBody(c).appendChild(e);
     delete e.dataset.rs;
     host.appendChild(c);
@@ -146,5 +147,20 @@ function rnFrame() {
     rnFrame();
   };
 }
+/* 3.63.0 Mehrtagestour (#/series/<id>, Ansicht in 15-etappen.js): wie die Reise-Seite anpassbar (Layout-Schlüssel „serie“) */
+{
+  const _ser62 = VIEWS.series;
+  VIEWS.series = async (...a) => {
+    window.SE_WRAPPED = true;
+    slViewStart("serie");
+    const tok = window._rt;
+    await slEnsure("serie");
+    if (tok !== window._rt) return STALE();
+    slResolve("serie");
+    window.RS_CUR = null;
+    await _ser62(...a);
+  };
+}
 /* Dieses Skript lädt zuletzt: Hat die Seite schon gezeichnet (boot() in 13-start.js läuft früher), bevor die Ansichten hier eingehängt waren, wird sie jetzt mit dem Layout neu gezeichnet (wie 56-statistik.js) */
 slLate(/^#\/trips?(\/[^/]*)?$/, "RS_WRAPPED", "#tr, #cm");
+slLate(/^#\/series\/[^/]*$/, "SE_WRAPPED", "#cm");

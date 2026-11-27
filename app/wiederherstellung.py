@@ -175,7 +175,7 @@ def _reisen():
     from . import more2
     hid = {r["id"] for r in db.query("SELECT id FROM trip_hidden")}
     mind = max(2, db.get_int("trip_min_days", more2.TRIP_MIN_DAYS))
-    return sum(1 for t in more2._apply_trip_edits(more2.build_trips()) if t["id"] not in hid and (t["days"] >= mind or t.get("edited")))
+    return sum(1 for t in more2.all_trips() if t.get("custom") or (t["id"] not in hid and (t["days"] >= mind or t.get("edited") or t.get("trimmed"))))
 
 
 def zahlen(strecken=None):

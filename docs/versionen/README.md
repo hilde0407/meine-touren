@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.63.0](3.63.0.md) – Mehrtagestour-Seite anpassbar mit Foto-Baustein; „Reise erstellen“ (eigene Reisen), Name leeren entfernt keine Reise, entfernte Reisen wiederherstellen
 - [3.62.2](3.62.2.md) – „Neu mischen“ im Foto-Baustein der Reise wirkt (Zufällig zieht neue Fotos, sonst sichtbar andere Reihenfolge)
 - [3.62.1](3.62.1.md) – Suche findet Gebiete, Inseln und Landschaften (eingebaute Gebietstabelle, Zuordnung aus den Startkoordinaten, „Südtirol“ nur Provinz Bozen) und durchsucht Reisen; Region der Tour nennt das genaueste Gebiet
 - [3.62.0](3.62.0.md) – Reise-Seite: ein Foto-Baustein „Fotos“ (Alle · Beste · Zufällig · Neueste) statt Abschnitt „Fotos“ und Baustein „Fotos der Reise“; gespeicherte Layouts unverändert

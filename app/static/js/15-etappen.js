@@ -42,10 +42,16 @@ VIEWS.trips = async () => {
     });
   } catch (e) {}
 };
+/* 3.63.0: Die Mehrtagestour als „Reise“ im Sinne der Reise-Seite (62-reiseseiten.js, Bausteine 61-bausteine-reise.js): Name, Zeitraum von der ersten bis zur letzten Etappe (Kalendertage, JJJJ-MM-TT), Etappen */
+function seriesTrip(s) {
+  const d = s.ids.map(i => (BY[i] || {}).date).filter(Boolean).map(x => x.slice(0, 10)).sort();
+  return {id: s.id, region: s.name, country: null, start: d[0], end: d[d.length - 1], tours: s.ids, km: s.km, up_m: s.up, serie: true};
+}
 VIEWS.series = async id => {
   const s = seriesList().find(x => x.id === id || decodeURIComponent(x.id) === decodeURIComponent(id));
   if (!s) throw new Error("Mehrtagestour nicht gefunden");
-  await collView(s.name, `${s.n} Etappen`, s.ids, "#/trips");
+  const tr = seriesTrip(s);
+  await collView(s.name, `${s.n} Etappen · ${fmtDatum(tr.start)}${tr.end !== tr.start ? " – " + fmtDatum(tr.end) : ""}`, s.ids, "#/trips", {serie: tr});
 };
 // Hinweis im Tourdetail
 const _tourSer = VIEWS.tour;
@@ -115,9 +121,9 @@ const _serV = VIEWS.series;
 VIEWS.series = async id => {
   await _serV(id);
   const s = seriesList().find(x => x.id === id || decodeURIComponent(x.id) === decodeURIComponent(id));
-  const row = document.querySelector("#main .row .btn");
+  const row = document.querySelector("#main [data-rs=kopf] .row");                      // 3.63.0: die Aktion gehört in den Kopf (wie „Reise bearbeiten“ bei der Reise)
   if (!s || !row || $("#serren")) return;
-  row.parentElement.insertAdjacentHTML("beforeend", `<button class="btn alt" id="serren">✎ Reihe umbenennen</button>`);
+  row.insertAdjacentHTML("beforeend", `<span class="sp"></span><button class="btn alt sm" id="serren" title="Name der Mehrtagestour ändern (alle Etappen werden umbenannt)">✎ Mehrtagestour umbenennen</button>`);
   $("#serren").onclick = () => {
     const m = uiModal(`<h2>Mehrtagestour umbenennen</h2><p class="mut fs14">Alle ${s.n} Etappen heißen danach „Neuer Name – Tag N“ (die Nummern bleiben).</p><input id="srn" value="${esc(s.name)}" class="w100"><div id="srer" class="bad"></div><div class="uifoot"><button class="btn ghost" id="srno">Abbrechen</button><button class="btn" id="srok">Umbenennen</button></div>`);
     m.querySelector("#srno").onclick = () => m.remove();

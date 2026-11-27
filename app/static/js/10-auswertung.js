@@ -258,7 +258,8 @@ async function collView(title, sub, ids, back, opt = {}) {
    <div data-rs="stat">${collStats(ts)}</div>
    <div class="row m6-0-12" data-rs="flug"><a class="btn" href="#/flight/${encodeURIComponent("set:" + ts.map(t => t.id).join(","))}">3D-Flug über alles</a><button class="btn alt" id="coff" title="Kartenkacheln dieser Strecken zwischenspeichern">Karte offline speichern</button><span id="cofm" class="mut"></span></div>
    <div data-rs="karte"><div class="tmap" id="cm" style="height:460px"></div></div><div data-rs="fotos"><div class="sec"><h2>Fotos</h2></div><div class="thumbs" id="cph"></div></div><div data-rs="touren"><div class="sec"><h2>Touren</h2></div><div class="tl">${ts.map(tourRow).join("")}</div></div>`;
-  if (opt.reise && typeof rsFrame === "function") rsFrame(opt.reise, ts, days);
+  const rsTr = opt.reise || opt.serie;                                      // 3.63.0: auch die Mehrtagestour (opt.serie) nutzt die anpassbare Seite
+  if (rsTr && typeof rsFrame === "function") rsFrame(rsTr, ts, days);
   map = mkMap("cm", {layers: true});
   const fg = L.featureGroup().addTo(map);
   const co = await Promise.all(ts.map(t => api(`/api/tours/${t.id}/coords`).catch(() => [])));
@@ -277,7 +278,7 @@ async function collView(title, sub, ids, back, opt = {}) {
   });
   const cmap = map;
   cmap._cvFit = () => (fg.getLayers().length ? cmap.fitBounds(fg.getBounds(), {padding: [30, 30], animate: false}) : cmap.setView([50, 9], 6, {animate: false}));
-  if (opt.reise && typeof rsMapBind === "function") rsMapBind(cmap);
+  if (rsTr && typeof rsMapBind === "function") rsMapBind(cmap);
   if ($("#cm").clientWidth && !$("#cm").closest("details:not([open])")) cmap._cvFit();
   else {
     cmap._cvStale = true;
@@ -290,7 +291,7 @@ async function collView(title, sub, ids, back, opt = {}) {
       ph.map((p, i) => `<img loading="lazy" decoding="async" src="${picSrc(p, 300)}" data-i="${i}">`).join("") ||
       '<span class="mut">Keine Fotos.</span>';
     bindThumbs($("#cph"), ph);
-    if (opt.reise && typeof rsBadge === "function") rsBadge("fotos", ph.length ? (ph.length === 1 ? "1 Foto" : `${ph.length} Fotos`) : "");
+    if (rsTr && typeof rsBadge === "function") rsBadge("fotos", ph.length ? (ph.length === 1 ? "1 Foto" : `${ph.length} Fotos`) : "");
   });
   const plan = await api(`/api/tiles/plan?ids=${ts.map(t => t.id).join(",")}`).catch(() => null);
   if (plan)

@@ -2,6 +2,12 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.63.0 – Mehrtagestour-Seite mit Foto-Baustein, „Reise erstellen“
+
+- Mehrtagestouren (#/series/…) sind wie die Reise anpassbar (Seite anpassen, Ansichten, Vorlagen, Export/Import) und haben den Baustein „Fotos“ (Alle · Beste · Zufällig · Neueste, Diashow starten/teilen, Neu mischen) für den Zeitraum der ersten bis letzten Etappe; Kennzahlen und „Strecke je Tag“ sind die Reise-Bausteine; ohne Anpassung sieht die Seite aus wie bisher, plus Fotos
+- Neu: „＋ Reise erstellen …“ (eigener Name, Zeitraum, gezielt gewählte Touren; Tabelle trip_custom) – erscheint in Liste, Suche, Reise-Seite, Diashow, PDF und Sicherung wie erkannte Reisen; bearbeitbar, löschbar mit Rückfrage; eigene Reisen haben Vorrang (keine Tour in zwei Reisen)
+- Name leeren entfernt keine Reise mehr (automatischer Name, Reise bleibt); „n entfernte Reisen – wiederherstellen …“ in der Reisenliste
+
 ## Version 3.62.2 – „Neu mischen“ wirkt im Foto-Baustein der Reise
 
 - Zufällig: der Knopf nahm die im Tab gemerkte Auswahl und zeigte dieselben Fotos; er zieht jetzt wirklich neu (und merkt sich die neue Auswahl)
