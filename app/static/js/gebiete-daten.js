@@ -571,6 +571,37 @@ const Gebiete = (() => {
   g("molokai", "Molokaʻi", INS, "hawaii", [[21.05, -157.32, 21.22, -156.72]], {alias: ["Molokai", "Kalaupapa", "Halawa"]});
   g("tasmanien", "Tasmanien", INS, null, [[-43.70, 144.55, -40.55, 148.45]], {alias: ["Tasmania", "Cradle Mountain", "Overland Track", "Freycinet", "Hobart", "Launceston", "Bay of Fires", "Tasmanische Halbinsel"]});
 
+  /* --- Welle 2 (3.70.0): weitere Regionen des Katalogs, bewusst grob und innen (Rand zu Nachbarn und Meer ausgespart) --- */
+  g("vancouver-island", "Vancouver Island", INS, null, [], {poly: [[[48.30, -123.65], [48.50, -123.40], [49.00, -123.65], [49.50, -124.25], [50.00, -125.05], [50.40, -125.90], [50.65, -127.00], [50.80, -127.95], [50.55, -127.70], [50.20, -127.30],
+                                                                  [49.60, -126.60], [49.15, -126.10], [48.75, -125.20], [48.50, -124.55], [48.30, -124.00]]], alias: ["Vancouver-Insel", "Victoria BC", "Tofino", "Pacific Rim", "Nanaimo", "Strathcona", "West Coast Trail", "Campbell River"]});
+  g("taiwan", "Taiwan", INS, null, [[21.90, 120.00, 25.35, 122.05]], {alias: ["Formosa", "Taipei", "Yushan", "Jadeberg", "Taroko", "Alishan", "Hualien", "Kaohsiung", "Sun Moon Lake"]});
+  g("cordillera-blanca", "Cordillera Blanca", GEB, null, [[-10.20, -77.95, -8.50, -77.20]], {alias: ["Huaraz", "Huascarán", "Huascaran", "Santa-Cruz-Trek", "Santa Cruz Trek", "Llanganuco", "Peru Anden", "Callejón de Huaylas"]});
+  g("cusco", "Cusco und Machu Picchu", REG, null, [[-14.00, -72.90, -12.90, -71.00]], {alias: ["Cusco", "Cuzco", "Machu Picchu", "Inkatrail", "Inka Trail", "Heiliges Tal", "Valle Sagrado", "Salkantay", "Ausangate", "Ollantaytambo", "Urubamba"], anz: true});
+  g("westkap", "Westkap", REG, null, [[-34.85, 18.00, -31.00, 23.80]], {alias: ["Western Cape", "Südafrika West", "Kapstadt", "Cape Town", "Tafelberg", "Table Mountain", "Garden Route", "Cederberg", "Stellenbosch", "Kap der Guten Hoffnung", "Hermanus", "Franschhoek"], anz: true});
+  g("sognefjord", "Sognefjord", KUE, "skandinavien", [[60.80, 5.00, 61.60, 7.60]], {alias: ["Sogn", "Flåm", "Flam", "Balestrand", "Gudvangen", "Fjærland", "Lærdal", "Aurlandsfjord", "Nærøyfjord", "Naeroyfjord", "Norwegen Süden Fjord"]});
+  g("lysefjord", "Lysefjord und Preikestolen", KUE, "skandinavien", [[58.85, 5.95, 59.15, 6.75]], {alias: ["Preikestolen", "Prekestolen", "Kjerag", "Kjeragbolten", "Pulpit Rock", "Forsand", "Lysebotn", "Stavanger Umgebung"]});
+  g("romsdal", "Romsdal und Sunnmøre", REG, "skandinavien", [[62.05, 6.05, 62.78, 8.00]], {alias: ["Romsdalen", "Sunnmøre", "Sunnmore", "Åndalsnes", "Andalsnes", "Trollstigen", "Trollveggen", "Geirangerfjord", "Geiranger", "Ålesund", "Molde", "Hjørundfjord", "Norwegen Mitte"], anz: true});
+  g("andalusien", "Andalusien", REG, null, [], {poly: [[[36.00, -5.62], [36.00, -6.05], [36.40, -6.55], [37.05, -7.05], [37.15, -7.36], [37.50, -7.30], [37.90, -7.10], [38.00, -6.60], [38.05, -5.60], [38.15, -4.60], [38.30, -3.70],
+                                                  [38.10, -3.00], [37.95, -2.50], [37.80, -2.15], [37.45, -1.80], [36.90, -1.80], [36.60, -2.30], [36.55, -3.10], [36.62, -4.50], [36.35, -5.15]]],
+                                    alias: ["Andalucía", "Andalucia", "Andalusia", "Sevilla", "Córdoba", "Granada", "Málaga", "Cádiz", "Almería", "Jaén", "Huelva", "Ronda", "Costa del Sol", "Alpujarras", "Las Alpujarras", "Sierra de Aracena", "Doñana", "Andalusien Süd"], anz: true, prio: -1});
+  g("provence", "Provence", REG, null, [[43.45, 5.00, 44.30, 6.40]], {alias: ["Haute-Provence", "Alpes-de-Haute-Provence", "Luberon", "Lubéron", "Verdon", "Gorges du Verdon", "Mont Ventoux", "Ventoux", "Sainte-Victoire", "Aix-en-Provence", "Alpilles", "Digne", "Provence Verdon"], anz: true, prio: -1});
+  g("languedoc", "Languedoc-Roussillon", REG, null, [[42.55, 2.00, 43.75, 4.20]], {alias: ["Languedoc", "Roussillon", "Hérault", "Herault", "Aude", "Corbières", "Corbieres", "Montpellier", "Narbonne", "Carcassonne", "Perpignan", "Pyrénées-Orientales", "Katharerburgen", "Katharer", "Occitanie"], anz: true, prio: -1});
+  g("elsass", "Elsass", REG, null, [], {poly: [[[49.02, 7.15], [49.02, 8.00], [48.88, 8.00], [48.58, 7.78], [48.00, 7.56], [47.60, 7.55], [47.58, 7.15], [47.85, 6.95], [48.30, 7.00], [48.70, 7.08]]],
+                                    alias: ["Alsace", "Elsaß", "Route des Vins", "Weinstraße Elsass", "Sundgau", "Colmar", "Straßburg", "Strasbourg", "Mulhouse", "Mülhausen", "Haut-Rhin", "Bas-Rhin", "Rhin supérieur"], anz: true, prio: -1});
+  g("veltlin", "Veltlin und Bergamasker Alpen", REG, "alpen", [[45.95, 9.45, 46.23, 10.30]], {alias: ["Valtellina", "Veltliner Tal", "Sondrio", "Tirano", "Morbegno", "Orobie", "Orobische Alpen", "Bergamasker Alpen", "Alpi Orobie", "Valmalenco"], anz: true});
+  g("pindos", "Pindos", GEB, null, [[39.40, 20.65, 39.95, 21.40]], {alias: ["Pindosgebirge", "Pindus", "Πίνδος", "Zagori", "Zagoria", "Vikos", "Vikos-Schlucht", "Metsovo", "Ioannina", "Epirus", "Tymfi", "Astraka", "Papingo", "Pindos Zagori"]});
+  g("yorkshire-dales", "Yorkshire Dales", GEB, null, [[54.05, -2.55, 54.45, -1.80]], {alias: ["Dales", "Yorkshire Dales Nationalpark", "Malham", "Hawes", "Settle", "Ingleborough", "Pen-y-ghent", "Wensleydale", "Swaledale", "Three Peaks", "Nordengland Dales"]});
+  g("northumberland", "Northumberland", REG, null, [[55.00, -2.65, 55.45, -1.55]], {alias: ["Hadrian's Wall", "Hadrianswall", "Hadrian's Wall Path", "Northumberland Nationalpark", "Cheviot Hills", "Alnwick", "Bamburgh", "Housesteads", "Kielder", "Nordengland Küste"], anz: true});
+  g("mittelrhein", "Oberes Mittelrheintal", TAL, null, [[49.98, 7.55, 50.38, 7.95]], {alias: ["Mittelrhein", "Mittelrheintal", "Rheinsteig", "RheinBurgenWeg", "Loreley", "Lorelei", "Boppard", "Bacharach", "Oberwesel", "St. Goar", "Rüdesheim", "Bingen am Rhein"], prio: -1});
+  g("ries", "Nördlinger Ries", REG, null, [[48.78, 10.40, 48.98, 10.75]], {alias: ["Ries", "Rieskrater", "Nördlingen", "Noerdlinger Ries", "Riesrandweg", "Harburg", "Oettingen", "Bopfingen"], anz: true});
+  g("fraenkisches-seenland", "Fränkisches Seenland", REG, null, [[49.05, 10.55, 49.20, 10.95]], {alias: ["Altmühlsee", "Brombachsee", "Igelsbachsee", "Gunzenhausen", "Pleinfeld", "Absberg", "Seenland Franken"], anz: true});
+  g("waldviertel", "Waldviertel", REG, null, [[48.46, 14.95, 48.72, 15.75]], {alias: ["Waldviertel Niederösterreich", "Zwettl", "Horn", "Weitra", "Gmünd", "Ottenschlag", "Kamptal", "Kamp", "Ysper", "Yspertal"], anz: true});
+  g("muehlviertel", "Mühlviertel", REG, null, [[48.42, 14.00, 48.58, 14.80]], {alias: ["Muehlviertel", "Freistadt", "Bad Leonfelden", "Rohrbach in Oberösterreich", "Sternstein", "Mühlkreis", "Granit- und Gneishochland", "Donau Böhmerwald"], anz: true});
+  g("suedsteiermark", "Südsteiermark", REG, null, [[46.74, 15.30, 46.88, 15.75]], {alias: ["Steirisches Weinland", "Steirische Weinstraße", "Südsteirische Weinstraße", "Leibnitz", "Gamlitz", "Ehrenhausen", "Kitzeck", "Weinland Steiermark"], anz: true});
+  g("flachgau", "Flachgau und Salzburger Umland", REG, null, [[47.76, 13.02, 47.97, 13.55]], {alias: ["Flachgau", "Rund um Salzburg", "Salzburger Seenland", "Mattsee", "Obertrum", "Seekirchen", "Wallersee", "Neumarkt am Wallersee", "Gaisberg", "Salzburg Umgebung", "Tennengau Flachgau"], anz: true, prio: -1});
+  g("rupertiwinkel", "Rupertiwinkel", REG, null, [[47.80, 12.72, 48.08, 12.99]], {alias: ["Laufen", "Tittmoning", "Teisendorf", "Freilassing", "Waginger See", "Rund um Salzburg Rupertiwinkel", "Abtsdorfer See"], anz: true});
+  g("liechtenstein", "Liechtenstein", REG, null, [[47.06, 9.50, 47.20, 9.63]], {alias: ["Fürstentum Liechtenstein", "Vaduz", "Malbun", "Triesenberg", "Schaan", "Bodensee bis Rätikon"], anz: true, prio: -1});
+
   /* --- Alias zu vorhandenen Gebieten (Schreibweisen, Wege, Titel der Reihe) --- */
   plus("allgaeu", "Oberallgäu", "Ostallgäu", "Westallgäu", "Unterallgäu", "Oberstaufen", "Allgäuer Alpenvorland", "Füssen", "Pfronten", "Immenstadt", "Sonthofen", "Bad Hindelang", "Allgäuer Höhenwege");
   plus("berchtesgaden", "Nationalpark Berchtesgaden", "Ramsau bei Berchtesgaden", "Schönau am Königssee");
@@ -611,6 +642,7 @@ const Gebiete = (() => {
   plus("tramuntana", "GR 221", "Trockensteinroute", "Ruta de Pedra en Sec");
   plus("highlands", "West Highland Way");
   plus("lofoten", "Lofoten und Vesterålen");
+  plus("hoher-atlas", "Marokko", "Morocco", "Maroc", "Atlas");
 
   /* ===================== Rechnen ===================== */
   const BY = {};

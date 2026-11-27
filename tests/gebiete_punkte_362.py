@@ -335,6 +335,31 @@ arkadien | Tripoli 37.51,22.37 ; Dimitsana 37.60,22.03 ; Megalopoli 37.40,22.14
 argolis | Nafplio 37.57,22.80 ; Epidavros 37.63,23.08 ; Mykene 37.73,22.76
 ilia | Olympia 37.64,21.63 ; Pyrgos 37.67,21.44 ; Zacharo 37.48,21.65
 # 3.70.0 Abgleich mit dem Rother-Wanderführer-Katalog
+vancouver-island | Sooke 48.37,-123.73 ; Port Renfrew 48.55,-124.42 ; Tofino 49.15,-125.91 ; Nanaimo 49.17,-123.94 ; Campbell River 50.03,-125.25 ; Port McNeill 50.59,-127.08
+taiwan | Taipei 25.04,121.56 ; Kaohsiung 22.63,120.30 ; Hualien 23.98,121.60 ; Yushan 23.47,120.96
+cordillera-blanca | Huaraz -9.53,-77.53 ; Huascarán -9.12,-77.60 ; Caraz -9.05,-77.81
+cusco | Cusco -13.52,-71.97 ; Machu Picchu -13.16,-72.55 ; Ollantaytambo -13.26,-72.26 ; Ausangate -13.80,-71.23
+westkap | Kapstadt -33.92,18.42 ; Stellenbosch -33.93,18.86 ; Hermanus -34.42,19.24 ; Oudtshoorn -33.59,22.20 ; Plettenberg Bay -34.05,23.37
+sognefjord | Flåm 60.86,7.11 ; Balestrand 61.21,6.54 ; Lærdal 61.10,7.48 ; Fjærland 61.42,6.75
+lysefjord | Preikestolen 58.99,6.19 ; Lysebotn 59.05,6.65 ; Forsand 58.90,6.06
+romsdal | Åndalsnes 62.57,7.69 ; Molde 62.74,7.16 ; Ålesund 62.47,6.15 ; Trollstigen 62.45,7.67 ; Geiranger 62.10,7.21
+andalusien | Sevilla 37.39,-5.99 ; Córdoba 37.88,-4.78 ; Granada 37.18,-3.60 ; Málaga 36.72,-4.42 ; Cádiz 36.53,-6.29 ; Huelva 37.26,-6.95 ; Almería 36.84,-2.46 ; Ronda 36.74,-5.17 ; Jaén 37.77,-3.79
+provence | Aix-en-Provence 43.53,5.45 ; Gordes 43.91,5.20 ; Gorges du Verdon 43.75,6.33 ; Digne 44.09,6.24 ; Mont Ventoux 44.17,5.28
+languedoc | Montpellier 43.61,3.88 ; Narbonne 43.18,3.00 ; Carcassonne 43.21,2.35 ; Perpignan 42.70,2.90 ; Béziers 43.34,3.21
+elsass | Straßburg 48.58,7.75 ; Colmar 48.08,7.36 ; Mulhouse 47.75,7.34 ; Haguenau 48.82,7.79 ; Saverne 48.74,7.36
+veltlin | Sondrio 46.17,9.87 ; Tirano 46.21,10.17 ; Morbegno 46.13,9.57
+pindos | Ioannina 39.66,20.85 ; Metsovo 39.77,21.18 ; Monodendri 39.89,20.73 ; Aristi 39.89,20.72
+yorkshire-dales | Malham 54.06,-2.15 ; Hawes 54.30,-2.20 ; Settle 54.07,-2.28 ; Ingleborough 54.17,-2.40
+northumberland | Alnwick 55.41,-1.70 ; Housesteads 55.03,-2.33 ; Rothbury 55.31,-1.91
+mittelrhein | Boppard 50.23,7.59 ; Loreley 50.15,7.73 ; Bacharach 50.06,7.77 ; Oberwesel 50.11,7.73
+ries | Nördlingen 48.85,10.49 ; Oettingen 48.95,10.60 ; Wallerstein 48.86,10.50
+fraenkisches-seenland | Gunzenhausen 49.11,10.76 ; Pleinfeld 49.11,10.80 ; Absberg 49.13,10.83
+waldviertel | Zwettl 48.61,15.17 ; Allentsteig 48.69,15.33 ; Horn 48.66,15.66 ; Ottenschlag 48.50,15.22
+muehlviertel | Freistadt 48.51,14.50 ; Bad Leonfelden 48.52,14.29 ; Haslach 48.56,14.04
+suedsteiermark | Leibnitz 46.78,15.54 ; Kitzeck 46.77,15.46
+flachgau | Salzburg 47.80,13.04 ; Seekirchen 47.90,13.12 ; Neumarkt 47.95,13.25 ; Gaisberg 47.80,13.11
+rupertiwinkel | Laufen 47.94,12.93 ; Tittmoning 48.06,12.76 ; Teisendorf 47.85,12.82 ; Freilassing 47.84,12.98
+liechtenstein | Vaduz 47.14,9.52 ; Triesenberg 47.12,9.54 ; Schaan 47.17,9.51
 cote-d-azur | Nizza 43.70,7.27 ; Cannes 43.55,7.01 ; Menton 43.78,7.50 ; Saint-Tropez 43.27,6.64 ; Grasse 43.66,6.92
 burgund | Dijon 47.32,5.04 ; Beaune 47.02,4.84 ; Auxerre 47.80,3.57 ; Vézelay 47.47,3.75 ; Cluny 46.43,4.66
 dordogne | Sarlat 44.89,1.22 ; Périgueux 45.18,0.72 ; Bergerac 44.85,0.48 ; Cahors 44.45,1.44 ; Rocamadour 44.80,1.62
@@ -568,6 +593,31 @@ NEG = """
 !burgund | Paris 48.86,2.35 ; Lyon 45.76,4.84 ; Besançon 47.24,6.02 ; Orléans 47.90,1.91
 !dordogne | Bordeaux 44.84,-0.58 ; Toulouse 43.60,1.44 ; Limoges 45.83,1.26 ; Clermont-Ferrand 45.78,3.09
 !dauphine | Lyon 45.76,4.84 ; Chambéry 45.57,5.92 ; Avignon 43.95,4.81 ; Annecy 45.90,6.13 ; Digne 44.09,6.24
+!vancouver-island | Vancouver 49.28,-123.12 ; Powell River 49.88,-124.55 ; Sechelt 49.47,-123.75 ; Seattle 47.61,-122.33 ; Bella Bella 52.16,-128.14
+!taiwan | Fuzhou 26.07,119.30 ; Manila 14.60,120.98 ; Xiamen 24.48,118.09
+!cordillera-blanca | Lima -12.05,-77.04 ; Cusco -13.52,-71.97
+!cusco | Lima -12.05,-77.04 ; Arequipa -16.40,-71.54 ; Puno -15.84,-70.03
+!westkap | Johannesburg -26.20,28.05 ; Port Elizabeth -33.96,25.60 ; Durban -29.86,31.02 ; Upington -28.45,21.26
+!sognefjord | Bergen 60.39,5.32 ; Geiranger 62.10,7.21 ; Finse 60.60,7.50 ; Gjendesheim 61.50,8.80
+!lysefjord | Stavanger 58.97,5.73 ; Haugesund 59.41,5.27 ; Odda 60.07,6.55
+!romsdal | Trondheim 63.43,10.40 ; Dombås 62.07,9.12 ; Kristiansund 63.11,7.73 ; Hjerkinn 62.22,9.55
+!andalusien | Gibraltar 36.14,-5.35 ; Faro 37.02,-7.93 ; Tavira 37.13,-7.65 ; Murcia 37.99,-1.13 ; Badajoz 38.88,-6.97 ; Ceuta 35.89,-5.32 ; Albacete 38.99,-1.86 ; Ciudad Real 38.99,-3.93
+!provence | Marseille 43.30,5.37 ; Avignon 43.95,4.81 ; Nizza 43.70,7.27 ; Gap 44.56,6.08
+!languedoc | Toulouse 43.60,1.44 ; Nîmes 43.84,4.36 ; Andorra la Vella 42.51,1.52 ; Figueres 42.27,2.96
+!elsass | Freiburg 47.99,7.85 ; Basel 47.56,7.59 ; Karlsruhe 49.01,8.40 ; Belfort 47.64,6.86 ; Metz 49.12,6.18 ; Kehl 48.57,7.82
+!veltlin | Poschiavo 46.32,10.06 ; Chiavenna 46.32,9.40 ; Bormio 46.47,10.37 ; Lecco 45.86,9.40 ; Bergamo 45.70,9.67
+!pindos | Kalambaka 39.71,21.63 ; Arta 39.16,20.99 ; Igoumenitsa 39.50,20.27 ; Gjirokastër 40.07,20.14
+!yorkshire-dales | Leeds 53.80,-1.55 ; Kendal 54.33,-2.75 ; Keswick 54.60,-3.13
+!northumberland | Newcastle 54.98,-1.62 ; Carlisle 54.89,-2.93 ; Edinburgh 55.95,-3.19 ; Berwick 55.77,-2.00
+!mittelrhein | Mainz 50.00,8.27 ; Köln 50.94,6.96 ; Wiesbaden 50.08,8.24
+!ries | Augsburg 48.37,10.90 ; Ulm 48.40,9.99 ; Dinkelsbühl 49.07,10.32 ; Aalen 48.84,10.09
+!fraenkisches-seenland | Nürnberg 49.45,11.08 ; Weißenburg 49.03,10.97 ; Ansbach 49.30,10.57
+!waldviertel | Wien 48.21,16.37 ; Krems 48.41,15.60 ; Budweis 48.97,14.47 ; Znojmo 48.86,16.05 ; Freistadt 48.51,14.50
+!muehlviertel | Linz 48.31,14.29 ; Perg 48.25,14.63 ; Budweis 48.97,14.47 ; Zwettl 48.61,15.17
+!suedsteiermark | Maribor 46.55,15.65 ; Graz 47.07,15.44 ; Bad Radkersburg 46.68,15.99
+!flachgau | Hallein 47.68,13.10 ; Freilassing 47.84,12.98 ; Gmunden 47.92,13.80 ; Laufen 47.94,12.93
+!rupertiwinkel | Salzburg 47.80,13.04 ; Bad Reichenhall 47.73,12.88 ; Burghausen 48.17,12.83 ; Traunstein 47.87,12.64
+!liechtenstein | Feldkirch 47.24,9.60 ; Buchs 47.17,9.47 ; Sargans 47.05,9.44 ; Bludenz 47.15,9.82
 !tasmanien | Melbourne -37.81,144.96 ; Wilsons Promontory -39.03,146.32
 """
 

@@ -34,7 +34,8 @@ NEU = ["muensterland", "oberlausitz", "seenplatte", "bergisches-land", "siegerla
        "cote-d-azur", "burgund", "dordogne", "dauphine",
        "galicien", "kantabrien", "asturien", "baskenland", "costa-brava", "costa-daurada", "costa-blanca", "alentejo", "nordportugal",
        "korfu", "chalkidiki", "thassos", "olymp", "pilion", "kefalonia", "ithaka", "zakynthos", "samos", "ikaria", "patmos", "fourni",
-       "dovrefjell", "vesteraalen", "gotland", "oeland", "bornholm", "faeroeer", "kanalinseln", "devon", "molokai", "tasmanien"]
+       "dovrefjell", "vesteraalen", "gotland", "oeland", "bornholm", "faeroeer", "kanalinseln", "devon", "molokai", "tasmanien",
+       "vancouver-island", "taiwan", "cordillera-blanca", "cusco", "westkap", "sognefjord", "lysefjord", "romsdal", "andalusien", "provence", "languedoc", "elsass", "veltlin", "pindos", "yorkshire-dales", "northumberland", "mittelrhein", "ries", "fraenkisches-seenland", "waldviertel", "muehlviertel", "suedsteiermark", "flachgau", "rupertiwinkel", "liechtenstein"]
 
 
 @node
@@ -74,7 +75,7 @@ SUCHE = [("Münsterland", 51.96, 7.63, "muensterland"), ("Oberlausitz", 51.18, 1
          ("Olymp", 40.10, 22.50, "olymp"), ("Pilion", 39.36, 22.94, "pilion"), ("Kefalonia", 38.18, 20.49, "kefalonia"), ("Ithaka", 38.37, 20.72, "ithaka"), ("Zakynthos", 37.78, 20.90, "zakynthos"),
          ("Samos", 37.69, 26.94, "samos"), ("Ikaria", 37.61, 26.30, "ikaria"), ("Patmos", 37.31, 26.55, "patmos"), ("Dovrefjell", 62.22, 9.55, "dovrefjell"), ("Vesterålen", 68.70, 15.42, "vesteraalen"),
          ("Lofoten und Vesterålen", 68.70, 15.42, "vesteraalen"), ("Gotland", 57.64, 18.30, "gotland"), ("Öland", 56.88, 16.65, "oeland"), ("Bornholm", 55.10, 14.70, "bornholm"),
-         ("Färöer", 62.01, -6.77, "faeroeer"), ("Kanalinseln", 49.46, -2.54, "kanalinseln"), ("Devon", 50.72, -3.53, "devon"), ("Tasmanien", -42.88, 147.33, "tasmanien"), ("Molokai", 21.09, -157.02, "molokai"),
+         ("Färöer", 62.01, -6.77, "faeroeer"), ("Kanalinseln", 49.46, -2.54, "kanalinseln"), ("Devon", 50.72, -3.53, "devon"), ("Tasmanien", -42.88, 147.33, "tasmanien"), ("Vancouver Island", 49.15, -125.91, "vancouver-island"), ("Taiwan", 25.04, 121.56, "taiwan"), ("Cusco", -13.52, -71.97, "cusco"), ("Westkap", -33.92, 18.42, "westkap"), ("Sognefjord", 60.86, 7.11, "sognefjord"), ("Preikestolen", 58.99, 6.19, "lysefjord"), ("Romsdal", 62.57, 7.69, "romsdal"), ("Andalusien", 37.39, -5.99, "andalusien"), ("Provence", 43.75, 6.33, "provence"), ("Languedoc-Roussillon", 43.61, 3.88, "languedoc"), ("Elsass", 48.08, 7.36, "elsass"), ("Veltlin", 46.17, 9.87, "veltlin"), ("Pindosgebirge", 39.66, 20.85, "pindos"), ("Yorkshire Dales", 54.07, -2.28, "yorkshire-dales"), ("Northumberland", 55.03, -2.33, "northumberland"), ("Rheinsteig", 50.15, 7.73, "mittelrhein"), ("Nördlinger Ries", 48.85, 10.49, "ries"), ("Fränkisches Seenland", 49.11, 10.76, "fraenkisches-seenland"), ("Waldviertel", 48.61, 15.17, "waldviertel"), ("Mühlviertel", 48.51, 14.50, "muehlviertel"), ("Steirisches Weinland", 46.78, 15.54, "suedsteiermark"), ("Rund um Salzburg", 47.90, 13.12, "flachgau"), ("Rupertiwinkel", 47.94, 12.93, "rupertiwinkel"), ("Liechtenstein", 47.14, 9.52, "liechtenstein"), ("Marokko", 31.06, -7.92, "hoher-atlas"), ("Molokai", 21.09, -157.02, "molokai"),
          # Wege und Schreibweisen als Alias vorhandener Gebiete
          ("Westweg", 47.874, 8.004, "schwarzwald"), ("Heidschnuckenweg", 53.05, 9.95, "lueneburger-heide"), ("Harzer Hexenstieg", 51.80, 10.62, "harz"), ("Goldsteig", 48.94, 13.50, "bayerischer-wald"),
          ("Eifelsteig", 50.37, 6.53, "eifel"), ("Albsteig", 48.40, 9.50, "schwaebische-alb"), ("Oberallgäu", 47.41, 10.28, "allgaeu"), ("Ostallgäu", 47.57, 10.70, "allgaeu"),

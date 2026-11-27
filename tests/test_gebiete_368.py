@@ -97,7 +97,7 @@ def test_eltern_und_nachbarn():
     assert "dachstein" in _ids(47.4167, 13.64) and "schladminger" not in _ids(47.4167, 13.64)   # Ramsau bleibt beim Dachstein
     assert "hohetauern" in _ids(46.98, 13.37) and _ids(46.98, 13.37)[0] == "maltatal"
     assert "gailtaler" not in _ids(46.66, 13.00) and "karnische" in _ids(46.60, 12.95)           # Kötschach/Plöckenpass: Karnische Alpen, nicht Gailtaler
-    assert _ids(36.7367, -4.94) == ["sierra-nieves"] and "sierra-nieves" not in _ids(36.74, -5.17)   # Ronda liegt außerhalb (Grazalema-Seite)
+    assert [i for i in _ids(36.7367, -4.94) if i != "andalusien"] == ["sierra-nieves"] and "sierra-nieves" not in _ids(36.74, -5.17)   # Ronda liegt außerhalb (Grazalema-Seite)
 
 
 @node
