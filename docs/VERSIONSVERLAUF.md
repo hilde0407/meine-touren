@@ -2,6 +2,14 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.67.0 – „Reise erstellen“: Touren einfach auswählen
+
+- Der Auswahldialog ist neu: **nichts mehr vorgewählt** (vorher die Touren der letzten 7 Tage, und jede Erweiterung des Zeitraums wählte still alle neuen Tage mit – so kamen 8 Touren von den Kanaren in eine Reise „Rostock“); Touren **nach Tag oder Gebiet gruppiert, neueste zuerst**, je Zeile Datum, Name, Ort/Gebiet, Strecke
+- **Zeitraum markieren** (Knopf), **Gruppenkopf** mit Kontrollkästchen (auch „teilweise gewählt“), Suchfeld, **Alle/Keine** für die gefilterte Liste
+- Immer sichtbar: „10 Touren · 17.09.–21.11. · Darß, Gran Canaria“; **Warnungen** (nicht blockierend) bei mehreren Ländern, über 300 km Abstand, mehr als zwei Gebieten oder Lücken über 14 Tage; Touren in einer erkannten Reise tragen „in Reise X“, Touren einer anderen eigenen Reise „in eigener Reise X“ (gesperrt)
+- Verwaltung → Sportarten: Abschnitt „Frühere Sportarten“ entfernt (Rückfall `SPORT_ALIAS`/`sport_alt` bleibt)
+- Liste bleibt beim Abhaken ruhig (kein Neuzeichnen: Bildlauf und Fokus bleiben); Handy: zweizeilige Zeilen, mindestens 44 px, Summenzeile bleibt oben
+
 ## Version 3.66.0 – Entfernen statt Ausblenden, zwei Wege beim Zurücksetzen, Werkseinstellung für alle Seiten
 
 - Bausteine haben auf allen Seiten nur noch **Entfernen** (mit Rückfrage); „Ausblenden“ und „Einblenden“ entfallen. Mitgelieferte Bausteine werden intern weiter als ausgeblendet gespeichert (keine Migration), bereits Ausgeblendetes gilt als entfernt. Im Katalog „Baustein hinzufügen“ steht ein entfernter Baustein als **Wieder hinzufügen** (statt „Steht schon auf der Seite“, das nur bei sichtbaren bleibt), Bausteine ohne eigene Karte in der Gruppe „Entfernte Bausteine“

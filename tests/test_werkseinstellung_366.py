@@ -126,10 +126,10 @@ def test_ziele_und_andere_daten_bleiben_unberuehrt():
 
 def test_quelltext_und_versionshinweis():
     from app import config
-    assert config.VERSION.startswith("3.66.0 · Meine Touren")
+    assert config.VERSION.startswith("3.67.0 · Meine Touren")
     js = (ROOT / "app" / "static" / "js")
-    assert 'SL_APPV = "3.66.0"' in (js / "54-ansichten.js").read_text(encoding="utf-8")
-    assert 'const V = "mt-v156"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.67.0"' in (js / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v157"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
     assert (ROOT / "docs" / "versionen" / "3.66.0.md").exists()
     assert "3.66.0" in (ROOT / "docs" / "VERSIONSVERLAUF.md").read_text(encoding="utf-8")
     assert "3.66.0" in (ROOT / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")

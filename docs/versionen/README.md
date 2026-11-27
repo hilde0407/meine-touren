@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.67.0](3.67.0.md) – „Reise erstellen“: Touren nach Tag/Gebiet gruppiert, nichts vorgewählt, Zeitraum markieren, Gruppenkopf, Summenzeile mit Warnungen, „in Reise X“
 - [3.66.0](3.66.0.md) – Seiten anpassen: „Entfernen“ statt Ausblenden, zwei Wege beim Zurücksetzen, Werkseinstellung für alle Seiten
 - [3.65.0](3.65.0.md) – Gebiete: Link in der Regionszeile, Übersicht und Seite je Gebiet, eigene Gebiete (Suche über OpenStreetMap)
 - [3.64.0](3.64.0.md) – Reisenamen aus Gebieten (genauestes passendes Gebiet; Tabelle auch auf dem Server), Filter „Gebiet“ in der Tourenliste und unter Umbenennen nach Regeln, „Meistbesuchte Orte“ nach Gebiet

@@ -113,10 +113,8 @@ def test_reiter_aktivitaeten_drei_abschnitte_und_altdaten(pw, app):
         assert pg.locator('#katp .katit[data-k="snowshoe"]').evaluate("e => e.closest('.sgcat').querySelector('.sgcl').textContent") == "Winter"
         assert pg.locator('#katp .katit[data-k="mtb"] .katn').inner_text() == "Mountainbike" and pg.locator('#katp .katit[data-k="mountaineering"] .katn').inner_text() == "Bergsteigen"
         assert pg.evaluate("() => getComputedStyle(document.querySelector('#katp .katit[data-k=kayak] .katdot')).backgroundColor !== 'rgba(0, 0, 0, 0)'")
-        # Frühere Aktivitäten: offen, weil es solche Touren gibt, mit Rückfall und Anzahl
-        assert pg.evaluate("() => document.querySelector('#katp details.katalt').open")
-        assert "Gassigehen → 🚶 Spazieren / Gehen 1 Tour" in pg.locator('#katp .katfr li[data-k="dogwalk"]').inner_text()
-        assert "Sonstiges" in pg.locator('#katp .katfr li[data-k="golf"]').inner_text() and "Kajak / Kanu" in pg.locator('#katp .katfr li[data-k="sup"]').inner_text()
+        # 3.67.0: kein Abschnitt „Frühere Sportarten“ mehr; der Rückfall bleibt (Zählung im Katalog über sport_alt)
+        assert pg.locator('#katp details, #katp .katfr').count() == 0
         # Favoriten: entfernte Schlüssel still weg, Reihenfolge bleibt
         assert pg.locator("#favp .favn").all_inner_texts() == ["Wandern", "Rafting"]
         assert pg.locator("#favp .favst").count() == 29

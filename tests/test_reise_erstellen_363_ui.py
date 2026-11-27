@@ -49,30 +49,25 @@ def _custom(app):
 def test_reise_erstellen_dialog_liste_seite_suche(pw, app):
     pg = _trips_page(pw, app)
     try:
-        d = _dates(pg, "h0")
         pg.locator("#trnew").click()
         pg.wait_for_selector("#tcn", timeout=T)
         assert pg.locator(".uidlg h2").first.inner_text() == "Reise erstellen"
         pg.fill("#tcn", "Rostock")
-        pg.fill("#tcf", d); pg.fill("#tct", d)
-        pg.locator("#tcf").dispatch_event("change")
-        pg.wait_for_function("() => document.querySelectorAll('#tcl .cb').length === 1", timeout=T)
-        assert pg.locator("#tcl .cb").is_checked() and "1 Tour gewählt" in pg.locator("#tcc").inner_text()
-        # Zeitraum weiter: die neu hinzukommenden Touren sind vorgewählt; „Keine“, dann gezielt zwei Touren
-        pg.fill("#tcf", "2020-01-01"); pg.fill("#tct", "2100-01-01")
-        pg.locator("#tcf").dispatch_event("change")
+        # 3.67.0: nichts ist vorgewählt; erst der Knopf „Markieren“ wählt die Touren des Zeitraums
         pg.wait_for_function("() => document.querySelectorAll('#tcl .cb').length > 20", timeout=T)
-        pg.locator("#tck").click()
-        assert "0 Touren gewählt" in pg.locator("#tcc").inner_text()
+        assert pg.locator("#tcl .cb:checked").count() == 0 and "0 Touren gewählt" in pg.locator("#tcc").inner_text()
         pg.locator("#tcok").click()
         assert "mindestens eine Tour" in pg.locator("#tcer").inner_text()
+        pg.locator("#tck").click()
+        assert "0 Touren gewählt" in pg.locator("#tcc").inner_text()
         pg.fill("#tcs", "Heimrunde 1")
         pg.wait_for_function("() => document.querySelectorAll('#tcl .cb').length === 1", timeout=T)
         pg.locator("#tcl .cb").check()
         pg.fill("#tcs", "Heimrunde 3")
+        pg.wait_for_function("() => document.querySelectorAll('#tcl .cb').length === 1", timeout=T)
         pg.locator("#tcl .cb").check()
         pg.fill("#tcs", "")
-        assert "2 Touren gewählt" in pg.locator("#tcc").inner_text()
+        assert "2 Touren" in pg.locator("#tcc").inner_text()
         pg.locator("#tcok").click()
         pg.wait_for_selector("#trx #tls-touren", state="attached", timeout=TL)
         assert pg.url.split("#/trip/")[1].startswith("eigen-")
@@ -101,7 +96,7 @@ def test_bearbeiten_und_loeschen_mit_rueckfrage(pw, app):
         pg.wait_for_function("() => !!document.querySelector('#trdel') && !!document.querySelector('#tredit')", timeout=TL)
         pg.locator("#tredit").click()
         pg.wait_for_selector("#tcn", timeout=T)
-        assert pg.locator("#tcn").input_value() == "Ostsee" and pg.locator("#tcl .cb:checked").count() == 2
+        assert pg.locator("#tcn").input_value() == "Ostsee" and pg.locator("#tcl .cb:checked").count() == 2 and "2 Touren" in pg.locator("#tcc").inner_text()
         pg.fill("#tcn", "Ostsee 2026")
         pg.locator("#tcl .cb:checked").first.uncheck()
         pg.locator("#tcok").click()
@@ -144,10 +139,8 @@ def test_eigene_reise_hat_vorrang_keine_doppelten_touren(pw, app):
         # im Dialog einer zweiten eigenen Reise sind diese Touren gesperrt
         pg.locator("#trnew").click()
         pg.wait_for_selector("#tcn", timeout=T)
-        pg.fill("#tcf", "2020-01-01"); pg.fill("#tct", "2100-01-01")
-        pg.locator("#tcf").dispatch_event("change")
         pg.wait_for_function("() => document.querySelectorAll('#tcl .cb:disabled').length === 2", timeout=T)
-        assert "Gomera-Ende" in pg.locator("#tcl").inner_text()
+        assert "in eigener Reise „Gomera-Ende“" in pg.locator("#tcl").inner_text()
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()

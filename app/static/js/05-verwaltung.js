@@ -590,22 +590,12 @@ async function favAdmin(box) {
 }
 
 /* 3.60.0 Aktivitäten-Katalog (Verwaltung → Aktivitäten, nur lesen): die 29 Aktivitäten nach Kategorien mit Symbol und Kartenfarbe (SPORT_TABLE, 01-grundlagen.js).
-   Darunter die Aktivitäten, die 3.59.0 noch angeboten hat, mit ihrem Rückfall (SPORT_ALIAS): ältere Touren bleiben unverändert und zählen als diese Aktivität. */
-const KAT_FRUEHER = [
-  ["dogwalk", "Gassigehen"], ["orienteering", "Orientierungslauf"], ["commute", "Radpendeln"], ["cyclocross", "Cyclocross"], ["bmx", "BMX"],
-  ["sled", "Rodeln/Bob"], ["iceskate", "Eislaufen"], ["snowmobile", "Schneemobil"], ["swim", "Freiwasserschwimmen"], ["snorkel", "Schnorcheln"],
-  ["sup", "Paddleboarding/SUP"], ["sailing", "Segeln"], ["waterski", "Wasserski"], ["surf", "Wellenreiten"], ["kitesurf", "Kitesurfen"], ["wakesurf", "Wakesurfen"],
-  ["fishing", "Angeln"], ["hunting", "Jagen"], ["archery", "Bogenschießen"], ["golf", "Golf"], ["atv", "Quad/ATV"], ["motorbike", "Offroad-Motorrad"],
-];
+   (3.67.0: der Abschnitt „Frühere Sportarten“ ist entfernt; der Rückfall SPORT_ALIAS / sport_alt bleibt, ältere Touren zählen weiter als die Sportart, auf die er verweist.) */
 function katAdmin(box) {
   if (!box) return;
   const T = typeof TOURS !== "undefined" && Array.isArray(TOURS) ? TOURS : [];
   const n = k => T.filter(t => t && (t.sport_alt || t.sport) === k).length;      // loadTours merkt sich den entfernten Schlüssel in sport_alt
   const item = k => `<li class="katit" data-k="${k}"><span class="katdot" style="background:var(${SPORT[k][1]})" aria-hidden="true"></span><span class="katic" aria-hidden="true">${SPORT[k][2]}</span><span class="katn">${esc(SPORT[k][0])}</span></li>`;
-  const alt = KAT_FRUEHER.filter(([k]) => n(k));
   box.innerHTML = `<p class="mut">Diese Sportarten bietet Meine Touren überall an – beim Aufzeichnen, Importieren und Planen, in Filtern und in der Statistik. Symbol und Farbe erscheinen in Listen und auf der Karte.</p>
-    ${SPORT_CAT.map(([id, l, ks]) => `<div class="sgcat"><span class="sgcl" id="katc-${id}">${esc(l)}</span><ul class="katlist" aria-labelledby="katc-${id}">${ks.map(item).join("")}</ul></div>`).join("")}
-    <details class="katalt"${alt.length ? " open" : ""}><summary>Frühere Sportarten</summary>
-      <p class="mut">Diese Sportarten gibt es nicht mehr. Touren damit bleiben unverändert; angezeigt, gefiltert und gezählt werden sie wie die Sportart rechts. Mit „Sportart ändern“ (Tour bearbeiten) kannst du sie jederzeit umstellen.</p>
-      <ul class="katfr">${KAT_FRUEHER.map(([k, nm]) => `<li data-k="${k}"><span>${esc(nm)}</span> <span aria-hidden="true">→</span> <span class="katic" aria-hidden="true">${sIcon(k)}</span> <span>${esc(sName(k))}</span>${n(k) ? ` <small class="mut katcnt">${esc(n(k) === 1 ? "1 Tour" : `${n(k)} Touren`)}</small>` : ""}</li>`).join("")}</ul></details>`;
+    ${SPORT_CAT.map(([id, l, ks]) => `<div class="sgcat"><span class="sgcl" id="katc-${id}">${esc(l)}</span><ul class="katlist" aria-labelledby="katc-${id}">${ks.map(item).join("")}</ul></div>`).join("")}`;
 }

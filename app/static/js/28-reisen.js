@@ -122,58 +122,137 @@ VIEWS.trip = async id => {
   }
 };
 
-/* 3.63.0 Reise erstellen / bearbeiten (eigene Reise: Name, Zeitraum und/oder gewählte Touren; Tabelle trip_custom). Der Dialog zeigt die Touren des Zeitraums zum Abhaken (Vorgabe: alle) und die schon gewählten;
-   Touren einer anderen eigenen Reise sind gesperrt (eine Tour gehört zu höchstens einer eigenen Reise). tr = die eigene Reise beim Bearbeiten. */
+/* 3.63.0 Reise erstellen / bearbeiten (eigene Reise: Name, Zeitraum und/oder gewählte Touren; Tabelle trip_custom).
+   3.67.0 Auswahl der Touren neu: nichts ist vorgewählt (vorher: die Touren der letzten 7 Tage und jeder Tag, den man im Zeitraum nachträglich erweiterte); die Touren stehen nach Tag (oder Gebiet) gruppiert,
+   neueste zuerst, mit Datum, Name, Ort/Gebiet und Strecke. „Zeitraum markieren“ (Knopf), Gruppenkopf mit Kontrollkästchen (auch teilweise gewählt), Suchfeld, Alle/Keine für die gefilterte Liste.
+   Immer sichtbar: Anzahl, Zeitraum und Gebiete der Auswahl; nicht blockierende Warnung bei weit entfernten Gebieten/Ländern, vielen Gebieten oder Lücken über 14 Tage. Touren einer anderen eigenen Reise sind gesperrt,
+   Touren einer erkannten Reise tragen „in Reise X“ (sie wechseln beim Speichern in die eigene Reise). tr = die eigene Reise beim Bearbeiten. */
+const TRIP_LUECKE_TAGE = 14, TRIP_FERN_KM = 300, TRIP_GEB_MAX = 2, TRIP_ZEILEN = 300;
+function tripAuswahlInfo(ts) {                                                   // reine Auswertung einer Auswahl: Anzahl, Zeitraum, Gebiete, Warnungen (auch einzeln testbar)
+  const day = t => String(t.date).slice(0, 10), nm = t => { const a = Gebiete.anzeige(t); return (a && a.name) || t.g_state || t.g_country || ""; };
+  const days = [...new Set(ts.map(day))].sort(), gc = {}, ld = new Set();
+  ts.forEach(t => { const g = nm(t); if (g) gc[g] = (gc[g] || 0) + 1; if (t.g_country) ld.add(t.g_country); });
+  const geb = Object.entries(gc).sort((a, b) => b[1] - a[1]).map(x => x[0]);
+  const km = (a, b) => { const r = Math.PI / 180, dl = (b.lng - a.lng) * r, p1 = a.lat * r, p2 = b.lat * r; return 6371 * Math.acos(Math.min(1, Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(dl))); };
+  const pts = ts.filter(t => Number.isFinite(t.lat) && Number.isFinite(t.lng) && (t.lat || t.lng));
+  let fern = 0;
+  if (pts.length > 1) {                                                           // zwei Durchläufe: weitester Punkt vom ersten, dann weitester von diesem (genau genug für eine Warnung)
+    const far = p => pts.reduce((m, q) => (km(p, q) > km(p, m) ? q : m), p), b = far(pts[0]);
+    fern = km(b, far(b));
+  }
+  const luecken = [];
+  for (let i = 1; i < days.length; i++) { const d = Math.round((Date.parse(days[i]) - Date.parse(days[i - 1])) / 864e5); if (d > TRIP_LUECKE_TAGE) luecken.push({von: days[i - 1], bis: days[i], tage: d}); }
+  return {n: ts.length, von: days[0] || "", bis: days[days.length - 1] || "", geb, laender: [...ld], fern: Math.round(fern), luecken};
+}
+function tripZeitraumText(von, bis) {                                            // „17.09.–21.11.“ (Jahr nur, wenn nicht das laufende Jahr oder zwei Jahre)
+  if (!von) return "";
+  const lg = FMT_LG(), cut = s => s.replace(/[./]\d{4}$/, lg === "de" ? "." : ""), y = new Date().getFullYear(), same = von.slice(0, 4) === bis.slice(0, 4);
+  if (von === bis) return fmtDatumKurz(von);
+  return same && +von.slice(0, 4) === y ? `${cut(fmtDatumKurz(von))}–${cut(fmtDatumKurz(bis))}` : `${fmtDatumKurz(von)}–${fmtDatumKurz(bis)}`;
+}
 async function tripDialog(tr) {
-  const day = t => String(t.date).slice(0, 10), trips = await api("/api/trips").catch(() => []), owner = {};
-  trips.filter(x => x.custom && (!tr || x.id !== tr.id)).forEach(x => x.tours.forEach(i => (owner[i] = x.region)));
-  const newest = TOURS.reduce((a, t) => (day(t) > a ? day(t) : a), "1970-01-01"), sel = new Set(tr ? tr.tours : []), seen = new Set();
+  const day = t => String(t.date).slice(0, 10), trips = await api("/api/trips").catch(() => []), owner = {}, erkannt = {};
+  trips.forEach(x => (!tr || x.id !== tr.id) && x.tours.forEach(i => (x.custom ? (owner[i] = x.region) : (erkannt[i] = x.region))));
+  const sel = new Set(tr ? tr.tours : []), nm = t => { const a = Gebiete.anzeige(t); return (a && a.name) || t.g_state || t.g_country || ""; };
+  let modus = "tag", zeilen = TRIP_ZEILEN;
   const m = uiModal(`<h2>${tr ? "Reise bearbeiten" : "Reise erstellen"}</h2>
-   <p class="mut fs14">Name vergeben, Zeitraum wählen und die Touren abhaken, die zur Reise gehören. Die Reise erscheint danach wie eine erkannte Reise unter Reisen. Touren einer eigenen Reise gehören nicht mehr zur automatisch erkannten Reise.</p>
-   <div class="field"><label>Name</label><input id="tcn" maxlength="120" class="w100" value="${esc(tr ? tr.region : "")}" placeholder="z. B. Rostock"></div>
-   <div class="row g8 aic mt8"><label>Von <input id="tcf" type="date" value="${tr ? tr.start : flDayAdd(newest, -6)}"></label><label>bis <input id="tct" type="date" value="${tr ? tr.end : newest}"></label></div>
-   <div class="row g8 aic mt8"><input id="tcs" type="search" class="fx1 mnw200" placeholder="Touren suchen …" aria-label="Touren suchen"><button class="btn ghost sm" id="tca" type="button">Alle</button><button class="btn ghost sm" id="tck" type="button">Keine</button></div>
-   <div id="tcl" class="rows m10-0 ova" style="max-height:260px"></div><div id="tcc" class="mut fs14" role="status" aria-live="polite"></div>
+   <p class="mut fs14">Name vergeben und die Touren abhaken, die zur Reise gehören. Es ist nichts vorgewählt. Die Reise erscheint danach wie eine erkannte Reise unter Reisen. Touren einer eigenen Reise gehören nicht mehr zur automatisch erkannten Reise.</p>
+   <div class="field"><label for="tcn">Name</label><input id="tcn" maxlength="120" class="w100" value="${esc(tr ? tr.region : "")}" placeholder="z. B. Rostock"></div>
+   <div class="row g8 aic mt8 tcz"><span class="mut fs14">Zeitraum markieren:</span><label>Von <input id="tcf" type="date"></label><label>bis <input id="tct" type="date"></label><button class="btn alt sm" id="tcz" type="button">Markieren</button></div>
+   <div class="row g8 aic mt8"><input id="tcs" type="search" class="fx1 mnw200" placeholder="Touren suchen …" aria-label="Touren suchen"><button class="btn ghost sm" id="tca" type="button" title="Alle Touren der gefilterten Liste wählen">Alle</button><button class="btn ghost sm" id="tck" type="button" title="Alle Touren der gefilterten Liste abwählen">Keine</button></div>
+   <div class="row g8 aic mt8"><span class="mut fs14">Gruppieren:</span><button class="chip on" id="tcgt" type="button" aria-pressed="true">Nach Tag</button><button class="chip" id="tcgg" type="button" aria-pressed="false">Nach Gebiet</button></div>
+   <div class="tcbar"><div id="tcc" class="tcsum" role="status" aria-live="polite"></div><div id="tcw" class="tcwarn" role="status" aria-live="polite"></div></div>
+   <div id="tcl" class="tclist ova"></div>
    <div id="tcer" class="bad"></div><div class="uifoot"><button class="btn ghost" id="tcno" type="button">Abbrechen</button><button class="btn" id="tcok" type="button">Speichern</button></div>`);
   const q = s => m.querySelector(s);
-  const inRange = () => TOURS.filter(t => day(t) >= q("#tcf").value && day(t) <= q("#tct").value);
-  const take = () => inRange().forEach(t => {
-    if (!seen.has(t.id)) {
-      seen.add(t.id);
-      if (!owner[t.id] && !tr) sel.add(t.id);
-    }
-  });
-  const shown = () => {
-    const need = q("#tcs").value.trim().toLowerCase(), set = new Map(inRange().map(t => [t.id, t]));
-    sel.forEach(i => BY[i] && set.set(i, BY[i]));
-    return [...set.values()].filter(t => !need || String(t.name).toLowerCase().includes(need)).sort((a, b) => a.start_ts - b.start_ts);
+  const frei = t => !owner[t.id];
+  const alle = () => TOURS.filter(t => t.date).sort((a, b) => b.start_ts - a.start_ts);          // neueste zuerst, wie die Tourenliste
+  const gefiltert = () => {
+    const need = Gebiete.fold(q("#tcs").value.trim());
+    return alle().filter(t => !need || Gebiete.fold(`${t.name} ${Gebiete.regionText(t)} ${fmtDatumKurz(t.date)} ${day(t)}`).includes(need));
   };
-  const count = () => (q("#tcc").textContent = sel.size === 1 ? "1 Tour gewählt" : `${sel.size} Touren gewählt`);
+  const gruppen = ts => {
+    const g = new Map();
+    ts.forEach(t => { const k = modus === "tag" ? day(t) : nm(t) || "~"; (g.get(k) || g.set(k, []).get(k)).push(t); });
+    return [...g.entries()].map(([k, l]) => ({k, l, geb: modus === "tag" ? [...new Set(l.map(nm).filter(Boolean))].join(", ") : ""}));
+  };
+  const summe = () => {
+    const ts = [...sel].map(i => BY[i]).filter(Boolean), i = tripAuswahlInfo(ts), w = [];
+    q("#tcc").innerHTML = ts.length ? `<b>${ts.length === 1 ? "1 Tour" : `${ts.length} Touren`}</b> · ${esc(tripZeitraumText(i.von, i.bis))}${i.geb.length ? " · " + esc(i.geb.slice(0, 4).join(", ") + (i.geb.length > 4 ? ` und ${i.geb.length - 4} weitere` : "")) : ""}` : "0 Touren gewählt";
+    if (i.laender.length > 1) w.push(`Die Touren liegen in ${i.laender.length} Ländern (${i.laender.slice(0, 4).join(", ")}) – wirklich eine Reise?`);
+    else if (i.fern > TRIP_FERN_KM) w.push(`Die Touren liegen bis zu ${fmtZahl(i.fern, 0)} km auseinander – wirklich eine Reise?`);
+    else if (i.geb.length > TRIP_GEB_MAX) w.push(`Die Touren liegen in ${i.geb.length} Gebieten – wirklich eine Reise?`);
+    if (i.luecken.length) { const l = i.luecken.reduce((a, b) => (b.tage > a.tage ? b : a)); w.push(`Zwischen ${fmtDatumKurz(l.von)} und ${fmtDatumKurz(l.bis)} liegen ${l.tage} Tage ohne gewählte Tour${i.luecken.length > 1 ? ` (insgesamt ${i.luecken.length} Lücken über ${TRIP_LUECKE_TAGE} Tage)` : ""}.`); }
+    const aus = ts.filter(t => erkannt[t.id]), von = [...new Set(aus.map(t => erkannt[t.id]))];
+    if (aus.length) w.push(`${aus.length === 1 ? "1 Tour gehört" : `${aus.length} Touren gehören`} zu ${von.length === 1 ? `der Reise „${von[0]}“` : `${von.length} anderen Reisen`} und ${aus.length === 1 ? "wechselt" : "wechseln"} beim Speichern in diese Reise.`);
+    q("#tcw").innerHTML = w.map(x => `<p class="tcw">⚠ ${esc(x)}</p>`).join("");
+  };
+  const zeile = t => {
+    const o = owner[t.id], e = erkannt[t.id], reg = Gebiete.regionText(t);
+    return `<label class="tcr${o ? " off" : ""}"><input type="checkbox" class="cb" data-i="${esc(t.id)}"${sel.has(t.id) ? " checked" : ""}${o ? " disabled" : ""}><span class="tcd">${fmtDatumKurz(t.date)}</span><span class="tcn"><b>${esc(t.name)}</b>${reg ? `<small class="mut">${esc(reg)}</small>` : ""}${o ? `<small class="tcin">in eigener Reise „${esc(o)}“</small>` : e ? `<small class="tcin">in Reise „${esc(e)}“</small>` : ""}</span><span class="tck mut">${fmtKm(t.km)}</span></label>`;
+  };
+  let gmap = new Map();
+  const kopf = () => {                                                              // Gruppenköpfe nachziehen (gewählt / teilweise), ohne die Liste neu zu zeichnen (Bildlauf und Fokus bleiben)
+    q("#tcl").querySelectorAll(".tcg").forEach(el => {
+      const g = gmap.get(el.dataset.k), c = el.querySelector(".cg"), fr = g ? g.l.filter(frei) : [], n = fr.filter(t => sel.has(t.id)).length;
+      if (!c) return;
+      c.checked = fr.length > 0 && n === fr.length;
+      c.indeterminate = n > 0 && n < fr.length;
+      el.querySelector(".tcgn").textContent = n && n < fr.length ? ` · ${n} gewählt` : "";
+    });
+    summe();
+  };
   const list = () => {
-    const ts = shown();
-    q("#tcl").innerHTML = ts.length
-      ? ts.map(x => `<label class="r g8 aic" style="display:flex"><input type="checkbox" class="cb" data-i="${esc(x.id)}"${sel.has(x.id) ? " checked" : ""}${owner[x.id] ? " disabled" : ""}><span>${fmtDatumKurz(x.date)} · ${esc(x.name)} <span class="mut">${fmtKm(x.km)}${owner[x.id] ? ` · gehört zu „${esc(owner[x.id])}“` : ""}</span></span></label>`).join("")
-      : '<p class="mut">Keine Touren in diesem Zeitraum.</p>';
-    count();
+    const sc = q("#tcl").scrollTop, ts = gefiltert(), gs = gruppen(ts);
+    let rest = zeilen, h = "";
+    gmap = new Map(gs.map(g => [g.k, g]));
+    for (const g of gs) {
+      if (rest <= 0) break;
+      const l = g.l.slice(0, rest);
+      rest -= l.length;
+      const fr = g.l.filter(frei), titel = modus === "tag" ? fmtDatum(g.k, {wochentag: true}) : g.k === "~" ? "Ohne Gebiet" : g.k;
+      h += `<div class="tcg" data-k="${esc(g.k)}"><label class="tch${fr.length ? "" : " off"}"><input type="checkbox" class="cg" data-g="${esc(g.k)}"${fr.length ? "" : " disabled"} aria-label="${esc(`${titel}: ${modus === "tag" ? "alle dieses Tages" : "alle dieses Gebiets"} wählen`)}"><b>${esc(titel)}</b><small class="mut">${g.l.length === 1 ? "1 Tour" : `${g.l.length} Touren`}<span class="tcgn"></span>${g.geb ? " · " + esc(g.geb) : ""}</small></label>${l.map(zeile).join("")}</div>`;
+    }
+    q("#tcl").innerHTML = ts.length ? h + (ts.length > zeilen && rest <= 0 ? `<button class="btn ghost sm" id="tcmore" type="button">Weitere Touren anzeigen</button>` : "") : `<p class="mut p8">${q("#tcs").value.trim() ? "Keine Tour passt zur Suche." : "Keine Touren vorhanden."}</p>`;
+    q("#tcl").scrollTop = sc;
+    kopf();
   };
-  if (tr) inRange().forEach(t => seen.add(t.id)); else take();
   list();
   q("#tcl").onchange = e => {
-    const c = e.target.closest("[data-i]");
+    const c = e.target.closest("[data-i]"), g = e.target.closest("[data-g]");
     if (c) (c.checked ? sel.add(c.dataset.i) : sel.delete(c.dataset.i));
-    count();
+    if (g) {
+      const gr = gmap.get(g.dataset.g), fr = gr ? gr.l.filter(frei) : [], on = !fr.every(x => sel.has(x.id));
+      fr.forEach(t => (on ? sel.add(t.id) : sel.delete(t.id)));
+      q("#tcl").querySelectorAll(".tcg").forEach(el => el.dataset.k === g.dataset.g && el.querySelectorAll(".cb").forEach(b => (b.checked = sel.has(b.dataset.i))));
+    }
+    kopf();
   };
-  m.querySelectorAll("input[type=date]").forEach(i => (i.onchange = () => { take(); list(); }));
-  q("#tcs").oninput = list;
-  q("#tca").onclick = () => { shown().forEach(t => !owner[t.id] && sel.add(t.id)); list(); };
-  q("#tck").onclick = () => { shown().forEach(t => sel.delete(t.id)); list(); };
+  q("#tcl").onclick = e => { if (e.target.closest("#tcmore")) { zeilen += TRIP_ZEILEN; list(); } };
+  q("#tcz").onclick = () => {
+    const a = q("#tcf").value, b = q("#tct").value, er = q("#tcer");
+    er.textContent = "";
+    if (!a && !b) return void (er.textContent = "Bitte Anfang und Ende des Zeitraums wählen.");
+    if (a && b && a > b) return void (er.textContent = "Das Ende liegt vor dem Beginn.");
+    const ts = alle().filter(t => frei(t) && (!a || day(t) >= a) && (!b || day(t) <= b));
+    ts.forEach(t => sel.add(t.id));
+    list();
+    q("#tcc").insertAdjacentHTML("beforeend", ` <span class="mut">(${ts.length === 1 ? "1 Tour" : `${ts.length} Touren`} im Zeitraum markiert)</span>`);
+  };
+  q("#tcs").oninput = () => { zeilen = TRIP_ZEILEN; list(); };
+  const gr = mo => { modus = mo; zeilen = TRIP_ZEILEN; [["tcgt", "tag"], ["tcgg", "gebiet"]].forEach(([id, k]) => { q("#" + id).classList.toggle("on", k === mo); q("#" + id).setAttribute("aria-pressed", String(k === mo)); }); list(); };
+  q("#tcgt").onclick = () => gr("tag");
+  q("#tcgg").onclick = () => gr("gebiet");
+  q("#tca").onclick = () => { gefiltert().forEach(t => frei(t) && sel.add(t.id)); list(); };
+  q("#tck").onclick = () => { gefiltert().forEach(t => sel.delete(t.id)); list(); };
   q("#tcno").onclick = () => m.remove();
   q("#tcok").onclick = async () => {
     const name = q("#tcn").value.trim(), er = q("#tcer");
     if (!name) return void (er.textContent = "Bitte einen Namen für die Reise eingeben.");
     if (!sel.size) return void (er.textContent = "Bitte mindestens eine Tour wählen.");
     try {
-      const body = JSON.stringify({name, start: q("#tcf").value, end: q("#tct").value, tours: [...sel]}), h = {"content-type": "application/json"};
+      const i = tripAuswahlInfo([...sel].map(x => BY[x]).filter(Boolean));
+      const body = JSON.stringify({name, start: i.von, end: i.bis, tours: [...sel]}), h = {"content-type": "application/json"};
       window._sReisen = null;
       if (tr) {
         await api(`/api/trips/${encodeURIComponent(tr.id)}/edit`, {method: "POST", headers: h, body});

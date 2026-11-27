@@ -226,7 +226,7 @@ def test_oberflaeche_nutzt_den_rueckfall_an_einer_stelle():
     assert {k: tuple(v) for k, v in fam.items()} == gpxtools.FAMILIE
     v = (JS / "05-verwaltung.js").read_text(encoding="utf-8")
     assert 'id="katp"' in v and 'id="favp"' in v and 'id="sgp"' in v and "function katAdmin" in v
-    assert [k for k, _ in re.findall(r'\["(\w+)", "([^"]+)"\]', v.split("const KAT_FRUEHER = [", 1)[1].split("];", 1)[0])] == ENTFERNT_359
+    assert "const KAT_FRUEHER" not in v                                            # 3.67.0: Abschnitt „Frühere Sportarten“ entfernt
     st = (JS / "13-start.js").read_text(encoding="utf-8")
     assert re.findall(r'^  \["(\w+)", "', st.split("const ADM_TABS = [", 1)[1].split("];", 1)[0], re.M) == [
         "allgemein", "sportarten", "quellen", "weitergabe", "fotos", "auto", "handy", "sicher"]
