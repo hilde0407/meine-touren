@@ -6,7 +6,7 @@ const pic = p => `/pic/${p.id}?size=2000${p.v ? `&v=${p.v}` : ""}`;          // 
   let sec = (+q.get("sec") || +(() => { try { return localStorage.getItem("showSec"); } catch (e) { return 0; } })() || info.slideshow_seconds || 6) * 1000;
   const u = new URLSearchParams({limit: 1500}); ["tour","year"].forEach(k => q.get(k) && u.set(k === "tour" ? "tour_id" : k, q.get(k))); if (q.get("random")) u.set("random", "true");
   // 3.32.0 (Kachel „Erinnerungen“): Sportart, Zeitraum, Kalendertag, neueste und beste Fotos – der Server prüft jeden Wert (app/fotofilter.py)
-  [["sport", "sport"], ["from", "date_from"], ["to", "date_to"], ["day", "day"], ["before", "before"]].forEach(([a, b]) => q.get(a) && u.set(b, q.get(a)));
+  [["sport", "sport"], ["from", "date_from"], ["to", "date_to"], ["day", "day"], ["before", "before"], ["gebiet", "gebiet"]].forEach(([a, b]) => q.get(a) && u.set(b, q.get(a)));
   if (q.get("recent")) u.set("recent", "true");
   if (q.get("best") && !q.get("tour")) { u.set("best", "true"); u.set("limit", Math.max(3, Math.min(300, +q.get("best") || 60))); }
   let list = await (await fetch("/api/photos?" + u)).json();
@@ -52,7 +52,7 @@ const pic = p => `/pic/${p.id}?size=2000${p.v ? `&v=${p.v}` : ""}`;          // 
   const bshr = document.getElementById("bshr"), fsh = document.getElementById("fsh");
   // 3.32.0: ein Link teilt nur „Tour“, „Jahr“ oder „alle“, keine gefilterte Auswahl; 3.61.5 auch einen Zeitraum (from und to, z. B. die Reise), aber ohne weiteren Filter
   const zeitraum = !!(q.get("from") && q.get("to")) && !["tour", "year", "sport", "day", "recent", "before"].some(k => q.get(k));
-  const gefiltert = ["sport", "day", "recent"].some(k => q.get(k)) || (["from", "to"].some(k => q.get(k)) && !zeitraum);
+  const gefiltert = ["sport", "day", "recent", "gebiet"].some(k => q.get(k)) || (["from", "to"].some(k => q.get(k)) && !zeitraum);
   if (!gefiltert && (zeitraum || q.get("tour") || q.get("year") || !q.get("random"))) bshr.style.display = "";
   const note = txt => { fsh.textContent = txt; fsh.style.display = "block"; setTimeout(() => { fsh.style.display = "none"; }, 4000); };
   bshr.onclick = async e => {

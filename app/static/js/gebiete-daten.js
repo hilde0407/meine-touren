@@ -430,6 +430,8 @@ const Gebiete = (() => {
   });
   const tiefe = x => { let n = 0; for (let e = x.eltern && BY[x.eltern]; e && n < 10; e = e.eltern && BY[e.eltern]) n++; return n; };
   L.forEach(x => { x.tiefe = tiefe(x); });
+  L.forEach(x => { x.quelle = "eingebaut"; });
+  const NBASIS = L.length;                                                   // die eingebauten Gebiete stehen vorn; eigene (3.65.0) werden dahinter ersetzt (setEigene)
 
   /** Liegt die Koordinate in der Fläche des Gebiets (Rechtecke/Vielecke, ohne Bezirk, ohne Ausschluss)? */
   const flaeche = (x, la, ln) => !!x.hull && inBox(x.hull, la, ln) && (x.boxen.some(b => inBox(b, la, ln)) || x.poly.some(r => inPoly(r, la, ln)));
@@ -477,9 +479,11 @@ const Gebiete = (() => {
     return gleich ? null : v;                   // das spezifischste Gebiet sagt nichts Neues: lieber nichts als ein gröberes Gebiet
   };
   /** Teile der Regionszeile: Ort, Gebiet, Bundesland, Land (leere und doppelte entfallen) – für Tourseite und Tourblatt. */
-  const regionTeile = t => {
+  const regionTeile = t => regionMit(t).map(x => x.text);
+  /** Wie regionTeile, jeder Teil als {text, gebiet}: gebiet = Kennung, wenn der Teil das Gebiet ist (für einen Link auf die Tourenliste dieses Gebiets), sonst null. */
+  const regionMit = t => {
     const a = anzeige(t), out = [];
-    for (const s of [t.g_place, a && a.name, t.g_state, t.g_country]) if (s && !out.some(o => fold(o) === fold(s))) out.push(s);
+    for (const [s, g] of [[t.g_place, null], [a && a.name, a && a.id], [t.g_state, null], [t.g_country, null]]) if (s && !out.some(o => fold(o.text) === fold(s))) out.push({text: s, gebiet: g});
     return out;
   };
   /** Suchwörter zusammenfassen: aufeinanderfolgende Wörter, die zusammen den Namen oder Alias eines Gebiets ergeben („La Palma“, „Gran Canaria“, „Wilder Kaiser“), zählen als EIN Suchwort
@@ -545,7 +549,25 @@ const Gebiete = (() => {
     for (const x of L) { let n = 0; for (let e = x; e && e.eltern; e = BY[e.eltern]) if (++n > 10) { err.push("Eltern-Kette zu lang/Schleife " + x.id); break; } }
     return err;
   };
-  const api = {liste: L, nach: BY, von, namen, fuerSuche, bundesland, anzeige, regionTeile, regionText, phrasen, bericht, pruefen, fold, trifft: (id, la, ln, kr) => !!BY[id] && trifft(BY[id], la, ln, kr ? kreis(kr) : "")};
+  /** Eigene Gebiete (3.65.0, GET /api/gebiete/eigene: [{id, name, typ, box: [Süd, West, Nord, Ost], land}]): ersetzt die bisherigen eigenen. Ein eigenes Gebiet ist ein Rechteck ohne übergeordnetes Gebiet, Alias
+   und Bezirk (wie app/gebiete.py `_eigen_zeile`) und geht bei der Anzeige und beim Reisenamen vor (Tiefe 99, wie eigene Reisen und eigene Namen Vorrang haben); es erscheint wie ein eingebautes in von(), Suche, Anzeige und Filter, mit quelle "eigen". */
+  const setEigene = liste => {
+    L.length = NBASIS;
+    for (const k of Object.keys(BY)) if (BY[k].quelle === "eigen") delete BY[k];
+    for (const e of Array.isArray(liste) ? liste : []) {
+      const b = e && e.box, ok = Array.isArray(b) && b.length === 4 && b.every(v => typeof v === "number" && isFinite(v)) && b[0] < b[2] && b[1] < b[3] && Math.abs(b[0]) <= 90 && Math.abs(b[2]) <= 90 && Math.abs(b[1]) <= 180 && Math.abs(b[3]) <= 180;
+      if (!ok || !e.id || BY[e.id] || ![GEB, TAL, INS, KUE, REG].includes(e.typ) || !e.name) continue;
+      const x = {id: e.id, name: String(e.name), typ: e.typ, eltern: null, boxen: [b.slice()], poly: [], alias: [], county: [], nicht: [], in: null, prio: 0, anz: true, kreise: [], quelle: "eigen", tiefe: 99, land: e.land || ""};
+      x.hull = b.slice();
+      x.flaeche = (b[2] - b[0]) * (b[3] - b[1]) || 1e9;
+      x.eigen = true;
+      L.push(x);
+      BY[x.id] = x;
+    }
+    cache.clear();
+    PHR = null;
+  };
+  const api = {setEigene, regionMit, liste: L, nach: BY, von, namen, fuerSuche, bundesland, anzeige, regionTeile, regionText, phrasen, bericht, pruefen, fold, trifft: (id, la, ln, kr) => !!BY[id] && trifft(BY[id], la, ln, kr ? kreis(kr) : "")};
   if (typeof module !== "undefined") module.exports = api;
   return api;
 })();

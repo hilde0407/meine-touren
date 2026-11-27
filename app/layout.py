@@ -1,7 +1,7 @@
 """Seite anpassen (3.17.0): gespeicherte Anordnung der Abschnitte und Bausteine je Seite.
 
 Schlüssel: „tour-haupt“ (Tourseite), „tour-auswertung“ (Unterseite Auswertung), „uebersicht“ (Übersicht), „statistik“ (Statistik, 3.22.0),
-„reise“ (Reise-Detailseite #/trip/<id>, 3.33.0), „serie“ (Mehrtagestour #/series/<id>, 3.63.0: dieselben Bausteine wie „reise“), „reisen“ (Reisen-Übersicht #/trips, 3.33.0), „fotos“ (Fotos-Seite #/photos, 3.34.0) und „karte“ (Gesamtkarte #/map, 3.34.0).
+„gebiete“ (Gebiete-Übersicht #/areas, 3.65.0), „gebiet“ (ein Gebiet #/area/<id>, 3.65.0), „reise“ (Reise-Detailseite #/trip/<id>, 3.33.0), „serie“ (Mehrtagestour #/series/<id>, 3.63.0: dieselben Bausteine wie „reise“), „reisen“ (Reisen-Übersicht #/trips, 3.33.0), „fotos“ (Fotos-Seite #/photos, 3.34.0) und „karte“ (Gesamtkarte #/map, 3.34.0).
 Das Layout einer Seite gilt für alle Reisen gleich (je Benutzer, nicht je Reise).
 Jeder Benutzer hat eine eigene Datenbank (app/ctx.py); die Tabelle `user_layout` ist daher je Benutzer getrennt, eine Spalte „user“ ist nicht nötig.
 Dokument (JSON-Objekt, alle Felder optional):
@@ -76,8 +76,8 @@ from . import baustein_umzug as umzug, db, kennzahl
 
 router = APIRouter()
 
-KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik", "reise", "serie", "reisen", "fotos", "karte")
-NEUE_SEITEN = ("uebersicht", "statistik", "reise", "serie", "reisen", "fotos", "karte")           # Seiten mit genau einem Dokument (ohne Regeln nach Sportart); 3.63.0: „serie“ = Seite einer Mehrtagestour (#/series/<id>)
+KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik", "reise", "serie", "reisen", "gebiete", "gebiet", "fotos", "karte")
+NEUE_SEITEN = ("uebersicht", "statistik", "reise", "serie", "reisen", "gebiete", "gebiet", "fotos", "karte")           # Seiten mit genau einem Dokument (ohne Regeln nach Sportart); 3.63.0: „serie“ = Seite einer Mehrtagestour (#/series/<id>)
 FIELDS = {"v", "order", "hidden", "closed", "open", "page", "widgets", "cfg", "w", "filter", "kopf", "groups", "mob", "zrbar"}
 WIDTHS = ("voll", "zweidrittel", "halb", "drittel")
 # Bausteine, die eine Tour brauchen (Typkennungen wie in static/js/50-bausteine.js und 51-bausteine-tour.js, fam "tour"): nicht in der Übersicht
@@ -92,15 +92,18 @@ HINWEIS_NUR_UEBERSICHT = frozenset(("hnauffaellig", "hnpause", "hnsicherung"))
 REISE_TYPEN = frozenset(("rkennzahl", "rdiashow", "rkmtag"))
 REISEN_TYPEN = frozenset(("rnzahlen", "rnjahre"))
 REISE_VALUES = {"rkennzahl": ("tage", "touren", "km", "up", "down", "h", "laender"), "rnzahlen": ("reisen", "tage", "km", "up", "laender"),
-                "fkennzahl": ("fotos", "zugeordnet", "touren", "jahre", "orte"), "kzahlen": ("touren", "km", "up", "h")}
+                "fkennzahl": ("fotos", "zugeordnet", "touren", "jahre", "orte"), "kzahlen": ("touren", "km", "up", "h"), "gbzahlen": ("gebiete", "laender", "touren", "km", "ohne")}
 REISE_ENUM = {"rkmtag": {"metric": ("km", "up", "h", "count")}, "rnjahre": {"metric": ("km", "count", "days")},
-              "kzahlen": {"basis": ("filter", "ausschnitt")}, "kliste": {"sort": ("date", "km", "up")}, "klegende": {"metric": ("count", "km")}}
+              "kzahlen": {"basis": ("filter", "ausschnitt")}, "gmonate": {"view": ("monate", "jahre"), "metric": ("count", "km", "up")}, "kliste": {"sort": ("date", "km", "up")}, "klegende": {"metric": ("count", "km")}}
 REISE_NUM = {"fjahre": {"n": (5, 8, 12)}, "kliste": {"n": (5, 10, 20)}}
 # 3.34.0: Bausteine der Fotos-Seite und der Karte (Typkennungen wie in static/js/63-fotoseiten.js und 64-kartenseite.js)
 FOTO_TYPEN = frozenset(("fkennzahl", "fjahre"))
 KARTE_TYPEN = frozenset(("kzahlen", "kliste", "klegende"))
-SEITEN_TYPEN = {"reise": REISE_TYPEN, "serie": REISE_TYPEN, "reisen": REISEN_TYPEN, "fotos": FOTO_TYPEN, "karte": KARTE_TYPEN}          # Seitenschlüssel -> Bausteine, die nur dort stehen dürfen
-ALLE_SEITEN_TYPEN = REISE_TYPEN | REISEN_TYPEN | FOTO_TYPEN | KARTE_TYPEN
+# 3.65.0: Bausteine der Gebiete-Seiten (static/js/68-gebiete.js): Übersicht „gebiete“: gbzahlen (Kennzahlen aller Gebiete); ein Gebiet „gebiet“: gfotos („Fotos“ des Gebiets, Fotos der Touren dort) und gmonate („Beste Monate“ bzw. Jahre)
+GEBIETE_TYPEN = frozenset(("gbzahlen",))
+GEBIET_TYPEN = frozenset(("gfotos", "gmonate"))
+SEITEN_TYPEN = {"reise": REISE_TYPEN, "serie": REISE_TYPEN, "reisen": REISEN_TYPEN, "gebiete": GEBIETE_TYPEN, "gebiet": GEBIET_TYPEN, "fotos": FOTO_TYPEN, "karte": KARTE_TYPEN}          # Seitenschlüssel -> Bausteine, die nur dort stehen dürfen
+ALLE_SEITEN_TYPEN = REISE_TYPEN | REISEN_TYPEN | FOTO_TYPEN | KARTE_TYPEN | GEBIETE_TYPEN | GEBIET_TYPEN
 HINWEIS_ARTEN = ("ziel", "meilenstein", "auffaellig", "pause", "rekord", "woche", "erholung", "sicherung")
 SNOOZE_RE = re.compile(r"^([a-z]{3,12}):(\d{1,11})$")
 MAX_SNOOZE_S = 366 * 86400                  # „Ausblenden“ höchstens ein Jahr im Voraus
@@ -138,6 +141,8 @@ STD_IDS = {
     "reise": frozenset(("kopf", "kennzahlen", "stat", "flug", "karte", "fotos", "touren")),
     "serie": frozenset(("kopf", "kennzahlen", "stat", "flug", "karte", "fotos", "touren")),             # 3.63.0: Mehrtagestour, gleiche Abschnitte wie die Reise
     "reisen": frozenset(("serien", "reisen", "alben", "entfernt")),
+    "gebiete": frozenset(("kopf", "liste")),                                                           # 3.65.0
+    "gebiet": frozenset(("kopf", "kennzahlen", "karte", "monate", "fotos", "reisen", "touren")),
     "fotos": frozenset(("kopf", "jahre", "raster")),
     "karte": frozenset(),
 }
@@ -313,12 +318,12 @@ def _reise_cfg(typ, v):
     """Streng geprüfte Konfiguration der Bausteine der Reisen-Seiten (3.33.0): feste Auswahllisten, nur Titel zusätzlich, keine fremden Felder."""
     if not isinstance(v, dict) or len(v) > 20:
         raise HTTPException(400, "Ungültige Konfiguration eines Bausteins")
-    if typ == "rdiashow":
+    if typ in ("rdiashow", "gfotos"):
         if set(v) & {"sports", "range", "yr"}:
-            raise HTTPException(400, "Die Reise-Diashow zeigt immer die Fotos der Reise (kein Filter nach Sportart oder Zeitraum)")
+            raise HTTPException(400, "Die Diashow zeigt immer die Fotos der Reise bzw. des Gebiets (kein Filter nach Sportart oder Zeitraum)")
         out = _erinn_cfg(v, ("all",))                 # 3.62.0: zusätzlich „Alle“ (alle Fotos der Reise)
         if out.get("mode") == "day":
-            raise HTTPException(400, "„An diesem Tag“ gibt es bei der Reise-Diashow nicht (es sind immer die Fotos der Reise)")
+            raise HTTPException(400, "„An diesem Tag“ gibt es bei dieser Diashow nicht (es sind immer die Fotos der Reise bzw. des Gebiets)")
         return out
     out = {}
     for k, x in v.items():
@@ -547,7 +552,7 @@ def clean(doc, key=None, goals=None):
                 if x["type"] in fremd:
                     raise HTTPException(400, "Dieser Baustein gehört nicht auf diese Seite")
             elif x["type"] in ALLE_SEITEN_TYPEN:
-                raise HTTPException(400, "Dieser Baustein gehört zu einer anderen Seite (Reisen, Fotos oder Karte) und kann nur dort stehen")
+                raise HTTPException(400, "Dieser Baustein gehört zu einer anderen Seite (Reisen, Gebiete, Fotos oder Karte) und kann nur dort stehen")
             if key in ("uebersicht", "statistik") and x["type"] in TOUR_ONLY:
                 raise HTTPException(400, "Dieser Baustein gehört zu einer Tour und kann nicht in der Übersicht oder Statistik stehen")
             if key not in (None, "statistik") and x["type"] in STATISTIK_ONLY:
@@ -592,6 +597,8 @@ def clean(doc, key=None, goals=None):
         sec = {ERINN_TYPE: ERINN_TYPE, "ziele": umzug.ZIELE, "bestwerte": umzug.BESTWERTE} if key in (None, "statistik") else {ERINN_TYPE: ERINN_TYPE}     # 3.45.0: Abschnitte „Ziele“ und „Bestwerte“ der Statistik sind Bausteine
         if key in (None, "reise", "serie"):
             sec["fotos"] = "rdiashow"                       # 3.62.0: der Abschnitt „Fotos“ der Reise ist der Baustein „Fotos“ (Typ rdiashow, Vorgabe „Alle“)
+        if key == "gebiet":
+            sec.update({"fotos": "gfotos", "monate": "gmonate"})        # 3.65.0: „Fotos“ und „Beste Monate“ des Gebiets sind Bausteine mit Vorgabe
         out["cfg"] = {k: _cfg(x, sec.get(k)) for k, x in c.items()}
     if len(json.dumps(out, ensure_ascii=False)) > MAX_BYTES:
         raise HTTPException(400, "Die Anordnung ist zu groß")
@@ -684,7 +691,7 @@ def check_export(doc):
         return res
     page = doc.get("page")
     if page not in ("tour",) + NEUE_SEITEN:
-        errors.append("Die Datei nennt keine gültige Seite (erlaubt: tour, uebersicht, statistik, reise, serie, reisen, fotos, karte).")
+        errors.append("Die Datei nennt keine gültige Seite (erlaubt: tour, uebersicht, statistik, reise, serie, reisen, gebiete, gebiet, fotos, karte).")
         return res
     res["page"] = page
     try:

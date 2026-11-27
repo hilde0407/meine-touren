@@ -118,6 +118,7 @@ const viewPref = () => {
 };
 const MORE = [
   ["trips", "Reisen"],
+  ["areas", "Gebiete"],
   ["places", "Orte & Ausrüstung"],
   ["check", "Prüfen"],
   ["shared", "Geteilte Fotos"],
@@ -153,7 +154,7 @@ function applyView() {
     (inApp ? tab(T[0]) + tab(T[2]) + rec + tab(T[1]) : T.map(tab).join("")) +
     `<button id="tmore"><span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span><span>Mehr</span></button>`;
   $("#tmore").onclick = () => {
-    const items = isViewer() ? MORE.filter(x => ["trips", "places", "photos"].includes(x[0])) : MORE,       // „photos“ steht nur in der Android-App unter „Mehr“ (dort ist „Aufzeichnen“ der mittlere Reiter)
+    const items = isViewer() ? MORE.filter(x => ["trips", "areas", "places", "photos"].includes(x[0])) : MORE,       // „photos“ steht nur in der Android-App unter „Mehr“ (dort ist „Aufzeichnen“ der mittlere Reiter)
       lnk = ([k, l]) => `<a class="btn alt" href="#/${k}">${l}</a>`,
       main = items.filter(x => !MORE_SET.includes(x[0])),
       sett = items.filter(x => MORE_SET.includes(x[0]));

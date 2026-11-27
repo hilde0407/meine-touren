@@ -11,9 +11,9 @@
    3.20.0 Raster: jeder Abschnitt hat eine Breite (voll, zweidrittel, halb, drittel; Dokumentfeld w, Standard je Eintrag/Typ: Feld w der Registry), das Raster selbst ist CSS (style.css „3.20.0“),
    hier werden nur die Klassen gesetzt (.slcell .w-…) und Zeilenreste aufgefüllt (slRaster). Seiteneignung: Typ.seiten (Standard: Tour-Bausteine nur „tour“, Übersichts-Bausteine „uebersicht“ und „tour“). */
 window.SL_WT = window.SL_WT || {};
-const SL_PAGE_KEY = {haupt: "tour-haupt", auswertung: "tour-auswertung", uebersicht: "uebersicht", statistik: "statistik", reise: "reise", serie: "serie", reisen: "reisen", fotos: "fotos", karte: "karte"};
+const SL_PAGE_KEY = {haupt: "tour-haupt", auswertung: "tour-auswertung", uebersicht: "uebersicht", statistik: "statistik", reise: "reise", serie: "serie", reisen: "reisen", gebiete: "gebiete", gebiet: "gebiet", fotos: "fotos", karte: "karte"};
 const slKey1 = fam => (fam === "tour" ? "tour-haupt" : fam);                                  // Schlüssel des (ersten) Dokuments einer Seitenfamilie
-const SL_ONE = ["uebersicht", "statistik", "reise", "serie", "reisen", "fotos", "karte"];                    // Seiten mit genau einem Dokument (3.33.0: Reise-Detailseite „reise“ und Reisen-Übersicht „reisen“; 3.34.0: Fotos „fotos“ und Gesamtkarte „karte“)
+const SL_ONE = ["uebersicht", "statistik", "reise", "serie", "reisen", "gebiete", "gebiet", "fotos", "karte"];                    // Seiten mit genau einem Dokument (3.33.0: Reise-Detailseite „reise“ und Reisen-Übersicht „reisen“; 3.34.0: Fotos „fotos“ und Gesamtkarte „karte“)
 const slFamOf = k => (SL_ONE.includes(k) ? k : "tour");
 const SL_W = {d: {voll: 12, zweidrittel: 8, halb: 6, drittel: 4}, t: {voll: 12, zweidrittel: 12, halb: 6, drittel: 6}};            // Spalten je Breite: Desktop (ab 900 px) und Tablet
 const SL_WALL = ["voll", "zweidrittel", "halb", "drittel"];
@@ -22,7 +22,7 @@ const SL_WCLS = SL_WALL.map(k => "w-" + k);
 const slTypeW = T => (T && SL_W.d[T.w] ? T.w : "voll");
 const slSeiten = T => (T && T.seiten) || (T && T.fam === "tour" ? ["tour"] : ["uebersicht", "tour"]);
 const slFits = (T, fam) => !!T && slSeiten(T).includes(fam);
-const SL_ROOT = {statistik: "stx", reise: "trx", serie: "srx", reisen: "rsx", fotos: "fox", karte: "kax"};
+const SL_ROOT = {statistik: "stx", reise: "trx", serie: "srx", reisen: "rsx", gebiete: "gex", gebiet: "gdx", fotos: "fox", karte: "kax"};
 const slOneRoot = fam => document.getElementById(SL_ROOT[fam] || "rsx");          // Wurzel des Rasters einer Seite mit einem Dokument (Übersicht: main.home)
 const SL_GROUPS = {route: "Streckenverlauf", rec: "Aufzeichnung", eval: "Auswertung dieser Tour", more: "Fotos zur Tour", bst: "Bausteine"};
 /* Registry: Standardseite, Gruppe, Standard „offen“ (def), fixed = kann nur auf dieser Seite stehen (wird von der Tourseite selbst aufgebaut),
@@ -717,6 +717,10 @@ async function slReset() {
       ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Reise-Seite werden zurückgesetzt. Das gilt für alle Reisen."
       : SL.fam === "serie"
       ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Mehrtagestour-Seite werden zurückgesetzt. Das gilt für alle Mehrtagestouren."
+      : SL.fam === "gebiete"
+      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Gebiete-Übersicht werden zurückgesetzt."
+      : SL.fam === "gebiet"
+      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Gebiets-Seite werden zurückgesetzt. Das gilt für alle Gebiete."
       : SL.fam === "reisen"
       ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Reisen-Übersicht werden zurückgesetzt."
       : SL.fam === "fotos"
@@ -945,7 +949,7 @@ function slRegroup(pres) {
 }
 function slPlace(root) {
   const main = root.matches && root.matches("main.home"),
-    one = {stx: "statistik", trx: "reise", srx: "serie", rsx: "reisen", fox: "fotos", kax: "karte"}[root.id],
+    one = {stx: "statistik", trx: "reise", srx: "serie", rsx: "reisen", gex: "gebiete", gdx: "gebiet", fox: "fotos", kax: "karte"}[root.id],
     fam = one || (main ? "uebersicht" : "tour"),
     page = one || (main ? "uebersicht" : root.classList.contains("tlsub") ? "auswertung" : "haupt");
   SL.fam = fam;

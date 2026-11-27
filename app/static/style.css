@@ -2486,3 +2486,58 @@ html:not(.mob) .atabs{gap:2px;align-items:stretch}
 .gbi.on small{color:inherit}
 .gbi[hidden],.gbg[hidden]{display:none}
 .gbnone{margin:12px 10px}
+
+/* =====================  3.65.0 Gebiete: Übersicht, Seite eines Gebiets, eigene Gebiete (68-gebiete.js)  =====================
+   #gex = Raster der Übersicht, #gdx = Raster der Gebiets-Seite (wie #trx/#rsx: 12 Spalten, Karten mit .rsb); Liste: Zeilen .gbrow (Name, Touren, Tage, Strecke, Aufstieg, Zeitraum), am Handy zwei Zeilen */
+#gdx{margin-top:0}
+#gex{margin-top:14px}
+.gblink{color:inherit;text-decoration:underline;text-decoration-color:color-mix(in srgb,currentColor 40%,transparent);text-underline-offset:2px}
+.gblink:hover{text-decoration-color:currentColor}
+.gblink[hidden]{display:none}
+#gbsee{margin-left:12px;font-size:15px}
+.gbflt{align-items:center}
+.gbflt select{min-height:44px}
+.gbhead,.gbrow{display:grid;grid-template-columns:minmax(0,2.2fr) repeat(4,minmax(0,.8fr)) minmax(0,1.9fr);gap:4px 14px;align-items:baseline}
+.gbhead{padding:0 12px 6px;font:600 13px var(--d);letter-spacing:.3px;text-transform:uppercase;color:var(--mut);border-bottom:2px solid var(--rule)}
+.gbhead span:not(:first-child),.gbc{text-align:right;font-variant-numeric:tabular-nums}
+.gbhead span:last-child{text-align:left}
+.gbh{margin:18px 0 4px;font-size:20px}
+.gbg2:first-of-type .gbh{margin-top:6px}
+.gbrow{min-height:44px;padding:9px 12px;border-bottom:1px solid var(--rule);color:inherit;text-decoration:none}
+.gbrow:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.gbrow .gbname{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;min-width:0;overflow-wrap:anywhere}
+.gbrow .gbname b{font-weight:600}
+.gbrow .gbc small{display:none}
+.gbrow .gbz{text-align:left;font-variant-numeric:normal}
+.gbrow .gbz b{font-weight:400;color:var(--mut)}
+.gbrow.gb0 .gbnt{grid-column:2/-1}
+.gbeigen{font:600 12px var(--d);letter-spacing:.3px;text-transform:uppercase;font-style:normal;padding:1px 7px;border-radius:99px;border:1px solid var(--rule);color:var(--mut);white-space:nowrap}
+.gbh1{font-size:clamp(30px,5vw,52px)}
+.gbh1 .gbeigen{margin-left:12px;vertical-align:middle;font-size:13px}
+.gbleer{margin:22px 0}
+.fig .v small{font-size:20px;font-weight:600;white-space:nowrap}html.mob .fig .v small{font-size:18px}
+html.mob .gbhead{display:none}
+html.mob .gbrow{grid-template-columns:repeat(4,minmax(0,1fr))}
+html.mob .gbrow .gbname{grid-column:1/-1}
+html.mob .gbrow .gbc{text-align:left;display:flex;flex-direction:column}
+html.mob .gbrow .gbc small{display:block;font-size:12px;color:var(--mut)}
+html.mob .gbrow .gbz{grid-column:1/-1;flex-direction:row}
+html.mob .gbrow.gb0 .gbnt{grid-column:1/-1}
+html.mob #gbsee{display:block;margin:6px 0 0}
+/* Dialog „Gebiet hinzufügen/bearbeiten“ */
+.gbsr{margin:12px 0 0;min-height:1.5em}
+.gbres{display:flex;flex-direction:column;border-top:1px solid var(--rule);max-height:min(45vh,340px);overflow-y:auto;overscroll-behavior:contain}
+.gbr{display:flex;align-items:baseline;justify-content:space-between;gap:10px;width:100%;min-height:44px;padding:6px 10px;text-align:left;background:none;border:0;border-bottom:1px solid var(--rule);color:var(--ink);font:500 16px var(--b);cursor:pointer}
+.gbr:hover:not(:disabled){background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.gbr:disabled{opacity:.55;cursor:not-allowed}
+.gbr .gbrn{display:flex;flex-direction:column;min-width:0;overflow-wrap:anywhere}
+.gbbox{margin:14px 0 0;padding:10px 12px 12px;border:1px solid var(--rule);border-radius:var(--r)}
+.gbbox legend{padding:0 6px;font:600 15px var(--d)}
+.gbnums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.gbnums label{display:flex;flex-direction:column;gap:2px;font-size:14px;color:var(--mut)}
+.gbnums input{width:100%;min-width:0;min-height:44px;font-size:16px}
+.gbmap{height:220px;margin-top:10px;border-radius:var(--r)}
+@media (max-width:520px){.gbnums{grid-template-columns:repeat(2,minmax(0,1fr))}.gbmap{height:200px}}
+:where(.mnw130){min-width:130px!important}
+/* Menüleiste mit dem Punkt „Gebiete“ (sieben Punkte): zwischen 701 und 1180 px etwas enger, damit „Statistik“ nicht abgeschnitten wird (die Regel steht nach dem allgemeinen nav a weiter oben) */
+@media (min-width:701px) and (max-width:1180px){nav a{padding:0 7px;font-size:14px}}

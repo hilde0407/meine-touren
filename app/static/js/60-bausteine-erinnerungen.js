@@ -13,6 +13,8 @@
 const ER_MODES = [["random", "Zufällige Fotos"], ["best", "Beste Fotos"], ["day", "An diesem Tag in früheren Jahren"], ["recent", "Neueste Fotos"]];
 /* 3.62.0: beim Baustein „Fotos“ der Reise (rdiashow) gibt es statt „An diesem Tag“ die Auswahl „Alle“ (alle Fotos der Reise, nicht auf n begrenzt) */
 const ER_MODES_TRIP = [["all", "Alle Fotos der Reise"], ["best", "Beste Fotos"], ["random", "Zufällige Fotos"], ["recent", "Neueste Fotos"]];
+/* 3.65.0: beim Baustein „Fotos“ eines Gebiets (gfotos) heißt es „Alle Fotos des Gebiets“ */
+const ER_MODES_GEB = ER_MODES_TRIP.map(x => (x[0] === "all" ? ["all", "Alle Fotos des Gebiets"] : x));
 const ER_ALL_LIMIT = 5000;                                                                  // „Alle“: so viele Fotos höchstens je Abfrage (der Server erlaubt 60000; Vorschaubilder laden erst beim Scrollen)
 const ER_N = [3, 6, 9, 12];
 const ER_VIEWS = [["grid", "Raster"], ["strip", "Streifen"], ["show", "Einzelbild-Show"]];
@@ -60,7 +62,8 @@ function erUrl(cfg, fix, cap) {
     if (R.from) u.set("date_from", R.from);
     if (R.to) u.set("date_to", R.to);
   }
-  if (fix) {                                                                                 // 3.33.0 Reise-Diashow: der Zeitraum der Reise (JJJJ-MM-TT) ersetzt jeden Filter
+  if (fix && fix.gebiet) u.set("gebiet", fix.gebiet);                                         // 3.65.0 Fotos eines Gebiets: die Fotos der Touren, die dort starten (Server: gebiete.tour_ids)
+  else if (fix) {                                                                            // 3.33.0 Reise-Diashow: der Zeitraum der Reise (JJJJ-MM-TT) ersetzt jeden Filter
     u.set("date_from", fix.from);
     u.set("date_to", fix.to);
   }
@@ -85,7 +88,10 @@ function erSlideUrl(cfg, fix) {
       if (R.to) u.set("to", R.to);
     }
   }
-  if (fix) {
+  if (fix && fix.gebiet) {
+    u.delete("year");
+    u.set("gebiet", fix.gebiet);                                                             // 3.65.0: slideshow.html reicht „gebiet“ an /api/photos weiter und bietet dann kein Teilen an
+  } else if (fix) {
     u.delete("year");
     u.set("from", fix.from);
     u.set("to", fix.to);
@@ -346,8 +352,8 @@ function erForm(cfg, trip) {
   return `<form class="slform erform" novalidate>` +
     `<section class="erpvs"><h3 class="erpvh">Vorschau</h3><div class="erpvb" role="status" aria-live="polite"></div></section>` +
     flField({kind: "title", ph: trip ? "Fotos" : "Erinnerungen"}, cfg, 2) +
-    `<details class="erdt" open><summary>Welche Fotos</summary>` + erRadio("er-mode", "Auswahl", trip ? ER_MODES_TRIP : ER_MODES, c.mode) + erRadio("er-n", "Anzahl", ER_N.map(x => [x, String(x)]), c.n, ' data-nm="1"') +
-    (trip ? `<p class="mut erhint">Es sind immer die Fotos aus dem Zeitraum der Reise. „Alle“ zeigt jedes Foto der Reise; die Anzahl gilt nur für Beste, Zufällige und Neueste.</p>` : `<details class="erdt erdt2"${filt ? " open" : ""}><summary>Filter: Sportart und Zeitraum</summary>${flField({kind: "sports"}, cfg, 0)}${flField({kind: "range", def: "all"}, cfg, 1)}</details>`) + `</details>` +
+    `<details class="erdt" open><summary>Welche Fotos</summary>` + erRadio("er-mode", "Auswahl", trip === "gebiet" ? ER_MODES_GEB : trip ? ER_MODES_TRIP : ER_MODES, c.mode) + erRadio("er-n", "Anzahl", ER_N.map(x => [x, String(x)]), c.n, ' data-nm="1"') +
+    (trip === "gebiet" ? `<p class="mut erhint">Es sind immer die Fotos der Touren in diesem Gebiet. „Alle“ zeigt jedes Foto des Gebiets; die Anzahl gilt nur für Beste, Zufällige und Neueste.</p>` : trip ? `<p class="mut erhint">Es sind immer die Fotos aus dem Zeitraum der Reise. „Alle“ zeigt jedes Foto der Reise; die Anzahl gilt nur für Beste, Zufällige und Neueste.</p>` : `<details class="erdt erdt2"${filt ? " open" : ""}><summary>Filter: Sportart und Zeitraum</summary>${flField({kind: "sports"}, cfg, 0)}${flField({kind: "range", def: "all"}, cfg, 1)}</details>`) + `</details>` +
     `<details class="erdt" open><summary>Darstellung</summary>` + erRadio("er-view", "Art der Darstellung", ER_VIEWS, c.view) + erRadio("er-ratio", "Seitenverhältnis der Kacheln", ER_RATIOS, c.ratio) +
     `<p class="mut erhint" data-for="show">In der Einzelbild-Show bestimmt die Höhe die Form; „Originalformat“ zeigt das ganze Foto ohne Zuschnitt.</p>` +
     erRadio("er-size", "Größe der Fotos", ER_SIZES, c.size, ' data-for="grid strip"') + erRadio("er-height", "Höhe der Show", ER_HEIGHTS, c.height, ' data-for="show"') +
@@ -387,7 +393,7 @@ function erSync(form) {
   form.querySelectorAll("[data-nm]").forEach(e => (e.hidden = m === "all"));                  // „Alle“ hat keine Anzahl
 }
 function erDialog(id, cfg0, trip) {
-  const R = trip && window.RS_CUR && window.RS_CUR.tr, fix = R ? {from: R.start, to: R.end} : null;
+  const R = trip && window.RS_CUR && window.RS_CUR.tr, GB = trip === "gebiet" && window.RS_CUR && window.RS_CUR.gebiet, fix = GB ? {gebiet: GB.id} : R ? {from: R.start, to: R.end} : null;
   slModal(trip ? "Einstellungen: Fotos" : "Einstellungen: Erinnerungen", (body, close) => {
     const mount = cfg => {
       body.innerHTML = erForm(cfg, trip);

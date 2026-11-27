@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.65.0](3.65.0.md) – Gebiete: Link in der Regionszeile, Übersicht und Seite je Gebiet, eigene Gebiete (Suche über OpenStreetMap)
 - [3.64.0](3.64.0.md) – Reisenamen aus Gebieten (genauestes passendes Gebiet; Tabelle auch auf dem Server), Filter „Gebiet“ in der Tourenliste und unter Umbenennen nach Regeln, „Meistbesuchte Orte“ nach Gebiet
 - [3.63.0](3.63.0.md) – Mehrtagestour-Seite anpassbar mit Foto-Baustein; „Reise erstellen“ (eigene Reisen), Name leeren entfernt keine Reise, entfernte Reisen wiederherstellen
 - [3.62.2](3.62.2.md) – „Neu mischen“ im Foto-Baustein der Reise wirkt (Zufällig zieht neue Fotos, sonst sichtbar andere Reihenfolge)

@@ -100,6 +100,8 @@ VIEWS.trip = async id => {
   const b = $("#tredit");
   if (b && !$("#trpdf")) b.insertAdjacentHTML("beforebegin", `<a class="btn alt sm" id="trpdf" href="#/tripsheet/${encodeURIComponent(id)}" title="Reisebericht mit Karte, Statistik und Fotos – als PDF herunterladbar">Reisebericht (PDF)</a> `);
   const cur = (await api("/api/trips").catch(() => [])).find(x => x.id === id);
+  const gk = document.querySelector("#main [data-rs=kopf] > .mut"), gx = cur && cur.area && Gebiete.nach[cur.area];                 // 3.65.0: das Gebiet der Reise (Name der erkannten Reise) als Sprung zu den Touren dort
+  if (gk && gx && !gk.querySelector(".rsgeb")) gk.insertAdjacentHTML("beforeend", ` · <span class="rsgeb">Gebiet: <a class="gblink" href="#/tours?g=${encodeURIComponent(gx.id)}" title="Alle Touren in diesem Gebiet">${esc(gx.name)}</a></span>`);
   if (b && cur && cur.custom && !$("#trdel")) {                                          // 3.63.0: eigene Reise: Löschen (mit Rückfrage) statt „Keine Reise“
     b.insertAdjacentHTML("afterend", ` <button class="btn alt sm" id="trdel" title="Diese eigene Reise löschen. Die Touren bleiben erhalten.">Löschen</button>`);
     $("#trdel").onclick = async () => {

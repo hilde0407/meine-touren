@@ -100,7 +100,7 @@ function slCodeDialog(fam, id) {
 }
 
 /* ---------- Link öffnen: #/layoutcode/<Code> ---------- */
-const SL_CODE_PAGES = {uebersicht: "#/dash", statistik: "#/stats", reisen: "#/trips", fotos: "#/photos", karte: "#/map"};
+const SL_CODE_PAGES = {uebersicht: "#/dash", statistik: "#/stats", reisen: "#/trips", gebiete: "#/areas", fotos: "#/photos", karte: "#/map"};
 VIEWS.layoutcode = async name => {
   const code = String(name || ""), main = document.getElementById("main"), page = slCodePage(code);
   let hash = SL_CODE_PAGES[page] || "";
@@ -109,9 +109,13 @@ VIEWS.layoutcode = async name => {
     const l = seriesList();
     if (l.length) hash = "#/series/" + l[0].id;
   }
+  if (page === "gebiet") {                                                                     // 3.65.0: Seite eines Gebiets: das Gebiet mit den meisten Touren öffnen, der Import öffnet sich dort
+    const l = typeof gebietListe === "function" ? gebietListe().sort((a, b) => b.n - a.n) : [];
+    if (l.length) hash = "#/area/" + encodeURIComponent(l[0].id);
+  }
   if (!slCan() || !hash) {
-    main.innerHTML = `<div class="card"><h2>Ansichtscode</h2><p>${!slCan() ? "Mit diesem Zugang lassen sich keine Ansichten importieren." : page === "reise" ? "Dieser Code gehört zu einer Reise-Seite. Öffne eine Reise, der Import öffnet sich dort." : page === "serie" ? "Dieser Code gehört zu einer Mehrtagestour-Seite. Öffne eine Mehrtagestour, der Import öffnet sich dort." : "Dieser Code kann nicht geöffnet werden."}</p></div>`;
-    if (slCan() && (page === "reise" || page === "serie")) SL.codePending = {code, page, fam: page};
+    main.innerHTML = `<div class="card"><h2>Ansichtscode</h2><p>${!slCan() ? "Mit diesem Zugang lassen sich keine Ansichten importieren." : page === "reise" ? "Dieser Code gehört zu einer Reise-Seite. Öffne eine Reise, der Import öffnet sich dort." : page === "serie" ? "Dieser Code gehört zu einer Mehrtagestour-Seite. Öffne eine Mehrtagestour, der Import öffnet sich dort." : page === "gebiet" ? "Dieser Code gehört zu einer Gebiets-Seite. Öffne ein Gebiet, der Import öffnet sich dort." : "Dieser Code kann nicht geöffnet werden."}</p></div>`;
+    if (slCan() && (page === "reise" || page === "serie" || page === "gebiet")) SL.codePending = {code, page, fam: page};
     return;
   }
   SL.codePending = {code, page, fam: page === "tour" ? "tour" : page};

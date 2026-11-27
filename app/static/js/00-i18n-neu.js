@@ -3765,4 +3765,103 @@ Der Name war leer – der automatische Name ist eingesetzt. Zum Übernehmen noch
 {} entfernte Reisen – wiederherstellen … || {} removed trips – restore … || {} voyages retirés – rétablir … || {} viajes quitados – restaurar …
 Diese erkannten Reisen hast du aus der Liste entfernt. Die Touren sind unverändert; „Wiederherstellen“ bringt die Reise zurück. || You removed these detected trips from the list. The tours are unchanged; “Restore” brings the trip back. || Vous avez retiré ces voyages détectés de la liste. Les parcours sont inchangés ; « Rétablir » ramène le voyage. || Quitaste estos viajes detectados de la lista. Las rutas no cambian; «Restaurar» devuelve el viaje.
 Wiederherstellen || Restore || Rétablir || Restaurar
+Gebiete-Kennzahlen || Area key figures || Chiffres clés des zones || Cifras clave de las zonas
+Beste Monate || Best months || Meilleurs mois || Mejores meses
+Stärkstes Jahr || Strongest year || Meilleure année || Mejor año
+Nach Typ || By type || Par type || Por tipo
+Nach Land || By country || Par pays || Por país
+Zuletzt besucht || Last visited || Dernière visite || Última visita
+Erstes – letztes Mal || First – last time || Première – dernière fois || Primera – última vez
+＋ Gebiet hinzufügen … || ＋ Add area … || ＋ Ajouter une zone … || ＋ Añadir zona …
+Gebiet hinzufügen || Add area || Ajouter une zone || Añadir zona
+Gebiet bearbeiten || Edit area || Modifier la zone || Editar zona
+✎ Gebiet bearbeiten || ✎ Edit area || ✎ Modifier la zone || ✎ Editar zona
+Von Hand anlegen … || Create by hand … || Créer à la main … || Crear a mano …
+Name des Gebiets || Name of the area || Nom de la zone || Nombre de la zona
+Rechteck des Gebiets || Rectangle of the area || Rectangle de la zone || Rectángulo de la zona
+Kartenausschnitt übernehmen || Use current map view || Reprendre la vue de la carte || Usar la vista del mapa
+Karte der Touren in diesem Gebiet || Map of the tours in this area || Carte des parcours de cette zone || Mapa de las rutas de esta zona
+Karte mit dem Rechteck des Gebiets || Map with the rectangle of the area || Carte avec le rectangle de la zone || Mapa con el rectángulo de la zona
+In diesem Gebiet gibt es noch keine Tour. || There is no tour in this area yet. || Il n’y a pas encore de parcours dans cette zone. || Todavía no hay ninguna ruta en esta zona.
+Zu diesem Gebiet gibt es keine Fotos. || There are no photos for this area. || Il n’y a pas de photos pour cette zone. || No hay fotos de esta zona.
+Reisen in diesem Gebiet || Trips in this area || Voyages dans cette zone || Viajes en esta zona
+Gebiet nicht gefunden || Area not found || Zone introuvable || Zona no encontrada
+Gebiet ansehen › || View area › || Voir la zone › || Ver zona ›
+1 Tour liegt in diesem Rechteck || 1 tour lies in this rectangle || 1 parcours se trouve dans ce rectangle || 1 ruta está en este rectángulo
+{} Touren liegen in diesem Rechteck || {} tours lie in this rectangle || {} parcours se trouvent dans ce rectangle || {} rutas están en este rectángulo
+Tour in Gebieten || Tour in areas || Parcours dans des zones || Ruta en zonas
+Touren in Gebieten || Tours in areas || Parcours dans des zones || Rutas en zonas
+Gemessen nach || Measured by || Mesuré par || Medido por
+Säulen je || Bars per || Barres par || Barras por
+Monat (alle Jahre) || Month (all years) || Mois (toutes années) || Mes (todos los años)
+Eingebautes Gebiet || Built-in area || Zone intégrée || Zona incorporada
+Eigenes Gebiet || Own area || Zone personnelle || Zona propia
+die Grenzen sind eine Näherung || the borders are an approximation || les limites sont une approximation || los límites son una aproximación
+zu groß || too large || trop grand || demasiado grande
+eigen || own || perso || propia
+Teil von || Part of || Fait partie de || Parte de
+Wann hinfahren || When to go || Quand partir || Cuándo ir
+Nur die Liste || Just the list || Seulement la liste || Solo la lista
+Süd || South || Sud || Sur
+West || West || Ouest || Oeste
+Nord || North || Nord || Norte
+Ost || East || Est || Este
+Ohne Land || No country || Sans pays || Sin país
+Tal || Valley || Vallée || Valle
+Küste || Coast || Côte || Costa
+Landschaft || Landscape || Paysage || Paisaje
+Insel || Island || Île || Isla
+1 Gebiet || 1 area || 1 zone || 1 zona
+{} Gebiete || {} areas || {} zones || {} zonas
+1 eigenes || 1 own || 1 personnelle || 1 propia
+{} eigene || {} own || {} personnelles || {} propias
+Gebiete || Areas || Zones || Zonas
+Gebiete-Übersicht || Areas overview || Aperçu des zones || Resumen de las zonas
+Gebiets-Seite || Area page || Page de zone || Página de zona
+Kopf: Titel, Suche und Aktionen || Header: title, search and actions || En-tête : titre, recherche et actions || Cabecera: título, búsqueda y acciones
+Kopf: Titel, Typ und Aktionen || Header: title, type and actions || En-tête : titre, type et actions || Cabecera: título, tipo y acciones
+Alle Fotos des Gebiets || All photos of the area || Toutes les photos de la zone || Todas las fotos de la zona
+Bitte mindestens zwei Zeichen eingeben. || Please enter at least two characters. || Veuillez saisir au moins deux caractères. || Introduce al menos dos caracteres.
+Bitte ein gültiges Rechteck angeben: Süd kleiner als Nord, West kleiner als Ost. || Please give a valid rectangle: south smaller than north, west smaller than east. || Indiquez un rectangle valide : sud inférieur au nord, ouest inférieur à l’est. || Indica un rectángulo válido: sur menor que norte, oeste menor que este.
+Dieser Baustein gehört auf die Seite eines Gebiets. || This block belongs on the page of an area. || Ce bloc va sur la page d’une zone. || Este bloque va en la página de una zona.
+Gebiet: … || Area: … || Zone : … || Zona: …
+Typ || Type || Type || Tipo
+Suchen … || Search … || Rechercher … || Buscar …
+Alle Gebiete auf einen Blick: in wie vielen Gebieten und Ländern du Touren gemacht hast, wie viele Touren und wie viele Kilometer in einem Gebiet liegen und wie viele Touren in keinem bekannten Gebiet. || All areas at a glance: in how many areas and countries you have done tours, how many tours and how many kilometres lie in an area, and how many tours are in no known area. || Toutes les zones en un coup d’œil : dans combien de zones et de pays vous avez fait des parcours, combien de parcours et de kilomètres se trouvent dans une zone et combien de parcours ne sont dans aucune zone connue. || Todas las zonas de un vistazo: en cuántas zonas y países has hecho rutas, cuántas rutas y cuántos kilómetros hay en una zona y cuántas rutas no están en ninguna zona conocida.
+Das eigene Gebiet wird gelöscht. Touren, Reisen und Fotos bleiben unverändert; nur die Zuordnung zu diesem Gebiet entfällt, und Reisen, die danach hießen, bekommen wieder ihren früheren automatischen Namen. Das lässt sich nicht rückgängig machen; du kannst das Gebiet aber neu hinzufügen. || The own area will be deleted. Tours, trips and photos stay unchanged; only the assignment to this area is dropped, and trips that were named after it get their earlier automatic name back. This cannot be undone; you can add the area again, though. || La zone personnelle sera supprimée. Les parcours, voyages et photos restent inchangés ; seule l’association à cette zone disparaît, et les voyages qui portaient son nom retrouvent leur ancien nom automatique. Cette action est irréversible ; vous pouvez toutefois rajouter la zone. || La zona propia se eliminará. Las rutas, los viajes y las fotos no cambian; solo desaparece la asignación a esta zona, y los viajes que se llamaban así recuperan su nombre automático anterior. No se puede deshacer; pero puedes volver a añadir la zona.
+Die Fotos der Touren in diesem Gebiet als Vorschaubilder, Raster, Streifen oder Einzelbild-Show: alle, die besten, zufällige oder die neuesten. „Diashow starten“ zeigt sie im Vollbild. Du kannst den Baustein mehrfach hinzufügen und verschieden einstellen. || The photos of the tours in this area as thumbnails, grid, strip or single-image show: all, the best, random or the newest. “Start slideshow” shows them full screen. You can add the block several times and set it up differently. || Les photos des parcours de cette zone en vignettes, grille, bandeau ou diaporama d’une image : toutes, les meilleures, au hasard ou les plus récentes. « Lancer le diaporama » les affiche en plein écran. Vous pouvez ajouter le bloc plusieurs fois et le régler différemment. || Las fotos de las rutas de esta zona como miniaturas, cuadrícula, tira o pase de una imagen: todas, las mejores, al azar o las más recientes. «Iniciar presentación» las muestra a pantalla completa. Puedes añadir el bloque varias veces y ajustarlo de forma distinta.
+Für die Erinnerung: oben die besten Fotos des Gebiets als Show, dann Karte und Kennzahlen, darunter alle Fotos und die Touren. || For remembering: the best photos of the area as a show at the top, then map and key figures, below all photos and the tours. || Pour le souvenir : en haut les meilleures photos de la zone en diaporama, puis la carte et les chiffres clés, dessous toutes les photos et les parcours. || Para el recuerdo: arriba las mejores fotos de la zona como pase, luego mapa y cifras clave, debajo todas las fotos y las rutas.
+Für die Planung: die besten Monate und die Jahre nebeneinander, darunter Kennzahlen, Karte und Reisen. || For planning: the best months and the years side by side, below key figures, map and trips. || Pour la planification : les meilleurs mois et les années côte à côte, dessous les chiffres clés, la carte et les voyages. || Para planificar: los mejores meses y los años juntos, debajo cifras clave, mapa y viajes.
+Oben die Kennzahlen aller Gebiete, darunter die Liste. || The key figures of all areas at the top, the list below. || En haut les chiffres clés de toutes les zones, dessous la liste. || Arriba las cifras clave de todas las zonas, debajo la lista.
+Ruhig und kurz: nur die Liste der Gebiete, ohne Kennzahlen. || Calm and short: only the list of areas, without key figures. || Calme et court : seulement la liste des zones, sans chiffres clés. || Tranquilo y breve: solo la lista de zonas, sin cifras clave.
+Touren ohne Gebiet || Tours without area || Parcours sans zone || Rutas sin zona
+Wenig auf einen Blick: Kopf, Kennzahlen, Karte und die Touren. Beste Monate, Fotos und Reisen sind ausgeblendet. || Little at a glance: header, key figures, map and the tours. Best months, photos and trips are hidden. || Peu d’informations d’un coup d’œil : en-tête, chiffres clés, carte et parcours. Meilleurs mois, photos et voyages sont masqués. || Poco de un vistazo: cabecera, cifras clave, mapa y rutas. Mejores meses, fotos y viajes están ocultos.
+Ein Säulendiagramm über die zwölf Monate (oder über die Jahre): wann du in diesem Gebiet unterwegs warst, nach Anzahl der Touren, Strecke oder Aufstieg. Die stärksten Monate stehen darunter. Gerechnet wird aus deinen eigenen Touren im Gebiet. || A bar chart over the twelve months (or over the years): when you were out in this area, by number of tours, distance or ascent. The strongest months are listed below. It is calculated from your own tours in the area. || Un diagramme en barres sur les douze mois (ou sur les années) : quand vous étiez en route dans cette zone, selon le nombre de parcours, la distance ou le dénivelé positif. Les mois les plus forts sont indiqués dessous. Le calcul se base sur vos propres parcours dans la zone. || Un gráfico de barras de los doce meses (o de los años): cuándo estuviste en esta zona, según número de rutas, distancia o desnivel positivo. Los meses más fuertes aparecen debajo. Se calcula con tus propias rutas de la zona.
+Gib den Namen eines Gebirges, Tals, einer Insel, Küste oder Landschaft ein. Die Suche (OpenStreetMap) schlägt Gebiete mit ihrem Rechteck vor; Name, Typ und Grenzen kannst du danach ändern. || Enter the name of a mountain range, valley, island, coast or landscape. The search (OpenStreetMap) suggests areas with their rectangle; you can change name, type and borders afterwards. || Saisissez le nom d’un massif, d’une vallée, d’une île, d’une côte ou d’un paysage. La recherche (OpenStreetMap) propose des zones avec leur rectangle ; vous pourrez ensuite modifier le nom, le type et les limites. || Introduce el nombre de una cordillera, valle, isla, costa o paisaje. La búsqueda (OpenStreetMap) propone zonas con su rectángulo; después puedes cambiar nombre, tipo y límites.
+Grenzen in Grad (Breite und Länge). Zuordnung: eine Tour gehört zum Gebiet, wenn ihr Startpunkt im Rechteck liegt. Du kannst die Zahlen eingeben oder den Kartenausschnitt übernehmen. || Borders in degrees (latitude and longitude). Assignment: a tour belongs to the area if its start point lies in the rectangle. You can enter the numbers or use the current map view. || Limites en degrés (latitude et longitude). Association : un parcours appartient à la zone si son point de départ se trouve dans le rectangle. Vous pouvez saisir les chiffres ou reprendre la vue de la carte. || Límites en grados (latitud y longitud). Asignación: una ruta pertenece a la zona si su punto de salida está dentro del rectángulo. Puedes introducir los números o usar la vista del mapa.
+Tour ohne Gebiet || Tour without area || Parcours sans zone || Ruta sin zona
+Treffer || Results || Résultats || Resultados
+Bitte mindestens zwei Zeichen eingeben || Please enter at least two characters || Veuillez saisir au moins deux caractères || Introduce al menos dos caracteres
+Das Rechteck braucht vier Werte: Süd, West, Nord, Ost || The rectangle needs four values: south, west, north, east || Le rectangle demande quatre valeurs : sud, ouest, nord, est || El rectángulo necesita cuatro valores: sur, oeste, norte, este
+Die Grenzen des Rechtecks müssen Zahlen sein || The borders of the rectangle must be numbers || Les limites du rectangle doivent être des nombres || Los límites del rectángulo deben ser números
+Breite muss zwischen −90 und 90 liegen, Länge zwischen −180 und 180 || Latitude must be between −90 and 90, longitude between −180 and 180 || La latitude doit être comprise entre −90 et 90, la longitude entre −180 et 180 || La latitud debe estar entre −90 y 90, la longitud entre −180 y 180
+Süd muss kleiner sein als Nord || South must be smaller than north || Le sud doit être inférieur au nord || Sur debe ser menor que norte
+West muss kleiner sein als Ost (Gebiete über den 180. Längengrad hinweg sind nicht möglich) || West must be smaller than east (areas crossing the 180th meridian are not possible) || L’ouest doit être inférieur à l’est (les zones à cheval sur le 180e méridien ne sont pas possibles) || Oeste debe ser menor que este (no son posibles zonas que crucen el meridiano 180)
+Das Rechteck ist zu groß (höchstens {}° Breite und {}° Länge) || The rectangle is too large (at most {}° latitude and {}° longitude) || Le rectangle est trop grand (au maximum {}° de latitude et {}° de longitude) || El rectángulo es demasiado grande (como máximo {}° de latitud y {}° de longitud)
+Bitte einen Namen eingeben || Please enter a name || Veuillez saisir un nom || Introduce un nombre
+Der Name darf höchstens 80 Zeichen lang sein (ohne Spitzklammern und Steuerzeichen) || The name may be at most 80 characters long (without angle brackets and control characters) || Le nom peut comporter 80 caractères au maximum (sans chevrons ni caractères de contrôle) || El nombre puede tener como máximo 80 caracteres (sin paréntesis angulares ni caracteres de control)
+Typ bitte wählen: Gebirge, Tal, Insel, Küste oder Landschaft || Please choose a type: mountain range, valley, island, coast or landscape || Choisissez un type : massif, vallée, île, côte ou paysage || Elige un tipo: cordillera, valle, isla, costa o paisaje
+Ein Gebiet „{}“ gibt es schon || An area “{}” already exists || Une zone « {} » existe déjà || Ya existe una zona «{}»
+Höchstens {} eigene Gebiete || At most {} own areas || {} zones personnelles au maximum || Como máximo {} zonas propias
+Eigenes Gebiet nicht gefunden || Own area not found || Zone personnelle introuvable || Zona propia no encontrada
+Gebietssuche nicht möglich: {} || Area search not possible: {} || Recherche de zone impossible : {} || Búsqueda de zonas no posible: {}
+nicht erreichbar ({}) || not reachable ({}) || injoignable ({}) || no accesible ({})
+Meiste Touren || Most tours || Plus de parcours || Más rutas
+Kompakt || Compact || Compact || Compacto
+Mit Fotos || With photos || Avec photos || Con fotos
+Löschen nicht möglich || Cannot delete || Suppression impossible || No se puede eliminar
+Alle Touren in diesem Gebiet || All tours in this area || Tous les parcours de cette zone || Todas las rutas de esta zona
+aktiver Tag || active day || jour actif || día activo
+aktive Tage || active days || jours actifs || días activos
+Alle {} Touren in der Liste › || All {} tours in the list › || Tous les {} parcours dans la liste › || Todas las {} rutas en la lista ›
 `;

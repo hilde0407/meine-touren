@@ -10,10 +10,10 @@ document.documentElement.classList.toggle("dbg", dbgOn());
 
 /* ---- Menüleiste: sechs Hauptpunkte; Verwaltung als Zahnrad rechts, „Prüfen“ liegt in der Verwaltung ---- */
 {
-  const std = ["dash", "map", "tours", "records", "trips", "places", "photos", "check", "admin", "stats"],
+  const std = ["dash", "map", "tours", "records", "trips", "areas", "places", "photos", "check", "admin", "stats"],
     extra = NAV.filter(([k]) => !std.includes(k));           // z. B. „Aufzeichnen“ in der Android-App
   NAV.length = 0;
-  NAV.push(["dash", "Übersicht"], ["map", "Karte"], ["tours", "Touren"], ["trips", "Reisen"], ["photos", "Fotos"], ["stats", "Statistik"], ...extra);
+  NAV.push(["dash", "Übersicht"], ["map", "Karte"], ["tours", "Touren"], ["trips", "Reisen"], ["areas", "Gebiete"], ["photos", "Fotos"], ["stats", "Statistik"], ...extra);
   if (typeof recApp === "function" && recApp() && !NAV.some(x => x[0] === "record")) NAV.unshift(["record", "Aufzeichnen"]);       // in der App vorn und hervorgehoben (style.css), Zustand über recNavPaint
 }
 $("#nav").innerHTML = NAV.map(([k, l]) => `<a href="#/${k}" data-k="${k}">${l}</a>`).join("");

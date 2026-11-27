@@ -562,6 +562,22 @@ function regionOpts() {
      gebietOpts(sel)          -> <option>/<optgroup> nach Typ (Auswahlfeld mit data-gsheet; der Wert ist die Kennung des Gebiets)
      inGebiet(t, id)          -> liegt die Tour im Gebiet (leer = alle)
      gebietSheetOpen(sel)     -> Blatt mit Suchfeld und Liste (am Computer und am Handy gleich); die Wahl setzt das Feld und löst „input“ und „change“ aus */
+/* 3.65.0 Eigene Gebiete (Tabelle gebiet_custom, Rechteck je Gebiet): vom Server holen und der Gebietstabelle übergeben (Gebiete.setEigene); danach rechnen Filter, Suche, Anzeige und Reisenamen mit ihnen.
+   gebieteLaden() wirft nie (ohne Verbindung bleibt es bei den eingebauten und den zuletzt geladenen); EIGENE_GEB = die Zeilen des Servers (für die Übersicht und das Bearbeiten). */
+let EIGENE_GEB = [];
+async function gebieteLaden() {
+  try {
+    const l = await api("/api/gebiete/eigene");
+    if (Array.isArray(l)) {
+      EIGENE_GEB = l;
+      Gebiete.setEigene(l);
+    }
+  } catch (e) {}
+}
+/* Regionszeile einer Tour als HTML: Ort, Gebiet, Bundesland, Land; das Gebiet ist ein Link auf die Tourenliste dieses Gebiets (#/tours?g=<Kennung>) */
+function regionHtml(t) {
+  return Gebiete.regionMit(t).map(x => (x.gebiet ? `<a class="gblink" href="#/tours?g=${encodeURIComponent(x.gebiet)}" title="Alle Touren in diesem Gebiet">${esc(x.text)}</a>` : esc(x.text))).join(", ");
+}
 const GEB_TYPEN = [["gebirge", "Gebirge"], ["tal", "Täler"], ["insel", "Inseln"], ["kueste", "Küsten"], ["region", "Landschaften"]];
 function gebietListe() {
   const m = {};
@@ -573,7 +589,8 @@ function gebietListe() {
   return Object.values(m).map(e => {
     const top = Object.entries(e.ld).sort((a, b) => b[1] - a[1])[0];
     const x = Gebiete.nach[e.id], land = top && top[1] >= e.n * 0.8 ? top[0] : "";
-    return {id: e.id, name: e.name, typ: e.typ, n: e.n, land, s: [e.name, land].concat(x ? x.alias : []).map(Gebiete.fold).filter(Boolean).join("|")};
+    const eigen = !!x && x.quelle === "eigen", ld = land || (x && x.land) || "";
+    return {id: e.id, name: e.name, typ: e.typ, n: e.n, land: ld, eigen, s: [e.name, ld, eigen ? "eigen" : ""].concat(x ? x.alias : []).map(Gebiete.fold).filter(Boolean).join("|")};
   }).sort((a, b) => a.name.localeCompare(b.name, "de"));
 }
 const inGebiet = (t, id) => !id || Gebiete.von(t).some(v => v.id === id);
@@ -582,12 +599,12 @@ function gebietOpts(sel = "") {
   if (sel && !L.some(x => x.id === sel)) sel = "";
   return `<option value="">Alle Gebiete</option>` + GEB_TYPEN.map(([k, l]) => {
     const a = L.filter(x => x.typ === k);
-    return a.length ? `<optgroup label="${esc(l)}">${a.map(x => `<option value="${esc(x.id)}"${x.id === sel ? " selected" : ""} data-n="${x.n}" data-name="${esc(x.name)}" data-land="${esc(x.land)}" data-s="${esc(x.s)}">${esc(x.name)} (${x.n})</option>`).join("")}</optgroup>` : "";
+    return a.length ? `<optgroup label="${esc(l)}">${a.map(x => `<option value="${esc(x.id)}"${x.id === sel ? " selected" : ""} data-n="${x.n}" data-name="${esc(x.name)}" data-land="${esc(x.land)}" data-eigen="${x.eigen ? 1 : ""}" data-s="${esc(x.s)}">${esc(x.name)} (${x.n})</option>`).join("")}</optgroup>` : "";
   }).join("");
 }
 function gebietSheetOpen(sel) {
   const row = (o, all) => `<button type="button" class="gbi${o.value === sel.value ? " on" : ""}" data-v="${esc(o.value)}" data-s="${esc(o.dataset.s || "")}" aria-pressed="${o.value === sel.value}"><span class="gbn">${esc(all ? o.textContent : o.dataset.name)}</span>` +
-      (all ? "" : `${o.dataset.land ? `<small class="mut">${esc(o.dataset.land)}</small>` : ""}<b>${esc(o.dataset.n)}</b>`) + `</button>`,
+      (all ? "" : `${o.dataset.land || o.dataset.eigen ? `<small class="mut">${esc([o.dataset.land, o.dataset.eigen ? "eigen" : ""].filter(Boolean).join(" · "))}</small>` : ""}<b>${esc(o.dataset.n)}</b>`) + `</button>`,
     body = [...sel.children].map(c => c.tagName === "OPTGROUP" ? `<div class="gbg"><span class="spkat">${esc(c.label)}</span>${[...c.children].map(o => row(o, false)).join("")}</div>` : row(c, true)).join("");
   const m = uiModal(`<h3>Gebiet</h3><input type="search" class="gbq" placeholder="Gebiet suchen" aria-label="Gebiet suchen" autocomplete="off"><div class="gbl" role="group" aria-label="Gebiet">${body}<p class="mut gbnone" role="status" hidden>Kein Gebiet gefunden.</p></div><div class="uifoot"><button type="button" class="btn ghost" data-x>Abbrechen</button></div>`);
   const q = m.querySelector(".gbq"), none = m.querySelector(".gbnone");
@@ -660,7 +677,7 @@ async function loadTours() {
       pre = await p;
     } catch (e) {}
   }
-  const gp = Promise.all([sgLoad(), favLoad()]);   // 3.59.0: Statistik-Gruppen und Favoriten parallel zur Tourenliste
+  const gp = Promise.all([sgLoad(), favLoad(), gebieteLaden()]);   // 3.59.0: Statistik-Gruppen und Favoriten parallel zur Tourenliste; 3.65.0: eigene Gebiete
   TOURS = pre || (await api("/api/tours"));
   await gp;
   if (pre && window.noTrAdd) window.noTrAdd("/api/tours", pre);
@@ -704,7 +721,7 @@ async function route() {
   const [path, qs] = (location.hash || "#/dash").replace(/^#\/?/, "").split("?");
   const [k0 = "dash", name, sub] = path.split("/");
   const k = k0 === "tour" && sub === "auswertung" ? "tourauswertung" : k0;      // #/tour/<id>/auswertung = Unterseite der Tour (3.16.0)
-  document.querySelectorAll("nav a").forEach(a => a.classList.toggle("on", a.dataset.k === (k === "tour" || k === "tourauswertung" || k === "story" || k === "flight" || k === "plan" ? "tours" : k === "tripsheet" || k === "trip" ? "trips" : k)));
+  document.querySelectorAll("nav a").forEach(a => a.classList.toggle("on", a.dataset.k === (k === "tour" || k === "tourauswertung" || k === "story" || k === "flight" || k === "plan" ? "tours" : k === "tripsheet" || k === "trip" ? "trips" : k === "area" ? "areas" : k)));
   document.querySelectorAll(".uimod").forEach(m => m.remove());
   closeFloaters();
   clearInterval(pollTimer);

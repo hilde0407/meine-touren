@@ -1085,10 +1085,10 @@ def test_record_weather_and_live_link(page, app_url):
 
 
 def test_nav_statistik_und_entwicklermodus(page, app_url):
-    """Menü: sechs Hauptpunkte; Rekorde/Auswertung unter „Statistik“; Prüfen in der Verwaltung; Entwickleransichten hinter einem Schalter."""
+    """Menü: sieben Hauptpunkte (ab 3.65.0 mit „Gebiete“ hinter „Reisen“); Rekorde/Auswertung unter „Statistik“; Prüfen in der Verwaltung; Entwickleransichten hinter einem Schalter."""
     page.evaluate("() => localStorage.setItem('mt_debug', '0')"); page.reload(); quiet(page, 1500)
     keys = page.evaluate("() => [...document.querySelectorAll('#nav a')].map(a => a.dataset.k).filter(k => k !== 'record')")      # (die gemeinsame Seite trägt aus früheren Tests die App-Attrappe: „Aufzeichnen“ steht dann vorn)
-    assert keys[:6] == ["dash", "map", "tours", "trips", "photos", "stats"] and "check" not in keys and "admin" not in keys
+    assert keys[:7] == ["dash", "map", "tours", "trips", "areas", "photos", "stats"] and "check" not in keys and "admin" not in keys
     page.evaluate("() => location.hash = '#/records'"); quiet(page, 1200)
     assert page.locator(".segtabs a.on").inner_text() == "Bestwerte"
     assert page.locator('#nav a[data-k="stats"]').get_attribute("class") == "on"

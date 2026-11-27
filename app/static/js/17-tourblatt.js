@@ -34,7 +34,7 @@ VIEWS.sheet = async id => {
   await pdfPhotoLoad();
   $("#main").innerHTML = `<div class="sheet">
    <div class="row noprint"><a class="back" href="#/tour/${esc(t.id)}">‹ Zurück zur Tour</a><span class="sp"></span>${pdfPhotoBar()}${pdfBtn()}<button class="btn ghost" id="shp">Drucken</button></div>
-   <div class="mt14"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span class="mut ml8">${fmtDatum(t.date, {zeit: true})}${Gebiete.regionText(t) ? " · " + esc(Gebiete.regionText(t)) : ""}</span></div>
+   <div class="mt14"><span class="tag" style="background:${sCol(t.sport)}">${sName(t.sport)}</span> <span class="mut ml8">${fmtDatum(t.date, {zeit: true})}${Gebiete.regionText(t) ? " · " + regionHtml(t) : ""}</span></div>
    <h1 class="fs34 m8-0-14">${esc(t.name)}</h1>
    <div class="figs"><div class="fig"><div class="v">${fmtKm(t.km, {einheit: false})}<span class="u">km</span></div><div class="l">Strecke</div></div><div class="fig"><div class="v">${nf(t.up_m, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div></div>
    <div class="fig"><div class="v">${nf(t.down_m, 0)}<span class="u">m</span></div><div class="l">Abstieg</div></div><div class="fig"><div class="v">${fmtDauerTeile(t.h * 3600).v}<span class="u">${fmtDauerTeile(t.h * 3600).u}</span></div><div class="l">Dauer</div></div>

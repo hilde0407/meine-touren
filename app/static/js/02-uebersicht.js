@@ -466,7 +466,7 @@ VIEWS.tours = async (_name, qp) => {
   const xf = tourXf(qp);
   const ys = years(),
     sp = [...new Set(TOURS.map(t => t.sport))];
-  $("#main").innerHTML = `<div class="sec mt0"><h2>Alle Touren</h2><span class="sub" id="cnt"></span></div>
+  $("#main").innerHTML = `<div class="sec mt0"><h2>Alle Touren</h2><span class="sub" id="cnt"></span><a class="gblink" id="gbsee" hidden>Gebiet ansehen ›</a></div>
    ${xf ? tourXfBar(xf) : ""}<div class="filters" id="flt"><input id="q" placeholder="Name suchen" class="mnw230"><span class="fxtra"><select id="fy"><option value="0">Gesamte Zeit</option>${ys.map(y => `<option>${y}</option>`).join("")}</select></span>
    <select data-spsheet id="fs" aria-label="Sportart">${sportFilterOptions(sp)}</select>
    <span class="fxtra"><select id="fz" title="Jahreszeit"><option value="">Ganzjährig</option><option value="sommer">Sommerhalbjahr (Mai–Okt)</option><option value="winter">Winterhalbjahr (Nov–Apr)</option></select>
@@ -567,6 +567,9 @@ VIEWS.tours = async (_name, qp) => {
       a.reduce((c, t) => c + t.km, 0),
       0
     )}\u00a0km`;
+    const ga = $("#gbsee");
+    ga.hidden = !gb;                                                                           // 3.65.0: bei gewähltem Gebiet: zur Seite des Gebiets (Kennzahlen, Karte, Fotos, Reisen)
+    if (gb) ga.href = "#/area/" + encodeURIComponent(gb);
     $("#tl").innerHTML = a.slice(0, lim).map(tourRow).join("") || `<div class="empty">Keine Treffer</div>`;
     $("#more").style.display = a.length > lim ? "" : "none";
   };

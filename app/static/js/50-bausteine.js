@@ -22,7 +22,7 @@ const slPvTiles = list => slPrev(slTiles(list));
 const slPvBars = v => slPrev(`<svg viewBox="0 0 120 40" class="slpvs" aria-hidden="true">${v.map((h, i) => `<rect x="${i * 14 + 4}" y="${38 - h}" width="10" height="${h}" rx="2"/>`).join("")}</svg>`);
 
 /* ---- 3.18.0 gemeinsame Hilfen für Grafiken: Maße als Attribute, Farben über Klassen und CSS-Variablen (style.css „Mehr Bausteine“) ---- */
-const SL_CATS = [["reise", "Reisen"], ["foto", "Fotos"], ["karte", "Karte"], ["statistik", "Statistik"], ["zahlen", "Zahlen"], ["grafik", "Grafiken"], ["spass", "Spaß und Eigenes"], ["rueck", "Rückblick"], ["plan", "Planung"], ["quellen", "Touren holen"]];
+const SL_CATS = [["reise", "Reisen"], ["gebiet", "Gebiete"], ["foto", "Fotos"], ["karte", "Karte"], ["statistik", "Statistik"], ["zahlen", "Zahlen"], ["grafik", "Grafiken"], ["spass", "Spaß und Eigenes"], ["rueck", "Rückblick"], ["plan", "Planung"], ["quellen", "Touren holen"]];
 const slEnc = encodeURIComponent;
 /* Zeile aus Teilen, jedes Teil ein eigener Textknoten (die Übersetzung greift je Teil; der Punkt dazwischen kommt aus dem Stylesheet) */
 const slSegs = parts => parts.filter(Boolean).map(x => `<span>${x}</span>`).join("");

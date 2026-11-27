@@ -127,6 +127,7 @@ def migrate(conn):
         conn.execute("ALTER TABLE wishlist ADD COLUMN season TEXT")                                      # '', 'sommer', 'winter'
     conn.execute("CREATE TABLE IF NOT EXISTS trip_hidden (id TEXT PRIMARY KEY)")      # Reisen, die der Nutzer aus der Liste entfernt hat (Schlüssel wie trip_edit)
     conn.execute("CREATE TABLE IF NOT EXISTS trip_custom (id TEXT PRIMARY KEY, name TEXT, start TEXT, end TEXT, tours TEXT, created INTEGER)")   # 3.63.0: selbst erstellte Reisen (Name, Zeitraum und/oder gewählte Touren als JSON-Liste)
+    conn.execute("CREATE TABLE IF NOT EXISTS gebiet_custom (id TEXT PRIMARY KEY, name TEXT, typ TEXT, box TEXT, land TEXT, quelle TEXT, created INTEGER)")   # 3.65.0: eigene Gebiete (Name, Typ, Rechteck [Süd, West, Nord, Ost] als JSON, Land, Herkunft des Vorschlags)
     conn.execute("CREATE TABLE IF NOT EXISTS trip_edit (id TEXT PRIMARY KEY, name TEXT, start TEXT, end TEXT)")   # eigener Name/Zeitraum einer erkannten Reise
     conn.execute("CREATE TABLE IF NOT EXISTS tour_rating (id TEXT PRIMARY KEY, stars INTEGER)")   # eigene Bewertung 1–5
     conn.execute("CREATE TABLE IF NOT EXISTS tour_safety (id TEXT PRIMARY KEY, level INTEGER, grp TEXT, gear TEXT, note TEXT)")   # Lawinenlage, Gruppe, Notfallausrüstung

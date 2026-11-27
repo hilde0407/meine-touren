@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.65.0 – Gebiete-Übersicht, Gebietsseite, eigene Gebiete
+
+- Das Gebiet in der Regionszeile der Tourseite und des Tourblatts (und im Kopf der Reise-Seite) ist ein Link auf die Tourenliste mit dem Filter „Gebiet“
+- Neue Seiten „Gebiete“ (#/areas: Liste mit Touren, Tagen, Strecke, Aufstieg, erstem und letztem Mal; Suche, nach Typ oder Land, sortierbar) und „Gebiet“ (#/area/…: Kennzahlen, Karte, Beste Monate, Fotos, Reisen, Touren); beide anpassbar wie die übrigen Seiten (Bausteine, Vorlagen, Ansichten)
+- Eigene Gebiete: „＋ Gebiet hinzufügen …“ sucht den Namen über den Server bei OpenStreetMap (höchstens 1 Anfrage je Sekunde, 30 Tage zwischengespeichert), Rechteck und Typ änderbar oder von Hand anlegen; bearbeiten und löschen; wie eingebaute Gebiete in Suche, Filter, Reisenamen und Übersicht (Kennzeichen „eigen“, Vorrang); Tabelle gebiet_custom, in der Datensicherung; Grenzen sind Rechtecke
+- Ausgelassen: Erinnerung „vor einem Jahr in dieser Gegend“ und Gebiet-Filter auf der Fotos-Seite (siehe docs/versionen/3.65.0.md)
+
 ## Version 3.64.0 – Reisenamen aus Gebieten, Filter „Gebiet“
 
 - Erkannte Reisen heißen nach dem genauesten passenden Gebiet („La Gomera“, „Lungau“, „Zillertal“ statt „Kanarische Inseln“, „Salzburg“); eine Rundreise über mehrere Inseln nach dem Oberbegriff („Kanaren“); sonst bleibt es beim Bundesland/Land. Eigene Namen und eigene Reisen haben Vorrang. **Bestehende Reisenamen ändern sich dadurch.** Die Gebietstabelle gilt jetzt auch auf dem Server (erzeugte Datei app/gebiete.json aus derselben Quelle, ein Test stellt Gleichheit sicher)

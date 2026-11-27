@@ -61,13 +61,19 @@ VIEWS.search = async (_, q) => {
     sub = (nr = 0) => (nr ? `<span>${sucheZaehler(nr, "Reise", "Reisen")}</span>, ` : "") + `<span>${sucheZaehler(a.length, "Tour", "Touren")}</span>, <span>${km}</span>`;
   $("#main").innerHTML =
     `<div class="sec mt0"><h2>Suche: „${esc(q.get("q") || "")}“</h2><span class="sub" id="sres">${sub()}</span></div>
-   <div id="sreisen"></div><div id="stouren"><div class="tl">${a.slice(0, 200).map(tourRow).join("") || `<div class="empty">Keine Treffer. Gesucht wird in Name, Notiz, Sportart, Datum, Monat, Region (Land, Bundesland, Landkreis, Ort), Gebiet (Gebirge, Tal, Insel) und Reisen.</div>`}</div></div>`;
+   <div id="sgeb"></div><div id="sreisen"></div><div id="stouren"><div class="tl">${a.slice(0, 200).map(tourRow).join("") || `<div class="empty">Keine Treffer. Gesucht wird in Name, Notiz, Sportart, Datum, Monat, Region (Land, Bundesland, Landkreis, Ort), Gebiet (Gebirge, Tal, Insel) und Reisen.</div>`}</div></div>`;
   if (!toks.length) return;
+  /* 3.65.0: Gebiete, deren Name oder Alias passt (eingebaute und eigene; nur Gebiete mit Touren und eigene), als Zeilen wie in der Gebiete-Übersicht */
+  const gb = typeof gbRows === "function" ? gbRows().filter(r => (r.n || r.eigen) && toks.every(k => [r.name].concat((Gebiete.nach[r.id] || {}).alias || []).some(x => Gebiete.fold(x).includes(Gebiete.fold(k))))).slice(0, 8) : [];
+  if (gb.length) {
+    $("#sgeb").innerHTML = `<div class="sec"><h2>Gebiete</h2></div>${gb.map(gbRow).join("")}`;
+    if (a.length) $("#stouren").insertAdjacentHTML("afterbegin", `<div class="sec"><h2>Touren</h2></div>`);
+  }
   const trips = await sucheReisen();
   if (location.hash !== h0 || !$("#sreisen")) return;               // inzwischen andere Seite oder neue Eingabe
   const rt = trips.filter(tr => { const h = reiseHeu(tr); return toks.every(k => sin(h, k)); });
   if (!rt.length) return;
-  $("#sreisen").innerHTML = `<div class="sec"><h2>Reisen</h2></div><div class="otdg">${rt.map(tripKarte).join("")}</div>` + (a.length ? `<div class="sec"><h2>Touren</h2></div>` : "");
+  $("#sreisen").innerHTML = `<div class="sec"><h2>Reisen</h2></div><div class="otdg">${rt.map(tripKarte).join("")}</div>` + (a.length && !gb.length ? `<div class="sec"><h2>Touren</h2></div>` : "");
   $("#sres").innerHTML = sub(rt.length);
   if (!a.length) $("#stouren").innerHTML = "";
 };
