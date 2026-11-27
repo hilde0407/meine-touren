@@ -678,7 +678,7 @@ Die Diashow läuft im Vollbild: automatischer Wechsel (3, 5 oder 8 Sekunden), un
 
 *Abbildung 37: Die Diashow des Jahres 2025 (30 Fotos).*
 
-**Diashow teilen:** In einer Tour über **Teilen & Export → Diashow senden** bzw. **Diashow-Link**; für ein ganzes Jahr oder alle Fotos über den Teilen-Knopf in der Diashow. Der Link braucht beim Empfänger **kein Konto**. Beim Tour-Link wählst du vorher, welche Fotos (alle oder nur die besten) und die Gültigkeit (7 Tage, 30 Tage, unbegrenzt). Der **Diashow-Link für ein Jahr oder alle Fotos gilt 24 Stunden** und enthält bis zu 300 der besten Fotos; abgelehnte und ausgeblendete Fotos fehlen. Der Link zeigt nur Fotos, ihre Aufnahmezeit und den Tournamen – keine Karte, keine Orte, keine Notizen, keine Strecken, keine Kommentare.
+**Diashow teilen:** In einer Tour über **Teilen & Export → Diashow senden** bzw. **Diashow-Link**; für ein ganzes Jahr, alle Fotos oder den Zeitraum einer Reise über den Teilen-Knopf in der Diashow (bei Reisen auch über **Diashow teilen** im Baustein „Fotos der Reise“). Der Link braucht beim Empfänger **kein Konto**. Beim Tour-Link wählst du vorher, welche Fotos (alle oder nur die besten) und die Gültigkeit (7 Tage, 30 Tage, unbegrenzt). Der **Diashow-Link für ein Jahr oder alle Fotos gilt 24 Stunden** und enthält bis zu 300 der besten Fotos; abgelehnte und ausgeblendete Fotos fehlen. Der Link zeigt nur Fotos, ihre Aufnahmezeit und den Tournamen – keine Karte, keine Orte, keine Notizen, keine Strecken, keine Kommentare.
 
 ### 10.5 Erinnerungen
 
@@ -689,6 +689,8 @@ Der Baustein **Erinnerungen** (Übersicht und Statistik) zeigt Fotos aus deinem 
 * **Anzeige:** Titel, Bildunterschrift, „Neu mischen“, Link „Diashow starten“.
 
 Der Baustein lässt sich mehrfach mit unterschiedlichen Einstellungen hinzufügen.
+
+**„Fotos“ und „Fotos der Reise“ auf der Reise-Seite:** Der Baustein **Fotos** zeigt *alle* Fotos der Reise als Vorschaubilder über die ganze Breite (zum Durchsehen und Anklicken, ohne Teilen). Der Baustein **Fotos der Reise** ist der Baustein „Erinnerungen“, eingeschränkt auf den Zeitraum der Reise: Du wählst eine Auswahl (zufällig, die besten oder die neuesten, 3 bis 12 Fotos) und die Darstellung (Einzelbild-Show, Raster oder Streifen). **Diashow starten** zeigt die Fotos der Reise im Vollbild, **Diashow teilen** erzeugt einen Link ohne Konto (24 Stunden gültig, bis zu 300 beste Fotos der Reise mit Tourname, ohne Karte, Orte, Notizen und Strecken; am Handy öffnet sich das Teilen-Fenster, sonst wird der Link kopiert). Raster, Streifen und Show nutzen in einer vollen Kachel die ganze Breite. Der Link erscheint unter **Freigegebene Links** als Diashow „Diashow TT.MM.JJJJ – TT.MM.JJJJ“.
 
 [↑ Inhaltsverzeichnis](#inhalt)
 

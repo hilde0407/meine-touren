@@ -50,15 +50,17 @@ const pic = p => `/pic/${p.id}?size=2000${p.v ? `&v=${p.v}` : ""}`;          // 
   spdTxt();
   // Teilen (Tour, Jahr oder alle Fotos; nicht bei der Zufalls-Diashow): Link ohne Konto, 24 Stunden gültig, ohne Kommentare; Jahr/alle: Fotos mit Tourname (seit 3.31.1), höchstens 300 beste
   const bshr = document.getElementById("bshr"), fsh = document.getElementById("fsh");
-  const gefiltert = ["sport", "from", "to", "day", "recent"].some(k => q.get(k));          // 3.32.0: ein Link teilt nur „Tour“, „Jahr“ oder „alle“, keine gefilterte Auswahl
-  if (!gefiltert && (q.get("tour") || q.get("year") || !q.get("random"))) bshr.style.display = "";
+  // 3.32.0: ein Link teilt nur „Tour“, „Jahr“ oder „alle“, keine gefilterte Auswahl; 3.61.5 auch einen Zeitraum (from und to, z. B. die Reise), aber ohne weiteren Filter
+  const zeitraum = !!(q.get("from") && q.get("to")) && !["tour", "year", "sport", "day", "recent", "before"].some(k => q.get(k));
+  const gefiltert = ["sport", "day", "recent"].some(k => q.get(k)) || (["from", "to"].some(k => q.get(k)) && !zeitraum);
+  if (!gefiltert && (zeitraum || q.get("tour") || q.get("year") || !q.get("random"))) bshr.style.display = "";
   const note = txt => { fsh.textContent = txt; fsh.style.display = "block"; setTimeout(() => { fsh.style.display = "none"; }, 4000); };
   bshr.onclick = async e => {
     e.stopPropagation(); paused = true; clearTimeout(timer); document.getElementById("bpp").textContent = "▶"; poke(); bshr.disabled = true;
     try {
       const best = q.get("best") ? +q.get("best") || 10 : 0;
       const r = q.get("tour") ? await fetch(`/api/tours/${encodeURIComponent(q.get("tour"))}/share`, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({show: true, trim: true, days: 1, best, comments: false})})
-        : await fetch("/api/diashow/share", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({year: +q.get("year") || 0, days: 1, best})});
+        : await fetch("/api/diashow/share", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(zeitraum ? {from: q.get("from"), to: q.get("to"), days: 1, best} : {year: +q.get("year") || 0, days: 1, best})});
       if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.status);
       const j = await r.json(), url = location.origin + j.url, title = j.title || (list[0] || {}).tour_name || document.title, hinweis = !q.get("tour");   // Jahr/alle: Tournamen stehen im Link (ein Name kann einen Ort verraten)
       if (navigator.share) { try { await navigator.share({title, url}); } catch (err) { /* abgebrochen */ } if (hinweis) note("Tournamen sind im Link sichtbar"); }

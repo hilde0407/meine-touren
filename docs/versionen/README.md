@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.61.5](3.61.5.md) – Reise-Fotos nutzen die ganze Breite; Diashow einer Reise (Zeitraum) lässt sich teilen, Knopf „Diashow teilen“ im Baustein „Fotos der Reise“
 - [3.61.4](3.61.4.md) – 3D-Flug flüssiger auf dem Handy: Darstellung Flüssig/Normal/Schön, gedrosselte Linie und Kopfzeile, Fotos als Kartenebene (keine readPixels-Bremse), Kamera als Funktion der Position
 - [3.61.3](3.61.3.md) – Zahl und Einheit nie getrennt (geschütztes Leerzeichen, Wert-Spalte ohne Umbruch); Statistik-Gruppen in Anzeigen nur mit Namen
 - [3.61.2](3.61.2.md) – Handy-Übersicht bei großer Systemschrift: „Seite anpassen“ nie abgeschnitten, Kennzahl-Kacheln mit Wert und Einheit in einer Zeile

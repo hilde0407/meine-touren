@@ -90,6 +90,32 @@ function erSlideUrl(cfg, fix) {
   if (c.view === "show" && cfg && cfg.tempo) u.set("sec", String(c.tempo));
   return "slideshow.html?" + u;
 }
+/* 3.61.5 Diashow einer Reise teilen (Knopf „Diashow teilen“ im Baustein „Fotos der Reise“): Link ohne Konto, 24 Stunden gültig, Fotos mit Tourname (POST /api/diashow/share mit from/to);
+   am Handy das Teilen-Fenster des Geräts, sonst wird der Link kopiert; Rückmeldung in der Statuszeile ernote */
+async function erShareRange(btn, fix, cfg) {
+  const note = btn.closest(".rsdh").querySelector(".erdsn"), say = t => {
+    note.textContent = t;
+    clearTimeout(note._t);
+    note._t = setTimeout(() => { note.textContent = ""; }, 6000);
+  };
+  btn.disabled = true;
+  try {
+    const best = erCfg(cfg).mode === "best" ? 60 : 0,                                          // wie „Diashow starten“ (slideshow.html?best=60)
+      r = await fetch("/api/diashow/share", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({from: fix.from, to: fix.to, days: 1, best})});
+    if (!r.ok) throw new Error(((await r.json().catch(() => ({}))).detail) || r.status);
+    const j = await r.json(), url = location.origin + j.url, title = (fix.name ? "Diashow " + fix.name : j.title);
+    if (navigator.share) {
+      try { await navigator.share({title, url}); } catch (e) { /* abgebrochen */ }
+      say("Tournamen sind im Link sichtbar");
+    } else {
+      await navigator.clipboard.writeText(url);
+      say("Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar)");
+    }
+  } catch (e) {
+    say("Link erstellen nicht möglich: " + e.message);
+  }
+  btn.disabled = false;
+}
 const erShuffle = a => {
   const l = a.slice();
   for (let i = l.length - 1; i > 0; i--) {

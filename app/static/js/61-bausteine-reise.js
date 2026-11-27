@@ -64,15 +64,17 @@ Object.assign(window.SL_WT, {
   },
   rdiashow: {
     fam: "reise", cat: "reise", icon: "cam", name: "Fotos der Reise", title: () => "Fotos der Reise", multi: true, w: "voll", seiten: ["reise"], defaults: {mode: "best", view: "show", n: 12, link: true},
-    desc: "Die Fotos aus dem Zeitraum dieser Reise als Einzelbild-Show, Raster oder Streifen, mit Link zur Vollbild-Diashow. Das ist der Baustein „Erinnerungen“, eingeschränkt auf diese Reise: Auswahl, Anzahl, Darstellung und Bildgröße stellst du in den Einstellungen ein.",
+    desc: "Eine Auswahl der Fotos dieser Reise (zufällig, die besten oder die neuesten) als Einzelbild-Show, Raster oder Streifen. „Diashow starten“ zeigt sie im Vollbild, „Diashow teilen“ schickt sie als Link (24 Stunden gültig, ohne Konto ansehbar). Alle Fotos der Reise als Vorschaubilder zeigt dagegen der Baustein „Fotos“. Auswahl, Anzahl, Darstellung und Bildgröße stellst du in den Einstellungen ein.",
     dialog: (id, cfg) => erDialog(id, cfg, true), fields: [{kind: "erinn"}],
     kurz: cfg => (erCfg(cfg).mode === "random" ? ["Zufällig"] : erCfg(cfg).mode === "recent" ? ["Neueste"] : []),
     preview: () => slPrev('<div class="slpvf" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'),
     render(c, b, cfg, {reise}) {
       if (!reise || !reise.tr) return rsNoTrip(b);
       const fix = {from: reise.tr.start, to: reise.tr.end}, k = erCfg(cfg);
-      b.innerHTML = (k.shuffle || k.link ? `<div class="rsdh">${k.shuffle ? '<button type="button" class="btn ghost sm ernew">Neu mischen</button>' : ""}${k.link ? `<a class="hmore erdia" target="_blank" rel="noopener" href="${esc(erSlideUrl(cfg, fix))}">Diashow starten</a>` : ""}</div>` : "") + '<div class="erb"></div>';
+      b.innerHTML = (k.shuffle || k.link ? `<div class="rsdh">${k.shuffle ? '<button type="button" class="btn ghost sm ernew">Neu mischen</button>' : ""}${k.link && rsSpan(reise.tr) <= 366 ? '<button type="button" class="btn ghost sm erdsh" title="Link ohne Konto, 24 Stunden gültig">Diashow teilen</button>' : ""}${k.link ? `<a class="hmore erdia" target="_blank" rel="noopener" href="${esc(erSlideUrl(cfg, fix))}">Diashow starten</a>` : ""}<span class="erdsn mut" role="status" aria-live="polite"></span></div>` : "") + '<div class="erb"></div>';
       const o = {keep: true, fix, none: "Zu dieser Reise gibt es keine Fotos."}, nb = b.querySelector(".ernew");
+      const sb = b.querySelector(".erdsh");
+      if (sb) sb.onclick = () => erShareRange(sb, {...fix, name: ((document.querySelector("#rs-kopf h1, #main h1") || {}).textContent || "").trim()}, cfg);
       if (nb) nb.onclick = () => erLoad(b, cfg, k.mode === "random" ? o : {...o, mix: true});
       return erLoad(b, cfg, o).then(() => {
         const n = (b._erList || []).length;

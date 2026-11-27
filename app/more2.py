@@ -448,20 +448,27 @@ async def api_diashow_share(request: Request):
         raise HTTPException(400, "Ungültige Daten")
     if not isinstance(d, dict):
         raise HTTPException(400, "Ungültige Daten")
-    year, sport, best = diashow_link.check(d.get("year"), d.get("sport") or "", d.get("best"))
+    rng = None
+    if d.get("from") or d.get("to"):                          # 3.61.5: Zeitraum (JJJJ-MM-TT, z. B. die Reise): from, to; ohne Sportart
+        if d.get("year") or d.get("sport"):
+            raise HTTPException(400, "Zeitraum und Jahr oder Sportart gehen nicht zusammen")
+        von, bis, best = diashow_link.check_range(d.get("from"), d.get("to"), d.get("best"))
+        year, sport, rng = 0, "", (von, bis)
+    else:
+        year, sport, best = diashow_link.check(d.get("year"), d.get("sport") or "", d.get("best"))
     try:
         days = int(d.get("days") if d.get("days") is not None else 1)
     except (TypeError, ValueError):
         raise HTTPException(400, "Ungültige Laufzeit")
     if days < 0 or days > 3650:
         raise HTTPException(400, "Ungültige Laufzeit")
-    diashow_link.photo_list(year, sport, best, measure=True)
+    diashow_link.photo_list(year, sport, best, measure=True, rng=rng)
     token = secrets.token_urlsafe(12)
     now = int(time.time())
     db.execute("INSERT INTO shares(token,tour_id,photos,trim,ts,exp,views,best,comments,blocks,names) VALUES(?,?,2,0,?,?,0,?,0,NULL,1)",
-               (token, diashow_link.ref(year, sport), now, now + days * 86400 if days else None, best))
+               (token, diashow_link.range_ref(*rng) if rng else diashow_link.ref(year, sport), now, now + days * 86400 if days else None, best))
     auth.q("INSERT OR REPLACE INTO share_index(token,uid) VALUES(?,?)", (token, ctx.uid() or ""))
-    return {"token": token, "url": f"/s/{token}", "title": diashow_link.title(year, sport)}
+    return {"token": token, "url": f"/s/{token}", "title": diashow_link.title(year, sport, rng)}
 
 
 @router.get("/api/tours/{tour_id}/shares")
@@ -476,8 +483,8 @@ def _with_blocks(rows):
         r = dict(r)
         raw = r.pop("blocks", None)
         if diashow_link.is_ds(r.get("tour_id")):             # 3.29.0: Diashow-Link für ein Jahr / alle Jahre
-            y, sp = diashow_link.parse(r["tour_id"])
-            r.update(kind="diashow", year=y, sport=sp, sport_name=stats.SPORT_DE.get(sp, sp) if sp else "", name=diashow_link.title(y, sp), tour_id=None, blocks=None, custom=False, comments=0)
+            y, sp, rg = diashow_link.spec(r["tour_id"])
+            r.update(kind="diashow", year=y, sport=sp, sport_name=stats.SPORT_DE.get(sp, sp) if sp else "", range_from=rg[0] if rg else "", range_to=rg[1] if rg else "", name=diashow_link.title(y, sp, rg), tour_id=None, blocks=None, custom=False, comments=0)
             out.append(r)
             continue
         if rueckblick.is_rb(r.get("tour_id")):             # 3.26.0: Jahresrückblick-Link
@@ -623,8 +630,8 @@ def share_page(token: str, request: Request):
     if s["photos"] == 2:                           # Diashow: Seite mit Vorschau-Angaben (WhatsApp zeigt Titel + erstes Foto)
         import html as _h
         if diashow_link.is_ds(s["tour_id"]):                  # 3.29.0: Jahres-/Gesamt-Diashow: Titel und erstes Foto der Liste
-            y, sp = diashow_link.parse(s["tour_id"])
-            t, lst = {"name": diashow_link.title(y, sp)}, diashow_link.photo_list(y, sp, s["best"] or 0)
+            y, sp, rg = diashow_link.spec(s["tour_id"])
+            t, lst = {"name": diashow_link.title(y, sp, rg)}, diashow_link.photo_list(y, sp, s["best"] or 0, rng=rg)
             ph = {"id": lst[0]["id"]} if lst else None
         else:
             t = db.one("SELECT name,start_ts,dist_m FROM tours WHERE id=?", (s["tour_id"],)) or {}
