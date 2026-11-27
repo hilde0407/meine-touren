@@ -334,6 +334,101 @@ parnon | Kosmas 37.12,22.63 ; Kastanitsa 37.10,22.60
 arkadien | Tripoli 37.51,22.37 ; Dimitsana 37.60,22.03 ; Megalopoli 37.40,22.14
 argolis | Nafplio 37.57,22.80 ; Epidavros 37.63,23.08 ; Mykene 37.73,22.76
 ilia | Olympia 37.64,21.63 ; Pyrgos 37.67,21.44 ; Zacharo 37.48,21.65
+# 3.70.0 Abgleich mit dem Rother-Wanderführer-Katalog
+cote-d-azur | Nizza 43.70,7.27 ; Cannes 43.55,7.01 ; Menton 43.78,7.50 ; Saint-Tropez 43.27,6.64 ; Grasse 43.66,6.92
+burgund | Dijon 47.32,5.04 ; Beaune 47.02,4.84 ; Auxerre 47.80,3.57 ; Vézelay 47.47,3.75 ; Cluny 46.43,4.66
+dordogne | Sarlat 44.89,1.22 ; Périgueux 45.18,0.72 ; Bergerac 44.85,0.48 ; Cahors 44.45,1.44 ; Rocamadour 44.80,1.62
+dauphine | Grenoble 45.19,5.72 ; Valence 44.93,4.89 ; Gap 44.56,6.08 ; Briançon 44.90,6.64 ; Die 44.75,5.37
+muensterland | Münster 51.96,7.63 ; Coesfeld 51.94,7.17 ; Rheine 52.28,7.44
+oberlausitz | Bautzen 51.18,14.43 ; Görlitz 51.15,14.99 ; Zittau 50.90,14.81
+seenplatte | Waren 53.52,12.68 ; Neustrelitz 53.36,13.06 ; Röbel 53.38,12.61
+bergisches-land | Wuppertal 51.26,7.15 ; Solingen 51.17,7.08 ; Wipperfürth 51.12,7.40
+siegerland | Siegen 50.87,8.02 ; Bad Berleburg 51.05,8.39
+isarwinkel | Bad Tölz 47.76,11.56 ; Lenggries 47.68,11.57 ; Walchensee 47.60,11.35
+pfaffenwinkel | Weilheim 47.84,11.14 ; Peiting 47.80,10.93 ; Murnau 47.68,11.20
+kaiserstuhl | Breisach 48.03,7.58 ; Endingen 48.14,7.70
+elbtalaue | Hitzacker 53.15,10.99 ; Dömitz 53.14,11.25
+uckermark | Prenzlau 53.32,13.86 ; Angermünde 53.02,14.00 ; Templin 53.12,13.50
+emsland | Meppen 52.69,7.29 ; Lingen 52.52,7.32 ; Papenburg 53.08,7.40 ; Nordhorn 52.43,7.07
+ostfriesland | Leer 53.23,7.45 ; Aurich 53.47,7.48 ; Norden 53.60,7.20 ; Emden 53.37,7.21
+rheinhessen | Alzey 49.75,8.12 ; Ingelheim 49.97,8.06 ; Bingen 49.97,7.90
+kraichgau | Sinsheim 49.25,8.88 ; Bruchsal 49.12,8.60 ; Eppingen 49.14,8.92
+taubertal | Rothenburg ob der Tauber 49.38,10.18 ; Wertheim 49.76,9.52 ; Bad Mergentheim 49.49,9.77
+altmuehltal | Eichstätt 48.89,11.18 ; Kelheim 48.92,11.87 ; Beilngries 49.03,11.47
+saale-unstrut | Naumburg 51.15,11.81 ; Freyburg 51.21,11.77
+baederdreieck | Bad Füssing 48.35,13.30 ; Bad Griesbach 48.43,13.20 ; Bad Birnbach 48.43,12.97
+bodensee | Konstanz 47.66,9.17 ; Friedrichshafen 47.65,9.48 ; Lindau 47.55,9.68 ; Überlingen 47.77,9.17
+wienerwald | Baden 48.01,16.23 ; Mödling 48.09,16.29 ; Klosterneuburg 48.30,16.32 ; Purkersdorf 48.21,16.18
+pitztal | Imst 47.24,10.74 ; Pitztaler Gletscher 46.93,10.87 ; Jerzens 47.13,10.77
+lesachtal | Kötschach 46.66,13.00 ; Maria Luggau 46.67,12.80 ; Liesing 46.67,12.88
+seefeld | Seefeld 47.33,11.19 ; Leutasch 47.35,11.15
+gastein | Bad Gastein 47.11,13.13 ; Bad Hofgastein 47.17,13.10 ; Dorfgastein 47.20,13.08
+mariazell | Mariazell 47.77,15.32 ; Erlaufsee 47.78,15.28
+moelltal | Winklern 46.86,12.95 ; Obervellach 46.93,13.20 ; Flattach 46.90,13.15
+woerthersee | Velden 46.62,14.04 ; Pörtschach 46.63,14.17 ; Klagenfurt 46.62,14.31
+millstaettersee | Millstatt 46.80,13.58 ; Seeboden 46.82,13.51
+grazer-hausberge | Graz 47.07,15.44 ; Schöckl 47.20,15.47 ; Gratkorn 47.13,15.34
+oststeiermark | Hartberg 47.28,15.97 ; Fürstenfeld 47.05,16.08 ; Weiz 47.22,15.62 ; Feldbach 46.95,15.89
+leithagebirge | Eisenstadt 47.85,16.52 ; Mattersburg 47.74,16.40 ; Forchtenstein 47.69,16.32
+kalkalpen | Windischgarsten 47.72,14.35 ; Molln 47.86,14.24 ; Reichraming 47.87,14.46
+glarnerland | Glarus 47.04,9.07 ; Elm 46.92,9.17 ; Linthal 46.92,9.00
+zuerichsee | Zürich 47.37,8.54 ; Rapperswil 47.23,8.82 ; Zug 47.17,8.52 ; Einsiedeln 47.13,8.75
+genfersee | Lausanne 46.52,6.63 ; Montreux 46.43,6.91 ; Genf 46.20,6.15 ; Évian 46.40,6.59 ; Vevey 46.46,6.84
+vierwaldstaettersee | Luzern 47.05,8.31 ; Brunnen 47.00,8.60 ; Flüelen 46.90,8.62 ; Weggis 47.03,8.43
+emmental | Langnau 46.94,7.79 ; Burgdorf 47.06,7.63 ; Entlebuch 46.99,8.06 ; Huttwil 47.11,7.85
+gruyere | Gruyères 46.58,7.08 ; Charmey 46.62,7.16 ; Les Diablerets 46.35,7.16 ; Château-d'Oex 46.48,7.14
+surselva | Disentis 46.70,8.85 ; Ilanz 46.77,9.20 ; Flims 46.83,9.28 ; Vals 46.62,9.18
+davos | Davos 46.80,9.84 ; Klosters 46.87,9.88 ; Küblis 46.91,9.78
+vinschgau | Schlanders 46.63,10.77 ; Mals 46.69,10.55 ; Latsch 46.62,10.87
+meran | Meran 46.67,11.16 ; Schenna 46.69,11.19 ; Algund 46.68,11.12 ; Lana 46.61,11.16
+bozen | Bozen 46.50,11.35 ; Kaltern 46.40,11.24 ; Eppan 46.47,11.27 ; Klobenstein 46.55,11.46
+sterzing | Sterzing 46.89,11.43 ; Gossensaß 46.97,11.47 ; Franzensfeste 46.79,11.62
+ahrntal | Sand in Taufers 46.90,11.95 ; Steinhaus 47.01,12.06 ; Luttach 46.94,11.98
+antholz | Antholz 46.86,12.15 ; St. Magdalena Gsies 46.79,12.20 ; Rasen 46.80,12.10
+pustertal | Bruneck 46.80,11.94 ; Toblach 46.73,12.22 ; Innichen 46.735,12.28 ; Olang 46.76,12.03
+seiser-alm | Seis 46.54,11.56 ; Kastelruth 46.57,11.57 ; Compatsch 46.54,11.63 ; Völs 46.52,11.54
+groeden | St. Ulrich 46.58,11.67 ; Selva 46.55,11.76 ; St. Christina 46.56,11.72
+fassatal | Canazei 46.48,11.77 ; Moena 46.37,11.66 ; Vigo di Fassa 46.43,11.69
+gadertal | Corvara 46.55,11.87 ; La Villa 46.58,11.89 ; St. Vigil 46.70,12.01 ; Pedraces 46.58,11.93
+sextner | Sexten 46.70,12.35 ; Toblach 46.73,12.22 ; Misurina 46.58,12.25 ; Drei Zinnen 46.62,12.30
+cortina | Cortina 46.54,12.14 ; Falzaregopass 46.52,12.01 ; Cinque Torri 46.50,12.04 ; Passo Giau 46.48,12.04
+eggental | Welschnofen 46.43,11.53 ; Karersee 46.41,11.58 ; Latemar 46.37,11.57 ; Obereggen 46.37,11.52
+lago-maggiore | Stresa 45.89,8.53 ; Locarno 46.17,8.80 ; Arona 45.76,8.56 ; Luino 46.00,8.75 ; Orta San Giulio 45.80,8.41
+comer-see | Como 45.81,9.08 ; Lecco 45.86,9.40 ; Menaggio 46.02,9.23 ; Bellagio 45.99,9.26 ; Colico 46.14,9.38
+adamello | Ponte di Legno 46.26,10.51 ; Pinzolo 46.16,10.76 ; Edolo 46.18,10.33 ; Passo del Tonale 46.26,10.58
+vizentiner | Asiago 45.88,11.51 ; Recoaro 45.70,11.22 ; Pian delle Fugazze 45.78,11.22 ; Folgaria 45.91,11.17
+golf-neapel | Pozzuoli 40.82,14.12 ; Anacapri 40.56,14.22 ; Ischia 40.73,13.90 ; Sorrent 40.63,14.37 ; Neapel 40.85,14.27
+galicien | Santiago de Compostela 42.88,-8.54 ; Vigo 42.24,-8.72 ; A Coruña 43.37,-8.40 ; Lugo 43.01,-7.56 ; Ourense 42.34,-7.86 ; Fisterra 42.91,-9.26
+kantabrien | Santander 43.46,-3.81 ; Potes 43.15,-4.62 ; Fuente Dé 43.15,-4.81 ; Santillana del Mar 43.39,-4.11 ; Reinosa 43.00,-4.14 ; Laredo 43.41,-3.41
+asturien | Oviedo 43.36,-5.85 ; Gijón 43.54,-5.66 ; Covadonga 43.31,-5.06 ; Llanes 43.42,-4.75 ; Cangas de Onís 43.35,-5.14
+baskenland | Bilbao 43.26,-2.93 ; San Sebastián 43.32,-1.98 ; Vitoria 42.85,-2.67 ; Bayonne 43.49,-1.47 ; Saint-Jean-Pied-de-Port 43.16,-1.24
+costa-brava | Roses 42.26,3.18 ; Cadaqués 42.29,3.28 ; Palafrugell 41.92,3.16 ; Tossa de Mar 41.72,2.93 ; Portbou 42.43,3.16
+costa-daurada | Tarragona 41.12,1.25 ; Salou 41.08,1.14 ; Cambrils 41.07,1.06 ; Siurana 41.26,0.93 ; Sitges 41.24,1.81 ; Deltebre 40.72,0.72
+costa-blanca | Alicante 38.35,-0.48 ; Benidorm 38.54,-0.13 ; Calpe 38.64,0.04 ; Dénia 38.84,0.11 ; Alcoy 38.70,-0.47 ; Torrevieja 37.98,-0.68
+alentejo | Évora 38.57,-7.91 ; Beja 38.02,-7.86 ; Sines 37.96,-8.87 ; Portalegre 39.29,-7.43 ; Mértola 37.64,-7.66
+nordportugal | Porto 41.15,-8.61 ; Braga 41.55,-8.43 ; Vila Real 41.30,-7.74 ; Bragança 41.81,-6.76 ; Guimarães 41.44,-8.30 ; Viana do Castelo 41.69,-8.83
+korfu | Kerkyra 39.62,19.92 ; Paleokastritsa 39.67,19.70 ; Kassiopi 39.79,19.91 ; Pantokrator 39.75,19.87
+chalkidiki | Polygyros 40.38,23.44 ; Nikiti 40.21,23.68 ; Ouranoupoli 40.32,23.98 ; Kallithea 39.98,23.41
+thassos | Limenas 40.78,24.71 ; Potos 40.67,24.69
+olymp | Litochoro 40.10,22.50 ; Mytikas 40.085,22.358 ; Prionia 40.10,22.40
+pilion | Volos 39.36,22.94 ; Zagora 39.43,23.10 ; Tsagarada 39.37,23.20 ; Milies 39.33,23.15
+kefalonia | Argostoli 38.18,20.49 ; Fiskardo 38.46,20.58 ; Sami 38.25,20.65 ; Lixouri 38.20,20.43
+ithaka | Vathy 38.37,20.72 ; Kioni 38.45,20.69 ; Stavros 38.43,20.67
+zakynthos | Zakynthos 37.78,20.90 ; Keri 37.66,20.83 ; Navagio 37.86,20.62
+samos | Pythagoreio 37.69,26.94 ; Karlovasi 37.79,26.70 ; Kokkari 37.79,26.89
+ikaria | Agios Kirykos 37.61,26.30 ; Evdilos 37.63,26.17 ; Armenistis 37.63,26.10
+patmos | Skala 37.31,26.55 ; Chora 37.31,26.54
+fourni | Fourni 37.60,26.51
+dovrefjell | Hjerkinn 62.22,9.55 ; Kongsvoll 62.30,9.60 ; Snøhetta 62.32,9.27
+vesteraalen | Sortland 68.70,15.42 ; Andenes 69.32,16.12
+gotland | Visby 57.64,18.30 ; Fårösund 57.86,19.06 ; Hoburgen 56.92,18.15 ; Slite 57.71,18.80
+oeland | Borgholm 56.88,16.65 ; Färjestaden 56.65,16.45 ; Byxelkrok 57.33,17.00
+bornholm | Rønne 55.10,14.70 ; Svaneke 55.13,15.14 ; Gudhjem 55.20,14.97 ; Dueodde 55.00,15.07
+faeroeer | Tórshavn 62.01,-6.77 ; Mykines 62.10,-7.65 ; Gásadalur 62.11,-7.44 ; Saksun 62.25,-7.18 ; Tvøroyri 61.55,-6.80
+kanalinseln | St. Helier 49.19,-2.11 ; St. Peter Port 49.46,-2.54 ; Sark 49.43,-2.36 ; Alderney 49.72,-2.20
+devon | Exeter 50.72,-3.53 ; Plymouth 50.37,-4.14 ; Princetown 50.54,-4.00 ; Ilfracombe 51.21,-4.12 ; Salcombe 50.24,-3.77 ; Torquay 50.46,-3.53
+molokai | Kaunakakai 21.09,-157.02 ; Kalaupapa 21.19,-156.98
+tasmanien | Hobart -42.88,147.33 ; Cradle Mountain -41.65,145.95 ; Launceston -41.44,147.14 ; Freycinet -42.15,148.30
 """
 
 NEG = """
@@ -401,12 +496,87 @@ NEG = """
 !messenien | Sparta 37.07,22.43 ; Patras 38.25,21.73 ; Olympia 37.64,21.63 ; Gytheio 36.76,22.57
 !argolis | Korinth 37.94,22.93 ; Tripoli 37.51,22.37
 !ilia | Patras 38.25,21.73 ; Kalamata 37.04,22.11
+!bodensee | Freiburg 47.99,7.85 ; Kempten 47.73,10.31
+!wienerwald | Wien Stephansplatz 48.21,16.37 ; Reichenau 47.69,15.85 ; St. Pölten 48.20,15.63
+!pitztal | Sölden 46.97,11.01 ; Landeck 47.14,10.57
+!lesachtal | Lienz 46.83,12.77 ; Sillian 46.75,12.42
+!seefeld | Innsbruck 47.26,11.39 ; Garmisch 47.49,11.09
+!gastein | Zell am See 47.32,12.80 ; Mallnitz 46.98,13.17
+!moelltal | Heiligenblut 47.04,12.84 ; Spittal 46.80,13.49
+!millstaettersee | Spittal an der Drau 46.80,13.49
+!grazer-hausberge | Leibnitz 46.78,15.54 ; Weiz 47.22,15.62
+!oststeiermark | Graz 47.07,15.44 ; Bad Radkersburg 46.68,15.99 ; Oberwart 47.29,16.21
+!kalkalpen | Admont 47.57,14.46 ; Steyr 48.04,14.42
+!glarnerland | Chur 46.85,9.53 ; Zürich 47.37,8.54 ; Flims 46.83,9.28
+!zuerichsee | Luzern 47.05,8.31 ; Winterthur 47.50,8.72
+!genfersee | Bern 46.95,7.45 ; Sion 46.23,7.36
+!vierwaldstaettersee | Engelberg 46.82,8.41 ; Interlaken 46.69,7.86
+!emmental | Bern 46.95,7.45 ; Luzern 47.05,8.31 ; Thun 46.76,7.63
+!gruyere | Montreux 46.43,6.91 ; Interlaken 46.69,7.86
+!surselva | Chur 46.85,9.53 ; Andermatt 46.63,8.59 ; Davos 46.80,9.84
+!davos | Arosa 46.78,9.68 ; Chur 46.85,9.53 ; Landquart 46.97,9.55
+!vinschgau | Landeck 47.14,10.57 ; Meran 46.67,11.16
+!meran | Bozen 46.50,11.35 ; Schlanders 46.63,10.77
+!bozen | Meran 46.67,11.16 ; Trient 46.07,11.12 ; Seis 46.54,11.56
+!sterzing | Brixen 46.72,11.66 ; Innsbruck 47.26,11.39 ; Steinach am Brenner 47.10,11.46
+!ahrntal | Bruneck 46.80,11.94 ; Mayrhofen 47.16,11.86
+!antholz | Bruneck 46.80,11.94 ; Sexten 46.70,12.35 ; Innichen 46.735,12.28
+!pustertal | Brixen 46.72,11.66 ; Sexten 46.70,12.35
+!seiser-alm | Bozen 46.50,11.35 ; Ortisei 46.57,11.67
+!groeden | Seis 46.54,11.56 ; Corvara 46.55,11.87 ; Canazei 46.48,11.77
+!fassatal | Bozen 46.50,11.35 ; Cortina 46.54,12.14 ; Arabba 46.50,11.88
+!gadertal | Bruneck 46.80,11.94 ; Cortina 46.54,12.14
+!sextner | Cortina 46.54,12.14 ; Bruneck 46.80,11.94
+!cortina | Sexten 46.70,12.35 ; Corvara 46.55,11.87 ; Canazei 46.48,11.77
+!eggental | Bozen 46.50,11.35 ; Canazei 46.48,11.77
+!lago-maggiore | Mailand 45.46,9.19 ; Domodossola 46.12,8.29 ; Bellinzona 46.19,9.02
+!comer-see | Mailand 45.46,9.19 ; Sondrio 46.17,9.87 ; Lugano 46.00,8.95
+!adamello | Madonna di Campiglio 46.23,10.83 ; Bormio 46.47,10.37 ; Brescia 45.54,10.22
+!vizentiner | Vicenza 45.55,11.55 ; Trient 46.07,11.12 ; Verona 45.44,10.99 ; Rovereto 45.89,11.04
+!golf-neapel | Salerno 40.68,14.77 ; Caserta 41.07,14.33
+!galicien | Oviedo 43.36,-5.85 ; Porto 41.15,-8.61 ; Soajo 41.87,-8.30 ; Braga 41.55,-8.43 ; Gijón 43.54,-5.66 ; León 42.60,-5.57 ; Chaves 41.74,-7.47
+!kantabrien | Bilbao 43.26,-2.93 ; Oviedo 43.36,-5.85 ; Covadonga 43.31,-5.06 ; Llanes 43.42,-4.75
+!asturien | Santander 43.46,-3.81 ; Potes 43.15,-4.62 ; Lugo 43.01,-7.56 ; León 42.60,-5.57 ; Fuente Dé 43.15,-4.81
+!baskenland | Santander 43.46,-3.81 ; Pamplona 42.82,-1.64 ; Pau 43.30,-0.37 ; Burgos 42.34,-3.70
+!costa-brava | Barcelona 41.39,2.17 ; Perpignan 42.70,2.90
+!costa-daurada | Barcelona 41.39,2.17 ; Valencia 39.47,-0.38 ; Lleida 41.62,0.62
+!costa-blanca | Valencia 39.47,-0.38 ; Murcia 37.99,-1.13 ; Cartagena 37.60,-0.99 ; Albacete 38.99,-1.86
+!alentejo | Lagos 37.10,-8.67 ; Lissabon 38.72,-9.14 ; Faro 37.02,-7.93 ; Badajoz 38.88,-6.97 ; Sevilla 37.39,-5.99
+!nordportugal | Lissabon 38.72,-9.14 ; Coimbra 40.21,-8.43 ; Vigo 42.24,-8.72 ; Ourense 42.34,-7.86
+!korfu | Igoumenitsa 39.50,20.27 ; Paxos 39.20,20.18
+!chalkidiki | Thessaloniki 40.64,22.94 ; Olymp 40.09,22.36 ; Limenas 40.78,24.71 ; Kavala 40.94,24.41
+!thassos | Kavala 40.94,24.41 ; Athos 40.16,24.33
+!olymp | Thessaloniki 40.64,22.94 ; Larisa 39.64,22.42 ; Katerini 40.27,22.50
+!pilion | Larisa 39.64,22.42 ; Skiathos 39.16,23.49 ; Lamia 38.90,22.43
+!kefalonia | Vathy Ithaka 38.37,20.72 ; Zakynthos 37.78,20.90 ; Lefkada 38.71,20.64
+!ithaka | Argostoli 38.18,20.49 ; Sami 38.25,20.65
+!zakynthos | Kyllini 37.93,21.15 ; Poros Kefalonia 38.15,20.77
+!samos | Agios Kirykos 37.61,26.30 ; Kusadasi 37.86,27.26 ; Patmos 37.31,26.55
+!ikaria | Karlovasi 37.79,26.70
+!patmos | Leros 37.15,26.85 ; Pythagoreio 37.69,26.94
+!fourni | Agios Kirykos 37.61,26.30 ; Pythagoreio 37.69,26.94 ; Patmos 37.31,26.55
+!dovrefjell | Oppdal 62.60,9.69 ; Rondvassbu 61.92,10.00 ; Lillehammer 61.11,10.47
+!vesteraalen | Svolvær 68.23,14.57 ; Harstad 68.80,16.54 ; Narvik 68.44,17.43
+!gotland | Borgholm 56.88,16.65 ; Stockholm 59.33,18.07
+!oeland | Kalmar 56.66,16.36 ; Visby 57.64,18.30
+!bornholm | Simrishamn 55.56,14.35 ; Kopenhagen 55.68,12.57
+!faeroeer | Reykjavik 64.15,-21.94 ; Lerwick 60.15,-1.15
+!kanalinseln | Saint-Malo 48.65,-2.02 ; Cherbourg 49.64,-1.62
+!devon | Truro 50.26,-5.05 ; Bude 50.83,-4.54 ; Bath 51.38,-2.36 ; Dorchester 50.71,-2.44 ; Lyme Regis 50.73,-2.93
+!molokai | Lahaina 20.88,-156.68 ; Honolulu 21.31,-157.86
+!cote-d-azur | Marseille 43.30,5.37 ; Ventimiglia 43.79,7.61 ; Toulon 43.12,5.93 ; Digne 44.09,6.24
+!burgund | Paris 48.86,2.35 ; Lyon 45.76,4.84 ; Besançon 47.24,6.02 ; Orléans 47.90,1.91
+!dordogne | Bordeaux 44.84,-0.58 ; Toulouse 43.60,1.44 ; Limoges 45.83,1.26 ; Clermont-Ferrand 45.78,3.09
+!dauphine | Lyon 45.76,4.84 ; Chambéry 45.57,5.92 ; Avignon 43.95,4.81 ; Annecy 45.90,6.13 ; Digne 44.09,6.24
+!tasmanien | Melbourne -37.81,144.96 ; Wilsons Promontory -39.03,146.32
 """
 
 
 def _teile(txt):
     out = []
     for zeile in txt.strip().splitlines():
+        if zeile.startswith("#"):
+            continue
         kopf, rest = zeile.split(" | ", 1)
         neg = kopf.startswith("!")
         for p in rest.split(" ; "):

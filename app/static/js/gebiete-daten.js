@@ -447,6 +447,171 @@ const Gebiete = (() => {
   g("neuseeland-sued", "Neuseeland (Südinsel)", INS, "neuseeland", [[-47.40, 166.30, -40.45, 174.40]], {alias: ["South Island", "Südinsel", "Suedinsel", "Milford Track", "Queenstown", "Aoraki", "Mount Cook", "Abel Tasman", "Fiordland"]});
   g("neuseeland", "Neuseeland", INS, null, [], {alias: ["New Zealand", "Aotearoa", "Nouvelle-Zélande", "Nueva Zelanda"]});
 
+  /* ===================== 3.70.0 Abgleich mit dem Rother-Wanderführer-Katalog =====================
+     Die Titel der Reihe „Rother Wanderführer“ zeigen, nach welchen Regionen Wanderer suchen. Fehlende Regionen sind hier als Gebiete ergänzt (nur wo die Grenzen als Rechteck sicher genug sind),
+     Regionen, die sich mit einem Gebirge überschneiden (Genfersee/Jura, Münsterland/Teutoburger Wald, Baskenland/Pyrenäen, Devon/Cornwall, Vesterålen/Lofoten, Siegerland/Sauerland, Emmental/Jura, Seefeld/Karwendel, Gruyère/Berner Oberland, Dauphiné/Vercors und Écrins), haben `prio: -1`: in der Anzeige gewinnt das Gebirge.
+     Abweichende Schreibweisen und Namen von Wegen („Westweg“, „Goldsteig“, „GR 20“) stehen als Alias bei den vorhandenen Gebieten (`plus`). Näherungen wie alle Gebiete.
+     Südtiroler Unterregionen schneiden sich über `in` mit der Fläche von Südtirol (nur Provinz Bozen), Dolomiten-Täler haben die Dolomiten als Eltern; beide sind Typ Region ohne `anz`:
+     sie werden gefunden und gefiltert, ändern aber die Anzeige der Regionszeile nicht („Südtirol“, „Dolomiten“ bleiben). */
+  const plus = (id, ...alias) => {
+    const x = L.find(k => k.id === id);
+    if (!x) throw new Error("plus: unbekanntes Gebiet " + id);
+    for (const a of alias) if (![x.name].concat(x.alias).some(o => o.toLowerCase() === a.toLowerCase())) x.alias.push(a);
+  };
+
+  /* --- Deutschland --- */
+  g("muensterland", "Münsterland", REG, null, [[51.70, 6.85, 52.35, 8.05]], {alias: ["Muensterland", "Münsterländer Parklandschaft", "Baumberge", "Coesfeld", "Steinfurt", "Warendorf", "Borken", "Westmünsterland"], anz: true, prio: -1});
+  g("oberlausitz", "Oberlausitz", REG, null, [[50.85, 14.05, 51.45, 15.04]], {alias: ["Lausitzer Bergland", "Zittauer Gebirge", "Bautzen", "Görlitz", "Zittau", "Oybin", "Lausitz", "Upper Lusatia"], anz: true});
+  g("seenplatte", "Mecklenburgische Seenplatte", REG, null, [[53.20, 12.20, 53.70, 13.35]], {alias: ["Mecklenburger Seenplatte", "Müritz", "Müritz-Nationalpark", "Neustrelitz", "Mirow", "Waren (Müritz)", "Seenplatte"], anz: true});
+  g("bergisches-land", "Bergisches Land", REG, null, [[50.90, 6.95, 51.30, 7.60]], {alias: ["Bergisches", "Wuppertal", "Solingen", "Remscheid", "Wipperfürth", "Müngsten", "Burg an der Wupper"], anz: true});
+  g("siegerland", "Siegerland und Wittgenstein", REG, null, [[50.75, 7.75, 51.08, 8.60]], {alias: ["Siegerland", "Wittgenstein", "Siegen", "Bad Berleburg", "Rothaargebirge", "Rothaarsteig", "Erndtebrück", "Hilchenbach"], anz: true, prio: -1});
+  g("isarwinkel", "Isarwinkel", REG, "alpen", [[47.58, 11.30, 47.82, 11.75]], {alias: ["Bad Tölz", "Lenggries", "Jachenau", "Kochel am See", "Walchensee", "Kochelsee", "Benediktbeuern", "Sylvensteinsee", "Tölzer Land"], anz: true});
+  g("pfaffenwinkel", "Pfaffenwinkel", REG, null, [[47.68, 10.85, 47.95, 11.35]], {alias: ["Weilheim", "Peißenberg", "Peiting", "Murnau", "Wessobrunn", "Schongau", "Bad Bayersoien"], anz: true});
+  g("kaiserstuhl", "Kaiserstuhl", GEB, null, [[48.03, 7.55, 48.15, 7.75]], {alias: ["Kaiserstuhl Baden", "Breisach", "Endingen", "Ihringen", "Vogtsburg", "Oberrotweil", "Bickensohl"]});
+  g("elbtalaue", "Elbtalaue", REG, null, [[53.00, 10.60, 53.40, 11.70]], {alias: ["Wendland", "Hitzacker", "Dömitz", "Lenzen", "Lüchow-Dannenberg", "Niedersächsische Elbtalaue"], anz: true});
+  g("uckermark", "Uckermark", REG, null, [[52.85, 13.35, 53.40, 14.28]], {alias: ["Prenzlau", "Schwedt", "Angermünde", "Templin", "Schorfheide", "Biosphärenreservat Schorfheide-Chorin"], anz: true});
+  g("emsland", "Emsland und Grafschaft Bentheim", REG, null, [[52.36, 7.05, 53.15, 7.90]], {alias: ["Emsland", "Grafschaft Bentheim", "Meppen", "Lingen", "Papenburg", "Nordhorn", "Haselünne", "Hümmling"], anz: true});
+  g("ostfriesland", "Ostfriesland", REG, null, [[53.20, 7.15, 53.62, 8.20]], {alias: ["Ostfriesland Küste", "Leer", "Emden", "Aurich", "Norden", "Wittmund", "Jever", "Wilhelmshaven", "Dollart"], anz: true});
+  g("rheinhessen", "Rheinhessen", REG, null, [[49.65, 7.85, 50.00, 8.45]], {alias: ["Alzey", "Bingen am Rhein", "Ingelheim", "Rheinhessisches Hügelland", "Rheinterrasse", "Wonnegau"], anz: true});
+  g("kraichgau", "Kraichgau", REG, null, [[48.95, 8.55, 49.30, 9.10]], {alias: ["Bruchsal", "Sinsheim", "Eppingen", "Bretten", "Heuchelberg", "Stromberg", "Zabergäu"], anz: true});
+  g("taubertal", "Taubertal", TAL, null, [[49.35, 9.45, 49.80, 10.25]], {alias: ["Tauber", "Rothenburg ob der Tauber", "Bad Mergentheim", "Wertheim", "Tauberbischofsheim", "Lauda-Königshofen", "Liebliches Taubertal"]});
+  g("altmuehltal", "Altmühltal", TAL, null, [[48.80, 10.85, 49.10, 11.95]], {alias: ["Altmuehltal", "Naturpark Altmühltal", "Altmühltal-Panoramaweg", "Eichstätt", "Kelheim", "Beilngries", "Treuchtlingen", "Solnhofen", "Riedenburg"]});
+  g("saale-unstrut", "Saale-Unstrut", REG, null, [[51.05, 11.55, 51.30, 11.95]], {alias: ["Saale-Unstrut-Triasland", "Unstrut", "Naumburg", "Freyburg", "Bad Kösen", "Laucha", "Nebra"], anz: true});
+  g("baederdreieck", "Niederbayerisches Bäderdreieck", REG, null, [[48.30, 12.85, 48.55, 13.45]], {alias: ["Bäderdreieck", "Rottal", "Bad Füssing", "Bad Griesbach", "Bad Birnbach", "Rottaler Bäderdreieck"], anz: true});
+  g("bodensee", "Bodensee", REG, null, [[47.45, 8.85, 47.85, 9.80]], {alias: ["Lake Constance", "Lac de Constance", "Bodenseeregion", "Obersee", "Untersee", "Konstanz", "Friedrichshafen", "Überlingen", "Lindau", "Bregenz", "Meersburg", "Reichenau", "Mainau"], anz: true});
+
+  /* --- Österreich --- */
+  g("wienerwald", "Wienerwald", GEB, null, [[47.98, 15.85, 48.35, 16.35]], {alias: ["Wiener Wald", "Vienna Woods", "Wien und Wienerwald", "Biosphärenpark Wienerwald", "Kahlenberg", "Lainzer Tiergarten", "Baden bei Wien", "Mödling", "Klosterneuburg", "Purkersdorf", "Heiligenkreuz", "Hermannskogel"]});
+  g("pitztal", "Pitztal", TAL, "alpen", [[46.88, 10.70, 47.27, 10.90]], {alias: ["Pitztaler Gletscher", "Imst", "Imst und Pitztal", "Jerzens", "Mittelberg im Pitztal", "St. Leonhard im Pitztal", "Rifflsee"]});
+  g("lesachtal", "Lesachtal", TAL, "alpen", [[46.60, 12.78, 46.72, 13.05]], {alias: ["Lesach", "Kötschach-Mauthen", "Liesing", "St. Lorenzen im Lesachtal", "Maria Luggau", "Luggau"]});
+  g("seefeld", "Seefeld und Leutasch", REG, "alpen", [[47.28, 11.07, 47.40, 11.25]], {alias: ["Seefelder Plateau", "Seefeld in Tirol", "Seefeld", "Leutasch", "Olympiaregion Seefeld", "Mösern", "Reith bei Seefeld"], anz: true, prio: -1});
+  g("gastein", "Gasteinertal", TAL, "hohetauern", [[47.02, 13.00, 47.28, 13.22]], {alias: ["Gastein", "Bad Gastein", "Bad Hofgastein", "Dorfgastein", "Böckstein", "Sportgastein", "Gasteiner Tal", "Anlauftal"]});
+  g("mariazell", "Mariazeller Land", REG, "alpen", [[47.70, 15.15, 47.88, 15.52]], {alias: ["Mariazell", "Erlaufsee", "Gußwerk", "Mitterbach", "Mariazeller Bürgeralpe"], anz: true});
+  g("moelltal", "Mölltal und Kreuzeckgruppe", TAL, "alpen", [[46.80, 12.90, 46.98, 13.40]], {alias: ["Mölltal", "Moelltal", "Kreuzeckgruppe", "Glockner-Region", "Winklern", "Obervellach", "Mallnitz", "Flattach", "Mölltaler Gletscher", "Reißeck"]});
+  g("woerthersee", "Wörthersee", REG, null, [[46.58, 14.00, 46.68, 14.32]], {alias: ["Woerthersee", "Kärntner Seen", "Klagenfurt", "Velden am Wörthersee", "Pörtschach", "Maria Wörth"], anz: true});
+  g("millstaettersee", "Millstätter See", REG, "alpen", [[46.72, 13.50, 46.85, 13.75]], {alias: ["Millstaetter See", "Kärntner Seen", "Millstatt", "Seeboden", "Döbriach", "Radenthein", "Millstätter Alpe"], anz: true});
+  g("grazer-hausberge", "Grazer Hausberge", GEB, null, [[47.02, 15.28, 47.30, 15.55]], {alias: ["Graz", "Grazer Bergland", "Schöckl", "Plabutsch", "Gratkorn", "Gratwein", "Semriach"]});
+  g("oststeiermark", "Oststeiermark", REG, null, [[46.88, 15.55, 47.50, 16.10]], {alias: ["Oststeirisches Hügelland", "Hartberg", "Fürstenfeld", "Weiz", "Feldbach", "Joglland", "Almenland", "Thermenland", "Pöllau", "Riegersburg", "Vorau"], anz: true});
+  g("leithagebirge", "Leithagebirge und Rosaliengebirge", GEB, null, [[47.82, 16.42, 47.98, 16.80], [47.62, 16.22, 47.78, 16.45]], {alias: ["Leithagebirge", "Rosaliengebirge", "Rosalia", "Eisenstadt", "Hornstein", "Forchtenstein", "Mattersburg", "Kaisersteinbruch"]});
+  g("kalkalpen", "Nationalpark Kalkalpen", GEB, "alpen", [[47.70, 14.20, 47.95, 14.60]], {alias: ["Kalkalpen", "Sengsengebirge", "Reichraminger Hintergebirge", "Windischgarsten", "Molln", "Hengstpass", "Steyrling"]});
+
+  /* --- Schweiz --- */
+  g("glarnerland", "Glarnerland", REG, "alpen", [[46.85, 8.88, 47.15, 9.25]], {alias: ["Glarus", "Kanton Glarus", "Glarner Alpen", "Elm", "Linthal", "Klöntal", "Braunwald", "Näfels", "Sardona", "Ostschweiz Glarnerland"], anz: true});
+  g("zuerichsee", "Zürichsee und Zugerland", REG, null, [[47.05, 8.42, 47.38, 8.98]], {alias: ["Zuerichsee", "Zürichsee", "Zugerland", "Zugersee", "Rapperswil", "Albis", "Einsiedeln", "Pfannenstiel", "Zimmerberg", "Lake Zurich"], anz: true});
+  g("genfersee", "Genfersee", REG, null, [[46.19, 6.15, 46.55, 7.00]], {alias: ["Lac Léman", "Lac Leman", "Léman", "Lake Geneva", "Genf", "Genève", "Lausanne", "Montreux", "Vevey", "Lavaux", "Évian", "Thonon", "Nyon", "Morges", "Chablais"], anz: true, prio: -1});
+  g("vierwaldstaettersee", "Vierwaldstättersee", REG, "zentralschweiz", [[46.90, 8.20, 47.10, 8.70]], {alias: ["Vierwaldstaettersee", "Lake Lucerne", "Lac des Quatre-Cantons", "Weggis", "Vitznau", "Brunnen", "Flüelen", "Beckenried", "Küssnacht"], anz: true});
+  g("emmental", "Emmental", REG, null, [[46.82, 7.55, 47.22, 8.15]], {alias: ["Emmental Oberaargau Entlebuch", "Entlebuch", "Oberaargau", "Napf", "Napfbergland", "Langnau im Emmental", "Burgdorf", "Sumiswald", "Biosphäre Entlebuch", "Escholzmatt", "Huttwil"], anz: true, prio: -1});
+  g("gruyere", "Gruyère und Waadtländer Alpen", REG, "alpen", [[46.30, 6.98, 46.72, 7.35]], {alias: ["Gruyère", "Gruyere", "Greyerz", "Freiburger Alpen", "Freiburger Voralpen", "Waadtländer Alpen", "Alpes vaudoises", "Les Diablerets", "Diablerets", "Charmey", "Château-d'Oex", "Moléson", "Rossinière", "Les Mosses", "Leysin"], anz: true, prio: -1});
+  g("surselva", "Surselva", REG, "graubuenden", [[46.52, 8.70, 46.85, 9.40]], {alias: ["Vorderrheintal", "Laax", "Flims", "Disentis", "Sedrun", "Ilanz", "Vals", "Valsertal", "Val Lumnezia", "Lugnez", "Obersaxen", "Oberalppass", "Ruinaulta", "Rheinschlucht"], anz: true});
+  g("davos", "Davos und Prättigau", REG, "graubuenden", [[46.72, 9.70, 47.07, 9.97]], {alias: ["Davos", "Prättigau", "Praettigau", "Klosters", "Küblis", "Schiers", "Seewis", "Davos Klosters", "Parsenn", "Schatzalp", "Sertig", "Dischma"], anz: true});
+
+  /* --- Italien --- */
+  g("vinschgau", "Vinschgau", REG, "suedtirol", [[46.52, 10.45, 46.85, 10.98]], {in: "suedtirol", alias: ["Val Venosta", "Reschenpass", "Reschensee", "Schlanders", "Mals", "Latsch", "Naturns", "Glurns", "Prad am Stilfserjoch", "Graun im Vinschgau", "Kastelbell", "Schnalstal", "Schnals", "Kurzras", "Langtaufers", "Matsch"]});
+  g("meran", "Meran und Umgebung", REG, "suedtirol", [[46.50, 10.98, 46.85, 11.30]], {in: "suedtirol", alias: ["Meran", "Merano", "Burggrafenamt", "Meraner Land", "Meraner Höhenweg", "Dorf Tirol", "Schenna", "Algund", "Lana", "Passeier", "Passeiertal", "St. Leonhard in Passeier", "Ultental", "Hafling", "Vöran", "Tisens"]});
+  g("bozen", "Bozen und Überetsch", REG, "suedtirol", [[46.33, 11.15, 46.58, 11.50]], {in: "suedtirol", alias: ["Bozen", "Bolzano", "Überetsch", "Ueberetsch", "Bozner Unterland", "Kaltern", "Eppan", "Ritten", "Kalterer See", "Mendel", "Mendelpass", "Salten", "Terlan", "Jenesien", "Tramin", "Neumarkt", "Montiggler See", "Bozen und Kaltern"]});
+  g("sterzing", "Sterzing und Wipptal", REG, "suedtirol", [[46.78, 11.30, 47.02, 11.65]], {in: "suedtirol", alias: ["Sterzing", "Vipiteno", "Wipptal", "Brenner", "Brennerpass", "Pfitsch", "Pfitscher Tal", "Ridnaun", "Ratschings", "Gossensaß", "Franzensfeste", "Jaufenpass"]});
+  g("ahrntal", "Tauferer Ahrntal", REG, "suedtirol", [[46.85, 11.75, 47.12, 12.20]], {in: "suedtirol", alias: ["Ahrntal", "Tauferer Tal", "Sand in Taufers", "Taufers", "Rein in Taufers", "Prettau", "Kasern", "Steinhaus", "St. Johann im Ahrntal", "Campo Tures", "Valle Aurina", "Reintal", "Mühlwald"]});
+  g("antholz", "Antholz und Gsies", REG, "suedtirol", [[46.75, 12.05, 46.95, 12.32]], {in: "suedtirol", alias: ["Antholz", "Anterselva", "Gsies", "Val Casies", "Rasen-Antholz", "Antholzer See", "Antholz Mittertal", "Antholz-Niedertal", "Gsieser Tal", "Welsberg"]});
+  g("pustertal", "Pustertal", REG, "suedtirol", [[46.68, 11.70, 46.92, 12.30]], {in: "suedtirol", alias: ["Val Pusteria", "Bruneck", "Brunico", "Kronplatz", "Toblach", "Innichen", "Hochpustertal", "Olang", "Niederdorf", "Prags", "Pragser Wildsee", "St. Lorenzen", "Rodeneck"]});
+  g("seiser-alm", "Seiser Alm", REG, "dolomiten", [[46.50, 11.50, 46.58, 11.66]], {alias: ["Alpe di Siusi", "Seis am Schlern", "Kastelruth", "Schlern", "Compatsch", "Völs am Schlern", "Santnerspitze", "Puflatsch", "Saltria"]});
+  g("groeden", "Gröden", REG, "dolomiten", [[46.50, 11.66, 46.62, 11.80]], {alias: ["Grödnertal", "Val Gardena", "Gardena", "St. Ulrich", "Ortisei", "St. Christina", "Selva", "Wolkenstein", "Langkofel", "Sellajoch", "Seceda", "Raschötz", "Puez", "Dolomiten 1 Grödnertal"]});
+  g("fassatal", "Fassatal", REG, "dolomiten", [[46.35, 11.64, 46.52, 11.85]], {alias: ["Val di Fassa", "Fassa", "Canazei", "Moena", "Vigo di Fassa", "Campitello", "Pordoijoch", "Passo Pordoi"]});
+  g("gadertal", "Gadertal", REG, "dolomiten", [[46.50, 11.80, 46.78, 12.02]], {alias: ["Val Badia", "Alta Badia", "Abtei", "Corvara", "Kolfuschg", "St. Kassian", "San Cassiano", "La Villa", "Pedraces", "St. Vigil", "Enneberg", "Kronplatz", "Fanes", "Peitlerkofel"]});
+  g("sextner", "Sextner Dolomiten", REG, "dolomiten", [[46.58, 12.15, 46.76, 12.45]], {alias: ["Sexten", "Sesto", "Drei Zinnen", "Tre Cime", "Innichen", "Toblach", "Dürrensee", "Misurina", "Auronzo"]});
+  g("cortina", "Cortina d'Ampezzo", REG, "dolomiten", [[46.45, 11.98, 46.58, 12.25]], {alias: ["Cortina", "Ampezzo", "Ampezzaner Dolomiten", "Falzarego", "Passo Falzarego", "Cinque Torri", "Tofane", "Cristallo", "Passo Giau", "Dolomiten 6 Cortina"]});
+  g("eggental", "Rosengarten und Latemar", REG, "dolomiten", [[46.33, 11.45, 46.50, 11.68]], {alias: ["Eggental", "Eggentaler Berge", "Val d'Ega", "Welschnofen", "Karersee", "Lago di Carezza", "Karerpass", "Deutschnofen", "Latemar", "Rosengarten", "Catinaccio", "Vajolet", "Nigerpass"]});
+  g("lago-maggiore", "Lago Maggiore", REG, null, [[45.70, 8.34, 46.20, 8.95]], {alias: ["Langensee", "Lake Maggiore", "Lago d'Orta", "Ortasee", "Verbania", "Stresa", "Locarno", "Ascona", "Arona", "Luino", "Cannobio", "Brissago", "Borromäische Inseln", "Mottarone", "Pallanza", "Grand Tour Lago Maggiore"], anz: true});
+  g("comer-see", "Comer See", REG, null, [[45.78, 9.05, 46.17, 9.45]], {alias: ["Lago di Como", "Lake Como", "Lario", "Como", "Lecco", "Bellagio", "Menaggio", "Varenna", "Colico", "Triangolo Lariano", "Grigna", "Grigne", "Cernobbio", "Tremezzina"], anz: true});
+  g("adamello", "Adamello und Presanella", GEB, "alpen", [[46.02, 10.20, 46.30, 10.78]], {alias: ["Adamello", "Presanella", "Val Camonica", "Ponte di Legno", "Tonale", "Passo del Tonale", "Pinzolo", "Val di Genova", "Edolo", "Temù", "Val Rendena", "Carè Alto"]});
+  g("vizentiner", "Vizentiner Alpen", GEB, "alpen", [[45.62, 11.15, 45.95, 11.65]], {alias: ["Vicentiner Alpen", "Prealpi Vicentine", "Vicentine Alps", "Asiago", "Altopiano di Asiago", "Sieben Gemeinden", "Sette Comuni", "Pasubio", "Pian delle Fugazze", "Recoaro Terme", "Kleine Dolomiten", "Piccole Dolomiti", "Lavarone", "Folgaria"]});
+  g("golf-neapel", "Golf von Neapel", KUE, "kampanien", [[40.55, 13.85, 40.95, 14.45]], {alias: ["Bay of Naples", "Golfo di Napoli", "Pozzuoli", "Phlegräische Felder", "Campi Flegrei", "Procida", "Sorrent", "Sorrento", "Halbinsel Sorrent", "Penisola Sorrentina", "Monte Faito", "Castellammare di Stabia"]});
+
+  /* --- Frankreich --- */
+  g("burgund", "Burgund", REG, null, [[46.15, 2.85, 48.40, 5.50]], {alias: ["Bourgogne", "Burgundy", "Morvan", "Côte-d'Or", "Dijon", "Beaune", "Chablis", "Vézelay", "Cluny", "Auxerre", "Autun", "Nièvre", "Yonne", "Saône-et-Loire", "Bourgogne Loire Saône"], anz: true});
+  g("dordogne", "Dordogne und Lot", REG, null, [[44.55, 0.00, 45.70, 1.50], [44.20, 1.00, 44.95, 2.20]], {alias: ["Dordogne", "Périgord", "Perigord", "Quercy", "Vézère", "Sarlat", "Rocamadour", "Les Eyzies", "Bergerac", "Cahors", "Périgueux", "Lot Frankreich", "Dordogne Lot"], anz: true});
+  g("cote-d-azur", "Côte d'Azur", KUE, null, [[43.25, 6.45, 43.90, 7.55]], {alias: ["Cote d'Azur", "Französische Riviera", "French Riviera", "Riviera française", "Nizza", "Nice", "Cannes", "Antibes", "Saint-Tropez", "Menton", "Grasse", "Fréjus", "Esterel", "Massif de l'Esterel", "Cap Ferrat", "Côte d'Azur mit Calanques"], anz: true});
+  g("dauphine", "Dauphiné", REG, null, [[44.20, 4.85, 45.55, 6.75]], {alias: ["Dauphine", "Dauphiné West", "Dauphiné Ost", "Isère", "Drôme", "Drôme provençale", "Hautes-Alpes", "Dévoluy", "Buëch", "Grenoble", "Gap", "Briançon"], anz: true, prio: -1});
+
+  /* --- Spanien und Portugal --- */
+  g("galicien", "Galicien", REG, null, [[41.95, -9.30, 43.05, -6.75], [43.05, -9.30, 43.80, -7.05]], {nicht: ["geres"], alias: ["Galicia", "Galiza", "Rías Baixas", "Rias Baixas", "Costa da Morte", "Finisterre", "Fisterra", "Santiago de Compostela", "Vigo", "A Coruña", "Lugo", "Ourense", "Pontevedra", "Ribeira Sacra", "Islas Cíes"], anz: true});
+  g("kantabrien", "Kantabrien", REG, null, [[42.75, -4.85, 43.25, -3.15], [43.25, -4.58, 43.56, -3.15]], {alias: ["Cantabria", "Santander", "Liébana", "Potes", "Santillana del Mar", "Spanien Kantabrien"], anz: true});
+  g("asturien", "Asturien", REG, null, [[42.95, -7.05, 43.25, -4.85], [43.25, -7.05, 43.67, -4.58]], {alias: ["Asturias", "Principado de Asturias", "Oviedo", "Gijón", "Covadonga", "Somiedo", "Ribadesella", "Cangas de Onís"], anz: true});
+  g("baskenland", "Baskenland", REG, null, [[42.45, -3.45, 43.46, -1.72], [43.12, -1.80, 43.52, -0.95]], {alias: ["Euskadi", "País Vasco", "Pais Vasco", "Pays Basque", "Pays Basque Espagnol", "Bizkaia", "Gipuzkoa", "Álava", "San Sebastián", "Donostia", "Bilbao", "Biarritz", "Bayonne", "Saint-Jean-Pied-de-Port", "Baskenland Frankreich"], anz: true, prio: -1});
+  g("costa-brava", "Costa Brava", KUE, null, [[41.65, 2.75, 42.45, 3.35]], {alias: ["Girona", "Gerona", "Roses", "Cadaqués", "Cap de Creus", "Palafrugell", "Tossa de Mar", "Lloret de Mar", "L'Estartit", "Begur", "Empordà", "Camí de Ronda", "Portbou", "Llançà", "Sant Feliu de Guíxols"], anz: true});
+  g("costa-daurada", "Costa Daurada", KUE, null, [[40.55, 0.50, 41.30, 1.85]], {alias: ["Tarragona", "Salou", "Cambrils", "Prades", "Siurana", "Priorat", "Ebrodelta", "Delta de l'Ebre", "Montsant", "Sitges", "Vilanova i la Geltrú", "Reus", "L'Ametlla de Mar"], anz: true});
+  g("costa-blanca", "Costa Blanca", KUE, null, [[37.95, -0.80, 38.88, 0.25]], {alias: ["Marina Alta", "Marina Baixa", "Alicante", "Alacant", "Benidorm", "Calpe", "Calp", "Dénia", "Denia", "Altea", "Jávea", "Xàbia", "Moraira", "Alcoy", "Alcoi", "Guadalest", "Puig Campana", "Peñón de Ifach", "Torrevieja", "Vall de Laguar"], anz: true});
+  g("alentejo", "Alentejo", REG, null, [[37.50, -8.90, 39.30, -7.30]], {alias: ["Alto Alentejo", "Baixo Alentejo", "Évora", "Evora", "Beja", "Portalegre", "Sines", "Costa Alentejana", "Marvão", "Monsaraz", "Serra de São Mamede", "Mértola", "Vila Nova de Milfontes", "Odemira"], anz: true});
+  g("nordportugal", "Nordportugal", REG, null, [[40.95, -8.90, 41.95, -6.55]], {alias: ["Portugal Norte", "Portugal Der Norden", "Minho", "Douro", "Alto Douro", "Dourotal", "Trás-os-Montes", "Tras-os-Montes", "Porto", "Braga", "Guimarães", "Viana do Castelo", "Vila Real", "Bragança", "Montesinho", "Serra do Marão"], anz: true});
+
+  /* --- Griechenland --- */
+  g("korfu", "Korfu", INS, null, [[39.37, 19.58, 39.82, 19.98]], {alias: ["Kerkyra", "Kerkira", "Corfu", "Κέρκυρα", "Paleokastritsa", "Pantokrator", "Kassiopi", "Sidari", "Lefkimmi", "Agios Gordios"]});
+  g("chalkidiki", "Chalkidiki", KUE, null, [[39.90, 22.70, 40.55, 24.45]], {alias: ["Chalkidike", "Halkidiki", "Χαλκιδική", "Sithonia", "Kassandra", "Athos", "Berg Athos", "Nikiti", "Ouranoupoli", "Polygyros", "Arnaia"]});
+  g("thassos", "Thassos", INS, null, [[40.57, 24.55, 40.80, 24.82]], {alias: ["Thasos", "Θάσος", "Limenas", "Skala Prinos", "Potos"]});
+  g("olymp", "Olymp", GEB, null, [[39.98, 22.25, 40.20, 22.55]], {alias: ["Olymp Griechenland", "Mount Olympus", "Olympos", "Litochoro", "Mytikas", "Prionia", "Enipeas"]});
+  g("pilion", "Pilion", GEB, null, [[39.08, 22.85, 39.50, 23.32]], {alias: ["Pelion", "Pilio", "Πήλιο", "Volos", "Zagora", "Tsagarada", "Makrinitsa", "Milies", "Portaria", "Damouchari", "Trikeri", "Argalasti"]});
+  g("kefalonia", "Kefalonia", INS, null, [[38.05, 20.30, 38.30, 20.82], [38.30, 20.30, 38.50, 20.64]], {alias: ["Kefalinia", "Cephalonia", "Kefallonia", "Argostoli", "Fiskardo", "Lixouri", "Myrtos", "Berg Ainos", "Aenos"]});
+  g("ithaka", "Ithaka", INS, null, [[38.30, 20.64, 38.50, 20.78]], {alias: ["Ithaki", "Ithaca", "Ιθάκη", "Vathy", "Stavros", "Frikes", "Kioni"]});
+  g("zakynthos", "Zakynthos", INS, null, [[37.65, 20.60, 37.95, 21.05]], {alias: ["Zante", "Zakinthos", "Ζάκυνθος", "Navagio", "Shipwreck Beach", "Laganas", "Alykes", "Volimes"]});
+  g("samos", "Samos", INS, null, [[37.64, 26.52, 37.86, 26.98]], {alias: ["Σάμος", "Pythagoreio", "Karlovasi", "Kokkari", "Mt Kerkis", "Kerkis", "Marathokambos"]});
+  g("ikaria", "Ikaria", INS, null, [[37.54, 25.95, 37.70, 26.35]], {alias: ["Ikaría", "Nikaria", "Ικαρία", "Agios Kirykos", "Evdilos", "Armenistis"]});
+  g("patmos", "Patmos", INS, null, [[37.27, 26.50, 37.38, 26.62]], {alias: ["Πάτμος", "Apokalypse-Höhle"]});
+  g("fourni", "Fourni", INS, null, [[37.55, 26.40, 37.63, 26.55]], {alias: ["Fourni Korseon", "Φούρνοι", "Furni"]});
+
+  /* --- Skandinavien und Nordsee/Ostsee --- */
+  g("dovrefjell", "Dovrefjell", GEB, "skandinavien", [[62.15, 8.90, 62.55, 10.00]], {alias: ["Dovrefjell Nationalpark", "Dovre", "Snøhetta", "Snohetta", "Hjerkinn", "Kongsvoll", "Dombås", "Dombaas", "Moskusochsen"]});
+  g("vesteraalen", "Vesterålen", INS, null, [[68.50, 14.40, 69.40, 16.30]], {alias: ["Vesteralen", "Lofoten und Vesterålen", "Andøya", "Andoya", "Hadsel", "Sortland", "Stokmarknes", "Melbu", "Langøya", "Hinnøya", "Øksnes"], prio: -1});
+  g("gotland", "Gotland", INS, null, [[56.90, 18.05, 58.00, 19.40]], {alias: ["Fårö", "Faro Gotland", "Visby", "Fårösund", "Hoburgen", "Slite", "Ljugarn", "Gotland und Fårö"]});
+  g("oeland", "Öland", INS, null, [[56.18, 16.42, 57.40, 17.10]], {alias: ["Oeland", "Borgholm", "Färjestaden", "Alvaret", "Stora Alvaret", "Ottenby", "Böda", "Byxelkrok", "Mörbylånga", "Grönhögen"]});
+  g("bornholm", "Bornholm", INS, null, [[54.95, 14.62, 55.33, 15.20]], {alias: ["Rønne", "Ronne", "Svaneke", "Gudhjem", "Hammeren", "Hammershus", "Almindingen", "Christiansø", "Nexø", "Allinge", "Sandvig", "Dueodde"]});
+  g("faeroeer", "Färöer", INS, null, [[61.35, -7.75, 62.45, -6.20]], {alias: ["Faeroeer", "Färöer-Inseln", "Faroe Islands", "Faroe", "Færøerne", "Føroyar", "Streymoy", "Eysturoy", "Vágar", "Mykines", "Tórshavn", "Gásadalur", "Saksun", "Kalsoy", "Suðuroy"]});
+  g("kanalinseln", "Kanalinseln", INS, null, [[49.16, -2.28, 49.28, -2.00], [49.40, -2.70, 49.52, -2.30], [49.69, -2.25, 49.74, -2.15]], {alias: ["Channel Islands", "Îles Anglo-Normandes", "Jersey", "Guernsey", "Sark", "Herm", "Alderney", "Saint Helier", "Saint Peter Port"]});
+  g("devon", "Devon", REG, null, [[50.20, -4.20, 50.90, -3.05], [50.90, -4.55, 51.25, -3.05]], {alias: ["Devon England", "Dartmoor", "Exmoor", "South Devon", "North Devon", "Torquay", "Plymouth", "Exeter", "Dartmouth", "Salcombe", "Ilfracombe", "Lynmouth", "Hartland", "Barnstaple", "Cornwall - Devon"], anz: true, prio: -1});
+
+  /* --- Übersee --- */
+  g("molokai", "Molokaʻi", INS, "hawaii", [[21.05, -157.32, 21.22, -156.72]], {alias: ["Molokai", "Kalaupapa", "Halawa"]});
+  g("tasmanien", "Tasmanien", INS, null, [[-43.70, 144.55, -40.55, 148.45]], {alias: ["Tasmania", "Cradle Mountain", "Overland Track", "Freycinet", "Hobart", "Launceston", "Bay of Fires", "Tasmanische Halbinsel"]});
+
+  /* --- Alias zu vorhandenen Gebieten (Schreibweisen, Wege, Titel der Reihe) --- */
+  plus("allgaeu", "Oberallgäu", "Ostallgäu", "Westallgäu", "Unterallgäu", "Oberstaufen", "Allgäuer Alpenvorland", "Füssen", "Pfronten", "Immenstadt", "Sonthofen", "Bad Hindelang", "Allgäuer Höhenwege");
+  plus("berchtesgaden", "Nationalpark Berchtesgaden", "Ramsau bei Berchtesgaden", "Schönau am Königssee");
+  plus("schwarzwald", "Westweg", "Mittelweg", "Ostweg", "Fernwanderwege Schwarzwald");
+  plus("lueneburger-heide", "Heidschnuckenweg", "Heidschnucken");
+  plus("harz", "Harzer Hexenstieg", "Harzer-Hexen-Stieg", "Hexenstieg");
+  plus("eifel", "Eifelsteig");
+  plus("schwaebische-alb", "Albsteig", "Schwäbische Alb Ost", "Schwäbische Alb West");
+  plus("bayerischer-wald", "Goldsteig");
+  plus("oberpfaelzer-wald", "Goldsteig");
+  plus("boehmerwald", "Tschechischer Goldsteig", "Goldsteig");
+  plus("pfaelzerwald", "Deutsche Weinstraße", "Pfälzer Weinsteig", "Südliche Weinstraße", "Pfälzerwald und Deutsche Weinstraße");
+  plus("moseltal", "Moselsteig");
+  plus("frankenwald", "Coburger Land");
+  plus("schladminger", "Steirische Niedere Tauern");
+  plus("dachstein", "Dachstein-Tauern", "Dachstein Tauern West", "Dachstein Tauern Ost");
+  plus("salzkammergut", "Salzkammergut West", "Salzkammergut Ost", "Bad Ischl", "Mondsee", "Fuschlsee", "Ausseerland", "Altaussee", "Gmunden", "Almtal");
+  plus("hohetauern", "Hohe Tauern Nationalpark Nord", "Nationalpark Hohe Tauern Nord");
+  plus("stubaital", "Wipptal", "Tiroler Wipptal", "Gschnitztal", "Sellraintal", "Sellrain", "Stubai-Wipptal", "Stubaier Höhenweg", "Sellrainer Hüttenrunde");
+  plus("kaunertal", "Oberinntal", "Kaunertal Oberinntal");
+  plus("ausserfern", "Lechweg", "Lechtaler Höhenweg");
+  plus("wachau", "Welterbesteig Wachau", "Welterbesteig");
+  plus("villach", "Kärntner Seen");
+  plus("wetterstein", "Zugspitze mit Ammergauer Alpen");
+  plus("wallis", "Oberwallis", "Unterwallis", "Walliser Alpen", "Goms", "Lötschental", "Tour Monte Rosa");
+  plus("jura", "Schweizer Jura", "Französischer Jura", "Franche-Comté", "Jura Franche-Comté");
+  plus("dolomiten", "Dolomiten Höhenwege", "Alta Via", "Dolomiten Fassatal", "Dolomiten Gadertal", "Dolomiten Sextner Dolomiten");
+  plus("friaul", "Friuli Venezia Giulia", "Friaul-Julisch Venetien", "Julisch Venetien", "Friuli");
+  plus("ligurien", "Italienische Riviera");
+  plus("piemont", "Grande Traversata delle Alpi", "GTA");
+  plus("calanques", "Côte d'Azur mit Nationalpark Calanques");
+  plus("gardasee", "Gardaseeberge");
+  plus("latium", "Rom", "Rom und Latium");
+  plus("umbrien", "Franziskusweg", "Via di San Francesco");
+  plus("korsika", "Mare e Monti", "Mare a Mare");
+  plus("pyrenaeen", "GR 10", "GR 11", "Pyrenäen GR 10");
+  plus("mallorca", "GR 221");
+  plus("tramuntana", "GR 221", "Trockensteinroute", "Ruta de Pedra en Sec");
+  plus("highlands", "West Highland Way");
+  plus("lofoten", "Lofoten und Vesterålen");
+
   /* ===================== Rechnen ===================== */
   const BY = {};
   L.forEach(x => { BY[x.id] = x; });

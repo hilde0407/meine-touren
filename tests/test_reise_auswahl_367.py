@@ -8,9 +8,9 @@ JS = ROOT / "app" / "static" / "js"
 
 
 def test_version_und_doku():
-    assert config.VERSION.startswith("3.69.0 · Meine Touren")
-    assert 'const V = "mt-v159"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.69.0"' in (JS / "54-ansichten.js").read_text(encoding="utf-8")
+    assert config.VERSION.startswith("3.70.0 · Meine Touren")
+    assert 'const V = "mt-v160"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.70.0"' in (JS / "54-ansichten.js").read_text(encoding="utf-8")
     assert (ROOT / "docs" / "versionen" / "3.67.0.md").exists()
     assert "3.67.0" in (ROOT / "docs" / "VERSIONSVERLAUF.md").read_text(encoding="utf-8")
     assert "3.67.0" in (ROOT / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")

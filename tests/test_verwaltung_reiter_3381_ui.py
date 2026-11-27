@@ -199,3 +199,19 @@ def test_reiterleiste_schmal_gleichmaessiger_umbruch(pw, app):
         assert r["sh"] <= r["ch"] + 1, r
     finally:
         pg.browser_.close()
+
+
+@pytest.mark.parametrize("breite", [360, 390, 430])
+@pytest.mark.parametrize("farbe", ["light", "dark"])
+def test_standort_teilen_laeuft_nicht_ueber_den_kartenrand(pw, app, breite, farbe):
+    """3.70.0: #livem bleibt in der Karte (kein seitliches Scrollen), Löschknopf ruhig (ghost sm), Statustext darunter."""
+    pg = _admin(pw, app, "de", tab="handy", width=breite, height=900)
+    try:
+        pg.emulate_media(color_scheme=farbe)
+        pg.locator("#livebox").scroll_into_view_if_needed()
+        r = pg.evaluate("""() => { const b = document.querySelector('#livebox'), s = document.querySelector('#livem'), x = document.querySelector('#livex'), br = b.getBoundingClientRect(), sr = s.getBoundingClientRect();
+          return {sw: b.scrollWidth, cw: b.clientWidth, sRight: sr.right, bRight: br.right, doc: document.documentElement.scrollWidth, win: window.innerWidth, cls: x.className}; }""")
+        assert r["sw"] <= r["cw"] and r["sRight"] <= r["bRight"] + 0.5 and r["doc"] <= r["win"], r
+        assert "ghost" in r["cls"] and "alt" not in r["cls"].split()
+    finally:
+        pg.browser_.close()

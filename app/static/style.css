@@ -2574,3 +2574,11 @@ html.mob #gbsee{display:block;margin:6px 0 0}
 .pgnone{margin:12px 0 0;font-size:16px}
 html.mob .sec .pgflt{display:flex;flex-direction:column;align-items:stretch;margin-top:6px}
 html.mob .pgflt select{width:100%;min-width:0}
+
+/* 3.70.0 Standort teilen (Verwaltung → Handy): Auswahlfeld bleibt in der Karte (Pfeil sichtbar), am Handy als Spalte, Löschen ruhig (btn ghost sm) */
+.livem-row select{max-width:100%;min-width:0;text-overflow:ellipsis}
+.livem-row #livemsg{flex-basis:100%;overflow-wrap:anywhere}
+html.mob .livem-row,.livem-row.mob{flex-direction:column;align-items:stretch}
+html.mob .livem-row select{width:100%}
+html.mob .livem-row .btn{align-self:flex-start}
+@media (max-width:640px){.livem-row{flex-direction:column;align-items:stretch}.livem-row select{width:100%}.livem-row .btn{align-self:flex-start}}

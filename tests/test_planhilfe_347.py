@@ -337,8 +337,8 @@ def test_migration_alter_plaene(tmp_path):
 def test_version_und_cache():
     from app import config
     root = Path(__file__).resolve().parent.parent
-    assert config.VERSION.startswith("3.69.0 · Meine Touren")
-    assert 'const V = "mt-v159"' in (root / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert config.VERSION.startswith("3.70.0 · Meine Touren")
+    assert 'const V = "mt-v160"' in (root / "app" / "static" / "sw.js").read_text(encoding="utf-8")
     assert (root / "docs" / "versionen" / "3.47.0.md").exists()
     assert "## Version 3.47.0" in (root / "docs" / "VERSIONSVERLAUF.md").read_text(encoding="utf-8")
-    assert 'const SL_APPV = "3.69.0"' in (root / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'const SL_APPV = "3.70.0"' in (root / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")

@@ -2,6 +2,12 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.70.0 – Gebiete mit dem Rother-Wanderführer-Katalog abgeglichen
+
+- **94 neue Gebiete** nach den Regionsnamen der Reihe „Rother Wanderführer“ (nur Titel als Maßstab): Münsterland, Oberlausitz, Mecklenburgische Seenplatte, Isarwinkel, Bodensee, Altmühltal u. a.; Wienerwald, Pitztal, Gasteinertal, Oststeiermark, Wörthersee u. a.; Glarnerland, Genfersee, Emmental, Davos/Prättigau u. a.; Südtiroler Täler (Vinschgau, Meran, Pustertal, Ahrntal …) und Dolomiten-Täler (Gröden, Fassa, Gadertal, Cortina …), Lago Maggiore, Comer See; Galicien, Kantabrien, Asturien, Baskenland, Costa Brava/Daurada/Blanca, Alentejo; Korfu, Chalkidiki, Kefalonia, Samos u. a.; Gotland, Öland, Bornholm, Färöer, Kanalinseln, Devon, Tasmanien
+- **103 neue Alias** für Schreibweisen und Wege (Westweg, Goldsteig, Heidschnuckenweg, GR 10, GR 221, West Highland Way …); Südtirol bleibt nur die Provinz Bozen
+- Liste „Noch nicht angelegt (Grenzen unklar)“ in den Versionsnotizen
+
 ## Version 3.69.0 – Gebiete ergänzt: Österreich und Peloponnes
 
 - **Österreich:** Osttirol (Bezirk Lienz, nie Südtirol) mit Villgratental, Defereggental, Virgental und Lienzer Dolomiten; Innsbruck und Mittelgebirge (Patsch, Igls), Tuxer Voralpen; Rätikon mit Brandnertal (Bürserberg); Ötscher, Wachau, Neusiedler See, Villach und Ossiacher See

@@ -124,7 +124,7 @@ VIEWS.admin = async (...a) => {
     cur = cfg.live_mode || "off",
     box = `<div class="panel" id="livebox"><h2>Standort teilen</h2>
     <p class="mut fs13">Zeigt Betrachtern (und dir selbst auf der Karte) deine zuletzt gemeldete Position. Die Android-App meldet sie während einer Aufzeichnung alle 30 Sekunden; mit „Immer“ auch die Ortungstaste auf der Karte. Es wird nur die letzte Position gespeichert, nicht der Verlauf.</p>
-    <p class="mut fs13 m0-0-6">Die Auswahl wird sofort gespeichert („Einstellungen speichern“ ist dafür nicht nötig).</p><div class="row g8"><select id="livem" aria-label="Standort teilen"><option value="off">Aus</option><option value="rec">Nur während einer Aufzeichnung</option><option value="on">Immer, wenn die Karte meinen Standort zeigt</option></select><button class="btn alt" id="livex">Letzten Standort löschen</button><span id="livemsg" class="mut"></span></div></div>`,
+    <p class="mut fs13 m0-0-6">Die Auswahl wird sofort gespeichert („Einstellungen speichern“ ist dafür nicht nötig).</p><div class="row g8 livem-row"><select id="livem" aria-label="Standort teilen"><option value="off">Aus</option><option value="rec">Nur während einer Aufzeichnung</option><option value="on">Immer, wenn die Karte meinen Standort zeigt</option></select><button class="btn ghost sm" id="livex">Letzten Standort löschen</button><span id="livemsg" class="mut"></span></div></div>`,
     body = document.querySelector('.atab[data-t="handy"] .gbody');
   if (body) body.insertAdjacentHTML("beforeend", box);
   else if ($("#save")) $("#save").closest(".row").insertAdjacentHTML("beforebegin", box);
