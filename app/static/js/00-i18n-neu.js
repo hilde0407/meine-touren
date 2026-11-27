@@ -1768,7 +1768,7 @@ vor {} Monaten || {} months ago || il y a {} mois || hace {} meses
 Sobald du ältere Touren hast, zeige ich dir hier eine zufällige. || As soon as you have older tours, a random one is shown here. || Dès que vous aurez d’anciens parcours, un parcours au hasard s’affichera ici. || En cuanto tengas rutas antiguas, aquí verás una al azar.
 Seeufer-Runde || Lakeside loop || Tour du lac || Vuelta al lago
 Meistbesuchte Orte || Most visited places || Lieux les plus visités || Lugares más visitados
-Die Orte, Landkreise, Regionen oder Länder, in denen du die meisten Touren gemacht hast, als Balken. || The places, districts, regions or countries where you did the most tours, as bars. || Les lieux, arrondissements, régions ou pays où vous avez fait le plus de parcours, en barres. || Los lugares, comarcas, regiones o países donde hiciste más rutas, en barras.
+Die Orte, Landkreise, Regionen, Gebiete oder Länder, in denen du die meisten Touren gemacht hast, als Balken. || The places, districts, regions, areas or countries where you did the most tours, as bars. || Les lieux, arrondissements, régions, zones ou pays où vous avez fait le plus de parcours, en barres. || Los lugares, comarcas, regiones, zonas o países donde hiciste más rutas, en barras.
 Gliedern nach || Group by || Regrouper par || Agrupar por
 Ort || Place || Lieu || Lugar
 Landkreis || District || Arrondissement || Comarca
@@ -1776,6 +1776,18 @@ Bundesland oder Region || State or region || Land ou région || Estado o región
 Land || Country || Pays || País
 1 Tour ohne Ortsangabe || 1 tour without a place || 1 parcours sans lieu || 1 ruta sin lugar
 {} Touren ohne Ortsangabe || {} tours without a place || {} parcours sans lieu || {} rutas sin lugar
+1 Tour ohne Gebiet || 1 tour without an area || 1 parcours sans zone || 1 ruta sin zona
+{} Touren ohne Gebiet || {} tours without an area || {} parcours sans zone || {} rutas sin zona
+Noch keine Tour liegt in einem bekannten Gebiet. || No tour is in a known area yet. || Aucun parcours ne se trouve encore dans une zone connue. || Aún ninguna ruta está en una zona conocida.
+Gebiet || Area || Zone || Zona
+Alle Gebiete || All areas || Toutes les zones || Todas las zonas
+Gebiet suchen || Search area || Rechercher une zone || Buscar zona
+Kein Gebiet gefunden. || No area found. || Aucune zone trouvée. || No se encontró ninguna zona.
+Gebirge || Mountains || Massifs || Montañas
+Täler || Valleys || Vallées || Valles
+Inseln || Islands || Îles || Islas
+Küsten || Coasts || Côtes || Costas
+Landschaften || Landscapes || Paysages || Paisajes
 Uhren-Zeitleiste || Watch timeline || Frise des montres || Línea de tiempo de relojes
 Uhren und Geräte || Watches and devices || Montres et appareils || Relojes y dispositivos
 Deine Geräte (Uhren, Handys) auf einer Zeitleiste: wann du sie genutzt hast und wie viele Touren sie aufgezeichnet haben. || Your devices (watches, phones) on a timeline: when you used them and how many tours they recorded. || Vos appareils (montres, téléphones) sur une frise : quand vous les avez utilisés et combien de parcours ils ont enregistrés. || Tus dispositivos (relojes, móviles) en una línea de tiempo: cuándo los usaste y cuántas rutas grabaron.

@@ -403,23 +403,23 @@ Object.assign(window.SL_WT, {
   },
   orte: {
     fam: "uebersicht", cat: "zahlen", icon: "pin", name: "Meistbesuchte Orte", title: () => "Meistbesuchte Orte", defaults: {level: "county"},
-    desc: "Die Orte, Landkreise, Regionen oder Länder, in denen du die meisten Touren gemacht hast, als Balken.",
-    fields: [{k: "level", kind: "radio", label: "Gliedern nach", options: [["place", "Ort"], ["county", "Landkreis"], ["state", "Bundesland oder Region"], ["country", "Land"]]}],
+    desc: "Die Orte, Landkreise, Regionen, Gebiete oder Länder, in denen du die meisten Touren gemacht hast, als Balken.",
+    fields: [{k: "level", kind: "radio", label: "Gliedern nach", options: [["place", "Ort"], ["county", "Landkreis"], ["state", "Bundesland oder Region"], ["gebiet", "Gebiet"], ["country", "Land"]]}],
     preview: () => slPvHbars([96, 70, 52, 30]),
     render(c, b, cfg) {
-      const key = {place: "g_place", county: "g_county", state: "g_state", country: "g_country"}[cfg.level] || "g_county", G = {};
+      const key = {place: "g_place", county: "g_county", state: "g_state", country: "g_country"}[cfg.level] || "g_county", G = {}, gb = cfg.level === "gebiet";       // 3.64.0: Gebiet = das genaueste Gebiet der Tour (jede Tour zählt einmal)
       let miss = 0;
       TOURS.forEach(t => {
-        const k = (t[key] || "").trim();
+        const k = gb ? ((Gebiete.von(t)[0] || {}).name || "") : (t[key] || "").trim();
         if (!k) return miss++;
         const g = (G[k] = G[k] || {k, n: 0, km: 0});
         g.n++;
         g.km += t.km;
       });
       const L = Object.values(G).sort((x, y) => y.n - x.n || y.km - x.km).slice(0, 8);
-      if (!L.length) return slNote(b, "Noch keine Regionen bestimmt: Verwaltung → Touren holen → Komoot „Regionen bestimmen“.");
+      if (!L.length) return slNote(b, gb ? "Noch keine Tour liegt in einem bekannten Gebiet." : "Noch keine Regionen bestimmt: Verwaltung → Touren holen → Komoot „Regionen bestimmen“.");
       b.innerHTML = slRows(L.map(g => `<li><div class="slr1"><span>${esc(g.k)}</span><b>${g.n === 1 ? "1 Tour" : g.n + " Touren"}</b></div>${slBr((g.n / L[0].n) * 100)}<p class="mut slr2">${slKm(g.km)}</p></li>`)) +
-        (miss ? `<p class="mut slcap">${miss === 1 ? "1 Tour ohne Ortsangabe" : miss + " Touren ohne Ortsangabe"}</p>` : "");
+        (miss ? `<p class="mut slcap">${gb ? (miss === 1 ? "1 Tour ohne Gebiet" : miss + " Touren ohne Gebiet") : miss === 1 ? "1 Tour ohne Ortsangabe" : miss + " Touren ohne Ortsangabe"}</p>` : "");
       slBadge(c, esc(L[0].k));
     },
   },

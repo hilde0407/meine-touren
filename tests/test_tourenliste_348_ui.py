@@ -27,11 +27,11 @@ def _anzahl(pg):
 def test_desktop_unveraendert(pw, app):
     pg = _liste(pw, app, width=1280, height=900)
     try:
-        for i in ("q", "fy", "fs", "fz", "fb", "fr", "ft", "so"):
+        for i in ("q", "fy", "fs", "fz", "fb", "fr", "fg", "ft", "so"):
             expect(pg.locator("#" + i)).to_be_visible(timeout=T)
         expect(pg.locator("#fmore")).to_be_hidden()
         order = pg.evaluate("() => [...document.querySelectorAll('#flt select, #flt input')].map(e => e.id)")
-        assert order == ["q", "fy", "fs", "fz", "fb", "fr", "ft", "so"], order                          # gleiche Reihenfolge wie bisher
+        assert order == ["q", "fy", "fs", "fz", "fb", "fr", "fg", "ft", "so"], order                    # gleiche Reihenfolge wie bisher, dazu (3.64.0) „Gebiet“ hinter „Region“
         r = pg.evaluate("""() => { const t = document.querySelector('.tr'), n = t.querySelector('.n').getBoundingClientRect(), m = t.querySelector('.nm').getBoundingClientRect();
           return {nRight: n.left > m.left + 200, fs: parseFloat(getComputedStyle(t.querySelector('.nm')).fontSize), nfs: parseFloat(getComputedStyle(t.querySelector('.n span')).fontSize)}; }""")
         assert r["nRight"] and r["fs"] == 22 and r["nfs"] == 24, r                                    # Kennzahlen rechts, Schriftgrößen wie bisher

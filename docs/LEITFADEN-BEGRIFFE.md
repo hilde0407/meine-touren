@@ -40,6 +40,7 @@ Interne Bezeichner (Dateinamen, Funktionen, Einstellungsschlüssel, API-Pfade, E
 | Startbildschirm | Meine Touren: „Übersicht“; Tagebuch: „Start“ (Seitentitel gleich dem Reiter) | Dashboard |
 | Erster Reiter der Verwaltung (Meine Touren) | „Allgemein“ | „Übersicht“ (doppelt belegt) |
 | Jahresauswertung | Jahresrückblick | Rückblick ohne „Jahres“ (wenn das Jahr gemeint ist) |
+| Gebirge, Tal, Insel, Küste, Landschaft einer Tour (eingebaute Tabelle) | Gebiet, Gebiete („Alle Gebiete“); Land und Bundesland bleiben „Region“ („Alle Regionen“) | „Gegend“, „Landschaft“ als Filtername |
 | Zeitraum ohne Grenze | „Gesamte Zeit“ | „Alle Jahre“, „Gesamt“ |
 | Alle Sportarten im Filter | „Alle Sportarten“ | „Alle“, „alle Sportarten“ |
 | Verbindung zu einem Dienst beenden | „Verbindung trennen“; Zustand „Verbunden mit …“ | „Trennen“, „Abmelden“, „Angemeldet als“ |
@@ -56,6 +57,7 @@ Interne Bezeichner (Dateinamen, Funktionen, Einstellungsschlüssel, API-Pfade, E
 8. **Wiederkehrende Aktionen an einer Tour:** gleiche Namen und Reihenfolge in Knopfleiste und Menü: Bearbeiten, Schlagwörter & Alben, Teilen, Exportieren, Löschen (zuletzt, rot). Menüpunkte, die einen weiteren Dialog öffnen, enden auf „ …“.
 9. **Wegangaben in Hinweisen:** „Verwaltung → <Reiter> → <Bereich>“ bzw. „Mehr → Einstellungen → <Bereich>“, mit genau den Namen, die dort stehen.
 10. **Schreibweisen:** Auslassung „ …“ (mit Leerzeichen davor), Anführungszeichen „…“, Pfeil „→“. Knöpfe beginnen groß. Einheiten und Datum nur über die zentrale Formatfunktion: km, m, „Std.“ und „Min.“; Datum TT.MM.JJJJ, auch bei Eingaben. Mehrzahl ausschreiben statt „Foto(s)“. Symbole an Knöpfen: je App ein System (Tagebuch SVG-Symbole, keine Emoji in Knöpfen; Meine Touren wie bisher, aber dieselbe Aktion immer mit demselben Symbol).
+11. **Gebiet wählen (Filter):** Auswahlfeld „Alle Gebiete“; es öffnet ein Blatt mit Suchfeld und Liste nach Typ (Gebirge, Täler, Inseln, Küsten, Landschaften) mit Anzahl Touren, nur Gebiete mit Touren; „Alle Gebiete“ hebt auf, Enter wählt den ersten Treffer. Eine gemeinsame Funktion (`gebietOpts`, `gebietSheetOpen`, `inGebiet`).
 
 ## 3. Regeln für künftige Änderungen
 - Neue Texte prüfen: steht die Sache in Tabelle 1, gilt das Wort dort.

@@ -14,7 +14,7 @@ import requests
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse
 
-from . import auth, config, ctx, db, diashow_link, extras, freigabe_inhalt, jobs, memo, more, photos, routes, rueckblick, stats
+from . import auth, config, ctx, db, diashow_link, extras, freigabe_inhalt, gebiete, jobs, memo, more, photos, routes, rueckblick, stats
 from .gpxtools import TZ
 
 router = APIRouter()
@@ -118,8 +118,11 @@ def build_trips():
             continue
         regs = [t["g_state"] or t["g_country"] or t["g_place"] for t in g if t["g_state"] or t["g_country"] or t["g_place"]]
         reg = max(set(regs), key=regs.count) if regs else "Reise"
+        geb = gebiete.trip_gebiet(g)      # 3.64.0: lieber das genaueste passende Gebiet („La Gomera“, „Lungau“) als Bundesland/Land („Kanarische Inseln“, „Salzburg“)
+        if geb:
+            reg = geb["name"]
         d0, d1 = min(days), max(days)
-        out.append({"id": g[0]["id"], "region": reg, "country": next((t["g_country"] for t in g if t["g_country"]), None), "start": d0.isoformat(), "end": d1.isoformat(),
+        out.append({"id": g[0]["id"], "region": reg, "area": geb["id"] if geb else None, "country": next((t["g_country"] for t in g if t["g_country"]), None), "start": d0.isoformat(), "end": d1.isoformat(),
                     "days": (d1 - d0).days + 1, "tours": [t["id"] for t in g], "km": round(sum(t["dist_m"] or 0 for t in g) / 1000, 1),
                     "up_m": round(sum(t["up_m"] or 0 for t in g)), "h": round(sum(t["dur_s"] or 0 for t in g) / 3600, 1)})
     _unique_names(out, {t["id"]: t for t in tours})

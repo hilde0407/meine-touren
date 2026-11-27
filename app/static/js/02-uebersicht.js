@@ -472,6 +472,7 @@ VIEWS.tours = async (_name, qp) => {
    <span class="fxtra"><select id="fz" title="Jahreszeit"><option value="">Ganzjährig</option><option value="sommer">Sommerhalbjahr (Mai–Okt)</option><option value="winter">Winterhalbjahr (Nov–Apr)</option></select>
    <select id="fb" title="Meine Bewertung"><option value="">Alle Bewertungen</option><option value="5">★★★★★</option><option value="4">ab ★★★★</option><option value="3">ab ★★★</option></select>
    <select id="fr" title="Region"><option value="">Alle Regionen</option>${regionOpts()}</select>
+   <select data-gsheet id="fg" title="Gebiet" aria-label="Gebiet">${gebietOpts()}</select>
    <select id="ft" title="Schlagwort / Album"><option value="">Alle Schlagwörter</option>${allTags()
      .map(x => `<option value="${esc(x)}">${esc(x)}</option>`)
      .join("")}</select></span>
@@ -497,6 +498,7 @@ VIEWS.tours = async (_name, qp) => {
           fy: $("#fy").value,
           fs: $("#fs").value,
           fr: $("#fr").value,
+          fg: $("#fg").value,
           fz: $("#fz").value,
           fb: $("#fb").value,
           ft: $("#ft").value,
@@ -506,12 +508,13 @@ VIEWS.tours = async (_name, qp) => {
       );
     } catch (e) {}
   };
-  const f0 = xf ? {so: ld().so} : ld();                                                         // mit Kennzahl-Filter starten die übrigen Filter leer (sonst fehlen Touren ohne ersichtlichen Grund)
-  ["q", "fy", "fs", "fr", "fz", "fb", "ft", "so"].forEach(i => {
-    if (f0[i] !== undefined) $("#" + i).value = f0[i];
+  const gq = qp && qp.get("g"),                                                                 // 3.64.0: #/tours?g=<Kennung des Gebiets> (Link „Alle Touren in diesem Gebiet“)
+    f0 = xf || gq ? {so: ld().so, fg: gq || ""} : ld();                                         // mit Kennzahl- oder Gebiets-Link starten die übrigen Filter leer (sonst fehlen Touren ohne ersichtlichen Grund)
+  ["q", "fy", "fs", "fr", "fg", "fz", "fb", "ft", "so"].forEach(i => {
+    if (f0[i] !== undefined) $("#" + i).value = f0[i];                                            // ein unbekanntes Gebiet (nie eine Tour dort) ergibt einen leeren Wert = „Alle Gebiete“
   });
   if (f0.lim) lim = f0.lim;
-  const XF = ["fy", "fz", "fb", "fr", "ft"],                                                     // 3.48.0 (Handy): diese Filter stehen hinter dem Knopf „Filter“
+  const XF = ["fy", "fz", "fb", "fr", "fg", "ft"],                                                     // 3.48.0 (Handy): diese Filter stehen hinter dem Knopf „Filter“
     xCount = () => XF.filter(i => $("#" + i).value && $("#" + i).value !== "0").length,
     xPaint = () => {
       const n = xCount(),
@@ -542,6 +545,7 @@ VIEWS.tours = async (_name, qp) => {
       s = $("#fs").value,
       so = $("#so").value,
       rg = $("#fr").value,
+      gb = $("#fg").value,
       tg = $("#ft").value,
       sz = $("#fz").value,
       sb = +$("#fb").value;
@@ -552,6 +556,7 @@ VIEWS.tours = async (_name, qp) => {
         (!sb || (t.stars || 0) >= sb) &&
         (!s || sgMatch(t.sport, [s])) &&
         inRegion(t, rg) &&
+        inGebiet(t, gb) &&
         (!tg || (t.tags || "").split("|").includes(tg)) &&
         (!q.trim() || smatch(t.name, q)) &&
         (!xf || tourXfOk(t, xf))
@@ -565,7 +570,7 @@ VIEWS.tours = async (_name, qp) => {
     $("#tl").innerHTML = a.slice(0, lim).map(tourRow).join("") || `<div class="empty">Keine Treffer</div>`;
     $("#more").style.display = a.length > lim ? "" : "none";
   };
-  ["q", "fy", "fs", "fr", "fz", "fb", "ft", "so"].forEach(
+  ["q", "fy", "fs", "fr", "fg", "fz", "fb", "ft", "so"].forEach(
     i =>
       ($("#" + i).oninput = () => {
         lim = 80;

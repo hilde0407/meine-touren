@@ -2,6 +2,11 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.64.0 – Reisenamen aus Gebieten, Filter „Gebiet“
+
+- Erkannte Reisen heißen nach dem genauesten passenden Gebiet („La Gomera“, „Lungau“, „Zillertal“ statt „Kanarische Inseln“, „Salzburg“); eine Rundreise über mehrere Inseln nach dem Oberbegriff („Kanaren“); sonst bleibt es beim Bundesland/Land. Eigene Namen und eigene Reisen haben Vorrang. **Bestehende Reisenamen ändern sich dadurch.** Die Gebietstabelle gilt jetzt auch auf dem Server (erzeugte Datei app/gebiete.json aus derselben Quelle, ein Test stellt Gleichheit sicher)
+- Neuer Filter „Alle Gebiete“ in der Tourenliste (Blatt mit Suchfeld und Liste nach Typ, mit Anzahl Touren, nur Gebiete mit Touren; Adresse #/tours?g=…), ebenso unter Prüfen → Umbenennen nach Regeln; der Baustein „Meistbesuchte Orte“ gliedert auch nach Gebiet. Alle Gebietsgrenzen sind Näherungen
+
 ## Version 3.63.0 – Mehrtagestour-Seite mit Foto-Baustein, „Reise erstellen“
 
 - Mehrtagestouren (#/series/…) sind wie die Reise anpassbar (Seite anpassen, Ansichten, Vorlagen, Export/Import) und haben den Baustein „Fotos“ (Alle · Beste · Zufällig · Neueste, Diashow starten/teilen, Neu mischen) für den Zeitraum der ersten bis letzten Etappe; Kennzahlen und „Strecke je Tag“ sind die Reise-Bausteine; ohne Anpassung sieht die Seite aus wie bisher, plus Fotos

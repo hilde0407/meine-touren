@@ -557,6 +557,82 @@ function regionOpts() {
     )
     .join("");
 }
+/* 3.64.0 Gebiet FILTERN (Gebirge, Täler, Inseln, Küsten, Landschaften aus js/gebiete-daten.js; Zuordnung aus dem Startpunkt der Tour, Näherung) – eine Auswahl für Tourenliste und „Umbenennen nach Regeln“:
+     gebietListe()            -> [{id, name, typ, n, land, s}] nur Gebiete, in denen Touren starten (inklusive Oberbegriffe wie „Kanaren“), n = Touren, land = Land, wenn fast alle Touren dort liegen
+     gebietOpts(sel)          -> <option>/<optgroup> nach Typ (Auswahlfeld mit data-gsheet; der Wert ist die Kennung des Gebiets)
+     inGebiet(t, id)          -> liegt die Tour im Gebiet (leer = alle)
+     gebietSheetOpen(sel)     -> Blatt mit Suchfeld und Liste (am Computer und am Handy gleich); die Wahl setzt das Feld und löst „input“ und „change“ aus */
+const GEB_TYPEN = [["gebirge", "Gebirge"], ["tal", "Täler"], ["insel", "Inseln"], ["kueste", "Küsten"], ["region", "Landschaften"]];
+function gebietListe() {
+  const m = {};
+  TOURS.forEach(t => Gebiete.von(t).forEach(v => {
+    const e = (m[v.id] ||= {id: v.id, name: v.name, typ: v.typ, n: 0, ld: {}});
+    e.n++;
+    if (t.g_country) e.ld[t.g_country] = (e.ld[t.g_country] || 0) + 1;
+  }));
+  return Object.values(m).map(e => {
+    const top = Object.entries(e.ld).sort((a, b) => b[1] - a[1])[0];
+    const x = Gebiete.nach[e.id], land = top && top[1] >= e.n * 0.8 ? top[0] : "";
+    return {id: e.id, name: e.name, typ: e.typ, n: e.n, land, s: [e.name, land].concat(x ? x.alias : []).map(Gebiete.fold).filter(Boolean).join("|")};
+  }).sort((a, b) => a.name.localeCompare(b.name, "de"));
+}
+const inGebiet = (t, id) => !id || Gebiete.von(t).some(v => v.id === id);
+function gebietOpts(sel = "") {
+  const L = gebietListe();
+  if (sel && !L.some(x => x.id === sel)) sel = "";
+  return `<option value="">Alle Gebiete</option>` + GEB_TYPEN.map(([k, l]) => {
+    const a = L.filter(x => x.typ === k);
+    return a.length ? `<optgroup label="${esc(l)}">${a.map(x => `<option value="${esc(x.id)}"${x.id === sel ? " selected" : ""} data-n="${x.n}" data-name="${esc(x.name)}" data-land="${esc(x.land)}" data-s="${esc(x.s)}">${esc(x.name)} (${x.n})</option>`).join("")}</optgroup>` : "";
+  }).join("");
+}
+function gebietSheetOpen(sel) {
+  const row = (o, all) => `<button type="button" class="gbi${o.value === sel.value ? " on" : ""}" data-v="${esc(o.value)}" data-s="${esc(o.dataset.s || "")}" aria-pressed="${o.value === sel.value}"><span class="gbn">${esc(all ? o.textContent : o.dataset.name)}</span>` +
+      (all ? "" : `${o.dataset.land ? `<small class="mut">${esc(o.dataset.land)}</small>` : ""}<b>${esc(o.dataset.n)}</b>`) + `</button>`,
+    body = [...sel.children].map(c => c.tagName === "OPTGROUP" ? `<div class="gbg"><span class="spkat">${esc(c.label)}</span>${[...c.children].map(o => row(o, false)).join("")}</div>` : row(c, true)).join("");
+  const m = uiModal(`<h3>Gebiet</h3><input type="search" class="gbq" placeholder="Gebiet suchen" aria-label="Gebiet suchen" autocomplete="off"><div class="gbl" role="group" aria-label="Gebiet">${body}<p class="mut gbnone" role="status" hidden>Kein Gebiet gefunden.</p></div><div class="uifoot"><button type="button" class="btn ghost" data-x>Abbrechen</button></div>`);
+  const q = m.querySelector(".gbq"), none = m.querySelector(".gbnone");
+  q.addEventListener("input", () => {
+    const f = Gebiete.fold(q.value);
+    let any = false;
+    m.querySelectorAll(".gbi[data-s]").forEach(b => {
+      const ok = !f || !b.dataset.s || b.dataset.s.split("|").some(x => x.includes(f)) || b.dataset.v === "";
+      b.hidden = !ok;
+      if (ok && b.dataset.v) any = true;
+    });
+    m.querySelectorAll(".gbg").forEach(g => (g.hidden = !g.querySelector(".gbi:not([hidden])")));
+    none.hidden = any || !f;
+  });
+  q.addEventListener("keydown", e => {                                                     // Enter im Suchfeld wählt den ersten Treffer
+    const b = e.key === "Enter" && m.querySelector('.gbi:not([hidden]):not([data-v=""])');
+    if (b) {
+      e.preventDefault();
+      b.click();
+    }
+  });
+  m.addEventListener("click", e => {
+    const b = e.target.closest(".gbi");
+    if (b) {
+      sel.value = b.dataset.v;
+      m.remove();
+      ["input", "change"].forEach(n => sel.dispatchEvent(new Event(n, {bubbles: true})));
+    } else if (e.target.closest("[data-x]")) m.remove();
+  });
+  if (!document.documentElement.classList.contains("mob")) q.focus();          // am Handy nicht: die Tastatur würde die Liste verdecken
+}
+document.addEventListener("mousedown", e => {
+  const s = e.target.closest && e.target.closest("select[data-gsheet]");
+  if (s && e.button === 0) {
+    e.preventDefault();
+    gebietSheetOpen(s);
+  }
+}, true);
+document.addEventListener("keydown", e => {
+  const s = e.target.closest && e.target.closest("select[data-gsheet]");
+  if (s && (e.key === "Enter" || e.key === " " || e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "F4")) {
+    e.preventDefault();
+    gebietSheetOpen(s);
+  }
+}, true);
 let TOURS = [],
   BY = {},
   ROUTES = null,

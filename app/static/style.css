@@ -2472,3 +2472,17 @@ html:not(.mob) .atabs{gap:2px;align-items:stretch}
   html:not(.mob) .atabs .atlink{border-left:0;font-family:var(--b);color:var(--mut)}
   html:not(.mob) .atabs .atlink:hover{color:var(--ink);background:var(--soft)}
 }
+
+/* 3.64.0 Gebiet-Filter (gebietSheetOpen, 01-grundlagen.js): Blatt mit Suchfeld und Liste nach Typ; Zeilen mit 44-px-Tippfläche, Anzahl der Touren rechts */
+.gbq{width:100%;box-sizing:border-box;min-height:44px;margin:4px 0 10px;font-size:16px}
+.gbl{max-height:min(55vh,420px);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;border-top:1px solid var(--rule)}
+.gbl .spkat{display:block;margin:12px 0 2px}
+.gbi{display:flex;align-items:baseline;gap:8px;width:100%;box-sizing:border-box;min-height:44px;padding:6px 10px;text-align:left;background:none;border:0;border-bottom:1px solid var(--rule);color:var(--ink);font:500 16px var(--b);cursor:pointer}
+.gbi .gbn{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.gbi small{flex:none;font-size:13px}
+.gbi b{flex:none;min-width:2.2em;text-align:right;font-variant-numeric:tabular-nums}
+.gbi:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.gbi.on{background:var(--yellow);color:var(--yellow-ink)}
+.gbi.on small{color:inherit}
+.gbi[hidden],.gbg[hidden]{display:none}
+.gbnone{margin:12px 10px}
