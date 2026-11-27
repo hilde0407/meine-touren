@@ -2,6 +2,12 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.70.1 – Gebiete korrigiert: Gasteinertal im Pongau, neues Großarltal
+
+- Touren bei Bad Hofgastein liegen im **Pongau** und Gasteinertal, nicht mehr im Pinzgau (Pinzgau-Fläche ohne Gasteinertal, Gasteinertal unter Pongau); Rauris, Kaprun, Zell am See u. a. bleiben Pinzgau
+- Neu: **Großarltal** (Großarl, Hüttschlag) unter Pongau; Gasteinertal reicht nicht mehr bis Großarl
+- Raster vorher/nachher: nur 759 Punkte im Raum Gastein/Rauris/Großarl ändern sich
+
 ## Version 3.70.0 – Gebiete mit dem Rother-Wanderführer-Katalog abgeglichen
 
 - **119 neue Gebiete** (94 + 25 in Welle 2: Vancouver Island, Taiwan, Cusco, Westkap, Sognefjord, Andalusien, Provence, Elsass, Waldviertel, Liechtenstein u. a.) nach den Regionsnamen der Reihe „Rother Wanderführer“ (nur Titel als Maßstab): Münsterland, Oberlausitz, Mecklenburgische Seenplatte, Isarwinkel, Bodensee, Altmühltal u. a.; Wienerwald, Pitztal, Gasteinertal, Oststeiermark, Wörthersee u. a.; Glarnerland, Genfersee, Emmental, Davos/Prättigau u. a.; Südtiroler Täler (Vinschgau, Meran, Pustertal, Ahrntal …) und Dolomiten-Täler (Gröden, Fassa, Gadertal, Cortina …), Lago Maggiore, Comer See; Galicien, Kantabrien, Asturien, Baskenland, Costa Brava/Daurada/Blanca, Alentejo; Korfu, Chalkidiki, Kefalonia, Samos u. a.; Gotland, Öland, Bornholm, Färöer, Kanalinseln, Devon, Tasmanien

@@ -4,7 +4,7 @@ Zeilen mit „!“ davor: „!<id> | Name lat,lng ; …“ – diese Punkte dür
 POS = """
 lungau | Mauterndorf 47.14,13.67 ; Tamsweg 47.12,13.81
 pongau | St. Johann im Pongau 47.35,13.20 ; Bad Gastein 47.11,13.13
-pinzgau | Zell am See 47.32,12.80 ; Mittersill 47.28,12.48 ; Lofer 47.59,12.70
+pinzgau | Rauris 47.22,13.00 ; Kaprun 47.27,12.76 ; Krimml 47.22,12.18 ; Saalbach 47.39,12.64 ; Zell am See 47.32,12.80 ; Mittersill 47.28,12.48 ; Lofer 47.59,12.70
 tennengau | Hallein 47.68,13.10 ; Golling 47.60,13.18
 salzkammergut | Bad Ischl 47.71,13.62 ; St. Wolfgang 47.74,13.45 ; Gmunden 47.92,13.80
 zillertal | Mayrhofen 47.16,11.86 ; Zell am Ziller 47.23,11.88
@@ -387,7 +387,8 @@ wienerwald | Baden 48.01,16.23 ; Mödling 48.09,16.29 ; Klosterneuburg 48.30,16.
 pitztal | Imst 47.24,10.74 ; Pitztaler Gletscher 46.93,10.87 ; Jerzens 47.13,10.77
 lesachtal | Kötschach 46.66,13.00 ; Maria Luggau 46.67,12.80 ; Liesing 46.67,12.88
 seefeld | Seefeld 47.33,11.19 ; Leutasch 47.35,11.15
-gastein | Bad Gastein 47.11,13.13 ; Bad Hofgastein 47.17,13.10 ; Dorfgastein 47.20,13.08
+gastein | Bad Gastein 47.11,13.13 ; Bad Hofgastein 47.17,13.10 ; Dorfgastein 47.27,13.10 ; Heißingfelding 47.18,13.06
+grossarltal | Großarl 47.22,13.20 ; Hüttschlag 47.14,13.20 ; Rattersberg 47.19,13.20
 mariazell | Mariazell 47.77,15.32 ; Erlaufsee 47.78,15.28
 moelltal | Winklern 46.86,12.95 ; Obervellach 46.93,13.20 ; Flattach 46.90,13.15
 woerthersee | Velden 46.62,14.04 ; Pörtschach 46.63,14.17 ; Klagenfurt 46.62,14.31
@@ -526,7 +527,9 @@ NEG = """
 !pitztal | Sölden 46.97,11.01 ; Landeck 47.14,10.57
 !lesachtal | Lienz 46.83,12.77 ; Sillian 46.75,12.42
 !seefeld | Innsbruck 47.26,11.39 ; Garmisch 47.49,11.09
-!gastein | Zell am See 47.32,12.80 ; Mallnitz 46.98,13.17
+!gastein | Zell am See 47.32,12.80 ; Mallnitz 46.98,13.17 ; Großarl 47.22,13.20 ; Hüttschlag 47.14,13.20 ; Rauris 47.22,13.00
+!pinzgau | Bad Hofgastein 47.17,13.10 ; Bad Gastein 47.11,13.13 ; Dorfgastein 47.27,13.10 ; Heißingfelding 47.18,13.06 ; Großarl 47.22,13.20 ; Hüttschlag 47.14,13.20
+!grossarltal | Bad Hofgastein 47.17,13.10 ; Bad Gastein 47.11,13.13 ; Kleinarl 47.24,13.30
 !moelltal | Heiligenblut 47.04,12.84 ; Spittal 46.80,13.49
 !millstaettersee | Spittal an der Drau 46.80,13.49
 !grazer-hausberge | Leibnitz 46.78,15.54 ; Weiz 47.22,15.62

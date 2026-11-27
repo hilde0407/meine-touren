@@ -102,7 +102,7 @@ def test_format_wie_tagebuch_und_gewandert():
         r = c.get("/api/guides/export")
     assert r.status_code == 200 and r.headers["content-type"].startswith("application/json")
     d = r.json()
-    assert d["format"] == "tourentagebuch-wanderfuehrer" and d["version"] == 1 and d["app"].startswith("Meine Touren 3.70.0")
+    assert d["format"] == "tourentagebuch-wanderfuehrer" and d["version"] == 1 and d["app"].startswith("Meine Touren 3.70.1")
     assert re.match(r"\d{4}-\d\d-\d\dT", d["erstellt"])
     (bk,) = d["buecher"]
     assert bk["name"] == b and bk["key"] == b and re.fullmatch(r"mt-[0-9a-f]{12}", bk["id"]) and bk["cover_v"] is None and "cover" not in bk

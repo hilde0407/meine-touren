@@ -1,6 +1,6 @@
 # Leitfaden: Begriffe und Bedienlogik (Meine Touren und Mein Tourentagebuch)
 
-Stand 27.11.2026 (3.70.0). Gilt für beide Apps, für alle sichtbaren Texte (Knöpfe, Überschriften, Hinweise, Meldungen, Tooltips, aria-label), das Handbuch und die Versionsnotizen. Von Volker entschieden sind die mit ★ markierten Punkte; der Rest folgt dem, was in den Apps heute überwiegt (Inventur vom 25.11.2026: /home/claude/inventur-meine-touren.md, /home/claude/inventur-tagebuch.md).
+Stand 27.11.2026 (3.70.1). Gilt für beide Apps, für alle sichtbaren Texte (Knöpfe, Überschriften, Hinweise, Meldungen, Tooltips, aria-label), das Handbuch und die Versionsnotizen. Von Volker entschieden sind die mit ★ markierten Punkte; der Rest folgt dem, was in den Apps heute überwiegt (Inventur vom 25.11.2026: /home/claude/inventur-meine-touren.md, /home/claude/inventur-tagebuch.md).
 
 Interne Bezeichner (Dateinamen, Funktionen, Einstellungsschlüssel, API-Pfade, Element-IDs) bleiben unverändert. Begriffe fremder Dienste bleiben, wie der Dienst sie nennt (Strava „Aktivitäten“, Suunto „Workouts“ nur, wenn der Dienst genau so genannt wird).
 

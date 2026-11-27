@@ -35,7 +35,7 @@ const Gebiete = (() => {
   g("alpen", "Alpen", GEB, null, [], {alias: ["Alps", "Alpes", "Alpi"]});
   g("lungau", "Lungau", REG, "alpen", [[47.02, 13.45, 47.22, 14.02]], {alias: ["Bezirk Tamsweg", "Tamsweg"], county: ["Tamsweg"], anz: true});
   g("pongau", "Pongau", REG, "alpen", [[47.10, 13.08, 47.50, 13.52]], {alias: ["Gastein"], county: ["St. Johann im Pongau", "Sankt Johann im Pongau"], anz: true});
-  g("pinzgau", "Pinzgau", REG, "alpen", [[47.12, 12.15, 47.62, 13.08]], {alias: ["Zell am See", "Kaprun"], county: ["Zell am See"], nicht: [[47.38, 12.0, 47.70, 12.62]], anz: true});
+  g("pinzgau", "Pinzgau", REG, "alpen", [[47.12, 12.15, 47.62, 13.08]], {alias: ["Zell am See", "Kaprun"], county: ["Zell am See"], nicht: [[47.38, 12.0, 47.70, 12.62], [47.02, 13.03, 47.24, 13.08]], anz: true});   // 3.70.1: Gasteinertal (Bad Hofgastein, Heißingfelding) liegt im Pongau, nicht im Pinzgau; Rauris (13.00 E) bleibt Pinzgau
   g("tennengau", "Tennengau", REG, "alpen", [[47.50, 13.08, 47.75, 13.45]], {county: ["Hallein"], anz: true});
   g("salzkammergut", "Salzkammergut", REG, "alpen", [[47.52, 13.30, 48.00, 14.00]], {alias: ["Wolfgangsee", "Attersee", "Traunsee"], anz: true});
   g("zillertal", "Zillertal", TAL, "alpen", [[47.00, 11.60, 47.42, 12.10]], {alias: ["Zillertaler Alpen", "Mayrhofen", "Zell am Ziller"]});
@@ -485,7 +485,8 @@ const Gebiete = (() => {
   g("pitztal", "Pitztal", TAL, "alpen", [[46.88, 10.70, 47.27, 10.90]], {alias: ["Pitztaler Gletscher", "Imst", "Imst und Pitztal", "Jerzens", "Mittelberg im Pitztal", "St. Leonhard im Pitztal", "Rifflsee"]});
   g("lesachtal", "Lesachtal", TAL, "alpen", [[46.60, 12.78, 46.72, 13.05]], {alias: ["Lesach", "Kötschach-Mauthen", "Liesing", "St. Lorenzen im Lesachtal", "Maria Luggau", "Luggau"]});
   g("seefeld", "Seefeld und Leutasch", REG, "alpen", [[47.28, 11.07, 47.40, 11.25]], {alias: ["Seefelder Plateau", "Seefeld in Tirol", "Seefeld", "Leutasch", "Olympiaregion Seefeld", "Mösern", "Reith bei Seefeld"], anz: true, prio: -1});
-  g("gastein", "Gasteinertal", TAL, "hohetauern", [[47.02, 13.00, 47.28, 13.22]], {alias: ["Gastein", "Bad Gastein", "Bad Hofgastein", "Dorfgastein", "Böckstein", "Sportgastein", "Gasteiner Tal", "Anlauftal"]});
+  g("gastein", "Gasteinertal", TAL, "pongau", [[47.02, 13.03, 47.24, 13.17], [47.24, 13.09, 47.28, 13.17]], {alias: ["Gastein", "Bad Gastein", "Bad Hofgastein", "Dorfgastein", "Böckstein", "Sportgastein", "Gasteiner Tal", "Anlauftal"]});        // 3.70.1: Eltern Pongau (vorher Hohe Tauern), Westrand 13.03 (Rauris und Lend gehören nicht dazu), Ostrand 13.17 (Großarl/Hüttschlag nicht mehr)
+  g("grossarltal", "Großarltal", TAL, "pongau", [[47.08, 13.17, 47.29, 13.28]], {alias: ["Großarl", "Grossarl", "Hüttschlag", "Huettschlag", "Großarler Tal", "Grossarler Tal", "Ellmautal", "Karseggalm", "Rattersberg"]});   // 3.70.1: neu; Kleinarl (13.30 E) gehört zu Kleinarl/Radstädter Tauern, nicht hierher
   g("mariazell", "Mariazeller Land", REG, "alpen", [[47.70, 15.15, 47.88, 15.52]], {alias: ["Mariazell", "Erlaufsee", "Gußwerk", "Mitterbach", "Mariazeller Bürgeralpe"], anz: true});
   g("moelltal", "Mölltal und Kreuzeckgruppe", TAL, "alpen", [[46.80, 12.90, 46.98, 13.40]], {alias: ["Mölltal", "Moelltal", "Kreuzeckgruppe", "Glockner-Region", "Winklern", "Obervellach", "Mallnitz", "Flattach", "Mölltaler Gletscher", "Reißeck"]});
   g("woerthersee", "Wörthersee", REG, null, [[46.58, 14.00, 46.68, 14.32]], {alias: ["Woerthersee", "Kärntner Seen", "Klagenfurt", "Velden am Wörthersee", "Pörtschach", "Maria Wörth"], anz: true});

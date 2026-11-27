@@ -43,7 +43,7 @@ def test_tabelle_pruefung_json_aktuell_und_alle_neuen_gebiete_da():
     assert _node("G.pruefen()") == []
     ids = _node("G.liste.map(x => x.id)")
     assert len(ids) == len(set(ids)) and len(NEU) == len(set(NEU))
-    assert set(NEU) <= set(ids) and len(ids) == 343 + len(NEU)
+    assert set(NEU) <= set(ids) and len(ids) == 343 + len(NEU) + 1
     namen = _node("G.liste.map(x => x.name)")
     assert len(namen) == len(set(namen))
     neu = subprocess.run(["node", str(ROOT / "scripts" / "gebiete_json.js"), "--stdout"], capture_output=True, text=True, check=True).stdout
