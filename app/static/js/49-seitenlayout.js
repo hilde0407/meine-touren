@@ -69,13 +69,14 @@ const SL_REG = {
 };
 /* 3.33.0 Reisen: Reise-Detailseite (#/trip/<id>, 62-reiseseiten.js kapselt collView in Karten) und Reisen-Übersicht (#/trips). Die Abschnitte stehen in der Reihenfolge der bisherigen Seite;
    „kopf“ (Titel, Zeitraum, Aktionen) ist Pflicht und bleibt sichtbar. Kennzahlen, Statistik, Flug/Offline-Karte, Karte, Fotos und Touren sind einklappbare Karten. Bausteine: 61-bausteine-reise.js. */
+const SL_FOTOS_DEF = {mode: "all", ratio: "43", size: "l"};                   // Vorgabe des Standard-Abschnitts „Fotos“ der Reise (ohne gespeicherte Einstellung): alle Fotos der Reise als Vorschaubilder 4:3
 SL_REG.reise = [
   {id: "kopf", w: "voll", title: "Kopf: Titel, Zeitraum und Aktionen", page: "reise", plain: true, must: true, ws: ["voll"]},
   {id: "kennzahlen", w: "voll", title: "Kennzahlen", page: "reise", def: true, ckeys: ["rs_kennzahlen"]},
   {id: "stat", w: "voll", title: "Statistik nach Sportart", page: "reise", def: true, ckeys: ["rs_stat"]},
   {id: "flug", w: "voll", title: "3D-Flug und Offline-Karte", page: "reise", def: true, ckeys: ["rs_flug"]},
   {id: "karte", w: "voll", title: "Karte", page: "reise", def: true, ckeys: ["rs_karte"]},
-  {id: "fotos", w: "voll", title: "Fotos", page: "reise", def: true, ckeys: ["rs_fotos"]},
+  {id: "fotos", w: "voll", title: "Fotos", page: "reise", build: "rdiashow", defcfg: SL_FOTOS_DEF, def: true, ckeys: ["rs_fotos"]},        // 3.62.0: der Abschnitt „Fotos“ ist der Baustein „Fotos“ (Typ rdiashow) mit „Alle“; Id, Position, Breite, Sichtbarkeit und Auf-/Zu-Zustand bleiben wie bisher
   {id: "touren", w: "voll", title: "Touren", page: "reise", def: true, ckeys: ["rs_touren"]},
 ];
 SL_REG.reisen = [
@@ -89,7 +90,7 @@ const SL_EL = {
     map: () => tlSec("map"), prof: () => tlSec("prof"), puls: () => $("#pulscard"), wp: () => $("#wpcard"), sum: () => $("#tlg-sum"), photos: () => tlSec("photos"),
     geraet: () => $("#tlrec"), wx: () => tlSec("wx"), ana: () => $("#anacard"), steig: () => $("#steigcard"), aehn: () => $("#aehncard"), cmp: () => $("#cmpseg"),
   },
-  reise: Object.fromEntries(["kopf", "kennzahlen", "stat", "flug", "karte", "fotos", "touren"].map(id => [id, () => (id === "kopf" ? document.getElementById("rs-kopf") : document.getElementById("rsc-" + id))])),
+  reise: Object.fromEntries(["kopf", "kennzahlen", "stat", "flug", "karte", "touren"].map(id => [id, () => (id === "kopf" ? document.getElementById("rs-kopf") : document.getElementById("rsc-" + id))])),
   reisen: Object.fromEntries(["serien", "reisen", "alben", "entfernt"].map(id => [id, () => document.getElementById("rnc-" + id)])),
   uebersicht: {aufmacher: () => $("#hlast"), jahr: () => $("#hyear"), zuletzt: () => $("#hrecent"), tag: () => $("#htag"), erinn: () => $("#hmemsec")},
   statistik: Object.fromEntries(["kpi", "kmmonat", "kmverlauf", "sportarten", "heat", "tag", "erinn"].map(id => [id, () => document.getElementById("stc-" + id)]).concat([["bl", () => $("#blsec")], ["tp", () => $("#tpsec")]])),
@@ -225,7 +226,7 @@ function slItems(fam) {
     const T = it.build && window.SL_WT[it.build];                          // 3.19.0: Standard-Baustein („Dein Jahr“) mit Konfiguration unter „cfg“ im Dokument
     if (!T) return;
     it.wtype = it.build;
-    it.cfg = (st.cfg || {})[it.id] || {};
+    it.cfg = {...(it.defcfg || {}), ...((st.cfg || {})[it.id] || {})};          // 3.62.0: defcfg = Vorgabe des Abschnitts, solange nichts gespeichert ist
     it.title = slWTitle(T, it.cfg);
     it.fl = slWFl(T, it.cfg);
   });
@@ -651,7 +652,7 @@ function slWidgetOf(id) {
   const st = slSt(SL.fam), w = (st.widgets || []).find(x => x.id === id);
   if (w) return {id, type: w.type, cfg: w.cfg || {}, widget: true};
   const r = SL_REG[SL.fam].find(x => x.id === id && x.build);
-  return r ? {id, type: r.build, cfg: (st.cfg || {})[id] || {}} : null;
+  return r ? {id, type: r.build, cfg: {...(r.defcfg || {}), ...((st.cfg || {})[id] || {})}} : null;
 }
 function slSetCfg(id, cfg) {
   const st = slStDoc(SL.fam),

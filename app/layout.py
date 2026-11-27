@@ -18,7 +18,7 @@ Seiteneignung (3.20.0): Bausteine der Übersicht dürfen auch auf der Tourseite 
 die Dokumente „uebersicht“ und „statistik“ lehnen sie ab. 3.22.0: Bausteine der Statistik (STATISTIK_ONLY) stehen nur im Dokument „statistik“; die Bausteine der Übersicht dürfen auch dort stehen.
 Unbekannte Typen (neuere Version) bleiben überall erlaubt.
 Erinnerungen (3.32.0, Typ „erinn“, als Standard-Abschnitt der Übersicht unter cfg.erinn und als hinzugefügter Baustein): streng geprüfte Konfiguration, andere Felder sind nicht erlaubt:
-  mode random|best|day|recent (Auswahl der Fotos)   n 3|6|9|12 (Anzahl)   view grid|strip|show (Darstellung)   ratio sq|43|169|orig (Seitenverhältnis)   size s|m|l (Größe der Fotos)
+  mode random|best|day|recent (Auswahl der Fotos; beim Reise-Baustein „rdiashow“ statt day zusätzlich all = alle Fotos der Reise, 3.62.0)   n 3|6|9|12 (Anzahl)   view grid|strip|show (Darstellung)   ratio sq|43|169|orig (Seitenverhältnis)   size s|m|l (Größe der Fotos)
   height k|n|h (Höhe der Einzelbild-Show)   tempo 3|5|8|12 (Sekunden je Bild)   caption / shuffle / link  Ja-Nein (Bildunterschrift, Knopf „Neu mischen“, Link „Diashow starten“)
   sports, range, yr, title wie üblich. Gespeichert werden nur Abweichungen vom Standard (ohne cfg: 6 zufällige Fotos als Raster, mit Link zur Diashow).
 Hinweis-Bausteine (3.23.0, „Alarm-Bausteine“: erscheinen nur, wenn etwas los ist; Typen hnmeilenstein, hnauffaellig, hnpause, hnrekord, hnerholung, hnsicherung und die Sammel-Variante „hinweise“):
@@ -42,7 +42,7 @@ Ansichten (3.21.0): Ein Dokument je Seitenschlüssel kann statt des Layouts auch
 Reisen (3.33.0): Bausteine der Reise-Detailseite (REISE_TYPEN: rkennzahl, rdiashow, rkmtag) stehen nur im Dokument „reise“, die der Reisen-Übersicht (REISEN_TYPEN: rnzahlen, rnjahre) nur in „reisen“.
 Alle Bausteine anderer Seiten, die dort bekannt sind (Tour-, Statistik-, Hinweis-Bausteine, eigene Kennzahl, Erinnerungen), werden dort abgelehnt; unbekannte Typen (neuere Version) bleiben erlaubt.
 Ihre Konfiguration wird streng geprüft (REISE_CFG: nur diese Felder, feste Auswahllisten). „rdiashow“ nimmt die Felder der Erinnerungen (mode, n, view, ratio, size, height, tempo, caption, shuffle, link, title), aber keine Filter:
-den Zeitraum der Reise setzt die Oberfläche. Regeln nach Sportart (rules) gibt es nur auf der Tourseite.
+den Zeitraum der Reise setzt die Oberfläche. 3.62.0: „rdiashow“ heißt in der Oberfläche „Fotos“ (mode all|best|random|recent); der feste Abschnitt „fotos“ der Reise ist derselbe Baustein, seine Einstellung steht unter cfg.fotos (ohne Eintrag: mode all). Regeln nach Sportart (rules) gibt es nur auf der Tourseite.
 Fotos und Karte (3.34.0): Bausteine der Fotos-Seite (FOTO_TYPEN: fkennzahl, fjahre) stehen nur im Dokument „fotos“, die der Karte (KARTE_TYPEN: kzahlen, kliste, klegende) nur in „karte“; alle Bausteine anderer
 Seiten, die dort bekannt sind, werden abgelehnt (unbekannte Typen bleiben erlaubt). Konfiguration streng geprüft (nur feste Auswahllisten, plus Titel). Die Bedienfelder auf der Karte (Standort, Jahr, Sportarten,
 Strecken-Stil, Heatmap und Fotos, Touren im Ausschnitt) sind Standard-Abschnitte der Seite (order/hidden/closed/open wie sonst). Betrachter und Regeln wie bei den anderen Seiten.
@@ -278,8 +278,8 @@ ERINN_NUM = {"n": (3, 6, 9, 12), "tempo": (3, 5, 8, 12)}
 ERINN_BOOL = ("caption", "shuffle", "link")
 
 
-def _erinn_cfg(v):
-    """Streng geprüfte Konfiguration der Kachel „Erinnerungen“ (3.32.0): feste Auswahllisten, keine fremden Felder."""
+def _erinn_cfg(v, mehr_mode=()):
+    """Streng geprüfte Konfiguration der Kachel „Erinnerungen“ (3.32.0): feste Auswahllisten, keine fremden Felder. mehr_mode: weitere erlaubte Werte für „mode“ (3.62.0: „all“ beim Baustein „Fotos“ der Reise)."""
     if not isinstance(v, dict) or len(v) > 20:
         raise HTTPException(400, "Ungültige Konfiguration eines Bausteins")
     out = {}
@@ -288,7 +288,7 @@ def _erinn_cfg(v):
         if k in ("sports", "range", "yr", "title"):
             out[k] = _known(k, x)
         elif k in ERINN_ENUM:
-            if not isinstance(x, str) or x not in ERINN_ENUM[k]:
+            if not isinstance(x, str) or x not in ERINN_ENUM[k] + (mehr_mode if k == "mode" else ()):
                 raise bad
             out[k] = x
         elif k in ERINN_NUM:
@@ -315,7 +315,7 @@ def _reise_cfg(typ, v):
     if typ == "rdiashow":
         if set(v) & {"sports", "range", "yr"}:
             raise HTTPException(400, "Die Reise-Diashow zeigt immer die Fotos der Reise (kein Filter nach Sportart oder Zeitraum)")
-        out = _erinn_cfg(v)
+        out = _erinn_cfg(v, ("all",))                 # 3.62.0: zusätzlich „Alle“ (alle Fotos der Reise)
         if out.get("mode") == "day":
             raise HTTPException(400, "„An diesem Tag“ gibt es bei der Reise-Diashow nicht (es sind immer die Fotos der Reise)")
         return out
@@ -589,6 +589,8 @@ def clean(doc, key=None, goals=None):
         if not isinstance(c, dict) or len(c) > 10 or not all(isinstance(k, str) and ID_RE.match(k) for k in c):
             raise HTTPException(400, "„cfg“ muss ein Objekt mit höchstens 10 Einträgen sein")
         sec = {ERINN_TYPE: ERINN_TYPE, "ziele": umzug.ZIELE, "bestwerte": umzug.BESTWERTE} if key in (None, "statistik") else {ERINN_TYPE: ERINN_TYPE}     # 3.45.0: Abschnitte „Ziele“ und „Bestwerte“ der Statistik sind Bausteine
+        if key in (None, "reise"):
+            sec["fotos"] = "rdiashow"                       # 3.62.0: der Abschnitt „Fotos“ der Reise ist der Baustein „Fotos“ (Typ rdiashow, Vorgabe „Alle“)
         out["cfg"] = {k: _cfg(x, sec.get(k)) for k, x in c.items()}
     if len(json.dumps(out, ensure_ascii=False)) > MAX_BYTES:
         raise HTTPException(400, "Die Anordnung ist zu groß")

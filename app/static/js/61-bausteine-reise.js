@@ -3,7 +3,8 @@
    Reise-Detailseite (Layout-Schlüssel „reise“, gilt für alle Reisen gleich; die Reise liefert ctx.reise = {tr, ts, days}: die Reise, ihre Touren nach Startzeit und ihre Tage mit Touren):
      rkennzahl  Reise-Kennzahlen: Reisetage, Touren, Strecke, Aufstieg, Abstieg, Unterwegs, Länder (Auswahl, geprüft in app/layout.py „REISE_VALUES“)
      rkmtag     Strecke je Tag: Säulendiagramm (Inline-SVG) über die Tage der Reise, auch Aufstieg, Dauer oder Anzahl der Touren (Feld „metric“)
-     rdiashow   Reise-Diashow: der Baustein „Erinnerungen“ (60-bausteine-erinnerungen.js), eingeschränkt auf die Fotos aus dem Zeitraum der Reise (GET /api/photos?date_from=…&date_to=…, seit 3.32.0)
+     rdiashow   „Fotos“ (bis 3.61 „Fotos der Reise“; der Typname bleibt, damit gespeicherte Layouts gültig sind): der Baustein „Erinnerungen“ (60-bausteine-erinnerungen.js), eingeschränkt auf die Fotos aus dem Zeitraum der Reise
+              (GET /api/photos?date_from=…&date_to=…); mode all (Alle, Vorgabe) | best | random | recent. 3.62.0: Der feste Abschnitt „Fotos“ der Reise (SL_REG.reise, Id „fotos“) ist derselbe Baustein (build: "rdiashow", Vorgabe mode all)
    Reisen-Übersicht (Schlüssel „reisen“, ctx.reise = {trips}):
      rnzahlen   Reisen-Kennzahlen: Reisen, Reisetage, Strecke, Aufstieg, Länder        rnjahre   Reisen je Jahr: Säulen je Jahr (Strecke, Anzahl der Reisen oder Reisetage)
    Alle Bausteine rechnen aus den schon geladenen Touren und Reisen (keine neue Abfrage außer den Fotos der Diashow) und zeigen bei fehlenden Daten einen kurzen Hinweis. */
@@ -63,18 +64,18 @@ Object.assign(window.SL_WT, {
     },
   },
   rdiashow: {
-    fam: "reise", cat: "reise", icon: "cam", name: "Fotos der Reise", title: () => "Fotos der Reise", multi: true, w: "voll", seiten: ["reise"], defaults: {mode: "best", view: "show", n: 12, link: true},
-    desc: "Eine Auswahl der Fotos dieser Reise (zufällig, die besten oder die neuesten) als Einzelbild-Show, Raster oder Streifen. „Diashow starten“ zeigt sie im Vollbild, „Diashow teilen“ schickt sie als Link (24 Stunden gültig, ohne Konto ansehbar). Alle Fotos der Reise als Vorschaubilder zeigt dagegen der Baustein „Fotos“. Auswahl, Anzahl, Darstellung und Bildgröße stellst du in den Einstellungen ein.",
+    fam: "reise", cat: "reise", icon: "cam", name: "Fotos", title: () => "Fotos", multi: true, w: "voll", seiten: ["reise"], defaults: {mode: "all", ratio: "43", size: "l", link: true},
+    desc: "Die Fotos dieser Reise als Vorschaubilder, Raster, Streifen oder Einzelbild-Show: alle Fotos der Reise oder nur eine Auswahl (die besten, zufällige oder die neuesten). „Diashow starten“ zeigt sie im Vollbild, „Diashow teilen“ schickt sie als Link (24 Stunden gültig, ohne Konto ansehbar; der Link enthält die besten bis zu 300 Fotos der Reise). Du kannst den Baustein mehrfach einfügen, z. B. oben die besten Fotos und weiter unten alle. Auswahl, Anzahl, Darstellung und Bildgröße stellst du in den Einstellungen ein.",
     dialog: (id, cfg) => erDialog(id, cfg, true), fields: [{kind: "erinn"}],
-    kurz: cfg => (erCfg(cfg).mode === "random" ? ["Zufällig"] : erCfg(cfg).mode === "recent" ? ["Neueste"] : []),
+    kurz: cfg => ({random: ["Zufällig"], recent: ["Neueste"], best: ["Beste"]}[erCfg(cfg).mode] || []),
     preview: () => slPrev('<div class="slpvf" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'),
     render(c, b, cfg, {reise}) {
       if (!reise || !reise.tr) return rsNoTrip(b);
-      const fix = {from: reise.tr.start, to: reise.tr.end}, k = erCfg(cfg);
-      b.innerHTML = (k.shuffle || k.link ? `<div class="rsdh">${k.shuffle ? '<button type="button" class="btn ghost sm ernew">Neu mischen</button>' : ""}${k.link && rsSpan(reise.tr) <= 366 ? '<button type="button" class="btn ghost sm erdsh" title="Link ohne Konto, 24 Stunden gültig">Diashow teilen</button>' : ""}${k.link ? `<a class="hmore erdia" target="_blank" rel="noopener" href="${esc(erSlideUrl(cfg, fix))}">Diashow starten</a>` : ""}<span class="erdsn mut" role="status" aria-live="polite"></span></div>` : "") + '<div class="erb"></div>';
-      const o = {keep: true, fix, none: "Zu dieser Reise gibt es keine Fotos."}, nb = b.querySelector(".ernew");
+      const fix = {from: reise.tr.start, to: reise.tr.end}, k = erCfg(cfg), all = k.mode === "all", pv = /^pv\d+$/.test(c.dataset.wid || "");            // pv…: Vorschau im Katalog (nicht tausende Bilder laden)
+      b.innerHTML = (k.shuffle || k.link ? `<div class="rsdh">${k.shuffle ? '<button type="button" class="btn ghost sm ernew">Neu mischen</button>' : ""}${k.link && rsSpan(reise.tr) <= 366 ? `<button type="button" class="btn ghost sm erdsh" title="${all ? "Link ohne Konto, 24 Stunden gültig; enthält die besten bis zu 300 Fotos der Reise" : "Link ohne Konto, 24 Stunden gültig"}">Diashow teilen</button>` : ""}${k.link ? `<a class="hmore erdia" target="_blank" rel="noopener" href="${esc(erSlideUrl(cfg, fix))}">Diashow starten</a>` : ""}<span class="erdsn mut" role="status" aria-live="polite"></span></div>` : "") + '<div class="erb"></div>';
+      const o = {keep: true, fix, cap: pv ? 12 : 0, none: "Zu dieser Reise gibt es keine Fotos."}, nb = b.querySelector(".ernew");
       const sb = b.querySelector(".erdsh");
-      if (sb) sb.onclick = () => erShareRange(sb, {...fix, name: ((document.querySelector("#rs-kopf h1, #main h1") || {}).textContent || "").trim()}, cfg);
+      if (sb) sb.onclick = () => erShareRange(sb, {...fix, name: ((document.querySelector("#rs-kopf h1, #main h1") || {}).textContent || "").trim()}, cfg, all ? (b._erList || []).length : 0);
       if (nb) nb.onclick = () => erLoad(b, cfg, k.mode === "random" ? o : {...o, mix: true});
       return erLoad(b, cfg, o).then(() => {
         const n = (b._erList || []).length;
@@ -123,8 +124,8 @@ Object.assign(window.SL_WT, {
 SL_TPL.push(
   {id: "re-kompakt", fam: "reise", name: "Kompakt", desc: "Wenig auf einen Blick: Kopf und Karte oben, daneben die Strecke je Tag, darunter die Touren. Statistik, Flug und Fotos sind ausgeblendet.",
     items: [["kopf", "voll"], ["karte", "halb"], ["w:rkmtag", "halb"], ["touren", "voll"]]},
-  {id: "re-fotos", fam: "reise", name: "Fotoreise", desc: "Für die Erinnerung: oben die Foto-Show der Reise, dann Karte und Kennzahlen, darunter alle Fotos und die Touren.",
-    items: [["kopf", "voll"], ["w:rdiashow", "voll"], ["karte", "voll"], ["w:rkennzahl", "voll"], ["fotos", "voll"], ["touren", "voll"]]},
+  {id: "re-fotos", fam: "reise", name: "Fotoreise", desc: "Für die Erinnerung: oben die besten Fotos der Reise als Show, dann Karte und Kennzahlen, darunter alle Fotos und die Touren.",
+    items: [["kopf", "voll"], ["w:rdiashow", "voll", {mode: "best", view: "show", n: 12, ratio: "sq", size: "m", link: true}], ["karte", "voll"], ["w:rkennzahl", "voll"], ["fotos", "voll"], ["touren", "voll"]]},
   {id: "re-tage", fam: "reise", name: "Tag für Tag", desc: "Für den Verlauf: Reise-Kennzahlen und Strecke je Tag nebeneinander, darunter Karte, Statistik nach Sportart und die Touren.",
     items: [["kopf", "voll"], ["w:rkennzahl", "halb"], ["w:rkmtag", "halb"], ["karte", "voll"], ["stat", "voll"], ["touren", "voll"]]},
   {id: "rn-kompakt", fam: "reisen", name: "Nur Reisen", desc: "Ruhig und kurz: die Reisen mit ihren Kennzahlen, ohne Mehrtagestouren und Alben.",

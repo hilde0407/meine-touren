@@ -360,7 +360,7 @@ window.slWidgetBuild = (it, root) => {
     e.dataset.sig = slSig(it);
     return e;
   }
-  const c = tlCard("tlw-" + it.id, {sec: it.id, key: "tl_w_" + it.id, icon: T.icon, title: esc(slWTitle(T, it.cfg || {})), def: true, bodyCls: "slwb"});
+  const c = tlCard("tlw-" + it.id, {sec: it.id, key: (it.ckeys && it.ckeys[0]) || "tl_w_" + it.id, icon: T.icon, title: esc(slWTitle(T, it.cfg || {})), def: true, bodyCls: "slwb"});
   c.dataset.wid = it.id;
   c.dataset.wtype = it.wtype;
   c.dataset.sig = slSig(it);

@@ -59,6 +59,7 @@ function rsFrame(tr, ts, days) {
     if (reg.id === "kopf") return;
     const e = main.querySelector(`:scope > [data-rs="${reg.id}"]`);
     if (!e) return;
+    if (reg.build) return e.remove();                                                   // 3.62.0: „Fotos“ ist ein Baustein (61-bausteine-reise.js), der Abschnitt der alten Ansicht entfällt
     const sec = e.querySelector(":scope > .sec");
     if (sec) sec.remove();                                                              // die Überschrift steht im Kopf der Karte
     if (!e.children.length) return e.remove();                                          // z. B. keine Statistik ohne Touren

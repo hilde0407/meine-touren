@@ -2,6 +2,11 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.62.0 – Reise-Seite: ein Foto-Baustein „Fotos“
+
+- Der feste Abschnitt „Fotos“ und der Baustein „Fotos der Reise“ sind ein Baustein „Fotos“: Auswahl **Alle** (Vorgabe) · Beste · Zufällig · Neueste, Darstellung Raster/Streifen/Show, „Diashow starten“ und „Diashow teilen“ (Link mit den besten bis zu 300 Fotos, bei „Alle“ ehrlich benannt), mehrfach einfügbar
+- Gespeicherte Reise-Layouts bleiben unverändert (Position, Breite, zugeklappt, ausgeblendet); bestehende Bausteine „Fotos der Reise“ behalten ihre Einstellungen; alte Layoutcodes sind weiter importierbar; Vorlage „Fotoreise“ mit „Beste“ oben und „Alle“ unten
+
 ## Version 3.61.0 – Pflegedurchgang: einheitliche Begriffe und Bedienlogik
 
 - Ein Wort je Sache nach dem Leitfaden (docs/LEITFADEN-BEGRIFFE.md): Bestwerte, Schlagwörter, aufzeichnen, Dauer/Bewegungszeit, aktive Tage, Aufstieg, geplante Tour/„im Soll“, holen/importieren/abgleichen, „Höhe korrigieren“, „Als GPX exportieren“, Baustein/Bausteingruppe/Statistik-Gruppe, Ansichten, Sicherung, „Gesamte Zeit“, „Alle Sportarten“, „Verbindung trennen“ – in Oberfläche, Meldungen, PDFs, vier Sprachen und Handbuch

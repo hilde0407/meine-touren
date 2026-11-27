@@ -139,7 +139,7 @@ def test_trip_default_is_unchanged(pw, app):
     pg = _trip(pw, app)
     try:
         assert pg.evaluate(UNITS) == STD and pg.evaluate(ALL_UNITS) == STD
-        for sel in ("#tredit", "#trpdf", "#trsnd", "#trhide", "#coff", "#cofm", "#cm", "#cph", "#main h1", "#main .figs .fig", ".cstat", "#main .tl .trow, #main .tl a, #main .tl .row"):
+        for sel in ("#tredit", "#trpdf", "#trsnd", "#trhide", "#coff", "#cofm", "#cm", "#main h1", "#main .figs .fig", ".cstat", "#main .tl .trow, #main .tl a, #main .tl .row"):
             assert pg.locator(sel).count() >= 1, sel
         assert pg.locator("#main h1").inner_text().strip() == "La Gomera, Spanien"
         assert [f.inner_text().split("\n")[-1] for f in pg.locator("#main .figs .fig").all()] == ["Touren", "Strecke", "Aufstieg", "Abstieg", "Unterwegs", "Tage"]
@@ -392,7 +392,7 @@ def test_trip_blocks_can_be_added_from_the_catalog_and_only_fit_here(pw, app):
         pg.locator("#slbar [data-a=add]").click()
         pg.wait_for_selector(".slcat .slcard", timeout=T)
         names = pg.locator(".slcat .slcard h3").all_inner_texts()
-        assert {"Reise-Kennzahlen", "Strecke je Tag", "Fotos der Reise"} <= set(names) and "Reisen-Kennzahlen" not in names and "Reisen je Jahr" not in names, names
+        assert {"Reise-Kennzahlen", "Strecke je Tag", "Fotos"} <= set(names) and "Reisen-Kennzahlen" not in names and "Reisen je Jahr" not in names, names
         assert pg.locator('.slcard:has([data-add="rkmtag"]) [data-add="rkmtag"]').inner_text() == "Hinzufügen"
         pg.locator('[data-add="rkmtag"]').click()
         pg.wait_for_function("() => !!document.querySelector('#trx [data-wtype=rkmtag] svg.slcol')", timeout=T)
@@ -412,7 +412,7 @@ def test_trip_blocks_can_be_added_from_the_catalog_and_only_fit_here(pw, app):
         pg.locator("#slbar [data-a=add]").click()
         pg.wait_for_selector(".slcat .slcard", timeout=T)
         names = pg.locator(".slcat .slcard h3").all_inner_texts()
-        assert {"Reisen-Kennzahlen", "Reisen je Jahr"} <= set(names) and "Reise-Kennzahlen" not in names and "Strecke je Tag" not in names and "Fotos der Reise" not in names, names
+        assert {"Reisen-Kennzahlen", "Reisen je Jahr"} <= set(names) and "Reise-Kennzahlen" not in names and "Strecke je Tag" not in names and "Fotos" not in names, names
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -571,7 +571,7 @@ def test_views_templates_and_reset_on_the_trip_page(pw, app):
         pg.locator("#slbar [data-a=more]").click() if pg.locator("#slbar [data-a=reset]").is_hidden() else None
         pg.locator("#slbar [data-a=reset]").click()
         pg.get_by_role("button", name="Standard wiederherstellen").last.click()
-        pg.wait_for_function("() => !document.querySelector('[data-wtype]')", timeout=T)
+        pg.wait_for_function("() => !document.querySelector('[data-wtype]:not(#tlw-fotos)')", timeout=T)
         _order(pg, STD, ALL_UNITS)
         c = _cont_wait(pg, app, "reise", lambda c: len(c["views"]) == 2 and c["views"][1]["layout"] in ({"v": 1}, {}))
         assert [v["name"] for v in c["views"]] == ["Standard", "Kompakt"]
@@ -605,7 +605,7 @@ def test_export_and_import_of_a_view(pw, app, tmp_path, page, key, widget):
         d = dl.value
         assert d.suggested_filename == f"ansicht-{key}-mein-reiselayout.json"
         doc = json.loads(open(d.path(), encoding="utf-8").read())
-        assert doc["format"] == "meine-touren-ansicht" and doc["page"] == key and doc["app_version"] == "3.61.5" and list(doc["layouts"]) == [key] and doc["layouts"][key]["widgets"][0]["type"] == widget["type"]
+        assert doc["format"] == "meine-touren-ansicht" and doc["page"] == key and doc["app_version"] == "3.62.0" and list(doc["layouts"]) == [key] and doc["layouts"][key]["widgets"][0]["type"] == widget["type"]
         f = tmp_path / "gut.json"
         f.write_text(json.dumps(doc), encoding="utf-8")
         pg.locator(".slvws").get_by_role("button", name="Importieren …", exact=True).click()
@@ -754,7 +754,7 @@ def test_english_texts(pw, app):
         pg.locator("#slbar [data-a=add]").click()
         pg.wait_for_selector(".slcat .slcard", timeout=T)
         names = pg.locator(".slcat .slcard h3").all_inner_texts()
-        assert "Photos of the trip" in names and "Trip key figures" in names, names
+        assert "Photos" in names and "Trip key figures" in names, names
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()

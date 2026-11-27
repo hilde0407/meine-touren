@@ -11,6 +11,9 @@
    Die Fotos kommen von GET /api/photos (Filter sport, date_from, date_to, day, before, best, app/fotofilter.py). Die Breite wählt man wie bei allen Bausteinen (Raster 49-seitenlayout.js);
    die Spaltenzahl im Raster richtet sich nach der tatsächlichen Breite der Kachel (ResizeObserver), die Höhen nach der Breite der Kachel (Container-Abfragen in style.css „3.32.0“). */
 const ER_MODES = [["random", "Zufällige Fotos"], ["best", "Beste Fotos"], ["day", "An diesem Tag in früheren Jahren"], ["recent", "Neueste Fotos"]];
+/* 3.62.0: beim Baustein „Fotos“ der Reise (rdiashow) gibt es statt „An diesem Tag“ die Auswahl „Alle“ (alle Fotos der Reise, nicht auf n begrenzt) */
+const ER_MODES_TRIP = [["all", "Alle Fotos der Reise"], ["best", "Beste Fotos"], ["random", "Zufällige Fotos"], ["recent", "Neueste Fotos"]];
+const ER_ALL_LIMIT = 5000;                                                                  // „Alle“: so viele Fotos höchstens je Abfrage (der Server erlaubt 60000; Vorschaubilder laden erst beim Scrollen)
 const ER_N = [3, 6, 9, 12];
 const ER_VIEWS = [["grid", "Raster"], ["strip", "Streifen"], ["show", "Einzelbild-Show"]];
 const ER_RATIOS = [["sq", "Quadratisch"], ["43", "4:3"], ["169", "16:9"], ["orig", "Originalformat"]];
@@ -25,12 +28,12 @@ const erIds = l => l.map(x => x[0]);
 function erCfg(cfg) {
   cfg = cfg || {};
   return {
-    mode: erPick(cfg.mode, erIds(ER_MODES), "random"), n: erPick(+cfg.n, ER_N, 6), view: erPick(cfg.view, erIds(ER_VIEWS), "grid"), ratio: erPick(cfg.ratio, erIds(ER_RATIOS), "sq"),
+    mode: erPick(cfg.mode, [...erIds(ER_MODES), "all"], "random"), n: erPick(+cfg.n, ER_N, 6), view: erPick(cfg.view, erIds(ER_VIEWS), "grid"), ratio: erPick(cfg.ratio, erIds(ER_RATIOS), "sq"),
     size: erPick(cfg.size, erIds(ER_SIZES), "m"), height: erPick(cfg.height, erIds(ER_HEIGHTS), "n"), tempo: erPick(+cfg.tempo, ER_TEMPO, 5),
     caption: cfg.caption === true, shuffle: cfg.shuffle === true, link: cfg.link !== false,
   };
 }
-const erModeName = m => (ER_MODES.find(x => x[0] === m) || ER_MODES[0])[1];
+const erModeName = m => (ER_MODES.concat(ER_MODES_TRIP).find(x => x[0] === m) || ER_MODES[0])[1];
 /* Kurztext der Einstellung (Kopf der Kachel, Zeile im Bearbeitungsmodus): Auswahl, Sportart, Zeitraum */
 function erKurz(cfg) {
   const m = erCfg(cfg).mode;
@@ -41,12 +44,12 @@ const erMd = () => {
   return `${pad2(n.getMonth() + 1)}-${pad2(n.getDate())}`;
 };
 /* Abfrage der Fotos; ohne Einstellung genau die bisherige (random=true, limit=6) */
-function erUrl(cfg, fix) {
+function erUrl(cfg, fix, cap) {
   const c = erCfg(cfg), u = new URLSearchParams();
   if (c.mode === "random" || c.mode === "day") u.set("random", "true");
   else if (c.mode === "best") u.set("best", "true");
-  else u.set("recent", "1");
-  u.set("limit", String(c.n));
+  else if (c.mode === "recent") u.set("recent", "1");                                         // „all“: ohne Sortierwunsch = nach Aufnahmezeit
+  u.set("limit", String(c.mode === "all" ? cap || ER_ALL_LIMIT : c.n));
   if (c.mode === "day") {
     u.set("day", erMd());
     u.set("before", String(new Date().getFullYear()));
@@ -69,7 +72,7 @@ function erSlideUrl(cfg, fix) {
   if (c.mode === "random") u.set("random", "1");
   else if (c.mode === "best") u.set("best", "60");
   else if (c.mode === "recent") u.set("recent", "1");
-  else {
+  else if (c.mode !== "all") {                                                               // „all“: alle Fotos im Zeitraum (from/to), ohne weitere Auswahl
     u.set("day", erMd());
     u.set("before", String(new Date().getFullYear()));
   }
@@ -90,9 +93,11 @@ function erSlideUrl(cfg, fix) {
   if (c.view === "show" && cfg && cfg.tempo) u.set("sec", String(c.tempo));
   return "slideshow.html?" + u;
 }
-/* 3.61.5 Diashow einer Reise teilen (Knopf „Diashow teilen“ im Baustein „Fotos der Reise“): Link ohne Konto, 24 Stunden gültig, Fotos mit Tourname (POST /api/diashow/share mit from/to);
+/* 3.61.5 Diashow einer Reise teilen (Knopf „Diashow teilen“ im Baustein „Fotos“ der Reise): Link ohne Konto, 24 Stunden gültig, Fotos mit Tourname (POST /api/diashow/share mit from/to);
+   nAll = Zahl der Fotos der Reise bei „Alle“ (dann nennt die Meldung ehrlich, dass der Link die besten bis zu 300 enthält);
    am Handy das Teilen-Fenster des Geräts, sonst wird der Link kopiert; Rückmeldung in der Statuszeile ernote */
-async function erShareRange(btn, fix, cfg) {
+const ER_SHARE_MAX = 300;                                                                   // wie MAX_PHOTOS in app/diashow_link.py
+async function erShareRange(btn, fix, cfg, nAll) {
   const note = btn.closest(".rsdh").querySelector(".erdsn"), say = t => {
     note.textContent = t;
     clearTimeout(note._t);
@@ -100,16 +105,16 @@ async function erShareRange(btn, fix, cfg) {
   };
   btn.disabled = true;
   try {
-    const best = erCfg(cfg).mode === "best" ? 60 : 0,                                          // wie „Diashow starten“ (slideshow.html?best=60)
+    const best = erCfg(cfg).mode === "best" ? 60 : 0,                                          // wie „Diashow starten“ (slideshow.html?best=60); sonst (auch „Alle“) die besten bis MAX_PHOTOS (300) des Servers
       r = await fetch("/api/diashow/share", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({from: fix.from, to: fix.to, days: 1, best})});
     if (!r.ok) throw new Error(((await r.json().catch(() => ({}))).detail) || r.status);
     const j = await r.json(), url = location.origin + j.url, title = (fix.name ? "Diashow " + fix.name : j.title);
     if (navigator.share) {
       try { await navigator.share({title, url}); } catch (e) { /* abgebrochen */ }
-      say("Tournamen sind im Link sichtbar");
+      say(nAll > ER_SHARE_MAX ? `Tournamen sind im Link sichtbar; er enthält nur die besten ${ER_SHARE_MAX} der ${nAll} Fotos der Reise` : nAll ? `Tournamen sind im Link sichtbar; er enthält die besten bis zu ${ER_SHARE_MAX} Fotos der Reise` : "Tournamen sind im Link sichtbar");
     } else {
       await navigator.clipboard.writeText(url);
-      say("Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar)");
+      say(nAll > ER_SHARE_MAX ? `Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar; enthält nur die besten ${ER_SHARE_MAX} der ${nAll} Fotos der Reise)` : nAll ? `Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar; enthält die besten bis zu ${ER_SHARE_MAX} Fotos der Reise)` : "Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar)");
     }
   } catch (e) {
     say("Link erstellen nicht möglich: " + e.message);
@@ -289,7 +294,7 @@ async function erLoad(sec, cfg, o = {}) {
   const my = (sec._erTok = (sec._erTok || 0) + 1);
   let list = sec._erList;
   if (!list || !o.mix) {
-    const url = erUrl(cfg, o.fix), rnd = /random=true/.test(url);
+    const url = erUrl(cfg, o.fix, o.cap), rnd = /random=true/.test(url);
     list = rnd && !o.fresh ? erHold(url) : null;
     if (!list) {
       try {
@@ -332,9 +337,9 @@ function erForm(cfg, trip) {
   const c = erCfg(cfg), filt = !!((cfg.sports && cfg.sports.length) || (cfg.range && cfg.range !== "all"));
   return `<form class="slform erform" novalidate>` +
     `<section class="erpvs"><h3 class="erpvh">Vorschau</h3><div class="erpvb" role="status" aria-live="polite"></div></section>` +
-    flField({kind: "title", ph: trip ? "Fotos der Reise" : "Erinnerungen"}, cfg, 2) +
-    `<details class="erdt" open><summary>Welche Fotos</summary>` + erRadio("er-mode", "Auswahl", trip ? ER_MODES.filter(m => m[0] !== "day") : ER_MODES, c.mode) + erRadio("er-n", "Anzahl", ER_N.map(x => [x, String(x)]), c.n) +
-    (trip ? `<p class="mut erhint">Es sind immer die Fotos aus dem Zeitraum der Reise.</p>` : `<details class="erdt erdt2"${filt ? " open" : ""}><summary>Filter: Sportart und Zeitraum</summary>${flField({kind: "sports"}, cfg, 0)}${flField({kind: "range", def: "all"}, cfg, 1)}</details>`) + `</details>` +
+    flField({kind: "title", ph: trip ? "Fotos" : "Erinnerungen"}, cfg, 2) +
+    `<details class="erdt" open><summary>Welche Fotos</summary>` + erRadio("er-mode", "Auswahl", trip ? ER_MODES_TRIP : ER_MODES, c.mode) + erRadio("er-n", "Anzahl", ER_N.map(x => [x, String(x)]), c.n, ' data-nm="1"') +
+    (trip ? `<p class="mut erhint">Es sind immer die Fotos aus dem Zeitraum der Reise. „Alle“ zeigt jedes Foto der Reise; die Anzahl gilt nur für Beste, Zufällige und Neueste.</p>` : `<details class="erdt erdt2"${filt ? " open" : ""}><summary>Filter: Sportart und Zeitraum</summary>${flField({kind: "sports"}, cfg, 0)}${flField({kind: "range", def: "all"}, cfg, 1)}</details>`) + `</details>` +
     `<details class="erdt" open><summary>Darstellung</summary>` + erRadio("er-view", "Art der Darstellung", ER_VIEWS, c.view) + erRadio("er-ratio", "Seitenverhältnis der Kacheln", ER_RATIOS, c.ratio) +
     `<p class="mut erhint" data-for="show">In der Einzelbild-Show bestimmt die Höhe die Form; „Originalformat“ zeigt das ganze Foto ohne Zuschnitt.</p>` +
     erRadio("er-size", "Größe der Fotos", ER_SIZES, c.size, ' data-for="grid strip"') + erRadio("er-height", "Höhe der Show", ER_HEIGHTS, c.height, ' data-for="show"') +
@@ -344,7 +349,7 @@ function erForm(cfg, trip) {
     `<p class="slerr ererr" role="alert"></p><div class="uifoot"><button type="button" class="btn ghost erreset" title="Alle Einstellungen dieses Bausteins auf den Standard setzen (gespeichert wird erst mit „Speichern“)">Standard wiederherstellen</button><button type="button" class="btn ghost" data-close>Abbrechen</button><button type="submit" class="btn">Speichern</button></div></form>`;
 }
 /* Formular → Einstellung (nur Abweichungen vom Standard; was zur gewählten Darstellung nicht gehört, wird nicht gespeichert) */
-function erRead(form) {
+function erRead(form, trip) {
   const out = {}, val = n => (form.querySelector(`input[name="${n}"]:checked`) || {}).value, D = erCfg({});
   if (form.querySelector('[name="f1"]')) {                                   // (die Reise-Diashow hat keinen Filter)
     flRead({kind: "sports"}, form, 0, out);
@@ -352,8 +357,8 @@ function erRead(form) {
   }
   flRead({kind: "title"}, form, 2, out);
   const mode = val("er-mode"), n = +val("er-n"), view = val("er-view"), ratio = val("er-ratio"), size = val("er-size"), height = val("er-height"), tempo = +val("er-tempo");
-  if (mode && mode !== D.mode) out.mode = mode;
-  if (n && n !== D.n) out.n = n;
+  if (mode && (mode !== D.mode || trip)) out.mode = mode;                     // Reise-Baustein „Fotos“: Auswahl immer ausdrücklich speichern (der Abschnitt „Fotos“ gilt ohne Eintrag als „Alle“)
+  if (n && n !== D.n && mode !== "all") out.n = n;
   if (view && view !== D.view) out.view = view;
   if (ratio && ratio !== D.ratio) out.ratio = ratio;
   if (view !== "show" && size && size !== D.size) out.size = size;
@@ -370,17 +375,19 @@ function erRead(form) {
 function erSync(form) {
   const v = (form.querySelector('input[name="er-view"]:checked') || {}).value || "grid";
   form.querySelectorAll("[data-for]").forEach(e => (e.hidden = !e.dataset.for.split(" ").includes(v)));
+  const m = (form.querySelector('input[name="er-mode"]:checked') || {}).value;
+  form.querySelectorAll("[data-nm]").forEach(e => (e.hidden = m === "all"));                  // „Alle“ hat keine Anzahl
 }
 function erDialog(id, cfg0, trip) {
   const R = trip && window.RS_CUR && window.RS_CUR.tr, fix = R ? {from: R.start, to: R.end} : null;
-  slModal(trip ? "Einstellungen: Reise-Diashow" : "Einstellungen: Erinnerungen", (body, close) => {
+  slModal(trip ? "Einstellungen: Fotos" : "Einstellungen: Erinnerungen", (body, close) => {
     const mount = cfg => {
       body.innerHTML = erForm(cfg, trip);
       const form = body.querySelector("form"), pv = form.querySelector(".erpvb");
       let timer = 0;
       const preview = () => {
         pv.textContent = "";
-        pv.appendChild(erShell({cfg: erRead(form)}, {preview: true, fix}));
+        pv.appendChild(erShell({cfg: erRead(form, trip)}, {preview: true, fix, cap: 12}));
       };
       const later = () => {
         clearTimeout(timer);
@@ -397,14 +404,14 @@ function erDialog(id, cfg0, trip) {
         if (e.target.closest("[data-close]")) close();
         else if (e.target.closest(".erreset")) {
           clearTimeout(timer);
-          mount({});
+          mount(trip ? {mode: "all", ratio: "43", size: "l"} : {});             // Standard des Reise-Bausteins „Fotos“: Alle
           body.querySelector("input,button").focus();
         }
       };
       form.onsubmit = e => {
         e.preventDefault();
         clearTimeout(timer);
-        const out = erRead(form);
+        const out = erRead(form, trip);
         close();
         slSetCfg(id, out);
       };

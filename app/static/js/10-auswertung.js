@@ -283,7 +283,7 @@ async function collView(title, sub, ids, back, opt = {}) {
     cmap._cvStale = true;
     cmap.setView([50, 9], 6, {animate: false});                          // vorläufig, damit Leaflet lesbar ist
   }                                                 // Karte steckt in einer zugeklappten oder ausgeblendeten Karte: angepasst, sobald sie sichtbar ist (62-reiseseiten.js)
-  Promise.all(ts.slice(0, 14).map(t => (t.photos ? api(`/api/photos?tour_id=${t.id}&limit=6`).catch(() => []) : []))).then(a => {
+  (!$("#cph") ? Promise.resolve([]) : Promise.all(ts.slice(0, 14).map(t => (t.photos ? api(`/api/photos?tour_id=${t.id}&limit=6`).catch(() => []) : [])))).then(a => {
     const ph = a.flat();
     if (!$("#cph")) return;
     $("#cph").innerHTML =

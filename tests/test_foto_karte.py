@@ -121,12 +121,12 @@ def test_photo_info_has_year_counts():
 
 def test_version_notes_and_assets():
     from app import config
-    assert config.VERSION.startswith("3.61.5 · Meine Touren")
+    assert config.VERSION.startswith("3.62.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.34.0.md").read_text(encoding="utf-8")
     assert "Fotos-Seite" in notes and "Zeitraum der Seite" in notes and "Live-Vorschau" in notes and "Alben" in notes
-    assert 'const V = "mt-v149"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v150"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
     js = ROOT / "app" / "static" / "js"
-    assert 'SL_APPV = "3.61.5"' in (js / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.62.0"' in (js / "54-ansichten.js").read_text(encoding="utf-8")
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("62-reiseseiten.js") < html.index("63-fotoseiten.js") < html.index("64-kartenseite.js") < html.index("65-zeitraum.js")
     hist = (ROOT / "docs" / "VERSIONSVERLAUF.md").read_text(encoding="utf-8")

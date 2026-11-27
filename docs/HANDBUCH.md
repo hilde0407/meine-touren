@@ -609,7 +609,7 @@ Oben stehen **Reisebericht (PDF)**, **Senden**, **Reise bearbeiten** (Name und Z
 
 ### 9.5 Reisen anpassen
 
-Reise-Seite und Reisen-Übersicht sind wie alle Seiten anpassbar ([Kapitel 13](#k13)): Jeder Teil der Seite ist ein Baustein, den du verschieben, ausblenden, einklappen und in der Breite ändern kannst. Der Kopf mit Titel, Zeitraum und Aktionen lässt sich verschieben, aber nicht ausblenden. In der Übersicht sind Mehrtagestouren, Reisen, Schlagwörter & Alben sowie „Entfernte Reisen“ (standardmäßig zugeklappt) Bausteine. Zusätzliche Bausteine: Reise-Kennzahlen, Kilometer je Tag, Reise-Diashow, Reisen-Kennzahlen und Reisen je Jahr; dazu gibt es fünf Vorlagen. Das Layout gilt für alle Reisen.
+Reise-Seite und Reisen-Übersicht sind wie alle Seiten anpassbar ([Kapitel 13](#k13)): Jeder Teil der Seite ist ein Baustein, den du verschieben, ausblenden, einklappen und in der Breite ändern kannst. Der Kopf mit Titel, Zeitraum und Aktionen lässt sich verschieben, aber nicht ausblenden. In der Übersicht sind Mehrtagestouren, Reisen, Schlagwörter & Alben sowie „Entfernte Reisen“ (standardmäßig zugeklappt) Bausteine. Zusätzliche Bausteine: Reise-Kennzahlen, Kilometer je Tag, weitere „Fotos“-Bausteine (mehrfach einfügbar), Reisen-Kennzahlen und Reisen je Jahr; dazu gibt es fünf Vorlagen. Das Layout gilt für alle Reisen.
 
 ![Reise-Seite im Bearbeitungsmodus](handbuch/bilder/30b-reise-seite-anpassen.png)
 
@@ -690,7 +690,14 @@ Der Baustein **Erinnerungen** (Übersicht und Statistik) zeigt Fotos aus deinem 
 
 Der Baustein lässt sich mehrfach mit unterschiedlichen Einstellungen hinzufügen.
 
-**„Fotos“ und „Fotos der Reise“ auf der Reise-Seite:** Der Baustein **Fotos** zeigt *alle* Fotos der Reise als Vorschaubilder über die ganze Breite (zum Durchsehen und Anklicken, ohne Teilen). Der Baustein **Fotos der Reise** ist der Baustein „Erinnerungen“, eingeschränkt auf den Zeitraum der Reise: Du wählst eine Auswahl (zufällig, die besten oder die neuesten, 3 bis 12 Fotos) und die Darstellung (Einzelbild-Show, Raster oder Streifen). **Diashow starten** zeigt die Fotos der Reise im Vollbild, **Diashow teilen** erzeugt einen Link ohne Konto (24 Stunden gültig, bis zu 300 beste Fotos der Reise mit Tourname, ohne Karte, Orte, Notizen und Strecken; am Handy öffnet sich das Teilen-Fenster, sonst wird der Link kopiert). Raster, Streifen und Show nutzen in einer vollen Kachel die ganze Breite. Der Link erscheint unter **Freigegebene Links** als Diashow „Diashow TT.MM.JJJJ – TT.MM.JJJJ“.
+**Der Baustein „Fotos“ auf der Reise-Seite:** Es gibt nur noch *einen* Foto-Baustein (bis 3.61 waren es zwei: der feste Abschnitt „Fotos“ und der Baustein „Fotos der Reise“). Er zeigt die Fotos aus dem Zeitraum der Reise. Unter **Einstellungen → Welche Fotos** wählst du:
+
+* **Alle** (Vorgabe): jedes Foto der Reise als Vorschaubild über die ganze Breite, zum Durchsehen und Anklicken (Lightbox). Eine Anzahl gibt es hier nicht.
+* **Beste**, **Zufällig** oder **Neueste**: eine Auswahl von 3, 6, 9 oder 12 Fotos.
+
+Die **Darstellung** (Raster, Streifen oder Einzelbild-Show), Bildgröße, Seitenverhältnis und Titel stellst du wie bei den Erinnerungen ein. **Diashow starten** zeigt die Fotos der Reise im Vollbild. **Diashow teilen** erzeugt einen Link ohne Konto (24 Stunden gültig, mit Tourname, ohne Karte, Orte, Notizen und Strecken; am Handy öffnet sich das Teilen-Fenster, sonst wird der Link kopiert). Der Link enthält immer die **besten bis zu 300 Fotos** der Reise, auch bei „Alle“ – hat die Reise mehr, steht das nach dem Teilen dabei. Er erscheint unter **Freigegebene Links** als Diashow „Diashow TT.MM.JJJJ – TT.MM.JJJJ“.
+
+Der Baustein lässt sich mehrfach einfügen (z. B. oben „Beste“ als Show, weiter unten „Alle“) und wie die anderen Abschnitte einklappen, verschieben, in der Breite ändern und ausblenden. Reise-Seiten, die du schon angepasst hattest, zeigen den bisherigen Abschnitt „Fotos“ unverändert an derselben Stelle (jetzt als Baustein mit „Alle“); ein Baustein „Fotos der Reise“ behält seine Einstellungen. Die Vorlage **Fotoreise** hat oben „Beste“ und unten „Alle“.
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
