@@ -2,6 +2,12 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.69.0 – Gebiete ergänzt: Österreich und Peloponnes
+
+- **Österreich:** Osttirol (Bezirk Lienz, nie Südtirol) mit Villgratental, Defereggental, Virgental und Lienzer Dolomiten; Innsbruck und Mittelgebirge (Patsch, Igls), Tuxer Voralpen; Rätikon mit Brandnertal (Bürserberg); Ötscher, Wachau, Neusiedler See, Villach und Ossiacher See
+- **Peloponnes** (Halbinsel, Vieleck bis zum Isthmus von Korinth) mit Messenien (Mavromati), Mani, Taygetos, Parnon, Arkadien, Argolis, Olympia und Elis; Alias Peloponnese, Morea
+- Grenzen sind wie alle Gebiete Näherungen; unsichere Gebiete (Waldviertel, Ennstal, Karawanken) bewusst weggelassen
+
 ## Version 3.68.0 – Gebiete korrigiert, Hinweis bei Reisen, „Vor einem Jahr in dieser Gegend“, Gebiet-Filter bei Fotos
 
 - **Südtirol** ist nur noch die Provinz Bozen (Sillian, Innervillgraten, Rabbi nicht mehr); neue Gebiete: Niedere Tauern, Schladminger und Radstädter Tauern, Maltatal, Gailtaler/Karnische Alpen, Sierra de las Nieves; Kirchdorf in Tirol im Wilden Kaiser

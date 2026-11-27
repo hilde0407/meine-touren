@@ -312,8 +312,8 @@ def test_layout_dokumente_pruefen():
 
 def test_version_und_dateien_365():
     from app import config
-    assert config.VERSION.startswith("3.68.0 · Meine Touren")
+    assert config.VERSION.startswith("3.69.0 · Meine Touren")
     html = (ROOT / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert "js/68-gebiete.js" in html
-    assert 'const V = "mt-v158"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.68.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v159"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.69.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")

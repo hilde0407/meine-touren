@@ -68,6 +68,25 @@ const Gebiete = (() => {
   g("arlberg", "Arlberg", GEB, "alpen", [[47.05, 10.08, 47.25, 10.35]], {alias: ["St. Anton", "Lech", "Zürs"]});
   g("ausserfern", "Außerfern", REG, "alpen", [[47.08, 10.35, 47.58, 11.00]], {alias: ["Ausserfern", "Reutte", "Lechtal", "Lechtaler Alpen", "Tannheimer Tal", "Ehrwald"], county: ["Reutte"], anz: true});
 
+  /* 3.69.0 Österreich ergänzt: Osttirol (Bezirk Lienz) mit Villgratental, Defereggen, Virgental und Lienzer Dolomiten; Innsbruck/Mittelgebirge und Tuxer Voralpen; Rätikon mit Brandnertal;
+     Ötscher, Wachau, Neusiedler See, Villach/Ossiacher See. Näherungen wie alle Gebiete; Osttirol und seine Täler schließen Südtirol über `nicht` aus (der Bezirk Lienz steht in dessen nichtKreis). */
+  g("osttirol", "Osttirol", REG, "alpen", [], {poly: [[[47.07, 12.14], [47.10, 12.28], [47.12, 12.42], [47.10, 12.58], [47.09, 12.70], [47.04, 12.75], [46.98, 12.79], [46.90, 12.83], [46.84, 12.86], [46.80, 12.92], [46.76, 12.93],
+                                                      [46.72, 12.82], [46.71, 12.70], [46.665, 12.66], [46.665, 12.50], [46.70, 12.45], [46.745, 12.37], [46.77, 12.33], [46.80, 12.29], [46.85, 12.27], [46.95, 12.20]]],
+                                  alias: ["East Tyrol", "Osttirol Lienz", "Bezirk Lienz", "Lienz", "Matrei in Osttirol", "Matrei", "Sillian", "Kals am Großglockner", "Obertilliach", "Kartitsch"], county: ["Lienz"], nicht: ["suedtirol"], anz: true});
+  g("villgratental", "Villgratental", TAL, "osttirol", [], {poly: [[[46.745, 12.45], [46.745, 12.37], [46.77, 12.33], [46.80, 12.29], [46.85, 12.27], [46.88, 12.30], [46.88, 12.46]]],
+                                  alias: ["Villgraten", "Innervillgraten", "Außervillgraten", "Ausservillgraten", "Kalkstein", "Villgrater Berge", "Hochgrubbachspitze"], nicht: ["suedtirol"]});
+  g("defereggen", "Defereggental", TAL, "osttirol", [[46.86, 12.25, 46.99, 12.55]], {alias: ["Defereggen", "Deferegger Alpen", "St. Jakob in Defereggen", "St. Veit in Defereggen", "Hopfgarten in Defereggen", "Staller Sattel"], nicht: ["suedtirol"]});
+  g("virgental", "Virgental", TAL, "osttirol", [[46.99, 12.28, 47.10, 12.50]], {alias: ["Virgen", "Prägraten am Großvenediger", "Praegraten", "Umbalfälle", "Johannishütte", "Neue Prager Hütte"], nicht: ["suedtirol"]});
+  g("lienzer-dolomiten", "Lienzer Dolomiten", GEB, "osttirol", [[46.73, 12.70, 46.82, 12.86]], {alias: ["Lienzer Dolomiten Osttirol", "Dolomitenhütte", "Karlsbader Hütte", "Laserzwand", "Spitzkofel", "Lienzer Hütte"]});
+  g("innsbruck", "Innsbruck und Mittelgebirge", REG, "alpen", [[47.17, 11.28, 47.31, 11.50]], {alias: ["Innsbrucker Mittelgebirge", "Mittelgebirge", "Innsbruck", "Igls", "Patsch", "Aldrans", "Lans", "Rinn", "Mutters", "Axams", "Patscherkofel", "Nordkette", "Hungerburg", "Ellbögen"], anz: true});
+  g("tuxer", "Tuxer Voralpen", GEB, "alpen", [[47.12, 11.42, 47.31, 11.80]], {alias: ["Tuxer Alpen", "Patscherkofel", "Glungezer", "Tulfes", "Tulfein", "Volderer Berg", "Kellerjoch", "Lizum"]});
+  g("raetikon", "Rätikon", GEB, "alpen", [[46.93, 9.52, 47.14, 9.88]], {alias: ["Raetikon", "Lünersee", "Luenersee", "Schesaplana", "Drei Türme", "Rellstal", "Gargellen", "Madrisa", "Bürserberg", "Brand", "Bürs", "Nenzing", "Gamperdonatal"]});
+  g("brandnertal", "Brandnertal", TAL, "raetikon", [[47.04, 9.66, 47.17, 9.86]], {alias: ["Brand", "Bürserberg", "Burserberg", "Bürs", "Brandner Tal", "Lünersee", "Bludenz", "Nüziders", "Dalaas"]});
+  g("oetscher", "Ötscher und Mostviertler Alpen", GEB, "alpen", [[47.80, 15.05, 47.95, 15.35]], {alias: ["Ötscher", "Oetscher", "Dürrenstein", "Lunz am See", "Lackenhof", "Gemeindealpe", "Annaberg", "Ötschergräben", "Wilder Mann"]});
+  g("wachau", "Wachau", REG, null, [[48.20, 15.25, 48.45, 15.62]], {alias: ["Wachau Donau", "Dürnstein", "Duernstein", "Spitz an der Donau", "Weißenkirchen", "Melk", "Krems an der Donau", "Rossatzbach", "Arnsdorf", "Wachauer Welterbesteig"], anz: true});
+  g("neusiedlersee", "Neusiedler See", REG, null, [[47.62, 16.62, 47.98, 16.95]], {alias: ["Neusiedlersee", "Fertő", "Fertö", "Seewinkel", "Illmitz", "Podersdorf", "Rust", "Breitenbrunn", "Mörbisch", "Weiden am See", "Apetlon"], anz: true});
+  g("villach", "Villach und Ossiacher See", REG, "alpen", [[46.58, 13.80, 46.76, 14.05]], {alias: ["Villach", "Gerlitzen", "Gerlitzen Alpe", "Ossiacher See", "Ossiach", "Annenheim", "Treffen", "Bodensdorf", "Landskron", "Verditz"], anz: true});
+
   /* ===================== Alpen: Deutschland ===================== */
   g("allgaeu", "Allgäu", REG, "alpen", [[47.32, 10.00, 47.95, 10.78]], {alias: ["Allgaeu", "Allgäuer Alpen", "Oberstdorf", "Kempten"], anz: true});
   g("berchtesgaden", "Berchtesgadener Land", REG, "alpen", [[47.48, 12.70, 47.78, 13.12]], {alias: ["Berchtesgaden", "Watzmann", "Königssee", "Bad Reichenhall"], county: ["Berchtesgadener Land"], anz: true});
@@ -307,6 +326,19 @@ const Gebiete = (() => {
   g("lipari", "Lipari", INS, "aeolische", [[38.435, 14.87, 38.55, 15.02]], {alias: ["Isola di Lipari"]});
   g("elba", "Elba", INS, null, [[42.72, 10.10, 42.88, 10.50]], {alias: ["Isola d'Elba", "Portoferraio", "Monte Capanne", "Toskanischer Archipel"]});
   g("kreta", "Kreta", INS, null, [[34.80, 23.45, 35.70, 26.35]], {alias: ["Crete", "Κρήτη", "Chania", "Heraklion", "Samaria", "Samariá", "Gavdos"]});
+  /* 3.69.0 Peloponnes (Halbinsel, seit dem Kanal von Korinth formal eine Insel; Nordgrenze = Isthmus, ohne Attika und Mittelgriechenland) mit Messenien, Mani, Taygetos, Parnon, Arkadien, Argolis, Olympia/Elis.
+     Vieleck, Näherung: die Küste ist grob, das Meer im Golf von Korinth und vor den Küsten ist mit eingeschlossen; die Inseln Hydra, Aigina, Kythira, Zakynthos gehören nicht dazu. */
+  g("peloponnes", "Peloponnes", INS, null, [], {poly: [[[38.22, 21.28], [38.27, 21.60], [38.32, 21.82], [38.31, 22.10], [38.28, 22.45], [38.18, 22.80], [38.05, 22.97], [37.97, 23.04], [37.88, 23.10], [37.70, 23.22], [37.66, 23.43], [37.55, 23.45],
+                                                    [37.45, 23.55], [37.40, 23.42], [37.33, 23.30], [37.22, 23.22], [37.00, 23.15], [36.70, 23.14], [36.42, 23.22], [36.30, 22.42], [36.50, 22.10], [36.62, 21.82], [36.82, 21.58], [37.25, 21.52],
+                                                    [37.65, 21.15], [37.90, 21.02], [38.00, 21.05]]],
+                                 alias: ["Peloponnese", "Peloponnesos", "Peloponnesus", "Morea", "Πελοπόννησος", "Péloponnèse", "Peloponeso"], anz: true});
+  g("messenien", "Messenien", REG, "peloponnes", [[36.75, 21.62, 37.32, 22.28]], {alias: ["Messinia", "Messenia", "Μεσσηνία", "Kalamata", "Pylos", "Methoni", "Koroni", "Messini", "Kyparissia", "Ithomi", "Ithome", "Mavromati", "Antikes Messene", "Ancient Messene", "Voidokilia"], anz: true});
+  g("mani", "Mani", KUE, "peloponnes", [[36.36, 22.20, 36.90, 22.60]], {alias: ["Μάνη", "Innere Mani", "Äußere Mani", "Areopoli", "Stoupa", "Kardamyli", "Gytheio", "Vathia", "Kap Tenaro", "Cape Tainaron", "Cape Matapan", "Limeni", "Itilo"]});
+  g("taygetos", "Taygetos", GEB, "peloponnes", [[36.85, 22.23, 37.12, 22.45]], {alias: ["Taygetus", "Taÿgetos", "Taigetos", "Ταΰγετος", "Profitis Ilias", "Mystras", "Mistras", "Sparta", "Taygetos-Gebirge"]});
+  g("parnon", "Parnon", GEB, "peloponnes", [[37.00, 22.52, 37.35, 22.80]], {alias: ["Parnonas", "Parnon-Gebirge", "Πάρνωνας", "Kosmas", "Kastanitsa", "Megali Tourla"]});
+  g("arkadien", "Arkadien", REG, "peloponnes", [[37.30, 22.00, 37.80, 22.60]], {alias: ["Arcadia", "Arkadia", "Αρκαδία", "Tripoli", "Tripolis", "Megalopoli", "Dimitsana", "Stemnitsa", "Vytina", "Tegea", "Lousios", "Lousios-Schlucht", "Mantineia"], anz: true});
+  g("argolis", "Argolis", REG, "peloponnes", [[37.30, 22.55, 37.75, 23.42]], {alias: ["Argolida", "Argolid", "Argolis Peloponnes", "Αργολίδα", "Nafplio", "Nauplia", "Nauplion", "Argos", "Epidavros", "Epidaurus", "Mykene", "Mycenae", "Tiryns", "Ermioni", "Kranidi", "Methana", "Astros"], anz: true});
+  g("ilia", "Olympia und Elis", REG, "peloponnes", [[37.42, 21.05, 37.98, 21.95]], {alias: ["Ilia", "Elis", "Ileia", "Ηλεία", "Olympia", "Archaia Olympia", "Pyrgos", "Katakolo", "Zacharo", "Foloi", "Andritsaina", "Kyllini", "Epikouros"], anz: true});
   g("zypern", "Zypern", INS, null, [[34.55, 32.25, 35.72, 34.65]], {alias: ["Cyprus", "Kıbrıs", "Kypros", "Troodos", "Paphos", "Akamas"]});
   g("malta", "Malta", INS, null, [[35.78, 14.18, 36.10, 14.60]], {alias: ["Gozo", "Valletta", "Comino"]});
   g("rhodos", "Rhodos", INS, null, [[35.85, 27.70, 36.50, 28.30]], {alias: ["Rhodes", "Rodos", "Lindos", "Prasonisi"]});

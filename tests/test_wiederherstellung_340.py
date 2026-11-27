@@ -716,7 +716,7 @@ def test_temporaerer_bereich_ist_nicht_im_umzugspaket(bak, tmp_path):
 # ------------------------------------------------------------------------------------------------ Buchhaltung
 def test_version_und_skript_bleiben():
     root = Path(__file__).resolve().parent.parent
-    assert config.VERSION.startswith("3.68.0")
+    assert config.VERSION.startswith("3.69.0")
     assert "komoot_hub.sqlite.vor-restore" in (root / "deploy" / "restore.sh").read_text(encoding="utf-8")      # das Skript gibt es weiterhin
     html = (root / "app/static/index.html").read_text(encoding="utf-8")
     assert html.index("js/68-wiederherstellen.js") < html.index("js/69-start.js")

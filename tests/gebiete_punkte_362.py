@@ -313,6 +313,27 @@ torres-del-paine | Torres del Paine -51.00,-73.00
 fitz-roy | El Chaltén -49.33,-72.89 ; Fitz Roy -49.27,-73.04
 neuseeland-nord | Auckland -36.85,174.76 ; Wellington -41.29,174.78 ; Tongariro -39.13,175.63 ; Rotorua -38.14,176.25
 neuseeland-sued | Queenstown -45.03,168.66 ; Mount Cook -43.59,170.14 ; Milford Sound -44.67,167.93 ; Abel Tasman -40.90,172.90 ; Christchurch -43.53,172.64
+osttirol | Lienz 46.83,12.77 ; Matrei in Osttirol 47.00,12.53 ; Sillian 46.7467,12.4167 ; Obertilliach 46.69,12.60 ; Kals 47.00,12.64
+villgratental | Innervillgraten 46.80,12.32 ; Außervillgraten 46.77,12.38
+defereggen | St. Jakob in Defereggen 46.91,12.35 ; St. Veit in Defereggen 46.92,12.45
+virgental | Virgen 47.00,12.45 ; Prägraten 47.00,12.37
+lienzer-dolomiten | Karlsbader Hütte 46.76,12.80 ; Dolomitenhütte 46.77,12.79
+innsbruck | Patsch 47.21,11.45 ; Igls 47.23,11.42 ; Innsbruck 47.26,11.39 ; Aldrans 47.25,11.46
+tuxer | Patscherkofel 47.21,11.46 ; Glungezer 47.22,11.67 ; Tulfes 47.28,11.54
+raetikon | Lünersee 47.05,9.77 ; Bürserberg 47.13,9.74 ; Gargellen 46.97,9.86
+brandnertal | Brand 47.07,9.72 ; Bürserberg 47.13,9.74 ; Bludenz 47.155,9.82
+oetscher | Ötscher 47.86,15.21 ; Lunz am See 47.90,15.05 ; Lackenhof 47.85,15.17
+wachau | Dürnstein 48.39,15.52 ; Spitz an der Donau 48.38,15.42 ; Melk 48.23,15.33
+neusiedlersee | Podersdorf 47.86,16.83 ; Illmitz 47.77,16.84 ; Rust 47.80,16.67
+villach | Villach 46.61,13.85 ; Ossiach 46.67,13.98 ; Gerlitzen 46.69,13.92
+peloponnes | Patras 38.25,21.73 ; Kalamata 37.04,22.11 ; Nafplio 37.57,22.80 ; Korinth 37.94,22.93 ; Monemvasia 36.69,23.04 ; Olympia 37.64,21.63 ; Sparta 37.07,22.43
+messenien | Kalamata 37.04,22.11 ; Pylos 36.91,21.70 ; Mavromati 37.18,21.92
+mani | Areopoli 36.67,22.38 ; Vathia 36.47,22.48 ; Kardamyli 36.89,22.23
+taygetos | Taygetos Gipfel 36.96,22.35 ; Mystras 37.07,22.37
+parnon | Kosmas 37.12,22.63 ; Kastanitsa 37.10,22.60
+arkadien | Tripoli 37.51,22.37 ; Dimitsana 37.60,22.03 ; Megalopoli 37.40,22.14
+argolis | Nafplio 37.57,22.80 ; Epidavros 37.63,23.08 ; Mykene 37.73,22.76
+ilia | Olympia 37.64,21.63 ; Pyrgos 37.67,21.44 ; Zacharo 37.48,21.65
 """
 
 NEG = """
@@ -366,6 +387,20 @@ NEG = """
 !gran-canaria | Teide 28.27,-16.64
 !mallorca | Menorca 39.89,4.26 ; Ibiza 38.91,1.43
 !ruegen | Stralsund 54.31,13.09
+!osttirol | Sexten 46.70,12.35 ; Innichen 46.735,12.28 ; Kitzbühel 47.45,12.39 ; Lofer 47.59,12.70 ; Oberdrauburg 46.75,12.97 ; Bruneck 46.80,11.94
+!villgratental | Sexten 46.70,12.35 ; Lienz 46.83,12.77 ; Kartitsch 46.74,12.50
+!innsbruck | Kitzbühel 47.45,12.39 ; Schwaz 47.34,11.71 ; Mayrhofen 47.16,11.86 ; Neustift 47.11,11.32
+!tuxer | Kitzbühel 47.45,12.39 ; Neustift 47.11,11.32
+!brandnertal | Schruns 47.08,9.91 ; Feldkirch 47.24,9.60
+!raetikon | Bregenz 47.50,9.75 ; Schruns 47.08,9.91
+!wachau | St. Pölten 48.20,15.63 ; Wien 48.21,16.37
+!neusiedlersee | Eisenstadt 47.85,16.52 ; Wien 48.21,16.37
+!villach | Klagenfurt 46.62,14.31 ; Spittal an der Drau 46.80,13.49
+!oetscher | Mariazell 47.77,15.32 ; Scheibbs 48.00,15.17
+!peloponnes | Athen 37.98,23.73 ; Megara 37.99,23.34 ; Delphi 38.48,22.50 ; Nafpaktos 38.39,21.83 ; Kythira 36.20,22.99 ; Zakynthos 37.78,20.90 ; Aegina 37.74,23.43 ; Mesolongi 38.37,21.43 ; Hydra 37.35,23.46
+!messenien | Sparta 37.07,22.43 ; Patras 38.25,21.73 ; Olympia 37.64,21.63 ; Gytheio 36.76,22.57
+!argolis | Korinth 37.94,22.93 ; Tripoli 37.51,22.37
+!ilia | Patras 38.25,21.73 ; Kalamata 37.04,22.11
 """
 
 
