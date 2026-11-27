@@ -50,7 +50,7 @@ Dieses Handbuch erklärt Schritt für Schritt, wie du mit **Meine Touren** arbei
 * Fotos automatisch über die Aufnahmezeit den Touren zuordnen, Diashow, Erinnerungen.
 * Statistik, Bestwerte, Pulszonen, Jahresziele, Jahresrückblick.
 * Reisen und Mehrtagestouren werden erkannt und bekommen eine eigene Seite samt Reisebericht.
-* **Alle Seiten sind anpassbar** („Seite anpassen“): Bausteine verschieben, ausblenden, in der Breite ändern, hinzufügen; mehrere Ansichten und Vorlagen; eigene Kennzahlen.
+* **Alle Seiten sind anpassbar** („Seite anpassen“): Bausteine verschieben, entfernen und wieder hinzufügen, in der Breite ändern; mehrere Ansichten und Vorlagen; eigene Kennzahlen.
 * Teilen per Link ohne Konto – du bestimmst, was gezeigt wird, und kannst jeden Link widerrufen.
 * Mehrere Benutzer mit getrennten Daten, Oberfläche auf Deutsch, Englisch, Französisch und Spanisch, Hell- und Dunkeldarstellung, Handy-Ansicht, Android-App.
 
@@ -556,7 +556,7 @@ Der Hinweistext am Knopf **Heatmap** erklärt den Unterschied: Die Heatmap zeich
 
 ### Die Karten-Seite anpassen
 
-Auch die Karte ist eine anpassbare Seite (**Seite anpassen**, [Kapitel 13](#k13)). Die **Karte** selbst bleibt immer sichtbar; du kannst nur ihre Breite wählen und sie verschieben. Die Bedienelemente sind einzelne **Bedienfelder**: **Mein Standort**, **Jahr und Anzahl**, **Sportarten**, Strecken-Stil, Heatmap und Fotos sowie **Touren im Ausschnitt**. Sie lassen sich verschieben, einklappen und ausblenden; ein ausgeblendetes Bedienfeld behält seine Einstellung. Nach jeder Änderung passt sich die Karte an, ohne dass ein selbst gewählter Kartenausschnitt verloren geht. Im Katalog (Kategorie **Karte**) gibt es zusätzlich die Bausteine **Karten-Kennzahlen**, **Touren im Kartenausschnitt** und **Legende der Sportarten**; Vorlagen sind „Karte mit Kennzahlen“, „Karte mit Liste“ und „Nur die Karte“. Gruppen gibt es auf der Karte nicht.
+Auch die Karte ist eine anpassbare Seite (**Seite anpassen**, [Kapitel 13](#k13)). Die **Karte** selbst bleibt immer sichtbar; du kannst nur ihre Breite wählen und sie verschieben. Die Bedienelemente sind einzelne **Bedienfelder**: **Mein Standort**, **Jahr und Anzahl**, **Sportarten**, Strecken-Stil, Heatmap und Fotos sowie **Touren im Ausschnitt**. Sie lassen sich verschieben, einklappen und entfernen; ein entferntes Bedienfeld behält seine Einstellung, wenn du es wieder hinzufügst. Nach jeder Änderung passt sich die Karte an, ohne dass ein selbst gewählter Kartenausschnitt verloren geht. Im Katalog (Kategorie **Karte**) gibt es zusätzlich die Bausteine **Karten-Kennzahlen**, **Touren im Kartenausschnitt** und **Legende der Sportarten**; Vorlagen sind „Karte mit Kennzahlen“, „Karte mit Liste“ und „Nur die Karte“. Gruppen gibt es auf der Karte nicht.
 
 ![Karte im Bearbeitungsmodus mit den Bedienfeldern als Bausteine](handbuch/bilder/18b-karte-anpassen.png)
 
@@ -623,17 +623,17 @@ Ein Klick auf eine Mehrtagestour (Menü **Reisen** → Baustein **Mehrtagestoure
 
 ### 9.5 Reisen anpassen
 
-Reise-Seite und Reisen-Übersicht sind wie alle Seiten anpassbar ([Kapitel 13](#k13)): Jeder Teil der Seite ist ein Baustein, den du verschieben, ausblenden, einklappen und in der Breite ändern kannst. Der Kopf mit Titel, Zeitraum und Aktionen lässt sich verschieben, aber nicht ausblenden. In der Übersicht sind Mehrtagestouren, Reisen, Schlagwörter & Alben sowie „Entfernte Reisen“ (standardmäßig zugeklappt) Bausteine. Die Seite einer Mehrtagestour (9.3a) nutzt dieselben Bausteine. Zusätzliche Bausteine: Reise-Kennzahlen, Kilometer je Tag, weitere „Fotos“-Bausteine (mehrfach einfügbar), Reisen-Kennzahlen und Reisen je Jahr; dazu gibt es fünf Vorlagen. Das Layout gilt für alle Reisen.
+Reise-Seite und Reisen-Übersicht sind wie alle Seiten anpassbar ([Kapitel 13](#k13)): Jeder Teil der Seite ist ein Baustein, den du verschieben, entfernen, einklappen und in der Breite ändern kannst. Der Kopf mit Titel, Zeitraum und Aktionen lässt sich verschieben, aber nicht entfernen. In der Übersicht sind Mehrtagestouren, Reisen, Schlagwörter & Alben sowie „Entfernte Reisen“ (standardmäßig zugeklappt) Bausteine. Die Seite einer Mehrtagestour (9.3a) nutzt dieselben Bausteine. Zusätzliche Bausteine: Reise-Kennzahlen, Kilometer je Tag, weitere „Fotos“-Bausteine (mehrfach einfügbar), Reisen-Kennzahlen und Reisen je Jahr; dazu gibt es fünf Vorlagen. Das Layout gilt für alle Reisen.
 
 ![Reise-Seite im Bearbeitungsmodus](handbuch/bilder/30b-reise-seite-anpassen.png)
 
-*Abbildung 32: Die Reise-Seite im Bearbeitungsmodus: Kopf, Kennzahlen und „Statistik nach Sportart“ als Bausteine mit Breitenwahl, Pfeilen und „Ausblenden“.*
+*Abbildung 32: Die Reise-Seite im Bearbeitungsmodus: Kopf, Kennzahlen und „Statistik nach Sportart“ als Bausteine mit Breitenwahl, Pfeilen und „Entfernen“.*
 
 ### 9.6 Gebiete: Übersicht, Gebietsseite und eigene Gebiete (ab 3.65.0)
 
 **Gebiet in der Regionszeile.** Unter dem Tournamen (Tourseite und Tourblatt) steht in der Regionszeile das genaueste Gebiet („Vallehermoso, **La Gomera**, Kanarische Inseln, Spanien“), im Kopf der Reise-Seite hinter dem Land „Gebiet: **La Gomera**“. Das Gebiet ist ein **Link**: ein Klick öffnet die Tourenliste mit dem Filter **Alle Gebiete** auf genau dieses Gebiet (`#/tours?g=<Kennung>`). Die Karten der Reisen und Touren in Listen bleiben ganz anklickbar und tragen keinen zweiten Link.
 
-**Gebiete (Menüpunkt „Gebiete“, Adresse `#/areas`).** Die Übersicht listet alle Gebiete, in denen du Touren hast, mit **Touren, Tagen, Strecke, Aufstieg** und dem **ersten und letzten Mal**. Oben stehen die Zahl der Gebiete und – wenn du welche angelegt hast – der eigenen. Das Suchfeld findet Namen, Alias und Land (ohne Groß/Klein und Akzente), **Enter** öffnet den ersten Treffer. **Nach Typ** gliedert in Gebirge, Täler, Inseln, Küsten und Landschaften, **Nach Land** nach dem Land, in dem die meisten Touren liegen; sortiert wird nach Name, **Meiste Touren**, **Längste Strecke** oder **Zuletzt besucht**. Gliederung und Sortierung merkt sich der Browser. Die Seite ist wie alle Seiten anpassbar ([Kapitel 13](#k13)): Kopf, Liste und der Baustein **Gebiete-Kennzahlen** (Gebiete, Länder, Touren in Gebieten, Strecke, Touren ohne Gebiet) lassen sich verschieben, ausblenden und einklappen; dazu gibt es zwei Vorlagen („Mit Kennzahlen“, „Nur die Liste“).
+**Gebiete (Menüpunkt „Gebiete“, Adresse `#/areas`).** Die Übersicht listet alle Gebiete, in denen du Touren hast, mit **Touren, Tagen, Strecke, Aufstieg** und dem **ersten und letzten Mal**. Oben stehen die Zahl der Gebiete und – wenn du welche angelegt hast – der eigenen. Das Suchfeld findet Namen, Alias und Land (ohne Groß/Klein und Akzente), **Enter** öffnet den ersten Treffer. **Nach Typ** gliedert in Gebirge, Täler, Inseln, Küsten und Landschaften, **Nach Land** nach dem Land, in dem die meisten Touren liegen; sortiert wird nach Name, **Meiste Touren**, **Längste Strecke** oder **Zuletzt besucht**. Gliederung und Sortierung merkt sich der Browser. Die Seite ist wie alle Seiten anpassbar ([Kapitel 13](#k13)): Kopf, Liste und der Baustein **Gebiete-Kennzahlen** (Gebiete, Länder, Touren in Gebieten, Strecke, Touren ohne Gebiet) lassen sich verschieben, entfernen und einklappen; dazu gibt es zwei Vorlagen („Mit Kennzahlen“, „Nur die Liste“).
 
 **Die Seite eines Gebiets (`#/area/<Kennung>`).** Ein Klick auf ein Gebiet öffnet seine Seite: **Kopf** (Name, Typ, Land, übergeordnetes Gebiet, „Alle Touren“), **Kennzahlen** (Touren, aktive Tage, Strecke, Aufstieg, Dauer, erstes und letztes Mal), **Karte** mit allen Strecken der Touren im Gebiet und der gestrichelten Grenze des Gebiets, **Beste Monate** (Säulen je Monat oder Jahr nach Touren, Strecke oder Aufstieg, darunter die stärksten Monate und das stärkste Jahr – nützlich für die Frage, wann man wieder hinfährt), **Fotos** der Touren im Gebiet (Vorschaubilder, Raster, Streifen oder Einzelbild-Show, „Diashow starten“), **Reisen in diesem Gebiet** und die neuesten **Touren**; „Alle Touren in der Liste“ führt zur Tourenliste mit dem Filter. Das Layout gilt für alle Gebiete gleich; drei Vorlagen stehen bereit („Mit Fotos“ für die Erinnerung, „Wann hinfahren“ für die Planung, „Kompakt“). Die Bausteine **Beste Monate** und **Fotos des Gebiets** gibt es auch mehrfach und mit eigenen Einstellungen im Katalog von „Seite anpassen“, aber nur auf dieser Seite.
 
@@ -680,7 +680,7 @@ Die Bilder werden **im Browser verkleinert**, nur die kleinen Dateien gehen übe
 
 Menü **Fotos**: oben **Fotos zuordnen**, **Fotos importieren …**, **Diashow 2025** (für das gewählte Jahr) und **Zufall**. Darunter Reiter je Jahr. Die Fotos sind nach Tour gruppiert; jede Gruppe hat einen eigenen Knopf **Diashow**. Ein Klick auf ein Foto öffnet die Großansicht.
 
-Auch die Fotos-Seite lässt sich anpassen ([Kapitel 13](#k13)): Der **Kopf** (Titel, Zahlen, Aktionen) bleibt immer sichtbar, die **Jahresleiste** und die **Fotos des Jahres** sind Bausteine, die du verschieben, ausblenden oder in der Breite ändern kannst. Neue Bausteine sind **Foto-Kennzahlen** (Fotos, einer Tour zugeordnet, Touren mit Fotos, Jahre, Länder – Länder nur, wenn sie bekannt sind) und **Fotos je Jahr** (Säulen je Jahr). Vorlagen: „Mit Kennzahlen“, „Nur Fotos“ und „Jahresverlauf“.
+Auch die Fotos-Seite lässt sich anpassen ([Kapitel 13](#k13)): Der **Kopf** (Titel, Zahlen, Aktionen) bleibt immer sichtbar, die **Jahresleiste** und die **Fotos des Jahres** sind Bausteine, die du verschieben, entfernen oder in der Breite ändern kannst. Neue Bausteine sind **Foto-Kennzahlen** (Fotos, einer Tour zugeordnet, Touren mit Fotos, Jahre, Länder – Länder nur, wenn sie bekannt sind) und **Fotos je Jahr** (Säulen je Jahr). Vorlagen: „Mit Kennzahlen“, „Nur Fotos“ und „Jahresverlauf“.
 
 ![Fotos-Seite im Bearbeitungsmodus](handbuch/bilder/20b-fotos-anpassen.png)
 
@@ -729,7 +729,7 @@ Der Baustein lässt sich mehrfach mit unterschiedlichen Einstellungen hinzufüge
 
 Die **Darstellung** (Raster, Streifen oder Einzelbild-Show), Bildgröße, Seitenverhältnis und Titel stellst du wie bei den Erinnerungen ein. **Diashow starten** zeigt die Fotos der Reise im Vollbild. **Diashow teilen** erzeugt einen Link ohne Konto (24 Stunden gültig, mit Tourname, ohne Karte, Orte, Notizen und Strecken; am Handy öffnet sich das Teilen-Fenster, sonst wird der Link kopiert). Der Link enthält immer die **besten bis zu 300 Fotos** der Reise, auch bei „Alle“ – hat die Reise mehr, steht das nach dem Teilen dabei. Er erscheint unter **Freigegebene Links** als Diashow „Diashow TT.MM.JJJJ – TT.MM.JJJJ“.
 
-Der Baustein lässt sich mehrfach einfügen (z. B. oben „Beste“ als Show, weiter unten „Alle“) und wie die anderen Abschnitte einklappen, verschieben, in der Breite ändern und ausblenden. Reise-Seiten, die du schon angepasst hattest, zeigen den bisherigen Abschnitt „Fotos“ unverändert an derselben Stelle (jetzt als Baustein mit „Alle“); ein Baustein „Fotos der Reise“ behält seine Einstellungen. Die Vorlage **Fotoreise** hat oben „Beste“ und unten „Alle“.
+Der Baustein lässt sich mehrfach einfügen (z. B. oben „Beste“ als Show, weiter unten „Alle“) und wie die anderen Abschnitte einklappen, verschieben, in der Breite ändern und entfernen. Reise-Seiten, die du schon angepasst hattest, zeigen den bisherigen Abschnitt „Fotos“ unverändert an derselben Stelle (jetzt als Baustein mit „Alle“); ein Baustein „Fotos der Reise“ behält seine Einstellungen. Die Vorlage **Fotoreise** hat oben „Beste“ und unten „Alle“.
 
 [↑ Inhaltsverzeichnis](#inhalt)
 
@@ -860,7 +860,7 @@ In der Kopfzeile jedes Bausteins:
 
 * der **Griff** (⋮⋮) zum Ziehen – auch mit Tastatur: Pfeiltasten verschieben, Home und End springen an den Anfang bzw. das Ende,
 * vier **Breiten**: ganze Breite, zwei Drittel, halbe Breite, ein Drittel (auf breiten Bildschirmen stehen kleine Bausteine nebeneinander),
-* **↑ ↓** zum Verschieben, **Ausblenden** (der Baustein ist weg, aber nicht gelöscht – im Bearbeitungsmodus holst du ihn zurück),
+* **↑ ↓** zum Verschieben, **Entfernen** (mit Rückfrage „Baustein entfernen?“; für alle Bausteine auf allen Seiten gleich – nur Pflicht-Bausteine wie der Kopf der Reise-Seite haben ihn nicht, sie stehen mit „bleibt immer sichtbar“ da; einen mitgelieferten Baustein holst du über **Baustein hinzufügen → Wieder hinzufügen** zurück, siehe 13.2),
 * **Einstellungen** (Zahnrad), falls der Baustein einstellbar ist,
 * **Standardmäßig offen:** ob der Baustein beim Öffnen der Seite aufgeklappt ist,
 * **Duplizieren** (bei Bausteinen, die mehrfach vorkommen dürfen) und **In Gruppe …** (bei schmalen Bausteinen im Menü „⋯“).
@@ -875,7 +875,8 @@ In der Kopfzeile jedes Bausteins:
 
 1. **Baustein hinzufügen** anklicken.
 2. Im Katalog nach Kategorie filtern – **Alle**, **Statistik**, **Zahlen**, **Grafiken**, **Rückblick**, **Planung**, **Touren holen**, **Hinweise**, **Eigene Kennzahlen** (je nach Seite gibt es unterschiedliche, etwa Reisen, Fotos und Karte nur auf der jeweiligen Seite) – oder mit **Bausteine suchen …** nach einem Wort.
-3. Bei **Hinzufügen** bekommst du den Baustein ans Seitenende; verschiebe ihn dann an die richtige Stelle. Jeder Baustein hat im Katalog eine kleine, nicht bedienbare **Vorschau mit deinen echten Zahlen**. Sie wird erst geladen, wenn die Karte sichtbar wird; solange steht dort ein Ladezustand. Hast du noch keine passenden Daten, zeigt die Vorschau Beispielwerte und kennzeichnet sie als „Beispielwerte“.
+3. **Entfernte Bausteine** der Seite stehen ganz oben im Katalog in der Gruppe **Entfernte Bausteine** (und bei Bausteinen mit eigener Karte dort mit dem Knopf **Wieder hinzufügen** statt „Steht schon auf der Seite“). **Wieder hinzufügen** stellt den Baustein an seiner früheren Stelle mit seinen früheren Einstellungen wieder her; er wird nicht doppelt angelegt. „Steht schon auf der Seite“ erscheint nur noch, wenn der Baustein sichtbar ist. Das gilt für mitgelieferte Bausteine; ein selbst hinzugefügter Baustein ist nach dem Entfernen weg und kommt über **Hinzufügen** neu.
+4. Bei **Hinzufügen** bekommst du den Baustein ans Seitenende; verschiebe ihn dann an die richtige Stelle. Jeder Baustein hat im Katalog eine kleine, nicht bedienbare **Vorschau mit deinen echten Zahlen**. Sie wird erst geladen, wenn die Karte sichtbar wird; solange steht dort ein Ladezustand. Hast du noch keine passenden Daten, zeigt die Vorschau Beispielwerte und kennzeichnet sie als „Beispielwerte“.
 
 Bausteine gelten nicht nur für eine Seite: „Dein Jahr“ kannst du z. B. auch auf der Tourseite einsetzen, und mehrere Exemplare mit verschiedenen Filtern (Sportart, Zeitraum, Kennzahlen, Titel) sind möglich.
 
@@ -937,6 +938,8 @@ Eine **Ansicht** ist eine gespeicherte Anordnung der Seite, z. B. „Wandern“,
 * Je Ansicht: **Umbenennen**, **Duplizieren**, **Exportieren**, **Teilen …** (Layoutcode und Link, siehe 13.11).
 * Neu: **Neue Ansicht**, **Aus Vorlage …**, **Importieren …**.
 * Im Bearbeitungsmodus speichert **Als neue Ansicht speichern …** den aktuellen Stand unter einem Namen.
+* **Als Standard festlegen** macht eine Ansicht zur Standardansicht; sie erscheint, wenn nichts anderes gewählt ist, und ist das Ziel von **Auf meine Standardansicht** (13.7).
+* Ganz unten: **Alle Seiten auf Werkseinstellung zurücksetzen …** (13.7).
 
 ![Dialog „Ansichten“](handbuch/bilder/56-ansichten.png)
 
@@ -955,15 +958,26 @@ Eine **Ansicht** ist eine gespeicherte Anordnung der Seite, z. B. „Wandern“,
 * **Exportieren** speichert eine Ansicht als Datei – zum Sichern oder für ein anderes Gerät oder Konto.
 * **Importieren …** liest eine solche Datei wieder ein (oder einen Layoutcode, siehe 13.11). Ungültige Dateien werden mit einer Fehlermeldung abgelehnt.
 
-### 13.7 Standard wiederherstellen
+### 13.7 Standard wiederherstellen und Werkseinstellung
 
-**Standard wiederherstellen** (untere Leiste im Bearbeitungsmodus) setzt die Seite auf die ursprüngliche Anordnung zurück. Deine gespeicherten Ansichten bleiben dabei bestehen. Mit **Rückgängig** (13.8) holst du den Stand zurück, wenn es zu schnell ging.
+**Standard wiederherstellen** (untere Leiste im Bearbeitungsmodus) setzt die **angezeigte Ansicht** dieser Seite zurück: Reihenfolge, Breiten, entfernte und hinzugefügte Bausteine. Andere Ansichten bleiben bestehen. Mit **Rückgängig** (13.8) holst du den Stand zurück, wenn es zu schnell ging.
+
+* Gibt es **nur eine Ansicht** (oder ist die mitgelieferte „Standard“ deine Standardansicht), fragt die App wie bisher nach und stellt die mitgelieferte Anordnung her.
+* Gibt es **mehrere Ansichten** und hast du eine **eigene Ansicht als Standard festgelegt** (13.4), bietet der Dialog zwei Knöpfe an: **Auf meine Standardansicht** (die angezeigte Ansicht übernimmt die Anordnung deiner Standardansicht) und **Auf die Werkseinstellung** (die mitgelieferte Anordnung), dazu **Abbrechen**. Zeigst du gerade selbst die Standardansicht an, gibt es nur die Werkseinstellung, weil „Auf meine Standardansicht“ nichts ändern würde.
+
+**Alle Seiten auf Werkseinstellung zurücksetzen (ab 3.66.0).** Du findest es an zwei Stellen mit demselben Dialog: im Dialog **Ansichten** jeder Seite (unten, Abschnitt **Alle Seiten**) und unter **Verwaltung → Allgemein → Seitenanordnung**. Die Rückfrage nennt, was betroffen ist: die Anordnung **aller** Seiten (Übersicht, Tourseite, Statistik, Reise- und Mehrtagestour-Seite, Reisen, Gebiete, Fotos, Karte) mit Layouts, Reihenfolge, Breiten, entfernten und hinzugefügten Bausteinen (auch eigene Kennzahlen und Notizen, die ja als Bausteine in den Ansichten stehen) und den Ansichten.
+
+* **Auch meine eigenen Ansichten löschen** ist **aus** (Standard): Deine eigenen Ansichten bleiben mit ihrem Inhalt und ihren Sportart-Zuordnungen bestehen. Zurückgesetzt wird nur die mitgelieferte Ansicht „Standard“ jeder Seite (fehlt sie, wird sie wieder angelegt), und sie ist danach wieder die Standardansicht.
+* **An:** Auch alle eigenen Ansichten und ihre Zuordnungen zu Sportarten werden gelöscht. Das lässt sich nicht rückgängig machen; sichere Ansichten vorher mit **Exportieren** (13.6).
+* **Unberührt** bleiben Touren, Ziele, Einstellungen und alle anderen Daten.
+
+Die Wirkung ist sofort sichtbar; das Ergebnis steht im Dialog bzw. im Bereich der Verwaltung und wird vorgelesen („Alle Seiten auf Werkseinstellung zurückgesetzt. 2 eigene Ansichten bleiben bestehen.“). Auf dem Server und im Zwischenspeicher dieses Browsers (Anordnung, gemerkte Ansicht, gemerktes Auf- und Zuklappen) wird alles zurückgesetzt; auf anderen Geräten gilt es, sobald sie die Seite wieder laden. Betrachter-Zugänge haben das nicht.
 
 ### 13.8 Bausteine duplizieren, Rückgängig und Wiederholen
 
 **Duplizieren:** In der Kopfzeile eines Bausteins (bei schmalen Bausteinen im Menü „⋯“) legt **Duplizieren** eine Kopie mit denselben Einstellungen direkt dahinter an. Sie heißt „… (Kopie)“, bekommt den Fokus und steht in derselben Gruppe wie das Original. Das gibt es nur bei Bausteinen, die mehrfach vorkommen dürfen (im Katalog erkennst du sie daran, dass „Noch einmal hinzufügen“ möglich ist) und nicht für feste Bausteine der Seite. Je Seite sind höchstens 40 Bausteine möglich; ist das Limit erreicht, sagt dir ein Hinweis, warum nichts passiert.
 
-**Rückgängig und Wiederholen:** Die Knöpfe **Rückgängig** und **Wiederholen** in der Leiste (auf dem Handy mit Text, Pfeilsymbol) nehmen die letzten Änderungen zurück bzw. stellen sie wieder her: verschieben, Breite, ausblenden, hinzufügen, entfernen, duplizieren, Einstellungen, Gruppen, Handy-Anordnung und „Standard wiederherstellen“. Mit der Tastatur: **Strg+Z** (Mac: **Cmd+Z**) und **Strg+Umschalt+Z** (auch Strg+Y). Die Kürzel gelten nur im Bearbeitungsmodus und nicht in Eingabefeldern oder Dialogen. Es werden die letzten 50 Schritte gemerkt; **Fertig**, **Verwerfen**, das Verlassen der Seite und der Wechsel der Ansicht beginnen einen neuen Verlauf. Vorlesehilfen hören jeden Schritt („Rückgängig: …“). Ein ausgegrauter Knopf bedeutet: nichts mehr da.
+**Rückgängig und Wiederholen:** Die Knöpfe **Rückgängig** und **Wiederholen** in der Leiste (auf dem Handy mit Text, Pfeilsymbol) nehmen die letzten Änderungen zurück bzw. stellen sie wieder her: verschieben, Breite, entfernen, wieder hinzufügen, hinzufügen, duplizieren, Einstellungen, Gruppen, Handy-Anordnung und „Standard wiederherstellen“. Mit der Tastatur: **Strg+Z** (Mac: **Cmd+Z**) und **Strg+Umschalt+Z** (auch Strg+Y). Die Kürzel gelten nur im Bearbeitungsmodus und nicht in Eingabefeldern oder Dialogen. Es werden die letzten 50 Schritte gemerkt; **Fertig**, **Verwerfen**, das Verlassen der Seite und der Wechsel der Ansicht beginnen einen neuen Verlauf. Vorlesehilfen hören jeden Schritt („Rückgängig: …“). Ein ausgegrauter Knopf bedeutet: nichts mehr da.
 
 ### 13.9 Gruppen
 
@@ -1121,6 +1135,7 @@ Die Verwaltung wird **Administratoren** angezeigt. Jeder Bereich ist eine gleich
 * **Updates:** zeigt die installierte und die neueste Version auf GitHub. **Jetzt prüfen** fragt sofort nach; „Regelmäßig (alle 6 Stunden) auf neue Versionen prüfen“ kannst du einschalten. Administratoren installieren neue Versionen auf den meisten Installationen per Knopfdruck; bei Docker nennt die App nur den Befehl. Vor jedem Update gibt es automatisch eine Sicherung.
 * **Protokoll:** Meldungen der Hintergrundarbeiten.
 * **Heimatort und Puls:** Heimatort suchen und wählen (wird sofort gespeichert); **Maximalpuls (bpm)** für die Pulszonen (leer = 185 bzw. der höchste gemessene Wert).
+* **Seitenanordnung (ab 3.66.0):** **Alle Seiten auf Werkseinstellung zurücksetzen …** (mit Rückfrage und dem Kontrollkästchen „Auch meine eigenen Ansichten löschen“, siehe 13.7). Touren, Ziele und Einstellungen bleiben unberührt.
 * **Entwicklermodus:** blendet Ansichten zur Fehlersuche ein (Selbsttest, vollständiges Protokoll …). Im Alltag nicht nötig.
 
 ### 15.1a Sportarten: Katalog, Favoriten, Statistik-Gruppen (ab 3.60.0)
@@ -1315,7 +1330,8 @@ Läufe der Zepp-Uhr sind in beiden Apps „Laufen“ (seit 3.50.0). Seit 3.59.0 
 | **Pulszonen wirken falsch.** | Maximalpuls in der Verwaltung (Heimatort und Puls) eintragen. |
 | **Das Teilen-Menü der Android-App fehlt in der Web-App.** | Installation als App braucht HTTPS. Siehe Kapitel 16. |
 | **Ein Link zeigt „nicht mehr gültig“.** | Er ist abgelaufen oder widerrufen. Erzeuge einen neuen oder verlängere ihn unter „Laufzeit ändern …“. |
-| **Eine Seite sieht nach dem Anpassen falsch aus.** | **Seite anpassen → Standard wiederherstellen**, oder eine andere Ansicht wählen. |
+| **Eine Seite sieht nach dem Anpassen falsch aus.** | **Seite anpassen → Standard wiederherstellen**, oder eine andere Ansicht wählen. Alles auf einmal: **Ansichten → Alle Seiten auf Werkseinstellung zurücksetzen …** (13.7). |
+| **Ein Baustein fehlt auf der Seite.** | **Seite anpassen → Baustein hinzufügen**: Entfernte Bausteine stehen oben als **Wieder hinzufügen** (13.2). |
 | **Nach einem Update fehlt etwas.** | Browser-Seite neu laden (Strg+F5). Die App zwischenspeichert Seiten. |
 | **Server nicht erreichbar.** | Läuft der Dienst? Beim Proxmox- oder Debian-Setup: `journalctl -u meine-touren -f`. Bei Docker: `docker compose logs`. |
 
@@ -1381,8 +1397,8 @@ Läufe der Zepp-Uhr sind in beiden Apps „Laufen“ (seit 3.50.0). Seit 3.59.0 
 | **Ansicht** | Eine gespeicherte Anordnung einer anpassbaren Seite (z. B. „Wandern“). |
 | **Layoutcode** | Kurzer Text, der eine Ansicht beschreibt und sich per Nachricht weitergeben lässt (beginnt mit `MTA1.`). |
 | **Bausteingruppe** | Mehrere Bausteine unter einer einklappbaren Überschrift mit eigenem Titel. |
-| **Zeitraum der Seite** | Gemeinsamer Zeitraum für alle Bausteine der Übersicht mit Zeitbezug; die Leiste ist standardmäßig ausgeblendet und lässt sich über Seite anpassen einblenden. |
-| **Baustein** | Ein Teil einer Seite, den du verschieben, ausblenden, einklappen und in der Breite ändern kannst. |
+| **Zeitraum der Seite** | Gemeinsamer Zeitraum für alle Bausteine der Übersicht mit Zeitbezug; die Leiste ist standardmäßig nicht sichtbar und lässt sich über Seite anpassen einschalten. |
+| **Baustein** | Ein Teil einer Seite, den du verschieben, entfernen (und über „Baustein hinzufügen“ wieder hinzufügen), einklappen und in der Breite ändern kannst. |
 | **BRouter** | Routing-Dienst für die Tourplanung. |
 | **Eigene Kennzahl** | Ein von dir zusammengestellter Wert (z. B. Aufstieg je km). |
 | **Erzählung** | Die Tour als Zeitleiste mit Start, Fotos und Ziel. |

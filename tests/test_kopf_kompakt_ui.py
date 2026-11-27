@@ -29,16 +29,18 @@ def test_kopf_ist_kompakt_und_bedienbar(pw, app, scheme, width, breite):
             assert x["head"] <= 100, x                                         # vorher 136 bis 144 px
             assert not x["small"] and not x["over"], x
         assert pg.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
-        # Ausblenden/Einblenden: Symbolknopf mit Namen und Hinweistext
-        eye = pg.locator('.slit[data-sl="wa"] [data-a=eye]')
-        assert eye.get_attribute("title") == "Ausblenden" and eye.get_attribute("aria-pressed") == "false"
-        assert eye.evaluate("e => { const t = e.querySelector('span'); return !t || t.getBoundingClientRect().width <= 1; }")          # nur Symbol, der Name bleibt für Sprachausgabe
+        # Entfernen: Symbolknopf mit Namen und Hinweistext (3.66.0: ersetzt Ausblenden/Einblenden)
+        rm = pg.locator('.slit[data-sl="wa"] [data-a=del]')
+        assert rm.get_attribute("title").startswith("Baustein von dieser Seite entfernen") and "entfernen" in rm.get_attribute("aria-label").lower() and rm.get_attribute("aria-pressed") is None
+        assert pg.locator('.slit[data-sl="wa"] [data-a=eye]').count() == 0
+        if width == 390 or breite != "voll":
+            assert rm.evaluate("e => { const t = e.querySelector('span'); return !t || t.getBoundingClientRect().width <= 1; }")          # schmal: nur Symbol, der Name bleibt für Sprachausgabe
         _shot(pg, f"kopf-{width}-{breite}-{scheme}.png", full=False)
-        eye.click()
-        expect(eye).to_have_attribute("aria-pressed", "true", timeout=T)
-        expect(pg.locator('.slit[data-sl="wa"] .slhid')).to_be_visible(timeout=T)
-        eye.click()
-        expect(eye).to_have_attribute("aria-pressed", "false", timeout=T)
+        rm.click()                                                                  # Rückfrage; Abbrechen lässt den Baustein stehen
+        pg.wait_for_selector(".uidlg .uibox", timeout=T)
+        pg.locator(".uidlg .uifoot button", has_text="Abbrechen").click()
+        pg.wait_for_selector(".uidlg", state="detached", timeout=T)
+        expect(pg.locator('.slit[data-sl="wa"]')).to_have_count(1, timeout=T)
         # Breite umschalten bleibt bedienbar
         pg.locator('.slit[data-sl="wb"] [data-a=w][data-w="voll"]').click()
         pg.wait_for_selector('.slit[data-sl="wb"].w-voll', timeout=T)

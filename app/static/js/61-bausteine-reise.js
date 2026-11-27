@@ -124,13 +124,13 @@ Object.assign(window.SL_WT, {
 
 /* Vorlagen für die Ansichten der Reisen-Seiten (55-vorlagen.js: Format der Einträge dort beschrieben) */
 SL_TPL.push(
-  {id: "re-kompakt", fam: "reise", name: "Kompakt", desc: "Wenig auf einen Blick: Kopf und Karte oben, daneben die Strecke je Tag, darunter die Touren. Statistik, Flug und Fotos sind ausgeblendet.",
+  {id: "re-kompakt", fam: "reise", name: "Kompakt", desc: "Wenig auf einen Blick: Kopf und Karte oben, daneben die Strecke je Tag, darunter die Touren. Statistik, Flug und Fotos sind entfernt.",
     items: [["kopf", "voll"], ["karte", "halb"], ["w:rkmtag", "halb"], ["touren", "voll"]]},
   {id: "re-fotos", fam: "reise", name: "Fotoreise", desc: "Für die Erinnerung: oben die besten Fotos der Reise als Show, dann Karte und Kennzahlen, darunter alle Fotos und die Touren.",
     items: [["kopf", "voll"], ["w:rdiashow", "voll", {mode: "best", view: "show", n: 12, ratio: "sq", size: "m", link: true}], ["karte", "voll"], ["w:rkennzahl", "voll"], ["fotos", "voll"], ["touren", "voll"]]},
   {id: "re-tage", fam: "reise", name: "Tag für Tag", desc: "Für den Verlauf: Reise-Kennzahlen und Strecke je Tag nebeneinander, darunter Karte, Statistik nach Sportart und die Touren.",
     items: [["kopf", "voll"], ["w:rkennzahl", "halb"], ["w:rkmtag", "halb"], ["karte", "voll"], ["stat", "voll"], ["touren", "voll"]]},
-  {id: "se-kompakt", fam: "serie", name: "Kompakt", desc: "Wenig auf einen Blick: Kopf und Karte oben, daneben die Strecke je Tag, darunter die Etappen. Statistik, Flug und Fotos sind ausgeblendet.",
+  {id: "se-kompakt", fam: "serie", name: "Kompakt", desc: "Wenig auf einen Blick: Kopf und Karte oben, daneben die Strecke je Tag, darunter die Etappen. Statistik, Flug und Fotos sind entfernt.",
     items: [["kopf", "voll"], ["karte", "halb"], ["w:rkmtag", "halb"], ["touren", "voll"]]},
   {id: "se-fotos", fam: "serie", name: "Mit Fotos", desc: "Für die Erinnerung: oben die besten Fotos der Mehrtagestour als Show, dann Karte und Kennzahlen, darunter alle Fotos und die Etappen.",
     items: [["kopf", "voll"], ["w:rdiashow", "voll", {mode: "best", view: "show", n: 12, ratio: "sq", size: "m", link: true}], ["karte", "voll"], ["w:rkennzahl", "voll"], ["fotos", "voll"], ["touren", "voll"]]},

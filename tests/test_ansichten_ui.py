@@ -13,6 +13,7 @@ import pytest
 expect = pytest.importorskip("playwright.sync_api").expect
 from tests.test_seitenlayout_ui import (ROOT, T, _api, _browser, _dash, _edit, _saved, pw)  # noqa: F401
 from tests.test_tourseite_ui import CONTRAST, LAUNCH, SEED, _shot, _wait
+from tests.helpers_ui import entferne  # noqa: E402
 
 KEYS = ("tour-haupt", "tour-auswertung", "uebersicht")
 SEED2 = SEED + "\ndb.execute(\"UPDATE tours SET sport='bike' WHERE id='s0'\")\n"          # zweite Sportart für die Regel „Sportart → Ansicht“
@@ -162,14 +163,13 @@ def test_create_switch_rename_duplicate_default_delete_and_reload(pw, app):
         assert _wait_server(pg, app, lambda x: len(x["views"]) == 2, "tour-auswertung")["views"][1]["id"] == c["views"][1]["id"]           # beide Dokumente führen dieselben Ansichten
         pg.keyboard.press("Escape")
         pg.wait_for_function(_dlg_open(pg), timeout=T)
-        # in „Wandern“ den Abschnitt Fotos ausblenden; „Standard“ bleibt unberührt
-        pg.locator('.slit[data-sl="photos"] [data-a=eye]').click()
-        pg.wait_for_function("() => !!document.querySelector('.slit[data-sl=photos].sl-dim')", timeout=T)
+        # in „Wandern“ den Abschnitt Fotos entfernen; „Standard“ bleibt unberührt
+        entferne(pg, "photos")
         pg.locator("#slview").select_option(label="Standard")
         _view_is(pg, "Standard")
-        pg.wait_for_function("() => !document.querySelector('.slit[data-sl=photos].sl-dim')", timeout=T)
+        pg.wait_for_selector(".slit[data-sl=photos]", timeout=T)
         pg.locator("#slview").select_option(label="Wandern")
-        pg.wait_for_function("() => !!document.querySelector('.slit[data-sl=photos].sl-dim')", timeout=T)
+        pg.wait_for_function("() => !document.querySelector('.slit[data-sl=photos]')", timeout=T)
         c = _wait_server(pg, app, lambda c: "photos" in (c["views"][1]["layout"].get("hidden") or []))
         assert not c["views"][0]["layout"].get("hidden")
         # umbenennen
@@ -241,7 +241,7 @@ def test_templates_dialog_adopts_a_template_as_new_editable_view(pw, app):
         pg.get_by_role("button", name="Kompakt: Als neue Ansicht übernehmen", exact=True).click()
         pg.wait_for_function("() => !document.querySelector('.slvt')", timeout=T)
         _view_is(pg, "Kompakt")
-        pg.wait_for_function("() => !!document.querySelector('#tlw-t-kennzahlen') && !!document.querySelector('.slit[data-sl=photos].sl-dim')", timeout=T)
+        pg.wait_for_function("() => !!document.querySelector('#tlw-t-kennzahlen') && !!document.querySelector('.slit[data-sl=map]') && !document.querySelector('.slit[data-sl=photos]')", timeout=T)
         c = _wait_server(pg, app, lambda c: len(c["views"]) == 2)
         lay = c["views"][1]["layout"]
         assert [w["type"] for w in lay["widgets"]] == ["kennzahlen"] and set(lay["hidden"]) == {"puls", "wp", "photos", "planist"} and lay["w"]["map"] == "halb"
@@ -250,7 +250,7 @@ def test_templates_dialog_adopts_a_template_as_new_editable_view(pw, app):
         # und danach änderbar; dieselbe Vorlage noch einmal: eindeutiger Name
         pg.keyboard.press("Escape")
         pg.wait_for_function(_dlg_open(pg), timeout=T)
-        pg.locator('.slit[data-sl="map"] [data-a=eye]').click()
+        entferne(pg, "map")
         _wait_server(pg, app, lambda c: "map" in (c["views"][1]["layout"].get("hidden") or []))
         _open_views(pg)
         _btn(pg, "Aus Vorlage …").click()
@@ -271,7 +271,7 @@ def test_templates_dialog_adopts_a_template_as_new_editable_view(pw, app):
         pg.get_by_role("button", name="Wanderer: Als neue Ansicht übernehmen", exact=True).click()
         _view_is(pg, "Wanderer", "uebersicht")
         pg.wait_for_function("() => ['t-ziele','t-meilensteine','t-heatmap','t-letzte','t-bestwerte'].every(i => !!document.getElementById('tlw-' + i))", timeout=T)
-        assert pg.evaluate("document.querySelector('#hlast').closest('.sl-dim') !== null")        # nicht aufgeführte Standard-Abschnitte sind ausgeblendet
+        assert pg.evaluate("document.querySelector('#hlast').classList.contains('sl-off')")        # nicht aufgeführte Standard-Abschnitte sind entfernt (intern „ausgeblendet“ gespeichert)
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -376,7 +376,7 @@ def test_export_file_and_import_valid_invalid_and_replace_only_after_confirmatio
         d = dl.value
         assert d.suggested_filename == "ansicht-uebersicht-training-test.json"
         doc = json.loads(open(d.path(), encoding="utf-8").read())
-        assert doc["format"] == "meine-touren-ansicht" and doc["format_version"] == 1 and doc["app_version"] == "3.65.0" and doc["page"] == "uebersicht" and doc["name"] == "Training-Test"
+        assert doc["format"] == "meine-touren-ansicht" and doc["format_version"] == 1 and doc["app_version"] == "3.66.0" and doc["page"] == "uebersicht" and doc["name"] == "Training-Test"
         assert list(doc["layouts"]) == ["uebersicht"] and doc["layouts"]["uebersicht"]["widgets"][0]["type"] == "periode" and doc["layouts"]["uebersicht"]["hidden"] == ["tag"]
         # Import gültig: Vorschau, dann als NEUE Ansicht (Name vergeben → nummeriert)
         f = _write(tmp_path, "gut.json", {**doc, "zukunft": 1})

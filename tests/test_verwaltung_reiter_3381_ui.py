@@ -19,7 +19,7 @@ TL = 15000
 
 # Reiterkennung -> Karten (Kennung: #id oder deutscher Titel der Überschrift)
 ERWARTET = {
-    "allgemein": ["#hlt", "#upd", "Selbsttest", "Protokoll", "#homep", "Entwicklermodus"],
+    "allgemein": ["#hlt", "#upd", "Selbsttest", "Protokoll", "#homep", "#slfacp", "Entwicklermodus"],
     "sportarten": ["#katp", "#favp", "#sgp"],                                       # 3.60.0: eigener Reiter (Katalog, Favoriten, Statistik-Gruppen); 3.60.1 „Sportarten“
     "quellen": ["#devsec", "Komoot (optional)", "Zepp-Import (optional)", "Garmin, Suunto & andere Uhren (Import)", "Wanderführer (z. B. Rother)"],
     "weitergabe": ["Portale (Upload)", "#brpanel"],

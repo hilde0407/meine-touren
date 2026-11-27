@@ -2,7 +2,7 @@
    Daten und Auswahl-Logik stehen in 49-seitenlayout.js (Behälter SL.store, slResolve, slPack); hier: Auswahl in der Kopfzeile, Verwaltung (Dialog), Vorlagen, Export und Import.
    Tourseite: Hauptseite und Auswertung sind zwei Schlüssel; jede Änderung an den Ansichten (anlegen, umbenennen, löschen, Standard, Regeln) wird in beiden geführt
    (slAlign), der Inhalt bleibt je Schlüssel eigen. Die Vorgabe der Anzeige: von Hand gewählt (diese Sitzung) vor Regel „Sportart → Ansicht“ (beim Öffnen einer Tour) vor Standardansicht. */
-const SL_APPV = "3.65.0";
+const SL_APPV = "3.66.0";
 const SL_EXPORT_FORMAT = "meine-touren-ansicht";
 const SL_MAXFILE = 200000;
 const slVm = fam => slMaster(fam).views;
@@ -296,6 +296,8 @@ function slViewsDialog() {
           (sp.length ? `<div class="slvrg">${sp.map((s, i) => `<label class="slvrl" for="slvr${i}">${esc(sName(s))}</label><select id="slvr${i}" data-rule="${esc(s)}"><option value="">Standardansicht (${esc(slViewName(fam, m.active))})</option>` +
             m.views.map(v => `<option value="${esc(v.id)}"${(m.rules || {})[s] === v.id ? " selected" : ""}>${esc(v.name)}</option>`).join("") + `</select>`).join("")}</div>` : `<p class="mut">Sobald es Touren gibt, kannst du hier Sportarten zuordnen.</p>`) + `</section>`;
       }
+      h += `<section class="slvru slvfw" aria-labelledby="slvfwh"><h3 id="slvfwh">Alle Seiten</h3><p class="mut slvin">Setzt die Anordnung aller Seiten zurück (nicht nur dieser). Touren, Ziele und Einstellungen bleiben unberührt.</p>` +
+        `<button type="button" class="btn ghost sm" data-a="factory" aria-haspopup="dialog">Alle Seiten auf Werkseinstellung zurücksetzen …</button></section>`;
       h += `<p class="slsr" id="slvlive" role="status" aria-live="polite"></p><div class="uifoot"><button type="button" class="btn ghost" data-close>Schließen</button></div>`;
       body.innerHTML = h;
       if (focus) {
@@ -366,6 +368,11 @@ function slViewsDialog() {
           slVLine(`Ansicht „${r.name}“ angelegt`);
         }
         draw();
+      } else if (a === "factory") {
+        focus = "[data-a=factory]";
+        const r = await slFactoryAll();
+        draw();
+        if (r) slVLine(r);
       } else if (a === "tpl") {
         slTplDialog(fam, nid => {
           focus = `[data-id="${nid}"][data-a="rename"]`;
@@ -380,6 +387,85 @@ function slViewsDialog() {
     });
   }, "slvws");
   return {close: () => closeDlg && closeDlg(), redraw: () => redraw && redraw()};
+}
+
+/* ---------- 3.66.0 Alle Seiten auf Werkseinstellung ----------
+   Ein Weg für alle Seiten (Ansichten-Dialog jeder Seite und Verwaltung → Allgemein → Seitenanordnung). Der Server setzt alle Layout-Dokumente zurück (POST /api/layout/werkseinstellung),
+   danach wird hier der Zustand im Browser gleichgezogen: Behälter und Zwischenspeicher (localStorage „mt_sl_…“), gemerkte Ansicht dieser Sitzung („mt_slv_…“), gemerkter Auf-/Zu-Zustand der
+   Abschnitte („mt_trf_…“), Antworten im Offline-Speicher; die angezeigte Seite wird sofort neu eingeordnet. Gibt den Ansagetext zurück (null = abgebrochen). */
+function slFactoryText() {
+  const tl = x => (typeof window.TL === "function" ? window.TL(x) : x), e = x => esc(tl(x));
+  return `<p>${e("Das betrifft alle Seiten: Übersicht, Tourseite, Statistik, Reise- und Mehrtagestour-Seite, Reisen, Gebiete, Fotos und Karte.")}</p>` +
+    `<p>${e("Zurückgesetzt werden Layouts, Reihenfolge, Breiten, entfernte und hinzugefügte Bausteine (auch eigene Kennzahlen und Notizen) und die Ansichten aller Seiten.")}</p>` +
+    `<p>${e("Touren, Ziele, Einstellungen und alle übrigen Daten bleiben unberührt.")}</p>` +
+    `<label class="slck slfck"><input type="checkbox" id="slfown"><span>${e("Auch meine eigenen Ansichten löschen")}</span></label>` +
+    `<p class="mut">${e("Aus: Deine eigenen Ansichten bleiben bestehen. Nur die mitgelieferte Standardansicht jeder Seite wird zurückgesetzt und wieder zur Standardansicht.")}</p>` +
+    `<p class="mut">${e("An: Auch alle eigenen Ansichten und ihre Zuordnung zu Sportarten werden gelöscht. Das lässt sich nicht rückgängig machen. Tipp: Mit „Exportieren“ unter „Ansichten“ kannst du eine Ansicht vorher sichern.")}</p>`;
+}
+const slFactoryDone = (own, n, unv) => {
+  const m = own ? "Alle Seiten auf Werkseinstellung zurückgesetzt. Eigene Ansichten gelöscht."
+    : n === 1 ? "Alle Seiten auf Werkseinstellung zurückgesetzt. 1 eigene Ansicht bleibt bestehen."
+    : n > 1 ? `Alle Seiten auf Werkseinstellung zurückgesetzt. ${n} eigene Ansichten bleiben bestehen.`
+    : "Alle Seiten auf Werkseinstellung zurückgesetzt.";
+  return unv ? "Alle Seiten auf Werkseinstellung zurückgesetzt, aber nicht ganz: Auf einigen Seiten gibt es schon 12 Ansichten, lösche zuerst eine." : m;
+};
+async function slFactoryAll() {
+  if (!slCan()) return null;
+  let cb = null;
+  const ok = await uiConfirm({
+    title: "Alle Seiten auf Werkseinstellung zurücksetzen?",
+    html: slFactoryText(),
+    ok: "Alle Seiten zurücksetzen",
+    danger: true,
+    onOpen: box => (cb = box.querySelector("#slfown")),
+  });
+  if (!ok) return null;
+  const own = !!(cb && cb.checked);
+  if (SL.edit) slLeave();                                                  // „Seite anpassen“ beenden (speichert noch Offenes)
+  clearTimeout(SL.timer);
+  await slFlush();
+  let j;
+  try {
+    const r = await fetch("/api/layout/werkseinstellung", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({eigene_ansichten_loeschen: own}), credentials: "same-origin"});
+    j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.detail || String(r.status));
+  } catch (e) {
+    const msg = `Zurücksetzen nicht möglich: ${e.message}`;
+    slLive(msg);
+    uiAlert({title: "Zurücksetzen nicht möglich", text: e.message});
+    return null;
+  }
+  Object.entries(j.layouts || {}).forEach(([k, c]) => {                    // Behälter, Zwischenspeicher und Zählwerk gegen noch laufende Abfragen
+    const n = c ? slNorm(c) : null;
+    if (n) SL.store[k] = n;
+    else delete SL.store[k];
+    delete SL.docs[k];
+    SL.dirty.delete(k);
+    SL.rev[k] = (SL.rev[k] || 0) + 1;
+    slWriteCache(k, n);
+  });
+  SL.manual = {};
+  SL.view = {};
+  try {
+    Object.keys(sessionStorage).filter(k => k.startsWith("mt_slv_")).forEach(k => sessionStorage.removeItem(k));
+  } catch (e) {}
+  try {
+    Object.keys(localStorage).filter(k => k.startsWith("mt_trf_")).forEach(k => localStorage.removeItem(k));
+  } catch (e) {}
+  try {
+    if (window.caches) caches.open("mt-api-v1").then(c => c.keys().then(ks => ks.filter(q => q.url.includes("/api/layout/")).forEach(q => c.delete(q)))).catch(() => {});
+  } catch (e) {}
+  Object.keys(SL.loaded).forEach(f => SL.loaded[f] && slResolve(f));
+  const fam = SL.fam, root = SL.root;
+  if (root && root.isConnected && SL.loaded[fam]) {                         // die angezeigte Seite sofort neu einordnen
+    document.querySelectorAll(".tlw[data-wid]").forEach(e => e.remove());
+    slApplyOpen(fam);
+    if (fam === "statistik" && typeof stReload === "function") stReload(false);
+    else slApply();
+  }
+  const msg = slFactoryDone(own, j.eigene_ansichten || 0, (j.unvollstaendig || []).length);
+  slLive(msg);
+  return msg;
 }
 
 /* ---------- Vorlagen ---------- */
@@ -471,7 +557,7 @@ function slImportDialog(fam, done, preset) {
       const L = r.layouts || {}, st = r.stats || {}, types = new Set(Object.values(st).flatMap(s => s.types || [])), unknown = [...types].filter(t => !window.SL_WT[t]),
         nWid = Object.values(st).reduce((n, s) => n + (s.widgets || 0), 0), nHid = Object.values(st).reduce((n, s) => n + (s.hidden || 0), 0),
         nGrp = Object.values(st).reduce((n, s) => n + (s.groups || 0), 0), hasMob = Object.values(st).some(s => s.mob);
-      res.innerHTML = `<div class="slimpok"><h3>${isCode ? "Code geprüft" : "Datei geprüft"}</h3><p>Ansicht „<b class="slimpn"></b>“ für die ${slFamName(fam)}: ${nWid === 1 ? "1 Baustein" : nWid + " Bausteine"}, ${nHid === 1 ? "1 ausgeblendeter Baustein" : nHid + " ausgeblendete Bausteine"}.</p>` +
+      res.innerHTML = `<div class="slimpok"><h3>${isCode ? "Code geprüft" : "Datei geprüft"}</h3><p>Ansicht „<b class="slimpn"></b>“ für die ${slFamName(fam)}: ${nWid === 1 ? "1 Baustein" : nWid + " Bausteine"}, ${nHid === 1 ? "1 entfernter Baustein" : nHid + " entfernte Bausteine"}.</p>` +
         (nGrp || hasMob ? `<ul class="slimpx">${nGrp ? `<li>${nGrp === 1 ? "1 Bausteingruppe" : nGrp + " Bausteingruppen"}</li>` : ""}${hasMob ? "<li>Eigene Handy-Anordnung</li>" : ""}</ul>` : "") +
         ((r.ignored || []).length ? `<p class="mut">Ignoriert:</p><ul class="mut">${r.ignored.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "") +
         (unknown.length ? `<p class="mut">${unknown.length === 1 ? "1 Baustein-Typ ist" : unknown.length + " Baustein-Typen sind"} in dieser Version nicht bekannt und werden nicht angezeigt.</p>` : "") +

@@ -39,6 +39,11 @@ Ansichten (3.21.0): Ein Dokument je Seitenschlüssel kann statt des Layouts auch
   Tourseite: Hauptseite und Auswertung sind zwei Schlüssel; die Ansichten (Kennungen, Namen, active, rules) werden von der Oberfläche in beiden Dokumenten gleich geführt,
   der Inhalt (layout) steht je Schlüssel für sich. Maßgeblich für Namen, Standardansicht und Regeln ist „tour-haupt“.
   POST /api/layout/check prüft eine Export-Datei (Ansicht als JSON) mit denselben Regeln wie beim Speichern und liefert das bereinigte Ergebnis oder klare Fehler.
+3.66.0 Werkseinstellung für alle Seiten: POST /api/layout/werkseinstellung {"eigene_ansichten_loeschen": false|true} setzt die Layouts aller Seiten (KEYS) in einem Schritt zurück. Mit true werden alle
+  Dokumente gelöscht (auch eigene Ansichten und Regeln nach Sportart). Mit false (Standard) bleiben eigene Ansichten, ihre Layouts und Regeln unverändert; nur die mitgelieferte Standardansicht
+  (Kennung „standard“) wird zurückgesetzt – fehlt sie, wird sie neu angelegt – und „active“ zeigt wieder auf sie. Ist die Seite danach wieder im Ausgangszustand, wird das Dokument gelöscht.
+  Antwort: {ok, layouts: {Schlüssel: Behälter|null}, eigene_ansichten, geloescht: bool, unvollstaendig: [Schlüssel]} („unvollstaendig“: die Standardansicht fehlte und es gibt schon 12 Ansichten, die Seite blieb unverändert).
+  Touren, Ziele, Einstellungen und alle übrigen Daten bleiben unberührt. Betrachter dürfen das nicht (403).
 Reisen (3.33.0): Bausteine der Reise-Detailseite (REISE_TYPEN: rkennzahl, rdiashow, rkmtag) stehen nur in den Dokumenten „reise“ und „serie“, die der Reisen-Übersicht (REISEN_TYPEN: rnzahlen, rnjahre) nur in „reisen“.
 Alle Bausteine anderer Seiten, die dort bekannt sind (Tour-, Statistik-, Hinweis-Bausteine, eigene Kennzahl, Erinnerungen), werden dort abgelehnt; unbekannte Typen (neuere Version) bleiben erlaubt.
 Ihre Konfiguration wird streng geprüft (REISE_CFG: nur diese Felder, feste Auswahllisten). „rdiashow“ nimmt die Felder der Erinnerungen (mode, n, view, ratio, size, height, tempo, caption, shuffle, link, title), aber keine Filter:
@@ -848,6 +853,74 @@ async def post_code(request: Request):
         r["errors"] = ["Kein gültiges JSON."]
         return r
     return check_export(doc)
+
+
+def _werk(stored, eigene_loeschen):
+    """Werkseinstellung einer Seite (3.66.0): (neuer Behälter oder None = Dokument löschen, unvollständig?, Zahl eigener Ansichten vorher)."""
+    c = normalize(stored)
+    if c is None:
+        return None, False, 0
+    views = [v for v in c.get("views", []) if isinstance(v, dict)]
+    own = sum(1 for v in views if v.get("id") != STD_ID)
+    if eigene_loeschen:
+        return None, False, own
+    std = next((v for v in views if v.get("id") == STD_ID), None)
+    if std is None and len(views) >= MAX_VIEWS:
+        return c, True, own
+    names = {str(v.get("name", "")).lower() for v in views if v is not std}
+    name = STD_NAME if STD_NAME.lower() not in names else STD_NAME + " (Werkseinstellung)"
+    new = {"id": STD_ID, "name": name, "layout": {"v": 1}}
+    views = [new if v is std else v for v in views] if std is not None else [new] + views
+    out = {"v": 2, "views": views, "active": STD_ID, "rules": dict(c.get("rules") or {})}
+    if len(views) == 1 and not out["rules"]:
+        return None, False, own
+    return out, False, own
+
+
+@router.post("/api/layout/werkseinstellung")
+async def post_werk(request: Request):
+    """Alle Seiten auf Werkseinstellung (3.66.0): Layouts, Reihenfolge, Breiten, entfernte und hinzugefügte Bausteine, Ansichten. Nichts anderes."""
+    if _viewer(request):
+        raise HTTPException(403, "Dieser Zugang darf nur ansehen")
+    raw = await request.body()
+    try:
+        body = json.loads(raw or b"{}")
+    except ValueError:
+        raise HTTPException(400, "Kein gültiges JSON")
+    if not isinstance(body, dict) or set(body) - {"eigene_ansichten_loeschen"} or not isinstance(body.get("eigene_ansichten_loeschen", False), bool):
+        raise HTTPException(400, "Erwartet wird {\"eigene_ansichten_loeschen\": true|false}")
+    loeschen = body.get("eigene_ansichten_loeschen", False)
+    plan, unvollst, eigene = {}, [], 0
+    for k in KEYS:
+        r = db.one("SELECT json FROM user_layout WHERE page_key=?", (k,))
+        try:
+            stored = json.loads(r["json"]) if r else None
+        except ValueError:
+            stored = None
+        neu, unv, own = _werk(stored, loeschen)
+        plan[k] = (neu, r is not None, unv)
+        if unv:
+            unvollst.append(k)
+        if k != "tour-auswertung":                      # die Tourseite führt dieselben Ansichten in beiden Dokumenten: einmal zählen
+            eigene += own
+    ts = int(time.time())
+    for k, (neu, da, unv) in plan.items():
+        if unv:
+            continue
+        if neu is None:
+            if da:
+                db.execute("DELETE FROM user_layout WHERE page_key=?", (k,))
+        else:
+            db.execute("INSERT INTO user_layout(page_key,json,ts) VALUES(?,?,?) ON CONFLICT(page_key) DO UPDATE SET json=excluded.json, ts=excluded.ts",
+                       (k, json.dumps(neu, ensure_ascii=False, separators=(",", ":")), ts))
+    layouts = {}
+    for k, (neu, da, unv) in plan.items():
+        if unv:
+            r = db.one("SELECT json FROM user_layout WHERE page_key=?", (k,))
+            layouts[k] = normalize(json.loads(r["json"])) if r else None
+        else:
+            layouts[k] = neu
+    return {"ok": True, "layouts": layouts, "eigene_ansichten": eigene, "geloescht": loeschen, "unvollstaendig": unvollst}
 
 
 @router.delete("/api/layout/{page_key}")

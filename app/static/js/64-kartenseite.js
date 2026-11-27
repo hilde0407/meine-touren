@@ -120,7 +120,7 @@ SL_TPL.push(
     items: [["karte", "zweidrittel"], ["w:kliste", "drittel"], ["jahr", "voll"], ["sport", "voll"]]},
   {id: "ka-zahlen", fam: "karte", name: "Karte mit Kennzahlen", desc: "Oben die Kennzahlen der Auswahl und die Legende der Sportarten, darunter die Karte mit allen Bedienfeldern.",
     items: [["w:kzahlen", "halb"], ["w:klegende", "halb"], ["karte", "voll"], ["jahr", "voll"], ["sport", "voll"], ["stil", "voll"], ["ebenen", "voll"], ["standort", "voll"], ["ausschnitt", "voll"]]},
-  {id: "ka-pur", fam: "karte", name: "Nur die Karte", desc: "Ruhig und übersichtlich: nur die Karte, alle Bedienfelder sind ausgeblendet.",
+  {id: "ka-pur", fam: "karte", name: "Nur die Karte", desc: "Ruhig und übersichtlich: nur die Karte, alle Bedienfelder sind entfernt.",
     items: [["karte", "voll"]]},
 );
 

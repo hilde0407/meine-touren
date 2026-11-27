@@ -2,7 +2,7 @@
    Fertige Anordnungen zum Start. Eine Vorlage ist eine kurze Beschreibung, aus der das Layout-Dokument (Format wie in app/layout.py) erzeugt wird:
      items  [[Kennung, Breite, Konfiguration?]]  Reihenfolge der sichtbaren Abschnitte; „w:<Typ>“ = Baustein dieses Typs (Kennung „t-<Typ>“), sonst ein Standard-Abschnitt der Seite
      groups [{title, items: [Kennung, …], closed?}]  (3.36.0, optional) Gruppen aus den Einträgen von „items“ (einklappbarer Abschnitt, Mitglieder in der Reihenfolge von „items“)
-     Standard-Abschnitte, die nicht aufgeführt sind, werden ausgeblendet (außer den Pflicht-Abschnitten, z. B. dem Einstieg in die Auswertung).
+     Standard-Abschnitte, die nicht aufgeführt sind, werden entfernt (außer den Pflicht-Abschnitten, z. B. dem Einstieg in die Auswertung).
    Die Dokumente gehen durch dieselbe Prüfung wie alles, was der Benutzer speichert (der Server prüft sie beim Speichern; tests/test_ansichten_ui.py prüft jede Vorlage dagegen). */
 const SL_TPL = [
   {id: "ue-wanderer", fam: "uebersicht", name: "Wanderer", desc: "Für alle, die gern draußen sind: deine Ziele als Ring, Meilensteine, die Kalender-Heatmap, die neuesten Touren und deine Bestwerte.",

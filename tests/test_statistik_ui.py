@@ -12,7 +12,7 @@ import sys
 import pytest
 expect = pytest.importorskip("playwright.sync_api").expect
 
-from tests.helpers_ui import quiet  # noqa: E402
+from tests.helpers_ui import entferne, quiet  # noqa: E402
 from tests.test_seitenlayout_ui import ROOT, T, _api, _browser, _edit, _saved, pw  # noqa: F401
 from tests.test_tourseite_ui import CONTRAST, LAUNCH, _settled, _shot, _wait
 
@@ -235,8 +235,7 @@ def test_edit_mode_order_width_hide_add_reset_and_reload(pw, app):
         pg.wait_for_function("() => { const o = [...document.querySelectorAll('#stx .slit')].map(e => e.dataset.sl); return o.indexOf('heat') === o.indexOf('bestwerte') - 1; }", timeout=T)
         pg.locator('.slit[data-sl="kmverlauf"] [data-a=w][data-w="voll"]').click()
         pg.wait_for_selector('.slit[data-sl="kmverlauf"].w-voll', timeout=T)
-        pg.locator('.slit[data-sl="ziele"] [data-a=eye]').click()
-        pg.wait_for_selector('.slit[data-sl="ziele"].sl-dim', timeout=T)
+        entferne(pg, "ziele")
         _add(pg, "sthoehe")
         _add(pg, "stlaengen")
         _saved(pg)

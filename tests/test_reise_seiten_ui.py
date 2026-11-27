@@ -16,6 +16,7 @@ from pathlib import Path
 import pytest
 expect = pytest.importorskip("playwright.sync_api").expect
 
+from tests.helpers_ui import entferne, wieder_hinzufuegen  # noqa: E402
 from tests.test_seitenlayout_ui import ROOT, T, _api, _browser, _edit, _saved, pw  # noqa: F401
 from tests.test_bausteine_konfig_ui import click_gear, save_dialog  # noqa: E402
 from tests.test_bausteine_ui import TEXTCONTRAST  # noqa: E402
@@ -197,17 +198,16 @@ def test_trip_edit_move_hide_width_open_and_persistence(pw, app):
     try:
         _edit(pg)
         assert pg.locator(".slit").count() == 7
-        assert pg.locator('.slit[data-sl="kopf"] [data-a="eye"]').count() == 0 and pg.locator('.slit[data-sl="kopf"] .slmust').is_visible()       # der Kopf bleibt immer sichtbar
+        assert pg.locator('.slit[data-sl="kopf"] [data-a="del"]').count() == 0 and pg.locator('.slit[data-sl="kopf"] .slmust').is_visible()       # der Kopf bleibt immer sichtbar
         assert pg.locator('.slit[data-sl="kopf"] [data-a="w"]').count() == 0                                                                    # und hat nur eine Breite
         # Hoch/Runter
         pg.locator('.slit[data-sl="touren"] [data-a="up"]').click()
         _order(pg, ["kopf", "kennzahlen", "stat", "flug", "karte", "touren", "fotos"], ALL_UNITS)
         pg.locator('.slit[data-sl="kennzahlen"] [data-a="down"]').click()
         _order(pg, ["kopf", "stat", "kennzahlen", "flug", "karte", "touren", "fotos"], ALL_UNITS)
-        # Ausblenden: im Bearbeitungsmodus gedimmt und beschriftet
-        pg.locator('.slit[data-sl="flug"] [data-a="eye"]').click()
-        pg.wait_for_function("() => document.querySelector('.slit[data-sl=flug]').classList.contains('sl-dim')", timeout=T)
-        assert pg.locator('.slit[data-sl="flug"] .slhid').is_visible()
+        # Entfernen (3.66.0): mit Rückfrage, im Bearbeitungsmodus nicht mehr da
+        entferne(pg, "flug")
+        assert pg.locator("#tls-flug").is_hidden()
         # Breite: Karte und Touren nebeneinander
         pg.locator('.slit[data-sl="karte"] [data-a="w"][data-w="halb"]').click()
         pg.locator('.slit[data-sl="touren"] [data-a="w"][data-w="halb"]').click()
@@ -219,7 +219,7 @@ def test_trip_edit_move_hide_width_open_and_persistence(pw, app):
         pg.wait_for_function("() => !document.querySelector('#tls-fotos').open", timeout=T)
         _saved(pg)
         _done(pg)
-        # ohne Rahmen: ausgeblendet ist weg, Reihenfolge, Breiten, Zustand
+        # ohne Rahmen: entfernt ist weg, Reihenfolge, Breiten, Zustand
         assert pg.evaluate(UNITS) == ["kopf", "stat", "kennzahlen", "karte", "touren", "fotos"] and pg.locator("#tls-flug").is_hidden()
         assert pg.locator("#rsc-karte").evaluate("e => e.classList.contains('w-halb')") and pg.locator("#tls-fotos").evaluate("e => !e.open")
         doc = _saved_doc(pg, want=lambda d: d.get("closed") == ["fotos"] and d.get("w") == {"karte": "halb", "touren": "halb"} and d.get("hidden") == ["flug"])
@@ -288,10 +288,9 @@ def test_trip_map_is_drawn_correctly_after_move_width_collapse_and_hide(pw, app)
         pg.locator('.slit[data-sl="karte"] [data-a="w"][data-w="voll"]').click()
         pg.wait_for_function("() => document.getElementById('cm').clientWidth > 900", timeout=T)
         pg.wait_for_function(MAPOK, timeout=T)
-        # ausblenden und wieder einblenden
-        pg.locator('.slit[data-sl="karte"] [data-a="eye"]').click()
-        pg.locator('.slit[data-sl="karte"] [data-a="eye"]').click()
-        pg.wait_for_function("() => !document.querySelector('.slit[data-sl=karte]').classList.contains('sl-dim')", timeout=T)
+        # entfernen und wieder hinzufügen
+        entferne(pg, "karte")
+        wieder_hinzufuegen(pg, "karte")
         pg.wait_for_function(MAPOK, timeout=T)
         _done(pg)
         pg.wait_for_function(MAPOK, timeout=T)
@@ -307,13 +306,15 @@ def test_trip_map_is_drawn_correctly_after_move_width_collapse_and_hide(pw, app)
 
 
 def test_trip_map_in_a_hidden_card_is_fitted_when_it_shows(pw, app):
-    """Ausgeblendet = kein Platz (Größe 0): die Karte wird erst eingerahmt, wenn sie sichtbar ist (Bearbeitungsmodus zeigt sie gedimmt)."""
+    """Ausgeblendet = kein Platz (Größe 0): die Karte wird erst eingerahmt, wenn sie sichtbar ist (3.66.0: entfernt = auch im Bearbeitungsmodus nicht da; „Wieder hinzufügen“ stellt sie her)."""
     _api(app, "reise", "PUT", {"hidden": ["karte"]})
     pg = _trip(pw, app)
     try:
         assert pg.locator("#tls-karte").is_hidden() and pg.evaluate("() => document.getElementById('cm').clientWidth") == 0
         assert pg.evaluate("() => map._cvStale === true")
         _edit(pg)
+        assert pg.locator('.slit[data-sl="karte"]').count() == 0
+        wieder_hinzufuegen(pg, "karte")
         pg.wait_for_function(MAPOK, timeout=T)
         assert pg.evaluate("() => map._cvStale === false")
         # eine selbst bewegte Karte bleibt beim Ändern der Größe stehen
@@ -481,8 +482,7 @@ def test_overview_edit_move_hide_and_persistence(pw, app):
         assert pg.locator(".slit").count() == 3 + (1 if pg.locator('.slit[data-sl="entfernt"]').count() else 0)
         pg.locator('.slit[data-sl="alben"] [data-a="up"]').click()
         _order(pg, ["serien", "alben", "reisen"], "() => [...document.querySelectorAll('#rsx details.tls')].map(e => e.dataset.tls)")
-        pg.locator('.slit[data-sl="serien"] [data-a="eye"]').click()
-        pg.wait_for_function("() => document.querySelector('.slit[data-sl=serien]').classList.contains('sl-dim')", timeout=T)
+        entferne(pg, "serien")
         pg.locator('.slit[data-sl="reisen"] [data-a="w"][data-w="zweidrittel"]').click()
         pg.locator('.slit[data-sl="alben"] [data-a="w"][data-w="drittel"]').click()
         pg.wait_for_function("() => { const a = document.querySelector('.slit[data-sl=reisen]'), b = document.querySelector('.slit[data-sl=alben]'); return Math.abs(a.getBoundingClientRect().top - b.getBoundingClientRect().top) < 2 && a.getBoundingClientRect().width > b.getBoundingClientRect().width * 1.7; }", timeout=T)
@@ -605,7 +605,7 @@ def test_export_and_import_of_a_view(pw, app, tmp_path, page, key, widget):
         d = dl.value
         assert d.suggested_filename == f"ansicht-{key}-mein-reiselayout.json"
         doc = json.loads(open(d.path(), encoding="utf-8").read())
-        assert doc["format"] == "meine-touren-ansicht" and doc["page"] == key and doc["app_version"] == "3.65.0" and list(doc["layouts"]) == [key] and doc["layouts"][key]["widgets"][0]["type"] == widget["type"]
+        assert doc["format"] == "meine-touren-ansicht" and doc["page"] == key and doc["app_version"] == "3.66.0" and list(doc["layouts"]) == [key] and doc["layouts"][key]["widgets"][0]["type"] == widget["type"]
         f = tmp_path / "gut.json"
         f.write_text(json.dumps(doc), encoding="utf-8")
         pg.locator(".slvws").get_by_role("button", name="Importieren …", exact=True).click()

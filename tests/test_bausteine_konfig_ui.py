@@ -18,7 +18,7 @@ from pathlib import Path
 from tests.test_bausteine_ui import EXTRA, T, TEXTCONTRAST, _api, _edit, _reset, _shot, _tour  # noqa: F401
 from tests.test_bausteine_ui import pw  # noqa: F401  (Fixture)
 from tests.test_tourseite_ui import LAUNCH, SEED, _wait
-from tests.helpers_ui import quiet  # noqa: E402
+from tests.helpers_ui import entferne, quiet  # noqa: E402
 
 # Zusätzliche Touren im laufenden Jahr, damit der Aktivitätsfilter die Zahlen wirklich verändert (Tage vor heute, Sportart, Strecke in m)
 MORE = """
@@ -141,21 +141,20 @@ def test_dein_jahr_default_block_is_the_old_block(pw, app):
         assert _api(app, "uebersicht")["layout"] is None                                                       # nichts gespeichert
         assert not pg.errors, pg.errors
         _edit(pg)
-        assert pg.locator(GEAR).count() == 1 and pg.locator('.slit[data-sl="jahr"] input[data-a="open"]').count() == 0 and pg.locator('.slit[data-sl="jahr"] [data-a="del"]').count() == 0
-        assert pg.locator('.slit[data-sl="jahr"] [data-a="eye"]').count() == 1                                  # ausblendbar wie andere
+        assert pg.locator(GEAR).count() == 1 and pg.locator('.slit[data-sl="jahr"] input[data-a="open"]').count() == 0 and pg.locator('.slit[data-sl="jahr"] [data-a="eye"]').count() == 0
+        assert pg.locator('.slit[data-sl="jahr"] [data-a="del"]').count() == 1                                  # entfernbar wie andere (3.66.0: ein Weg „Entfernen“)
         assert pg.locator(GEAR).get_attribute("aria-haspopup") == "dialog" and "Einstellungen" in pg.locator(GEAR).inner_text()
         assert pg.locator("#hyear").evaluate("e => e.closest('.slit').dataset.sl") == "jahr"
     finally:
         pg.browser_.close()
 
 
-def test_dein_jahr_can_be_hidden_and_stays_hidden(pw, app):
+def test_dein_jahr_can_be_removed_and_stays_removed(pw, app):
     _reset(app)
     pg = browser(pw, app)
     try:
         _edit(pg)
-        pg.locator('.slit[data-sl="jahr"] [data-a="eye"]').click()
-        pg.wait_for_function("() => document.querySelector('.slit[data-sl=jahr]').classList.contains('sl-dim')", timeout=T)
+        entferne(pg, "jahr")
         pg.locator("#slbar").get_by_role("button", name="Fertig").click()
         pg.wait_for_function("() => !document.querySelector('.slit') && !document.querySelector('#hyear:not(.sl-off)')", timeout=T)
         pg.wait_for_function(SAVED) if pg.locator("#slsaved").count() else None

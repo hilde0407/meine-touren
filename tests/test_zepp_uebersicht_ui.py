@@ -221,20 +221,24 @@ def test_katalog_kategorie_touren_holen(pw, app, clean):
         pg.browser_.close()
 
 
-def test_katalog_fuegt_baustein_hinzu_wenn_standard_ausgeblendet(pw, app, clean):
+def test_katalog_holt_entfernten_standard_baustein_zurueck(pw, app, clean):
+    """3.66.0: Ist der mitgelieferte Abschnitt entfernt (intern „hidden“), steht auf seiner Karte „Wieder hinzufügen“; das stellt den Abschnitt wieder her (kein zweiter Baustein)."""
     from tests.test_bausteine_ui import _catalog, _edit
     fake = Fake()
     pg = _page(pw, app, fake, layout={"v": 1, "hidden": ["zepp"]})
     try:
         pg.wait_for_selector("#slopen", state="visible", timeout=30000)
         _edit(pg)
+        assert pg.locator('.slit[data-sl="zepp"]').count() == 0                                   # bereits Ausgeblendetes gilt als entfernt (keine Migration)
         _catalog(pg)
-        pg.locator('[data-add="zeppimport"]').click()
-        pg.wait_for_selector('[data-wtype="zeppimport"] button.zpb', timeout=T)
+        card = pg.locator('.slcard:has([data-readd="zepp"])')
+        assert card.locator("[data-readd]").inner_text() == "Wieder hinzufügen" and pg.locator('[data-add="zeppimport"]').count() == 0 and pg.locator(".slre").count() == 0
+        card.locator("[data-readd]").click()
+        pg.wait_for_selector('.slit[data-sl="zepp"] [data-wtype="zeppimport"] button.zpb, [data-wtype="zeppimport"] button.zpb', timeout=T)
         pg.wait_for_function("() => { const s = document.getElementById('slsaved'); return !!s && s.textContent.trim() === 'Ansicht gespeichert'; }", timeout=T)
-        assert [x["type"] for x in _api(app, "uebersicht")["layout"]["widgets"]] == ["zeppimport"]
+        assert not (_api(app, "uebersicht")["layout"] or {}).get("widgets") and not (_api(app, "uebersicht")["layout"] or {}).get("hidden")
         _catalog(pg)
-        assert pg.locator('[data-add="zeppimport"]').is_disabled()
+        assert pg.locator('[data-add="zeppimport"]').is_disabled() and pg.locator('[data-add="zeppimport"]').inner_text() == "Steht schon auf der Seite"
     finally:
         pg.browser_.close()
 
@@ -540,12 +544,11 @@ def test_polar_ohne_konto_hinweis_dateiimport_kein_knopf(pw, app, clean):
 
 # ----------------------------------------------------------------------------------------------------------------- Baustein „Touren-Knopf“
 def _darstellung_knopf(pg):
-    wid = pg.evaluate("() => SL.docs.uebersicht.widgets.find(w => w.type === 'zeppimport').id")
-    pg.locator(f'.slit[data-sl="{wid}"] [data-a=cfg]').click()
+    pg.locator('.slit[data-sl="zepp"] [data-a=cfg]').click()                    # 3.66.0: der Baustein ist der wieder hinzugefügte Standard-Abschnitt „zepp“ (Einstellungen in cfg.zepp)
     pg.wait_for_selector(".slform", timeout=T)
     pg.locator(".slform label.flchip", has_text="Nur Knopf").click()
     pg.locator(".slform button[type=submit]").click()
-    pg.wait_for_function("() => SL.docs.uebersicht.widgets.some(w => w.type === 'zeppimport' && w.cfg.view === 'knopf')", timeout=T)
+    pg.wait_for_function("() => (((SL.docs.uebersicht.cfg || {}).zepp) || {}).view === 'knopf'", timeout=T)
 
 
 def _add_knopf(pg):
@@ -553,7 +556,7 @@ def _add_knopf(pg):
     pg.wait_for_selector("#slopen", state="visible", timeout=30000)
     _edit(pg)
     _catalog(pg)
-    pg.locator('[data-add="zeppimport"]').click()
+    pg.locator('[data-readd="zepp"]').click()                                    # 3.66.0: entfernter Standard-Abschnitt = „Wieder hinzufügen“ (kein zweiter Baustein)
     pg.wait_for_selector('[data-wtype="zeppimport"] .zpi', timeout=T)
     _darstellung_knopf(pg)                                                       # 3.48.0: „Touren holen (nur Knopf)“ ist die Darstellung „Nur Knopf“
     pg.wait_for_selector('[data-wtype="zeppimport"].zpk .zpi', timeout=T)
@@ -568,11 +571,11 @@ def test_baustein_touren_knopf_eine_quelle_und_katalog(pw, app, clean):
         pg.wait_for_selector("#slopen", state="visible", timeout=30000)
         _edit(pg)
         _catalog(pg)
-        card = pg.locator('.slcard:has([data-add="zeppimport"])')
+        card = pg.locator('.slcard:has([data-readd="zepp"])')
         assert card.get_attribute("data-cat") == "quellen" and card.locator("h3").inner_text() == "Touren holen" and card.locator(".slpv").inner_html().strip()
         assert pg.locator('[data-add="holenknopf"]').count() == 0                  # nur noch ein Baustein im Katalog
-        assert card.locator("[data-add]").is_enabled()
-        pg.locator('[data-add="zeppimport"]').click()
+        assert card.locator("[data-readd]").is_enabled() and card.locator("[data-readd]").inner_text() == "Wieder hinzufügen"
+        pg.locator('[data-readd="zepp"]').click()
         pg.wait_for_selector('[data-wtype="zeppimport"] .zpi', timeout=T)
         _darstellung_knopf(pg)
         w = pg.locator('[data-wtype="zeppimport"].zpk')
@@ -589,7 +592,8 @@ def test_baustein_touren_knopf_eine_quelle_und_katalog(pw, app, clean):
         btn.click(force=True)
         assert fake.posts == 1
         _gespeichert(pg)
-        assert [(x["type"], x["cfg"].get("view")) for x in _api(app, "uebersicht")["layout"]["widgets"]] == [("zeppimport", "knopf")]
+        lay = _api(app, "uebersicht")["layout"]
+        assert lay["cfg"]["zepp"]["view"] == "knopf" and "zepp" not in (lay.get("hidden") or []) and not lay.get("widgets")
         assert pg.evaluate("() => SL_WT.holenknopf === undefined && SL_WT.zeppimport.seiten.join()") == "uebersicht"
     finally:
         pg.browser_.close()

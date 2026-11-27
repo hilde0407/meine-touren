@@ -154,7 +154,7 @@ Object.assign(window.SL_WT, {
 SL_TPL.push(
   {id: "gb-kompakt", fam: "gebiete", name: "Nur die Liste", desc: "Ruhig und kurz: nur die Liste der Gebiete, ohne Kennzahlen.", items: [["kopf", "voll"], ["liste", "voll"]]},
   {id: "gb-zahlen", fam: "gebiete", name: "Mit Kennzahlen", desc: "Oben die Kennzahlen aller Gebiete, darunter die Liste.", items: [["kopf", "voll"], ["w:gbzahlen", "voll"], ["liste", "voll"]]},
-  {id: "gd-kompakt", fam: "gebiet", name: "Kompakt", desc: "Wenig auf einen Blick: Kopf, Kennzahlen, Karte und die Touren. Beste Monate, Fotos und Reisen sind ausgeblendet.", items: [["kopf", "voll"], ["kennzahlen", "voll"], ["karte", "voll"], ["touren", "voll"]]},
+  {id: "gd-kompakt", fam: "gebiet", name: "Kompakt", desc: "Wenig auf einen Blick: Kopf, Kennzahlen, Karte und die Touren. Beste Monate, Fotos und Reisen sind entfernt.", items: [["kopf", "voll"], ["kennzahlen", "voll"], ["karte", "voll"], ["touren", "voll"]]},
   {id: "gd-jahreszeit", fam: "gebiet", name: "Wann hinfahren", desc: "Für die Planung: die besten Monate und die Jahre nebeneinander, darunter Kennzahlen, Karte und Reisen.",
     items: [["kopf", "voll"], ["monate", "halb"], ["w:gmonate", "halb", {view: "jahre"}], ["kennzahlen", "voll"], ["karte", "voll"], ["reisen", "voll"]]},
   {id: "gd-fotos", fam: "gebiet", name: "Mit Fotos", desc: "Für die Erinnerung: oben die besten Fotos des Gebiets als Show, dann Karte und Kennzahlen, darunter alle Fotos und die Touren.",

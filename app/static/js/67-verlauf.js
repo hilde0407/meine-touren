@@ -1,5 +1,5 @@
 /* =====================  3.36.0 Rückgängig und Wiederholen im Bearbeitungsmodus  =====================
-   Verlauf der Layoutänderungen der angezeigten Ansicht (verschieben, Breite, ausblenden, hinzufügen, entfernen, duplizieren, Einstellungen, Gruppen, Handy-Anordnung, Standard wiederherstellen).
+   Verlauf der Layoutänderungen der angezeigten Ansicht (verschieben, Breite, entfernen, hinzufügen, duplizieren, Einstellungen, Gruppen, Handy-Anordnung, Standard wiederherstellen).
    Jeder Schritt ist ein Schnappschuss der Layout-Dokumente der Seite vor der Änderung (SL.hist.undo); „Wiederholen“ gibt die rückgängig gemachten zurück (SL.hist.redo).
    Höchstens SL_HMAX Schritte. Der Verlauf beginnt mit dem Bearbeiten und endet mit „Fertig“, „Verwerfen“, dem Verlassen der Seite und jedem Wechsel der Ansicht (er gilt nur für die angezeigte Ansicht).
    Tastatur: Strg/Cmd+Z und Strg/Cmd+Umschalt+Z (auch Strg+Y), nur im Bearbeitungsmodus und nie in Eingabefeldern oder offenen Dialogen. Jeder Schritt wird angesagt (Bereich „sllive“). */

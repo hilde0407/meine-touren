@@ -1,5 +1,5 @@
 """3.17.0 – Seite anpassen und Bausteine (Browser, Chromium).
-Bearbeitungsmodus an/aus, Verschieben (Tastatur, Hoch/Runter, Maus per Pointer-Ereignissen), Ausblenden, Seitenwechsel Tour Haupt/Auswertung, Standard wiederherstellen,
+Bearbeitungsmodus an/aus, Verschieben (Tastatur, Hoch/Runter, Maus per Pointer-Ereignissen), Entfernen und Wiederhinzufügen, Seitenwechsel Tour Haupt/Auswertung, Standard wiederherstellen,
 Layout bleibt nach Neuladen, neuer Abschnitt an Standardposition, Bausteine hinzufügen/einstellen/entfernen, Übersicht, 390 px, Kontrast hell/dunkel, Betrachter.
 Wettlauf-Regel: nach jeder Aktion auf den Zustand warten (wait_for_function/expect, 15 s), nie sofort prüfen und nie nur schlafen.
 Mit TS_SHOTS=<Ordner> werden Screenshots abgelegt (Chromium, dpr 2)."""
@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 from tests.test_tourseite_ui import (CONTRAST, DEV1, HR_JSON, LAUNCH, READY_SUB, SEED, WPS_JSON, WX_JSON, _ready_main, _shot, _wait, uhr_json)
-from tests.helpers_ui import quiet  # noqa: E402
+from tests.helpers_ui import entferne, quiet, wieder_hinzufuegen  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 T = 15000
@@ -261,18 +261,26 @@ def test_drag_below_everything_moves_to_the_end(pw, app):
         pg.browser_.close()
 
 
-# ------------------------------------------------------------------  Ausblenden, Standard offen  ------------------------------------------------------------------
+# ------------------------------------------------------------------  Entfernen, Standard offen  ------------------------------------------------------------------
 
-def test_hide_and_show_and_group_heading_disappears(pw, app):
+def test_remove_and_readd_and_group_heading_disappears(pw, app):
+    """3.66.0: „Entfernen“ (mit Rückfrage) statt Ausblenden; gespeichert wird weiter als „hidden“; über „Baustein hinzufügen“ → „Wieder hinzufügen“ kommt der Baustein zurück."""
     pg = _tour(pw, app)
     try:
         _edit(pg)
-        pg.locator('.slit[data-sl="wp"] [data-a="eye"]').click()
-        pg.wait_for_function("() => document.querySelector('.slit[data-sl=wp]').classList.contains('sl-dim')", timeout=T)
-        assert pg.locator('.slit[data-sl="wp"] .slhid').is_visible()           # im Bearbeitungsmodus bleibt der Abschnitt sichtbar (gedimmt) und ist beschriftet
+        assert pg.locator('.slit[data-sl="wp"] [data-a="eye"]').count() == 0                   # Ausblenden/Einblenden gibt es nicht mehr
+        btn = pg.locator('.slit[data-sl="wp"] [data-a="del"]')
+        assert btn.inner_text().strip() == "Entfernen" and "entfernen" in btn.get_attribute("aria-label").lower()
+        btn.click()                                                                            # Rückfrage; Abbrechen ändert nichts
+        pg.wait_for_selector(".uidlg .uibox", timeout=T)
+        assert "Baustein entfernen?" in pg.locator(".uidlg h2").inner_text() and "wieder hinzufügen" in pg.locator(".uidlg .uitext").inner_text()
+        pg.locator(".uidlg .uifoot button", has_text="Abbrechen").click()
+        pg.wait_for_selector(".uidlg", state="detached", timeout=T)
+        assert pg.locator('.slit[data-sl="wp"]').count() == 1
+        entferne(pg, "wp")
+        assert pg.locator("#tls-wp").is_hidden()                                               # entfernt: auch im Bearbeitungsmodus nicht mehr auf der Seite
         for s in ("map", "prof", "puls"):
-            pg.locator(f'.slit[data-sl="{s}"] [data-a="eye"]').click()
-        pg.wait_for_function("() => document.querySelector('.slit[data-sl=puls]').classList.contains('sl-dim')", timeout=T)
+            entferne(pg, s)
         pg.locator("#slbar").get_by_role("button", name="Fertig").click()
         pg.wait_for_function("() => !document.querySelector('.slit')", timeout=T)
         assert pg.locator("#tls-map").is_hidden() and pg.locator("#tls-wp").is_hidden()
@@ -280,16 +288,21 @@ def test_hide_and_show_and_group_heading_disappears(pw, app):
         assert pg.locator("#tl .tlgh:visible").all_inner_texts() == ["Auswertung dieser Tour", "Fotos zur Tour"]
         assert pg.evaluate(UNITS) == ["sum", "photos"]
         _saved(pg) if pg.locator("#slsaved").count() else None
-        assert sorted(_server(app, "tour-haupt")["hidden"]) == ["map", "prof", "puls", "wp"]
-        # wieder einblenden
+        assert sorted(_server(app, "tour-haupt")["hidden"]) == ["map", "prof", "puls", "wp"]      # Speicherung unverändert (Abwärtskompatibilität)
+        # Katalog: „Wieder hinzufügen“ statt „Steht schon auf der Seite“
         pg.locator("#slopen").click()
         pg.wait_for_selector(".slit", timeout=T)
+        pg.locator('#slbar [data-a="add"]').click()
+        pg.wait_for_selector(".slcard.slre", timeout=T)
+        assert pg.locator(".slre [data-readd]").count() == 4 and "Entfernte Bausteine" in pg.locator(".slre").first.locator("xpath=ancestor::section[1]").inner_text()
+        pg.locator(".uidlg [data-close]").click()
+        pg.wait_for_selector(".uidlg", state="detached", timeout=T)
         for s in ("map", "prof", "puls", "wp"):
-            pg.locator(f'.slit[data-sl="{s}"] [data-a="eye"]').click()
-            pg.wait_for_function("(s) => !document.querySelector('.slit[data-sl=' + s + ']').classList.contains('sl-dim')", arg=s, timeout=T)
+            wieder_hinzufuegen(pg, s)
         pg.locator("#slbar").get_by_role("button", name="Fertig").click()
         pg.wait_for_function("() => !document.querySelector('.slit')", timeout=T)
         assert pg.evaluate(SECS) == MAIN_ORDER and pg.locator("#tlgh-route").is_visible()
+        assert _server(app, "tour-haupt").get("hidden", []) == []
         assert not pg.errors, pg.errors
     finally:
         pg.browser_.close()
@@ -562,11 +575,10 @@ def test_overview_default_and_reorder_hide_and_widgets(pw, app):
         assert pg.evaluate(OVU)[:4] == ["aufmacher", "jahr", "zepp", "zuletzt"]
         pg.locator('.slit[data-sl="jahr"] [data-a="up"]').click()
         pg.wait_for_function("() => document.querySelector('main.home .slit').dataset.sl === 'jahr'", timeout=T)
-        pg.locator('.slit[data-sl="zuletzt"] [data-a="eye"]').click()
-        pg.wait_for_function("() => document.querySelector('.slit[data-sl=zuletzt]').classList.contains('sl-dim')", timeout=T)
+        entferne(pg, "zuletzt")
         assert pg.locator('.slit[data-sl="jahr"] input[data-a="open"]').count() == 0        # Übersichtsabschnitte sind nicht einklappbar: kein Schalter
         _catalog(pg)
-        assert pg.locator(".slcard").count() == 33                  # 3.45.0: „Ziele“ und „Bestwerte“ statt „Jahresziel“, „Ziele“, „Jahresziel in Gefahr“, „Wochenziel“, „Rekorde“ (−3); 3.44.0: plus „Fitness-Einordnung“; 3.31.0: plus „Touren-Knopf“; 3.30.0: plus „Zepp-Import“; 20 Bausteine bis 3.18.0 plus „Ziele“ (3.29.0) plus „Dein Jahr“ (3.19.0) plus 9 Hinweis-Bausteine (3.23.0) plus „Eigene Kennzahl“ (3.28.0)
+        assert pg.locator(".slcard").count() == 33 + 1 and pg.locator('.slre [data-readd="zuletzt"]').count() == 1       # 3.66.0: plus eine Karte „Letzte Touren“ zum Wiederhinzufügen (entfernt). Sonst 3.45.0: „Ziele“ und „Bestwerte“ statt „Jahresziel“, „Ziele“, „Jahresziel in Gefahr“, „Wochenziel“, „Rekorde“ (−3); 3.44.0: plus „Fitness-Einordnung“; 3.31.0: plus „Touren-Knopf“; 3.30.0: plus „Zepp-Import“; 20 Bausteine bis 3.18.0 plus „Ziele“ (3.29.0) plus „Dein Jahr“ (3.19.0) plus 9 Hinweis-Bausteine (3.23.0) plus „Eigene Kennzahl“ (3.28.0)
         pg.locator('[data-add="periode"]').click()
         pg.wait_for_selector('[data-wtype="periode"] .utile', timeout=T)
         pg.locator("#slbar").get_by_role("button", name="Fertig").click()
@@ -643,7 +655,7 @@ def test_mobile_390_overview_edit_mode(pw, app):
         pg.browser_.close()
 
 
-EDIT_CONTRAST = ["#slbar .slbi b", "#slbar .slsaved", "#slbar .btn", ".slit .slnm", ".slit .slb", ".slit .slsw span", ".slit .slmust", ".slit .slhid", ".slit .slgrip"]
+EDIT_CONTRAST = ["#slbar .slbi b", "#slbar .slsaved", "#slbar .btn", ".slit .slnm", ".slit .slb", ".slit .slsw span", ".slit .slmust", ".slit .slgrip"]
 
 
 @pytest.mark.parametrize("scheme", ["light", "dark"])
@@ -658,7 +670,8 @@ def test_contrast_and_screenshots_light_and_dark(pw, app, scheme):
         assert len(c) >= 7 and not low, f"{scheme}: Kontrast unter 4,5:1 (Bausteine): {low}"
         _shot(pg, f"tour-desktop-{scheme}-mit-bausteinen.png")
         _edit(pg)
-        pg.wait_for_function("() => !!document.querySelector('.slit.sl-dim')", timeout=T)
+        pg.wait_for_selector(".slit .slb[data-a=del]", timeout=T)
+        assert pg.locator('.slit[data-sl="prof"]').count() == 0                      # „prof“ ist entfernt (3.66.0: auch im Bearbeitungsmodus nicht da)
         c = pg.evaluate(CONTRAST, EDIT_CONTRAST)
         low = {k: round(v, 2) for k, v in c.items() if v < 4.5}
         assert len(c) >= 8 and not low, f"{scheme}: Kontrast unter 4,5:1 (Bearbeitungsmodus): {low}"
@@ -666,7 +679,7 @@ def test_contrast_and_screenshots_light_and_dark(pw, app, scheme):
         pg.evaluate("window.scrollTo(0, 0)")
         _shot(pg, f"tour-desktop-{scheme}-anpassen.png", full=False)
         _catalog(pg)
-        c = pg.evaluate(CONTRAST, [".slbox h2", ".slcard h3", ".slcard p", ".slcatin", ".slcard .btn"])
+        c = pg.evaluate(CONTRAST, [".slbox h2", ".slcard h3", ".slcard p", ".slcatin", ".slcard .btn", ".slre .btn"])
         low = {k: round(v, 2) for k, v in c.items() if v < 4.5}
         assert not low, f"{scheme}: Kontrast unter 4,5:1 (Katalog): {low}"
         _shot(pg, f"baustein-dialog-{scheme}.png", full=False)

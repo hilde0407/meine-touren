@@ -62,7 +62,7 @@ Die Oberfläche passt sich kleinen Bildschirmen an und lässt sich im Browser zu
 
 ![Seite anpassen](bilder/bausteine-bearbeiten.png)
 
-„Seite anpassen“ (auf Übersicht, Tourseite, Statistik, Reise-Seite und Reisen-Übersicht) schaltet den Bearbeitungsmodus ein: Bausteine verschieben, ausblenden, ein- oder ausklappen und in der Breite ändern, neue Bausteine aus dem Katalog hinzufügen (auch eigene Kennzahlen). „Ansichten“ speichert mehrere Anordnungen (z. B. „Wandern“, „Rad“) und bietet fertige Vorlagen sowie Export und Import als Datei. „Fertig“ übernimmt, „Verwerfen“ lässt alles wie vorher.
+„Seite anpassen“ (auf Übersicht, Tourseite, Statistik, Reise-Seite und Reisen-Übersicht) schaltet den Bearbeitungsmodus ein: Bausteine verschieben, entfernen (und über den Katalog wieder hinzufügen), ein- oder ausklappen und in der Breite ändern, neue Bausteine aus dem Katalog hinzufügen (auch eigene Kennzahlen). „Ansichten“ speichert mehrere Anordnungen (z. B. „Wandern“, „Rad“) und bietet fertige Vorlagen sowie Export und Import als Datei. „Fertig“ übernimmt, „Verwerfen“ lässt alles wie vorher.
 
 ## 10. Reisen
 

@@ -8,7 +8,7 @@
 
 ## Highlights (Stand Version 3.33.0)
 
-* **Seiten selbst gestalten:** Tourseite, Übersicht, Statistik, Reise-Seite und Reisen-Übersicht bestehen aus **Bausteinen** („Seite anpassen“): verschieben, ausblenden, einklappen, Breite wählen, Bausteine aus einem Katalog hinzufügen, **Ansichten** und **Vorlagen** (z. B. „Wandern“, „Rad“, „Kompakt“), Export und Import. Ohne Anpassung sieht alles aus wie gewohnt.
+* **Seiten selbst gestalten:** Tourseite, Übersicht, Statistik, Reise-Seite und Reisen-Übersicht bestehen aus **Bausteinen** („Seite anpassen“): verschieben, entfernen, einklappen, Breite wählen, Bausteine aus einem Katalog hinzufügen, **Ansichten** und **Vorlagen** (z. B. „Wandern“, „Rad“, „Kompakt“), Export und Import. Ohne Anpassung sieht alles aus wie gewohnt.
 * **Eigene Kennzahlen** ohne Programmierung, Hinweis-Bausteine (nur bei Anlass), die **Erinnerungen-Kachel** und ein globaler Filter (Sportart, Zeitraum) in der Statistik.
 * **Teilen:** Freigegebene Links an einem Ort verwalten, Tour-Links in einer **gewählten Ansicht** (z. B. nur Karte und Fotos), **Jahresrückblick als teilbare Seite**, **Diashow-Links** für Tour, Jahr oder Sammlung (Vollbild, ohne Konto, widerrufbar).
 * **Uhren und Messwerte:** Zepp-, Garmin- und Suunto-Import (der Import-Knopf auf der Übersicht passt sich den verbundenen Konten an), Messwerte, „Meine Geräte“ mit Genauigkeit, Training laut Uhr, Belastung und Tempo nach Steigung.
@@ -21,7 +21,7 @@ Alle Bilder stammen aus dem **Demo-Modus** (`MT_DEMO=1 python3 -m app.demo`), er
 
 | | |
 |---|---|
-| ![Übersicht](docs/bilder/uebersicht.png) **Übersicht** – letzte Tour, Dein Jahr, Erinnerungen | ![Seite anpassen](docs/bilder/bausteine-bearbeiten.png) **Seite anpassen** – Bausteine verschieben, ausblenden, Breite wählen |
+| ![Übersicht](docs/bilder/uebersicht.png) **Übersicht** – letzte Tour, Dein Jahr, Erinnerungen | ![Seite anpassen](docs/bilder/bausteine-bearbeiten.png) **Seite anpassen** – Bausteine verschieben, entfernen, Breite wählen |
 | ![Touren](docs/bilder/touren.png) **Touren** – Liste mit Filtern und Streckenform | ![Tourdetail](docs/bilder/tour-ganz.png) **Tourdetail** – Höhenprofil mit Foto-Punkten |
 | ![Karte](docs/bilder/karte.png) **Karte** – alle Touren auf einen Blick | ![Statistik](docs/bilder/statistik.png) **Statistik** – Bausteine mit globalem Filter |
 | ![Bestwerte](docs/bilder/rekorde.png) **Bestwerte** (Statistik → Bestwerte) | ![Jahresrückblick](docs/bilder/jahresrueckblick.png) **Jahresrückblick** – auch als Link teilbar |

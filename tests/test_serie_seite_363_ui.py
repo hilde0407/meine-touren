@@ -6,6 +6,7 @@ import urllib.request
 import pytest
 expect = pytest.importorskip("playwright.sync_api").expect
 
+from tests.helpers_ui import entferne  # noqa: E402
 from tests.test_core import fresh  # noqa: F401
 from tests.test_seitenlayout_ui import T, _api, _edit, pw  # noqa: F401
 from tests.test_reise_seiten_ui import TL, _saved_doc, _done, _chip, app, clean, KEYS as _K  # noqa: F401
@@ -103,9 +104,9 @@ def test_serie_seite_anpassen_eigenes_layout_katalog_einstellungen(pw, app):
     try:
         _edit(pg)
         assert pg.locator(".slit").count() == 7
-        assert pg.locator('.slit[data-sl="kopf"] [data-a="eye"]').count() == 0 and pg.locator('.slit[data-sl="kopf"] .slmust').is_visible()
-        # Karte „Kennzahlen“ ausblenden, Katalog: nur Reise-Bausteine, nicht die Reisen-Bausteine
-        pg.locator('.slit[data-sl="kennzahlen"] [data-a="eye"]').click()
+        assert pg.locator('.slit[data-sl="kopf"] [data-a="del"]').count() == 0 and pg.locator('.slit[data-sl="kopf"] .slmust').is_visible()
+        # Karte „Kennzahlen“ entfernen, Katalog: nur Reise-Bausteine, nicht die Reisen-Bausteine
+        entferne(pg, "kennzahlen")
         pg.locator("#slbar [data-a=add]").click()
         pg.wait_for_selector(".slcat .slcard", timeout=T)
         names = pg.locator(".slcat .slcard h3").all_inner_texts()

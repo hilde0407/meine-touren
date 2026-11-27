@@ -12,7 +12,7 @@ from tests.test_seitenlayout_ui import T, _api, _browser, _edit, _saved, pw  # n
 from tests.test_reise_seiten_ui import app, _done, _saved_doc  # noqa: F401
 from tests.test_bausteine_ui import TEXTCONTRAST  # noqa: E402
 from tests.test_tourseite_ui import _shot
-from tests.helpers_ui import quiet  # noqa: E402
+from tests.helpers_ui import entferne, quiet  # noqa: E402
 
 TL = 30000
 KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik", "reise", "reisen", "fotos", "karte")
@@ -74,13 +74,12 @@ def test_photos_edit_hide_width_persist_and_reset(pw, app):
     pg = _fotos(pw, app)
     try:
         _edit(pg)
-        assert pg.locator(".slit").count() == 3 and pg.locator('.slit[data-sl="kopf"] [data-a="eye"]').count() == 0 and pg.locator('.slit[data-sl="kopf"] .slmust').is_visible()
+        assert pg.locator(".slit").count() == 3 and pg.locator('.slit[data-sl="kopf"] [data-a="del"]').count() == 0 and pg.locator('.slit[data-sl="kopf"] .slmust').is_visible()
         pg.locator('.slit[data-sl="raster"] [data-a="up"]').click()
         pg.wait_for_function("() => JSON.stringify([...document.querySelectorAll('#fox .slit')].map(e => e.dataset.sl)) === JSON.stringify(['kopf', 'raster', 'jahre'])", timeout=T)
         pg.locator('.slit[data-sl="jahre"] [data-a="w"][data-w="halb"]').click()
         pg.wait_for_function("() => document.querySelector('.slit[data-sl=jahre]').dataset.cw === 'halb'", timeout=T)
-        pg.locator('.slit[data-sl="jahre"] [data-a="eye"]').click()
-        pg.wait_for_function("() => document.querySelector('.slit[data-sl=jahre]').classList.contains('sl-dim')", timeout=T)
+        entferne(pg, "jahre")
         _saved(pg)
         _done(pg)
         assert pg.locator("#fo-jahre").is_hidden() and pg.locator("#pg .pgroup").first.is_visible()
@@ -161,10 +160,9 @@ def test_map_panels_hide_collapse_and_edit_blocks(pw, app):
     pg = _karte(pw, app)
     try:
         _edit(pg)
-        assert pg.locator('.slit[data-sl="karte"]').count() == 1 and pg.locator('.slit[data-sl="karte"] [data-a="eye"]').count() == 0                       # die Karte bleibt immer sichtbar
-        assert pg.locator('.slit[data-sl="jahr"] [data-a="eye"]').count() == 1
-        pg.locator('.slit[data-sl="stil"] [data-a="eye"]').click()
-        pg.wait_for_function("() => document.querySelector('.slit[data-sl=stil]').classList.contains('sl-dim')", timeout=T)
+        assert pg.locator('.slit[data-sl="karte"]').count() == 1 and pg.locator('.slit[data-sl="karte"] [data-a="del"]').count() == 0                       # die Karte bleibt immer sichtbar
+        assert pg.locator('.slit[data-sl="jahr"] [data-a="del"]').count() == 1 and pg.locator('.slit[data-sl="karte"] [data-a="del"]').count() == 0
+        entferne(pg, "stil")
         pg.locator('.slit[data-sl="ebenen"] input[data-a="open"]').uncheck()
         _saved(pg)
         _done(pg)

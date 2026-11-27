@@ -2,6 +2,13 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.66.0 – Entfernen statt Ausblenden, zwei Wege beim Zurücksetzen, Werkseinstellung für alle Seiten
+
+- Bausteine haben auf allen Seiten nur noch **Entfernen** (mit Rückfrage); „Ausblenden“ und „Einblenden“ entfallen. Mitgelieferte Bausteine werden intern weiter als ausgeblendet gespeichert (keine Migration), bereits Ausgeblendetes gilt als entfernt. Im Katalog „Baustein hinzufügen“ steht ein entfernter Baustein als **Wieder hinzufügen** (statt „Steht schon auf der Seite“, das nur bei sichtbaren bleibt), Bausteine ohne eigene Karte in der Gruppe „Entfernte Bausteine“
+- „Standard wiederherstellen“ hat bei mehreren Ansichten und einer eigenen Standardansicht zwei Knöpfe: **Auf meine Standardansicht** und **Auf die Werkseinstellung**; sonst wie bisher
+- Neu: **Alle Seiten auf Werkseinstellung zurücksetzen …** (Dialog „Ansichten“ und Verwaltung → Allgemein → Seitenanordnung) mit Rückfrage, die nennt, was betroffen ist, und dem Kontrollkästchen „Auch meine eigenen Ansichten löschen“ (Standard aus); Server (`POST /api/layout/werkseinstellung`) und Browser-Speicher werden zurückgesetzt, Wirkung sofort sichtbar, Ergebnis wird angesagt; Touren, Ziele und Einstellungen bleiben unberührt
+- Ehrlich: „Entfernen“ gilt je Anordnung (Desktop oder Handy); eigene Kennzahlen und Notizen stehen in den Ansichten und gehen beim Werksreset mit (siehe docs/versionen/3.66.0.md)
+
 ## Version 3.65.0 – Gebiete-Übersicht, Gebietsseite, eigene Gebiete
 
 - Das Gebiet in der Regionszeile der Tourseite und des Tourblatts (und im Kopf der Reise-Seite) ist ein Link auf die Tourenliste mit dem Filter „Gebiet“

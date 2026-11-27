@@ -146,3 +146,20 @@ def toggle_details(pg, selector, open=True, timeout=T):
         except PWTimeout:
             quiet(pg, 3000)
     pg.wait_for_function(fn, arg=[selector, bool(open)], timeout=timeout)
+
+
+def entferne(pg, sid, timeout=T):
+    """3.66.0: Baustein im Bearbeitungsmodus entfernen (ein Weg für alle Bausteine): Knopf „Entfernen“ im Kopf, Rückfrage „Baustein entfernen?“ bestätigen,
+    dann warten, bis der Rahmen (.slit) des Bausteins weg ist (mitgelieferte Bausteine bleiben im Dokument, werden aber nirgends mehr gezeigt)."""
+    pg.locator(f'.slit[data-sl="{sid}"] [data-a="del"]').click()
+    pg.wait_for_selector(".uidlg .uibox", timeout=timeout)
+    pg.locator(".uidlg .uifoot button[data-danger]").click()
+    pg.wait_for_function("(s) => !document.querySelector('.slit[data-sl=\"' + s + '\"]')", arg=sid, timeout=timeout)
+
+
+def wieder_hinzufuegen(pg, sid, timeout=T):
+    """3.66.0: entfernten mitgelieferten Baustein über den Katalog („Baustein hinzufügen“ → „Wieder hinzufügen“) zurückholen."""
+    pg.locator('#slbar [data-a="add"]').click()
+    pg.wait_for_selector(f'.slcard [data-readd="{sid}"]', timeout=timeout)
+    pg.locator(f'.slcard [data-readd="{sid}"]').click()
+    pg.wait_for_selector(f'.slit[data-sl="{sid}"]', timeout=timeout)

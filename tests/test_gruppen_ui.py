@@ -13,7 +13,7 @@ import pytest
 expect = pytest.importorskip("playwright.sync_api").expect
 from tests.test_seitenlayout_ui import ROOT, T, _api, _browser, _dash, _edit, _saved, pw  # noqa: F401
 from tests.test_tourseite_ui import CONTRAST, LAUNCH, SEED, _shot, _wait
-from tests.helpers_ui import press_until_gone, quiet  # noqa: E402
+from tests.helpers_ui import entferne, press_until_gone, quiet  # noqa: E402
 
 KEYS = ("tour-haupt", "tour-auswertung", "uebersicht", "statistik")
 W = lambda i, t="periode", **c: {"id": i, "type": t, "cfg": c}  # noqa: E731
@@ -155,15 +155,15 @@ def test_undo_redo_buttons_keyboard_and_announcements(pw, app):
         expect(_redo(pg)).to_have_attribute("aria-disabled", "true", timeout=T)
         _btn(pg, "wk1", "down").click()                                                                  # verschieben
         _order_is(pg, ["zuletzt", "wk2", "wk1"])
-        _btn(pg, "wk2", "eye").click()                                                                   # ausblenden
-        pg.wait_for_function("() => SL.docs.uebersicht.hidden && SL.docs.uebersicht.hidden.includes('wk2')", timeout=T)
+        entferne(pg, "zuletzt")                                                                          # entfernen (mitgelieferter Baustein: intern „hidden“)
+        pg.wait_for_function("() => SL.docs.uebersicht.hidden && SL.docs.uebersicht.hidden.includes('zuletzt')", timeout=T)
         expect(_undo(pg)).to_have_attribute("aria-disabled", "false", timeout=T)
-        _undo(pg).click()                                                                                # Ausblenden zurück
-        pg.wait_for_function("() => !(SL.docs.uebersicht.hidden || []).includes('wk2')", timeout=T)
+        _undo(pg).click()                                                                                # Entfernen zurück
+        pg.wait_for_function("() => !(SL.docs.uebersicht.hidden || []).includes('zuletzt')", timeout=T)
         expect(_live(pg)).to_contain_text("Rückgängig:", timeout=T)
         expect(_redo(pg)).to_have_attribute("aria-disabled", "false", timeout=T)
         pg.keyboard.press("Control+Shift+Z")                                                             # wiederholen per Tastatur
-        pg.wait_for_function("() => SL.docs.uebersicht.hidden.includes('wk2')", timeout=T)
+        pg.wait_for_function("() => SL.docs.uebersicht.hidden.includes('zuletzt')", timeout=T)
         expect(_live(pg)).to_contain_text("Wiederholt:", timeout=T)
         pg.keyboard.press("Control+z")
         pg.keyboard.press("Control+z")
@@ -207,8 +207,8 @@ def test_history_is_limited_to_50_steps_and_discard_clears_it(pw, app):
     pg = _page(pw, app, {"widgets": [W("wk1")]})
     try:
         _edit(pg)
-        for _ in range(55):
-            _btn(pg, "wk1", "eye").click()
+        for i in range(55):                                                                              # 55 Schritte: die Breite wechselt zwischen der ersten und der letzten Wahl
+            (_btn(pg, "wk1", "w").first if i % 2 == 0 else _btn(pg, "wk1", "w").last).click()
         pg.wait_for_function("() => SL.hist.undo.length === 50", timeout=T)
         for _ in range(60):
             if pg.evaluate("SL.hist.undo.length") == 0:
@@ -216,7 +216,7 @@ def test_history_is_limited_to_50_steps_and_discard_clears_it(pw, app):
             _undo(pg).click()
         assert pg.evaluate("SL.hist.undo.length") == 0 and pg.evaluate("SL.hist.redo.length") == 50
         pg.locator("#slbar [data-a=more]").click() if pg.locator("#slbar [data-a=more]").is_visible() else None
-        _btn(pg, "wk1", "w").first.click()
+        _btn(pg, "wk1", "w").last.click()
         pg.wait_for_function("() => SL.hist.undo.length === 1 && SL.docs.uebersicht.w", timeout=T)
         pg.locator("#slbar [data-a=discard]").click()
         pg.locator(".uibox button:has-text('Verwerfen')").last.click()
@@ -411,20 +411,20 @@ def test_mobile_arrangement_edit_preview_server_and_effect(pw, app):
         expect(pg.locator("#slbn")).to_contain_text("noch keine eigene Anordnung", timeout=T)
         _btn(pg, "wk2", "up").click()                                                                      # nur die Handy-Reihenfolge ändern
         _order_is(pg, ["zuletzt", "wk2", "wk1"])
-        _btn(pg, "wk1", "eye").click()
-        pg.wait_for_function("() => SL.docs.uebersicht.mob && SL.docs.uebersicht.mob.hidden.includes('wk1')", timeout=T)
+        entferne(pg, "zuletzt")                                                                            # nur auf dem Handy entfernt
+        pg.wait_for_function("() => SL.docs.uebersicht.mob && SL.docs.uebersicht.mob.hidden.includes('zuletzt')", timeout=T)
         assert pg.evaluate("SL.docs.uebersicht.order.join()") == "zuletzt,wk1,wk2" and not pg.evaluate("SL.docs.uebersicht.hidden")
         pg.locator('#slbar [data-a="dev"][data-d="desk"]').click()                                         # Desktop: unverändert
         pg.wait_for_function("() => !document.body.classList.contains('sl-dev-mob')", timeout=T)
         _order_is(pg, ["zuletzt", "wk1", "wk2"])
-        expect(_btn(pg, "wk1", "eye")).to_have_attribute("aria-pressed", "false", timeout=T)
+        expect(pg.locator('.slit[data-sl="zuletzt"]')).to_have_count(1, timeout=T)                         # am Desktop ist er noch da
         _undo(pg).click()                                                                                  # Rückgängig gilt auch für die Handy-Anordnung
-        pg.wait_for_function("() => !((SL.docs.uebersicht.mob || {}).hidden || []).includes('wk1')", timeout=T)
+        pg.wait_for_function("() => !((SL.docs.uebersicht.mob || {}).hidden || []).includes('zuletzt')", timeout=T)
         _redo(pg).click()
-        pg.wait_for_function("() => ((SL.docs.uebersicht.mob || {}).hidden || []).includes('wk1')", timeout=T)
+        pg.wait_for_function("() => ((SL.docs.uebersicht.mob || {}).hidden || []).includes('zuletzt')", timeout=T)
         _done(pg)
         d = _wait_srv(pg, app, lambda d: d.get("mob"))
-        assert [i for i in d["mob"]["order"] if i in ("zuletzt", "wk1", "wk2")] == ["zuletzt", "wk2", "wk1"] and d["mob"]["hidden"] == ["wk1"] and d["order"] == ["zuletzt", "wk1", "wk2"]
+        assert [i for i in d["mob"]["order"] if i in ("zuletzt", "wk1", "wk2")] == ["zuletzt", "wk2", "wk1"] and d["mob"]["hidden"] == ["zuletzt"] and d["order"] == ["zuletzt", "wk1", "wk2"]
         # Wirkung: Desktop unverändert
         pg.wait_for_selector("#tlw-wk1", timeout=T)
         assert pg.evaluate("[...document.querySelectorAll('#main > *')].map(e => e.id).filter(i => i.startsWith('tlw-w')).join()") == "tlw-wk1,tlw-wk2"
@@ -435,8 +435,8 @@ def test_mobile_arrangement_edit_preview_server_and_effect(pw, app):
         quiet(m, 5000)
         m.wait_for_selector("#tlw-wk2", timeout=T)
         assert m.evaluate("document.documentElement.classList.contains('mob')")
-        assert m.evaluate("[...document.querySelectorAll('#main > *')].map(e => e.id).filter(i => i.startsWith('tlw-w')).filter(i => !document.getElementById(i).closest('.sl-off')).join()") == "tlw-wk2"
-        assert m.evaluate("document.getElementById('tlw-wk1').classList.contains('sl-off')")
+        assert m.evaluate("[...document.querySelectorAll('#main > *')].map(e => e.id).filter(i => i.startsWith('tlw-w')).filter(i => !document.getElementById(i).closest('.sl-off')).join()") == "tlw-wk2,tlw-wk1"          # Handy-Reihenfolge
+        assert m.evaluate("!document.querySelector('#hrecent:not(.sl-off)')")      # „zuletzt“ ist auf dem Handy entfernt
         # auf dem Handy startet der Umschalter bei „Handy“, „zurücksetzen“ entfernt die Anordnung
         m.locator("#slopen").click()
         m.wait_for_selector("#slbar", timeout=T)
@@ -652,7 +652,7 @@ def test_screenshots_group_mobile_preview_and_code_dialog(pw, app):
                 pg.evaluate("() => { document.querySelector('.slgd').open = true; }")
                 _snap(pg, f"gr-gruppe-{width}-{scheme}.png", ".slgrp")
                 _edit(pg)
-                _btn(pg, "wk1", "eye").click()
+                _btn(pg, "wk1", "w").first.click()
                 _undo(pg).click()
                 _snap(pg, f"gr-bearbeiten-{width}-{scheme}.png", ".slgrp")
                 pg.locator('#slbar [data-a="dev"][data-d="mob"]').click()

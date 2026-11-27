@@ -89,6 +89,17 @@ const DEV_PANELS = ["Selbsttest", "Verlorene App-Aufzeichnungen"];
     const zt = $("#ztest");
     if (zt) zt.dataset.dev = "1";
     const host = document.querySelector('.atab[data-t="allgemein"] .gbody');
+    if (host && !$("#slfacp") && typeof slFactoryAll === "function" && slCan()) {                        // 3.66.0: Werkseinstellung für alle Seiten (dieselbe Funktion wie im Dialog „Ansichten“)
+      host.insertAdjacentHTML(
+        "beforeend",
+        `<div class="panel" id="slfacp"><h2>Seitenanordnung</h2><p class="mut">Setzt die Anordnung aller Seiten (Übersicht, Tourseite, Statistik, Reisen, Gebiete, Fotos, Karte) auf die Werkseinstellung zurück: Reihenfolge, Breiten, entfernte und hinzugefügte Bausteine und Ansichten. Touren, Ziele und Einstellungen bleiben unberührt.</p>
+         <div class="row"><button type="button" class="btn ghost" id="slfacb" aria-haspopup="dialog">Alle Seiten auf Werkseinstellung zurücksetzen …</button><span class="ok" id="slfacok" role="status" aria-live="polite"></span></div></div>`
+      );
+      $("#slfacb").onclick = async () => {
+        const r = await slFactoryAll();
+        if (r) $("#slfacok").textContent = r;
+      };
+    }
     if (host && !$("#dbgsw")) {
       host.insertAdjacentHTML(
         "beforeend",

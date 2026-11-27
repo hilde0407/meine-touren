@@ -26,7 +26,7 @@ const SL_ROOT = {statistik: "stx", reise: "trx", serie: "srx", reisen: "rsx", ge
 const slOneRoot = fam => document.getElementById(SL_ROOT[fam] || "rsx");          // Wurzel des Rasters einer Seite mit einem Dokument (Übersicht: main.home)
 const SL_GROUPS = {route: "Streckenverlauf", rec: "Aufzeichnung", eval: "Auswertung dieser Tour", more: "Fotos zur Tour", bst: "Bausteine"};
 /* Registry: Standardseite, Gruppe, Standard „offen“ (def), fixed = kann nur auf dieser Seite stehen (wird von der Tourseite selbst aufgebaut),
-   must = Pflicht (nicht ausblendbar), plain = kein einklappbarer Abschnitt, ckeys = Speicherschlüssel des Auf-/Zu-Zustands (localStorage „mt_trf_…“) */
+   must = Pflicht (nicht entfernbar), plain = kein einklappbarer Abschnitt, ckeys = Speicherschlüssel des Auf-/Zu-Zustands (localStorage „mt_trf_…“) */
 const SL_REG = {
   tour: [
     {id: "map", w: "voll", title: "Karte", page: "haupt", group: "route", def: true, fixed: true, ckeys: ["tl_map"]},
@@ -514,17 +514,52 @@ function slStep(id, d) {
   if (d < 0) slMove(id, ord[j], g ? g.id : undefined);
   else slMove(id, ord[j + 1] || null, g ? g.id : undefined);
 }
-function slToggleHidden(id) {
-  const st = slStDoc(SL.fam),
-    on = !slHidList(st).includes(id);
+/* 3.66.0 Für den Benutzer gibt es nur „Entfernen“ und „Wieder hinzufügen“. Mitgelieferte Standard-Bausteine werden dabei wie bisher als „ausgeblendet“ gespeichert (Feld hidden,
+   bei der Handy-Anordnung mob.hidden): keine Umstellung der gespeicherten Layouts, bereits ausgeblendete Bausteine gelten einfach als entfernt. */
+function slSetHidden(id, on) {
+  const st = slStDoc(SL.fam);
   if (slMobEff()) {                                                         // 3.36.0: Handy-Reiter: eigene Liste der ausgeblendeten Abschnitte (Start: Kopie der Desktop-Liste)
     const m = (st.mob = st.mob || {}), l = (m.hidden || st.hidden || []).filter(x => x !== id);
     if (on) l.push(id);
     m.hidden = l;
   } else slSet(st, "hidden", id, on);
+}
+function slRemoveStd(id) {
+  const nm = slTitle(id);
+  slSetHidden(id, true);
+  slGrpDrop(id);                                                            // wie bei einem hinzugefügten Baustein: nicht mehr Mitglied einer Bausteingruppe
   slTouch(slKey1(SL.fam));
+  SL.focus = null;
   slApply();
-  slLive(on ? `${slTitle(id)}: ausgeblendet` : `${slTitle(id)}: eingeblendet`);
+  slLive(`Baustein „${nm}“ entfernt`);
+  slFocusAdd();
+}
+function slReadd(id) {
+  const nm = slTitle(id);
+  slSetHidden(id, false);
+  slTouch(slKey1(SL.fam));
+  SL.focus = {id, a: "grip", ps: false};
+  slApply();
+  slLive(`Baustein „${nm}“ wieder hinzugefügt`);
+}
+/* nach dem Entfernen steht der Fokus nicht mehr auf einem Baustein, der nicht mehr da ist, sondern auf „Baustein hinzufügen“ */
+function slFocusAdd() {
+  const b = document.querySelector('#slbar [data-a="add"]');
+  if (b && SL.edit) b.focus({preventScroll: true});
+}
+/* Entfernen mit Rückfrage (ein Weg für alle Bausteine aller Seiten): hinzugefügte Bausteine sind danach weg, mitgelieferte stehen im Katalog als „Wieder hinzufügen“ */
+async function slAskRemove(id) {
+  const it = slItems(SL.fam).find(i => i.id === id);
+  if (!it || it.must) return;
+  const ok = await uiConfirm({
+    title: "Baustein entfernen?",
+    text: it.widget ? `„${slTitle(id)}“ wird von dieser Seite entfernt.` : `„${slTitle(id)}“ wird von dieser Seite entfernt. Du kannst ihn jederzeit über „Baustein hinzufügen“ wieder hinzufügen.`,
+    ok: "Entfernen",
+    danger: true,
+  });
+  if (!ok) return;
+  if (it.widget) slRemoveWidget(id);
+  else slRemoveStd(id);
 }
 /* Zustand „offen/zu“ eines gebauten Abschnitts setzen (auch für Rückgängig/Wiederholen) */
 function slOpenDom(it, on) {
@@ -658,6 +693,7 @@ function slRemoveWidget(id) {
   SL.focus = null;
   slApply();
   slLive(`Baustein „${nm}“ entfernt`);
+  slFocusAdd();
 }
 /* Baustein zu einer Kennung: hinzugefügter Baustein oder Standard-Baustein mit Konfiguration (cfg[id]) */
 function slWidgetOf(id) {
@@ -704,46 +740,70 @@ async function slDiscard() {
   slLive("Änderungen verworfen, der Stand von vor dem Bearbeiten ist wiederhergestellt");
   if (fam === "statistik" && SL.view[fam] !== was && typeof stReload === "function") stReload();
 }
+/* 3.66.0 „Standard wiederherstellen“: bei mehreren Ansichten und einer eigenen Standardansicht zwei Wege in einem Dialog (zwei Knöpfe, Abbrechen),
+   sonst wie bisher ein Weg (mitgelieferter Standard). Die Rückfrage nennt, was zurückgesetzt wird und was nicht. */
+const SL_RESET_TXT = {
+  tour: "Reihenfolge, entfernte Bausteine, Seitenzuordnung und alle hinzugefügten Bausteine der Tourseite (Hauptseite und Auswertung) werden zurückgesetzt.",
+  statistik: "Reihenfolge, Breiten, entfernte und alle hinzugefügten Bausteine der Statistik werden zurückgesetzt. Der Filter oben bleibt, wie er ist.",
+  reise: "Reihenfolge, Breiten, entfernte und alle hinzugefügten Bausteine der Reise-Seite werden zurückgesetzt. Das gilt für alle Reisen.",
+  serie: "Reihenfolge, Breiten, entfernte und alle hinzugefügten Bausteine der Mehrtagestour-Seite werden zurückgesetzt. Das gilt für alle Mehrtagestouren.",
+  gebiete: "Reihenfolge, Breiten, entfernte und alle hinzugefügten Bausteine der Gebiete-Übersicht werden zurückgesetzt.",
+  gebiet: "Reihenfolge, Breiten, entfernte und alle hinzugefügten Bausteine der Gebiets-Seite werden zurückgesetzt. Das gilt für alle Gebiete.",
+  reisen: "Reihenfolge, Breiten, entfernte und alle hinzugefügten Bausteine der Reisen-Übersicht werden zurückgesetzt.",
+  fotos: "Reihenfolge, Breiten, entfernte und alle hinzugefügten Bausteine der Fotos-Seite werden zurückgesetzt.",
+  karte: "Reihenfolge, Breite der Karte, entfernte Bedienfelder und alle hinzugefügten Bausteine der Karte werden zurückgesetzt.",
+  uebersicht: "Reihenfolge, entfernte und alle hinzugefügten Bausteine der Übersicht werden zurückgesetzt.",
+};
+/* Nur, wenn es einen Unterschied macht: mehrere Ansichten, eine eigene (nicht die mitgelieferte) ist Standardansicht und diese ist nicht die angezeigte */
+const slOwnDefault = fam => {
+  const m = slMaster(fam);
+  return m.views.length > 1 && m.active !== SL_STD && m.active !== SL.view[fam] && m.views.some(v => v.id === m.active) ? m.active : "";
+};
 async function slReset() {
+  const fam = SL.fam, own = slOwnDefault(fam), many = slMaster(fam).views.length > 1;
+  let way = "werk";
+  const tl = x => (typeof window.TL === "function" ? window.TL(x) : x);
   const ok = await uiConfirm({
     title: "Standard wiederherstellen?",
-    text: slMaster(SL.fam).views.length > 1
-      ? "Alles in dieser Ansicht wird auf den Standard zurückgesetzt: Reihenfolge, ausgeblendete und alle hinzugefügten Bausteine. Andere Ansichten bleiben unverändert."
-      : SL.fam === "tour"
-      ? "Reihenfolge, ausgeblendete Bausteine, Seitenzuordnung und alle hinzugefügten Bausteine der Tourseite (Hauptseite und Auswertung) werden zurückgesetzt."
-      : SL.fam === "statistik"
-      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Statistik werden zurückgesetzt. Der Filter oben bleibt, wie er ist."
-      : SL.fam === "reise"
-      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Reise-Seite werden zurückgesetzt. Das gilt für alle Reisen."
-      : SL.fam === "serie"
-      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Mehrtagestour-Seite werden zurückgesetzt. Das gilt für alle Mehrtagestouren."
-      : SL.fam === "gebiete"
-      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Gebiete-Übersicht werden zurückgesetzt."
-      : SL.fam === "gebiet"
-      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Gebiets-Seite werden zurückgesetzt. Das gilt für alle Gebiete."
-      : SL.fam === "reisen"
-      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Reisen-Übersicht werden zurückgesetzt."
-      : SL.fam === "fotos"
-      ? "Reihenfolge, Breiten, ausgeblendete und alle hinzugefügten Bausteine der Fotos-Seite werden zurückgesetzt."
-      : SL.fam === "karte"
-      ? "Reihenfolge, Breite der Karte, ausgeblendete Bedienfelder und alle hinzugefügten Bausteine der Karte werden zurückgesetzt."
-      : "Reihenfolge, ausgeblendete und alle hinzugefügten Bausteine der Übersicht werden zurückgesetzt.",
-    ok: "Standard wiederherstellen",
+    text: own
+      ? `Die Ansicht „${slViewName(fam, SL.view[fam])}“ wird zurückgesetzt: Reihenfolge, Breiten, entfernte und alle hinzugefügten Bausteine. Andere Ansichten bleiben unverändert.\n\n„Auf meine Standardansicht“ übernimmt die Anordnung deiner Standardansicht „${slViewName(fam, own)}“.\n\n„Auf die Werkseinstellung“ stellt die mitgelieferte Anordnung her.`
+      : many
+      ? "Alles in dieser Ansicht wird auf den Standard zurückgesetzt: Reihenfolge, entfernte und alle hinzugefügten Bausteine. Andere Ansichten bleiben unverändert."
+      : SL_RESET_TXT[fam] || SL_RESET_TXT.uebersicht,
+    ok: own ? "Auf die Werkseinstellung" : "Standard wiederherstellen",
     danger: true,
+    onOpen: (box, bOk) => {
+      if (!own) return;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn alt";
+      b.id = "slresetown";
+      b.textContent = tl("Auf meine Standardansicht");
+      b.onclick = () => {
+        way = "mein";
+        bOk.click();
+      };
+      bOk.before(b);
+    },
   });
   if (!ok) return;
-  slKeys(SL.fam).forEach(k => delete SL.docs[k]);
-  slItems(SL.fam).forEach(it => (it.ckeys || []).forEach(k => {
+  if (own && way === "mein") {
+    const src = slLayoutsOf(fam, own);                                      // gleicht zuerst die angezeigte Ansicht in den Behälter ab und kopiert dann die Standardansicht
+    slKeys(fam).forEach(k => (slLayEmpty(src[k]) ? delete SL.docs[k] : (SL.docs[k] = src[k])));
+  } else slKeys(fam).forEach(k => delete SL.docs[k]);
+  slItems(fam).forEach(it => (it.ckeys || []).forEach(k => {
     try {
       localStorage.removeItem("mt_trf_" + k);
     } catch (e) {}
   }));
   document.querySelectorAll(".tlw[data-wid]").forEach(e => e.remove());
-  slTouch(...slKeys(SL.fam));
+  slTouch(...slKeys(fam));
   SL.focus = null;
   slApply();
-  slLive("Standard wiederhergestellt");
-  slStatus("Standard wiederhergestellt");
+  const msg = own && way === "mein" ? `Auf deine Standardansicht „${slViewName(fam, own)}“ zurückgesetzt` : "Standard wiederhergestellt";
+  slLive(msg);
+  slStatus(msg);
+  if (own && way === "mein" && fam === "statistik" && typeof stReload === "function") stReload(SL.edit);
 }
 
 /* ---------- Einordnen ---------- */
@@ -804,6 +864,7 @@ const slIcon = {
   grip: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="6" r="1.8"/><circle cx="15" cy="6" r="1.8"/><circle cx="9" cy="12" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="9" cy="18" r="1.8"/><circle cx="15" cy="18" r="1.8"/></svg>',
   eye: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.7-6.5 10-6.5S22 12 22 12s-3.7 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
   eyeoff: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 3l18 18M10.6 5.7A10 10 0 0 1 12 5.5c6.3 0 10 6.5 10 6.5a17 17 0 0 1-3.2 3.9M6.4 7.4A16.5 16.5 0 0 0 2 12s3.7 6.5 10 6.5c1.5 0 2.8-.3 4-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>',
+  remove: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19"/></svg>',
   gear: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
   sliders: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg>',
   layers: '<svg class="sli" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.5l8.5 4.5-8.5 4.5L3.5 8z"/><path d="M3.5 12.5l8.5 4.5 8.5-4.5"/></svg>',
@@ -909,19 +970,17 @@ function slStripHtml(p, idx, n) {
     open = slDef(it.id, !!it.def);
   let h = `<button type="button" class="slgrip" data-a="grip" aria-label="Zum Verschieben ziehen, oder Pfeil hoch und Pfeil runter drücken" aria-describedby="slhint">${slIcon.grip}</button>`;
   h += `<span class="slnm" title="${nm}">${nm}${it.fl ? ` <small class="slfl mut">${esc(it.fl)}</small>` : ""}</span>`;
-  if (p.off) h += `<span class="slhid">ausgeblendet</span>`;
   h += `<span class="slbs">`;
   if ((it.ws || SL_WALL).length > 1) h += `<span class="slwd" role="group" aria-label="Breite">${(it.ws || SL_WALL).map(k => `<button type="button" class="slw" data-a="w" data-w="${k}" aria-pressed="${k === p.cw}" aria-label="${SL_WNAME[k]}" title="${SL_WNAME[k]}">${slWIcon(k)}</button>`).join("")}</span>`;
   h += `<button type="button" class="slb" data-a="up" aria-label="Nach oben" title="Nach oben"${dis(idx === 0)}>↑</button>`;
   h += `<button type="button" class="slb" data-a="down" aria-label="Nach unten" title="Nach unten"${dis(idx === n - 1)}>↓</button>`;
-  if (!it.must) h += `<button type="button" class="slb" data-a="eye" aria-pressed="${p.off}" title="${p.off ? "Einblenden" : "Ausblenden"}">${p.off ? slIcon.eyeoff : slIcon.eye}<span>${p.off ? "Einblenden" : "Ausblenden"}</span></button>`;
+  if (!it.must) h += `<button type="button" class="slb slrm" data-a="del" aria-label="Baustein entfernen: ${nm}" title="Baustein von dieser Seite entfernen (über „Baustein hinzufügen“ wieder hinzufügbar)">${slIcon.remove}<span>Entfernen</span></button>`;
   let mo = "";
   if (!it.plain) mo += `<label class="slsw"><input type="checkbox" data-a="open"${open ? " checked" : ""}><span>Standardmäßig offen</span></label>`;
   if (SL.fam === "tour" && !it.fixed) mo += `<button type="button" class="slb" data-a="page" >${other}</button>`;
   if ((it.widget || it.build) && slFieldsOf(window.SL_WT[it.wtype]).length) mo += `<button type="button" class="slb slcfgb" data-a="cfg" aria-haspopup="dialog" title="Einstellungen dieses Bausteins">${slIcon.gear}<span>Einstellungen</span></button>`;
   if (it.widget && slCanDup(window.SL_WT[it.wtype])) mo += `<button type="button" class="slb slmx" data-a="dup" aria-label="Duplizieren: ${nm}" title="Eine Kopie mit denselben Einstellungen direkt dahinter anlegen">Duplizieren</button>`;
   if (slGrpOk(it)) mo += `<button type="button" class="slb slmx" data-a="grp" aria-haspopup="dialog">${slGrpOf(it.id) ? "Bausteingruppe wechseln …" : "In Bausteingruppe …"}</button>` + (slGrpOf(it.id) ? `<button type="button" class="slb slmx" data-a="ungrp">Aus Bausteingruppe lösen</button>` : "");
-  if (it.widget) mo += `<button type="button" class="slb slrm" data-a="del" >Entfernen</button>`;
   if (mo) h += `<button type="button" class="slb slmorebtn" data-a="more" aria-haspopup="true" aria-expanded="false" aria-label="Weitere Aktionen" title="Weitere Aktionen">⋯</button><span class="slmo">${mo}</span>`;
   if (it.must) h += `<span class="slmust">bleibt immer sichtbar</span>`;
   return h + `</span>`;
@@ -980,16 +1039,15 @@ function slPlace(root) {
   });
   if (fam === "tour" && !edit) slRegroup(pres);                          // 3.24.1: eine Gruppe steht nur einmal da (eine Überschrift), auch wenn eine alte gespeicherte Reihenfolge ihre Mitglieder trennt
   slGrpOrder(pres, gdefs);                                               // 3.36.0: Mitglieder einer Gruppe stehen zusammen
-  SL.present = pres.map(p => p.it.id);
+  SL.present = pres.filter(p => !p.off).map(p => p.it.id);
   const blocks = [];
   let cur = null;
   const cnt = {};
   pres.forEach(p => {
-    p.unit = slUnit(p, edit);
+    p.unit = slUnit(p, edit && !p.off);
     p.grp = gdefs.find(g => g.ids.includes(p.it.id)) || null;
     slCell(p, fam !== "tour" || !!p.grp || (!!p.it.group && !p.it.own));
-    p.el.classList.toggle("sl-off", p.off && !edit);
-    p.unit.classList.toggle("sl-dim", edit && p.off && p.unit !== p.el);
+    p.el.classList.toggle("sl-off", p.off);                              // 3.66.0: entfernt = auf der Seite und im Bearbeitungsmodus nicht da (Wiederholen über „Baustein hinzufügen“)
     if (p.grp) {
       if (!cur || cur.grp !== p.grp) {
         cur = {grp: p.grp, ps: []};
@@ -1022,7 +1080,7 @@ function slPlace(root) {
       const r = slRun(root, fam, b.g, b.n);
       used.add(r.el);
       slPlaceIn(r.body, b.ps.map(p => p.unit));
-      r.el.hidden = !b.ps.some(p => edit || !p.off);                          // eine Gruppe ohne sichtbaren Inhalt zeigt keine Überschrift
+      r.el.hidden = !b.ps.some(p => !p.off);                          // eine Gruppe ohne sichtbaren Inhalt zeigt keine Überschrift
       return r.el;
     });
   if (fam === "tour") root.querySelectorAll(":scope > .tlg:not(.tlsumg)").forEach(g => !used.has(g) && (g.hidden = true));
@@ -1388,20 +1446,30 @@ function slLivePreviews(body) {
 }
 /* 3.45.0 Tourseite: Bausteine ohne Bezug zur einzelnen Tour (Übersichts-Bausteine wie „Dein Jahr“ oder „Ziele“) stehen im Katalog in einer eigenen, zugeklappten Gruppe */
 const SL_ALLG = ["allg", "Allgemein (nicht zu dieser Tour)"];
+const SL_RE = ["entfernt", "Entfernte Bausteine"];                                                    // 3.66.0: mitgelieferte Bausteine dieser Seite, die entfernt wurden
 const slCatOf = T => (SL.fam === "tour" && T.fam !== "tour" ? SL_ALLG[0] : T.cat || "zahlen");
 function slCatalog() {
   const list = Object.entries(window.SL_WT).filter(([, T]) => slFits(T, SL.fam)),
     have = type => (slSt(SL.fam).widgets || []).filter(w => w.type === type).length,
-    cats = [...SL_CATS, SL_ALLG].filter(([k]) => list.some(([, T]) => slCatOf(T) === k)),
+    hid = slHidList(slSt(SL.fam)),
+    /* 3.66.0 Entfernte mitgelieferte Bausteine (intern „ausgeblendet“) stehen hier als „Wieder hinzufügen“: Bausteine mit Typ-Karte (ohne „mehrfach“) auf ihrer Karte, alle übrigen auf einer eigenen Karte */
+    reOf = type => SL_REG[SL.fam].find(r => r.build === type && hid.includes(r.id) && !r.must),
+    onCard = new Set(list.filter(([type, T]) => !T.multi && !T.neu && !have(type)).map(([type]) => (reOf(type) || {}).id).filter(Boolean)),
+    gone = slItems(SL.fam).filter(i => !i.widget && !i.must && hid.includes(i.id) && !onCard.has(i.id)),
+    cats = [...(gone.length ? [SL_RE] : []), ...SL_CATS, SL_ALLG].filter(([k]) => k === SL_RE[0] || list.some(([, T]) => slCatOf(T) === k)),
+    reCard = i => `<article class="slcard slre" data-cat="${SL_RE[0]}"><div class="slci"><h3>${esc(i.title)}</h3>${i.fl ? `<p class="mut">${esc(i.fl)}</p>` : ""}<button type="button" class="btn sm" data-readd="${esc(i.id)}" aria-label="Wieder hinzufügen: ${esc(i.title)}">Wieder hinzufügen</button></div></article>`,
     card = ([type, T]) => {
       const n = have(type),
-        std = !T.multi && SL_REG[SL.fam].some(r => r.build === type && !(slSt(SL.fam).hidden || []).includes(r.id)),             // 3.30.0: steht als Standard-Abschnitt schon (sichtbar) auf der Seite
-        dis = !T.multi && (n > 0 || std);
+        re = !T.multi && !T.neu && reOf(type),
+        std = !T.multi && !re && SL_REG[SL.fam].some(r => r.build === type),             // 3.30.0: steht als Standard-Abschnitt schon (sichtbar) auf der Seite
+        dis = !T.multi && !re && (n > 0 || std);
       if (T.neu)                                                                                         // 3.28.0: Baustein, den der Benutzer in einem eigenen Dialog zusammenstellt
         return `<article class="slcard" data-cat="${slCatOf(T)}"><div class="slpv" aria-hidden="true">${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name)}</h3><p>${esc(T.desc || "")}</p>` +
           `<button type="button" class="btn sm" data-neu="${type}">${n ? "Noch eine erstellen" : "Erstellen"}</button></div></article>`;
       return `<article class="slcard" data-cat="${slCatOf(T)}"><div class="slpv" aria-hidden="true"${T.hinweis ? "" : ` data-live="${type}"`}>${T.preview ? T.preview() : ""}</div><div class="slci"><h3>${esc(T.name || T.title(T.defaults || {}))}</h3>${n || std ? '<span class="slhave">Bereits auf dieser Seite</span>' : ""}<p>${esc(T.desc || "")}</p>` +
-        `<button type="button" class="btn sm${dis ? " ghost" : ""}" data-add="${type}"${dis ? " disabled" : ""}>${dis ? (std && !n ? "Steht schon auf der Seite" : "Bereits hinzugefügt") : n ? "Noch einmal hinzufügen" : "Hinzufügen"}</button></div></article>`;
+        (re && !n
+          ? `<button type="button" class="btn sm" data-readd="${esc(re.id)}">Wieder hinzufügen</button>`
+          : `<button type="button" class="btn sm${dis ? " ghost" : ""}" data-add="${type}"${dis ? " disabled" : ""}>${dis ? (std && !n ? "Steht schon auf der Seite" : "Bereits hinzugefügt") : n ? "Noch einmal hinzufügen" : "Hinzufügen"}</button>`) + `</div></article>`;
     };
   slModal("Baustein hinzufügen", (body, close) => {
     body.innerHTML =
@@ -1410,7 +1478,9 @@ function slCatalog() {
       cats.map(([k, l]) => `<button type="button" class="slchip" data-cat="${k}" aria-pressed="false">${k === SL_ALLG[0] ? "Allgemein" : l}</button>`).join("") +
       `</div><label class="slsr" for="slq">Bausteine suchen</label><input id="slq" type="search" class="slq" placeholder="Bausteine suchen …" autocomplete="off" enterkeyhint="search"></div>` +
       `<p class="mut slcnt" role="status" aria-live="polite"></p><div class="slcatl">` +
-      cats.map(([k, l]) => (k === SL_ALLG[0]
+      cats.map(([k, l]) => (k === SL_RE[0]
+        ? `<section class="slsec" data-cat="${k}"><h3 class="slcath">${l}</h3><p class="mut slallgp">Diese Bausteine gehören zur Seite, wurden aber entfernt. Mit „Wieder hinzufügen“ stehen sie wieder an ihrer früheren Stelle.</p><div class="slcats">${gone.map(reCard).join("")}</div></section>`
+        : k === SL_ALLG[0]
         ? `<details class="slsec slallg" data-cat="${k}"><summary class="slcath">${l}</summary><p class="mut slallgp">Diese Bausteine zeigen nichts zu dieser Tour, sondern deine Touren insgesamt (wie auf der Übersicht).</p><div class="slcats">${list.filter(([, T]) => slCatOf(T) === k).map(card).join("")}</div></details>`
         : `<section class="slsec" data-cat="${k}"><h3 class="slcath">${l}</h3><div class="slcats">${list.filter(([, T]) => slCatOf(T) === k).map(card).join("")}</div></section>`)).join("") +
       `</div><p class="slnorsl mut" hidden>Nichts gefunden. Probiere einen anderen Suchbegriff oder eine andere Kategorie.</p><div class="uifoot"><button type="button" class="btn ghost" data-close>Schließen</button></div>`;
@@ -1442,10 +1512,14 @@ function slCatalog() {
     q.addEventListener("keydown", e => e.key === "Enter" && e.preventDefault());
     body.onclick = e => {
       const a = e.target.closest("[data-add]"),
+        ra = e.target.closest("[data-readd]"),
         nw = e.target.closest("[data-neu]"),
         ch = e.target.closest(".slchip");
       if (e.target.closest("[data-close]")) close();
-      else if (nw) {
+      else if (ra) {
+        close();
+        slReadd(ra.dataset.readd);
+      } else if (nw) {
         close();
         window.SL_WT[nw.dataset.neu].neu();
       }
@@ -1587,15 +1661,13 @@ document.addEventListener("click", e => {
   SL.focus = {id, a};
   if (a === "up") slStep(id, -1);
   else if (a === "down") slStep(id, 1);
-  else if (a === "eye") slToggleHidden(id);
   else if (a === "w") slSetWidth(id, b.dataset.w);
   else if (a === "page") slSetPage(id, SL.page === "haupt" ? "auswertung" : "haupt");
   else if (a === "cfg") slCfgDialog(id);
   else if (a === "dup") slDupWidget(id);
   else if (a === "grp") slGrpDialog(id);
   else if (a === "ungrp") slGrpUngroup(id);
-  else if (a === "del")
-    uiConfirm({title: "Baustein entfernen?", text: `„${slTitle(id)}“ wird von dieser Seite entfernt.`, ok: "Entfernen", danger: true}).then(ok => ok && slRemoveWidget(id));
+  else if (a === "del") slAskRemove(id);
 });
 document.addEventListener("click", e => {
   const h = e.target.closest && e.target.closest("#slzrhb");
