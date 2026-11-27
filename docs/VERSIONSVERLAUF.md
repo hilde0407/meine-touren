@@ -2,6 +2,11 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.62.2 – „Neu mischen“ wirkt im Foto-Baustein der Reise
+
+- Zufällig: der Knopf nahm die im Tab gemerkte Auswahl und zeigte dieselben Fotos; er zieht jetzt wirklich neu (und merkt sich die neue Auswahl)
+- Alle · Beste · Neueste: die Reihenfolge ist nach dem Mischen immer sichtbar anders (bei wenigen Fotos blieb sie oft gleich); Raster, Streifen und Einzelbild-Show werden neu gezeichnet; Übersicht und Erinnerungen-Baustein nutzen dieselbe Logik
+
 ## Version 3.62.1 – Suche findet Gebiete, Inseln, Landschaften und Reisen
 
 - Eingebaute Gebietstabelle (rund 300 Gebiete: Gebirge, Täler, Inseln, Küsten, Landschaften; Grenzen ausdrücklich Näherungen) und Zuordnung je Tour im Browser aus den Startkoordinaten – keine Datenbank-, keine Serveränderung, kein Netz; „Gomera“, „Lungau“, „Zillertal“, „Mafate“, „Sizilien“ … treffen auch Touren, deren Name sie nicht nennt

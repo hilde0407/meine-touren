@@ -1,6 +1,6 @@
 // Service Worker: App-Dateien offline verfügbar; Daten (/api), Kartenkacheln und kleine Fotos werden bei Verbindung
 // frisch geladen und zuletzt Gesehenes dient als Rückfall, wenn keine Verbindung besteht.
-const V = "mt-v151", API = "mt-api-v1", TILES = "mt-tiles-v1", PICS = "mt-pics-v2";
+const V = "mt-v152", API = "mt-api-v1", TILES = "mt-tiles-v1", PICS = "mt-pics-v2";
 const KEEP = [V, API, TILES, PICS];
 const PICMAX = 2000;   // 3.54.0: höchstens so viele kleine Bilder (bis 600 px, typisch 10–40 kB) im Speicher: Tourenliste, Foto-Streifen und jetzt auch die Bilder der Übersicht (vorher 1200)
 const NOCACHE = /^\/api\/(jobs|update|selftest|health|login|logout|setup|restore|me\/password|clock-check\/ignore|komoot\/|tours\/[^/]+\/komoot-paket)/;   // 3.58.0: Komoot-Sichtbarkeit immer frisch, Komoot-Paket (ZIP, evtl. groß) nie im Speicher

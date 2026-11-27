@@ -76,7 +76,7 @@ Object.assign(window.SL_WT, {
       const o = {keep: true, fix, cap: pv ? 12 : 0, none: "Zu dieser Reise gibt es keine Fotos."}, nb = b.querySelector(".ernew");
       const sb = b.querySelector(".erdsh");
       if (sb) sb.onclick = () => erShareRange(sb, {...fix, name: ((document.querySelector("#rs-kopf h1, #main h1") || {}).textContent || "").trim()}, cfg, all ? (b._erList || []).length : 0);
-      if (nb) nb.onclick = () => erLoad(b, cfg, k.mode === "random" ? o : {...o, mix: true});
+      if (nb) nb.onclick = () => erLoad(b, cfg, k.mode === "random" ? {...o, fresh: true} : {...o, mix: true});
       return erLoad(b, cfg, o).then(() => {
         const n = (b._erList || []).length;
         if (n) slBadge(c, n === 1 ? "1 Foto" : `${n} Fotos`);

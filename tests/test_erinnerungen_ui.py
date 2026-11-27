@@ -555,3 +555,24 @@ def test_english_texts(pw, app):
     assert not re.search(r"\b(Auswahl|Darstellung|Größe|Zufällige|Seitenverhältnis)\b", txt), txt
     _reset(app)
     close(pg)
+
+
+def test_neu_mischen_aendert_reihenfolge_und_zeichnet_neu(pw, app):
+    """3.62.2: „Neu mischen“ (nicht Zufällig) mischt die Reihenfolge sichtbar anders, in Raster und Einzelbild-Show, und zeichnet die Anzeige neu; Zufällig zieht neu."""
+    srcs = "() => [...document.querySelectorAll('#hmemsec .erf img')].map(i => i.getAttribute('src'))"
+    for view, mode in (("grid", "recent"), ("grid", "random")):
+        pg = show(pw, app, {"mode": mode, "n": 6, "view": view, "shuffle": True})
+        ready(pg, 6)
+        cur = pg.evaluate(srcs)
+        for _ in range(3):
+            pg.evaluate("() => { document.querySelector('#hmemsec .erb').firstElementChild._alt = 1; }")
+            pg.click("#hmemsec .ernew")
+            pg.wait_for_function("() => { const c = document.querySelector('#hmemsec .erb').firstElementChild; return !!c && !c._alt; }", timeout=T)
+            ready(pg, None)
+            new = pg.evaluate(srcs)
+            assert new != cur, (mode, cur)
+            if mode == "recent":
+                assert sorted(new) == sorted(cur)
+            cur = new
+        close(pg)
+    put(app)

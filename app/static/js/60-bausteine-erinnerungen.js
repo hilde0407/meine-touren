@@ -121,12 +121,18 @@ async function erShareRange(btn, fix, cfg, nAll) {
   }
   btn.disabled = false;
 }
+const erSame = (a, b) => a.length === b.length && a.every((p, i) => p.id === b[i].id);
+/* mischt so, dass die Reihenfolge sichtbar anders ist (bei 2 Fotos sonst in der Hälfte der Fälle unverändert) */
 const erShuffle = a => {
-  const l = a.slice();
-  for (let i = l.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [l[i], l[j]] = [l[j], l[i]];
+  let l = a;
+  for (let t = 0; t < 5 && erSame(l, a); t++) {
+    l = a.slice();
+    for (let i = l.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [l[i], l[j]] = [l[j], l[i]];
+    }
   }
+  if (erSame(l, a) && a.length > 1) l = a.slice(1).concat(a[0]);
   return l;
 };
 const erCap = p => {
@@ -303,6 +309,7 @@ async function erLoad(sec, cfg, o = {}) {
         list = [];
       }
       if (!Array.isArray(list)) list = [];
+      if (o.fresh && sec._erList && list.length > 1 && erSame(list, sec._erList)) list = erShuffle(list);       // „Neu mischen“ soll nie dasselbe Bild in derselben Reihenfolge zeigen
       if (rnd && list.length && !o.preview) erHold(url, list);
     }
     sec._erList = list;
