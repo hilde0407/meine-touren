@@ -3709,4 +3709,7 @@ Flug vereinfacht || Flight simplified || Vol simplifié || Vuelo simplificado
 Diashow teilen || Share slideshow || Partager le diaporama || Compartir presentación
 Link ohne Konto, 24 Stunden gültig || Link without an account, valid 24 hours || Lien sans compte, valable 24 heures || Enlace sin cuenta, válido 24 horas
 Fotos vom {} bis {} || Photos from {} to {} || Photos du {} au {} || Fotos del {} al {}
+{} Tour || {} tour || {} parcours || {} ruta
+{} Reise || {} trip || {} voyage || {} viaje
+Gesucht wird in Name, Notiz, Sportart, Datum, Monat, Region (Land, Bundesland, Landkreis, Ort), Gebiet (Gebirge, Tal, Insel) und Reisen. || Searched in name, note, sport, date, month, region (country, state, district, place), area (mountains, valley, island) and trips. || Recherche dans le nom, la note, le sport, la date, le mois, la région (pays, État, arrondissement, lieu), la zone (massif, vallée, île) et les voyages. || Se busca en nombre, nota, deporte, fecha, mes, región (país, estado, comarca, lugar), zona (montañas, valle, isla) y viajes.
 `;

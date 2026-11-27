@@ -26,11 +26,30 @@ $("#nav").innerHTML = NAV.map(([k, l]) => `<a href="#/${k}" data-k="${k}">${l}</
 }
 
 /* ---- Suche ---- */
+/* 3.62.1: Reisen der Suche: /api/trips einmal holen und 60 s behalten (die Suche läuft bei jeder Eingabe neu) */
+function sucheReisen() {
+  const c = window._sReisen;
+  if (c && Date.now() - c.t < 60000) return c.p;
+  const p = api("/api/trips").catch(() => []);
+  window._sReisen = {t: Date.now(), p};
+  return p;
+}
+/* Suchtext einer Reise: Name, Land, Jahre, Orte und Gebiete ihrer Touren */
+function reiseHeu(tr) {
+  if (!tr._sh) {
+    const reg = [...new Set((tr.tours || []).map(i => BY[i]).filter(Boolean).map(t => Gebiete.fuerSuche(t)))].join(" ");
+    tr._sh = sforms(`${tr.region} ${tr.country || ""} ${String(tr.start).slice(0, 4)} ${String(tr.end).slice(0, 4)} ${reg}`);
+  }
+  return tr._sh;
+}
+const sucheZaehler = (n, e, m) => `${n} ${n === 1 ? e : m}`;
 VIEWS.search = async (_, q) => {
   const term = (q.get("q") || "").trim(),
-    toks = term.split(/\s+/).filter(Boolean);
+    toks = Gebiete.phrasen(term.split(/\s+/).filter(Boolean)),           // 3.62.1: „La Palma“, „Gran Canaria“ … als ein Suchwort
+    h0 = location.hash;
+  /* 3.62.1: Region = Ort, Bezirk, Bundesland, Land und die Gebiete der Tour (Gebiete.fuerSuche, js/gebiete-daten.js: Inseln, Gebirge, Täler … mit Aliasen) */
   const hay = t =>
-    `${t.name} ${t.note || ""} ${sName(t.sport)} ${fmtDatumKurz(t.date)} ${MONL[t.m - 1]} ${t.y} ${t.g_place || ""} ${t.g_county || ""} ${t.g_state || ""} ${t.g_country || ""} ${(t.tags || "").replace(/\|/g, " ")}`;
+    `${t.name} ${t.note || ""} ${sName(t.sport)} ${fmtDatumKurz(t.date)} ${MONL[t.m - 1]} ${t.y} ${Gebiete.fuerSuche(t)} ${(t.tags || "").replace(/\|/g, " ")}`;
   const a = toks.length
     ? TOURS.filter(t => {
         const h = sforms(hay(t));
@@ -38,12 +57,19 @@ VIEWS.search = async (_, q) => {
       })
     : [];
   if (document.activeElement !== $("#gs") && $("#gs")) $("#gs").value = q.get("q") || "";
+  const km = fmtKm(a.reduce((c, t) => c + t.km, 0), {d: 0}),
+    sub = (nr = 0) => (nr ? `<span>${sucheZaehler(nr, "Reise", "Reisen")}</span>, ` : "") + `<span>${sucheZaehler(a.length, "Tour", "Touren")}</span>, <span>${km}</span>`;
   $("#main").innerHTML =
-    `<div class="sec mt0"><h2>Suche: „${esc(q.get("q") || "")}“</h2><span class="sub">${a.length} Touren, ${nf(
-      a.reduce((c, t) => c + t.km, 0),
-      0
-    )}\u00a0km</span></div>
-   <div class="tl">${a.slice(0, 200).map(tourRow).join("") || `<div class="empty">Keine Treffer. Gesucht wird in Name, Notiz, Sportart, Datum, Monat und Region (Land, Bundesland, Landkreis, Ort).</div>`}</div>`;
+    `<div class="sec mt0"><h2>Suche: „${esc(q.get("q") || "")}“</h2><span class="sub" id="sres">${sub()}</span></div>
+   <div id="sreisen"></div><div id="stouren"><div class="tl">${a.slice(0, 200).map(tourRow).join("") || `<div class="empty">Keine Treffer. Gesucht wird in Name, Notiz, Sportart, Datum, Monat, Region (Land, Bundesland, Landkreis, Ort), Gebiet (Gebirge, Tal, Insel) und Reisen.</div>`}</div></div>`;
+  if (!toks.length) return;
+  const trips = await sucheReisen();
+  if (location.hash !== h0 || !$("#sreisen")) return;               // inzwischen andere Seite oder neue Eingabe
+  const rt = trips.filter(tr => { const h = reiseHeu(tr); return toks.every(k => sin(h, k)); });
+  if (!rt.length) return;
+  $("#sreisen").innerHTML = `<div class="sec"><h2>Reisen</h2></div><div class="otdg">${rt.map(tripKarte).join("")}</div>` + (a.length ? `<div class="sec"><h2>Touren</h2></div>` : "");
+  $("#sres").innerHTML = sub(rt.length);
+  if (!a.length) $("#stouren").innerHTML = "";
 };
 
 /* ---- Ziele (Übersicht) ---- */

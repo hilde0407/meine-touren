@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.62.1](3.62.1.md) – Suche findet Gebiete, Inseln und Landschaften (eingebaute Gebietstabelle, Zuordnung aus den Startkoordinaten, „Südtirol“ nur Provinz Bozen) und durchsucht Reisen; Region der Tour nennt das genaueste Gebiet
 - [3.62.0](3.62.0.md) – Reise-Seite: ein Foto-Baustein „Fotos“ (Alle · Beste · Zufällig · Neueste) statt Abschnitt „Fotos“ und Baustein „Fotos der Reise“; gespeicherte Layouts unverändert
 - [3.61.5](3.61.5.md) – Reise-Fotos nutzen die ganze Breite; Diashow einer Reise (Zeitraum) lässt sich teilen, Knopf „Diashow teilen“ im Baustein „Fotos der Reise“
 - [3.61.4](3.61.4.md) – 3D-Flug flüssiger auf dem Handy: Darstellung Flüssig/Normal/Schön, gedrosselte Linie und Kopfzeile, Fotos als Kartenebene (keine readPixels-Bremse), Kamera als Funktion der Position

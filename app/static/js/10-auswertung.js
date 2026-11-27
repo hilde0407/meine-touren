@@ -312,6 +312,10 @@ async function collView(title, sub, ids, back, opt = {}) {
     }
   };
 }
+/* 3.62.1: Karte einer Reise (Reisen-Seite und Reisen-Abschnitt der Suche): Name, Zeitraum, Touren, Strecke, Aufstieg */
+function tripKarte(x) {
+  return `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(${picSrc({id: x.photo, v: x.photo_v}, 500)})` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${fmtDatumKurz(x.start)}${x.end !== x.start ? " – " + fmtDatumKurz(x.end) : ""}</span><small>${x.tours.length} Touren · ${fmtKm(x.km, {d: 0})} · ${fmtHm(x.up_m)}</small></a>`;
+}
 VIEWS.trips = async () => {
   $("#main").innerHTML =
     `<div class="sec mt0"><h2>Reisen</h2><span class="sub">automatisch erkannt: Touren weit weg von zu Hause an mindestens 4 Tagen</span></div><div id="tr" class="mut">Wird geladen …</div>`;
@@ -320,7 +324,7 @@ VIEWS.trips = async () => {
   $("#tr").className = "";
   $("#tr").innerHTML =
     (tr.length
-      ? `<div class="otdg">${tr.map(x => `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(${picSrc({id: x.photo, v: x.photo_v}, 500)})` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${fmtDatumKurz(x.start)}${x.end !== x.start ? " – " + fmtDatumKurz(x.end) : ""}</span><small>${x.tours.length} Touren · ${fmtKm(x.km, {d: 0})} · ${fmtHm(x.up_m)}</small></a>`).join("")}</div>`
+      ? `<div class="otdg">${tr.map(tripKarte).join("")}</div>`
       : '<p class="mut">Keine Reisen erkannt (es braucht Touren an mindestens 4 Tagen am Stück, über 60 km von deinem üblichen Startort entfernt – Wochenendausflüge zählen nicht). Eigene Alben legst du mit Schlagwörtern an.</p>') +
     `<div id="rnalb"><div class="sec"><h2>Schlagwörter &amp; Alben</h2><span class="sub">in der Tour über „🏷 Schlagwörter & Alben“ vergeben</span></div>` +
     (tg.length

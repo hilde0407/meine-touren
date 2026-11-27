@@ -2,6 +2,12 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.62.1 – Suche findet Gebiete, Inseln, Landschaften und Reisen
+
+- Eingebaute Gebietstabelle (rund 300 Gebiete: Gebirge, Täler, Inseln, Küsten, Landschaften; Grenzen ausdrücklich Näherungen) und Zuordnung je Tour im Browser aus den Startkoordinaten – keine Datenbank-, keine Serveränderung, kein Netz; „Gomera“, „Lungau“, „Zillertal“, „Mafate“, „Sizilien“ … treffen auch Touren, deren Name sie nicht nennt
+- „Südtirol“ findet nur noch die Provinz Bozen (nicht mehr das Trentino); Region der Tour nennt das genaueste Gebiet („Vallehermoso, La Gomera, Kanarische Inseln, Spanien“); über den Touren der Suche erscheint der Abschnitt „Reisen“ mit „n Reisen, m Touren, x km“
+- Prüfbericht `Gebiete.bericht(TOURS)` und `tests/gebiete_pruefen.js` (keine Oberfläche)
+
 ## Version 3.62.0 – Reise-Seite: ein Foto-Baustein „Fotos“
 
 - Der feste Abschnitt „Fotos“ und der Baustein „Fotos der Reise“ sind ein Baustein „Fotos“: Auswahl **Alle** (Vorgabe) · Beste · Zufällig · Neueste, Darstellung Raster/Streifen/Show, „Diashow starten“ und „Diashow teilen“ (Link mit den besten bis zu 300 Fotos, bei „Alle“ ehrlich benannt), mehrfach einfügbar
