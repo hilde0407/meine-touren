@@ -622,6 +622,16 @@ NEG = """
 !rupertiwinkel | Salzburg 47.80,13.04 ; Bad Reichenhall 47.73,12.88 ; Burghausen 48.17,12.83 ; Traunstein 47.87,12.64
 !liechtenstein | Feldkirch 47.24,9.60 ; Buchs 47.17,9.47 ; Sargans 47.05,9.44 ; Bludenz 47.15,9.82
 !tasmanien | Melbourne -37.81,144.96 ; Wilsons Promontory -39.03,146.32
+rheingau | Rüdesheim 49.98,7.93 ; Oestrich-Winkel 50.00,8.00 ; Eltville 50.04,8.12 ; Kiedrich 50.04,8.10 ; Erbach 50.02,8.08 ; Wiesbaden 50.08,8.24 ; Frauenstein 50.07,8.19
+nahetal | Bad Kreuznach 49.85,7.87 ; Feilbingert 49.80,7.80 ; Bad Sobernheim 49.79,7.65
+soonwald | Stromberg 49.94,7.77 ; Wallhausen 49.90,7.72
+hochwald | Losheim am See 49.51,6.75 ; Rissenthal 49.53,6.80 ; Hermeskeil 49.66,6.94
+mullerthal | Echternach 49.81,6.42 ; Berdorf 49.82,6.35 ; Manternach 49.71,6.47
+vogesen | Roppeviller 49.05,7.62
+grossarltal | Großarl 47.2286,13.1684
+!rheingau | Mainz 49.99,8.27 ; Rüdesheim-Bingen Westufer 49.96,7.88 ; Idstein 50.22,8.27 ; Bad Schwalbach 50.14,8.07
+!mullerthal | Luxemburg 49.61,6.13 ; Grevenmacher 49.68,6.44
+!gastein | Großarl 47.2286,13.1684
 """
 
 
