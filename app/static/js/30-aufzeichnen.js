@@ -444,7 +444,7 @@ function recWeather() {
   };
   box.hidden = false;
   box.dataset.l = o.level === "danger" ? "danger" : "warn";
-  const html = `<b>Wetter</b>${ev.map(e => `<div>${esc(txt(e))}</div>`).join("")}`;
+  const html = `<b>Wetter</b>${ev.map(e => `<div data-sym>${esc(txt(e))}</div>`).join("")}`;
   if (box.dataset.h !== html) {                               // nur bei Änderung neu schreiben (sonst liest ein Vorleser alle 2 s dasselbe)
     box.dataset.h = html;
     box.innerHTML = html;
@@ -464,7 +464,7 @@ function recLive(st) {
   if (ri.off) nxt = '<div class="bad fs20 fw700">⚠ Abseits der Route</div>';
   else if (ri.next_m !== undefined) {
     const a = ri.next_angle, ar = Math.abs(a) >= 150 ? "↩" : a > 0 ? "➡" : "⬅";
-    nxt = `<div class="fs34 lh1_1">${ar} <b>${ri.next_m >= 1000 ? fmtKm(ri.next_m / 1000) : Math.max(10, Math.round(ri.next_m / 10) * 10) + " m"}</b></div><div class="mut fs13">Nächste Abbiegung</div>`;
+    nxt = `<div class="fs34 lh1_1" data-sym>${ar} <b>${ri.next_m >= 1000 ? fmtKm(ri.next_m / 1000) : Math.max(10, Math.round(ri.next_m / 10) * 10) + " m"}</b></div><div class="mut fs13">Nächste Abbiegung</div>`;
   } else nxt = '<div class="fs20">Keine Abbiegung mehr</div>';
   let prof = "";
   const pr = recProfile(ri.name);
@@ -545,13 +545,13 @@ function recLiveHtml(A, st) {
     <div class="recrow">${cell("ru", "Aufstieg m")}${cell("ralt", "Höhe m")}${cell("rspd", "Tempo km/h")}</div>
     <div id="rlive" class="reclive" hidden></div>
     <div id="rwx" class="recwx" role="status" hidden></div>
-    ${ri.has ? `<div class="recgi" id="rgi"><span>🧭 ${esc(ri.name)} · ${fmtKm(ri.km)}</span><label class="chk"><input type="checkbox" id="rgon" ${ri.on ? "checked" : ""}> <span>Ansagen</span></label></div>` : ""}
+    ${ri.has ? `<div class="recgi" id="rgi"><span data-sym>🧭 ${esc(ri.name)} · ${fmtKm(ri.km)}</span><label class="chk"><input type="checkbox" id="rgon" ${ri.on ? "checked" : ""}> <span>Ansagen</span></label></div>` : ""}
     <div id="rmap" class="recmap"></div>
     <div class="recdock">
       ${recHas("takePhoto") || recHas("addWaypoint") ? `<div class="recpair">${recHas("takePhoto") ? `<button type="button" class="recb" id="rphoto">${REC_SVG.cam}<span>Foto</span></button>` : ""}${recHas("addWaypoint") ? `<button type="button" class="recb" id="rwpb">${REC_SVG.pin}<span>Wegpunkt</span></button>` : ""}</div>` : ""}
       <div class="recpair">${s === "paused" ? `<button type="button" class="recb big go" id="rres">${REC_SVG.play}<span>Fortsetzen</span></button>` : `<button type="button" class="recb big" id="rpause">${REC_SVG.pause}<span data-notr>${recT("Pausieren")}</span></button>`}<button type="button" class="recb big stop" id="rstop">${REC_SVG.stop}<span>Beenden</span></button></div>
     </div>
-    <p class="recinfo mut"><span id="rwpm">${st.wps ? `📍 ${fmtAnzahl(st.wps, "Wegpunkt", "Wegpunkte")} gesetzt` : ""}</span> <span id="rphinfo"></span></p>
+    <p class="recinfo mut"><span id="rwpm" data-sym>${st.wps ? `📍 ${fmtAnzahl(st.wps, "Wegpunkt", "Wegpunkte")} gesetzt` : ""}</span> <span id="rphinfo"></span></p>
     <details class="recset" id="rmore"${recLs("mt_rec_more") === "1" ? " open" : ""}><summary>Weitere Werte</summary><div class="recrow four">${cell("rdn", "Abstieg m")}${cell("rmax", "Höchster Punkt m")}${cell("ravg", "Ø km/h")}${cell("racc", "GPS ± m")}</div></details></div>`;
 }
 
@@ -563,7 +563,7 @@ function recDoneHtml(A, st) {
     <div class="recrow sum">${cell(`${fmtKm((sum.dist_m || 0) / 1000, {einheit: false})}<small>km</small>`, "Strecke")}${cell(fmtDauerHtml(sum.active_s || 0).replace('<span class="u">', "<small>").replace("</span>", "</small>"), "Dauer")}${cell(`${fmtHm(sum.up_m || 0, {einheit: false})}<small>m</small>`, "Aufstieg")}</div>
     <div class="recf"><label class="reclbl" for="rname">Name der Tour</label><input id="rname" maxlength="120" value="${esc(st.state === "finished" ? st.name || "" : recUp.sent || "")}" placeholder="leer lassen = automatisch" autocomplete="off" enterkeyhint="done"><div id="rnamem" class="mut fs13" role="status"></div></div>
     <div class="recup" id="rup" role="status" aria-live="polite"><span class="rupi" aria-hidden="true"></span><span><b id="rupt"></b><span id="rups"></span></span></div>
-    ${pend ? `<p class="mut fs13" id="rphn">📷 ${fmtAnzahl(pend, "Foto wird", "Fotos werden")} mit hochgeladen.</p>` : ""}
+    ${pend ? `<p class="mut fs13" id="rphn" data-sym>📷 ${fmtAnzahl(pend, "Foto wird", "Fotos werden")} mit hochgeladen.</p>` : ""}
     <div class="recact"><button type="button" class="recb big go" id="rview" hidden>Tour ansehen</button><button type="button" class="recb" id="rretry" hidden>Jetzt erneut versuchen</button>
       <button type="button" class="recb" id="rnew" hidden>Neue Aufzeichnung</button><button type="button" class="recb" id="rlater" hidden>Später senden, neue Aufzeichnung</button><button type="button" class="recb quiet" id="rdrop" hidden>Verwerfen</button></div></div>`;
 }

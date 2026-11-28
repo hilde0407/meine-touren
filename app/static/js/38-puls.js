@@ -134,7 +134,7 @@ VIEWS.pulse = async (_, q) => {
   const r = await api("/api/hr/stats").catch(() => ({tours: []}));
   const rows = r.tours.map(x => ({...x, t: BY[x.id], sec: x.zones.reduce((a, b) => a + b, 0)})).filter(x => x.t && x.sec > 0);
   if (!rows.length) {
-    main.innerHTML = `<h1>Puls</h1><div class="empty"><h2>Noch keine Pulsdaten</h2><p class="mut">Touren mit Herzfrequenz erkennst du am ❤ in der Tourenliste. Der Zepp-Import und FIT-, GPX- oder TCX-Dateien mit Puls bringen die Werte mit.</p></div>`;
+    main.innerHTML = `<h1>Puls</h1><div class="empty"><h2>Noch keine Pulsdaten</h2><p class="mut">Touren mit Herzfrequenz erkennst du am Herzsymbol in der Tourenliste. Der Zepp-Import und FIT-, GPX- oder TCX-Dateien mit Puls bringen die Werte mit.</p></div>`;
     statTabs("pulse");
     return;
   }

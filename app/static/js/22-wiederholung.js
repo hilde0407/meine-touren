@@ -15,7 +15,7 @@ const _tourRowR = tourRow;
 tourRow = t => {
   const h = _tourRowR(t),
     r = REP[t.id];
-  return r ? h.replace(/(<div class="nm">[\s\S]*?)(<\/div>)/, `$1 <span class="rep" title="Diese Strecke bist du ${r.n}-mal gegangen">🔁 ${r.n}×</span>$2`) : h;
+  return r ? h.replace(/(<div class="nm">[\s\S]*?)(<\/div>)/, `$1 <span class="rep" data-sym title="Diese Strecke bist du ${r.n}-mal gegangen">🔁 ${r.n}×</span>$2`) : h;
 };
 const _tourRep = VIEWS.tour;
 VIEWS.tour = async (id, q) => {
@@ -35,7 +35,7 @@ function showRepNote(id) {
     ds = ts => fmtDatumKurz(ts);
   w.insertAdjacentHTML(
     "beforebegin",
-    `<div id="repnote" class="mn4-0-10">🔁 Diese Strecke bist du schon <b>${r.n}-mal</b> gegangen – diese Tour war das <b>${rank}. Mal</b>. <span class="mut">Weitere: ${r.with
+    `<div id="repnote" class="mn4-0-10" data-sym>🔁 Diese Strecke bist du schon <b>${r.n}-mal</b> gegangen – diese Tour war das <b>${rank}. Mal</b>. <span class="mut">Weitere: ${r.with
       .map(x => `<a href="#/tour/${esc(x.id)}">${ds(x.start_ts)}</a>`)
       .join(", ")}</span></div>`
   );

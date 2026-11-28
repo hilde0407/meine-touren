@@ -75,7 +75,7 @@ async function anaRun(id) {
                     : "☀️";
       f.insertAdjacentHTML(
         "afterend",
-        `<div class="wx">${ic} <b>${esc(w.text)}</b> · ${nf(w.tmin, 0)}–${nf(w.tmax, 0)} °C · Niederschlag ${nf(w.precip, 1)} mm · Wind bis ${fmtTempo(w.wind, {d: 0})}${w.snow_depth != null && (w.snow_depth > 0 || w.snow72 > 0 || w.snowfall > 0) ? ` · ❄ Schneehöhe ca. ${nf(w.snow_depth, 0)} cm${w.snow72 > 0 ? `, Neuschnee 3 Tage davor ${nf(w.snow72, 0)} cm` : ""}${w.snowfall > 0 ? `, während der Tour ${nf(w.snowfall, 0)} cm` : ""}` : ""} <span class="mut">(Open-Meteo, grobe Modelldaten)</span></div>`
+        `<div class="wx">${symHtml(ic)} <b>${esc(w.text)}</b> · ${nf(w.tmin, 0)}–${nf(w.tmax, 0)} °C · Niederschlag ${nf(w.precip, 1)} mm · Wind bis ${fmtTempo(w.wind, {d: 0})}${w.snow_depth != null && (w.snow_depth > 0 || w.snow72 > 0 || w.snowfall > 0) ? ` · ${symHtml('❄', 15)} Schneehöhe ca. ${nf(w.snow_depth, 0)} cm${w.snow72 > 0 ? `, Neuschnee 3 Tage davor ${nf(w.snow72, 0)} cm` : ""}${w.snowfall > 0 ? `, während der Tour ${nf(w.snowfall, 0)} cm` : ""}` : ""} <span class="mut">(Open-Meteo, grobe Modelldaten)</span></div>`
       );
     })
     .catch(() => {});

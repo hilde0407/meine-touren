@@ -44,6 +44,6 @@ def test_json_aktuell():
 
 def test_version_3701():
     from app import config
-    assert config.VERSION.startswith("3.71.1 · Meine Touren")
-    assert 'SL_APPV = "3.71.1"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
-    assert 'const V = "mt-v163"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
+    assert config.VERSION.startswith("3.72.0 · Meine Touren")
+    assert 'SL_APPV = "3.72.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v164"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")

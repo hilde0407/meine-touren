@@ -327,9 +327,9 @@ VIEWS.trips = async () => {
     (tr.length
       ? `<div class="otdg">${tr.map(tripKarte).join("")}</div>`
       : '<p class="mut">Noch keine Reisen erkannt. Es braucht Touren an mindestens 4 Tagen am Stück, über 60 km von deinem üblichen Startort entfernt – Wochenendausflüge zählen nicht. Eigene Alben legst du mit Schlagwörtern an.</p>') +
-    `<div id="rnalb"><div class="sec"><h2>Schlagwörter &amp; Alben</h2><span class="sub">in der Tour über „🏷 Schlagwörter & Alben“ vergeben</span></div>` +
+    `<div id="rnalb"><div class="sec"><h2>Schlagwörter &amp; Alben</h2><span class="sub">in der Tour über „Schlagwörter & Alben“ vergeben</span></div>` +
     (tg.length
-      ? `<div class="otdg">${tg.map(x => `<a class="otd" href="#/album/${encodeURIComponent(x.tag)}"${x.photo ? ` style="background-image:linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(${picSrc({id: x.photo, v: x.photo_v}, 500)})"` : ""}><b>🏷 ${esc(x.tag)}</b><small>${fmtAnzahl(x.n, "Tour", "Touren")} · ${fmtKm(x.km, {d: 0})}</small></a>`).join("")}</div>`
+      ? `<div class="otdg">${tg.map(x => `<a class="otd" href="#/album/${encodeURIComponent(x.tag)}"${x.photo ? ` style="background-image:linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(${picSrc({id: x.photo, v: x.photo_v}, 500)})"` : ""}><b data-sym>🏷 ${esc(x.tag)}</b><small>${fmtAnzahl(x.n, "Tour", "Touren")} · ${fmtKm(x.km, {d: 0})}</small></a>`).join("")}</div>`
       : '<p class="mut">Noch keine Schlagwörter vergeben.</p>') + "</div>";
 };
 VIEWS.trip = async id => {

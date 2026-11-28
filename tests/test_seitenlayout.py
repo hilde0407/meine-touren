@@ -100,7 +100,7 @@ def test_viewer_route_pattern_and_photos_recent():
 def test_table_lives_in_the_users_database_and_version():
     from app import config, db
     assert db.one("SELECT name FROM sqlite_master WHERE name='user_layout'")
-    assert config.VERSION.startswith("3.71.1 · Meine Touren")
+    assert config.VERSION.startswith("3.72.0 · Meine Touren")
     root = Path(__file__).resolve().parent.parent
     html = (root / "app" / "static" / "index.html").read_text(encoding="utf-8")
     assert html.index("js/48-tourlayout.js") < html.index("js/49-seitenlayout.js") < html.index("js/50-bausteine.js") < html.index("js/39-sw.js")

@@ -1,6 +1,6 @@
 /* =====================  Ausrüstung: Rad, Schuhe, Ski … mit Kilometerstand und Wechsel-Hinweis  ===================== */
 const GEAR_KINDS = ["Rad", "Schuhe", "Ski", "Schneeschuhe", "Sonstiges"];
-const GEAR_ICON = {Rad: "🚲", Schuhe: "🥾", Ski: "🎿", Schneeschuhe: "❄️", Sonstiges: "🎒"};
+const GEAR_ICON = new Proxy({}, {get: (_, k) => symHtml("gear:" + (typeof k === "string" ? k : "Sonstiges"), 18)});         // 3.72.0: Liniensymbole (Rad, Schuhe, Ski, Schneeschuhe, Sonstiges)
 const gJson = o => ({method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify(o)});
 const gStatus = g =>
   g.status === "over"
@@ -50,7 +50,7 @@ async function gearPanel() {
      list.length
        ? `<div class="rows">${list
            .map(
-             g => `<div class="r gr" data-g="${g.id}" style="${g.until ? "opacity:.6" : ""}"><span>${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)} ${gStatus(g)}<small>${esc(g.kind)}${g.until ? " · seit " + esc(g.until) + " nicht mehr im Gebrauch" : ""}${g.limit_km ? ` · Hinweis ab ${fmtKm(g.limit_km, {d: 0})}` : ""}${g.note ? " · " + esc(g.note) : ""}</small></span><span class="tar"><b>${fmtKm(g.km, {d: 0})}</b><small class="db">${fmtAuf(g.up)} · ${fmtAnzahl(g.n, "Tour", "Touren")}</small></span></div>`
+             g => `<div class="r gr" data-g="${g.id}" style="${g.until ? "opacity:.6" : ""}"><span>${GEAR_ICON[g.kind]} ${esc(g.name)} ${gStatus(g)}<small>${esc(g.kind)}${g.until ? " · seit " + esc(g.until) + " nicht mehr im Gebrauch" : ""}${g.limit_km ? ` · Hinweis ab ${fmtKm(g.limit_km, {d: 0})}` : ""}${g.note ? " · " + esc(g.note) : ""}</small></span><span class="tar"><b>${fmtKm(g.km, {d: 0})}</b><small class="db">${fmtAuf(g.up)} · ${fmtAnzahl(g.n, "Tour", "Touren")}</small></span></div>`
            )
            .join("")}</div>`
        : `<p class="mut">Noch nichts angelegt. Lege zum Beispiel dein Rad oder deine Wanderschuhe an und wähle die Sportart – dann zählt die App die Kilometer automatisch mit.</p>`
@@ -83,10 +83,10 @@ VIEWS.tour = async (...a) => {
       row = $("#gearrow");
     }
     const mine = r.all.filter(g => r.ids.includes(g.id));
-    row.innerHTML = `<span class="mut">Ausrüstung:</span>${mine.length ? mine.map(g => `<span class="chip on">${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)}</span>`).join("") : `<span class="mut">keine</span>`}<button class="btn ghost sm" id="gedit" title="Ausrüstung dieser Tour ändern">✎</button>`;
+    row.innerHTML = `<span class="mut">Ausrüstung:</span>${mine.length ? mine.map(g => `<span class="chip on">${GEAR_ICON[g.kind]} ${esc(g.name)}</span>`).join("") : `<span class="mut">keine</span>`}<button class="btn ghost sm" id="gedit" title="Ausrüstung dieser Tour ändern">✎</button>`;
     $("#gedit").onclick = () => {
       const m = uiModal(`<h2>Ausrüstung dieser Tour</h2><label class="row g8"><input type="checkbox" id="gauto" ${r.auto ? "checked" : ""}> automatisch nach Sportart und Datum</label>
-        <div id="glist" class="m10-0">${r.all.map(g => `<label class="row g8 m4-0"><input type="checkbox" class="cb" value="${g.id}" ${r.ids.includes(g.id) ? "checked" : ""}> ${GEAR_ICON[g.kind] || "🎒"} ${esc(g.name)}</label>`).join("")}</div>
+        <div id="glist" class="m10-0">${r.all.map(g => `<label class="row g8 m4-0"><input type="checkbox" class="cb" value="${g.id}" ${r.ids.includes(g.id) ? "checked" : ""}> ${GEAR_ICON[g.kind]} ${esc(g.name)}</label>`).join("")}</div>
         <div class="uifoot"><button class="btn ghost" id="gno">Abbrechen</button><button class="btn" id="gok">Speichern</button></div>`);
       const sync = () => m.querySelectorAll("#glist input").forEach(i => (i.disabled = $("#gauto").checked));
       $("#gauto").onchange = sync;

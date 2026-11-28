@@ -149,7 +149,8 @@ const SPORT_TABLE = [
 ];
 const SPORT = Object.fromEntries(SPORT_TABLE.map(([k, , n, c, i]) => [k, [n, c, i]]));
 const SPORT_CAT = SPORT_KAT.map(([id, l]) => [id, l, SPORT_TABLE.filter(r => r[1] === id).map(r => r[0])]);
-const sIcon = s => (SPORT[sNorm(s)] || [0, 0, "📍"])[2];
+const sIcon = s => (SPORT[sNorm(s)] || [0, 0, "📍"])[2];                       // das Zeichen der Sportart (Daten; die Oberfläche zeigt sSym)
+const sSym = s => symHtml(SPORT[sNorm(s)] ? "sp:" + sNorm(s) : "sp:other", 18);            // 3.72.0: Liniensymbol der Sportart (40-oberflaeche.js)
 /* 3.59.0 Favoriten-Aktivitäten (Verwaltung → Aktivitäten, GET/PUT /api/aktivitaeten/favoriten, je Benutzer): werden beim Aufnehmen einer Tour zuerst angeboten */
 const FAV_DEF = ["hike", "jogging", "touringbicycle", "skitour", "mtb"];
 let FAV = FAV_DEF.slice();
@@ -321,7 +322,7 @@ function sportWahlHtml(cur, o = {}) {
     extra = (o.extra || []).slice(),
     known = k => favs.includes(k) || extra.some(x => x[0] === k) || SPORT_CAT.some(c => c[2].includes(k));
   if (cur && !known(cur)) extra.push([cur, sName(cur), ""]);                     // z. B. ein Schlüssel von Komoot, den der Katalog nicht kennt: bleibt wählbar
-  const b = (k, l, cls, t) => `<button type="button" class="${cls}" role="radio" aria-checked="${k === cur}" data-sp="${esc(k)}"${t ? ` title="${esc(t)}"` : ""}>${cls === "recspx" ? `<span aria-hidden="true">${sIcon(k)}</span> <span>${esc(l)}</span>` : esc(l)}</button>`,
+  const b = (k, l, cls, t) => `<button type="button" class="${cls}" role="radio" aria-checked="${k === cur}" data-sp="${esc(k)}"${t ? ` title="${esc(t)}"` : ""}>${cls === "recspx" ? `<span aria-hidden="true">${sSym(k)}</span> <span>${esc(l)}</span>` : esc(l)}</button>`,
     inMore = SPORT_CAT.some(([, , ks]) => ks.includes(cur) && !favs.includes(cur));
   return `<div class="spwahl"${o.id ? ` data-for="${o.id}"` : ""}>` +
     `<div class="recsports" role="radiogroup" aria-label="${esc(o.aria || "Sportart")}">${extra.map(([k, l, t]) => b(k, l, "recsp", t)).join("")}${favs.map(k => b(k, lbl(k), "recsp")).join("")}</div>` +

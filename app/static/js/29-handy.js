@@ -37,7 +37,7 @@ VIEWS.admin = async (...a) => {
     standalone = matchMedia("(display-mode: standalone)").matches;
   const html = `<div class="panel" id="handy"><h2>Auf dem Handy</h2>
     <p class="mut">Meine Touren lässt sich wie eine App auf dem Startbildschirm installieren. Danach erscheint sie im <b>Teilen-Menü</b> von Android: GPX-/FIT-Dateien und Fotos aus anderen Apps (Garmin, Komoot, Galerie …) lassen sich direkt an Meine Touren senden.</p>
-    <p>${standalone ? "✓ Läuft gerade als installierte App." : secure ? "✓ Gesicherte Verbindung (HTTPS) – Installation möglich." : '<span class="bad">Diese Adresse ist nicht gesichert (HTTP).</span> Chrome installiert die App dann nur als einfache Verknüpfung, ohne Teilen-Menü und ohne Offline-Funktion.'}</p>
+    <p data-sym>${standalone ? "✓ Läuft gerade als installierte App." : secure ? "✓ Gesicherte Verbindung (HTTPS) – Installation möglich." : '<span class="bad">Diese Adresse ist nicht gesichert (HTTP).</span> Chrome installiert die App dann nur als einfache Verknüpfung, ohne Teilen-Menü und ohne Offline-Funktion.'}</p>
     <div class="row g8"><button class="btn" id="pwainst" style="${_installEv ? "" : "display:none"}">App installieren</button></div>
     ${secure ? "" : `<p class="mut fs13 mt8"><b>So bekommst du HTTPS:</b> am einfachsten mit <b>Tailscale</b> (kostenlos): auf Server und Handy installieren, auf dem Server <code>tailscale serve --bg 80</code> ausführen und die angezeigte Adresse <code>https://…ts.net</code> öffnen. Alternativ ein Reverse-Proxy mit eigener Domain (Caddy, Nginx Proxy Manager). Einzelheiten: README → „Handy und HTTPS“.</p>`}
     <p class="mut fs13 mt8">Ohne Installation: In Chrome ⋮ → „Zum Startbildschirm hinzufügen“.</p></div>`;

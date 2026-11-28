@@ -134,7 +134,7 @@ async function healthBanner() {
       "afterbegin",
       `<div class="warnbar">${_hl.v.map(w => `<div><span aria-hidden="true">⚠</span> <span>${esc(w.text)}</span>${w.action === "backup" ? ` <button class="btn sm" data-act="backup">Jetzt sichern</button>` : ""}</div>`).join("")}${
         u
-          ? `<div>⬆ Neue Version <b>${esc(u.latest)}</b> verfügbar (installiert: ${esc(u.current)}). <a href="#/admin">${u.can_install ? "Jetzt installieren" : "Details"}</a></div>`
+          ? `<div data-sym>⬆ Neue Version <b>${esc(u.latest)}</b> verfügbar (installiert: ${esc(u.current)}). <a href="#/admin">${u.can_install ? "Jetzt installieren" : "Details"}</a></div>`
           : ""
       }${_hl.v.length && !location.hash.startsWith("#/admin") ? '<a href="#/admin">Verwaltung öffnen</a>' : ""}</div>`
     );

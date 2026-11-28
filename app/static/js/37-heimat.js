@@ -13,7 +13,7 @@ VIEWS.admin = async (...a) => {
     <div id="hsr"></div>
     <input type="hidden" data-k="home_name" id="hn" value="${esc(s.home_name || "")}"><input type="hidden" data-k="home_lat" id="hla" value="${esc(s.home_lat || "")}"><input type="hidden" data-k="home_lng" id="hlo" value="${esc(s.home_lng || "")}">
     <div class="field mt14"><label>Maximalpuls (bpm) für die Pulszonen</label><input type="number" min="100" max="230" data-k="hr_max" value="${esc(s.hr_max || "")}" placeholder="leer = 185 bzw. höchster gemessener Wert" class="mw320"></div>
-    <div class="mut fs13" id="hst">${s.home_lat ? `📍 ${esc(s.home_name || "")} (${nf(+s.home_lat, 3)}, ${nf(+s.home_lng, 3)})` : "Noch kein Heimatort eingetragen."}</div></div>`);
+    <div class="mut fs13" id="hst" data-sym>${s.home_lat ? `📍 ${esc(s.home_name || "")} (${nf(+s.home_lat, 3)}, ${nf(+s.home_lng, 3)})` : "Noch kein Heimatort eingetragen."}</div></div>`);
   /* 3.61.0: Auswahl und Entfernen speichern sofort (Leitfaden 2.4: Auswahlen speichern sofort) – kein Umweg über „Einstellungen speichern“ mehr */
   const store = async (name, la, lo, ok) => {
     $("#hn").value = name; $("#hla").value = la; $("#hlo").value = lo; $("#hsq").value = name;
@@ -32,7 +32,7 @@ VIEWS.admin = async (...a) => {
     $("#hsr").innerHTML = '<p class="mut">Suche …</p>';
     try {
       const r = await api("/api/geo/search?q=" + encodeURIComponent(q));
-      $("#hsr").innerHTML = r.length ? r.map((e, i) => `<div><a href="#" class="hsp" data-i="${i}">📍 ${esc(e.name)}</a></div>`).join("") : '<p class="mut">Nichts gefunden.</p>';
+      $("#hsr").innerHTML = r.length ? r.map((e, i) => `<div><a href="#" class="hsp" data-i="${i}" data-sym>📍 ${esc(e.name)}</a></div>`).join("") : '<p class="mut">Nichts gefunden.</p>';
       $("#hsr").querySelectorAll(".hsp").forEach(x => x.onclick = ev => { ev.preventDefault(); const e = r[+x.dataset.i]; pick(e.name.split(",").slice(0, 2).join(",").trim(), e.lat.toFixed(5), e.lng.toFixed(5)); });
     } catch (e) { $("#hsr").innerHTML = `<p class="mut">${esc(e.message || "Fehler")}</p>`; }
   };

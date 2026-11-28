@@ -126,9 +126,9 @@ function showCompare(t) {
       const mx = Math.max(...L.map(x => x.h)),
         rank = [...L].sort((x, y) => x.h - y.h).findIndex(x => x.id === t.id) + 1,
         hm = h => fmtDauer(h * 3600);
-      const cc = tlCard("cmpseg", {sec: "cmp", key: "tl_cmp", icon: "cmp", title: "Vergleich dieser Strecke", def: false, badge: `diese Tour: ${rank}. schnellste von ${L.length}${best.id === t.id ? " 🏆" : ""}`});
+      const cc = tlCard("cmpseg", {sec: "cmp", key: "tl_cmp", icon: "cmp", title: "Vergleich dieser Strecke", def: false, badge: `diese Tour: ${rank}. schnellste von ${L.length}${best.id === t.id ? " " + symHtml("🏆", 15) : ""}`});
       tlBody(cc).innerHTML = L.map(
-        x => `<div class="cmprow ${x.id === t.id ? "me" : ""}"><a href="#/tour/${x.id}">${fmtDatumKurz(x.date)}</a><div class="cmpbar"><i style="width:${(x.h / mx) * 100}%${x.id === best.id ? ";background:#d98a1f" : ""}"></i></div><span>${hm(x.h)} · ${fmtTempo(x.km / x.h)}${x.id === best.id ? " 🏆" : ""}</span></div>`
+        x => `<div class="cmprow ${x.id === t.id ? "me" : ""}"><a href="#/tour/${x.id}">${fmtDatumKurz(x.date)}</a><div class="cmpbar"><i style="width:${(x.h / mx) * 100}%${x.id === best.id ? ";background:#d98a1f" : ""}"></i></div><span>${hm(x.h)} · ${fmtTempo(x.km / x.h)}${x.id === best.id ? " " + symHtml("🏆", 15) : ""}</span></div>`
       ).join("") + `<div class="mut fs13 mt6">Dauer inkl. Pausen. Bestzeit: ${fmtDatumKurz(best.date)} mit ${hm(best.h)}.</div>`;
       anc.after(cc);
     }

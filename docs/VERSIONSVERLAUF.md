@@ -2,6 +2,15 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.72.0 – Einheitliche Liniensymbole, Reiter wischbar, Filter in der Adresse, Gebiete
+
+- **Symbole:** Sportarten, Ausrüstung, Wetter und Zeichen wie ✓ ⚠ ✕ ℹ ❤ erscheinen als Liniensymbole im Stil der App, keine Emoji mehr in der Oberfläche
+- **Verwaltung am Handy:** Reiter wieder seitlich wischbar (Verlauf am Rand), nicht zweizeilig
+- **Tourenliste:** Name, Sortierung und Filter stehen in der Adresse (`#/tours?q=…&so=…&g=…`); Neuladen, Zurück-Taste und Link erhalten sie
+- **Leere Seiten:** Gebiete und Reisen zeigen im Leerzustand nur eine Überschrift
+- **Gebiete:** Großarl im Großarltal; neu Rheingau, Nahetal, Soonwald, Hochwald, Mullerthal
+- Details: [3.72.0](versionen/3.72.0.md)
+
 ## Version 3.71.1 – Fehlerbehebung nach 3.71.0 (volle Testsuite)
 
 - **Behoben:** Das „×“ im Baustein „Ausrüstung“ war unlesbar (rot auf rot); der Leerzustand „Noch keine Touren“ blieb in Englisch, Französisch und Spanisch deutsch

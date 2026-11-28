@@ -1,6 +1,6 @@
 # Meine Touren – Handbuch
 
-**Für Anwenderinnen und Anwender · Stand: Version 3.71.1**
+**Für Anwenderinnen und Anwender · Stand: Version 3.72.0**
 
 Dieses Handbuch erklärt Schritt für Schritt, wie du mit **Meine Touren** arbeitest: Touren holen und importieren, ansehen, auswerten, mit Fotos verbinden, die Seiten nach deinem Geschmack gestalten und Links sicher teilen. Es richtet sich an Menschen, die die App benutzen – nicht an Entwickler.
 
@@ -51,6 +51,7 @@ Dieses Handbuch erklärt Schritt für Schritt, wie du mit **Meine Touren** arbei
 * Statistik, Bestwerte, Pulszonen, Jahresziele, Jahresrückblick.
 * Reisen und Mehrtagestouren werden erkannt und bekommen eine eigene Seite samt Reisebericht.
 * **Alle Seiten sind anpassbar** („Seite anpassen“): Bausteine verschieben, entfernen und wieder hinzufügen, in der Breite ändern; mehrere Ansichten und Vorlagen; eigene Kennzahlen.
+* **Einheitliche Symbole (ab 3.72.0):** Knöpfe, Sportarten, Ausrüstung, Wetter und Hinweise tragen dieselben Liniensymbole in der Schriftfarbe – keine bunten Emoji, die je nach Gerät anders aussehen.
 * Teilen per Link ohne Konto – du bestimmst, was gezeigt wird, und kannst jeden Link widerrufen.
 * Mehrere Benutzer mit getrennten Daten, Oberfläche auf Deutsch, Englisch, Französisch und Spanisch, Hell- und Dunkeldarstellung, Handy-Ansicht, Android-App.
 
@@ -345,6 +346,7 @@ In den Einstellungen eines Bausteins steht unter **Zeitraum der Seite verwenden*
 1. Klicke in der Menüleiste auf **Touren**.
 2. Jede Zeile zeigt Streckenform, Name, Datum, Sportart, Fotos, Bewertung sowie Strecke („km“), Aufstieg („m“) und Dauer („Std.“). Ein Klick öffnet die Tour.
    **Ab 3.52.0** steht vorn ein **Foto der Tour** (Touren ohne Fotos zeigen weiter die Streckenform in der Farbe der Sportart). Gewählt wird ein Foto mit deinen Sternen, sonst eines aus der Mitte der Tour, das nicht als unscharf oder abgelehnt bekannt ist; dieselbe Tour zeigt immer dasselbe Foto, bis sich ihre Fotos ändern. Die Bilder bleiben im Browser: beim nächsten Öffnen der Liste wird nichts nachgeladen. Abschalten lässt sich das je Gerät unter **Konto & Freigaben → Darstellung** oder am Handy unter **Mehr → Darstellung** („Fotos in der Tourenliste“).
+   **Ab 3.72.0 steht dein Filter in der Adresse.** Name, Sortierung und die übrigen Filter erscheinen als Teil der Adresse, zum Beispiel `#/tours?q=Heim&so=km&g=alpen` (Kürzel: `q` Name, `so` Sortierung, `g` Gebiet, `y` Jahr, `s` Sportart, `r` Region, `z` Jahreszeit, `b` Bewertung, `t` Schlagwort; nur abweichende Werte stehen darin). So bleibt der Filter nach dem Neuladen erhalten, die **Zurück-Taste** des Browsers bringt dich nach dem Öffnen einer Tour zur gefilterten Liste, und du kannst die Adresse als Link weitergeben. Beim Tippen legt die App keine neuen Einträge im Verlauf an, ein Druck auf Zurück springt also nicht Buchstabe für Buchstabe zurück. Bisherige Adressen wie `?g=` bleiben gültig. Die Fotos-Seite behält ihre Adressen (`?y=`, `?g=`); Reisen und Gebiete haben kein Textfeld in der Liste.
 3. Oben filterst du:
    * **Name suchen** – Textfeld,
    * **Gesamte Zeit** (oder ein Jahr), **Alle Sportarten** (dann die Statistik-Gruppen und die Sportarten nach Kategorien),
@@ -593,7 +595,7 @@ Auch die Karte ist eine anpassbare Seite (**Seite anpassen**, [Kapitel 13](#k13)
 
 ### 9.2 Die Reisen-Übersicht
 
-Menü **Reisen**. Die Seite besteht aus den Bausteinen **Mehrtagestouren**, **Reisen**, **Schlagwörter & Alben** und (zugeklappt) **Entfernte Reisen**. Jede Reise ist eine Kachel mit Zeitraum, Zahl der Touren, Strecke und Aufstieg.
+Menü **Reisen**. Die Seite besteht aus den Bausteinen **Mehrtagestouren**, **Reisen**, **Schlagwörter & Alben** und (zugeklappt) **Entfernte Reisen**. Gibt es noch keine Reise, steht statt eines zweiten Titels „Reisen“ nur der Hinweis, wie Reisen erkannt werden (ab 3.72.0; ebenso zeigt die leere Gebiete-Seite nur einen Titel). Jede Reise ist eine Kachel mit Zeitraum, Zahl der Touren, Strecke und Aufstieg.
 
 ![Reisen-Übersicht](handbuch/bilder/29-reisen.png)
 
@@ -643,6 +645,8 @@ Reise-Seite und Reisen-Übersicht sind wie alle Seiten anpassbar ([Kapitel 13](#
 **Gebiet in der Regionszeile.** Unter dem Tournamen (Tourseite und Tourblatt) steht in der Regionszeile das genaueste Gebiet („Vallehermoso, **La Gomera**, Kanarische Inseln, Spanien“), im Kopf der Reise-Seite hinter dem Land „Gebiet: **La Gomera**“. Das Gebiet ist ein **Link**: ein Klick öffnet die Tourenliste mit dem Filter **Alle Gebiete** auf genau dieses Gebiet (`#/tours?g=<Kennung>`). Die Karten der Reisen und Touren in Listen bleiben ganz anklickbar und tragen keinen zweiten Link.
 
 **Gebiete (Menüpunkt „Gebiete“, Adresse `#/areas`).** Die Übersicht listet alle Gebiete, in denen du Touren hast, mit **Touren, Tagen, Strecke, Aufstieg** und dem **ersten und letzten Mal**. Oben stehen die Zahl der Gebiete und – wenn du welche angelegt hast – der eigenen. Das Suchfeld findet Namen, Alias und Land (ohne Groß/Klein und Akzente), **Enter** öffnet den ersten Treffer. **Nach Typ** gliedert in Gebirge, Täler, Inseln, Küsten und Landschaften, **Nach Land** nach dem Land, in dem die meisten Touren liegen; sortiert wird nach Name, **Meiste Touren**, **Längste Strecke** oder **Zuletzt besucht**. Gliederung und Sortierung merkt sich der Browser. Die Seite ist wie alle Seiten anpassbar ([Kapitel 13](#k13)): Kopf, Liste und der Baustein **Gebiete-Kennzahlen** (Gebiete, Länder, Touren in Gebieten, Strecke, Touren ohne Gebiet) lassen sich verschieben, entfernen und einklappen; dazu gibt es zwei Vorlagen („Mit Kennzahlen“, „Nur die Liste“).
+
+**Neu in 3.72.0.** **Großarl** liegt im **Großarltal** (nicht mehr im Gasteinertal; Grenze bei etwa 13,15° Ost). Neue Gebiete: **Rheingau** (Weinbaulandschaft zwischen Rüdesheim und Wiesbaden, zusätzlich zu Taunus und Oberem Mittelrheintal), **Nahetal** (Bad Kreuznach, Bad Sobernheim, Idar-Oberstein), **Soonwald** und **Hochwald** (beide Teil des Hunsrücks, der Hochwald mit Losheim am See) und **Mullerthal** (Kleine Luxemburger Schweiz). Die Nordvogesen reichen bis etwa 49,10° Nord. Auch diese Grenzen sind Näherungen.
 
 **Die Seite eines Gebiets (`#/area/<Kennung>`).** Ein Klick auf ein Gebiet öffnet seine Seite: **Kopf** (Name, Typ, Land, übergeordnetes Gebiet, „Alle Touren“), **Kennzahlen** (Touren, aktive Tage, Strecke, Aufstieg, Dauer, erstes und letztes Mal), **Karte** mit allen Strecken der Touren im Gebiet und der gestrichelten Grenze des Gebiets, **Beste Monate** (Säulen je Monat oder Jahr nach Touren, Strecke oder Aufstieg, darunter die stärksten Monate und das stärkste Jahr – nützlich für die Frage, wann man wieder hinfährt), **Fotos** der Touren im Gebiet (Vorschaubilder, Raster, Streifen oder Einzelbild-Show, „Diashow starten“), **Reisen in diesem Gebiet** und die neuesten **Touren**; „Alle Touren in der Liste“ führt zur Tourenliste mit dem Filter. Das Layout gilt für alle Gebiete gleich; drei Vorlagen stehen bereit („Mit Fotos“ für die Erinnerung, „Wann hinfahren“ für die Planung, „Kompakt“). Die Bausteine **Beste Monate** und **Fotos des Gebiets** gibt es auch mehrfach und mit eigenen Einstellungen im Katalog von „Seite anpassen“, aber nur auf dieser Seite.
 
@@ -905,7 +909,7 @@ Mit einer eigenen Kennzahl rechnest du selbst aus, was du wissen willst – ohne
 
 1. **Seite anpassen → Baustein hinzufügen → Eigene Kennzahlen → Erstellen** (Übersicht und Statistik).
 2. Optional: **Mit einer Vorlage starten**, z. B. „Aufstieg je km“, „Touren pro Monat“, „Längste Wanderung“, „Ziel: 1000 km im Jahr“, „Durchschnittstempo“, „Größter Aufstieg“.
-3. **Name und Symbol** vergeben (Emoji, optional).
+3. **Name und Symbol** vergeben (aus einer kleinen Auswahl, optional; die Symbole erscheinen als Liniensymbole).
 4. **Was wird gerechnet?** – **Messgröße** (Anzahl Touren, Strecke, Aufstieg, Abstieg, Dauer, Gehzeit, Durchschnittspuls, Höchstpuls, Geschwindigkeit, Steigung, Aufstieg je Kilometer) und **Rechenart** (Summe, Durchschnitt, Maximum, Minimum, Anzahl, Bestwert mit Tourname, Durchschnitt pro Monat). Optional **Formel: durch eine zweite Kennzahl teilen**, z. B. Aufstieg geteilt durch Strecke.
 5. **Filter:** Sportart, Zeitraum (Laufendes Jahr, Letzte 12 Monate, Letzte 90 Tage, Gesamte Zeit, Bestimmtes Jahr, Eigener Bereich), Schlagwort, Mindeststrecke.
 6. **Anzeige** – vier einklappbare Gruppen:
@@ -1124,7 +1128,7 @@ Damit Empfänger ohne Konto einen Link öffnen können, muss deine Installation 
 
 ## 15. Die Verwaltung
 
-**Zweck:** Einrichtung, Wartung und Sicherung. Öffne sie mit dem **Zahnrad** oben (auf dem Handy: **Mehr → Verwaltung**). Die Verwaltung hat acht Reiter (ab 3.60.0; dazu der Link „Prüfen & Aufräumen“; ab 3.71.0 brechen sie am Handy auf zwei Zeilen um, sodass alle sichtbar sind) und oben die Knöpfe **Freigegebene Links verwalten** und – rechts oben – die Versionsangabe („Version: 3.37.0“).
+**Zweck:** Einrichtung, Wartung und Sicherung. Öffne sie mit dem **Zahnrad** oben (auf dem Handy: **Mehr → Verwaltung**). Die Verwaltung hat acht Reiter (ab 3.60.0; dazu der Link „Prüfen & Aufräumen“; am Handy wischst du die Reiterleiste seitlich; ein Verlauf am rechten Rand zeigt, dass es weitergeht, und der gewählte Reiter ist in Sicht – ab 3.72.0 wieder so, in 3.71.0 gab es kurz zwei Zeilen) und oben die Knöpfe **Freigegebene Links verwalten** und – rechts oben – die Versionsangabe („Version: 3.37.0“).
 
 | Reiter | Inhalt |
 |---|---|
@@ -1153,7 +1157,7 @@ Die Verwaltung wird **Administratoren** angezeigt. Jeder Bereich ist eine gleich
 
 Verwaltung → **Sportarten** (`#/admin?tab=sportarten`; die ältere Adresse `?tab=aktivitaeten` führt ebenfalls dorthin) hat drei Bereiche:
 
-* **Sportarten-Katalog** (nur lesen): die 29 Sportarten nach Kategorien mit Symbol und Kartenfarbe. Den früheren Abschnitt „Frühere Sportarten“ gibt es seit 3.67.0 nicht mehr; der Rückfall unten gilt unverändert.
+* **Sportarten-Katalog** (nur lesen): die 29 Sportarten nach Kategorien mit Liniensymbol (ab 3.72.0 statt Emoji) und Kartenfarbe. Den früheren Abschnitt „Frühere Sportarten“ gibt es seit 3.67.0 nicht mehr; der Rückfall unten gilt unverändert.
 * **Favoriten-Sportarten (für „Tour aufzeichnen“):** Stern ☆/★ wählt bis zu 12 Sportarten, ↑/↓ ordnet sie, **Standard wiederherstellen** (mit Rückfrage, speichert sofort) setzt Wandern, Laufen, Radtour, Skitour, Mountainbike. Beim Aufzeichnen und Planen stehen sie zuerst, alle übrigen unter „Mehr …“; die zuletzt benutzte ist vorgewählt. **Speichern** übernimmt die Auswahl.
 * **Statistik-Gruppen:** welche Sportarten die Statistik gemeinsam zählt; Vorschläge nur per Klick ([Abschnitt 11.6](#k11)).
 

@@ -138,7 +138,7 @@ function kaFrame() {
       w.id = "kap-" + id;
       w.dataset.kp = id;
       ui.insertBefore(w, bx);
-      w.innerHTML = `<button type="button" class="chip kapt" aria-expanded="false" hidden><span>${esc(KA_NAME[id])}</span> ▸</button>`;
+      w.innerHTML = `<button type="button" class="chip kapt" aria-expanded="false" hidden><span>${esc(KA_NAME[id])}</span> ${symSvg("▸", 14, "ic ics")}</button>`;
       w.appendChild(bx);
     });
   if (ui) {                                                                           // 3.43.0 Handy: ein Knopf „Filter & Ebenen“ öffnet das Blatt mit Jahr, Sportarten, Strecken, Heatmap/Fotos und Ausschnitt (am Desktop unsichtbar)

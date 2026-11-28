@@ -531,7 +531,7 @@ async function favAdmin(box) {
   let F = (d.favoriten || FAV_DEF).filter(k => SPORT[k]), msg = "", err = "";
   const draw = (focus = "") => {
     box.innerHTML = `<p class="mut">Für „Tour aufzeichnen“: Diese Sportarten stehen dort zuerst – ebenso beim Planen, bei „Sportart ändern“ und bei Zielen. Alle übrigen Sportarten findest du dort unter „Mehr …“.</p>
-      <ol class="favlist" aria-label="Reihenfolge der Favoriten-Sportarten">${F.map((k, i) => `<li><span aria-hidden="true">${sIcon(k)}</span> <span class="favn">${esc(sName(k))}</span>
+      <ol class="favlist" aria-label="Reihenfolge der Favoriten-Sportarten">${F.map((k, i) => `<li><span aria-hidden="true">${sSym(k)}</span> <span class="favn">${esc(sName(k))}</span>
         <button type="button" class="btn ghost sm favup" data-k="${k}"${i ? "" : " disabled"} aria-label="${esc(`${sName(k)} nach oben`)}">↑</button><button type="button" class="btn ghost sm favdn" data-k="${k}"${i < F.length - 1 ? "" : " disabled"} aria-label="${esc(`${sName(k)} nach unten`)}">↓</button></li>`).join("")}</ol>
       ${SPORT_CAT.map(([id, l, ks]) => `<div class="sgcat"><span class="sgcl" id="favc-${id}">${esc(l)}</span><div class="flchips favchips" role="group" aria-labelledby="favc-${id}">${ks.map(k => `<button type="button" class="flchip favst" data-k="${k}" aria-pressed="${F.includes(k)}"${!F.includes(k) && F.length >= MAX ? " disabled" : ""}><span aria-hidden="true">${F.includes(k) ? "★" : "☆"}</span> <span>${esc(sName(k))}</span></button>`).join("")}</div></div>`).join("")}
       ${F.length >= MAX ? `<p class="mut fs13">${esc(`Höchstens ${MAX} Favoriten-Sportarten.`)}</p>` : ""}
@@ -595,7 +595,7 @@ function katAdmin(box) {
   if (!box) return;
   const T = typeof TOURS !== "undefined" && Array.isArray(TOURS) ? TOURS : [];
   const n = k => T.filter(t => t && (t.sport_alt || t.sport) === k).length;      // loadTours merkt sich den entfernten Schlüssel in sport_alt
-  const item = k => `<li class="katit" data-k="${k}"><span class="katdot" style="background:var(${SPORT[k][1]})" aria-hidden="true"></span><span class="katic" aria-hidden="true">${SPORT[k][2]}</span><span class="katn">${esc(SPORT[k][0])}</span></li>`;
+  const item = k => `<li class="katit" data-k="${k}"><span class="katdot" style="background:var(${SPORT[k][1]})" aria-hidden="true"></span><span class="katic" aria-hidden="true">${sSym(k)}</span><span class="katn">${esc(SPORT[k][0])}</span></li>`;
   box.innerHTML = `<p class="mut">Diese Sportarten bietet Meine Touren überall an – beim Aufzeichnen, Importieren und Planen, in Filtern und in der Statistik. Symbol und Farbe erscheinen in Listen und auf der Karte.</p>
     ${SPORT_CAT.map(([id, l, ks]) => `<div class="sgcat"><span class="sgcl" id="katc-${id}">${esc(l)}</span><ul class="katlist" aria-labelledby="katc-${id}">${ks.map(item).join("")}</ul></div>`).join("")}`;
 }

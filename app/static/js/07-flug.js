@@ -371,7 +371,7 @@ VIEWS.flight = async id => {
     if (SET && p.trans) return `✈ weiter zu <b>${esc(p.name)}</b>`;
     if (SET) return `<b>${esc(p.name)}</b> · ${nf(p.d / 1000, 1)} / ${fmtKm(total / 1000)} · ${fmtHm(p.alt)}`;
     const bpm = flHr && p.t != null ? flHr(p.t) : null;
-    return `<b>${nf(p.d / 1000, 1)}</b> / ${fmtKm(total / 1000)} · <b>${nf(p.alt, 0)}</b> m · ${fmtAuf(p.up)}` + (bpm ? ` · <span style="color:${HR_ZC[hrZone(bpm, flHrMax)]}">❤</span> <b>${bpm}</b>` : "");
+    return `<b>${nf(p.d / 1000, 1)}</b> / ${fmtKm(total / 1000)} · <b>${nf(p.alt, 0)}</b> m · ${fmtAuf(p.up)}` + (bpm ? ` · <span data-sym style="color:${HR_ZC[hrZone(bpm, flHrMax)]}">❤</span> <b>${bpm}</b>` : "");
   };
   let phUntil = 0,
     prevU = 0;

@@ -80,7 +80,7 @@ VIEWS.account = async (...a) => {
      <div class="panel"><h2>Zwei-Faktor-Anmeldung</h2>
       ${
         st.on
-          ? `<p>✅ <b>Eingeschaltet.</b> Bei der Anmeldung wird nach dem Passwort ein Code aus deiner Authenticator-App abgefragt.</p><p class="mut fs14">Noch ${st.recovery_left} Wiederherstellungscode${st.recovery_left === 1 ? "" : "s"} übrig.</p>
+          ? `<p data-sym>✅ <b>Eingeschaltet.</b> Bei der Anmeldung wird nach dem Passwort ein Code aus deiner Authenticator-App abgefragt.</p><p class="mut fs14">Noch ${st.recovery_left} Wiederherstellungscode${st.recovery_left === 1 ? "" : "s"} übrig.</p>
              <div class="field"><label>Dein Passwort</label><input id="tf1" type="password" autocomplete="current-password"></div><div class="field"><label>Aktueller Code (oder Wiederherstellungscode)</label><input id="tf2" inputmode="numeric" autocomplete="one-time-code"></div>
              <div class="row"><button class="btn alt" id="tfoff">Ausschalten</button><button class="btn alt" id="tfrec">Neue Wiederherstellungscodes</button><span id="tfm" class="mut"></span></div>`
           : `<p class="mut">Schützt dein Konto zusätzlich: Nach dem Passwort wird ein 6-stelliger Code aus einer Authenticator-App auf deinem Handy verlangt. Auch wenn jemand dein Passwort kennt, kommt er so nicht hinein.</p>

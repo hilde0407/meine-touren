@@ -294,7 +294,7 @@ VIEWS.recap = async name => {
   sel.forEach(t => { if (t.g_place) { const o = byPlace[t.g_place] || (byPlace[t.g_place] = {n: 0, km: 0, st: t.g_state || t.g_country || ""}); o.n++; o.km += t.km; } });
   const places = Object.entries(byPlace).sort((a, b) => b[1].n - a[1].n || b[1].km - a[1].km),
     states = new Set(sel.map(t => t.g_state).filter(Boolean)).size, lands = new Set(sel.map(t => t.g_country).filter(Boolean)).size;
-  const placePanel = places.length ? `<div class="panel gap"><h2>Orte des Jahres</h2><div class="mut fs14 mb8">${places.length} Startorte${states ? ` · ${states} Bundesländer/Regionen` : ""}${lands ? ` · ${lands} ${lands === 1 ? "Land" : "Länder"}` : ""}</div><div class="rows">${places.slice(0, 8).map(([n, o]) => `<div class="row"><span>📌 ${esc(n)}${o.st ? ` <span class="mut">(${esc(o.st)})</span>` : ""}</span><span class="sp"></span><b>${o.n} ${o.n === 1 ? "Tour" : "Touren"} · ${fmtKm(o.km, {d: 0})}</b></div>`).join("")}</div></div>` : "";
+  const placePanel = places.length ? `<div class="panel gap"><h2>Orte des Jahres</h2><div class="mut fs14 mb8">${places.length} Startorte${states ? ` · ${states} Bundesländer/Regionen` : ""}${lands ? ` · ${lands} ${lands === 1 ? "Land" : "Länder"}` : ""}</div><div class="rows">${places.slice(0, 8).map(([n, o]) => `<div class="row"><span data-sym>📌 ${esc(n)}${o.st ? ` <span class="mut">(${esc(o.st)})</span>` : ""}</span><span class="sp"></span><b>${o.n} ${o.n === 1 ? "Tour" : "Touren"} · ${fmtKm(o.km, {d: 0})}</b></div>`).join("")}</div></div>` : "";
   await pdfPhotoLoad();
   const days = new Set(sel.map(t => t.date.slice(0, 10))).size,
     ph = await api(`/api/photos?year=${Y}&random=true&limit=${Math.max(12, PDFP.n)}`).catch(() => []);
@@ -655,7 +655,7 @@ assignDialog = (sp, done) => {
         sel.dispatchEvent(new Event("input"));
         sel.insertAdjacentHTML(
           "afterend",
-          `<div class="mut fs13 mt4">📍 = das Foto wurde in der Nähe dieser Strecke aufgenommen (GPS)</div>`
+          `<div class="mut fs13 mt4" data-sym>📍 = das Foto wurde in der Nähe dieser Strecke aufgenommen (GPS)</div>`
         );
       }
     });

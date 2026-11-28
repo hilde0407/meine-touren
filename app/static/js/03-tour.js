@@ -247,7 +247,7 @@ function phStrip(ph) {
       part
         .map(
           (p, j) =>
-            `<div class="th"><img loading="lazy" decoding="async" src="${picSrc(p, 500)}" data-i="${shown + j}" alt=""><span class="cap">${fmtDatumKurz(p.taken_ts, {zeit: true})}${p.manual === 1 ? " 📌" : ""}</span></div>`
+            `<div class="th"><img loading="lazy" decoding="async" src="${picSrc(p, 500)}" data-i="${shown + j}" alt=""><span class="cap">${fmtDatumKurz(p.taken_ts, {zeit: true})}${p.manual === 1 ? " " + symHtml("📌", 14) : ""}</span></div>`
         )
         .join("")
     );
