@@ -13,7 +13,7 @@ import urllib.request
 from pathlib import Path
 
 import pytest
-from tests.helpers_ui import quiet  # noqa: E402
+from tests.helpers_ui import glyph_text, quiet  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -168,7 +168,7 @@ def test_plan_check_karte_desktop_hell_dunkel_mobil(pw, app):
             expect(body).to_contain_text(re.compile(r"Deine längste Tour der letzten 12 Monate: 17,0\s+km mit 1\.000\s+m; diese: 19,\d\s+km mit 800\s+m"), timeout=TL)
             expect(body).to_contain_text("Länger als deine längste Tour (+12 %)")
             expect(body).to_contain_text("Reine Gehzeit ohne Pausen")
-            assert "▲" in pg.inner_text("#pcheck")                                                # Symbol zusätzlich zur Farbe
+            assert "▲" in glyph_text(pg, "#pcheck")                                                # Symbol zusätzlich zur Farbe
             # eine Zeitzahl: Kennzahl oben und Karte zeigen dasselbe
             top = pg.evaluate("() => { const l = [...document.querySelectorAll('#pf .fig')].find(f => /Geschätzte Zeit/.test(f.innerText)); return l.querySelector('.v').innerText.replace(/Std\\./, '').trim(); }")
             assert f"Geschätzte Dauer inkl. Pausen: {top} Std. (wie oben)" in pg.inner_text("#pcb")
@@ -198,7 +198,7 @@ def test_plan_check_stufen_zu_wenig_und_englisch(pw, app):
     try:
         _open_plan_page(pg, app, p_gewohnt)
         expect(pg.locator("#pcsum")).to_contain_text("Im gewohnten Rahmen", timeout=TL)
-        assert "✓" in pg.inner_text("#pcsum")
+        assert "✓" in glyph_text(pg, "#pcsum")
         # andere Sportart: zu wenig Touren, keine Scheinzahlen
         _open_plan_page(pg, app, p_rad)
         expect(pg.locator("#pcsum")).to_contain_text("Zu wenig eigene Touren für eine persönliche Einschätzung", timeout=TL)
@@ -335,7 +335,7 @@ def test_verwaltung_defekte_sicherung_und_fehlgeschlagene_sicherung_sichtbar(pw,
         expect(pg.locator("#bkerr")).to_contain_text("Letzte Sicherung fehlgeschlagen: Zu wenig freier Speicher", timeout=TL)
         pg.click("#bkchk")
         expect(pg.locator("#bkbad")).to_contain_text("Fehler", timeout=TL)
-        assert "✗" in pg.inner_text("#bkbad") and pg.locator("#bkok").count() == 0
+        assert "✗" in glyph_text(pg, "#bkbad") and pg.locator("#bkok").count() == 0
         _shot(pg, "verwaltung-sicherung-fehler-d-hell.png")
         assert not pg.errors, pg.errors
     finally:

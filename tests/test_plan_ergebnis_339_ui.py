@@ -7,7 +7,7 @@ import urllib.request
 import pytest
 expect = pytest.importorskip("playwright.sync_api").expect
 
-from tests.helpers_ui import T, quiet, settled, toggle_details  # noqa: E402
+from tests.helpers_ui import T, glyph_text, quiet, settled, toggle_details  # noqa: E402
 from tests.test_seitenlayout_ui import _api, _browser, pw  # noqa: E402,F401
 from tests.test_reise_seiten_ui import app  # noqa: E402,F401
 from tests.test_tourseite_ui import _shot  # noqa: E402
@@ -72,7 +72,7 @@ def test_karte_mit_verknuepfung_zahlen_symbole_linien_und_link(pw, app):
         # 3.55.0: Geplant / Gelaufen als zwei Spalten, je vier Kennzahlen; die Abweichung steht beim gelaufenen Wert
         expect(c.locator(".pe-ist .pek")).to_have_count(4, timeout=T)
         pl = [r.inner_text() for r in c.locator(".pe-plan .pek").all()]
-        txt = [r.inner_text() for r in c.locator(".pe-ist .pek").all()]
+        txt = [glyph_text(r) for r in c.locator(".pe-ist .pek").all()]
         assert "Strecke" in pl[0] and "8,0 km" in pl[0] and "länger" not in pl[0] and "Dauer" in pl[3] and "3:00" in pl[3]
         assert "Strecke" in txt[0] and "9,0 km" in txt[0] and "↑" in txt[0] and "+1,0 km" in txt[0] and "länger als geplant" in txt[0]
         assert "Aufstieg" in txt[1] and "=" in txt[1] and "wie geplant" in txt[1]

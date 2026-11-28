@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 from pathlib import Path
 
 import pytest
-from tests.helpers_ui import quiet, set_lang  # noqa: E402
+from tests.helpers_ui import glyph_text, quiet, set_lang  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -203,7 +203,7 @@ def test_abschnitte_desktop_mobil_hell_dunkel(pw, app):
             expect(w).to_have_count(1)
             assert w.get_attribute("target") == "_blank" and "noopener" in w.get_attribute("rel") and "noreferrer" in w.get_attribute("rel")
             assert "Wanderführer Seite 12" not in body.inner_text()                           # nur Wetter/Lawinenbericht
-            assert "✓" in pg.inner_text("#phsum")                                              # Symbol zusätzlich zur Farbe
+            assert "✓" in glyph_text(pg, "#phsum")                                              # Symbol zusätzlich zur Farbe
             # Notizen & Quellen
             expect(pg.locator("#pnote")).to_have_value("Anfahrt mit dem Zug\nEinkehr unterwegs")
             expect(pg.locator("#pquelle")).to_have_value("outdooractive")
@@ -240,7 +240,7 @@ def test_entscheidungshilfe_datum_start_puffer(pw, app):
         expect(pg.locator("#phsum")).to_contain_text("Tageslicht: nach Sonnenuntergang", timeout=TL)
         expect(pg.locator("#phb")).to_contain_text("Puffer 2:00 Std. (50 %): Rückkehr gegen 02:00 Uhr am Folgetag")
         expect(pg.locator("#phb .pcst")).to_contain_text("nach Sonnenuntergang")
-        assert "⚠" in pg.inner_text("#phb .pcst")
+        assert "⚠" in glyph_text(pg, "#phb .pcst")
         assert _req(app, f"/api/plans/{pid}")["plan_start"] is None                           # Vorschau speichert nichts
         pg.fill("#phd", "2026-06-21")
         expect(pg.locator("#phb")).to_contain_text("Sonnenaufgang 05:", timeout=TL)

@@ -1048,7 +1048,7 @@ def test_story_photo_markers(page, app_url):
     page.route("**/api/photos?tour_id=*", lambda r: r.fulfill(status=200, content_type="application/json", body=_j.dumps(fake)))
     page.goto(base + f"#/story/{t['id']}")
     page.wait_for_selector("#stl .stev", timeout=20000)
-    page.wait_for_function("() => [...document.querySelectorAll('#sm .leaflet-marker-icon')].filter(e => e.textContent.includes('\\u{1F4F7}')).length >= 6", timeout=15000)
+    page.wait_for_function("() => [...document.querySelectorAll('#sm .leaflet-marker-icon')].filter(e => e.querySelector('svg.ic')).length >= 6", timeout=15000)       # 3.72.0: 📷 ist ein Liniensymbol
     page.unroute("**/api/photos?tour_id=*")
 
 

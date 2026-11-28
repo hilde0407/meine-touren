@@ -163,3 +163,11 @@ def wieder_hinzufuegen(pg, sid, timeout=T):
     pg.wait_for_selector(f'.slcard [data-readd="{sid}"]', timeout=timeout)
     pg.locator(f'.slcard [data-readd="{sid}"]').click()
     pg.wait_for_selector(f'.slit[data-sl="{sid}"]', timeout=timeout)
+
+
+def glyph_text(pg_or_loc, selector=None):
+    """3.72.0: Text eines Elements, in dem die Liniensymbole (svg[data-g]) wieder durch ihr Zeichen (✓ ✗ ↑ ↓ …) ersetzt sind – für Tests, die das Zeichen als Bedeutung prüfen."""
+    js = "(e) => { const c = e.cloneNode(true); c.querySelectorAll('svg[data-g]').forEach(v => v.replaceWith(v.dataset.g)); return c.textContent; }"
+    if selector is None:
+        return pg_or_loc.evaluate(js)
+    return pg_or_loc.locator(selector).first.evaluate(js)

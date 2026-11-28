@@ -7,6 +7,7 @@ import pytest
 from tests.test_statistik_ui import _api, _edit, _saved, _shot, _stats, app, clean, pw, T  # noqa: F401
 from tests.test_tourseite_ui import _settled
 from tests.test_eigene_kennzahl_ui import _open_new, _widgets
+from tests.helpers_ui import glyph_text  # noqa: E402
 
 expect = pytest.importorskip("playwright.sync_api").expect
 
@@ -46,7 +47,7 @@ def test_tile_goal_trend_sparkline_accessible(pw, app):
         # Trend: Pfeil plus Text für Vorlesehilfen, neutrale Farbe
         expect(t.locator(".kztr")).to_contain_text("gegenüber dem selben Zeitraum im Vorjahr", timeout=T)
         assert t.locator(".kztr .slsr").inner_text().strip() in ("Zunahme:", "Rückgang:", "Unverändert:")
-        assert t.locator(".kztr .kzd span[aria-hidden]").inner_text().strip() in ("↑", "↓", "→")
+        assert glyph_text(t, ".kztr .kzd span[aria-hidden]").strip() in ("↑", "↓", "→")
         assert pg.evaluate("() => getComputedStyle(document.querySelector('#tlw-k1 .kzd')).color === getComputedStyle(document.querySelector('#tlw-k1 .kzval')).color")
         # Sparkline als Linie (SVG) mit Beschriftung, Säulen nur bei „saeulen“
         sp = t.locator("svg.kzspk")

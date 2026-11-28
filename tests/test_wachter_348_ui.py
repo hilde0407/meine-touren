@@ -15,6 +15,7 @@ import pytest
 from tests.test_bausteine_ui import T, _shot  # noqa: F401
 from tests.test_bausteine_ui import pw  # noqa: F401  (Fixture)
 from tests.test_tourseite_ui import LAUNCH, SEED, _wait
+from tests.helpers_ui import glyph_text  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -138,7 +139,7 @@ def test_missing_backup_and_error_cases_not_dismissable(pw, app):
         _bar(pg)
         assert "Die letzte Sicherung ist fehlgeschlagen." in pg.locator("#wbar").inner_text()
         assert pg.locator("#wbhide").count() == 0 and pg.get_attribute("#wbar", "role") == "alert"
-        assert pg.locator("#wbar .wbi").inner_text() == "✗"                                                         # Text und Symbol, nicht nur Farbe
+        assert glyph_text(pg, "#wbar .wbi") == "✗"                                                         # Text und Symbol, nicht nur Farbe
     finally:
         pg.browser_.close()
     _state(app, tage=0)                                                                                           # frisch, aber nicht lesbar (Prüfung)

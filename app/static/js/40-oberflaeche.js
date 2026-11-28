@@ -231,7 +231,7 @@ const SYM_CHARS = Object.keys(BTN_ICONS).filter(k => !/^(sp|gear):/.test(k));
 const symKey = k => String(k || "").replace(/️/g, "").trim();
 const symSvg = (key, size = 17, cls = "ic") => {
   const p = BTN_ICONS[symKey(key)];
-  return p ? `<svg class="${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>` : "";
+  return p ? `<svg class="${cls}" data-g="${symKey(key)}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>` : "";
 };
 /* Symbol für Vorlagen: symHtml("⚠"), symHtml("sp:hike"), symHtml("gear:Rad"); bei unbekanntem Schlüssel (z. B. eigenes Zeichen eines Nutzers) bleibt das Zeichen */
 const symHtml = (key, size = 18) => symSvg(key, size, "ic ics") || esc(key);

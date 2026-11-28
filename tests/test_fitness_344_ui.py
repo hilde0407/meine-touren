@@ -8,7 +8,7 @@ import urllib.request
 import pytest
 expect = pytest.importorskip("playwright.sync_api").expect
 
-from tests.helpers_ui import quiet, settled, set_lang  # noqa: E402
+from tests.helpers_ui import glyph_text, quiet, settled, set_lang  # noqa: E402
 from tests.test_seitenlayout_ui import T, _api, _browser, _edit, pw  # noqa: E402,F401
 from tests.test_statistik_ui import TL, app  # noqa: E402,F401
 from tests.test_tourseite_ui import CONTRAST, _shot  # noqa: E402
@@ -228,7 +228,7 @@ def test_trend_und_einordnung_in_worten(pw, app, trend, text, pfeil):
     try:
         c = pg.locator(CARD)
         expect(c.locator(".ftrend")).to_contain_text(text, timeout=T)
-        assert pfeil in c.locator(".ftrend").inner_text()
+        assert pfeil in glyph_text(c, ".ftrend")
         assert c.locator(".ftw").inner_text() == "Gut für dein Alter" and c.locator(".ftz").inner_text() == "72"
         t = c.inner_text()
         assert "3:44 Std. pro Woche" in t and "Empfehlung der WHO: 150–300 Min. pro Woche" in t and "11 von 12 Wochen mit Tour" in t, t
