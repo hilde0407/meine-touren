@@ -2,6 +2,11 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.73.0 – Wanderführer als ZIP, Titelbild aus der ZIP
+
+- **Wanderführer:** ZIP-Dateien mit GPX-Dateien lassen sich hochladen; ein Bild darin wird das Titelbild des Buchs (nur wenn es noch keins hat)
+- Details: [3.73.0](versionen/3.73.0.md)
+
 ## Version 3.72.0 – Einheitliche Liniensymbole, Reiter wischbar, Filter in der Adresse, Gebiete
 
 - **Symbole:** Sportarten, Ausrüstung, Wetter und Zeichen wie ✓ ⚠ ✕ ℹ ❤ erscheinen als Liniensymbole im Stil der App, keine Emoji mehr in der Oberfläche

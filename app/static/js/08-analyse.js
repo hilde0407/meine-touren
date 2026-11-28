@@ -292,9 +292,9 @@ VIEWS.admin = async (...a) => {
     `<div class="grid g2 mt40"><div class="panel"><h2>Foto-Eingang</h2>
     <p class="mut">Fotos einfach in den Eingangsordner kopieren (per <code>scp</code>, <code>rsync</code> oder SMB-Freigabe): <code>${esc(st.inbox || "/var/lib/meine-touren/inbox")}</code>. Sie werden automatisch verkleinert, mit Aufnahmezeit übernommen und Touren zugeordnet (Prüfung alle 5 Minuten).</p>
     <p class="mut fs13">Beispiel vom Mac: <code>rsync -av ~/Pictures/Wanderung/ root@SERVER:${esc(st.inbox || "/var/lib/meine-touren/inbox")}/</code></p></div>
-   <div class="panel"><h2>Wanderführer (z. B. Rother)</h2><p class="mut">Lade die GPX-Dateien deiner Wanderführer hoch (bei Rother im Download-Bereich zum Buch). Folgt eine Tour einer dieser Strecken, wird der Tourtitel aus dem Buch beim Umbenennen vorgeschlagen.</p>
+   <div class="panel"><h2>Wanderführer (z. B. Rother)</h2><p class="mut">Lade die GPX-Dateien deiner Wanderführer hoch (bei Rother im Download-Bereich zum Buch); eine ZIP-Datei mit GPX-Dateien geht auch, ein Bild darin wird das Titelbild. Folgt eine Tour einer dieser Strecken, wird der Tourtitel aus dem Buch beim Umbenennen vorgeschlagen.</p>
     <div class="field"><label>Buch (z. B. „Rother Taunus“)</label><input id="gbook"></div>
-    <div class="row"><button class="btn" id="gup">GPX-Dateien auswählen …</button><input type="file" id="gfile" accept=".gpx" multiple hidden><span id="gres" class="mut"></span></div><div id="glist" class="mt10"></div></div>
+    <div class="row"><button class="btn" id="gup">GPX- oder ZIP-Dateien auswählen …</button><input type="file" id="gfile" accept=".gpx,.zip,application/zip" multiple hidden><span id="gres" class="mut"></span></div><div id="glist" class="mt10"></div></div>
    <div class="panel"><h2>Selbsttest</h2><p class="mut">Prüft Komoot-Zugang, Strecken, Zepp-Token, Internet-Dienste (Karten, Wetter, Höhendaten), Speicherplatz und Sicherung.</p>
     <div class="row"><button class="btn alt" id="stest">Selbsttest starten</button></div><div id="stres" class="mt10"></div></div></div>`
   );
@@ -325,14 +325,29 @@ VIEWS.admin = async (...a) => {
     const fs = [...e.target.files];
     if (!fs.length) return;
     $("#gres").textContent = "Lese " + fs.length + " Dateien …";
-    const items = await Promise.all(fs.map(f => f.text().then(gpx => ({name: f.name, gpx}))));
+    const zips = fs.filter(f => /\.zip$/i.test(f.name)), gpxs = fs.filter(f => !/\.zip$/i.test(f.name));
+    let added = 0, failed = [], cover = 0, msg = "";
     try {
-      const r = await api("/api/guides", {
-        method: "POST",
-        headers: {"content-type": "application/json"},
-        body: JSON.stringify({book: $("#gbook").value, items}),
-      });
-      $("#gres").textContent = `${r.added} hinzugefügt${r.failed.length ? ", " + r.failed.length + " fehlgeschlagen: " + r.failed[0] : ""}`;
+      if (gpxs.length) {
+        const items = await Promise.all(gpxs.map(f => f.text().then(gpx => ({name: f.name, gpx}))));
+        const r = await api("/api/guides", {
+          method: "POST",
+          headers: {"content-type": "application/json"},
+          body: JSON.stringify({book: $("#gbook").value, items}),
+        });
+        added += r.added;
+        failed.push(...r.failed);
+      }
+      for (const f of zips) {
+        const fd = new FormData();
+        fd.append("file", f, f.name);
+        const r = await api("/api/guides/zip?book=" + encodeURIComponent($("#gbook").value), {method: "POST", body: fd});
+        added += r.added;
+        failed.push(...r.failed);
+        if (r.cover === true) cover++;
+        else if (r.cover === false) msg += " · Titelbild nicht lesbar";
+      }
+      $("#gres").textContent = `${added} hinzugefügt${cover ? " · Titelbild übernommen" : ""}${msg}${failed.length ? ", " + failed.length + " fehlgeschlagen: " + failed[0] : ""}`;
     } catch (x) {
       $("#gres").textContent = x.message;
     }

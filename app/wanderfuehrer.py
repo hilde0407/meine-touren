@@ -139,6 +139,76 @@ async def api_guides_add(request: Request):
     return {"added": ok, "failed": bad}
 
 
+# ---------- 3.73.0: Wanderführer als ZIP-Datei hochladen (alle GPX darin, ein Bild darin wird das Titelbild) ----------
+ZIP_MAX_BYTES = 60 * 1024 * 1024           # hochgeladene ZIP-Datei
+ZIP_MAX_ENTRIES = 1000                     # Einträge in der ZIP
+ZIP_MAX_GPX = 20 * 1024 * 1024             # entpackte Größe je GPX-Datei
+ZIP_MAX_TOTAL = 400 * 1024 * 1024          # entpackt insgesamt (Schutz vor ZIP-Bomben)
+_BILD_RX = re.compile(r"\.(jpe?g|png|webp)$", re.I)
+
+
+def _zip_skip(name):
+    return any(p.startswith(".") or p == "__MACOSX" for p in name.replace("\\", "/").split("/") if p)
+
+
+def _zip_bild_wahl(namen):
+    """Titelbild unter den Dateinamen einer ZIP: Namen mit titel/cover/bild zuerst, dann am wenigsten tief, dann alphabetisch. None ohne Bild."""
+    l = [n for n in namen if _BILD_RX.search(n) and not _zip_skip(n)]
+    if not l:
+        return None
+    key = lambda n: (0 if re.search(r"(titel|cover|bild)", n.replace("\\", "/").split("/")[-1], re.I) else 1, n.replace("\\", "/").count("/"), n.lower())
+    return sorted(l, key=key)[0]
+
+
+@router.post("/api/guides/zip")
+async def api_guides_zip(book: str = "", file: UploadFile = File(...)):
+    raw = await file.read(ZIP_MAX_BYTES + 1)
+    if len(raw) > ZIP_MAX_BYTES:
+        raise HTTPException(413, f"Die ZIP-Datei ist zu groß (höchstens {ZIP_MAX_BYTES // 1048576} MB)")
+    try:
+        z = zipfile.ZipFile(io.BytesIO(raw))
+    except zipfile.BadZipFile:
+        raise HTTPException(400, "Das ist keine ZIP-Datei, die ich lesen kann")
+    infos = z.infolist()
+    if len(infos) > ZIP_MAX_ENTRIES or sum(i.file_size for i in infos) > ZIP_MAX_TOTAL:
+        raise HTTPException(413, "Die ZIP-Datei ist zu umfangreich")
+    book = (book or "").strip()[:80] or re.sub(r"(?i)\.zip$", "", (file.filename or "").replace("\\", "/").split("/")[-1]).strip()[:80]
+    have = {r["title"] for r in db.query("SELECT title FROM guide_tours WHERE COALESCE(book,'')=?", (book,))}
+    ok, schon, bad = 0, 0, []
+    for i in sorted((i for i in infos if not i.is_dir() and i.filename.lower().endswith(".gpx") and not _zip_skip(i.filename)), key=lambda i: i.filename.lower()):
+        try:
+            if i.file_size > ZIP_MAX_GPX:
+                raise ValueError("Datei zu groß")
+            text = z.read(i).decode("utf-8", "replace")
+            title, pts = _guide_parse(text, i.filename.replace("\\", "/").split("/")[-1])
+            title = title[:200]
+            if title in have:
+                schon += 1
+                continue
+            km, up = guide_stats(text, pts)
+            db.execute("INSERT INTO guide_tours(book,title,pts,km,up) VALUES(?,?,?,?,?)", (book, title, json.dumps([[round(a, 5), round(b, 5)] for a, b in pts]), km, up))
+            have.add(title)
+            ok += 1
+        except Exception as ex:  # noqa
+            bad.append(f"{i.filename}: {ex}")
+    cover = None      # None: kein Bild in der ZIP · True: übernommen · False: Bild nicht lesbar · "vorhanden": das Buch hat schon ein Titelbild
+    bn = _zip_bild_wahl([i.filename for i in infos if not i.is_dir()])
+    if bn and (ok or schon) and db.one("SELECT 1 FROM guide_tours WHERE COALESCE(book,'')=? LIMIT 1", (book,)):
+        if db.one("SELECT 1 FROM guide_cover WHERE book=?", (book,)):
+            cover = "vorhanden"
+        else:
+            try:
+                info = z.getinfo(bn)
+                if info.file_size > COVER_MAX_BYTES * 5:
+                    raise ValueError("Bild zu groß")
+                data = _cover_jpeg(z.read(info))
+                db.execute("INSERT OR REPLACE INTO guide_cover(book, img, v, ts) VALUES(?,?,?,?)", (book, data, hashlib.sha1(data).hexdigest()[:12], int(time.time())))
+                cover = True
+            except Exception:  # noqa
+                cover = False
+    return {"book": book, "added": ok, "existing": schon, "failed": bad, "cover": cover}
+
+
 # ---------- 3.53.0: Titelbild je Buch ----------
 # Der Benutzer wählt das Bild selbst (nie ein Download aus dem Netz). Gespeichert wird ein kleines, vom Server neu kodiertes JPEG
 # in der Datenbank (Tabelle guide_cover): kein Dateipfad, also keine Pfadangriffe; Sicherung, Wiederherstellung und Umzug nehmen es von selbst mit.
