@@ -360,7 +360,7 @@ def test_version_doku_und_uebersetzungen():
     from pathlib import Path
     from app import config
     root = Path(__file__).resolve().parent.parent
-    assert config.VERSION.startswith("3.70.1 · Meine Touren") and komoot.user_agent() == "MeineTouren/3.70.1"
+    assert config.VERSION.startswith("3.71.0 · Meine Touren") and komoot.user_agent() == "MeineTouren/3.71.0"
     notes = (root / "docs" / "versionen" / "3.58.0.md").read_text(encoding="utf-8")
     assert notes.startswith("# 3.58.0") and "Standard-Sichtbarkeit" in notes and "kompy" in notes and "nicht geprüft" in notes
     assert "3.58.0" in (root / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")
@@ -368,7 +368,7 @@ def test_version_doku_und_uebersetzungen():
     hb = (root / "docs" / "HANDBUCH.md").read_text(encoding="utf-8")
     assert "Komoot: immer privat (ab 3.58.0)" in hb and "Komoot-Paket" in hb
     st = root / "app" / "static"
-    assert 'const V = "mt-v161"' in (st / "sw.js").read_text(encoding="utf-8") and "komoot-paket" in (st / "sw.js").read_text(encoding="utf-8")
+    assert 'const V = "mt-v162"' in (st / "sw.js").read_text(encoding="utf-8") and "komoot-paket" in (st / "sw.js").read_text(encoding="utf-8")
     i18n = (st / "js" / "00-i18n-neu.js").read_text(encoding="utf-8")
     for k in ("Bei Komoot: privat bestätigt", "Notiz und Pins mitsenden (Komoot)", "Ort aus den Fotos entfernen", "{} öffentlich, {} privat, {} unbekannt",
               "Sichtbarkeit nicht bestätigt, bitte in Komoot prüfen", "Paket herunterladen"):

@@ -1,6 +1,6 @@
 # Meine Touren – Handbuch
 
-**Für Anwenderinnen und Anwender · Stand: Version 3.63.0**
+**Für Anwenderinnen und Anwender · Stand: Version 3.71.0**
 
 Dieses Handbuch erklärt Schritt für Schritt, wie du mit **Meine Touren** arbeitest: Touren holen und importieren, ansehen, auswerten, mit Fotos verbinden, die Seiten nach deinem Geschmack gestalten und Links sicher teilen. Es richtet sich an Menschen, die die App benutzen – nicht an Entwickler.
 
@@ -115,7 +115,7 @@ Solange noch keine Benutzerverwaltung eingerichtet ist, zeigt das Benutzermenü 
 1. Klicke oben rechts auf **Benutzer**.
 2. Wähle **Benutzer einrichten …**.
 3. Trage Name, E-Mail-Adresse und Passwort ein (mindestens 8 Zeichen, zweimal). Die E-Mail-Adresse dient zum Zurücksetzen des Passworts.
-4. Klicke auf **Einrichten**. Mit **Später** schließt du den Dialog, ohne etwas zu ändern.
+4. Klicke auf **Einrichten**. Mit **Abbrechen** (links) schließt du den Dialog, ohne etwas zu ändern. Ab 3.71.0 steht in allen Dialogen **Abbrechen** links und die Hauptaktion rechts; auf dem Handy bleibt diese Knopfzeile am unteren Rand des Dialogs sichtbar, auch wenn der Inhalt länger ist.
 
 ![Benutzermenü mit „Benutzer einrichten …“](handbuch/bilder/43-benutzermenue.png)
 
@@ -371,6 +371,8 @@ In den Einstellungen eines Bausteins steht unter **Zeitraum der Seite verwenden*
 *Abbildung 12: Die Filter (rot umrandet) – hier ist „Wandern“ gewählt, daher steht oben „24 Touren, 416 km“.*
 
 ### Die Suche
+
+**Ab 3.71.0:** Die Trefferliste zeigt höchstens 200 Touren auf einmal; darunter steht „Mehr anzeigen“ mit dem Stand („200 von 450“). Ein Link auf eine Seite („Tour öffnen“) führt nach der Anmeldung dorthin zurück, nicht auf die Startseite. Ist eine Tour, Reise oder ein Gebiet nicht (mehr) vorhanden, zeigt die App eine Karte „… nicht gefunden“ mit dem Weg zur Liste. Fehler des Servers erscheinen als verständlicher Satz mit **Noch einmal versuchen**, nie als Programmmeldung. Wer die Seite mit der Tastatur bedient, springt mit dem ersten Tabulator-Schritt („Zum Inhalt springen“) direkt zum Inhalt.
 
 Das Suchfeld ganz oben („Suchen … ( / )“) durchsucht Tournamen, Notizen, Sportart, Datum, Monat, Jahr, Orte, Landkreis, Bundesland, Land, **Gebiete** und Schlagwörter; zusätzlich werden die **Reisen** durchsucht. Drücke die Taste **/**, um es sofort anzuspringen.
 
@@ -1122,7 +1124,7 @@ Damit Empfänger ohne Konto einen Link öffnen können, muss deine Installation 
 
 ## 15. Die Verwaltung
 
-**Zweck:** Einrichtung, Wartung und Sicherung. Öffne sie mit dem **Zahnrad** oben (auf dem Handy: **Mehr → Verwaltung**). Die Verwaltung hat acht Reiter (ab 3.60.0; dazu der Link „Prüfen & Aufräumen“) und oben die Knöpfe **Freigegebene Links verwalten** und – rechts oben – die Versionsangabe („Version: 3.37.0“).
+**Zweck:** Einrichtung, Wartung und Sicherung. Öffne sie mit dem **Zahnrad** oben (auf dem Handy: **Mehr → Verwaltung**). Die Verwaltung hat acht Reiter (ab 3.60.0; dazu der Link „Prüfen & Aufräumen“; ab 3.71.0 brechen sie am Handy auf zwei Zeilen um, sodass alle sichtbar sind) und oben die Knöpfe **Freigegebene Links verwalten** und – rechts oben – die Versionsangabe („Version: 3.37.0“).
 
 | Reiter | Inhalt |
 |---|---|

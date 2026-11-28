@@ -2,6 +2,16 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.71.0 – Prüfbericht umgesetzt: Handy-Layout, Wörter, Dialoge, Fehler, Barrierefreiheit
+
+- **Handy-Layout (H-01 bis H-04):** „Jahresrückblick“, die Leistungsdiagramme auf „Orte & Ausrüstung“ und „Alle Seiten auf Werkseinstellung zurücksetzen …“ passen auf 360 bis 430 px; Dialoge haben eine feste Knopfzeile unten
+- **Link nach der Anmeldung (H-05):** Wer einen Link öffnet und sich anmelden muss, landet danach auf dieser Seite
+- **Begriffe (M-01 bis M-05):** „Fotos“ statt „Bilder“, richtige Einzahl („1 Foto“, „1 Tour“), „Neues Schlagwort“, „Abbrechen“ links und Hauptaktion rechts, Löschtexte sagen „gelöscht“ und nennen die Sicherung
+- **Fehler (M-06, M-09, M-13):** Serverfehler als lesbarer Satz mit „Noch einmal versuchen“; Fehlerkarte mit Rückweg für „… nicht gefunden“; keine 401-Fehler im Einzelbenutzer-Betrieb
+- **Bedienbarkeit (M-07, M-08, M-10 bis M-12, N-01 bis N-07):** Touch-Ziele mindestens 44 px, Kontrast WCAG AA, einheitliche Leerzustände, kompaktes Sicherungs-Banner, Alternativtexte, Feldbeschriftungen, Sprunglink, „Ansichten“ öffnet bei einer Ansicht gleich den Dialog, Verwaltungs-Reiter umbrechen am Handy
+- **Optimierung:** Die Suche zeigt höchstens 200 Touren auf einmal („Mehr anzeigen“)
+- Details und Nicht umgesetztes: [3.71.0](versionen/3.71.0.md)
+
 ## Version 3.70.1 – Gebiete korrigiert: Gasteinertal im Pongau, neues Großarltal
 
 - Touren bei Bad Hofgastein liegen im **Pongau** und Gasteinertal, nicht mehr im Pinzgau (Pinzgau-Fläche ohne Gasteinertal, Gasteinertal unter Pongau); Rauris, Kaprun, Zell am See u. a. bleiben Pinzgau
