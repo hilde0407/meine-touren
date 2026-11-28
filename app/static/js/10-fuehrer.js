@@ -1,4 +1,4 @@
-/* =====================  3.73.0 Wanderführer: Ordner, Umbenennen, Verschieben, Übertragen, Tournamen angleichen  =====================
+/* =====================  3.74.0 Wanderführer: Ordner, Umbenennen, Verschieben, Übertragen, Tournamen angleichen  =====================
    Gehört zur Seite „Orte & Ausrüstung“ (gfMount/gfDraw in 10-auswertung.js) und folgt dem Tagebuch (Wanderführer ab 2.4.0, Ordner ab 2.25.0, Datei ab 2.13.0):
    - Ordner enthalten Bücher (anlegen, umbenennen, löschen – nie Bücher; Bücher in Ordner verschieben oder aus dem Ordner entfernen)
    - Buch: umbenennen, GPX-Dateien hinzufügen, löschen; Buchtour: umbenennen, in ein anderes Buch verschieben, löschen
@@ -168,8 +168,8 @@ async function gfBookAdd(b) {
   let name = null,
     files = null;
   const html = `${b ? `<p class="mut" translate="no">${esc(gfBuch(b))}</p>` : `<label class="uiplbl">Name des Buchs<input class="uipin" id="gfbn" maxlength="80" autocomplete="off" placeholder="z. B. Rother Wanderführer Gran Canaria"></label>`}
-    <label class="uiplbl">GPX-Dateien<input class="uipin" id="gfbf" type="file" accept=".gpx,application/gpx+xml,text/xml" multiple></label>
-    <p class="mut fs14">Wähle die GPX-Dateien des Buchs (bei Rother im Download-Bereich zum Buch). Du kannst mehrere auf einmal wählen. Eine Buchtour mit gleichem Titel und gleicher Länge wird nicht doppelt angelegt.</p>`;
+    <label class="uiplbl">GPX- oder ZIP-Dateien<input class="uipin" id="gfbf" type="file" accept=".gpx,.zip,application/gpx+xml,text/xml,application/zip" multiple></label>
+    <p class="mut fs14">Wähle die GPX-Dateien des Buchs (bei Rother im Download-Bereich zum Buch) oder eine ZIP-Datei mit GPX-Dateien; ein Bild in der ZIP wird das Titelbild, wenn das Buch noch keins hat. Du kannst mehrere auf einmal wählen. Eine Buchtour mit gleichem Titel und gleicher Länge wird nicht doppelt angelegt.</p>`;
   const ok = await uiConfirm({
     title: b ? "GPX-Dateien hinzufügen" : "Buch anlegen",
     html,
@@ -177,7 +177,7 @@ async function gfBookAdd(b) {
     onOpen: (box, bOk) => {
       const nn = box.querySelector("#gfbn"),
         ff = box.querySelector("#gfbf"),
-        chk = () => ((name = nn ? nn.value : null), (files = ff.files), (bOk.disabled = !files.length || (nn && !nn.value.trim())));
+        chk = () => ((name = nn ? nn.value : null), (files = ff.files), (bOk.disabled = !files.length || (nn && !nn.value.trim() && ![...files].every(f => /\.zip$/i.test(f.name)))));
       if (nn) nn.oninput = chk;
       ff.onchange = chk;
       chk();
@@ -186,18 +186,33 @@ async function gfBookAdd(b) {
   });
   if (!ok || !files || !files.length) return;
   const fs = [...files],
-    book = b ? b.key : name.trim();
+    book = b ? b.key : name.trim(),
+    zips = fs.filter(f => /\.zip$/i.test(f.name)),
+    gpxs = fs.filter(f => !/\.zip$/i.test(f.name));
   let added = 0,
     schon = 0,
+    cover = 0,
+    covbad = 0,
     bad = [];
   try {
-    for (let i = 0; i < fs.length; i += 25) {
-      gfMsg(`Lese Datei ${Math.min(i + 25, fs.length)} von ${fs.length} …`);
-      const items = await Promise.all(fs.slice(i, i + 25).map(f => f.text().then(gpx => ({name: f.name, gpx}))));
+    for (let i = 0; i < gpxs.length; i += 25) {
+      gfMsg(`Lese Datei ${Math.min(i + 25, gpxs.length)} von ${gpxs.length} …`);
+      const items = await Promise.all(gpxs.slice(i, i + 25).map(f => f.text().then(gpx => ({name: f.name, gpx}))));
       const r = await gfJson("/api/guides", {book, items});
       added += r.added;
       schon += r.schon || 0;
       bad = bad.concat(r.failed || []);
+    }
+    for (const f of zips) {
+      gfMsg(`Lese ${f.name} …`);
+      const fd = new FormData();
+      fd.append("file", f, f.name);
+      const r = await api("/api/guides/zip?book=" + encodeURIComponent(book), {method: "POST", body: fd});
+      added += r.added;
+      schon += r.schon || 0;
+      bad = bad.concat(r.failed || []);
+      if (r.cover === true) cover++;
+      else if (r.cover === false) covbad++;
     }
   } catch (e) {
     gfMsg(`${b ? "GPX-Dateien hinzufügen" : "Buch anlegen"} nicht möglich: ${e.message}`, true);
@@ -205,8 +220,10 @@ async function gfBookAdd(b) {
   }
   const teile = [`${gfBTitel(added)} ${b ? "hinzugefügt" : "angelegt"}`];
   if (schon) teile.push(`${schon} schon vorhanden`);
+  if (cover) teile.push("Titelbild übernommen");
+  if (covbad) teile.push("Titelbild nicht lesbar");
   if (bad.length) teile.push(`${bad.length} nicht lesbar (${bad.slice(0, 2).map(x => x.split(":")[0]).join(", ")}${bad.length > 2 ? " …" : ""})`);
-  await gfReload(added || b ? teile.join(" · ") : `Keine Buchtour gefunden: ${bad.length ? bad[0] : "die Dateien enthalten keine Strecke"}`);
+  await gfReload(added || b || schon ? teile.join(" · ") : `Keine Buchtour gefunden: ${bad.length ? bad[0] : "die Dateien enthalten keine Strecke"}`);
 }
 
 /* ---------- Buchtour ---------- */

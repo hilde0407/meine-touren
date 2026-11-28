@@ -59,7 +59,7 @@ DEFAULTS = {
 SECRET_KEYS = {"zepp_password", "zepp_token", "komoot_password", "strava_client_secret", "strava_tokens", "suunto_client_secret", "suunto_key", "suunto_tokens", "garmin_tokens"}
 ENCRYPTED_KEYS = SECRET_KEYS | {"zepp_key"}     # werden verschlüsselt in der Datenbank abgelegt (app/secret.py)
 
-VERSION = "3.73.0 · Meine Touren (2026-11-28)"
+VERSION = "3.74.0 · Meine Touren (2026-11-28)"
 
 
 SYSTEM_DB = DATA_DIR / "system.sqlite"          # Benutzer, Sitzungen, Freigaben

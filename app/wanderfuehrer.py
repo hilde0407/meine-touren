@@ -118,7 +118,7 @@ def guide_matches(pts):
     return [(b, t) for _, b, t in out[:2]]
 
 
-# ---------- 3.73.0: gemeinsame Helfer (Namen, Ordner) ----------
+# ---------- 3.74.0: gemeinsame Helfer (Namen, Ordner) ----------
 MAX_BOOK, MAX_TITLE, MAX_FOLDER = 80, 200, 60
 OHNE_ORDNER = "Ohne Ordner"
 
@@ -156,7 +156,7 @@ async def api_guides_add(request: Request):
     book = _clean(data.get("book"))[:MAX_BOOK]
     ex_ = _existing_book(book)
     if ex_ is not None:
-        book = ex_                                         # 3.73.0: ein vorhandenes Buch gilt ohne Rücksicht auf Groß-/Kleinschreibung (kein zweites Buch „rother taunus“)
+        book = ex_                                         # 3.74.0: ein vorhandenes Buch gilt ohne Rücksicht auf Groß-/Kleinschreibung (kein zweites Buch „rother taunus“)
     da = [(_key(r["title"]), r["km"]) for r in db.query("SELECT title,km FROM guide_tours WHERE COALESCE(book,'')=?", (book,))]
     ok, schon, bad = 0, 0, []
     for it in data.get("items") or []:
@@ -165,7 +165,7 @@ async def api_guides_add(request: Request):
             km, up = guide_stats(it.get("gpx", ""), pts)
             title = title[:MAX_TITLE]
             if any(k == _key(title) and t is not None and abs(t - km) < 0.05 for k, t in da):
-                schon += 1                                 # 3.73.0: gleicher Titel und gleiche Länge (auf 50 m) zählt nicht doppelt (wie im Tagebuch)
+                schon += 1                                 # 3.74.0: gleicher Titel und gleiche Länge (auf 50 m) zählt nicht doppelt (wie im Tagebuch)
                 continue
             db.execute("INSERT INTO guide_tours(book,title,pts,km,up) VALUES(?,?,?,?,?)", (book, title, json.dumps([[round(a, 5), round(b, 5)] for a, b in pts]), km, up))
             da.append((_key(title), km))
@@ -173,6 +173,79 @@ async def api_guides_add(request: Request):
         except Exception as ex:  # noqa
             bad.append(f"{it.get('name', '?')}: {ex}")
     return {"added": ok, "schon": schon, "failed": bad}
+
+
+# ---------- 3.73.0: Wanderführer als ZIP-Datei hochladen (alle GPX darin, ein Bild darin wird das Titelbild) ----------
+ZIP_MAX_BYTES = 60 * 1024 * 1024           # hochgeladene ZIP-Datei
+ZIP_MAX_ENTRIES = 1000                     # Einträge in der ZIP
+ZIP_MAX_GPX = 20 * 1024 * 1024             # entpackte Größe je GPX-Datei
+ZIP_MAX_TOTAL = 400 * 1024 * 1024          # entpackt insgesamt (Schutz vor ZIP-Bomben)
+_BILD_RX = re.compile(r"\.(jpe?g|png|webp)$", re.I)
+
+
+def _zip_skip(name):
+    return any(p.startswith(".") or p == "__MACOSX" for p in name.replace("\\", "/").split("/") if p)
+
+
+def _zip_bild_wahl(namen):
+    """Titelbild unter den Dateinamen einer ZIP: Namen mit titel/cover/bild zuerst, dann am wenigsten tief, dann alphabetisch. None ohne Bild."""
+    l = [n for n in namen if _BILD_RX.search(n) and not _zip_skip(n)]
+    if not l:
+        return None
+    key = lambda n: (0 if re.search(r"(titel|cover|bild)", n.replace("\\", "/").split("/")[-1], re.I) else 1, n.replace("\\", "/").count("/"), n.lower())
+    return sorted(l, key=key)[0]
+
+
+@router.post("/api/guides/zip")
+async def api_guides_zip(book: str = "", file: UploadFile = File(...)):
+    raw = await file.read(ZIP_MAX_BYTES + 1)
+    if len(raw) > ZIP_MAX_BYTES:
+        raise HTTPException(413, f"Die ZIP-Datei ist zu groß (höchstens {ZIP_MAX_BYTES // 1048576} MB)")
+    try:
+        z = zipfile.ZipFile(io.BytesIO(raw))
+    except zipfile.BadZipFile:
+        raise HTTPException(400, "Das ist keine ZIP-Datei, die ich lesen kann")
+    infos = z.infolist()
+    if len(infos) > ZIP_MAX_ENTRIES or sum(i.file_size for i in infos) > ZIP_MAX_TOTAL:
+        raise HTTPException(413, "Die ZIP-Datei ist zu umfangreich")
+    book = _clean(book)[:MAX_BOOK] or _clean(re.sub(r"(?i)\.zip$", "", (file.filename or "").replace("\\", "/").split("/")[-1]))[:MAX_BOOK]
+    ex_ = _existing_book(book)
+    if ex_ is not None:
+        book = ex_                                         # 3.74.0: wie beim GPX-Upload: vorhandenes Buch ohne Rücksicht auf Groß-/Kleinschreibung
+    have = [(_key(r["title"]), r["km"]) for r in db.query("SELECT title,km FROM guide_tours WHERE COALESCE(book,'')=?", (book,))]
+    ok, schon, bad = 0, 0, []
+    for i in sorted((i for i in infos if not i.is_dir() and i.filename.lower().endswith(".gpx") and not _zip_skip(i.filename)), key=lambda i: i.filename.lower()):
+        try:
+            if i.file_size > ZIP_MAX_GPX:
+                raise ValueError("Datei zu groß")
+            text = z.read(i).decode("utf-8", "replace")
+            title, pts = _guide_parse(text, i.filename.replace("\\", "/").split("/")[-1])
+            title = title[:MAX_TITLE]
+            km, up = guide_stats(text, pts)
+            if any(k == _key(title) and h is not None and abs(h - km) < 0.05 for k, h in have):
+                schon += 1                                 # 3.74.0: gleiche Doppel-Prüfung wie beim GPX-Upload (Titel und Länge auf 50 m)
+                continue
+            db.execute("INSERT INTO guide_tours(book,title,pts,km,up) VALUES(?,?,?,?,?)", (book, title, json.dumps([[round(a, 5), round(b, 5)] for a, b in pts]), km, up))
+            have.append((_key(title), km))
+            ok += 1
+        except Exception as ex:  # noqa
+            bad.append(f"{i.filename}: {ex}")
+    cover = None      # None: kein Bild in der ZIP · True: übernommen · False: Bild nicht lesbar · "vorhanden": das Buch hat schon ein Titelbild
+    bn = _zip_bild_wahl([i.filename for i in infos if not i.is_dir()])
+    if bn and (ok or schon) and db.one("SELECT 1 FROM guide_tours WHERE COALESCE(book,'')=? LIMIT 1", (book,)):
+        if db.one("SELECT 1 FROM guide_cover WHERE book=?", (book,)):
+            cover = "vorhanden"
+        else:
+            try:
+                info = z.getinfo(bn)
+                if info.file_size > COVER_MAX_BYTES * 5:
+                    raise ValueError("Bild zu groß")
+                data = _cover_jpeg(z.read(info))
+                db.execute("INSERT OR REPLACE INTO guide_cover(book, img, v, ts) VALUES(?,?,?,?)", (book, data, hashlib.sha1(data).hexdigest()[:12], int(time.time())))
+                cover = True
+            except Exception:  # noqa
+                cover = False
+    return {"book": book, "added": ok, "existing": schon, "schon": schon, "failed": bad, "cover": cover}
 
 
 # ---------- 3.53.0: Titelbild je Buch ----------
@@ -335,7 +408,7 @@ def api_guides_export(cover: int = 0):
     for key, gs in books.items():
         e = {"id": _book_id(key), "key": key, "name": key or "(ohne Buch)", "cover_v": cv.get(key), "touren": []}
         if ordner.get(key):
-            e["ordner"] = ordner[key]                      # 3.73.0: zusätzliches Feld (das Tagebuch ignoriert unbekannte Felder; ein Import in Meine Touren legt den Ordner für neue Bücher an)
+            e["ordner"] = ordner[key]                      # 3.74.0: zusätzliches Feld (das Tagebuch ignoriert unbekannte Felder; ein Import in Meine Touren legt den Ordner für neue Bücher an)
         for ord_, g in enumerate(gs):
             try:
                 line = [(float(p[0]), float(p[1])) for p in json.loads(g["pts"] or "[]")]
@@ -359,7 +432,7 @@ def api_guides_export(cover: int = 0):
     return out
 
 
-# ---------- 3.73.0: Ordner für Bücher, Umbenennen, Verschieben ----------
+# ---------- 3.74.0: Ordner für Bücher, Umbenennen, Verschieben ----------
 # Wie „Geplante Touren“ im Tagebuch (js/calc-ordner.js, ab 2.25.0): Ordner enthalten Bücher; ein Buch liegt in höchstens einem Ordner (fehlt = „Ohne Ordner“).
 # Namen sind ohne Rücksicht auf Groß-/Kleinschreibung und doppelte Leerzeichen eindeutig. Auch leere Ordner bleiben (Tabelle guide_folders); „Ordner löschen“ löscht nie ein
 # Buch: die Bücher darin kommen zurück nach „Ohne Ordner“. Beides liegt in der Datenbank und damit in jeder Sicherung. Schreiben darf nur der Besitzer (Betrachter: nur GET).
@@ -518,7 +591,7 @@ def api_guide_tour_edit(gid: int, body: dict):
     return {"ok": True, "book": book, "title": title}
 
 
-# ---------- 3.73.0: Wanderführer-Datei importieren (Gegenstück zu GET /api/guides/export und zu „Wanderführer exportieren“ im Tagebuch) ----------
+# ---------- 3.74.0: Wanderführer-Datei importieren (Gegenstück zu GET /api/guides/export und zu „Wanderführer exportieren“ im Tagebuch) ----------
 # Dasselbe Verhalten wie im Tagebuch (js/calc-fuehrer-datei.js): erst eine Vorschau (nichts wird geschrieben), dann „Importieren“. Nichts wird überschrieben:
 # neue Bücher kommen dazu, in vorhandenen Büchern (gleicher Name ohne Rücksicht auf Groß-/Kleinschreibung) nur neue Buchtouren; gleiche Buchtour (gleicher Titel, Länge auf 50 m)
 # zählt als „schon da“; gleicher Titel mit anderer Länge bleibt draußen (Unterschied), ebenso ein zweites Titelbild und ein anderer Ordner. „Gewandert“ rechnet Meine Touren selbst neu.
@@ -687,7 +760,7 @@ async def api_guides_import(request: Request):
     return _plan_antwort(pl, defekt)
 
 
-# ---------- 3.73.0: Tournamen an die Buchtouren angleichen ----------
+# ---------- 3.74.0: Tournamen an die Buchtouren angleichen ----------
 # Vorschlag aus dem „Gewandert“-Abgleich (more.api_guides_progress): Titel der Buchtour -> Name der eigenen Tour. Nichts geschieht ohne Bestätigung der Vorschau; jede Umbenennung
 # steht im Protokoll (guide_rename_log: alter und neuer Name) und lässt sich rückgängig machen. Optional und nur auf ausdrücklichen Wunsch auch bei Komoot (sync.rename_tour,
 # PATCH /v007/tours/<id>): der Client muss die Anzahl der betroffenen Komoot-Touren bestätigen. Ein Komoot-Fehler stoppt die lokale Umbenennung nicht und wird je Tour gemeldet.
@@ -844,5 +917,5 @@ def api_guides_del(gid: str):
         db.execute("DELETE FROM guide_tours WHERE book=?", (gid[5:],))
     else:
         db.execute("DELETE FROM guide_tours WHERE id=?", (int(gid),))
-    _tidy()                    # 3.53.0: Titelbild verschwindet mit dem Buch; 3.73.0: ebenso die Ordnerzuordnung und die Wunschlisten-Einträge gelöschter Buchtouren
+    _tidy()                    # 3.53.0: Titelbild verschwindet mit dem Buch; 3.74.0: ebenso die Ordnerzuordnung und die Wunschlisten-Einträge gelöschter Buchtouren
     return {"ok": True}

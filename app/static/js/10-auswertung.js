@@ -24,7 +24,7 @@ VIEWS.places = async (...a) => {
     <div class="row mt12"><button class="btn alt" id="pkb">Gipfel bestimmen${p.pending_peaks ? ` (${fmtAnzahl(p.pending_peaks, "Tour", "Touren")} offen)` : ""}</button><span id="pkm" class="mut"></span></div></div></div>
    <div class="sec"><h2>Wanderführer</h2>${gp.length ? `<span class="sub">${gfSum(gp)}</span>` : ""}</div>
    <div id="gfx"></div>`;
-  gfMount($("#gfx"), gp, a[1], gfo.folders || []);                 // 3.73.0: immer eingehängt (Knöpfe „Buch anlegen …“, Ordner, Übertragen); ohne Bücher zeigt es den Leerzustand
+  gfMount($("#gfx"), gp, a[1], gfo.folders || []);                 // 3.74.0: immer eingehängt (Knöpfe „Buch anlegen …“, Ordner, Übertragen); ohne Bücher zeigt es den Leerzustand
   $("#pkb").onclick = async e => {
     e.target.disabled = true;
     try {
@@ -712,7 +712,7 @@ function gfDraw() {
     none = `<p class="mut">Kein Buch und keine Buchtour passt zu „${esc(GF.q)}“.</p>`;
   if (!GF.folders.length) box.innerHTML = cards.map(c => c.html).join("") || none;
   else {
-    /* 3.73.0 Ordner wie „Geplante Touren“ im Tagebuch: Ordner alphabetisch (auch leere), danach „Ohne Ordner“; bei Suche oder Filter nur Ordner mit Treffern */
+    /* 3.74.0 Ordner wie „Geplante Touren“ im Tagebuch: Ordner alphabetisch (auch leere), danach „Ohne Ordner“; bei Suche oder Filter nur Ordner mit Treffern */
     const filtered = !!(GF.q || GF.f),
       sec = (name, i) => {
         const mine = cards.filter(c => (c.b.folder || "") === (name || "")),

@@ -97,9 +97,9 @@ def migrate(conn):
     if "up" not in gcols:
         conn.execute("ALTER TABLE guide_tours ADD COLUMN up REAL")
     conn.execute("CREATE TABLE IF NOT EXISTS guide_cover (book TEXT PRIMARY KEY, img BLOB, v TEXT, ts INTEGER)")   # 3.53.0: Titelbild je Wanderführer (kleines JPEG, vom Benutzer gewählt; Teil der Datenbank und damit der Sicherung)
-    conn.execute("CREATE TABLE IF NOT EXISTS guide_folders (k TEXT PRIMARY KEY, name TEXT)")           # 3.73.0: Ordner für Wanderführer-Bücher (k = Name ohne Groß-/Kleinschreibung und doppelte Leerzeichen; auch leere Ordner bleiben)
-    conn.execute("CREATE TABLE IF NOT EXISTS guide_book_folder (book TEXT PRIMARY KEY, fk TEXT)")      # 3.73.0: in welchem Ordner ein Buch liegt (fehlt = „Ohne Ordner“); Teil der Datenbank und damit der Sicherung
-    conn.execute("CREATE TABLE IF NOT EXISTS guide_rename_log (id INTEGER PRIMARY KEY AUTOINCREMENT, batch TEXT, ts INTEGER, tour_id TEXT, old TEXT, new TEXT, komoot INTEGER DEFAULT 0, undone INTEGER DEFAULT 0)")   # 3.73.0: Protokoll der Tournamen, die an die Buchtouren angeglichen wurden (alter und neuer Name; Grundlage für „Rückgängig“)
+    conn.execute("CREATE TABLE IF NOT EXISTS guide_folders (k TEXT PRIMARY KEY, name TEXT)")           # 3.74.0: Ordner für Wanderführer-Bücher (k = Name ohne Groß-/Kleinschreibung und doppelte Leerzeichen; auch leere Ordner bleiben)
+    conn.execute("CREATE TABLE IF NOT EXISTS guide_book_folder (book TEXT PRIMARY KEY, fk TEXT)")      # 3.74.0: in welchem Ordner ein Buch liegt (fehlt = „Ohne Ordner“); Teil der Datenbank und damit der Sicherung
+    conn.execute("CREATE TABLE IF NOT EXISTS guide_rename_log (id INTEGER PRIMARY KEY AUTOINCREMENT, batch TEXT, ts INTEGER, tour_id TEXT, old TEXT, new TEXT, komoot INTEGER DEFAULT 0, undone INTEGER DEFAULT 0)")   # 3.74.0: Protokoll der Tournamen, die an die Buchtouren angeglichen wurden (alter und neuer Name; Grundlage für „Rückgängig“)
     conn.execute("CREATE INDEX IF NOT EXISTS guide_rename_log_b ON guide_rename_log(batch)")
     if "ts" not in {r["name"] for r in conn.execute("PRAGMA table_info(tour_notes)")}:
         conn.execute("ALTER TABLE tour_notes ADD COLUMN ts INTEGER")     # 3.57.0: Notiz geändert am (ms) für den Abgleich mit dem Tagebuch; NULL = früher gespeichert

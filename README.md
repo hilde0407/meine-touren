@@ -9,7 +9,8 @@
 ## Highlights (Stand Version 3.33.0)
 
 * **Seiten selbst gestalten:** Tourseite, Übersicht, Statistik, Reise-Seite und Reisen-Übersicht bestehen aus **Bausteinen** („Seite anpassen“): verschieben, entfernen, einklappen, Breite wählen, Bausteine aus einem Katalog hinzufügen, **Ansichten** und **Vorlagen** (z. B. „Wandern“, „Rad“, „Kompakt“), Export und Import. Ohne Anpassung sieht alles aus wie gewohnt.
-* **Wanderführer (3.73.0): ** Ordner, Bücher und Buchtouren umbenennen/verschieben/löschen, Import und Export im Tagebuch-Format, Tournamen an Buchtouren angleichen (optional auch bei Komoot, nur nach Bestätigung).
+* **Wanderführer (3.74.0): ** Ordner, Bücher und Buchtouren umbenennen/verschieben/löschen, Import und Export im Tagebuch-Format, Tournamen an Buchtouren angleichen (optional auch bei Komoot, nur nach Bestätigung).
+* **Wanderführer als ZIP (3.73.0): ** ZIP-Dateien mit GPX-Dateien lassen sich hochladen; ein Bild darin wird das Titelbild des Buchs.
 * **Symbole, Filter, Gebiete (3.72.0): ** einheitliche Liniensymbole statt Emoji, Verwaltungs-Reiter am Handy wieder wischbar, Filter der Tourenliste in der Adresse (teilbar, Zurück-Taste), eine Überschrift auf leeren Gebiete- und Reisen-Seiten, Großarl im Großarltal sowie neue Gebiete Rheingau, Nahetal, Soonwald, Hochwald und Mullerthal.
 * **Fehlerbehebung (3.71.1): ** lesbares „×“ im Baustein „Ausrüstung“ (Hell und Dunkel) und übersetzter Leerzustand „Noch keine Touren“.
 * **Bedienung (3.71.0, Prüfbericht): ** Dialoge mit „Abbrechen“ links und fester Knopfzeile am Handy, Touch-Ziele ab 44 px, lesbare Serverfehler mit „Noch einmal versuchen“, Fehlerkarte mit Rückweg, Link bleibt nach der Anmeldung erhalten, kontrastreiche Farben in Hell und Dunkel, Beschriftungen für Screenreader, Suche mit „Mehr anzeigen“.

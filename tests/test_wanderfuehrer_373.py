@@ -1,4 +1,4 @@
-"""3.73.0 – Wanderführer: Ordner für Bücher, Buch und Buchtour umbenennen/verschieben, Import der Tagebuch-Datei, Tournamen angleichen (auch bei Komoot, gemockt).
+"""3.74.0 – Wanderführer: Ordner für Bücher, Buch und Buchtour umbenennen/verschieben, Import der Tagebuch-Datei, Tournamen angleichen (auch bei Komoot, gemockt).
 Alles datumsunabhängig (feste Zeitstempel relativ zu „jetzt“ nur für die Reihenfolge), Komoot nie echt: sync._komoot wird ersetzt, Zugangsdaten sind Platzhalter."""
 import base64
 import io
@@ -444,3 +444,22 @@ def test_rechte_liste_buchtour_ordner():
     assert main.VIEWER_GET.match("/api/guides/folders") and main.VIEWER_GET.match("/api/guides/export")
     for u in ("/api/guides/rename-suggestions", "/api/guides/rename-log", "/api/guides/import", "/api/guides/book/rename", "/api/guides/folders/move"):
         assert not main.VIEWER_GET.match(u), u
+
+
+def test_zip_upload_doppel_pruefung_und_buchname_ohne_gross_klein():
+    """3.74.0: der ZIP-Upload (3.73.0) nutzt dieselbe Doppel-Prüfung und denselben Buchnamen-Vergleich wie der GPX-Upload."""
+    import io
+    import zipfile
+    from fastapi.testclient import TestClient
+    from app import main
+    pts = "".join(f'<trkpt lat="{47.5 + j * 0.0005:.5f}" lon="{11.0 + j * 0.0004:.5f}"><ele>{500 + j}</ele></trkpt>' for j in range(30))
+    b = io.BytesIO()
+    with zipfile.ZipFile(b, "w") as z:
+        z.writestr("a.gpx", f'<?xml version="1.0"?><gpx version="1.1"><trk><name>Runde Eins</name><trkseg>{pts}</trkseg></trk></gpx>')
+    c = TestClient(main.app)
+    up = lambda book: c.post("/api/guides/zip", params={"book": book}, files={"file": ("x.zip", b.getvalue(), "application/zip")}).json()
+    r1 = up("Rother Süd")
+    assert r1["added"] == 1 and r1["schon"] == 0
+    r2 = up("rother  süd")
+    assert r2["added"] == 0 and r2["schon"] == 1 and r2["existing"] == 1 and r2["book"] == "Rother Süd"
+    assert db.one("SELECT COUNT(DISTINCT book) n FROM guide_tours")["n"] == 1

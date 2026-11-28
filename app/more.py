@@ -233,7 +233,7 @@ def api_guides_progress_get():
     Startpunkt (für Sortierung und die Karte der offenen Touren). Die Titelbilder kommen außerhalb des Zwischenspeichers dazu (billige Abfrage)."""
     from . import wanderfuehrer
     cv = wanderfuehrer.cover_versions()
-    fo = wanderfuehrer.book_folders()               # 3.73.0: Ordner je Buch (außerhalb des Zwischenspeichers, billige Abfrage)
+    fo = wanderfuehrer.book_folders()               # 3.74.0: Ordner je Buch (außerhalb des Zwischenspeichers, billige Abfrage)
     return [{**b, "cover": cv.get(b["key"]), "folder": fo.get(b["key"])} for b in api_guides_progress()]
 
 

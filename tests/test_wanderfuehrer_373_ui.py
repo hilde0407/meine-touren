@@ -1,4 +1,4 @@
-"""3.73.0 – Wanderführer in der Oberfläche (Browser, Chromium): Ordner anlegen/umbenennen/löschen/Bücher verschieben, Buch und Buchtour umbenennen/verschieben/löschen,
+"""3.74.0 – Wanderführer in der Oberfläche (Browser, Chromium): Ordner anlegen/umbenennen/löschen/Bücher verschieben, Buch und Buchtour umbenennen/verschieben/löschen,
 Export als Datei und Import mit Vorschau, Tournamen angleichen (Vorschau Alt → Neu, nichts vorgewählt, Komoot-Schalter mit Bestätigung, Fehler je Tour, Rückgängig),
 Handy 390 px (Touch-Ziele, kein Seitwärtsscrollen, klebende Fußzeile), Englisch. Komoot wird nie angerufen: die Zugangsdaten sind Platzhalter, der Server-Aufruf wird im Browser abgefangen."""
 import json
@@ -123,7 +123,7 @@ def test_ordner_anlegen_umbenennen_verschieben_loeschen(pw, app):
     _msg(pg, "Ordner „Süddeutschland“ gespeichert")
     expect(pg.locator(".gfsec")).to_have_count(2)                                              # der neue (leere) Ordner und „Ohne Ordner“
     expect(pg.locator('.gfsec[data-fi="0"] .gfleer')).to_contain_text("Leer.")
-    assert pg.locator('.gfsec[data-fi="-1"] details.gfb').count() == 3
+    expect(pg.locator('.gfsec[data-fi="-1"] details.gfb')).to_have_count(3)
     # gleicher Name (andere Schreibweise): Fehlerdialog „<Vorgang> nicht möglich“, nichts ändert sich
     pg.click("#gffold")
     _dlg(pg).locator(".uipin").fill("süddeutschland")
@@ -170,16 +170,17 @@ def test_ordner_anlegen_umbenennen_verschieben_loeschen(pw, app):
     expect(_dlg(pg)).to_contain_text("Das Buch darin bleibt erhalten und kommt zurück nach „Ohne Ordner“.")
     expect(_btn(pg, "Löschen")).to_be_visible()
     _btn(pg, "Abbrechen").click()
-    assert pg.locator("details.gfb").count() == 3
+    expect(pg.locator("details.gfb")).to_have_count(3)
     pg.locator('.gfsec[data-fi="0"] .gfoi[data-a=del]').click()
     _btn(pg, "Löschen").click()
     _msg(pg, "Ordner gelöscht")
-    assert pg.locator("details.gfb").count() == 3                                            # alle drei Bücher noch da
+    expect(pg.locator("details.gfb")).to_have_count(3)                                            # alle drei Bücher noch da
     pg.locator('.gfsec[data-fi="0"] .gfoi[data-a=del]').click()
     _btn(pg, "Löschen").click()
     _msg(pg, "Ordner gelöscht")
     expect(pg.locator(".gfsec")).to_have_count(0)                                              # keine Ordner mehr: flache Liste
-    assert pg.locator("details.gfb").count() == 3 and not pg.errors, pg.errors
+    expect(pg.locator("details.gfb")).to_have_count(3)
+    assert not pg.errors, pg.errors
     pg.b_.close()
 
 
@@ -261,6 +262,38 @@ def test_buch_anlegen_mit_gpx_dateien_und_doppelte_nicht_doppelt(pw, app):
     _btn(pg, "Anlegen").click()
     _msg(pg, "1 Buchtour angelegt · 1 schon vorhanden")
     assert _card(pg, "Rother Neubuch").locator(".gfn").inner_text() == "0 von 1 gewandert"
+    pg.b_.close()
+
+
+def test_buch_anlegen_mit_zip_titelbild_und_doppel_pruefung(pw, app):
+    import io
+    import zipfile
+    from PIL import Image
+    pts = "".join(f'<trkpt lat="{47.3 + j * 0.0005:.5f}" lon="{9.0 + j * 0.0004:.5f}"><ele>{500 + j}</ele></trkpt>' for j in range(60))
+    g = lambda n: f'<?xml version="1.0"?><gpx version="1.1"><trk><name>{n}</name><trkseg>{pts}</trkseg></trk></gpx>'
+    im = io.BytesIO()
+    Image.new("RGB", (400, 300), (30, 90, 140)).save(im, "PNG")
+    zb = io.BytesIO()
+    with zipfile.ZipFile(zb, "w") as z:
+        z.writestr("a.gpx", g("ZIP-Runde"))
+        z.writestr("titel.png", im.getvalue())
+    zdata = zb.getvalue()
+    pg = _page(pw, app)
+    pg.click("#gfadd")
+    # Bei reiner ZIP-Auswahl ist der Buchname frei (Name der Datei)
+    _dlg(pg).locator("#gfbf").set_input_files([{"name": "Zipbuch.zip", "mimeType": "application/zip", "buffer": zdata}])
+    expect(_btn(pg, "Anlegen")).to_be_enabled()
+    _dlg(pg).locator("#gfbn").fill("Zip Buch")
+    _btn(pg, "Anlegen").click()
+    _msg(pg, "1 Buchtour angelegt · Titelbild übernommen")
+    assert _card(pg, "Zip Buch").locator(".gfn").inner_text() == "0 von 1 gewandert"
+    # nochmal (andere Schreibweise des Buchnamens): nichts doppelt, kein zweites Buch
+    pg.click("#gfadd")
+    _dlg(pg).locator("#gfbn").fill("zip buch")
+    _dlg(pg).locator("#gfbf").set_input_files([{"name": "Zipbuch.zip", "mimeType": "application/zip", "buffer": zdata}])
+    _btn(pg, "Anlegen").click()
+    _msg(pg, "0 Buchtouren angelegt · 1 schon vorhanden")
+    assert pg.locator("details.gfb", has=pg.locator(".gfname", has_text="Zip Buch")).count() == 1
     pg.b_.close()
 
 

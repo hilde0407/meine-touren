@@ -2656,7 +2656,7 @@ svg.ic.ics{width:1.1em;height:1.1em;margin-right:0;vertical-align:-.2em}
 .slem svg.ic{width:1.3em;height:1.3em}
 .bad svg.ic,.ok svg.ic,.notice svg.ic,.tcw svg.ic{width:1.1em;height:1.1em;margin-right:5px;vertical-align:-.2em}
 button svg.ic:only-child,.btn svg.ic:only-child{margin-right:0}
-/* =====================  3.73.0 Wanderführer: Ordner, Aktionen, Übertragen, Tournamen angleichen  ===================== */
+/* =====================  3.74.0 Wanderführer: Ordner, Aktionen, Übertragen, Tournamen angleichen  ===================== */
 .gfmsg{margin:0 0 8px;min-height:0;font:500 15px var(--b);color:var(--ink)}.gfmsg:empty{display:none}.gfmsg.bad{font-weight:700}
 .gftool{gap:8px;flex-wrap:wrap;margin:4px 0 12px}
 .gfsec{margin:0 0 14px}
