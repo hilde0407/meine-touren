@@ -82,7 +82,7 @@ def test_leiste_390_kompakt_mit_mehr_menue(pw, app, scheme):
         bar = "#slbar"
         pg.wait_for_function("() => { const b = document.querySelector('#slbar'); return !!b && b.getBoundingClientRect().height > 0; }", timeout=T)
         h = pg.evaluate("() => document.querySelector('#slbar').getBoundingClientRect().height")
-        assert h <= 130, h                                                                        # vorher mehrzeilig (über 190)
+        assert h <= 140, h                                                                        # vorher mehrzeilig (über 190); 3.71.1: 140 statt 130, weil die Knöpfe nun mindestens 44 px hoch sind (M-07)
         for sel in ("[data-a=views]", "[data-a=add]", "[data-a=more]", "[data-a=done]"):
             assert pg.locator(f"{bar} {sel}").is_visible(), sel
         for sel in ("reset", "savenew", "discard"):

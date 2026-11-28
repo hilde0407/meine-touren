@@ -3991,4 +3991,5 @@ Sortierung || Sort order || Tri || Orden
 Zeitraum || Period || Période || Periodo
 Tour zum Vergleich || Tour to compare || Sortie à comparer || Ruta para comparar
 1 Stern || 1 star || 1 étoile || 1 estrella
+Du kannst Zepp-Trainings oder GPX/TCX-Dateien importieren – sie werden lokal gespeichert. Optional: Komoot-Zugangsdaten eintragen und „Komoot aktualisieren“. || You can import Zepp workouts or GPX/TCX files – they are stored locally. Optionally enter your Komoot credentials and choose “Update Komoot”. || Vous pouvez importer des entraînements Zepp ou des fichiers GPX/TCX – ils sont enregistrés localement. En option : saisissez vos identifiants Komoot et choisissez « Mettre à jour Komoot ». || Puedes importar entrenamientos de Zepp o archivos GPX/TCX: se guardan en local. Opcionalmente, introduce tus datos de acceso a Komoot y elige «Actualizar Komoot».
 `;

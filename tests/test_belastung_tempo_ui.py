@@ -162,7 +162,7 @@ def test_stats_sections_content_keyboard_and_fold_state(pw, apps):
         g.focus()
         pg.wait_for_selector("#bltip:not([hidden])", timeout=15000)
         tip = pg.locator("#bltip").inner_text()
-        assert "Belastung" in tip and "Touren mit Uhr-Daten" in tip
+        assert "Belastung" in tip and "1 von 1 Tour mit Uhr-Daten" in tip
         first = pg.evaluate("document.activeElement.dataset.i")
         pg.keyboard.press("ArrowLeft")
         assert pg.evaluate("document.activeElement.dataset.i") != first and pg.evaluate("document.activeElement.getAttribute('tabindex')") == "0"

@@ -1904,7 +1904,8 @@ body.sl-dev-mob #main .slgb{display:flex;flex-direction:column}
 .slwleg{margin-top:10px}
 .slwi{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-right:6px;border-radius:50%;font:700 13px/1 var(--d);vertical-align:-2px;color:var(--card,#fff)}
 .slwi.warn{box-sizing:border-box;border:2px solid var(--sl-c5);color:var(--ink)}
-.slwi.bad{background:var(--sl-c6)}
+.slwi.bad{background:var(--sl-c6);color:#fff}
+@media (prefers-color-scheme:dark){.slwi.bad{color:#0b1617}}
 .slgw.gw-warn .slr2,.slgw.gw-bad .slr2{color:var(--ink);font-weight:600}
 .slbest .slr1 span{font-weight:600}
 .sltmp{margin-top:2px}

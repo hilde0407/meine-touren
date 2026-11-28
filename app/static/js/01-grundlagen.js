@@ -769,7 +769,7 @@ addEventListener("hashchange", route);
    nie nur einen roten Satz. notFound("Tour", "#/tours", "Alle Touren") wirft einen Fehler mit Rückweg; jeder andere Fehler bekommt „Noch einmal versuchen“ und „Zur Übersicht“. */
 const EMPTY_PAGES = ["dash", "tours", "map", "stats", "records", "places"];
 const emptyTours = () =>
-  `<div class="empty"><h2>Noch keine Touren</h2><p>Unter <a href="#/admin"><b>Verwaltung</b></a> kannst du Zepp-Trainings oder GPX/TCX-Dateien importieren – sie werden lokal gespeichert. Optional: Komoot-Zugangsdaten eintragen und „Komoot aktualisieren“.</p></div>`;
+  `<div class="empty"><h2>Noch keine Touren</h2><p>Du kannst Zepp-Trainings oder GPX/TCX-Dateien importieren – sie werden lokal gespeichert. Optional: Komoot-Zugangsdaten eintragen und „Komoot aktualisieren“.</p><p><a class="btn" href="#/admin">Zur Verwaltung</a></p></div>`;
 const notFound = (was, back, label, text) => {
   const e = new Error(`${was} nicht gefunden`);
   e.nf = {title: e.message, back, label, text: text || "Die Adresse passt zu nichts (mehr): Vielleicht wurde der Eintrag gelöscht oder der Link ist nicht vollständig."};

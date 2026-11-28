@@ -94,15 +94,18 @@ def test_old_backup_text_buttons_dismiss_and_expiry(pw, app):
     try:
         _bar(pg)
         txt = pg.locator("#wbar").inner_text()
-        assert "Sicherung" in txt and "Letzte Sicherung vor 9 Tagen." in txt and "Zur Sicherung" in txt and "Morgen erinnern" in txt
+        assert "Sicherung" in txt and "Letzte Sicherung vor 9 Tagen." in txt and "Jetzt sichern" in txt and "Später" in txt                # 3.71.1: „Später“ und „Jetzt sichern“ (M-11, vorher „Morgen erinnern“ und „Zur Sicherung“)
+        assert pg.get_attribute("#wbhide", "title") == "Morgen wieder erinnern"                                    # die Dauer der Zurückstellung steht weiter im Hinweistext
         assert pg.evaluate("() => document.querySelector('header.top').nextElementSibling.id") == "wbar"          # direkt unter der Kopfzeile
         order = pg.evaluate("() => [...document.querySelectorAll('#wbar .wba > *')].map(e => e.textContent.trim())")
-        assert order == ["Morgen erinnern", "Zur Sicherung"]                                                     # sekundär links, Hauptknopf rechts
+        assert order == ["Später", "Jetzt sichern"]                                                     # sekundär links, Hauptknopf rechts
         assert pg.evaluate("() => document.getElementById('wbar').getBoundingClientRect().height") < 60            # schmal
         pg.locator("#wbgo").click()
         pg.wait_for_function("() => location.hash === '#/admin?tab=sicher'", timeout=T)
         pg.wait_for_selector("#bkst", timeout=T)
-        pg.wait_for_selector("#wbar", timeout=T)                                                                   # auf allen Seiten, auch in der Verwaltung
+        pg.wait_for_function("() => !document.getElementById('wbar')", timeout=T)                                  # 3.71.1: in der Verwaltung ausgeblendet (dieselbe Meldung steht dort im Reiter), M-11
+        pg.evaluate("() => { location.hash = '#/stats'; }")
+        pg.wait_for_selector("#wbar", timeout=T)                                                                   # auf den anderen Seiten wieder da
         pg.locator("#wbhide").click()
         pg.wait_for_function("() => !document.getElementById('wbar')", timeout=T)
         pg.evaluate("() => { location.hash = '#/stats'; }")                                                       # Seitenwechsel: bleibt weg
@@ -201,12 +204,14 @@ def test_english_and_french(pw, app):
         pg.reload()
         _bar(pg)
         txt = pg.locator("#wbar").inner_text()
-        assert "Last backup 9 days ago." in txt and "Remind me tomorrow" in txt and "Go to backup" in txt, txt
+        assert "Last backup 9 days ago." in txt and "Later" in txt and "Back up now" in txt, txt
+        assert pg.get_attribute("#wbhide", "title") == "Remind me again tomorrow"
         pg.evaluate("() => localStorage.setItem('lang', 'fr')")
         pg.reload()
         _bar(pg)
         txt = pg.locator("#wbar").inner_text()
-        assert "il y a 9 jours" in txt and "Me le rappeler demain" in txt, txt
+        assert "il y a 9 jours" in txt and "Plus tard" in txt and "Sauvegarder maintenant" in txt, txt
+        assert pg.get_attribute("#wbhide", "title") == "Me le rappeler demain"
         pg.evaluate("() => localStorage.setItem('lang', 'de')")
     finally:
         pg.browser_.close()

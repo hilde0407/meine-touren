@@ -896,7 +896,7 @@ def test_viewer_ui(page):
     page.goto(base + "#/admin"); page.wait_for_timeout(500)
     assert page.evaluate("location.hash") == "#/dash"
     page.goto(base + "#/map"); quiet(page, 1200)
-    assert page.query_selector("#mloc")
+    page.wait_for_selector("#mloc", state="attached", timeout=8000)          # 3.71.1: warten statt nur 1,2 s ruhen (gelegentlich zu knapp)
 
 
 def test_viewer_tour_page_readonly(page):
@@ -1181,6 +1181,7 @@ def test_messwerte_and_meine_geraete(page):
     page.locator("#devsec .dvcard").first.click(); page.wait_for_selector("#dvn")                 # Karte öffnet den Dialog
     page.fill("#dvn", "Test-Uhr neu"); page.click("#dvsave")
     page.wait_for_function("() => /Test-Uhr neu/.test(document.querySelector('#devsec').textContent)", timeout=6000)
+    page.locator("#devsec .dvmore").first.scroll_into_view_if_needed(); page.wait_for_timeout(200)    # 3.71.1: erst in den Blick, dann klicken – das Menü schließt beim Scrollen (ein spätes Scroll-Ereignis nach dem Klick schloss es sofort)
     page.locator("#devsec .dvmore").first.click(); page.wait_for_selector(".dvmenu")
     assert {"Bearbeiten", "Touren zuordnen …", "Deaktivieren", "Löschen …"} <= set(page.locator(".dvmenu button").all_inner_texts()) | {"Löschen …"}
     page.locator(".dvmenu button", has_text="Löschen").click()

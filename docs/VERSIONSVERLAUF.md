@@ -2,6 +2,12 @@
 
 Alle Versionen von **neu nach alt**, nach Versionsnummer sortiert (nicht alphabetisch). Ausführliche Beschreibungen der Versionen ab 3.7.2 stehen in [docs/versionen/](versionen/README.md); die Einträge hier fassen kurz zusammen. Ältere Versionen sind hier ausführlicher beschrieben. Aktuelle Übersicht in der [README](../README.md).
 
+## Version 3.71.1 – Fehlerbehebung nach 3.71.0 (volle Testsuite)
+
+- **Behoben:** Das „×“ im Baustein „Ausrüstung“ war unlesbar (rot auf rot); der Leerzustand „Noch keine Touren“ blieb in Englisch, Französisch und Spanisch deutsch
+- Tests an die Änderungen von 3.71.0 angepasst (Einzahl, Sicherungs-Banner, „Ansichten“, 44-px-Ziele); ein datumsabhängiger Test rechnet nun mit „heute“
+- Details: [3.71.1](versionen/3.71.1.md)
+
 ## Version 3.71.0 – Prüfbericht umgesetzt: Handy-Layout, Wörter, Dialoge, Fehler, Barrierefreiheit
 
 - **Handy-Layout (H-01 bis H-04):** „Jahresrückblick“, die Leistungsdiagramme auf „Orte & Ausrüstung“ und „Alle Seiten auf Werkseinstellung zurücksetzen …“ passen auf 360 bis 430 px; Dialoge haben eine feste Knopfzeile unten

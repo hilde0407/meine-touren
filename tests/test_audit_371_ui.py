@@ -474,6 +474,22 @@ def test_m10_leerer_bestand_ueberall_dieselbe_karte(pw, app_leer, h):
         pg.browser_.close()
 
 
+@pytest.mark.parametrize("lang,erwartet", [("en", "You can import Zepp workouts"), ("fr", "Vous pouvez importer des entraînements Zepp"), ("es", "Puedes importar entrenamientos de Zepp")])
+def test_m10_leerer_bestand_uebersetzt(pw, app_leer, lang, erwartet):
+    """3.71.1: Die gemeinsame Leerzustands-Karte hat keinen deutschen Restsatz (der Text wurde in Sätze ohne Verknüpfung im Satz zerlegt, damit er übersetzt wird)."""
+    pg = _browser(pw, app_leer, width=390, height=844, devs=None)
+    try:
+        pg.add_init_script("try { localStorage.setItem('lang', %r); } catch (e) {}" % lang)
+        pg.goto(f"{app_leer}/#/dash")
+        pg.reload()
+        pg.wait_for_selector("#main .empty h2", timeout=T)
+        pg.wait_for_function("t => document.querySelector('#main .empty').innerText.includes(t)", arg=erwartet, timeout=T)
+        t = pg.locator("#main .empty").inner_text()
+        assert "Zepp-Trainings" not in t and "kannst" not in t and "Verwaltung" not in t, t
+    finally:
+        pg.browser_.close()
+
+
 def test_m10_leere_reisen_formulierung(pw, app_leer):
     pg = _browser(pw, app_leer, width=390, height=844, devs=None)
     try:

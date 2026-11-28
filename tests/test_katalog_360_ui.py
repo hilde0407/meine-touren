@@ -142,7 +142,7 @@ def test_anzeige_statistik_und_sportart_aendern_mit_rueckfall(pw, app):
     b, pg, errs = _page(pw, app)
     try:
         pg.goto(app + "/#/dash")
-        pg.wait_for_function("() => typeof TOURS !== 'undefined' && TOURS.length === 7", timeout=TL)
+        pg.wait_for_function("() => typeof TOURS !== 'undefined' && TOURS.length === 7 && !!BY.g1 && !!BY.d1", timeout=TL)      # 3.71.1: BY wird erst nach TOURS gefüllt (Wettlauf)
         r = pg.evaluate("""() => ({g: [BY.g1.sport, BY.g1.sport_alt, sName('golf'), sIcon('golf')], d: [BY.d1.sport, sName('dogwalk')], s: sName('sup'),
             key: sgKey('dogwalk'), fav: FAV, grp: SGRP.map(g => g.sports), fam: sportGrp('commute'), opts: flSportOptions().map(o => o[0])})""")
         assert r["g"] == ["other", "golf", "Sonstiges", "📍"] and r["d"] == ["walk", "Spazieren / Gehen"] and r["s"] == "Kajak / Kanu"

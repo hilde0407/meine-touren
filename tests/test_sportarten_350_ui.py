@@ -118,7 +118,7 @@ def test_pruefen_laeufe_von_der_uhr(pw, app):
     pg.click("#zlall")
     dlg = pg.locator(".uidlg .uibox")
     expect(dlg).to_be_visible(timeout=T)
-    expect(dlg).to_contain_text("Alle 1 Touren auf „Laufen“ umstellen?")
+    expect(dlg).to_contain_text("Alle 1 Tour auf „Laufen“ umstellen?")
     dlg.locator("button", has_text="Abbrechen").click()
     expect(dlg).to_have_count(0, timeout=T)
     assert _q(app, "SELECT sport FROM tours WHERE id='k2'") == [("hike",)]

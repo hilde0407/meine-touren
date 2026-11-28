@@ -21,11 +21,11 @@ LOC = {"en": "en-GB", "fr": "fr-FR", "es": "es-ES"}
 
 # Erwartete Übersetzungen (Auszug der Prüfliste): Warnleiste, Backup, Umzug
 ERW = {
-    "en": {"warn": ["No tours yet: enter your Komoot access", "There is no backup yet – the first one is created automatically (at night), or right now:"],
+    "en": {"warn": ["There is no backup yet – the first one is created automatically (at night), or right now:"],
            "sicher": ["Passwords and tokens are not included in the download. Photos and routes are not included.", "Moving to a new server", "The moving package contains everything", "Create moving package", "No moving package created yet."]},
-    "fr": {"warn": ["Aucun parcours pour l’instant : saisissez votre accès Komoot", "Il n’y a pas encore de sauvegarde – la première sera créée automatiquement (la nuit), ou tout de suite :"],
+    "fr": {"warn": ["Il n’y a pas encore de sauvegarde – la première sera créée automatiquement (la nuit), ou tout de suite :"],
            "sicher": ["Les mots de passe et les jetons ne sont pas inclus dans le téléchargement.", "Déménagement vers un nouveau serveur", "Le paquet de déménagement contient tout", "Créer un paquet de déménagement", "Aucun paquet de déménagement créé pour l’instant."]},
-    "es": {"warn": ["Aún no hay rutas: introduce tu acceso a Komoot", "Todavía no hay ninguna copia de seguridad: la primera se crea automáticamente (por la noche) o ahora mismo:"],
+    "es": {"warn": ["Todavía no hay ninguna copia de seguridad: la primera se crea automáticamente (por la noche) o ahora mismo:"],
            "sicher": ["Las contraseñas y los tokens no están incluidos en la descarga.", "Traslado a un servidor nuevo", "El paquete de traslado contiene todo", "Crear paquete de traslado", "Todavía no se ha creado ningún paquete de traslado."]},
 }
 # Deutsche Satzreste, die in keiner anderen Sprache in der Verwaltung stehen dürfen (Ganzseitenprüfung je Reiter)

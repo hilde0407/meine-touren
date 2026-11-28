@@ -60,6 +60,14 @@ def _dash(pw, url, **kw):
     return pg
 
 
+ZWEITE = """() => { const f = SL.fam; slViewAdd(f, 'Zweite', slLayoutsOf(f, SL.view[f])); slApply(); }"""     # 3.71.1: mit nur einer Ansicht öffnet „Ansichten“ gleich den Dialog (3.71.0, N-06); das Menü braucht eine zweite
+
+
+def _zweite_ansicht(pg):
+    pg.evaluate(ZWEITE)
+    pg.wait_for_function("() => !!document.getElementById('slview')", timeout=T)
+
+
 ROW = """() => { const w = document.getElementById('slopenw'), r = w.getBoundingClientRect(), z = document.getElementById('zrbar'), zr = z.getBoundingClientRect();
   const btn = [...w.querySelectorAll('button')].filter(b => b.offsetParent !== null).map(b => [b.id, Math.round(b.getBoundingClientRect().height), Math.round(b.getBoundingClientRect().width)]);
   return {h: Math.round(r.height), zr: Math.round(zr.height), zrShown: getComputedStyle(z).display !== 'none', btn, mob: document.documentElement.classList.contains('mob'), over: document.documentElement.scrollWidth - innerWidth,
@@ -160,6 +168,7 @@ def test_zeitraum_chip_per_tastatur_und_englisch(pw, app):
 def test_ansichten_menue(pw, app, scheme):
     pg = _dash(pw, app, scheme=scheme)
     try:
+        _zweite_ansicht(pg)
         btn = pg.locator("#slviews")
         assert btn.get_attribute("aria-haspopup") == "menu" and btn.get_attribute("aria-expanded") == "false"
         btn.click()
@@ -225,6 +234,7 @@ def test_andere_seiten_einzeilig(pw, app, seite):
     try:
         pg.wait_for_selector("#slopen", timeout=TL)
         _idle(pg)
+        _zweite_ansicht(pg)
         m = pg.evaluate("() => { const w = document.getElementById('slopenw'); return {h: Math.round(w.getBoundingClientRect().height), n: [...w.querySelectorAll('button')].filter(b => b.offsetParent !== null).length, "
                         "small: [...w.querySelectorAll('button')].filter(b => b.offsetParent !== null && (b.getBoundingClientRect().height < 40 || b.getBoundingClientRect().width < 40)).length, over: document.documentElement.scrollWidth - innerWidth, "
                         "sel: !!document.querySelector('#slopenw .slvw') && getComputedStyle(document.querySelector('#slopenw .slvw')).display !== 'none'}; }")
@@ -286,7 +296,7 @@ def test_karte_chips_ohne_hoehensprung(pw, app, scheme):
         jumps = {k: v for k, v in rec.items() if v["max"] - v["min"] > 1 or abs(v["last"] - v["first"]) > 1}
         assert not jumps, jumps                                                       # Höhe direkt nach dem Laden (erstes Bild) = nach 1,5 s Ruhe, auch zwischendurch nie anders (Toleranz 1 px)
         chips = {k: v for k, v in rec.items() if (k.startswith("chip") and not k.startswith("chip.kapt")) or k.startswith(("mloc", "mfb"))}
-        assert chips and all(v["max"] <= 40 for v in chips.values()), chips            # Mobilgröße der Chips (3.43.0: 40 px statt 32), kein Sprung auf 44
+        assert chips and all(v["max"] <= 44 and v["min"] == v["max"] == v["first"] for v in chips.values()), chips            # Mobilgröße der Chips: 3.71.0 (M-07) mindestens 44 px; geprüft wird weiter, dass sie nicht springen (gleiche Höhe von Anfang an)
         assert rec["mapui#1"]["last"] <= 60, rec["mapui#1"]                            # die Reihe der Bedienfelder bleibt eine schlanke Zeile
         bt = pg.evaluate("() => [...document.querySelectorAll('.kaopen .btn')].filter(b => b.offsetParent !== null).map(b => Math.round(b.getBoundingClientRect().height))")
         assert bt and all(40 <= h <= 44 for h in bt), bt
@@ -302,6 +312,7 @@ def test_karte_ansichten_menue_nicht_abgeschnitten(pw, app):
     try:
         pg.wait_for_selector(".mapui #slviews", state="attached", timeout=TL)
         _idle(pg)
+        _zweite_ansicht(pg)
         pg.evaluate("() => { document.querySelector('.mapui').scrollLeft = 9999; }")
         pg.locator("#slviews").click()
         expect(pg.locator("#slvmenu")).to_be_visible(timeout=T)

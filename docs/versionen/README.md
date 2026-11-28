@@ -2,6 +2,7 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.71.1](3.71.1.md) – Fehlerbehebung nach 3.71.0: lesbares „×“ im Baustein „Ausrüstung“, übersetzter Leerzustand, Tests angepasst
 - [3.71.0](3.71.0.md) – Prüfbericht umgesetzt: Handy-Layout, Begriffe, Dialoge, Fehlerkarte, Barrierefreiheit
 - [3.70.1](3.70.1.md) – Gebiete korrigiert: Gasteinertal gehört zum Pongau (nicht Pinzgau), neues Gebiet Großarltal
 - [3.70.0](3.70.0.md) – Gebiete mit dem Katalog der Rother-Wanderführer abgeglichen: 119 neue Gebiete (Deutschland, Österreich, Schweiz, Südtirol/Dolomiten, Seen, Spanien, Portugal, Griechenland, Skandinavien u. a.), 103 Alias, Liste der noch nicht angelegten Regionen

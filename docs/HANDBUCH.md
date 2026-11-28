@@ -1,6 +1,6 @@
 # Meine Touren – Handbuch
 
-**Für Anwenderinnen und Anwender · Stand: Version 3.71.0**
+**Für Anwenderinnen und Anwender · Stand: Version 3.71.1**
 
 Dieses Handbuch erklärt Schritt für Schritt, wie du mit **Meine Touren** arbeitest: Touren holen und importieren, ansehen, auswerten, mit Fotos verbinden, die Seiten nach deinem Geschmack gestalten und Links sicher teilen. Es richtet sich an Menschen, die die App benutzen – nicht an Entwickler.
 
