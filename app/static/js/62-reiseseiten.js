@@ -101,6 +101,7 @@ function rnFrame() {
   const trips = window.RS_TRIPS || [];
   b = card("reisen", "Reisen", trips.length === 1 ? "1 Reise" : trips.length ? `${trips.length} Reisen` : "", true);
   b.appendChild(document.getElementById("tr"));
+  tlLeer(b.closest(".tlw"), !trips.length);                                  // 3.72.0 (M-10): leer = kein zweiter Titel „Reisen“
   b = card("alben", "Schlagwörter & Alben", "", true);
   if (alb) {
     const h = alb.querySelector(":scope > .sec .sub");

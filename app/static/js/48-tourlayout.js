@@ -53,6 +53,14 @@ function tlCard(id, o) {
   return w;
 }
 const tlBody = w => w.querySelector(".tlsb");
+/* 3.72.0 (M-10): Eine Karte, die genauso heißt wie die Seite und nichts enthält (leere Gebiete- oder Reisen-Seite), zeigt keinen eigenen Kopf: Der Leerzustand hat genau eine Überschrift (der Seitentitel).
+   Die Karte bleibt im Baustein-System (Ansichten, Katalog unverändert); nur der Kopf entfällt, solange sie leer ist, und die Karte steht offen. */
+function tlLeer(w, leer = true) {
+  const d = w && w.querySelector("details.tls");
+  if (!d) return;
+  d.classList.toggle("tlleer", !!leer);
+  if (leer) d.open = true;
+}
 function tlSetBadge(w, html) {
   const k = typeof w === "string" ? document.getElementById("tlk-" + w) : w.querySelector(".tlk");
   if (k && k.dataset.src !== html) {

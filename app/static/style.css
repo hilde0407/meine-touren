@@ -2645,3 +2645,7 @@ html.mob .warnbar a{display:inline-flex;align-items:center;min-height:44px}
 .skip:focus{top:8px}
 #main:focus{outline:0}
 /* 3.72.0 (N-07): Verwaltungs-Reiter am Handy wieder seitlich wischbar (Verlauf am Rand, aktiver Reiter in Sicht; Regeln von 3.61.0 oben), Touch-Ziele 44 px */
+
+/* 3.72.0 (M-10): leere Karte mit demselben Titel wie die Seite: ohne eigenen Kopf (die Karte steht offen) */
+.tls.tlleer>summary{display:none}
+.tls.tlleer>.tlsb{border-top:0;padding-top:4px}

@@ -218,6 +218,7 @@ function gbFrame() {
   const c = tlCard("gec-liste", {sec: "liste", key: "ge_liste", icon: GE_ICON.liste, title: "Gebiete", badge: esc(n === 1 ? "1 Gebiet" : n ? `${n} Gebiete` : ""), def: true, bodyCls: "stb rsb"});
   tlBody(c).appendChild(liste.firstElementChild);
   liste.remove();
+  tlLeer(c, !n && !kopf.querySelector("#gbq").value);              // 3.72.0 (M-10): leer = kein zweiter Titel „Gebiete“
   host.appendChild(c);
   main.appendChild(host);
   slPlace(host);
