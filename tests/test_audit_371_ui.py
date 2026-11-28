@@ -587,3 +587,24 @@ def test_n07_admin_tabs_umbrechen_am_handy(pw, app, w):
         assert r["sw"] <= r["cw"] + 1 and r["dw"] <= r["iw"] + 1, r
     finally:
         pg.browser_.close()
+
+
+# ---------------------------------------------------------------- Welle 4 (Optimierung)
+def test_o_suche_begrenzt_zeilen_und_mehr_anzeigen(pw, app):
+    pg = _browser(pw, app, width=390, height=844, devs=None)
+    try:
+        pg.goto(f"{app}/#/dash")
+        pg.wait_for_selector("main", timeout=T)
+        _ready(pg)
+        n = pg.evaluate("""() => { const b = TOURS[0]; for (let i = 0; i < 450; i++) TOURS.push(Object.assign({}, b, {id: 'x' + i, name: 'Zzyzx ' + i})); return TOURS.length; }""")
+        pg.evaluate("location.hash = '#/search?q=Zzyzx'")
+        pg.wait_for_selector(".smore button", timeout=T)
+        assert pg.evaluate("document.querySelectorAll('#stl .tr, #stl > *').length") <= 210
+        assert "200 von 450" in pg.inner_text(".smore")
+        pg.click(".smore button")
+        assert "400 von 450" in pg.inner_text(".smore")
+        pg.click(".smore button")
+        assert pg.query_selector(".smore") is None
+        assert pg.evaluate("document.getElementById('stl').children.length") == 450
+    finally:
+        pg.browser_.close()

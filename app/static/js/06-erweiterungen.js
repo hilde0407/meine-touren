@@ -42,6 +42,7 @@ function reiseHeu(tr) {
   }
   return tr._sh;
 }
+const SUCHE_SEITE = 200;
 const sucheZaehler = (n, e, m) => `${n} ${n === 1 ? e : m}`;
 VIEWS.search = async (_, q) => {
   const term = (q.get("q") || "").trim(),
@@ -61,7 +62,21 @@ VIEWS.search = async (_, q) => {
     sub = (nr = 0) => (nr ? `<span>${sucheZaehler(nr, "Reise", "Reisen")}</span>, ` : "") + `<span>${sucheZaehler(a.length, "Tour", "Touren")}</span>, <span>${km}</span>`;
   $("#main").innerHTML =
     `<div class="sec mt0"><h2>Suche: „${esc(q.get("q") || "")}“</h2><span class="sub" id="sres">${sub()}</span></div>
-   <div id="sgeb"></div><div id="sreisen"></div><div id="stouren"><div class="tl">${a.slice(0, 200).map(tourRow).join("") || `<div class="empty">Keine Treffer. Gesucht wird in Name, Notiz, Sportart, Datum, Monat, Region (Land, Bundesland, Landkreis, Ort), Gebiet (Gebirge, Tal, Insel) und Reisen.</div>`}</div></div>`;
+   <div id="sgeb"></div><div id="sreisen"></div><div id="stouren"><div class="tl" id="stl">${a.slice(0, SUCHE_SEITE).map(tourRow).join("") || `<div class="empty">Keine Treffer. Gesucht wird in Name, Notiz, Sportart, Datum, Monat, Region (Land, Bundesland, Landkreis, Ort), Gebiet (Gebirge, Tal, Insel) und Reisen.</div>`}</div></div>`;
+  /* 3.71.0: die Trefferliste zeigt höchstens SUCHE_SEITE Touren auf einmal (schnell auch bei Tausenden Treffern); „Mehr anzeigen“ holt die nächsten */
+  if (a.length > SUCHE_SEITE) {
+    let shown = SUCHE_SEITE;
+    const box = $("#stouren");
+    box.insertAdjacentHTML("beforeend", `<div class="row jcc mt20 smore"><button type="button" class="btn ghost sm">Mehr anzeigen</button><span class="mut fs13"></span></div>`);
+    const mk = box.querySelector(".smore"), cnt = mk.querySelector("span"), paint = () => (cnt.textContent = `${shown} von ${a.length}`);
+    paint();
+    mk.querySelector("button").onclick = () => {
+      $("#stl").insertAdjacentHTML("beforeend", a.slice(shown, shown + SUCHE_SEITE).map(tourRow).join(""));
+      shown = Math.min(a.length, shown + SUCHE_SEITE);
+      if (shown >= a.length) mk.remove();
+      else paint();
+    };
+  }
   if (!toks.length) return;
   /* 3.65.0: Gebiete, deren Name oder Alias passt (eingebaute und eigene; nur Gebiete mit Touren und eigene), als Zeilen wie in der Gebiete-Übersicht */
   const gb = typeof gbRows === "function" ? gbRows().filter(r => (r.n || r.eigen) && toks.every(k => [r.name].concat((Gebiete.nach[r.id] || {}).alias || []).some(x => Gebiete.fold(x).includes(Gebiete.fold(k))))).slice(0, 8) : [];
