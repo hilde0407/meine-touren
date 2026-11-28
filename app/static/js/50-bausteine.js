@@ -48,7 +48,7 @@ function slBelWochen(c, b, d, said, nw, mon, now) {
       val = none ? "Ruhewoche" : noval ? "Belastung ohne Angabe" : `Belastung ${nf(v.belastung, 0)}`,
       dots = [...v.tage].map((x, k) => `<i class="slwdo ${k >= r.elapsed ? "fut" : x === "1" ? "on" : "off"}"><span class="slwdl">${wd[k]}</span></i>`).join("");
     return `<li class="slwk${r.cur ? " cur" : ""}"><div class="slr1"><span>${esc(lab)}${r.cur ? ' <small class="mut">läuft</small>' : ""}</span><b>${val}</b></div>${slBr(v.belastung == null ? 0 : (v.belastung / mx) * 100)}` +
-      `<div class="slwdd" aria-hidden="true">${dots}</div><p class="mut slr2 slsegs">${slSegs([v.touren === 1 ? "1 Tour" : `${v.touren} Touren`, `${fmtKm(v.km || 0)}`, r.rest === 1 ? "1 Ruhetag" : `${r.rest} Ruhetage`])}</p></li>`;
+      `<div class="slwdd" aria-hidden="true">${dots}</div><p class="mut slr2 slsegs">${slSegs([v.touren === 1 ? "1 Tour" : `${fmtAnzahl(v.touren, "Tour", "Touren")}`, `${fmtKm(v.km || 0)}`, r.rest === 1 ? "1 Ruhetag" : `${r.rest} Ruhetage`])}</p></li>`;
   });
   b.innerHTML = `<p class="slcmp">${said || "Für einen Vergleich liegen noch zu wenige Wochen mit Uhr-Daten vor"}</p>` +
     `<p class="mut slcmpn">In ${nw} Wochen: ${rest === 1 ? "1 Ruhetag" : rest + " Ruhetage"} bei ${tours === 1 ? "1 Tour" : tours + " Touren"} (im Schnitt ${nf((rest / days) * 7, 1)} Ruhetage je Woche).</p>` +
@@ -203,7 +203,7 @@ Object.assign(window.SL_WT, {
     async render(c, b, cfg, {t}) {
       const l = t && t.photos ? await api(`/api/photos?tour_id=${encodeURIComponent(t.id)}&limit=12`).catch(() => []) : [];
       slPhotos(c, b, l, "Foto der Tour");
-      if (l.length) slBadge(c, l.length === 1 ? "1 Foto" : `${l.length} Fotos`);
+      if (l.length) slBadge(c, l.length === 1 ? "1 Foto" : `${fmtAnzahl(l.length, "Foto", "Fotos")}`);
     },
   },
   notiz: {
@@ -347,7 +347,7 @@ Object.assign(window.SL_WT, {
         a = TOURS.filter(t => t.date.slice(5, 10) === md && t.y !== now.getFullYear());
       if (!a.length) return slNote(b, "An diesem Tag gab es in früheren Jahren keine Tour.");
       b.innerHTML = `<ul class="sllist">${a.map(t => `<li><b>${now.getFullYear() - t.y === 1 ? "Vor 1 Jahr" : "Vor " + (now.getFullYear() - t.y) + " Jahren"}</b><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${fmtKm(t.km)}</span></li>`).join("")}</ul>`;
-      slBadge(c, a.length === 1 ? "1 Tour" : `${a.length} Touren`);
+      slBadge(c, a.length === 1 ? "1 Tour" : `${fmtAnzahl(a.length, "Tour", "Touren")}`);
     },
   },
 });

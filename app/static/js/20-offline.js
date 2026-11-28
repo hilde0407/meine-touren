@@ -67,7 +67,7 @@ VIEWS.admin = async (...a) => {
     b.disabled = b2.disabled = true;
     try {
       const r = await prepareOffline(m => ($("#offm").textContent = m), 8, all);
-      $("#offm").textContent = `Fertig: ${r.tours} Touren und ${r.tiles} Kartenkacheln stehen offline bereit.`;
+      $("#offm").textContent = `Fertig: ${fmtAnzahl(r.tours, "Tour", "Touren")} und ${r.tiles} Kartenkacheln stehen offline bereit.`;
     } catch (e) {
       $("#offm").textContent = "Fehler: " + e.message;
     }

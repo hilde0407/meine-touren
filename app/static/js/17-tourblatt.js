@@ -30,7 +30,7 @@ const spread = (a, n) => (a.length <= n ? a : Array.from({length: n}, (_, i) => 
 
 VIEWS.sheet = async id => {
   const t = BY[id];
-  if (!t) throw new Error("Tour nicht gefunden");
+  if (!t) throw notFound("Tour", "#/tours", "Alle Touren");
   await pdfPhotoLoad();
   $("#main").innerHTML = `<div class="sheet">
    <div class="row noprint"><a class="back" href="#/tour/${esc(t.id)}">‹ Zurück zur Tour</a><span class="sp"></span>${pdfPhotoBar()}${pdfBtn()}<button class="btn ghost" id="shp">Drucken</button></div>

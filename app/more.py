@@ -353,8 +353,7 @@ def api_health():
     w = []
     if os.environ.get("MT_DEMO") == "1":
         w.append({"level": "info", "text": "Demo-Modus: Alle Touren und Fotos hier sind Beispieldaten."})
-    if not (db.get("komoot_email") and db.get("komoot_password")) and not db.one("SELECT 1 x FROM tours LIMIT 1"):
-        w.append({"level": "warn", "text": "Noch keine Touren: Komoot-Zugang eintragen oder GPX-Dateien bzw. Zepp-Trainings importieren (Verwaltung)."})
+    # 3.71.0: kein Hinweis „Noch keine Touren“ mehr in der Leiste – die leeren Seiten zeigen ihn selbst (gemeinsame Karte emptyTours, 01-grundlagen.js)
     z = db.get("zepp_state") or ""
     if z.startswith("fail"):
         w.append({"level": "warn", "text": "Zepp-Token ist abgelaufen oder ungültig (Verwaltung → Touren holen → Zepp-Import)."})

@@ -118,10 +118,10 @@ async function erShareRange(btn, fix, cfg, nAll) {
     const j = await r.json(), url = location.origin + j.url, title = (fix.name ? "Diashow " + fix.name : j.title);
     if (navigator.share) {
       try { await navigator.share({title, url}); } catch (e) { /* abgebrochen */ }
-      say(nAll > ER_SHARE_MAX ? `Tournamen sind im Link sichtbar; er enthält nur die besten ${ER_SHARE_MAX} der ${nAll} Fotos der ${nn}` : nAll ? `Tournamen sind im Link sichtbar; er enthält die besten bis zu ${ER_SHARE_MAX} Fotos der ${nn}` : "Tournamen sind im Link sichtbar");
+      say(nAll > ER_SHARE_MAX ? `Tournamen sind im Link sichtbar; er enthält nur die besten ${ER_SHARE_MAX} der ${fmtAnzahl(nAll, "Foto", "Fotos")} der ${nn}` : nAll ? `Tournamen sind im Link sichtbar; er enthält die besten bis zu ${fmtAnzahl(ER_SHARE_MAX, "Foto", "Fotos")} der ${nn}` : "Tournamen sind im Link sichtbar");
     } else {
       await navigator.clipboard.writeText(url);
-      say(nAll > ER_SHARE_MAX ? `Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar; enthält nur die besten ${ER_SHARE_MAX} der ${nAll} Fotos der ${nn})` : nAll ? `Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar; enthält die besten bis zu ${ER_SHARE_MAX} Fotos der ${nn})` : "Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar)");
+      say(nAll > ER_SHARE_MAX ? `Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar; enthält nur die besten ${ER_SHARE_MAX} der ${fmtAnzahl(nAll, "Foto", "Fotos")} der ${nn})` : nAll ? `Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar; enthält die besten bis zu ${fmtAnzahl(ER_SHARE_MAX, "Foto", "Fotos")} der ${nn})` : "Link kopiert (24 Stunden gültig, ohne Konto ansehbar; Tournamen sind sichtbar)");
     }
   } catch (e) {
     say("Link erstellen nicht möglich: " + e.message);
@@ -495,7 +495,7 @@ window.SL_WT.vorjahr = {
       };
     };
     paint();
-    slBadge(c, all.length === 1 ? "1 Tour" : `${all.length} Touren`);
+    slBadge(c, all.length === 1 ? "1 Tour" : `${fmtAnzahl(all.length, "Tour", "Touren")}`);
     hnState(c, "an");
   },
 };

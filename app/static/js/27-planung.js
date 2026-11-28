@@ -99,7 +99,7 @@ function planCheckHtml(r, estH) {
     dk = r.diese,
     kmup = (km, up) => (up != null ? `${fmtKm(km)} mit ${fmtHm(up)}` : `${fmtKm(km)} (ohne Höhenangabe)`),
     li = [];
-  if (r.stufe === "zu_wenig") li.push(`<li>Gefunden: ${r.n} Touren dieser Sportart in den letzten ${r.monate} Monaten, nötig sind mindestens ${r.min_n}.</li>`);
+  if (r.stufe === "zu_wenig") li.push(`<li>Gefunden: ${fmtAnzahl(r.n, "Tour", "Touren")} dieser Sportart in den letzten ${r.monate} Monaten, nötig sind mindestens ${r.min_n}.</li>`);
   else {
     const L = r.laengste,
       H = r.hoechster_aufstieg;
@@ -107,7 +107,7 @@ function planCheckHtml(r, estH) {
     if (H && H.id !== L.id && dk.up != null) li.push(`<li>Dein größter Aufstieg der letzten ${r.monate} Monate: ${fmtHm(H.up)} auf ${fmtKm(H.km)}; diese: ${fmtHm(dk.up)}</li>`);
     if (r.gruende.includes("km")) li.push(`<li>Länger als deine längste Tour (+${Math.round((dk.km / L.km - 1) * 100)}\u00a0%)</li>`);
     if (r.gruende.includes("up") && H && H.up > 0) li.push(`<li>Mehr Aufstieg als deine bisher höchste Tour (+${Math.round((dk.up / H.up - 1) * 100)}\u00a0%)</li>`);
-    li.push(`<li>Länger als diese Strecke: ${r.laenger} von ${r.n} Touren</li>`);
+    li.push(`<li>Länger als diese Strecke: ${r.laenger} von ${fmtAnzahl(r.n, "Tour", "Touren")}</li>`);
     const a = r.aehnlich;
     if (a) {
       li.push(`<li>Ähnlich lange Touren (±25 % der Strecke): ${a.n} in den letzten ${r.monate} Monaten</li>`);
@@ -118,7 +118,7 @@ function planCheckHtml(r, estH) {
   }
   if (estH != null) li.push(`<li>Geschätzte Dauer inkl. Pausen: ${hmm(estH)} (wie oben)</li>`);
   if (r.gehzeit) li.push(`<li><span>Reine Gehzeit ohne Pausen: ca. ${hmm(r.gehzeit.sekunden / 3600)}</span> <span class="mut">(${PLAN_QUELLE[r.gehzeit.quelle] || PLAN_QUELLE.standard})</span></li>`);
-  const base = r.stufe === "zu_wenig" ? "" : `<p class="mut fs13">Grundlage: ${r.n} Touren dieser Sportart der letzten ${r.monate} Monate.</p>`;
+  const base = r.stufe === "zu_wenig" ? "" : `<p class="mut fs13">Grundlage: ${fmtAnzahl(r.n, "Tour", "Touren")} dieser Sportart der letzten ${r.monate} Monate.</p>`;
   return {
     cls: st[0],
     sum: `<span class="pcs ${st[0]}"><span aria-hidden="true">${st[1]}</span> <span>${st[2]}</span></span>`,
@@ -268,7 +268,7 @@ function planHilfeHtml(h) {
     body = [`<h3 class="phh">Form</h3>`];
   if (f.status === "zu_wenig") {
     sum.push(planPill("info", "Form: zu wenig Vergleichstouren"));
-    body.push(`<p class="mut">Zu wenig Vergleichstouren: ${f.n} Touren dieser Sportart in den letzten ${f.monate} Monaten, nötig sind mindestens ${f.min_n}.</p>`);
+    body.push(`<p class="mut">Zu wenig Vergleichstouren: ${fmtAnzahl(f.n, "Tour", "Touren")} dieser Sportart in den letzten ${f.monate} Monaten, nötig sind mindestens ${f.min_n}.</p>`);
   } else {
     const li = [],
       fm = {km: x => fmtKm(x), up: x => fmtHm(x), dauer: x => hmm(x)};
@@ -286,7 +286,7 @@ function planHilfeHtml(h) {
     }
     if (f.belastung) li.push(`<li>${PLAN_BEL[f.belastung.stufe].replace("{}", planSgn(f.belastung.abweichung_pct))}</li>`);
     sum.push(f.deutlich_ueber.length ? planPill("nach_untergang", "Form: deutlich über deinem Maximum") : mehr ? planPill("knapp", "Form: mehr als üblich") : planPill("reserve", "Form: im üblichen Rahmen"));
-    body.push(`<ul class="pcl">${li.join("")}</ul><p class="mut fs13">Grundlage: ${f.n} Touren dieser Sportart der letzten ${f.monate} Monate.</p>`);
+    body.push(`<ul class="pcl">${li.join("")}</ul><p class="mut fs13">Grundlage: ${fmtAnzahl(f.n, "Tour", "Touren")} dieser Sportart der letzten ${f.monate} Monate.</p>`);
   }
   body.push(`<h3 class="phh">Tageslicht</h3>`);
   if (t.status === "keine_position") body.push(`<p class="mut">Ohne Startpunkt keine Tageslicht-Angabe.</p>`);

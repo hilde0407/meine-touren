@@ -55,7 +55,7 @@ async function homeView() {
   /* „Dein Jahr“ (#hyear) setzt die Layout-Engine als Baustein ein (49-seitenlayout.js, 52-bausteine-uebersicht.js: slYearShell); ohne eigenes Layout steht er an der alten Stelle */
   main.innerHTML = `
   <section class="hlast" id="hlast"></section>
-  ${recent.length > 1 ? `<section id="hrecent"><div class="hsh"><h2>Zuletzt unterwegs</h2><span class="sp"></span><a class="hmore" href="#/tours">Alle ${nf(TOURS.length, 0)} Touren</a></div><div class="hcards">${recent.slice(1).map(card).join("")}</div></section>` : ""}
+  ${recent.length > 1 ? `<section id="hrecent"><div class="hsh"><h2>Zuletzt unterwegs</h2><span class="sp"></span><a class="hmore" href="#/tours">Alle ${fmtAnzahl(TOURS.length, "Tour", "Touren")}</a></div><div class="hcards">${recent.slice(1).map(card).join("")}</div></section>` : ""}
   <div class="hcols" id="hcols">
     ${otd.length ? `<section id="htag"><div class="hsh"><h2>An diesem Tag</h2><span class="sub">in früheren Jahren</span></div><div class="tl">${otd.map(tourRow).join("")}</div></section>` : ""}
   </div>`;

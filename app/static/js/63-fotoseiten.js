@@ -55,7 +55,7 @@ Object.assign(window.SL_WT, {
         }, list = want.map(v => tile[v]).filter(Boolean);
       if (!list.length) return slNote(b, "Für die gewählten Werte liegen keine Daten vor.");
       b.innerHTML = slTiles(list);
-      slBadge(c, `${nf(d.count, 0)} Fotos`);
+      slBadge(c, `${fmtAnzahl(d.count, "Foto", "Fotos")}`);
     },
   },
   fjahre: {
@@ -69,7 +69,7 @@ Object.assign(window.SL_WT, {
       const n = [5, 8, 12].includes(+cfg.n) ? +cfg.n : 8, y1 = Math.max(...all), y0 = Math.max(Math.min(...all), y1 - n + 1), ys = Array.from({length: y1 - y0 + 1}, (_, i) => y0 + i),
         v = ys.map(y => yc[y] || 0), cur = foYear(d), hl = ys.includes(cur) ? ys.indexOf(cur) : v.indexOf(Math.max(...v)), best = v.indexOf(Math.max(...v));
       b.innerHTML = slCols(v, {hl, label: `Säulendiagramm: Fotos je Jahr, am meisten ${ys[best]} mit ${nf(v[best], 0)}`, labels: ys.map(y => (ys.length > 8 ? "’" + String(y).slice(2) : String(y))), cls: "slsm rscol"}) +
-        `<p class="slcmp">Meiste Fotos: ${ys[best]}</p><p class="mut slcmpn">${nf(v[best], 0)} Fotos${ys.includes(cur) ? `; hervorgehoben: ${cur} (${nf(yc[cur] || 0, 0)})` : ""}</p>`;
+        `<p class="slcmp">Meiste Fotos: ${ys[best]}</p><p class="mut slcmpn">${fmtAnzahl(v[best], "Foto", "Fotos")}${ys.includes(cur) ? `; hervorgehoben: ${cur} (${nf(yc[cur] || 0, 0)})` : ""}</p>`;
       slBadge(c, String(ys[best]));
     },
   },

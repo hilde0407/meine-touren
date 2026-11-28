@@ -20,7 +20,7 @@ const TACT = [
       ["-", "Strecke und Höhe"],
       ["etc", "Streckenfarbe …", "Farbe und Breite auf der Karte"],
       ["efix", "Höhe korrigieren …", "aus dem Geländemodell"],
-      ["ezepp", "Höhe korrigieren (aus der Uhr) …", "aus der barometrischen Höhe der Uhr (Zepp)"],
+      ["ezepp", "Höhe korrigieren …", "aus der Uhr (barometrische Höhe, Zepp)"],
       ["etfix", "Track korrigieren", "Fehlpunkte und Pausen bereinigen"],
       ["-", "Hochladen und Abgleich"],
       ["eup", "Hochladen …", "Zu Strava, Komoot … senden"],

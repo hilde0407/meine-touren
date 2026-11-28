@@ -622,7 +622,7 @@ function recBkFill() {
 VIEWS.record = async () => {
   const A = recApp();
   if (!A) {
-    $("#main").innerHTML = '<div class="panel"><h2>Aufzeichnen</h2><p class="mut">Das Aufzeichnen funktioniert nur in der Android-App „Meine Touren“ (siehe README → Android-App).</p></div>';
+    $("#main").innerHTML = '<div class="panel"><h2>Aufzeichnen</h2><p class="mut">Das Aufzeichnen funktioniert nur in der Android-App „Meine Touren“. Wie du sie installierst und mit diesem Server verbindest, steht unter Verwaltung → Handy &amp; App.</p><p><a class="btn" href="#/admin">Verwaltung öffnen</a></p></div>';
     return;
   }
   if (recOff) recOff();
@@ -817,7 +817,7 @@ VIEWS.record = async () => {
           if ($("#rroute") === sel) loaded(recRouteInfo());
         } catch (e) {
           sel.value = "";
-          info.innerHTML = `<span class="bad">Route laden nicht möglich: ${esc(e.message)}</span>`;
+          info.innerHTML = `<span class="bad">Laden der Route nicht möglich: ${esc(e.message)}</span>`;
         }
       };
     }

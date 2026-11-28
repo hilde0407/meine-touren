@@ -64,7 +64,7 @@ Object.assign(window.SL_WT, {
         }
         const tile = {touren: [nf(L.length, 0), L.length === 1 ? "Tour" : "Touren"], km: [slKm(slSum(L, t => t.km)), "Strecke"], up: [slHm(slSum(L, t => t.up_m || 0)), "Aufstieg"], h: [fmtDauer(slSum(L, t => t.h) * 3600, {summe: true}), "Unterwegs"]};
         b.innerHTML = slTiles(want.map(v => tile[v]).filter(Boolean)) + `<p class="mut slcmpn">${esc(kaTxt(st, aus))}</p>`;
-        slBadge(c, L.length === 1 ? "1 Tour" : `${L.length} Touren`);
+        slBadge(c, L.length === 1 ? "1 Tour" : `${fmtAnzahl(L.length, "Tour", "Touren")}`);
         return true;
       });
     },
@@ -86,7 +86,7 @@ Object.assign(window.SL_WT, {
         }
         b.innerHTML = `<ul class="sllist kalist">${L.slice(0, n).map(t => `<li><a href="#/tour/${encodeURIComponent(t.id)}">${esc(t.name)}</a><span class="mut">${fmtDatumKurz(t.date)} · ${fmtKm(t.km)} · ${fmtHm(t.up_m || 0)}</span></li>`).join("")}</ul>` +
           (L.length > n ? `<p class="mut slcmpn">und ${nf(L.length - n, 0)} weitere</p>` : "");
-        slBadge(c, L.length === 1 ? "1 Tour" : `${L.length} Touren`);
+        slBadge(c, L.length === 1 ? "1 Tour" : `${fmtAnzahl(L.length, "Tour", "Touren")}`);
         return true;
       });
     },

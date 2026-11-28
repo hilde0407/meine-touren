@@ -93,7 +93,7 @@ async function uploadDialog(t) {
     <p class="kvnote">Nach dem Hochladen setzt Meine Touren die Tour bei Komoot auf „privat“ und prüft das. Öffentlich macht Meine Touren nie etwas.</p></div>`
     : "";
   const m = uiModal(`<h3>Tour hochladen</h3><p class="mut">„${esc(t.name)}“ wird mit der lokal gespeicherten Strecke zu den gewählten Portalen gesendet. Es passiert nichts ohne dein Häkchen.</p>${rows}${kopt}<div id="upr" class="mt10"></div>
-    <div class="uifoot"><button class="btn ghost" id="ucx">Schließen</button><button class="btn" id="uok">Hochladen</button></div>`);
+    <div class="uifoot"><button class="btn ghost" id="ucx">Abbrechen</button><button class="btn" id="uok">Hochladen</button></div>`);
   m.querySelector("#ucx").onclick = () => m.remove();
   m.querySelectorAll(".ff").forEach(
     f =>
@@ -155,16 +155,17 @@ async function komootPaketDialog(t) {
     <h4 class="kph">Fotos <span class="mut" id="kpc">keins ausgewählt</span></h4>
     ${ph.length ? `<div class="kpgrid">${ph.map(p => `<label class="kpf" title="${esc(fmtDatumKurz(p.taken_ts, {zeit: true}))}"><input type="checkbox" class="kpcb" value="${+p.id}"><img src="${picSrc(p, 200)}" alt="Foto ${esc(fmtDatumKurz(p.taken_ts, {zeit: true}))}" loading="lazy" decoding="async"></label>`).join("")}</div>` : `<p class="mut">Zu dieser Tour gibt es keine Fotos.</p>`}
     <div class="kpwarn" role="note"><b>Bitte beachten:</b> <span>Wähle nur Fotos, die du selbst gemacht hast oder für die du die Rechte hast.</span> <span>Sind Personen erkennbar, brauchst du für eine Veröffentlichung in der Regel ihre Einwilligung – Meine Touren erkennt keine Gesichter.</span> <span>Was in Komoot einmal öffentlich war, lässt sich nicht zuverlässig zurückholen.</span> <span>Die Sichtbarkeit wählst du beim Hochladen in Komoot selbst.</span></div>
-    <div class="uifoot"><button class="btn ghost" id="kpx">Schließen</button><a class="btn" id="kpd" download>Paket herunterladen</a></div>`);
+    <div class="uifoot"><button class="btn ghost" id="kpx">Abbrechen</button><a class="btn" id="kpd" download>Exportieren</a></div>`);
   const upd = () => {
     const ids = [...m.querySelectorAll(".kpcb:checked")].map(c => c.value);
-    m.querySelector("#kpc").textContent = ids.length ? (ids.length === 1 ? "1 Foto ausgewählt" : `${ids.length} Fotos ausgewählt`) : "keins ausgewählt";
+    m.querySelector("#kpc").textContent = ids.length ? (ids.length === 1 ? "1 Foto ausgewählt" : `${fmtAnzahl(ids.length, "Foto", "Fotos")} ausgewählt`) : "keins ausgewählt";
     const q = new URLSearchParams({notiz: m.querySelector("#kpn").checked ? "1" : "0", ohne_ort: m.querySelector("#kpo").checked ? "1" : "0"});
     if (ids.length) q.set("fotos", ids.join(","));
     m.querySelector("#kpd").href = `/api/tours/${encodeURIComponent(t.id)}/komoot-paket?${q}`;
   };
   m.querySelectorAll("input").forEach(i => (i.onchange = upd));
   m.querySelector("#kpx").onclick = () => m.remove();
+  m.querySelector("#kpd").onclick = () => setTimeout(() => m.remove(), 400);      // 3.71.0: nach dem Exportieren ist der Dialog erledigt (der Download läuft weiter)
   upd();
 }
 
@@ -179,7 +180,7 @@ const TL_DETAIL = [];
 const tlOnSub = fn => TL_DETAIL.push(fn);
 VIEWS.tourauswertung = async id => {
   const t = BY[id];
-  if (!t) throw new Error("Tour nicht gefunden");
+  if (!t) throw notFound("Tour", "#/tours", "Alle Touren");
   const hm = fmtDauer(t.h * 3600);
   $("#main").innerHTML =
     `<div class="row"><a class="back" id="tlback" href="#/tour/${esc(String(t.id))}">‹ Zurück zur Tour</a></div>
@@ -211,7 +212,7 @@ function phSecHtml(t) {
     sk = Array.from({length: Math.min(n, PH_STRIP_N)}, () => '<span class="phi phsk"></span>').join("");
   return (
     `<div id="phbox"><div class="phstrip" id="phs" role="list" aria-label="Ausgewählte Fotos"${n ? "" : " hidden"}>${sk}</div>` +
-    `<div class="phmore" id="phm"${n > PH_STRIP_N ? "" : " hidden"}><button class="btn sm ghost" id="phall" aria-expanded="false" aria-controls="th">Alle ${n} Fotos</button></div>` +
+    `<div class="phmore" id="phm"${n > PH_STRIP_N ? "" : " hidden"}><button class="btn sm ghost" id="phall" aria-expanded="false" aria-controls="th">Alle ${fmtAnzahl(n, "Foto", "Fotos")}</button></div>` +
     `<div class="thumbs" id="th" hidden></div><div class="phpg" id="phpg" hidden><button class="btn sm alt" id="phnext">Mehr anzeigen</button></div></div>`
   );
 }
@@ -238,7 +239,7 @@ function phStrip(ph) {
   let shown = 0,
     isOpen = false,
     io = null;
-  const label = () => (btn.textContent = isOpen ? "Weniger zeigen" : `Alle ${ph.length} Fotos`);
+  const label = () => (btn.textContent = isOpen ? "Weniger zeigen" : `Alle ${fmtAnzahl(ph.length, "Foto", "Fotos")}`);
   const page = () => {
     const part = ph.slice(shown, shown + PH_PAGE);
     th.insertAdjacentHTML(
@@ -281,7 +282,7 @@ function phStrip(ph) {
 /* ---------- Tourdetail ---------- */
 VIEWS.tour = async id => {
   const t = BY[id];
-  if (!t) throw new Error("Tour nicht gefunden");
+  if (!t) throw notFound("Tour", "#/tours", "Alle Touren");
   const i = TOURS.indexOf(t),
     nx = TOURS[i - 1],
     pv = TOURS[i + 1];
@@ -400,8 +401,8 @@ VIEWS.tour = async id => {
       return null;
     });
   const ph = await api(`/api/photos?tour_id=${encodeURIComponent(t.id)}&limit=400&strip=${PH_STRIP_N}`);     // nur Metadaten (id, Zeit, Ort, Version), ein Aufruf
-  $("#pc").textContent = ph.length ? `${ph.length} Fotos` : "Zu dieser Tour gibt es noch keine Fotos.";
-  tlSetBadge("photos", ph.length ? `${ph.length} Fotos` : "keine");
+  $("#pc").textContent = ph.length ? `${fmtAnzahl(ph.length, "Foto", "Fotos")}` : "Zu dieser Tour gibt es noch keine Fotos.";
+  tlSetBadge("photos", ph.length ? `${fmtAnzahl(ph.length, "Foto", "Fotos")}` : "keine");
   if (ph.length) {
     $("#ss").hidden = false;
     $("#ss").href = `slideshow.html?tour=${t.id}`;
@@ -428,7 +429,7 @@ VIEWS.tour = async id => {
   if ($("#edel") && t.source !== "local")
     $("#edel").onclick = () => {
       // Tour von Komoot: nur hier entfernen (kommt beim Abgleich nicht wieder) oder auch bei Komoot endgültig löschen
-      const m = uiModal(`<h3>Tour löschen?</h3><p>„${esc(t.name)}“ (${fmtKm(t.km)}) wird aus Meine Touren entfernt – mit Strecke, Notizen und Schlagwörtern. Zugeordnete Fotos bleiben erhalten.</p>
+      const m = uiModal(`<h3>Tour löschen?</h3><p>„${esc(t.name)}“ (${fmtKm(t.km)}) wird in Meine Touren gelöscht – mit Strecke, Notizen und Schlagwörtern. Zugeordnete Fotos bleiben erhalten. Zurückholen lässt sich die Tour nur aus einer Sicherung.</p>
         <label class="chk"><input type="checkbox" id="dk"> <b>auch bei Komoot endgültig löschen</b> <span class="mut">(lässt sich nicht rückgängig machen)</span></label>
         <p class="mut fs13">Ohne Häkchen bleibt die Tour bei Komoot und wird beim nächsten Abgleich nicht wieder übernommen.</p>
         <div id="dm" class="mut"></div><div class="uifoot"><button class="btn ghost" id="dx">Abbrechen</button><button class="btn alt uidanger" data-danger id="dok">Löschen</button></div>`);
@@ -510,7 +511,7 @@ VIEWS.tour = async id => {
         } catch (e) {
           z.disabled = b.disabled = false;
           $("#ksm").textContent = "";
-          uiAlert("Höhe korrigieren nicht möglich: " + e.message);
+          uiRetry({vorgang: "Höhe korrigieren", error: e, retry: () => z.click()});      // 3.71.0: Grund in einfachen Worten, mit „Noch einmal versuchen“
         }
       };
     }
@@ -536,7 +537,7 @@ VIEWS.tour = async id => {
       } catch (e) {
         b.disabled = false;
         $("#ksm").textContent = "";
-        uiAlert("Höhe korrigieren nicht möglich: " + e.message);
+        uiRetry({vorgang: "Höhe korrigieren", error: e, retry: () => b.click()});
       }
     };
   })();

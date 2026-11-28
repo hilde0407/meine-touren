@@ -41,7 +41,7 @@ VIEWS.trip = async id => {
 /* ---- Reisebericht: druckbare Seite / PDF ---- */
 VIEWS.tripsheet = async id => {
   const tr = (await api("/api/trips")).find(x => x.id === id);
-  if (!tr) throw new Error("Reise nicht gefunden");
+  if (!tr) throw notFound("Reise", "#/trips", "Alle Reisen");
   await pdfPhotoLoad();
   const ts = tr.tours.map(i => BY[i]).filter(Boolean).sort((a, b) => a.start_ts - b.start_ts),
     sum = f => ts.reduce((c, t) => c + (f(t) || 0), 0),
@@ -199,7 +199,7 @@ async function tripDialog(tr) {
   };
   const summe = () => {
     const ts = [...sel].map(i => BY[i]).filter(Boolean), i = tripAuswahlInfo(ts), w = [];
-    q("#tcc").innerHTML = ts.length ? `<b>${ts.length === 1 ? "1 Tour" : `${ts.length} Touren`}</b> · ${esc(tripZeitraumText(i.von, i.bis))}${i.geb.length ? " · " + esc(i.geb.slice(0, 4).join(", ") + (i.geb.length > 4 ? ` und ${i.geb.length - 4} weitere` : "")) : ""}` : "0 Touren gewählt";
+    q("#tcc").innerHTML = ts.length ? `<b>${ts.length === 1 ? "1 Tour" : `${fmtAnzahl(ts.length, "Tour", "Touren")}`}</b> · ${esc(tripZeitraumText(i.von, i.bis))}${i.geb.length ? " · " + esc(i.geb.slice(0, 4).join(", ") + (i.geb.length > 4 ? ` und ${i.geb.length - 4} weitere` : "")) : ""}` : "0 Touren gewählt";
     const af = tripAuffaellig(i);
     if (af) w.push(af.art === "laender" ? `Die Touren liegen in ${af.n} Ländern (${af.namen}) – wirklich eine Reise?` : af.art === "fern" ? `Die Touren liegen bis zu ${fmtZahl(af.km, 0)} km auseinander – wirklich eine Reise?` : `Die Touren liegen in ${af.n} Gebieten – wirklich eine Reise?`);
     if (i.luecken.length) { const l = i.luecken.reduce((a, b) => (b.tage > a.tage ? b : a)); w.push(`Zwischen ${fmtDatumKurz(l.von)} und ${fmtDatumKurz(l.bis)} liegen ${l.tage} Tage ohne gewählte Tour${i.luecken.length > 1 ? ` (insgesamt ${i.luecken.length} Lücken über ${TRIP_LUECKE_TAGE} Tage)` : ""}.`); }
@@ -231,7 +231,7 @@ async function tripDialog(tr) {
       const l = g.l.slice(0, rest);
       rest -= l.length;
       const fr = g.l.filter(frei), titel = modus === "tag" ? fmtDatum(g.k, {wochentag: true}) : g.k === "~" ? "Ohne Gebiet" : g.k;
-      h += `<div class="tcg" data-k="${esc(g.k)}"><label class="tch${fr.length ? "" : " off"}"><input type="checkbox" class="cg" data-g="${esc(g.k)}"${fr.length ? "" : " disabled"} aria-label="${esc(`${titel}: ${modus === "tag" ? "alle dieses Tages" : "alle dieses Gebiets"} wählen`)}"><b>${esc(titel)}</b><small class="mut">${g.l.length === 1 ? "1 Tour" : `${g.l.length} Touren`}<span class="tcgn"></span>${g.geb ? " · " + esc(g.geb) : ""}</small></label>${l.map(zeile).join("")}</div>`;
+      h += `<div class="tcg" data-k="${esc(g.k)}"><label class="tch${fr.length ? "" : " off"}"><input type="checkbox" class="cg" data-g="${esc(g.k)}"${fr.length ? "" : " disabled"} aria-label="${esc(`${titel}: ${modus === "tag" ? "alle dieses Tages" : "alle dieses Gebiets"} wählen`)}"><b>${esc(titel)}</b><small class="mut">${g.l.length === 1 ? "1 Tour" : `${fmtAnzahl(g.l.length, "Tour", "Touren")}`}<span class="tcgn"></span>${g.geb ? " · " + esc(g.geb) : ""}</small></label>${l.map(zeile).join("")}</div>`;
     }
     q("#tcl").innerHTML = ts.length ? h + (ts.length > zeilen && rest <= 0 ? `<button class="btn ghost sm" id="tcmore" type="button">Weitere Touren anzeigen</button>` : "") : `<p class="mut p8">${q("#tcs").value.trim() ? "Keine Tour passt zur Suche." : "Keine Touren vorhanden."}</p>`;
     q("#tcl").scrollTop = sc;
@@ -257,7 +257,7 @@ async function tripDialog(tr) {
     const ts = alle().filter(t => frei(t) && (!a || day(t) >= a) && (!b || day(t) <= b));
     ts.forEach(t => sel.add(t.id));
     list();
-    q("#tcc").insertAdjacentHTML("beforeend", ` <span class="mut">(${ts.length === 1 ? "1 Tour" : `${ts.length} Touren`} im Zeitraum markiert)</span>`);
+    q("#tcc").insertAdjacentHTML("beforeend", ` <span class="mut">(${ts.length === 1 ? "1 Tour" : `${fmtAnzahl(ts.length, "Tour", "Touren")}`} im Zeitraum markiert)</span>`);
   };
   q("#tcs").oninput = () => { zeilen = TRIP_ZEILEN; list(); };
   const gr = mo => { modus = mo; zeilen = TRIP_ZEILEN; [["tcgt", "tag"], ["tcgg", "gebiet"]].forEach(([id, k]) => { q("#" + id).classList.toggle("on", k === mo); q("#" + id).setAttribute("aria-pressed", String(k === mo)); }); list(); };
@@ -292,7 +292,7 @@ async function tripDialog(tr) {
 /* Entfernte Reisen wiederherstellen (Fenster aus der Hinweiszeile der Reisenliste) */
 function tripRestoreDialog(hid) {
   const m = uiModal(`<h2>Entfernte Reisen</h2><p class="mut fs14">Diese erkannten Reisen hast du aus der Liste entfernt. Die Touren sind unverändert; „Wiederherstellen“ bringt die Reise zurück.</p>
-   ${hid.map(t => `<div class="r g10 aic p8-0" style="display:flex;border-bottom:1px solid var(--rule)"><span class="fx1">${esc(t.region)} <small class="mut">${fmtDatumKurz(t.start)}${t.end !== t.start ? " – " + fmtDatumKurz(t.end) : ""}, ${t.tours.length} Touren</small></span><button class="btn alt sm" data-rt="${esc(t.id)}">Wiederherstellen</button></div>`).join("")}
+   ${hid.map(t => `<div class="r g10 aic p8-0" style="display:flex;border-bottom:1px solid var(--rule)"><span class="fx1">${esc(t.region)} <small class="mut">${fmtDatumKurz(t.start)}${t.end !== t.start ? " – " + fmtDatumKurz(t.end) : ""}, ${fmtAnzahl(t.tours.length, "Tour", "Touren")}</small></span><button class="btn alt sm" data-rt="${esc(t.id)}">Wiederherstellen</button></div>`).join("")}
    <div class="uifoot"><button class="btn ghost" id="trrx">Schließen</button></div>`);
   m.querySelector("#trrx").onclick = () => m.remove();
   m.querySelectorAll("[data-rt]").forEach(b => (b.onclick = async () => {
@@ -321,7 +321,7 @@ VIEWS.trips = async (...a) => {
   const hid = await api("/api/trips?hidden=1").catch(() => []);
   if (!hid.length || $("#trhidbox")) return;
   $("#main").insertAdjacentHTML("beforeend", `<details id="trhidbox" class="mt28"><summary class="mut cp">Entfernte Reisen (${hid.length})</summary>${hid
-    .map(t => `<div class="r g10 aic p8-0" style="display:flex;border-bottom:1px solid var(--rule)"><span class="fx1">${esc(t.region)} <small class="mut">${esc(t.start)}${t.end !== t.start ? " – " + esc(t.end) : ""}, ${t.tours.length} Touren</small></span><button class="btn alt sm" data-rt="${esc(t.id)}">Wiederherstellen</button></div>`)
+    .map(t => `<div class="r g10 aic p8-0" style="display:flex;border-bottom:1px solid var(--rule)"><span class="fx1">${esc(t.region)} <small class="mut">${esc(t.start)}${t.end !== t.start ? " – " + esc(t.end) : ""}, ${fmtAnzahl(t.tours.length, "Tour", "Touren")}</small></span><button class="btn alt sm" data-rt="${esc(t.id)}">Wiederherstellen</button></div>`)
     .join("")}</details>`);
   document.querySelectorAll("[data-rt]").forEach(
     b =>

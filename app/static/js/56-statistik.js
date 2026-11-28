@@ -121,7 +121,7 @@ function stFilterBar(F, R, n, inRange) {
     Z = [["year", "Laufendes Jahr", F.kind === "y" && F.yr === cy], ["12m", "Letzte 12 Monate", F.kind === "12m"], ["90d", "Letzte 90 Tage", F.kind === "90d"], ["prev", "Vorjahr", F.kind === "y" && F.yr === cy - 1], ["c", "Von–bis …", F.kind === "c"]],
     sum = [F.sports.length ? stSportsTxt(F) : "", F.kind === "all" ? "" : R.label].filter(Boolean).join(", ");
   return `<section class="stf" id="stf" aria-label="Filter der Statistik">
-  <div class="sec"><h2>${esc(title)}</h2><span class="sub">${nf(n, 0)} Touren</span></div>
+  <div class="sec"><h2>${esc(title)}</h2><span class="sub">${fmtAnzahl(n, "Tour", "Touren")}</span></div>
   <div class="years" role="group" aria-label="Zeitraum: Jahr"><button type="button" data-y="0" aria-pressed="${F.kind === "all"}" class="${F.kind === "all" ? "on" : ""}">Gesamte Zeit</button>${ys.map(y => `<button type="button" data-y="${y}" aria-pressed="${F.kind === "y" && F.yr === y}" class="${F.kind === "y" && F.yr === y ? "on" : ""}">${y}</button>`).join("")}</div>
   <div class="chips mt14 stz" role="group" aria-label="Zeitraum: weitere">${Z.map(([k, l, on]) => `<button type="button" class="chip${on ? " on" : ""}" data-z="${k}" aria-pressed="${on}"${k === "c" ? ' aria-controls="stfc"' : ""}>${l}</button>`).join("")}</div>
   <form class="stfc" id="stfc"${F.kind === "c" ? "" : " hidden"} novalidate><label>Von <input type="date" name="von" value="${F.von}"></label><label>Bis <input type="date" name="bis" value="${F.bis}"></label><button class="btn sm" type="submit">Anzeigen</button><span class="stfe" role="alert"></span></form>

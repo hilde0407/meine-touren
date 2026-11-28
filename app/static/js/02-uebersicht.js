@@ -98,7 +98,7 @@ VIEWS.dash = async (_, q) => {
     <div class="signs"><div class="sign">${fmtSignWert(fmtKm(last.km, {einheit: false}), "km")}<small>Strecke</small></div><div class="sign l">${fmtSignWert(fmtHm(last.up_m, {einheit: false}), "m")}<small>Aufstieg</small></div><div class="sign">${(p => fmtSignWert(p.v, p.u))(fmtDauerTeile(last.h * 3600))}<small>Dauer</small></div></div></div></section>
   <div class="inner">
   ${stFilterBar(F, R, sel.length, yearAll)}
-  <div class="figs" data-st="kpi" data-badge="${esc(`${nf(sel.length, 0)} Touren · ${fmtKm(km, {d: 0})}`)}">
+  <div class="figs" data-st="kpi" data-badge="${esc(`${fmtAnzahl(sel.length, "Tour", "Touren")} · ${fmtKm(km, {d: 0})}`)}">
     <div class="fig"><div class="v">${nf(sel.length, 0)}</div><div class="l">Touren</div>${delta(sel.length, prev.length)}</div>
     <div class="fig"><div class="v">${fmtKm(km, {summe: true, einheit: false})}<span class="u">km</span></div><div class="l">Strecke</div>${delta(km, pk)}</div>
     <div class="fig"><div class="v">${nf(up, 0)}<span class="u">m</span></div><div class="l">Aufstieg</div>${delta(
@@ -236,7 +236,7 @@ document.addEventListener(
   true
 );
 function tourRow(t) {
-  return `<a class="tr${trfOn() ? " trf" : ""}" href="#/tour/${t.id}">${trThumb(t)}<span><div class="nm">${esc(t.name)}</div><div class="s"><span>${fmtDatumKurz(t.date, {zeit: true})}</span><span><i style="background:${sCol(t.sport)}"></i>${sName(t.sport)}</span>${t.photos ? `<span>${t.photos} Fotos</span>` : ""}${t.has_hr ? `<span class="hrt" title="Mit Herzfrequenz">❤</span>` : ""}${t.stars ? `<span class="stars" title="Meine Bewertung">${"★".repeat(t.stars)}</span>` : ""}</div></span>
+  return `<a class="tr${trfOn() ? " trf" : ""}" href="#/tour/${t.id}">${trThumb(t)}<span><div class="nm">${esc(t.name)}</div><div class="s"><span>${fmtDatumKurz(t.date, {zeit: true})}</span><span><i style="background:${sCol(t.sport)}"></i>${sName(t.sport)}</span>${t.photos ? `<span>${fmtAnzahl(t.photos, "Foto", "Fotos")}</span>` : ""}${t.has_hr ? `<span class="hrt" title="Mit Herzfrequenz">❤</span>` : ""}${t.stars ? `<span class="stars" title="Meine Bewertung">${"★".repeat(t.stars)}</span>` : ""}</div></span>
   <span class="n"><span>${fmtKm(t.km)}</span><span>${fmtAuf(t.up_m)}</span><span>${fmtDauer(t.h * 3600)}</span></span></a>`;
 }
 
@@ -318,7 +318,7 @@ VIEWS.map = async () => {
           r.map(p => [p[0], p[1]])
         );
     });
-    $("#mc").textContent = `${n} Touren`;
+    $("#mc").textContent = `${fmtAnzahl(n, "Tour", "Touren")}`;
     return b;
   };
   // Beim Hineinzoomen: fehlende bzw. grob vereinfachte Strecken der sichtbaren Touren in voller Genauigkeit nachladen
@@ -563,7 +563,7 @@ VIEWS.tours = async (_name, qp) => {
     );
     const k = {date: t => -t.start_ts, old: t => t.start_ts, km: t => -t.km, up: t => -(t.up_m || 0), h: t => -t.h}[so];
     a.sort((x, z) => k(x) - k(z));
-    $("#cnt").textContent = `${a.length} Touren, ${nf(
+    $("#cnt").textContent = `${fmtAnzahl(a.length, "Tour", "Touren")}, ${nf(
       a.reduce((c, t) => c + t.km, 0),
       0
     )}\u00a0km`;

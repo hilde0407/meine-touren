@@ -143,11 +143,12 @@ VIEWS.dash = async (n, q) => {
   const ys = years(),
     Y = +(q.get("y") || 0) || 0;
   /* 3.45.0: Die Ziele (Anzeige und Pflege) sind der Baustein „Ziele“ (52-bausteine-uebersicht.js), als Abschnitt „Ziele“ der Statistik mit „Ziel hinzufügen“ und Löschen. */
-  const yrs = $(".years");
-  if (yrs)
+  /* 3.71.0 (H-01): der Knopf steht in der Titelzeile des Filters (sie bricht um), nicht mehr in der seitlich scrollenden Jahresleiste, wo er am Handy abgeschnitten wurde */
+  const yrs = $("#stf .sec") || $(".years");
+  if (yrs && !yrs.querySelector(".recaplink"))
     yrs.insertAdjacentHTML(
       "beforeend",
-      `<a class="btn ghost sm" style="margin-left:auto;align-self:center" href="#/recap/${Y || ys[0]}">Jahresrückblick ${Y || ys[0]}</a>`
+      `<span class="sp"></span><a class="btn ghost sm recaplink" href="#/recap/${Y || ys[0]}">Jahresrückblick ${Y || ys[0]}</a>`
     );
 };
 
@@ -206,7 +207,7 @@ VIEWS.records = async (_, q) => {
     .filter(a => !fs || (BY[a.id] && (isSg(fs) ? sgMatch(BY[a.id].sport, [fs]) : BY[a.id].sport === fs)))
     .slice(0, 8);
   $("#main").innerHTML =
-    `<div class="sec mt0"><h2>Bestwerte</h2><span class="sub">${nf(T.length, 0)} Touren seit ${T[T.length - 1].y}${fs ? " · " + sName(fs) : ""}</span></div>${chips}
+    `<div class="sec mt0"><h2>Bestwerte</h2><span class="sub">${fmtAnzahl(T.length, "Tour", "Touren")} seit ${T[T.length - 1].y}${fs ? " · " + sName(fs) : ""}</span></div>${chips}
    <div class="figs"><div class="fig"><div class="v">${nf(km / 40075, 2)}<span class="u">×</span></div><div class="l">um die Erde (${fmtKm(km, {d: 0})})</div></div>
     <div class="fig"><div class="v">${nf(up / 8849, 1)}<span class="u">×</span></div><div class="l">Mount Everest bergauf (${fmtHm(up)})</div></div>
     <div class="fig"><div class="v">${nf(h / 24, 1)}<span class="u">Tage</span></div><div class="l">unterwegs (${fmtDauer(h * 3600, {summe: true})})</div></div>
@@ -234,7 +235,7 @@ VIEWS.records = async (_, q) => {
             a.filter(t => t.km >= 3 && t.h > 0),
             t => t.km / t.h
           );
-        return `<div class="r" style="display:block"><div><i class="sw" style="background:${sCol(s)}"></i><b style="font:600 20px var(--d)"${isSg(s) ? ` title="${esc(sgTitle(s))}"` : ""}>${isSg(s) ? esc(sName(s)) : sName(s)}</b> <span class="mut">· ${a.length} Touren, ${nf(
+        return `<div class="r" style="display:block"><div><i class="sw" style="background:${sCol(s)}"></i><b style="font:600 20px var(--d)"${isSg(s) ? ` title="${esc(sgTitle(s))}"` : ""}>${isSg(s) ? esc(sName(s)) : sName(s)}</b> <span class="mut">· ${fmtAnzahl(a.length, "Tour", "Touren")}, ${nf(
           sum(a, t => t.km),
           0
         )}\u00a0km, ${nf(
@@ -597,7 +598,7 @@ VIEWS.map = async () => {
       y = yearSel(),
       o = off();
     const a = TOURS.filter(t => (!y || t.y === y) && !o.has(t.sport) && cleanPts(routes[t.id]).some(p => b.contains(p)));
-    const md = uiModal(`<div class="sec m0-0-10"><h2>Im Kartenausschnitt</h2><span class="sub">${a.length} Touren, ${fmtKm(a.reduce((c, t) => c + t.km, 0), {summe: true})} · ${fmtAuf(a.reduce((c, t) => c + (t.up_m || 0), 0))}</span></div>
+    const md = uiModal(`<div class="sec m0-0-10"><h2>Im Kartenausschnitt</h2><span class="sub">${fmtAnzahl(a.length, "Tour", "Touren")}, ${fmtKm(a.reduce((c, t) => c + t.km, 0), {summe: true})} · ${fmtAuf(a.reduce((c, t) => c + (t.up_m || 0), 0))}</span></div>
       <div class="tl">${a.slice(0, 300).map(tourRow).join("") || '<div class="empty">Keine Touren in diesem Ausschnitt. Zoome heraus oder verschiebe die Karte.</div>'}</div>
       <div class="uifoot"><button class="btn ghost" id="mbc">Schließen</button></div>`);
     md.classList.add("mbxfen");
@@ -661,7 +662,7 @@ async function bkInit() {
     if (g) {
       const von = g.name && g.alter_h != null ? `<span class="ml8">Geprüft: Sicherung vom ${dt(g.ts - g.alter_h * 3600)}.</span>` : "";
       if (g.ok) {
-        const inh = g.layouts != null ? `Enthält ${g.touren} Touren, ${g.tracks} Tracks und ${g.layouts} Ansichten` : `Enthält ${g.touren} Touren und ${g.tracks} Tracks`;
+        const inh = g.layouts != null ? `Enthält ${fmtAnzahl(g.touren, "Tour", "Touren")}, ${g.tracks} Tracks und ${g.layouts} Ansichten` : `Enthält ${fmtAnzahl(g.touren, "Tour", "Touren")} und ${g.tracks} Tracks`;
         h += `<p class="ok" id="bkok"><span aria-hidden="true">✓</span> <span>Zuletzt geprüft: ${dt(g.ts)}, in Ordnung</span></p><p class="mut fs13"><span>${inh}.</span>${von}</p>`;
       } else h += `<p class="bad" id="bkbad"><span aria-hidden="true">✗</span> <span>Zuletzt geprüft: ${dt(g.ts)}, Fehler: ${esc(g.fehler || "")}</span></p>`;
     } else h += `<p class="mut">Die letzte Sicherung wurde noch nicht geprüft.</p>`;

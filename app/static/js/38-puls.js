@@ -182,7 +182,7 @@ VIEWS.pulse = async (_, q) => {
   const hard = [...sel].map(x => ({...x, hs: (x.zones[3] + x.zones[4]) / x.sec})).sort((a, b) => b.hs - a.hs || b.avg - a.avg).slice(0, 8),
     zbar = `<div class="zbar">${zs.map((s, i) => `<span style="flex:${Math.max(s, 0.001)};background:${HR_ZC[i]}" title="Z${i + 1} ${HR_ZN[i]}: ${fmtDauer(s)}"></span>`).join("")}</div>
       <div class="mut zleg">${zs.map((s, i) => `<span><i style="background:${HR_ZC[i]}"></i>Z${i + 1} ${HR_ZN[i]}: ${fmtDauer(s)} (${Math.round((s / (tot || 1)) * 100)}\u00a0%)</span>`).join("")}</div>`;
-  main.innerHTML = `<div class="sec mt0"><h2>Puls</h2><span class="sub">${nf(sel.length, 0)} Touren mit Herzfrequenz</span></div>
+  main.innerHTML = `<div class="sec mt0"><h2>Puls</h2><span class="sub">${fmtAnzahl(sel.length, "Tour", "Touren")} mit Herzfrequenz</span></div>
     <div class="chips mb12"><a class="chip ${Y ? "" : "on"}" href="#/pulse">Gesamte Zeit</a>${ys.map(y => `<a class="chip ${Y === y ? "on" : ""}" href="#/pulse?y=${y}">${y}</a>`).join("")}</div>
     <div class="figs"><div class="fig"><div class="v">${nf(hh(tot), 0)}<span class="u">h</span></div><div class="l">mit Pulsmessung</div></div>
       <div class="fig"><div class="v">${avg}<span class="u">bpm</span></div><div class="l">Puls im Schnitt</div></div>

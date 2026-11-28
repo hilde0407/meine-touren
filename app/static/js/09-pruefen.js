@@ -78,7 +78,7 @@ VIEWS.check = async () => {
           (b.onclick = () => {
             const row = b.closest("[data-id]"),
               d = row.dataset;
-            const m = uiModal(`<h3>Tour löschen?</h3><p>„${esc(d.name)}“ (${fmtKm(+d.km)}) wird aus Meine Touren entfernt – mit Strecke, Notizen und Schlagwörtern. Zugeordnete Fotos bleiben erhalten.</p>
+            const m = uiModal(`<h3>Tour löschen?</h3><p>„${esc(d.name)}“ (${fmtKm(+d.km)}) wird in Meine Touren gelöscht – mit Strecke, Notizen und Schlagwörtern. Zugeordnete Fotos bleiben erhalten. Zurückholen lässt sich die Tour nur aus einer Sicherung.</p>
         ${d.onk ? `<label class="chk"><input type="checkbox" id="dk"> <b>auch bei Komoot endgültig löschen</b> <span class="mut">(lässt sich nicht rückgängig machen)</span></label>` : ""}
         ${!d.local && d.onk ? `<p class="mut fs13">Ohne Häkchen bleibt die Tour bei Komoot und wird beim nächsten Abgleich nicht wieder übernommen.</p>` : ""}
         <div id="dm" class="mut"></div><div class="uifoot"><button class="btn ghost" id="dx">Abbrechen</button><button class="btn alt uidanger" data-danger id="dok">Löschen</button></div>`);
@@ -325,7 +325,7 @@ VIEWS.check = async (...a) => {
       b.disabled = true;
       try {
         const x = await api("/api/sport-umzug/laufen", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({ids})});
-        $("#zlm").textContent = x.n === 1 ? "1 Tour umgestellt." : `${x.n} Touren umgestellt.`;
+        $("#zlm").textContent = x.n === 1 ? "1 Tour umgestellt." : `${fmtAnzahl(x.n, "Tour", "Touren")} umgestellt.`;
         await loadTours();
         route();
       } catch (e) {
@@ -336,7 +336,7 @@ VIEWS.check = async (...a) => {
   box.querySelectorAll("[data-zl]").forEach(b => (b.onclick = () => go([b.closest("[data-id]").dataset.id], b)));
   $("#zlall").onclick = async e => {
     const b = e.currentTarget;
-    if (!(await uiConfirm({text: `Alle ${k.length} Touren auf „Laufen“ umstellen? Die Sportart gilt dann als von dir gewählt und bleibt auch nach dem Komoot-Abgleich.`, ok: "Umstellen"}))) return;
+    if (!(await uiConfirm({text: `Alle ${fmtAnzahl(k.length, "Tour", "Touren")} auf „Laufen“ umstellen? Die Sportart gilt dann als von dir gewählt und bleibt auch nach dem Komoot-Abgleich.`, ok: "Umstellen"}))) return;
     go(k.map(t => t.id), b);
   };
 };
@@ -377,12 +377,12 @@ VIEWS.check = async (...a) => {
     $("#snall").onclick = async e => {
       const b = e.currentTarget;
       if (!(await uiConfirm({text: `${k.length} Touren als „Schneeschuh“ führen? Das lässt sich hier wieder zurücknehmen.`, ok: "Als Schneeschuh führen"}))) return;
-      done("/api/schneeschuh/umstellen", b, x => (x === 1 ? "1 Tour umgestellt." : `${x} Touren umgestellt.`));
+      done("/api/schneeschuh/umstellen", b, x => (x === 1 ? "1 Tour umgestellt." : `${fmtAnzahl(x, "Tour", "Touren")} umgestellt.`));
     };
   if ($("#snback"))
     $("#snback").onclick = async e => {
       const b = e.currentTarget;
       if (!(await uiConfirm({text: "Die als Schneeschuh geführten Touren wieder als Wandern führen? Das Schlagwort „Schneeschuh“ bleibt.", ok: "Zurücknehmen"}))) return;
-      done("/api/schneeschuh/zuruecknehmen", b, x => (x === 1 ? "1 Tour zurückgenommen." : `${x} Touren zurückgenommen.`));
+      done("/api/schneeschuh/zuruecknehmen", b, x => (x === 1 ? "1 Tour zurückgenommen." : `${fmtAnzahl(x, "Tour", "Touren")} zurückgenommen.`));
     };
 };

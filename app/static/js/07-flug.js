@@ -127,7 +127,7 @@ VIEWS.flight = async id => {
           lng: 8,
         }
       : BY[id];
-  if (!t) throw new Error("Tour nicht gefunden");
+  if (!t) throw notFound("Tour", "#/tours", "Alle Touren");
   $("#main").className = "wide";
   $("#main").innerHTML =
     `<div class="flight" id="fl"><div id="fm"></div><div class="fbar"><a class="btn ghost sm" href="${SET ? "#" : "#/tour/" + t.id}"${SET ? ' data-act="back"' : ""}>‹ Zurück</a><b class="ft">${esc(t.name)}</b><span class="sp"></span><span id="fh" class="fh"></span></div>

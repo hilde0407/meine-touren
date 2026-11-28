@@ -207,11 +207,11 @@ html.mob .umpop{top:48px;right:8px}
 html.mob main{padding:16px 14px 24px}html.mob main.wide{padding:0}
 html.mob h1{font-size:30px}html.mob .sec h2{font-size:24px}html.mob .sec{flex-wrap:wrap;gap:6px}
 html.mob input,html.mob select,html.mob textarea{font-size:16px;min-height:44px}
-html.mob .btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:8px 16px}html.mob .btn.sm{min-height:40px;padding:6px 12px;font-size:15px}
-html.mob .chip{min-height:38px;display:inline-flex;align-items:center}
+html.mob .btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:8px 16px}html.mob .btn.sm{min-height:44px;padding:6px 12px;font-size:15px}
+html.mob .chip{min-height:44px;display:inline-flex;align-items:center}
 html.mob .filters{flex-direction:column;align-items:stretch}html.mob .filters>*{width:100%;min-width:0!important}
 html.mob .figs{grid-template-columns:1fr 1fr;gap:6px 0}html.mob .fig{margin:0 0 10px;padding:4px 10px 4px 0;border:0}html.mob .fig .v{font-size:30px}
-html.mob .grid.g2,html.mob .grid{grid-template-columns:1fr!important}
+html.mob .grid.g2,html.mob .grid{grid-template-columns:minmax(0,1fr)!important}.grid>*{min-width:0}   /* 3.71.0 (H-02): Panels mit Chips-Zeile oder Diagramm dehnen die Spalte nicht mehr über den Bildschirm */
 html.mob .hero{min-height:440px}html.mob .hero h1{font-size:34px}html.mob .hero .in{padding:0 16px 22px;gap:18px}html.mob .signs{width:100%}
 html.mob .hnav{top:24%}html.mob .hdots{top:10px;right:10px}
 html.mob .tmap{height:300px;margin-top:16px}
@@ -2582,3 +2582,59 @@ html.mob .livem-row,.livem-row.mob{flex-direction:column;align-items:stretch}
 html.mob .livem-row select{width:100%}
 html.mob .livem-row .btn{align-self:flex-start}
 @media (max-width:640px){.livem-row{flex-direction:column;align-items:stretch}.livem-row select{width:100%}.livem-row .btn{align-self:flex-start}}
+
+/* =====================  3.71.0 Prüfbericht: Überlauf, klebender Dialogfuß  ===================== */
+/* H-01 Jahresrückblick-Knopf steht in der Titelzeile des Filters; H-02 Chips-Zeile der Leistungsdiagramme bricht um */
+.stf .sec .recaplink{align-self:center}
+.chips.chwrap{align-items:center}
+html.mob .chips.chwrap{flex-wrap:wrap;overflow:visible}
+/* H-03 lange Knopftexte und Code brechen um (nie über den Bildschirm) */
+html.mob .panel .row .btn,#slfacb{white-space:normal;max-width:100%;text-align:left}
+code,.uitext code{overflow-wrap:anywhere}
+/* H-04 Dialogfuß klebt unten: Speichern/Abbrechen bleiben bei langen Dialogen sichtbar (gemeinsam für alle Dialoge mit .uifoot) */
+.uibox{--uipb:18px}
+html.mob .uimod .uibox{--uipb:calc(18px + env(safe-area-inset-bottom))}
+.uibox .uifoot{position:sticky;bottom:calc(-1 * var(--uipb));z-index:3;background:var(--card,var(--bg));margin-top:14px;margin-bottom:calc(-1 * var(--uipb));padding:12px 0 var(--uipb)}
+/* M-09 gemeinsame Fehlerkarte (errCard, 01-grundlagen.js) */
+.errcard{padding:48px 10px}.errcard p{max-width:48ch;margin:0 auto 12px;overflow-wrap:anywhere}
+.errcard .errbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px}
+
+/* =====================  3.71.0 M-07 Touch-Ziele am Handy (html.mob): alles Antippbare mindestens 44 × 44 px  ===================== */
+html.mob .tlchip,html.mob .tlall,html.mob .years button,html.mob .segtabs a,
+html.mob .atabs button,html.mob .atabs .atlink,html.mob .filters .btn,html.mob .mapui .chip,html.mob .mapui>.kaopen .btn,html.mob .hero .btns .btn{min-height:44px}
+html.mob a.chip,html.mob label.chip,html.mob button.chip{display:inline-flex;align-items:center}
+html.mob .segtabs a{display:inline-flex;align-items:center;justify-content:center}
+html.mob .atabs button,html.mob .atabs .atlink{display:inline-flex;align-items:center}
+html.mob .top .brand{display:inline-flex;align-items:center;min-height:44px}
+html.mob #gs{width:44px;height:44px;min-width:44px}
+html.mob .umenu{min-width:44px;min-height:44px;justify-content:center}
+html.mob .starrow button.st{min-width:44px;min-height:44px;padding:0}
+html.mob .backl,html.mob .back,html.mob .hmore,html.mob .gblink,html.mob .dvulink,html.mob a.fw600.tourlink{display:inline-flex;align-items:center;min-height:44px}
+html.mob .dvulink{padding:0 2px}
+html.mob #hprev,html.mob #hnext{min-width:44px;min-height:44px}
+html.mob #mloc{min-width:44px}
+html.mob details:not(.tls):not(.recset)>summary{min-height:44px;box-sizing:border-box}
+:where(html.mob details:not(.tls)>summary){padding-block:12px}
+html.mob .wbar .btn{min-height:44px}
+html.mob .rows .r a:not(.btn),html.mob #memsub a,html.mob .pgroup .ph h3 a{display:inline-flex;align-items:center;min-height:44px}
+html.mob .btn,html.mob .rows .r a:not(.btn){min-width:44px}
+html.mob .favlist .btn.sm{min-width:44px;min-height:44px}
+html.mob .starrow{flex-wrap:wrap;gap:0 2px}html.mob .starrow>.mut{flex-basis:100%}
+
+/* =====================  3.71.0 M-08 Kontrast (WCAG AA) – Farben-Token für Text, überall gleich  ===================== */
+/* Erfolg/Fehler als Text: eigene Token (die Sportartfarben --hike/--run bleiben für Strecken und Punkte, wie sie sind) */
+:root{--ok-text:#1d6b46;--bad-text:#b3261e;--star:#a35f00}
+@media (prefers-color-scheme:dark){:root{--ok-text:#6fd1a0;--bad-text:#f08a84;--star:#d98a1f}}
+.ok{color:var(--ok-text)}.bad{color:var(--bad-text)}
+.stars,.starrow button.st.on{color:var(--star)}
+/* Sport-Etikett: weiße Schrift auf der Sportartfarbe – die Farbe wird um 30 % abgedunkelt (Kontrast ≥ 4,5 : 1 für alle Katalogfarben, auch das Grau „andere“) */
+.tag{box-shadow:inset 0 0 0 999px rgba(0,0,0,.3)}
+.hero .stars,.hli .stars{color:#e8a23a}
+
+/* =====================  3.71.0 M-11 Sicherungs-Banner kompakt: am Handy eine Zeile (Kurztext), Knöpfe daneben  ===================== */
+.wbar .wbk{display:none}
+html.mob .wbar{flex-wrap:nowrap;gap:8px;padding:4px 12px}
+html.mob .wbar .wbl{display:none}html.mob .wbar .wbk{display:inline}
+html.mob .wbar .wbt{flex:1 1 0;min-width:0}
+html.mob .wbar .wba{width:auto;flex:none;margin-left:0}
+html.mob .warnbar a{display:inline-flex;align-items:center;min-height:44px}

@@ -12,6 +12,10 @@
   const norm = (o, kind) => {
     o = o && typeof o === "object" && ("text" in o || "html" in o || "title" in o) ? Object.assign({}, o) : {text: o == null ? "" : String(o)};
     o.kind = kind;
+    if (o.title == null && kind === "alert" && typeof o.text === "string") {          // 3.71.0: „<Vorgang> nicht möglich: <Grund>“ → Titel „<Vorgang> nicht möglich“, Text = Grund (nie der allgemeine Titel „Hinweis“)
+      const m = /^(.{3,60}?) nicht möglich:?\s+([\s\S]+)$/.exec(o.text);
+      if (m) { o.title = m[1] + " nicht möglich"; o.text = m[2]; }
+    }
     if (o.title == null) o.title = kind === "alert" ? "Hinweis" : o.danger ? "Bist du sicher?" : "Bitte bestätigen";
     if (o.ok == null) o.ok = kind === "alert" ? "Schließen" : "Bestätigen";        // 3.61.0: kein „OK“ – Aufrufer nennen die Hauptaktion selbst (Leitfaden 2.1)
     if (o.cancel == null) o.cancel = "Abbrechen";
@@ -162,6 +166,14 @@
 
   window.uiConfirm = o => open(o, "confirm");
   window.uiAlert = o => open(o, "alert");
+  /* 3.71.0 Fehler mit Wiederholen (Prüfbericht M-06): Titel „<Vorgang> nicht möglich“, der Grund in einfachen Worten, links „Schließen“, rechts „Noch einmal versuchen“.
+       uiRetry({vorgang, error|text, retry}) -> Promise<boolean>   (true = der Benutzer will es noch einmal versuchen; mit `retry` wird die Funktion gleich aufgerufen) */
+  window.uiRetry = async o => {
+    const grund = o.text || (o.error && o.error.message) || String(o.error || "");
+    const again = await open({title: `${o.vorgang} nicht möglich`, text: grund, ok: "Noch einmal versuchen", cancel: "Schließen"}, "confirm");
+    if (again && typeof o.retry === "function") await o.retry();
+    return !!again;
+  };
 
   /* 3.61.0 Eingabe statt prompt() (Leitfaden 2.1: keine Browser-Fenster): ein Feld, „Abbrechen“ links, die benannte Hauptaktion rechts; Enter im Feld bestätigt.
        uiPrompt({title, label, value, type, ok, hint, min}) -> Promise<string|null>   (null = abgebrochen; min = Mindestlänge, sonst bleibt der Knopf aus) */

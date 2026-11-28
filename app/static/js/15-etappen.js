@@ -49,7 +49,7 @@ function seriesTrip(s) {
 }
 VIEWS.series = async id => {
   const s = seriesList().find(x => x.id === id || decodeURIComponent(x.id) === decodeURIComponent(id));
-  if (!s) throw new Error("Mehrtagestour nicht gefunden");
+  if (!s) throw notFound("Mehrtagestour", "#/trips", "Alle Reisen");
   const tr = seriesTrip(s);
   await collView(s.name, `${s.n} Etappen · ${fmtDatum(tr.start)}${tr.end !== tr.start ? " – " + fmtDatum(tr.end) : ""}`, s.ids, "#/trips", {serie: tr});
 };
@@ -79,7 +79,7 @@ function seriesBuildDialog() {
    <div class="row g8 aic"><label>Von <input id="sbf" type="date" value="${iso(newest - 6 * 86400)}"></label><label>bis <input id="sbt" type="date" value="${iso(newest)}"></label></div>
    <div class="row g8 aic mt8"><input id="sbn" placeholder="Name, z. B. Alpenüberquerung E5" class="fx1 mnw200"><select id="sbw" style="width:auto"><option>Tag</option><option>Etappe</option></select></div>
    <div id="sbl" class="rows m10-0 ova" style="max-height:260px"></div>
-   <div id="sber" class="bad"></div><div class="uifoot"><button class="btn ghost" id="sbno">Abbrechen</button><button class="btn" id="sbok">Benennen</button></div>`);
+   <div id="sber" class="bad"></div><div class="uifoot"><button class="btn ghost" id="sbno">Abbrechen</button><button class="btn" id="sbok">Speichern</button></div>`);
   const list = () => {
     const f = m.querySelector("#sbf").value,
       t = m.querySelector("#sbt").value;

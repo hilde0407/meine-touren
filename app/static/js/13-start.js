@@ -136,7 +136,7 @@ async function healthBanner() {
         u
           ? `<div>⬆ Neue Version <b>${esc(u.latest)}</b> verfügbar (installiert: ${esc(u.current)}). <a href="#/admin">${u.can_install ? "Jetzt installieren" : "Details"}</a></div>`
           : ""
-      }${_hl.v.length ? '<a href="#/admin">Verwaltung öffnen</a>' : ""}</div>`
+      }${_hl.v.length && !location.hash.startsWith("#/admin") ? '<a href="#/admin">Verwaltung öffnen</a>' : ""}</div>`
     );
     const bb = m.querySelector('[data-act="backup"]');
     if (bb)

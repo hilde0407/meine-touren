@@ -47,8 +47,15 @@ const api = async (u, o) => {
     _FL.clear();
     if (typeof isViewer === "function" && isViewer() && !/^\/api\/(login|logout)/.test(u + "")) throw new Error("Dieser Zugang darf nur ansehen");
   }
-  const tok = window._rt,
+  const tok = window._rt;
+  let r;
+  try {
     r = await (!o && typeof u === "string" ? _once(u) : fetch(u, o));
+  } catch (x) {
+    const n = new Error("Keine Verbindung zum Server. Bitte Verbindung prüfen und noch einmal versuchen.");      // 3.71.0: statt „Failed to fetch“
+    n.offline = true;
+    throw n;
+  }
   if (tok && tok !== window._rt && (!o || !o.method || o.method === "GET")) return STALE();
   if (r.status === 401 && ME.users_enabled && !(u + "").startsWith("/api/login")) {
     showAuth("login", "Bitte anmelden.");
@@ -59,7 +66,12 @@ const api = async (u, o) => {
     try {
       m = JSON.parse(m).detail || m;
     } catch (e) {}
-    throw new Error(m || r.status);
+    if (Array.isArray(m)) m = m.map(x => (x && x.msg) || JSON.stringify(x)).join("; ");      // 422 von FastAPI: Liste der Fehler
+    else if (typeof m !== "string") m = m && m.message ? m.message : JSON.stringify(m);
+    if (/^\s*<(!doctype|html)|^Internal Server Error$|Traceback \(most recent call last\)/i.test(m || "")) m = "Unerwarteter Fehler im Server. Bitte noch einmal versuchen.";      // 3.71.0: keine rohen Serverseiten oder Ausnahmen
+    const n = new Error(m || r.status);
+    n.status = r.status;
+    throw n;
   }
   const j = await r.json();
   if (window.noTrAdd) window.noTrAdd(u, j);      // eigene Namen nie übersetzen (00-i18n.js)
@@ -743,12 +755,35 @@ async function route() {
   const tok = (window._rt = (window._rt || 0) + 1); // nur die zuletzt geöffnete Seite darf Fehler anzeigen
   try {
     if (!TOURS.length) await loadTours();
+    if (!TOURS.length && EMPTY_PAGES.includes(k)) {      // 3.71.0 (M-10): leerer Bestand – überall dieselbe Karte statt leerer Filter, leerer Karte oder doppelter Hinweise
+      $("#main").innerHTML = emptyTours();
+      return;
+    }
     await (VIEWS[k] || VIEWS.dash)(name, new URLSearchParams(qs || ""));
   } catch (e) {
-    if (tok === window._rt) $("#main").innerHTML = `<div class="card bad">${esc(e.message)}</div>`;
+    if (tok === window._rt) $("#main").innerHTML = errCard(e);
   }
 }
 addEventListener("hashchange", route);
+/* 3.71.0 Gemeinsame Fehlerkarte (M-09, M-06): „… nicht gefunden“ (Adresse passt zu nichts) und Fehler beim Laden einer Seite zeigen Titel, Grund und einen Rückweg –
+   nie nur einen roten Satz. notFound("Tour", "#/tours", "Alle Touren") wirft einen Fehler mit Rückweg; jeder andere Fehler bekommt „Noch einmal versuchen“ und „Zur Übersicht“. */
+const EMPTY_PAGES = ["dash", "tours", "map", "stats", "records", "places"];
+const emptyTours = () =>
+  `<div class="empty"><h2>Noch keine Touren</h2><p>Unter <a href="#/admin"><b>Verwaltung</b></a> kannst du Zepp-Trainings oder GPX/TCX-Dateien importieren – sie werden lokal gespeichert. Optional: Komoot-Zugangsdaten eintragen und „Komoot aktualisieren“.</p></div>`;
+const notFound = (was, back, label, text) => {
+  const e = new Error(`${was} nicht gefunden`);
+  e.nf = {title: e.message, back, label, text: text || "Die Adresse passt zu nichts (mehr): Vielleicht wurde der Eintrag gelöscht oder der Link ist nicht vollständig."};
+  return e;
+};
+function errCard(e) {
+  const n = e && e.nf;
+  if (n)
+    return `<div class="empty errcard" role="alert"><h2>${esc(n.title)}</h2><p>${esc(n.text)}</p><p class="errbtns">${n.back ? `<a class="btn" href="${esc(n.back)}">‹ ${esc(n.label)}</a>` : ""}<a class="btn alt" href="#/dash">Zur Übersicht</a></p></div>`;
+  return `<div class="empty errcard" role="alert"><h2>Die Seite konnte nicht geladen werden</h2><p>${esc((e && e.message) || "Unbekannter Fehler")}</p><p class="errbtns"><button type="button" class="btn" data-errretry>Noch einmal versuchen</button><a class="btn alt" href="#/dash">Zur Übersicht</a></p></div>`;
+}
+document.addEventListener("click", e => {
+  if (e.target.closest && e.target.closest("[data-errretry]")) route();
+});
 
 function miniRoute(id, sport) {
   const r = ROUTES && ROUTES[id];

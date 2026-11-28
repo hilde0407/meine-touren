@@ -26,8 +26,8 @@ function blRangeQuery() {
 function blLines(b, mode) {
   const l = [blLabel(b, mode), blRange(b)];
   if (!b.touren) l.push("Keine Tour");
-  else if (b.belastung == null) l.push(b.touren === 1 ? `${b.touren} Tour ohne Uhr-Daten (keine Angabe)` : `${b.touren} Touren ohne Uhr-Daten (keine Angabe)`);
-  else l.push(`Belastung ${nf(b.belastung, 0)}`, `${b.mit_daten} von ${b.touren} Touren mit Uhr-Daten`);
+  else if (b.belastung == null) l.push(b.touren === 1 ? `${b.touren} Tour ohne Uhr-Daten (keine Angabe)` : `${fmtAnzahl(b.touren, "Tour", "Touren")} ohne Uhr-Daten (keine Angabe)`);
+  else l.push(`Belastung ${nf(b.belastung, 0)}`, `${b.mit_daten} von ${fmtAnzahl(b.touren, "Tour", "Touren")} mit Uhr-Daten`);
   return l;
 }
 
@@ -270,9 +270,9 @@ async function tpDraw(root) {
   const e = d.gruppen[BL.sport] || {touren: 0};
   let h = "";
   if (e.touren) {
-    h += `<div class="utiles">` + TP_CLS.filter(c => e[c[0]] != null).map(c => `<div class="utile" title="${esc(c[2])}"><b>${fmtTempo(e[c[0]])}</b><span class="mut">${c[1]}</span><small class="mut">${e["n_" + c[0]]} Touren</small></div>`).join("") +
-      (e.vert_mh != null ? `<div class="utile" title="Steigung über 5 %"><b>${nf(e.vert_mh, 0)} m/h</b><span class="mut">Aufstieg pro Stunde</span><small class="mut">${e.n_vert_mh} Touren</small></div>` : "") + `</div>`;
-    h += `<div class="mut hrnote"><span>Median über ${e.touren} Touren (mindestens 2 km, mit Höhendaten).</span> <span>Nur Bewegungszeit: Pausen unter 0,3 km/h sind herausgenommen; die Steigung ist über etwa 50 m geglättet.</span></div>`;
+    h += `<div class="utiles">` + TP_CLS.filter(c => e[c[0]] != null).map(c => `<div class="utile" title="${esc(c[2])}"><b>${fmtTempo(e[c[0]])}</b><span class="mut">${c[1]}</span><small class="mut">${fmtAnzahl(e["n_" + c[0]], "Tour", "Touren")}</small></div>`).join("") +
+      (e.vert_mh != null ? `<div class="utile" title="Steigung über 5 %"><b>${nf(e.vert_mh, 0)} m/h</b><span class="mut">Aufstieg pro Stunde</span><small class="mut">${fmtAnzahl(e.n_vert_mh, "Tour", "Touren")}</small></div>` : "") + `</div>`;
+    h += `<div class="mut hrnote"><span>Median über ${fmtAnzahl(e.touren, "Tour", "Touren")} (mindestens 2 km, mit Höhendaten).</span> <span>Nur Bewegungszeit: Pausen unter 0,3 km/h sind herausgenommen; die Steigung ist über etwa 50 m geglättet.</span></div>`;
   } else h += `<p class="mut">Keine Touren mit Höhendaten und mindestens 2 km.</p>`;
   if (d.offen) h += `<div class="mut hrnote" role="status">${d.offen} Touren werden noch berechnet …</div>`;
   box.innerHTML = h;
@@ -291,7 +291,7 @@ async function tpCalc(root) {
   }
   try {
     const r = await api(`/api/stats/gehzeit?km=${encodeURIComponent(km)}&auf=${encodeURIComponent(auf)}&ab=${encodeURIComponent(ab)}&sport=${BL.sport}${BL.jahr ? "&jahr=" + BL.jahr : ""}`);
-    const src = r.quelle === "eigene" ? `Grundlage: deine Werte aus ${r.touren} Touren.` : r.quelle === "teilweise" ? `Teilweise deine Werte (aus ${r.touren} Touren), der Rest sind Standardwerte (Naismith).` : "Noch zu wenig eigene Daten – es gelten Standardwerte (Naismith: 5 km/h, 1 Stunde je 600 m Aufstieg).";
+    const src = r.quelle === "eigene" ? `Grundlage: deine Werte aus ${fmtAnzahl(r.touren, "Tour", "Touren")}.` : r.quelle === "teilweise" ? `Teilweise deine Werte (aus ${fmtAnzahl(r.touren, "Tour", "Touren")}), der Rest sind Standardwerte (Naismith).` : "Noch zu wenig eigene Daten – es gelten Standardwerte (Naismith: 5 km/h, 1 Stunde je 600 m Aufstieg).";
     out.innerHTML = `<div class="tpbig"><span>Geschätzte Gehzeit:</span> <b>${blDur(r.sekunden)}</b></div><div class="mut hrnote"><span>Reine Gehzeit ohne Pausen.</span> <span>${src}</span></div>`;
   } catch (e) {
     out.textContent = e.message || "Fehler";

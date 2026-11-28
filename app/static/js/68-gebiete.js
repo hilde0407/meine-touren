@@ -147,7 +147,7 @@ Object.assign(window.SL_WT, {
       if (nb) nb.onclick = () => erLoad(b, cfg, k.mode === "random" ? {...o, fresh: true} : {...o, mix: true});
       return erLoad(b, cfg, o).then(() => {
         const n = (b._erList || []).length;
-        if (n) slBadge(c, n === 1 ? "1 Foto" : `${n} Fotos`);
+        if (n) slBadge(c, n === 1 ? "1 Foto" : `${fmtAnzahl(n, "Foto", "Fotos")}`);
       });
     },
   },
@@ -238,14 +238,14 @@ function gbFrame() {
 }
 
 /* ---------- Seite eines Gebiets #/area/<Kennung> ---------- */
-const gbAlle = n => `Alle ${nf(n, 0)} Touren in der Liste ›`;
+const gbAlle = n => `Alle ${fmtAnzahl(n, "Tour", "Touren")} in der Liste ›`;
 const gbFig = (v, u, l) => `<div class="fig"><div class="v">${v}${u ? `<span class="u">${u}</span>` : ""}</div><div class="l">${l}</div></div>`;
 async function gbAreaBase(id) {
   try {
     id = decodeURIComponent(id || "");
   } catch (e) {}
   const g = Gebiete.nach[id];
-  if (!g) throw new Error("Gebiet nicht gefunden");
+  if (!g) throw notFound("Gebiet", "#/areas", "Alle Gebiete");
   const ts = TOURS.filter(t => inGebiet(t, id)).sort((a, z) => a.start_ts - z.start_ts), st = gbStats(ts)[id], eigen = g.quelle === "eigen", l = gbLand(st), land = l.land || l.top || g.land || "",
     par = g.eltern && Gebiete.nach[g.eltern], box = eigen ? g.boxen[0] : null,
     quelle = eigen
@@ -294,7 +294,7 @@ function gbAreaFrame(g, ts, trips) {
   kopf.id = "gd-kopf";
   kopf.classList.add("rskopf");
   host.appendChild(kopf);
-  const badge = {kennzahlen: ts.length === 1 ? "1 Tour" : `${ts.length} Touren`, reisen: trips.length === 1 ? "1 Reise" : `${trips.length} Reisen`, touren: ts.length === 1 ? "1 Tour" : `${ts.length} Touren`}, title = {kennzahlen: "Kennzahlen", karte: "Karte", reisen: "Reisen in diesem Gebiet", touren: "Touren"};
+  const badge = {kennzahlen: ts.length === 1 ? "1 Tour" : `${fmtAnzahl(ts.length, "Tour", "Touren")}`, reisen: trips.length === 1 ? "1 Reise" : `${trips.length} Reisen`, touren: ts.length === 1 ? "1 Tour" : `${fmtAnzahl(ts.length, "Tour", "Touren")}`}, title = {kennzahlen: "Kennzahlen", karte: "Karte", reisen: "Reisen in diesem Gebiet", touren: "Touren"};
   SL_REG.gebiet.forEach(reg => {
     if (reg.id === "kopf" || reg.build) return;
     const e = main.querySelector(`:scope > [data-gd="${reg.id}"]`);

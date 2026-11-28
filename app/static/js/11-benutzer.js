@@ -38,6 +38,23 @@ async function postJson(url, body) {
   if (!r.ok) throw new Error(j.detail || t || "Fehler " + r.status);
   return j;
 }
+/* 3.71.0 (H-05): Deep Link nach der Anmeldung. Die Adresse, die beim Öffnen des Anmeldefensters galt (z. B. #/tours?g=alpen oder ein geteilter Link zu einer Tour), wird in der Sitzung
+   gemerkt und nach der Anmeldung wieder aufgerufen; ohne Adresse: Startseite (in der Android-App deren Startseite, 30-aufzeichnen.js). */
+const AUTH_BACK_KEY = "mt_after_login";
+function authRemember() {
+  try {
+    const h = location.hash;
+    if (/^#\/[a-z]/i.test(h)) sessionStorage.setItem(AUTH_BACK_KEY, h);
+  } catch (e) {}
+}
+function authBack() {
+  try {
+    const h = sessionStorage.getItem(AUTH_BACK_KEY);
+    sessionStorage.removeItem(AUTH_BACK_KEY);
+    if (h && /^#\/[a-z]/i.test(h)) return h;
+  } catch (e) {}
+  return typeof appHome === "function" ? appHome() : "#/dash";
+}
 /* Zweiter Schritt der Anmeldung: Code aus der Authenticator-App (oder Wiederherstellungscode) */
 function codeBox(w, ticket) {
   w.querySelector("form").innerHTML = `<div class="brandl">Meine Touren</div><h2>Bestätigungscode</h2>
@@ -49,7 +66,7 @@ function codeBox(w, ticket) {
     e.preventDefault();
     try {
       const j = await postJson("/api/login/2fa", {ticket, code: $("#au_c").value});
-      location.hash = typeof appHome === "function" ? appHome() : "#/dash";      // in der Android-App: Startseite der App (30-aufzeichnen.js)
+      location.hash = authBack();      // in der Android-App: Startseite der App (30-aufzeichnen.js)
       location.reload();
     } catch (x) {
       $("#au_e").textContent = x.message;
@@ -77,6 +94,7 @@ function forgotBox(w, who) {
 }
 function showAuth(kind, msg = "") {
   document.querySelector(".authwrap")?.remove();
+  authRemember();
   const setup = kind === "setup",
     w = document.createElement("div");
   w.className = "authwrap";
@@ -86,7 +104,7 @@ function showAuth(kind, msg = "") {
     ${setup ? `<label>E-Mail-Adresse<input id="au_m" type="email" autocomplete="email" required><small class="mut">Wird zum Zurücksetzen des Passworts verwendet.</small></label>` : ""}
     <label>Passwort<input id="au_p" name="password" type="password" autocomplete="${setup ? "new-password" : "current-password"}" required minlength="${setup ? 8 : 1}"></label>
     ${setup ? `<label>Passwort wiederholen<input id="au_p2" type="password" autocomplete="new-password" required></label><p class="mut fs13">Mindestens 8 Zeichen.</p>` : ""}
-    <div class="bad" id="au_e">${esc(msg)}</div><div class="row"><button class="btn" type="submit">${setup ? "Einrichten" : "Anmelden"}</button>${setup ? '<button class="btn alt" type="button" id="au_x">Später</button>' : ""}</div>${setup ? "" : '<p class="m14-0-0"><a href="#" id="au_f">Passwort vergessen?</a></p>'}</form>`;
+    <div class="bad" id="au_e">${esc(msg)}</div><div class="row">${setup ? '<button class="btn alt" type="button" id="au_x">Abbrechen</button>' : ""}<button class="btn" type="submit">${setup ? "Einrichten" : "Anmelden"}</button></div>${setup ? "" : '<p class="m14-0-0"><a href="#" id="au_f">Passwort vergessen?</a></p>'}</form>`;
   document.body.appendChild(w);
   $("#au_n").focus();
   if (setup) $("#au_x").onclick = () => w.remove();
@@ -101,7 +119,7 @@ function showAuth(kind, msg = "") {
     try {
       const j = await postJson(setup ? "/api/setup" : "/api/login", {name: $("#au_n").value, password: $("#au_p").value, email: setup ? $("#au_m").value : undefined});
       if (j && j.need_2fa) return codeBox(w, j.ticket);
-      location.hash = typeof appHome === "function" ? appHome() : "#/dash";
+      location.hash = authBack();
       location.reload();
     } catch (x) {
       $("#au_e").textContent = x.message;
@@ -249,7 +267,7 @@ function userMenu() {
 }
 
 VIEWS.account = async () => {
-  const [gr, us] = await Promise.all([api("/api/grants").catch(() => ({mine: [], received: []})), api("/api/users").catch(() => [])]),
+  const [gr, us] = ME.user ? await Promise.all([api("/api/grants").catch(() => ({mine: [], received: []})), api("/api/users").catch(() => [])]) : [{mine: [], received: []}, []],      // 3.71.0 (M-13): nur mit Benutzerverwaltung abfragen
     me = ME.user,
     adm = me && me.role === "admin";
   if (!me) {
@@ -423,13 +441,13 @@ VIEWS.shared = async () => {
       const by = {};
       o.photos.forEach(p => (by[p.tour_id || ""] ||= []).push(p));
       return (
-        `<div class="sec"><h2>${esc(o.name)}</h2><span class="sub">${o.photos.length} Fotos</span><span class="sp"></span><button class="btn sm" data-all="${oi}">Alle übernehmen</button></div>` +
+        `<div class="sec"><h2>${esc(o.name)}</h2><span class="sub">${fmtAnzahl(o.photos.length, "Foto", "Fotos")}</span><span class="sp"></span><button class="btn sm" data-all="${oi}">Alle übernehmen</button></div>` +
         Object.entries(by)
           .map(
             ([
               tid,
               ps,
-            ]) => `<div class="pgroup"><div class="ph"><h3>${esc(tid ? o.tours[tid] || "Tour" : "Ohne Tour")}</h3><span>${ps.length} Fotos</span><button class="btn alt sm" data-grp="${oi}|${esc(tid)}">Fotos übernehmen</button></div>
+            ]) => `<div class="pgroup"><div class="ph"><h3>${esc(tid ? o.tours[tid] || "Tour" : "Ohne Tour")}</h3><span>${fmtAnzahl(ps.length, "Foto", "Fotos")}</span><button class="btn alt sm" data-grp="${oi}|${esc(tid)}">Fotos übernehmen</button></div>
       <div class="thumbs" data-g="${oi}|${esc(tid)}">${ps.map((p, i) => `<img loading="lazy" src="/spic/${esc(o.owner)}/${p.id}?size=300" data-i="${i}" title="${fmtDatumKurz(p.taken_ts, {zeit: true})}">`).join("")}</div></div>`
           )
           .join("")

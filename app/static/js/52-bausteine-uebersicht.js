@@ -270,7 +270,7 @@ Object.assign(window.SL_WT, {
       b.innerHTML = slRows([
         row("Strecke gesamt", slKm(km), K.p, K.nx ? `Noch ${slKm(K.nx - km)} bis ${fmtKm(K.nx, {d: 0})}` : "Alle Meilensteine erreicht: mehr als einmal um die Erde."),
         row("Aufstieg gesamt", `${nf(ev, ev >= 10 ? 0 : 1)} × Mount Everest`, (ev % 1) * 100, `Noch ${slHm(evn * EV - up)} bis zum nächsten Everest`),
-        row("Touren gesamt", nf(n, 0), N.p, N.nx ? `Noch ${N.nx - n} bis ${N.nx} Touren` : "Alle Meilensteine erreicht."),
+        row("Touren gesamt", nf(n, 0), N.p, N.nx ? `Noch ${N.nx - n} bis ${fmtAnzahl(N.nx, "Tour", "Touren")}` : "Alle Meilensteine erreicht."),
       ]);
       slBadge(c, K.nx ? `Noch ${slKm(K.nx - km)}` : "");
     },
@@ -328,7 +328,7 @@ Object.assign(window.SL_WT, {
       else {
         const KL = {kalt: "Unter 0 °C", kuehl: "0 bis 10 °C", mild: "10 bis 20 °C", warm: "Ab 20 °C"}, kmax = Math.max(...wx.klassen.map(x => x.touren), 1);
         h += `<p class="slcmpn">Touren nach Temperatur</p>` + slRows(wx.klassen.map(k => `<li><div class="slr1"><span>${KL[k.key]}</span><b>${k.touren === 1 ? "1 Tour" : k.touren + " Touren"}</b></div>${slBr((k.touren / kmax) * 100)}<p class="mut slr2">${fmtKm(k.km, {d: 0})}</p></li>`)) +
-          `<p class="mut slcmpn">${wx.ohne ? `Wetterdaten für ${wx.mit} von ${d.touren} Touren; die übrigen fehlen und zählen nicht mit (nie als 0 °C).` : `Wetterdaten für alle ${wx.mit} Touren.`} Gespeichertes Wetter, kein neuer Abruf.</p>`;
+          `<p class="mut slcmpn">${wx.ohne ? `Wetterdaten für ${wx.mit} von ${fmtAnzahl(d.touren, "Tour", "Touren")}; die übrigen fehlen und zählen nicht mit (nie als 0 °C).` : `Wetterdaten für alle ${fmtAnzahl(wx.mit, "Tour", "Touren")}.`} Gespeichertes Wetter, kein neuer Abruf.</p>`;
       }
       b.innerHTML = h;
       slPos(b);

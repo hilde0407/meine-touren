@@ -41,7 +41,7 @@ VIEWS.tour = async id => {
 /* ---- Erzählung: Zeitleiste aus Start, Wegpunkten, Fotos und Ziel ---- */
 VIEWS.story = async id => {
   const t = BY[id];
-  if (!t) throw new Error("Tour nicht gefunden");
+  if (!t) throw notFound("Tour", "#/tours", "Alle Touren");
   $("#main").innerHTML = `<div class="row"><a class="back" href="#/tour/${esc(id)}">‹ Zur Tour</a></div><p class="mut">Wird geladen …</p>`;
   let CM = {};
   const [wps, ph, co, cmt] = await Promise.all([api(`/api/tours/${id}/wps`).catch(() => []), api(`/api/photos?tour_id=${id}&limit=400`).catch(() => []), api(`/api/tours/${id}/coords`).catch(() => []), api(`/api/tours/${id}/comments`).catch(() => ({}))]);

@@ -187,7 +187,7 @@ function xyChart(series, o) {
 VIEWS.compare = async (_, q) => {
   const ta = BY[q.get("a")],
     tb = BY[q.get("b")];
-  if (!ta || !tb) throw new Error("Touren zum Vergleichen nicht gefunden");
+  if (!ta || !tb) throw notFound("Touren zum Vergleichen", "#/tours", "Alle Touren", "Zum Vergleichen braucht die Adresse zwei vorhandene Touren.");
   const [ca, cb] = await Promise.all(
       [ta, tb].map(t =>
         api(`/api/tours/${encodeURIComponent(t.id)}/coords`)
@@ -307,7 +307,7 @@ VIEWS.admin = async (...a) => {
       Object.keys(by)
         .map(
           b =>
-            `<div class="r jcsb g8" style="display:flex"><span>${esc(b || "(ohne Buch)")} <small class="mut">${by[b].length} Touren</small></span><button class="btn alt sm" data-gb="${esc(b)}">Entfernen</button></div>`
+            `<div class="r jcsb g8" style="display:flex"><span>${esc(b || "(ohne Buch)")} <small class="mut">${fmtAnzahl(by[b].length, "Tour", "Touren")}</small></span><button class="btn alt sm" data-gb="${esc(b)}">Entfernen</button></div>`
         )
         .join("") || '<span class="mut">Noch keine Wanderführer hinterlegt.</span>';
     document.querySelectorAll("[data-gb]").forEach(

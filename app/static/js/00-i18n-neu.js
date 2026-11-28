@@ -3944,4 +3944,43 @@ Wirklich eine Reise? || Really one trip? || Vraiment un seul voyage ? || ¿De ve
 Name, Zeitraum und Touren dieser Reise ändern || Change the name, period and tours of this trip || Modifier le nom, la période et les parcours de ce voyage || Cambiar el nombre, el período y las rutas de este viaje
 Keine Fotos in diesem Gebiet || No photos in this area || Aucune photo dans cette zone || Ninguna foto en esta zona
 Im Jahr {} gibt es keine Fotos in {}. Fotos ohne Tour haben kein Gebiet. || In {} there are no photos in {}. Photos without a tour have no area. || En {}, il n’y a aucune photo dans {}. Les photos sans parcours n’ont pas de zone. || En {} no hay fotos en {}. Las fotos sin ruta no tienen zona.
+Zur Übersicht || To the overview || Vers l’aperçu || A la vista general
+‹ Alle Reisen || ‹ All trips || ‹ Tous les voyages || ‹ Todos los viajes
+‹ Alle Gebiete || ‹ All areas || ‹ Toutes les zones || ‹ Todas las zonas
+Die Adresse passt zu nichts (mehr): Vielleicht wurde der Eintrag gelöscht oder der Link ist nicht vollständig. || The address matches nothing (any more): the entry may have been deleted or the link is incomplete. || L’adresse ne correspond à rien (ou plus) : l’entrée a peut-être été supprimée ou le lien est incomplet. || La dirección no coincide con nada (ya): quizá se borró la entrada o el enlace está incompleto.
+Touren zum Vergleichen nicht gefunden || Tours to compare not found || Parcours à comparer introuvables || Rutas para comparar no encontradas
+Zum Vergleichen braucht die Adresse zwei vorhandene Touren. || The address needs two existing tours to compare. || L’adresse doit désigner deux parcours existants à comparer. || La dirección necesita dos rutas existentes para comparar.
+Noch einmal versuchen || Try again || Réessayer || Intentarlo de nuevo
+Die Seite konnte nicht geladen werden || The page could not be loaded || La page n’a pas pu être chargée || No se pudo cargar la página
+Unbekannter Fehler || Unknown error || Erreur inconnue || Error desconocido
+Keine Verbindung zum Server. Bitte Verbindung prüfen und noch einmal versuchen. || No connection to the server. Please check the connection and try again. || Pas de connexion au serveur. Vérifiez la connexion et réessayez. || Sin conexión con el servidor. Comprueba la conexión e inténtalo de nuevo.
+Unerwarteter Fehler im Server. Bitte noch einmal versuchen. || Unexpected server error. Please try again. || Erreur inattendue du serveur. Veuillez réessayer. || Error inesperado del servidor. Inténtalo de nuevo.
+Geländemodell nicht erreichbar (kein Internet?) || Terrain model not reachable (no internet?) || Modèle de terrain injoignable (pas d’internet ?) || Modelo de terreno no accesible (¿sin internet?)
+Wetterdienst nicht erreichbar (kein Internet?) || Weather service not reachable (no internet?) || Service météo injoignable (pas d’internet ?) || Servicio meteorológico no accesible (¿sin internet?)
+Ortssuche nicht erreichbar (kein Internet?) || Place search not reachable (no internet?) || Recherche de lieux injoignable (pas d’internet ?) || Búsqueda de lugares no accesible (¿sin internet?)
+Routing-Dienst nicht erreichbar (kein Internet?) || Routing service not reachable (no internet?) || Service d’itinéraires injoignable (pas d’internet ?) || Servicio de rutas no accesible (¿sin internet?)
+Kartendienst nicht erreichbar (kein Internet?) || Map service not reachable (no internet?) || Service de cartes injoignable (pas d’internet ?) || Servicio de mapas no accesible (¿sin internet?)
+Komoot nicht erreichbar (kein Internet?) || Komoot not reachable (no internet?) || Komoot injoignable (pas d’internet ?) || Komoot no accesible (¿sin internet?)
+{} nicht erreichbar (kein Internet?) || {} not reachable (no internet?) || {} injoignable (pas d’internet ?) || {} no accesible (¿sin internet?)
+Ein Dienst im Internet nicht erreichbar (kein Internet?) || An internet service is not reachable (no internet?) || Un service internet est injoignable (pas d’internet ?) || Un servicio de internet no es accesible (¿sin internet?)
+Neues Schlagwort + Enter || New keyword + Enter || Nouveau mot-clé + Entrée || Nueva palabra clave + Intro
+Neues Schlagwort || New keyword || Nouveau mot-clé || Nueva palabra clave
+„{}“ ({}) wird in Meine Touren gelöscht – mit Strecke, Notizen und Schlagwörtern. Zugeordnete Fotos bleiben erhalten. Zurückholen lässt sich die Tour nur aus einer Sicherung. || “{}” ({}) will be deleted from Meine Touren – with its track, notes and keywords. Assigned photos are kept. The tour can only be restored from a backup. || « {} » ({}) sera supprimé de Meine Touren – avec le tracé, les notes et les mots-clés. Les photos associées sont conservées. Le parcours ne peut être récupéré qu’à partir d’une sauvegarde. || «{}» ({}) se borrará de Meine Touren, con su trazado, notas y palabras clave. Las fotos asignadas se conservan. La ruta solo se puede recuperar desde una copia de seguridad.
+Laden der Route nicht möglich: {} || The route could not be loaded: {} || Impossible de charger l’itinéraire : {} || No se pudo cargar la ruta: {}
+Höhe korrigieren nicht möglich || Height correction not possible || Correction de l’altitude impossible || Corrección de altitud no posible
+Höhe korrigieren … || Correct height … || Corriger l’altitude … || Corregir altitud …
+aus der Uhr (barometrische Höhe, Zepp) || from the watch (barometric height, Zepp) || depuis la montre (altitude barométrique, Zepp) || del reloj (altitud barométrica, Zepp)
+Noch keine Reisen erkannt. Es braucht Touren an mindestens {} Tagen am Stück, über 60 km von deinem üblichen Startort entfernt – Wochenendausflüge zählen nicht. Eigene Alben legst du mit Schlagwörtern an. || No trips detected yet. Tours on at least {} days in a row, more than 60 km from your usual starting point, are needed – weekend outings do not count. Create your own albums with keywords. || Aucun voyage détecté pour l’instant. Il faut des parcours sur au moins {} jours d’affilée, à plus de 60 km de votre point de départ habituel – les sorties de week-end ne comptent pas. Créez vos propres albums avec des mots-clés. || Aún no se detectó ningún viaje. Se necesitan rutas durante al menos {} días seguidos, a más de 60 km de tu punto de salida habitual; las excursiones de fin de semana no cuentan. Crea tus propios álbumes con palabras clave.
+Das Aufzeichnen funktioniert nur in der Android-App „Meine Touren“. Wie du sie installierst und mit diesem Server verbindest, steht unter Verwaltung → Handy & App. || Recording only works in the Android app “Meine Touren”. How to install it and connect it to this server is described under Admin → Phone & app. || L’enregistrement ne fonctionne que dans l’application Android « Meine Touren ». L’installation et la connexion à ce serveur sont décrites sous Administration → Téléphone et appli. || Grabar solo funciona en la app Android «Meine Touren». Cómo instalarla y conectarla con este servidor se explica en Administración → Móvil y app.
+Verwaltung öffnen || Open administration || Ouvrir l’administration || Abrir administración
+Später || Later || Plus tard || Más tarde
+Morgen wieder erinnern || Remind me again tomorrow || Me le rappeler demain || Recordármelo mañana
+Noch keine Sicherung. || No backup yet. || Pas encore de sauvegarde. || Aún no hay copia de seguridad.
+Letzte Sicherung beschädigt. || Last backup damaged. || Dernière sauvegarde endommagée. || Última copia dañada.
+Letzte Sicherung fehlgeschlagen. || Last backup failed. || Dernière sauvegarde échouée. || Última copia fallida.
+Letzte vor 1 Tag. || Last one 1 day ago. || La dernière date de 1 jour. || La última es de hace 1 día.
+Letzte vor {} Tagen. || Last one {} days ago. || La dernière date de {} jours. || La última es de hace {} días.
+1 Foto ist schon in der Bibliothek || 1 photo is already in the library || 1 photo est déjà dans la bibliothèque || 1 foto ya está en la biblioteca
+{} von 1 Foto wird importiert || {} of 1 photo is being imported || {} sur 1 photo est importée || {} de 1 foto se importa
+1 von 1 Foto liegt nach ihrer Zeit auf der Strecke (orange{}) || 1 of 1 photo lies on the track by its time (orange{}) || 1 photo sur 1 se trouve sur le tracé d’après l’heure (orange{}) || 1 de 1 foto está en el trazado según su hora (naranja{})
 `;

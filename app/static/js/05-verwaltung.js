@@ -31,11 +31,11 @@ VIEWS.admin = async (_, q) => {
   <div class="sec admin mt0"><h2>Verwaltung</h2><span class="sub" id="st"></span><span class="sp"></span><span class="mut fs13" id="ver"></span></div>
   <div id="upd"></div><div class="panel mb16" id="hlt"><h2>Zustand</h2><p class="mut">wird geprüft …</p></div>
   <div class="grid g2">
-   <div class="panel"><h2>Komoot <span class="mut h2sub">(optional)</span></h2><p class="mut">${nf(st.tours, 0)} Touren (davon ${nf(st.local_tours, 0)} nur lokal) · ${nf(st.routes, 0)} Strecken lokal gespeichert. Karten und Tourdetails nutzen immer die lokal gespeicherten Strecken; Komoot wird nur zum Holen und Hochladen gebraucht.</p>
+   <div class="panel"><h2>Komoot <span class="mut h2sub">(optional)</span></h2><p class="mut">${fmtAnzahl(st.tours, "Tour", "Touren")} (davon ${nf(st.local_tours, 0)} nur lokal) · ${nf(st.routes, 0)} Strecken lokal gespeichert. Karten und Tourdetails nutzen immer die lokal gespeicherten Strecken; Komoot wird nur zum Holen und Hochladen gebraucht.</p>
     <div class="row"><button class="btn" data-job="refresh">Komoot aktualisieren</button><button class="btn alt" data-job="tours">Nur Touren</button><button class="btn alt" data-job="routes" title="Fehlende Strecken von Komoot holen und lokal speichern">Fehlende Strecken holen</button><button class="btn alt" data-job="geo" title="Land, Bundesland und Ort jeder Tour per OpenStreetMap bestimmen (für Suche und Filter)">Regionen bestimmen</button><button class="btn alt" id="diag">Komoot-Test</button></div>
     <p class="mut fs13">„Komoot aktualisieren“ holt neue Touren und deren Strecken von Komoot und durchsucht die Fotobibliothek. Es wird <b>nichts</b> zu Komoot hochgeladen. <span id="dres"></span></p>
     <div class="field"><label>Komoot-E-Mail</label><input data-k="komoot_email" value="${esc(s.komoot_email)}"></div><div class="field"><label>Komoot-Passwort</label><input data-k="komoot_password" type="password" value="${esc(s.komoot_password)}"></div></div>
-   <div class="panel"><h2>Fotos</h2><p class="mut">${nf(pi.count, 0)} Fotos in der Bibliothek, ${nf(pi.assigned, 0)} einer Tour zugeordnet.<br>Bibliothek: <code>${esc(pi.lib_dir)}</code></p>
+   <div class="panel"><h2>Fotos</h2><p class="mut">${fmtAnzahl(pi.count, "Foto", "Fotos")} in der Bibliothek, ${nf(pi.assigned, 0)} einer Tour zugeordnet.<br>Bibliothek: <code>${esc(pi.lib_dir)}</code></p>
     <div class="row"><button class="btn" id="photoimp">Fotos importieren …</button><button class="btn alt" data-job="photos">Bibliothek neu durchsuchen</button></div>
     
     <details><summary>Weitere Wege (SMB-Ordner, Mac-Skript)</summary><div class="row m8-0"><button class="btn alt sm" data-job="photo-import" ${pi.folder_exists ? "" : 'disabled title="Quellordner nicht gefunden"'}>Fotos aus Ordner übernehmen</button></div>
@@ -363,7 +363,7 @@ async function komootVisDialog() {
   m.querySelector("#kvall").onclick = async () => {
     const pub = L.filter(x => x.vis === "public" || x.vis === "friends");
     if (!pub.length) return;
-    if (!(await uiConfirm({text: `${pub.length} Touren bei Komoot auf „privat“ (nur ich) setzen? Touren, die du absichtlich geteilt hast, sieht danach nur noch du.`, ok: "Auf privat setzen"}))) return;
+    if (!(await uiConfirm({text: `${fmtAnzahl(pub.length, "Tour", "Touren")} bei Komoot auf „privat“ (nur ich) setzen? Touren, die du absichtlich geteilt hast, sieht danach nur noch du.`, ok: "Auf privat setzen"}))) return;
     await privat(pub);
   };
   m.querySelector("#kvgo").onclick = async e => {

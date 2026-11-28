@@ -29,7 +29,7 @@ const HN_SAMMEL = HN_ARTEN.filter(a => a !== "woche");                          
 const HN_AUS = [[0, "Nicht anbieten"], [1, "1 Tag"], [3, "3 Tage"], [7, "7 Tage"], [14, "14 Tage"], [30, "30 Tage"]];
 const HN = {pending: new Map(), focus: null};
 const hnPl = (n, one, many) => (n === 1 ? one : many);
-const hnTours = n => (n === 1 ? "1 Tour" : `${nf(n, 0)} Touren`);
+const hnTours = n => (n === 1 ? "1 Tour" : `${fmtAnzahl(n, "Tour", "Touren")}`);
 const hnVal = (m, x) => (m === "km" ? `${fmtKm(x, {d: 0})}` : m === "up" ? `${fmtHm(x)}` : m === "hours" ? fmtDauer(x * 3600, {summe: true}) : hnTours(Math.round(x)));
 const hnMetric = {km: "Strecke", up: "Aufstieg", count: "Touren", hours: "Dauer"};
 const hnNum = x => nf(x, x % 1 ? 1 : 0);
@@ -105,7 +105,7 @@ const HN_ART = {
     sample: ["hinweis", "3 Touren sind auffällig und noch nicht geprüft."],
     fields: [{k: "min", kind: "number", label: "Mindestanzahl auffälliger Touren", min: 1, max: 1000, step: 1, int: true}],
     cond: c => [(c.min ?? 1) === 1 ? "Wird nur angezeigt, wenn mindestens eine Tour in der Genauigkeitsliste auffällig und noch nicht als geprüft markiert ist."
-      : `Wird nur angezeigt, wenn mindestens ${nf(c.min, 0)} Touren in der Genauigkeitsliste auffällig und noch nicht als geprüft markiert sind.`],
+      : `Wird nur angezeigt, wenn mindestens ${fmtAnzahl(c.min, "Tour", "Touren")} in der Genauigkeitsliste auffällig und noch nicht als geprüft markiert sind.`],
     body: h => `<p class="hnt">${h.daten.anzahl === 1 ? "1 Tour ist auffällig und noch nicht geprüft." : `${nf(h.daten.anzahl, 0)} Touren sind auffällig und noch nicht geprüft.`}</p>`,
     link: () => hnAdminLink("quellen"),
     badge: h => String(h.daten.anzahl),
@@ -318,12 +318,18 @@ function wbText(d) {
   if (d.alter_tage === 1) return "Letzte Sicherung vor 1 Tag.";
   return `Letzte Sicherung vor ${nf(d.alter_tage, 0)} Tagen.`;
 }
+/* 3.71.0 (M-11): Kurzfassung für schmale Bildschirme (eine Zeile statt drei) */
+function wbKurz(d) {
+  if (d.art === "fehler") return d.grund === "pruefung" ? "Letzte Sicherung beschädigt." : "Letzte Sicherung fehlgeschlagen.";
+  if (d.art === "keine") return "Noch keine Sicherung.";
+  return d.alter_tage === 1 ? "Letzte vor 1 Tag." : `Letzte vor ${nf(d.alter_tage, 0)} Tagen.`;
+}
 function wbZeichnen(d) {
   let bar = document.getElementById("wbar");
   const top = document.querySelector("header.top");
   /* 3.49.0: Auf der Aufzeichnungsseite der App bleibt die Leiste weg – dort zählt nur die Aufnahme; auf jeder anderen Seite erscheint sie wieder. */
   const aufnahme = !!window.MTApp && location.hash.startsWith("#/record");
-  if (!d || !d.zeige || !top || !isAdmin() || isViewer() || aufnahme || (d.ausblendbar && wbVerborgen())) {
+  if (!d || !d.zeige || !top || !isAdmin() || isViewer() || aufnahme || location.hash.startsWith("#/admin") || (d.ausblendbar && wbVerborgen())) {      // 3.71.0: in der Verwaltung steht dieselbe Meldung schon in „Zustand“ und „Sicherung & Zugang“
     if (bar) bar.remove();
     wbHoehe();
     return;
@@ -336,8 +342,8 @@ function wbZeichnen(d) {
   const fehler = d.art === "fehler";
   bar.className = "wbar" + (fehler ? " bad" : "");
   bar.setAttribute("role", fehler ? "alert" : "status");
-  bar.innerHTML = `<span class="wbi" aria-hidden="true">${fehler ? "✗" : "⚠"}</span><span class="wbt"><b>Sicherung</b> <span>${wbText(d)}</span></span>` +
-    `<span class="wba">${d.ausblendbar ? `<button type="button" class="btn alt sm" id="wbhide">Morgen erinnern</button>` : ""}<a class="btn sm" id="wbgo" href="#/admin?tab=sicher">Zur Sicherung</a></span>`;
+  bar.innerHTML = `<span class="wbi" aria-hidden="true">${fehler ? "✗" : "⚠"}</span><span class="wbt"><b>Sicherung</b> <span class="wbl">${wbText(d)}</span><span class="wbk">${wbKurz(d)}</span></span>` +
+    `<span class="wba">${d.ausblendbar ? `<button type="button" class="btn alt sm" id="wbhide" title="Morgen wieder erinnern">Später</button>` : ""}<a class="btn sm" id="wbgo" href="#/admin?tab=sicher">Jetzt sichern</a></span>`;
   const h = bar.querySelector("#wbhide");
   if (h) h.onclick = () => {
     try { localStorage.setItem(wbKey(), wbTag()); } catch (e) {}

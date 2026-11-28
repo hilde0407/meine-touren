@@ -16,8 +16,9 @@ from fastapi import FastAPI, File, Form, HTTPException, Query, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from . import auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche, layout, bausteine_daten, hinweise, kennzahl, suche, fotofilter, backup_check, wiederherstellung, gebiete, fitness, tourrueckblick, sport_umzug, tagebuch_abgleich, komoot_paket, stat_gruppen, aktivitaeten
+from . import fehler, auth, gear, puls, health, pdfgen, gpxtools, plan, uipw, config, ctx, db, devices, elev, extras, jobs, more, more2, photos, portals, routes, stats, sync, tracks, updater, users_api, security, wps, wanderfuehrer, selbsttest, wiederholungen, gipfel, begleiter, zepp, metrics, mydevices, devquality, devbatch, uhrdiag, uhrtraining, belastung, steigung, aehnliche, layout, bausteine_daten, hinweise, kennzahl, suche, fotofilter, backup_check, wiederherstellung, gebiete, fitness, tourrueckblick, sport_umzug, tagebuch_abgleich, komoot_paket, stat_gruppen, aktivitaeten
 from .gpxtools import TZ
 
 STATIC = Path(__file__).parent / "static"
@@ -32,6 +33,25 @@ async def lifespan(_app):
 
 app = FastAPI(title="Meine Touren", lifespan=lifespan)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def _http_fehler(request: Request, exc: StarletteHTTPException):
+    """3.71.0 (M-06): Meldungen mit technischen Ausnahmen („HTTPSConnectionPool …“) werden lesbar (app/fehler.py); alles andere bleibt, wie es ist."""
+    d = exc.detail
+    if isinstance(d, str):
+        n = fehler.lesbar(d)
+        if n != d:
+            fehler.melden(f"{request.method} {request.url.path} -> {exc.status_code}", d)
+            d = n
+    return JSONResponse({"detail": d}, status_code=exc.status_code, headers=getattr(exc, "headers", None))
+
+
+@app.exception_handler(Exception)
+async def _unbehandelt(request: Request, exc: Exception):
+    """Unbehandelte Ausnahme: lesbare Meldung statt „Internal Server Error“ (die Einzelheiten stehen im Protokoll)."""
+    fehler.melden(f"{request.method} {request.url.path} -> 500", repr(exc))
+    return JSONResponse({"detail": "Unerwarteter Fehler im Server. Bitte noch einmal versuchen."}, status_code=500)
 
 
 _EXT = "https://tile.openstreetmap.org https://tile.opentopomap.org https://server.arcgisonline.com https://s3.amazonaws.com"

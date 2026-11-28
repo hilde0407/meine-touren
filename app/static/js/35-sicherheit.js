@@ -127,7 +127,7 @@ VIEWS.account = async (...a) => {
 const _adm35 = VIEWS.admin;
 VIEWS.admin = async (...a) => {
   await _adm35(...a);
-  if ($("#mailbox") || !isAdmin() || !$("#save")) return;
+  if ($("#mailbox") || !isAdmin() || !$("#save") || !ME.user) return;      // 3.71.0 (M-13): ohne Benutzerverwaltung gibt es die Einstellungen nicht (401 vermeiden)
   const c = await api("/api/mail/settings").catch(() => null);
   if (!c) return;
   const box = `<div class="panel" id="mailbox"><h2>E-Mail-Versand</h2>

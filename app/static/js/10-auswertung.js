@@ -21,7 +21,7 @@ VIEWS.places = async (...a) => {
            .join("")}</div>`
        : '<p class="mut">Noch keine Gipfel bestimmt.</p>'
    }
-    <div class="row mt12"><button class="btn alt" id="pkb">Gipfel bestimmen${p.pending_peaks ? ` (${p.pending_peaks} Touren offen)` : ""}</button><span id="pkm" class="mut"></span></div></div></div>
+    <div class="row mt12"><button class="btn alt" id="pkb">Gipfel bestimmen${p.pending_peaks ? ` (${fmtAnzahl(p.pending_peaks, "Tour", "Touren")} offen)` : ""}</button><span id="pkm" class="mut"></span></div></div></div>
    <div class="sec"><h2>Wanderführer-Fortschritt</h2>${gp.length ? `<span class="sub">${gfSum(gp)}</span>` : ""}</div>
    ${gp.length ? '<div id="gfx"></div>' : '<p class="mut">Noch keine Wanderführer hinterlegt: Verwaltung → Touren holen → Wanderführer (GPX-Dateien hochladen).</p>'}`;
   if (gp.length) gfMount($("#gfx"), gp, a[1]);
@@ -96,7 +96,7 @@ VIEWS.tour = async (id, q) => {
     let cur = (t.tags || "").split("|").filter(Boolean);
     const m =
       uiModal(`<h3>Schlagwörter &amp; Alben</h3><p class="mut fs14">Mit Schlagwörtern wie „Urlaub Réunion 2026“ oder „Rother Taunus“ entsteht ein Album mit eigener Seite (Karte, Summen, Fotos, 3D-Flug).</p>
-      <div id="tgc" class="chips"></div><input id="tgi" list="tgl" placeholder="Neuer Tag + Enter" class="w100 mt10"><datalist id="tgl">${allTags()
+      <div id="tgc" class="chips"></div><input id="tgi" list="tgl" placeholder="Neues Schlagwort + Enter" aria-label="Neues Schlagwort" class="w100 mt10"><datalist id="tgl">${allTags()
         .map(x => `<option value="${esc(x)}">`)
         .join("")}</datalist>
       <div class="uifoot"><button class="btn ghost" id="tgx">Abbrechen</button><button class="btn" id="tgs">Speichern</button></div>`);
@@ -156,7 +156,7 @@ VIEWS.tour = async (id, q) => {
         s
           .map(x => {
             const u = location.origin + "/s/" + x.token;
-            return `<div class="r p8-0" style="display:block;border-top:1px solid var(--rule)"><input readonly value="${esc(u)}" class="w100" data-act="select"><small class="mut">${x.photos == 2 ? "Diashow" : `<b>Zeigt:</b> ${esc(shrLabel(x.blocks))}`}${x.trim ? ", Anfang/Ende ausgeblendet" : ""}${x.best ? `, beste ${x.best} Fotos` : ""} · ${x.exp ? (x.exp * 1000 < Date.now() ? "abgelaufen" : "gültig bis " + fmtDatumKurz(x.exp)) : "unbegrenzt"}${x.photos == 2 ? ` · ${x.views || 0}× angesehen` : ""}</small> <button class="btn alt sm" data-cp="${esc(u)}">Kopieren</button> ${x.photos != 2 ? `<button class="btn alt sm" data-bl="${x.token}">Auswahl ändern</button> ` : ""}<button class="btn alt sm" data-rv="${x.token}">Widerrufen</button></div>`;
+            return `<div class="r p8-0" style="display:block;border-top:1px solid var(--rule)"><input readonly value="${esc(u)}" class="w100" data-act="select"><small class="mut">${x.photos == 2 ? "Diashow" : `<b>Zeigt:</b> ${esc(shrLabel(x.blocks))}`}${x.trim ? ", Anfang/Ende ausgeblendet" : ""}${x.best ? `, beste ${fmtAnzahl(x.best, "Foto", "Fotos")}` : ""} · ${x.exp ? (x.exp * 1000 < Date.now() ? "abgelaufen" : "gültig bis " + fmtDatumKurz(x.exp)) : "unbegrenzt"}${x.photos == 2 ? ` · ${x.views || 0}× angesehen` : ""}</small> <button class="btn alt sm" data-cp="${esc(u)}">Kopieren</button> ${x.photos != 2 ? `<button class="btn alt sm" data-bl="${x.token}">Auswahl ändern</button> ` : ""}<button class="btn alt sm" data-rv="${x.token}">Widerrufen</button></div>`;
           })
           .join("") || '<span class="mut">Noch kein Link.</span>';
       m.querySelectorAll("[data-cp]").forEach(
@@ -291,7 +291,7 @@ async function collView(title, sub, ids, back, opt = {}) {
       ph.map((p, i) => `<img loading="lazy" decoding="async" src="${picSrc(p, 300)}" data-i="${i}">`).join("") ||
       '<span class="mut">Keine Fotos.</span>';
     bindThumbs($("#cph"), ph);
-    if (rsTr && typeof rsBadge === "function") rsBadge("fotos", ph.length ? (ph.length === 1 ? "1 Foto" : `${ph.length} Fotos`) : "");
+    if (rsTr && typeof rsBadge === "function") rsBadge("fotos", ph.length ? (ph.length === 1 ? "1 Foto" : `${fmtAnzahl(ph.length, "Foto", "Fotos")}`) : "");
   });
   const plan = await api(`/api/tiles/plan?ids=${ts.map(t => t.id).join(",")}`).catch(() => null);
   if (plan)
@@ -315,7 +315,7 @@ async function collView(title, sub, ids, back, opt = {}) {
 }
 /* 3.62.1: Karte einer Reise (Reisen-Seite und Reisen-Abschnitt der Suche): Name, Zeitraum, Touren, Strecke, Aufstieg */
 function tripKarte(x) {
-  return `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(${picSrc({id: x.photo, v: x.photo_v}, 500)})` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${fmtDatumKurz(x.start)}${x.end !== x.start ? " – " + fmtDatumKurz(x.end) : ""}</span><small>${x.tours.length} Touren · ${fmtKm(x.km, {d: 0})} · ${fmtHm(x.up_m)}</small></a>`;
+  return `<a class="otd" href="#/trip/${x.id}" style="background-image:${x.photo ? `linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(${picSrc({id: x.photo, v: x.photo_v}, 500)})` : "linear-gradient(#0e2a2b99,#0e2a2bee)"}"><b>${esc(x.region)}</b><span>${fmtDatumKurz(x.start)}${x.end !== x.start ? " – " + fmtDatumKurz(x.end) : ""}</span><small>${fmtAnzahl(x.tours.length, "Tour", "Touren")} · ${fmtKm(x.km, {d: 0})} · ${fmtHm(x.up_m)}</small></a>`;
 }
 VIEWS.trips = async () => {
   $("#main").innerHTML =
@@ -326,15 +326,15 @@ VIEWS.trips = async () => {
   $("#tr").innerHTML =
     (tr.length
       ? `<div class="otdg">${tr.map(tripKarte).join("")}</div>`
-      : '<p class="mut">Keine Reisen erkannt (es braucht Touren an mindestens 4 Tagen am Stück, über 60 km von deinem üblichen Startort entfernt – Wochenendausflüge zählen nicht). Eigene Alben legst du mit Schlagwörtern an.</p>') +
+      : '<p class="mut">Noch keine Reisen erkannt. Es braucht Touren an mindestens 4 Tagen am Stück, über 60 km von deinem üblichen Startort entfernt – Wochenendausflüge zählen nicht. Eigene Alben legst du mit Schlagwörtern an.</p>') +
     `<div id="rnalb"><div class="sec"><h2>Schlagwörter &amp; Alben</h2><span class="sub">in der Tour über „🏷 Schlagwörter & Alben“ vergeben</span></div>` +
     (tg.length
-      ? `<div class="otdg">${tg.map(x => `<a class="otd" href="#/album/${encodeURIComponent(x.tag)}"${x.photo ? ` style="background-image:linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(${picSrc({id: x.photo, v: x.photo_v}, 500)})"` : ""}><b>🏷 ${esc(x.tag)}</b><small>${x.n} Touren · ${fmtKm(x.km, {d: 0})}</small></a>`).join("")}</div>`
+      ? `<div class="otdg">${tg.map(x => `<a class="otd" href="#/album/${encodeURIComponent(x.tag)}"${x.photo ? ` style="background-image:linear-gradient(#0e2a2b33 20%,#0e2a2bf0),url(${picSrc({id: x.photo, v: x.photo_v}, 500)})"` : ""}><b>🏷 ${esc(x.tag)}</b><small>${fmtAnzahl(x.n, "Tour", "Touren")} · ${fmtKm(x.km, {d: 0})}</small></a>`).join("")}</div>`
       : '<p class="mut">Noch keine Schlagwörter vergeben.</p>') + "</div>";
 };
 VIEWS.trip = async id => {
   const tr = (await api("/api/trips")).find(x => x.id === id);
-  if (!tr) throw new Error("Reise nicht gefunden");
+  if (!tr) throw notFound("Reise", "#/trips", "Alle Reisen");
   await collView(
     `${tr.region}${tr.country && tr.country !== tr.region ? ", " + tr.country : ""}`,
     `${fmtDatum(tr.start)}${tr.end !== tr.start ? " – " + fmtDatum(tr.end) : ""}`,
@@ -349,7 +349,7 @@ VIEWS.album = async tag => {
   if (!ts.length) throw new Error("Album ist leer");
   await collView(
     "🏷 " + tag,
-    `Album mit ${ts.length} Touren`,
+    `Album mit ${fmtAnzahl(ts.length, "Tour", "Touren")}`,
     ts.map(t => t.id),
     "#/trips"
   );
@@ -383,7 +383,7 @@ function yearChart(series, xs, unit) {
       );
     })
     .join("");
-  return `<svg viewBox="0 0 ${W} ${H}" class="w100 mw640">${g}</svg><div class="chips">${series.map(s => `<span class="chip" style="cursor:default"><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join("")}<span class="mut fs13 ml6">${unit}</span></div>`;
+  return `<svg viewBox="0 0 ${W} ${H}" class="w100 mw640">${g}</svg><div class="chips chwrap">${series.map(s => `<span class="chip" style="cursor:default"><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join("")}<span class="mut fs13 ml6">${unit}</span></div>`;
 }
 const _plA = VIEWS.places;
 VIEWS.places = async (...a) => {
@@ -430,7 +430,7 @@ VIEWS.places = async (...a) => {
       hot = top((a, b) => b.tmax - a.tmax),
       cold = top((a, b) => a.tmin - b.tmin),
       wet = top((a, b) => b.precip - a.precip);
-    h += `<div class="sec"><h2>Wetter</h2><span class="sub">${r.length} Touren mit Wetterdaten</span></div><div class="grid g2"><div class="panel"><h2>Bei welcher Temperatur bist du unterwegs?</h2><div class="rows">${bins
+    h += `<div class="sec"><h2>Wetter</h2><span class="sub">${fmtAnzahl(r.length, "Tour", "Touren")} mit Wetterdaten</span></div><div class="grid g2"><div class="panel"><h2>Bei welcher Temperatur bist du unterwegs?</h2><div class="rows">${bins
       .map(b => {
         const n = r.filter(b[1]).length;
         return `<div class="r"><span>${b[0]}<div class="stack mnw2 mt4" style="width:${(100 * n) / mxn}%"><div class="w100" style="background:var(--yellow)"></div></div></span><b>${n}</b></div>`;
@@ -513,12 +513,12 @@ VIEWS.check = async (...a) => {
         .map(([t, n]) => `<div class="r" style="display:block"><span class="mut">${esc(t.name)}</span><br><b>${esc(n)}</b></div>`)
         .join("") + (plan.length > 60 ? `<div class="mut">… und ${plan.length - 60} weitere</div>` : "") ||
       '<div class="mut">Nichts zu ändern.</div>';
-    $("#rn_m").textContent = `${plan.length} Touren betroffen`;
+    $("#rn_m").textContent = `${fmtAnzahl(plan.length, "Tour", "Touren")} betroffen`;
     $("#rn_go").disabled = !plan.length;
   };
   $("#rn_p").onclick = calc;
   $("#rn_go").onclick = async e => {
-    if (!await uiConfirm({title: `${plan.length} Touren umbenennen?`, ok: "Umbenennen", text: $("#rn_k").checked ? "Die Namen werden auch bei Komoot geändert." : "Die Namen werden nur in Meine Touren geändert."})) return;
+    if (!await uiConfirm({title: `${fmtAnzahl(plan.length, "Tour", "Touren")} umbenennen?`, ok: "Umbenennen", text: $("#rn_k").checked ? "Die Namen werden auch bei Komoot geändert." : "Die Namen werden nur in Meine Touren geändert."})) return;
     e.target.disabled = true;
     let n = 0,
       bad = 0;

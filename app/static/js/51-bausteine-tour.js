@@ -220,7 +220,7 @@ Object.assign(window.SL_WT, {
       slPhotos(c, b, l, "Foto der Tour", "slfh");
       if (l.length) {
         b.insertAdjacentHTML("beforeend", '<p class="mut slcap">Ausgewählt nach Bewertung und Schärfe.</p>');
-        slBadge(c, l.length === 1 ? "1 Foto" : `${l.length} Fotos`);
+        slBadge(c, l.length === 1 ? "1 Foto" : `${fmtAnzahl(l.length, "Foto", "Fotos")}`);
       }
     },
   },
@@ -311,7 +311,7 @@ function rbBlock(blk, head) {
 }
 function rbPaint(c, b, d) {
   const parts = [];
-  if (d.eigene) parts.push(rbBlock(d.eigene, d.eigene.n === 1 ? "Gegenüber deiner Tour dieser Sportart in den 12 Monaten davor" : `Gegenüber deinen ${d.eigene.n} Touren dieser Sportart in den 12 Monaten davor`));
+  if (d.eigene) parts.push(rbBlock(d.eigene, d.eigene.n === 1 ? "Gegenüber deiner Tour dieser Sportart in den 12 Monaten davor" : `Gegenüber deinen ${fmtAnzahl(d.eigene.n, "Tour", "Touren")} dieser Sportart in den 12 Monaten davor`));
   if (d.aehnliche) parts.push(rbBlock(d.aehnliche, `Gegenüber ${d.aehnliche.n} ähnlichen Touren auf dieser Strecke`));
   const bs = d.besuch ? `<p class="rbv"><b>Dein ${d.besuch.nr}. Besuch dieser Strecke</b> <span class="mut">(${d.besuch.von} Läufe insgesamt)</span></p>` : "";
   b.innerHTML = `<div role="group" aria-label="Wie ist es gelaufen?">${bs}${parts.join("")}<p class="mut slcap">Üblich = Median der Vergleichstouren. Unter 80 % davon gilt als kürzer, weniger oder langsamer, über 125 % als länger, mehr oder schneller. Tempo = Strecke geteilt durch die gesamte Dauer.</p></div>`;

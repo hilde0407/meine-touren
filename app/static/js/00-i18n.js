@@ -730,13 +730,14 @@ Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen 
     [/^(\d+) Touren?$/, (m, n) => `${n} ${pl(n, U.tour[0], U.tour[1])}`],
     [/^(\d+) Tage?$/, (m, n) => `${n} ${pl(n, U.day[0], U.day[1])}`],
     [new RegExp(`^(\\d+)\\. (${MO}) (\\d{4})$`), (m, d, mo, y) => dt(d, mo, y)],
-    [/^(.*), (\d+) Fotos$/, (m, a2, n) => `${a2}, ${n} ${pl(n, U.photo[0], U.photo[1])}`],
+    [/^(.*), (\d+) Fotos?$/, (m, a2, n) => `${a2}, ${n} ${pl(n, U.photo[0], U.photo[1])}`],
     [/^(\d+) von (\d+)$/, (m, a2, b2) => `${a2} ${U.of} ${b2}`],
     [/^(\d+(?:[.,]\d+)?) Uhr$/, (m, t) => t],
   ];
   const S = [   // Ersetzungen innerhalb längerer Texte
     [new RegExp(`(\\d+)\\. (${MO}) (\\d{4})`, "g"), (m, d, mo, y) => dt(d, mo, y)],
     [/(\d+) Bilder, (\d+) einer Tour zugeordnet/g, (m, a2, b2) => `${a2} ${U.img}, ${b2} ${U.asg}`],
+    [/(\d+) Fotos?, (\d+) einer Tour zugeordnet/g, (m, a2, b2) => `${a2} ${pl(a2, U.photo[0], U.photo[1])}, ${b2} ${U.asg}`],      // 3.71.0: „Fotos“ statt „Bilder“, Einzahl
     [/Es gibt noch kein Backup – das erste wird automatisch angelegt \(nachts\), oder jetzt sofort:/g, () => U.nobk],
     [/Letzte Tour, Wandern/g, () => U.lh],
     [/Letzte Tour, Radtour/g, () => U.lc],
@@ -755,8 +756,8 @@ Offline – es werden zuletzt gesehene Daten angezeigt. Speichern und Hochladen 
     [/Verwaltung öffnen/g, () => U.open],
     [/Fotos zuordnen/g, () => U.asgp],
     [/Diashow (\d{4})/g, (m, y) => `${U.show} ${y}`],
-    [/(\d+) Fotos/g, (m, n) => `${n} ${pl(n, U.photo[0], U.photo[1])}`],
-    [/(\d+) Touren/g, (m, n) => `${n} ${pl(n, U.tour[0], U.tour[1])}`],
+    [/(\d+) Fotos?\b/g, (m, n) => `${n} ${pl(n, U.photo[0], U.photo[1])}`],
+    [/(\d+) Touren?\b/g, (m, n) => `${n} ${pl(n, U.tour[0], U.tour[1])}`],
     [/(\d+) Aktivitäten/g, (m, n) => `${n} ${U.act}`],
     [/(\d+) Etappen/g, (m, n) => `${n} ${pl(n, U.stg[0], U.stg[1])}`],
     [/(\d+) Abschnitte?  ?mit Fahrt-Tempo \(Seilbahn, Bus, Auto\?\)/g, (m, n) => `${n} ${pl(n, U.fast[0], U.fast[1])}`],

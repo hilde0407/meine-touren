@@ -162,6 +162,6 @@ if (_recap31)
     $("#rcsnd").onclick = () => {
       const n = TOURS.filter(t => String(t.y) === String(y)),
         s = f => n.reduce((a, t) => a + (f(t) || 0), 0);
-      shareOut(`Mein Tourenjahr ${y}`, `Mein Tourenjahr ${y}: ${n.length} Touren, ${fmtKm(s(t => t.km), {summe: true})}, ${fmtHm(s(t => t.up_m))} Aufstieg, ${fmtDauer(s(t => t.h) * 3600, {summe: true})} unterwegs.`);
+      shareOut(`Mein Tourenjahr ${y}`, `Mein Tourenjahr ${y}: ${fmtAnzahl(n.length, "Tour", "Touren")}, ${fmtKm(s(t => t.km), {summe: true})}, ${fmtHm(s(t => t.up_m))} Aufstieg, ${fmtDauer(s(t => t.h) * 3600, {summe: true})} unterwegs.`);
     };
   };

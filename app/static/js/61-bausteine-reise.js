@@ -81,7 +81,7 @@ Object.assign(window.SL_WT, {
       if (nb) nb.onclick = () => erLoad(b, cfg, k.mode === "random" ? {...o, fresh: true} : {...o, mix: true});
       return erLoad(b, cfg, o).then(() => {
         const n = (b._erList || []).length;
-        if (n) slBadge(c, n === 1 ? "1 Foto" : `${n} Fotos`);
+        if (n) slBadge(c, n === 1 ? "1 Foto" : `${fmtAnzahl(n, "Foto", "Fotos")}`);
       });
     },
   },

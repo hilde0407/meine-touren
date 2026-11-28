@@ -57,7 +57,7 @@ VIEWS.photos = async (_, q) => {
     Y = +(q.get("y") || (G && PHINFO.years.find(y => gy.has(y))) || PHINFO.years[0]),
     gq = G ? `&g=${encodeURIComponent(G)}` : "";
   $("#main").innerHTML =
-    `<div class="sec mt0"><h2>Fotos</h2><span class="sub">${nf(PHINFO.count, 0)} Bilder, ${nf(PHINFO.assigned, 0)} einer Tour zugeordnet</span>${PHINFO.undated ? `<span class="chip" style="cursor:default;background:#f6e3b4;color:#5a4300" title="Diese Fotos enthalten keine Aufnahmezeit im Foto. Es wird das Dateidatum benutzt (meist der Exportzeitpunkt); sie werden deshalb nicht automatisch einer Tour zugeordnet. Mit dem Foto-Zeit-Abgleich (mac/foto_zeit_abgleich.py) lässt sich die echte Zeit aus den RAW-Originalen nachtragen.">⚠ ${nf(PHINFO.undated, 0)} ohne Aufnahmezeit</span>` : ""}<span class="sp"></span><button class="btn" id="pimp">Fotos importieren …</button><a class="btn alt" target="_blank" href="slideshow.html?year=${Y}">Diashow ${Y}</a><a class="btn ghost" target="_blank" href="slideshow.html?random=1">Zufall</a>${gl.length ? `<div class="filters pgflt" id="pgfl"><select data-gsheet id="pgg" title="Gebiet" aria-label="Gebiet">${gebietOpts(G)}</select>${G ? `<a class="gblink" id="pggsee" href="#/area/${encodeURIComponent(G)}">Gebiet ansehen ›</a>` : ""}</div>` : ""}</div>
+    `<div class="sec mt0"><h2>Fotos</h2><span class="sub">${fmtAnzahl(PHINFO.count, "Foto", "Fotos")}, ${nf(PHINFO.assigned, 0)} einer Tour zugeordnet</span>${PHINFO.undated ? `<span class="chip" style="cursor:default;background:#f6e3b4;color:#5a4300" title="Diese Fotos enthalten keine Aufnahmezeit im Foto. Es wird das Dateidatum benutzt (meist der Exportzeitpunkt); sie werden deshalb nicht automatisch einer Tour zugeordnet. Mit dem Foto-Zeit-Abgleich (mac/foto_zeit_abgleich.py) lässt sich die echte Zeit aus den RAW-Originalen nachtragen.">⚠ ${nf(PHINFO.undated, 0)} ohne Aufnahmezeit</span>` : ""}<span class="sp"></span><button class="btn" id="pimp">Fotos importieren …</button><a class="btn alt" target="_blank" href="slideshow.html?year=${Y}">Diashow ${Y}</a><a class="btn ghost" target="_blank" href="slideshow.html?random=1">Zufall</a>${gl.length ? `<div class="filters pgflt" id="pgfl"><select data-gsheet id="pgg" title="Gebiet" aria-label="Gebiet">${gebietOpts(G)}</select>${G ? `<a class="gblink" id="pggsee" href="#/area/${encodeURIComponent(G)}">Gebiet ansehen ›</a>` : ""}</div>` : ""}</div>
    <div class="years">${PHINFO.years.map(y => `<button data-y="${y}" class="${y === Y ? "on" : ""}${gy && !gy.has(y) ? " pgoff" : ""}"${gy && !gy.has(y) ? ' title="Keine Fotos in diesem Gebiet"' : ""}>${y}</button>`).join("")}</div><div id="pg" class="mt26"></div>`;
   $("#pimp").onclick = () => photoImportModal();
   $(".years").onclick = e => e.target.dataset.y && (location.hash = `#/photos?y=${e.target.dataset.y}${gq}`);
@@ -79,7 +79,7 @@ VIEWS.photos = async (_, q) => {
   $("#pg").innerHTML = [...groups.entries()]
     .map(([k, a]) => {
       const t = BY[k];
-      return `<div class="pgroup"><div class="ph"><h3>${t ? `<a href="#/tour/${k}">${esc(t.name)}</a>` : "Ohne Tour"}</h3><span>${t ? fmtDatum(t.date) : fmtDatumKurz(a[0].taken_ts)}, ${a.length} Fotos</span><span class="sp"></span>${t ? `<a class="btn ghost sm" target="_blank" href="slideshow.html?tour=${k}">Diashow</a>` : ""}</div>
+      return `<div class="pgroup"><div class="ph"><h3>${t ? `<a href="#/tour/${k}">${esc(t.name)}</a>` : "Ohne Tour"}</h3><span>${t ? fmtDatum(t.date) : fmtDatumKurz(a[0].taken_ts)}, ${fmtAnzahl(a.length, "Foto", "Fotos")}</span><span class="sp"></span>${t ? `<a class="btn ghost sm" target="_blank" href="slideshow.html?tour=${k}">Diashow</a>` : ""}</div>
     <div class="thumbs">${a.map(p => `<div class="th"><img loading="lazy" src="${picSrc(p, 400)}" data-i="${ph.indexOf(p)}"><span class="cap">${fmtDatumKurz(p.taken_ts, {zeit: true})}${p.manual === 1 ? " 📌" : ""}</span></div>`).join("")}</div></div>`;
     })
     .join("");
@@ -548,7 +548,7 @@ function photoImportModal(o = {}) {
       const info = {total: files.length, dup: files.length - fresh.length - deleted, deleted, other, heic, nodate, all};
       if (!fresh.length) {
         busy = false;
-        body(`<p><b>Nichts zu importieren:</b> ${info.dup ? `${info.dup} Fotos sind schon in der Bibliothek` : ""}${info.dup && deleted ? " und " : ""}${deleted ? `${deleted} Fotos hast du früher gelöscht – sie werden deshalb nicht erneut übernommen` : ""}.</p>
+        body(`<p><b>Nichts zu importieren:</b> ${info.dup ? (info.dup === 1 ? "1 Foto ist schon in der Bibliothek" : `${fmtAnzahl(info.dup, "Foto", "Fotos")} sind schon in der Bibliothek`) : ""}${info.dup && deleted ? " und " : ""}${deleted ? `${fmtAnzahl(deleted, "Foto", "Fotos")} hast du früher gelöscht – ${deleted === 1 ? "es wird" : "sie werden"} deshalb nicht erneut übernommen` : ""}.</p>
           <div class="uifoot"><button class="btn ghost" id="pcx">Schließen</button><button class="btn alt" id="pback">Anderen Ordner wählen</button>${deleted ? `<button class="btn" id="pre">Die ${deleted} gelöschten Fotos erneut importieren</button>` : ""}</div>`);
         if (deleted) q("#pre").onclick = () => analyse(all, true);
         q("#pback").onclick = start;
@@ -589,7 +589,7 @@ function photoImportModal(o = {}) {
         return {d, ch, def};
       });
     q("#pih").textContent = o.tour ? `Fotos zu „${o.tour.name}“ hinzufügen` : "Fotos importieren";
-    body(`<p>${info.total} Fotos gefunden, davon <b>${fresh.length}</b> zu importieren${info.dup ? ` (${info.dup} schon vorhanden)` : ""}${info.deleted ? ` · <a href="#" id="pre">${info.deleted} früher gelöschte ebenfalls importieren</a>` : ""}.${info.nodate ? ` <span class="mut">${info.nodate} ohne Aufnahmezeit im Foto – dort gilt das Dateidatum.</span>` : ""}${info.heic ? ` <span class="mut">${info.heic} HEIC-Fotos werden übersprungen (Server ohne pillow-heif; bitte als JPG exportieren).</span>` : ""}</p>
+    body(`<p>${fmtAnzahl(info.total, "Foto", "Fotos")} gefunden, davon <b>${fresh.length}</b> zu importieren${info.dup ? ` (${info.dup} schon vorhanden)` : ""}${info.deleted ? ` · <a href="#" id="pre">${info.deleted} früher gelöschte ebenfalls importieren</a>` : ""}.${info.nodate ? ` <span class="mut">${info.nodate} ohne Aufnahmezeit im Foto – dort gilt das Dateidatum.</span>` : ""}${info.heic ? ` <span class="mut">${info.heic} HEIC-Fotos werden übersprungen (Server ohne pillow-heif; bitte als JPG exportieren).</span>` : ""}</p>
       <p class="mut fs14">So werden die Fotos nach Aufnahmetag zugeordnet. Pro Tag kannst du die Auswahl ändern.</p>
       ${rows
         .map(
@@ -691,7 +691,7 @@ function photoImportModal(o = {}) {
       note.onAdd = () => {
         const dv = L.DomUtil.create("div");
         dv.style.cssText = "background:#000b;color:#fff;font-size:12px;padding:3px 8px;border-radius:4px;max-width:260px";
-        dv.innerHTML = tp.length > 1 ? `${on} von ${d.n} Fotos liegen nach ihrer Zeit auf der Strecke (orange${d.gps ? ", blau = Aufnahmeort" : ""})` : "Die Strecke hat keine Zeitangaben";
+        dv.innerHTML = tp.length > 1 ? `${d.n === 1 ? "1 von 1 Foto liegt" : `${on} von ${fmtAnzahl(d.n, "Foto", "Fotos")} liegen`} nach ihrer Zeit auf der Strecke (orange${d.gps ? ", blau = Aufnahmeort" : ""})` : "Die Strecke hat keine Zeitangaben";
         return dv;
       };
       note.addTo(mp);
@@ -705,7 +705,7 @@ function photoImportModal(o = {}) {
     }));
     const count = () => {
       const n = rows.reduce((a, r, i) => a + (val(i) === "skip" ? 0 : r.d.n), 0);
-      q("#pisum").textContent = `${n} von ${fresh.length} Fotos werden importiert`;
+      q("#pisum").textContent = (fresh.length === 1 ? `${n} von 1 Foto wird importiert` : `${n} von ${fresh.length} Fotos werden importiert`);
       q("#pigo").disabled = !n;
       q("#pigo").textContent = n ? `${n} Foto${n > 1 ? "s" : ""} importieren` : "Nichts ausgewählt";
     };
@@ -863,7 +863,7 @@ const s_max = () => document.querySelector('[data-k="photo_max_side"]')?.value,
 async function gpsAlign(t) {
   const r = await api(`/api/photo-offset?tour_id=${encodeURIComponent(t.id)}`);
   if (!r.ok) return uiAlert("Zeiten prüfen nicht möglich:\n\n" + r.reason);
-  if (r.aligned) return uiAlert(`Die Zeiten der Fotos passen zur Strecke (${r.n} von ${r.of} Fotos mit Aufnahmeort geprüft).`);
+  if (r.aligned) return uiAlert(`Die Zeiten der Fotos passen zur Strecke (${r.n} von ${fmtAnzahl(r.of, "Foto", "Fotos")} mit Aufnahmeort geprüft).`);
   if (
     !await uiConfirm({title: "Zeiten der Fotos korrigieren?", ok: "Korrigieren", text: `Die Kamerauhr scheint ${shiftTxt(Math.abs(r.delta_s)).replace("+", "")} ${r.delta_s > 0 ? "nachzugehen" : "vorzugehen"}.\n\nAus dem Aufnahmeort von ${r.n} von ${r.of} Fotos ergibt sich eine Korrektur von ${shiftTxt(r.delta_s)}. Die Fotos aus diesem Zeitraum werden korrigiert und dieser Tour zugeordnet.`})
   )

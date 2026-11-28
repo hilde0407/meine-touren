@@ -542,8 +542,8 @@ def test_sub_for_unknown_tour_shows_error_not_blank(pw, app):
     try:
         p = b.new_context(locale="de-DE").new_page()
         p.goto(f"{app}/#/tour/gibtsnicht/auswertung")
-        p.wait_for_selector("#main .bad", timeout=10000)
-        assert "nicht gefunden" in p.locator("#main .bad").inner_text()
+        p.wait_for_selector("#main .errcard", timeout=10000)
+        assert "nicht gefunden" in p.locator("#main .errcard").inner_text()
     finally:
         b.close()
 

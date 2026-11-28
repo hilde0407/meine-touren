@@ -33,7 +33,7 @@ VIEWS.shared = async (...a) => {
     msg.textContent = "Wird übernommen …";
     try {
       const r = await api("/api/shared/tours-import", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({owner: o, ids})});
-      msg.textContent = `${r.imported} Touren und ${r.photos} Fotos übernommen.${r.failed.length ? " Nicht möglich: " + r.failed.join("; ") : ""}`;
+      msg.textContent = `${fmtAnzahl(r.imported, "Tour", "Touren")} und ${fmtAnzahl(r.photos, "Foto", "Fotos")} übernommen.${r.failed.length ? " Nicht möglich: " + r.failed.join("; ") : ""}`;
       await loadTours();
     } catch (e) {
       msg.textContent = e.message;

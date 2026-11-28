@@ -27,7 +27,7 @@ VIEWS.tour = async (id, q) => {
         )
         .join("");
       bindThumbs($("#th"), r.photos);
-      $("#pc").textContent = `${r.photos.length} beste von ${r.total} Fotos${r.rated ? ` (${r.rated} mit Sternen)` : " (keine Sternebewertung gefunden – Auswahl nach Schärfe und Verteilung)"}`;
+      $("#pc").textContent = `${r.photos.length} beste von ${fmtAnzahl(r.total, "Foto", "Fotos")}${r.rated ? ` (${r.rated} mit Sternen)` : " (keine Sternebewertung gefunden – Auswahl nach Schärfe und Verteilung)"}`;
       b.textContent = "Alle Fotos zeigen";
       const ss = $("#ss");
       if (ss) {

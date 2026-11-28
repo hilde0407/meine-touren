@@ -38,6 +38,8 @@ VERBOTEN = {
     r"\bAktivität(en)?\b": "Sportart bzw. Tour (Aktivität nur als Name eines Dienstes)",
     r"Verwaltung → Portale\b|Verwaltung → (Garmin|Suunto|Zepp|Komoot|Update|Sicherung|Protokoll|Standort teilen)\b(?! &)": "Wegangabe „Verwaltung → Reiter → Bereich“",
     r"\w\((s|e|n|en)\)\s": "Mehrzahl ausschreiben (fmtAnzahl)",
+    r"\d+ Bilder\b|\bBilder,? \d+ einer Tour|Neuer Tag\b": "Foto / Fotos bzw. Schlagwort (3.71.0)",
+    r"aus Meine Touren entfernt": "„gelöscht“ (Löschen = Daten sind weg, Leitfaden 2.2)",
 }
 # Genaue Knopf- bzw. Literaltexte, die es nicht mehr gibt
 VERBOTEN_GANZ = {

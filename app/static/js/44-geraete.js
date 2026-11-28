@@ -146,7 +146,7 @@ function devRange(dv, g, done) {
       const res = await api("/api/devices/assign-range", METJ({device_id: g.id, from: $("#rf").value, to: $("#rt").value}));
       m.remove();
       MET_CACHE.clear();
-      uiAlert({title: "Touren zugeordnet", text: `${res.n} Touren zugeordnet.`});
+      uiAlert({title: "Touren zugeordnet", text: `${fmtAnzahl(res.n, "Tour", "Touren")} zugeordnet.`});
       done();
     } catch (e) {
       $("#rerr").textContent = e.message;
@@ -257,7 +257,7 @@ function dvDots(a, lim, good, ok, label) {
   const band = (w, c) => `<rect class="dvb ${c}" x="${x(-w)}" y="6" width="${x(w) - x(-w)}" height="34"/>`;
   const dots = a.points.map((v, i) => `<circle class="dvdot" cx="${x(v).toFixed(1)}" cy="${(13 + ((i * 37) % 9) * 2.6).toFixed(1)}" r="2.6"/>`).join("");
   const box = a.p25 != null ? `<rect class="dvbox2" x="${x(a.p25).toFixed(1)}" y="45" width="${Math.max(2, x(a.p75) - x(a.p25)).toFixed(1)}" height="9" rx="2"/><line class="dvmed" x1="${x(a.median).toFixed(1)}" x2="${x(a.median).toFixed(1)}" y1="43" y2="56"/>` : "";
-  const desc = `${label}: ${a.points.length} Touren, Median ${dvPct(a.median)}, mittlere Hälfte ${dvPct(a.p25)} bis ${dvPct(a.p75)}`;
+  const desc = `${label}: ${fmtAnzahl(a.points.length, "Tour", "Touren")}, Median ${dvPct(a.median)}, mittlere Hälfte ${dvPct(a.p25)} bis ${dvPct(a.p75)}`;
   return `<svg class="dvdots" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(desc)}"><rect class="dvb bad" x="${pad}" y="6" width="${W - 2 * pad}" height="34"/>${band(ok, "warn")}${band(good, "ok")}
     <line class="dvzero" x1="${x(0)}" x2="${x(0)}" y1="6" y2="40"/>${dots}${box}
     <text class="dvax" x="${pad}" y="70" text-anchor="start">${dvPct(-lim).replace(" %", "")}\u00a0%</text><text class="dvax" x="${x(0)}" y="70" text-anchor="middle">0</text><text class="dvax" x="${W - pad}" y="70" text-anchor="end">${dvPct(lim)}</text></svg>`;
@@ -275,7 +275,7 @@ function dvSecWire(root) {
 }
 /* Fortschrittsbalken (ruhender Zustand): role=progressbar mit aria-valuenow; die Zahl steht zusätzlich als Text daneben */
 const dvBar = (done, total, label) => `<div class="dvbar" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}" aria-label="${esc(label)}"><span style="width:${total ? Math.round((100 * done) / total) : 0}%"></span></div>`;
-const dvOpenText = n => (n === 1 ? "Noch 1 Tour offen – erneut starten." : `Noch ${n} Touren offen – erneut starten.`);
+const dvOpenText = n => (n === 1 ? "Noch 1 Tour offen – erneut starten." : `Noch ${fmtAnzahl(n, "Tour", "Touren")} offen – erneut starten.`);
 
 function dvQBody(q, g, viewer) {
   const pr = g.progress || {total: 0, done: 0, open: 0, n_detail: 0, n_summary: 0};
@@ -304,7 +304,7 @@ function dvQBody(q, g, viewer) {
   const split = h.n_summary ? `<div class="dvsplit" role="group" aria-label="Höhenvergleich: genau und grob"><span class="dvsl">Mit Detail (genau)</span><b>${dvTours(h.n_detail || 0)}</b><span class="dvsl">Nur Zusammenfassung (grob)</span><b>${dvTours(h.n_summary)}</b></div>
     <span class="dvh dvsplith">Grobe Werte kommen aus dem Auf- und Abstieg, den die Uhr selbst meldet; sie haben großzügigere Grenzen (gut bis ${nf(th.height_summary[0], 0)}\u00a0%, mäßig bis ${nf(th.height_summary[1], 0)}\u00a0%) und werden nicht mit den genauen Werten vermischt.</span>${h.rough ? `<span class="dvh dvsplith">Die Einschätzung der Höhe beruht hier nur auf den groben Werten.</span>` : ""}` : "";
   const stand = `<div class="dvstand">${pr.total ? dvBar(pr.done, pr.total, "Fortschritt der Auswertung") : ""}
-    <p class="mut dvqwhen">Zuletzt ausgewertet am ${esc(dvQTime(q.computed_at))}${pr.total ? `, ${pr.done} von ${pr.total} Touren` : ""}.</p>
+    <p class="mut dvqwhen">Zuletzt ausgewertet am ${esc(dvQTime(q.computed_at))}${pr.total ? `, ${pr.done} von ${fmtAnzahl(pr.total, "Tour", "Touren")}` : ""}.</p>
     ${pr.open ? `<p class="dvopen" role="status"><b>${dvOpenText(pr.open)}</b><span class="dvh">Offen sind Touren, bei denen noch Geländekacheln oder Zepp-Details fehlen. Je Lauf gibt es Obergrenzen, damit nichts überlastet wird.</span></p>` : ""}
     <div class="row dvqfoot">${run}${prog}</div></div>`;
   const bat = g.batch && !viewer ? dvSec("batch", "Sammel-Korrektur", g.batch.n_done ? `<span class="dvqs ok">${g.batch.n_done}</span>` : `<span class="dvqs none">zurückgenommen</span>`,
@@ -437,7 +437,7 @@ function dvJobBar(host) {
     sub.textContent = note || "";
   };
 }
-const dvDoneText = (d, t) => `${d} von ${t} Touren geprüft`;
+const dvDoneText = (d, t) => `${d} von ${fmtAnzahl(t, "Tour", "Touren")} geprüft`;
 /* wartet, bis der Job fertig ist; on(j) bei jedem Stand von /api/jobs (neu: j.done / j.total). Rückgabe: letzter Stand oder null (Server nicht erreichbar) */
 async function dvWatch(on) {
   for (let i = 0; i < 3000; i++) {
@@ -526,8 +526,8 @@ async function dvBatch(g, again) {
     const mt = method(), s = sel();
     boxes.forEach(b => { const t = pv.tours[+b.dataset.i]; b.closest("li").querySelector("[data-new]").textContent = fmtHm(t.new[mt] ?? 0); });
     const a = s.reduce((x, t) => x + (t.up_now || 0), 0), n = s.reduce((x, t) => x + (t.new[mt] || 0), 0);
-    $("#bxcount", m).textContent = `${s.length} von ${pv.total} Touren ausgewählt`;
-    $("#bxsum", m).innerHTML = s.length ? `<b>${s.length} ${s.length === 1 ? "Tour" : "Touren"}, ändert den Aufstieg um insgesamt ${esc(dvSigned(n - a))}</b><span class="dvh">Aufstieg aller gewählten Touren von ${fmtHm(a)} auf etwa ${fmtHm(n)}. Der genaue Wert wird beim Korrigieren neu berechnet.</span>${s.length > pv.cap ? `<span class="dvh">In einem Lauf werden höchstens ${pv.cap} Touren korrigiert; der Rest bleibt offen und lässt sich danach mit einem neuen Start erledigen.</span>` : ""}` : `<span class="mut">Keine Tour ausgewählt.</span>`;
+    $("#bxcount", m).textContent = `${s.length} von ${fmtAnzahl(pv.total, "Tour", "Touren")} ausgewählt`;
+    $("#bxsum", m).innerHTML = s.length ? `<b>${s.length} ${s.length === 1 ? "Tour" : "Touren"}, ändert den Aufstieg um insgesamt ${esc(dvSigned(n - a))}</b><span class="dvh">Aufstieg aller gewählten Touren von ${fmtHm(a)} auf etwa ${fmtHm(n)}. Der genaue Wert wird beim Korrigieren neu berechnet.</span>${s.length > pv.cap ? `<span class="dvh">In einem Lauf werden höchstens ${fmtAnzahl(pv.cap, "Tour", "Touren")} korrigiert; der Rest bleibt offen und lässt sich danach mit einem neuen Start erledigen.</span>` : ""}` : `<span class="mut">Keine Tour ausgewählt.</span>`;
     $("#bxgo", m).disabled = !s.length;
   };
   boxes.forEach(b => (b.onchange = refresh));
@@ -551,8 +551,8 @@ async function dvBatch(g, again) {
     let fin = null;
     try {
       const st = await api(`/api/devices/${g.id}/quality/fix`, METJ({method: mt, tours: s.map(t => t.id)}));
-      upd(`0 von ${st.will_run} Touren korrigiert`, 0, st.will_run);
-      fin = await dvWatch(j => { if (j.running) upd(j.total > 0 ? `${j.done || 0} von ${j.total} Touren korrigiert` : j.progress || "Läuft …", j.done || 0, j.total || 0, j.progress || ""); });
+      upd(`0 von ${fmtAnzahl(st.will_run, "Tour", "Touren")} korrigiert`, 0, st.will_run);
+      fin = await dvWatch(j => { if (j.running) upd(j.total > 0 ? `${j.done || 0} von ${fmtAnzahl(j.total, "Tour", "Touren")} korrigiert` : j.progress || "Läuft …", j.done || 0, j.total || 0, j.progress || ""); });
     } catch (e) {
       $("#bxres", m).innerHTML = `<p class="bad">${esc(e.message)}</p>${closeBtn("Schließen")}`;
       $("#bxjob", m).hidden = true;
@@ -570,7 +570,7 @@ async function dvBatch(g, again) {
     $("#bxres", m).innerHTML = `<p class="dvbdone"><b>${b && b.n_done ? `${b.n_done} ${b.n_done === 1 ? "Tour" : "Touren"} korrigiert` : "Es wurde nichts korrigiert"}</b>${b && b.n_done ? `, Aufstieg zusammen ${esc(dvSigned(b.delta_up))}` : ""}.</p>
       ${nSkip || nFail ? `<p class="dvh">${nSkip ? `<span>${nSkip} übersprungen</span> ` : ""}${nFail ? `<span>${nFail} nicht möglich</span> ` : ""}<span>Einzelheiten stehen im Protokoll der Verwaltung.</span></p>` : ""}
       ${fin && fin.ok === false ? `<p class="bad">Der Lauf ist mit einem Fehler beendet worden. Schon Korrigiertes bleibt (einzeln wiederherstellbar); du kannst erneut starten.</p>` : ""}
-      ${rest ? `<p class="dvopen"><b>${rest === 1 ? "Noch 1 Tour mit auffälliger Höhe offen – erneut starten." : `Noch ${rest} Touren mit auffälliger Höhe offen – erneut starten.`}</b></p>` : ""}
+      ${rest ? `<p class="dvopen"><b>${rest === 1 ? "Noch 1 Tour mit auffälliger Höhe offen – erneut starten." : `Noch ${fmtAnzahl(rest, "Tour", "Touren")} mit auffälliger Höhe offen – erneut starten.`}</b></p>` : ""}
       <div class="dvfoot"><button class="btn ghost" id="bxclose" type="button">Schließen</button>${b && b.n_done ? `<button class="btn alt" id="bxundo" type="button" data-batch="${esc(b.id)}">Alles rückgängig machen</button>` : ""}</div>`;
     $("#bxclose", m).onclick = close;
     const ub = $("#bxundo", m);
@@ -624,7 +624,7 @@ function dvuBody(rep, only) {
   rep.sources.forEach(s => {
     const fl = only ? s.fields.filter(f => !f.used && f.n_tours) : s.fields;
     const nUn = s.fields.filter(f => !f.used && f.n_tours).length;
-    h += `<section class="dvusrc"><h3>${esc(s.label)}<span class="dvqs ${DVU_STATE[s.state] || "none"}">${s.state === "ok" ? (scope === "device" ? `${s.tours_checked} von ${rep.tours_checked} Touren` : `${s.fields.length} Felder`) : esc(DVU_STLAB[s.state] || s.state)}</span></h3>`;
+    h += `<section class="dvusrc"><h3>${esc(s.label)}<span class="dvqs ${DVU_STATE[s.state] || "none"}">${s.state === "ok" ? (scope === "device" ? `${s.tours_checked} von ${fmtAnzahl(rep.tours_checked, "Tour", "Touren")}` : `${s.fields.length} Felder`) : esc(DVU_STLAB[s.state] || s.state)}</span></h3>`;
     if (s.state !== "ok") h += one ? "" : `<p class="mut dvuh">${esc(s.hint || "")}</p>`;
     else {
       if (s.bad) h += `<p class="mut dvuh">Die FIT-Datei ist beschädigt; gezeigt wird, was gelesen werden konnte.</p>`;
@@ -667,7 +667,7 @@ async function devAdoptPhone(g, done) {
     const r = await api(`/api/devices/${g.id}/adopt-phone`, dvJson("POST", {}));
     MET_CACHE.clear();
     await loadTours().catch(() => {});
-    uiAlert({title: "Touren zugeordnet", text: `${r.n} Touren zugeordnet.`});
+    uiAlert({title: "Touren zugeordnet", text: `${fmtAnzahl(r.n, "Tour", "Touren")} zugeordnet.`});
   } catch (e) {
     await uiAlert({title: "Nicht möglich", text: e.message});
   }
@@ -701,7 +701,7 @@ async function devPanel() {
       ${viewer ? "" : `<div class="row"><button class="btn" id="dvzepp">Gerät aus Zepp ermitteln</button><button class="btn alt" id="dvnew2">Gerät von Hand anlegen</button></div>`}</div>`;
   root.innerHTML = `<div class="dvhead"><h2>Meine Geräte</h2><span class="sp"></span>${viewer || !dv.devices.length ? "" : `${mc && mc.total ? `<button class="btn ghost sm" id="dvall" title="Alle ${mc.total} von Hand gesetzten Zuordnungen zurücknehmen; danach entscheidet die Automatik (Art, Zepp-Kennung, Datum)">Standard wiederherstellen</button>` : ""}<button class="btn alt sm" id="dvmatch" title="Alle Touren mit passendem Zepp-Training dem richtigen Gerät zuordnen">Touren automatisch zuordnen</button>${qa ? `<button class="btn alt sm dvqrun" id="dvqall" title="Vergleicht, was die Uhren gemessen haben, mit Strecke, Geländemodell und GPS-Spur. Verändert keine Tour.">Genauigkeit auswerten</button>` : ""}<button class="btn alt sm" id="dvzepp">Geräte aus Zepp ermitteln</button><button class="btn sm" id="dvnew">+ Gerät anlegen</button>`}</div>
     <p class="mut dvintro">Deine Aufnahmegeräte mit eigenem Namen. Der Name erscheint bei jeder Tour als „Quelle“; welche Messwerte eine Tour zeigt, richtet sich nach dem, was das Gerät wirklich geliefert hat.</p>
-    ${qa && qa.progress && qa.progress.total && qa.computed_at ? `<div class="dvstat ${qa.progress.open ? "warn" : ""}" id="dvqstat" role="status"><div class="dvstatt"><b>${qa.progress.open ? dvOpenText(qa.progress.open) : "Alle Touren sind ausgewertet."}</b><span class="mut">Zuletzt ausgewertet am ${esc(dvQTime(qa.computed_at))}, ${qa.progress.done} von ${qa.progress.total} Touren.</span>${qa.progress.n_summary ? `<span class="mut">${qa.progress.n_detail} mit Detail (genau), ${qa.progress.n_summary} nur Zusammenfassung (grob).</span>` : ""}${dvBar(qa.progress.done, qa.progress.total, "Fortschritt der Auswertung")}</div>${viewer || !qa.progress.open ? "" : `<button class="btn sm dvqrun" type="button">Weiter auswerten</button>`}</div>` : ""}
+    ${qa && qa.progress && qa.progress.total && qa.computed_at ? `<div class="dvstat ${qa.progress.open ? "warn" : ""}" id="dvqstat" role="status"><div class="dvstatt"><b>${qa.progress.open ? dvOpenText(qa.progress.open) : "Alle Touren sind ausgewertet."}</b><span class="mut">Zuletzt ausgewertet am ${esc(dvQTime(qa.computed_at))}, ${qa.progress.done} von ${fmtAnzahl(qa.progress.total, "Tour", "Touren")}.</span>${qa.progress.n_summary ? `<span class="mut">${qa.progress.n_detail} mit Detail (genau), ${qa.progress.n_summary} nur Zusammenfassung (grob).</span>` : ""}${dvBar(qa.progress.done, qa.progress.total, "Fortschritt der Auswertung")}</div>${viewer || !qa.progress.open ? "" : `<button class="btn sm dvqrun" type="button">Weiter auswerten</button>`}</div>` : ""}
     ${mc && mc.redundant && !viewer ? `<div class="dvhint" id="dvred"><span><b>${mc.redundant} ${mc.redundant === 1 ? "Tour steht" : "Touren stehen"} als „von Hand zugeordnet“, entspr${mc.redundant === 1 ? "icht" : "echen"} aber der automatischen Zuordnung</b><span class="mut">Die Zuordnung ändert sich dabei nicht – nur der Zusatz „von Hand“ entfällt, und künftige Änderungen (z. B. neues Gerät, geänderter Zeitraum) wirken wieder automatisch.</span></span>
       <button class="btn sm" id="dvredok">Auf automatisch umstellen</button></div>` : ""}
     ${mc && mc.outside && !viewer ? `<div class="dvhint" id="dvmc"><span><b>${mc.outside} von Hand gesetzte ${mc.outside === 1 ? "Zuordnung widerspricht" : "Zuordnungen widersprechen"} dem Zeitraum ihres Geräts</b><span class="mut">${Object.entries(mc.by_device).map(([n, k]) => `${esc(n)}: ${k}`).join(" · ")} – die Touren liegen vor „seit“ bzw. nach „bis“ des Geräts. „Standard wiederherstellen“ übergibt sie wieder der automatischen Zuordnung (Zepp-Kennung und Datum); andere von Hand gesetzte Zuordnungen bleiben.</span></span>
@@ -719,7 +719,7 @@ async function devPanel() {
     try {
       const r = await api("/api/devices/reset-manual", METJ({mode: "all"}));
       MET_CACHE.clear();
-      if ((await uiConfirm({title: "Jetzt automatisch zuordnen?", ok: "Zuordnen", cancel: "Später", text: `${r.reset} Zuordnungen aufgehoben. Jetzt alle Touren automatisch den Uhren zuordnen?`})) && $("#dvmatch")) { $("#dvmatch").click(); return; }
+      if ((await uiConfirm({title: "Jetzt automatisch zuordnen?", ok: "Zuordnen", text: `${r.reset} Zuordnungen aufgehoben. Jetzt alle Touren automatisch den Uhren zuordnen?`})) && $("#dvmatch")) { $("#dvmatch").click(); return; }
       await loadTours().catch(() => {});
     } catch (e) { await uiAlert({title: "Nicht möglich", text: e.message}); }
     again();
@@ -727,7 +727,7 @@ async function devPanel() {
   const rb = $("#dvredok");
   if (rb) rb.onclick = async () => {
     rb.disabled = true;
-    try { const r = await api("/api/devices/reset-manual", METJ({mode: "redundant"})); MET_CACHE.clear(); await loadTours().catch(() => {}); uiAlert({title: "Umgestellt", text: `${r.reset} Touren auf automatische Zuordnung umgestellt.`}); } catch (e) { await uiAlert({title: "Nicht möglich", text: e.message}); }
+    try { const r = await api("/api/devices/reset-manual", METJ({mode: "redundant"})); MET_CACHE.clear(); await loadTours().catch(() => {}); uiAlert({title: "Umgestellt", text: `${fmtAnzahl(r.reset, "Tour", "Touren")} auf automatische Zuordnung umgestellt.`}); } catch (e) { await uiAlert({title: "Nicht möglich", text: e.message}); }
     again();
   };
   const mcb = $("#dvmcok");
@@ -737,7 +737,7 @@ async function devPanel() {
     try {
       const r = await api("/api/devices/reset-manual", METJ({mode: "outside"}));
       MET_CACHE.clear();
-      if ((await uiConfirm({title: "Jetzt automatisch zuordnen?", ok: "Zuordnen", cancel: "Später", text: `${r.reset} Zuordnungen aufgehoben. Jetzt alle Touren automatisch den Uhren zuordnen?`})) && $("#dvmatch")) { $("#dvmatch").click(); return; }
+      if ((await uiConfirm({title: "Jetzt automatisch zuordnen?", ok: "Zuordnen", text: `${r.reset} Zuordnungen aufgehoben. Jetzt alle Touren automatisch den Uhren zuordnen?`})) && $("#dvmatch")) { $("#dvmatch").click(); return; }
       await loadTours().catch(() => {});
     } catch (e) { await uiAlert({title: "Nicht möglich", text: e.message}); }
     again();
