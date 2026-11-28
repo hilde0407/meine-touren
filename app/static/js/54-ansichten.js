@@ -169,6 +169,8 @@ function slvKey(e) {
 function slvMenuToggle(btn) {
   if (slvMenuEl()) return slvMenuClose(true);
   const fam = SL.fam, h = SLF[fam], dirty = !!(h && h.dirty && h.dirty()), sel = document.getElementById("slview"), m = document.createElement("div");
+  /* 3.71.0 (N-06): mit nur einer Ansicht und ohne ungesicherte Änderung gibt es nichts zu wählen: der Knopf öffnet gleich den Dialog */
+  if (!dirty && (!sel || sel.options.length <= 1)) return slViewsDialog();
   m.id = "slvmenu";
   m.className = "slvmenu";
   m.setAttribute("role", "menu");

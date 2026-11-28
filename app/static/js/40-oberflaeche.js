@@ -180,6 +180,33 @@ function iconize() {
     e.insertAdjacentHTML("afterbegin", `<svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${BTN_ICONS[m[1]]}</svg>`);
   });
 }
+/* ---- 3.71.0 (N-01/N-02/N-04): Alternativtexte, Feldbeschriftungen und Orientierungspunkte zentral ergänzen ---- */
+const A11Y_LABEL = {gs: "Suche", so: "Sortierung", fy: "Jahr", my: "Zeitraum", cmp: "Tour zum Vergleich", q: "Name suchen"};
+document.addEventListener("click", e => {
+  const a = e.target.closest && e.target.closest("a.skip");
+  if (!a) return;
+  e.preventDefault();
+  const m = document.getElementById("main");
+  m && m.focus({preventScroll: false});
+});
+function a11y() {
+  document.querySelectorAll("img:not([alt])").forEach(i => {
+    const c = i.closest("[title],[aria-label]"),
+      t = i.title || (c && (c.getAttribute("aria-label") || c.title)) || "";
+    i.setAttribute("alt", t || "Foto");
+  });
+  Object.keys(A11Y_LABEL).forEach(id => {
+    const e = document.getElementById(id);
+    if (e && !e.getAttribute("aria-label") && !e.labels?.length) e.setAttribute("aria-label", A11Y_LABEL[id]);
+  });
+  const tb = document.getElementById("tabbar");
+  if (tb && tb.tagName !== "NAV") {
+    tb.setAttribute("role", "navigation");
+    tb.setAttribute("aria-label", "Hauptmenü");
+  }
+  const nv = document.getElementById("nav");
+  if (nv && !nv.getAttribute("aria-label")) nv.setAttribute("aria-label", "Bereiche");
+}
 {
   let pend = false;
   new MutationObserver(() => {
@@ -188,7 +215,9 @@ function iconize() {
     requestAnimationFrame(() => {
       pend = false;
       iconize();
+      a11y();
     });
   }).observe(document.body, {childList: true, subtree: true, characterData: true});
   iconize();
+  a11y();
 }

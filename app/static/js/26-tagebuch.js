@@ -59,7 +59,7 @@ VIEWS.tour = async (...a) => {
   if (!$("#starrow")) {
     w.insertAdjacentHTML("beforebegin", `<div class="starrow" id="starrow"></div>`);
     const drawStars = () => {
-      $("#starrow").innerHTML = `<span class="mut">Meine Bewertung:</span>${[1, 2, 3, 4, 5].map(n => `<button type="button" class="st ${n <= (t.stars || 0) ? "on" : ""}" data-n="${n}" title="${n} Stern${n > 1 ? "e" : ""}" aria-label="${n} Sterne">★</button>`).join("")}${t.stars ? `<button type="button" class="btn ghost sm" id="stclr" title="Bewertung entfernen">✕</button>` : ""}`;
+      $("#starrow").innerHTML = `<span class="mut">Meine Bewertung:</span>${[1, 2, 3, 4, 5].map(n => `<button type="button" class="st ${n <= (t.stars || 0) ? "on" : ""}" data-n="${n}" title="${n} Stern${n > 1 ? "e" : ""}" aria-label="${n} ${n > 1 ? "Sterne" : "Stern"}">★</button>`).join("")}${t.stars ? `<button type="button" class="btn ghost sm" id="stclr" title="Bewertung entfernen">✕</button>` : ""}`;
       $("#starrow").querySelectorAll(".st").forEach(b => (b.onclick = () => setStars(+b.dataset.n === t.stars ? 0 : +b.dataset.n)));
       if ($("#stclr")) $("#stclr").onclick = () => setStars(0);
     };

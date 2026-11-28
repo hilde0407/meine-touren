@@ -3983,4 +3983,12 @@ Letzte vor {} Tagen. || Last one {} days ago. || La dernière date de {} jours. 
 1 Foto ist schon in der Bibliothek || 1 photo is already in the library || 1 photo est déjà dans la bibliothèque || 1 foto ya está en la biblioteca
 {} von 1 Foto wird importiert || {} of 1 photo is being imported || {} sur 1 photo est importée || {} de 1 foto se importa
 1 von 1 Foto liegt nach ihrer Zeit auf der Strecke (orange{}) || 1 of 1 photo lies on the track by its time (orange{}) || 1 photo sur 1 se trouve sur le tracé d’après l’heure (orange{}) || 1 de 1 foto está en el trazado según su hora (naranja{})
+Zum Inhalt springen || Skip to content || Aller au contenu || Ir al contenido
+Hauptmenü || Main menu || Menu principal || Menú principal
+Bereiche || Sections || Sections || Secciones
+Suche || Search || Recherche || Búsqueda
+Sortierung || Sort order || Tri || Orden
+Zeitraum || Period || Période || Periodo
+Tour zum Vergleich || Tour to compare || Sortie à comparer || Ruta para comparar
+1 Stern || 1 star || 1 étoile || 1 estrella
 `;

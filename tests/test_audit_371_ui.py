@@ -525,3 +525,65 @@ def test_m13_keine_401_im_einzelbetrieb(pw, app):
         assert not bad, bad
     finally:
         pg.browser_.close()
+
+
+# ---------------------------------------------------------------- Welle 3 (N-Funde)
+def test_n01_n02_n04_beschriftungen_und_orientierung(pw, app):
+    pg = _browser(pw, app, width=390, height=844, devs=None)
+    try:
+        pg.goto(f"{app}/#/tours")
+        pg.wait_for_selector("#so", timeout=T)
+        _ready(pg)
+        pg.wait_for_timeout(200)
+        r = pg.evaluate("""() => ({
+          so: document.getElementById('so').getAttribute('aria-label'),
+          fy: document.getElementById('fy') && document.getElementById('fy').getAttribute('aria-label'),
+          gs: document.getElementById('gs') && document.getElementById('gs').getAttribute('aria-label'),
+          tab: document.getElementById('tabbar').getAttribute('aria-label'),
+          nav: document.getElementById('nav').getAttribute('aria-label'),
+          noalt: document.querySelectorAll('img:not([alt])').length,
+          skip: !!document.querySelector('a.skip'), main: document.getElementById('main').tabIndex})""")
+        assert r["so"] and r["gs"] and r["tab"] and r["nav"], r
+        assert r["fy"], r
+        assert r["noalt"] == 0 and r["skip"] and r["main"] == -1, r
+        pg.focus("a.skip")
+        pg.keyboard.press("Enter")
+        assert pg.evaluate("location.hash").startswith("#/tours")          # Sprunglink ändert die Adresse nicht
+        assert pg.evaluate("document.activeElement.id") == "main"
+    finally:
+        pg.browser_.close()
+
+
+def test_n03_sterne_einzahl():
+    src = open(os.path.join(ROOT, "app/static/js/26-tagebuch.js"), encoding="utf-8").read()
+    assert '"Sterne" : "Stern"' in src
+
+
+def test_n06_ansichten_knopf_oeffnet_bei_einer_ansicht_direkt_den_dialog(pw, app):
+    pg = _browser(pw, app, width=390, height=844, devs=None)
+    try:
+        pg.goto(f"{app}/#/dash")
+        pg.wait_for_selector("#slviews", timeout=T)
+        _ready(pg)
+        n = pg.evaluate("document.getElementById('slview') ? document.getElementById('slview').options.length : 0")
+        pg.click("#slviews")
+        if n <= 1:
+            pg.wait_for_selector(".sldlg", timeout=T)
+            assert not pg.query_selector("#slvmenu")
+        else:
+            pg.wait_for_selector("#slvmenu", timeout=T)
+    finally:
+        pg.browser_.close()
+
+
+@pytest.mark.parametrize("w", (360, 430))
+def test_n07_admin_tabs_umbrechen_am_handy(pw, app, w):
+    pg = _browser(pw, app, width=w, height=844, devs=None)
+    try:
+        pg.goto(f"{app}/#/admin")
+        pg.wait_for_selector(".atabs", timeout=T)
+        _ready(pg)
+        r = pg.evaluate("""() => { const t = document.querySelector('.atabs'); return {sw: t.scrollWidth, cw: t.clientWidth, dw: document.documentElement.scrollWidth, iw: innerWidth}; }""")
+        assert r["sw"] <= r["cw"] + 1 and r["dw"] <= r["iw"] + 1, r
+    finally:
+        pg.browser_.close()
