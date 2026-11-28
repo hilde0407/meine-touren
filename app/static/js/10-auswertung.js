@@ -2,7 +2,7 @@
 VIEWS.places = async (...a) => {
   $("#main").innerHTML =
     `<div class="sec mt0"><h2>Orte & Ausrüstung</h2><span class="sub">Orte, Gipfel, Leistung, Wetter, Neuland</span></div><div id="plb" class="mut">Wird geladen …</div>`;
-  const [p, gp] = await Promise.all([api("/api/places"), api("/api/guides/progress").catch(() => [])]),
+  const [p, gp, gfo] = await Promise.all([api("/api/places"), api("/api/guides/progress").catch(() => []), api("/api/guides/folders").catch(() => ({folders: []}))]),
     box = $("#plb");
   box.className = "";
   const mx = Math.max(1, ...p.starts.map(s => s.n));
@@ -22,9 +22,9 @@ VIEWS.places = async (...a) => {
        : '<p class="mut">Noch keine Gipfel bestimmt.</p>'
    }
     <div class="row mt12"><button class="btn alt" id="pkb">Gipfel bestimmen${p.pending_peaks ? ` (${fmtAnzahl(p.pending_peaks, "Tour", "Touren")} offen)` : ""}</button><span id="pkm" class="mut"></span></div></div></div>
-   <div class="sec"><h2>Wanderführer-Fortschritt</h2>${gp.length ? `<span class="sub">${gfSum(gp)}</span>` : ""}</div>
-   ${gp.length ? '<div id="gfx"></div>' : '<p class="mut">Noch keine Wanderführer hinterlegt: Verwaltung → Touren holen → Wanderführer (GPX-Dateien hochladen).</p>'}`;
-  if (gp.length) gfMount($("#gfx"), gp, a[1]);
+   <div class="sec"><h2>Wanderführer</h2>${gp.length ? `<span class="sub">${gfSum(gp)}</span>` : ""}</div>
+   <div id="gfx"></div>`;
+  gfMount($("#gfx"), gp, a[1], gfo.folders || []);                 // 3.73.0: immer eingehängt (Knöpfe „Buch anlegen …“, Ordner, Übertragen); ohne Bücher zeigt es den Leerzustand
   $("#pkb").onclick = async e => {
     e.target.disabled = true;
     try {
@@ -624,19 +624,42 @@ function gfHash() {
   const h = "#/places" + (u.toString() ? "?" + u : "");
   if (location.hash !== h) history.replaceState(null, "", h);                 // teilbar, ohne die Seite neu aufzubauen
 }
-function gfMount(host, gp, q) {
+function gfMount(host, gp, q, folders) {
   q = q || new URLSearchParams();
   GF.books = gp;
+  GF.folders = folders || [];
+  GF.ro = typeof isViewer === "function" && isViewer();                      // Betrachter: nur ansehen und exportieren
   GF.f = GF_FILTER.some(x => x[0] === q.get("wf")) ? q.get("wf") || "" : "";
   GF.o = GF_ORDER.some(x => x[0] === q.get("wo")) ? q.get("wo") || "" : "";
   GF.q = (q.get("wq") || "").slice(0, 80);
   GF.lim = {};
   GF.covers = {};
   gp.forEach(b => b.cover && (GF.covers[b.key] = gfCover(b)));
-  host.innerHTML = `<div class="gfbar"><div class="chips" role="group" aria-label="Touren zeigen">${GF_FILTER.map(([k, l]) => `<button type="button" class="chip${GF.f === k ? " on" : ""}" data-gff="${k}" aria-pressed="${GF.f === k}">${l}</button>`).join("")}</div>
-    <input type="search" id="gfq" class="gfq" value="${esc(GF.q)}" placeholder="Buch oder Tour suchen" aria-label="Buch oder Tour suchen" autocomplete="off">
-    <select id="gfo" class="gfo" aria-label="Reihenfolge der Touren im Buch">${GF_ORDER.map(([k, l]) => `<option value="${k}"${GF.o === k ? " selected" : ""}>${l}</option>`).join("")}</select></div>
-    <div id="gfl" class="gfl"></div><input type="file" id="gffile" accept="image/jpeg,image/png,image/webp,image/gif" hidden>`;
+  const ic = (k, n) => symHtml(k, n || 17);
+  host.innerHTML = `<p class="gfmsg" id="gfmsg" role="status" aria-live="polite"></p>
+    ${GF.ro ? "" : `<div class="row gftool"><button type="button" class="btn sm" id="gfadd" aria-haspopup="dialog">${ic("ic:plus")} Buch anlegen …</button><button type="button" class="btn sm" id="gffold" aria-haspopup="dialog">${ic("ic:folder")} Neuer Ordner …</button>${
+      gp.length ? `<button type="button" class="btn sm" id="gfnames" aria-haspopup="dialog">${ic("✎")} Tournamen angleichen …</button>` : ""
+    }</div>`}
+    ${
+      gp.length
+        ? `<div class="gfbar"><div class="chips" role="group" aria-label="Touren zeigen">${GF_FILTER.map(([k, l]) => `<button type="button" class="chip${GF.f === k ? " on" : ""}" data-gff="${k}" aria-pressed="${GF.f === k}">${l}</button>`).join("")}</div>
+    <input type="search" id="gfq" class="gfq" value="${esc(GF.q)}" placeholder="Buch oder Buchtour suchen" aria-label="Buch oder Buchtour suchen" autocomplete="off">
+    <select id="gfo" class="gfo" aria-label="Reihenfolge der Buchtouren im Buch">${GF_ORDER.map(([k, l]) => `<option value="${k}"${GF.o === k ? " selected" : ""}>${l}</option>`).join("")}</select></div>
+    <div id="gfl" class="gfl"></div>`
+        : `<p class="mut" id="gfempty">${GF.ro ? "Noch keine Wanderführer." : "Noch keine Wanderführer. Lege ein Buch an und wähle die GPX-Dateien dazu (bei Rother im Download-Bereich zum Buch)."}</p>`
+    }
+    <input type="file" id="gffile" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+    <div class="gfxfer"><h3 class="gfh3">Übertragen</h3><p class="mut fs14">Bücher als Datei sichern oder auf ein anderes Gerät bringen. Mein Tourentagebuch liest dieselbe Datei.</p>
+     <div class="row"><button type="button" class="btn sm" id="gfexp" aria-haspopup="dialog">${ic("⬇")} Wanderführer exportieren …</button>${GF.ro ? "" : `<button type="button" class="btn sm" id="gfimp" aria-haspopup="dialog">${ic("⬆")} Wanderführer importieren …</button>`}</div></div>`;
+  const on = (id, fn) => $(id) && ($(id).onclick = fn);
+  on("#gfadd", () => gfBookAdd(null));
+  on("#gffold", () => gfFolderNew());
+  on("#gfnames", () => gfNamesOpen());
+  on("#gfexp", () => gfExport());
+  on("#gfimp", () => gfImport());
+  const msg = GF.msg;                                                       // Meldung der Aktion, die die Seite neu aufgebaut hat: erst zeigen, wenn die Liste steht
+  GF.msg = "";
+  if (!gp.length) return msg && gfMsg(msg);
   host.querySelectorAll("[data-gff]").forEach(
     c =>
       (c.onclick = () => {
@@ -662,24 +685,65 @@ function gfMount(host, gp, q) {
   };
   $("#gffile").onchange = gfCoverPick;
   gfDraw();
+  if (msg) gfMsg(msg);
+}
+/* Meldung an der Stelle der Aktion (Leitfaden 2.5): „<Sache> gespeichert“, Fehler „<Vorgang> nicht möglich: <Grund>“ */
+function gfMsg(t, bad) {
+  const m = $("#gfmsg");
+  if (!m) return;
+  m.textContent = t || "";
+  m.classList.toggle("bad", !!bad);
+}
+function gfCard(b, i) {
+  const m = gfMatch(b);
+  if (!m) return "";
+  const forced = !!(GF.q && !m.all),
+    open = forced || gfLs("o_" + b.key) === "1",
+    cv = GF.covers[b.key];
+  return `<details class="gfb" data-i="${i}" data-sy="${open ? 1 : 0}"${forced ? ' data-forced="1"' : ""}${open ? " open" : ""}>
+       <summary class="gfh"><span class="gfc">${cv ? `<img src="${cv}" alt="" loading="lazy" decoding="async">` : GF_BOOK_ICON}</span>
+        <span class="gft"><span class="gfname" translate="no">${esc(b.book)}</span><span class="gfn">${b.done} von ${b.total} gewandert</span><span class="gfz">${gfCount(b, m)}</span></span>${gfRing(b.done, b.total)}</summary>
+       <div class="gfbody"></div></details>`;
 }
 function gfDraw() {
   const box = $("#gfl");
   if (!box) return;
-  const cards = GF.books
-    .map((b, i) => {
-      const m = gfMatch(b);
-      if (!m) return "";
-      const forced = !!(GF.q && !m.all),
-        open = forced || gfLs("o_" + b.key) === "1",
-        cv = GF.covers[b.key];
-      return `<details class="gfb" data-i="${i}" data-sy="${open ? 1 : 0}"${forced ? ' data-forced="1"' : ""}${open ? " open" : ""}>
-       <summary class="gfh"><span class="gfc">${cv ? `<img src="${cv}" alt="" loading="lazy" decoding="async">` : GF_BOOK_ICON}</span>
-        <span class="gft"><span class="gfname" translate="no">${esc(b.book)}</span><span class="gfn">${b.done} von ${b.total} gewandert</span><span class="gfz">${gfCount(b, m)}</span></span>${gfRing(b.done, b.total)}</summary>
-       <div class="gfbody"></div></details>`;
-    })
-    .join("");
-  box.innerHTML = cards || `<p class="mut">Kein Buch und keine Tour passt zu „${esc(GF.q)}“.</p>`;
+  const cards = GF.books.map((b, i) => ({b, html: gfCard(b, i)})),
+    none = `<p class="mut">Kein Buch und keine Buchtour passt zu „${esc(GF.q)}“.</p>`;
+  if (!GF.folders.length) box.innerHTML = cards.map(c => c.html).join("") || none;
+  else {
+    /* 3.73.0 Ordner wie „Geplante Touren“ im Tagebuch: Ordner alphabetisch (auch leere), danach „Ohne Ordner“; bei Suche oder Filter nur Ordner mit Treffern */
+    const filtered = !!(GF.q || GF.f),
+      sec = (name, i) => {
+        const mine = cards.filter(c => (c.b.folder || "") === (name || "")),
+          shown = mine.filter(c => c.html);
+        if (filtered && !shown.length) return "";
+        if (name === null && !shown.length) return "";
+        const zu = name !== null && gfLs("f_" + name) === "z" && !filtered,
+          n = mine.length,
+          label = name === null ? "Ohne Ordner" : name,
+          cnt = fmtAnzahl(n, "Buch", "Bücher");
+        return `<section class="gfsec${zu ? " zu" : ""}" data-fi="${i}"><div class="gfoh"><button type="button" class="gfot" aria-expanded="${!zu}"><span class="gfpf" aria-hidden="true"></span>${symHtml("ic:folder", 20)}<b translate="no">${esc(label)}</b><span class="gfanz mut" aria-label="${cnt}">${n}</span></button>${
+          name === null || GF.ro
+            ? ""
+            : `<button type="button" class="ico gfoi" data-a="ren" aria-label="Ordner „${esc(name)}“ umbenennen" title="Umbenennen">${symHtml("✎", 18)}</button><button type="button" class="ico gfoi" data-a="del" aria-label="Ordner „${esc(name)}“ löschen" title="Löschen">${symHtml("🗑", 18)}</button>`
+        }</div><div class="gfoc"${zu ? " hidden" : ""}>${shown.map(c => c.html).join("") || (n ? "" : '<p class="mut fs14 gfleer">Leer. Lege Bücher hierher mit „In Ordner verschieben …“.</p>')}</div></section>`;
+      };
+    box.innerHTML = GF.folders.map((f, i) => sec(f, i)).join("") + sec(null, -1) || none;
+    box.querySelectorAll(".gfsec").forEach(s => {
+      const fi = +s.dataset.fi,
+        nm = fi >= 0 ? GF.folders[fi] : null;
+      s.querySelector(".gfot").onclick = e => {
+        const c = s.querySelector(".gfoc"),
+          zu = !c.hidden;
+        c.hidden = zu;
+        s.classList.toggle("zu", zu);
+        e.currentTarget.setAttribute("aria-expanded", String(!zu));
+        if (nm !== null) gfLs("f_" + nm, zu ? "z" : "o");
+      };
+      s.querySelectorAll(".gfoi").forEach(b => (b.onclick = () => (b.dataset.a === "ren" ? gfFolderRename(nm) : gfFolderDelete(nm))));
+    });
+  }
   box.querySelectorAll("details.gfb").forEach(d => {
     if (d.open) gfBody(d);
     d.addEventListener("toggle", () => {
@@ -691,12 +755,12 @@ function gfDraw() {
     });
   });
 }
-function gfRow(x) {
+function gfRow(x, b) {
   const t = x.tour && BY[x.tour],
     meta = [x.km != null ? fmtKm(x.km) : "", x.up != null ? fmtAuf(x.up) : ""].filter(Boolean).join(" · ");
-  return `<div class="r gfr${x.tour ? " done" : ""}"><span><span class="gfst" aria-hidden="true">${x.tour ? "✓" : "○"}</span><span translate="no">${esc(x.title)}</span>${meta ? `<small>${meta}</small>` : ""}</span>${
+  return `<div class="r gfr${x.tour ? " done" : ""}" data-t="${x.id}"><span><span class="gfst" aria-hidden="true">${x.tour ? "✓" : "○"}</span><span translate="no">${esc(x.title)}</span>${meta ? `<small>${meta}</small>` : ""}</span><span class="gfend">${
     x.tour ? `<a href="#/tour/${x.tour}" aria-label="Gewandert am ${t ? fmtDatumKurz(t.date) : ""}">${t ? fmtDatumKurz(t.date) : "Tour"}</a>` : '<span class="mut">offen</span>'
-  }</div>`;
+  }${GF.ro ? "" : `<button type="button" class="ico gfrm" data-t="${x.id}" aria-haspopup="dialog" aria-label="Weitere Aktionen für „${esc(x.title)}“" title="Weitere Aktionen">${symHtml("⋯", 18)}</button>`}</span></div>`;
 }
 function gfBody(d) {
   const b = GF.books[+d.dataset.i],
@@ -707,12 +771,15 @@ function gfBody(d) {
     ro = typeof isViewer === "function" && isViewer(),
     nOpen = b.tours.filter(x => !x.tour && x.s).length;
   d.dataset.r = "1";
-  const empty = GF.f === "offen" ? "Alle Touren dieses Buchs sind gewandert." : GF.f === "gewandert" ? "Aus diesem Buch ist noch keine Tour gewandert." : "Keine Touren.";
+  const empty = GF.f === "offen" ? "Alle Buchtouren dieses Buchs sind gewandert." : GF.f === "gewandert" ? "Aus diesem Buch ist noch keine Buchtour gewandert." : "Keine Buchtouren.";
   body.innerHTML = `<div class="row gfacts">${nOpen ? `<button type="button" class="btn alt sm gfmapb" aria-expanded="false">Offene Touren auf der Karte</button>` : ""}${
-    ro ? "" : `<button type="button" class="btn ghost sm gfcov">Titelbild wählen</button>${b.cover ? '<button type="button" class="btn ghost sm gfcovx">Titelbild entfernen</button>' : ""}`
+    ro ? "" : `<button type="button" class="btn ghost sm gfcov">Titelbild wählen</button>${b.cover ? '<button type="button" class="btn ghost sm gfcovx">Titelbild entfernen</button>' : ""}<button type="button" class="btn ghost sm gfact" aria-haspopup="dialog">Aktionen …</button>`
   }</div><div class="gfmap" hidden></div>
-   ${ls.length ? `<div class="rows gfrows">${ls.slice(0, lim).map(gfRow).join("")}</div>` : `<p class="mut">${empty}</p>`}
+   ${ls.length ? `<div class="rows gfrows">${ls.slice(0, lim).map(x => gfRow(x, b)).join("")}</div>` : `<p class="mut">${empty}</p>`}
    ${ls.length > lim ? `<div class="row jcc gfmore"><button type="button" class="btn ghost sm gfmoreb">Mehr anzeigen</button><span class="mut fs13">${lim} von ${ls.length}</span></div>` : ""}`;
+  const ab = body.querySelector(".gfact");
+  if (ab) ab.onclick = () => gfBookMenu(b);
+  body.querySelectorAll(".gfrm").forEach(bt => (bt.onclick = () => gfTourMenu(b, b.tours.find(x => String(x.id) === bt.dataset.t))));
   const mb = body.querySelector(".gfmoreb");
   if (mb)
     mb.onclick = () => {

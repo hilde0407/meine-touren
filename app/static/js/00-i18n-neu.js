@@ -3304,8 +3304,8 @@ Je Tour ein Foto statt der Strecke (gilt nur auf diesem Gerät) || One photo per
 Touren zeigen || Show tours || Afficher les parcours || Mostrar rutas
 Offen || Open || À faire || Pendientes
 Gewandert || Hiked || Randonnés || Recorridas
-Buch oder Tour suchen || Search guide or tour || Rechercher un guide ou un parcours || Buscar guía o ruta
-Reihenfolge der Touren im Buch || Order of tours in the guide || Ordre des parcours dans le guide || Orden de las rutas en la guía
+Buch oder Buchtour suchen || Search guide or guide tour || Rechercher un guide ou un parcours du guide || Buscar guía o ruta de la guía
+Reihenfolge der Buchtouren im Buch || Order of guide tours in the guide || Ordre des parcours du guide dans le guide || Orden de las rutas de la guía en la guía
 Buchreihenfolge || Guide order || Ordre du guide || Orden de la guía
 Nach Strecke || By distance || Par distance || Por distancia
 Zuletzt gewandert || Last hiked || Randonnés récemment || Recorridas recientemente
@@ -3316,8 +3316,8 @@ gewandert: {} || hiked: {} || randonnés : {} || recorridas: {}
 {} Treffer || {} matches || {} résultats || {} resultados
 Kein Buch und keine Tour passt zu „{}“. || No guide and no tour matches “{}”. || Aucun guide ni parcours ne correspond à « {} ». || Ninguna guía ni ruta coincide con «{}».
 Gewandert am {} || Hiked on {} || Randonné le {} || Recorrida el {}
-Alle Touren dieses Buchs sind gewandert. || All tours in this guide have been hiked. || Tous les parcours de ce guide ont été randonnés. || Ya has recorrido todas las rutas de esta guía.
-Aus diesem Buch ist noch keine Tour gewandert. || No tour from this guide hiked yet. || Aucun parcours de ce guide n’a encore été randonné. || Aún no has recorrido ninguna ruta de esta guía.
+Alle Buchtouren dieses Buchs sind gewandert. || All guide tours in this guide have been hiked. || Tous les parcours de ce guide ont été randonnés. || Ya has recorrido todas las rutas de esta guía.
+Aus diesem Buch ist noch keine Buchtour gewandert. || No guide tour from this guide hiked yet. || Aucun parcours de ce guide n’a encore été randonné. || Aún no has recorrido ninguna ruta de esta guía.
 Keine Touren. || No tours. || Aucun parcours. || No hay rutas.
 Offene Touren auf der Karte || Open tours on the map || Parcours à faire sur la carte || Rutas pendientes en el mapa
 Titelbild wählen || Choose cover || Choisir la couverture || Elegir portada
@@ -3897,8 +3897,8 @@ Alle Seiten auf Werkseinstellung zurückgesetzt. 1 eigene Ansicht bleibt bestehe
 Alle Seiten auf Werkseinstellung zurückgesetzt. {} eigene Ansichten bleiben bestehen. || All pages reset to factory settings. {} own views remain. || Toutes les pages ont été réinitialisées aux réglages d’usine. {} vues personnelles sont conservées. || Todas las páginas se restablecieron a los valores de fábrica. {} vistas propias se conservan.
 Alle Seiten auf Werkseinstellung zurückgesetzt. || All pages reset to factory settings. || Toutes les pages ont été réinitialisées aux réglages d’usine. || Todas las páginas se restablecieron a los valores de fábrica.
 Alle Seiten auf Werkseinstellung zurückgesetzt, aber nicht ganz: Auf einigen Seiten gibt es schon 12 Ansichten, lösche zuerst eine. || All pages reset to factory settings, but not completely: some pages already have 12 views, delete one first. || Toutes les pages ont été réinitialisées aux réglages d’usine, mais pas complètement : certaines pages ont déjà 12 vues, supprime-en d’abord une. || Todas las páginas se restablecieron a los valores de fábrica, pero no del todo: algunas páginas ya tienen 12 vistas, elimina primero una.
-Zurücksetzen nicht möglich || Reset not possible || Réinitialisation impossible || Restablecimiento no posible
-Zurücksetzen nicht möglich: {} || Reset not possible: {} || Réinitialisation impossible : {} || Restablecimiento no posible: {}
+Rückgängig machen nicht möglich || Reset not possible || Réinitialisation impossible || Restablecimiento no posible
+Rückgängig machen nicht möglich: {} || Reset not possible: {} || Réinitialisation impossible : {} || Restablecimiento no posible: {}
 Seitenanordnung || Page layout || Disposition des pages || Disposición de las páginas
 Setzt die Anordnung aller Seiten (Übersicht, Tourseite, Statistik, Reisen, Gebiete, Fotos, Karte) auf die Werkseinstellung zurück: Reihenfolge, Breiten, entfernte und hinzugefügte Bausteine und Ansichten. Touren, Ziele und Einstellungen bleiben unberührt. || Resets the layout of all pages (overview, tour page, statistics, trips, areas, photos, map) to factory settings: order, widths, removed and added widgets and views. Tours, goals and settings stay untouched. || Réinitialise la disposition de toutes les pages (aperçu, page du parcours, statistiques, voyages, zones, photos, carte) aux réglages d’usine : ordre, largeurs, blocs retirés et ajoutés, et vues. Les parcours, les objectifs et les réglages restent intacts. || Restablece la disposición de todas las páginas (vista general, página de la ruta, estadísticas, viajes, zonas, fotos, mapa) a los valores de fábrica: orden, anchos, bloques quitados y añadidos, y vistas. Las rutas, los objetivos y los ajustes permanecen intactos.
 Name vergeben und die Touren abhaken, die zur Reise gehören. Es ist nichts vorgewählt. Die Reise erscheint danach wie eine erkannte Reise unter Reisen. Touren einer eigenen Reise gehören nicht mehr zur automatisch erkannten Reise. || Enter a name and tick the tours that belong to the trip. Nothing is preselected. The trip then appears under Trips like a detected trip. Tours of your own trip no longer belong to the automatically detected trip. || Donne un nom et coche les parcours qui font partie du voyage. Rien n’est présélectionné. Le voyage apparaît ensuite sous Voyages comme un voyage détecté. Les parcours de ton propre voyage ne font plus partie du voyage détecté automatiquement. || Pon un nombre y marca las rutas que forman parte del viaje. No hay nada preseleccionado. El viaje aparece después en Viajes como un viaje detectado. Las rutas de tu propio viaje ya no pertenecen al viaje detectado automáticamente.
@@ -3994,4 +3994,162 @@ Tour zum Vergleich || Tour to compare || Sortie à comparer || Ruta para compara
 Du kannst Zepp-Trainings oder GPX/TCX-Dateien importieren – sie werden lokal gespeichert. Optional: Komoot-Zugangsdaten eintragen und „Komoot aktualisieren“. || You can import Zepp workouts or GPX/TCX files – they are stored locally. Optionally enter your Komoot credentials and choose “Update Komoot”. || Vous pouvez importer des entraînements Zepp ou des fichiers GPX/TCX – ils sont enregistrés localement. En option : saisissez vos identifiants Komoot et choisissez « Mettre à jour Komoot ». || Puedes importar entrenamientos de Zepp o archivos GPX/TCX: se guardan en local. Opcionalmente, introduce tus datos de acceso a Komoot y elige «Actualizar Komoot».
 Als Wiederholung gilt, wer weitgehend denselben Weg nimmt (dieselbe Erkennung wie die Markierung „Wiederholung“ in der Tourenliste). || A repeat is a tour that follows largely the same route (same detection as the “Repeat” marker in the tour list). || Une répétition suit en grande partie le même itinéraire (même détection que le repère « Répétition » dans la liste des parcours). || Una repetición sigue en gran parte el mismo camino (misma detección que la marca «Repetición» de la lista de rutas).
 in der Tour über „Schlagwörter & Alben“ vergeben || assign in the tour via “Tags & albums” || à attribuer dans le parcours via « Tags et albums » || se asignan en la ruta con «Etiquetas y álbumes»
+Buch anlegen … || Add book … || Ajouter un livre … || Añadir libro …
+Neuer Ordner … || New folder … || Nouveau dossier … || Nueva carpeta …
+Tournamen angleichen … || Match tour names … || Aligner les noms des parcours … || Igualar nombres de rutas …
+Noch keine Wanderführer. Lege ein Buch an und wähle die GPX-Dateien dazu (bei Rother im Download-Bereich zum Buch). || No hiking guides yet. Add a book and choose its GPX files (for Rother in the download area of the book). || Pas encore de guide de randonnée. Ajoutez un livre et choisissez ses fichiers GPX (chez Rother : zone de téléchargement du livre). || Aún no hay guías de senderismo. Añade un libro y elige sus archivos GPX (en Rother, en la zona de descargas del libro).
+Noch keine Wanderführer. || No hiking guides yet. || Pas encore de guide de randonnée. || Aún no hay guías de senderismo.
+Übertragen || Transfer || Transférer || Transferir
+Bücher als Datei sichern oder auf ein anderes Gerät bringen. Mein Tourentagebuch liest dieselbe Datei. || Save books as a file or move them to another device. Mein Tourentagebuch reads the same file. || Enregistrer les livres dans un fichier ou les transférer sur un autre appareil. Mein Tourentagebuch lit le même fichier. || Guarda los libros como archivo o llévalos a otro dispositivo. Mein Tourentagebuch lee el mismo archivo.
+Wanderführer exportieren … || Export hiking guides … || Exporter les guides de randonnée … || Exportar guías de senderismo …
+Wanderführer importieren … || Import hiking guides … || Importer des guides de randonnée … || Importar guías de senderismo …
+Kein Buch und keine Buchtour passt zu „{}“. || No book and no guide tour matches “{}”. || Aucun livre ni parcours du livre ne correspond à « {} ». || Ningún libro ni ruta de libro coincide con «{}».
+Ohne Ordner || No folder || Sans dossier || Sin carpeta
+Leer. Lege Bücher hierher mit „In Ordner verschieben …“. || Empty. Put books here with “Move to folder …”. || Vide. Placez-y des livres avec « Déplacer vers un dossier … ». || Vacía. Coloca libros aquí con «Mover a carpeta …».
+Ordner „{}“ umbenennen || Rename folder “{}” || Renommer le dossier « {} » || Renombrar la carpeta «{}»
+Ordner „{}“ löschen || Delete folder “{}” || Supprimer le dossier « {} » || Eliminar la carpeta «{}»
+Weitere Aktionen für „{}“ || More actions for “{}” || Autres actions pour « {} » || Más acciones para «{}»
+Aktionen … || Actions … || Actions … || Acciones …
+Keine Buchtouren. || No guide tours. || Aucun parcours du livre. || Ninguna ruta del libro.
+1 Buchtour || 1 guide tour || 1 parcours du livre || 1 ruta del libro
+{} Buchtouren || {} guide tours || {} parcours du livre || {} rutas del libro
+Neuer Ordner || New folder || Nouveau dossier || Nueva carpeta
+Ordner „{}“ gespeichert || Folder “{}” saved || Dossier « {} » enregistré || Carpeta «{}» guardada
+Ordner anlegen nicht möglich || Cannot create folder || Création du dossier impossible || No se puede crear la carpeta
+Ordner umbenennen || Rename folder || Renommer le dossier || Renombrar carpeta
+Ordner umbenennen nicht möglich || Cannot rename folder || Renommage du dossier impossible || No se puede renombrar la carpeta
+Das Buch darin bleibt erhalten und kommt zurück nach „Ohne Ordner“. || The book inside is kept and goes back to “No folder”. || Le livre qu’il contient est conservé et revient dans « Sans dossier ». || El libro que contiene se conserva y vuelve a «Sin carpeta».
+Die {} Bücher darin bleiben erhalten und kommen zurück nach „Ohne Ordner“. || The {} books inside are kept and go back to “No folder”. || Les {} livres qu’il contient sont conservés et reviennent dans « Sans dossier ». || Los {} libros que contiene se conservan y vuelven a «Sin carpeta».
+Der Ordner ist leer. || The folder is empty. || Le dossier est vide. || La carpeta está vacía.
+Ordner „{}“ löschen? || Delete folder “{}”? || Supprimer le dossier « {} » ? || ¿Eliminar la carpeta «{}»?
+Ordner gelöscht || Folder deleted || Dossier supprimé || Carpeta eliminada
+In Ordner verschieben || Move to folder || Déplacer vers un dossier || Mover a carpeta
+Ordner || Folder || Dossier || Carpeta
+Name des neuen Ordners || Name of the new folder || Nom du nouveau dossier || Nombre de la nueva carpeta
+„{}“ in „{}“ verschoben || “{}” moved to “{}” || « {} » déplacé vers « {} » || «{}» movido a «{}»
+„{}“ aus dem Ordner entfernt || “{}” removed from the folder || « {} » retiré du dossier || «{}» quitado de la carpeta
+Verschieben nicht möglich || Cannot move || Déplacement impossible || No se puede mover
+Entfernen nicht möglich || Cannot remove || Retrait impossible || No se puede quitar
+In Ordner verschieben … || Move to folder … || Déplacer vers un dossier … || Mover a carpeta …
+Aus Ordner entfernen || Remove from folder || Retirer du dossier || Quitar de la carpeta
+GPX-Dateien hinzufügen … || Add GPX files … || Ajouter des fichiers GPX … || Añadir archivos GPX …
+Buch löschen … || Delete book … || Supprimer le livre … || Eliminar libro …
+Buch umbenennen || Rename book || Renommer le livre || Renombrar libro
+Name des Buchs || Name of the book || Nom du livre || Nombre del libro
+Name gespeichert || Name saved || Nom enregistré || Nombre guardado
+Das Buch mit {} wird gelöscht, samt Titelbild. Deine eigenen Touren bleiben. Zurückholen lässt es sich nur aus einer Sicherung oder mit den GPX-Dateien. || The book with {} will be deleted, including its cover. Your own tours stay. It can only be restored from a backup or with the GPX files. || Le livre avec {} sera supprimé, avec sa couverture. Vos propres parcours restent. Il ne peut être restauré que depuis une sauvegarde ou avec les fichiers GPX. || El libro con {} se eliminará, con su portada. Tus propias rutas se conservan. Solo se puede recuperar desde una copia de seguridad o con los archivos GPX.
+Buch „{}“ löschen? || Delete book “{}”? || Supprimer le livre « {} » ? || ¿Eliminar el libro «{}»?
+Buch gelöscht || Book deleted || Livre supprimé || Libro eliminado
+Umbenennen nicht möglich || Cannot rename || Renommage impossible || No se puede renombrar
+GPX-Dateien hinzufügen || Add GPX files || Ajouter des fichiers GPX || Añadir archivos GPX
+Buch anlegen || Add book || Ajouter un livre || Añadir libro
+z. B. Rother Wanderführer Gran Canaria || e.g. Rother hiking guide Gran Canaria || p. ex. guide de randonnée Rother Gran Canaria || p. ej. guía de senderismo Rother Gran Canaria
+GPX-Dateien || GPX files || Fichiers GPX || Archivos GPX
+Wähle die GPX-Dateien des Buchs (bei Rother im Download-Bereich zum Buch). Du kannst mehrere auf einmal wählen. Eine Buchtour mit gleichem Titel und gleicher Länge wird nicht doppelt angelegt. || Choose the GPX files of the book (for Rother in the download area of the book). You can choose several at once. A guide tour with the same title and length is not added twice. || Choisissez les fichiers GPX du livre (chez Rother : zone de téléchargement du livre). Vous pouvez en choisir plusieurs à la fois. Un parcours du livre de même titre et de même longueur n’est pas ajouté deux fois. || Elige los archivos GPX del libro (en Rother, en la zona de descargas del libro). Puedes elegir varios a la vez. Una ruta del libro con el mismo título y la misma longitud no se añade dos veces.
+Lese Datei {} von {} … || Reading file {} of {} … || Lecture du fichier {} sur {} … || Leyendo archivo {} de {} …
+GPX-Dateien hinzufügen nicht möglich: {} || Cannot add GPX files: {} || Impossible d’ajouter les fichiers GPX : {} || No se pueden añadir los archivos GPX: {}
+Buch anlegen nicht möglich: {} || Cannot add book: {} || Impossible d’ajouter le livre : {} || No se puede añadir el libro: {}
+{} Buchtouren hinzugefügt || {} guide tours added || {} parcours du livre ajoutés || {} rutas del libro añadidas
+1 Buchtour hinzugefügt || 1 guide tour added || 1 parcours du livre ajouté || 1 ruta del libro añadida
+{} Buchtouren angelegt || {} guide tours added || {} parcours du livre ajoutés || {} rutas del libro añadidas
+1 Buchtour angelegt || 1 guide tour added || 1 parcours du livre ajouté || 1 ruta del libro añadida
+{} nicht lesbar ({}) || {} unreadable ({}) || {} illisibles ({}) || {} ilegibles ({})
+Keine Buchtour gefunden: {} || No guide tour found: {} || Aucun parcours du livre trouvé : {} || No se encontró ninguna ruta del libro: {}
+die Dateien enthalten keine Strecke || the files contain no track || les fichiers ne contiennent aucun tracé || los archivos no contienen ningún trazado
+Buchtour umbenennen || Rename guide tour || Renommer le parcours du livre || Renombrar ruta del libro
+Name der Buchtour || Name of the guide tour || Nom du parcours du livre || Nombre de la ruta del libro
+In ein anderes Buch verschieben … || Move to another book … || Déplacer vers un autre livre … || Mover a otro libro …
+Buchtour löschen … || Delete guide tour … || Supprimer le parcours du livre … || Eliminar ruta del libro …
+Das ist die einzige Buchtour von „{}“. Das Buch ist danach leer und verschwindet samt Titelbild. || This is the only guide tour of “{}”. The book will then be empty and disappear together with its cover. || C’est le seul parcours de « {} ». Le livre sera alors vide et disparaîtra avec sa couverture. || Es la única ruta de «{}». El libro quedará vacío y desaparecerá junto con su portada.
+Buchtour verschieben || Move guide tour || Déplacer le parcours du livre || Mover ruta del libro
+In dieses Buch || Into this book || Dans ce livre || A este libro
+Neues Buch … || New book … || Nouveau livre … || Nuevo libro …
+Name des neuen Buchs || Name of the new book || Nom du nouveau livre || Nombre del nuevo libro
+Die Buchtour wird aus dem Buch gelöscht. Deine eigenen Touren bleiben. Zurückholen lässt sie sich nur aus einer Sicherung oder mit der GPX-Datei. || The guide tour will be deleted from the book. Your own tours stay. It can only be restored from a backup or with the GPX file. || Le parcours du livre sera supprimé du livre. Vos propres parcours restent. Il ne peut être restauré que depuis une sauvegarde ou avec le fichier GPX. || La ruta del libro se eliminará del libro. Tus propias rutas se conservan. Solo se puede recuperar desde una copia de seguridad o con el archivo GPX.
+Buchtour „{}“ löschen? || Delete guide tour “{}”? || Supprimer le parcours du livre « {} » ? || ¿Eliminar la ruta del libro «{}»?
+Buchtour gelöscht || Guide tour deleted || Parcours du livre supprimé || Ruta del libro eliminada
+Wanderführer exportieren || Export hiking guides || Exporter les guides de randonnée || Exportar guías de senderismo
+Speichert deine Bücher mit allen Buchtouren (Titel, Strecke, Aufstieg, Ordner) als Datei – zum Übertragen auf ein anderes Gerät oder zum Aufheben. || Saves your books with all guide tours (title, track, ascent, folder) as a file – to transfer to another device or to keep. || Enregistre vos livres avec tous les parcours (titre, tracé, dénivelé, dossier) dans un fichier – pour les transférer sur un autre appareil ou les conserver. || Guarda tus libros con todas las rutas (título, trazado, desnivel, carpeta) como archivo, para llevarlos a otro dispositivo o conservarlos.
+Keine Spuren deiner Touren, keine Fotos, keine Zugangsdaten. || No tracks of your tours, no photos, no credentials. || Pas de tracés de vos parcours, pas de photos, pas d’identifiants. || Sin trazados de tus rutas, sin fotos, sin datos de acceso.
+Titelbilder mitnehmen (deine eigenen Bilder, größere Datei) || Include cover images (your own images, larger file) || Inclure les couvertures (vos propres images, fichier plus volumineux) || Incluir portadas (tus propias imágenes, archivo mayor)
+Noch kein Buch angelegt. || No book added yet. || Aucun livre ajouté. || Aún no hay ningún libro.
+Wanderführer exportiert: {} || Hiking guides exported: {} || Guides de randonnée exportés : {} || Guías de senderismo exportadas: {}
+Export nicht möglich: {} || Export not possible: {} || Exportation impossible : {} || Exportación imposible: {}
+1 neues Buch || 1 new book || 1 nouveau livre || 1 libro nuevo
+{} neue Bücher || {} new books || {} nouveaux livres || {} libros nuevos
+1 neue Buchtour in einem vorhandenen Buch || 1 new guide tour in an existing book || 1 nouveau parcours dans un livre existant || 1 ruta nueva en un libro existente
+{} neue Buchtouren in vorhandenen Büchern || {} new guide tours in existing books || {} nouveaux parcours dans des livres existants || {} rutas nuevas en libros existentes
+1 Buchtour ist schon da || 1 guide tour is already there || 1 parcours du livre est déjà là || 1 ruta del libro ya está
+{} Buchtouren sind schon da || {} guide tours are already there || {} parcours du livre sont déjà là || {} rutas del libro ya están
+1 Titelbild || 1 cover image || 1 couverture || 1 portada
+{} Titelbilder || {} cover images || {} couvertures || {} portadas
+Nichts Neues in der Datei || Nothing new in the file || Rien de nouveau dans le fichier || Nada nuevo en el archivo
+Titelbild von „{}“: deines bleibt. || Cover of “{}”: yours stays. || Couverture de « {} » : la vôtre est conservée. || Portada de «{}»: la tuya se conserva.
+„{}“ in „{}“: in der Datei {}, bei dir {} – nicht übernommen. || “{}” in “{}”: {} in the file, {} for you – not imported. || « {} » dans « {} » : {} dans le fichier, {} chez vous – non importé. || «{}» en «{}»: {} en el archivo, {} en tu caso – no importado.
+Wähle eine Wanderführer-Datei (aus Meine Touren oder aus Mein Tourentagebuch). Vor dem Importieren siehst du, was dazukommt. || Choose a hiking guide file (from Meine Touren or Mein Tourentagebuch). Before importing you see what will be added. || Choisissez un fichier de guides de randonnée (de Meine Touren ou de Mein Tourentagebuch). Avant l’import, vous voyez ce qui sera ajouté. || Elige un archivo de guías de senderismo (de Meine Touren o de Mein Tourentagebuch). Antes de importar ves lo que se añadirá.
+Import nicht möglich: {} || Import not possible: {} || Importation impossible : {} || Importación imposible: {}
+1 Eintrag ist nicht lesbar und bleibt draußen. || 1 entry is unreadable and stays out. || 1 entrée est illisible et reste de côté. || 1 entrada es ilegible y se deja fuera.
+{} Einträge sind nicht lesbar und bleiben draußen. || {} entries are unreadable and stay out. || {} entrées sont illisibles et restent de côté. || {} entradas son ilegibles y se dejan fuera.
+1 Unterschied || 1 difference || 1 différence || 1 diferencia
+{} Unterschiede || {} differences || {} différences || {} diferencias
+… und {} weitere. || … and {} more. || … et {} autres. || … y {} más.
+Vorhandenes bleibt, wie es ist: Es kommen nur neue Bücher und neue Buchtouren dazu. Welche Buchtouren gewandert sind, rechnet Meine Touren danach selbst mit deinen Touren aus. || Existing items stay as they are: only new books and new guide tours are added. Which guide tours you have hiked, Meine Touren then works out itself from your tours. || Ce qui existe reste tel quel : seuls les nouveaux livres et parcours sont ajoutés. Les parcours déjà randonnés sont ensuite recalculés par Meine Touren à partir de vos parcours. || Lo existente se queda como está: solo se añaden libros y rutas nuevos. Qué rutas del libro has hecho lo calcula después Meine Touren con tus rutas.
+Importieren || Import || Importer || Importar
+Importiert: {} || Imported: {} || Importé : {} || Importado: {}
+Tournamen angleichen || Match tour names || Aligner les noms des parcours || Igualar nombres de rutas
+Alle Touren, die zu einer Buchtour passen, heißen schon wie die Buchtour. || All tours that match a guide tour already have the name of the guide tour. || Tous les parcours qui correspondent à un parcours du livre portent déjà son nom. || Todas las rutas que coinciden con una ruta del libro ya se llaman igual.
+Hier erscheinen deine gewanderten Touren, deren Name vom Titel der Buchtour abweicht. || Your hiked tours whose name differs from the title of the guide tour appear here. || Vos parcours randonnés dont le nom diffère du titre du parcours du livre apparaissent ici. || Aquí aparecen tus rutas hechas cuyo nombre difiere del título de la ruta del libro.
+Protokoll … || Log … || Journal … || Registro …
+Der Name einer gewanderten Tour wird zum Titel der Buchtour. Nichts geschieht, bevor du „Umbenennen“ wählst; die alten Namen stehen danach im Protokoll. || The name of a hiked tour becomes the title of the guide tour. Nothing happens until you choose “Rename”; the old names are then kept in the log. || Le nom d’un parcours randonné devient le titre du parcours du livre. Rien ne se passe avant que vous choisissiez « Renommer » ; les anciens noms sont ensuite conservés dans le journal. || El nombre de una ruta hecha pasa a ser el título de la ruta del libro. No ocurre nada hasta que elijas «Renombrar»; los nombres antiguos quedan después en el registro.
+Auch bei Komoot umbenennen || Also rename on Komoot || Renommer aussi sur Komoot || Renombrar también en Komoot
+{} von {} gewählt || {} of {} selected || {} sur {} sélectionnés || {} de {} seleccionadas
+Komoot ist nicht verbunden: Verwaltung → Touren holen → Komoot. || Komoot is not connected: Admin → Fetch tours → Komoot. || Komoot n’est pas connecté : Administration → Récupérer les parcours → Komoot. || Komoot no está conectado: Administración → Obtener rutas → Komoot.
+Komoot ist nicht verbunden || Komoot is not connected || Komoot n’est pas connecté || Komoot no está conectado
+1 Tour liegt bei Komoot und wird dort umbenannt, du bestätigst das vor dem Umbenennen. || 1 tour is on Komoot and will be renamed there; you confirm this before renaming. || 1 parcours est sur Komoot et y sera renommé ; vous le confirmez avant le renommage. || 1 ruta está en Komoot y se renombrará allí; lo confirmas antes de renombrar.
+{} Touren liegen bei Komoot und werden dort umbenannt, du bestätigst das vor dem Umbenennen. || {} tours are on Komoot and will be renamed there; you confirm this before renaming. || {} parcours sont sur Komoot et y seront renommés ; vous le confirmez avant le renommage. || {} rutas están en Komoot y se renombrarán allí; lo confirmas antes de renombrar.
+Ändert die Namen nur hier. Bei Komoot bleiben sie, wie sie sind. || Changes the names here only. On Komoot they stay as they are. || Ne modifie les noms qu’ici. Sur Komoot, ils restent inchangés. || Cambia los nombres solo aquí. En Komoot se quedan como están.
+„{}“ in „{}“ umbenennen || Rename “{}” to “{}” || Renommer « {} » en « {} » || Renombrar «{}» a «{}»
+passt auch zu weiteren Buchtouren || also matches other guide tours || correspond aussi à d’autres parcours du livre || también coincide con otras rutas del libro
+Bei Komoot umbenennen? || Rename on Komoot? || Renommer sur Komoot ? || ¿Renombrar en Komoot?
+1 Tour wird auch bei Komoot umbenannt. Das ändert die Namen in deinem Komoot-Konto. Die alten Namen stehen vorher im Protokoll. || 1 tour will also be renamed on Komoot. This changes the names in your Komoot account. The old names are logged first. || 1 parcours sera aussi renommé sur Komoot. Cela modifie les noms dans votre compte Komoot. Les anciens noms sont d’abord consignés dans le journal. || 1 ruta se renombrará también en Komoot. Esto cambia los nombres en tu cuenta de Komoot. Los nombres antiguos se anotan antes en el registro.
+{} Touren werden auch bei Komoot umbenannt. Das ändert die Namen in deinem Komoot-Konto. Die alten Namen stehen vorher im Protokoll. || {} tours will also be renamed on Komoot. This changes the names in your Komoot account. The old names are logged first. || {} parcours seront aussi renommés sur Komoot. Cela modifie les noms dans votre compte Komoot. Les anciens noms sont d’abord consignés dans le journal. || {} rutas se renombrarán también en Komoot. Esto cambia los nombres en tu cuenta de Komoot. Los nombres antiguos se anotan antes en el registro.
+Bei Komoot umbenennen nicht möglich || Cannot rename on Komoot || Renommage sur Komoot impossible || No se puede renombrar en Komoot
+Wird umbenannt … || Renaming … || Renommage en cours … || Renombrando …
+Das hat nicht geklappt || That did not work || Cela n’a pas fonctionné || Eso no ha funcionado
+„{}“: Umbenennen nicht möglich: {} || “{}”: Cannot rename: {} || « {} » : renommage impossible : {} || «{}»: no se puede renombrar: {}
+„{}“: Bei Komoot umbenennen nicht möglich: {} || “{}”: Cannot rename on Komoot: {} || « {} » : renommage sur Komoot impossible : {} || «{}»: no se puede renombrar en Komoot: {}
+1 Tour umbenannt || 1 tour renamed || 1 parcours renommé || 1 ruta renombrada
+{} Touren umbenannt || {} tours renamed || {} parcours renommés || {} rutas renombradas
+Bei Komoot umbenannt: {} || Renamed on Komoot: {} || Renommés sur Komoot : {} || Renombradas en Komoot: {}
+Namen gespeichert || Names saved || Noms enregistrés || Nombres guardados
+Umbenennung rückgängig machen? || Undo renaming? || Annuler le renommage ? || ¿Deshacer el cambio de nombre?
+Die Touren bekommen ihre alten Namen zurück. Eine Tour, die inzwischen anders heißt, bleibt, wie sie ist. || The tours get their old names back. A tour that has been renamed since stays as it is. || Les parcours retrouvent leurs anciens noms. Un parcours renommé entre-temps reste tel quel. || Las rutas recuperan sus nombres antiguos. Una ruta que ya se llama de otro modo se queda como está.
+Auch bei Komoot rückgängig machen (1 Tour) || Also undo on Komoot (1 tour) || Annuler aussi sur Komoot (1 parcours) || Deshacer también en Komoot (1 ruta)
+Auch bei Komoot rückgängig machen ({} Touren) || Also undo on Komoot ({} tours) || Annuler aussi sur Komoot ({} parcours) || Deshacer también en Komoot ({} rutas)
+Alte Namen wiederhergestellt || Old names restored || Anciens noms rétablis || Nombres antiguos restaurados
+Rückgängig machen nicht überall möglich || Undo not possible everywhere || Annulation impossible partout || Deshacer no es posible en todas partes
+Bei Komoot rückgängig machen nicht möglich: {} || Cannot undo on Komoot: {} || Annulation sur Komoot impossible : {} || No se puede deshacer en Komoot: {}
+Protokoll der Tournamen || Log of tour names || Journal des noms de parcours || Registro de nombres de rutas
+Noch keine Tour umbenannt. || No tour renamed yet. || Aucun parcours renommé. || Aún no se ha renombrado ninguna ruta.
+bei Komoot || on Komoot || sur Komoot || en Komoot
+zurückgesetzt || reset || réinitialisé || restablecido
+Der Name ist leer || The name is empty || Le nom est vide || El nombre está vacío
+Der Name ist zu lang (höchstens {} Zeichen) || The name is too long (at most {} characters) || Le nom est trop long ({} caractères au maximum) || El nombre es demasiado largo (máximo {} caracteres)
+„Ohne Ordner“ ist kein Ordnername || “No folder” is not a folder name || « Sans dossier » n’est pas un nom de dossier || «Sin carpeta» no es un nombre de carpeta
+Einen Ordner „{}“ gibt es schon || A folder “{}” already exists || Un dossier « {} » existe déjà || Ya existe una carpeta «{}»
+Ein Buch „{}“ gibt es schon || A book “{}” already exists || Un livre « {} » existe déjà || Ya existe un libro «{}»
+„{}“ gibt es in „{}“ schon || “{}” already exists in “{}” || « {} » existe déjà dans « {} » || «{}» ya existe en «{}»
+Ordner nicht gefunden || Folder not found || Dossier introuvable || Carpeta no encontrada
+Buchtour nicht gefunden || Guide tour not found || Parcours du livre introuvable || Ruta del libro no encontrada
+Kein Buch gewählt || No book selected || Aucun livre sélectionné || Ningún libro seleccionado
+Keine Tour gewählt || No tour selected || Aucun parcours sélectionné || Ninguna ruta seleccionada
+Das ist keine Wanderführer-Datei. || This is not a hiking guide file. || Ce n’est pas un fichier de guides de randonnée. || Este no es un archivo de guías de senderismo.
+Die Datei stammt aus einer neueren Version. Bitte Meine Touren aktualisieren. || The file comes from a newer version. Please update Meine Touren. || Le fichier provient d’une version plus récente. Veuillez mettre à jour Meine Touren. || El archivo procede de una versión más reciente. Actualiza Meine Touren.
+In der Datei stehen keine Bücher. || The file contains no books. || Le fichier ne contient aucun livre. || El archivo no contiene libros.
+Die Datei ist keine Wanderführer-Datei (kein JSON). || The file is not a hiking guide file (not JSON). || Le fichier n’est pas un fichier de guides de randonnée (pas du JSON). || El archivo no es un archivo de guías de senderismo (no es JSON).
+Die Datei ist zu groß (höchstens {} MB) || The file is too large (at most {} MB) || Le fichier est trop volumineux ({} Mo au maximum) || El archivo es demasiado grande (máximo {} MB)
+Bei Komoot umbenennen braucht die ausdrückliche Bestätigung mit der Anzahl der betroffenen Touren || Renaming on Komoot needs explicit confirmation with the number of tours affected || Le renommage sur Komoot exige une confirmation explicite indiquant le nombre de parcours concernés || Renombrar en Komoot requiere confirmación explícita con el número de rutas afectadas
+Bei Komoot rückgängig machen braucht die ausdrückliche Bestätigung mit der Anzahl der betroffenen Touren || Undoing on Komoot needs explicit confirmation with the number of tours affected || L’annulation sur Komoot exige une confirmation explicite indiquant le nombre de parcours concernés || Deshacer en Komoot requiere confirmación explícita con el número de rutas afectadas
+Die Tour heißt inzwischen anders und bleibt, wie sie ist || The tour has been renamed since and stays as it is || Le parcours a été renommé entre-temps et reste tel quel || La ruta ya se llama de otro modo y se queda como está
+Komoot hat die Umbenennung nicht angenommen || Komoot did not accept the renaming || Komoot n’a pas accepté le renommage || Komoot no aceptó el cambio de nombre
 `;

@@ -168,7 +168,7 @@ def test_eingeklappt_ring_titelbild_und_aufbauzeit(pw, app):
     assert all(re.fullmatch(r"/api/guides/cover\?book=[^&]+&v=[0-9a-f]{12}", s) for s in srcs)
     eager_images(pg)
     assert pg.evaluate("() => [...document.querySelectorAll('#gfl .gfc img')].every(i => i.naturalWidth > 0)")
-    expect(pg.locator("#plb .sec", has_text="Wanderführer-Fortschritt").locator(".sub")).to_have_text("5 Bücher · 49 von 400 gewandert")
+    expect(pg.locator("#plb .sec", has_text="Wanderführer").locator(".sub")).to_have_text("5 Bücher · 49 von 400 gewandert")
     times.sort()
     print(f"\n[Messung 3.53.0] Seite Orte & Ausrüstung mit 5 Büchern × 80 Touren: Karten stehen nach {times[2]:.0f} ms (Median aus 5, min {times[0]:.0f}, max {times[-1]:.0f}), "
           f"{rows_dom} Elemente im Wanderführer-Abschnitt")
@@ -220,7 +220,7 @@ def test_filter_offen_gewandert_und_adresse(pw, app):
     expect(c1.locator(".gfz")).to_have_text("gewandert: 30")
     expect(_card(pg, B3).locator(".gfz")).to_have_text("gewandert: 0")
     _card(pg, B3).locator("summary").click()
-    expect(_card(pg, B3).locator(".gfbody")).to_contain_text("Aus diesem Buch ist noch keine Tour gewandert.")
+    expect(_card(pg, B3).locator(".gfbody")).to_contain_text("Aus diesem Buch ist noch keine Buchtour gewandert.")
     pg.select_option("#gfo", "zuletzt")
     pg.wait_for_function("() => location.hash === '#/places?wf=gewandert&wo=zuletzt'")
     dates = c1.locator(".gfrows .r a").all_inner_texts()
@@ -265,7 +265,7 @@ def test_suche_ueber_buecher_und_touren(pw, app):
     n = _card(pg, B1).locator(".gfrows .r").count()
     assert n == 8 and _card(pg, B1).locator(".gfz").inner_text() == "8 Treffer"
     pg.fill("#gfq", "xyzxyz")
-    expect(pg.locator("#gfl")).to_contain_text("Kein Buch und keine Tour passt zu „xyzxyz“.")
+    expect(pg.locator("#gfl")).to_contain_text("Kein Buch und keine Buchtour passt zu „xyzxyz“.")
     pg.fill("#gfq", "")
     pg.wait_for_function("() => document.querySelectorAll('#gfl details.gfb').length === 5 && location.hash === '#/places'", timeout=T)
     assert not pg.errors, pg.errors
@@ -330,7 +330,7 @@ def test_mobil_390(pw, app, scheme):
     pg = _page(ctx)
     _open(pg, app)
     assert pg.evaluate("() => document.documentElement.classList.contains('mob')")
-    pg.locator("#plb .sec", has_text="Wanderführer-Fortschritt").scroll_into_view_if_needed()
+    pg.locator("#plb .sec", has_text="Wanderführer").scroll_into_view_if_needed()
     settled(pg)
     assert pg.evaluate("() => document.documentElement.scrollWidth <= window.innerWidth + 1")
     m = pg.evaluate("""() => { const d = document.querySelector('#gfl details.gfb'), s = d.getBoundingClientRect(), c = d.querySelector('.gfc').getBoundingClientRect(),
@@ -343,7 +343,7 @@ def test_mobil_390(pw, app, scheme):
     assert 64 <= m["ch"] <= 72 and m["rw"] == 48 and m["sh"] >= 44
     assert min(m["chips"]) >= 44 and m["q"] >= 44 and m["o"] >= 44
     assert m["ink"] != m["bg"] and m["ringInk"] != m["bg"] and m["fs"] >= 14
-    _shots(pg, f"wf-390-{scheme}-eingeklappt.png", pg.locator("#plb .sec", has_text="Wanderführer-Fortschritt"))
+    _shots(pg, f"wf-390-{scheme}-eingeklappt.png", pg.locator("#plb .sec", has_text="Wanderführer"))
     c1 = _card(pg, B1)
     c1.locator("summary").click()
     expect(c1.locator(".gfrows .r")).to_have_count(60, timeout=T)
@@ -374,7 +374,7 @@ def test_desktop(pw, app, scheme):
     _open(pg, app)
     m = pg.evaluate("() => { const d = document.querySelector('#gfl details.gfb'); return [d.querySelector('.gfc').getBoundingClientRect().height, d.querySelector('.gfring').getBoundingClientRect().width]; }")
     assert m == [72, 56]
-    _shots(pg, f"wf-1280-{scheme}-eingeklappt.png", pg.locator("#plb .sec", has_text="Wanderführer-Fortschritt"))
+    _shots(pg, f"wf-1280-{scheme}-eingeklappt.png", pg.locator("#plb .sec", has_text="Wanderführer"))
     c2 = _card(pg, B2)
     c2.locator("summary").click()
     expect(c2.locator(".gfrows .r")).to_have_count(60, timeout=T)
@@ -394,9 +394,9 @@ def test_desktop(pw, app, scheme):
 
 
 @pytest.mark.parametrize("lang,done,chips,search,ring", [
-    ("en", "30 of 80 hiked", ["All", "Open", "Hiked"], "Search guide or tour", "37%"),
-    ("fr", "30 sur 80 randonnés", ["Tous", "À faire", "Randonnés"], "Rechercher un guide ou un parcours", "37 %"),
-    ("es", "30 de 80 recorridas", ["Todas", "Pendientes", "Recorridas"], "Buscar guía o ruta", "37 %"),
+    ("en", "30 of 80 hiked", ["All", "Open", "Hiked"], "Search guide or guide tour", "37%"),
+    ("fr", "30 sur 80 randonnés", ["Tous", "À faire", "Randonnés"], "Rechercher un guide ou un parcours du guide", "37 %"),
+    ("es", "30 de 80 recorridas", ["Todas", "Pendientes", "Recorridas"], "Buscar guía o ruta de la guía", "37 %"),
 ])
 def test_sprachen(pw, app, lang, done, chips, search, ring):
     ctx = _ctx(pw, 390, lang=lang)

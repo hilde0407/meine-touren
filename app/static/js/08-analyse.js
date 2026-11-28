@@ -292,9 +292,8 @@ VIEWS.admin = async (...a) => {
     `<div class="grid g2 mt40"><div class="panel"><h2>Foto-Eingang</h2>
     <p class="mut">Fotos einfach in den Eingangsordner kopieren (per <code>scp</code>, <code>rsync</code> oder SMB-Freigabe): <code>${esc(st.inbox || "/var/lib/meine-touren/inbox")}</code>. Sie werden automatisch verkleinert, mit Aufnahmezeit übernommen und Touren zugeordnet (Prüfung alle 5 Minuten).</p>
     <p class="mut fs13">Beispiel vom Mac: <code>rsync -av ~/Pictures/Wanderung/ root@SERVER:${esc(st.inbox || "/var/lib/meine-touren/inbox")}/</code></p></div>
-   <div class="panel"><h2>Wanderführer (z. B. Rother)</h2><p class="mut">Lade die GPX-Dateien deiner Wanderführer hoch (bei Rother im Download-Bereich zum Buch). Folgt eine Tour einer dieser Strecken, wird der Tourtitel aus dem Buch beim Umbenennen vorgeschlagen.</p>
-    <div class="field"><label>Buch (z. B. „Rother Taunus“)</label><input id="gbook"></div>
-    <div class="row"><button class="btn" id="gup">GPX-Dateien auswählen …</button><input type="file" id="gfile" accept=".gpx" multiple hidden><span id="gres" class="mut"></span></div><div id="glist" class="mt10"></div></div>
+   <div class="panel" id="gpanel"><h2>Wanderführer (z. B. Rother)</h2><p class="mut">Die GPX-Dateien deiner Wanderführer legst du jetzt unter Statistik → Orte &amp; Ausrüstung → Wanderführer an – dort gibt es auch Ordner, Umbenennen, Exportieren und Importieren. Folgt eine Tour einer dieser Strecken, wird der Tourtitel aus dem Buch beim Umbenennen vorgeschlagen.</p>
+    <div class="row"><a class="btn alt" href="#/places" id="gup">Zu den Wanderführern</a><span id="gres" class="mut"></span></div><div id="glist" class="mt10"></div></div>
    <div class="panel"><h2>Selbsttest</h2><p class="mut">Prüft Komoot-Zugang, Strecken, Zepp-Token, Internet-Dienste (Karten, Wetter, Höhendaten), Speicherplatz und Sicherung.</p>
     <div class="row"><button class="btn alt" id="stest">Selbsttest starten</button></div><div id="stres" class="mt10"></div></div></div>`
   );
@@ -305,39 +304,8 @@ VIEWS.admin = async (...a) => {
     if (!$("#glist")) return; // Seite inzwischen verlassen
     $("#glist").innerHTML =
       Object.keys(by)
-        .map(
-          b =>
-            `<div class="r jcsb g8" style="display:flex"><span>${esc(b || "(ohne Buch)")} <small class="mut">${fmtAnzahl(by[b].length, "Tour", "Touren")}</small></span><button class="btn alt sm" data-gb="${esc(b)}">Entfernen</button></div>`
-        )
+        .map(b => `<div class="r jcsb g8" style="display:flex"><span translate="no">${esc(b || "(ohne Buch)")}</span> <small class="mut">${fmtAnzahl(by[b].length, "Buchtour", "Buchtouren")}</small></div>`)
         .join("") || '<span class="mut">Noch keine Wanderführer hinterlegt.</span>';
-    document.querySelectorAll("[data-gb]").forEach(
-      b =>
-        (b.onclick = async () => {
-          if (await uiConfirm({text: "Alle Touren dieses Buchs entfernen?", danger: true, ok: "Entfernen"})) {
-            await api("/api/guides/" + encodeURIComponent("book:" + b.dataset.gb), {method: "DELETE"});
-            gl();
-          }
-        })
-    );
-  };
-  $("#gup").onclick = () => $("#gfile").click();
-  $("#gfile").onchange = async e => {
-    const fs = [...e.target.files];
-    if (!fs.length) return;
-    $("#gres").textContent = "Lese " + fs.length + " Dateien …";
-    const items = await Promise.all(fs.map(f => f.text().then(gpx => ({name: f.name, gpx}))));
-    try {
-      const r = await api("/api/guides", {
-        method: "POST",
-        headers: {"content-type": "application/json"},
-        body: JSON.stringify({book: $("#gbook").value, items}),
-      });
-      $("#gres").textContent = `${r.added} hinzugefügt${r.failed.length ? ", " + r.failed.length + " fehlgeschlagen: " + r.failed[0] : ""}`;
-    } catch (x) {
-      $("#gres").textContent = x.message;
-    }
-    e.target.value = "";
-    gl();
   };
   gl();
   $("#stest").onclick = async () => {

@@ -2,6 +2,8 @@
 
 Eine Datei je Version, **neueste zuerst** (numerisch nach Versionsnummer sortiert). Kurzfassung aller Versionen: [Versionsverlauf](../VERSIONSVERLAUF.md).
 
+- [3.73.0](3.73.0.md) – Wanderführer: Ordner, Umbenennen, Import/Export im Tagebuch-Format, Tournamen angleichen (optional auch bei Komoot)
+- [3.72.0](3.72.0.md) – Einheitliche Liniensymbole, Reiter wischbar, Filter in der Adresse, Gebiete
 - [3.71.1](3.71.1.md) – Fehlerbehebung nach 3.71.0: lesbares „×“ im Baustein „Ausrüstung“, übersetzter Leerzustand, Tests angepasst
 - [3.71.0](3.71.0.md) – Prüfbericht umgesetzt: Handy-Layout, Begriffe, Dialoge, Fehlerkarte, Barrierefreiheit
 - [3.70.1](3.70.1.md) – Gebiete korrigiert: Gasteinertal gehört zum Pongau (nicht Pinzgau), neues Gebiet Großarltal

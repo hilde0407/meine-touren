@@ -223,11 +223,12 @@ Object.assign(BTN_ICONS, {
   "sp:rafting": wave + '<path d="M4 12c3 1 13 1 16 0l-1-3H5zM9 9l-2-5M15 9l2-5"/>', "sp:boat": wave + '<path d="M4 14h16l-3 3H7zM12 14V4l6 8"/>',
   "sp:skateboard": '<path d="M3 11h18l-1 3H4z"/><circle cx="7" cy="18" r="1.500"/><circle cx="17" cy="18" r="1.500"/>', "sp:skaten": '<path d="M5 4h6v9h8v5H5z"/><circle cx="8" cy="20" r="1.200"/><circle cx="16" cy="20" r="1.200"/>',
   "sp:horse": '<path d="M7 21c0-6 2-10 5-12l-1-5 4 2 4 5v2l-4 1-2-1v8"/>', "sp:paraglide": '<path d="M3 10a9 7 0 0 1 18 0c-2.500-1.500-4-1.500-6 0-1.500-1.500-4.500-1.500-6 0-2-1.500-3.500-1.500-6 0zM8 11l4 9 4-9"/>', "sp:other": pin,
+  "ic:plus": '<path d="M12 5v14M5 12h14"/>', "ic:folder": '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',      /* 3.73.0: Ordner, Neu (nur über symHtml, nie als Zeichen am Anfang eines Knopfs) */
   "gear:Rad": bike, "gear:Schuhe": foot, "gear:Ski": ski, "gear:Schneeschuhe": flake, "gear:Sonstiges": BTN_ICONS["🎒"],
 });
 }
 /* Zeichen, die nur als ganzes Element ein Symbol sind, und Anfänge, die in Knöpfen ersetzt werden (die Namen, die mit „sp:“ oder „gear:“ beginnen, sind keine Zeichen) */
-const SYM_CHARS = Object.keys(BTN_ICONS).filter(k => !/^(sp|gear):/.test(k));
+const SYM_CHARS = Object.keys(BTN_ICONS).filter(k => !/^(sp|gear|ic):/.test(k));
 const symKey = k => String(k || "").replace(/️/g, "").trim();
 const symSvg = (key, size = 17, cls = "ic") => {
   const p = BTN_ICONS[symKey(key)];
