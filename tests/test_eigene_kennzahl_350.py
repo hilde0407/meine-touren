@@ -116,11 +116,11 @@ def test_layout_speichert_neue_felder_und_betrachter():
 
 def test_version_and_notes():
     from app import config
-    assert config.VERSION.startswith("3.72.0 · Meine Touren")
+    assert config.VERSION.startswith("3.73.0 · Meine Touren")
     notes = (ROOT / "docs" / "versionen" / "3.35.0.md").read_text(encoding="utf-8")
     assert "Fortschrittsbalken" in notes and "Sparkline" in notes and "Trend" in notes and "Antippen" in notes
     assert 'const V = "mt-v164"' in (ROOT / "app" / "static" / "sw.js").read_text(encoding="utf-8")
-    assert 'SL_APPV = "3.72.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
+    assert 'SL_APPV = "3.73.0"' in (ROOT / "app" / "static" / "js" / "54-ansichten.js").read_text(encoding="utf-8")
     hist = (ROOT / "docs" / "VERSIONSVERLAUF.md").read_text(encoding="utf-8")
     assert hist.index("## Version 3.35.0") < hist.index("## Version 3.34.0")
     assert "3.35.0.md" in (ROOT / "docs" / "versionen" / "README.md").read_text(encoding="utf-8")
