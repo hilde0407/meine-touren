@@ -593,14 +593,14 @@ def test_n06_ansichten_knopf_oeffnet_bei_einer_ansicht_direkt_den_dialog(pw, app
 
 
 @pytest.mark.parametrize("w", (360, 430))
-def test_n07_admin_tabs_umbrechen_am_handy(pw, app, w):
+def test_n07_admin_tabs_wischbar_am_handy(pw, app, w):
     pg = _browser(pw, app, width=w, height=844, devs=None)
     try:
         pg.goto(f"{app}/#/admin")
         pg.wait_for_selector(".atabs", timeout=T)
         _ready(pg)
         r = pg.evaluate("""() => { const t = document.querySelector('.atabs'); return {sw: t.scrollWidth, cw: t.clientWidth, dw: document.documentElement.scrollWidth, iw: innerWidth}; }""")
-        assert r["sw"] <= r["cw"] + 1 and r["dw"] <= r["iw"] + 1, r
+        assert r["sw"] > r["cw"] and r["dw"] <= r["iw"] + 1, r                  # 3.72.0: Leiste wischbar (breiter als sichtbar), die Seite selbst scrollt nicht seitlich
     finally:
         pg.browser_.close()
 

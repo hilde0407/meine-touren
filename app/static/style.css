@@ -2644,6 +2644,4 @@ html.mob .warnbar a{display:inline-flex;align-items:center;min-height:44px}
 .skip{position:absolute;left:8px;top:-60px;z-index:2000;background:var(--yellow);color:#1b1b1b;padding:10px 16px;border-radius:8px;font-weight:700;text-decoration:none}
 .skip:focus{top:8px}
 #main:focus{outline:0}
-/* N-07: Verwaltungs-Reiter am Handy zweizeilig statt seitlich abgeblendet; alle Reiter sind sichtbar */
-html.mob .atabs,.atabs.atscroll{flex-wrap:wrap;overflow:visible;-webkit-mask-image:none;mask-image:none}
-@media (max-width:700px){.atabs,.atabs:not([data-end]){flex-wrap:wrap;overflow:visible;-webkit-mask-image:none;mask-image:none}}
+/* 3.72.0 (N-07): Verwaltungs-Reiter am Handy wieder seitlich wischbar (Verlauf am Rand, aktiver Reiter in Sicht; Regeln von 3.61.0 oben), Touch-Ziele 44 px */

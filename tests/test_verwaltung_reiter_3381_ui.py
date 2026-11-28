@@ -156,17 +156,21 @@ def test_reiterleiste_computer_alles_sichtbar(pw, app, lang):
 
 
 def test_reiterleiste_handy_wischen(pw, app):
-    """3.71.0 (N-07): am Handy umbrechen die Reiter auf mehrere Zeilen; alle sind sichtbar, nichts wird abgeblendet oder muss gewischt werden."""
+    """3.72.0 (N-07): am Handy wieder seitlich wischbar (Verlauf am Rand, aktiver Reiter in Sicht), nie senkrecht; Touch-Ziele mindestens 44 px, die Seite scrollt nicht seitlich."""
     pg = _admin(pw, app, "de", "sicher", width=390, height=800)
     try:
         pg.wait_for_function("() => !!document.querySelector('#atabs .atlink')", timeout=TL)
         r = pg.evaluate(LEISTE)
-        assert r["sh"] <= r["ch"] + 1, r                                         # nie senkrecht scrollbar
-        assert r["sw"] <= r["cw"] + 1 and r["lastIn"] and r["onIn"], r          # alle Reiter sichtbar, kein seitliches Wischen
-        assert r["mask"] == "none", r                                            # kein Verlauf mehr am Rand
+        assert r["sh"] <= r["ch"] + 1 and r["oy"] == "hidden", r                # waagerecht wischen, nie senkrecht
+        assert r["sw"] > r["cw"] and r["onIn"], r                                # der aktive Reiter („Sicherung & Zugang“) ist in Sicht gerollt
         assert r["bars"] == [], r
-        z = pg.evaluate(ZEILEN)
-        assert z["rows"] >= 2, z
+        m = pg.evaluate("() => ({minh: Math.min(...[...document.querySelectorAll('#atabs button, #atabs .atlink')].map(e => e.getBoundingClientRect().height)), doc: document.documentElement.scrollWidth, win: window.innerWidth})")
+        assert m["minh"] >= 44 and m["doc"] <= m["win"], m
+        pg.evaluate("() => { const n = document.querySelector('#atabs'); n.scrollLeft = 0; n.dispatchEvent(new Event('scroll')); }")
+        r = pg.evaluate(LEISTE)
+        assert not r["end"] and r["mask"] != "none", r                           # Verlauf am Rand: es geht weiter
+        pg.evaluate("() => { const n = document.querySelector('#atabs'); n.scrollLeft = n.scrollWidth; n.dispatchEvent(new Event('scroll')); }")
+        pg.wait_for_function("() => document.querySelector('#atabs').hasAttribute('data-end')", timeout=TL)
     finally:
         pg.browser_.close()
 

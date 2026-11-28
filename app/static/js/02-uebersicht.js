@@ -508,11 +508,34 @@ VIEWS.tours = async (_name, qp) => {
       );
     } catch (e) {}
   };
-  const gq = qp && qp.get("g"),                                                                 // 3.64.0: #/tours?g=<Kennung des Gebiets> (Link „Alle Touren in diesem Gebiet“)
-    f0 = xf || gq ? {so: ld().so, fg: gq || ""} : ld();                                         // mit Kennzahl- oder Gebiets-Link starten die übrigen Filter leer (sonst fehlen Touren ohne ersichtlichen Grund)
-  ["q", "fy", "fs", "fr", "fg", "fz", "fb", "ft", "so"].forEach(i => {
-    if (f0[i] !== undefined) $("#" + i).value = f0[i];                                            // ein unbekanntes Gebiet (nie eine Tour dort) ergibt einen leeren Wert = „Alle Gebiete“
+  /* 3.72.0: Textfilter, Sortierung und die übrigen Filter stehen in der Adresse (#/tours?q=Heim&so=km&g=alpen&y=2025&s=hike …), damit Neuladen, Zurück-Taste und ein geteilter Link sie erhalten.
+     Kürzel: q Name, so Sortierung, g Gebiet (3.64.0), y Jahr, s Sportart, r Region, z Jahreszeit, b Bewertung, t Schlagwort. Nur Abweichungen vom Standard stehen drin; fremde Parameter (kz, sp, von, bis, tag, minkm, hn) bleiben unberührt. */
+  const URLK = {q: "q", so: "so", fg: "g", fy: "y", fs: "s", fr: "r", fz: "z", fb: "b", ft: "t"},
+    fromUrl = qp && Object.keys(URLK).some(i => qp.has(URLK[i])),
+    f0 = xf || fromUrl ? Object.assign({so: ld().so}, Object.fromEntries(Object.keys(URLK).filter(i => qp && qp.has(URLK[i])).map(i => [i, qp.get(URLK[i])]))) : ld();   // mit Kennzahl- oder Adress-Filter starten die übrigen Filter leer (sonst fehlen Touren ohne ersichtlichen Grund)
+  Object.keys(URLK).forEach(i => {
+    const e = $("#" + i);
+    if (f0[i] !== undefined) e.value = f0[i];                                                    // ein unbekannter Wert (z. B. Gebiet ohne Touren) ergibt einen leeren Wert
+    if (e.tagName === "SELECT" && e.selectedIndex < 0) e.selectedIndex = 0;
   });
+  let urlT = 0;
+  const urlSync = () => {                                                                          // replaceState statt pushState: die Zurück-Taste legt keine Einträge pro Eingabe an
+    clearTimeout(urlT);
+    urlT = setTimeout(() => {
+      if (!$("#q") || !/^#\/tours(\?|$)/.test(location.hash)) return;
+      const cur = new URLSearchParams(location.hash.split("?")[1] || ""), out = new URLSearchParams();
+      cur.forEach((v, k) => !Object.values(URLK).includes(k) && out.set(k, v));
+      for (const i of Object.keys(URLK)) {
+        const v = $("#" + i).value.trim();
+        if (v && v !== "0" && !(i === "so" && v === "date")) out.set(URLK[i], v);
+      }
+      const h = "#/tours" + (out.toString() ? "?" + out.toString() : "");
+      if (h !== location.hash) {
+        history.replaceState(history.state, "", h);
+        window._cur = h;
+      }
+    }, 250);
+  };
   if (f0.lim) lim = f0.lim;
   const XF = ["fy", "fz", "fb", "fr", "fg", "ft"],                                                     // 3.48.0 (Handy): diese Filter stehen hinter dem Knopf „Filter“
     xCount = () => XF.filter(i => $("#" + i).value && $("#" + i).value !== "0").length,
@@ -539,6 +562,7 @@ VIEWS.tours = async (_name, qp) => {
   }
   const draw = () => {
     sv();
+    urlSync();
     xPaint();
     const q = $("#q").value,
       y = +$("#fy").value,
