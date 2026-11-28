@@ -10,6 +10,7 @@ const gfFail = (vorgang, e) => uiAlert({text: `${vorgang} nicht möglich: ${(e &
 /* Seite neu aufbauen (Daten frisch, Scrollstand und Filter bleiben), Meldung steht danach an der Stelle der Aktion */
 async function gfReload(msg) {
   GF.msg = msg || "";
+  GF.msgT = Date.now();
   const y = window.scrollY;
   await route();
   window.scrollTo(0, y);

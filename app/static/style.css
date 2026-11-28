@@ -2661,7 +2661,7 @@ button svg.ic:only-child,.btn svg.ic:only-child{margin-right:0}
 .gftool{gap:8px;flex-wrap:wrap;margin:4px 0 12px}
 .gfsec{margin:0 0 14px}
 .gfoh{display:flex;align-items:center;gap:4px;margin:0 0 8px}
-.gfot{display:flex;align-items:center;gap:8px;flex:1;min-width:0;min-height:44px;background:none;border:0;padding:4px 6px;color:var(--ink);font:600 17px var(--b);cursor:pointer;text-align:left;border-radius:var(--r,6px)}
+.gfot{display:flex;align-items:center;gap:8px;flex:1;min-width:0;min-height:44px;background:none;border:0;padding:4px 6px;color:var(--ink);font:600 18px var(--b);cursor:pointer;text-align:left;border-radius:var(--r,6px)}
 .gfot b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .gfot:focus-visible,.gfoi:focus-visible,.gfrm:focus-visible{outline:2px solid var(--bars);outline-offset:2px}
 .gfpf{flex:none;width:9px;height:9px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:rotate(-45deg);transition:transform .15s}
@@ -2674,7 +2674,7 @@ button svg.ic:only-child,.btn svg.ic:only-child{margin-right:0}
 .gfend{display:inline-flex;align-items:center;gap:6px;flex:none}
 .gfrows .r{align-items:center}
 .gfxfer{margin-top:22px;padding-top:14px;border-top:1px solid var(--rule)}.gfxfer .row{gap:8px;flex-wrap:wrap}
-.gfh3{margin:0 0 4px;font:700 17px var(--d)}
+.gfh3{margin:0 0 4px;font:700 18px var(--d)}
 .uibox .btn.gfdanger{color:var(--dv-bad);border-color:var(--dv-bad)}
 .gfnb{margin:6px 0 0}
 .gfnbar{gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}

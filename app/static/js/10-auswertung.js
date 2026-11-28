@@ -657,8 +657,7 @@ function gfMount(host, gp, q, folders) {
   on("#gfnames", () => gfNamesOpen());
   on("#gfexp", () => gfExport());
   on("#gfimp", () => gfImport());
-  const msg = GF.msg;                                                       // Meldung der Aktion, die die Seite neu aufgebaut hat: erst zeigen, wenn die Liste steht
-  GF.msg = "";
+  const msg = GF.msg && Date.now() - (GF.msgT || 0) < 8000 ? GF.msg : "";    // Meldung der Aktion, die die Seite neu aufgebaut hat: erst zeigen, wenn die Liste steht (bleibt bei einem zweiten Aufbau kurz erhalten)
   if (!gp.length) return msg && gfMsg(msg);
   host.querySelectorAll("[data-gff]").forEach(
     c =>
