@@ -114,7 +114,7 @@ VIEWS.story = async id => {
         const r = await api(`/api/place?lat=${e.pos[0]}&lng=${e.pos[1]}`);
         const box = document.querySelector(`#stl .stev[data-e="${i}"] .splc`);
         if (!box) return;                                  // Ansicht inzwischen verlassen
-        if (r && r.name) { box.textContent = "📌 " + r.name; e.place = r.name; }
+        if (r && r.name) { box.innerHTML = symHtml("📌", 14) + " " + esc(r.name); e.place = r.name; }
       } catch (er) { return; }
     }
   })();
